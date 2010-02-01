@@ -3,12 +3,13 @@
 # Created: 01/02/2010 by defo
 import os
 import sys
+sys.path.append('..')
 
 def main(argv = sys.argv):
     '''
     GUI entry point
     '''
-    #TODO: CLI options
+    
     from prymatex.app import PMXApplication
     app = PMXApplication(argv)
     return app.exec_()
