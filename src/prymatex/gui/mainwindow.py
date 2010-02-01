@@ -30,6 +30,7 @@ class PMXMainWindow(QMainWindow):
         
         self.actionNewTab = QAction(_("New &tab"), self)
         self.actionNewTab.setObjectName("actionNewTab")
+        self.actionNewTab.setShortcut(QKeySequence("Ctrl+N"))
     
     def setup_menus(self):
         menubar = QMenuBar(self)
