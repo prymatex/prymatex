@@ -8,3 +8,10 @@ float distancia(Point *p1, Point *p2) {
 	dy = p1->y - p2->y;
 	return sqrt( dx * dx + dy * dy);
 }
+
+
+const char *say_hello() {
+	static char *saludo = "Hola mundo desde una libería";
+	return saludo;
+
+}

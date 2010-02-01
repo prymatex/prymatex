@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 	p1->y = 55.89;
 	printf("La distancia entre los puntos es %f", distancia(p1, p2));
 	//printf("El valor del puntero es: %.8x\n", (unsigned int)p1);
-
+	return 0;
 }
 
 
