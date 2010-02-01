@@ -15,3 +15,15 @@ print "Ahora definimos que la salida es char* (en ctypes c_char_p)"
 lib.say_hello.restype = c_char_p
 print "Y la llamamamos: ", lib.say_hello()
 
+class Point(Structure):
+    _fields_ = [("x", c_float),
+                ("y", c_float)]
+
+Point_p = POINTER(Point)
+p1, p2 = Point(2, 4.3), Point(20.17, 55.89)
+    
+print Point_p
+lib.distancia.restype = c_float
+lib.distancia.argtypes = [Point_p, Point_p]
+print "Ejecutando"
+print lib.distancia(p1, p2)
