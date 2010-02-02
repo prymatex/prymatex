@@ -4,6 +4,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from pprint import pformat
 from prymatex.lib.i18n import ugettext as _
+from camelot.action.utils import addActions
 
 def createAction(object, caption, 
                  shortcut = None, # QKeySequence
@@ -28,6 +29,33 @@ def createAction(object, caption,
     setattr(object, actionName, action )
     return action
 
+def addActionsToMenu(menu, *actions):
+    '''
+    Helper for mass menu action creation
+    Usage:
+    addActionsToMenu(menu,
+                     ("&Open", "Ctrl+O", "actionFOpen", {do_i18n = False}),
+                     (pos1, pos2, pos3, {x = 2}),
+                     None,
+                     ()
+    )
+    '''
+    for action_params in actions:
+        parent = menu.parent()
+        assert parent is not None
+        if not action_params:
+            menu.addSeparator()
+        else:
+            kwargs = {}
+            if isinstance(action_params[-1], dict):
+                largs = action_params[:-1]
+                kwargs.update(action_params[-1])
+            else:
+                largs = action_params
+            menu.addAction(createAction(parent, *largs, **kwargs))
+            
+            
+
 class PMXMainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
@@ -50,37 +78,43 @@ class PMXMainWindow(QMainWindow):
         
     
     def setup_actions(self):
-        self.file_menu.addActions([
-                                   createAction(self, "New Tab", "Ctrl+N"),
-                                   createAction(self, "&Close Tab", "Ctrl+W"),
-                                   createAction(self, "&Quit", "Ctrl+Q"),
-        ])
+        addActionsToMenu(self.file_menu,
+                                   ("&Open...", "Ctrl+O", {'name':'FileOpen'}),
+                                   ("&Save", "Ctrl+S"),
+                                   ("Save &As", "Ctrl+Shift+S"),
+                                   ("New Tab", "Ctrl+N"),
+                                   ("&Close Tab", "Ctrl+W"),
+                                   ("&Quit", "Ctrl+Q"),
+        )
         
-        self.edit_menu.addActions( [
-                              createAction(self, "&Copy", "Ctrl+C"),
-                              createAction(self, "C&ut", "Ctrl+X"),
-                              createAction(self, "&Paste", "Ctrl+V"),
-        ])
+        addActionsToMenu(self.edit_menu,
+                        ("&Copy", "Ctrl+C"),
+                        ("C&ut", "Ctrl+X"),
+                        ("&Paste", "Ctrl+V"),
+        )
         
-        self.view_menu.addActions([
-                                createAction(self, "&Full Screen", Qt.Key_F11),
-                                createAction(self, "&Show Menus", "Ctrl+M"),
-                                   
-        ])
+        addActionsToMenu(self.view_menu,
+                                ("&Full Screen", Qt.Key_F11),
+                                ("&Show Menus", "Ctrl+M"),
+        )
         
-        self.window_menu.addActions([
-                                createAction(self, "&Next Tab", Qt.CTRL + Qt.Key_PageDown),
-                                createAction(self, "&Previous Tab", Qt.CTRL + Qt.Key_PageUp),
-                                
-        ])
+        addActionsToMenu(self.window_menu,
+                                ("&Next Tab", Qt.CTRL + Qt.Key_PageDown),
+                                ("&Previous Tab", Qt.CTRL + Qt.Key_PageUp),
+        )
         
         app_name = qApp.instance().applicationName()
-        self.help_menu.addActions([
-                                createAction(self, _("&About %s") % app_name, 
-                                             name = 'AboutApp', do_i18n = False),
-                                createAction(self, _("&About Qt")),
-                                   
-        ])
+        addActionsToMenu(self.help_menu, 
+                         ("&About thsi app", {'name': 'AboutApp', 'do_i18n': False,}),
+                         None,
+                         ("&AboutQt",)
+        )
+#        self.help_menu.addActions([
+#                                createAction(self, _("&About %s") % app_name, 
+#                                             name = 'AboutApp', do_i18n = False),
+#                                createAction(self, _("&About Qt")),
+#                                   
+#        ])
         
         
     
@@ -179,3 +213,11 @@ class PMXMainWindow(QMainWindow):
             menubar.show()
         else:
             menubar.hide()
+            
+    @pyqtSignature('')
+    def on_actionFileOpen_triggered(self):
+        fs = QFileDialog.getOpenFileNames()
+        if not fs:
+            return
+        for f in fs:
+            print f 
