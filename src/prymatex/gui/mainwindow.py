@@ -21,7 +21,7 @@ def createAction(object, caption,
     if not name:
         name = caption.replace(' ', '')
         name = name.replace('&', '')
-        print name
+        #print name
     actionName = 'action' + name
     action.setObjectName(actionName)
     if shortcut:
@@ -72,8 +72,7 @@ class PMXMainWindow(QMainWindow):
         self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
     
     def setup_gui(self):
-        self.edior_tabs = PMXTabWidget()
-        self.edior_tabs.addTab(QTextEdit(), "Hello world")
+        self.edior_tabs = PMXTabWidget(self)
         self.setCentralWidget(self.edior_tabs)
         
     
@@ -81,6 +80,8 @@ class PMXMainWindow(QMainWindow):
         addActionsToMenu(self.file_menu,
                                    ("&Open...", "Ctrl+O", {'name':'FileOpen'}),
                                    ("&Save", "Ctrl+S"),
+                                   ("Save &All", "Ctrl+Alt+S"),
+                                   None,
                                    ("Save &As", "Ctrl+Shift+S"),
                                    ("New Tab", "Ctrl+N"),
                                    ("&Close Tab", "Ctrl+W"),
@@ -128,6 +129,9 @@ class PMXMainWindow(QMainWindow):
         
         self.view_menu = QMenu(_("&View"), self)
         menubar.addMenu(self.view_menu)
+        
+        self.bundle_menu = QMenu(_("&Bundle"), self)
+        menubar.addMenu(self.bundle_menu)
         
         self.window_menu = QMenu(_("&Window"), self)
         menubar.addMenu(self.window_menu)
@@ -220,5 +224,6 @@ class PMXMainWindow(QMainWindow):
         fs = QFileDialog.getOpenFileNames()
         if not fs:
             return
-        for f in fs:
-            print f 
+        for path in fs:
+            self.edior_tabs.openLocalFile(path)
+             
