@@ -11,10 +11,8 @@ class PMXTextEdit(QTextEdit):
     def __init__(self, parent, path = None):
         QTextEdit.__init__(self, parent)
         if not path:
-            return
-        
-        path = isinstance(path, QString) and unicode(path) or path
-        if os.path.exists(path):
+            self.path = None
+        elif os.path.exists(unicode(path)):
             try:
                 f = open(path)
                 text = f.read()
@@ -34,7 +32,12 @@ class PMXTextEdit(QTextEdit):
 #            if widget == self:
 #                return index
 #        return -1
-
+    @property
+    def filename(self):
+        if self.path:
+            return self.path
+        return _("This unsaved file")
+    
     def setTitle(self, text):
         tabwidget = self.parent().parent()
         #print tabwidget, tabwidget.parent()
@@ -47,9 +50,11 @@ class PMXTextEdit(QTextEdit):
     
     def requestClose(self):
         if self.document().isModified():
-            resp = QMessageBox.question(self, _("File modified"), _("%s is modified"), 
+            resp = QMessageBox.question(self, _("File modified"), _("%s is modified", self.filename), 
                                  QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             return resp
+        else:
+            return True
         
 
 class PMXTabWidget(QTabWidget):
@@ -99,8 +104,10 @@ class PMXTabWidget(QTabWidget):
         self.setCurrentIndex(index)
         if self.count() == 1:
             editor.setFocus(Qt.TabFocusReason)
-        
+    
+    
     def closeTab(self, index):
         editor = self.widget(index)
+        print editor
         if editor.requestClose():
             self.removeTab(index)

@@ -169,7 +169,11 @@ class PMXMainWindow(QMainWindow):
     @pyqtSignature('')
     def on_actionCloseTab_triggered(self):
         #self.edior_tabs.currentWidget()
-        self.edior_tabs.removeTab(self.edior_tabs.currentIndex())
+        #self.edior_tabs.removeTab(self.edior_tabs.currentIndex())
+        index = self.edior_tabs.currentIndex()
+        self.edior_tabs.closeTab(index)
+        self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+
     
     @pyqtSignature('')    
     def on_actionNextTab_triggered(self):
