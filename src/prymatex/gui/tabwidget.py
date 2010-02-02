@@ -1,6 +1,7 @@
 
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox
-from PyQt4.QtCore import QString
+from PyQt4.QtCore import QString, SIGNAL, Qt
+
 
 from prymatex.lib.i18n import ugettext as _
 import os
@@ -43,12 +44,25 @@ class PMXTextEdit(QTextEdit):
     def updateTitle(self):
         
         self.setTitle(os.path.basename(self.path))
+    
+    def requestClose(self):
+        if self.document().isModified():
+            resp = QMessageBox.question(self, _("File modified"), _("%s is modified"), 
+                                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            return resp
         
 
 class PMXTabWidget(QTabWidget):
     EDIT_TAB_WIDGET = PMXTextEdit
-    UNTITLED_LABEL = _("New File") 
+    UNTITLED_LABEL = _("New File %s")
     
+     
+    counter = 1
+    
+    def untitled_label(self):
+        counter = self.counter
+        self.counter += 1
+        return self.UNTITLED_LABEL % counter
     
     def __init__(self, parent):
         QTabWidget.__init__(self, parent)
@@ -56,6 +70,7 @@ class PMXTabWidget(QTabWidget):
             self.appendEmptyTab()
         self.setTabsClosable(True)
         self.setMovable(True)
+        self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         
         #self.setTab
     
@@ -80,5 +95,12 @@ class PMXTabWidget(QTabWidget):
     
     def appendEmptyTab(self):
         editor = self.getEditor()
-        index = self.addTab(editor, self.UNTITLED_LABEL)
+        index = self.addTab(editor, self.untitled_label())
         self.setCurrentIndex(index)
+        if self.count() == 1:
+            editor.setFocus(Qt.TabFocusReason)
+        
+    def closeTab(self, index):
+        editor = self.widget(index)
+        if editor.requestClose():
+            self.removeTab(index)

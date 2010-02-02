@@ -7,7 +7,7 @@ def ugettext(string, *largs, **kwargs):
         return string
     
     i18n_string = string
-    if i18n_string.count('%'):
+    if i18n_string.count('%') and largs:
         i18n_string = i18n_string % largs
     return i18n_string
     
