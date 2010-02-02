@@ -106,7 +106,7 @@ class PMXMainWindow(QMainWindow):
         
         app_name = qApp.instance().applicationName()
         addActionsToMenu(self.help_menu, 
-                         ("&About thsi app", {'name': 'AboutApp', 'do_i18n': False,}),
+                         (_("&About %s", app_name), {'name': 'AboutApp', 'do_i18n': False,}),
                          None,
                          ("&AboutQt",)
         )

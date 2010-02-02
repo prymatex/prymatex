@@ -55,6 +55,8 @@ class PMXTabWidget(QTabWidget):
         if not self.count():
             self.appendEmptyTab()
         self.setTabsClosable(True)
+        self.setMovable(True)
+        
         #self.setTab
     
     
