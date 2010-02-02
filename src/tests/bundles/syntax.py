@@ -3,7 +3,9 @@
 import re
 import ipdb
 import plistlib
-from debug_processor import DebugProcessor
+#from debug_processor import DebugProcessor
+
+SYNTAXES = {}
 
 class SyntaxProxy(object):
     def __init__(self, hash, syntax):
@@ -27,14 +29,12 @@ class SyntaxProxy(object):
         else:
             return self.syntax.syntaxes[self.proxy]
 
-
 def parse_file(filename, name_space = 'default'):
     data = plistlib.readPlist(filename)
     return SyntaxNode(data, None, name_space)
 
 class SyntaxNode(object):
     OPTIONS = re.UNICODE
-    syntaxes = {}
     
     def __init__(self, hash, syntax = None, name_space = 'default'):
         for k in ['syntax', 'firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 
@@ -42,9 +42,9 @@ class SyntaxNode(object):
                   'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
             setattr(self, k, None)
         self.name_space = name_space
-        self.__class__.syntaxes.setdefault(self.name_space, {})
+        SYNTAXES.setdefault(self.name_space, {})
         if 'scopeName' in hash:
-            self.__class__.syntaxes[self.name_space][hash["scopeName"]] = self 
+            SYNTAXES[self.name_space][hash["scopeName"]] = self 
         self.syntax = syntax or self
         for key, value in hash.iteritems():
             if key in ["firstLineMatch", "foldingStartMarker", "foldingStopMarker", "match", "begin"]:
@@ -55,7 +55,8 @@ class SyntaxNode(object):
                     value = value.replace('?<=', '(?<=)')
                     setattr(self, key, re.compile( value ))
                 except:
-                  print "Parsing error in %s: %s" % (key, value)
+		  pass
+                  #print "Parsing error in %s: %s" % (key, value)
             elif key in ["content", "fileTypes", "name", "contentName", "end", "scopeName", "keyEquivalent"]:
                 setattr(self, key, value )
             elif key in ["captures", "beginCaptures", "endCaptures"]:
@@ -67,7 +68,8 @@ class SyntaxNode(object):
             elif key in ["patterns"]:
                 self.create_children(value)
             else:
-                print u"Ignoring: %s: %s" % (key, value)
+		pass
+                #print u"Ignoring: %s: %s" % (key, value)
     
     def parse(self, string, processor = None ):
         if processor:
