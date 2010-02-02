@@ -5,6 +5,7 @@ from PyQt4.QtCore import *
 from pprint import pformat
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget 
+from prymatex.gui.statusbar import PMXStatusBar
 
 def createAction(object, caption, 
                  shortcut = None, # QKeySequence
@@ -74,6 +75,8 @@ class PMXMainWindow(QMainWindow):
     def setup_gui(self):
         self.edior_tabs = PMXTabWidget(self)
         self.setCentralWidget(self.edior_tabs)
+        status_bar = PMXStatusBar(self)
+        self.setStatusBar(status_bar)
         
     
     def setup_actions(self):
@@ -107,8 +110,11 @@ class PMXMainWindow(QMainWindow):
         app_name = qApp.instance().applicationName()
         addActionsToMenu(self.help_menu, 
                          (_("&About %s", app_name), {'name': 'AboutApp', 'do_i18n': False,}),
+                         ("&AboutQt",),
                          None,
-                         ("&AboutQt",)
+                         ("Report &Bug", ),
+                         ("Project &Homepage", ),
+                         (_("&Translate %s", app_name), {'do_i18n': False}),
         )
 #        self.help_menu.addActions([
 #                                createAction(self, _("&About %s") % app_name, 
@@ -211,8 +217,10 @@ class PMXMainWindow(QMainWindow):
             <li>diegomvh</li>
             <li>locurask</li>
         </ul>
+        <a href="">Homepage</a>
+        <p>Version %s</p>
         </p>
-        """))
+        """, qApp.instance().applicationVersion()))
         
     @pyqtSignature('')
     def on_actionFullScreen_triggered(self):
@@ -240,4 +248,10 @@ class PMXMainWindow(QMainWindow):
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
         qApp.aboutQt()
+    
+    @pyqtSignature('')
+    def on_actionProjectHomepage_triggered(self):
+        import webbrowser
+        
+        webbrowser.open(qApp.instance().projectUrl)
         

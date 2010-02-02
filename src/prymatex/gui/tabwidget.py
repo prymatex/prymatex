@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+# Created: 02/02/2010 by defo
 
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox
 from PyQt4.QtCore import QString, SIGNAL, Qt
@@ -7,22 +10,38 @@ from prymatex.lib.i18n import ugettext as _
 import os
 
 class PMXTextEdit(QTextEdit):
+    _path = ''
     
-    def __init__(self, parent, path = None):
+    def __init__(self, parent, path = ''):
         QTextEdit.__init__(self, parent)
-        if not path:
-            self.path = None
-        elif os.path.exists(unicode(path)):
+        print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
+        
+        self.path = path
+        if os.path.exists(self.path):
             try:
-                f = open(path)
+                f = open(self.path)
                 text = f.read()
                 f.close()
                 self.setPlainText(text)
             except Exception, e:
-                QMessageBox.critical(self, _("Read Error"), _("Could not read %s<br/>") % path)
-            else:
-                self.path = path
-                
+                QMessageBox.critical(self, _("Read Error"), _("Could not read %s<br/>") % self.path)
+        
+    
+    def path(): #@NoSelf
+        def fget(self):
+            return self._path
+        def fset(self, value):
+            self._path = unicode(value)
+        doc = u"Path property QString->unicode/str"
+        return locals()
+    path = property(**path())
+    
+    def cleanUp(self):
+        print "HOLA"
+        
+    def destroy(self, destroyWindow, destroySubWindows):
+        print "Chau"
+    
 #    @property
 #    def index(self):
 #        tabwidget = self.parent()
@@ -78,6 +97,9 @@ class PMXTabWidget(QTabWidget):
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         
         #self.setTab
+    
+    def mouseDoubleClickEvent(self, event):
+        self.appendEmptyTab()
     
     
     def getEditor(self, *largs, **kwargs):

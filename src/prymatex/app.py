@@ -11,6 +11,7 @@ class PMXApplication(QApplication):
         self.setApplicationVersion("0.1") # hg stuff?
         self.setOrganizationDomain("org")
         self.setOrganizationName("Xurix")
+        self.projectUrl = 'http://code.google.com/p/prymatex'
         #self.setWindowIcon()
         from prymatex.gui.mainwindow import PMXMainWindow
         self.main_window = PMXMainWindow()
