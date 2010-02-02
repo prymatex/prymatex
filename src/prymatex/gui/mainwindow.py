@@ -7,13 +7,15 @@ from prymatex.lib.i18n import ugettext as _
 
 def createAction(object, caption, 
                  shortcut = None, # QKeySequence
-                 name = None): # Name, 
+                 name = None,
+                 do_i18n = True): # Name, 
     '''
     @param object: Objeto
     @param name: Nombre de la propiedad
     @param caption: Texto de la acción a ser i18nalizdo
     @param shortcut: Texto del atajo a ser i18nalizdo
     '''
+    caption = do_i18n and _(caption) or caption
     action = QAction(_(caption), object)
     if not name:
         name = caption.replace(' ', '')
@@ -63,6 +65,15 @@ class PMXMainWindow(QMainWindow):
         self.window_menu.addActions([
                                 createAction(self, "&Next Tab", Qt.CTRL + Qt.Key_PageDown),
                                 createAction(self, "&Previous Tab", Qt.CTRL + Qt.Key_PageUp),
+                                createAction(self, "&Full Screen", Qt.Key_F11),
+        ])
+        
+        app_name = qApp.instance().applicationName()
+        self.help_menu.addActions([
+                                createAction(self, _("&About %s") % app_name, 
+                                             name = 'AboutApp', do_i18n = False),
+                                createAction(self, _("&About Qt")),
+                                   
         ])
         
         
@@ -130,3 +141,26 @@ class PMXMainWindow(QMainWindow):
             prox = count -1
         self.edior_tabs.setCurrentIndex(prox)
         self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+        
+    @pyqtSignature('')
+    def on_actionAboutApp_triggered(self):
+        QMessageBox.about(self, _("About"), _("""
+        <h3>Prymatex Text Editor</h3>
+        <p>(c) 2010 Xurix</p>
+        <p><h4>Authors:</h4>
+        <ul>
+            <li>D3f0</li>
+            <li>diegomvh</li>
+            <li>locurask</li>
+        </ul>
+        </p>
+        """))
+        
+    @pyqtSignature('')
+    def on_actionFullScreen_triggered(self):
+        if self.isFullScreen():
+            self.showNormal()
+        else:
+            self.showFullScreen()
+            
+    
