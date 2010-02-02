@@ -226,4 +226,8 @@ class PMXMainWindow(QMainWindow):
             return
         for path in fs:
             self.edior_tabs.openLocalFile(path)
-             
+    
+    @pyqtSignature('')
+    def on_actionAboutQt_triggered(self):
+        qApp.aboutQt()
+        

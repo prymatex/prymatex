@@ -54,6 +54,8 @@ class PMXTabWidget(QTabWidget):
         QTabWidget.__init__(self, parent)
         if not self.count():
             self.appendEmptyTab()
+        self.setTabsClosable(True)
+        #self.setTab
     
     
     def getEditor(self, *largs, **kwargs):
