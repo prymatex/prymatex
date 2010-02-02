@@ -217,8 +217,10 @@ class PMXMainWindow(QMainWindow):
             <li>diegomvh</li>
             <li>locurask</li>
         </ul>
+        <a href="">Homepage</a>
+        <p>Version %s</p>
         </p>
-        """))
+        """, qApp.instance().applicationVersion()))
         
     @pyqtSignature('')
     def on_actionFullScreen_triggered(self):

@@ -98,6 +98,9 @@ class PMXTabWidget(QTabWidget):
         
         #self.setTab
     
+    def mouseDoubleClickEvent(self, event):
+        self.appendEmptyTab()
+    
     
     def getEditor(self, *largs, **kwargs):
         '''
