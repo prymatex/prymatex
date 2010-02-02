@@ -4,7 +4,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from pprint import pformat
 from prymatex.lib.i18n import ugettext as _
-from camelot.action.utils import addActions
+from prymatex.gui.tabwidget import PMXTabWidget 
 
 def createAction(object, caption, 
                  shortcut = None, # QKeySequence
@@ -72,7 +72,7 @@ class PMXMainWindow(QMainWindow):
         self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
     
     def setup_gui(self):
-        self.edior_tabs = QTabWidget()
+        self.edior_tabs = PMXTabWidget()
         self.edior_tabs.addTab(QTextEdit(), "Hello world")
         self.setCentralWidget(self.edior_tabs)
         
@@ -152,8 +152,9 @@ class PMXMainWindow(QMainWindow):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        self.edior_tabs.addTab(QTextEdit(), "New Tab %d" % self.counter)
-        self.counter += 1
+        #self.edior_tabs.addTab(QTextEdit(), "New Tab %d" % self.counter)
+        #self.counter += 1
+        self.edior_tabs.appendEmptyTab()
     
     @pyqtSignature('')
     def on_actionCloseTab_triggered(self):
