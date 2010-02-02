@@ -62,10 +62,16 @@ class PMXMainWindow(QMainWindow):
                               createAction(self, "&Paste", "Ctrl+V"),
         ])
         
+        self.view_menu.addActions([
+                                createAction(self, "&Full Screen", Qt.Key_F11),
+                                createAction(self, "&Show Menus", "Ctrl+M"),
+                                   
+        ])
+        
         self.window_menu.addActions([
                                 createAction(self, "&Next Tab", Qt.CTRL + Qt.Key_PageDown),
                                 createAction(self, "&Previous Tab", Qt.CTRL + Qt.Key_PageUp),
-                                createAction(self, "&Full Screen", Qt.Key_F11),
+                                
         ])
         
         app_name = qApp.instance().applicationName()
@@ -85,6 +91,9 @@ class PMXMainWindow(QMainWindow):
         
         self.edit_menu = QMenu(_("&Edit"), self)
         menubar.addMenu(self.edit_menu)
+        
+        self.view_menu = QMenu(_("&View"), self)
+        menubar.addMenu(self.view_menu)
         
         self.window_menu = QMenu(_("&Window"), self)
         menubar.addMenu(self.window_menu)
@@ -163,4 +172,10 @@ class PMXMainWindow(QMainWindow):
         else:
             self.showFullScreen()
             
-    
+    @pyqtSignature('')
+    def on_actionShowMenus_triggered(self):
+        menubar = self.menuBar()
+        if menubar.isHidden():
+            menubar.show()
+        else:
+            menubar.hide()
