@@ -46,6 +46,8 @@ def addActionsToMenu(menu, *actions):
         assert parent is not None
         if not action_params:
             menu.addSeparator()
+        elif type(action_params) is QMenu:
+            menu.addMenu(action_params)
         else:
             kwargs = {}
             if isinstance(action_params[-1], dict):
@@ -81,17 +83,23 @@ class PMXMainWindow(QMainWindow):
     
     def setup_actions(self):
         addActionsToMenu(self.file_menu,
+                                   ("New", "Ctrl+N", {'name': "NewTab"}),
                                    ("&Open...", "Ctrl+O", {'name':'FileOpen'}),
                                    ("&Save", "Ctrl+S"),
+                                   ("Save &As", "Ctrl+Shift+S"),
                                    ("Save &All", "Ctrl+Alt+S"),
                                    None,
-                                   ("Save &As", "Ctrl+Shift+S"),
-                                   ("New Tab", "Ctrl+N"),
-                                   ("&Close Tab", "Ctrl+W"),
+                                   ("&Reload", "Ctrl+R"),
+                                   ("&Close", "Ctrl+W"),
+                                   ("Close &Others", "Ctrl+Shift+W"),
+                                   None,
                                    ("&Quit", "Ctrl+Q"),
         )
         
         addActionsToMenu(self.edit_menu,
+                        ("Un&do", "Ctrl+Z"),
+                        ("&Redo", "Ctrl+Shift+Z"),
+                        None,
                         ("&Copy", "Ctrl+C"),
                         ("C&ut", "Ctrl+X"),
                         ("&Paste", "Ctrl+V"),
@@ -105,6 +113,9 @@ class PMXMainWindow(QMainWindow):
         addActionsToMenu(self.window_menu,
                                 ("&Next Tab", Qt.CTRL + Qt.Key_PageDown),
                                 ("&Previous Tab", Qt.CTRL + Qt.Key_PageUp),
+                                None,
+                                self.panes_submenu,
+                                None,
         )
         
         app_name = qApp.instance().applicationName()
@@ -140,7 +151,11 @@ class PMXMainWindow(QMainWindow):
         menubar.addMenu(self.bundle_menu)
         
         self.window_menu = QMenu(_("&Window"), self)
+        self.window_menu.windowActionGroup = MenuActionGroup(self.window_menu)
         menubar.addMenu(self.window_menu)
+        
+        # Panes
+        self.panes_submenu = QMenu(_("&Panes"), self)
         
         self.help_menu = QMenu(_("&Help"), self)
         menubar.addMenu(self.help_menu)
@@ -173,9 +188,7 @@ class PMXMainWindow(QMainWindow):
         self.edior_tabs.appendEmptyTab()
     
     @pyqtSignature('')
-    def on_actionCloseTab_triggered(self):
-        #self.edior_tabs.currentWidget()
-        #self.edior_tabs.removeTab(self.edior_tabs.currentIndex())
+    def on_actionClose_triggered(self):
         index = self.edior_tabs.currentIndex()
         self.edior_tabs.closeTab(index)
         self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
@@ -252,6 +265,25 @@ class PMXMainWindow(QMainWindow):
     @pyqtSignature('')
     def on_actionProjectHomepage_triggered(self):
         import webbrowser
-        
         webbrowser.open(qApp.instance().projectUrl)
-        
+    
+    @pyqtSignature('')
+    def on_actionSave_triggered(self):
+        print "actionSave"
+    
+    @pyqtSignature('')
+    def on_actionSaveAll_triggered(self):
+        print "actionSaveAll"
+
+class MenuActionGroup(QActionGroup):
+    def __init__(self, parent):
+        assert isinstance(parent, QMenu)
+        QActionGroup.__init__(self, parent)
+    
+    def addAction(self, action):
+        QActionGroup.addAction(self, action)
+        self.parent().addAction(action)
+    
+    def removeAction(self, action):
+        QActionGroup.removeAction(self, action)
+        self.parent().removeAction(action)

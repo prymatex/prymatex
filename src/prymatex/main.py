@@ -9,7 +9,6 @@ def main(argv = sys.argv):
     '''
     GUI entry point
     '''
-    
     from prymatex.app import PMXApplication
     app = PMXApplication(argv)
     return app.exec_()
