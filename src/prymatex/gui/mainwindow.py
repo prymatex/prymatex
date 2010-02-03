@@ -77,6 +77,9 @@ class PMXMainWindow(QMainWindow):
         QMetaObject.connectSlotsByName(self)
         
         self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+        
+        self.pane = FSPane(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.pane)
     
     def setup_gui(self):
         self.edior_tabs = PMXTabWidget(self)
