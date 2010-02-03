@@ -11,7 +11,8 @@ from prymatex.gui.panes.fspane import FSPane
 def createAction(object, caption, 
                  shortcut = None, # QKeySequence
                  name = None,
-                 do_i18n = True): # Name, 
+                 do_i18n = True,
+                 checkable = False): # Name, 
     '''
     @param object: Objeto
     @param name: Nombre de la propiedad
@@ -29,6 +30,8 @@ def createAction(object, caption,
     if shortcut:
         action.setShortcut(_(shortcut))
     setattr(object, actionName, action )
+    if checkable:
+        action.setCheckable(checkable)
     return action
 
 def addActionsToMenu(menu, *actions):
@@ -56,12 +59,12 @@ def addActionsToMenu(menu, *actions):
                 kwargs.update(action_params[-1])
             else:
                 largs = action_params
-            #menu.addAction(createAction(parent, *largs, **kwargs))
-            action = menu.addAction(createAction(parent, *largs))
-            for key, value in kwargs.iteritems():
-                f = getattr(action, 'set'+key.capitalize(), None)
-                if f:
-                    f(value)
+            menu.addAction(createAction(parent, *largs, **kwargs))
+            #action = menu.addAction(createAction(parent, *largs))
+#            for key, value in kwargs.iteritems():
+#                f = getattr(action, 'set'+key.capitalize(), None)
+#                if f:
+#                    f(value)
 
 class PMXMainWindow(QMainWindow):
     def __init__(self):
@@ -133,6 +136,8 @@ class PMXMainWindow(QMainWindow):
                          ("Report &Bug", ),
                          ("Project &Homepage", ),
                          (_("&Translate %s", app_name), {'do_i18n': False}),
+                         None,
+                         ('&Take Screenshot', 'Ctrl+8'),
         )
 #        self.help_menu.addActions([
 #                                createAction(self, _("&About %s") % app_name, 
@@ -285,6 +290,23 @@ class PMXMainWindow(QMainWindow):
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
         print "actionSaveAll"
+    
+    @pyqtSignature('')
+    def on_actionTakeScreenshot_triggered(self):
+        QTimer.singleShot()
+        pxm = QPixmap.grabWindow(self.winId())
+        format = 'png'
+        from datetime import datetime
+        now = datetime.now()
+        #initialPath = QDir.currentPath() + "/untitled." + format
+
+#        fileName = QFileDialog.getSaveFileName(self, "Save As",
+#                initialPath,
+#                "%s Files (*.%s);;All Files (*)" % (format.upper(), format))
+#        if fileName:
+#            pxm.save(fileName, format)
+        name = now.strftime('sshot-%Y-%m-%d-%H_%M_%S') + '.' + format
+        pxm.save(name, format)
 
 class MenuActionGroup(QActionGroup):
     def __init__(self, parent):
