@@ -6,6 +6,7 @@ from pprint import pformat
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget 
 from prymatex.gui.statusbar import PMXStatusBar
+from prymatex.gui.panes.fspane import FSPane
 
 def createAction(object, caption, 
                  shortcut = None, # QKeySequence
@@ -55,9 +56,12 @@ def addActionsToMenu(menu, *actions):
                 kwargs.update(action_params[-1])
             else:
                 largs = action_params
-            menu.addAction(createAction(parent, *largs, **kwargs))
-            
-            
+            #menu.addAction(createAction(parent, *largs, **kwargs))
+            action = menu.addAction(createAction(parent, *largs))
+            for key, value in kwargs.iteritems():
+                f = getattr(action, 'set'+key.capitalize(), None)
+                if f:
+                    f(value)
 
 class PMXMainWindow(QMainWindow):
     def __init__(self):
@@ -156,7 +160,11 @@ class PMXMainWindow(QMainWindow):
         
         # Panes
         self.panes_submenu = QMenu(_("&Panes"), self)
-        
+        addActionsToMenu(self.panes_submenu, 
+                         ('Filesystem', {'checkable': True}),
+                         ('Text Search', {'checkable': True}),
+                         ('Session', {'checkable': True}),
+                         )
         self.help_menu = QMenu(_("&Help"), self)
         menubar.addMenu(self.help_menu)
         
