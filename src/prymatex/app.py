@@ -16,7 +16,11 @@ class PMXApplication(QApplication):
         from prymatex.gui.mainwindow import PMXMainWindow
         self.main_window = PMXMainWindow()
         self.main_window.show()
-        
+    
+    
+    def getThemePath(self):
+        #TODO: Get something from the config
+        pass
     
     
         

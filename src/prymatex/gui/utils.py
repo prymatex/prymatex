@@ -24,12 +24,17 @@ def text_to_object_name(text, prefix = None):
         name = prefix + name
     return name
 
-def createButton(parent, text, object_name = None, do_i18n = False, **opts):
+def createButton(parent, text, shortcut = None, object_name = None, do_i18n = False, **opts):
     text = do_i18n and _(text) or text
+    if shortcut:
+        shortcut = do_i18n and _(shortcut) or shortcut
     button = QPushButton(text, parent)
     if not object_name:
         object_name = text_to_object_name(text, 'button')
     button.setObjectName(object_name)
+    #buttons.setKey
+    button.setFlat(True)
+    setattr(parent, object_name, button)
     return button
 
 
@@ -94,6 +99,11 @@ def addActionsToMenu(menu, *action_tuples):
 #                f = getattr(action, 'set'+key.capitalize(), None)
 #                if f:
 #                    f(value)
+
+
+def get_icon(path):
+    root = qApp.instace().getThemePath()
+    pass
 
 
 

@@ -7,7 +7,7 @@ from PyQt4.QtCore import QString, SIGNAL, Qt
 from prymatex.gui.editor import PMXTextEdit
 
 from prymatex.lib.i18n import ugettext as _
-
+from prymatex.gui.utils import *
 
         
 
@@ -31,6 +31,8 @@ class PMXTabWidget(QTabWidget):
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
         
+        self.setCornerWidget(createButton(self, "Tab List", "Ctrl+Space"), 
+                             Qt.TopRightCorner)
         #self.setTab
     
     

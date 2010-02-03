@@ -2,6 +2,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
 from prymatex.lib.i18n import ugettext as _
+from prymatex.gui.utils import createButton
 #from pr
 
 
@@ -15,10 +16,10 @@ class FSPaneWidget(QWidget):
     def setupGui(self):
         mainlayout = QVBoxLayout()
         button_layout = QHBoxLayout()
-        self.buttonUp = QPushButton(_("Up"), self)
-        self.buttonUp.setObjectName('buttonUp')
+        # Oneliner Watchout!! Sorry
+        button_layout.addWidget(createButton(self, _("&Up")))
+        button_layout.addWidget(createButton(self, _("&Filter")))
         button_layout.addStretch()
-        button_layout.addWidget(self.buttonUp)
         mainlayout.addLayout(button_layout)
         self.tree = FSTree(self)
         mainlayout.addWidget(self.tree)
