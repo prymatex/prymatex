@@ -19,6 +19,7 @@ class FSPaneWidget(QWidget):
         # Oneliner Watchout!! Sorry
         button_layout.addWidget(createButton(self, _("&Up")))
         button_layout.addWidget(createButton(self, _("&Filter")))
+        button_layout.addWidget(createButton(self, _("&Set Root")))
         button_layout.addStretch()
         mainlayout.addLayout(button_layout)
         self.tree = FSTree(self)
@@ -30,7 +31,15 @@ class FSTree(QTreeView):
     def __init__(self, parent):
         QTreeView.__init__(self, parent)
         model = QDirModel(self)
+#        for i in range(model.columnCount()):
+#            val = model.headerData(i, Qt.Horizontal)
+#            print val.toPyObject()
+        
+        
+
         self.setModel(model)
+        for i in range(1,model.columnCount()):
+            self.setColumnHidden(i, True)
         self.setAnimated(False)
         self.setIndentation(20)
         self.setSortingEnabled(True)

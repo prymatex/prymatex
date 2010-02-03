@@ -64,7 +64,8 @@ class PMXMainWindow(QMainWindow):
                                 None,
                                 ("Zoom &In", Qt.CTRL + Qt.Key_Plus),
                                 ("Zoom &Out", Qt.CTRL + Qt.Key_Minus),
-                                
+                                None,
+                                ("Focus Editor", Qt.Key_F12),
         )
         
         addActionsToMenu(self.window_menu,
@@ -269,6 +270,14 @@ class PMXMainWindow(QMainWindow):
     def on_actionZoomOut_triggered(self):
         self.edior_tabs.currentWidget().zoomOut()
     
+    @pyqtSignature('')
+    def on_actionFocusEditor_triggered(self):
+        # Siempre debería haber una ventana de edición
+        try:
+            self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+        except Exception:
+            pass
+    
 class MenuActionGroup(QActionGroup):
     def __init__(self, parent):
         assert isinstance(parent, QMenu)
@@ -281,3 +290,4 @@ class MenuActionGroup(QActionGroup):
     def removeAction(self, action):
         QActionGroup.removeAction(self, action)
         self.parent().removeAction(action)
+        
