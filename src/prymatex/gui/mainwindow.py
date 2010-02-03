@@ -7,67 +7,7 @@ from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget 
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.panes.fspane import FSPane
-
-def createAction(object, caption, 
-                 shortcut = None, # QKeySequence
-                 name = None,
-                 do_i18n = True,
-                 checkable = False): # Name, 
-    '''
-    @param object: Objeto
-    @param name: Nombre de la propiedad
-    @param caption: Texto de la acción a ser i18nalizdo
-    @param shortcut: Texto del atajo a ser i18nalizdo
-    '''
-    caption = do_i18n and _(caption) or caption
-    action = QAction(_(caption), object)
-    if not name:
-        name = caption.replace(' ', '')
-        name = name.replace('&', '')
-        #print name
-    actionName = 'action' + name
-    action.setObjectName(actionName)
-    if shortcut:
-        action.setShortcut(_(shortcut))
-    setattr(object, actionName, action )
-    if checkable:
-        action.setCheckable(checkable)
-    return action
-
-def addActionsToMenu(menu, *action_tuples):
-    '''
-    Helper for mass menu action creation
-    Usage:
-    addActionsToMenu(menu,
-                     ("&Open", "Ctrl+O", "actionFOpen", {do_i18n = False}),
-                     (pos1, pos2, pos3, {x = 2}),
-                     None,
-                     ()
-    )
-    '''
-    actions = []
-    for action_params in action_tuples:
-        parent = menu.parent()
-        assert parent is not None
-        if not action_params:
-            menu.addSeparator()
-        elif type(action_params) is QMenu:
-            menu.addMenu(action_params)
-        else:
-            kwargs = {}
-            if isinstance(action_params[-1], dict):
-                largs = action_params[:-1]
-                kwargs.update(action_params[-1])
-            else:
-                largs = action_params
-            action = menu.addAction(createAction(parent, *largs, **kwargs))
-            actions.append(action)
-    return actions
-            #action = menu.addAction(createAction(parent, *largs))
-#            for key, value in kwargs.iteritems():
-#                f = getattr(action, 'set'+key.capitalize(), None)
-#                if f:
-#                    f(value)
+from prymatex.gui.utils import addActionsToMenu
 
 class PMXMainWindow(QMainWindow):
     def __init__(self):
