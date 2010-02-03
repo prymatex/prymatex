@@ -34,7 +34,7 @@ def createAction(object, caption,
         action.setCheckable(checkable)
     return action
 
-def addActionsToMenu(menu, *actions):
+def addActionsToMenu(menu, *action_tuples):
     '''
     Helper for mass menu action creation
     Usage:
@@ -45,7 +45,8 @@ def addActionsToMenu(menu, *actions):
                      ()
     )
     '''
-    for action_params in actions:
+    actions = []
+    for action_params in action_tuples:
         parent = menu.parent()
         assert parent is not None
         if not action_params:
@@ -59,7 +60,9 @@ def addActionsToMenu(menu, *actions):
                 kwargs.update(action_params[-1])
             else:
                 largs = action_params
-            menu.addAction(createAction(parent, *largs, **kwargs))
+            action = menu.addAction(createAction(parent, *largs, **kwargs))
+            actions.append(action)
+    return actions
             #action = menu.addAction(createAction(parent, *largs))
 #            for key, value in kwargs.iteritems():
 #                f = getattr(action, 'set'+key.capitalize(), None)
@@ -73,7 +76,7 @@ class PMXMainWindow(QMainWindow):
         
         self.setup_menus()
         self.setup_actions()
-        
+        self.setup_panes()
         self.setup_toolbars()
         self.setup_gui()
         self.center()
@@ -118,6 +121,10 @@ class PMXMainWindow(QMainWindow):
         addActionsToMenu(self.view_menu,
                                 ("&Full Screen", Qt.Key_F11),
                                 ("&Show Menus", "Ctrl+M"),
+                                None,
+                                ("Zoom &In", Qt.CTRL + Qt.Key_Plus),
+                                ("Zoom &Out", Qt.CTRL + Qt.Key_Minus),
+                                
         )
         
         addActionsToMenu(self.window_menu,
@@ -168,15 +175,21 @@ class PMXMainWindow(QMainWindow):
         
         # Panes
         self.panes_submenu = QMenu(_("&Panes"), self)
+        
+        self.help_menu = QMenu(_("&Help"), self)
+        menubar.addMenu(self.help_menu)
+        
+        self.setMenuBar(menubar)
+    
+    def setup_panes(self):
+        actions = \
         addActionsToMenu(self.panes_submenu, 
                          ('Filesystem', {'checkable': True}),
                          ('Text Search', {'checkable': True}),
                          ('Session', {'checkable': True}),
                          )
-        self.help_menu = QMenu(_("&Help"), self)
-        menubar.addMenu(self.help_menu)
+        print actions
         
-        self.setMenuBar(menubar)
     
     def setup_toolbars(self):
         pass 
@@ -307,7 +320,15 @@ class PMXMainWindow(QMainWindow):
 #            pxm.save(fileName, format)
         name = now.strftime('sshot-%Y-%m-%d-%H_%M_%S') + '.' + format
         pxm.save(name, format)
-
+        
+    @pyqtSignature('')
+    def on_actionZoomIn_triggered(self):
+        self.edior_tabs.currentWidget().zoomIn()
+    
+    @pyqtSignature('')
+    def on_actionZoomOut_triggered(self):
+        self.edior_tabs.currentWidget().zoomOut()
+    
 class MenuActionGroup(QActionGroup):
     def __init__(self, parent):
         assert isinstance(parent, QMenu)

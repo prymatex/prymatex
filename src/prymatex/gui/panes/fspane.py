@@ -3,6 +3,16 @@ from PyQt4.QtCore import *
 
 from prymatex.lib.i18n import ugettext as _
 
+class FSTree(QTreeView):
+    
+    def mouseDoubleClickEvent(self, event):
+        index = self.indexAt(event.pos())
+        print self.model().data(index).toPyObject()
+        print self.model().data(index.parent()).toPyObject()
+        print self.rootIndex()
+    
+
+
 class FSPane(QDockWidget):
     def __init__(self, parent):
         QDockWidget.__init__(self, parent)
@@ -10,7 +20,7 @@ class FSPane(QDockWidget):
         
 
         self.model = QDirModel()
-        self.tree = QTreeView(self)
+        self.tree = FSTree(self)
         self.tree.setModel(self.model)
 
         self.tree.setAnimated(False)

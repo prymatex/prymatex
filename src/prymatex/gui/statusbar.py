@@ -59,5 +59,6 @@ class PMXStatusBar(QStatusBar):
         
         self.setStyleSheet(
                            '''
-        QLabel { border-left: 1px solid #000 }
+        QLabel { border-left: 1px solid #000;
+                font-weight: bold; }
         ''')

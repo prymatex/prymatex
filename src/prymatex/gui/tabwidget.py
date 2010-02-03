@@ -14,7 +14,7 @@ from prymatex.lib.i18n import ugettext as _
 class PMXTabWidget(QTabWidget):
     EDIT_TAB_WIDGET = PMXTextEdit
     UNTITLED_LABEL = _("New File %s")
-     
+    
     counter = 1
     
     def untitled_label(self):

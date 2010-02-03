@@ -7,7 +7,7 @@ from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
 import os
 
-class PMXTextEdit(QTextEdit):
+class PMXTextEdit(QPlainTextEdit):
     _path = ''
     
     def __init__(self, parent, path = ''):
