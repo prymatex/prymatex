@@ -1,6 +1,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-
+import os
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import createButton
 #from pr
@@ -43,12 +43,23 @@ class FSTree(QTreeView):
         self.setAnimated(False)
         self.setIndentation(20)
         self.setSortingEnabled(True)
-        
+        self.setExpandsOnDoubleClick(True)
     def mouseDoubleClickEvent(self, event):
+        QTreeView.mouseDoubleClickEvent(self, event)
+        
         index = self.indexAt(event.pos())
-        print self.model().data(index).toPyObject()
-        print self.model().data(index.parent()).toPyObject()
-        print self.rootIndex()
+        data = unicode(self.model().filePath(index))
+        print data
+        if os.path.isfile(data):
+            mainwin = self.parent().parent().parent()
+            mainwin.tabWidgetEditors.openLocalFile(data)
+        if os.path.isdir(data):
+            if self.model().hasChildren(index):
+                print "Cerpeta"
+#        print self.model().data(index).toPyObject()
+#        print self.model().data(index.parent()).toPyObject()
+#        print "Root", self.model().filePath(self.rootIndex())
+        
     
 
 

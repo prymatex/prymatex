@@ -22,14 +22,14 @@ class PMXMainWindow(QMainWindow):
         self.center()
         QMetaObject.connectSlotsByName(self)
         
-        self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
         self.pane = FSPane(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.pane)
     
     def setup_gui(self):
-        self.edior_tabs = PMXTabWidget(self)
-        self.setCentralWidget(self.edior_tabs)
+        self.tabWidgetEditors = PMXTabWidget(self)
+        self.setCentralWidget(self.tabWidgetEditors)
         status_bar = PMXStatusBar(self)
         self.setStatusBar(status_bar)
         
@@ -153,41 +153,41 @@ class PMXMainWindow(QMainWindow):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        #self.edior_tabs.addTab(QTextEdit(), "New Tab %d" % self.counter)
+        #self.tabWidgetEditors.addTab(QTextEdit(), "New Tab %d" % self.counter)
         #self.counter += 1
-        self.edior_tabs.appendEmptyTab()
+        self.tabWidgetEditors.appendEmptyTab()
     
     @pyqtSignature('')
     def on_actionClose_triggered(self):
-        index = self.edior_tabs.currentIndex()
-        self.edior_tabs.closeTab(index)
-        self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+        index = self.tabWidgetEditors.currentIndex()
+        self.tabWidgetEditors.closeTab(index)
+        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
 
     
     @pyqtSignature('')    
     def on_actionNextTab_triggered(self):
         
-        curr = self.edior_tabs.currentIndex()
-        count = self.edior_tabs.count()
+        curr = self.tabWidgetEditors.currentIndex()
+        count = self.tabWidgetEditors.count()
         
         if curr < count -1:
             prox = curr +1
         else:
             prox = 0
-        self.edior_tabs.setCurrentIndex(prox)
-        self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+        self.tabWidgetEditors.setCurrentIndex(prox)
+        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
     @pyqtSignature('')
     def on_actionPreviousTab_triggered(self):
-        curr = self.edior_tabs.currentIndex()
-        count = self.edior_tabs.count()
+        curr = self.tabWidgetEditors.currentIndex()
+        count = self.tabWidgetEditors.count()
         
         if curr > 0:
             prox = curr -1
         else:
             prox = count -1
-        self.edior_tabs.setCurrentIndex(prox)
-        self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+        self.tabWidgetEditors.setCurrentIndex(prox)
+        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
     @pyqtSignature('')
     def on_actionAboutApp_triggered(self):
@@ -226,7 +226,7 @@ class PMXMainWindow(QMainWindow):
         if not fs:
             return
         for path in fs:
-            self.edior_tabs.openLocalFile(path)
+            self.tabWidgetEditors.openLocalFile(path)
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
@@ -264,17 +264,17 @@ class PMXMainWindow(QMainWindow):
         
     @pyqtSignature('')
     def on_actionZoomIn_triggered(self):
-        self.edior_tabs.currentWidget().zoomIn()
+        self.tabWidgetEditors.currentWidget().zoomIn()
     
     @pyqtSignature('')
     def on_actionZoomOut_triggered(self):
-        self.edior_tabs.currentWidget().zoomOut()
+        self.tabWidgetEditors.currentWidget().zoomOut()
     
     @pyqtSignature('')
     def on_actionFocusEditor_triggered(self):
         # Siempre debería haber una ventana de edición
         try:
-            self.edior_tabs.currentWidget().setFocus(Qt.TabFocusReason)
+            self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         except Exception:
             pass
     

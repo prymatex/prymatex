@@ -53,9 +53,22 @@ class PMXTabWidget(QTabWidget):
     
     
     def openLocalFile(self, path):
-        editor = self.getEditor(path)
-        index = self.addTab(editor, _("Loading..."))
-        self.setCurrentIndex(index)
+        '''
+        
+        '''
+#        print self.count()
+#        print "modificado?", self.widget(0).document().isModified()
+        if self.count() == 1 and not self.widget(0).document().isModified() and \
+            not self.widget(0).path:
+            print "Reutilizando vacio"
+            editor = self.widget(0)
+            editor.path = path
+            editor.afterInsertionEvent()
+            
+        else:
+            editor = self.getEditor(path)
+            index = self.addTab(editor, _("Loading..."))
+            self.setCurrentIndex(index)
         
     
     

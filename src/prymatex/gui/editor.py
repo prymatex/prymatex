@@ -33,21 +33,23 @@ class PMXTextEdit(QPlainTextEdit):
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
         
         self.path = path
-        if os.path.exists(self.path):
-            try:
-                f = open(self.path)
-                text = f.read()
-                f.close()
-                self.setPlainText(text)
-            except Exception, e:
-                QMessageBox.critical(self, _("Read Error"), _("Could not read %s<br/>") % self.path)
+        
         
     
     def path(): #@NoSelf
         def fget(self):
             return self._path
+        
         def fset(self, value):
             self._path = unicode(value)
+            if os.path.exists(value):
+                f = open(self.path)
+                text = f.read()
+                f.close()
+                self.setPlainText(text)
+                
+            elif value: # Si no es nulo
+                raise IOError("%s does not exist")
             
         doc = u"Path property QString->unicode/str"
         return locals()
