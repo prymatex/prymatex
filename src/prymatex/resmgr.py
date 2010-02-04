@@ -6,6 +6,10 @@ from PyQt4.QtGui import *
 import os
 
 class ResourceManager(QObject):
+    '''
+    Resource Manager
+    It handles Files, Icons, and static stuff.
+    '''
     __loaded_resources = []
     __current_theme = None
     __current_theme_path = None

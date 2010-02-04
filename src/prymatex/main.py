@@ -9,9 +9,14 @@ def main(argv = sys.argv):
     '''
     GUI entry point
     '''
-    from prymatex.app import PMXApplication
-    app = PMXApplication(argv)
-    return app.exec_()
+    from prymatex import app
+    from prymatex.lib import exceptions
+    try:
+        myapp = app.PMXApplication(argv)
+    except exceptions.AlreadyRunningError, e:
+        return e.RETURN_VALUE
+         
+    return myapp.exec_()
 
 if __name__ == '__main__':
     sys.exit(main())

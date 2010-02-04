@@ -75,14 +75,7 @@ class PMXTabWidget(QTabWidget):
                 if path == editor.path:
                     self.setCurrentWidget(editor)
                     return
-#        for i in range(self.count()):
-#            editor = self.widget(i)
-#            path = editor.path
-#            if path:
-#                path_assoc[path] = editor
-#        if path in path_assoc:
-#            self.setCurrentWidget(path_assoc[path])
-#            return
+
         
         if count == 1 and not self.widget(0).document().isModified() and \
             not self.widget(0).path:
