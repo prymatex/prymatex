@@ -31,8 +31,18 @@ class PMXTabWidget(QTabWidget):
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
         
-        self.setCornerWidget(createButton(self, "Tab List", "Ctrl+Space"), 
-                             Qt.TopRightCorner)
+#        self.setCornerWidget(createButton(self, "Tab List", "Ctrl+Space"), 
+#                             Qt.TopRightCorner)
+        self.buttonTabList = QPushButton(self)
+        self.buttonTabList.setToolTip("Tab list")
+        self.buttonTabList.setIcon(qApp.instance().res_mngr.getIcon('application_view_list.png'))
+        self.buttonTabList.setStyleSheet('''
+            QPushButton {
+                padding: 5px;
+            }
+        ''')
+        self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
+        
         #self.setTab
     
     
@@ -64,6 +74,7 @@ class PMXTabWidget(QTabWidget):
             editor = self.widget(0)
             editor.path = path
             editor.afterInsertionEvent()
+            editor.getFocus()
             
         else:
             editor = self.getEditor(path)
@@ -89,6 +100,8 @@ class PMXTabWidget(QTabWidget):
         editor = self.widget(index)
         if editor.requestClose():
             self.removeTab(index)
+            return True
+        return False
     
     def addTab(self, widget, label):
         '''

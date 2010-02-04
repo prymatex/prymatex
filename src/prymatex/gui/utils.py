@@ -28,6 +28,7 @@ def createButton(parent, text, shortcut = None, object_name = None, do_i18n = Fa
     text = do_i18n and _(text) or text
     if shortcut:
         shortcut = do_i18n and _(shortcut) or shortcut
+    
     button = QPushButton(text, parent)
     if not object_name:
         object_name = text_to_object_name(text, 'button')
@@ -38,20 +39,40 @@ def createButton(parent, text, shortcut = None, object_name = None, do_i18n = Fa
     return button
 
 
+_available_keys = filter(lambda s: s.startswith('Key_'), dir(Qt))
+KEYS_DICT = dict([(name[4:], getattr(Qt, name)) for name in _available_keys])
+KEYS_DICT.update({'Ctrl': Qt.CTRL, 'Control': Qt.CTRL, 'CTRL': Qt.CTRL, 
+                  'Shift': Qt.SHIFT, 'Shift': Qt.SHIFT,
+                  'Alt': Qt.ALT, 'ALT': Qt.ALT,
+                  'Meta': Qt.META, 'META': Qt.META,
+                  })
 
-def createAction(object, caption, 
+
+def text_to_KeySequence(text):
+    try:
+        ints = [ KEYS_DICT[k] for k in text.split('+') ]
+        ks = QKeySequence(sum(ints))
+        #ks = QKeySequence.fromString(text)
+        
+    except Exception, e:
+        print "Error en shortcut", e, text
+        return QKeySequence()
+    
+    return ks
+
+def createAction(parent, caption, 
                  shortcut = None, # QKeySequence
                  name = None,
                  do_i18n = True,
                  checkable = False): # Name, 
     '''
-    @param object: Objeto
+    @param parent: Objeto
     @param name: Nombre de la propiedad
     @param caption: Texto de la acción a ser i18nalizdo
     @param shortcut: Texto del atajo a ser i18nalizdo
     '''
     caption = do_i18n and _(caption) or caption
-    action = QAction(_(caption), object)
+    action = QAction(_(caption), parent)
     if not name:
         name = caption.replace(' ', '')
         name = name.replace('&', '')
@@ -59,8 +80,10 @@ def createAction(object, caption,
     actionName = 'action' + name
     action.setObjectName(actionName)
     if shortcut:
-        action.setShortcut(_(shortcut))
-    setattr(object, actionName, action )
+        shortcut = do_i18n and _(shortcut) or shortcut 
+        sequence = text_to_KeySequence(shortcut)
+        action.setShortcut(sequence)
+    setattr(parent, actionName, action )
     if checkable:
         action.setCheckable(checkable)
     return action

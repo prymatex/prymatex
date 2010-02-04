@@ -71,6 +71,9 @@ class PMXTextEdit(QPlainTextEdit):
             return self.path
         return _("This unsaved file")
     
+    def getFocus(self):
+        self.setFocus(Qt.TabFocusReason)
+    
     def setToolTip(self, text):
         tabwidget = self.parent().parent()
         index = tabwidget.indexOf(self)
@@ -124,6 +127,9 @@ class PMXTextEdit(QPlainTextEdit):
         self.menu_action.setText(self.title())
         self.menu_action.setCheckable(True)
         menu.windowActionGroup.addAction(self.menu_action)
+    
+    def afterModificationEvent(self):
+        pass
         
     def showTab(self, checked):
         if checked:

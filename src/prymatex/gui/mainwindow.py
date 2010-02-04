@@ -59,21 +59,24 @@ class PMXMainWindow(QMainWindow):
         )
         
         addActionsToMenu(self.view_menu,
-                                ("&Full Screen", Qt.Key_F11),
+                                ("&Full Screen", "F11"),
                                 ("&Show Menus", "Ctrl+M"),
                                 None,
-                                ("Zoom &In", Qt.CTRL + Qt.Key_Plus),
-                                ("Zoom &Out", Qt.CTRL + Qt.Key_Minus),
+                                ("Zoom &In", "Ctrl+Plus"),
+                                ("Zoom &Out", "Ctrl+Minus"),
                                 None,
-                                ("Focus Editor", Qt.Key_F12),
+                                ("Focus Editor", "F12"),
         )
         
         addActionsToMenu(self.window_menu,
-                                ("&Next Tab", Qt.CTRL + Qt.Key_PageDown),
-                                ("&Previous Tab", Qt.CTRL + Qt.Key_PageUp),
+                                ("&Next Tab", "Ctrl+PageDown"),
+                                ("&Previous Tab", "Ctrl+PageUp"),
+                                None,
+                                ("Move Tab &Left",  "Ctrl+Shift+PageDown"),
+                                ("Move Tab &Right", "Ctrl+Shift+PageUp"),
                                 None,
                                 self.panes_submenu,
-                                None,
+                                
         )
         
         app_name = qApp.instance().applicationName()
@@ -277,6 +280,26 @@ class PMXMainWindow(QMainWindow):
             self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         except Exception:
             pass
+    
+    
+    @pyqtSignature('')
+    def on_actionCloseOthers_triggered(self):
+        count = self.tabWidgetEditors.count()
+        index = self.tabWidgetEditors.currentIndex()
+        widgets = []
+        
+        for i in range(0, index) + range(index+1, count):
+            widgets.append(self.tabWidgetEditors.widget(i))
+        for w in widgets:
+            i = self.tabWidgetEditors.indexOf(w)
+            if not self.tabWidgetEditors.closeTab(i):
+                return
+            
+#                return
+#        for i in range(index+1, count):
+#            if not self.tabWidgetEditors.closeTab(i):
+#                return
+                
     
 class MenuActionGroup(QActionGroup):
     def __init__(self, parent):
