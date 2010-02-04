@@ -69,7 +69,12 @@ class PMXTabWidget(QTabWidget):
         '''
         count = self.count()
         # Primero hay que buscar si no está abierto
-#        path_assoc = {}
+        if count:
+            for i in range(self.count()):
+                editor = self.widget(i)
+                if path == editor.path:
+                    self.setCurrentWidget(editor)
+                    return
 #        for i in range(self.count()):
 #            editor = self.widget(i)
 #            path = editor.path
