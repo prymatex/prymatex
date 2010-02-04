@@ -9,6 +9,7 @@ from prymatex.gui.editor import PMXTextEdit
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import *
 
+
         
 
 class PMXTabWidget(QTabWidget):
@@ -64,11 +65,21 @@ class PMXTabWidget(QTabWidget):
     
     def openLocalFile(self, path):
         '''
-        
+        Abre un archivo en una tab
         '''
-#        print self.count()
-#        print "modificado?", self.widget(0).document().isModified()
-        if self.count() == 1 and not self.widget(0).document().isModified() and \
+        count = self.count()
+        # Primero hay que buscar si no está abierto
+#        path_assoc = {}
+#        for i in range(self.count()):
+#            editor = self.widget(i)
+#            path = editor.path
+#            if path:
+#                path_assoc[path] = editor
+#        if path in path_assoc:
+#            self.setCurrentWidget(path_assoc[path])
+#            return
+        
+        if count == 1 and not self.widget(0).document().isModified() and \
             not self.widget(0).path:
             print "Reutilizando vacio"
             editor = self.widget(0)
@@ -98,7 +109,10 @@ class PMXTabWidget(QTabWidget):
         Asks the editor to be closed
         '''
         editor = self.widget(index)
-        if self.count() == 1 and not editor.path and not editor.document().isModified():
+        count = self.count() 
+        if count == 1 and not editor.path and not editor.document().isModified():
+            return
+        elif count == 0:
             return
         if editor.requestClose():
             self.removeTab(index)

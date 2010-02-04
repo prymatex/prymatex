@@ -57,7 +57,16 @@ class PMXMainWindow(QMainWindow):
                         ("C&ut", "Ctrl+X"),
                         ("&Paste", "Ctrl+V"),
                         ("Paste As &New", "Ctrl+Shift+V"),
+                        
         )
+        
+        addActionsToMenu(self.settings_menu,
+                        ("Show Line &Numbers", "F10"),
+                         None,
+                        ('Preferences', ),
+                         
+                        )
+        
         
         addActionsToMenu(self.view_menu,
                                 ("&Full Screen", "F11"),
@@ -68,6 +77,8 @@ class PMXMainWindow(QMainWindow):
                                 None,
                                 ("Focus Editor", "F12"),
         )
+        
+        
         
         addActionsToMenu(self.window_menu,
                                 ("&Next Tab", "Ctrl+PageDown"),
@@ -113,6 +124,12 @@ class PMXMainWindow(QMainWindow):
         
         self.bundle_menu = QMenu(_("&Bundle"), self)
         menubar.addMenu(self.bundle_menu)
+        
+        self.tools_menu = QMenu(_("&Tools"), self)
+        menubar.addMenu(self.tools_menu)
+        
+        self.settings_menu = QMenu(_("&Settings"), self)
+        menubar.addMenu(self.settings_menu)
         
         self.window_menu = QMenu(_("&Window"), self)
         self.window_menu.windowActionGroup = MenuActionGroup(self.window_menu)
@@ -165,7 +182,8 @@ class PMXMainWindow(QMainWindow):
     def on_actionClose_triggered(self):
         index = self.tabWidgetEditors.currentIndex()
         self.tabWidgetEditors.closeTab(index)
-        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+        if self.tabWidgetEditors.count():
+            self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
 
     
     @pyqtSignature('')    
