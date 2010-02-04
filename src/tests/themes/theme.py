@@ -60,7 +60,7 @@ def main(argv = sys.argv):
     app = QApplication(argv)
     win = QMainWindow() # Creamos la ventana de edición
     text_edit = QTextEdit()
-    text_edit.setFontFamily("Consolas")
+    text_edit.setFontFamily('Consolas')
     win.setCentralWidget(text_edit)
 
     #Leer los temas
