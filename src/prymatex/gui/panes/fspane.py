@@ -1,6 +1,7 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import os
+from os.path import abspath, join
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
 #from pr
@@ -49,8 +50,11 @@ class FSPaneWidget(QWidget):
         mainlayout.addWidget(self.tree)
         self.setLayout(mainlayout)
     
+    @pyqtSignature('')
     def on_actionUp_triggered(self):
-        QMessageBox.information(self, "A", "A")
+        #QMessageBox.information(self, "UP", "Up")
+        #self.get
+        self.tree.goUp()
     
     
     
@@ -72,6 +76,7 @@ class FSTree(QTreeView):
         self.setIndentation(20)
         self.setSortingEnabled(True)
         self.setExpandsOnDoubleClick(True)
+        QMetaObject.connectSlotsByName(self)
     
     def createMenus(self):
         # File Menu
@@ -101,6 +106,7 @@ class FSTree(QTreeView):
         )
         
         
+        
     def mouseDoubleClickEvent(self, event):
         if event.button() != Qt.LeftButton:
             return
@@ -117,10 +123,23 @@ class FSTree(QTreeView):
                 print "Cerpeta"
                 
     
+    def goUp(self):
+        current_top = unicode(self.model().filePath(self.rootIndex()))
+        #self.tree.setRootIndex(self.tree.model().index(QDir.currentPath()))
+        upper = abspath(join(current_top, '..'))
+        
+        if upper != current_top:
+            self.setRootIndex(self.model().index(upper))
 #        print self.model().data(index).toPyObject()
 #        print self.model().data(index.parent()).toPyObject()
 #        print "Root", self.model().filePath(self.rootIndex())
-        
+    
+    def on_actionSetAsRoot_triggered(self):
+        index_list = self.selectedIndexes()
+        if len(index_list) == 1:
+            index = index_list[0]
+            self.setRootIndex(index)
+    
     def mouseReleaseEvent(self, event):
         QTreeView.mouseReleaseEvent(self, event)
         if event.button() == Qt.RightButton:
@@ -130,6 +149,7 @@ class FSTree(QTreeView):
                 self.fileMenu.popup(event.globalPos())
             elif os.path.isdir(data):
                 self.dirMenu.popup(event.globalPos())
+    
 
     @property
     def current_selected_path(self):

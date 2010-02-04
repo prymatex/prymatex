@@ -91,6 +91,10 @@ class PMXMainWindow(QMainWindow):
                                 
         )
         
+        addActionsToMenu(self.tools_menu,
+                         (_("&Rub Script"), _("Ctrl+Shift+R"),),
+        )
+        
         app_name = qApp.instance().applicationName()
         addActionsToMenu(self.help_menu, 
                          (_("&About %s", app_name), {'name': 'AboutApp', 'do_i18n': False,}),

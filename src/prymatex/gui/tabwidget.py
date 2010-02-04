@@ -56,7 +56,13 @@ class PMXTabWidget(QTabWidget):
         '''
         Editor Factory
         '''
-        return self.EDIT_TAB_WIDGET(self, *largs, **kwargs)
+        editor =  self.EDIT_TAB_WIDGET(self, *largs, **kwargs)
+        # TODO: Poner esto en configuración
+        font = QFont()
+        font.setFamily('Consolas')
+        font.setPointSize(11)
+        editor.setFont(font)
+        return editor
     
 #    def tabRemoved(self, index):
 #        if not self.count():
