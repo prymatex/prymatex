@@ -11,7 +11,7 @@ MACROS = {}
 
 class Macro(object):
     def __init__(self, hash, name_space):
-        pprint(hash)
+        #pprint(hash)
         self.name_space = name_space
         MACROS.setdefault(self.name_space, {})
         #Todo lo que diga scope es en que scope esta, puede ser mas de uno
