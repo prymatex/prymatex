@@ -39,7 +39,7 @@ class MenuNode(object):
             for submenu in filter(lambda x: isinstance(x, MenuNode), self.main.values()):
                 if key in submenu:
                     submenu[key] = menu
-
+        
 class Bundle(object):
     def __init__(self, uuid, name, description = '', contactName = '', contactEmailRot13 = '', deleted = [], ordering = [], mainMenu = [], excludedItems = []):
         self.uuid = uuid
@@ -99,20 +99,23 @@ class Bundle(object):
                 pass
         
         #Templates
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Templates', '*'))
-        for sf in syntax_files:
+        #syntax_files = glob.glob(os.path.join(bundle_path, 'Templates', '*'))
+        #for sf in syntax_files:
             #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                template.Template(data, bundle.name)
-            except ExpatError:
-                pass
+            #try:
+                #data = plistlib.readPlist(sf)
+                #template.Template(data, bundle.name)
+            #except ExpatError:
+                #pass
 
-def main():
-    paths = glob.glob('./Bundles/*.tmbundle')
+def load_bundles():
+    paths = glob.glob('./bundles/Bundles/*.tmbundle')
     for path in paths:
         Bundle.load(os.path.abspath(path))
-  
+
+load_bundles()
+
+def main():
     # TEST, TEST
     from pprint import pprint
     pprint(syntax.SYNTAXES)
