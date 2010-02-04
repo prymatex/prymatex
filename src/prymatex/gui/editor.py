@@ -112,7 +112,7 @@ class PMXTextEdit(QPlainTextEdit):
             return True
     
     def afterRemoveEvent(self):
-        print 'afterRemoveEvent', self
+        #print 'afterRemoveEvent', self
         mainwin = self.parent().parent().parent()
         menu = mainwin.window_menu
         menu.windowActionGroup.removeAction(self.menu_action)

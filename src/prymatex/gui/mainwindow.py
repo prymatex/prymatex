@@ -56,6 +56,7 @@ class PMXMainWindow(QMainWindow):
                         ("&Copy", "Ctrl+C"),
                         ("C&ut", "Ctrl+X"),
                         ("&Paste", "Ctrl+V"),
+                        ("Paste As &New", "Ctrl+Shift+V"),
         )
         
         addActionsToMenu(self.view_menu,

@@ -64,7 +64,8 @@ def createAction(parent, caption,
                  shortcut = None, # QKeySequence
                  name = None,
                  do_i18n = True,
-                 checkable = False): # Name, 
+                 checkable = False, 
+                 addToParent = True): # Name, 
     '''
     @param parent: Objeto
     @param name: Nombre de la propiedad
@@ -86,6 +87,7 @@ def createAction(parent, caption,
     setattr(parent, actionName, action )
     if checkable:
         action.setCheckable(checkable)
+    parent.addAction(action)
     return action
 
 def addActionsToMenu(menu, *action_tuples):

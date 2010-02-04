@@ -57,9 +57,9 @@ class PMXTabWidget(QTabWidget):
         '''
         return self.EDIT_TAB_WIDGET(self, *largs, **kwargs)
     
-    def tabRemoved(self, index):
-        if not self.count():
-            self.appendEmptyTab()
+#    def tabRemoved(self, index):
+#        if not self.count():
+#            self.appendEmptyTab()
     
     
     def openLocalFile(self, path):
@@ -98,21 +98,23 @@ class PMXTabWidget(QTabWidget):
         Asks the editor to be closed
         '''
         editor = self.widget(index)
+        if self.count() == 1 and not editor.path and not editor.document().isModified():
+            return
         if editor.requestClose():
             self.removeTab(index)
             return True
         return False
     
-    def addTab(self, widget, label):
-        '''
-        Lets the widget know when it has been inserted
-        '''
-        retval = QTabWidget.addTab(self, widget, label)
-        if hasattr(widget, 'afterInsertionEvent' ):
-            widget.afterInsertionEvent()
-        if not self.count():
-            widget.menu_action.setChecked(True)
-        return retval
+#    def addTab(self, widget, label):
+#        '''
+#        Lets the widget know when it has been inserted
+#        '''
+#        retval = QTabWidget.addTab(self, widget, label)
+#        if hasattr(widget, 'afterInsertionEvent' ):
+#            widget.afterInsertionEvent()
+#        if not self.count():
+#            widget.menu_action.setChecked(True)
+#        return retval
             
     def removeTab(self, index):
         '''
@@ -132,4 +134,17 @@ class PMXTabWidget(QTabWidget):
         if index > 0:
             widget = self.widget(index)
             widget.menu_action.setChecked(True)
+    
+    def tabInserted(self, index):
+        '''
+        Lets the widget know when it has been inserted
+        '''
+        widget = self.widget(index)
+        if hasattr(widget, 'afterInsertionEvent' ):
+            widget.afterInsertionEvent()
+        if not self.count():
+            widget.menu_action.setChecked(True)
         
+    
+#    def tabRemoved (self, index ):
+#        QTabW
