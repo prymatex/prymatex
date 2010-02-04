@@ -5,26 +5,54 @@ from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
 #from pr
 
-
+class QActionPushButton(QPushButton):
+    
+    def __init__(self, action):
+        assert isinstance(action, QAction)
+        QPushButton.__init__(self)
+        self._action = action
+        self.copyParams()
+        self.connect(self, SIGNAL("pressed()"), self._action, SLOT("trigger()"))
+        
+    def copyParams(self):
+        self.setText(self._action.text())
+#        setTextOrig = self._action.setText
+        self.setIcon(self._action.icon())
+        self.setToolTip(self._action.toolTip())
+    
+    
+        
 
 class FSPaneWidget(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.setupGui()
+        QMetaObject.connectSlotsByName(self)
         self.tree.setRootIndex(self.tree.model().index(QDir.currentPath()))
         
     def setupGui(self):
         mainlayout = QVBoxLayout()
         button_layout = QHBoxLayout()
         # Oneliner Watchout!! Sorry
-        button_layout.addWidget(createButton(self, _("&Up")))
-        button_layout.addWidget(createButton(self, _("&Filter")))
-        button_layout.addWidget(createButton(self, _("&Set Root")))
+        self.actionUp = QAction(_("Up"), self)
+        self.actionUp.setObjectName('actionUp')
+        self.buttonUp = QActionPushButton(self.actionUp)
+        
+        button_layout.addWidget(self.buttonUp)
+        
+        #button_layout.addWidget(createButton(self, _("&Up")))
+        #button_layout.addWidget(createButton(self, _("&Filter")))
+        #button_layout.addWidget(createButton(self, _("&Set Root")))
         button_layout.addStretch()
         mainlayout.addLayout(button_layout)
         self.tree = FSTree(self)
         mainlayout.addWidget(self.tree)
         self.setLayout(mainlayout)
+    
+    def on_actionUp_triggered(self):
+        QMessageBox.information(self, "A", "A")
+    
+    
     
 
 class FSTree(QTreeView):
