@@ -72,8 +72,8 @@ class PMXMainWindow(QMainWindow):
                                 ("&Next Tab", "Ctrl+PageDown"),
                                 ("&Previous Tab", "Ctrl+PageUp"),
                                 None,
-                                ("Move Tab &Left",  "Ctrl+Shift+PageDown"),
-                                ("Move Tab &Right", "Ctrl+Shift+PageUp"),
+                                ("Move Tab &Left",  "Ctrl+Shift+PageUp"),
+                                ("Move Tab &Right", "Ctrl+Shift+PageDown"),
                                 None,
                                 self.panes_submenu,
                                 
@@ -299,7 +299,36 @@ class PMXMainWindow(QMainWindow):
 #        for i in range(index+1, count):
 #            if not self.tabWidgetEditors.closeTab(i):
 #                return
-                
+    @pyqtSignature('')
+    def on_actionMoveTabLeft_triggered(self):
+        if self.tabWidgetEditors.count() == 1:
+            return
+        count = self.tabWidgetEditors.count()
+        index = self.tabWidgetEditors.currentIndex()
+        text = self.tabWidgetEditors.tabText(index)       
+        widget = self.tabWidgetEditors.currentWidget()
+        self.tabWidgetEditors.removeTab(index)
+        index -= 1
+        if index < 0:
+            index = count
+        self.tabWidgetEditors.insertTab(index, widget, text)
+        self.tabWidgetEditors.setCurrentWidget(widget)
+    
+    @pyqtSignature('')    
+    def on_actionMoveTabRight_triggered(self):
+        if self.tabWidgetEditors.count() == 1:
+            return
+        count = self.tabWidgetEditors.count()
+        index = self.tabWidgetEditors.currentIndex()
+        text = self.tabWidgetEditors.tabText(index)       
+        widget = self.tabWidgetEditors.currentWidget()
+        self.tabWidgetEditors.removeTab(index)
+        index += 1
+        if index >= count:
+            index = 0
+        self.tabWidgetEditors.insertTab(index, widget, text)
+        self.tabWidgetEditors.setCurrentWidget(widget)
+
     
 class MenuActionGroup(QActionGroup):
     def __init__(self, parent):
