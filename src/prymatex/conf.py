@@ -17,7 +17,7 @@ class Settings(object):
                 setattr(self, key, value)
         
     def __getattr__(self, name):
-        return self.__dict__.get(name, self.__dict__.__class__.get(name)) 
+        return self.__dict__.get(name, self.__class__.__dict__.get(name)) 
     
     def __setattr__(self, name, value):
         self.__dict__[name] = value
