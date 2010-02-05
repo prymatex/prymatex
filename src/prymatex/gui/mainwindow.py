@@ -103,7 +103,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
                          (_("&Translate %s", app_name), {'do_i18n': False}),
                          None,
                          ("Project &Homepage...", ),
-                         ('&Take Screenshot', 'Ctrl+PrintScreen'),
+                         ('&Take Screenshot', 'Ctrl+Print'),
                          ("&About Qt",),
                          (_("&About %s", app_name), {'name': 'AboutApp', 'do_i18n': False,}),
                          
