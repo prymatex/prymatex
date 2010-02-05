@@ -97,14 +97,15 @@ class PMXMainWindow(QMainWindow):
         
         app_name = qApp.instance().applicationName()
         addActionsToMenu(self.help_menu, 
-                         (_("&About %s", app_name), {'name': 'AboutApp', 'do_i18n': False,}),
-                         ("&AboutQt",),
-                         None,
                          ("Report &Bug", ),
-                         ("Project &Homepage", ),
+
                          (_("&Translate %s", app_name), {'do_i18n': False}),
                          None,
-                         ('&Take Screenshot', 'Ctrl+8'),
+                         ("Project &Homepage...", ),
+                         ('&Take Screenshot', 'Ctrl+PrintScreen'),
+                         ("&About Qt",),
+                         (_("&About %s", app_name), {'name': 'AboutApp', 'do_i18n': False,}),
+                         
         )
 #        self.help_menu.addActions([
 #                                createAction(self, _("&About %s") % app_name, 
@@ -273,20 +274,17 @@ class PMXMainWindow(QMainWindow):
     
     @pyqtSignature('')
     def on_actionTakeScreenshot_triggered(self):
-        QTimer.singleShot()
+        QTimer.singleShot(1000, self, SLOT('takeScreenShot()'))
+        
+    @pyqtSignature('takeScreenShot()')
+    def takeScreenShot(self):
         pxm = QPixmap.grabWindow(self.winId())
         format = 'png'
         from datetime import datetime
         now = datetime.now()
-        #initialPath = QDir.currentPath() + "/untitled." + format
-
-#        fileName = QFileDialog.getSaveFileName(self, "Save As",
-#                initialPath,
-#                "%s Files (*.%s);;All Files (*)" % (format.upper(), format))
-#        if fileName:
-#            pxm.save(fileName, format)
         name = now.strftime('sshot-%Y-%m-%d-%H_%M_%S') + '.' + format
         pxm.save(name, format)
+        self.statusBar().showMessage("Screenshot saved as %s" % name)
         
     @pyqtSignature('')
     def on_actionZoomIn_triggered(self):

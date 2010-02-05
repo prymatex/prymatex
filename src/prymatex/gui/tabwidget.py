@@ -10,8 +10,6 @@ from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import *
 
 
-        
-
 class PMXTabWidget(QTabWidget):
     EDIT_TAB_WIDGET = PMXTextEdit
     UNTITLED_LABEL = _("New File %s")
