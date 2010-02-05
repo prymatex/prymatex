@@ -17,6 +17,8 @@ def deco(f):
 
 class PMXTextEdit(QPlainTextEdit):
     _path = ''
+    _tab_length = 4
+    _soft_tabs = False
     
     def __init__(self, parent, path = ''):
         QTextEdit.__init__(self, parent)
@@ -27,14 +29,81 @@ class PMXTextEdit(QPlainTextEdit):
         self.connect(self, SIGNAL("cursorPositionChanged()"), self.highlightCurrentLine)
         
         self.updateLineNumberAreaWidth(0)
-        
         self.highlightCurrentLine()
 
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
         
         self.path = path
         
+        self.tab_length = 4
+        self.soft_tabs = True
         
+        
+    
+    def soft_tabs(): #@NoSelf
+        doc = """Soft tabs, insert spaces instead of tab""" #@UnusedVariable
+       
+        def fget(self):
+            return self._soft_tabs
+           
+        def fset(self, value):
+            self._soft_tabs = value
+           
+        return locals()
+       
+    soft_tabs = property(**soft_tabs())
+    
+    def keyPressEvent(self, event):
+        '''
+        
+        '''
+        key = event.key()
+        cursor = self.textCursor()
+        doc = self.document()
+        start_block_pos, end_block_pos = cursor.selectionStart(), cursor.selectionEnd()
+        start_block, end_block = map(doc.findBlock, (start_block_pos, end_block_pos)) 
+        blocknum_start, blocknum_end = start_block.blockNumber(), end_block.blockNumber()
+        
+        #start_pos, end_pos = 
+        blocknum_diff = blocknum_end - blocknum_start 
+          
+#        print doc.findBlock().blockNumber() 
+#        print doc.findBlock().blockNumber()
+        
+        if key == Qt.Key_Tab:
+            if blocknum_diff:
+                
+                cursor.beginEditBlock()
+                cursor.movePosition(QTextCursor.StartOfBlock)
+                for _i in range(blocknum_diff +1):
+                    cursor.insertText(self.indent_text)
+                    cursor.movePosition(QTextCursor.NextBlock)
+                cursor.endEditBlock()
+                return
+                
+            elif self.soft_tabs:
+                self.textCursor().insertText(' '* self.tab_length)
+                return
+        QPlainTextEdit.keyPressEvent(self, event)
+    @property
+    def indent_text(self):
+        return self.soft_tabs and (self.tab_length * " ") or "\t"
+    
+    def tab_length(): #@NoSelf
+        doc = """Tab length in characters""" #@UnusedVariable
+       
+        def fget(self):
+            return self._tab_length
+           
+        def fset(self, value):
+            if value:
+                self._tab_length = value
+                self.setTabStopWidth(self.fontMetrics().width('9') * value)
+            
+           
+        return locals()
+       
+    tab_length = property(**tab_length())
     
     def path(): #@NoSelf
         def fget(self):
@@ -170,7 +239,9 @@ class PMXTextEdit(QPlainTextEdit):
         extraSelections = []
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
-            lineColor = QColor(Qt.yellow).lighter(180)
+            #e8f2fe
+            color = QColor(232, 242, 25)
+            lineColor = QColor(color).lighter(180)
             selection.format.setBackground(lineColor);
             selection.format.setProperty(QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
