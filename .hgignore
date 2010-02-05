@@ -6,3 +6,7 @@ syntax: glob
 */test
 *.o
 */themes/*
+*/macromates/*
+*.orig
+*sshot*png
+*src/tests/bundles
