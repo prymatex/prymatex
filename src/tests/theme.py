@@ -7,49 +7,24 @@ from PyQt4.Qt import *
 from bundles import syntax
 from xml.parsers.expat import ExpatError
 
-THEMES = {}
-
-class SyntaxThemeProcessor(QSyntaxHighlighter, syntax.SyntaxProcessor):
-    def __init__(self, parent, uuid, name, settings, author = '', comment = ''):
-        QSyntaxHighlighter.__init__(self, parent)
-        self.uuid = uuid
-        self.name = name
-        self.author = author
-        default = settings.pop(0)
-        self.default = QTextCharFormat()
-        if 'foreground' in default:
-            self.default.setForeground(QColor(default['foreground']))
-        if 'background' in default:
-            self.default.setBackground(QColor(default['background']))
-        self.formats = {}
-        for setting in settings:
-            if 'scope' not in setting:
-                continue
-            format = QTextCharFormat()
-            if 'fontStyle' in setting:
-                format.setFontWeight(QFont.Light)
-            if 'foreground' in setting:
-                format.setForeground(QColor(setting['foreground']))
-            if 'background' in setting:
-                format.setBackground(QColor(setting['background']))
-            setting['format'] = format
-            self.formats[setting['scope']] = setting
-
+class PMXSyntaxProcessor(QSyntaxHighlighter, syntax.TMSyntaxProcessor):
+    def __init__(self):
+        pass
+    
     def highlightBlock(self, texto):
-        syntax.SYNTAXES['PHP']['source.php'].parse(unicode(texto), self)
+        parser = syntax.TM_SYNTAXES['HTML']['text.html.basic']
+        stack = [[parser, None]] 
+        parser.parse_line(stack, unicode(texto), self)
+        pprint(stack)
         #for match in patron.finditer(texto):
         #    inicio, cant = match.start(), match.end() - match.start()
         #    self.setFormat(inicio, cant, self.formats.values()[0].format)
 
-    def pprint(self, line, string, position = 0):
-        line = line[:position] + string + line[position:]
-        return line
-
     def open_tag(self, name, position):
-        print self.pprint( '', '{ %s' % name, position + len(self.line_marks))
+        print "open: %s in %d" % (name, position)
 
     def close_tag(self, name, position):
-        print self.pprint( '', '} %s' % name, position + len(self.line_marks))
+        print "close: %s in %d" % (name, position)
 
     def new_line(self, line):
         self.line_number += 1
