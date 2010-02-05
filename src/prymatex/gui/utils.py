@@ -109,6 +109,8 @@ def addActionsToMenu(menu, *action_tuples):
             menu.addSeparator()
         elif type(action_params) is QMenu:
             menu.addMenu(action_params)
+        elif isinstance(action_params, QAction):
+            menu.addAction(action_params)
         else:
             kwargs = {}
             if isinstance(action_params[-1], dict):
