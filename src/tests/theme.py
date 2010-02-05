@@ -5,6 +5,7 @@ import os, re, sys, glob, plistlib
 from pprint import pprint
 from PyQt4.Qt import *
 from bundles import syntax
+from xml.parsers.expat import ExpatError
 
 THEMES = {}
 
@@ -72,9 +73,12 @@ def main(argv = sys.argv):
     #Leer los temas
     paths = glob.glob('./bundles/Themes/*.tmTheme')
     for path in paths:
-        data = plistlib.readPlist(os.path.abspath(path))
-        theme = SyntaxThemeProcessor(win, **data)
-        THEMES[theme.name] = theme
+        try:
+            data = plistlib.readPlist(os.path.abspath(path))
+            theme = SyntaxThemeProcessor(win, **data)
+            THEMES[theme.name] = theme
+        except ExpatError:
+            pass
 
     theme = THEMES.values()[7]
     sintaxis = theme.setDocument(text_edit.document())
