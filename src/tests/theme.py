@@ -57,10 +57,10 @@ class SyntaxThemeProcessor(QSyntaxHighlighter, syntax.SyntaxProcessor):
 
     def start_parsing(self, name):
         self.line_number = 0
-        print '{%s' % name
+        print '{ %s' % name
 
     def end_parsing(self, name):
-        print '}%s' % name
+        print '} %s' % name
         
 def main(argv = sys.argv):
     app = QApplication(argv)
