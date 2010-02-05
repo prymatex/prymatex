@@ -41,13 +41,16 @@ class MenuNode(object):
                     submenu[key] = menu
         
 class Bundle(object):
-    def __init__(self, uuid, name, description = '', contactName = '', contactEmailRot13 = '', deleted = [], ordering = [], mainMenu = [], excludedItems = []):
-        self.uuid = uuid
-        self.name = name
-        self.description = description
-        self.contact = {'Name': contactName, 'Email': contactEmailRot13 }
-        if mainMenu:
-            self.menu = MenuNode(uuid, 'main', mainMenu)
+    def __init__(self, hash):
+        self.uuid = hash.get('uuid')
+        self.name = hash.get('name')
+        self.description = hash.get('description')
+        self.contact = {'Name': hash.get('contactName'), 'Email': hash.get('contactEmailRot13') }
+        if 'mainMenu' in hash:
+            self.menu = MenuNode(self.uuid, 'main', hash.get('mainMenu'))
+        self.deleted = hash.get('deleted', [])
+        self.ordering = hash.get('ordering', [])
+        self.excludedItems = hash.get(' excludedItems', [])
         BUNDLES[self.name] = self
     
     @classmethod
@@ -55,7 +58,7 @@ class Bundle(object):
         #Info
         info_file = os.path.join(bundle_path, 'info.plist')
         data = plistlib.readPlist(info_file)
-        bundle = Bundle(**data)
+        bundle = Bundle(data)
         
         #TODO: Agregar las entradas al menu
         #Syntaxes
