@@ -1,2 +1,4 @@
 - Syntax highlighting
     - Oniguruma compat
+    - Block selection (vertical mode)
+    - Multiple cursor text insertion

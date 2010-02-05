@@ -6,6 +6,8 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
 import os
+import codecs
+from os.path import basename
 
 def deco(f):
     def wrapped(*largs, **kwargs):
@@ -30,7 +32,7 @@ class PMXTextEdit(QPlainTextEdit):
         
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrentLine()
-
+        self.setTabChangesFocus(False)
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
         
         self.path = path
@@ -38,7 +40,24 @@ class PMXTextEdit(QPlainTextEdit):
         self.tab_length = 4
         self.soft_tabs = True
         
-        
+    
+    # File operations
+    def save(self, filename = None):
+        filename = filename or self.path
+        assert filename is not None
+        # TODO: Cargar la codificación por defecto de la config
+        s = codecs.open(filename, 'w', 'utf-8')
+        s.write(unicode(self.toPlainText()))
+        s.close()
+        if filename != self.path:
+            self.path = filename
+            self.updateTab()
+        self.parent().parent().parent().\
+            statusBar().showMessage(_("'%s' saved", basename(filename)), 5000)
+            
+        self.document().setModified(False)
+
+    
     
     def soft_tabs(): #@NoSelf
         doc = """Soft tabs, insert spaces instead of tab""" #@UnusedVariable
@@ -59,6 +78,8 @@ class PMXTextEdit(QPlainTextEdit):
         '''
         key = event.key()
         cursor = self.textCursor()
+        con_shift = event.modifiers() & Qt.ShiftModifier
+        
         doc = self.document()
         start_block_pos, end_block_pos = cursor.selectionStart(), cursor.selectionEnd()
         start_block, end_block = map(doc.findBlock, (start_block_pos, end_block_pos)) 
@@ -71,7 +92,10 @@ class PMXTextEdit(QPlainTextEdit):
 #        print doc.findBlock().blockNumber()
         
         if key == Qt.Key_Tab:
-            if blocknum_diff:
+            if con_shift:
+                print "A"
+                return
+            elif blocknum_diff:
                 
                 cursor.beginEditBlock()
                 cursor.movePosition(QTextCursor.StartOfBlock)
@@ -174,9 +198,16 @@ class PMXTextEdit(QPlainTextEdit):
         
     def requestClose(self):
         if self.document().isModified():
-            resp = QMessageBox.question(self, _("File modified"), _("%s is modified", self.filename), 
-                                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-            return resp
+            while True:
+                resp = QMessageBox.question(self, _("File modified"), _("%s is modified. Save changes before closing?", self.filename), 
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+                
+                if resp == QMessageBox.Yes:
+                    if not self.path:
+                        path = unicode(QFileDialog.getSaveFileName(self, "Save As", "", ""))
+                        if not path:
+                            continue
+                return resp
         else:
             return True
     

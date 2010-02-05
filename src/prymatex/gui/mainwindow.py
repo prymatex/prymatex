@@ -9,6 +9,7 @@ from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.panes.fspane import FSPane
 from prymatex.gui.utils import addActionsToMenu
 from prymatex.gui.mixins.common import CenterWidget
+from prymatex.gui.editor import PMXTextEdit
 
 class PMXMainWindow(QMainWindow, CenterWidget):
     def __init__(self):
@@ -256,10 +257,25 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         import webbrowser
         webbrowser.open(qApp.instance().projectUrl)
     
+    @property
+    def current_editor(self):
+        editor = self.tabWidgetEditors.currentWidget()
+        if isinstance(editor, PMXTextEdit):
+            return editor
+        
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        print "actionSave"
+        if not self.current_editor.path:
+            self.on_actionSaveAs_triggered()
+        else:
+            self.current_editor.save()
     
+    @pyqtSignature('')
+    def on_actionSaveAs_triggered(self):
+        filename = QFileDialog.getSaveFileName(self, _("Save as"), '', '')
+        if filename:
+            self.current_editor.save(unicode(filename))
+        
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
         print "actionSaveAll"
