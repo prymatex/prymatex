@@ -3,6 +3,7 @@
 
 import os, re, sys, glob, plistlib
 from PyQt4.Qt import *
+from xml.parsers.expat import ExpatError
 
 TM_THEMES = {}
 
@@ -35,3 +36,12 @@ class TMTheme(object):
                 format.setBackground(QColor(setting['background']))
             setting['format'] = format
             self.formats[setting['scope']] = setting
+
+def load_textmate_themes():
+    paths = glob.glob('./bundles/Themes/*.tmTheme')
+    for path in paths:
+        try:
+            data = plistlib.readPlist(os.path.abspath(path))
+            TMTheme(data)
+        except ExpatError:
+            pass

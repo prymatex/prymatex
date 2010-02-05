@@ -6,7 +6,7 @@ import plistlib
 import syntax, snippet, macro, command, template, theme
 from xml.parsers.expat import ExpatError
 
-BUNDLES = {}
+TM_BUNDLES = {}
 
 class MenuItem(object):
     def __init__(self, uuid, name, comment = ''):
@@ -51,14 +51,18 @@ class Bundle(object):
         self.deleted = hash.get('deleted', [])
         self.ordering = hash.get('ordering', [])
         self.excludedItems = hash.get(' excludedItems', [])
-        BUNDLES[self.name] = self
-    
-    @classmethod
-    def load(cls, bundle_path):
+        TM_BUNDLES[self.name] = self
+
+def load_textmate_bundles():
+    paths = glob.glob('./bundles/Bundles/*.tmbundle')
+    for bundle_path in paths:
         #Info
         info_file = os.path.join(bundle_path, 'info.plist')
-        data = plistlib.readPlist(info_file)
-        bundle = Bundle(data)
+        try:
+            data = plistlib.readPlist(info_file)
+            bundle = Bundle(data)
+        except ExpatError:
+            continue
         
         #TODO: Agregar las entradas al menu
         #Syntaxes
@@ -67,7 +71,7 @@ class Bundle(object):
             #Quito plis con caracteres raros.
             try:
                 data = plistlib.readPlist(sf)
-                syntax.SyntaxNode(data, None, bundle.name)
+                syntax.TMSyntaxNode(data, None, bundle.name)
             except ExpatError:
                 pass
         
@@ -77,7 +81,7 @@ class Bundle(object):
             #Quito plis con caracteres raros.
             try:
                 data = plistlib.readPlist(sf)
-                snippet.Snippet(data, bundle.name)
+                snippet.TMSnippet(data, bundle.name)
             except ExpatError:
                 pass
         
@@ -110,25 +114,6 @@ class Bundle(object):
                 #template.Template(data, bundle.name)
             #except ExpatError:
                 #pass
-
-def load_bundles():
-    paths = glob.glob('./bundles/Bundles/*.tmbundle')
-    for path in paths:
-        Bundle.load(os.path.abspath(path))
-
-def load_themes():
-    paths = glob.glob('./bundles/Themes/*.tmTheme')
-    for path in paths:
-        try:
-            data = plistlib.readPlist(os.path.abspath(path))
-            theme = theme.TMTheme(data)
-        except ExpatError:
-            pass
-    for path in paths:
-        Bundle.load(os.path.abspath(path))
-
-load_bundles()
-load_themes()
 
 def main():
     # TEST, TEST
