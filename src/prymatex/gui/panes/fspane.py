@@ -97,6 +97,7 @@ class FSTree(QTreeView):
         self.dirMenu = QMenu(self)
         self.dirMenu.setObjectName('menuDir')
         addActionsToMenu(self.dirMenu,
+                        self.actionCopyPathToClipboard,
                         (_("Set As Root"),),
                         (_("Rename"),),
                         (_("Delete"),),
@@ -156,8 +157,12 @@ class FSTree(QTreeView):
         pass
     
     def on_actionCopyPathToClipboard_triggered(self):
-        pass
-
+        index_list = self.selectedIndexes()
+        if len(index_list) == 1:
+            index = index_list[0]
+            #QClipboard.setText(self.model().data(index))
+            qApp.instance().clipboard().setText(self.model().filePath(index))
+            
 class FSPane(QDockWidget):
     def __init__(self, parent):
         QDockWidget.__init__(self, parent)
