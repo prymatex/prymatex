@@ -8,8 +8,9 @@ from prymatex.gui.tabwidget import PMXTabWidget
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.panes.fspane import FSPane
 from prymatex.gui.utils import addActionsToMenu
+from prymatex.gui.mixins.common import CenterWidget
 
-class PMXMainWindow(QMainWindow):
+class PMXMainWindow(QMainWindow, CenterWidget):
     def __init__(self):
         QMainWindow.__init__(self)
         self.setWindowTitle(_(u"Prymatex Text Editor"))
@@ -159,18 +160,9 @@ class PMXMainWindow(QMainWindow):
         
     
     def setup_toolbars(self):
-        pass 
+        #raise NotImplementedError("Do we need them?")
+        pass
     
-    def center(self):
-        
-        dsk_geo = qApp.instance().desktop().availableGeometry()
-        dwidth, dheight = dsk_geo.width(), dsk_geo.height() 
-        width = dwidth * 0.7
-        height = dheight * 0.67
-        x0 = (dwidth - width) / 2 
-        y0 = (dheight - height) / 2
-        self.setGeometry(x0,y0,width,height)
-        
         
     def on_actionQuit_triggered(self):
         QApplication.quit()
