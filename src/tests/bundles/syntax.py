@@ -1,12 +1,18 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+'''
+    Syntax's module
+        content, name, scope, keyEquivalent, tabTrigger
+'''
 
 import re
 import ipdb
 import plistlib
 
-SYNTAXES = {}
+TM_SYNTAXES = {}
 
-class SyntaxProcessor(object):
+class TMSyntaxProcessor(object):
     def __init__(self):
         pass
 
@@ -25,7 +31,7 @@ class SyntaxProcessor(object):
     def end_parsing(self, name):
         pass
 
-class DebugSyntaxProcessor(SyntaxProcessor):
+class TMDebugSyntaxProcessor(TMSyntaxProcessor):
     def __init__(self):
         self.line_number = 0
         self.printable_line = ''
@@ -51,7 +57,7 @@ class DebugSyntaxProcessor(SyntaxProcessor):
     def end_parsing(self, name):
         print '}%s' % name
 
-class SyntaxProxy(object):
+class TMSyntaxProxy(object):
     def __init__(self, hash, syntax):
         self.syntax = syntax
         self.proxy = hash['include']
@@ -73,7 +79,7 @@ class SyntaxProxy(object):
         else:
             return self.syntax.syntaxes[self.proxy]
 
-class SyntaxNode(object):
+class TMSyntaxNode(object):
     OPTIONS = re.UNICODE
     
     def __init__(self, hash, syntax = None, name_space = 'default'):
@@ -82,10 +88,10 @@ class SyntaxNode(object):
                   'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
             setattr(self, k, None)
         self.name_space = name_space
-        SYNTAXES.setdefault(self.name_space, {})
+        TM_SYNTAXES.setdefault(self.name_space, {})
         #Definicion de un scope
         if 'scopeName' in hash:
-            SYNTAXES[self.name_space][hash['scopeName']] = self 
+            TM_SYNTAXES[self.name_space][hash['scopeName']] = self 
         self.syntax = syntax or self
         for key, value in hash.iteritems():
             if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 'begin']:
@@ -117,6 +123,8 @@ class SyntaxNode(object):
             processor.start_parsing(self.scopeName)
         stack = [[self, None]]
         for line in string.splitlines():
+            if processor:
+                processor.new_line(line)
             self.parse_line(stack, line, processor)
         if processor:
             processor.end_parsing(self.scopeName)
@@ -126,17 +134,17 @@ class SyntaxNode(object):
         self.repository = {}
         for key, value in repository.iteritems():
             if 'include' in value:
-                self.repository[key] = SyntaxProxy( value, self.syntax )
+                self.repository[key] = TMSyntaxProxy( value, self.syntax )
             else:
-                self.repository[key] = SyntaxNode( value, self.syntax, self.name_space )
+                self.repository[key] = TMSyntaxNode( value, self.syntax, self.name_space )
 
     def create_children(self, patterns):
         self.patterns = []
         for p in patterns:
             if 'include' in p:
-                self.patterns.append(SyntaxProxy( p, self.syntax ))
+                self.patterns.append(TMSyntaxProxy( p, self.syntax ))
             else:
-                self.patterns.append(SyntaxNode( p, self.syntax, self.name_space ))
+                self.patterns.append(TMSyntaxNode( p, self.syntax, self.name_space ))
     
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
@@ -217,8 +225,6 @@ class SyntaxNode(object):
         return match
       
     def parse_line(self, stack, line, processor):
-        if processor:
-            processor.new_line(line)
         top, match = stack[-1]
         position = 0
             
@@ -274,12 +280,12 @@ class SyntaxNode(object):
 
 def parse_file(filename, name_space = 'default'):
     data = plistlib.readPlist(filename)
-    return SyntaxNode(data, None, name_space)
+    return TMSyntaxNode(data, None, name_space)
 
 if __name__ == '__main__':
     python = parse_file('./Python.tmLanguage', 'python')
     json = parse_file('./JSON.tmLanguage', 'json')
-    p = DebugSyntaxProcessor()
+    p = TMDebugSyntaxProcessor()
     print python.parse(open('./debug_processor.py', 'r').read(), p)
     print json.parse('{"hola": "mundo", "estas": [1,2,3,"re","loco"]}', p)
     ipdb.set_trace()

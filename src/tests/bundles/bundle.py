@@ -3,7 +3,7 @@
 
 import os, glob
 import plistlib
-import syntax, snippet, macro, command, template
+import syntax, snippet, macro, command, template, theme
 from xml.parsers.expat import ExpatError
 
 BUNDLES = {}
@@ -116,13 +116,25 @@ def load_bundles():
     for path in paths:
         Bundle.load(os.path.abspath(path))
 
+def load_themes():
+    paths = glob.glob('./bundles/Themes/*.tmTheme')
+    for path in paths:
+        try:
+            data = plistlib.readPlist(os.path.abspath(path))
+            theme = theme.TMTheme(data)
+        except ExpatError:
+            pass
+    for path in paths:
+        Bundle.load(os.path.abspath(path))
+
 load_bundles()
+load_themes()
 
 def main():
     # TEST, TEST
     from pprint import pprint
-    pprint(syntax.SYNTAXES)
-    pprint(snippet.SNIPPETS)
+    pprint(syntax.TM_SYNTAXES)
+    pprint(snippet.TM_SNIPPETS)
 
 if __name__ == '__main__':
     main()
