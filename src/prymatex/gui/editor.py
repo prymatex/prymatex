@@ -42,9 +42,19 @@ class PMXTextEdit(QPlainTextEdit):
         
     
     # File operations
-    def save(self, filename = None):
-        filename = filename or self.path
-        assert filename is not None
+    def save(self, filename = None, save_as = False):
+        '''
+        @returns: Filename or None if save operation was somewhat canceled
+        
+        '''
+        if not save_as:
+            filename = filename or self.path
+            
+        if not filename or save_as:
+            filename = QFileDialog.getSaveFileName(self, _("Save as"), "")
+            if not filename:
+                return
+        
         # TODO: Cargar la codificación por defecto de la config
         s = codecs.open(filename, 'w', 'utf-8')
         s.write(unicode(self.toPlainText()))
@@ -52,11 +62,11 @@ class PMXTextEdit(QPlainTextEdit):
         if filename != self.path:
             self.path = filename
             self.updateTab()
-        self.parent().parent().parent().\
-            statusBar().showMessage(_("'%s' saved", basename(filename)), 5000)
             
+        self.parent().parent().parent().\
+            statusBar().showMessage(_("'%s' saved.", basename(self.path)), 5000)
         self.document().setModified(False)
-
+        return self.path
     
     
     def soft_tabs(): #@NoSelf
@@ -203,10 +213,9 @@ class PMXTextEdit(QPlainTextEdit):
                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
                 
                 if resp == QMessageBox.Yes:
-                    if not self.path:
-                        path = unicode(QFileDialog.getSaveFileName(self, "Save As", "", ""))
-                        if not path:
-                            continue
+                    if not self.save():
+                        continue
+                    
                 return resp
         else:
             return True

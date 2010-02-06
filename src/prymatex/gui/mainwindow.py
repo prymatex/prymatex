@@ -265,20 +265,18 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        if not self.current_editor.path:
-            self.on_actionSaveAs_triggered()
-        else:
-            self.current_editor.save()
+        self.current_editor.save()
     
     @pyqtSignature('')
     def on_actionSaveAs_triggered(self):
-        filename = QFileDialog.getSaveFileName(self, _("Save as"), '', '')
-        if filename:
-            self.current_editor.save(unicode(filename))
+        self.current_editor.save(save_as = True)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
-        print "actionSaveAll"
+        for i in range(0, self.tabWidgetEditors.count()):
+            if not self.tabWidgetEditors.widget(i).save():
+                self.statusBar().showMessage(_("Not all documents were saved"), 1000)
+                break
     
     @pyqtSignature('')
     def on_actionTakeScreenshot_triggered(self):
