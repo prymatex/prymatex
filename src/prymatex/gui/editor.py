@@ -146,7 +146,7 @@ class PMXTextEdit(QPlainTextEdit):
         def fset(self, value):
             self._path = unicode(value)
             if os.path.exists(value):
-                f = open(self.path)
+                f = codecs.open(value,'r','utf-8')
                 text = f.read()
                 f.close()
                 self.setPlainText(text)
@@ -209,8 +209,9 @@ class PMXTextEdit(QPlainTextEdit):
     def requestClose(self):
         if self.document().isModified():
             while True:
-                resp = QMessageBox.question(self, _("File modified"), _("%s is modified. Save changes before closing?", self.filename), 
-                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+                resp = QMessageBox.question(self, _("File modified"), 
+                                            _("%s is modified. Save changes before closing?", self.filename), 
+                                            QMessageBox.Yes | QMessageBox.No)
                 
                 if resp == QMessageBox.Yes:
                     if not self.save():

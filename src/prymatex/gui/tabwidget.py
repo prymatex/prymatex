@@ -83,8 +83,9 @@ class PMXTabWidget(QTabWidget):
         
         if count == 1 and not self.widget(0).document().isModified() and \
             not self.widget(0).path:
-            print "Reutilizando vacio"
+            #print "Reutilizando vacio"
             editor = self.widget(0)
+            
             editor.path = path
             editor.afterInsertionEvent()
             editor.getFocus()
