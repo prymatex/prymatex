@@ -62,6 +62,12 @@ class PMXMainWindow(QMainWindow, CenterWidget):
                         
         )
         
+        addActionsToMenu(self.navigation_menu,
+                        ("&Find", "Ctrl+F"),
+                        ("Find/&Replace", "Ctrl+F"),
+                                                
+        )
+        
         addActionsToMenu(self.settings_menu,
                         ("Show Line &Numbers", "F10"),
                          None,
@@ -128,6 +134,9 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
         self.view_menu = QMenu(_("&View"), self)
         menubar.addMenu(self.view_menu)
+        
+        self.navigation_menu = QMenu(_("&Navigation"), self)
+        menubar.addMenu(self.navigation_menu)
         
         self.bundle_menu = QMenu(_("&Bundle"), self)
         menubar.addMenu(self.bundle_menu)
@@ -358,15 +367,29 @@ class PMXMainWindow(QMainWindow, CenterWidget):
 
     
 class MenuActionGroup(QActionGroup):
+    '''
+    [Multiple] menu[s] should track
+    '''
     def __init__(self, parent):
         assert isinstance(parent, QMenu)
         QActionGroup.__init__(self, parent)
+        self.slave_menus = []
+        
     
     def addAction(self, action):
         QActionGroup.addAction(self, action)
         self.parent().addAction(action)
+        for menu in self.slave_menus:
+            menu.addAction(action)
     
     def removeAction(self, action):
         QActionGroup.removeAction(self, action)
         self.parent().removeAction(action)
+        for menu in self.slave_menus:
+            menu.removeAction(action)
         
+    def addSlaveSubMenu(self, menu):
+        self.slave_menus.append(menu)
+        for action in self.actions():
+            menu.addAction(action)
+            

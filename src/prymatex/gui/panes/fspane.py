@@ -63,9 +63,6 @@ class FSTree(QTreeView):
     def __init__(self, parent):
         QTreeView.__init__(self, parent)
         model = QDirModel(self)
-#        for i in range(model.columnCount()):
-#            val = model.headerData(i, Qt.Horizontal)
-#            print val.toPyObject()
         
         self.createMenus()        
 
