@@ -80,28 +80,47 @@ class FSTree(QTreeView):
         self.fileMenu = QMenu(self)
         self.fileMenu.setObjectName('menuFile')
         addActionsToMenu(self.fileMenu,
-                        (_("Copy Path To Clipboard"),),
-                        (_("Rename"), ),
-                        (_("Delete"), ),
-                        (_("Open"),),
-                        (_("Open Width"),),
+                        (_("Copy Path To &Clipboard"),),
+                        (_("&Rename"), ),
+                        (_("&Delete"), ),
+                        (_("&Open"),),
+                        (_("Open &width..."),),
+                        (_("R&efresh"),),
                         None,
-                        (_("Properties"),), 
+                        (_("&Properties"),), 
         )
         
         
         # Directory Menus
+        self.menuNewFileSystemElement = QMenu(_("&New.."), self)
+        self.menuNewFileSystemElement.setObjectName('menuNewFileSystemElement')
+        self.menuNewFileSystemElement.addAction('File')
+        self.menuNewFileSystemElement.addAction('Directory')
+        
+        
         self.dirMenu = QMenu(self)
         self.dirMenu.setObjectName('menuDir')
         addActionsToMenu(self.dirMenu,
+                         self.menuNewFileSystemElement,
                         self.actionCopyPathToClipboard,
                         (_("Set As Root"),),
+                        self.actionRefresh,
                         (_("Rename"),),
                         (_("Delete"),),
                         None,
                         (_("Properties"),),
-                                         
         )
+        
+        
+        self.defaultMenu = QMenu(self)
+        self.defaultMenu.setObjectName("defaultMenu")
+        addActionsToMenu(self.defaultMenu,
+                         self.menuNewFileSystemElement,
+                         self.actionRefresh,
+                         
+                         
+        )
+        
         
         
         
@@ -147,6 +166,8 @@ class FSTree(QTreeView):
                 self.fileMenu.popup(event.globalPos())
             elif os.path.isdir(data):
                 self.dirMenu.popup(event.globalPos())
+            else:
+                self.defaultMenu.popup(event.globalPos())
     
 
     @property
