@@ -5,6 +5,7 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
+from prymatex.gui.panes.fspane import get_fspanel
 import os
 import codecs
 from os.path import basename
@@ -66,6 +67,8 @@ class PMXTextEdit(QPlainTextEdit):
         self.parent().parent().parent().\
             statusBar().showMessage(_("'%s' saved.", basename(self.path)), 5000)
         self.document().setModified(False)
+        
+        #get_fspanel()
         return self.path
     
     

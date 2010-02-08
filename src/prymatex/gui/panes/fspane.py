@@ -24,9 +24,11 @@ class QActionPushButton(QPushButton):
         self.setToolTip(self._action.toolTip())
     
     
-        
+    
+
 
 class FSPaneWidget(QWidget):
+    
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.setupGui()
@@ -258,11 +260,24 @@ class FSTree(QTreeView):
             else:
                 shutil.rmtree(curpath)
             self.actionRefresh.trigger()
+
+
+_fs_pane_ = None
     
 class FSPane(QDockWidget):
     def __init__(self, parent):
+        global _fs_pane_
         QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("File System Panel"))
         self.setWidget(FSPaneWidget(self))
-        
-        
+        if _fs_pane_:
+            raise Exception("Already instantiated error")
+        else:
+            _fs_pane_ = self
+
+
+
+def get_fspanel():
+    '''
+    '''
+    return _fs_pane_
