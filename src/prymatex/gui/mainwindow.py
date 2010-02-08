@@ -10,6 +10,8 @@ from prymatex.gui.panes.fspane import FSPane
 from prymatex.gui.utils import addActionsToMenu
 from prymatex.gui.mixins.common import CenterWidget
 from prymatex.gui.editor import PMXTextEdit
+from prymatex.config.configdialog import PMXConfigDialog
+
 
 class PMXMainWindow(QMainWindow, CenterWidget):
     def __init__(self):
@@ -22,6 +24,9 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.setup_toolbars()
         self.setup_gui()
         self.center()
+        
+        self.dialogConfig = PMXConfigDialog(self)
+        
         QMetaObject.connectSlotsByName(self)
         
         self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
@@ -71,7 +76,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         addActionsToMenu(self.settings_menu,
                         ("Show Line &Numbers", "F10"),
                          None,
-                        ('Preferences', ),
+                        ('Preferences', 'Ctrl+Shift+P'),
                          
                         )
         
@@ -364,7 +369,10 @@ class PMXMainWindow(QMainWindow, CenterWidget):
             index = 0
         self.tabWidgetEditors.insertTab(index, widget, text)
         self.tabWidgetEditors.setCurrentWidget(widget)
-
+    
+    @pyqtSignature('')
+    def on_actionPreferences_triggered(self):
+        self.dialogConfig.exec_()
     
 class MenuActionGroup(QActionGroup):
     '''

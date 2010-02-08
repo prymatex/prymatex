@@ -1,9 +1,11 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+import shutil
 import os
 from os.path import abspath, join, dirname, isdir, isfile, basename
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
+ 
 #from pr
 
 class QActionPushButton(QPushButton):
@@ -233,11 +235,12 @@ class FSTree(QTreeView):
     @pyqtSignature('')
     def on_actionRefresh_triggered(self):
         self.model().refresh()
+        print "Refresh"
     
     @pyqtSignature('')
     def on_actionDelete_triggered(self):
-        filename = abspath(self.current_selected_path)
-        filename = filename.split(os.sep)[-1]
+        curpath = abspath(self.current_selected_path)
+        filename = curpath.split(os.sep)[-1]
 #        if isfile(filename):
 #            file = basename(filename)
 #        else:
@@ -249,7 +252,12 @@ class FSTree(QTreeView):
                                QMessageBox.Ok | QMessageBox.No | QMessageBox.Cancel
                              )
         if resp == QMessageBox.Ok:
-            pass
+            if isfile(curpath):
+                # Primero hay que cerrar el editor si hay
+                os.unlink(curpath)
+            else:
+                shutil.rmtree(curpath)
+            self.actionRefresh.trigger()
     
 class FSPane(QDockWidget):
     def __init__(self, parent):
