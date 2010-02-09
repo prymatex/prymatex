@@ -10,6 +10,8 @@ import os
 import codecs
 from os.path import basename
 
+from prymatex.lib.textmate.syntax import TMSyntaxProcessor, TM_SYNTAXES 
+
 def deco(f):
     def wrapped(*largs, **kwargs):
         
@@ -17,6 +19,27 @@ def deco(f):
         print "%s() -> %s" % (f.func_name, retval)
         return retval
     return wrapped 
+
+class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
+    def __init__(self, parent, syntax, style):
+        QSyntaxHighlighter.__init__(self, parent)
+        self.syntax = syntax
+        self.style = style
+    
+    def highlightBlock(self, texto):
+        stack = [[self.syntax, None]]
+        self.open = []
+        self.syntax.parse_line(stack, unicode(texto), self)
+
+    def open_tag(self, open_name, begin):
+        self.open.append((open_name, begin))
+        print "open: %s in %d" % (open_name, begin)
+
+    def close_tag(self, close_name, end):
+        open_name, begin = self.open.pop()
+        if open_name != close_name:
+            raise Exception('Un Token no cerro bien')
+        print "close: %s in %d" % (close_name, end)
 
 class PMXTextEdit(QPlainTextEdit):
     _path = ''
@@ -36,6 +59,8 @@ class PMXTextEdit(QPlainTextEdit):
         self.setTabChangesFocus(False)
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
         
+        self.syntax_processor = PMXSyntaxProcessor(self, TM_SYNTAXES['HTML']['text.html.basic'], None)
+        self.syntax_processor.setDocument(self.document()) 
         self.path = path
         
         self.tab_length = 4
