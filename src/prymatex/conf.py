@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+from prymatex.lib.exceptions import ConfigNotFound
 
 import os, plistlib
 
@@ -10,18 +11,19 @@ class Settings(object):
     TEXTMATE_BUNDLES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'Bundles')
     TEXTMATE_THEMES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'Themes')
     
-    def __init__(self):
-        try:
-            if os.path.exists(PRYMATEX_SETTINGS_FILE):
-                config = plistlib.readPlist(PRYMATEX_SETTINGS_FILE)
-            else:
-                raise Exception()
-        except:
+    def __init__(self, config_file = None, **defaults):
+        self.config_file = config_file or PRYMATEX_SETTINGS_FILE 
+        
+        if os.path.exists(self.config_file):
+            config = plistlib.readPlist(self.config_file)
+            self.loaded = True
+        else:
+            self.loaded = False
             config = dict(
                           TEXTMATE_THEMES_PATHS = ["../tests/bundles/Themes", ],
                           TEXTMATE_BUNDLES_PATHS = ["../tests/bundles/Bundles", ],
-                          
             )
+            config.update(defaults)
                       
                 
         for key, value in config.iteritems():
@@ -34,7 +36,7 @@ class Settings(object):
         self.__dict__[name] = value
     
     def save(self):
-        plistlib.writePlist(self.__dict__, PRYMATEX_SETTINGS_FILE)
+        plistlib.writePlist(self.__dict__, self.config_file)
     
     def __str__(self):
         return str(self.__dict__)

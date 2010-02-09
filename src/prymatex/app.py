@@ -2,13 +2,16 @@
 from PyQt4.QtGui import QApplication, QMessageBox
 from PyQt4.QtCore import SIGNAL
 
-from os.path import join, exists, isdir, isabs
+from os.path import join, exists, isdir, isabs, basename
 
 from os import getpid, unlink, getcwd
 import sys
+from time import time
 
 from prymatex.lib.exceptions import AlreadyRunningError
-
+from prymatex.lib.textmate import load_textmate_bundles, load_textmate_themes
+        
+        
 class PMXApplication(QApplication):
     
     __config = None
@@ -64,6 +67,7 @@ class PMXApplication(QApplication):
             pass
     
     def save_config(self):
+        print "Save config"
         self.config.save()
     
     def init_resources(self):
@@ -73,8 +77,18 @@ class PMXApplication(QApplication):
         
     def init_config(self):
         if not self.__config:
-            from prymatex.conf import settings
+            from prymatex.conf import settings, PRYMATEX_SETTINGS_FILE
+            from prymatex.lib.i18n import ugettext as _
             self.__config = settings
+            # Se pudo cargar la configuración???
+            if not self.__config.loaded:
+                QMessageBox.information(None, _("Configuration Defaults"), _("""
+                <p>The configuration file <i><b>%s</b></i> was not found on <i>%s</i> application
+                directory.</p><p> A default settings file has been creates and will
+                be saved when you close this app. If you belive this is a mistake
+                please check the file or its contents.</p>
+                
+                """, basename(PRYMATEX_SETTINGS_FILE), self.applicationName()))
         
     @property
     def config(self):
@@ -95,9 +109,12 @@ class PMXApplication(QApplication):
         '''
         Load textmate Bundles and Themes
         '''
-        from prymatex.lib.textmate.bundle import load_textmate_bundles, TM_BUNDLES
-        from prymatex.lib.textmate.theme import load_textmate_themes, TM_THEMES
-        from time import time
+        if not all(map(lambda x: hasattr(self.config, x), ('TEXTMATE_THEMES_PATHS',
+                                                           'TEXTMATE_BUNDLES_PATHS' ))):
+            QMessageBox.critical(self, _("Fatal Error"), 
+                                 _("No bundle dirs have been found in config file."))
+            
+        
         themes, bundles = 0, 0
         t0 = time()
         for dirname in self.config.TEXTMATE_THEMES_PATHS:

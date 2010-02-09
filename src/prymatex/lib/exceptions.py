@@ -8,3 +8,6 @@ class UnsupportedPlatformError(Exception):
 
 class AlreadyRunningError(Exception):
     RETURN_VALUE = 10
+    
+class ConfigNotFound(Exception):
+    RETURN_VALUE = 15
