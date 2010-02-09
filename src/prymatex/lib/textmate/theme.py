@@ -42,9 +42,7 @@ class TMTheme(object):
 
 def load_textmate_themes(path):
     search_path = join(abspath(path), '*.tmTheme')
-    print search_path
     paths = glob(search_path)
-    print "Paths", len(paths)
     counter = 0
     for path in paths:
         try:

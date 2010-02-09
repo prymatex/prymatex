@@ -50,74 +50,85 @@ class TMBundle(object):
             self.menu = {}
         TM_BUNDLES[self.name] = self
 
+def load_textmate_bundle(bundle_path):
+    '''
+    Carga un bundle
+    @return: bundle cargado
+    '''
+    info_file = os.path.join(bundle_path, 'info.plist')
+    try:
+        data = plistlib.readPlist(info_file)
+        bundle = TMBundle(data)
+    except ExpatError:
+        continue
+    
+    #Syntaxes
+    syntax_files = glob(os.path.join(bundle_path, 'Syntaxes', '*'))
+    for sf in syntax_files:
+        #Quito plis con caracteres raros.
+        try:
+            data = plistlib.readPlist(sf)
+            uuid = data.pop('uuid')
+            s = syntax.TMSyntaxNode(data, None, bundle.name)
+            bundle.menu[uuid] = s
+        except ExpatError:
+            pass
+    
+    #Snippets
+    syntax_files = glob(os.path.join(bundle_path, 'Snippets', '*'))
+    for sf in syntax_files:
+        #Quito plis con caracteres raros.
+        try:
+            data = plistlib.readPlist(sf)
+            uuid = data.pop('uuid')
+            s = snippet.TMSnippet(data, bundle.name)
+            bundle.menu[uuid] = s
+        except ExpatError:
+            pass
+    
+    #Macros
+    syntax_files = glob(os.path.join(bundle_path, 'Macros', '*'))
+    for sf in syntax_files:
+        #Quito plis con caracteres raros.
+        try:
+            data = plistlib.readPlist(sf)
+            uuid = data.pop('uuid')
+            m = macro.Macro(data, bundle.name)
+            bundle.menu[uuid] = m
+        except ExpatError:
+            pass
+    
+    #Commands
+    syntax_files = glob(os.path.join(bundle_path, 'Commands', '*'))
+    for sf in syntax_files:
+        #Quito plis con caracteres raros.
+        try:
+            data = plistlib.readPlist(sf)
+            uuid = data.pop('uuid')
+            c = command.Command(data, bundle.name)
+            bundle.menu[uuid] = c
+        except ExpatError:
+            pass
+    
+    #Templates
+    #syntax_files = glob(os.path.join(bundle_path, 'Templates', '*'))
+    #for sf in syntax_files:
+        #Quito plis con caracteres raros.
+        #try:
+            #data = plistlib.readPlist(sf)
+            #template.Template(data, bundle.name)
+        #except ExpatError:
+            #pass
+    return bundle
+
 def load_textmate_bundles(path):
+    '''
+    Forma simple de cargar los bundles de manera no diferida
+    @return: Canidad de bundles cargados
+    '''
     paths = glob(os.path.join(path, '*.tmbundle'))
     counter = 0
     for bundle_path in paths:
-        #Info
-        info_file = os.path.join(bundle_path, 'info.plist')
-        try:
-            data = plistlib.readPlist(info_file)
-            bundle = TMBundle(data)
-        except ExpatError:
-            continue
-        
-        #Syntaxes
-        syntax_files = glob(os.path.join(bundle_path, 'Syntaxes', '*'))
-        for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                uuid = data.pop('uuid')
-                s = syntax.TMSyntaxNode(data, None, bundle.name)
-                bundle.menu[uuid] = s
-            except ExpatError:
-                pass
-        
-        #Snippets
-        syntax_files = glob(os.path.join(bundle_path, 'Snippets', '*'))
-        for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                uuid = data.pop('uuid')
-                s = snippet.TMSnippet(data, bundle.name)
-                bundle.menu[uuid] = s
-            except ExpatError:
-                pass
-        
-        #Macros
-        syntax_files = glob(os.path.join(bundle_path, 'Macros', '*'))
-        for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                uuid = data.pop('uuid')
-                m = macro.Macro(data, bundle.name)
-                bundle.menu[uuid] = m
-            except ExpatError:
-                pass
-        
-        #Commands
-        syntax_files = glob(os.path.join(bundle_path, 'Commands', '*'))
-        for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                uuid = data.pop('uuid')
-                c = command.Command(data, bundle.name)
-                bundle.menu[uuid] = c
-            except ExpatError:
-                pass
-        
-        #Templates
-        #syntax_files = glob(os.path.join(bundle_path, 'Templates', '*'))
-        #for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            #try:
-                #data = plistlib.readPlist(sf)
-                #template.Template(data, bundle.name)
-            #except ExpatError:
-                #pass
+        load_textmate_bundle(bundle_path)
         counter += 1
     return counter
