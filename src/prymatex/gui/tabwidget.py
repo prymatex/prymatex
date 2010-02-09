@@ -71,30 +71,35 @@ class PMXTabWidget(QTabWidget):
         '''
         Abre un archivo en una tab
         '''
-        count = self.count()
-        # Primero hay que buscar si no está abierto
-        if count:
-            for i in range(self.count()):
-                editor = self.widget(i)
-                if path == editor.path:
-                    self.setCurrentWidget(editor)
-                    return
-
-        
-        if count == 1 and not self.widget(0).document().isModified() and \
-            not self.widget(0).path:
-            #print "Reutilizando vacio"
-            editor = self.widget(0)
+        try:
+            count = self.count()
+            # Primero hay que buscar si no está abierto
+            if count:
+                for i in range(self.count()):
+                    editor = self.widget(i)
+                    if path == editor.path:
+                        self.setCurrentWidget(editor)
+                        return
+    
             
-            editor.path = path
-            editor.afterInsertionEvent()
-            editor.getFocus()
-            
-        else:
-            editor = self.getEditor(path)
-            index = self.addTab(editor, _("Loading..."))
-            self.setCurrentIndex(index)
-        
+            if count == 1 and not self.widget(0).document().isModified() and \
+                not self.widget(0).path:
+                #print "Reutilizando vacio"
+                editor = self.widget(0)
+                
+                editor.path = path
+                editor.afterInsertionEvent()
+                editor.getFocus()
+                
+            else:
+                editor = self.getEditor(path)
+                index = self.addTab(editor, _("Loading..."))
+                self.setCurrentIndex(index)
+        except UnicodeDecodeError, e:
+            QMessageBox.critical(self, _("Could not decode file %s", path), 
+                                 _("""<p>File %s could not be decoded</p>
+                                 <p>Some exception data:</p>
+                                 <pre>%s</pre>""", path, unicode(e)[:40]))
     
     
     def appendEmptyTab(self):
