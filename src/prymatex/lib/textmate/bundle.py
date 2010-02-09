@@ -1,4 +1,5 @@
-import os, glob
+import os
+from glob import glob
 import plistlib
 from prymatex.lib.textmate import command, macro, snippet, syntax, template 
 from xml.parsers.expat import ExpatError
@@ -50,7 +51,8 @@ class TMBundle(object):
         TM_BUNDLES[self.name] = self
 
 def load_textmate_bundles(path):
-    paths = glob.glob(os.path.join(path, '*.tmbundle'))
+    paths = glob(os.path.join(path, '*.tmbundle'))
+    counter = 0
     for bundle_path in paths:
         #Info
         info_file = os.path.join(bundle_path, 'info.plist')
@@ -61,7 +63,7 @@ def load_textmate_bundles(path):
             continue
         
         #Syntaxes
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Syntaxes', '*'))
+        syntax_files = glob(os.path.join(bundle_path, 'Syntaxes', '*'))
         for sf in syntax_files:
             #Quito plis con caracteres raros.
             try:
@@ -73,7 +75,7 @@ def load_textmate_bundles(path):
                 pass
         
         #Snippets
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Snippets', '*'))
+        syntax_files = glob(os.path.join(bundle_path, 'Snippets', '*'))
         for sf in syntax_files:
             #Quito plis con caracteres raros.
             try:
@@ -85,7 +87,7 @@ def load_textmate_bundles(path):
                 pass
         
         #Macros
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Macros', '*'))
+        syntax_files = glob(os.path.join(bundle_path, 'Macros', '*'))
         for sf in syntax_files:
             #Quito plis con caracteres raros.
             try:
@@ -97,7 +99,7 @@ def load_textmate_bundles(path):
                 pass
         
         #Commands
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Commands', '*'))
+        syntax_files = glob(os.path.join(bundle_path, 'Commands', '*'))
         for sf in syntax_files:
             #Quito plis con caracteres raros.
             try:
@@ -109,7 +111,7 @@ def load_textmate_bundles(path):
                 pass
         
         #Templates
-        #syntax_files = glob.glob(os.path.join(bundle_path, 'Templates', '*'))
+        #syntax_files = glob(os.path.join(bundle_path, 'Templates', '*'))
         #for sf in syntax_files:
             #Quito plis con caracteres raros.
             #try:
@@ -117,3 +119,5 @@ def load_textmate_bundles(path):
                 #template.Template(data, bundle.name)
             #except ExpatError:
                 #pass
+        counter += 1
+    return counter

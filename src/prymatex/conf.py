@@ -11,10 +11,21 @@ class Settings(object):
     TEXTMATE_THEMES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'Themes')
     
     def __init__(self):
-        if os.path.exists(PRYMATEX_SETTINGS_FILE):
-            config = plistlib.readPlist(PRYMATEX_SETTINGS_FILE)
-            for key, value in config.iteritems():
-                setattr(self, key, value)
+        try:
+            if os.path.exists(PRYMATEX_SETTINGS_FILE):
+                config = plistlib.readPlist(PRYMATEX_SETTINGS_FILE)
+            else:
+                raise Exception()
+        except:
+            config = dict(
+                          TEXTMATE_THEMES_PATHS = ["../tests/bundles/Themes", ],
+                          TEXTMATE_BUNDLES_PATHS = ["../tests/bundles/Bundles", ],
+                          
+            )
+                      
+                
+        for key, value in config.iteritems():
+            setattr(self, key, value)
         
     def __getattr__(self, name):
         return self.__dict__.get(name, self.__class__.__dict__.get(name)) 
@@ -24,11 +35,13 @@ class Settings(object):
     
     def save(self):
         plistlib.writePlist(self.__dict__, PRYMATEX_SETTINGS_FILE)
+    
+    def __str__(self):
+        return str(self.__dict__)
         
 settings = Settings()
 
 if __name__ == '__main__':
-    print settings.TEXTMATE_BUNDLES_PATH
+    print settings
     #Ponemos algo en settings, efecto configuracion de usuario
-    settings.TEXTMATE_THEMES_PATH = '/pepe/algo/Themes'
     settings.save()

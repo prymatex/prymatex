@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, glob, plistlib
+import os #, #glob, 
+import plistlib
+from os.path import join, abspath
+from glob import glob
 from PyQt4.Qt import QTextCharFormat, QColor, QFont
 from xml.parsers.expat import ExpatError
 
@@ -38,10 +41,16 @@ class TMTheme(object):
             self.formats[setting['scope']] = setting
 
 def load_textmate_themes(path):
-    paths = glob.glob(os.path.join(path, '*.tmTheme'))
+    search_path = join(abspath(path), '*.tmTheme')
+    print search_path
+    paths = glob(search_path)
+    print "Paths", len(paths)
+    counter = 0
     for path in paths:
         try:
             data = plistlib.readPlist(os.path.abspath(path))
             TMTheme(data)
         except ExpatError:
             pass
+        counter += 1
+    return counter
