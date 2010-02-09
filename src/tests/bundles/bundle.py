@@ -13,10 +13,11 @@ class MenuItem(object):
         pass
 
 class MenuNode(object):
-    def __init__(self, uuid, name, items, submenus = {}):
-        self.uuid = uuid
+    def __init__(self, name, items, excludedItems = [], submenus = {}):
         self.name = name
-        self.main = dict(map(lambda i: (i, None), filter(lambda x: x != '-' * 36, items)))
+        self.items = items
+        self.excludedItems = excludedItems
+        self.main = dict(map(lambda i: (i, None), filter(lambda x: x != '-' * 36, self.items)))
         for uuid, submenu in submenus.iteritems():
             self[uuid] = MenuNode(**submenu)
 
@@ -47,73 +48,11 @@ class Bundle(object):
         self.description = hash.get('description')
         self.contact = {'Name': hash.get('contactName'), 'Email': hash.get('contactEmailRot13') }
         if 'mainMenu' in hash:
-            self.menu = MenuNode(self.uuid, 'main', hash.get('mainMenu'))
+            self.menu = MenuNode('main', **hash.get('mainMenu'))
         self.deleted = hash.get('deleted', [])
         self.ordering = hash.get('ordering', [])
-        self.excludedItems = hash.get(' excludedItems', [])
+    
         TM_BUNDLES[self.name] = self
-
-def load_textmate_bundles():
-    paths = glob.glob('./bundles/Bundles/*.tmbundle')
-    for bundle_path in paths:
-        #Info
-        info_file = os.path.join(bundle_path, 'info.plist')
-        try:
-            data = plistlib.readPlist(info_file)
-            bundle = Bundle(data)
-        except ExpatError:
-            continue
-        
-        #TODO: Agregar las entradas al menu
-        #Syntaxes
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Syntaxes', '*'))
-        for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                syntax.TMSyntaxNode(data, None, bundle.name)
-            except ExpatError:
-                pass
-        
-        #Snippets
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Snippets', '*'))
-        for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                snippet.TMSnippet(data, bundle.name)
-            except ExpatError:
-                pass
-        
-        #Macros
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Macros', '*'))
-        for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                macro.Macro(data, bundle.name)
-            except ExpatError:
-                pass
-        
-        #Commands
-        syntax_files = glob.glob(os.path.join(bundle_path, 'Commands', '*'))
-        for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                command.Command(data, bundle.name)
-            except ExpatError:
-                pass
-        
-        #Templates
-        #syntax_files = glob.glob(os.path.join(bundle_path, 'Templates', '*'))
-        #for sf in syntax_files:
-            #Quito plis con caracteres raros.
-            #try:
-                #data = plistlib.readPlist(sf)
-                #template.Template(data, bundle.name)
-            #except ExpatError:
-                #pass
 
 def main():
     # TEST, TEST

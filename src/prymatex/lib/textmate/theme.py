@@ -39,6 +39,14 @@ class TMTheme(object):
                 format.setBackground(QColor(setting['background']))
             setting['format'] = format
             self.formats[setting['scope']] = setting
+    
+    def get_format(self, scope):
+        format = None
+        tags = scope.split('.')
+        while format == None and tags:
+            format = self.formats.get(['.'.join(tags)], None)
+            tags.pop()
+        return format or self.default
 
 def load_textmate_themes(path):
     search_path = join(abspath(path), '*.tmTheme')

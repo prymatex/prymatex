@@ -201,7 +201,7 @@ class TMSyntaxNode(object):
     def match_end(self, string, match, position):
         regstring = self.end[:]
         def g_match(mobj):
-            index = int(mobj.group(0))
+            index = mobj.group(0)
             return match.group(index)
         def d_match(mobj):
             index = mobj.group(0)
