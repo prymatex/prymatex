@@ -39,7 +39,7 @@ class PMXApplication(QApplication):
         self.init_config()
         
         # Bundles and Stuff
-        self.load_texmate_bundles()
+        #self.load_texmate_bundles()
         
         
         from prymatex.gui.mainwindow import PMXMainWindow

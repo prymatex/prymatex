@@ -60,7 +60,7 @@ def load_textmate_bundle(bundle_path):
         data = plistlib.readPlist(info_file)
         bundle = TMBundle(data)
     except ExpatError:
-        continue
+        raise
     
     #Syntaxes
     syntax_files = glob(os.path.join(bundle_path, 'Syntaxes', '*'))

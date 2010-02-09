@@ -167,9 +167,10 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.view_menu.addAction(self.actionFullScreen)
         
         self.actionShowMenus = QAction(_("&Show Menus"), self)
-        self.actionShowMenus.setObjectName("actionShowMenu")
+        self.actionShowMenus.setObjectName("actionShowMenus")
         self.actionShowMenus.setShortcut(text_to_KeySequence("Ctrl+M"))
         self.actionShowMenus.setCheckable(True)
+        self.actionShowMenus.setChecked(True)
         self.view_menu.addAction(self.actionShowMenus)
         
         self.view_menu.addSeparator()
@@ -249,18 +250,21 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.help_menu.addAction(self.actionProjectHomePage)
         
         
+        self.actionTakeScreenshot = QAction(_("&Take Screenshot"), self)
+        self.actionTakeScreenshot.setObjectName("actionTakeScreenshot")
+        self.actionTakeScreenshot.setShortcut(text_to_KeySequence("Ctrl+Print"))
+        self.help_menu.addAction(self.actionTakeScreenshot)
         
-        addActionsToMenu(self.help_menu, 
-                         #("Report &Bug", ),
-
-                         #(_("&Translate %s", app_name), {'do_i18n': False}),
-                         None,
-                   #      ("Project &Homepage...", ),
-                         ('&Take Screenshot', 'Ctrl+Print'),
-                         ("&About Qt",),
-                         (_("&About %s", app_name), {'name': 'AboutApp', 'do_i18n': False,}),
-                         
-        )
+        self.help_menu.addSeparator()
+        self.actionAboutQt = QAction(_("About &Qt"), self)
+        self.actionAboutQt.setObjectName("actionAboutQt")
+        #self.actionAboutQt.setShortcut("")
+        self.help_menu.addAction(self.actionAboutQt)
+        
+        self.actionAboutApp = QAction(_("&About %s", app_name), self)
+        self.actionAboutApp.setObjectName("actionAboutApp")
+        #self.actionAboutApp.setShortcut()
+        self.file_menu.addAction(self.actionAboutApp)
         
         self.actionBundleEditor = QAction(_("&Edit Bundles"), self)
         self.actionBundleEditor.setObjectName("actionBundleEditor")
@@ -381,14 +385,17 @@ class PMXMainWindow(QMainWindow, CenterWidget):
             self.showNormal()
         else:
             self.showFullScreen()
-            
-    @pyqtSignature('')
-    def on_actionShowMenus_triggered(self):
+    
+    
+    #@pyqtSignature('toggled(bool)')
+    def on_actionShowMenus_toggled(self, state):
+        print "Toggle", state
         menubar = self.menuBar()
-        if menubar.isHidden():
+        if state:
             menubar.show()
         else:
             menubar.hide()
+        
             
     @pyqtSignature('')
     def on_actionFileOpen_triggered(self):
