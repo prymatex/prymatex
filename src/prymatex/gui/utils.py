@@ -128,11 +128,6 @@ def addActionsToMenu(menu, *action_tuples):
 #                    f(value)
 
 
-def get_icon(path):
-    root = qApp.instace().getThemePath()
-    pass
-
-
 
 if __name__ == "__main__":
     print text_to_object_name('Button Text Editor')

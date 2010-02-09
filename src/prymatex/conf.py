@@ -4,7 +4,7 @@ from prymatex.lib.exceptions import ConfigNotFound
 
 import os, plistlib
 
-PRIMATEX_BASE_PATH = os.path.abspath(os.path.curdir)
+PRIMATEX_BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 PRYMATEX_SETTINGS_FILE = os.path.join(PRIMATEX_BASE_PATH , "settings.plist")
 
 class Settings(object):
