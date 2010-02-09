@@ -2,7 +2,7 @@
 from PyQt4.QtGui import QApplication, QMessageBox
 from PyQt4.QtCore import SIGNAL
 
-from os.path import join, exists, isdir, isabs, basename
+from os.path import join, exists, isdir, isabs, basename, abspath
 
 from os import getpid, unlink, getcwd
 import sys
@@ -39,7 +39,7 @@ class PMXApplication(QApplication):
         self.init_config()
         
         # Bundles and Stuff
-        #self.load_texmate_bundles()
+        self.load_texmate_bundles()
         
         
         from prymatex.gui.mainwindow import PMXMainWindow
@@ -107,6 +107,22 @@ class PMXApplication(QApplication):
     
     def load_texmate_bundles(self):
         '''
+        Crea una lista de los paths abslutos de donde se cargan
+        bundles y lanza un hilo para cargarlos.
+        '''
+        from prymatex.lib.textmate.loader import PMXBundleLoaderThread
+        print "iniciando hilo de bundles con", self.config.TEXTMATE_BUNDLES_PATHS
+        path_list = []
+        for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
+            if isdir(dirname):
+                if not isabs(dirname):
+                    dirname = join(getcwd(), dirname)
+                path_list.append(dirname)
+        self.bundle_thread = PMXBundleLoaderThread(path_list, self)
+        self.bundle_thread.start()
+    
+    def _load_texmate_bundles(self):
+        '''
         Load textmate Bundles and Themes
         '''
         if not all(map(lambda x: hasattr(self.config, x), ('TEXTMATE_THEMES_PATHS',
@@ -126,15 +142,29 @@ class PMXApplication(QApplication):
                 print("El directorio de temas %s no existe" % dirname)
                 
         print ("%d temas cargados desde %s en %f segundos" % (themes, dirname, time() - t0))
-        t0 = time()
-        for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
-            if isdir(dirname):
-                if not isabs(dirname):
-                    dirname = join(getcwd(), dirname) 
-                bundles += load_textmate_bundles(dirname)
-            else:
-                print("El directorio de temas %s no existe" % dirname)
-        print ("%d bundles cargados desde %s en %f segundos" % (bundles, dirname, time() -t0))
+#        t0 = time()
+#        for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
+#            if isdir(dirname):
+#                if not isabs(dirname):
+#                    dirname = join(getcwd(), dirname) 
+#                bundles += load_textmate_bundles(dirname)
+#            else:
+#                print("El directorio de temas %s no existe" % dirname)
+#        print ("%d bundles cargados desde %s en %f segundos" % (bundles, dirname, time() -t0))
+#        from glob import glob
+#        from prymatex.lib.textmate.bundle import load_textmate_bundle
+#        for path in self.config.TEXTMATE_BUNDLES_PATH:
+#            search_path = join(abspath(path), '*.tmbundle')
+#            bundles = glob(search_path)
+#            # Con eso se podrían llenar los menus
+#            for bundle_path in bundles:
+#                
+#                try:
+#                    bundle = load_textmate_bundle(bundle_path)
+#                except Exception, e:
+#                    print e
+#                self.processEvents()
+#                print bundle
         
         
     def check_single_instance(self):

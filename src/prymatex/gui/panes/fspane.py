@@ -105,9 +105,9 @@ class FSTree(QTreeView):
         self.actionDelete.setObjectName("actionDelete")
         self.menuFile.addAction(self.actionDelete)
         
-        self.actionOpen = QAction(_("&Open"), self)
-        self.actionOpen.setObjectName("actionOpen")
-        self.menuFile.addAction(self.actionOpen)
+        self.actionFileOpen = QAction(_("&Open"), self)
+        self.actionFileOpen.setObjectName("actionFileOpen")
+        self.menuFile.addAction(self.actionFileOpen)
         
         self.actionRefresh = QAction(_("&Refresh"), self)
         self.actionRefresh.setObjectName("actionRefresh")
@@ -150,6 +150,9 @@ class FSTree(QTreeView):
         self.defaultMenu.addAction(self.actionRefresh)
         #self.defaultMenu.addAction()
         
+        
+        
+            
 
         
         
