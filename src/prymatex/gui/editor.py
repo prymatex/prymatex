@@ -58,9 +58,12 @@ class PMXTextEdit(QPlainTextEdit):
         self.highlightCurrentLine()
         self.setTabChangesFocus(False)
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
-        
-        self.syntax_processor = PMXSyntaxProcessor(self, TM_SYNTAXES['HTML']['text.html.basic'], None)
-        self.syntax_processor.setDocument(self.document()) 
+        try:
+            self.syntax_processor = PMXSyntaxProcessor(self, TM_SYNTAXES['HTML']['text.html.basic'], None)
+            self.syntax_processor.setDocument(self.document())
+        except Exception, e:
+            print ("Error al cargar la sintaxis %s" % e)
+             
         self.path = path
         
         self.tab_length = 4
