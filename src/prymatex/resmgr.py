@@ -39,23 +39,22 @@ class ResourceManager(QObject):
         print os.path.exists(theme_path)
         for _dirpath, dirnames, _filenames in os.walk(theme_path):
             return dirnames
-            
     
-    def getIcon(self, path):
-        # Busca primero en los fijos
-        
+    def seach_file(self, path):
         fpath = os.path.join(self.path, 'resources', 'icons', path)
         if not os.path.exists(fpath):
             fpath = os.path.join(self.current_theme_path, 'icons', path)
-            
-        
-#        if os.path.exists(fpath):
-#            print path, "->", fpath
-        # TODO: ALmacenar el icono
-        print os.path.exists(fpath), fpath
+        return fpath
+    
+    def getIcon(self, path):
+        fpath = self.seach_file(path)
         
         return QIcon(fpath)
-    
+
+    def getPixmap(self, path):
+        fpath = self.seach_file(path)
+        return QPixmap(fpath)
+        
     def changeLocale(self, locale):
         pass
     def changeTheme(self, name):

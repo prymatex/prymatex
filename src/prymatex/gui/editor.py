@@ -5,7 +5,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
-from prymatex.gui.panes.fspane import get_fspanel
 import os
 import codecs
 from os.path import basename

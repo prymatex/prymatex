@@ -1,9 +1,9 @@
 
 INKSCAPE=$(shell which inkscape)
-INKSCAPE_FLAGS=-z -C -d180
+INKSCAPE_FLAGS=-z -C -d120
 
 
-all: Prymatex_Logo.png
+all: Prymatex_Logo.png Prymatex_Splash.png
 
 
 
