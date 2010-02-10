@@ -31,8 +31,8 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
         self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
-        self.pane = FSPane(self)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.pane)
+        self.actionShowFSPane.setChecked(True)
+        
     
     def setup_gui(self):
         self.tabWidgetEditors = PMXTabWidget(self)
@@ -221,6 +221,32 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.view_menu.addAction(self.actionFocusEditor)
         self.addAction(self.actionFocusEditor)
         
+        self.view_menu.addSeparator()
+        
+        self.actionShowFSPane = QAction(_("Show File System Panel"), self)
+        self.actionShowFSPane.setObjectName("actionShowFSPane")
+        self.actionShowFSPane.setShortcut("F8")
+        self.actionShowFSPane.setCheckable(True)
+        self.view_menu.addAction(self.actionShowFSPane)
+        
+        self.actionShowOutputPane = QAction(_("Shou Output Panel"), self)
+        self.actionShowOutputPane.setObjectName("actionShowOutputPane")
+        self.actionShowOutputPane.setCheckable(True)
+        #self.actionShowOutputPane.setShortcut("")
+        self.view_menu.addAction(self.actionShowOutputPane)
+        
+        self.actionShowProjectPanel = QAction(_("Show Project Panel"), self)
+        self.actionShowProjectPanel.setObjectName("actionShowProjectPanel")
+        self.actionShowProjectPanel.setCheckable(True)
+        self.actionShowProjectPanel.setShortcut("Alt+P")
+        self.view_menu.addAction(self.actionShowProjectPanel)
+        
+        self.showSymbolListPanel = QAction(_("Show Symbol List Panel"), self)
+        self.showSymbolListPanel.setObjectName("showSymbolListPanel")
+        self.showSymbolListPanel.setShortcut("Alt+S")
+        self.showSymbolListPanel.setCheckable(True)
+        self.view_menu.addAction(self.showSymbolListPanel)
+         
         #=======================================================================
         # Window Menu
         #=======================================================================
@@ -249,7 +275,6 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.window_menu.addAction(self.actionMoveTabRight)
         self.addAction(self.actionMoveTabRight)
         
-        self.window_menu.addMenu(self.panes_submenu)
         
         #=======================================================================
         # Run Script
@@ -329,6 +354,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
     
     def setup_menus(self):
+        
         menubar = QMenuBar(self)
         self.file_menu = QMenu(_("&File"), self)
         menubar.addMenu(self.file_menu)
@@ -352,22 +378,15 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.window_menu.windowActionGroup = MenuActionGroup(self.window_menu)
         menubar.addMenu(self.window_menu)
         
-        # Panes
-        self.panes_submenu = QMenu(_("&Panes"), self)
-        
         self.help_menu = QMenu(_("&Help"), self)
         menubar.addMenu(self.help_menu)
         
         self.setMenuBar(menubar)
     
     def setup_panes(self):
-        actions = \
-        addActionsToMenu(self.panes_submenu, 
-                         ('Filesystem', {'checkable': True}),
-                         ('Text Search', {'checkable': True}),
-                         ('Session', {'checkable': True}),
-                         )
-        print actions
+        self.paneFileSystem = FSPane(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.paneFileSystem)
+        self.paneFileSystem.hide()
         
     
     def setup_toolbars(self):
@@ -569,6 +588,10 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.tabWidgetEditors.insertTab(index, widget, text)
         self.tabWidgetEditors.setCurrentWidget(widget)
     
+    #===========================================================================
+    # Dumb code :/
+    #===========================================================================
+    
     @pyqtSignature('')
     def on_actionPreferences_triggered(self):
         self.dialogConfig.exec_()
@@ -611,7 +634,22 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     @pyqtSignature('')
     def on_actionMoveToTab9_triggered(self):
         self.moveToTab(9)
+    
+    def on_actionShowFSPane_toggled(self, check):
+        if check:
+            self.paneFileSystem.show()
+            self.actionShowFSPane.setText(_("Hide File System Pane"))
+        else:
+            self.paneFileSystem.hide()
+            self.actionShowFSPane.setText(_("Show File System Pane"))
         
+    def on_actionShowLineNumbers_toggled(self, check):
+        print "Line", check
+    def on_actionShowOutputPane_toggled(self, check):
+        print "Output", check
+    def on_actionShowProjectPanel_toggled(self, check):
+        print "Project", check
+    
 class MenuActionGroup(QActionGroup):
     '''
     [Multiple] menu[s] should track
