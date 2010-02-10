@@ -246,7 +246,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
         self.actionShowSymbolListPane = QAction(_("Show Symbol List Panel"), self)
         self.actionShowSymbolListPane.setObjectName("actionShowSymbolListPane")
-        self.actionShowSymbolListPane.setShortcut(text_to_KeySequence("F10"))
+        self.actionShowSymbolListPane.setShortcut(text_to_KeySequence("F6"))
         self.actionShowSymbolListPane.setCheckable(True)
         self.view_menu.addAction(self.actionShowSymbolListPane)
          

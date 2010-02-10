@@ -17,6 +17,7 @@ class SymbolListWidget(QWidget):
         layout_buttons = QHBoxLayout(self)
         layout_buttons.addWidget(QPushButton(_("Refresh")))
         layout_buttons.addStretch(-1)
+        layout.addLayout(layout_buttons)
         self.setLayout(layout)
         
 class PMXSymboldListDock(QDockWidget):
