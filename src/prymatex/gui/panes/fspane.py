@@ -266,7 +266,6 @@ class FSTree(QTreeView):
 
 class FSPane(QDockWidget):
     def __init__(self, parent):
-        global _fs_pane_
         QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("File System Panel"))
         self.setWidget(FSPaneWidget(self))

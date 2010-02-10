@@ -11,6 +11,7 @@ from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.mixins.common import CenterWidget
 from prymatex.gui.editor import PMXTextEdit
 from prymatex.config.configdialog import PMXConfigDialog
+from prymatex.gui.panes.outputpanel import PMXOutputDock
 
 
 class PMXMainWindow(QMainWindow, CenterWidget):
@@ -225,14 +226,14 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
         self.actionShowFSPane = QAction(_("Show File System Panel"), self)
         self.actionShowFSPane.setObjectName("actionShowFSPane")
-        self.actionShowFSPane.setShortcut("F8")
+        self.actionShowFSPane.setShortcut(text_to_KeySequence("F8"))
         self.actionShowFSPane.setCheckable(True)
         self.view_menu.addAction(self.actionShowFSPane)
         
         self.actionShowOutputPane = QAction(_("Shou Output Panel"), self)
         self.actionShowOutputPane.setObjectName("actionShowOutputPane")
         self.actionShowOutputPane.setCheckable(True)
-        #self.actionShowOutputPane.setShortcut("")
+        self.actionShowOutputPane.setShortcut(text_to_KeySequence("Alt+O"))
         self.view_menu.addAction(self.actionShowOutputPane)
         
         self.actionShowProjectPanel = QAction(_("Show Project Panel"), self)
@@ -285,6 +286,17 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.actionRunScript.setShortcut(text_to_KeySequence("Alt+R"))
         self.tools_menu.addAction(self.actionRunScript)
         self.addAction(self.actionRunScript)
+        
+        self.actionOpenCommandPrompt = QAction(_("Open Terminal"), self)
+        self.actionOpenCommandPrompt.setObjectName("actionOpenCommandPrompt")
+        self.actionOpenCommandPrompt.setShortcut(text_to_KeySequence("F4"))
+        self.tools_menu.addAction(self.actionOpenCommandPrompt)
+        
+        self.actionOpenFileManager = QAction(_("Open File Manager"), self)
+        self.actionOpenFileManager.setObjectName("actionOpenFileManager")
+        self.actionOpenFileManager.setShortcut(text_to_KeySequence("F6"))
+        self.tools_menu.addAction(self.actionOpenFileManager)
+        
         
         #=======================================================================
         # Help Menu
@@ -339,6 +351,11 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.bundle_menu.addAction(self.actionBundleEditor)
         self.addAction(self.actionBundleEditor)
         
+        self.actionActivateBundle = QAction(_("Select Bundle Item..."), self)
+        self.actionActivateBundle.setObjectName("actionActivateBundle")
+        self.actionActivateBundle.setShortcut(text_to_KeySequence("Ctrl+Alt+T"))
+        self.bundle_menu.addAction(self.actionActivateBundle)
+        
         #=======================================================================
         # Configuración 
         #=======================================================================
@@ -384,10 +401,14 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.setMenuBar(menubar)
     
     def setup_panes(self):
+        
         self.paneFileSystem = FSPane(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.paneFileSystem)
         self.paneFileSystem.hide()
         
+        self.paneOutput = PMXOutputDock(self)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
+        self.paneOutput.hide()
     
     def setup_toolbars(self):
         #raise NotImplementedError("Do we need them?")
@@ -645,8 +666,15 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
     def on_actionShowLineNumbers_toggled(self, check):
         print "Line", check
+        
     def on_actionShowOutputPane_toggled(self, check):
-        print "Output", check
+        #self.paneOutput
+        if check:
+            self.paneOutput.show()
+            self.actionShowOutputPane.setText(_("Hide Output Pane"))
+        else:
+            self.paneOutput.hide()
+            self.actionShowOutputPane.setText(_("Show Output Pane"))
     def on_actionShowProjectPanel_toggled(self, check):
         print "Project", check
     

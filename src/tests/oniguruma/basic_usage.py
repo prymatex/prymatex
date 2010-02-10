@@ -37,6 +37,8 @@ if (r != ONIG_NORMAL):
     oniguruma.onig_error_code_to_str(s, r, byref(einfo))
     print s
     sys.exit()
+    
+region = oniguruma.onig_region_new()
 
     
   

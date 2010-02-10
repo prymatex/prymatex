@@ -30,8 +30,8 @@ class PMXApplication(QApplication):
         self.init_application_params()
         
         self.init_resources()
-        splash = QSplashScreen(self.res_mngr.getPixmap('Prymatex_Splash.png'))
-        splash.show()
+        self.splash = QSplashScreen(self.res_mngr.getPixmap('Prymatex_Splash.png'))
+        self.splash.show()
         
         self.setWindowIcon(self.res_mngr.getIcon('Prymatex_Logo.png'))
         
@@ -47,7 +47,7 @@ class PMXApplication(QApplication):
         
         from prymatex.gui.mainwindow import PMXMainWindow
         self.main_window = PMXMainWindow()
-        splash.finish(self.main_window)
+        self.splash.finish(self.main_window)
         self.main_window.show()
         
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
@@ -129,6 +129,7 @@ class PMXApplication(QApplication):
         '''
         Load textmate Bundles and Themes
         '''
+        from prymatex.lib.i18n import ugettext as _
         if not all(map(lambda x: hasattr(self.config, x), ('TEXTMATE_THEMES_PATHS',
                                                            'TEXTMATE_BUNDLES_PATHS' ))):
             QMessageBox.critical(self, _("Fatal Error"), 
@@ -139,9 +140,10 @@ class PMXApplication(QApplication):
                 if not isabs(dirname):
                     dirname = join(getcwd(), dirname)
                 themes += load_textmate_themes(dirname)
+                
             else:
                 print("El directorio de temas %s no existe" % dirname)
-                
+        self.splash.showMessage(_("%d themes loaded", themes))
         
 #        t0 = time()
 #        for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
