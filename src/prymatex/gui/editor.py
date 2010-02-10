@@ -185,6 +185,16 @@ class PMXTextEdit(QPlainTextEdit):
        
     tab_length = property(**tab_length())
     
+    def contextMenuEvent(self, event):
+        '''
+        '''
+        menu = self.createStandardContextMenu()
+        #menu.insertSeparator()
+        menu.addAction("Ideas to add here?")
+        menu.exec_(event.globalPos())
+        
+        
+    
     def path(): #@NoSelf
         def fget(self):
             return self._path
@@ -204,6 +214,9 @@ class PMXTextEdit(QPlainTextEdit):
         return locals()
     path = property(**path())
     
+    #===========================================================================
+    # Show dialogs
+    #===========================================================================
     
     def showGoToLineDialog(self):
         doc = self.document()
@@ -221,15 +234,6 @@ class PMXTextEdit(QPlainTextEdit):
         pass
     
     
-#    @property
-#    def index(self):
-#        tabwidget = self.parent()
-#        for index in range(tabwidget.count()):
-#            widget = tabwidget.widget(index)
-#            print widget, self
-#            if widget == self:
-#                return index
-#        return -1
     @property
     def filename(self):
         if self.path:
@@ -286,14 +290,14 @@ class PMXTextEdit(QPlainTextEdit):
     def afterRemoveEvent(self):
         #print 'afterRemoveEvent', self
         mainwin = self.parent().parent().parent()
-        menu = mainwin.menuNavigation
+        menu = mainwin.menuPanes
         menu.windowActionGroup.removeAction(self.menu_action)
         
     def afterInsertionEvent(self):
         #print 'afterRemoveEvent', self
         self.updateTab()
         mainwin = self.parent().parent().parent()
-        menu = mainwin.menuNavigation
+        menu = mainwin.menuPanes
         self.menu_action = QAction(self)
         self.connect(self.menu_action, SIGNAL("toggled(bool)"), self.showTab)
         self.menu_action.setText(self.title())
@@ -397,7 +401,14 @@ class PMXTextEdit(QPlainTextEdit):
             font.setPointSize(pt_size)
             print pt_size
         self.setFont(font)
-        
+
+
+class EditorTabAction(QAction):
+    def __init__(self, title, parent):
+        QAction.__init__(self, title, parent)
+    
+    
+
 class LineNumberArea(QWidget):
     def __init__(self, editor):
         QWidget.__init__(self, editor)

@@ -165,23 +165,14 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.edit_menu.addAction(self.actionFindReplace)
         self.addAction(self.actionFindReplace)
         
-        #=======================================================================
-        # Settings Menu
-        #=======================================================================
-        
-        
-        self.actionShowLineNumbers = QAction(_("Show Line &Numbers"), self)
-        self.actionShowLineNumbers.setObjectName("actionShowLineNumbers")
-        self.actionShowLineNumbers.setShortcut(text_to_KeySequence("F10"))
-        self.actionShowLineNumbers.setCheckable(True)
-        self.settings_menu.addAction(self.actionShowLineNumbers)
-        self.addAction(self.actionShowLineNumbers)
         
         self.actionPreferences = QAction(_("&Preferences"), self)
         self.actionPreferences.setObjectName("actionPreferences")
         self.actionPreferences.setShortcut(text_to_KeySequence("Ctrl+Shift+P"))
-        self.settings_menu.addAction(self.actionPreferences)
+        self.edit_menu.addAction(self.actionPreferences)
         self.addAction(self.actionPreferences)
+        
+        
         
         #=======================================================================
         # View Menu
@@ -223,6 +214,13 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.actionFocusEditor.setShortcut(text_to_KeySequence("F12"))
         self.view_menu.addAction(self.actionFocusEditor)
         self.addAction(self.actionFocusEditor)
+        
+        self.actionShowLineNumbers = QAction(_("Show Line &Numbers"), self)
+        self.actionShowLineNumbers.setObjectName("actionShowLineNumbers")
+        self.actionShowLineNumbers.setShortcut(text_to_KeySequence("F10"))
+        self.actionShowLineNumbers.setCheckable(True)
+        self.view_menu.addAction(self.actionShowLineNumbers)
+        self.addAction(self.actionShowLineNumbers)
         
         self.view_menu.addSeparator()
         
@@ -306,6 +304,10 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.menuNavigation.addAction(self.actionMoveTabRight)
         self.addAction(self.actionMoveTabRight)
         
+        self.menuNavigation.addSeparator()
+        
+        self.menuPanes = QMenu(_("Panes"), self)
+        self.menuNavigation.addMenu(self.menuPanes)
         
         self.menuNavigation.addSeparator()
         # Gotos
@@ -432,7 +434,80 @@ class PMXMainWindow(QMainWindow, CenterWidget):
             self.addAction(action)
             
         
+        self.menuConvertCase = QMenu(_("&Convert"), self)
+        self.menuText.addMenu(self.menuConvertCase)
         
+        self.actionConvertUpercase = QAction(_("to Uppercase"), self)
+        self.actionConvertUpercase.setObjectName("actionConvertUpercase")
+        #self.actionConvertUpercase.setShortcut("")
+        self.menuConvertCase.addAction(self.actionConvertUpercase)
+        self.addAction(self.actionConvertUpercase)
+        
+        self.actionConvertLowercase = QAction(_("to &Lowercase"), self)
+        self.actionConvertLowercase.setObjectName("actionConvertLowercase")
+        #self.actionConvertLowercase.setShortcut("")
+        self.menuConvertCase.addAction(self.actionConvertLowercase)
+        self.addAction(self.actionConvertLowercase)
+        
+        self.actionConvertTitleCase = QAction(_("to &Titlecase"), self)
+        self.actionConvertTitleCase.setObjectName("actionConvertTitleCase")
+        #self.actionConvertTitleCase.setShortcut("")
+        self.menuConvertCase.addAction(self.actionConvertTitleCase)
+        self.addAction(self.actionConvertTitleCase)
+        
+        self.actionConvertInvertCase = QAction(_("to Invert case"), self)
+        self.actionConvertInvertCase.setObjectName("actionConvertInvertCase")
+        #self.actionConvertInvertCase.setShortcut("")
+        self.menuConvertCase.addAction(self.actionConvertInvertCase)
+        self.addAction(self.actionConvertInvertCase)
+        
+        self.actionConvertTranspose = QAction(_("Transpose"), self)
+        self.actionConvertTranspose.setObjectName("actionConvertTranspose")
+        #self.actionConvertTranspose.setShortcut("")
+        self.menuConvertCase.addAction(self.actionConvertTranspose)
+        self.addAction(self.actionConvertTranspose)
+        
+        self.menuText.addSeparator()
+        
+        self.actionShiftLeft = QAction(_("Shift Left"), self)
+        self.actionShiftLeft.setObjectName("actionShiftLeft")
+        #self.actionShiftLeft.setShortcut("")
+        self.menuText.addAction(self.actionShiftLeft)
+        self.addAction(self.actionShiftLeft)
+        
+        self.actionShiftRight = QAction(_("Shift Right"), self)
+        self.actionShiftRight.setObjectName("actionShiftRight")
+        #self.actionShiftRight.setShortcut("")
+        self.menuText.addAction(self.actionShiftRight)
+        self.addAction(self.actionShiftRight)
+        
+        self.menuText.addSeparator()
+        
+        self.actionTabToSpaces = QAction(_("Tab to spaces"), self)
+        self.actionTabToSpaces.setObjectName("actionTabToSpaces")
+        #self.actionTabToSpaces.setShortcut("")
+        self.menuText.addAction(self.actionTabToSpaces)
+        self.addAction(self.actionTabToSpaces)
+        
+        self.actionSpacesToTabs = QAction(_("Spaces to tabs"), self)
+        self.actionSpacesToTabs.setObjectName("actionSpacesToTabs")
+        #self.actionSpacesToTabs.setShortcut("")
+        self.menuText.addAction(self.actionSpacesToTabs)
+        self.addAction(self.actionSpacesToTabs)
+        
+        self.menuText.addSeparator()
+        
+        self.actionFilterThroughCommand = QAction(_("Filter through command"), self)
+        self.actionFilterThroughCommand.setObjectName("actionFilterThroughCommand")
+        #self.actionFilterThroughCommand.setShortcut("")
+        self.menuText.addAction(self.actionFilterThroughCommand)
+        self.addAction(self.actionFilterThroughCommand)
+        
+        self.actionRunSelection = QAction(_("Run Selection"), self)
+        self.actionRunSelection.setObjectName("actionRunSelection")
+        #self.actionRunSelection.setShortcut("")
+        self.menuText.addAction(self.actionRunSelection)
+        self.addAction(self.actionRunSelection)
     
     def setup_menus(self):
         
@@ -446,18 +521,18 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.view_menu = QMenu(_("&View"), self)
         menubar.addMenu(self.view_menu)
         
-        self.bundle_menu = QMenu(_("&Bundle"), self)
-        menubar.addMenu(self.bundle_menu)
+        self.menuText = QMenu(_("&Text"), self)
+        menubar.addMenu(self.menuText)
         
         self.tools_menu = QMenu(_("&Tools"), self)
         menubar.addMenu(self.tools_menu)
         
-        self.settings_menu = QMenu(_("&Settings"), self)
-        menubar.addMenu(self.settings_menu)
-        
         self.menuNavigation = QMenu(_("&Navigation"), self)
         self.menuNavigation.windowActionGroup = MenuActionGroup(self.menuNavigation)
         menubar.addMenu(self.menuNavigation)
+        
+        self.bundle_menu = QMenu(_("&Bundle"), self)
+        menubar.addMenu(self.bundle_menu)
         
         self.help_menu = QMenu(_("&Help"), self)
         menubar.addMenu(self.help_menu)

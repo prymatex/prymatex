@@ -167,6 +167,10 @@ class PMXTabWidget(QTabWidget):
         if not self.count():
             widget.menu_action.setChecked(True)
         
-    
-#    def tabRemoved (self, index ):
-#        QTabW
+
+class PMWTabsMenu(QMenu):
+    def __init__(self, caption, parent):
+        QMenu.__init__(self, caption, parent)
+        self.actionGroup = QActionGroup()
+        
+        
