@@ -10,3 +10,8 @@ syntax: glob
 *.orig
 *sshot*png
 *src/tests/bundles
+# Deben ser incluidos explicitamente los SVG
+*.svg
+res/*.png
+# Definicones XML de conversion de H a Python
+src/prymatex/*.xml

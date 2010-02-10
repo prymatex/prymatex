@@ -12,6 +12,8 @@ from prymatex.gui.mixins.common import CenterWidget
 from prymatex.gui.editor import PMXTextEdit
 from prymatex.config.configdialog import PMXConfigDialog
 from prymatex.gui.panes.outputpanel import PMXOutputDock
+from prymatex.gui.panes.project import PMXProjectDock
+from prymatex.gui.panes.symbols import PMXSymboldListDock
 
 
 class PMXMainWindow(QMainWindow, CenterWidget):
@@ -233,20 +235,20 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.actionShowOutputPane = QAction(_("Shou Output Panel"), self)
         self.actionShowOutputPane.setObjectName("actionShowOutputPane")
         self.actionShowOutputPane.setCheckable(True)
-        self.actionShowOutputPane.setShortcut(text_to_KeySequence("Alt+O"))
+        self.actionShowOutputPane.setShortcut(text_to_KeySequence("F7"))
         self.view_menu.addAction(self.actionShowOutputPane)
         
         self.actionShowProjectPanel = QAction(_("Show Project Panel"), self)
         self.actionShowProjectPanel.setObjectName("actionShowProjectPanel")
         self.actionShowProjectPanel.setCheckable(True)
-        self.actionShowProjectPanel.setShortcut("Alt+P")
+        self.actionShowProjectPanel.setShortcut(text_to_KeySequence("F9"))
         self.view_menu.addAction(self.actionShowProjectPanel)
         
-        self.showSymbolListPanel = QAction(_("Show Symbol List Panel"), self)
-        self.showSymbolListPanel.setObjectName("showSymbolListPanel")
-        self.showSymbolListPanel.setShortcut("Alt+S")
-        self.showSymbolListPanel.setCheckable(True)
-        self.view_menu.addAction(self.showSymbolListPanel)
+        self.actionShowSymbolListPane = QAction(_("Show Symbol List Panel"), self)
+        self.actionShowSymbolListPane.setObjectName("actionShowSymbolListPane")
+        self.actionShowSymbolListPane.setShortcut(text_to_KeySequence("F10"))
+        self.actionShowSymbolListPane.setCheckable(True)
+        self.view_menu.addAction(self.actionShowSymbolListPane)
          
         #=======================================================================
         # Window Menu
@@ -409,6 +411,15 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.paneOutput = PMXOutputDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
         self.paneOutput.hide()
+        
+        self.paneProject = PMXProjectDock(self)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
+        self.paneProject.hide()
+        
+        self.paneSymbolList = PMXSymboldListDock(self)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
+        self.paneSymbolList.hide()
+        
     
     def setup_toolbars(self):
         #raise NotImplementedError("Do we need them?")
@@ -675,8 +686,22 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         else:
             self.paneOutput.hide()
             self.actionShowOutputPane.setText(_("Show Output Pane"))
+    
     def on_actionShowProjectPanel_toggled(self, check):
-        print "Project", check
+        if check:
+            self.paneProject.show()
+            self.actionShowOutputPane.setText(_("Hide Project Pane"))
+        else:
+            self.paneProject.hide()
+            self.actionShowOutputPane.setText(_("Show Project Pane"))
+    
+    def on_actionShowSymbolListPane_toggled(self, check):
+        if check:
+            self.paneSymbolList.show()
+            self.actionShowSymbolListPane.setText(_("Hide Symbol List Pane"))
+        else:
+            self.paneSymbolList.hide()
+            self.actionShowSymbolListPane.setText(_("Show Symbol List Pane"))
     
 class MenuActionGroup(QActionGroup):
     '''
