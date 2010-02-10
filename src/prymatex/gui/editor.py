@@ -204,7 +204,23 @@ class PMXTextEdit(QPlainTextEdit):
         return locals()
     path = property(**path())
     
-       
+    
+    def showGoToLineDialog(self):
+        doc = self.document()
+        cur_pos = self.textCursor().blockNumber() + 1
+        num, ok = QInputDialog.getInt(self, _("Go to line"), 
+                            _("Please enter the line number:"),
+                            cur_pos, 1,
+                            doc.blockCount() )
+        if ok:
+            block = doc.findBlockByLineNumber(num)
+            self.setTextCursor(QTextCursor(block))
+            
+    
+    def showGoToSymbol(self):
+        pass
+    
+    
 #    @property
 #    def index(self):
 #        tabwidget = self.parent()
@@ -270,14 +286,14 @@ class PMXTextEdit(QPlainTextEdit):
     def afterRemoveEvent(self):
         #print 'afterRemoveEvent', self
         mainwin = self.parent().parent().parent()
-        menu = mainwin.window_menu
+        menu = mainwin.menuNavigation
         menu.windowActionGroup.removeAction(self.menu_action)
         
     def afterInsertionEvent(self):
         #print 'afterRemoveEvent', self
         self.updateTab()
         mainwin = self.parent().parent().parent()
-        menu = mainwin.window_menu
+        menu = mainwin.menuNavigation
         self.menu_action = QAction(self)
         self.connect(self.menu_action, SIGNAL("toggled(bool)"), self.showTab)
         self.menu_action.setText(self.title())

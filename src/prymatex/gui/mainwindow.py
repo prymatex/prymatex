@@ -231,54 +231,116 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.actionShowFSPane.setShortcut(text_to_KeySequence("F8"))
         self.actionShowFSPane.setCheckable(True)
         self.view_menu.addAction(self.actionShowFSPane)
+        self.addAction(self.actionShowFSPane)
         
         self.actionShowOutputPane = QAction(_("Shou Output Panel"), self)
         self.actionShowOutputPane.setObjectName("actionShowOutputPane")
         self.actionShowOutputPane.setCheckable(True)
         self.actionShowOutputPane.setShortcut(text_to_KeySequence("F7"))
         self.view_menu.addAction(self.actionShowOutputPane)
+        self.addAction(self.actionShowOutputPane)
         
         self.actionShowProjectPanel = QAction(_("Show Project Panel"), self)
         self.actionShowProjectPanel.setObjectName("actionShowProjectPanel")
         self.actionShowProjectPanel.setCheckable(True)
         self.actionShowProjectPanel.setShortcut(text_to_KeySequence("F9"))
         self.view_menu.addAction(self.actionShowProjectPanel)
+        self.addAction(self.actionShowProjectPanel)
         
         self.actionShowSymbolListPane = QAction(_("Show Symbol List Panel"), self)
         self.actionShowSymbolListPane.setObjectName("actionShowSymbolListPane")
         self.actionShowSymbolListPane.setShortcut(text_to_KeySequence("F6"))
         self.actionShowSymbolListPane.setCheckable(True)
         self.view_menu.addAction(self.actionShowSymbolListPane)
+        self.addAction(self.actionShowSymbolListPane)
          
         #=======================================================================
-        # Window Menu
+        # Navigation Menu
         #=======================================================================
+        
+        # Bookmarks
+        self.actionToogleBookmark = QAction(_("Toggle &Bookmark"), self)
+        self.actionToogleBookmark.setObjectName("actionToogleBookmark")
+        self.actionToogleBookmark.setShortcut(text_to_KeySequence("Ctrl+B"))
+        self.menuNavigation.addAction(self.actionToogleBookmark)
+        
+        self.actionGoToNextBookmark = QAction(_("&Next Bookmark"), self)
+        self.actionGoToNextBookmark.setObjectName("actionGoToNextBookmark")
+        self.actionGoToNextBookmark.setShortcut(text_to_KeySequence("F2"))
+        self.menuNavigation.addAction(self.actionGoToNextBookmark)
+        
+        self.actionGoToPreviousBookmark = QAction(_("&Previous Bookmark"), self)
+        self.actionGoToPreviousBookmark.setObjectName("actionGoToPreviousBookmark")
+        self.actionGoToPreviousBookmark.setShortcut(text_to_KeySequence("Ctrl+F2"))
+        self.menuNavigation.addAction(self.actionGoToPreviousBookmark)
+        
+        self.actionRemoveAllBookmarks = QAction(_("&Remove All Bookmarks"), self)
+        self.actionRemoveAllBookmarks.setObjectName("actionRemoveAllBookmarks")
+        self.actionRemoveAllBookmarks.setShortcut(text_to_KeySequence("Ctrl+Shift+F2"))
+        self.menuNavigation.addAction(self.actionRemoveAllBookmarks)
+        
+        
+        self.menuNavigation.addSeparator()
         
         self.actionNexTab = QAction(_("&Next Tab"), self)
         self.actionNexTab.setObjectName("actionNexTab")
         self.actionNexTab.setShortcut(text_to_KeySequence("Ctrl+PageDown"))
-        self.window_menu.addAction(self.actionNexTab)
+        self.menuNavigation.addAction(self.actionNexTab)
         self.addAction(self.actionNexTab)
         
         self.actionPreviousTab = QAction(_("&Previous Tab"), self)
         self.actionPreviousTab.setObjectName("actionPreviousTab")
         self.actionPreviousTab.setShortcut(text_to_KeySequence("Ctrl+PageUp"))
-        self.window_menu.addAction(self.actionPreviousTab)
+        self.menuNavigation.addAction(self.actionPreviousTab)
         self.addAction(self.actionPreviousTab)
         
         self.actionMoveTabLeft = QAction(_("Move Tab &Left"), self)
         self.actionMoveTabLeft.setObjectName("actionMoveTabLeft")
         self.actionMoveTabLeft.setShortcut(text_to_KeySequence("Ctrl+Shift+PageUp"))
-        self.window_menu.addAction(self.actionMoveTabLeft)
+        self.menuNavigation.addAction(self.actionMoveTabLeft)
         self.addAction(self.actionMoveTabLeft)
         
         self.actionMoveTabRight = QAction(_("Move Tab &Right"), self)
         self.actionMoveTabRight.setObjectName("actionMoveTabRight")
         self.actionMoveTabRight.setShortcut(text_to_KeySequence("Ctrl+Shift+PageDown"))
-        self.window_menu.addAction(self.actionMoveTabRight)
+        self.menuNavigation.addAction(self.actionMoveTabRight)
         self.addAction(self.actionMoveTabRight)
         
         
+        self.menuNavigation.addSeparator()
+        # Gotos
+        
+        self.actionGoHeaderSource = QAction(_("Go to &Header/Source"), self)
+        self.actionGoHeaderSource.setObjectName("actionGoHeaderSource")
+        self.actionGoHeaderSource.setShortcut(text_to_KeySequence("Ctrl+F3"))
+        self.menuNavigation.addAction(self.actionGoHeaderSource)
+        self.addAction(self.actionGoHeaderSource)
+        
+        self.actionGoToFile = QAction(_("Go to &File"), self)
+        self.actionGoToFile.setObjectName("actionGoToFile")
+        #self.actionGoToFile.setShortcut("")
+        self.menuNavigation.addAction(self.actionGoToFile)
+        self.addAction(self.actionGoToFile)
+        
+        self.actionGoToSymbol = QAction(_("Go to &Symbol"), self)
+        self.actionGoToSymbol.setObjectName("actionGoToSymbol")
+        self.actionGoToSymbol.setShortcut(text_to_KeySequence("Ctrl+Shift+G"))
+        self.menuNavigation.addAction(self.actionGoToSymbol)
+        self.addAction(self.actionGoToSymbol)
+        
+        self.actionGoToMatchingBracket = QAction(_("Go to Matching &Bracket"), self)
+        self.actionGoToMatchingBracket.setObjectName("actionGoToMatchingBracket")
+        self.actionGoToMatchingBracket.setShortcut(text_to_KeySequence("Ctrl+B"))
+        self.menuNavigation.addAction(self.actionGoToMatchingBracket)
+        self.addAction(self.actionGoToMatchingBracket)
+        
+        self.actionGoToLine = QAction(_("Go To Line"), self)
+        self.actionGoToLine.setObjectName("actionGoToLine")
+        self.actionGoToLine.setShortcut(text_to_KeySequence("Ctrl+G"))
+        self.menuNavigation.addAction(self.actionGoToLine)
+        self.addAction(self.actionGoToLine)
+        
+                
         #=======================================================================
         # Run Script
         #=======================================================================
@@ -393,9 +455,9 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.settings_menu = QMenu(_("&Settings"), self)
         menubar.addMenu(self.settings_menu)
         
-        self.window_menu = QMenu(_("&Window"), self)
-        self.window_menu.windowActionGroup = MenuActionGroup(self.window_menu)
-        menubar.addMenu(self.window_menu)
+        self.menuNavigation = QMenu(_("&Navigation"), self)
+        self.menuNavigation.windowActionGroup = MenuActionGroup(self.menuNavigation)
+        menubar.addMenu(self.menuNavigation)
         
         self.help_menu = QMenu(_("&Help"), self)
         menubar.addMenu(self.help_menu)
@@ -667,6 +729,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     def on_actionMoveToTab9_triggered(self):
         self.moveToTab(9)
     
+    
     def on_actionShowFSPane_toggled(self, check):
         if check:
             self.paneFileSystem.show()
@@ -702,6 +765,13 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         else:
             self.paneSymbolList.hide()
             self.actionShowSymbolListPane.setText(_("Show Symbol List Pane"))
+    
+    @pyqtSignature('')
+    def on_actionGoToLine_triggered(self):
+        
+        editor = self.tabWidgetEditors.currentWidget()
+        editor.showGoToLineDialog()
+        
     
 class MenuActionGroup(QActionGroup):
     '''
