@@ -4,18 +4,8 @@
 from PyQt4.Qt import *
 from prymatex.lib.i18n import ugettext as _
 from ui_configdialog import Ui_ConfigDialog
+from widgets import PMXBasicConfTitileWidget
 
-class PMXTitleLabel(QLabel):
-    def __init__(self, text, parent = None):
-        QLabel.__init__(self, text, parent)
-        self.setStyleSheet('''
-            QLabel {
-                font-weight: bolder;
-                font-size: 15px;
-                text-align: center;
-            }
-        ''')
-        
         
 
 class PMXConfigDialog(QDialog, Ui_ConfigDialog):
@@ -30,7 +20,7 @@ class PMXConfigDialog(QDialog, Ui_ConfigDialog):
         self.itemGeneral = QStandardItem(_("General"))
         self.itemGeneral.setEditable(False)
         
-        self.itemGeneral.widgetToShow = PMXTitleLabel(_("General Configuration"))
+        self.itemGeneral.widgetToShow = PMXBasicConfTitileWidget(self)
         
         model.appendRow(self.itemGeneral)
         
@@ -75,5 +65,4 @@ class PMXConfigDialog(QDialog, Ui_ConfigDialog):
             widget = self.null_object
         
         self.scrollArea.setWidget(widget)
-        
         
