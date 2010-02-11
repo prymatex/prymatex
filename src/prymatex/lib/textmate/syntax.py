@@ -95,7 +95,7 @@ class TMSyntaxNode(object):
         for key, value in hash.iteritems():
             if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 'begin']:
                 try:
-                    # Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
+                    # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
                     value = value.replace('?i:', '(?i)')
                     value = value.replace('?x:', '(?x)')
                     value = value.replace('?<=', '(?<=)')

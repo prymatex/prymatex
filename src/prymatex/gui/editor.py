@@ -81,6 +81,12 @@ class PMXTextEdit(QPlainTextEdit):
         #get_fspanel()
         return self.path
     
+    def getCurrentScope(self):
+        cursor = self.textCursor()
+        return cursor.block().userData().get_scope_at(cursor.columnNumber())
+        
+        
+    
     
     def soft_tabs(): #@NoSelf
         doc = """Soft tabs, insert spaces instead of tab""" #@UnusedVariable

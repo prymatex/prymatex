@@ -257,6 +257,13 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.actionShowSymbolListPane.setShortcut(text_to_KeySequence("F6"))
         self.view_menu.addAction(self.actionShowSymbolListPane)
         self.addAction(self.actionShowSymbolListPane)
+        
+        self.view_menu.addSeparator()
+        self.actionShowCurrentScope = QAction(_("Show current scope"), self)
+        self.actionShowCurrentScope.setObjectName("actionShowCurrentScope")
+        self.actionShowCurrentScope.setShortcut(text_to_KeySequence("Alt+S"))
+        self.view_menu.addAction(self.actionShowCurrentScope)
+        #self.addAction(self.actionShowCurrentScope)
          
         #=======================================================================
         # Navigation Menu
@@ -778,6 +785,11 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
         editor = self.tabWidgetEditors.currentWidget()
         editor.showGoToLineDialog()
+        
+    @pyqtSignature('')
+    def on_actionShowCurrentScope_triggered(self):
+        scope = self.tabWidgetEditors.currentWidget().getCurrentScope()
+        self.statusBar().showMessage(scope)
         
 
 class PMXDockAction(QAction):
