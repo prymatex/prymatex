@@ -33,8 +33,9 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
             raise Exception('Error al parsear un token.')
         self.add_token(self.current_position, position, self.scopes[:])
         self.scopes.pop()
+        self.current_position = position
     
     def add_token(self, begin, end, scopes):
         self.tokens = Token(begin, end, scopes)
-        print "%s, %s, " % (begin, end - begin)
+        print "%s, %s, %s" % (begin, end - begin, " ".join(scopes))
         self.setFormat(begin, end - begin, self.style.get_format(scopes[-1]))
