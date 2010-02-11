@@ -1,66 +1,174 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# syntax.py
 
-from PyQt4.Qt import *
-import sys, re
+import sys
 
-C_KEYWORDS = """
-auto    double  int     struct
-break   else    long    switch
-case    enum    register        typedef
-char    extern  return  union
-const   float   short   unsigned
-continue        for     signed  void
-default goto    sizeof  volatile
-do      if      static  while
-""".split()
+from PyQt4.QtCore import QRegExp
+from PyQt4.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
+from PyQt4 import QtGui
 
+def format(color, style=''):
+    """Return a QTextCharFormat with the given attributes.
+    """
+    _color = QColor()
+    _color.setNamedColor(color)
 
+    _format = QTextCharFormat()
+    _format.setForeground(_color)
+    if 'bold' in style:
+        _format.setFontWeight(QFont.Bold)
+    if 'italic' in style:
+        _format.setFontItalic(True)
 
-class Resaltador(QSyntaxHighlighter):
-    '''
-    Resaltador de sintaxis basado en QSyntaxHighlighter de Qt4.
-
-    Con cada edición de texto se invoca a la función highlightBlock
-
-    '''
-    def __init__(self, doc):
-        QSyntaxHighlighter.__init__(self, doc)
+    return _format
 
 
-        self.formatos = {} # Acá vamos a guardar los patrones 
-        # Crear el formato
-        formato = QTextCharFormat()
-        formato.setFontWeight(QFont.Bold)
-        formato.setForeground(Qt.darkMagenta)
-        patron = '|'.join(C_KEYWORDS)
-        patron = re.compile(patron)
-        self.formatos[patron] = formato
+# Syntax styles that can be shared by all languages
+STYLES = {
+    'keyword': format('blue'),
+    'operator': format('red'),
+    'brace': format('darkGray'),
+    'defclass': format('black', 'bold'),
+    'string': format('magenta'),
+    'string2': format('darkMagenta'),
+    'comment': format('darkGreen', 'italic'),
+}
 
-    def highlightBlock(self, texto):
-        # Fuerza bruta
-        for patron, formato in self.formatos.iteritems():
-            
-            for match in patron.finditer(texto):
-                inicio, longitud = match.span()
-                #print inicio, longitud
-                inivio, cant = match.start(), match.end() - match.start()
-                self.setFormat(inicio, cant, formato)
-                
-            
-            
 
-def main(argv = sys.argv):
-    app = QApplication(argv)
-    win = QMainWindow() # Creamos la ventana de edición
-    text_edit = QTextEdit()
-    text_edit.setFontFamily("Consolas")
-    win.setCentralWidget(text_edit)
-    sintaxis = Resaltador(text_edit.document())
+class Python (QSyntaxHighlighter):
+    """Syntax highlighter for the Python language.
+    """
+    # Python keywords
+    keywords = [
+        'and', 'assert', 'break', 'class', 'continue', 'def',
+        'del', 'elif', 'else', 'except', 'exec', 'finally',
+        'for', 'from', 'global', 'if', 'import', 'in',
+        'is', 'lambda', 'not', 'or', 'pass', 'print',
+        'raise', 'return', 'try', 'while', 'yield',
+        'None', 'True', 'False',
+    ]
+
+    # Python operators
+    operators = [
+        '=',
+        # Comparison
+        '==', '!=', '<', '<=', '>', '>=',
+        # Arithmetic
+        '\+', '-', '\*', '/', '//', '\%', '\*\*',
+        # In-place
+        '\+=', '-=', '\*=', '/=', '\%=',
+        # Bitwise
+        '\^', '\|', '\&', '\~', '>>', '<<',
+    ]
+
+    # Python braces
+    braces = [
+        '\{', '\}', '\(', '\)', '\[', '\]',
+    ]
+    def __init__(self, document):
+        QSyntaxHighlighter.__init__(self, document)
+
+        # Multi-line strings (expression, flag, style)
+        # FIXME: The triple-quotes in these two lines will mess up the
+        # syntax highlighting from this point onward
+        self.tri_single = (QRegExp("'''"), 1, STYLES['string2'])
+        self.tri_double = (QRegExp('"""'), 2, STYLES['string2'])
+
+        rules = []
+        rules += [(r'\b%s\b' % w, 0, STYLES['keyword'])
+            for w in Python.keywords]
+        rules += [(r'%s' % o, 0, STYLES['operator'])
+            for o in Python.operators]
+        rules += [(r'%s' % b, 0, STYLES['brace'])
+            for b in Python.braces]
+        rules += [
+            # Double-quoted string, possibly containing escape sequences
+            (r'"[^"\\]*(\\.[^"\\]*)*"', 0, STYLES['string']),
+            # Single-quoted string, possibly containing escape sequences
+            (r"'[^'\\]*(\\.[^'\\]*)*'", 0, STYLES['string']),
+            # 'def' followed by an identifier
+            (r'\bdef\b\s*(\w+)', 1, STYLES['defclass']),
+            # 'class' followed by an identifier
+            (r'\bclass\b\s*(\w+)', 1, STYLES['defclass']),
+            # From '#' until a newline
+            (r'#[^\n]*', 0, STYLES['comment']),
+        ]
+
+        # Build a QRegExp for each pattern
+        self.rules = [(QRegExp(pat), index, fmt)
+            for (pat, index, fmt) in rules]
+
+
+    def highlightBlock(self, text):
+        """Apply syntax highlighting to the given block of text.
+        """
+        # Do other syntax formatting
+        for expression, nth, format in self.rules:
+            index = expression.indexIn(text, 0)
+
+            while index >= 0:
+                # We actually want the index of the nth match
+                index = expression.pos(nth)
+                length = expression.cap(nth).length()
+                self.setFormat(index, length, format)
+                index = expression.indexIn(text, index + length)
+
+        self.setCurrentBlockState(0)
+
+        # Do multi-line strings
+        in_multiline = self.match_multiline(text, *self.tri_single)
+        if not in_multiline:
+            in_multiline = self.match_multiline(text, *self.tri_double)
+
+
+    def match_multiline(self, text, delimiter, in_state, style):
+        """Do highlighting of multi-line strings. ``delimiter`` should be a
+        ``QRegExp`` for triple-single-quotes or triple-double-quotes, and
+        ``in_state`` should be a unique integer to represent the corresponding
+        state changes when inside those strings. Returns True if we're still
+        inside a multi-line string when this function is finished.
+        """
+        # If inside triple-single quotes, start at 0
+        if self.previousBlockState() == in_state:
+            start = 0
+            add = 0
+        # Otherwise, look for the delimiter on this line
+        else:
+            start = delimiter.indexIn(text)
+            # Move past this match
+            add = delimiter.matchedLength()
+
+        # As long as there's a delimiter match on this line...
+        while start >= 0:
+            # Look for the ending delimiter
+            end = delimiter.indexIn(text, start + add)
+            # Ending delimiter on this line?
+            if end >= add:
+                length = end - start + add + delimiter.matchedLength()
+                self.setCurrentBlockState(0)
+            # No; multi-line string
+            else:
+                self.setCurrentBlockState(in_state)
+                length = text.length() - start + add
+            # Apply formatting
+            self.setFormat(start, length, style)
+            # Look for the next match
+            start = delimiter.indexIn(text, start + length)
+
+        # Return True if still inside a multi-line string, False otherwise
+        if self.currentBlockState() == in_state:
+            return True
+        else:
+            return False
+
+if __name__ == '__main__':
+
+    app = QtGui.QApplication([])
+    editor = QtGui.QPlainTextEdit()
+    highlight = Python(editor.document())
+    editor.show()
     
-    win.show()
-    return app.exec_()
+    # Load syntax.py into the editor for demo purposes
+    infile = open('./highlight.py', 'r')
+    editor.setPlainText(infile.read())
     
-
-if __name__ == "__main__":
-    sys.exit(main())
+    app.exec_()
