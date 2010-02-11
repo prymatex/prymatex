@@ -55,7 +55,11 @@ class PMXStatusBar(QStatusBar):
         self.addPermanentWidget(self.langComboBox)
         self.addPermanentWidget(self.indentModeComboBox)
         self.addPermanentWidget(self.indentWidthComboBox)
-        
+    
+    def updateCursorPos(self, col, row):
+        '''  Called by the main window '''
+        self.lineLabel.setText(_("Line: %6d", row))
+        self.columnLabel.setText(_("Column: %6d", col))
         
 #        self.setStyleSheet(
 #                           '''

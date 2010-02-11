@@ -764,45 +764,11 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     def on_actionPreferences_triggered(self):
         self.dialogConfig.exec_()
     
-    def moveToTab(self, i):
-        print "Move to tabs %d" % i
-    
-    @pyqtSignature('')
-    def on_actionMoveToTab1_triggered(self):
-        self.moveToTab(1)
+    def notifyCursorChange(self, editor, row, col):
+        ''' Called by editors '''
+        if editor == self.tabWidgetEditors.currentWidget():
+            self.statusBar().updateCursorPos(col, row)
         
-    @pyqtSignature('')
-    def on_actionMoveToTab2_triggered(self):
-        self.moveToTab(2)
-        
-    @pyqtSignature('')
-    def on_actionMoveToTab3_triggered(self):
-        self.moveToTab(3)
-    
-    @pyqtSignature('')
-    def on_actionMoveToTab4_triggered(self):
-        self.moveToTab(4)
-    
-    @pyqtSignature('')
-    def on_actionMoveToTab5_triggered(self):
-        self.moveToTab(5)
-    
-    @pyqtSignature('')
-    def on_actionMoveToTab6_triggered(self):
-        self.moveToTab(6)
-    
-    @pyqtSignature('')
-    def on_actionMoveToTab7_triggered(self):
-        self.moveToTab(7)
-    
-    @pyqtSignature('')
-    def on_actionMoveToTab8_triggered(self):
-        self.moveToTab(8)
-    
-    @pyqtSignature('')
-    def on_actionMoveToTab9_triggered(self):
-        self.moveToTab(9)
-    
     def on_actionShowLineNumbers_toggled(self, check):
         print "Line", check
     

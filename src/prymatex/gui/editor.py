@@ -69,6 +69,7 @@ class PMXTextEdit(QPlainTextEdit):
         self.connect(self, SIGNAL("updateRequest(const QRect &, int)"), self.updateLineNumberArea)
         self.connect(self, SIGNAL("cursorPositionChanged()"), self.highlightCurrentLine)
         
+        print self.connect(self, SIGNAL("cursorPositionChanged()"), self.notifyCursorChange)
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrentLine()
         self.setTabChangesFocus(False)
@@ -217,6 +218,17 @@ class PMXTextEdit(QPlainTextEdit):
         return locals()
     path = property(**path())
     
+    def notifyCursorChange(self):
+        '''
+        Bubbles cursor changes
+        '''
+        textcursor = self.textCursor()
+        col, row = textcursor.columnNumber(), textcursor.blockNumber()
+        self.mainwindow.notifyCursorChange(self, row, col)
+        
+    @property
+    def mainwindow(self):
+        return self.parent().parent().parent()
     #===========================================================================
     # Show dialogs
     #===========================================================================
