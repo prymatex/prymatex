@@ -21,11 +21,13 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         QMainWindow.__init__(self)
         self.setWindowTitle(_(u"Prymatex Text Editor"))
         
+        
+        self.setup_panes()
         self.setup_menus()
         self.setup_actions()
-        self.setup_panes()
-        self.setup_toolbars()
         self.setup_gui()
+        self.setup_toolbars()
+        
         self.center()
         
         self.dialogConfig = PMXConfigDialog(self)
@@ -224,31 +226,35 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
         self.view_menu.addSeparator()
         
-        self.actionShowFSPane = QAction(_("Show File System Panel"), self)
+        self.actionShowFSPane = PMXDockAction(_("Show File System Panel"),
+                                              _("Hide File System Panel"),
+                                              self.paneFileSystem, self)
         self.actionShowFSPane.setObjectName("actionShowFSPane")
         self.actionShowFSPane.setShortcut(text_to_KeySequence("F8"))
-        self.actionShowFSPane.setCheckable(True)
         self.view_menu.addAction(self.actionShowFSPane)
         self.addAction(self.actionShowFSPane)
         
-        self.actionShowOutputPane = QAction(_("Shou Output Panel"), self)
+        self.actionShowOutputPane = PMXDockAction(_("Show Output Panel"),
+                                                  _("Hide Output Panel"),
+                                                  self.paneOutput, self)
         self.actionShowOutputPane.setObjectName("actionShowOutputPane")
-        self.actionShowOutputPane.setCheckable(True)
         self.actionShowOutputPane.setShortcut(text_to_KeySequence("F7"))
         self.view_menu.addAction(self.actionShowOutputPane)
         self.addAction(self.actionShowOutputPane)
         
-        self.actionShowProjectPanel = QAction(_("Show Project Panel"), self)
+        self.actionShowProjectPanel = PMXDockAction(_("Show Project Panel"),
+                                                    _("Hide Project Panel"), 
+                                                    self.paneProject, self)
         self.actionShowProjectPanel.setObjectName("actionShowProjectPanel")
-        self.actionShowProjectPanel.setCheckable(True)
         self.actionShowProjectPanel.setShortcut(text_to_KeySequence("F9"))
         self.view_menu.addAction(self.actionShowProjectPanel)
         self.addAction(self.actionShowProjectPanel)
         
-        self.actionShowSymbolListPane = QAction(_("Show Symbol List Panel"), self)
+        self.actionShowSymbolListPane = PMXDockAction(_("Show Symbol List Panel"),
+                                                _("Hide Symbol List Panel"), 
+                                                self.paneSymbolList, self)
         self.actionShowSymbolListPane.setObjectName("actionShowSymbolListPane")
         self.actionShowSymbolListPane.setShortcut(text_to_KeySequence("F6"))
-        self.actionShowSymbolListPane.setCheckable(True)
         self.view_menu.addAction(self.actionShowSymbolListPane)
         self.addAction(self.actionShowSymbolListPane)
          
@@ -505,6 +511,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     def setup_menus(self):
         
         menubar = QMenuBar(self)
+        
         self.file_menu = QMenu(_("&File"), self)
         menubar.addMenu(self.file_menu)
         
@@ -521,7 +528,6 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         menubar.addMenu(self.tools_menu)
         
         self.menuNavigation = QMenu(_("&Navigation"), self)
-        self.menuNavigation.windowActionGroup = MenuActionGroup(self.menuNavigation)
         menubar.addMenu(self.menuNavigation)
         
         self.bundle_menu = QMenu(_("&Bundle"), self)
@@ -797,43 +803,10 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     def on_actionMoveToTab9_triggered(self):
         self.moveToTab(9)
     
-    
-    def on_actionShowFSPane_toggled(self, check):
-        if check:
-            self.paneFileSystem.show()
-            self.actionShowFSPane.setText(_("Hide File System Pane"))
-        else:
-            self.paneFileSystem.hide()
-            self.actionShowFSPane.setText(_("Show File System Pane"))
-        
     def on_actionShowLineNumbers_toggled(self, check):
         print "Line", check
-        
-    def on_actionShowOutputPane_toggled(self, check):
-        #self.paneOutput
-        if check:
-            self.paneOutput.show()
-            self.actionShowOutputPane.setText(_("Hide Output Pane"))
-        else:
-            self.paneOutput.hide()
-            self.actionShowOutputPane.setText(_("Show Output Pane"))
     
-    def on_actionShowProjectPanel_toggled(self, check):
-        if check:
-            self.paneProject.show()
-            self.actionShowOutputPane.setText(_("Hide Project Pane"))
-        else:
-            self.paneProject.hide()
-            self.actionShowOutputPane.setText(_("Show Project Pane"))
-    
-    def on_actionShowSymbolListPane_toggled(self, check):
-        if check:
-            self.paneSymbolList.show()
-            self.actionShowSymbolListPane.setText(_("Hide Symbol List Pane"))
-        else:
-            self.paneSymbolList.hide()
-            self.actionShowSymbolListPane.setText(_("Show Symbol List Pane"))
-    
+
     @pyqtSignature('')
     def on_actionGoToLine_triggered(self):
         
@@ -841,31 +814,31 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         editor.showGoToLineDialog()
         
 
-# Deprecate this!!!    
-class MenuActionGroup(QActionGroup):
+class PMXDockAction(QAction):
     '''
-    [Multiple] menu[s] should track
+    Hides or shows a dock wheater the action is activated or deactivated
+    respectively.
     '''
-    def __init__(self, parent):
-        assert isinstance(parent, QMenu)
-        QActionGroup.__init__(self, parent)
-        self.slave_menus = []
+    def __init__(self, text_show, text_hide, dock, parent):
+        '''
+        @param text_show: Text to show when the dock is hidden
+        @param text_hide: Text to show when the dock is shown
+        @param dock: Dock widget
+        @param parent: Parent QObject
+        '''
+        text = dock.isHidden() and text_show or text_hide
+        QAction.__init__(self, text, parent)
+        self.setCheckable(True)
+        self.connect(self, SIGNAL("toggled(bool)"), self.toggleDock)
+        self.dock = dock
+        self.text_show, self.text_hide = text_show, text_hide
         
+    def toggleDock(self, check):
+        if check:
+            self.dock.show()
+            self.setText(self.text_hide)
+        else:
+            self.dock.hide()
+            self.setText(self.text_show)
     
-    def addAction(self, action):
-        QActionGroup.addAction(self, action)
-        self.parent().addAction(action)
-        for menu in self.slave_menus:
-            menu.addAction(action)
-    
-    def removeAction(self, action):
-        QActionGroup.removeAction(self, action)
-        self.parent().removeAction(action)
-        for menu in self.slave_menus:
-            menu.removeAction(action)
         
-    def addSlaveSubMenu(self, menu):
-        self.slave_menus.append(menu)
-        for action in self.actions():
-            menu.addAction(action)
-            
