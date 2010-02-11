@@ -78,12 +78,15 @@ class PMXTextEdit(QPlainTextEdit):
             self.syntax_processor.setDocument(self.document())
         except Exception, e:
             print ("Error al cargar la sintaxis %s" % e)
-             
+        
+        
+        # TODO: Ver     
         self.path = path
         
         self.tab_length = 4
         self.soft_tabs = True
         
+        self.actionMenuTab = EditorTabAction(self.title(), self)
     
     # File operations
     def save(self, filename = None, save_as = False):
@@ -249,7 +252,7 @@ class PMXTextEdit(QPlainTextEdit):
         tabwidget.setTabToolTip(index, text)
         
     def title(self):
-        tabwidget = self.parent().parent()
+        tabwidget = self.parent()
         #print tabwidget, tabwidget.parent()
         index = tabwidget.indexOf(self)
         return tabwidget.tabText(index)
@@ -260,18 +263,22 @@ class PMXTextEdit(QPlainTextEdit):
         #print tabwidget, tabwidget.parent()
         index = tabwidget.indexOf(self)
         tabwidget.setTabText(index, text)
+        self.actionMenuTab.setText(text)
+    
     
     def updateTab(self):
         '''
         Updates tab info
         '''
         if self.path:
-            self.setTitle(os.path.basename(self.path))
+            name = os.path.basename(self.path)
+            self.setTitle(name)
             self.setToolTip(self.path)
+            self.actionMenuTab.setText(name)
         else:
             self.setTitle(_("Unsaved File"))
             self.setToolTip(_("Unsaved File"))
-        
+            
     def requestClose(self):
         if self.document().isModified():
             while True:
@@ -290,19 +297,17 @@ class PMXTextEdit(QPlainTextEdit):
     def afterRemoveEvent(self):
         #print 'afterRemoveEvent', self
         mainwin = self.parent().parent().parent()
-        menu = mainwin.menuPanes
-        menu.windowActionGroup.removeAction(self.menu_action)
+        mainwin.menuPanes.removeAction(self.actionMenuTab)
         
     def afterInsertionEvent(self):
         #print 'afterRemoveEvent', self
         self.updateTab()
         mainwin = self.parent().parent().parent()
-        menu = mainwin.menuPanes
-        self.menu_action = QAction(self)
-        self.connect(self.menu_action, SIGNAL("toggled(bool)"), self.showTab)
-        self.menu_action.setText(self.title())
-        self.menu_action.setCheckable(True)
-        menu.windowActionGroup.addAction(self.menu_action)
+        
+        #self.connect(self.actionMenuTab, SIGNAL("toggled(bool)"), self.showTab)
+        #self.actionMenuTab.setText()
+        #self.actionMenuTab.setCheckable(True)
+        mainwin.menuPanes.addAction(self.actionMenuTab)
     
     def afterModificationEvent(self):
         pass
@@ -406,8 +411,15 @@ class PMXTextEdit(QPlainTextEdit):
 class EditorTabAction(QAction):
     def __init__(self, title, parent):
         QAction.__init__(self, title, parent)
+        self.setCheckable(True)
+        self.connect(self, SIGNAL('toggled(bool)'), self.parent().showTab )
     
-    
+    def focus(self, checked):
+        if checked:
+            editor = self.parent()
+            tabs = self.parent().parent()
+            print editor, tabs
+        
 
 class LineNumberArea(QWidget):
     def __init__(self, editor):

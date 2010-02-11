@@ -57,8 +57,8 @@ class PMXStatusBar(QStatusBar):
         self.addPermanentWidget(self.indentWidthComboBox)
         
         
-        self.setStyleSheet(
-                           '''
-        QLabel { border-left: 1px solid #000;
-                font-weight: bold; }
-        ''')
+#        self.setStyleSheet(
+#                           '''
+#        QLabel { border-left: 1px solid #000;
+#                font-weight: bold; }
+#        ''')

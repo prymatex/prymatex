@@ -4,7 +4,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from pprint import pformat
 from prymatex.lib.i18n import ugettext as _
-from prymatex.gui.tabwidget import PMXTabWidget 
+from prymatex.gui.tabwidget import PMXTabWidget , PMWTabsMenu
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.panes.fspane import FSPane
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
@@ -306,7 +306,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
         self.menuNavigation.addSeparator()
         
-        self.menuPanes = QMenu(_("Panes"), self)
+        self.menuPanes = PMWTabsMenu(_("Panes"), self) 
         self.menuNavigation.addMenu(self.menuPanes)
         
         self.menuNavigation.addSeparator()
@@ -426,13 +426,6 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         # Configuración 
         #=======================================================================
         
-        for i in range(1,9):
-            action_name = "actionMoveToTab%d" % i
-            action = QAction(_("Move to tab #%d", i), self )
-            action.setShortcut(text_to_KeySequence("Alt+%d" % i))
-            setattr(self, action_name, action)
-            self.addAction(action)
-            
         
         self.menuConvertCase = QMenu(_("&Convert"), self)
         self.menuText.addMenu(self.menuConvertCase)
@@ -847,7 +840,8 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         editor = self.tabWidgetEditors.currentWidget()
         editor.showGoToLineDialog()
         
-    
+
+# Deprecate this!!!    
 class MenuActionGroup(QActionGroup):
     '''
     [Multiple] menu[s] should track

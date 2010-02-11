@@ -8,7 +8,7 @@ from prymatex.gui.editor import PMXTextEdit
 
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import *
-
+import itertools
 
 class PMXTabWidget(QTabWidget):
     EDIT_TAB_WIDGET = PMXTextEdit
@@ -33,13 +33,16 @@ class PMXTabWidget(QTabWidget):
 #        self.setCornerWidget(createButton(self, "Tab List", "Ctrl+Space"), 
 #                             Qt.TopRightCorner)
         self.buttonTabList = QPushButton(self)
-        self.buttonTabList.setToolTip("Tab list")
+        self.buttonTabList.setToolTip(_("Tab list"))
+        self.buttonTabList.setShortcut(text_to_KeySequence("Ctrl+Tab"))
         self.buttonTabList.setIcon(qApp.instance().res_mngr.getIcon('application_view_list.png'))
         self.buttonTabList.setStyleSheet('''
             QPushButton {
                 padding: 5px;
             }
         ''')
+        # Seteamos
+        self.buttonTabList.setMenu(self.parent().menuPanes)
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
         
         #self.setTab
@@ -135,7 +138,7 @@ class PMXTabWidget(QTabWidget):
 #        if hasattr(widget, 'afterInsertionEvent' ):
 #            widget.afterInsertionEvent()
 #        if not self.count():
-#            widget.menu_action.setChecked(True)
+#            widget.actionMenuTab.setChecked(True)
 #        return retval
             
     def removeTab(self, index):
@@ -148,14 +151,14 @@ class PMXTabWidget(QTabWidget):
             widget.afterRemoveEvent()
         return retval
     
-    #def setCurrentIndex(self, index):
-    #    QTabWidget.setCurrentIndex(self, index)
-    #    self.currentWidget().menu_action.setChecked(True)
+    def tabRemoved(self, index):
+        if not self.count():
+            self.appendEmptyTab()
     
     def indexChanged(self, index):
         if index > 0:
             widget = self.widget(index)
-            widget.menu_action.setChecked(True)
+            widget.actionMenuTab.setChecked(True)
     
     def tabInserted(self, index):
         '''
@@ -165,12 +168,36 @@ class PMXTabWidget(QTabWidget):
         if hasattr(widget, 'afterInsertionEvent' ):
             widget.afterInsertionEvent()
         if not self.count():
-            widget.menu_action.setChecked(True)
+            widget.actionMenuTab.setChecked(True)
         
 
 class PMWTabsMenu(QMenu):
+    '''
+    A menu that keeps only one action active
+    '''
     def __init__(self, caption, parent):
         QMenu.__init__(self, caption, parent)
-        self.actionGroup = QActionGroup()
+        self.actionGroup = QActionGroup(self)
+        self.shortcuts = []
+        for i in range(1, 10):
+            self.shortcuts.append(text_to_KeySequence("Alt+%d" % i))
+            
+        
+    def addAction(self, action):
+        QMenu.addAction(self, action)
+        self.actionGroup.addAction(action)
+        self.updateShortcuts()
+        
+    def removeAction(self, action):
+        QMenu.removeAction(self, action)
+        self.actionGroup.removeAction(action)
+        self.updateShortcuts()
+        
+    def updateShortcuts(self):
+        for action, shortcut in itertools.izip(self.actions(), self.shortcuts):
+            action.setShortcut(shortcut)
+        
+    
+        
         
         
