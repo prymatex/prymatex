@@ -145,14 +145,15 @@ class PMXApplication(QApplication):
                 print("El directorio de temas %s no existe" % dirname)
         self.splash.showMessage(_("%d themes loaded", themes))
         
-#        t0 = time()
-#        for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
-#            if isdir(dirname):
-#                if not isabs(dirname):
-#                    dirname = join(getcwd(), dirname) 
-#                bundles += load_textmate_bundles(dirname)
-#            else:
-#                print("El directorio de temas %s no existe" % dirname)
+        t0 = time()
+        bundles = 0
+        for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
+            if isdir(dirname):
+                if not isabs(dirname):
+                    dirname = join(getcwd(), dirname) 
+                bundles += load_textmate_bundles(dirname)
+            else:
+                print("El directorio de temas %s no existe" % dirname)
 #        print ("%d bundles cargados desde %s en %f segundos" % (bundles, dirname, time() -t0))
 #        from glob import glob
 #        from prymatex.lib.textmate.bundle import load_textmate_bundle

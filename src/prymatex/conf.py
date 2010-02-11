@@ -8,9 +8,6 @@ PRIMATEX_BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 PRYMATEX_SETTINGS_FILE = os.path.join(PRIMATEX_BASE_PATH , "settings.plist")
 
 class Settings(object):
-    TEXTMATE_BUNDLES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'Bundles')
-    TEXTMATE_THEMES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'Themes')
-    
     def __init__(self, config_file = None, **defaults):
         self.config_file = config_file or PRYMATEX_SETTINGS_FILE 
         
@@ -20,8 +17,8 @@ class Settings(object):
         else:
             self.loaded = False
             config = dict(
-                          TEXTMATE_THEMES_PATHS = ["../tests/bundles/Themes", ],
-                          TEXTMATE_BUNDLES_PATHS = ["../tests/bundles/Bundles", ],
+                          TEXTMATE_THEMES_PATHS = [os.path.join(PRIMATEX_BASE_PATH, 'resources', 'Themes')],
+                          TEXTMATE_BUNDLES_PATHS = [os.path.join(PRIMATEX_BASE_PATH, 'resources', 'Bundles')],
             )
             config.update(defaults)
                       
