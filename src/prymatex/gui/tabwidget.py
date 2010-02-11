@@ -154,9 +154,13 @@ class PMXTabWidget(QTabWidget):
     def tabRemoved(self, index):
         if not self.count():
             self.appendEmptyTab()
-    
+        # 
+        widget = self.currentWidget()
+        if not widget.actionMenuTab.isChecked():
+            widget.actionMenuTab.setChecked(True)
+            
     def indexChanged(self, index):
-        if index > 0:
+        if index >= 0:
             widget = self.widget(index)
             widget.actionMenuTab.setChecked(True)
     
