@@ -9,7 +9,8 @@ from PyQt4.Qt import QTextCharFormat, QColor, QFont
 from xml.parsers.expat import ExpatError
 
 TM_THEMES = {}
-
+#TODO: No me gusta como esta este temes muy pegado al parser y como se arman los estilos, 
+#quiza dejar esto como un themes de textmate y crear un objeto que los interprete y cree nuestro sistema de estilos
 class TMTheme(object):
     def __init__(self, hash):
         self.uuid = self.name = hash.get('uuid')
@@ -31,12 +32,12 @@ class TMTheme(object):
             if 'scope' not in setting:
                 continue
             format = QTextCharFormat()
-            if 'fontStyle' in setting:
+            if 'fontStyle' in setting['settings']:
                 format.setFontWeight(QFont.Light)
-            if 'foreground' in setting:
-                format.setForeground(QColor(setting['foreground']))
-            if 'background' in setting:
-                format.setBackground(QColor(setting['background']))
+            if 'foreground' in setting['settings']:
+                format.setForeground(QColor(setting['settings']['foreground']))
+            if 'background' in setting['settings']:
+                format.setBackground(QColor(setting['settings']['background']))
             setting['format'] = format
             self.formats[setting['scope']] = setting
     
@@ -44,9 +45,12 @@ class TMTheme(object):
         format = None
         tags = scope.split('.')
         while format == None and tags:
-            format = self.formats.get(['.'.join(tags)], None)
+            format = self.formats.get('.'.join(tags), None)
             tags.pop()
-        return format or self.default
+        if format:
+            print format['format']
+            return format['format']
+        return self.default
 
 def load_textmate_themes(path):
     search_path = join(abspath(path), '*.tmTheme')

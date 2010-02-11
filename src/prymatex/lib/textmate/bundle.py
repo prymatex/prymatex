@@ -7,7 +7,7 @@ from xml.parsers.expat import ExpatError
 TM_BUNDLES = {}
 
 class TMMenuNode(object):
-    def __init__(self, name, items, excludedItems = [], submenus = {}):
+    def __init__(self, name = '', items = [], excludedItems = [], submenus = {}):
         self.name = name
         self.items = items
         self.excludedItems = excludedItems
