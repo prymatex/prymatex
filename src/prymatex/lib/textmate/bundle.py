@@ -69,7 +69,7 @@ def load_textmate_bundle(bundle_path):
         try:
             data = plistlib.readPlist(sf)
             uuid = data.pop('uuid')
-            s = syntax.TMSyntaxNode(data, None, bundle.name)
+            s = syntax.TMSyntaxNode(data, None, 'textmate')
             bundle.menu[uuid] = s
         except ExpatError:
             pass

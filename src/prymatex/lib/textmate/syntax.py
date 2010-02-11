@@ -69,10 +69,11 @@ class TMSyntaxProxy(object):
     
     def __proxy(self):
         if re.compile('^#').match(self.proxy):
-            return self.syntax.repository[self.proxy[1:]]
-        elif '$self':
+            if hasattr(self.syntax, 'repository') and self.syntax.repository.has_key(self.proxy[1:]):  
+                return self.syntax.repository[self.proxy[1:]]
+        elif self.proxy == '$self':
             return self.syntax
-        elif '$base':
+        elif self.proxy == '$base':
             return self.syntax
         else:
             return self.syntax.syntaxes[self.proxy]
@@ -115,6 +116,10 @@ class TMSyntaxNode(object):
             else:
                 pass
                 #print u'Ignoring: %s: %s' % (key, value)
+                
+    @property
+    def syntaxes(self):
+        return TM_SYNTAXES[self.name_space]
     
     def parse(self, string, processor = None ):
         if processor:
