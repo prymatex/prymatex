@@ -121,17 +121,18 @@ class TMSyntaxNode(object):
     def syntaxes(self):
         return TM_SYNTAXES[self.name_space]
     
-    def parse(self, string, processor = None ):
+    def parse(self, string, processor = None, _stack = None):
+        position = 0
         if processor:
-            processor.start_parsing(self.scopeName)
-        stack = [[self, None]]
+            processor.start_parsing(self.scopeName, position)
+        stack = _stack or [[self, None]]
         for line in string.splitlines():
             if processor:
                 processor.new_line(line)
-            self.parse_line(stack, line, processor)
+            position += self.parse_line(stack, line, processor)
         if processor:
-            processor.end_parsing(self.scopeName)
-        return processor
+            processor.end_parsing(self.scopeName, position)
+        return stack
     
     def parse_repository(self, repository):
         self.repository = {}

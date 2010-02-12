@@ -9,7 +9,7 @@ class PMXToken(object):
     def __str__(self):
         return '<token: Position: (%d, %d) Scopes: "%s...">' % (self.begin, self.end, self.scopes)
 
-class PMXUserData(QTextBlockUserData):
+class PMXBlockUserData(QTextBlockUserData):
     def __init__(self, tokens):
         QTextBlockUserData.__init__(self)
         self.tokens = tokens
@@ -18,12 +18,9 @@ class PMXUserData(QTextBlockUserData):
         return ' '.join(map(str, self.tokens))
     
     def get_scope_at(self, pos):
-        tokens = filter(lambda t: t.begin <= pos <= t.end, self.tokens)
-        if not tokens:
-            #TODO: Rtornar la syntax
-            return 'No scope' 
-        elif len(tokens) > 1:
-            raise Exception("Multiples scopes :S")
+        if len(self.tokens) == 1:
+            return self.tokens[0].scopes
+        tokens = filter(lambda t: t.begin < pos <= t.end, self.tokens)
         return tokens[0].scopes
         
 
@@ -34,27 +31,51 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         self.style = style
     
     def highlightBlock(self, texto):
-        stack = [[self.syntax, None]]
-        self.tokens = []
-        self.scopes = []
-        self.current_position = None
-        self.syntax.parse_line(stack, unicode(texto), self)
-        self.setCurrentBlockUserData(PMXUserData(self.tokens))
+        print self.syntax.parse(unicode(texto), self)
+        self.setCurrentBlockUserData(PMXBlockUserData(self.tokens))
 
-    def open_tag(self, name, position):
-        self.scopes.append(name)
-        if self.current_position != None:
+    def start_parsing(self, scope, position):
+        self.current_position = position
+        self.tokens = []
+        self.scopes = [ scope ]
+
+    def end_parsing(self, scope, position):
+        self.add_token(self.current_position, position, self.scopes[:])
+        self.scopes.pop()
+
+    def open_tag(self, scope, position):
+        if self.current_position < position:
             self.add_token(self.current_position, position, self.scopes[:])
+        self.scopes.append(scope)
         self.current_position = position
 
-    def close_tag(self, name, position):
-        if self.current_position == None or name != self.scopes[-1]:
-            raise Exception('Error al parsear un token.')
+    def close_tag(self, scope, position):
         self.add_token(self.current_position, position, self.scopes[:])
         self.scopes.pop()
         self.current_position = position
     
     def add_token(self, begin, end, scopes):
         self.tokens.append(PMXToken(begin, end, " ".join(scopes)))
-        print "%s, %s, %s" % (begin, end - begin, " ".join(scopes))
+        print "%s, %s, %s" % (begin, end, " ".join(scopes))
         self.setFormat(begin, end - begin, self.style.get_format(scopes[-1]))
+
+
+class TMDebugSyntaxProcessor(TMSyntaxProcessor):
+    def __init__(self):
+        self.line_number = 0
+        self.printable_line = ''
+
+    def pprint(self, line, string, position = 0):
+        line = line[:position] + string + line[position:]
+        return line
+
+    def open_tag(self, name, position):
+        print self.pprint( '', '{ %s' % name, position + len(self.line_marks))
+
+    def close_tag(self, name, position):
+        print self.pprint( '', '} %s' % name, position + len(self.line_marks))
+
+    def new_line(self, line):
+        self.line_number += 1
+        self.line_marks = '[%04s] ' % self.line_number
+        print '%s%s' % (self.line_marks, line)
