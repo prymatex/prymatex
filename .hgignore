@@ -16,3 +16,4 @@ res/*.png
 # Definicones XML de conversion de H a Python
 src/prymatex/*.xml
 */LOCK
+*.cache

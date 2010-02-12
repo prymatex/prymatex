@@ -12,13 +12,7 @@ from prymatex.gui.syntax import PMXSyntaxProcessor
 from prymatex.lib.textmate.syntax import TM_SYNTAXES 
 from prymatex.lib.textmate.theme import TM_THEMES
 
-def deco(f):
-    def wrapped(*largs, **kwargs):
-        
-        retval = f(*largs, **kwargs)
-        print "%s() -> %s" % (f.func_name, retval)
-        return retval
-    return wrapped 
+
    
 class PMXTextEdit(QPlainTextEdit):
     _path = ''
