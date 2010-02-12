@@ -5,15 +5,8 @@ from prymatex.lib.deco import printparams, printtime
 import shelve, sys
 
 class cacheable(object):
-    '''
-    ''' 
     falashback = None
     warning_show = False
-    
-    def __init__(self, recall_callback = lambda x: True):
-        
-        self.recall_callback = recall_callback
-        
     def __call__(self, f):
         
         if cacheable.flashback is None and not cacheable.warning_show:
@@ -58,6 +51,13 @@ if __name__ == "__main__":
     @cacheable()
     def suma(*largs):
         time.sleep(0.3)
+        return sum(largs)
+    
+    print "Vamos a llamar una función que espera un tiempo"
+    print suma(1, 2)
+    print suma(1, 2)
+    print suma(1, 2)
+    cacheable.close_cache()
         return sum(largs)
     
     print "Vamos a llamar una función que espera un tiempo"

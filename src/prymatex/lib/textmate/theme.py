@@ -33,7 +33,12 @@ class TMTheme(object):
                 continue
             format = QTextCharFormat()
             if 'fontStyle' in setting['settings']:
-                format.setFontWeight(QFont.Light)
+                if setting['settings']['fontStyle'] == 'bold':
+                    format.setFontWeight(QFont.Bold)
+                elif setting['settings']['fontStyle'] == 'underline':
+                    format.setFontUnderline(True)
+                elif setting['settings']['fontStyle'] == 'italic':
+                    format.setFontItalic(True)
             if 'foreground' in setting['settings']:
                 format.setForeground(QColor(setting['settings']['foreground']))
             if 'background' in setting['settings']:
@@ -48,7 +53,6 @@ class TMTheme(object):
             format = self.formats.get('.'.join(tags), None)
             tags.pop()
         if format:
-            print format['format']
             return format['format']
         return self.default
 

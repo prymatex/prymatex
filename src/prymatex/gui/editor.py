@@ -33,7 +33,7 @@ class PMXTextEdit(QPlainTextEdit):
         self.setTabChangesFocus(False)
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
         try:
-            self.syntax_processor = PMXSyntaxProcessor(self.document(), TM_SYNTAXES['textmate']['source.python.django'], TM_THEMES['Twilight'])
+            self.syntax_processor = PMXSyntaxProcessor(self.document(), TM_SYNTAXES['textmate']['source.python.django'], TM_THEMES['iPlastic'])
         except Exception, e:
             print ("Error al cargar la sintaxis %s" % e)
         
