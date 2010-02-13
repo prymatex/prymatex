@@ -121,14 +121,21 @@ def load_textmate_bundle(bundle_path):
             #pass
     return bundle
 
-def load_textmate_bundles(path):
+from os.path import basename
+
+def load_textmate_bundles(path, after_load_callback = None):
     '''
     Forma simple de cargar los bundles de manera no diferida
     @return: Canidad de bundles cargados
     '''
     paths = glob(os.path.join(path, '*.tmbundle'))
     counter = 0
+    total = len(paths)
     for bundle_path in paths:
+        if callable(after_load_callback):
+            after_load_callback(counter = counter, total = total, 
+                                name = basename(bundle_path).split('.')[0])
         load_textmate_bundle(bundle_path)
         counter += 1
+        
     return counter

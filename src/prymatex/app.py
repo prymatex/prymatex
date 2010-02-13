@@ -109,7 +109,7 @@ class PMXApplication(QApplication):
         '''
         return self.__res_mngr
     
-    def load_texmate_bundles(self):
+    def deferred_load_texmate_bundles(self):
         '''
         Crea una lista de los paths abslutos de donde se cargan
         bundles y lanza un hilo para cargarlos.
@@ -134,6 +134,8 @@ class PMXApplication(QApplication):
                                                            'TEXTMATE_BUNDLES_PATHS' ))):
             QMessageBox.critical(self, _("Fatal Error"), 
                                  _("No bundle dirs have been found in config file."))
+        
+        self.splash.showMessage(_("Loading themes..."))
         themes = 0
         for dirname in self.config.TEXTMATE_THEMES_PATHS:
             if isdir(dirname):
@@ -143,33 +145,29 @@ class PMXApplication(QApplication):
                 
             else:
                 print("El directorio de temas %s no existe" % dirname)
+            
         self.splash.showMessage(_("%d themes loaded", themes))
-        
-        t0 = time()
+        QApplication.processEvents()
+    
+    def load_texmate_bundles(self):
+        from prymatex.lib.i18n import ugettext as _
         bundles = 0
+        splash = self.splash
+        def before_load_callback(counter, total, name):
+            progress = (float(counter) / total) * 100
+            splash.showMessage(_("Loading bundle %s\n%4d of %4d (%.d%%)", 
+                                 name, counter, total, progress))
+            QApplication.processEvents()
+            
         for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
+            self.splash.showMessage(_("Loading bundles..."))
             if isdir(dirname):
                 if not isabs(dirname):
                     dirname = join(getcwd(), dirname) 
-                bundles += load_textmate_bundles(dirname)
+                bundles += load_textmate_bundles(dirname, before_load_callback)
             else:
                 print("El directorio de temas %s no existe" % dirname)
-#        print ("%d bundles cargados desde %s en %f segundos" % (bundles, dirname, time() -t0))
-#        from glob import glob
-#        from prymatex.lib.textmate.bundle import load_textmate_bundle
-#        for path in self.config.TEXTMATE_BUNDLES_PATH:
-#            search_path = join(abspath(path), '*.tmbundle')
-#            bundles = glob(search_path)
-#            # Con eso se podrían llenar los menus
-#            for bundle_path in bundles:
-#                
-#                try:
-#                    bundle = load_textmate_bundle(bundle_path)
-#                except Exception, e:
-#                    print e
-#                self.processEvents()
-#                print bundle
-        
+        QApplication.processEvents()
         
     def check_single_instance(self):
         '''

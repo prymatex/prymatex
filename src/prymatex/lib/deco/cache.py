@@ -2,7 +2,9 @@
 #-*- encoding: utf-8 -*-
 from prymatex.lib.deco import printparams, printtime
 
-import shelve, sys
+import shelve
+import sys
+import os
 
 class cacheable(object):
     falashback = None
@@ -40,6 +42,18 @@ class cacheable(object):
     def close_cache(cls):
         cls.flashback.close()
     
+
+
+def file_alteration_check(path):
+    '''
+    Checks weather a file has been changed
+    '''
+    if os.path.isdir(path):
+        pass
+    elif os.path.isfile(path):
+        update_time = os.stat(path)
+        path = path
+
 # {'func': {(1, 2, 4, (3, 4)): 3}} 
 if __name__ == "__main__":
     import time, random
@@ -52,13 +66,7 @@ if __name__ == "__main__":
     def suma(*largs):
         time.sleep(0.3)
         return sum(largs)
-    
-    print "Vamos a llamar una función que espera un tiempo"
-    print suma(1, 2)
-    print suma(1, 2)
-    print suma(1, 2)
-    cacheable.close_cache()
-        return sum(largs)
+
     
     print "Vamos a llamar una función que espera un tiempo"
     print suma(1, 2)

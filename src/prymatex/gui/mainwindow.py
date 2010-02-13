@@ -808,15 +808,20 @@ class PMXDockAction(QAction):
         QAction.__init__(self, text, parent)
         self.setCheckable(True)
         self.connect(self, SIGNAL("toggled(bool)"), self.toggleDock)
+        
+        self.connect(dock, SIGNAL("widgetShown(bool)"), self, SLOT('setChecked(bool)'))
+        
         self.dock = dock
         self.text_show, self.text_hide = text_show, text_hide
         
     def toggleDock(self, check):
         if check:
-            self.dock.show()
+            if self.dock.isHidden():
+                self.dock.show()
             self.setText(self.text_hide)
         else:
-            self.dock.hide()
+            if not self.dock.isHidden():
+                self.dock.hide()
             self.setText(self.text_show)
     
         

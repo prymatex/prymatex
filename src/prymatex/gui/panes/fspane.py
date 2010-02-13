@@ -1,5 +1,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from prymatex.gui.panes import ShowHideSignalsMixin
 import shutil
 import os
 from os.path import abspath, join, dirname, isdir, isfile, basename
@@ -24,10 +25,7 @@ class QActionPushButton(QPushButton):
         self.setToolTip(self._action.toolTip())
     
     
-    
-
-
-class FSPaneWidget(QWidget):
+class FSPaneWidget(QWidget, ShowHideSignalsMixin):
     
     def __init__(self, parent):
         QWidget.__init__(self, parent)
