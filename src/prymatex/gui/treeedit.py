@@ -3,6 +3,11 @@
 '''
 Configuration may use this
 '''
+try:
+    from prymatex.lib.i18n import ugettext as _
+except:
+    _ = lambda s: s
+    
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -30,10 +35,10 @@ class ListNode(QStandardItem):
             pass
         
 class DictNode(QStandardItem):
-    def __init__(self, name, lst):
-        QStandardItem.__init__(self, "List")
-        for item in lst:
-            pass
+    def __init__(self, data, lst):
+        QStandardItem.__init__(self, 1, 2)
+        self.setText("Dict")
+        
 
 
 class PMXPythonItemModel(QStandardItemModel):
@@ -52,9 +57,8 @@ class PMXPythonItemModel(QStandardItemModel):
             self.addList(data, root)
             
     def addHash(self, data, root):
-        
-        for k, v in data.iteritems():
-            root.appendRow(QStandardItem(k))
+        node = DictNode(data, self)
+        self.appendRow(node)
     
     def addList(self, data, root):
         pass

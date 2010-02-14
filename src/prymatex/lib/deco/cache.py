@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+
 from prymatex.lib.deco import printparams, printtime
 
 import shelve
@@ -42,11 +43,15 @@ class cacheable(object):
     def close_cache(cls):
         cls.flashback.close()
     
+    @classmethod
+    def clear_cache(cls):
+        if cls.falashback is not None:
+            cls.falashback.clear()
 
 
 def file_alteration_check(path):
     '''
-    Checks weather a file has been changed
+    Checks wether a file has changed based on its mtime and size
     '''
     if os.path.isdir(path):
         pass

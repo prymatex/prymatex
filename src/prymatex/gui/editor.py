@@ -13,15 +13,61 @@ from prymatex.lib.textmate.syntax import TM_SYNTAXES
 from prymatex.lib.textmate.theme import TM_THEMES
 
 
+
+class PMXTextEdit(QWidget):
+    '''
+    Abstract class for every editor
+    '''
+    def __init__(self, parent):
+        raise NotImplementedError("This is a ABC")
+        #QWidget.__init__(self)
+        
+    def beforeGainFocus(self):
+        pass   
+    
+    def afterGainFocus(self):
+        pass
+    
+    def beforeLooseFocus(self):
+        pass
+    
+    def afterLooseFocus(self):
+        pass
+        
+    
+    
+class PMXCodeEditWidget(PMXTextEdit):
+    '''
+    
+    '''
+    
+    
+    
+    
+
+
    
-class PMXTextEdit(QPlainTextEdit):
+class PMXCodeEdit(QPlainTextEdit):
     _path = ''
     _tab_length = 4
     _soft_tabs = False
     
+    class LineNumberArea(QWidget):
+        def __init__(self, editor):
+            QWidget.__init__(self, editor)
+            self.codeEditor = editor
+            
+        def sizeHint(self):
+            
+            return QSize(self.codeEditor.lineNumberAreaWidth(), 0)
+        
+        def paintEvent(self, event):
+            self.codeEditor.lineNumberAreaPaintEvent(event)
+            
+    # Ctor
     def __init__(self, parent, path = ''):
         QTextEdit.__init__(self, parent)
-        self.lineNumberArea = LineNumberArea(self)
+        self.lineNumberArea = PMXCodeEdit.LineNumberArea(self)
         
         self.connect(self, SIGNAL("blockCountChanged(int)"), self.updateLineNumberAreaWidth)
         self.connect(self, SIGNAL("updateRequest(const QRect &, int)"), self.updateLineNumberArea)
@@ -187,7 +233,12 @@ class PMXTextEdit(QPlainTextEdit):
         '''
         textcursor = self.textCursor()
         col, row = textcursor.columnNumber(), textcursor.blockNumber()
-        self.mainwindow.notifyCursorChange(self, row, col)
+        try:
+            self.mainwindow.notifyCursorChange(self, row, col)
+        except AttributeError:
+            # Cursor changes before widget's been attached to it's panel
+            # will produce mainwindow errors
+            pass
         
     @property
     def mainwindow(self):
@@ -396,15 +447,3 @@ class EditorTabAction(QAction):
             print editor, tabs
         
 
-class LineNumberArea(QWidget):
-    def __init__(self, editor):
-        QWidget.__init__(self, editor)
-        
-        self.codeEditor = editor
-        
-    def sizeHint(self):
-        
-        return QSize(self.codeEditor.lineNumberAreaWidth(), 0)
-    
-    def paintEvent(self, event):
-        self.codeEditor.lineNumberAreaPaintEvent(event)

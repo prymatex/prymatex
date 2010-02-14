@@ -40,8 +40,34 @@ class FSPaneWidget(QWidget, ShowHideSignalsMixin):
         self.actionUp = QAction(_("Up"), self)
         self.actionUp.setObjectName('actionUp')
         self.buttonUp = QActionPushButton(self.actionUp)
-        
         button_layout.addWidget(self.buttonUp)
+        
+        self.buttonFilter = QPushButton(_("F"), self)
+        self.buttonFilter.setObjectName("buttonFilter")
+        button_layout.addWidget(self.buttonFilter)
+        
+        self.buttonSyncTabFile = QPushButton(_("S"), self)
+        self.buttonSyncTabFile.setToolTip(_("Sync opened file"))
+        self.buttonSyncTabFile.setObjectName("self.buttonSyncTabFile")
+        self.buttonSyncTabFile.setCheckable(True)
+        button_layout.addWidget(self.buttonSyncTabFile)
+        
+        
+        self.buttonBackRoot = QPushButton(_("<-"), self)
+        self.buttonBackRoot.setToolTip(_("Back to previous location"))
+        self.buttonBackRoot.setEnabled(False)
+        self.buttonBackRoot.setObjectName("buttonBackRoot")
+        button_layout.addWidget(self.buttonBackRoot)
+        
+        self.buttonNextRoot = QPushButton(_("->"), self)
+        self.buttonNextRoot.setToolTip(_("Next location"))
+        self.buttonNextRoot.setObjectName("buttonNextkRoot")
+        button_layout.addWidget(self.buttonNextRoot)  
+        
+        self.buttonCollapseAll = QPushButton(_("-"), self)
+        self.buttonCollapseAll.setObjectName("buttonCollapseAll")
+        button_layout.addWidget(self.buttonCollapseAll)
+        
         
         #button_layout.addWidget(createButton(self, _("&Up")))
         #button_layout.addWidget(createButton(self, _("&Filter")))
@@ -49,14 +75,24 @@ class FSPaneWidget(QWidget, ShowHideSignalsMixin):
         button_layout.addStretch()
         mainlayout.addLayout(button_layout)
         self.tree = FSTree(self)
+        
+        
+        
         mainlayout.addWidget(self.tree)
         self.setLayout(mainlayout)
+        
     
     @pyqtSignature('')
     def on_actionUp_triggered(self):
         #QMessageBox.information(self, "UP", "Up")
         #self.get
         self.tree.goUp()
+    
+    @pyqtSignature('')
+    def on_buttonCollapseAll_pressed(self):
+        
+        self.tree.collapseAll()
+        self.buttonSyncTabFile.setEnabled(False)
     
     
     

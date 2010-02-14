@@ -1,3 +1,10 @@
+'''
+This module contains the main window status bar definition and widgets.
+Some of the widgets defined here are:
+    * The line counter
+    * Syntax selector
+    * 
+'''
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
@@ -18,6 +25,7 @@ class PWMStatusLabel(QLabel):
             actions.append(action)
         if actions:
             actions[default].trigger()
+        
         
     def mouseReleaseEvent(self, event):
         if self.menu.actions():
@@ -61,8 +69,7 @@ class PMXStatusBar(QStatusBar):
         self.lineLabel.setText(_("Line: %6d", row))
         self.columnLabel.setText(_("Column: %6d", col))
         
-#        self.setStyleSheet(
-#                           '''
-#        QLabel { border-left: 1px solid #000;
-#                font-weight: bold; }
-#        ''')
+        self.setStyleSheet('''
+            QLabel { border-left: 1px solid #000;
+                    font-family: Monospace; }
+        ''')

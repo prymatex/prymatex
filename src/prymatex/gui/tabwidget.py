@@ -4,14 +4,14 @@
 
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction
 from PyQt4.QtCore import QString, SIGNAL, Qt
-from prymatex.gui.editor import PMXTextEdit
+from prymatex.gui.editor import PMXTextEdit, PMXCodeEdit
 
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import *
 import itertools
 
 class PMXTabWidget(QTabWidget):
-    EDIT_TAB_WIDGET = PMXTextEdit
+    EDIT_TAB_WIDGET = PMXCodeEdit
     UNTITLED_LABEL = _("New File %s")
     
     counter = 1
