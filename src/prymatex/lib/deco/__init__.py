@@ -46,6 +46,10 @@ def printtime(f):
     def wrapped(*largs, **kwargs):
         t0 = time()
         retval = f(*largs, **kwargs)
-        print "%s tomó %.7f s" % (f.func_name, time()-t0)
+        if hasattr(f, 'im_class'):
+            func_name = '.'.join([f.im_class.__name__, f.im_func.__name__]) 
+        else:
+            func_name = f.func_name
+        print "%s tomó %.7f s" % (func_name, time()-t0)
         return retval
     return wrapped 

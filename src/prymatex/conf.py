@@ -13,18 +13,18 @@ class Settings(object):
         
         if os.path.exists(self.config_file):
             config = plistlib.readPlist(self.config_file)
-            self.loaded = True
+            
         else:
-            self.loaded = False
             config = dict(
                           TEXTMATE_THEMES_PATHS = [os.path.join(PRIMATEX_BASE_PATH, 'resources', 'Themes')],
                           TEXTMATE_BUNDLES_PATHS = [os.path.join(PRIMATEX_BASE_PATH, 'resources', 'Bundles')],
             )
             config.update(defaults)
-                      
                 
         for key, value in config.iteritems():
             setattr(self, key, value)
+            
+        
         
     def __getattr__(self, name):
         return self.__dict__.get(name, self.__class__.__dict__.get(name)) 

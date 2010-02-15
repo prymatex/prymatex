@@ -5,6 +5,7 @@ from PyQt4.QtCore import SIGNAL
 from os.path import join, exists, isdir, isabs, basename, abspath
 
 from os import getpid, unlink, getcwd
+from prymatex.lib.deco import printtime
 import sys
 from time import time
 
@@ -17,6 +18,7 @@ class PMXApplication(QApplication):
     __config = None
     __res_mngr = None
     
+    @printtime
     def __init__(self, arguments):
         '''
         Inicialización de la aplicación.
@@ -85,14 +87,14 @@ class PMXApplication(QApplication):
             from prymatex.lib.i18n import ugettext as _
             self.__config = settings
             # Se pudo cargar la configuración???
-            if not self.__config.loaded:
-                QMessageBox.information(None, _("Configuration Defaults"), _("""
-                <p>The configuration file <i><b>%s</b></i> was not found on <i>%s</i> application
-                directory.</p><p> A default settings file has been creates and will
-                be saved when you close this app. If you belive this is a mistake
-                please check the file or its contents.</p>
-                
-                """, basename(PRYMATEX_SETTINGS_FILE), self.applicationName()))
+#            if not self.__config.loaded:
+#                QMessageBox.information(None, _("Configuration Defaults"), _("""
+#                <p>The configuration file <i><b>%s</b></i> was not found on <i>%s</i> application
+#                directory.</p><p> A default settings file has been creates and will
+#                be saved when you close this app. If you belive this is a mistake
+#                please check the file or its contents.</p>
+#                
+#                """, basename(PRYMATEX_SETTINGS_FILE), self.applicationName()))
         
     @property
     def config(self):
@@ -149,6 +151,8 @@ class PMXApplication(QApplication):
         self.splash.showMessage(_("%d themes loaded", themes))
         QApplication.processEvents()
     
+    # Decorador para imprimir cuanto tarda
+    @printtime
     def load_texmate_bundles(self):
         from prymatex.lib.i18n import ugettext as _
         bundles = 0

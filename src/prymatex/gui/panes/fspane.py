@@ -44,12 +44,14 @@ class FSPaneWidget(QWidget, ShowHideSignalsMixin):
         
         self.buttonFilter = QPushButton(_("F"), self)
         self.buttonFilter.setObjectName("buttonFilter")
+        self.buttonFilter.setToolTip("Filter Settings")
         button_layout.addWidget(self.buttonFilter)
         
         self.buttonSyncTabFile = QPushButton(_("S"), self)
         self.buttonSyncTabFile.setToolTip(_("Sync opened file"))
         self.buttonSyncTabFile.setObjectName("self.buttonSyncTabFile")
-        self.buttonSyncTabFile.setCheckable(True)
+        # Keeping it simple
+        #self.buttonSyncTabFile.setCheckable(True)
         button_layout.addWidget(self.buttonSyncTabFile)
         
         
@@ -66,17 +68,12 @@ class FSPaneWidget(QWidget, ShowHideSignalsMixin):
         
         self.buttonCollapseAll = QPushButton(_("-"), self)
         self.buttonCollapseAll.setObjectName("buttonCollapseAll")
+        self.buttonCollapseAll.setToolTip(_("Collapse All"))
         button_layout.addWidget(self.buttonCollapseAll)
         
-        
-        #button_layout.addWidget(createButton(self, _("&Up")))
-        #button_layout.addWidget(createButton(self, _("&Filter")))
-        #button_layout.addWidget(createButton(self, _("&Set Root")))
         button_layout.addStretch()
         mainlayout.addLayout(button_layout)
         self.tree = FSTree(self)
-        
-        
         
         mainlayout.addWidget(self.tree)
         self.setLayout(mainlayout)
@@ -90,7 +87,6 @@ class FSPaneWidget(QWidget, ShowHideSignalsMixin):
     
     @pyqtSignature('')
     def on_buttonCollapseAll_pressed(self):
-        
         self.tree.collapseAll()
         self.buttonSyncTabFile.setEnabled(False)
     

@@ -14,6 +14,7 @@ from prymatex.config.configdialog import PMXConfigDialog
 from prymatex.gui.panes.outputpanel import PMXOutputDock
 from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
+from prymatex.gui.panes.bundles import PMXBundleEditorDock
 
 
 class PMXMainWindow(QMainWindow, CenterWidget):
@@ -424,11 +425,16 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         # Bundles menus
         #=======================================================================
         
-        self.actionBundleEditor = QAction(_("&Edit Bundles"), self)
+        self.actionBundleEditor = PMXDockAction(_("Show &Bundle Editor"),
+                                                _("Hide &Bundle Editor"),
+                                                  self.paneBundleEditor, 
+                                                  self)
         self.actionBundleEditor.setObjectName("actionBundleEditor")
         self.actionBundleEditor.setShortcut(text_to_KeySequence("Ctrl+Shift+B"))
         self.bundle_menu.addAction(self.actionBundleEditor)
         self.addAction(self.actionBundleEditor)
+        
+        
         
         self.actionActivateBundle = QAction(_("Select Bundle Item..."), self)
         self.actionActivateBundle.setObjectName("actionActivateBundle")
@@ -562,6 +568,10 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.paneSymbolList = PMXSymboldListDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
         self.paneSymbolList.hide()
+        
+        self.paneBundleEditor = PMXBundleEditorDock(self)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneBundleEditor)
+        self.paneBundleEditor.hide()
         
     
     def setup_toolbars(self):
