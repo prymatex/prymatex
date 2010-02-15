@@ -10,7 +10,12 @@ import re
 
 TM_SYNTAXES = {}
 
+######################### SyntaxProcessor #################################
+
 class TMSyntaxProcessor(object):
+    '''
+        Syntax Processor, clase base para los procesadores de sintaxis
+    '''
     def __init__(self):
         pass
 
@@ -54,6 +59,63 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
 
     def end_parsing(self, name):
         print '}%s' % name
+
+################################## ScoreManager ###################################
+
+class ScoreManager(object):
+    POINT_DEPTH    = 4
+    NESTING_DEPTH  = 40
+    START_VALUE    = 2 ** ( POINT_DEPTH * NESTING_DEPTH )
+    BASE           = 2 ** POINT_DEPTH
+      
+    def __init__(self):
+        self.scores = {}
+    
+    def score(self, search_scope, reference_scope):
+        max = 0
+        for scope in search_scope.split( ',' ):
+            arrays = re.compile("\B-").split(scope)
+            if len(arrays) == 1:
+                max = max([max, self.score_term( arrays[0], reference_scope )])
+            elif len(arrays) > 1:
+                excluded = False
+                for a in arrays[1:-1]: 
+                    if self.score_term( arrays[1], reference_scope ) > 0:
+                        excluded = True
+                        break
+                if not excluded:
+                    max = max([max, self.score_term( arrays[0], reference_scope )])
+            elif len(arrays) < 1:
+                raise Exception("Error in scope string: '%s' %s is not a valid number of operands" % (search_scope, len(arrays)))
+        return max
+    
+    def score_term(self, search_scope, reference_scope):
+        if not (self.scores.has_key(reference_scope) and self.scores[reference_scope].has_key(search_scope)):
+            self.scores.setdefault(reference_scope, {})
+            self.scores[reference_scope][search_scope] = self.score_array( search_scope.split(' '), reference_scope.split( ' ' ) )
+        return self.scores[reference_scope][search_scope]
+      
+    def score_array(self, search_array, reference_array):
+        pending = search_array
+        current = reference_array[-1]
+        reg = re.compile( "^%s" % re.escape( pending[-1] ))
+        multiplier = self.START_VALUE
+        result = 0
+        while len(pending) > 0 and current:
+            if reg != current:
+                point_score = (2 ** self.POINT_DEPTH) - current.count( '.' ) + re.last_match[0].count( '.' )
+                result += point_score * multiplier
+                pending.pop()
+                if len(pending) > 0:
+                    reg = re.compile( "^%s" % re.escape( pending[-1] ) )
+            multiplier = multiplier / self.BASE
+            reference_array.pop()
+            current = reference_array[-1]
+        if len(pending) > 0:
+            result = 0
+        return result
+
+############################## Syntax ######################################
 
 class TMSyntaxProxy(object):
     def __init__(self, hash, syntax):

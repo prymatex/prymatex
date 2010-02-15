@@ -12,7 +12,12 @@ import plistlib
 
 TM_SYNTAXES = {}
 
+######################### SyntaxProcessor #################################
+
 class TMSyntaxProcessor(object):
+    '''
+        Syntax Processor, clase base para los procesadores de sintaxis
+    '''
     def __init__(self):
         pass
 
@@ -57,6 +62,67 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
     def end_parsing(self, name):
         print '}%s' % name
 
+################################## ScoreManager ###################################
+
+class ScoreManager(object):
+    POINT_DEPTH    = 4
+    NESTING_DEPTH  = 40
+    START_VALUE    = 2 ** ( POINT_DEPTH * NESTING_DEPTH )
+    BASE           = 2 ** POINT_DEPTH
+      
+    def __init__(self):
+        self.scores = {}
+    
+    def score(self, search_scope, reference_scope):
+        maxi = 0
+        for scope in search_scope.split( ',' ):
+            arrays = re.compile("\B-").split(scope)
+            if len(arrays) == 1:
+                maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
+            elif len(arrays) > 1:
+                excluded = False
+                for a in arrays[1:-1]: 
+                    if self.score_term( arrays[1], reference_scope ) > 0:
+                        excluded = True
+                        break
+                if not excluded:
+                    maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
+            elif len(arrays) < 1:
+                raise Exception("Error in scope string: '%s' %s is not a valid number of operands" % (search_scope, len(arrays)))
+        return maxi
+    
+    def score_term(self, search_scope, reference_scope):
+        if not (self.scores.has_key(reference_scope) and self.scores[reference_scope].has_key(search_scope)):
+            self.scores.setdefault(reference_scope, {})
+            self.scores[reference_scope][search_scope] = self.score_array( search_scope.split(' '), reference_scope.split( ' ' ) )
+        return self.scores[reference_scope][search_scope]
+      
+    def score_array(self, search_array, reference_array):
+        last_match = None
+        pending = search_array
+        current = reference_array[-1]
+        reg = re.compile( "^%s" % re.escape( pending[-1] ))
+        multiplier = self.START_VALUE
+        result = 0
+        while len(pending) > 0 and current:
+            match = reg.match(current)
+            if last_match and not match:
+                point_score = (2 ** self.POINT_DEPTH) - current.count( '.' ) + last_match.count( '.' )
+                result += point_score * multiplier
+                pending.pop()
+                if len(pending) > 0:
+                    reg = re.compile( "^%s" % re.escape( pending[-1] ) )
+            elif match:
+                last_match = match.group()
+            multiplier = multiplier / self.BASE
+            reference_array.pop()
+            current = reference_array and reference_array[-1] or None
+        if len(pending) > 0:
+            result = 0
+        return result
+
+############################## Syntax ######################################
+
 class TMSyntaxProxy(object):
     def __init__(self, hash, syntax):
         self.syntax = syntax
@@ -71,10 +137,11 @@ class TMSyntaxProxy(object):
     
     def __proxy(self):
         if re.compile('^#').match(self.proxy):
-            return self.syntax.repository[self.proxy[1:]]
-        elif '$self':
+            if hasattr(self.syntax, 'repository') and self.syntax.repository.has_key(self.proxy[1:]):  
+                return self.syntax.repository[self.proxy[1:]]
+        elif self.proxy == '$self':
             return self.syntax
-        elif '$base':
+        elif self.proxy == '$base':
             return self.syntax
         else:
             return self.syntax.syntaxes[self.proxy]
@@ -96,7 +163,7 @@ class TMSyntaxNode(object):
         for key, value in hash.iteritems():
             if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 'begin']:
                 try:
-                    # Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
+                    # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
                     value = value.replace('?i:', '(?i)')
                     value = value.replace('?x:', '(?x)')
                     value = value.replace('?<=', '(?<=)')
@@ -117,18 +184,23 @@ class TMSyntaxNode(object):
             else:
                 pass
                 #print u'Ignoring: %s: %s' % (key, value)
+                
+    @property
+    def syntaxes(self):
+        return TM_SYNTAXES[self.name_space]
     
-    def parse(self, string, processor = None ):
+    def parse(self, string, processor = None, _stack = None):
+        position = 0
         if processor:
-            processor.start_parsing(self.scopeName)
-        stack = [[self, None]]
+            processor.start_parsing(self.scopeName, position)
+        stack = _stack or [[self, None]]
         for line in string.splitlines():
             if processor:
                 processor.new_line(line)
-            self.parse_line(stack, line, processor)
+            position += self.parse_line(stack, line, processor)
         if processor:
-            processor.end_parsing(self.scopeName)
-        return processor
+            processor.end_parsing(self.scopeName, position)
+        return stack
     
     def parse_repository(self, repository):
         self.repository = {}
@@ -203,11 +275,9 @@ class TMSyntaxNode(object):
     def match_end(self, string, match, position):
         regstring = self.end[:]
         def g_match(mobj):
-            ipdb.set_trace()
-            index = int(mobj.group(0))
+            index = mobj.group(0)
             return match.group(index)
         def d_match(mobj):
-            ipdb.set_trace()
             index = mobj.group(0)
             return match.groupdict(index)
         regstring = re.sub(re.compile('\\\\([1-9])'), g_match, regstring)
@@ -282,10 +352,39 @@ def parse_file(filename, name_space = 'default'):
     data = plistlib.readPlist(filename)
     return TMSyntaxNode(data, None, name_space)
 
-if __name__ == '__main__':
-    python = parse_file('./Python.tmLanguage', 'python')
-    json = parse_file('./JSON.tmLanguage', 'json')
-    p = TMDebugSyntaxProcessor()
-    print python.parse(open('./debug_processor.py', 'r').read(), p)
-    print json.parse('{"hola": "mundo", "estas": [1,2,3,"re","loco"]}', p)
+def test_score():
+    sp = ScoreManager()
+    reference_scope = 'text.html.basic source.php.embedded.html string.quoted.double.php'
+   
     ipdb.set_trace()
+    print 0 != sp.score( 'source.php string', reference_scope )
+    ipdb.set_trace()
+    print 0 != sp.score( 'text.html source.php', reference_scope )
+    ipdb.set_trace()
+    print 0 == sp.score( 'string source.php', reference_scope )
+    ipdb.set_trace() 
+    print 0 == sp.score( 'source.php text.html', reference_scope ) 
+    
+    ipdb.set_trace()
+    print 0 == sp.score( 'text.html source.php - string', reference_scope )
+    ipdb.set_trace() 
+    print 0 != sp.score( 'text.html source.php - ruby', reference_scope ) 
+    
+    ipdb.set_trace()
+    print  sp.score( 'string', reference_scope ) > sp.score( 'source.php', reference_scope )
+    ipdb.set_trace() 
+    print sp.score( 'string.quoted', reference_scope ) > sp.score( 'source.php', reference_scope )
+    ipdb.set_trace() 
+    print sp.score( 'text source string', reference_scope ) > sp.score( 'source string', reference_scope )
+
+if __name__ == '__main__':
+    import ipdb
+    test_score()
+
+#    python = parse_file('./Python.tmLanguage', 'python')
+#    json = parse_file('./JSON.tmLanguage', 'json')
+#    p = TMDebugSyntaxProcessor()
+#    print python.parse(open('./debug_processor.py', 'r').read(), p)
+#    print json.parse('{"hola": "mundo", "estas": [1,2,3,"re","loco"]}', p)
+#    ipdb.set_trace()
+    
