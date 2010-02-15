@@ -64,7 +64,7 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
 
 ################################## ScoreManager ###################################
 
-class ScoreManager(object):
+class TMScoreManager(object):
     POINT_DEPTH    = 4
     NESTING_DEPTH  = 40
     START_VALUE    = 2 ** ( POINT_DEPTH * NESTING_DEPTH )
@@ -353,7 +353,7 @@ def parse_file(filename, name_space = 'default'):
     return TMSyntaxNode(data, None, name_space)
 
 def test_score():
-    sp = ScoreManager()
+    sp = TMScoreManager()
     reference_scope = 'text.html.basic source.php.embedded.html string.quoted.double.php'
    
     ipdb.set_trace()
