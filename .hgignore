@@ -17,3 +17,5 @@ res/*.png
 src/prymatex/*.xml
 */LOCK
 *.cache
+tests/*/basic_usage
+src/prymatex/test.*

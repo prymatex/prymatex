@@ -3,7 +3,7 @@ from PyQt4.QtGui import QDockWidget
 
 class PaneDockBase(QDockWidget):
     '''
-    Provides some useful functions
+    Pane base functions
     '''
     def showEvent(self, event):
         QDockWidget.showEvent(self, event)

@@ -13,13 +13,13 @@ class SymbolListWidget(QWidget):
         self.setupGui()
     
     def setupGui(self):
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
         layout.addWidget(QTreeView(self))
         layout_buttons = QHBoxLayout(self)
         layout_buttons.addWidget(QPushButton(_("Refresh")))
         layout_buttons.addStretch(-1)
         layout.addLayout(layout_buttons)
-        self.setLayout(layout)
+        #self.setLayout(layout)
         
 class PMXSymboldListDock(PaneDockBase):
     def __init__(self, parent):

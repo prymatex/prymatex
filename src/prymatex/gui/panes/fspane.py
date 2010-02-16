@@ -6,7 +6,7 @@ import os
 from os.path import abspath, join, dirname, isdir, isfile, basename
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
- 
+from ui_fssettings import Ui_FSSettingsDialog
 #from pr
 
 class QActionPushButton(QPushButton):
@@ -31,6 +31,7 @@ class FSPaneWidget(QWidget):
         QWidget.__init__(self, parent)
         self.setupGui()
         QMetaObject.connectSlotsByName(self)
+        self.dialogConfigFilters = PMXFSPaneConfigDialog(self)
         self.tree.setRootIndex(self.tree.model().index(QDir.currentPath()))
         
     def setupGui(self):
@@ -90,7 +91,8 @@ class FSPaneWidget(QWidget):
         self.tree.collapseAll()
         self.buttonSyncTabFile.setEnabled(False)
     
-    
+    def on_buttonFilter_pressed(self):
+        self.dialogConfigFilters.exec_()
     
 
 class FSTree(QTreeView):
@@ -294,7 +296,14 @@ class FSTree(QTreeView):
                 shutil.rmtree(curpath)
             self.actionRefresh.trigger()
 
-class FSPane(PaneDockBase):
+
+class PMXFSPaneConfigDialog(Ui_FSSettingsDialog, QDialog):
+    def __init__(self, parent):
+        QDialog.__init__(self, parent)
+        self.setupUi(self)
+
+
+class PMXFSPaneDock(PaneDockBase):
     def __init__(self, parent):
         QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("File System Panel"))
