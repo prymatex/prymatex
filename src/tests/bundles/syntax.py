@@ -81,8 +81,8 @@ class TMScoreManager(object):
                 maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
             elif len(arrays) > 1:
                 excluded = False
-                for a in arrays[1:-1]: 
-                    if self.score_term( arrays[1], reference_scope ) > 0:
+                for a in arrays[1:]:
+                    if self.score_term( a, reference_scope ) > 0:
                         excluded = True
                         break
                 if not excluded:
@@ -98,7 +98,6 @@ class TMScoreManager(object):
         return self.scores[reference_scope][search_scope]
       
     def score_array(self, search_array, reference_array):
-        last_match = None
         pending = search_array
         current = reference_array[-1]
         reg = re.compile( "^%s" % re.escape( pending[-1] ))
@@ -106,14 +105,12 @@ class TMScoreManager(object):
         result = 0
         while len(pending) > 0 and current:
             match = reg.match(current)
-            if last_match and not match:
-                point_score = (2 ** self.POINT_DEPTH) - current.count( '.' ) + last_match.count( '.' )
+            if match:
+                point_score = (2 ** self.POINT_DEPTH) - current.count( '.' ) + match.group().count( '.' )
                 result += point_score * multiplier
                 pending.pop()
                 if len(pending) > 0:
                     reg = re.compile( "^%s" % re.escape( pending[-1] ) )
-            elif match:
-                last_match = match.group()
             multiplier = multiplier / self.BASE
             reference_array.pop()
             current = reference_array and reference_array[-1] or None
