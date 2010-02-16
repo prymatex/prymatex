@@ -9,7 +9,7 @@ UI_FILES=$(notdir $(shell ls ${UI_BASE}/*.ui))
 PY_FILES=$(patsubst %.ui,ui_%.py,${UI_FILES})
 
 all: ${PY_FILES}
-	${MAKE} -C panes
+	
 	
 ui_%.py: ui_files/%.ui
 	${PYUIC} ${PYUIC_FLAGS} $^ -o $@

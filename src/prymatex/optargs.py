@@ -21,3 +21,6 @@ parser.add_option('-R', '--reset-config', dest='reste_config',
 
 parser.add_option('-s', '--session', dest='session_name', 
                   help = 'Open session name')
+
+parser.add_option('-D', '--devel', dest='devel', action='store_true', default=False,
+                  help = 'Start directory')
