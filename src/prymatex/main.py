@@ -3,7 +3,8 @@
 # Created: 01/02/2010 by defo
 import os
 import sys
-sys.path.append('..')
+basepath = os.path.dirname(__file__)
+sys.path.append(os.path.join(basepath, '..'))
 
 def main(argv = sys.argv):
     '''

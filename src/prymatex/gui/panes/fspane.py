@@ -1,6 +1,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from prymatex.gui.panes import ShowHideSignalsMixin
+from prymatex.gui.panes import PaneDockBase
 import shutil
 import os
 from os.path import abspath, join, dirname, isdir, isfile, basename
@@ -25,7 +25,7 @@ class QActionPushButton(QPushButton):
         self.setToolTip(self._action.toolTip())
     
     
-class FSPaneWidget(QWidget, ShowHideSignalsMixin):
+class FSPaneWidget(QWidget):
     
     def __init__(self, parent):
         QWidget.__init__(self, parent)
@@ -294,7 +294,7 @@ class FSTree(QTreeView):
                 shutil.rmtree(curpath)
             self.actionRefresh.trigger()
 
-class FSPane(QDockWidget):
+class FSPane(PaneDockBase):
     def __init__(self, parent):
         QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("File System Panel"))

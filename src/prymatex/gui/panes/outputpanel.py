@@ -4,6 +4,7 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
+from prymatex.gui.panes import PaneDockBase
 
 class OutputPanel(QWidget):
     def __init__(self, parent):
@@ -23,7 +24,7 @@ class OutputPanel(QWidget):
         layout.addLayout(layout_buttons)
         self.setLayout(layout)
 
-class PMXOutputDock(QDockWidget):
+class PMXOutputDock(PaneDockBase):
     def __init__(self, parent):
         QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Output"))

@@ -819,11 +819,11 @@ class PMXDockAction(QAction):
         self.setCheckable(True)
         self.connect(self, SIGNAL("toggled(bool)"), self.toggleDock)
         
-        self.connect(dock, SIGNAL("widgetShown(bool)"), self, SLOT('setChecked(bool)'))
+        self.connect(dock, SIGNAL("widgetShown(bool)"), self.checkCrossButtonHide)
         
         self.dock = dock
         self.text_show, self.text_hide = text_show, text_hide
-        
+    
     def toggleDock(self, check):
         if check:
             if self.dock.isHidden():
@@ -834,4 +834,7 @@ class PMXDockAction(QAction):
                 self.dock.hide()
             self.setText(self.text_show)
     
-        
+    def checkCrossButtonHide(self, dockShown):
+        if not dockShown:
+            if self.isChecked():
+                self.setChecked(False)

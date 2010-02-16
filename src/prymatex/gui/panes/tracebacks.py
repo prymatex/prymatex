@@ -5,6 +5,7 @@
 from PyQt4.QtGui import QDockWidget, QWidget, QVBoxLayout, QHBoxLayout
 
 from PyQt4.QtGui import QPushButton, QTextEdit
+from prymatex.gui.panes import PaneDockBase
 
 
 
@@ -24,7 +25,7 @@ class PMXTracebackConsoleWidget(QWidget):
         
         
 
-class PMXTracebackConsoleDock(QDockWidget):
+class PMXTracebackConsoleDock(PaneDockBase):
     def __init__(self, parent):
         QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Traceback Console"))

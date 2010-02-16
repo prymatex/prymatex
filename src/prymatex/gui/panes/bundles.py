@@ -2,6 +2,7 @@
 
 from PyQt4.QtGui import *
 from prymatex.lib.i18n import ugettext as _
+from prymatex.gui.panes import PaneDockBase
 
 class PMXBundleWidget(QWidget):
     def __init__(self, parent):
@@ -37,7 +38,7 @@ class PMXBundleWidget(QWidget):
         self.setLayout(layout)
         
     
-class PMXBundleEditorDock(QDockWidget):
+class PMXBundleEditorDock(PaneDockBase):
     def __init__(self, parent):
         QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Bundles"))

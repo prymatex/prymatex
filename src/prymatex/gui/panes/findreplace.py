@@ -3,6 +3,7 @@
 # Created: 10/02/2010 by defo
 
 from PyQt4.QtGui import *
+from prymatex.gui.panes import PaneDockBase
 
 class PMXFindReplaceDockWidget(QWidget):
     def __init__(self, parent):
@@ -13,7 +14,7 @@ class PMXFindReplaceDockWidget(QWidget):
         
         self.setLayout(layout)
         
-class PMXFindReplaceDock(QDockWidget):
+class PMXFindReplaceDock(PaneDockBase):
     def __init__(self, parent):
         QDockWidget.__init__(self)
         # TODO: Set allowed areas
