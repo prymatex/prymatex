@@ -6,7 +6,7 @@ from pprint import pformat
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget , PMWTabsMenu
 from prymatex.gui.statusbar import PMXStatusBar
-from prymatex.gui.panes.fspane import FSPane
+from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.mixins.common import CenterWidget
 from prymatex.gui.editor import PMXTextEdit
@@ -553,7 +553,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     
     def setup_panes(self):
         
-        self.paneFileSystem = FSPane(self)
+        self.paneFileSystem = PMXFSPaneDock(self)
         self.addDockWidget(Qt.RightDockWidgetArea, self.paneFileSystem)
         self.paneFileSystem.hide()
         
