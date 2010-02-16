@@ -30,10 +30,10 @@ class TMSyntaxProcessor(object):
     def new_line(self, line):
         pass
 
-    def start_parsing(self, name):
+    def start_parsing(self, name, position):
         pass
 
-    def end_parsing(self, name):
+    def end_parsing(self, name, position):
         pass
 
 class TMDebugSyntaxProcessor(TMSyntaxProcessor):
@@ -56,10 +56,10 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
         self.line_marks = '[%04s] ' % self.line_number
         print '%s%s' % (self.line_marks, line)
 
-    def start_parsing(self, name):
+    def start_parsing(self, name, position):
         print '{%s' % name
 
-    def end_parsing(self, name):
+    def end_parsing(self, name, position):
         print '}%s' % name
 
 ################################## ScoreManager ###################################
@@ -376,12 +376,9 @@ def test_score():
 
 if __name__ == '__main__':
     import ipdb
-    test_score()
 
-#    python = parse_file('./Python.tmLanguage', 'python')
-#    json = parse_file('./JSON.tmLanguage', 'json')
-#    p = TMDebugSyntaxProcessor()
-#    print python.parse(open('./debug_processor.py', 'r').read(), p)
-#    print json.parse('{"hola": "mundo", "estas": [1,2,3,"re","loco"]}', p)
-#    ipdb.set_trace()
+    python = parse_file('../../prymatex/resources/Bundles/Python.tmbundle/Syntaxes/Python.tmLanguage', 'python')
+    p = TMDebugSyntaxProcessor()
+    print python.parse(open('./syntax.py', 'r').read(), p)
+    ipdb.set_trace()
     
