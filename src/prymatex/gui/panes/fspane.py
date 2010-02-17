@@ -98,12 +98,12 @@ class FSPaneWidget(QWidget):
 class FSTree(QTreeView):
     def __init__(self, parent):
         QTreeView.__init__(self, parent)
-        model = QDirModel(self)
+        self.dirmodelFiles = QDirModel(self)
         
         self.createMenus()        
 
-        self.setModel(model)
-        for i in range(1,model.columnCount()):
+        self.setModel(self.dirmodelFiles)
+        for i in range(1,self.dirmodelFiles.columnCount()):
             self.setColumnHidden(i, True)
         self.setAnimated(False)
         self.setIndentation(20)

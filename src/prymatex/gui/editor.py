@@ -206,7 +206,23 @@ class PMXCodeEdit(QPlainTextEdit):
         menu.addAction("Ideas to add here?")
         menu.exec_(event.globalPos())
         
-        
+    
+    def replaceCursorText(self, function):
+        '''
+        Used for text alteration such as 
+            * title case
+            * uppercase
+            * lowercase
+        '''
+        assert callable(function)
+        cursor = self.textCursor() 
+        selected_text =  cursor.selectedText()
+        self.textCursor().beginEditBlock()
+        new_text = function(selected_text)
+        cursor.removeSelectedText()
+        cursor.movePosition(QTextCursor.NextWord, QTextCursor.KeepAnchor);
+        cursor.insertText(new_text)
+        self.textCursor().endEditBlock()    
     
     def path(): #@NoSelf
         def fget(self):

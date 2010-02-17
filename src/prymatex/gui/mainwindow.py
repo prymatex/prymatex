@@ -676,9 +676,8 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     
     @property
     def current_editor(self):
-        editor = self.tabWidgetEditors.currentWidget()
-        if isinstance(editor, PMXTextEdit):
-            return editor
+        return self.tabWidgetEditors.currentWidget()
+        
         
     @pyqtSignature('')
     def on_actionSave_triggered(self):
@@ -800,6 +799,41 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     def on_actionShowCurrentScope_triggered(self):
         scope = self.tabWidgetEditors.currentWidget().getCurrentScope()
         self.statusBar().showMessage(scope)
+        
+    @pyqtSignature('')
+    def on_actionConvertInvertCase_triggered(self):
+        def to_title(s):
+            return unicode(s).swapcase()
+        self.current_editor.replaceCursorText(to_title)
+        
+    @pyqtSignature('')
+    def on_actionConvertLowercase_triggered(self):
+        def to_lower(s):
+            return unicode(s).lower()
+        self.current_editor.replaceCursorText(to_lower)
+        
+    @pyqtSignature('')
+    def on_actionConvertTitleCase_triggered(self):
+        def to_title(s):
+            return unicode(s).title()
+        self.current_editor.replaceCursorText(to_title)
+        
+    @pyqtSignature('')
+    def on_actionConvertTranspose_triggered(self):
+        def transpose(s):
+            s = list(unicode(s))
+            l = len(s)
+            for i in range(len(s)/2):
+                s[i], s[l-i-1] = s[l-i-1], s[i],
+            return ''.join(s)
+        
+        self.current_editor.replaceCursorText(transpose)
+        
+    @pyqtSignature('')
+    def on_actionConvertUpercase_triggered(self):
+        def to_upper(s):
+            return unicode(s).upper()
+        self.current_editor.replaceCursorText(to_upper)
         
 
 class PMXDockAction(QAction):
