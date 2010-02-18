@@ -12,12 +12,16 @@ def main(argv = sys.argv):
     '''
     from prymatex import app
     from prymatex.lib import exceptions
-    try:
-        myapp = app.PMXApplication(argv)
-    except exceptions.AlreadyRunningError, e:
-        return e.RETURN_VALUE
-         
-    return myapp.exec_()
+    while True:
+        
+        try:
+            myapp = app.PMXApplication(argv)
+        except exceptions.AlreadyRunningError, e:
+            return e.RETURN_VALUE
+        retval = myapp.exec_()
+        # Segun la salida se crea
+        return retval
+    
 
 if __name__ == '__main__':
     sys.exit(main())
