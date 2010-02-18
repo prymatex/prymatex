@@ -1,6 +1,56 @@
-from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
+from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QColor, QFont
+from prymatex.lib.textmate.syntax import TMSyntaxProcessor, TMScoreManager
+from prymatex.lib.textmate.theme import TM_THEMES
 
-from prymatex.lib.textmate.syntax import TMSyntaxProcessor 
+class PMXSyntaxStyle(object):
+    def __init__(self):
+        self.score = TMScoreManager()
+        self.styles = {}
+        self.default = None
+        self.formats = {}
+    
+    def add_format(self, scope, format):
+        self.styles[scope] = format
+    
+    def get_format(self, scope):
+        if not (self.formats.has_key(scope)):
+            self.formats[scope] = self.__search_format( scope )
+        print scope, self.formats[scope]
+        return self.formats[scope]
+    
+    def __search_format(self, reference_scope):
+        score, format = 0, self.default 
+        for search_scope in self.styles.keys():
+            tmp_score, tmp_format = self.score.score(search_scope, reference_scope), self.styles[search_scope]
+            if tmp_score > score:
+                score, format = tmp_score, tmp_format
+        return format
+    
+    @classmethod
+    def build_format_from_style(cls, style):
+        format = QTextCharFormat()
+        if 'foreground' in style:
+            format.setForeground(QColor(style['foreground']))
+        if 'background' in style:
+            format.setBackground(QColor(style['background']))
+        if 'fontStyle' in style:
+            if style['fontStyle'] == 'bold':
+                format.setFontWeight(QFont.Bold)
+            elif style['fontStyle'] == 'underline':
+                format.setFontUnderline(True)
+            elif style['fontStyle'] == 'italic':
+                format.setFontItalic(True)
+        return format
+    
+    @classmethod
+    def load_from_textmate_theme(cls, theme_name):
+        assert theme_name in TM_THEMES, 'No textmate theme for %s' % theme_name
+        theme = TM_THEMES[theme_name] 
+        ss = PMXSyntaxStyle()
+        ss.default = cls.build_format_from_style(theme.default)
+        for scope, style in theme.items():
+            ss.add_format(scope, cls.build_format_from_style(style))
+        return ss
 
 class PMXBlockToken(object):
     def __init__(self, begin, end, scopes):
@@ -25,7 +75,6 @@ class PMXBlockUserData(QTextBlockUserData):
         tokens = filter(lambda t: t.begin < pos <= t.end, self.tokens)
         return tokens[0].scopes
         
-
 class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
     NO_STATE_SET = -1
     SINGLE_LINE = 0
@@ -56,6 +105,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         # TODO: Validar
         print self.current_position, position
         self.tokens.append(PMXBlockToken(self.current_position, position, " ".join(self.scopes)))
+        self.setFormat(self.current_position, position - self.current_position, self.style.get_format(" ".join(self.scopes)))
         self.current_position = position
         self.scopes.append(scope)
 
@@ -63,12 +113,14 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         # TODO: Validar
         print self.current_position, position
         self.tokens.append(PMXBlockToken(self.current_position, position, " ".join(self.scopes)))
+        self.setFormat(self.current_position, position - self.current_position, self.style.get_format(" ".join(self.scopes)))
         self.current_position = position
         self.scopes.pop()
 
     def end_parsing(self, scope, position, stack):
         # TODO: Validar
         self.tokens.append(PMXBlockToken(self.current_position, position, " ".join(self.scopes)))
+        self.setFormat(self.current_position, position - self.current_position, self.style.get_format(" ".join(self.scopes)))
         print stack
         if len(stack) > 1:
             user_data = PMXBlockUserData(self.tokens, self.scopes[:], stack[:])
@@ -78,23 +130,3 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
             self.setCurrentBlockState(self.SINGLE_LINE)
             self.scopes.pop()
         self.setCurrentBlockUserData(user_data)
-
-class TMDebugSyntaxProcessor(TMSyntaxProcessor):
-    def __init__(self):
-        self.line_number = 0
-        self.printable_line = ''
-
-    def pprint(self, line, string, position = 0):
-        line = line[:position] + string + line[position:]
-        return line
-
-    def open_tag(self, name, position):
-        print self.pprint( '', '{ %s' % name, position + len(self.line_marks))
-
-    def close_tag(self, name, position):
-        print self.pprint( '', '} %s' % name, position + len(self.line_marks))
-
-    def new_line(self, line):
-        self.line_number += 1
-        self.line_marks = '[%04s] ' % self.line_number
-        print '%s%s' % (self.line_marks, line)
