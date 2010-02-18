@@ -13,49 +13,30 @@ TM_THEMES = {}
 #quiza dejar esto como un themes de textmate y crear un objeto que los interprete y cree nuestro sistema de estilos
 class TMTheme(object):
     def __init__(self, hash):
-        self.uuid = self.name = hash.get('uuid')
-        self.name = self.name = hash.get('name')
+        self.name = hash.get('name')
+        self.author = hash.get('author')
+        self.styles = hash.get('settings')
+        self.default = self.styles.pop(0)
         TM_THEMES[self.name] = self
-        self.author = self.name = hash.get('author')
         
-        settings = hash.get('settings')
-        default = settings.pop(0)
-        
-        self.default = QTextCharFormat()
-        if 'foreground' in default:
-            self.default.setForeground(QColor(default['foreground']))
-        if 'background' in default:
-            self.default.setBackground(QColor(default['background']))
-        
-        self.formats = {}
-        for setting in settings:
-            if 'scope' not in setting:
-                continue
-            format = QTextCharFormat()
-            if 'fontStyle' in setting['settings']:
-                if setting['settings']['fontStyle'] == 'bold':
-                    format.setFontWeight(QFont.Bold)
-                elif setting['settings']['fontStyle'] == 'underline':
-                    format.setFontUnderline(True)
-                elif setting['settings']['fontStyle'] == 'italic':
-                    format.setFontItalic(True)
-            if 'foreground' in setting['settings']:
-                format.setForeground(QColor(setting['settings']['foreground']))
-            if 'background' in setting['settings']:
-                format.setBackground(QColor(setting['settings']['background']))
-            setting['format'] = format
-            self.formats[setting['scope']] = setting
+    def get_style(self, scope):
+        for style in self.styles:
+            if style['scope'] == scope: 
+                return style['settings']
     
-    def get_format(self, scope):
-        format = None
-        tags = scope.split('.')
-        while format == None and tags:
-            format = self.formats.get('.'.join(tags), None)
-            tags.pop()
-        if format:
-            return format['format']
-        return self.default
-
+    def get_default_style(self):
+        return self.default['settings']
+    
+    def get_style_or_default(self, scope):
+        return self.get_style(scope) or self.get_default_style()
+    
+    @property
+    def scopes(self):
+        return map(lambda style: style['scope'], self.styles)
+    
+    def items(self):
+        return map(lambda style: (style['scope'], style['settings']), self.styles)
+        
 def load_textmate_themes(path):
     search_path = join(abspath(path), '*.tmTheme')
     paths = glob(search_path)
@@ -68,3 +49,10 @@ def load_textmate_themes(path):
             pass
         counter += 1
     return counter
+
+def main():
+    from pprint import pprint
+    print load_textmate_themes('../../resources/Themes')
+    pprint(TM_THEMES['Blackboard'].scopes)
+if __name__ == '__main__':
+    main()
