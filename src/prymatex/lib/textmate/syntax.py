@@ -188,13 +188,14 @@ class TMSyntaxNode(object):
         position = 0
         stack = _stack or [[self, None]]
         if processor:
-            processor.start_parsing(self.scopeName, position, stack)
+            processor.start_parsing(self.scopeName, position)
         for line in string.splitlines():
             if processor:
                 processor.new_line(line)
             position += self.parse_line(stack, line, processor)
         if processor:
-            processor.end_parsing(self.scopeName, position, stack)
+            processor.end_parsing(self.scopeName, position)
+        return stack
     
     def parse_repository(self, repository):
         self.repository = {}

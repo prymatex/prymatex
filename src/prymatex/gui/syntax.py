@@ -2,7 +2,7 @@ from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QC
 from prymatex.lib.textmate.syntax import TMSyntaxProcessor, TMScoreManager
 from prymatex.lib.textmate.theme import TM_THEMES
 
-class PMXSyntaxStyle(object):
+class PMXSyntaxFormater(object):
     def __init__(self):
         self.score = TMScoreManager()
         self.styles = {}
@@ -46,7 +46,7 @@ class PMXSyntaxStyle(object):
     def load_from_textmate_theme(cls, theme_name):
         assert theme_name in TM_THEMES, 'No textmate theme for %s' % theme_name
         theme = TM_THEMES[theme_name] 
-        ss = PMXSyntaxStyle()
+        ss = PMXSyntaxFormater()
         ss.default = cls.build_format_from_style(theme.default)
         for scope, style in theme.items():
             ss.add_format(scope, cls.build_format_from_style(style))
@@ -60,11 +60,9 @@ class PMXBlockToken(object):
         return '<token: Position: (%d, %d) Scopes: "%s...">' % (self.begin, self.end, self.scopes)
 
 class PMXBlockUserData(QTextBlockUserData):
-    def __init__(self, tokens, scopes = [], stack = None):
+    def __init__(self, tokens):
         QTextBlockUserData.__init__(self)
         self.tokens = tokens
-        self.scopes = scopes
-        self.stack = stack
     
     def __str__(self):
         return ' '.join(map(str, self.tokens))
@@ -76,57 +74,65 @@ class PMXBlockUserData(QTextBlockUserData):
         return tokens[0].scopes
         
 class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
-    NO_STATE_SET = -1
     SINGLE_LINE = 0
     MULTI_LINE = 1
-    def __init__(self, doc, syntax, style):
+    
+    def __init__(self, doc, syntax, formater):
         QSyntaxHighlighter.__init__(self, doc)
         self.syntax = syntax
-        self.style = style
+        self.formater = formater
+        self.discard_lines = 0
     
-    def highlightBlock(self, texto):
+    def collect_previous_text(self):
+        text = ""
+        block = self.currentBlock().previous()
+        while block.userState() == self.MULTI_LINE:
+            text = "\n%s" % unicode(block.text()) + text
+            self.discard_lines += 1
+            block = block.previous()
+        return text
+    
+    def highlightBlock(self, text):
         self.tokens = []
-        if self.previousBlockState() == self.NO_STATE_SET or self.previousBlockState() == self.SINGLE_LINE:
+        text = unicode(text)
+        if self.previousBlockState() == self.MULTI_LINE:
+            previous = self.collect_previous_text()
+            print self.discard_lines, previous
+            stack = self.syntax.parse(previous, self)
+            stack = self.syntax.parse(text, self, stack)
+        else:
             self.scopes = []
-            self.syntax.parse(unicode(texto), self)
-        elif self.previousBlockState() == self.MULTI_LINE:
-            user_data = self.currentBlock().previous().userData()
-            self.scopes = user_data.scopes
-            self.syntax.parse(unicode(texto), self, user_data.stack)
+            stack = self.syntax.parse(text, self)
+        if len(stack) > 1:
+            print "multiple"
+            self.setCurrentBlockState(self.MULTI_LINE)
+        else: 
+            self.setCurrentBlockState(self.SINGLE_LINE)
+    
+    def add_token(self, begin, end, scope):
+        if self.discard_lines == 0:
+            self.tokens.append(PMXBlockToken(begin, end, scope))
+            self.setFormat(begin, end - begin, self.formater.get_format(scope))
+    
+    def new_line(self, line):
+        self.current_position = 0
+        if self.discard_lines:
+            self.discard_lines -= 1
 
     # Arranca el parser
-    def start_parsing(self, scope, position, stack):
-        self.current_position = position
-        if len(stack) == 1:
-            self.scopes.append(scope)
+    def start_parsing(self, scope, position):
+        self.scopes.append(scope)
 
     # En cada oportunidad de se abre un tag
     def open_tag(self, scope, position):
-        # TODO: Validar
-        print self.current_position, position
-        self.tokens.append(PMXBlockToken(self.current_position, position, " ".join(self.scopes)))
-        self.setFormat(self.current_position, position - self.current_position, self.style.get_format(" ".join(self.scopes)))
+        self.add_token(self.current_position, position, " ".join(self.scopes))
         self.current_position = position
         self.scopes.append(scope)
 
     def close_tag(self, scope, position):
-        # TODO: Validar
-        print self.current_position, position
-        self.tokens.append(PMXBlockToken(self.current_position, position, " ".join(self.scopes)))
-        self.setFormat(self.current_position, position - self.current_position, self.style.get_format(" ".join(self.scopes)))
+        self.add_token(self.current_position, position, " ".join(self.scopes))
         self.current_position = position
         self.scopes.pop()
 
-    def end_parsing(self, scope, position, stack):
-        # TODO: Validar
-        self.tokens.append(PMXBlockToken(self.current_position, position, " ".join(self.scopes)))
-        self.setFormat(self.current_position, position - self.current_position, self.style.get_format(" ".join(self.scopes)))
-        print stack
-        if len(stack) > 1:
-            user_data = PMXBlockUserData(self.tokens, self.scopes[:], stack[:])
-            self.setCurrentBlockState(self.MULTI_LINE)
-        else:
-            user_data = PMXBlockUserData(self.tokens)
-            self.setCurrentBlockState(self.SINGLE_LINE)
-            self.scopes.pop()
-        self.setCurrentBlockUserData(user_data)
+    def end_parsing(self, scope, position):
+        self.setCurrentBlockUserData(PMXBlockUserData(self.tokens))

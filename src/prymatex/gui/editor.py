@@ -8,7 +8,7 @@ from prymatex.lib.i18n import ugettext as _
 import os, codecs
 from os.path import basename
 
-from prymatex.gui.syntax import PMXSyntaxProcessor, PMXSyntaxStyle
+from prymatex.gui.syntax import PMXSyntaxProcessor, PMXSyntaxFormater
 from prymatex.lib.textmate.syntax import TM_SYNTAXES 
 
 
@@ -71,7 +71,7 @@ class PMXCodeEdit(QPlainTextEdit):
         self.setTabChangesFocus(False)
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
         try:
-            self.syntax_processor = PMXSyntaxProcessor(self.document(), TM_SYNTAXES['textmate']['source.python'], PMXSyntaxStyle.load_from_textmate_theme('Blackboard'))
+            self.syntax_processor = PMXSyntaxProcessor(self.document(), TM_SYNTAXES['textmate']['source.python'], PMXSyntaxFormater.load_from_textmate_theme('iPlastic'))
         except Exception, e:
             print ("Error al cargar la sintaxis %s" % e)
         
