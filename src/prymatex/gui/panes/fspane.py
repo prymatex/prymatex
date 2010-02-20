@@ -36,49 +36,59 @@ class FSPaneWidget(QWidget):
         
     def setupGui(self):
         mainlayout = QVBoxLayout()
-        button_layout = QHBoxLayout()
+        layoutButtons = QHBoxLayout()
+        layoutButtons.setObjectName('layoutButtons')
         # Oneliner Watchout!! Sorry
         self.actionUp = QAction(_("Up"), self)
         self.actionUp.setObjectName('actionUp')
         self.buttonUp = QActionPushButton(self.actionUp)
-        button_layout.addWidget(self.buttonUp)
+        layoutButtons.addWidget(self.buttonUp)
         
         self.buttonFilter = QPushButton(_("F"), self)
         self.buttonFilter.setObjectName("buttonFilter")
         self.buttonFilter.setToolTip("Filter Settings")
-        button_layout.addWidget(self.buttonFilter)
+        layoutButtons.addWidget(self.buttonFilter)
         
         self.buttonSyncTabFile = QPushButton(_("S"), self)
         self.buttonSyncTabFile.setToolTip(_("Sync opened file"))
         self.buttonSyncTabFile.setObjectName("self.buttonSyncTabFile")
         # Keeping it simple
         #self.buttonSyncTabFile.setCheckable(True)
-        button_layout.addWidget(self.buttonSyncTabFile)
+        layoutButtons.addWidget(self.buttonSyncTabFile)
         
         
         self.buttonBackRoot = QPushButton(_("<-"), self)
         self.buttonBackRoot.setToolTip(_("Back to previous location"))
         self.buttonBackRoot.setEnabled(False)
         self.buttonBackRoot.setObjectName("buttonBackRoot")
-        button_layout.addWidget(self.buttonBackRoot)
+        layoutButtons.addWidget(self.buttonBackRoot)
         
         self.buttonNextRoot = QPushButton(_("->"), self)
         self.buttonNextRoot.setToolTip(_("Next location"))
         self.buttonNextRoot.setObjectName("buttonNextkRoot")
-        button_layout.addWidget(self.buttonNextRoot)  
+        layoutButtons.addWidget(self.buttonNextRoot)  
         
         self.buttonCollapseAll = QPushButton(_("-"), self)
         self.buttonCollapseAll.setObjectName("buttonCollapseAll")
         self.buttonCollapseAll.setToolTip(_("Collapse All"))
-        button_layout.addWidget(self.buttonCollapseAll)
+        layoutButtons.addWidget(self.buttonCollapseAll)
         
-        button_layout.addStretch()
-        mainlayout.addLayout(button_layout)
+        layoutButtons.addStretch()
+        
+        mainlayout.addLayout(layoutButtons)
         self.tree = FSTree(self)
         
         mainlayout.addWidget(self.tree)
         self.setLayout(mainlayout)
         
+        self.setStyleSheet('''
+            QPushButton {
+                padding-left: 10px;
+                padding-right: 10px;
+                padding-top: 2%;
+                padding-bottom: 2%;
+            }
+        ''')
     
     @pyqtSignature('')
     def on_actionUp_triggered(self):
