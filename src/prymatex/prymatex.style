@@ -7,10 +7,6 @@
 #FSPaneWidget #buttonNextkRoot,
 #FSPaneWidget #buttonCollapseAll
 {
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 2%;
-    padding-bottom: 2%;
-    color: red;
+    
 }
 
