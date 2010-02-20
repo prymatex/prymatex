@@ -57,7 +57,7 @@ class FSPaneWidget(QWidget):
         # Keeping it simple
         #self.buttonSyncTabFile.setCheckable(True)
         layoutButtons.addWidget(self.buttonSyncTabFile)
-        
+        self.setMaximumWidth(200)
         
         self.buttonBackRoot = QPushButton(_("<-"), self)
         self.buttonBackRoot.setToolTip(_("Back to previous location"))
