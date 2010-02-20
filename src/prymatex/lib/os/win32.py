@@ -4,6 +4,7 @@
 # http://coding.derkeiler.com/Archive/Python/comp.lang.python/2008-07/msg00947.html
 # http://timgolden.me.uk/python/wmi/index.html
 import wmi
+import os
 instrumentation = wmi.WMI()
 
 def pid_proc_dict():
@@ -18,6 +19,9 @@ def pid_proc_dict():
         pid = getattr(proc, 'ProcessId')
         d[pid] = proc
     return d
+
+def get_homedir():
+    return os.environ.get('USERPROFILE')
 
 if __name__ == "__main__":
     from pprint import pprint

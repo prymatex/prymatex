@@ -6,14 +6,27 @@ from prymatex.lib.deco import printparams, printtime
 import shelve
 import sys
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 class cacheable(object):
     falashback = None
     warning_show = False
+    
+    def __init__(self, alteration_callback = None):
+        '''
+        @param alteration_callback: A callback that should check if the cached value is still valid
+        The alteration_callback should return False if the value is still valid
+        or the new alteration-stamp.
+        modified = alteration_callback(args, current_stamp)
+        
+        '''
+        self.alteration_callback = alteration_callback
+            
     def __call__(self, f):
         
         if cacheable.flashback is None and not cacheable.warning_show:
-            sys.stderr.write("Call init_cache()\n")
+            logging.warning("Call init_cache()\n")
             cacheable.warning_show = True
             return f
         

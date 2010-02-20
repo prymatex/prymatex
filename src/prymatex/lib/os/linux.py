@@ -5,6 +5,7 @@
 import os
 from subprocess import PIPE, Popen
 import re
+import user
 
 # PLATOFRM DEPENDENT CODE
 
@@ -30,7 +31,9 @@ def pid_proc_dict():
         pid = int(proc.pop('pid'))
         d[pid] = proc
     return d
-
+def get_homedir():
+    return user.home
+    
 if __name__ == "__main__":
     from pprint import pprint
     pprint(ps_proc_dict())

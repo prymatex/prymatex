@@ -47,6 +47,6 @@ if __name__ == '__main__':
     # add the handlers to the logger
     logger.addHandler(fh)
     logger.addHandler(ch)
-
+    logger.info("Application startup")
     sys.exit(main())
 

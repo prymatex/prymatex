@@ -12,7 +12,7 @@ parser = OptionParser(usage="%prog [options] [files]",
                         prymatex.PROJECT_HOME,
                       ))
 
-parser.add_option('-d', '--startdir', dest='startdir',
+parser.add_option('-d', '--startdir', dest='startdir', default = '',
                   help = 'Start directory')
 
 

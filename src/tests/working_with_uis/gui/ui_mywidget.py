@@ -35,7 +35,7 @@ class Ui_MyWidget(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(MyWidget)
-        QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL("clicked()"), MyWidget.close)
+        QtCore.QWidget.connect(self.pushButton_2, QtCore.SIGNAL("clicked()"), MyWidget.close)
         QtCore.QMetaObject.connectSlotsByName(MyWidget)
 
     def retranslateUi(self, MyWidget):

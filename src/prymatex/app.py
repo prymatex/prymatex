@@ -2,19 +2,17 @@
 from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen
 from PyQt4.QtCore import SIGNAL
 
-from os.path import join, exists, isdir, isabs, basename, abspath
+from os.path import join, exists, isdir, isabs
 
 from os import getpid, unlink, getcwd
-from os.path import dirname
+from os.path import dirname, abspath
 from prymatex.lib.deco import printtime
-import sys
-from time import time
 
 from prymatex.lib.exceptions import AlreadyRunningError
 from prymatex.lib.textmate import load_textmate_bundles, load_textmate_themes
-
         
-#BASE_PATH = getattr(prymatex, '__path__')[0]
+import prymatex
+
 BASE_PATH = dirname(__file__)
 
 import logging
@@ -33,7 +31,7 @@ class PMXApplication(QApplication):
         QApplication.__init__(self, arguments)
         
         from prymatex.optargs import parser
-        options, args = parser.parse_args(arguments)
+        self.options, args = parser.parse_args(arguments) # Options are readonly
         files_to_open = args[1:]
         
         self.init_application_params()
@@ -65,11 +63,10 @@ class PMXApplication(QApplication):
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
     
     def init_application_params(self):
-        self.setApplicationName("Prymatex Text Editor")
-        self.setApplicationVersion("0.1") # hg stuff?
+        self.setApplicationName(prymatex.PRODUCT_NAME)
+        self.setApplicationVersion(prymatex.VERSION) # hg stuff?
         self.setOrganizationDomain("org")
-        self.setOrganizationName("Xurix")
-        self.projectUrl = 'http://code.google.com/p/prymatex'    
+        self.projectUrl = prymatex.PROJECT_HOME    
     
     @property
     def lock_filename(self):
@@ -82,9 +79,9 @@ class PMXApplication(QApplication):
             pass
     
     def save_config(self):
-        logging.info("Save config")
+        logger.info("Save config")
         self.config.save()
-        logging.info("Config saved")
+        logger.info("Config saved")
     
     def init_resources(self):
         if not self.__res_mngr:
@@ -127,7 +124,7 @@ class PMXApplication(QApplication):
         bundles y lanza un hilo para cargarlos.
         '''
         from prymatex.lib.textmate.loader import PMXBundleLoaderThread
-        print "iniciando hilo de bundles con", self.config.TEXTMATE_BUNDLES_PATHS
+        
         path_list = []
         for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
             if isdir(dirname):
@@ -156,7 +153,7 @@ class PMXApplication(QApplication):
                 themes += load_textmate_themes(dirname)
                 
             else:
-                print("El directorio de temas %s no existe" % dirname)
+                logger.warning("The theme dir does not exist: %s", dirname)
             
         self.splash.showMessage(_("%d themes loaded", themes))
         QApplication.processEvents()
@@ -180,7 +177,8 @@ class PMXApplication(QApplication):
                     dirname = join(getcwd(), dirname) 
                 bundles += load_textmate_bundles(dirname, before_load_callback)
             else:
-                print("El directorio de temas %s no existe" % dirname)
+                logger.warning("The theme dir does not exist")
+                
         QApplication.processEvents()
         
     def check_single_instance(self):
@@ -192,10 +190,12 @@ class PMXApplication(QApplication):
             f = open(self.lock_filename)
             pid = int(f.read())
             f.close()
-            print "Esta?", pid in os.pid_proc_dict()
+            logger.info("Checking for another instance: %s", 
+                        pid in os.pid_proc_dict()
+                        )
             if pid in os.pid_proc_dict():
                 from prymatex.lib.i18n import ugettext as _
-                print "PID Existente"
+                logger.warning("Another app running")
                 QMessageBox.critical(None, _('Application Already Running'),
                                      _('''%s seems to be runnig. Please
                                      close the other instance.''', self.applicationName()),
@@ -206,6 +206,14 @@ class PMXApplication(QApplication):
             f = open(self.lock_filename, 'w')
             f.write('%s' % getpid())
             f.close()
-    
-    
-        
+            
+    def startDirectory(self):
+        '''
+        Returns the start dir
+        '''
+        if self.options.startdir and exists(self.options.startdir):
+            return abspath(self.options.startdir)
+        else:
+            from prymatex.lib.os import get_homedir
+            return get_homedir()
+            

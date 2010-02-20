@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/configdialog.ui'
 #
-# Created: Mon Feb  8 18:56:50 2010
-#      by: PyQt4 UI code generator 4.6
+# Created: Sat Feb 20 14:27:05 2010
+#      by: PyQt4 UI code generator 4.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -13,14 +13,14 @@ class Ui_ConfigDialog(object):
     def setupUi(self, ConfigDialog):
         ConfigDialog.setObjectName("ConfigDialog")
         ConfigDialog.resize(673, 372)
-        ConfigDialog.setStyleSheet("""QLabel#labelTitle {
-    font-size: 17pt;
-    font-weight: bold;
-
-}
-QScrollArea {
-    border:  1px solid #ccc;
-}""")
+        ConfigDialog.setStyleSheet("QLabel#labelTitle {\n"
+"    font-size: 17pt;\n"
+"    font-weight: bold;\n"
+"\n"
+"}\n"
+"QScrollArea {\n"
+"    border:  1px solid #ccc;\n"
+"}")
         self.verticalLayout_2 = QtGui.QVBoxLayout(ConfigDialog)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.splitter = QtGui.QSplitter(ConfigDialog)
