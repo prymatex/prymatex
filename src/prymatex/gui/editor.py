@@ -212,7 +212,8 @@ class PMXCodeEdit(QPlainTextEdit):
         self.textCursor().beginEditBlock()
         new_text = function(selected_text)
         cursor.removeSelectedText()
-        cursor.movePosition(QTextCursor.NextWord, QTextCursor.KeepAnchor);
+        #cursor.clearSelection()
+        #cursor.movePosition(QTextCursor.NoMove, QTextCursor.KeepAnchor)
         cursor.insertText(new_text)
         self.textCursor().endEditBlock()    
     
