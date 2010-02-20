@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/fssettings.ui'
 #
-# Created: Tue Feb 16 12:31:10 2010
-#      by: PyQt4 UI code generator 4.6
+# Created: Sat Feb 20 14:27:04 2010
+#      by: PyQt4 UI code generator 4.7
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -46,11 +46,11 @@ class Ui_FSSettingsDialog(object):
         self.texteditExcludeDirs.setObjectName("texteditExcludeDirs")
         self.gridLayout.addWidget(self.texteditExcludeDirs, 3, 1, 1, 1)
         self.label_5 = QtGui.QLabel(self.tabFilters)
-        self.label_5.setStyleSheet("""QLabel {
-    border: 1px solid yellow;
-    background: white;
-    padding: 6px;
-}""")
+        self.label_5.setStyleSheet("QLabel {\n"
+"    border: 1px solid yellow;\n"
+"    background: white;\n"
+"    padding: 6px;\n"
+"}")
         self.label_5.setObjectName("label_5")
         self.gridLayout.addWidget(self.label_5, 4, 0, 1, 2)
         self.tabWidget.addTab(self.tabFilters, "")

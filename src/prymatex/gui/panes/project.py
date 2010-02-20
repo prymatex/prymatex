@@ -5,23 +5,14 @@
 from PyQt4.QtGui import *
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.panes import PaneDockBase
+from prymatex.gui.panes.ui_project import Ui_ProjectPane
 
-
-class ProjectWidget(QWidget):
+class ProjectWidget(QWidget, Ui_ProjectPane):
     def __init__(self, parent):
         QWidget.__init__(self, parent)
-        self.setupGui()
+        self.setupUi(self)
     
-    def setupGui(self):
-        layout = QVBoxLayout()
-        self.treeviewProject = QTreeView(self)
-        layout.addWidget(self.treeviewProject)
-        buttons_layout = QHBoxLayout(self)
-        buttons_layout.addWidget(QPushButton(_("New")))
-        buttons_layout.addWidget(QPushButton(_("Config")))
-        
-        layout.addLayout(buttons_layout)
-        self.setLayout(layout)
+    
 
 class PMXProjectDock(PaneDockBase):
     def __init__(self, parent):
