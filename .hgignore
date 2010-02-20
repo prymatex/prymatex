@@ -19,3 +19,4 @@ src/prymatex/*.xml
 *.cache
 tests/*/basic_usage
 src/prymatex/test.*
+*.log

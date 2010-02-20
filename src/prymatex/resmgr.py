@@ -4,6 +4,8 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 class ResourceManager(QObject):
     '''
@@ -14,9 +16,11 @@ class ResourceManager(QObject):
     __current_theme = None
     __current_theme_path = None
     
-    def __init__(self):
-        self.path = os.path.dirname(__file__)
-        # TODO: Cargar por confgiuracion
+    def __init__(self, path = None):
+        '''
+        '''
+        self.path = path or os.path.dirname(__file__)
+        print path
         self.current_theme = self.available_themes[0]
         
     
@@ -60,7 +64,20 @@ class ResourceManager(QObject):
     def changeTheme(self, name):
         pass
     
-resource_manager = ResourceManager()
-
+    def loadStyleSheet(self):
+        stylename = 'prymatex.style'
+        stylesheet = os.path.join(self.path, stylename)
+        logger.info("Stylesheet: %s", stylesheet)
+        if os.path.exists(stylesheet):
+            logger.info("Loading %", stylesheet)
+            f = open(stylesheet)
+            contents = f.read()
+            f.close()
+            qApp.instance().setStyleSheet(contents)
+            logger.info("Style loaded")
+        else:
+            print 'x'
+            logger.info("Could not load Qt style file: %s", stylename)
+    
     
     

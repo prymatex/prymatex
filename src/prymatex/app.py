@@ -5,14 +5,21 @@ from PyQt4.QtCore import SIGNAL
 from os.path import join, exists, isdir, isabs, basename, abspath
 
 from os import getpid, unlink, getcwd
+from os.path import dirname
 from prymatex.lib.deco import printtime
 import sys
 from time import time
 
 from prymatex.lib.exceptions import AlreadyRunningError
 from prymatex.lib.textmate import load_textmate_bundles, load_textmate_themes
+
         
-        
+#BASE_PATH = getattr(prymatex, '__path__')[0]
+BASE_PATH = dirname(__file__)
+
+import logging
+logger = logging.getLogger(__name__)
+
 class PMXApplication(QApplication):
     
     __config = None
@@ -30,8 +37,10 @@ class PMXApplication(QApplication):
         files_to_open = args[1:]
         
         self.init_application_params()
-        
+        self.init_config()
         self.init_resources()
+        self.res_mngr.loadStyleSheet()
+        
         self.splash = QSplashScreen(self.res_mngr.getPixmap('Prymatex_Splash.png'))
         self.splash.show()
         
@@ -40,7 +49,7 @@ class PMXApplication(QApplication):
         self.check_single_instance()
         
         # Settings
-        self.init_config()
+        
         
         # Bundles and Stuff
         self.load_texmate_themes()
@@ -73,13 +82,14 @@ class PMXApplication(QApplication):
             pass
     
     def save_config(self):
-        print "Save config"
+        logging.info("Save config")
         self.config.save()
+        logging.info("Config saved")
     
     def init_resources(self):
         if not self.__res_mngr:
-            from prymatex.resmgr import resource_manager
-            self.__res_mngr = resource_manager
+            from prymatex.resmgr import ResourceManager
+            self.__res_mngr = ResourceManager(BASE_PATH)
         
     def init_config(self):
         if not self.__config:

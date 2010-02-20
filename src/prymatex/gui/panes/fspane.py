@@ -29,6 +29,7 @@ class FSPaneWidget(QWidget):
     
     def __init__(self, parent):
         QWidget.__init__(self, parent)
+        self.setObjectName('FSPaneWidget')
         self.setupGui()
         QMetaObject.connectSlotsByName(self)
         self.dialogConfigFilters = PMXFSPaneConfigDialog(self)
@@ -42,6 +43,7 @@ class FSPaneWidget(QWidget):
         self.actionUp = QAction(_("Up"), self)
         self.actionUp.setObjectName('actionUp')
         self.buttonUp = QActionPushButton(self.actionUp)
+        self.buttonUp.setObjectName('buttonUp')
         layoutButtons.addWidget(self.buttonUp)
         
         self.buttonFilter = QPushButton(_("F"), self)
@@ -51,7 +53,7 @@ class FSPaneWidget(QWidget):
         
         self.buttonSyncTabFile = QPushButton(_("S"), self)
         self.buttonSyncTabFile.setToolTip(_("Sync opened file"))
-        self.buttonSyncTabFile.setObjectName("self.buttonSyncTabFile")
+        self.buttonSyncTabFile.setObjectName("buttonSyncTabFile")
         # Keeping it simple
         #self.buttonSyncTabFile.setCheckable(True)
         layoutButtons.addWidget(self.buttonSyncTabFile)
@@ -73,7 +75,7 @@ class FSPaneWidget(QWidget):
         self.buttonCollapseAll.setToolTip(_("Collapse All"))
         layoutButtons.addWidget(self.buttonCollapseAll)
         
-        layoutButtons.addStretch()
+        layoutButtons.addStretch(1)
         
         mainlayout.addLayout(layoutButtons)
         self.tree = FSTree(self)
@@ -81,14 +83,10 @@ class FSPaneWidget(QWidget):
         mainlayout.addWidget(self.tree)
         self.setLayout(mainlayout)
         
-        self.setStyleSheet('''
-            QPushButton {
-                padding-left: 10px;
-                padding-right: 10px;
-                padding-top: 2%;
-                padding-bottom: 2%;
-            }
-        ''')
+#        self.setStyleSheet('''
+#            QPushButton {
+#            }
+#        ''')
     
     @pyqtSignature('')
     def on_actionUp_triggered(self):
