@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #-*- encoding: utf-8 -*-
 # Created: 02/02/2010 by defo
 
@@ -33,21 +34,18 @@ class PMXTabWidget(QTabWidget):
 #        self.setCornerWidget(createButton(self, "Tab List", "Ctrl+Space"), 
 #                             Qt.TopRightCorner)
         self.buttonTabList = QPushButton(self)
+        self.buttonTabList.setObjectName("buttonTabList")
         self.buttonTabList.setToolTip(_("Tab list"))
         self.buttonTabList.setShortcut(text_to_KeySequence("Ctrl+Tab"))
-        self.buttonTabList.setIcon(qApp.instance().res_mngr.getIcon('application_view_list.png'))
+        #self.buttonTabList.setIcon(qApp.instance().res_mngr.getIcon('application_view_list.png'))
         self.buttonTabList.setStyleSheet('''
             QPushButton {
                 padding: 5px;
             }
         ''')
-        # Seteamos
-        self.buttonTabList.setMenu(self.parent().menuPanes)
+        
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
         
-        #self.setTab
-    
-    
     
     def mouseDoubleClickEvent(self, event):
         self.appendEmptyTab()
@@ -201,6 +199,9 @@ class PMWTabsMenu(QMenu):
         for action, shortcut in itertools.izip(self.actions(), self.shortcuts):
             action.setShortcut(shortcut)
         
+    
+
+
     
         
         

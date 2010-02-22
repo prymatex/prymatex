@@ -1,18 +1,21 @@
 #!/usr/bin/env python
-#-*- encoding: utf-8 -*-
-# Created: 03/02/2010 by defo
+# -*- coding: utf-8 -*-
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
+from prymatex.gui import PMXBaseGUIMixin
 import os, codecs
 from os.path import basename
 
 from prymatex.gui.syntax import PMXSyntaxProcessor, PMXSyntaxFormater
-from prymatex.lib.textmate.syntax import TM_SYNTAXES 
+from prymatex.lib.textmate.syntax import TM_SYNTAXES
 
 
-class PMXTextEdit(QWidget):
+import logging
+logger = logging.getLogger(__name__)
+
+class PMXTextEdit(QWidget, PMXBaseGUIMixin):
     '''
     Abstract class for every editor
     '''
@@ -94,7 +97,8 @@ class PMXCodeEdit(QPlainTextEdit):
             filename = filename or self.path
             
         if not filename or save_as:
-            filename = QFileDialog.getSaveFileName(self, _("Save as"), "")
+            filename = QFileDialog.getSaveFileName(self, _("Save as"),
+                                                    self.path or qApp.instance().startDirectory())
             if not filename:
                 return
         
@@ -330,19 +334,18 @@ class PMXCodeEdit(QPlainTextEdit):
             return True
     
     def afterRemoveEvent(self):
-        #print 'afterRemoveEvent', self
-        mainwin = self.parent().parent().parent()
-        mainwin.menuPanes.removeAction(self.actionMenuTab)
+        self.mainwindow.actionGroupTabs.removeAction(self.actionMenuTab)
         
     def afterInsertionEvent(self):
         #print 'afterRemoveEvent', self
         self.updateTab()
-        mainwin = self.parent().parent().parent()
+        #mainwin = self.parent().parent().parent()
         
         #self.connect(self.actionMenuTab, SIGNAL("toggled(bool)"), self.showTab)
         #self.actionMenuTab.setText()
         #self.actionMenuTab.setCheckable(True)
-        mainwin.menuPanes.addAction(self.actionMenuTab)
+        logger.info("Insert tab %s", self)
+        self.mainwindow.actionGroupTabs.addAction(self.actionMenuTab)
     
     def afterModificationEvent(self):
         pass

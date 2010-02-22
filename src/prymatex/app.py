@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # encoding: utf-8
 from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen
 from PyQt4.QtCore import SIGNAL
@@ -216,4 +217,6 @@ class PMXApplication(QApplication):
         else:
             from prymatex.lib.os import get_homedir
             return get_homedir()
+
             
+import res_rc
