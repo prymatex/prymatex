@@ -84,10 +84,12 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         self.discard_lines = 0
     
     def collect_previous_text(self):
+        self.discard_lines = 1
         text_blocks = []
+        
         block = self.currentBlock().previous()
         while block.userState() == self.MULTI_LINE:
-            text_blocks.append(unicode(block.text()))
+            text_blocks.insert(0, unicode(block.text()))
             self.discard_lines += 1
             block = block.previous()
         return '\n'.join(text_blocks)
