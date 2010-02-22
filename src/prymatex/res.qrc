@@ -1,5 +1,21 @@
 <RCC>
   <qresource>
+    <file>resources/actions/view-close.png</file>
+    <file>resources/actions/document-close.png</file>
+    <file>resources/actions/document-new.png</file>
+    <file>resources/actions/document-open-folder.png</file>
+    <file>resources/actions/document-open.png</file>
+    <file>resources/actions/document-open-recent.png</file>
+    <file>resources/actions/document-open-remote.png</file>
+    <file>resources/actions/document-preview.png</file>
+    <file>resources/actions/document-print-direct.png</file>
+    <file>resources/actions/document-print-frame.png</file>
+    <file>resources/actions/document-print.png</file>
+    <file>resources/actions/document-revert.png</file>
+    <file>resources/actions/document-save-all.png</file>
+    <file>resources/actions/document-save-as.png</file>
+    <file>resources/actions/document-save.png</file>
     <file>resources/icons/Prymatex_Logo.png</file>
+    <file>resources/Prymatex_Splash.png</file>
   </qresource>
 </RCC>

@@ -337,14 +337,7 @@ class PMXCodeEdit(QPlainTextEdit):
         self.mainwindow.actionGroupTabs.removeAction(self.actionMenuTab)
         
     def afterInsertionEvent(self):
-        #print 'afterRemoveEvent', self
         self.updateTab()
-        #mainwin = self.parent().parent().parent()
-        
-        #self.connect(self.actionMenuTab, SIGNAL("toggled(bool)"), self.showTab)
-        #self.actionMenuTab.setText()
-        #self.actionMenuTab.setCheckable(True)
-        logger.info("Insert tab %s", self)
         self.mainwindow.actionGroupTabs.addAction(self.actionMenuTab)
     
     def afterModificationEvent(self):

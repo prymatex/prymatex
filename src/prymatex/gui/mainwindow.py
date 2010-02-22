@@ -31,7 +31,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.setCentralWidget(self.tabWidgetEditors)
         self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
         self.actionGroupTabs.addMenu(self.menuPanes)
-        #self.setup_panes()
+        
+        self.setup_panes()
         #self.setup_menus()
         #self.setup_actions()
         
@@ -58,12 +59,19 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             if isinstance(action, QAction):
                 self.addAction(action)
             
+
     
     def setup_panes(self):
-        
+        '''
+        Basic panels, dock objects. More docks should be available via plugins
+        '''
         self.paneFileSystem = PMXFSPaneDock(self)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.paneFileSystem)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
         self.paneFileSystem.hide()
+        self.paneFileSystem.associateAction(self.actionShow_File_System_Pane,
+                                            _("Show Filesystem Panel"),
+                                            _("Hide Filesystem Panel"))
+        
         
         self.paneOutput = PMXOutputDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
@@ -298,7 +306,16 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
     def on_actionShow_Line_Numbers_toggled(self, check):
         print "Line", check
-    
+
+    @pyqtSlot()
+    def on_actionPaste_As_New_triggered(self):
+        text = qApp.instance().clipboard().text()
+        if text:
+            editor = self.tabWidgetEditors.appendEmptyTab()
+            editor.appendPlainText(text)
+        else:
+            self.mainwindow.statusbar.showMessage(_("Nothing to paste."))
+          
 
     @pyqtSignature('')
     def on_actionGo_To_Line_triggered(self):
@@ -347,101 +364,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.current_editor.replaceCursorText(to_upper)
 
 
-def associateQActionWithDock(qAction, dockWidget, showText, hiddenText):
-    pass
 
-class PMXActionDockConnector(QObject):
-    '''
-    A wrapper for QActions that watches a widget hide/show events
-    and sets the QAction to checked
-    '''
-    def __init__(self, action, widget, show_text, hide_text):
-        assert action.isCeckable(), "%s is not checkable!" % action
-        self.action = action
-        self.widget = widget
-        self.show_text, self.hide_text = show_text, hide_text
-        text = widget.isHidden() and show_text or hide_text
-        self.action.setText(text)
-        self.connect(self.action, SIGNAL("toggled(bool)"), self.toggleDock)
-        self.connect(self.widget, SIGNAL("widgetShown(bool)"), self.checkCrossButtonHide) 
-    
-    def toggleDock(self, check):
-        if check:
-            if self.widget.isHidden():
-                self.widget.show()
-            self.action.setText(self.hide_text)
-        else:
-            if not self.widget.isHidden():
-                self.widget.hide()
-            self.action.setText(self.text_show)
-    
-    def checkCrossButtonHide(self, dockShown):
-        if not dockShown:
-            if self.action.isChecked():
-                self.action.setChecked(False)
-
-class PMXDockAction(QAction):
-    '''
-    Hides or shows a dock wheater the action is activated or deactivated
-    respectively.
-    '''
-    def __init__(self, text_show, text_hide, dock, parent):
-        '''
-        @param text_show: Text to show when the dock is hidden
-        @param text_hide: Text to show when the dock is shown
-        @param dock: Dock widget
-        @param parent: Parent QObject
-        '''
-        text = dock.isHidden() and text_show or text_hide
-        QAction.__init__(self, text, parent)
-        self.setCheckable(True)
-        self.connect(self, SIGNAL("toggled(bool)"), self.toggleDock)
-        
-        self.connect(dock, SIGNAL("widgetShown(bool)"), self.checkCrossButtonHide)
-        
-        self.dock = dock
-        self.text_show, self.text_hide = text_show, text_hide
-    
-    def toggleDock(self, check):
-        if check:
-            if self.dock.isHidden():
-                self.dock.show()
-            self.setText(self.text_hide)
-        else:
-            if not self.dock.isHidden():
-                self.dock.hide()
-            self.setText(self.text_show)
-    
-    def checkCrossButtonHide(self, dockShown):
-        if not dockShown:
-            if self.isChecked():
-                self.setChecked(False)
-
-class __PMWTabsMenu(QMenu):
-    '''
-    A menu that keeps only one action active
-    '''
-    def __init__(self, caption, parent):
-        QMenu.__init__(self, caption, parent)
-        self.actionGroup = QActionGroup(self)
-        self.shortcuts = []
-        for i in range(1, 10):
-            self.shortcuts.append(text_to_KeySequence("Alt+%d" % i))
-
-
-    def addAction(self, action):
-        QMenu.addAction(self, action)
-        self.actionGroup.addAction(action)
-        self.updateShortcuts()
-
-    def removeAction(self, action):
-        QMenu.removeAction(self, action)
-        self.actionGroup.removeAction(action)
-        self.updateShortcuts()
-
-
-
-                
 class PMXTabActionGroup(QActionGroup):
     '''
     This calss stores some information realted
