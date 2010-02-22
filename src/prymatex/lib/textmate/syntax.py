@@ -31,7 +31,7 @@ class TMSyntaxProcessor(object):
     def start_parsing(self, name):
         pass
 
-    def end_parsing(self, name):
+    def end_parsing(self, name, closed):
         pass
 
 class TMDebugSyntaxProcessor(TMSyntaxProcessor):
@@ -57,7 +57,7 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
     def start_parsing(self, name):
         print '{%s' % name
 
-    def end_parsing(self, name):
+    def end_parsing(self, name, closed):
         print '}%s' % name
 
 ################################## ScoreManager ###################################
@@ -184,17 +184,17 @@ class TMSyntaxNode(object):
     def syntaxes(self):
         return TM_SYNTAXES[self.name_space]
     
-    def parse(self, string, processor = None, _stack = None):
+    def parse(self, string, processor = None):
         position = 0
-        stack = _stack or [[self, None]]
+        stack = [[self, None]]
         if processor:
-            processor.start_parsing(self.scopeName, position)
+            processor.start_parsing(self.scopeName)
         for line in string.splitlines():
             if processor:
                 processor.new_line(line)
             position += self.parse_line(stack, line, processor)
         if processor:
-            processor.end_parsing(self.scopeName, position)
+            processor.end_parsing(self.scopeName, len(stack) == 1)
         return stack
     
     def parse_repository(self, repository):

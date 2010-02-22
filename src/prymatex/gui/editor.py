@@ -71,7 +71,7 @@ class PMXCodeEdit(QPlainTextEdit):
         self.setTabChangesFocus(False)
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
         try:
-            self.syntax_processor = PMXSyntaxProcessor(self.document(), TM_SYNTAXES['textmate']['source.python'], PMXSyntaxFormater.load_from_textmate_theme('iPlastic'))
+            self.syntax_processor = PMXSyntaxProcessor(self.document(), TM_SYNTAXES['textmate']['source.python'], PMXSyntaxFormater.load_from_textmate_theme('Blackboard'))
         except Exception, e:
             print ("Error al cargar la sintaxis %s" % e)
         

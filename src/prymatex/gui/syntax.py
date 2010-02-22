@@ -84,30 +84,25 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         self.discard_lines = 0
     
     def collect_previous_text(self):
-        text = ""
+        text_blocks = []
         block = self.currentBlock().previous()
         while block.userState() == self.MULTI_LINE:
-            text = "\n%s" % unicode(block.text()) + text
+            text_blocks.append(unicode(block.text()))
             self.discard_lines += 1
             block = block.previous()
-        return text
+        return '\n'.join(text_blocks)
     
     def highlightBlock(self, text):
         self.tokens = []
+        self.scopes = []
         text = unicode(text)
         if self.previousBlockState() == self.MULTI_LINE:
             previous = self.collect_previous_text()
-            print self.discard_lines, previous
-            stack = self.syntax.parse(previous, self)
-            stack = self.syntax.parse(text, self, stack)
+            text = previous + '\n' + text
+            print text
+            self.syntax.parse(text, self)
         else:
-            self.scopes = []
-            stack = self.syntax.parse(text, self)
-        if len(stack) > 1:
-            print "multiple"
-            self.setCurrentBlockState(self.MULTI_LINE)
-        else: 
-            self.setCurrentBlockState(self.SINGLE_LINE)
+            self.syntax.parse(text, self)
     
     def add_token(self, begin, end, scope):
         if self.discard_lines == 0:
@@ -120,7 +115,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
             self.discard_lines -= 1
 
     # Arranca el parser
-    def start_parsing(self, scope, position):
+    def start_parsing(self, scope):
         self.scopes.append(scope)
 
     # En cada oportunidad de se abre un tag
@@ -134,5 +129,10 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         self.current_position = position
         self.scopes.pop()
 
-    def end_parsing(self, scope, position):
+    def end_parsing(self, scope, closed):
+        if closed:
+            self.setCurrentBlockState(self.SINGLE_LINE)
+        else:
+            self.setCurrentBlockState(self.MULTI_LINE)
+            self.add_token(self.current_position, self.currentBlock().length(), " ".join(self.scopes))
         self.setCurrentBlockUserData(PMXBlockUserData(self.tokens))
