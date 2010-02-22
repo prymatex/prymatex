@@ -77,30 +77,30 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
     
-    def __init__(self, doc, syntax, formater):
+    def __init__(self, doc, syntax, formatter):
         QSyntaxHighlighter.__init__(self, doc)
         self.syntax = syntax
-        self.formater = formater
-        self.discard_lines = 0
+        self.formatter = formatter
     
     def collect_previous_text(self):
         self.discard_lines = 1
-        text_blocks = []
+        text = ''
         
         block = self.currentBlock().previous()
         while block.userState() == self.MULTI_LINE:
-            text_blocks.insert(0, unicode(block.text()))
+            text = '%s\n' % unicode(block.text()) + text
             self.discard_lines += 1
             block = block.previous()
-        return '\n'.join(text_blocks)
+        return text
     
     def highlightBlock(self, text):
+        self.discard_lines = 0
         self.tokens = []
         self.scopes = []
         text = unicode(text)
         if self.previousBlockState() == self.MULTI_LINE:
             previous = self.collect_previous_text()
-            text = previous + '\n' + text
+            text = previous + text
             print text
             self.syntax.parse(text, self)
         else:
@@ -109,7 +109,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
     def add_token(self, begin, end, scope):
         if self.discard_lines == 0:
             self.tokens.append(PMXBlockToken(begin, end, scope))
-            self.setFormat(begin, end - begin, self.formater.get_format(scope))
+            self.setFormat(begin, end - begin, self.formatter.get_format(scope))
     
     def new_line(self, line):
         self.current_position = 0
@@ -122,11 +122,13 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
 
     # En cada oportunidad de se abre un tag
     def open_tag(self, scope, position):
+        print "open %s" % scope
         self.add_token(self.current_position, position, " ".join(self.scopes))
         self.current_position = position
         self.scopes.append(scope)
 
     def close_tag(self, scope, position):
+        print "close %s" % scope
         self.add_token(self.current_position, position, " ".join(self.scopes))
         self.current_position = position
         self.scopes.pop()
