@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>307</height>
+    <height>325</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <property name="margin">
+      <number>10</number>
+     </property>
      <item>
       <widget class="QLabel" name="label">
        <property name="sizePolicy">
@@ -50,6 +56,9 @@
        <property name="editable">
         <bool>true</bool>
        </property>
+       <property name="className" stdset="0">
+        <string>bigPadding</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -78,14 +87,14 @@
         <item>
          <widget class="QRadioButton" name="radioInputNone">
           <property name="text">
-           <string>None</string>
+           <string>&amp;None</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="radioInputSelection">
           <property name="text">
-           <string>Selection</string>
+           <string>&amp;Selection</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -95,7 +104,7 @@
         <item>
          <widget class="QRadioButton" name="radioInputDocument">
           <property name="text">
-           <string>Document</string>
+           <string>&amp;Document</string>
           </property>
          </widget>
         </item>
@@ -124,14 +133,14 @@
         <item>
          <widget class="QRadioButton" name="radioOutputDiscard">
           <property name="text">
-           <string>Discard</string>
+           <string>D&amp;iscard</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="radioOutputSelection">
           <property name="text">
-           <string>Replace Selection</string>
+           <string>Replace Se&amp;lection</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -141,42 +150,42 @@
         <item>
          <widget class="QRadioButton" name="radioOutputDocument">
           <property name="text">
-           <string>Replace Document</string>
+           <string>Replace D&amp;ocument</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="radioOutputInsertText">
           <property name="text">
-           <string>Insert As Text</string>
+           <string>&amp;Insert As Text</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="radioOutputInsertSnippet">
           <property name="text">
-           <string>Insert As Snippet</string>
+           <string>Insert As Sni&amp;ppet</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="radioOutputShowToolTip">
           <property name="text">
-           <string>Show As ToolTip</string>
+           <string>Show As &amp;ToolTip</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="radioOutputShowAsHTML">
           <property name="text">
-           <string>Show As Html</string>
+           <string>Show As &amp;Html</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="radioOutputCreateNewDocument">
           <property name="text">
-           <string>Create New Document</string>
+           <string>Create &amp;New Document</string>
           </property>
          </widget>
         </item>

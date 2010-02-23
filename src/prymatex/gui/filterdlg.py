@@ -26,7 +26,7 @@ class PMXFilterDialog(QDialog, Ui_FilterThroughCommand, PMXBaseGUIMixin):
             txt_input = self.currentEditor.textCursor().selectedText()
         elif self.radioInputDocument.isChecked():
             txt_input = self.currentEditor.toPlainText()
-        txt_input = unicode(txt_input or '')
+        txt_input = txt_input and unicode(txt_input, 'utf-8') or ''
         logger.info(txt_input)
         self.proc = QProcess(self)
         self.proc.start(cmd)
@@ -35,18 +35,42 @@ class PMXFilterDialog(QDialog, Ui_FilterThroughCommand, PMXBaseGUIMixin):
             self.proc.write(txt_input)
             self.proc.closeWriteChannel()
         if not self.proc.waitForFinished(3000):
-            logger.info("Mal")
+            logger.info("Output with errors while calling %s" % cmd)
             output = self.proc.readAllStandardError()
-            QMessageBox.warning(self, "Error", _(u"%s", output) )
+            #QMessageBox.warning(self, "Error", _(u"%s", output) )
         else:
             output = self.proc.readAllStandardOutput ()
+        output = unicode(output.data(), 'utf-8')
+        # Process Output
         if self.radioOutputDiscard.isChecked():
             return
         elif self.radioOutputSelection.isChecked():
             cursor = self.currentEditor.textCursor()
             cursor.beginEditBlock()
             cursor.clearSelection()
-            cursor.insertText(unicode(output))
-            end.endEditBlock()
+            cursor.insertText(output)
+            cursor.endEditBlock()
+        elif self.radioOutputDocument.isChecked():
+            cursor = self.currentEditor.textCursor()
+            cursor.beginEditBlock()
+            self.currentEditor.setPlainText(ouput)
+            #cursor.clearSelection()
+            #cursor.setText(output)
+            cursor.endEditBlock()
+        elif self.radioOutputCreateNewDocument.isChecked():
             
+            editor = self.mainwindow.tabWidgetEditors.appendEmptyTab()
+            editor.setPlainText(output)
+            
+        elif self.radioOutputInsertSnippet.isChecked():
+            pass
+        elif self.radioOutputInsertText.isChecked():
+            cursor = self.currentEditor.textCursor()
+            cursor.beginEditBlock()
+            cursor.insertText(output)
+            cursor.endEditBlock()
+        elif self.radioOutputShowAsHTML.isChecked():
+            pass
+        elif self.radioOutputShowToolTip.isChecked():
+            pass
             
