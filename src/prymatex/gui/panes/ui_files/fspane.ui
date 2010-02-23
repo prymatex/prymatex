@@ -13,48 +13,63 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QPushButton {
+	padding: 5px;
+
+}</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="buttonUp">
        <property name="text">
-        <string>Up</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../res.qrc">
+         <normaloff>:/resources/actions/go-up.png</normaloff>:/resources/actions/go-up.png</iconset>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="buttonFilter">
-       <property name="text">
-        <string>F</string>
+       <property name="icon">
+        <iconset resource="../../../res.qrc">
+         <normaloff>:/resources/actions/view-filter.png</normaloff>:/resources/actions/view-filter.png</iconset>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="buttonSyncTabFile">
-       <property name="text">
-        <string>S</string>
+       <property name="icon">
+        <iconset resource="../../../res.qrc">
+         <normaloff>:/resources/actions/system-switch-user.png</normaloff>:/resources/actions/system-switch-user.png</iconset>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="buttonBackRoot">
-       <property name="text">
-        <string>&lt;-</string>
+       <property name="icon">
+        <iconset resource="../../../res.qrc">
+         <normaloff>:/resources/actions/go-previous.png</normaloff>:/resources/actions/go-previous.png</iconset>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="buttonNextkRoot">
-       <property name="text">
-        <string>-&gt;</string>
+       <property name="icon">
+        <iconset resource="../../../res.qrc">
+         <normaloff>:/resources/actions/go-next.png</normaloff>:/resources/actions/go-next.png</iconset>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="buttonCollapseAll">
-       <property name="text">
-        <string>-</string>
+       <property name="icon">
+        <iconset resource="../../../res.qrc">
+         <normaloff>:/resources/actions/zoom-out.png</normaloff>:/resources/actions/zoom-out.png</iconset>
        </property>
       </widget>
      </item>
@@ -85,6 +100,8 @@
    <header>fstree</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

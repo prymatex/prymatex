@@ -27,7 +27,7 @@ class PaneDockBase(QDockWidget):
         QDockWidget.hideEvent(self, event)
         self.emitWidgetShown(False)
         if self.action.isChecked():
-            self.setChecked(False)
+            self.action.setChecked(False)
         
     def emitWidgetShown(self, val):
         self.emit(SIGNAL('widgetShown(bool)'), val)

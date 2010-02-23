@@ -76,14 +76,21 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.paneOutput = PMXOutputDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
         self.paneOutput.hide()
+        self.paneOutput.associateAction(self.actionShow_Output,
+                                        _("Show Output"),
+                                        _("Hide output"))
         
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
         self.paneProject.hide()
+        self.paneProject.associateAction(self.actionShow_Project_Dock,
+                                         _("Show Project"),
+                                         _("Hide project"))
         
         self.paneSymbolList = PMXSymboldListDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
         self.paneSymbolList.hide()
+        
         
         self.paneBundleEditor = PMXBundleEditorDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneBundleEditor)
@@ -157,10 +164,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         """, qApp.instance().applicationVersion()))
         
     @pyqtSlot(bool)
-    def on_actionFullScreen_triggered(self):
-        if self.isFullScreen():
+    def on_actionFullscreen_toggled(self, check):
+        if not check and self.isFullScreen():
             self.showNormal()
-        else:
+        elif check:
             self.showFullScreen()
     
     
@@ -257,10 +264,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             if not self.tabWidgetEditors.closeTab(i):
                 return
             
-#                return
-#        for i in range(index+1, count):
-#            if not self.tabWidgetEditors.closeTab(i):
-#                return
+
     @pyqtSignature('')
     def on_actionMove_Tab_Left_triggered(self):
         if self.tabWidgetEditors.count() == 1:

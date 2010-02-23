@@ -247,7 +247,7 @@
   <action name="actionClose">
    <property name="icon">
     <iconset resource="../../res.qrc">
-     <normaloff>:/resources/actions/document-close.png</normaloff>:/resources/actions/document-close.png</iconset>
+     <normaloff>:/resources/actions/tab-close.png</normaloff>:/resources/actions/tab-close.png</iconset>
    </property>
    <property name="text">
     <string>Close</string>
@@ -257,6 +257,10 @@
    </property>
   </action>
   <action name="actionClose_Others">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/tab-close-other.png</normaloff>:/resources/actions/tab-close-other.png</iconset>
+   </property>
    <property name="text">
     <string>Close Others</string>
    </property>
@@ -273,6 +277,10 @@
    </property>
   </action>
   <action name="actionQuit">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/system-shutdown.png</normaloff>:/resources/actions/system-shutdown.png</iconset>
+   </property>
    <property name="text">
     <string>Quit</string>
    </property>
@@ -281,6 +289,10 @@
    </property>
   </action>
   <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/edit-undo.png</normaloff>:/resources/actions/edit-undo.png</iconset>
+   </property>
    <property name="text">
     <string>Undo</string>
    </property>
@@ -289,6 +301,10 @@
    </property>
   </action>
   <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/edit-redo.png</normaloff>:/resources/actions/edit-redo.png</iconset>
+   </property>
    <property name="text">
     <string>Redo</string>
    </property>
@@ -297,6 +313,10 @@
    </property>
   </action>
   <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/edit-copy.png</normaloff>:/resources/actions/edit-copy.png</iconset>
+   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -305,6 +325,10 @@
    </property>
   </action>
   <action name="actionCut">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/edit-cut.png</normaloff>:/resources/actions/edit-cut.png</iconset>
+   </property>
    <property name="text">
     <string>Cut</string>
    </property>
@@ -313,6 +337,10 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/edit-paste.png</normaloff>:/resources/actions/edit-paste.png</iconset>
+   </property>
    <property name="text">
     <string>Paste</string>
    </property>
@@ -321,6 +349,10 @@
    </property>
   </action>
   <action name="actionPaste_As_New">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/edit-paste.png</normaloff>:/resources/actions/edit-paste.png</iconset>
+   </property>
    <property name="text">
     <string>Paste As New</string>
    </property>
@@ -329,6 +361,10 @@
    </property>
   </action>
   <action name="actionFind">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/edit-find-project.png</normaloff>:/resources/actions/edit-find-project.png</iconset>
+   </property>
    <property name="text">
     <string>Find</string>
    </property>
@@ -337,6 +373,10 @@
    </property>
   </action>
   <action name="actionFind_Replace">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/edit-find-replace.png</normaloff>:/resources/actions/edit-find-replace.png</iconset>
+   </property>
    <property name="text">
     <string>Find/Replace</string>
    </property>
@@ -345,6 +385,10 @@
    </property>
   </action>
   <action name="actionPreferences">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/configure.png</normaloff>:/resources/actions/configure.png</iconset>
+   </property>
    <property name="text">
     <string>Preferences</string>
    </property>
@@ -353,6 +397,9 @@
    </property>
   </action>
   <action name="actionFullscreen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Fullscreen</string>
    </property>
@@ -364,6 +411,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show Menus</string>
    </property>
@@ -372,6 +422,10 @@
    </property>
   </action>
   <action name="actionZoom_In">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/zoom-in.png</normaloff>:/resources/actions/zoom-in.png</iconset>
+   </property>
    <property name="text">
     <string>Zoom In</string>
    </property>
@@ -380,6 +434,10 @@
    </property>
   </action>
   <action name="actionZoom_Out">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/zoom-out.png</normaloff>:/resources/actions/zoom-out.png</iconset>
+   </property>
    <property name="text">
     <string>Zoom Out</string>
    </property>
@@ -472,6 +530,10 @@
    </property>
   </action>
   <action name="actionShilft_Left">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/format-indent-less.png</normaloff>:/resources/actions/format-indent-less.png</iconset>
+   </property>
    <property name="text">
     <string>Shilft Left</string>
    </property>
@@ -480,6 +542,10 @@
    </property>
   </action>
   <action name="actionShift_Right">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/format-indent-more.png</normaloff>:/resources/actions/format-indent-more.png</iconset>
+   </property>
    <property name="text">
     <string>Shift Right</string>
    </property>
