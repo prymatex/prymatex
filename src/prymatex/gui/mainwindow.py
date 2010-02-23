@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # encoding: utf-8
 
 from PyQt4.QtGui import *
@@ -15,559 +16,82 @@ from prymatex.gui.panes.outputpanel import PMXOutputDock
 from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
 from prymatex.gui.panes.bundles import PMXBundleEditorDock
+from prymatex.gui.ui_mainwindow import Ui_MainWindow
+from prymatex.gui.filterdlg import PMXFilterDialog
+import itertools
+import logging
+logger = logging.getLogger(__name__)
 
-
-class PMXMainWindow(QMainWindow, CenterWidget):
+class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def __init__(self):
         QMainWindow.__init__(self)
         self.setWindowTitle(_(u"Prymatex Text Editor"))
-        
+
+        self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
+        self.setupUi(self)
+        self.setCentralWidget(self.tabWidgetEditors)
+        self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
+        self.actionGroupTabs.addMenu(self.menuPanes)
         
         self.setup_panes()
-        self.setup_menus()
-        self.setup_actions()
-        self.setup_gui()
-        self.setup_toolbars()
+        #self.setup_menus()
+        #self.setup_actions()
+        
+        #self.setup_toolbars()
         
         self.center()
         
         self.dialogConfig = PMXConfigDialog(self)
-        
-        QMetaObject.connectSlotsByName(self)
-        
+        self.dialogFilter = PMXFilterDialog(self)
         self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
-        self.actionShowFSPane.setChecked(True)
-        
-    
-    def setup_gui(self):
-        self.tabWidgetEditors = PMXTabWidget(self)
-        self.setCentralWidget(self.tabWidgetEditors)
-        status_bar = PMXStatusBar(self)
-        self.setStatusBar(status_bar)
-        
-    
-    def setup_actions(self):
-        
-        #=======================================================================
-        # File Menu
-        #=======================================================================
-        
-        self.actionNewTab = QAction(_("New"), self)
-        self.actionNewTab.setObjectName("actionNewTab")
-        self.actionNewTab.setShortcut(text_to_KeySequence("Ctrl+N"))
-        self.file_menu.addAction(self.actionNewTab)
-        self.addAction(self.actionNewTab)
-        
-        self.actionFileOpen = QAction(_("&Open"), self)
-        self.actionFileOpen.setObjectName("actionFileOpen")
-        self.actionFileOpen.setShortcut(text_to_KeySequence("Ctrl+O"))
-        self.file_menu.addAction(self.actionFileOpen)
-        self.addAction(self.actionFileOpen)
-        
-        self.actionSave = QAction(_("&Save"), self)
-        self.actionSave.setObjectName("actionSave")
-        self.actionSave.setShortcut(text_to_KeySequence("Ctrl+S"))
-        self.file_menu.addAction(self.actionSave)
-        self.addAction(self.actionSave)
-        
-        self.actionSaveAs = QAction(_("Save &As"), self)
-        self.actionSaveAs.setObjectName("actionSaveAs")
-        self.actionSaveAs.setShortcut(text_to_KeySequence("Ctrl+Shift+S"))
-        self.file_menu.addAction(self.actionSaveAs)
-        self.addAction(self.actionSaveAs)
-        
-        self.actionSaveAll = QAction(_("Save A&ll"), self)
-        self.actionSaveAll.setObjectName("actionSaveAll")
-        self.actionSaveAll.setShortcut(text_to_KeySequence("Ctrl+Alt+S"))
-        self.file_menu.addAction(self.actionSaveAll)
-        self.addAction(self.actionSaveAll)
-        
-        self.file_menu.addSeparator()
-        
-        self.actionReload = QAction(_("&Reload"), self)
-        self.actionReload.setObjectName("actionReload")
-        self.actionReload.setShortcut(text_to_KeySequence("F5"))
-        self.file_menu.addAction(self.actionReload)
-        self.addAction(self.actionReload)
-        
-        self.actionClose = QAction(_("&Close"), self)
-        self.actionClose.setObjectName("actionClose")
-        self.actionClose.setShortcut(text_to_KeySequence("Ctrl+W"))
-        self.file_menu.addAction(self.actionClose)
-        self.addAction(self.actionClose)
-        
-        self.actionCloseOthers = QAction(_("Close &Others"), self)
-        self.actionCloseOthers.setObjectName("actionCloseOthers")
-        self.actionCloseOthers.setShortcut(text_to_KeySequence("Ctrl+Shift+W"))
-        self.file_menu.addAction(self.actionCloseOthers)
-        self.addAction(self.actionCloseOthers)
-        
-        self.file_menu.addSeparator()
-        
-        self.actionClose = QAction(_("&Quit"), self)
-        self.actionClose.setObjectName("actionClose")
-        self.actionClose.setShortcut(text_to_KeySequence("Ctrl+Q"))
-        self.file_menu.addAction(self.actionClose)
-        self.addAction(self.actionClose)
-        
-        #=======================================================================
-        # Edit Menu
-        #=======================================================================
-        
-        self.actionUndo = QAction(_("Un&do"), self)
-        self.actionUndo.setObjectName("actionUndo")
-        self.actionUndo.setShortcut(text_to_KeySequence("Ctrl+Z"))
-        self.edit_menu.addAction(self.actionUndo)
-        self.addAction(self.actionUndo)
-        
-        self.actionRedo = QAction(_("&Redo"), self)
-        self.actionRedo.setObjectName("actionRedo")
-        self.actionRedo.setShortcut(text_to_KeySequence("Ctrl+Shift+Z"))
-        self.edit_menu.addAction(self.actionRedo)
-        self.addAction(self.actionRedo)
-        
-        self.edit_menu.addSeparator()
-        
-        self.actionCopy = QAction(_("&Copy"), self)
-        self.actionCopy.setObjectName("actionCopy")
-        self.actionCopy.setShortcut(text_to_KeySequence("Ctrl+C"))
-        self.edit_menu.addAction(self.actionCopy)
-        self.addAction(self.actionCopy)
-        
-        self.actionCut = QAction(_("C&ut"), self)
-        self.actionCut.setObjectName("actionCut")
-        self.actionCut.setShortcut(text_to_KeySequence("Ctrl+X"))
-        self.edit_menu.addAction(self.actionCut)
-        self.addAction(self.actionCut)
-        
-        self.actionPaste = QAction(_("&Paste"), self)
-        self.actionPaste.setObjectName("actionPaste")
-        self.actionPaste.setShortcut(text_to_KeySequence("Ctrl+V"))
-        self.edit_menu.addAction(self.actionPaste)
-        self.addAction(self.actionPaste)
-        
-        self.actionPasteAsNew = QAction(_("Paste As &New"), self)
-        self.actionPasteAsNew.setObjectName("actionPasteAsNew")
-        self.actionPasteAsNew.setShortcut("")
-        self.edit_menu.addAction(self.actionPasteAsNew)
-        self.addAction(self.actionPasteAsNew)
-        
-        self.edit_menu.addSeparator()
-        
-        self.actionFind = QAction(_("&Find"), self)
-        self.actionFind.setObjectName("actionFind")
-        self.actionFind.setShortcut(text_to_KeySequence("Ctrl+F"))
-        self.edit_menu.addAction(self.actionFind)
-        self.addAction(self.actionFind)
-        
-        
-        self.actionFindReplace = QAction(_("Find/&Replace"), self)
-        self.actionFindReplace.setObjectName("actionFindReplace")
-        self.actionFindReplace.setShortcut(text_to_KeySequence("Ctrl+R"))
-        self.edit_menu.addAction(self.actionFindReplace)
-        self.addAction(self.actionFindReplace)
-        
-        
-        self.actionPreferences = QAction(_("&Preferences"), self)
-        self.actionPreferences.setObjectName("actionPreferences")
-        self.actionPreferences.setShortcut(text_to_KeySequence("Ctrl+Shift+P"))
-        self.edit_menu.addAction(self.actionPreferences)
-        self.addAction(self.actionPreferences)
-        
-        
-        
-        #=======================================================================
-        # View Menu
-        #=======================================================================
-        
-        self.actionFullScreen = QAction(_("&Full Screen"), self)
-        self.actionFullScreen.setObjectName("actionFullScreen")
-        self.actionFullScreen.setShortcut(text_to_KeySequence("F11"))
-        self.actionFullScreen.setCheckable(True)
-        self.view_menu.addAction(self.actionFullScreen)
-        self.addAction(self.actionFullScreen)
-        
-        self.actionShowMenus = QAction(_("&Show Menus"), self)
-        self.actionShowMenus.setObjectName("actionShowMenus")
-        self.actionShowMenus.setShortcut(text_to_KeySequence("Ctrl+M"))
-        self.actionShowMenus.setCheckable(True)
-        self.actionShowMenus.setChecked(True)
-        self.view_menu.addAction(self.actionShowMenus)
-        self.addAction(self.actionShowMenus)
-        
-        self.view_menu.addSeparator()
-        
-        self.actionZoomIn = QAction(_("Zoom &In"), self)
-        self.actionZoomIn.setObjectName("actionZoomIn")
-        self.actionZoomIn.setShortcut(text_to_KeySequence("Ctrl+Plus"))
-        self.view_menu.addAction(self.actionZoomIn)
-        self.addAction(self.actionZoomIn)
-        
-        self.actionZoomOut = QAction(_("Zoom &Out"), self)
-        self.actionZoomOut.setObjectName("actionZoomOut")
-        self.actionZoomOut.setShortcut(text_to_KeySequence("Ctrl+Minus"))
-        self.view_menu.addAction(self.actionZoomOut)
-        self.addAction(self.actionZoomOut)
-        
-        self.view_menu.addSeparator()
-        
-        self.actionFocusEditor = QAction(_("Focus &Editor"), self)
-        self.actionFocusEditor.setObjectName("actionFocusEditor")
-        self.actionFocusEditor.setShortcut(text_to_KeySequence("F12"))
-        self.view_menu.addAction(self.actionFocusEditor)
-        self.addAction(self.actionFocusEditor)
-        
-        self.actionShowLineNumbers = QAction(_("Show Line &Numbers"), self)
-        self.actionShowLineNumbers.setObjectName("actionShowLineNumbers")
-        self.actionShowLineNumbers.setShortcut(text_to_KeySequence("F10"))
-        self.actionShowLineNumbers.setCheckable(True)
-        self.view_menu.addAction(self.actionShowLineNumbers)
-        self.addAction(self.actionShowLineNumbers)
-        
-        self.view_menu.addSeparator()
-        
-        self.actionShowFSPane = PMXDockAction(_("Show File System Panel"),
-                                              _("Hide File System Panel"),
-                                              self.paneFileSystem, self)
-        self.actionShowFSPane.setObjectName("actionShowFSPane")
-        self.actionShowFSPane.setShortcut(text_to_KeySequence("F8"))
-        self.view_menu.addAction(self.actionShowFSPane)
-        self.addAction(self.actionShowFSPane)
-        
-        self.actionShowOutputPane = PMXDockAction(_("Show Output Panel"),
-                                                  _("Hide Output Panel"),
-                                                  self.paneOutput, self)
-        self.actionShowOutputPane.setObjectName("actionShowOutputPane")
-        self.actionShowOutputPane.setShortcut(text_to_KeySequence("F7"))
-        self.view_menu.addAction(self.actionShowOutputPane)
-        self.addAction(self.actionShowOutputPane)
-        
-        self.actionShowProjectPanel = PMXDockAction(_("Show Project Panel"),
-                                                    _("Hide Project Panel"), 
-                                                    self.paneProject, self)
-        self.actionShowProjectPanel.setObjectName("actionShowProjectPanel")
-        self.actionShowProjectPanel.setShortcut(text_to_KeySequence("F9"))
-        self.view_menu.addAction(self.actionShowProjectPanel)
-        self.addAction(self.actionShowProjectPanel)
-        
-        self.actionShowSymbolListPane = PMXDockAction(_("Show Symbol List Panel"),
-                                                _("Hide Symbol List Panel"), 
-                                                self.paneSymbolList, self)
-        self.actionShowSymbolListPane.setObjectName("actionShowSymbolListPane")
-        self.actionShowSymbolListPane.setShortcut(text_to_KeySequence("F6"))
-        self.view_menu.addAction(self.actionShowSymbolListPane)
-        self.addAction(self.actionShowSymbolListPane)
-        
-        self.view_menu.addSeparator()
-        self.actionShowCurrentScope = QAction(_("Show current scope"), self)
-        self.actionShowCurrentScope.setObjectName("actionShowCurrentScope")
-        self.actionShowCurrentScope.setShortcut(text_to_KeySequence("Alt+S"))
-        self.view_menu.addAction(self.actionShowCurrentScope)
-        #self.addAction(self.actionShowCurrentScope)
-         
-        #=======================================================================
-        # Navigation Menu
-        #=======================================================================
-        
-        # Bookmarks
-        self.actionToogleBookmark = QAction(_("Toggle &Bookmark"), self)
-        self.actionToogleBookmark.setObjectName("actionToogleBookmark")
-        self.actionToogleBookmark.setShortcut(text_to_KeySequence("Ctrl+B"))
-        self.menuNavigation.addAction(self.actionToogleBookmark)
-        
-        self.actionGoToNextBookmark = QAction(_("&Next Bookmark"), self)
-        self.actionGoToNextBookmark.setObjectName("actionGoToNextBookmark")
-        self.actionGoToNextBookmark.setShortcut(text_to_KeySequence("F2"))
-        self.menuNavigation.addAction(self.actionGoToNextBookmark)
-        
-        self.actionGoToPreviousBookmark = QAction(_("&Previous Bookmark"), self)
-        self.actionGoToPreviousBookmark.setObjectName("actionGoToPreviousBookmark")
-        self.actionGoToPreviousBookmark.setShortcut(text_to_KeySequence("Ctrl+F2"))
-        self.menuNavigation.addAction(self.actionGoToPreviousBookmark)
-        
-        self.actionRemoveAllBookmarks = QAction(_("&Remove All Bookmarks"), self)
-        self.actionRemoveAllBookmarks.setObjectName("actionRemoveAllBookmarks")
-        self.actionRemoveAllBookmarks.setShortcut(text_to_KeySequence("Ctrl+Shift+F2"))
-        self.menuNavigation.addAction(self.actionRemoveAllBookmarks)
-        
-        
-        self.menuNavigation.addSeparator()
-        
-        self.actionNexTab = QAction(_("&Next Tab"), self)
-        self.actionNexTab.setObjectName("actionNexTab")
-        self.actionNexTab.setShortcut(text_to_KeySequence("Ctrl+PageDown"))
-        self.menuNavigation.addAction(self.actionNexTab)
-        self.addAction(self.actionNexTab)
-        
-        self.actionPreviousTab = QAction(_("&Previous Tab"), self)
-        self.actionPreviousTab.setObjectName("actionPreviousTab")
-        self.actionPreviousTab.setShortcut(text_to_KeySequence("Ctrl+PageUp"))
-        self.menuNavigation.addAction(self.actionPreviousTab)
-        self.addAction(self.actionPreviousTab)
-        
-        self.actionMoveTabLeft = QAction(_("Move Tab &Left"), self)
-        self.actionMoveTabLeft.setObjectName("actionMoveTabLeft")
-        self.actionMoveTabLeft.setShortcut(text_to_KeySequence("Ctrl+Shift+PageUp"))
-        self.menuNavigation.addAction(self.actionMoveTabLeft)
-        self.addAction(self.actionMoveTabLeft)
-        
-        self.actionMoveTabRight = QAction(_("Move Tab &Right"), self)
-        self.actionMoveTabRight.setObjectName("actionMoveTabRight")
-        self.actionMoveTabRight.setShortcut(text_to_KeySequence("Ctrl+Shift+PageDown"))
-        self.menuNavigation.addAction(self.actionMoveTabRight)
-        self.addAction(self.actionMoveTabRight)
-        
-        self.menuNavigation.addSeparator()
-        
-        self.menuPanes = PMWTabsMenu(_("Panes"), self) 
-        self.menuNavigation.addMenu(self.menuPanes)
-        
-        self.menuNavigation.addSeparator()
-        # Gotos
-        
-        self.actionGoHeaderSource = QAction(_("Go to &Header/Source"), self)
-        self.actionGoHeaderSource.setObjectName("actionGoHeaderSource")
-        self.actionGoHeaderSource.setShortcut(text_to_KeySequence("Ctrl+F3"))
-        self.menuNavigation.addAction(self.actionGoHeaderSource)
-        self.addAction(self.actionGoHeaderSource)
-        
-        self.actionGoToFile = QAction(_("Go to &File"), self)
-        self.actionGoToFile.setObjectName("actionGoToFile")
-        #self.actionGoToFile.setShortcut("")
-        self.menuNavigation.addAction(self.actionGoToFile)
-        self.addAction(self.actionGoToFile)
-        
-        self.actionGoToSymbol = QAction(_("Go to &Symbol"), self)
-        self.actionGoToSymbol.setObjectName("actionGoToSymbol")
-        self.actionGoToSymbol.setShortcut(text_to_KeySequence("Ctrl+Shift+G"))
-        self.menuNavigation.addAction(self.actionGoToSymbol)
-        self.addAction(self.actionGoToSymbol)
-        
-        self.actionGoToMatchingBracket = QAction(_("Go to Matching &Bracket"), self)
-        self.actionGoToMatchingBracket.setObjectName("actionGoToMatchingBracket")
-        self.actionGoToMatchingBracket.setShortcut(text_to_KeySequence("Ctrl+B"))
-        self.menuNavigation.addAction(self.actionGoToMatchingBracket)
-        self.addAction(self.actionGoToMatchingBracket)
-        
-        self.actionGoToLine = QAction(_("Go To Line"), self)
-        self.actionGoToLine.setObjectName("actionGoToLine")
-        self.actionGoToLine.setShortcut(text_to_KeySequence("Ctrl+G"))
-        self.menuNavigation.addAction(self.actionGoToLine)
-        self.addAction(self.actionGoToLine)
-        
-                
-        #=======================================================================
-        # Run Script
-        #=======================================================================
-        
-        self.actionRunScript = QAction(_("Run Script"), self)
-        self.actionRunScript.setObjectName("actionRunScript")
-        self.actionRunScript.setShortcut(text_to_KeySequence("Alt+R"))
-        self.tools_menu.addAction(self.actionRunScript)
-        self.addAction(self.actionRunScript)
-        
-        self.actionOpenCommandPrompt = QAction(_("Open Terminal"), self)
-        self.actionOpenCommandPrompt.setObjectName("actionOpenCommandPrompt")
-        self.actionOpenCommandPrompt.setShortcut(text_to_KeySequence("F4"))
-        self.tools_menu.addAction(self.actionOpenCommandPrompt)
-        
-        self.actionOpenFileManager = QAction(_("Open File Manager"), self)
-        self.actionOpenFileManager.setObjectName("actionOpenFileManager")
-        self.actionOpenFileManager.setShortcut(text_to_KeySequence("F6"))
-        self.tools_menu.addAction(self.actionOpenFileManager)
-        
-        
-        #=======================================================================
-        # Help Menu
-        #=======================================================================
-        app_name = qApp.instance().applicationName()
-        
-        self.actionReportBug = QAction(_("Report &Bug"), self)
-        self.actionReportBug.setObjectName("actionReportBug")
-        #self.actionReportBug.setShortcut(text_to_KeySequence(""))
-        self.help_menu.addAction(self.actionReportBug)
-        self.addAction(self.actionReportBug)
-        
-        
-        self.actionTranslateApp = QAction(_("Translate %s", app_name), self)
-        self.actionTranslateApp.setObjectName("actionTranslateApp")
-        #self.actionTranslateApp.setShortcut(text_to_KeySequence(""))
-        self.help_menu.addAction(self.actionTranslateApp)
-        self.addAction(self.actionTranslateApp)
-        
-        self.actionProjectHomePage = QAction(_("Project &Homepage"), self)
-        self.actionProjectHomePage.setObjectName("actionProjectHomePage")
-        #self.actionProjectHomePage.setShortcut("")
-        self.help_menu.addAction(self.actionProjectHomePage)
-        self.addAction(self.actionProjectHomePage)
-        
-        self.actionTakeScreenshot = QAction(_("&Take Screenshot"), self)
-        self.actionTakeScreenshot.setObjectName("actionTakeScreenshot")
-        self.actionTakeScreenshot.setShortcut(text_to_KeySequence("Ctrl+Print"))
-        self.help_menu.addAction(self.actionTakeScreenshot)
-        self.addAction(self.actionTakeScreenshot)
-        
-        self.help_menu.addSeparator()
-        self.actionAboutQt = QAction(_("About &Qt"), self)
-        self.actionAboutQt.setObjectName("actionAboutQt")
-        #self.actionAboutQt.setShortcut("")
-        self.help_menu.addAction(self.actionAboutQt)
-        self.addAction(self.actionAboutQt)
-        
-        self.actionAboutApp = QAction(_("&About %s", app_name), self)
-        self.actionAboutApp.setObjectName("actionAboutApp")
-        #self.actionAboutApp.setShortcut()
-        self.help_menu.addAction(self.actionAboutApp)
-        self.addAction(self.actionAboutApp)
-        
-        #=======================================================================
-        # Bundles menus
-        #=======================================================================
-        
-        self.actionBundleEditor = PMXDockAction(_("Show &Bundle Editor"),
-                                                _("Hide &Bundle Editor"),
-                                                  self.paneBundleEditor, 
-                                                  self)
-        self.actionBundleEditor.setObjectName("actionBundleEditor")
-        self.actionBundleEditor.setShortcut(text_to_KeySequence("Ctrl+Shift+B"))
-        self.bundle_menu.addAction(self.actionBundleEditor)
-        self.addAction(self.actionBundleEditor)
-        
-        
-        
-        self.actionActivateBundle = QAction(_("Select Bundle Item..."), self)
-        self.actionActivateBundle.setObjectName("actionActivateBundle")
-        self.actionActivateBundle.setShortcut(text_to_KeySequence("Ctrl+Alt+T"))
-        self.bundle_menu.addAction(self.actionActivateBundle)
-        
-        #=======================================================================
-        # Configuración 
-        #=======================================================================
-        
-        
-        self.menuConvertCase = QMenu(_("&Convert"), self)
-        self.menuText.addMenu(self.menuConvertCase)
-        
-        self.actionConvertUpercase = QAction(_("to Uppercase"), self)
-        self.actionConvertUpercase.setObjectName("actionConvertUpercase")
-        #self.actionConvertUpercase.setShortcut("")
-        self.menuConvertCase.addAction(self.actionConvertUpercase)
-        self.addAction(self.actionConvertUpercase)
-        
-        self.actionConvertLowercase = QAction(_("to &Lowercase"), self)
-        self.actionConvertLowercase.setObjectName("actionConvertLowercase")
-        #self.actionConvertLowercase.setShortcut("")
-        self.menuConvertCase.addAction(self.actionConvertLowercase)
-        self.addAction(self.actionConvertLowercase)
-        
-        self.actionConvertTitleCase = QAction(_("to &Titlecase"), self)
-        self.actionConvertTitleCase.setObjectName("actionConvertTitleCase")
-        #self.actionConvertTitleCase.setShortcut("")
-        self.menuConvertCase.addAction(self.actionConvertTitleCase)
-        self.addAction(self.actionConvertTitleCase)
-        
-        self.actionConvertInvertCase = QAction(_("to Invert case"), self)
-        self.actionConvertInvertCase.setObjectName("actionConvertInvertCase")
-        #self.actionConvertInvertCase.setShortcut("")
-        self.menuConvertCase.addAction(self.actionConvertInvertCase)
-        self.addAction(self.actionConvertInvertCase)
-        
-        self.actionConvertTranspose = QAction(_("Transpose"), self)
-        self.actionConvertTranspose.setObjectName("actionConvertTranspose")
-        #self.actionConvertTranspose.setShortcut("")
-        self.menuConvertCase.addAction(self.actionConvertTranspose)
-        self.addAction(self.actionConvertTranspose)
-        
-        self.menuText.addSeparator()
-        
-        self.actionShiftLeft = QAction(_("Shift Left"), self)
-        self.actionShiftLeft.setObjectName("actionShiftLeft")
-        #self.actionShiftLeft.setShortcut("")
-        self.menuText.addAction(self.actionShiftLeft)
-        self.addAction(self.actionShiftLeft)
-        
-        self.actionShiftRight = QAction(_("Shift Right"), self)
-        self.actionShiftRight.setObjectName("actionShiftRight")
-        #self.actionShiftRight.setShortcut("")
-        self.menuText.addAction(self.actionShiftRight)
-        self.addAction(self.actionShiftRight)
-        
-        self.menuText.addSeparator()
-        
-        self.actionTabToSpaces = QAction(_("Tab to spaces"), self)
-        self.actionTabToSpaces.setObjectName("actionTabToSpaces")
-        #self.actionTabToSpaces.setShortcut("")
-        self.menuText.addAction(self.actionTabToSpaces)
-        self.addAction(self.actionTabToSpaces)
-        
-        self.actionSpacesToTabs = QAction(_("Spaces to tabs"), self)
-        self.actionSpacesToTabs.setObjectName("actionSpacesToTabs")
-        #self.actionSpacesToTabs.setShortcut("")
-        self.menuText.addAction(self.actionSpacesToTabs)
-        self.addAction(self.actionSpacesToTabs)
-        
-        self.menuText.addSeparator()
-        
-        self.actionFilterThroughCommand = QAction(_("Filter through command"), self)
-        self.actionFilterThroughCommand.setObjectName("actionFilterThroughCommand")
-        #self.actionFilterThroughCommand.setShortcut("")
-        self.menuText.addAction(self.actionFilterThroughCommand)
-        self.addAction(self.actionFilterThroughCommand)
-        
-        self.actionRunSelection = QAction(_("Run Selection"), self)
-        self.actionRunSelection.setObjectName("actionRunSelection")
-        #self.actionRunSelection.setShortcut("")
-        self.menuText.addAction(self.actionRunSelection)
-        self.addAction(self.actionRunSelection)
-    
-    def setup_menus(self):
-        
-        menubar = QMenuBar(self)
-        
-        self.file_menu = QMenu(_("&File"), self)
-        menubar.addMenu(self.file_menu)
-        
-        self.edit_menu = QMenu(_("&Edit"), self)
-        menubar.addMenu(self.edit_menu)
-        
-        self.view_menu = QMenu(_("&View"), self)
-        menubar.addMenu(self.view_menu)
-        
-        self.menuText = QMenu(_("&Text"), self)
-        menubar.addMenu(self.menuText)
-        
-        self.tools_menu = QMenu(_("&Tools"), self)
-        menubar.addMenu(self.tools_menu)
-        
-        self.menuNavigation = QMenu(_("&Navigation"), self)
-        menubar.addMenu(self.menuNavigation)
-        
-        self.bundle_menu = QMenu(_("&Bundle"), self)
-        menubar.addMenu(self.bundle_menu)
-        
-        self.help_menu = QMenu(_("&Help"), self)
-        menubar.addMenu(self.help_menu)
-        
-        self.setMenuBar(menubar)
+        #self.actionShowFSPane.setChecked(True)
+        self.prevent_menu_lock()
+
+    def prevent_menu_lock(self):
+        '''
+        Inspects the MainWindow definition and add the actions itself.
+        If menubar is hidden (Ctrl+M), actions will be available.
+        Maybe we will need to filter something, right now I don't belive
+        it'll be nesseary.
+        '''
+        action_names = filter(lambda name: name.startswith('action'), dir(self))
+        for action in map(lambda name: getattr(self, name), action_names):
+            if isinstance(action, QAction):
+                self.addAction(action)
+            
+
     
     def setup_panes(self):
-        
+        '''
+        Basic panels, dock objects. More docks should be available via plugins
+        '''
         self.paneFileSystem = PMXFSPaneDock(self)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.paneFileSystem)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
         self.paneFileSystem.hide()
+        self.paneFileSystem.associateAction(self.actionShow_File_System_Pane,
+                                            _("Show Filesystem Panel"),
+                                            _("Hide Filesystem Panel"))
+        
         
         self.paneOutput = PMXOutputDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
         self.paneOutput.hide()
+        self.paneOutput.associateAction(self.actionShow_Output,
+                                        _("Show Output"),
+                                        _("Hide output"))
         
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
         self.paneProject.hide()
+        self.paneProject.associateAction(self.actionShow_Project_Dock,
+                                         _("Show Project"),
+                                         _("Hide project"))
         
         self.paneSymbolList = PMXSymboldListDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
         self.paneSymbolList.hide()
+        
         
         self.paneBundleEditor = PMXBundleEditorDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneBundleEditor)
@@ -588,6 +112,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
     def on_actionNewTab_triggered(self):
         #self.tabWidgetEditors.addTab(QTextEdit(), "New Tab %d" % self.counter)
         #self.counter += 1
+        logger.info("New")
         self.tabWidgetEditors.appendEmptyTab()
     
     @pyqtSignature('')
@@ -599,7 +124,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
 
     
     @pyqtSignature('')    
-    def on_actionNextTab_triggered(self):
+    def on_actionNext_Tab_triggered(self):
         
         curr = self.tabWidgetEditors.currentIndex()
         count = self.tabWidgetEditors.count()
@@ -612,7 +137,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
     @pyqtSignature('')
-    def on_actionPreviousTab_triggered(self):
+    def on_actionPrevious_Tab_triggered(self):
         curr = self.tabWidgetEditors.currentIndex()
         count = self.tabWidgetEditors.count()
         
@@ -639,16 +164,16 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         </p>
         """, qApp.instance().applicationVersion()))
         
-    @pyqtSignature('')
-    def on_actionFullScreen_triggered(self):
-        if self.isFullScreen():
+    @pyqtSlot(bool)
+    def on_actionFullscreen_toggled(self, check):
+        if not check and self.isFullScreen():
             self.showNormal()
-        else:
+        elif check:
             self.showFullScreen()
     
     
-    #@pyqtSignature('toggled(bool)')
-    def on_actionShowMenus_toggled(self, state):
+    @pyqtSlot(bool)
+    def on_actionShow_Menus_toggled(self, state):
         print "Toggle", state
         menubar = self.menuBar()
         if state:
@@ -658,8 +183,10 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         
             
     @pyqtSignature('')
-    def on_actionFileOpen_triggered(self):
-        fs = QFileDialog.getOpenFileNames()
+    def on_actionOpen_triggered(self):
+        #qApp.instance().startDirectory()
+        fs = QFileDialog.getOpenFileNames(self, _("Select Files to Open"),
+                                            qApp.instance().startDirectory())
         if not fs:
             return
         for path in fs:
@@ -709,24 +236,27 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.statusBar().showMessage("Screenshot saved as %s" % name)
         
     @pyqtSignature('')
-    def on_actionZoomIn_triggered(self):
+    def on_actionZoom_In_triggered(self):
         self.tabWidgetEditors.currentWidget().zoomIn()
     
     @pyqtSignature('')
-    def on_actionZoomOut_triggered(self):
+    def on_actionZoom_Out_triggered(self):
         self.tabWidgetEditors.currentWidget().zoomOut()
     
     @pyqtSignature('')
-    def on_actionFocusEditor_triggered(self):
+    def on_actionFocus_Editor_triggered(self):
         # Siempre debería haber una ventana de edición
         try:
             self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         except Exception:
             pass
     
+    @pyqtSignature('')
+    def on_actionFilter_Through_Command_triggered(self):
+        self.dialogFilter.exec_()
     
     @pyqtSignature('')
-    def on_actionCloseOthers_triggered(self):
+    def on_actionClose_Others_triggered(self):
         count = self.tabWidgetEditors.count()
         index = self.tabWidgetEditors.currentIndex()
         widgets = []
@@ -738,12 +268,9 @@ class PMXMainWindow(QMainWindow, CenterWidget):
             if not self.tabWidgetEditors.closeTab(i):
                 return
             
-#                return
-#        for i in range(index+1, count):
-#            if not self.tabWidgetEditors.closeTab(i):
-#                return
+
     @pyqtSignature('')
-    def on_actionMoveTabLeft_triggered(self):
+    def on_actionMove_Tab_Left_triggered(self):
         if self.tabWidgetEditors.count() == 1:
             return
         count = self.tabWidgetEditors.count()
@@ -758,7 +285,7 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.tabWidgetEditors.setCurrentWidget(widget)
     
     @pyqtSignature('')    
-    def on_actionMoveTabRight_triggered(self):
+    def on_actionMove_Tab_Right_triggered(self):
         if self.tabWidgetEditors.count() == 1:
             return
         count = self.tabWidgetEditors.count()
@@ -785,41 +312,50 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         if editor == self.tabWidgetEditors.currentWidget():
             self.statusBar().updateCursorPos(col, row)
         
-    def on_actionShowLineNumbers_toggled(self, check):
+    def on_actionShow_Line_Numbers_toggled(self, check):
         print "Line", check
-    
+
+    @pyqtSlot()
+    def on_actionPaste_As_New_triggered(self):
+        text = qApp.instance().clipboard().text()
+        if text:
+            editor = self.tabWidgetEditors.appendEmptyTab()
+            editor.appendPlainText(text)
+        else:
+            self.mainwindow.statusbar.showMessage(_("Nothing to paste."))
+          
 
     @pyqtSignature('')
-    def on_actionGoToLine_triggered(self):
+    def on_actionGo_To_Line_triggered(self):
         
         editor = self.tabWidgetEditors.currentWidget()
         editor.showGoToLineDialog()
         
     @pyqtSignature('')
-    def on_actionShowCurrentScope_triggered(self):
+    def on_actionShow_Current_Scope_triggered(self):
         scope = self.tabWidgetEditors.currentWidget().getCurrentScope()
         self.statusBar().showMessage(scope)
         
     @pyqtSignature('')
-    def on_actionConvertInvertCase_triggered(self):
+    def on_actionTo_iNVERT_cASE_triggered(self):
         def to_title(s):
             return unicode(s).swapcase()
         self.current_editor.replaceCursorText(to_title)
         
     @pyqtSignature('')
-    def on_actionConvertLowercase_triggered(self):
+    def on_actionTo_lowercase_triggered(self):
         def to_lower(s):
             return unicode(s).lower()
         self.current_editor.replaceCursorText(to_lower)
         
     @pyqtSignature('')
-    def on_actionConvertTitleCase_triggered(self):
+    def on_actionTo_TitleCase_triggered(self):
         def to_title(s):
             return unicode(s).title()
         self.current_editor.replaceCursorText(to_title)
         
     @pyqtSignature('')
-    def on_actionConvertTranspose_triggered(self):
+    def on_actionTranspose_triggered(self):
         def transpose(s):
             s = list(unicode(s))
             l = len(s)
@@ -830,45 +366,42 @@ class PMXMainWindow(QMainWindow, CenterWidget):
         self.current_editor.replaceCursorText(transpose)
         
     @pyqtSignature('')
-    def on_actionConvertUpercase_triggered(self):
+    def on_actionTo_UPPERCASE_triggered(self):
         def to_upper(s):
             return unicode(s).upper()
         self.current_editor.replaceCursorText(to_upper)
-        
 
-class PMXDockAction(QAction):
+
+
+class PMXTabActionGroup(QActionGroup):
     '''
-    Hides or shows a dock wheater the action is activated or deactivated
-    respectively.
+    This calss stores some information realted
     '''
-    def __init__(self, text_show, text_hide, dock, parent):
-        '''
-        @param text_show: Text to show when the dock is hidden
-        @param text_hide: Text to show when the dock is shown
-        @param dock: Dock widget
-        @param parent: Parent QObject
-        '''
-        text = dock.isHidden() and text_show or text_hide
-        QAction.__init__(self, text, parent)
-        self.setCheckable(True)
-        self.connect(self, SIGNAL("toggled(bool)"), self.toggleDock)
+    def __init__(self, parent):
+        QActionGroup.__init__(self, parent)
+        self.menus = []
+        # TODO: Translate this shorcuts, but not really nesseary, are they?
+        self.shortcuts = [ QKeySequence("Alt+%s" % i)  for i in range(10) ]
+
+    def addAction(self, action):
+        QActionGroup.addAction(self, action)
+        for m in self.menus:
+            m.addAction(action)
+        self.updateShortcuts()
+       
+    def updateShortcuts(self):
+        for action, shortcut in itertools.izip(self.actions(), self.shortcuts):
+            action.setShortcut(shortcut)
+
+    def removeAction(self, action):
+        QActionGroup.removeAction(self, action)
+        for m in self.menus:
+            m.removeAction(action)
+        self.updateShortcuts()
         
-        self.connect(dock, SIGNAL("widgetShown(bool)"), self.checkCrossButtonHide)
-        
-        self.dock = dock
-        self.text_show, self.text_hide = text_show, text_hide
-    
-    def toggleDock(self, check):
-        if check:
-            if self.dock.isHidden():
-                self.dock.show()
-            self.setText(self.text_hide)
-        else:
-            if not self.dock.isHidden():
-                self.dock.hide()
-            self.setText(self.text_show)
-    
-    def checkCrossButtonHide(self, dockShown):
-        if not dockShown:
-            if self.isChecked():
-                self.setChecked(False)
+    def addMenu(self, menu):
+        if not menu in self.menus:
+            self.menus.append(menu)
+            for action in self.actions():
+                menu.addAction(action)
+            

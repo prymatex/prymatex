@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #-*- encoding: utf-8 -*-
 # Created: 02/02/2010 by defo
 
-from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction
+from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
 from PyQt4.QtCore import QString, SIGNAL, Qt
 from prymatex.gui.editor import PMXTextEdit, PMXCodeEdit
 
@@ -33,21 +34,18 @@ class PMXTabWidget(QTabWidget):
 #        self.setCornerWidget(createButton(self, "Tab List", "Ctrl+Space"), 
 #                             Qt.TopRightCorner)
         self.buttonTabList = QPushButton(self)
+        self.buttonTabList.setObjectName("buttonTabList")
         self.buttonTabList.setToolTip(_("Tab list"))
         self.buttonTabList.setShortcut(text_to_KeySequence("Ctrl+Tab"))
-        self.buttonTabList.setIcon(qApp.instance().res_mngr.getIcon('application_view_list.png'))
+        self.buttonTabList.setIcon(QIcon(":/resources/actions/view-close.png"))
         self.buttonTabList.setStyleSheet('''
             QPushButton {
                 padding: 5px;
             }
         ''')
-        # Seteamos
-        self.buttonTabList.setMenu(self.parent().menuPanes)
+        
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
         
-        #self.setTab
-    
-    
     
     def mouseDoubleClickEvent(self, event):
         self.appendEmptyTab()
@@ -106,6 +104,9 @@ class PMXTabWidget(QTabWidget):
     
     
     def appendEmptyTab(self):
+        '''
+        Creates a new empty tab and returns it
+        '''
         editor = self.getEditor()
         # Title should be filled after tab insertion
         index = self.addTab(editor, '')
@@ -113,6 +114,7 @@ class PMXTabWidget(QTabWidget):
         self.setCurrentIndex(index)
         if self.count() == 1:
             editor.setFocus(Qt.TabFocusReason)
+        return editor
     
     
     def closeTab(self, index):
@@ -130,17 +132,6 @@ class PMXTabWidget(QTabWidget):
             return True
         return False
     
-#    def addTab(self, widget, label):
-#        '''
-#        Lets the widget know when it has been inserted
-#        '''
-#        retval = QTabWidget.addTab(self, widget, label)
-#        if hasattr(widget, 'afterInsertionEvent' ):
-#            widget.afterInsertionEvent()
-#        if not self.count():
-#            widget.actionMenuTab.setChecked(True)
-#        return retval
-            
     def removeTab(self, index):
         '''
         Lets the widget know when it has been removed
@@ -201,6 +192,9 @@ class PMWTabsMenu(QMenu):
         for action, shortcut in itertools.izip(self.actions(), self.shortcuts):
             action.setShortcut(shortcut)
         
+    
+
+
     
         
         

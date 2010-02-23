@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 # encoding: utf-8
-from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen
+from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
 from PyQt4.QtCore import SIGNAL
 
 from os.path import join, exists, isdir, isabs
@@ -39,10 +40,10 @@ class PMXApplication(QApplication):
         self.init_resources()
         self.res_mngr.loadStyleSheet()
         
-        self.splash = QSplashScreen(self.res_mngr.getPixmap('Prymatex_Splash.png'))
+        self.splash = QSplashScreen(QPixmap(":/resources/Prymatex_Splash.png"))
         self.splash.show()
         
-        self.setWindowIcon(self.res_mngr.getIcon('Prymatex_Logo.png'))
+        self.setWindowIcon(QIcon(":/resources/icons/Prymatex_Logo.png"))
         
         self.check_single_instance()
         
@@ -216,4 +217,6 @@ class PMXApplication(QApplication):
         else:
             from prymatex.lib.os import get_homedir
             return get_homedir()
+
             
+import res_rc

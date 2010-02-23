@@ -20,3 +20,4 @@ src/prymatex/*.xml
 tests/*/basic_usage
 src/prymatex/test.*
 *.log
+src/prymatex/resources/*

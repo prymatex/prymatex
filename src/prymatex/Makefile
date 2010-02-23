@@ -2,10 +2,20 @@ PLATFORM=$(shell python -c "import sys; print(sys.platform)")
 H2XML=../tools/ctypeslib/scripts/h2xml.py
 XML2PY=../tools/ctypeslib/scripts/xml2py.py
 ONIGOUTPUT=
-all: oniguruma
+QRC_FILES=$(shell find ./ -iname "*.qrc")
+
+
+
+
+all: oniguruma resources
 	
 	${MAKE} -C gui
 	${MAKE} -C config
+	
+resources: res_rc.py
+
+res_rc.py: res.qrc
+	pyrcc4 -py2 $^ -o $@
 	
 oniguruma:
 	#TODO: Hacer compilación segun plataforma
