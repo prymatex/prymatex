@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Mon Feb 22 21:06:28 2010
+# Created: Mon Feb 22 22:21:22 2010
 #      by: PyQt4 UI code generator 4.7
 #
 # WARNING! All changes made in this file will be lost!
@@ -199,8 +199,11 @@ class Ui_MainWindow(object):
         self.actionTab_to_spaces.setObjectName("actionTab_to_spaces")
         self.actionSpaces_to_Tabs = QtGui.QAction(MainWindow)
         self.actionSpaces_to_Tabs.setObjectName("actionSpaces_to_Tabs")
-        self.actionFilter_through_command = QtGui.QAction(MainWindow)
-        self.actionFilter_through_command.setObjectName("actionFilter_through_command")
+        self.actionFilter_Through_Command = QtGui.QAction(MainWindow)
+        icon21 = QtGui.QIcon()
+        icon21.addPixmap(QtGui.QPixmap(":/resources/actions/view-filter.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionFilter_Through_Command.setIcon(icon21)
+        self.actionFilter_Through_Command.setObjectName("actionFilter_Through_Command")
         self.actionRun_selection = QtGui.QAction(MainWindow)
         self.actionRun_selection.setObjectName("actionRun_selection")
         self.actionTermial = QtGui.QAction(MainWindow)
@@ -307,7 +310,7 @@ class Ui_MainWindow(object):
         self.menuText.addAction(self.actionTab_to_spaces)
         self.menuText.addAction(self.actionSpaces_to_Tabs)
         self.menuText.addSeparator()
-        self.menuText.addAction(self.actionFilter_through_command)
+        self.menuText.addAction(self.actionFilter_Through_Command)
         self.menuText.addAction(self.actionRun_selection)
         self.menuRun.addAction(self.actionThis_file)
         self.menuRun.addAction(self.actionWith_options)
@@ -438,8 +441,9 @@ class Ui_MainWindow(object):
         self.actionTranspose.setText(QtGui.QApplication.translate("MainWindow", "Transpose", None, QtGui.QApplication.UnicodeUTF8))
         self.actionTab_to_spaces.setText(QtGui.QApplication.translate("MainWindow", "Tab to Spaces", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSpaces_to_Tabs.setText(QtGui.QApplication.translate("MainWindow", "Spaces to Tabs", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionFilter_through_command.setText(QtGui.QApplication.translate("MainWindow", "Filter through command", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionFilter_through_command.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+F", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionFilter_Through_Command.setText(QtGui.QApplication.translate("MainWindow", "Filter through command", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionFilter_Through_Command.setIconText(QtGui.QApplication.translate("MainWindow", "Filter Through Command", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionFilter_Through_Command.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+F", None, QtGui.QApplication.UnicodeUTF8))
         self.actionRun_selection.setText(QtGui.QApplication.translate("MainWindow", "Run selection", None, QtGui.QApplication.UnicodeUTF8))
         self.actionRun_selection.setShortcut(QtGui.QApplication.translate("MainWindow", "Alt+Shift+R", None, QtGui.QApplication.UnicodeUTF8))
         self.actionTermial.setText(QtGui.QApplication.translate("MainWindow", "Termial", None, QtGui.QApplication.UnicodeUTF8))

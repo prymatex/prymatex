@@ -17,6 +17,7 @@ from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
 from prymatex.gui.panes.bundles import PMXBundleEditorDock
 from prymatex.gui.ui_mainwindow import Ui_MainWindow
+from prymatex.gui.filterdlg import PMXFilterDialog
 import itertools
 import logging
 logger = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.center()
         
         self.dialogConfig = PMXConfigDialog(self)
-        
+        self.dialogFilter = PMXFilterDialog(self)
         self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
         #self.actionShowFSPane.setChecked(True)
@@ -250,6 +251,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         except Exception:
             pass
     
+    @pyqtSignature('')
+    def on_actionFilter_Through_Command_triggered(self):
+        self.dialogFilter.exec_()
     
     @pyqtSignature('')
     def on_actionClose_Others_triggered(self):

@@ -104,7 +104,7 @@
     <addaction name="actionTab_to_spaces"/>
     <addaction name="actionSpaces_to_Tabs"/>
     <addaction name="separator"/>
-    <addaction name="actionFilter_through_command"/>
+    <addaction name="actionFilter_Through_Command"/>
     <addaction name="actionRun_selection"/>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -588,9 +588,16 @@
     <string>Spaces to Tabs</string>
    </property>
   </action>
-  <action name="actionFilter_through_command">
+  <action name="actionFilter_Through_Command">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/resources/actions/view-filter.png</normaloff>:/resources/actions/view-filter.png</iconset>
+   </property>
    <property name="text">
     <string>Filter through command</string>
+   </property>
+   <property name="iconText">
+    <string>Filter Through Command</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>
