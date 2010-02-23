@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QColor, QFont
 from prymatex.lib.textmate.syntax import TMSyntaxProcessor, TMScoreManager
 from prymatex.lib.textmate.theme import TM_THEMES
@@ -68,8 +69,6 @@ class PMXBlockUserData(QTextBlockUserData):
         return ' '.join(map(str, self.tokens))
     
     def get_scope_at(self, pos):
-        if len(self.tokens) == 1:
-            return self.tokens[0].scopes
         tokens = filter(lambda t: t.begin < pos <= t.end, self.tokens)
         return tokens[0].scopes
         
@@ -112,7 +111,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
             self.setFormat(begin, end - begin, self.formatter.get_format(scope))
     
     def new_line(self, line):
-        self.current_position = 0
+        self.current_position = -1
         if self.discard_lines:
             self.discard_lines -= 1
 
@@ -139,4 +138,6 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         else:
             self.setCurrentBlockState(self.MULTI_LINE)
             self.add_token(self.current_position, self.currentBlock().length(), " ".join(self.scopes))
-        self.setCurrentBlockUserData(PMXBlockUserData(self.tokens))
+        user_data = PMXBlockUserData(self.tokens)
+        print user_data
+        self.setCurrentBlockUserData(user_data)
