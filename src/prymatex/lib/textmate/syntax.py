@@ -31,7 +31,7 @@ class TMSyntaxProcessor(object):
     def start_parsing(self, name):
         pass
 
-    def end_parsing(self, name, closed):
+    def end_parsing(self, name):
         pass
 
 class TMDebugSyntaxProcessor(TMSyntaxProcessor):
@@ -44,10 +44,10 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
         return line
 
     def open_tag(self, name, position):
-        print self.pprint( '', '{ %s' % name, position + len(self.line_marks))
+        print self.pprint( '', '{ %d - %s' % (position, name), position + len(self.line_marks))
 
     def close_tag(self, name, position):
-        print self.pprint( '', '} %s' % name, position + len(self.line_marks))
+        print self.pprint( '', '} %d - %s' % (position, name), position + len(self.line_marks))
 
     def new_line(self, line):
         self.line_number += 1
@@ -194,7 +194,7 @@ class TMSyntaxNode(object):
                 processor.new_line(line)
             position += self.parse_line(stack, line, processor)
         if processor:
-            processor.end_parsing(self.scopeName, len(stack) == 1)
+            processor.end_parsing(self.scopeName)
         return stack
     
     def parse_repository(self, repository):
@@ -224,7 +224,7 @@ class TMSyntaxNode(object):
             ends.append([range.last, -group, name])
         starts = starts[::-1]
         ends = ends[::-1]
-         
+        
         while starts or ends:
             if starts:
                 pos, _, name = ends.pop()
@@ -242,6 +242,7 @@ class TMSyntaxNode(object):
     def match_captures(self, name, match):
         matches = []
         captures = getattr(self, name)
+
         if captures:
             for key, value in captures:
                 if re.compile('^\d*$').match(key):
@@ -251,12 +252,12 @@ class TMSyntaxNode(object):
                     if match.to_index( key.to_sym ):
                         matches.append([match.to_index( key.to_sym ), match.offset( key.to_sym), value['name']])
         return matches
-        
+      
     def match_first(self, string, position):
         if self.match:
             match = self.match.search( string, position )
             if match:
-                return (self, match) 
+                return (self, match)
         elif self.begin:
             match = self.begin.search( string, position )
             if match:
@@ -270,9 +271,11 @@ class TMSyntaxNode(object):
     def match_end(self, string, match, position):
         regstring = self.end[:]
         def g_match(mobj):
+            print "g_match"
             index = mobj.group(0)
             return match.group(index)
         def d_match(mobj):
+            print "d_match"
             index = mobj.group(0)
             return match.groupdict(index)
         regstring = re.sub(re.compile('\\\\([1-9])'), g_match, regstring)
@@ -288,11 +291,11 @@ class TMSyntaxNode(object):
                     if not match[1] or match[1].start() > tmatch[1].start():
                         match = tmatch
         return match
-      
+
     def parse_line(self, stack, line, processor):
         top, match = stack[-1]
         position = 0
-            
+        
         while True:
             if top.patterns:
                 pattern, pattern_match = top.match_first_son(line, position)
@@ -342,3 +345,15 @@ class TMSyntaxNode(object):
                         processor.close_tag(pattern.name, end_pos)
             position = end_pos
         return position
+
+def parse_file(filename, name_space = 'default'):
+    import plistlib
+    data = plistlib.readPlist(filename)
+    return TMSyntaxNode(data, None, name_space)
+
+if __name__ == '__main__':
+    import ipdb
+
+    python = parse_file('../../../prymatex/resources/Bundles/Python.tmbundle/Syntaxes/Python.tmLanguage', 'python')
+    p = TMDebugSyntaxProcessor()
+    print python.parse("a = [ 1, 2 ]", p)
