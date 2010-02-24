@@ -93,7 +93,7 @@ def load_textmate_bundle(bundle_path):
         try:
             data = plistlib.readPlist(sf)
             uuid = data.pop('uuid')
-            m = macro.Macro(data, bundle.name)
+            m = macro.TMMacro(data, bundle.name)
             bundle.menu[uuid] = m
         except ExpatError:
             pass
