@@ -2,7 +2,7 @@
 from prymatex.lib.exceptions import UnsupportedPlatformError
 
 import sys
-if sys.platform.count('linux'):
+if sys.platform.count('linux') or sys.platform.count('darwin'):
     from linux import *
 elif sys.platform.count('win'):
     from win32 import *
