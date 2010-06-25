@@ -44,22 +44,6 @@
     <addaction name="actionRestart"/>
     <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="actionUndo"/>
-    <addaction name="actionRedo"/>
-    <addaction name="actionCopy"/>
-    <addaction name="actionCut"/>
-    <addaction name="actionPaste"/>
-    <addaction name="actionPaste_As_New"/>
-    <addaction name="actionFind"/>
-    <addaction name="actionFind_Replace"/>
-    <addaction name="actionPreferences"/>
-    <addaction name="separator"/>
-    <addaction name="separator"/>
-   </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>&amp;View</string>
@@ -165,6 +149,24 @@
     </property>
     <addaction name="actionShow_Bundle_Editor"/>
     <addaction name="actionSelect_Bundle_Item"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionPaste"/>
+    <addaction name="actionPaste_As_New"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind"/>
+    <addaction name="actionFind_Replace"/>
+    <addaction name="actionPreferences"/>
+    <addaction name="actionSelect_All"/>
+    <addaction name="actionSelect_None"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -775,6 +777,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+T</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+  </action>
+  <action name="actionSelect_None">
+   <property name="text">
+    <string>Select None</string>
    </property>
   </action>
  </widget>

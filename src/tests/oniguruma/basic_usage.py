@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #-*- encoding: utf-8 -*-
 # Created: 10/02/2010 by defo
 
@@ -7,7 +8,7 @@
 # tests/py-ctypes/onig
 import sys
 from os.path import *
-pth = abspath('../..') # Hacemos disponible oniguruma
+pth = abspath(join(dirname(__file__), '../..')) # Hacemos disponible oniguruma
 sys.path.append(pth)
 from prymatex.lib.ctypes import oniguruma
 from  ctypes import *
@@ -22,7 +23,7 @@ pattern = c_char_p("a(.*)b|[e-f]+")
 string = c_char_p("zzzzaffffffffb")
 reg = oniguruma.regex_t()
 einfo = oniguruma.OnigErrorInfo()
-
+print oniguruma.onig_copyright()
 r = oniguruma.onig_new(pointer(reg), 
                        cast(pattern, POINTER(c_ubyte)), 
                        cast(byref(pattern, len(py_pattern)), POINTER(c_ubyte)),
@@ -33,8 +34,10 @@ r = oniguruma.onig_new(pointer(reg),
     
 if (r != ONIG_NORMAL):
     #char s[ONIG_MAX_ERROR_MESSAGE_LEN];
-    s = ''
-    oniguruma.onig_error_code_to_str(s, r, byref(einfo))
+    print r
+    t = POINTER(c_ubyte)
+    s = c_ubyte()
+    oniguruma.onig_error_code_to_str(byref(s), r, byref(einfo))
     print s
     sys.exit()
     

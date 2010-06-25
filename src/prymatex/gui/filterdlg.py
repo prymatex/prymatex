@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt4.QtGui import QDialog, QMessageBox
+from PyQt4.QtGui import QDialog, QMessageBox, QToolTip
 from PyQt4.QtCore import SIGNAL, QProcess
 from ui_filterthroughcommand import Ui_FilterThroughCommand
 from prymatex.gui import PMXBaseGUIMixin
@@ -72,5 +72,9 @@ class PMXFilterDialog(QDialog, Ui_FilterThroughCommand, PMXBaseGUIMixin):
         elif self.radioOutputShowAsHTML.isChecked():
             pass
         elif self.radioOutputShowToolTip.isChecked():
-            pass
+            point = self.currentEditor.cursorRect().bottomRight()
+            point = self.mainwindow.mapToGlobal(point)
+            logger.info("Mostrar como tooltip %s %s", point, output)
+            
+            QToolTip.showText(point, output, self.mainwindow)
             
