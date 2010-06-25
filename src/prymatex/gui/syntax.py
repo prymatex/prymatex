@@ -16,7 +16,6 @@ class PMXSyntaxFormatter(object):
     def get_format(self, scope):
         if not (self.formats.has_key(scope)):
             self.formats[scope] = self.__search_format( scope )
-        print scope, self.formats[scope]
         return self.formats[scope]
     
     def __search_format(self, reference_scope):
@@ -92,7 +91,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         self.syntax = syntax
         self.formatter = formatter
     
-    def collect_all_text(self, current):
+    def collect_previous_text(self, current):
         text = [ current ]
         block = self.currentBlock().previous()
         
@@ -105,18 +104,20 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
     def highlightBlock(self, text):
         text = unicode(text)
         if self.previousBlockState() == self.MULTI_LINE:
-            text = self.collect_all_text(text)
+            text = self.collect_previous_text(text)
             self.discard_lines = len(text)
             text = "\n".join( text )
         else:  
             self.discard_lines = 0
         self.syntax.parse(text, self)
     
-    def add_token(self, begin, end):
+    def add_token(self, end):
+        begin = self.current_position
         if self.discard_lines == 0:
             scopes = " ".join(self.scopes)
             self.user_data.add_token(PMXBlockToken(begin, end, scopes))
             self.setFormat(begin, end - begin, self.formatter.get_format(scopes))
+        self.current_position = end
     
     def new_line(self, line):
         self.current_position = 0
@@ -130,21 +131,22 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
 
     # En cada oportunidad de se abre un tag
     def open_tag(self, scope, position):
-        self.add_token(self.current_position, position)
-        self.current_position = position
+        print "open: %d, %s" % (position, scope)
+        self.add_token(position)
         self.scopes.append(scope)
 
     def close_tag(self, scope, position):
+        print "close: %d, %s" % (position, scope)
         if self.scopes[-1] != scope:
             raise Exception('Bad scope close "%s"' % scope)
-        self.add_token(self.current_position, position)
-        self.current_position = position
+        self.add_token(position)
         self.scopes.pop()
 
     def end_parsing(self, scope):
+        print "fin: %s" % scope
         if len(self.scopes) == 0:
             self.setCurrentBlockState(self.SINGLE_LINE)
         else:
             self.setCurrentBlockState(self.MULTI_LINE)
-            self.add_token(self.current_position, self.currentBlock().length())
+            self.add_token(self.currentBlock().length())
         self.setCurrentBlockUserData(self.user_data)

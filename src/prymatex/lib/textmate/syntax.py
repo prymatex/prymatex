@@ -169,9 +169,8 @@ class TMSyntaxNode(object):
             elif key in ['content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:
-                keys = map(lambda v: int(v), value.keys())
-                value = map(lambda v: value['%s' % (v)], keys)
-                setattr(self, key, value.sort() )
+                value = sorted(value.items(), key=lambda v: int(v[0]))
+                setattr(self, key, value)
             elif key == 'repository':
                 self.parse_repository(value)
             elif key in ['patterns']:
@@ -215,13 +214,12 @@ class TMSyntaxNode(object):
     
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
-        
         captures = filter(lambda group, range, name: range[0] and range[0] != range[-1], captures)
         starts = []
         ends = []
         for group, range, name in captures:
-            starts.append([range.first, group, name])
-            ends.append([range.last, -group, name])
+            starts.append([range[0], group, name])
+            ends.append([range[-1], -group, name])
         starts = starts[::-1]
         ends = ends[::-1]
         
@@ -230,7 +228,7 @@ class TMSyntaxNode(object):
                 pos, _, name = ends.pop()
                 processor.close_tag(name, pos)
             elif ends:
-                pos, _, name = starts.pop
+                pos, _, name = starts.pop()
                 processor.open_tag(name, pos)
             elif abs(ends[-1][1]) < starts[-1][1]:
                 pos, _, name = ends.pop()
@@ -242,15 +240,21 @@ class TMSyntaxNode(object):
     def match_captures(self, name, match):
         matches = []
         captures = getattr(self, name)
-
+        
+        ''' if key =~ /^\d*$/
+                matches << [key.to_i, match.offset( key.to_i ), value["name"]] if key.to_i < match.size
+            else
+                matches << [match.to_index( key.to_sym ), match.offset( key.to_sym), value["name"]] if match.to_index( key.to_sym )
+        '''
+        
         if captures:
             for key, value in captures:
                 if re.compile('^\d*$').match(key):
-                    if int(key) < len(match):
-                        matches.append([int(key), match.offset( int(key) ), value['name']])
+                    if int(key) < len(match.groups()):
+                        matches.append([int(key), match.groups()[ int(key) ], value['name']])
                 else:
-                    if match.to_index( key.to_sym ):
-                        matches.append([match.to_index( key.to_sym ), match.offset( key.to_sym), value['name']])
+                    if match.groups().index( key ):
+                        matches.append([match.groups().index( key ), match.groupdict()[ key ], value['name']])
         return matches
       
     def match_first(self, string, position):
