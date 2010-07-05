@@ -57,7 +57,7 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
     def start_parsing(self, name):
         print '{%s' % name
 
-    def end_parsing(self, name, closed):
+    def end_parsing(self, name):
         print '}%s' % name
 
 ################################## ScoreManager ###################################
@@ -161,7 +161,7 @@ class TMSyntaxNode(object):
                     # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
                     value = value.replace('?i:', '(?i)')
                     value = value.replace('?x:', '(?x)')
-                    value = value.replace('?<=', '(?<=)')
+                    #value = value.replace('?<=', '(?<=)')
                     setattr(self, key, re.compile( value ))
                 except:
                     pass
@@ -184,14 +184,11 @@ class TMSyntaxNode(object):
         return TM_SYNTAXES[self.name_space]
     
     def parse(self, string, processor = None):
-        position = 0
-        stack = [[self, None]]
         if processor:
             processor.start_parsing(self.scopeName)
+        stack = [[self, None]]
         for line in string.splitlines():
-            if processor:
-                processor.new_line(line)
-            position += self.parse_line(stack, line, processor)
+            self.parse_line(stack, line, processor)
         if processor:
             processor.end_parsing(self.scopeName)
         return stack
@@ -214,7 +211,7 @@ class TMSyntaxNode(object):
     
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
-        captures = filter(lambda group, range, name: range[0] and range[0] != range[-1], captures)
+        captures = filter(lambda (group, range, name): range[0] and range[0] != range[-1], captures)
         starts = []
         ends = []
         for group, range, name in captures:
@@ -225,10 +222,10 @@ class TMSyntaxNode(object):
         
         while starts or ends:
             if starts:
-                pos, _, name = ends.pop()
+                pos, _, name = starts.pop()
                 processor.close_tag(name, pos)
             elif ends:
-                pos, _, name = starts.pop()
+                pos, _, name = ends.pop()
                 processor.open_tag(name, pos)
             elif abs(ends[-1][1]) < starts[-1][1]:
                 pos, _, name = ends.pop()
@@ -251,7 +248,7 @@ class TMSyntaxNode(object):
             for key, value in captures:
                 if re.compile('^\d*$').match(key):
                     if int(key) < len(match.groups()):
-                        matches.append([int(key), match.groups()[ int(key) ], value['name']])
+                        matches.append([int(key), match.span(int(key)), value['name']])
                 else:
                     if match.groups().index( key ):
                         matches.append([match.groups().index( key ), match.groupdict()[ key ], value['name']])
@@ -274,6 +271,7 @@ class TMSyntaxNode(object):
     
     def match_end(self, string, match, position):
         regstring = self.end[:]
+        print regstring
         def g_match(mobj):
             print "g_match"
             index = mobj.group(0)
@@ -297,6 +295,8 @@ class TMSyntaxNode(object):
         return match
 
     def parse_line(self, stack, line, processor):
+        if processor:
+            processor.new_line(line)
         top, match = stack[-1]
         position = 0
         
@@ -360,4 +360,4 @@ if __name__ == '__main__':
 
     python = parse_file('../../../prymatex/resources/Bundles/Python.tmbundle/Syntaxes/Python.tmLanguage', 'python')
     p = TMDebugSyntaxProcessor()
-    print python.parse("a = [ 1, 2 ]", p)
+    print python.parse("a = 'una cadena de texto'", p)

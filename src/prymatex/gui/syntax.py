@@ -138,7 +138,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
     def close_tag(self, scope, position):
         print "close: %d, %s" % (position, scope)
         if self.scopes[-1] != scope:
-            raise Exception('Bad scope close "%s"' % scope)
+            return
         self.add_token(position)
         self.scopes.pop()
 
