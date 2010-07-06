@@ -223,10 +223,10 @@ class TMSyntaxNode(object):
         while starts or ends:
             if starts:
                 pos, _, name = starts.pop()
-                processor.close_tag(name, pos)
+                processor.open_tag(name, pos)
             elif ends:
                 pos, _, name = ends.pop()
-                processor.open_tag(name, pos)
+                processor.close_tag(name, pos)
             elif abs(ends[-1][1]) < starts[-1][1]:
                 pos, _, name = ends.pop()
                 processor.close_tag(name, pos)
@@ -247,7 +247,7 @@ class TMSyntaxNode(object):
         if captures:
             for key, value in captures:
                 if re.compile('^\d*$').match(key):
-                    if int(key) < len(match.groups()):
+                    if int(key) <= len(match.groups()):
                         matches.append([int(key), match.span(int(key)), value['name']])
                 else:
                     if match.groups().index( key ):
@@ -271,7 +271,6 @@ class TMSyntaxNode(object):
     
     def match_end(self, string, match, position):
         regstring = self.end[:]
-        print regstring
         def g_match(mobj):
             print "g_match"
             index = mobj.group(0)
@@ -360,4 +359,4 @@ if __name__ == '__main__':
 
     python = parse_file('../../../prymatex/resources/Bundles/Python.tmbundle/Syntaxes/Python.tmLanguage', 'python')
     p = TMDebugSyntaxProcessor()
-    print python.parse("a = 'una cadena de texto'", p)
+    print python.parse('a = {"clave": 1, "algo": 3}', p)

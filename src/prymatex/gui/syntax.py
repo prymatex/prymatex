@@ -62,9 +62,8 @@ class PMXBlockToken(object):
         return '<token: Position: (%d, %d) Scopes: "%s...">' % (self.begin, self.end, self.scopes)
 
 class PMXBlockUserData(QTextBlockUserData):
-    def __init__(self, root):
+    def __init__(self):
         QTextBlockUserData.__init__(self)
-        self.root = root
         self.tokens = []
     
     def __str__(self):
@@ -74,11 +73,11 @@ class PMXBlockUserData(QTextBlockUserData):
         self.tokens.append(token)
         
     def get_scope_at(self, pos):
+        #FIXME: if pos == 0 then is in border
+        pos = pos or 1
         tokens = filter(lambda t: t.begin < pos <= t.end, self.tokens)
-        if not tokens:
-            return self.root
         if len(tokens) == 1:
-            return self.root + " " + tokens[-1].scopes
+            return tokens[-1].scopes
         else:
             raise Exception("WTF? muchos tokens")
         
@@ -112,41 +111,40 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         self.syntax.parse(text, self)
     
     def add_token(self, end):
-        begin = self.current_position
+        begin = self.line_position
         if self.discard_lines == 0:
             scopes = " ".join(self.scopes)
             self.user_data.add_token(PMXBlockToken(begin, end, scopes))
             self.setFormat(begin, end - begin, self.formatter.get_format(scopes))
-        self.current_position = end
+        self.line_position = end
     
     def new_line(self, line):
-        self.current_position = 0
+        self.line_position = 0
         if self.discard_lines:
             self.discard_lines -= 1
 
-    # Arranca el parser
+    #START
     def start_parsing(self, scope):
-        self.scopes = []
-        self.user_data = PMXBlockUserData(scope)
+        self.line_position = 0
+        self.scopes = [ scope ]
+        self.user_data = PMXBlockUserData()
 
-    # En cada oportunidad de se abre un tag
+    #OPEN
     def open_tag(self, scope, position):
-        print "open: %d, %s" % (position, scope)
         self.add_token(position)
         self.scopes.append(scope)
 
+    #CLOSE
     def close_tag(self, scope, position):
-        print "close: %d, %s" % (position, scope)
-        if self.scopes[-1] != scope:
-            return
         self.add_token(position)
         self.scopes.pop()
 
+    #END
     def end_parsing(self, scope):
-        print "fin: %s" % scope
-        if len(self.scopes) == 0:
+        if self.scopes[-1] == scope:
             self.setCurrentBlockState(self.SINGLE_LINE)
         else:
             self.setCurrentBlockState(self.MULTI_LINE)
-            self.add_token(self.currentBlock().length())
+        self.add_token(self.currentBlock().length())
+        self.scopes.pop()
         self.setCurrentBlockUserData(self.user_data)
