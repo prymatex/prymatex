@@ -126,10 +126,9 @@ class PMXCodeEdit(QPlainTextEdit):
     
     def getCurrentScope(self):
         cursor = self.textCursor()
-        return cursor.block().userData().get_scope_at(cursor.columnNumber())
+        user_data = cursor.block().userData()
+        return user_data and user_data.get_scope_at(cursor.columnNumber()) or ""
         
-        
-    
     
     def soft_tabs(): #@NoSelf
         doc = """Soft tabs, insert spaces instead of tab""" #@UnusedVariable

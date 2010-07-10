@@ -39,12 +39,11 @@ class PWMStatusLabel(QLabel):
 class PMXSyntaxMenu(QComboBox):
     def __init__(self, parent = None):
         QComboBox.__init__(self, parent)
-        self.addItem("No syntax")
+        self.addItem("No syntax", userData=QVariant(None))
         self.connect(self, SIGNAL('currentIndexChanged(int)'), self.setSyntax)
     
     def setSyntax(self, index):
         syntax = self.itemData(index).toPyObject()
-        print "Cambiando la syntax a ", syntax.name
         qApp.instance().current_editor.set_syntax(syntax)
     
 
@@ -73,7 +72,6 @@ class PMXStatusBar(QStatusBar):
         self.syntaxMenu = PMXSyntaxMenu(self)
         # TODO: Nueva iteracion
         for scope, syntax in TM_SYNTAXES['textmate'].items():
-            
             self.syntaxMenu.addItem(syntax.name, userData=QVariant(syntax))
             
         self.addPermanentWidget(self.syntaxMenu)

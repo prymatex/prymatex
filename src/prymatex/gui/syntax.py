@@ -73,9 +73,7 @@ class PMXBlockUserData(QTextBlockUserData):
         self.tokens.append(token)
         
     def get_scope_at(self, pos):
-        #FIXME: if pos == 0 then is in border
-        pos = pos or 1
-        tokens = filter(lambda t: t.begin < pos <= t.end, self.tokens)
+        tokens = filter(lambda t: t.begin <= pos < t.end, self.tokens)
         if len(tokens) == 1:
             return tokens[-1].scopes
         else:
@@ -102,7 +100,6 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         return text
     
     def highlightBlock(self, text):
-        
         if not self.syntax:
             return
         text = unicode(text)
