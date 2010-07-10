@@ -20,6 +20,7 @@ from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.filterdlg import PMXFilterDialog
 import itertools
 import logging
+from prymatex.lib.textmate.bundle import TMMenuNode, MENU_SPACE
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
@@ -40,6 +41,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #self.setup_toolbars()
         
         self.center()
+        
+        # Una vez centrada la ventana caramos los mnues
+        from prymatex.lib.textmate.bundle import TM_BUNDLES
+        self.add_bundles_to_menu(TM_BUNDLES)
         
         self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
@@ -102,7 +107,29 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #raise NotImplementedError("Do we need them?")
         pass
     
-        
+    
+    def add_menu_item(self, parent_menu, item):
+        if isinstance(item, TMMenuNode):
+            menu = QMenu(item.name)
+            parent_menu.addMenu(menu)
+            for _, i in item.iteritems():
+                self.add_menu_item(menu, i)
+        elif item == MENU_SPACE:
+            parent_menu.addSeparator()
+        elif item and item.name:
+            action = QAction(item.name, self)
+            parent_menu.addAction(action)
+            
+    def add_bundles_to_menu(self, bundles):
+        names = sorted(bundles.keys())
+        #assert isinstance(bundles, TMMenuNode), "No me pasaste bundles"
+        for name in names:
+            menu = QMenu(name, self)
+            self.menuBundles.addMenu(menu)
+            bundle = bundles[name]
+            for _, item in bundle.menu.iteritems():
+                self.add_menu_item(menu, item)  
+                
     def on_actionQuit_triggered(self):
         QApplication.quit()
     

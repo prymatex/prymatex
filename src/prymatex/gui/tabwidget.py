@@ -62,6 +62,7 @@ class PMXTabWidget(QTabWidget):
         font.setPointSize(11)
         editor.setFont(font)
         return editor
+        
     
 #    def tabRemoved(self, index):
 #        if not self.count():
@@ -80,7 +81,7 @@ class PMXTabWidget(QTabWidget):
                     editor = self.widget(i)
                     if path == editor.path:
                         self.setCurrentWidget(editor)
-                        return
+                        returntabWidgetEditors
     
             
             if count == 1 and not self.widget(0).document().isModified() and \

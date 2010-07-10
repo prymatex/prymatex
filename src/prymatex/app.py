@@ -63,6 +63,15 @@ class PMXApplication(QApplication):
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
     
+    def _get_current_editor(self):
+        '''
+        Shortcut al editor actual
+        '''
+        return self.main_window.tabWidgetEditors.currentWidget()
+        
+    
+    current_editor = property(_get_current_editor)
+    
     def init_application_params(self):
         self.setApplicationName(prymatex.PRODUCT_NAME)
         self.setApplicationVersion(prymatex.VERSION) # hg stuff?

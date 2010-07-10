@@ -7,6 +7,7 @@
 '''
 
 from pprint import pprint
+from PyQt4.QtGui import QAction
 
 COMMANDS = {}
 
@@ -24,3 +25,5 @@ class Command(object):
         self.name = hash.get('name')
         self.keyEquivalent = hash.get('keyEquivalent')
         self.tabTrigger = hash.get('tabTrigger')
+        
+        

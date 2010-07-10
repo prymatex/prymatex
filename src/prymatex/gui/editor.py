@@ -52,6 +52,7 @@ class PMXCodeEdit(QPlainTextEdit):
             QWidget.__init__(self, editor)
             self.codeEditor = editor
             
+            
         def sizeHint(self):
             
             return QSize(self.codeEditor.lineNumberAreaWidth(), 0)
@@ -62,21 +63,24 @@ class PMXCodeEdit(QPlainTextEdit):
     # Ctor
     def __init__(self, parent, path = ''):
         QTextEdit.__init__(self, parent)
+        print "Se crea editor"
         self.lineNumberArea = PMXCodeEdit.LineNumberArea(self)
         
         self.connect(self, SIGNAL("blockCountChanged(int)"), self.updateLineNumberAreaWidth)
         self.connect(self, SIGNAL("updateRequest(const QRect &, int)"), self.updateLineNumberArea)
         self.connect(self, SIGNAL("cursorPositionChanged()"), self.highlightCurrentLine)
         
-        print self.connect(self, SIGNAL("cursorPositionChanged()"), self.notifyCursorChange)
+        self.connect(self, SIGNAL("cursorPositionChanged()"), self.notifyCursorChange)
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrentLine()
         self.setTabChangesFocus(False)
+        
+        
         #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
-        try:
-            self.syntax_processor = PMXSyntaxProcessor(self.document(), TM_SYNTAXES['textmate']['source.python'], PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
-        except Exception, e:
-            print ("Error al cargar la sintaxis %s" % e)
+#        try:
+        self.syntax_processor = PMXSyntaxProcessor(self.document(), None, PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
+#        except Exception, e:
+#            print ("Error al cargar la sintaxis %s" % e)
         
         
         # TODO: Ver     
@@ -87,6 +91,9 @@ class PMXCodeEdit(QPlainTextEdit):
         
         self.actionMenuTab = EditorTabAction(self.title(), self)
     
+    def set_syntax(self, syntax):
+        self.syntax_processor.set_syntax(syntax)
+        
     # File operations
     def save(self, filename = None, save_as = False):
         '''

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Mon Feb 22 22:21:22 2010
-#      by: PyQt4 UI code generator 4.7
+# Created: Fri Jul  9 20:27:09 2010
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -21,12 +21,10 @@ class Ui_MainWindow(object):
         self.verticalLayout = QtGui.QVBoxLayout(self.tabWidgetEditors)
         self.verticalLayout.setObjectName("verticalLayout")
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 20))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
-        self.menuEdit = QtGui.QMenu(self.menubar)
-        self.menuEdit.setObjectName("menuEdit")
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setObjectName("menuView")
         self.menuText = QtGui.QMenu(self.menubar)
@@ -43,6 +41,8 @@ class Ui_MainWindow(object):
         self.menuPanes.setObjectName("menuPanes")
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName("menuHelp")
+        self.menuEdit = QtGui.QMenu(self.menubar)
+        self.menuEdit.setObjectName("menuEdit")
         self.menuBundles = QtGui.QMenu(self.menubar)
         self.menuBundles.setObjectName("menuBundles")
         MainWindow.setMenuBar(self.menubar)
@@ -259,6 +259,10 @@ class Ui_MainWindow(object):
         self.actionShow_Bundle_Editor.setObjectName("actionShow_Bundle_Editor")
         self.actionSelect_Bundle_Item = QtGui.QAction(MainWindow)
         self.actionSelect_Bundle_Item.setObjectName("actionSelect_Bundle_Item")
+        self.actionSelect_All = QtGui.QAction(MainWindow)
+        self.actionSelect_All.setObjectName("actionSelect_All")
+        self.actionSelect_None = QtGui.QAction(MainWindow)
+        self.actionSelect_None.setObjectName("actionSelect_None")
         self.menuFile.addAction(self.actionNewTab)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave)
@@ -269,17 +273,6 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionClose_Others)
         self.menuFile.addAction(self.actionRestart)
         self.menuFile.addAction(self.actionQuit)
-        self.menuEdit.addAction(self.actionUndo)
-        self.menuEdit.addAction(self.actionRedo)
-        self.menuEdit.addAction(self.actionCopy)
-        self.menuEdit.addAction(self.actionCut)
-        self.menuEdit.addAction(self.actionPaste)
-        self.menuEdit.addAction(self.actionPaste_As_New)
-        self.menuEdit.addAction(self.actionFind)
-        self.menuEdit.addAction(self.actionFind_Replace)
-        self.menuEdit.addAction(self.actionPreferences)
-        self.menuEdit.addSeparator()
-        self.menuEdit.addSeparator()
         self.menuView.addAction(self.actionFullscreen)
         self.menuView.addAction(self.actionShow_Menus)
         self.menuView.addSeparator()
@@ -339,8 +332,22 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.actionTake_Screenshot)
         self.menuHelp.addAction(self.actionAbout_this_application)
         self.menuHelp.addAction(self.actionAbout_Qt)
+        self.menuEdit.addAction(self.actionUndo)
+        self.menuEdit.addAction(self.actionRedo)
+        self.menuEdit.addSeparator()
+        self.menuEdit.addAction(self.actionCopy)
+        self.menuEdit.addAction(self.actionCut)
+        self.menuEdit.addAction(self.actionPaste)
+        self.menuEdit.addAction(self.actionPaste_As_New)
+        self.menuEdit.addSeparator()
+        self.menuEdit.addAction(self.actionFind)
+        self.menuEdit.addAction(self.actionFind_Replace)
+        self.menuEdit.addAction(self.actionPreferences)
+        self.menuEdit.addAction(self.actionSelect_All)
+        self.menuEdit.addAction(self.actionSelect_None)
         self.menuBundles.addAction(self.actionShow_Bundle_Editor)
         self.menuBundles.addAction(self.actionSelect_Bundle_Item)
+        self.menuBundles.addSeparator()
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
@@ -356,7 +363,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "&Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "&View", None, QtGui.QApplication.UnicodeUTF8))
         self.menuText.setTitle(QtGui.QApplication.translate("MainWindow", "&Text", None, QtGui.QApplication.UnicodeUTF8))
         self.menuConvert.setTitle(QtGui.QApplication.translate("MainWindow", "Convert", None, QtGui.QApplication.UnicodeUTF8))
@@ -365,6 +371,7 @@ class Ui_MainWindow(object):
         self.menuNavigation.setTitle(QtGui.QApplication.translate("MainWindow", "&Navigation", None, QtGui.QApplication.UnicodeUTF8))
         self.menuPanes.setTitle(QtGui.QApplication.translate("MainWindow", "Panes", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "&Help", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "&Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuBundles.setTitle(QtGui.QApplication.translate("MainWindow", "&Bundles", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNewTab.setText(QtGui.QApplication.translate("MainWindow", "&New", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNewTab.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
@@ -483,6 +490,8 @@ class Ui_MainWindow(object):
         self.actionShow_Bundle_Editor.setText(QtGui.QApplication.translate("MainWindow", "Show Bundle Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSelect_Bundle_Item.setText(QtGui.QApplication.translate("MainWindow", "Select Bundle Item", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSelect_Bundle_Item.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Alt+T", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSelect_All.setText(QtGui.QApplication.translate("MainWindow", "Select All", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSelect_None.setText(QtGui.QApplication.translate("MainWindow", "Select None", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
 from tabwidget import PMXTabWidget

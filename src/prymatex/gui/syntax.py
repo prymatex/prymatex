@@ -89,6 +89,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         QSyntaxHighlighter.__init__(self, doc)
         self.syntax = syntax
         self.formatter = formatter
+        
     
     def collect_previous_text(self, current):
         text = [ current ]
@@ -101,6 +102,9 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         return text
     
     def highlightBlock(self, text):
+        
+        if not self.syntax:
+            return
         text = unicode(text)
         if self.previousBlockState() == self.MULTI_LINE:
             text = self.collect_previous_text(text)
@@ -109,6 +113,10 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         else:  
             self.discard_lines = 0
         self.syntax.parse(text, self)
+    
+    def set_syntax(self, syntax):
+        self.syntax =  syntax
+        self.rehighlight()
     
     def add_token(self, end):
         begin = self.line_position

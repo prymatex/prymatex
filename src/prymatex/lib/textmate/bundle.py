@@ -6,12 +6,13 @@ from xml.parsers.expat import ExpatError
 
 TM_BUNDLES = {}
 
+MENU_SPACE = '-' * 36
 class TMMenuNode(object):
     def __init__(self, name = '', items = [], excludedItems = [], submenus = {}):
         self.name = name
         self.items = items
         self.excludedItems = excludedItems
-        self.main = dict(map(lambda i: (i, None), filter(lambda x: x != '-' * 36, self.items)))
+        self.main = dict(map(lambda i: (i, None), filter(lambda x: x != MENU_SPACE, self.items)))
         for uuid, submenu in submenus.iteritems():
             self[uuid] = TMMenuNode(**submenu)
 
@@ -25,7 +26,7 @@ class TMMenuNode(object):
             for submenu in filter(lambda x: isinstance(x, TMMenuNode), self.main.values()):
                 if key in submenu:
                     return submenu[key]
-        raise Exception();
+        raise KeyError(key)
     
     def __setitem__(self, key, menu):
         #TODO: Ver si esta en exclude o en deleted
@@ -36,6 +37,18 @@ class TMMenuNode(object):
                 if key in submenu:
                     submenu[key] = menu
 
+    def iteritems(self):
+        items = self.items
+        if self.excludedItems:
+            items = filter(lambda x: not x in self.excludedItems, items)
+        if hasattr(self, 'deleted') and self.deleted:
+            items = filter(lambda x: not x in self.deleted, items)
+        for item in items:
+            if item != MENU_SPACE:
+                yield (item, self[item])
+            else:
+                yield (MENU_SPACE, MENU_SPACE)
+        
 class TMBundle(object):
     def __init__(self, hash):
         self.uuid = hash.get('uuid')
@@ -117,7 +130,7 @@ def load_textmate_bundle(bundle_path):
         #try:
             #data = plistlib.readPlist(sf)
             #template.Template(data, bundle.name)
-        #except ExpatError:
+        #except ExpatError:addMenu
             #pass
     return bundle
 
@@ -139,3 +152,8 @@ def load_textmate_bundles(path, after_load_callback = None):
         counter += 1
         
     return counter
+
+if __name__ == '__main__':
+    bundle = load_textmate_bundle('../../../prymatex/resources/Bundles/Python.tmbundle')
+    from pprint import pprint
+    pprint(bundle.menu.main)

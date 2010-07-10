@@ -8,6 +8,7 @@ Some of the widgets defined here are:
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
+from prymatex.lib.textmate.syntax import TM_SYNTAXES
 
 
 class PWMStatusLabel(QLabel):
@@ -35,6 +36,17 @@ class PWMStatusLabel(QLabel):
     def on_menu_triggered(self, action):
         self.setText(action.text())
     
+class PMXSyntaxMenu(QComboBox):
+    def __init__(self, parent = None):
+        QComboBox.__init__(self, parent)
+        self.addItem("No syntax")
+        self.connect(self, SIGNAL('currentIndexChanged(int)'), self.setSyntax)
+    
+    def setSyntax(self, index):
+        syntax = self.itemData(index).toPyObject()
+        print "Cambiando la syntax a ", syntax.name
+        qApp.instance().current_editor.set_syntax(syntax)
+    
 
 class PMXStatusBar(QStatusBar):
     
@@ -58,6 +70,13 @@ class PMXStatusBar(QStatusBar):
                                                   )
         
         
+        self.syntaxMenu = PMXSyntaxMenu(self)
+        # TODO: Nueva iteracion
+        for scope, syntax in TM_SYNTAXES['textmate'].items():
+            
+            self.syntaxMenu.addItem(syntax.name, userData=QVariant(syntax))
+            
+        self.addPermanentWidget(self.syntaxMenu)
         self.addPermanentWidget(self.lineLabel)
         self.addPermanentWidget(self.columnLabel)
         self.addPermanentWidget(self.langComboBox)
