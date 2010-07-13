@@ -5,7 +5,7 @@
 
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
 from PyQt4.QtCore import QString, SIGNAL, Qt
-from prymatex.gui.editor import PMXTextEdit, PMXCodeEdit
+from prymatex.gui.editor import PMXCodeEdit
 
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import *
@@ -14,6 +14,9 @@ import itertools
 class PMXTabWidget(QTabWidget):
     EDIT_TAB_WIDGET = PMXCodeEdit
     UNTITLED_LABEL = _("New File %s")
+    
+    #Signal
+    currentEditorChange = pyqtSignal(PMXCodeEdit)
     
     counter = 1
     
@@ -28,11 +31,11 @@ class PMXTabWidget(QTabWidget):
             self.appendEmptyTab()
         self.setTabsClosable(True)
         self.setMovable(True)
+        
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
+        self.currentChanged.connect(self.on_current_changed)
         
-#        self.setCornerWidget(createButton(self, "Tab List", "Ctrl+Space"), 
-#                             Qt.TopRightCorner)
         self.buttonTabList = QPushButton(self)
         self.buttonTabList.setObjectName("buttonTabList")
         self.buttonTabList.setToolTip(_("Tab list"))
@@ -45,30 +48,30 @@ class PMXTabWidget(QTabWidget):
         ''')
         
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
-        
     
+    def on_current_changed(self, index):
+        self.currentEditorChange.emit(self.widget(index))
+        
     def mouseDoubleClickEvent(self, event):
         self.appendEmptyTab()
-    
     
     def getEditor(self, *largs, **kwargs):
         '''
         Editor Factory
         '''
         editor =  self.EDIT_TAB_WIDGET(self, *largs, **kwargs)
+        
         # TODO: Poner esto en configuración
         font = QFont()
         font.setFamily('Consolas')
         font.setPointSize(11)
         editor.setFont(font)
         return editor
+    
+    def on_syntax_change(self, syntax):
+        editor = self.currentWidget()
+        editor.set_syntax(syntax)
         
-    
-#    def tabRemoved(self, index):
-#        if not self.count():
-#            self.appendEmptyTab()
-    
-    
     def openLocalFile(self, path):
         '''
         Abre un archivo en una tab
@@ -81,8 +84,7 @@ class PMXTabWidget(QTabWidget):
                     editor = self.widget(i)
                     if path == editor.path:
                         self.setCurrentWidget(editor)
-                        returntabWidgetEditors
-    
+                        return tabWidgetEditors
             
             if count == 1 and not self.widget(0).document().isModified() and \
                 not self.widget(0).path:
@@ -102,7 +104,6 @@ class PMXTabWidget(QTabWidget):
                                  _("""<p>File %s could not be decoded</p>
                                  <p>Some exception data:</p>
                                  <pre>%s</pre>""", path, unicode(e)[:40]))
-    
     
     def appendEmptyTab(self):
         '''
@@ -177,8 +178,7 @@ class PMWTabsMenu(QMenu):
         self.shortcuts = []
         for i in range(1, 10):
             self.shortcuts.append(text_to_KeySequence("Alt+%d" % i))
-            
-        
+    
     def addAction(self, action):
         QMenu.addAction(self, action)
         self.actionGroup.addAction(action)

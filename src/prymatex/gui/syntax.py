@@ -83,11 +83,10 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
     
-    def __init__(self, doc, syntax, formatter):
+    def __init__(self, doc, syntax = None, formatter = None):
         QSyntaxHighlighter.__init__(self, doc)
         self.syntax = syntax
         self.formatter = formatter
-        
     
     def collect_previous_text(self, current):
         text = [ current ]

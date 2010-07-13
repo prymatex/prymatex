@@ -6,7 +6,6 @@ from PyQt4.QtCore import *
 from pprint import pformat
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget , PMWTabsMenu
-from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.mixins.common import CenterWidget
@@ -26,10 +25,15 @@ logger = logging.getLogger(__name__)
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def __init__(self):
         QMainWindow.__init__(self)
+        self.setupUi(self)
+        
         self.setWindowTitle(_(u"Prymatex Text Editor"))
 
+        #Conectar tabs con status y status con tabs
+        self.statusbar.syntaxMenu.syntaxChange.connect(self.tabWidgetEditors.on_syntax_change)
+        self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
+        
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
-        self.setupUi(self)
         self.setCentralWidget(self.tabWidgetEditors)
         self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
         self.actionGroupTabs.addMenu(self.menuPanes)
@@ -64,8 +68,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         for action in map(lambda name: getattr(self, name), action_names):
             if isinstance(action, QAction):
                 self.addAction(action)
-            
-
     
     def setup_panes(self):
         '''
@@ -102,7 +104,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneBundleEditor)
         self.paneBundleEditor.hide()
         
-    
     def setup_toolbars(self):
         #raise NotImplementedError("Do we need them?")
         pass
@@ -231,7 +232,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @property
     def current_editor(self):
         return self.tabWidgetEditors.currentWidget()
-        
         
     @pyqtSignature('')
     def on_actionSave_triggered(self):

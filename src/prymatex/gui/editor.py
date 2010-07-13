@@ -34,13 +34,6 @@ class PMXTextEdit(QWidget, PMXBaseGUIMixin):
     
     def afterLooseFocus(self):
         pass
-        
-    
-    
-class PMXCodeEditWidget(PMXTextEdit):
-    '''
-    
-    '''
    
 class PMXCodeEdit(QPlainTextEdit):
     _path = ''
@@ -52,44 +45,36 @@ class PMXCodeEdit(QPlainTextEdit):
             QWidget.__init__(self, editor)
             self.codeEditor = editor
             
-            
         def sizeHint(self):
             
             return QSize(self.codeEditor.lineNumberAreaWidth(), 0)
         
         def paintEvent(self, event):
             self.codeEditor.lineNumberAreaPaintEvent(event)
-            
-    # Ctor
+    
     def __init__(self, parent, path = ''):
         QTextEdit.__init__(self, parent)
-        print "Se crea editor"
+        
         self.lineNumberArea = PMXCodeEdit.LineNumberArea(self)
         
-        self.connect(self, SIGNAL("blockCountChanged(int)"), self.updateLineNumberAreaWidth)
-        self.connect(self, SIGNAL("updateRequest(const QRect &, int)"), self.updateLineNumberArea)
-        self.connect(self, SIGNAL("cursorPositionChanged()"), self.highlightCurrentLine)
-        
-        self.connect(self, SIGNAL("cursorPositionChanged()"), self.notifyCursorChange)
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrentLine()
         self.setTabChangesFocus(False)
         
-        
-        #print self.connect(self, SIGNAL("destroyed(QObject)"), self.cleanUp)
-#        try:
-        self.syntax_processor = PMXSyntaxProcessor(self.document(), None, PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
-#        except Exception, e:
-#            print ("Error al cargar la sintaxis %s" % e)
-        
+        #Como para ponerle algo de color y que funcione por ahora
+        self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
         
         # TODO: Ver     
         self.path = path
         
         self.tab_length = 4
         self.soft_tabs = True
-        
         self.actionMenuTab = EditorTabAction(self.title(), self)
+        
+        self.connect(self, SIGNAL("blockCountChanged(int)"), self.updateLineNumberAreaWidth)
+        self.connect(self, SIGNAL("updateRequest(const QRect &, int)"), self.updateLineNumberArea)
+        self.connect(self, SIGNAL("cursorPositionChanged()"), self.highlightCurrentLine)
+        self.connect(self, SIGNAL("cursorPositionChanged()"), self.notifyCursorChange)
     
     def set_syntax(self, syntax):
         self.syntax_processor.set_syntax(syntax)
@@ -128,7 +113,6 @@ class PMXCodeEdit(QPlainTextEdit):
         cursor = self.textCursor()
         user_data = cursor.block().userData()
         return user_data and user_data.get_scope_at(cursor.columnNumber()) or ""
-        
     
     def soft_tabs(): #@NoSelf
         doc = """Soft tabs, insert spaces instead of tab""" #@UnusedVariable
@@ -302,14 +286,12 @@ class PMXCodeEdit(QPlainTextEdit):
         index = tabwidget.indexOf(self)
         return tabwidget.tabText(index)
         
-        
     def setTitle(self, text):
         tabwidget = self.parent().parent()
         #print tabwidget, tabwidget.parent()
         index = tabwidget.indexOf(self)
         tabwidget.setTabText(index, text)
         self.actionMenuTab.setText(text)
-    
     
     def updateTab(self):
         '''
@@ -397,7 +379,6 @@ class PMXCodeEdit(QPlainTextEdit):
             selection.cursor.clearSelection()
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
-        
     
     def lineNumberAreaPaintEvent(self, event):
         
@@ -433,7 +414,6 @@ class PMXCodeEdit(QPlainTextEdit):
             font.setPointSize(pt_size)
             print pt_size
         self.setFont(font)
-        
     
     def zoomOut(self):
         font = self.font()
@@ -443,7 +423,6 @@ class PMXCodeEdit(QPlainTextEdit):
             font.setPointSize(pt_size)
             print pt_size
         self.setFont(font)
-
 
 class EditorTabAction(QAction):
     def __init__(self, title, parent):

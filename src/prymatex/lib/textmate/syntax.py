@@ -173,8 +173,8 @@ class TMSyntaxNode(object):
                         value = value.replace('?+', '')
                         setattr(self, key, re.compile( value ))
                     except:
-                        print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
-                        pass;
+                        #print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
+                        pass
             elif key in ['content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:

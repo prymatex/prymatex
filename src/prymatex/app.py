@@ -54,7 +54,6 @@ class PMXApplication(QApplication):
         self.load_texmate_themes()
         self.load_texmate_bundles()
         
-        
         from prymatex.gui.mainwindow import PMXMainWindow
         self.main_window = PMXMainWindow()
         self.splash.finish(self.main_window)
