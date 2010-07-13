@@ -161,11 +161,20 @@ class TMSyntaxNode(object):
                     # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
                     value = value.replace('?i:', '(?i)')
                     value = value.replace('?x:', '(?x)')
+                    value = value.replace('?+', '?')
+                    value = value.replace('*+', '*')
+                    value = value.replace('++', '+')
                     #value = value.replace('?<=', '(?<=)')
                     setattr(self, key, re.compile( value ))
                 except:
-                    pass
-                #print 'Parsing error in %s: %s' % (key, value)
+                    try:
+                        value = value.replace('?<=', '(?<=)')
+                        value = value.replace('?>', '')
+                        value = value.replace('?+', '')
+                        setattr(self, key, re.compile( value ))
+                    except:
+                        print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
+                        pass;
             elif key in ['content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:
@@ -357,6 +366,6 @@ def parse_file(filename, name_space = 'default'):
 if __name__ == '__main__':
     import ipdb
 
-    python = parse_file('../../../prymatex/resources/Bundles/Python.tmbundle/Syntaxes/Python.tmLanguage', 'python')
+    python = parse_file('../../../prymatex/resources/Bundles/CSS.tmbundle/Syntaxes/CSS.plist', 'python')
     p = TMDebugSyntaxProcessor()
-    print python.parse('a = {"clave": 1, "algo": 3}', p)
+    print python.parse('div.algo { text-align: centar; }', p)
