@@ -61,7 +61,6 @@ class PMXCodeEdit(QPlainTextEdit):
         self.highlightCurrentLine()
         self.setTabChangesFocus(False)
         
-        #Como para ponerle algo de color y que funcione por ahora
         self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
         
         # TODO: Ver     
