@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Prymatex Text Editor</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../res.qrc">

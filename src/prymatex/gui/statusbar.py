@@ -1,3 +1,4 @@
+# encoding: utf-8
 '''
 This module contains the main window status bar definition and widgets.
 Some of the widgets defined here are:
@@ -10,6 +11,24 @@ from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
 from prymatex.lib.textmate.syntax import TM_SYNTAXES
 
+class QuickSyntaxSwitchDialog(QDialog):
+    def __init__(self, parent = None):
+        '''
+        Una idea para seleccionar rápidamente la sintaxis
+        '''
+        QDialog.__init__(self, parent)
+        self.setWindowTitle("Quick Syntax Switch")
+        layout = QVBoxLayout()
+        lineEdit = QLineEdit()
+        completer = QCompleter(['python', 'python and django', 'C', 'C++'], lineEdit)
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        lineEdit.setCompleter(completer)
+        layout.addWidget(QLabel("Select Syntax and press Intro"))
+        layout.addWidget(lineEdit)
+        
+        self.setLayout(layout)
+        
+        
 
 class PWMStatusLabel(QLabel):
     def __init__(self, text, parent, default = 0, *options):
@@ -37,6 +56,7 @@ class PWMStatusLabel(QLabel):
         self.setText(action.text())
     
 class PMXSyntaxMenu(QComboBox):
+    # TODO: Seleccionar la última sintaxis utilizada
     def __init__(self, parent = None):
         QComboBox.__init__(self, parent)
         self.addItem("No syntax")
@@ -92,3 +112,10 @@ class PMXStatusBar(QStatusBar):
             QLabel { border-left: 1px solid #000;
                     font-family: Monospace; }
         ''')
+    
+if __name__ == "__main__":
+    import sys
+    app = QApplication(sys.argv)
+    dlg = QuickSyntaxSwitchDialog(None)
+    dlg.exec_()
+    
