@@ -56,6 +56,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
         #self.actionShowFSPane.setChecked(True)
         self.prevent_menu_lock()
+        
 
     def prevent_menu_lock(self):
         '''
