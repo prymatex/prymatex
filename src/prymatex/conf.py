@@ -23,8 +23,6 @@ class Settings(object):
                 
         for key, value in config.iteritems():
             setattr(self, key, value)
-            
-        
         
     def __getattr__(self, name):
         return self.__dict__.get(name, self.__class__.__dict__.get(name)) 

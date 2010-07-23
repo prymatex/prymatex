@@ -62,9 +62,14 @@ class PMXBlockToken(object):
         return '<token: Position: (%d, %d) Scopes: "%s...">' % (self.begin, self.end, self.scopes)
 
 class PMXBlockUserData(QTextBlockUserData):
+    FOLDING_NONE = 0
+    FOLDING_START = 1
+    FOLDING_STOP = -1
+    
     def __init__(self):
         QTextBlockUserData.__init__(self)
         self.tokens = []
+        self.folding = self.FOLDING_NONE
     
     def __str__(self):
         return ' '.join(map(str, self.tokens))
@@ -143,6 +148,14 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
         self.add_token(position)
         self.scopes.pop()
 
+    def folding_marker(self):
+        if hasattr(self.syntax, 'foldingStartMarker') and self.syntax.foldingStartMarker.match(self.currentBlock().text()):
+            self.user_data.folding = self.user_data.FOLDING_START
+        elif hasattr(self.syntax, 'foldingStopMarker') and self.syntax.foldingStopMarker.match(self.currentBlock().text()):
+            self.user_data.folding = self.user_data.FOLDING_STOP
+        else: 
+            self.user_data.folding = self.user_data.FOLDING_NONE
+        
     #END
     def end_parsing(self, scope):
         if self.scopes[-1] == scope:
@@ -151,4 +164,5 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
             self.setCurrentBlockState(self.MULTI_LINE)
         self.add_token(self.currentBlock().length())
         self.scopes.pop()
+        self.folding_marker()
         self.setCurrentBlockUserData(self.user_data)
