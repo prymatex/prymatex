@@ -41,7 +41,6 @@ class PMXCodeEdit(QPlainTextEdit):
         self.setTabChangesFocus(False)
         
         self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
-        
         # TODO: Ver     
         self.path = path
         
