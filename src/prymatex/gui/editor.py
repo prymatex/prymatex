@@ -9,7 +9,7 @@ import os, codecs
 from os.path import basename
 
 from prymatex.gui.syntax import PMXSyntaxProcessor, PMXSyntaxFormatter
-from prymatex.lib.textmate.syntax import TM_SYNTAXES
+from prymatex.lib.textmate.syntax import TM_SYNTAXES, find_syntax_by_first_line
 
 
 import logging
@@ -110,9 +110,6 @@ class PMXCodeEdit(QPlainTextEdit):
     soft_tabs = property(**soft_tabs())
     
     def keyPressEvent(self, event):
-        '''
-        
-        '''
         key = event.key()
         cursor = self.textCursor()
         con_shift = event.modifiers() & Qt.ShiftModifier
@@ -128,6 +125,7 @@ class PMXCodeEdit(QPlainTextEdit):
 #        print doc.findBlock().blockNumber() 
 #        print doc.findBlock().blockNumber()
         
+        # All keys in http://doc.trolltech.com/qtjambi-4.4/html/com/trolltech/qt/core/Qt.Key.html
         if key == Qt.Key_Tab:
             if con_shift:
                 print "A"
@@ -145,7 +143,15 @@ class PMXCodeEdit(QPlainTextEdit):
             elif self.soft_tabs:
                 self.textCursor().insertText(' '* self.tab_length)
                 return
+        elif key == 16777220 and doc.blockCount() == 1:
+            #Esto es un enter y es el primer blocke que tiene el documento
+            text = doc.firstBlock().text()
+            syntax = find_syntax_by_first_line(text)
+            if syntax != None:
+                self.set_syntax(syntax)
+                self.parent().currentEditorChange.emit(self)
         QPlainTextEdit.keyPressEvent(self, event)
+        
     @property
     def indent_text(self):
         return self.soft_tabs and (self.tab_length * " ") or "\t"
@@ -160,7 +166,6 @@ class PMXCodeEdit(QPlainTextEdit):
             if value:
                 self._tab_length = value
                 self.setTabStopWidth(self.fontMetrics().width('9') * value)
-            
            
         return locals()
        

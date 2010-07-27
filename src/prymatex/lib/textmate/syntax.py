@@ -358,6 +358,12 @@ class TMSyntaxNode(object):
             position = end_pos
         return position
 
+def find_syntax_by_first_line(line):
+    for _, syntaxes in TM_SYNTAXES.iteritems():
+        for _, syntax in syntaxes.iteritems():
+            if syntax.firstLineMatch != None and syntax.firstLineMatch.match(line):
+                return syntax
+
 def parse_file(filename, name_space = 'default'):
     import plistlib
     data = plistlib.readPlist(filename)

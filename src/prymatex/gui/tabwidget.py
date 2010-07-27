@@ -17,13 +17,8 @@ class PMXTabWidget(QTabWidget):
     
     #Signal
     currentEditorChange = pyqtSignal(PMXCodeEdit)
-    
+
     counter = 1
-    
-    def untitled_label(self):
-        counter = self.counter
-        self.counter += 1
-        return self.UNTITLED_LABEL % counter
     
     def __init__(self, parent):
         QTabWidget.__init__(self, parent)
@@ -46,8 +41,12 @@ class PMXTabWidget(QTabWidget):
                 padding: 5px;
             }
         ''')
-        
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
+    
+    def untitled_label(self):
+        counter = self.counter
+        self.counter += 1
+        return self.UNTITLED_LABEL % counter
     
     def on_current_changed(self, index):
         self.currentEditorChange.emit(self.widget(index))
@@ -166,7 +165,6 @@ class PMXTabWidget(QTabWidget):
             widget.afterInsertionEvent()
         if not self.count():
             widget.actionMenuTab.setChecked(True)
-        
 
 class PMWTabsMenu(QMenu):
     '''
