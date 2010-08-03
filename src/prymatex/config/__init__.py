@@ -1,0 +1,1 @@
+from prymatex.config.base import settings

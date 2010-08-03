@@ -5,7 +5,7 @@
 
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
 from PyQt4.QtCore import QString, SIGNAL, Qt
-from prymatex.gui.editor import PMXCodeEdit
+from prymatex.editor import PMXCodeEdit
 
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import *
@@ -17,20 +17,15 @@ class PMXTabWidget(QTabWidget):
     
     #Signal
     currentEditorChange = pyqtSignal(PMXCodeEdit)
-    
+
     counter = 1
-    
-    def untitled_label(self):
-        counter = self.counter
-        self.counter += 1
-        return self.UNTITLED_LABEL % counter
     
     def __init__(self, parent):
         QTabWidget.__init__(self, parent)
+        self.setupUi()
         if not self.count():
             self.appendEmptyTab()
-        self.setTabsClosable(True)
-        self.setMovable(True)
+        
         
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
@@ -46,8 +41,16 @@ class PMXTabWidget(QTabWidget):
                 padding: 5px;
             }
         ''')
-        
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
+    
+    def setupUi(self):
+        self.setTabsClosable(True)
+        self.setMovable(True)
+        
+    def untitled_label(self):
+        counter = self.counter
+        self.counter += 1
+        return self.UNTITLED_LABEL % counter
     
     def on_current_changed(self, index):
         self.currentEditorChange.emit(self.widget(index))
@@ -166,7 +169,6 @@ class PMXTabWidget(QTabWidget):
             widget.afterInsertionEvent()
         if not self.count():
             widget.actionMenuTab.setChecked(True)
-        
 
 class PMWTabsMenu(QMenu):
     '''

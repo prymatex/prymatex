@@ -9,31 +9,11 @@ import os, codecs
 from os.path import basename
 
 from prymatex.gui.syntax import PMXSyntaxProcessor, PMXSyntaxFormatter
-from prymatex.lib.textmate.syntax import TM_SYNTAXES
+from prymatex.lib.textmate.syntax import TM_SYNTAXES, find_syntax_by_first_line
 
 
 import logging
 logger = logging.getLogger(__name__)
-
-class PMXTextEdit(QWidget, PMXBaseGUIMixin):
-    '''
-    Abstract class for every editor
-    '''
-    def __init__(self, parent):
-        raise NotImplementedError("This is a ABC")
-        #QWidget.__init__(self)
-        
-    def beforeGainFocus(self):
-        pass   
-    
-    def afterGainFocus(self):
-        pass
-    
-    def beforeLooseFocus(self):
-        pass
-    
-    def afterLooseFocus(self):
-        pass
    
 class PMXCodeEdit(QPlainTextEdit):
     _path = ''
@@ -46,7 +26,6 @@ class PMXCodeEdit(QPlainTextEdit):
             self.codeEditor = editor
             
         def sizeHint(self):
-            
             return QSize(self.codeEditor.lineNumberAreaWidth(), 0)
         
         def paintEvent(self, event):
@@ -61,9 +40,7 @@ class PMXCodeEdit(QPlainTextEdit):
         self.highlightCurrentLine()
         self.setTabChangesFocus(False)
         
-        #Como para ponerle algo de color y que funcione por ahora
         self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
-        
         # TODO: Ver     
         self.path = path
         
@@ -109,10 +86,15 @@ class PMXCodeEdit(QPlainTextEdit):
         #get_fspanel()
         return self.path
     
-    def getCurrentScope(self):
+    def get_current_scope(self):
         cursor = self.textCursor()
         user_data = cursor.block().userData()
         return user_data and user_data.get_scope_at(cursor.columnNumber()) or ""
+    
+    def get_current_folding(self):
+        cursor = self.textCursor()
+        user_data = cursor.block().userData()
+        return user_data.folding
     
     def soft_tabs(): #@NoSelf
         doc = """Soft tabs, insert spaces instead of tab""" #@UnusedVariable
@@ -128,9 +110,6 @@ class PMXCodeEdit(QPlainTextEdit):
     soft_tabs = property(**soft_tabs())
     
     def keyPressEvent(self, event):
-        '''
-        
-        '''
         key = event.key()
         cursor = self.textCursor()
         con_shift = event.modifiers() & Qt.ShiftModifier
@@ -146,6 +125,7 @@ class PMXCodeEdit(QPlainTextEdit):
 #        print doc.findBlock().blockNumber() 
 #        print doc.findBlock().blockNumber()
         
+        # All keys in http://doc.trolltech.com/qtjambi-4.4/html/com/trolltech/qt/core/Qt.Key.html
         if key == Qt.Key_Tab:
             if con_shift:
                 print "A"
@@ -163,7 +143,15 @@ class PMXCodeEdit(QPlainTextEdit):
             elif self.soft_tabs:
                 self.textCursor().insertText(' '* self.tab_length)
                 return
+        elif key == 16777220 and doc.blockCount() == 1:
+            #Esto es un enter y es el primer blocke que tiene el documento
+            text = doc.firstBlock().text()
+            syntax = find_syntax_by_first_line(text)
+            if syntax != None:
+                self.set_syntax(syntax)
+                self.parent().currentEditorChange.emit(self)
         QPlainTextEdit.keyPressEvent(self, event)
+        
     @property
     def indent_text(self):
         return self.soft_tabs and (self.tab_length * " ") or "\t"
@@ -178,7 +166,6 @@ class PMXCodeEdit(QPlainTextEdit):
             if value:
                 self._tab_length = value
                 self.setTabStopWidth(self.fontMetrics().width('9') * value)
-            
            
         return locals()
        
@@ -339,15 +326,8 @@ class PMXCodeEdit(QPlainTextEdit):
                 tw.setCurrentIndex(index)
     
     def lineNumberAreaWidth(self):
-        digits = 1
-        max_cnt = max((1, self.blockCount(),))
-        while max_cnt >= 10:
-            max_cnt /= 10;
-            digits += 1
-        space = 3 + self.fontMetrics().width('9') * digits
-        #return 30
-        return space
-    
+        # si tiene folding tengo que sumar mas 10
+        return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + 10
     
     def updateLineNumberAreaWidth(self, newBlockCount):
         self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
@@ -384,7 +364,7 @@ class PMXCodeEdit(QPlainTextEdit):
         
         painter = QPainter(self.lineNumberArea)
         
-        painter.fillRect(event.rect(), Qt.lightGray)
+        painter.fillRect(event.rect(), Qt.white)
         block = self.firstVisibleBlock()
         
         blockNumber = block.blockNumber()
@@ -392,12 +372,15 @@ class PMXCodeEdit(QPlainTextEdit):
         bottom = top + int(self.blockBoundingRect(block).height())
 
         while block.isValid() and top < event.rect().bottom():
+            user_data = block.userData()
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(blockNumber + 1)
-                painter.setPen(Qt.black)
-                painter.drawText(0, top, self.lineNumberArea.width(), 
-                                      self.fontMetrics().height(),
-                                      Qt.AlignRight, number)
+                painter.setPen(Qt.lightGray)
+                painter.drawText(-7, top, self.lineNumberArea.width(), self.fontMetrics().height(), Qt.AlignRight, number)
+                #Rudimentos de folding
+                if user_data and user_data.folding == user_data.FOLDING_START:
+                    painter.drawText(0, top, self.lineNumberArea.width(), self.fontMetrics().height(), Qt.AlignRight, '-')
+                    
             block = block.next()
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())

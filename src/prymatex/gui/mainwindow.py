@@ -9,7 +9,6 @@ from prymatex.gui.tabwidget import PMXTabWidget , PMWTabsMenu
 from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.mixins.common import CenterWidget
-from prymatex.gui.editor import PMXTextEdit
 from prymatex.config.configdialog import PMXConfigDialog
 from prymatex.gui.panes.outputpanel import PMXOutputDock
 from prymatex.gui.panes.project import PMXProjectDock
@@ -355,14 +354,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     @pyqtSignature('')
     def on_actionGo_To_Line_triggered(self):
-        
         editor = self.tabWidgetEditors.currentWidget()
         editor.showGoToLineDialog()
         
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
-        scope = self.tabWidgetEditors.currentWidget().getCurrentScope()
-        self.statusBar().showMessage(scope)
+        scope = self.tabWidgetEditors.currentWidget().get_current_scope()
+        folding = self.tabWidgetEditors.currentWidget().get_current_folding()
+        self.statusBar().showMessage("%d - %s" % (folding, scope))
         
     @pyqtSignature('')
     def on_actionTo_iNVERT_cASE_triggered(self):

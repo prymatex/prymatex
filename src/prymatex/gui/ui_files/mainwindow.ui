@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>801</width>
     <height>600</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>Prymatex Text Editor</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../res.qrc">
+   <iconset>
     <normaloff>:/resources/icons/Prymatex_Logo.png</normaloff>:/resources/icons/Prymatex_Logo.png</iconset>
   </property>
   <widget class="PMXTabWidget" name="tabWidgetEditors">
@@ -25,8 +25,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>20</height>
+     <width>801</width>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -181,7 +181,7 @@
   <widget class="PMXStatusBar" name="statusbar"/>
   <action name="actionNewTab">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/document-new.png</normaloff>:/resources/actions/document-new.png</iconset>
    </property>
    <property name="text">
@@ -193,7 +193,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/document-open.png</normaloff>:/resources/actions/document-open.png</iconset>
    </property>
    <property name="text">
@@ -205,7 +205,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/document-save.png</normaloff>:/resources/actions/document-save.png</iconset>
    </property>
    <property name="text">
@@ -217,7 +217,7 @@
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/document-save-as.png</normaloff>:/resources/actions/document-save-as.png</iconset>
    </property>
    <property name="text">
@@ -229,7 +229,7 @@
   </action>
   <action name="actionSave_All">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/document-save-all.png</normaloff>:/resources/actions/document-save-all.png</iconset>
    </property>
    <property name="text">
@@ -249,7 +249,7 @@
   </action>
   <action name="actionClose">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/tab-close.png</normaloff>:/resources/actions/tab-close.png</iconset>
    </property>
    <property name="text">
@@ -261,7 +261,7 @@
   </action>
   <action name="actionClose_Others">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/tab-close-other.png</normaloff>:/resources/actions/tab-close-other.png</iconset>
    </property>
    <property name="text">
@@ -281,7 +281,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/system-shutdown.png</normaloff>:/resources/actions/system-shutdown.png</iconset>
    </property>
    <property name="text">
@@ -293,7 +293,7 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/edit-undo.png</normaloff>:/resources/actions/edit-undo.png</iconset>
    </property>
    <property name="text">
@@ -305,7 +305,7 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/edit-redo.png</normaloff>:/resources/actions/edit-redo.png</iconset>
    </property>
    <property name="text">
@@ -317,7 +317,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/edit-copy.png</normaloff>:/resources/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
@@ -329,7 +329,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/edit-cut.png</normaloff>:/resources/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
@@ -341,7 +341,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/edit-paste.png</normaloff>:/resources/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
@@ -353,7 +353,7 @@
   </action>
   <action name="actionPaste_As_New">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/edit-paste.png</normaloff>:/resources/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
@@ -365,7 +365,7 @@
   </action>
   <action name="actionFind">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/edit-find-project.png</normaloff>:/resources/actions/edit-find-project.png</iconset>
    </property>
    <property name="text">
@@ -377,7 +377,7 @@
   </action>
   <action name="actionFind_Replace">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/edit-find-replace.png</normaloff>:/resources/actions/edit-find-replace.png</iconset>
    </property>
    <property name="text">
@@ -389,7 +389,7 @@
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/configure.png</normaloff>:/resources/actions/configure.png</iconset>
    </property>
    <property name="text">
@@ -426,7 +426,7 @@
   </action>
   <action name="actionZoom_In">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/zoom-in.png</normaloff>:/resources/actions/zoom-in.png</iconset>
    </property>
    <property name="text">
@@ -438,7 +438,7 @@
   </action>
   <action name="actionZoom_Out">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/zoom-out.png</normaloff>:/resources/actions/zoom-out.png</iconset>
    </property>
    <property name="text">
@@ -534,7 +534,7 @@
   </action>
   <action name="actionShilft_Left">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/format-indent-less.png</normaloff>:/resources/actions/format-indent-less.png</iconset>
    </property>
    <property name="text">
@@ -546,7 +546,7 @@
   </action>
   <action name="actionShift_Right">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/format-indent-more.png</normaloff>:/resources/actions/format-indent-more.png</iconset>
    </property>
    <property name="text">
@@ -593,7 +593,7 @@
   </action>
   <action name="actionFilter_Through_Command">
    <property name="icon">
-    <iconset resource="../../res.qrc">
+    <iconset>
      <normaloff>:/resources/actions/view-filter.png</normaloff>:/resources/actions/view-filter.png</iconset>
    </property>
    <property name="text">

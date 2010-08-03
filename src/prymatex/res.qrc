@@ -1,5 +1,5 @@
 <RCC>
-  <qresource>
+  <qresource prefix="actions">
     <file>resources/actions/configure.png</file>
     <file>resources/actions/edit-copy.png</file>
     <file>resources/actions/edit-cut.png</file>
@@ -56,8 +56,12 @@
     <file>resources/actions/document-save-all.png</file>
     <file>resources/actions/document-save-as.png</file>
     <file>resources/actions/document-save.png</file>
-    <file>resources/icons/Prymatex_Logo.png</file>
-    <file>resources/Prymatex_Splash.png</file>
   </qresource>
-  <qresource prefix="newPrefix"/>
+  <qresource prefix="icons">
+    <file>resources/icons/Prymatex_Logo.png</file>
+  </qresource>
+  <qresource prefix="editor">
+    <file>resources/editor/code-visible-off.png</file>
+    <file>resources/editor/code-visible-on.png</file>
+  </qresource>
 </RCC>

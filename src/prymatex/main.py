@@ -26,9 +26,7 @@ def main(argv = sys.argv):
             reload(app)
             reload(exceptions)
             continue
-        
         return retval
-    
 
 if __name__ == '__main__':
     # create logger with "spam_application"
