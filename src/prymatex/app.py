@@ -99,19 +99,9 @@ class PMXApplication(QApplication):
         
     def init_config(self):
         if not self.__config:
-            from prymatex.conf import settings, PRYMATEX_SETTINGS_FILE
-            from prymatex.lib.i18n import ugettext as _
+            from prymatex.config import settings
             self.__config = settings
-            # Se pudo cargar la configuración???
-#            if not self.__config.loaded:
-#                QMessageBox.information(None, _("Configuration Defaults"), _("""
-#                <p>The configuration file <i><b>%s</b></i> was not found on <i>%s</i> application
-#                directory.</p><p> A default settings file has been creates and will
-#                be saved when you close this app. If you belive this is a mistake
-#                please check the file or its contents.</p>
-#                
-#                """, basename(PRYMATEX_SETTINGS_FILE), self.applicationName()))
-        
+            
     @property
     def config(self):
         '''
