@@ -1,12 +1,64 @@
-from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat
+# -*- encoding: utf-8 -*-
+
 from PyQt4.QtCore import QRect
+from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
+from PyQt4.QtGui import QFileDialog
+from logging import getLogger
 from prymatex.editor.sidearea import PMXSideArea
 
+#TODO: i18n
+_ = lambda s: s
+
+# Create the logger instance
+logger = getLogger(__name__)
+
 class PMXCodeEdit(QPlainTextEdit):
-    def __init__(self, *args):
-        super(PMXCodeEdit, self).__init__(*args)
+    '''
+    The GUI element which holds the editor.
+    It holds the highlighter
+    '''
+    def __init__(self, parent):
+        print "*" * 20
+        print "Se instancia un PMXCodeEdit", parent
+        print "*" * 20
+        super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
         self.setupUi()
+        self.__title = _("Untitled docuemnt")
+        self.__path = ''
+    
+    
+    @property
+    def index(self):
+        '''
+        Returns this tab index
+        '''
+        tab_widget = self.parent()
+        return tab_widget.indexOf(self)
+    
+    
+    def title(): #@NoSelf
+        def fget(self):
+            return self.__title
+        def fset(self, title):
+            self.__title = title
+        return locals()
+    title = property(**title())
+    
+    
+    def setTitle(self, title):
+        '''
+        Sets the tab title
+        
+        '''
+        print "Seteo del título"
+        tabwidget = self.parent()
+        print "tabwidget", tabwidget
+        tabwidget.setTabText(0, title)
+        
+         
+        #tabwidget.setTabText()  
+        #self.parent().setWindowTitle(title)
     
     def setupUi(self):
         
@@ -52,3 +104,63 @@ class PMXCodeEdit(QPlainTextEdit):
             selection.cursor.clearSelection()
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
+    
+    def do_save(self):
+        '''
+        This method is call to actually save the file, the path has to be
+        set.
+        '''
+        assert self.path, _("No path defined!")
+        buffer_contents = str(self.document().toPlainText())
+        f = open(str(self.path), 'w')
+        #TODO: Check exceptions, for example, disk full.
+        f.write(buffer_contents)
+        f.close()
+     
+    
+    def save(self):
+        '''
+        Save the document.
+        do_save() actually saves the document, but it should no be called
+        directly because it expects self.path to be defined.
+        '''
+        if self.path:
+            return self.do_save()
+        else:
+            self.path = QFileDialog.getSaveFileName(self, _("Save file as..."))
+            if self.path:
+                return self.do_save()
+        return False
+            
+    
+    
+    
+    def requestClose(self):
+        '''
+        When a editor has to be closed this method is called
+        @returns true when it's safe to remove the editor wdiget, the user has been prompted
+        for save
+        '''
+        if self.document().isModified():
+            r = QMessageBox.question(self, _("Save changes?"), 
+                                     _("Save changes for this file"),
+                                     QMessageBox.Save | QMessageBox.Cancel | QMessageBox.No,
+                                     QMessageBox.Cancel)
+            
+            if r == QMessageBox.Save:
+                return self.save()
+            elif r == QMessageBox.Cancel:
+                return False
+            elif r == QMessageBox.No:
+                return True # Can close, discard changes
+        return True
+            
+        
+    def path(): #@NoSelf
+        def fget(self):
+            return self.__path
+        def fset(self, path):
+            self.__path = path
+            
+        return locals()
+    path = property(**path())

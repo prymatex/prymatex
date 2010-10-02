@@ -114,7 +114,7 @@ class PMXTabWidget(QTabWidget):
         '''
         editor = self.getEditor()
         # Title should be filled after tab insertion
-        index = self.addTab(editor, '')
+        index = self.addTab(editor, editor.title)
         
         self.setCurrentIndex(index)
         if self.count() == 1:
