@@ -2,7 +2,7 @@
 # encoding: utf-8
 from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
 from PyQt4.QtCore import SIGNAL
-
+import res_rc
 from os.path import join, exists, isdir, isabs
 
 from os import getpid, unlink, getcwd
@@ -19,7 +19,20 @@ BASE_PATH = dirname(__file__)
 import logging
 logger = logging.getLogger(__name__)
 
+def infinite_generator(initial = 0):
+    ''' A simple integer generator for unique
+    endless sequences, such as "Untitled %d" files and such
+    '''
+    while True:
+        yield initial
+        initial += 1 
+
 class PMXApplication(QApplication):
+    '''
+    The application instance.
+    It's loaded only one time for every application instance, so some counters
+    and shared data that need to be correctly updaded upon close are held here.
+    '''
     
     __config = None
     __res_mngr = None
@@ -39,6 +52,8 @@ class PMXApplication(QApplication):
         self.init_config()
         self.init_resources()
         self.res_mngr.loadStyleSheet()
+        
+        self.__untitled_counter = 0
         
         self.splash = QSplashScreen(QPixmap(":/resources/Prymatex_Splash.png"))
         self.splash.show()
@@ -62,6 +77,21 @@ class PMXApplication(QApplication):
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
     
+    @property
+    def untitled_counter(self):
+        '''
+        Returns current untitled counter value.
+        '''
+        return self.__untitled_counter
+    
+    def get_inc_untitled_counter(self):
+        '''
+        Gets the untitled counter
+        '''
+        v = self.__untitled_counter
+        self.__untitled_counter += 1
+        return v
+        
     def _get_current_editor(self):
         '''
         Shortcut al editor actual
@@ -217,4 +247,4 @@ class PMXApplication(QApplication):
             return get_homedir()
 
             
-import res_rc
+

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from PyQt4.QtCore import QRect
+from PyQt4.QtCore import QRect, QObject
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
 from PyQt4.QtGui import QFileDialog
 from logging import getLogger
@@ -12,20 +12,43 @@ _ = lambda s: s
 # Create the logger instance
 logger = getLogger(__name__)
 
+
+class FileBuffer(QObject):
+    '''
+    
+    '''
+    _counter = 0
+    def __init__(self, file_name = None):
+        pass
+    
+    def get_header(self):        
+        return _("Untitled %d" % self.get_untitled_counter())
+    
+    @classmethod
+    def get_untitled_counter(cls):
+        ''' Contador '''
+        v = FileBuffer._counter
+        FileBuffer._counter += 1
+        return v
+    
+    
+
 class PMXCodeEdit(QPlainTextEdit):
     '''
     The GUI element which holds the editor.
+    It has a document
     It holds the highlighter
     '''
     def __init__(self, parent):
-        print "*" * 20
-        print "Se instancia un PMXCodeEdit", parent
-        print "*" * 20
+#        print "*" * 20
+#        print "Se instancia un PMXCodeEdit", parent
+#        print "*" * 20
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
         self.setupUi()
         self.__title = _("Untitled docuemnt")
         self.__path = ''
+        self.__last_save_time = None
     
     
     @property
@@ -74,7 +97,7 @@ class PMXCodeEdit(QPlainTextEdit):
     def lineNumberAreaWidth(self):
         # si tiene folding tengo que sumar mas 10
         return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + 10
-    
+        
     def updateLineNumberAreaWidth(self, newBlockCount):
         self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
     
@@ -154,7 +177,7 @@ class PMXCodeEdit(QPlainTextEdit):
             elif r == QMessageBox.No:
                 return True # Can close, discard changes
         return True
-            
+    
         
     def path(): #@NoSelf
         def fget(self):
@@ -164,3 +187,16 @@ class PMXCodeEdit(QPlainTextEdit):
             
         return locals()
     path = property(**path())
+    
+    
+    def contextMenuEvent(self, event):
+        menu = self.createStandardContextMenu()
+        a = menu.addAction(_("My Menu Item"))
+        self.connect(self, )
+        
+        menu.exec_(event.globalPos());
+        del menu
+    
+    
+    def debugIndex(self):
+        pass
