@@ -13,6 +13,7 @@ from prymatex.lib.exceptions import AlreadyRunningError
 from prymatex.lib.textmate import load_textmate_bundles, load_textmate_themes
         
 import prymatex
+from optparse import OptionParser
 
 BASE_PATH = dirname(__file__)
 
@@ -48,6 +49,7 @@ class PMXApplication(QApplication):
         self.options, args = parser.parse_args(arguments) # Options are readonly
         files_to_open = args[1:]
         
+        # Some init's
         self.init_application_params()
         self.init_config()
         self.init_resources()
@@ -76,6 +78,30 @@ class PMXApplication(QApplication):
         
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
+    
+    def setup_logger(self):
+        '''
+        Setup logger
+        '''
+        pass
+    
+    def parse_args(self, args):
+        '''
+        Parse command line arguments through optparse library.
+        
+        This parsing could halt the application.
+        '''
+        parser = OptionParser(version = self.applicationVersion(),
+                                description = self.applicationName(), 
+                                prog = 'prymatex', 
+                                epilog = "")
+    
+        parser.add_option('-s', '--session', dest="session",
+                          help="Name of the session")
+        parser.add_option('-l', '--last', dest="last",
+                          help="Load last session")
+        
+        opts, files = parser.parse_args(argv)
     
     @property
     def untitled_counter(self):

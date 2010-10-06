@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 # Created: 01/02/2010 by defo
+'''
+    Pryamatex main script.
+    Path checking and correcting.
+    Instanciate the application and exec_() it :)
+'''
 import os
 import sys
 import logging
@@ -9,12 +14,9 @@ basepath = os.path.dirname(__file__)
 sys.path.append(os.path.join(basepath, '..'))
 
 
-
-        
-
 def main(argv = sys.argv):
     '''
-    GUI entry point
+    GUI entry point.
     '''
     
     logger = logging.getLogger("")
@@ -34,21 +36,10 @@ def main(argv = sys.argv):
     logger.addHandler(ch)
     logger.info("Application startup")
     
-    parser = OptionParser(version = '0.1',
-                                description = "A configurable text editor", prog = 'prymatex', 
-                                epilog = "")
-    
-    parser.add_option('-s', '--session', dest="session",
-                      help="Name of the session")
-    parser.add_option('-l', '--last', dest="last",
-                      help="Load last session")
-    
-    opts, files = parser.parse_args(argv)
-    
     from prymatex import app
     from prymatex.lib import exceptions
+    # TODO: Implement quit and restart
     while True:
-        
         try:
             myapp = app.PMXApplication(argv)
         except exceptions.AlreadyRunningError, e:
