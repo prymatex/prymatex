@@ -52,6 +52,8 @@ def main(argv = sys.argv):
             continue
         return retval
 
+import res_rc
+
 if __name__ == '__main__':
     # create logger with "spam_application"
     sys.exit(main())
