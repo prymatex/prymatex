@@ -45,6 +45,7 @@ class IncludeParser(object):
         """
         self.options = options
         self.excluded = set()
+        print "Instanciado un ", self.__class__.__name__
             
     def create_source_file(self, lines, ext=".cpp"):
         "Create a temporary file, write lines to it, and return the filename"
