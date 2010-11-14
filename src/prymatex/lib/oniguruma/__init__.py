@@ -1,3 +1,0 @@
-'''
-Oniguruma library wraper
-'''

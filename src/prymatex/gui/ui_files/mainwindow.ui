@@ -26,7 +26,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -66,6 +66,8 @@
     <addaction name="separator"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Current_Scope"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_Log_Window"/>
    </widget>
    <widget class="QMenu" name="menuText">
     <property name="title">
@@ -788,6 +790,23 @@
   <action name="actionSelect_None">
    <property name="text">
     <string>Select None</string>
+   </property>
+  </action>
+  <action name="actionShow_Log_Window">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Log Window</string>
+   </property>
+   <property name="statusTip">
+    <string>Displays Log Messages</string>
+   </property>
+   <property name="whatsThis">
+    <string>Shows logs from the application and its plugins</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+L</string>
    </property>
   </action>
  </widget>

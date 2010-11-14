@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Tue Jul 13 12:01:56 2010
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Sun Nov 14 12:27:30 2010
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(801, 600)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/resources/icons/Prymatex_Logo.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -21,7 +21,7 @@ class Ui_MainWindow(object):
         self.verticalLayout = QtGui.QVBoxLayout(self.tabWidgetEditors)
         self.verticalLayout.setObjectName("verticalLayout")
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -263,6 +263,9 @@ class Ui_MainWindow(object):
         self.actionSelect_All.setObjectName("actionSelect_All")
         self.actionSelect_None = QtGui.QAction(MainWindow)
         self.actionSelect_None.setObjectName("actionSelect_None")
+        self.actionShow_Log_Window = QtGui.QAction(MainWindow)
+        self.actionShow_Log_Window.setCheckable(True)
+        self.actionShow_Log_Window.setObjectName("actionShow_Log_Window")
         self.menuFile.addAction(self.actionNewTab)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave)
@@ -291,6 +294,8 @@ class Ui_MainWindow(object):
         self.menuView.addSeparator()
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionShow_Current_Scope)
+        self.menuView.addSeparator()
+        self.menuView.addAction(self.actionShow_Log_Window)
         self.menuConvert.addAction(self.actionTo_UPPERCASE)
         self.menuConvert.addAction(self.actionTo_lowercase)
         self.menuConvert.addAction(self.actionTo_TitleCase)
@@ -492,6 +497,10 @@ class Ui_MainWindow(object):
         self.actionSelect_Bundle_Item.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Alt+T", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSelect_All.setText(QtGui.QApplication.translate("MainWindow", "Select All", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSelect_None.setText(QtGui.QApplication.translate("MainWindow", "Select None", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShow_Log_Window.setText(QtGui.QApplication.translate("MainWindow", "Show Log Window", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShow_Log_Window.setStatusTip(QtGui.QApplication.translate("MainWindow", "Displays Log Messages", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShow_Log_Window.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Shows logs from the application and its plugins", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShow_Log_Window.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+L", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
 from tabwidget import PMXTabWidget
