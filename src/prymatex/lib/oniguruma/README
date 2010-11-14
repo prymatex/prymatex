@@ -1,0 +1,32 @@
+Directories
+===========
+
+ctypeslib/          SVN checkout of http://pypi.python.org/pypi/ctypeslib/
+                    Repo: http://svn.python.org/projects/ctypes/trunk/ctypeslib/
+ctypes_output/      Bindings generated from oniguruma.h
+tests/              Some tests for the library
+Makefile            This makefile should create the necessary files and modules
+                    for you to use oniguruma.
+                    
+ 
+
+Porting to other platforms
+==========================
+
+If you get import errors while loading ongiuruma library, you should check
+if you have both the library and the binding generated for your platform.
+This binding relies on ctypeslib packages which has been included in 
+this directory for simplicity reasons.
+
+Please note the ctypeslib might have changed, and you should consider upgrading
+it before trying to create the bindings.
+
+Prerequisites
+-------------
+
+    * gcc2xml
+    
+    
+Reporting Bugs
+==============
+
