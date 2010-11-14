@@ -1,8 +1,14 @@
+Prymatex Text Editor TODO
+=========================
+
+
+
 - Syntax highlighting (ctypeslib has a h2xml y xml2py)
     - Oniguruma compat
     - Block selection (vertical mode)
     - Multiple cursor text insertion
 
 
-- Twisted Subprocess to edit remote filesystems
+- Remote Filesystem Access
+     
 - 

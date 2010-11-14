@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/projects/!svn/ver/77594/ctypes/trunk/ctypeslib
+END
+LICENSE.txt
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/projects/!svn/ver/77594/ctypes/trunk/ctypeslib/LICENSE.txt
+END
+TODO
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/projects/!svn/ver/52838/ctypes/trunk/ctypeslib/TODO
+END
+ChangeLog
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/projects/!svn/ver/68636/ctypes/trunk/ctypeslib/ChangeLog
+END
+setup.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/projects/!svn/ver/68399/ctypes/trunk/ctypeslib/setup.py
+END
+.cvsignore
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/projects/!svn/ver/52600/ctypes/trunk/ctypeslib/.cvsignore
+END
