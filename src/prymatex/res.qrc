@@ -60,8 +60,7 @@
   <qresource prefix="icons">
     <file>resources/icons/Prymatex_Logo.png</file>
   </qresource>
-  <qresource prefix="editor">
-    <file>resources/editor/code-visible-off.png</file>
-    <file>resources/editor/code-visible-on.png</file>
+  <qresource prefix="images">
+    <file>resources/prymatex/Prymatex_Splash.svg</file>
   </qresource>
 </RCC>

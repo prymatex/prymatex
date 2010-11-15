@@ -57,7 +57,7 @@ class PMXApplication(QApplication):
         
         self.__untitled_counter = 0
         
-        self.splash = QSplashScreen(QPixmap(":/resources/Prymatex_Splash.png"))
+        self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))
         self.splash.show()
         
         self.setWindowIcon(QIcon(":/resources/icons/Prymatex_Logo.png"))

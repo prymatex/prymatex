@@ -70,7 +70,9 @@ class PMXSyntaxMenu(QComboBox):
         self.syntaxChange.emit(syntax)
         
     def on_current_editor_changed(self, editor):
-        syntax = editor.syntax_processor.syntax
+        # TODO: Enable
+        #syntax = editor.syntax_processor.syntax
+        syntax = None
         if syntax != None:
             self.setCurrentIndex(syntax.syntax_menu_index)
         else:

@@ -35,7 +35,7 @@ class PMXTabWidget(QTabWidget):
         self.buttonTabList.setObjectName("buttonTabList")
         self.buttonTabList.setToolTip(_("Tab list"))
         self.buttonTabList.setShortcut(text_to_KeySequence("Ctrl+Tab"))
-        self.buttonTabList.setIcon(QIcon(":/resources/actions/view-close.png"))
+        self.buttonTabList.setIcon(QIcon(":/actions/resources/actions/view-close.png"))
         self.buttonTabList.setStyleSheet('''
             QPushButton {
                 padding: 5px;
@@ -156,9 +156,10 @@ class PMXTabWidget(QTabWidget):
             widget.actionMenuTab.setChecked(True)
             
     def indexChanged(self, index):
-        if index >= 0:
-            widget = self.widget(index)
-            widget.actionMenuTab.setChecked(True)
+        #if index >= 0:
+        #    widget = self.widget(index)
+        #    widget.actionMenuTab.setChecked(True)
+        pass
     
     def tabInserted(self, index):
         '''
