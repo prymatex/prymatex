@@ -1,12 +1,14 @@
 Directories
 ===========
 
-ctypeslib/          SVN checkout of http://pypi.python.org/pypi/ctypeslib/
-                    Repo: http://svn.python.org/projects/ctypes/trunk/ctypeslib/
-ctypes_output/      Bindings generated from oniguruma.h
-tests/              Some tests for the library
-Makefile            This makefile should create the necessary files and modules
-                    for you to use oniguruma.
+.. code-block:: text
+
+    ctypeslib/          SVN checkout of http://pypi.python.org/pypi/ctypeslib/
+                        Repo: http://svn.python.org/projects/ctypes/trunk/ctypeslib/
+    ctypes_output/      Bindings generated from oniguruma.h
+    tests/              Some tests for the library
+    Makefile            This makefile should create the necessary files and modules
+                        for you to use oniguruma.
                     
  
 
