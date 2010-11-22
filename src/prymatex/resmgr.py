@@ -69,15 +69,15 @@ class ResourceManager(QObject):
         stylesheet = os.path.join(self.path, stylename)
         logger.info("Stylesheet: %s", stylesheet)
         if os.path.exists(stylesheet):
-            logger.info("Loading %", stylesheet)
+            logger.info("Loading %s", stylesheet )
             f = open(stylesheet)
             contents = f.read()
             f.close()
             qApp.instance().setStyleSheet(contents)
             logger.info("Style loaded")
         else:
-            print 'x'
-            logger.info("Could not load Qt style file: %s", stylename)
+            #print 'x'
+            logger.info("Could not load Qt style file: %s", stylename or '')
     
     
     
