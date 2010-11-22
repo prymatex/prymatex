@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Sun Nov 14 18:53:59 2010
+# Created: Sun Nov 21 21:27:32 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -148,12 +148,12 @@ class Ui_MainWindow(object):
         self.actionShow_Menus.setObjectName("actionShow_Menus")
         self.actionZoom_In = QtGui.QAction(MainWindow)
         icon18 = QtGui.QIcon()
-        icon18.addPixmap(QtGui.QPixmap(":/resources/actions/zoom-in.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon18.addPixmap(QtGui.QPixmap(":/actions/resources/actions/zoom-in.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionZoom_In.setIcon(icon18)
         self.actionZoom_In.setObjectName("actionZoom_In")
         self.actionZoom_Out = QtGui.QAction(MainWindow)
         icon19 = QtGui.QIcon()
-        icon19.addPixmap(QtGui.QPixmap(":/resources/actions/zoom-out.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon19.addPixmap(QtGui.QPixmap(":/actions/resources/actions/zoom-out.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionZoom_Out.setIcon(icon19)
         self.actionZoom_Out.setObjectName("actionZoom_Out")
         self.actionFocus_Editor = QtGui.QAction(MainWindow)

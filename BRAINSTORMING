@@ -1,4 +1,41 @@
-Configuration
-=============
+# Configuration
 
-Inspired in config module (available at PyPi) 
+
+
+* Inspired in config module (available at PyPi)
+* Events when config changes
+* Configuration hierachy
+
+
+# Text Editor
+
+* Support for spellcheck defined in each bundle for
+     
+     * Comments
+
+# Plugins
+
+* Lots of them!
+* Detonator (signal handling cross-OS)
+
+
+
+# Signals
+
+* Simple API when a file changes it would trigger something
+    * A plugin would be add 
+
+
+## Plugins
+
+### Detonator
+
+* Allow the user and projects to subscribe to signals
+* FileSystem signals
+    * Some signals should be intercepted, for example, when you delete
+    a directory from the FileSystemPane, the SCM should be able to
+    caputre it.
+    
+### Spell check
+
+* Spellcheck comments

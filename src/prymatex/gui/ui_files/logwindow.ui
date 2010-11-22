@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>LogWidget</class>
+ <widget class="QWidget" name="LogWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Prymatex Log</string>
+   <string>Log</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../res.qrc">
+    <normaloff>:/actions/resources/actions/document-preview.png</normaloff>:/actions/resources/actions/document-preview.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

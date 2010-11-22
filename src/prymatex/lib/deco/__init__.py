@@ -6,7 +6,8 @@ Some useful decorators
 
 from time import time
 
-# Taken from http://wiki.python.org/moin/PythonDecoratorLibrary#CreatingWell-BehavedDecorators.2BAC8.22Decoratordecorator.22
+# Taken from http://wiki.python.org/moin/PythonDecoratorLibrary
+# #CreatingWell-BehavedDecorators.2BAC8.22Decoratordecorator.22
 def simple_decorator(decorator):
     """This decorator can be used to turn simple functions
     into well-behaved decorators, so long as the decorators
@@ -52,4 +53,22 @@ def printtime(f):
             func_name = f.func_name
         print "%s tomó %.7f s" % (func_name, time()-t0)
         return retval
-    return wrapped 
+    return wrapped
+
+def _get_logger(f):
+    import logging
+    return logging.getLogger(f.__module__)
+
+@simple_decorator
+def logtime(f):
+    def wrapped(*largs, **kwargs):
+        t0 = time()
+        retval = f(*largs, **kwargs)
+        if hasattr(f, 'im_class'):
+            func_name = '.'.join([f.im_class.__name__, f.im_func.__name__]) 
+        else:
+            func_name = f.func_name
+
+        _get_logger(f).info("%s took %.7f s" % (func_name, time()-t0))
+        return retval
+    return wrapped

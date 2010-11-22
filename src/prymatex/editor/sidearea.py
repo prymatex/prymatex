@@ -1,16 +1,18 @@
-from PyQt4.QtGui import QWidget, QPainter
+from PyQt4.QtGui import QWidget, QPainter, qApp
 from PyQt4.QtCore import Qt, QSize
 
 class PMXSideArea(QWidget):
     def __init__(self, editor):
         super(PMXSideArea, self).__init__(editor)
         self.editor = editor
+        print qApp.instance().logger
     
     def sizeHint(self):
         return QSize(self.editor.lineNumberAreaWidth(), 0)
     
     def paintEvent(self, event):
         self.lineNumberAreaPaintEvent(event)
+        
     
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self)

@@ -2,23 +2,16 @@
 # encoding: utf-8
 from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
 from PyQt4.QtCore import SIGNAL
-import res_rc
+
 from os.path import join, exists, isdir, isabs
 
 from os import getpid, unlink, getcwd
 from os.path import dirname, abspath
-from prymatex.lib.deco import printtime
+from prymatex.lib.deco import printtime, logtime
 
-from prymatex.lib.exceptions import AlreadyRunningError
-from prymatex.lib.textmate import load_textmate_bundles, load_textmate_themes
-        
-import prymatex
 from optparse import OptionParser
 
 BASE_PATH = dirname(__file__)
-
-import logging
-logger = logging.getLogger(__name__)
 
 def infinite_generator(initial = 0):
     ''' A simple integer generator for unique
@@ -27,6 +20,8 @@ def infinite_generator(initial = 0):
     while True:
         yield initial
         initial += 1 
+
+
 
 class PMXApplication(QApplication):
     '''
@@ -37,14 +32,17 @@ class PMXApplication(QApplication):
     
     __config = None
     __res_mngr = None
+    __logger = None
     
-    @printtime
-    def __init__(self, arguments):
+    #@printtime
+    @logtime
+    def __init__(self, arguments, logger = None):
         '''
         Inicialización de la aplicación.
         '''
         QApplication.__init__(self, arguments)
-        
+        # Logger setup
+        self.setup_logging()
         from prymatex.optargs import parser
         self.options, args = parser.parse_args(arguments) # Options are readonly
         files_to_open = args[1:]
@@ -79,11 +77,43 @@ class PMXApplication(QApplication):
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
     
-    def setup_logger(self):
-        '''
-        Setup logger
-        '''
-        pass
+    @property
+    def logger(self):
+        return self.__logger
+    
+    @logger.setter
+    def logger(self, logger):
+        from  logging import RootLogger
+        assert isinstance(logger, RootLogger)
+        self.__logger = logger
+        logger.info("Logger set in the application instance")
+    
+    def setup_logging(self):
+        import logging
+        
+        logger = logging.getLogger("")
+        logger.setLevel(logging.DEBUG)
+        # create file handler which logs even debug messages
+        fh = logging.FileHandler("messages.log")
+        fh.setLevel(logging.DEBUG)
+        # create console handler with a higher log level
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        
+        
+        
+        # create formatter and add it to the handlers
+        formatter = logging.Formatter()#"%(message)s")
+        fh.setFormatter(formatter)
+        ch.setFormatter(formatter)
+        # add the handlers to the logger
+        logger.addHandler(fh)
+        logger.addHandler(ch)
+        from prymatex.gui.logwidget import handler as qth
+        logger.addHandler(qth)
+        logger.info("Application startup")
+        self.logger = logger
+        
     
     def parse_args(self, args):
         '''
@@ -128,6 +158,7 @@ class PMXApplication(QApplication):
     current_editor = property(_get_current_editor)
     
     def init_application_params(self):
+        import prymatex
         self.setApplicationName(prymatex.PRODUCT_NAME)
         self.setApplicationVersion(prymatex.VERSION) # hg stuff?
         self.setOrganizationDomain("org")
@@ -144,9 +175,9 @@ class PMXApplication(QApplication):
             pass
     
     def save_config(self):
-        logger.info("Save config")
+        self.logger.info("Save config")
         self.config.save()
-        logger.info("Config saved")
+        self.logger.info("Config saved")
     
     def init_resources(self):
         if not self.__res_mngr:
@@ -193,6 +224,7 @@ class PMXApplication(QApplication):
         '''
         Load textmate Bundles and Themes
         '''
+        from prymatex.lib.textmate import load_textmate_themes
         from prymatex.lib.i18n import ugettext as _
         if not all(map(lambda x: hasattr(self.config, x), ('TEXTMATE_THEMES_PATHS',
                                                            'TEXTMATE_BUNDLES_PATHS' ))):
@@ -208,14 +240,15 @@ class PMXApplication(QApplication):
                 themes += load_textmate_themes(dirname)
                 
             else:
-                logger.warning("The theme dir does not exist: %s", dirname)
+                self.logger.warning("The theme dir does not exist: %s", dirname)
             
         self.splash.showMessage(_("%d themes loaded", themes))
         QApplication.processEvents()
     
     # Decorador para imprimir cuanto tarda
-    @printtime
+    @logtime
     def load_texmate_bundles(self):
+        from prymatex.lib.textmate import load_textmate_bundles
         from prymatex.lib.i18n import ugettext as _
         bundles = 0
         splash = self.splash
@@ -232,7 +265,7 @@ class PMXApplication(QApplication):
                     dirname = join(getcwd(), dirname) 
                 bundles += load_textmate_bundles(dirname, before_load_callback)
             else:
-                logger.warning("The theme dir does not exist")
+                self.logger.warning("The theme dir does not exist")
                 
         QApplication.processEvents()
         
@@ -245,16 +278,17 @@ class PMXApplication(QApplication):
             f = open(self.lock_filename)
             pid = int(f.read())
             f.close()
-            logger.info("Checking for another instance: %s", 
+            self.logger.info("Checking for another instance: %s", 
                         pid in os.pid_proc_dict()
                         )
             if pid in os.pid_proc_dict():
                 from prymatex.lib.i18n import ugettext as _
-                logger.warning("Another app running")
+                self.logger.warning("Another app running")
                 QMessageBox.critical(None, _('Application Already Running'),
                                      _('''%s seems to be runnig. Please
                                      close the other instance.''', self.applicationName()),
                                      QMessageBox.Ok)
+                from prymatex.lib.exceptions import AlreadyRunningError
                 raise AlreadyRunningError(pid)
             
         else:
@@ -272,5 +306,5 @@ class PMXApplication(QApplication):
             from prymatex.lib.os import get_homedir
             return get_homedir()
 
-            
 
+import res_rc

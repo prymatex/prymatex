@@ -22,6 +22,7 @@ from prymatex.lib.textmate.bundle import TMMenuNode, MENU_SPACE
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
+    
     def __init__(self):
         QMainWindow.__init__(self)
         self.setupUi(self)
@@ -38,6 +39,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.actionGroupTabs.addMenu(self.menuPanes)
         
         self.setup_panes()
+        self.setup_logging()
+        
         #self.setup_menus()
         #self.setup_actions()
         
@@ -56,6 +59,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #self.actionShowFSPane.setChecked(True)
         self.prevent_menu_lock()
         
+    
+    def setup_logging(self):
+        from logwidget import LogDockWidget
+        self.log_dock_widget = LogDockWidget(self)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.log_dock_widget)
+        self.log_dock_widget.action = self.actionShow_Log_Window
 
     def prevent_menu_lock(self):
         '''
@@ -397,8 +406,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         def to_upper(s):
             return unicode(s).upper()
         self.current_editor.replaceCursorText(to_upper)
-
-
+    
 
 class PMXTabActionGroup(QActionGroup):
     '''
