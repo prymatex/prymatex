@@ -9,7 +9,7 @@ ONIGOUTPUT=ctypes_output/
 
 .PHONY:  pyrex re clean
 
-all: pyrex
+all: cython
 
 oniguruma:
 	@#TODO: Hacer compilación segun plataforma
@@ -17,10 +17,10 @@ oniguruma:
 	${H2XML} -D ONIG_NORMAL oniguruma.h -o ${ONIGOUTPUT}ongdefs.xml
 	${XML2PY} -c -d -l libonig.so -v -o ${ONIGOUTPUT}onig_${PLATFORM}.py ${ONIGOUTPUT}ongdefs.xml
 
-pyrex: pyonig.so
+cython: pyonig.so
 
 %.c: %.pyx
-	pyrexc $^
+	cython $^
 
 %.o: %.c
 	gcc -c -fPIC -I/usr/include/python2.6 $^ -o $@
