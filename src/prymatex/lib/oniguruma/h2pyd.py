@@ -10,11 +10,21 @@ import re
 
 c_define_re = re.compile('''
 
-    ^\#define\s             # The keyword
-    (?P<name>[\w\_]+)\s+    # The constant name
-    (?P<value>[\d]+)\s*$    # The numeric value
+    ^\#define\s                         # The keyword
+    (?P<name>[\w\_]+)\s+                # The constant name
+    (?P<value>\(?[\d\w\_\>\<\U]+\)?)        # The numeric value
+    \s*$
                  
 ''', re.VERBOSE)
+
+def process_value(name, value):
+    '''
+    
+    '''
+    return value.replace('U', '')
+
+
+
 
 def eval_line(line):
     '''
@@ -22,7 +32,9 @@ def eval_line(line):
     '''
     match = c_define_re.match(line)
     if match:
-        return "%s = %s" % (match.group('name'), match.group('value')) 
+        name = match.group('name')
+        value = process_value(name, match.group('value'))
+        return "%s = %s" % (name, value) 
 
 def handle_file(fp, dest = sys.stdout):
     '''
