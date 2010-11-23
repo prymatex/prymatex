@@ -12,8 +12,8 @@ c_define_re = re.compile('''
 
     ^\#define\s                         # The keyword
     (?P<name>[\w\_]+)\s+                # The constant name
-    (?P<value>\(?[\d\w\_\>\<\U]+\)?)        # The numeric value
-    \s*$
+    (?P<value>\(?[\-\d\w\_\>\<\U]+\)?)        # The numeric value
+    \s*(?P<comment>\/\*[\s\w\W\(\)]+\*\/)?$    # Comment's
                  
 ''', re.VERBOSE)
 
