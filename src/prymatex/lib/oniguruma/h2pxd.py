@@ -2,13 +2,15 @@
 '''
 Created on 23/11/2010
 
-Converts .h definitions to Cython definitions
+Converts .h definitions to Cython pxd definitions
+@see http://docs.cython.org/src/tutorial/pxd_files.html
 
 @author: defo
 '''
 import sys
 import re
 from optparse import OptionParser
+from os.path import exists
 
 c_define_re = re.compile('''
 
@@ -19,12 +21,31 @@ c_define_re = re.compile('''
                  
 ''', re.VERBOSE)
 
+# Sotre values
+CACHE = {}
+
 def process_value(name, value, cfg):
     '''
-    
+    Makes some adjustments to values
     '''
-    return value.replace('U', '')
-
+    global CACHE
+    final_value = None
+    
+    value = value.replace('U', '') # Remove unsigned
+    
+    if value.upper() != value:
+        return
+    
+    try:
+        final_value = eval(value, CACHE) # Cache are globals
+    except Exception, _e:
+        #print e, name, value
+        pass
+    
+    if not CACHE.has_key(value):
+        CACHE[name] = final_value
+         
+    return final_value
 
 
 
@@ -36,11 +57,22 @@ def eval_line(line, number, cfg):
     if match:
         name = match.group('name')
         value = process_value(name, match.group('value'), cfg)
-        if match.group('comment'):
+        
+        if not value:
+            # Value discarded, maybe it's not something you can translate
+            # to python. 
+            return
+        
+        if match.group('comment') and cfg.comments:
             comment = "# %s" % match.group('comment') 
         else:
-            comment = '' 
-        return "%s = %s %s" % (name, value, comment) 
+            comment = ''
+        if cfg.linenumbers:
+            linenumber = '# From line %d\n' % number
+        else:
+            linenumber = ''
+        
+        return "%s%s = %s %s" % (linenumber, name, value, comment) 
 
 def handle_file(fp, cfg, dest = sys.stdout):
     '''
@@ -60,26 +92,49 @@ def main(argv = sys.argv):
     '''
     Entry point, accepts a list of files or stdin
     '''
-    #usage, option_list, option_class, version, conflict_handler, description, formatter, add_help_option, prog, epilog
+    #usage, option_list, option_class, version, conflict_handler, description, 
+    # formatter, add_help_option, prog, epilog
     parser = OptionParser(description = "A simple regex conversor for C defs",
                           )
-    parser.add_option('-o', '--ouput', help = "Output file (defaults to "
+    parser.add_option('-o', '--output', help = "Output file (defaults to "
                       "stdout)", default = None)
+    parser.add_option('-f', '--force-overwrite', dest='overwrite',
+                      default = False, action = "store_true",
+                      help = "Overwrite output file if exists")
     parser.add_option('-l', '--linenumbers', help = "Print line numbers in "
-                      "comments", action = "store_true")
-    parser.add_option("-c", "--comments", help = "Print comments")
+                      "comments", action = "store_true", default = False)
+    parser.add_option("-c", "--comments", help = "Include comments if"
+                      "available")
     parser.add_option("-s", "--substitute", help = "Substitute values")
+    parser.add_option("-i", "--include-original", dest="include",
+                      action = "store_true", default = False)
     
     cfg, args = parser.parse_args(argv)
     
     files = args[1:]
+    
+    if cfg.output:
+        if exists(cfg.output) and not cfg.overwrite:
+            sys.stderr.write("%s already exists. Try --force-overwrite." % 
+                             cfg.output)
+            sys.exit(1)
+        else:
+            output = open(cfg.output, 'w')
+    else:
+        output = sys.stdout
+        
+    
     if not files:
-        handle_file(sys.stdin, cfg)
+        handle_file(sys.stdin, dest = output, cfg =  cfg)
     else:
         for fname in files:
             fp = open(fname)
-            handle_file(fp, cfg)
+            handle_file(fp, cfg = cfg, dest = output)
             fp.close()
+    if output != sys.stdout:
+        output.close()
+    #from pprint import pprint
+    #pprint(CACHE)
     return 0
 
 if __name__ == "__main__":
