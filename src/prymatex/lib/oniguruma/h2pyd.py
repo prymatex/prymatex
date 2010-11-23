@@ -34,7 +34,11 @@ def eval_line(line):
     if match:
         name = match.group('name')
         value = process_value(name, match.group('value'))
-        return "%s = %s" % (name, value) 
+        if match.group('comment'):
+            comment = "# %s" % match.group('comment') 
+        else:
+            comment = '' 
+        return "%s = %s %s" % (name, value, comment) 
 
 def handle_file(fp, dest = sys.stdout):
     '''
