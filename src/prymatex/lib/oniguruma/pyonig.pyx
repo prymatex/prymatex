@@ -1,8 +1,14 @@
 #
-#
+# Cython Oniguruma Binding
 #
 
+__doc__ = '''
+    Oniguruma Binding
+'''
+
 #ONIG_CHAR_TABLE_SIZE = 255
+
+from pyonig cimport *
 
 cdef extern from "includes/oniguruma.h":
     #cdef static ONIG_CHAR_TABLE_SIZE = 255
@@ -133,7 +139,12 @@ cdef extern from "includes/oniguruma.h":
         
     ctypedef re_pattern_buffer OnigRegexType
     ctypedef OnigRegexType* OnigRegex
-            
+    
+    #extern from "includes/oniguruma.h"
+    #cdef  class RePatternBuffer(object):
+    #    cdef public int x
+    #    cdef public int y
+        
     ctypedef struct OnigCompileInfo:
         int             num_of_elements
         OnigEncoding    pattern_enc
@@ -151,30 +162,30 @@ cdef extern from "includes/oniguruma.h":
 
     #char[255] onig_error_string
     cdef char onig_error_string[255]
+
+cdef  class RePatternBuffer(object):
+    cdef public int x
+    cdef public int y
     
-ONIGENC_CTYPE_NEWLINE   = 0
-ONIGENC_CTYPE_ALPHA     = 1
-ONIGENC_CTYPE_BLANK     = 2
-ONIGENC_CTYPE_CNTRL     = 3
-ONIGENC_CTYPE_DIGIT     = 4
-ONIGENC_CTYPE_GRAPH     = 5
-ONIGENC_CTYPE_LOWER     = 6
-ONIGENC_CTYPE_PRINT     = 7
-ONIGENC_CTYPE_PUNCT     = 8
-ONIGENC_CTYPE_SPACE     = 9
-ONIGENC_CTYPE_UPPER     = 10
-ONIGENC_CTYPE_XDIGIT    = 11
-ONIGENC_CTYPE_WORD      = 12
-ONIGENC_CTYPE_ALNUM     = 13  #/* alpha || digit */
-ONIGENC_CTYPE_ASCII     = 14
-ONIGENC_MAX_STD_CTYPE   = ONIGENC_CTYPE_ASCII
+    def __init__(self):
+        self.x = 1
+        self.y = 2
+
+
+cdef public un_valor_de_C = 3
+
+class Regex:
+    def __init__(self, pattern, options):
+        print "Hay que hacer algo con esto", pattern, options
 
 
 def init():
     '''
     Initialize
     '''
+    raise ImportError()
     return onig_init()
+    
     
 def onig_new():
     cdef OnigRegex regex
@@ -184,5 +195,6 @@ def new_region():
     '''
     Get a new region
     '''
-    return onig_region_new () 
+    region = onig_region_new () 
+    return None
 
