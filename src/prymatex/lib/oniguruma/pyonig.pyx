@@ -8,12 +8,15 @@ __doc__ = '''
 
 #ONIG_CHAR_TABLE_SIZE = 255
 
-from pyonig cimport *
+from pyonig_defs cimport *
+
 
 cdef extern from "includes/oniguruma.h":
     #cdef static ONIG_CHAR_TABLE_SIZE = 255
     ctypedef char OnigUChar
+    ctypedef OnigUChar UChar
     ctypedef long OnigCodePoint
+    ctypedef OnigCodePoint CodePoint
     ctypedef int OnigCtype
     ctypedef int OnigDistance
 
@@ -140,6 +143,8 @@ cdef extern from "includes/oniguruma.h":
     ctypedef re_pattern_buffer OnigRegexType
     ctypedef OnigRegexType* OnigRegex
     
+    ctypedef OnigRegexType regex_t
+    
     #extern from "includes/oniguruma.h"
     #cdef  class RePatternBuffer(object):
     #    cdef public int x
@@ -158,43 +163,35 @@ cdef extern from "includes/oniguruma.h":
     OnigRegion* onig_region_new ()
     
     
-    int onig_new (OnigRegex*, OnigUChar* pattern, OnigUChar* pattern_end, OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax, OnigErrorInfo* einfo)
+    int onig_new (OnigRegex*, OnigUChar* pattern, OnigUChar* pattern_end, 
+                    OnigOptionType option, 
+                    OnigEncoding enc, 
+                    OnigSyntaxType* syntax, 
+                    OnigErrorInfo* einfo)
 
     #char[255] onig_error_string
     cdef char onig_error_string[255]
-
-cdef  class RePatternBuffer(object):
-    cdef public int x
-    cdef public int y
-    
-    def __init__(self):
-        self.x = 1
-        self.y = 2
-
-
-cdef public un_valor_de_C = 3
+#
+#
+#
+from libc cimport stdlib
 
 class Regex:
-    def __init__(self, pattern, options):
-        print "Hay que hacer algo con esto", pattern, options
-
-
-def init():
     '''
-    Initialize
+    Oniguruma Regex
     '''
-    raise ImportError()
-    return onig_init()
-    
-    
-def onig_new():
-    cdef OnigRegex regex
-    return "hola"
-
-def new_region():
-    '''
-    Get a new region
-    '''
-    region = onig_region_new () 
-    return None
+    def __init__(self, char *pattern, int options = ONIG_OPTION_NONE):
+        cdef regex_t *c_oregexp 
+        self.pattern = pattern
+        self.options = options
+        cdef UChar* pat_ptr = pattern
+        #cdef int s_length = strlen( pattern )
+        cdef char *start = pattern
+        cdef char *end = pattern + len(pattern)
+        print "%x %x" % (&start[0], &end[0])
+        #print ("%d" % s_length )
+        # Now we have to call onig_new 
+        
+    def __str__(self):
+        return "<ORegex %s>" % self.pattern[:20]
 
