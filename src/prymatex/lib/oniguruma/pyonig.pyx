@@ -8,7 +8,7 @@ __doc__ = '''
 
 #ONIG_CHAR_TABLE_SIZE = 255
 
-from pyonig_defs cimport *
+from oniguruma_consts import *
 
 
 cdef extern from "includes/oniguruma.h":
@@ -168,12 +168,15 @@ cdef extern from "includes/oniguruma.h":
                     OnigEncoding enc, 
                     OnigSyntaxType* syntax, 
                     OnigErrorInfo* einfo)
-
+    
+    char* onig_version ()
+    
     #char[255] onig_error_string
     cdef char onig_error_string[255]
 #
 #
 #
+
 from libc cimport stdlib
 
 class Regex:
@@ -185,13 +188,18 @@ class Regex:
         self.pattern = pattern
         self.options = options
         cdef UChar* pat_ptr = pattern
-        #cdef int s_length = strlen( pattern )
-        cdef char *start = pattern
-        cdef char *end = pattern + len(pattern)
-        print "%x %x" % (&start[0], &end[0])
-        #print ("%d" % s_length )
-        # Now we have to call onig_new 
+    
+    def match(self, s):
+        '''
+        Match
+        '''
+        pass 
         
     def __str__(self):
         return "<ORegex %s>" % self.pattern[:20]
+        
+
+
+# Module initialization
+VERSION = onig_version()
 
