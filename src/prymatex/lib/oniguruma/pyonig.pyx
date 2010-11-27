@@ -27,7 +27,7 @@ class Regex:
     
     def match(self, s):
         '''
-        Match
+        Match. Should return something iterable
         '''
         pass 
         

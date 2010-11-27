@@ -16,13 +16,17 @@ pyonig.c: pyonig.pyx oniguruma_consts.py
 
 
 oniguruma_consts.py: includes/oniguruma.h
-	./h2cython.py -o $@ $^
+	@echo "Converting .H defs to python"
+	./h2cython.py -v -r "^ONIG_" -o $@ $^
 
 %.o: %.c
 	gcc -c -fPIC -I/usr/include/python2.6 $^ -o $@
 
 pyonig.so: pyonig.o
 	gcc -shared $^ -lonig -o $@
+	@echo "-----------------------------------------------------------"
+	@echo "You should be able to make import pyoing and play with it :)"
+	@echo "-----------------------------------------------------------"
 
 clean:
 	@rm -rf pyonig.so pyonig.o pyonig.c pyonig.pxd oniguruma_consts.py

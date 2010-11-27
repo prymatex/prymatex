@@ -14,10 +14,12 @@ import re
 from optparse import OptionParser
 from os.path import exists
 
-     
-# Sotre values
-CACHE = {}
-REJECTED = []
+# Some exceptions
+class ConfigException(Exception):
+    pass
+
+class ArgumentException(ConfigException):
+    pass
 
 
 def largest_word(iterable):
@@ -46,6 +48,13 @@ class HeaderFileParser(object):
         #define VALUE 1U
         #define VALUE_A (VALUE << 1)
     
+    Allows to define regular expressions to be taken away from the resulting
+    names as many C libraries prepend their name due to lack of namespaces,
+    i.e.:
+        #define MYLIBNAME_VALUE_A 1
+        #define MYLIBNAME_VALUE_B 2
+        
+    
     '''
     # C #define regex
     regex = re.compile('''
@@ -68,6 +77,8 @@ class HeaderFileParser(object):
         (?<=\d)U
     ''', re.VERBOSE)
     
+    # Loaded form the values dict passed in the __init__ method
+    remove_from_name_regexes = []
     
     def __init__(self, file_or_name, config, output = sys.stdout):
         '''
@@ -81,13 +92,22 @@ class HeaderFileParser(object):
         self.output = output
         self.rejected = []
         
+        try:
+            for reg in config.remove_exprs:
+                self.remove_from_name_regexes.append(re.compile(reg))
+        except Exception, e:
+            raise ArgumentException("Bad regex %s" % e)
         
         self.values = {} # Values
         self.order = [] # Name - Value sociation, celan data
         self.pending_keys = [] # Values that could not yet be processed
         self.pending_dict = {} # The values 
-        
+    
+    
     def parse(self):
+        '''
+        Parses the file
+        '''
         for number, line in enumerate(self.file.readlines()):
             self.process_line(line)
             
@@ -138,7 +158,7 @@ class HeaderFileParser(object):
             self.order.append(name)
             self.values[name] = final_value 
     
-    def get_undefined_name(self, exc_msg):
+    def get_undefined_variable(self, exc_msg):
         '''
         Parses a NameError exception string. This method relies on Python
         exception messages.
@@ -172,16 +192,24 @@ class HeaderFileParser(object):
         '''
         Writes to output the resulting pxd file
         '''
+        
         if not output:
             output = self.output
             
         width = largest_word(self.order) + 1
         format = "%-" + str(width) + "s = %s\n"
             
+        for name, value in self.iter_clean():
+            output.write(format % (name, value))
+        
+        
+    
+    def iter_clean(self):
+        '''
+        Generator that produces clean name, clean value tuples
+        '''
         for name in self.order:
-            output.write(format % (name, self[name]))
-        
-        
+            yield (self.clean_name(name), self[name])
     
     def iter_pending(self):
         '''
@@ -198,7 +226,10 @@ class HeaderFileParser(object):
     def is_empty(self):
         return len(self.values) == 0
 
-
+    def clean_name(self, name):
+        for regex in self.remove_from_name_regexes:
+            name = regex.sub('', name)
+        return name
 
 def handle_file(fp, cfg, output = sys.stdout):
     '''
@@ -206,16 +237,25 @@ def handle_file(fp, cfg, output = sys.stdout):
     @param dest: A file stream to write on, defaults to stdout.
     @return: Amount of times a python definition could be retrived
     '''
-    
-    parser = HeaderFileParser(fp, config = cfg)
+    try:
+        parser = HeaderFileParser(fp, config = cfg)
+    except ArgumentException, e:
+        sys.stderr.write("%s\n" % e)
+        sys.exit(-3)
+        
     parser.parse()
     parser.as_pxd(output)
     if cfg.verbose and not parser.is_clean():
+        converted = len(parser.order)
+        rejected = len(parser.pending_keys)
+        total = converted + rejected
+        conv_stat = float(rejected) / converted 
         sys.stderr.write("-"*50+"\n")
-        sys.stderr.write("Definitions that could not be decoded are:")
-        sys.stderr.write(" (%d)\n" % len(parser.pending_keys))
+        sys.stderr.write("Definitions that could not be decoded were")
+        sys.stderr.write(" (%d from %d %2.2f%%)\n" % (rejected, total, 
+                                                    conv_stat))
         for name, value in parser.iter_pending():
-            sys.stderr.write("%s = %s\n" % (name, value))
+            sys.stderr.write(" * %s = %s\n" % (name, value))
     
     
     
@@ -240,9 +280,15 @@ def main(argv = sys.argv):
     parser.add_option("-i", "--include-original", dest="include",
                       action = "store_true", default = False)
     
+    parser.add_option('-r', '--remove-expr', dest = "remove_exprs", 
+                      action = "append",
+                      help = "Defines regular expressions to be removed"
+                        "from the keys")
+    parser.set_default("remove_exprs", [])
     parser.add_option("-v", "--verbose", default = False, action = "store_true",
                       help = "Be verbose")
     cfg, files = parser.parse_args(argv[1:])
+    
     
     if cfg.output:
         if exists(cfg.output) and not cfg.overwrite:
