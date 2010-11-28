@@ -80,7 +80,8 @@ cdef extern from "includes/oniguruma.h":
         unsigned int   behavior
         OnigOptionType options  #/* default option */
         OnigMetaCharTableType meta_char_table 
-
+    
+    ctypedef OnigSyntaxType* OnigSyntax
         
     ctypedef struct re_pattern_buffer:
           # /* common members of BBuf(bytes-buffer) */
@@ -153,10 +154,62 @@ cdef extern from "includes/oniguruma.h":
     int onig_new (OnigRegex*, OnigUChar* pattern, OnigUChar* pattern_end, 
                     OnigOptionType option, 
                     OnigEncoding enc, 
-                    OnigSyntaxType* syntax, 
+                    OnigSyntax syntax, 
                     OnigErrorInfo* einfo)
     
     char* onig_version ()
     
+    # Search
+    int onig_search ( Regex, UChar* str, UChar* end, UChar* start,
+                        UChar* range, OnigRegion* region,
+                        OnigOptionType option )
+    
     #char[255] onig_error_string
     cdef char onig_error_string[255]
+    
+    
+    # Syntaxes
+    OnigSyntaxType OnigSyntaxASIS
+    OnigSyntaxType OnigSyntaxPosixBasic
+    OnigSyntaxType OnigSyntaxPosixExtended
+    OnigSyntaxType OnigSyntaxEmacs
+    OnigSyntaxType OnigSyntaxGrep
+    OnigSyntaxType OnigSyntaxGnuRegex
+    OnigSyntaxType OnigSyntaxJava
+    OnigSyntaxType OnigSyntaxPerl
+    OnigSyntaxType OnigSyntaxPerl_NG
+    OnigSyntaxType OnigSyntaxRuby
+    
+    
+    # Encodings
+    OnigEncodingType OnigEncodingASCII
+    OnigEncodingType OnigEncodingISO_8859_1
+    OnigEncodingType OnigEncodingISO_8859_2
+    OnigEncodingType OnigEncodingISO_8859_3
+    OnigEncodingType OnigEncodingISO_8859_4
+    OnigEncodingType OnigEncodingISO_8859_5
+    OnigEncodingType OnigEncodingISO_8859_6
+    OnigEncodingType OnigEncodingISO_8859_7
+    OnigEncodingType OnigEncodingISO_8859_8
+    OnigEncodingType OnigEncodingISO_8859_9
+    OnigEncodingType OnigEncodingISO_8859_10
+    OnigEncodingType OnigEncodingISO_8859_11
+    OnigEncodingType OnigEncodingISO_8859_13
+    OnigEncodingType OnigEncodingISO_8859_14
+    OnigEncodingType OnigEncodingISO_8859_15
+    OnigEncodingType OnigEncodingISO_8859_16
+    OnigEncodingType OnigEncodingUTF8
+    OnigEncodingType OnigEncodingUTF16_BE
+    OnigEncodingType OnigEncodingUTF16_LE
+    OnigEncodingType OnigEncodingUTF32_BE
+    OnigEncodingType OnigEncodingUTF32_LE
+    OnigEncodingType OnigEncodingEUC_JP
+    OnigEncodingType OnigEncodingEUC_TW
+    OnigEncodingType OnigEncodingEUC_KR
+    OnigEncodingType OnigEncodingEUC_CN
+    OnigEncodingType OnigEncodingSJIS
+    OnigEncodingType OnigEncodingKOI8
+    OnigEncodingType OnigEncodingKOI8_R
+    OnigEncodingType OnigEncodingCP1251
+    OnigEncodingType OnigEncodingBIG5
+    OnigEncodingType OnigEncodingGB18030
