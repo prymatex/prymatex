@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>. "$TM_SUPPORT_PATH/lib/webpreview.sh"
+html_header "Replace Colors"
+echo '&lt;p&gt;WARNING: Changes you make here are instantly saved to disk. The only way to undo is if you keep the document open in textmate, undo and resave.&lt;/p&gt;'
+"${TM_RUBY:-ruby}" "$TM_BUNDLE_SUPPORT/show_hex_colors_and_replace.rb"
+html_footer
+
+</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>name</key>
+	<string>Replace Hex Colors</string>
+	<key>output</key>
+	<string>showAsHTML</string>
+	<key>uuid</key>
+	<string>BD115447-20FA-43E3-8694-E8B4280C296B</string>
+</dict>
+</plist>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>List.iter2 ${1:(fun ${2:x1} ${3:x2} -&gt; ${4:})} ${5:lst1} ${6:lst2}$0</string>
+	<key>name</key>
+	<string>List.iter2</string>
+	<key>scope</key>
+	<string>source.ocaml</string>
+	<key>tabTrigger</key>
+	<string>List.</string>
+	<key>uuid</key>
+	<string>A073DBB2-7566-11D9-B7C0-000A95AFE286</string>
+</dict>
+</plist>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>contactEmailRot13</key>
+	<string>co@r-fpevor.pbz</string>
+	<key>contactName</key>
+	<string>Paul Bissex</string>
+	<key>description</key>
+	<string>Support for &lt;a href="http://en.wikipedia.org/wiki/Logo_programming_language"&gt;Logo&lt;/a&gt;, the educational programming language best known for its turtle drawing mode.</string>
+	<key>mainMenu</key>
+	<dict>
+		<key>items</key>
+		<array>
+			<string>D03092A5-DED1-4527-9FF0-00E7EC10A0E0</string>
+			<string>------------------------------------</string>
+			<string>EABE4310-C402-415B-AA03-8950F3AF0D3B</string>
+			<string>902EBE48-7449-4631-BA2A-CF3242800AA7</string>
+		</array>
+		<key>submenus</key>
+		<dict/>
+	</dict>
+	<key>name</key>
+	<string>Logo</string>
+	<key>ordering</key>
+	<array>
+		<string>D03092A5-DED1-4527-9FF0-00E7EC10A0E0</string>
+		<string>902EBE48-7449-4631-BA2A-CF3242800AA7</string>
+		<string>EABE4310-C402-415B-AA03-8950F3AF0D3B</string>
+		<string>7613EC24-B0F9-4D01-8706-1D54098BFFD8</string>
+		<string>113270D8-98E6-4128-BBBB-D8BC931AC698</string>
+		<string>C77C1250-3F12-4739-BEDD-50E79B234A5D</string>
+	</array>
+	<key>uuid</key>
+	<string>72FC431C-997D-4CBF-A4F2-66F6638F9CB6</string>
+</dict>
+</plist>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>(* CR `whoami`: $1 *)$0</string>
+	<key>name</key>
+	<string>CR</string>
+	<key>scope</key>
+	<string>source</string>
+	<key>tabTrigger</key>
+	<string>cr</string>
+	<key>uuid</key>
+	<string>4FD90BDA-3348-486F-BCDB-A07DB264ED64</string>
+</dict>
+</plist>

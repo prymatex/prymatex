@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>saveActiveFile</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+require ENV['TM_BUNDLE_SUPPORT'] + '/lib/GTD.rb'
+require ENV['TM_SUPPORT_PATH'] + '/lib/ui.rb'
+include GTD
+files = GTD.process_directory
+projects = files.map{|i| i.projects}.flatten
+projectNames = projects.map{|i| i.name+" : "+i.root.name}
+require 'pp'
+choice = TextMate::UI.menu(projectNames)
+if choice then
+	projectName = projectNames[choice]
+  project = projects.find{|i| i.name+" : "+i.root.name == projectName}
+puts project.txmt
+  `open "#{project.txmt}"`
+end</string>
+	<key>fallbackInput</key>
+	<string>word</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^G</string>
+	<key>name</key>
+	<string>Go to Project</string>
+	<key>output</key>
+	<string>discard</string>
+	<key>scope</key>
+	<string>text.gtdalt</string>
+	<key>uuid</key>
+	<string>A54CF0C9-ECBF-4A20-B345-3EA167ABD6A0</string>
+</dict>
+</plist>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+
+require "#{ENV['TM_SUPPORT_PATH']}/lib/exit_codes.rb"
+require "#{ENV['TM_SUPPORT_PATH']}/lib/ui.rb"
+
+regex_string = TextMate::UI.request_string(
+  :title =&gt; 'Strip Matching Lines', 
+  :prompt =&gt; 'Regular Expression',
+  :button1 =&gt; 'Strip'
+)
+
+TextMate.exit_discard if regex_string.nil?
+
+re = Regexp.new(regex_string)
+$stdin.each_line() do |line|
+	print line if !re.match(line)
+end
+</string>
+	<key>fallbackInput</key>
+	<string>document</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>name</key>
+	<string>Strip Matching Lines</string>
+	<key>output</key>
+	<string>replaceSelectedText</string>
+	<key>uuid</key>
+	<string>A1D725D0-E28F-491C-8776-C6FAF0A89DF7</string>
+</dict>
+</plist>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+dialog = ENV['TM_SUPPORT_PATH'] + '/bin/tm_dialog'
+require ENV['TM_SUPPORT_PATH'] + '/lib/osx/plist'
+require ENV['TM_SUPPORT_PATH'] + '/lib/escape'
+require ENV['TM_SUPPORT_PATH'] + '/lib/exit_codes'
+require 'date'
+line = STDIN.read
+if line =~ / (at|due|from):\[(\d{4})-(\d{2})-(\d{2})\]$/
+absoluteYear, absoluteMonth, absoluteDay = $2.to_i, $3.to_i, $4.to_i
+weekdayDay = 0
+date = Date.new(absoluteYear,absoluteMonth,absoluteDay)
+else
+  date = Date.today
+  absoluteYear, absoluteMonth, absoluteDay = date.year, date.month, date.day
+  weekdayDay = date.wday
+end
+tod = Date.today
+def to_cocoa_date(date)
+  ((date - Date.new(2001, 1, 1)+1)* 3600 * 24).to_i
+end
+def from_cocoa_date(number)
+  Date.new(2001,1,1)+number.to_i/(3600 * 24) - 1
+end
+def myformat(date)
+  date.strftime("%A, %m/%d/%Y")
+end
+plist = { 
+  'currentDeadline' =&gt; "Current value: " + myformat(date),
+  'daysFromToday' =&gt; "Current value: " + (date - tod).to_s,
+  'newDeadlineDate' =&gt; to_cocoa_date(date),
+  'newDaysFromToday' =&gt; (date - tod).to_i,
+  'today' =&gt; "Today is " + myformat(tod)
+}.to_plist
+str = `#{e_sh dialog} datePicker -mp #{e_sh plist}`
+res=OSX::PropertyList.load(str)
+if res['returnButton'].to_s != "OK" then
+  newDate = nil
+else
+  newDate = res['newDeadlineDate'].to_s
+  if newDate =~ /^[\d\+\-*]+$/
+    newDate = (tod + eval(res['newDaysFromToday'].to_s).to_i)
+  else
+    newDate =~ /^\w{3} (\w{3}) (\d{2}) \d{2}:\d{2}:\d{2} \w{3} (\d{4})/
+    newDate = Date.new($3.to_i,Date::ABBR_MONTHNAMES.index($1),$2.to_i)-1
+  end
+end
+#puts res['newDeadlineDate']/(3600*24)
+#pp from_cocoa_date(res['newDeadlineDate']).to_s
+if newDate.nil?
+  TextMate.exit_discard
+else
+  print e_sn(line).gsub(/ (at|due|from):\[\d{4}-\d{2}-\d{2}\]$/,"") + " #{if $1 &amp;&amp; $1 != "" then $1 else "\$0due" end}:[#{newDate}]"
+end
+</string>
+	<key>fallbackInput</key>
+	<string>line</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>#</string>
+	<key>name</key>
+	<string>Set Date</string>
+	<key>output</key>
+	<string>insertAsSnippet</string>
+	<key>scope</key>
+	<string>text.gtdalt meta.action</string>
+	<key>uuid</key>
+	<string>7FBD47E6-F919-45C0-956C-3996106E0C49</string>
+</dict>
+</plist>

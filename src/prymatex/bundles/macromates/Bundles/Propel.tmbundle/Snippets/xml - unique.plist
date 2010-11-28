@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;unique name="unique_${1:key}"&gt;
+	&lt;unique-column name="${1:key}" /&gt;
+&lt;/unique&gt;</string>
+	<key>name</key>
+	<string>xml - unique</string>
+	<key>scope</key>
+	<string>text.xml</string>
+	<key>tabTrigger</key>
+	<string>&lt;u</string>
+	<key>uuid</key>
+	<string>2340D768-1E9F-455C-AC2E-1F1570A1424F</string>
+</dict>
+</plist>

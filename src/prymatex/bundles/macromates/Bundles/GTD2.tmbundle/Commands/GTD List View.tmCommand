@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>saveActiveFile</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby  
+
+require "#{ENV['TM_SUPPORT_PATH']}/lib/textmate"
+require "erb"
+require "pp"
+include ERB::Util
+require "#{ENV['TM_BUNDLE_SUPPORT']}/gtd_functions" 
+
+displayAllTasks</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^@T</string>
+	<key>name</key>
+	<string>GTD List View</string>
+	<key>output</key>
+	<string>showAsHTML</string>
+	<key>scope</key>
+	<string>text.html.markdown.wiki.gtd</string>
+	<key>uuid</key>
+	<string>4351CBE0-CE02-472E-A0A9-F9F895B2946C</string>
+</dict>
+</plist>

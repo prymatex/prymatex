@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+
+MARK = [0xFFFC].pack("U").freeze
+def snippet_escape (str); str.gsub(/[$`\\]/, '\\\\\0'); end
+
+def strip_bracket (txt)
+  if idx = txt.index(/[\[("']/) then
+    chr_map = { ?[ =&gt; ?], ?( =&gt; ?), ?" =&gt; ?", ?' =&gt; ?' }
+    if ridx = txt.rindex(chr_map[txt[idx]]) then
+      txt[ridx, 1] = ""
+      txt[idx, 1] = ""
+      txt.insert idx, " " if txt[idx - 1, 1] =~ /[^\[\]\(\)\{\}\s]/ &amp;&amp; ENV['TM_SELECTED_TEXT'].nil?
+    end
+  end
+  return txt
+end
+
+line = STDIN.gets
+unless ENV.has_key?('TM_SELECTED_TEXT') then
+  line.insert(ENV['TM_LINE_INDEX'].to_i, MARK)
+end
+print snippet_escape(strip_bracket(line)).sub(/#{MARK}/, '${0}')
+</string>
+	<key>fallbackInput</key>
+	<string>line</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>^$</string>
+	<key>name</key>
+	<string>Smart Delete Brackets</string>
+	<key>output</key>
+	<string>insertAsSnippet</string>
+	<key>uuid</key>
+	<string>AE00FFF1-C436-4826-808A-3AF6C2ABD18B</string>
+</dict>
+</plist>

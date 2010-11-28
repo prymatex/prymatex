@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>Line(${1:p1}, ${2:p2}, ${3:image}, ${4:color}, ${5:width});</string>
+	<key>name</key>
+	<string>line</string>
+	<key>scope</key>
+	<string>source.fxscript</string>
+	<key>tabTrigger</key>
+	<string>line</string>
+	<key>uuid</key>
+	<string>2572F624-B65B-46C1-BF97-5FAEF3EAEA72</string>
+</dict>
+</plist>

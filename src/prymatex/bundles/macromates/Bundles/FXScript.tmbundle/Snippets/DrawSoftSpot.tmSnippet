@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>DrawSoftDot(${1:dest}, ${2:point/poly}, ${3:shape}, ${4:size}, ${5:softness}, ${6:subSteps}, ${7:color(s)}, ${8:opacity(s)}, ${9:aspectOf(${10:$1})});</string>
+	<key>name</key>
+	<string>DrawSoftSpot</string>
+	<key>scope</key>
+	<string>source.fxscript</string>
+	<key>tabTrigger</key>
+	<string>drawsoftdot</string>
+	<key>uuid</key>
+	<string>E678D4CC-8981-48A2-B7CE-060DBF8D6F53</string>
+</dict>
+</plist>

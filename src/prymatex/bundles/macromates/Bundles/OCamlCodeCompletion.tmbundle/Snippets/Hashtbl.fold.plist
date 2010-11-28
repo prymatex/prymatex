@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>Hashtbl.fold ${1:(fun ${2:k} ${3:v} ${4:b} -&gt; ${5:})} ${6:h} ${7:base} $0</string>
+	<key>name</key>
+	<string>Hashtbl.fold</string>
+	<key>scope</key>
+	<string>source.ocaml</string>
+	<key>tabTrigger</key>
+	<string>Hashtbl.</string>
+	<key>uuid</key>
+	<string>0229BBF8-755E-11D9-AC9E-000A95AFE286</string>
+</dict>
+</plist>

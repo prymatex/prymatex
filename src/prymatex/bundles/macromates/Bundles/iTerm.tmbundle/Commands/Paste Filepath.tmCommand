@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>export SHELL_NAME=${SHELL_NAME:="TextMate Shell"}
+"$TM_BUNDLE_SUPPORT/new.sh"
+PASTE=$(echo "$TM_FILEPATH" | sed s/\"/\\\\\"/g)
+osascript &lt;&lt; END
+tell application "iTerm"
+	tell first terminal
+		tell session named "$SHELL_NAME"
+			write text "$PASTE"
+		end tell
+	end tell
+end tell
+END
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^I</string>
+	<key>name</key>
+	<string>Paste Filepath</string>
+	<key>output</key>
+	<string>discard</string>
+	<key>uuid</key>
+	<string>BED3AE43-7F29-4F92-B2F1-3361B4ACC71A</string>
+</dict>
+</plist>

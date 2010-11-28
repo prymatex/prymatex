@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby -w
+
+$LOAD_PATH &lt;&lt; ENV['TM_BUNDLE_SUPPORT'] + "/lib"
+$LOAD_PATH &lt;&lt; ENV['TM_SUPPORT_PATH'] + "/lib"
+
+require 'p4_forms'
+require 'shelltokenize'
+
+p4				= ENV['TM_P4'] || 'p4'
+#commit_paths	= ENV['CommitPaths']
+support			= ENV['TM_SUPPORT_PATH']
+commit_tool		= support + "/bin/CommitWindow.app/Contents/MacOS/CommitWindow"
+
+ignore_file_pattern = /(\/.*)*(\/\..*|\.(tmproj|o|pyc)|Icon)/
+
+
+StatusMap = {	'edit' 		=&gt; 'M',
+			'add'		=&gt; 'A',
+			'delete'	=&gt; 'D'}
+	# TODO others probably needed
+		
+output = %x{"#{p4}" change -o}
+puts output
+
+commit_form = Perforce::Form.new(output)
+#puts commit_form.inspect
+
+raw_paths = commit_form.paths_from_entry("Files")
+commit_paths = []
+commit_status = []
+
+raw_paths.each do |path|
+	match = /^(.*)\s#\s(\w*)/.match(path)
+	commit_paths.push(match[1])
+	commit_status.push(match[2])
+end
+		
+# map to CVS-like status for CommitWindow display
+commit_status = commit_status.collect{|status| StatusMap[status]}
+
+commit_paths = commit_paths.collect {|path| path.p4_to_local_path }
+commit_path_text = commit_paths.join_p4_to_local_paths
+
+#puts commit_path_text
+#puts "--------------"
+
+commit_args = %x{"#{commit_tool}" --status #{commit_status.join(":")} #{commit_path_text}}
+#puts commit_args
+#puts "--------------"
+
+commit_tokens = commit_args.tokenize
+
+#puts commit_tokens.inspect
+
+commit_form.fields['Status'] = 'pending'
+commit_form.fields['Description'] = commit_tokens[1]
+commit_form.fields['Files'] = commit_tokens[2...commit_tokens.size].local_to_p4_paths.inject("") {|out, path| out += "#{path}\n" }
+
+
+puts commit_form.to_s
+
+IO.popen(%Q{"#{p4}" submit -i}, "w+" ) {|p| p.puts commit_form.to_s }
+
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^$</string>
+	<key>name</key>
+	<string>Submit Changelist…</string>
+	<key>output</key>
+	<string>openAsNewDocument</string>
+	<key>uuid</key>
+	<string>BE2B6161-2E23-4C08-B438-409BB1E82DA8</string>
+</dict>
+</plist>

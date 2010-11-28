@@ -1,0 +1,38 @@
+# Shell Commands
+
+The shell is a scripting language used to piece together various programs (shell commands), and often in an interactive way, e.g. as done when launching Terminal and entering commands to execute.
+
+For a thorough introduction to the shell scripting language have a look at this [shell tutorial provided by Apple][AppleShellTutorial].
+
+[AppleShellTutorial]: http://developer.apple.com/documentation/OpenSource/Conceptual/ShellScripting/index.html
+
+## Executing Commands / Filtering Text
+
+TextMate allows shell commands to be executed in different contexts. Some of the more useful options are:
+
+ 1. In the current document, either press &#x2303;R with no selection to run the current line as a shell command, or select one or more lines and use &#x2303;R to run the selection as a shell script (it supports shebang as well).
+
+    ![Execute Line](execute_line.png)
+
+ 2. From the Text menu you can select Filter Through Command… (&#x2325;&#x2318;R) which opens a panel where you can enter a shell command to run and set what should be given as input (stdin) plus what to do with the output of the command (often you want to set input to the selected text and let the output replace the selection).
+
+    ![Filter Through Command](filter_through_command.png)
+
+ 3. [Commands][Commands] via the Bundle Editor. The first two options are mostly for one-shot commands, whereas commands created in the Bundle Editor are for stuff you want to run again later. The options here are the same as those of option 2, i.e. you can set what to do with input/output, even have the output shown as a tool tip (e.g. for commands which lookup help for the current word) or HTML (e.g. for commands which build the project and show results, incrementally). You can also set that documents should be saved before executing the command and give the command a key equivalent or tab trigger.
+
+    ![Command Editor](command_editor.png)
+
+
+## Search Path
+
+When running a command from Terminal, the shell will use the value of the `PATH` variable to locate it (when it is specified without an absolute location). For example `ruby` is located in `/usr/bin/ruby` and `svn` is (for me) located in `/opt/local/bin/svn`.
+
+TextMate [inherits the value of `PATH` from Finder][1], which has only a few search locations specified, so for many users, it is necessary to augment this PATH if they need TextMate to find `git`, `pdflatex`, or similar commands not included with Mac OS X.
+
+There are two ways to setup `PATH` for TextMate. Either via Preferences → Advanced → Shell Variables or by editing [`~/.MacOSX/environment.plist`][2].
+
+The former is by far the simplest, the latter is a property list with [environment variables read by Finder when you login][3], so values set here should affect all applications.
+
+[1]: http://developer.apple.com/qa/qa2001/qa1255.html
+[2]: http://developer.apple.com/documentation/MacOSX/Conceptual/BPRuntimeConfig/Articles/EnvironmentVars.html#//apple_ref/doc/uid/20002093-113982
+[3]: http://developer.apple.com/qa/qa2001/qa1067.html

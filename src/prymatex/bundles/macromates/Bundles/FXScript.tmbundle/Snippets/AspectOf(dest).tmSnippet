@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>AspectOf(${1:dest});</string>
+	<key>name</key>
+	<string>AspectOf(dest)</string>
+	<key>scope</key>
+	<string>source.fxscript</string>
+	<key>tabTrigger</key>
+	<string>aspectof</string>
+	<key>uuid</key>
+	<string>8F6C9982-167C-4266-950C-5073AC5125BA</string>
+</dict>
+</plist>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>saveModifiedFiles</string>
+	<key>command</key>
+	<string>cd "${TM_PROJECT_DIRECTORY:=$TM_DIRECTORY}";
+
+ruby &lt;&lt;'RUBY'
+
+require "#{ENV['TM_SUPPORT_PATH']}/lib/exit_codes.rb"
+require "#{ENV['TM_SUPPORT_PATH']}/lib/ui.rb"
+
+output = TextMate::UI.request_string(
+  :title =&gt; 'Input', 
+  :prompt =&gt; 'Record Message',
+  :button1 =&gt; 'Record'
+)
+
+TextMate.exit_discard if output.nil?
+
+output = `darcs record -a -m '#{output.strip.gsub(/(')/, '\\\\1')}'`
+
+puts(output)
+
+RUBY</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^Z</string>
+	<key>name</key>
+	<string>Record All</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>uuid</key>
+	<string>1C9B5F32-759D-4B3E-BA91-A83897C48026</string>
+</dict>
+</plist>

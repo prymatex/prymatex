@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>saveActiveFile</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+require ENV['TM_BUNDLE_SUPPORT'] + '/lib/GTD.rb'
+include GTD
+objects = GTD.process_directory
+acts = objects.map{|o| o.actions}.flatten
+acts.sort! do |a,b|
+  da, db = *[a.due, b.due].map {|i| i || ""}  # convert nils to empty strings
+#  puts a,b, da, db
+  if a.context == b.context then
+    if da == db then
+      a.parent.name &lt;=&gt; b.parent.name
+    else
+      da &lt;=&gt; db
+    end
+  else
+    a.context &lt;=&gt; b.context
+  end
+end
+pr = Printer.new
+b = &lt;&lt;HTML
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;link rel="stylesheet" href="tm-file://#{ENV['TM_SUPPORT_PATH']}/css/default.css" type="text/css" media="screen" title="no title" charset="utf-8" /&gt;
+    &lt;link rel="stylesheet" href="tm-file://#{ENV['TM_BUNDLE_SUPPORT']}/css/sidebar.css" type="text/css" media="screen" title="no title" charset="utf-8" /&gt;
+    &lt;script src="tm-file://#{ENV['TM_BUNDLE_SUPPORT']}/js/sidebar.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+    &lt;script src="tm-file://#{ENV['TM_BUNDLE_SUPPORT']}/js/sorttable.js" type="text/javascript" charset="utf-8"&gt;&lt;/script&gt;
+    &lt;style type="text/css"&gt;
+      .nobr {white-space: nowrap}
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;body class=""&gt;
+  &lt;ul id="toggles"&gt;
+    &lt;p&gt;Next Actions Only &lt;input type="checkbox" name="next-show" value="" id="next-show-button"&gt;&lt;/p&gt;
+    &lt;li class="collapse" tablecolumn="0"&gt;Contexts&lt;/li&gt;
+    &lt;li class="collapse" tablecolumn="2"&gt;Projects&lt;/li&gt;
+    &lt;li class="collapse" tablecolumn="3"&gt;Files&lt;/li&gt;
+  &lt;/ul&gt;
+HTML
+e = &lt;&lt;HTML
+  &lt;/body&gt;
+&lt;/html&gt;
+HTML
+pr.raw b
+pr.table do
+  pr.title "List of all Actions"
+  pr.headers([ "Context", "Action", "Project", "File" , "Due by","Completed"])
+  acts.each do |a|
+    proj = a.parent.link
+    due = case a.due
+      when "",nil
+        ""
+      when DateLate
+        "&lt;span style=\"color:red\"&gt;#{a.due}&lt;/span&gt;"
+      else
+        a.due
+    end
+    note_part = (a.note != "") ? " title=\"#{a.note}\"" : ""
+    text = "&lt;a href=\"#{a.txmt}\"#{note_part}&gt;#{a.name}&lt;/a&gt;"
+    if a.is_next_action?
+      pr.row_next([a.context, text, proj, a.root.link , "&lt;span class=\"nobr\"&gt;#{due}&lt;/span&gt;", a.mark_completed_link])
+    else
+      pr.row([a.context, text, proj, a.root.link , "&lt;span class=\"nobr\"&gt;#{due}&lt;/span&gt;", a.mark_completed_link])
+    end
+  end
+end
+pr.raw e
+puts pr.to_html</string>
+	<key>fallbackInput</key>
+	<string>word</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^~@0</string>
+	<key>name</key>
+	<string>Current Actions</string>
+	<key>output</key>
+	<string>showAsHTML</string>
+	<key>scope</key>
+	<string>text.gtdalt</string>
+	<key>uuid</key>
+	<string>F4884C32-9046-48E8-AB57-1784AF8C264C</string>
+</dict>
+</plist>

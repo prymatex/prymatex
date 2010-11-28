@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>array date(${1:\$array}; *; ${2:date})$0</string>
+	<key>name</key>
+	<string>array date * ..</string>
+	<key>scope</key>
+	<string>source.active4d - text.xml</string>
+	<key>tabTrigger</key>
+	<string>ards</string>
+	<key>uuid</key>
+	<string>2B8845C2-C670-4287-9C6B-C43D57057BFA</string>
+</dict>
+</plist>

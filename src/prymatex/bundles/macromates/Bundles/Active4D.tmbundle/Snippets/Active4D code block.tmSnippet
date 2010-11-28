@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;%$1$2%&gt;$0</string>
+	<key>keyEquivalent</key>
+	<string>@&lt;</string>
+	<key>name</key>
+	<string>Active4D code block</string>
+	<key>scope</key>
+	<string>text.html.strict.active4d - source.active4d</string>
+	<key>tabTrigger</key>
+	<string>&lt;</string>
+	<key>uuid</key>
+	<string>A37A4FC0-03EC-4275-A7AB-C2F853960BD2</string>
+</dict>
+</plist>

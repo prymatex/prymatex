@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>Generator "${1:Name}";
+Group "${2:Name}";
+</string>
+	<key>name</key>
+	<string>Generator</string>
+	<key>scope</key>
+	<string>source.fxscript</string>
+	<key>tabTrigger</key>
+	<string>generator</string>
+	<key>uuid</key>
+	<string>8265E927-C628-4028-B12C-60C233BAA124</string>
+</dict>
+</plist>

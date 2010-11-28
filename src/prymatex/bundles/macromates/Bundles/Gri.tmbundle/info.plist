@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>contactEmailRot13</key>
+	<string>Qna.Xryyrl@qny.pn</string>
+	<key>contactName</key>
+	<string>Dan Kelley</string>
+	<key>description</key>
+	<string>Support for &lt;a href="http://gri.sourceforge.net/"&gt;Gri&lt;/a&gt;, a language for scientific graphics programming.</string>
+	<key>mainMenu</key>
+	<dict>
+		<key>items</key>
+		<array>
+			<string>41A8F343-48CB-482E-A395-34C31CE9A5AB</string>
+			<string>------------------------------------</string>
+			<string>2046FFE7-A68E-4955-8FCA-C802F456792C</string>
+			<string>68248C77-9EB9-4B05-BEA6-162719D55AE0</string>
+		</array>
+		<key>submenus</key>
+		<dict/>
+	</dict>
+	<key>name</key>
+	<string>Gri</string>
+	<key>ordering</key>
+	<array>
+		<string>41A8F343-48CB-482E-A395-34C31CE9A5AB</string>
+		<string>2046FFE7-A68E-4955-8FCA-C802F456792C</string>
+		<string>68248C77-9EB9-4B05-BEA6-162719D55AE0</string>
+		<string>A7E000BE-6A87-4D7E-A053-469DA0DFEA02</string>
+		<string>3BC63705-0826-4C6F-B0F4-7417722655DB</string>
+	</array>
+	<key>uuid</key>
+	<string>47889EBB-6E0F-4D16-ADDE-0616D5795636</string>
+</dict>
+</plist>

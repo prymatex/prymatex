@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>labels=`"${TM_P4:=p4}" labels | cut -d " " -f 2`
+#echo $labels
+
+difflabels=`osascript&lt;&lt;END
+	set AppleScript's text item delimiters to {"\n", "\r"}
+	tell app "SystemUIServer" to activate
+	tell app "SystemUIServer" to choose from list (every text item of "$labels") with prompt "Please 
+choose two labels:" with multiple selections allowed
+END`
+#echo $difflabels
+
+IFS=", "
+difflabels=( $difflabels )
+
+#echo "0:" ${difflabels[0]}
+#echo "1:" ${difflabels[1]}
+
+ruby -I "$TM_BUNDLE_SUPPORT/lib/"&lt;&lt;END
+	require 'p4_diff'
+	Perforce::diff_files_in_revisions("@${difflabels[0]}", "@${difflabels[1]}", "Perforce—Diff Labels…")
+END
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^$</string>
+	<key>name</key>
+	<string>Diff Labels…</string>
+	<key>output</key>
+	<string>openAsNewDocument</string>
+	<key>uuid</key>
+	<string>556314B2-B3BF-11D9-9B1F-000A95A89C98</string>
+</dict>
+</plist>

@@ -1,0 +1,14 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSDatePicker; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
+        {ACTIONS = {performButtonClick = id; }; CLASS = NSObject; LANGUAGE = ObjC; }, 
+        {
+            ACTIONS = {performButtonClick = id; }; 
+            CLASS = ObjectWithButton; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

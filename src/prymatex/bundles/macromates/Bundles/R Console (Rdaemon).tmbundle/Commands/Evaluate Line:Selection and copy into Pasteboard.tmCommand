@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>TASK=$(cat | perl -pe 's/^&gt; \s*//')
+TASK="ifelse(is.null(dim($TASK)),write($TASK, '|pbcopy'),write.table($TASK, file=pipe('pbcopy'),quote=F,row.names=F, sep='\t'))"
+
+echo "@|$TASK" | "$TM_BUNDLE_SUPPORT"/bin/execute.sh &gt; /dev/null &amp;
+
+# | sed '1d;$d' | pbcopy</string>
+	<key>fallbackInput</key>
+	<string>line</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>$</string>
+	<key>name</key>
+	<string>Execute Line / Selection and Copy into Pasteboard</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>scope</key>
+	<string>source.rd.console</string>
+	<key>uuid</key>
+	<string>CDBEF676-C47F-492B-B005-BFC7426798B9</string>
+</dict>
+</plist>

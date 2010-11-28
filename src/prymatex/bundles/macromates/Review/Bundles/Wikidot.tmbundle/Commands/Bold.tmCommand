@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/php
+&lt;?php
+// author tim.bates@ed.ac.uk
+// version .7
+// created: 22:10:2008
+// bolds or unbolds the selection or the currentword
+
+$input        = $_ENV["TM_SELECTED_TEXT"];
+$marker       = $_ENV["TM_BOLD_MARKER"];
+$esapedMarker = addcslashes($marker, "*()[].$^");
+
+// TM_CURRENT_WORD doesn't include markup :-(
+$unFormatted = ereg_replace("$esapedMarker(.*)$esapedMarker", "\\1", $input);
+if ($input==$unFormatted) {
+	//plain--&gt;formatted
+	echo($marker . $input . $marker);
+}else {
+	//formatted--&gt;plain
+	echo($unFormatted);
+}
+?&gt;</string>
+	<key>fallbackInput</key>
+	<string>line</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>@b</string>
+	<key>name</key>
+	<string>Bold **</string>
+	<key>output</key>
+	<string>insertAsSnippet</string>
+	<key>scope</key>
+	<string>text.html.wikidot</string>
+	<key>uuid</key>
+	<string>AB5674B9-97E9-4271-AE78-6D4C881713AA</string>
+</dict>
+</plist>

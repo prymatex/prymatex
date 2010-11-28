@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>if [ "$TM_RdaemonRAMDRIVE" == "1" ]; then
+	tail /tmp/TMRramdisk1/r_out| perl -e '
+	undef($/); $a=&lt;&gt;;
+	$a=~s/\x0D{1,}/\x0D/sg;
+	while($a=~m/(.*?)\x0D&lt;.{50}(.) +\x08+(.*)/) { $a=~s/(.*?)\x0D&lt;.{50}(.) +\x08+(.*)/$1$2$3/sg; }
+	$a=~s/\\/\\\\/g;$a=~s/\`/\\\`/sg;$a=~s/\$/\\\$/sg;$a=~s/_\x08//sg;
+	$a=~s/\x07//sg;
+	$a .= "\n&gt; " if ($a!~/&gt; $/ &amp;&amp; $a!~/\+ $/);
+	print "$a";
+'
+else
+	tail "$HOME/Library/Application Support/Rdaemon"/r_out| perl -e '
+	undef($/); $a=&lt;&gt;;
+	$a=~s/\x0D{1,}/\x0D/sg;
+	while($a=~m/(.*?)\x0D&lt;.{50}(.) +\x08+(.*)/) { $a=~s/(.*?)\x0D&lt;.{50}(.) +\x08+(.*)/$1$2$3/sg; }
+	$a=~s/\\/\\\\/g;$a=~s/\`/\\\`/sg;$a=~s/\$/\\\$/sg;$a=~s/_\x08//sg;
+	$a=~s/\x07//sg;
+	$a .= "\n&gt; " if ($a!~/&gt; $/ &amp;&amp; $a!~/\+ $/);
+	print "$a";
+'
+fi</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>~@t</string>
+	<key>name</key>
+	<string>Show End of r_out</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>scope</key>
+	<string>source.rd.console</string>
+	<key>uuid</key>
+	<string>2E40AF2C-A50C-4453-9880-7B67FD7D3599</string>
+</dict>
+</plist>

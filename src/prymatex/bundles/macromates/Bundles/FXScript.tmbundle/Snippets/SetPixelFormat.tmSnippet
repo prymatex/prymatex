@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>SetPixelFormat(${1:dest}, ${2:colorspace});</string>
+	<key>name</key>
+	<string>SetPixelFormat</string>
+	<key>scope</key>
+	<string>source.fxscript</string>
+	<key>tabTrigger</key>
+	<string>setpixelformat</string>
+	<key>uuid</key>
+	<string>E3F28EA4-A9A3-483E-826D-5D2666724146</string>
+</dict>
+</plist>

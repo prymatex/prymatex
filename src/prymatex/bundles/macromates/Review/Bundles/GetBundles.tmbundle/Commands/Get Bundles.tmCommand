@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/bin/bash
+
+if [ `echo -n "$DIALOG" | tail -c 1` != "2" ]; then
+  CHECK=$("$DIALOG" -l | egrep -c 'TextMate — GetBundles')
+else
+  CHECK=$("$DIALOG" nib --list | egrep -c 'TextMate — GetBundles')
+fi
+
+[[ ! -d ~/Library/Logs ]] &amp;&amp; mkdir -p ~/Library/Logs
+rm -f ~/Library/Logs/TextMateGetBundles.log
+
+if [ $CHECK == 0 ]; then
+	ruby -wKU "$TM_BUNDLE_SUPPORT/getBundles.rb" &amp;&gt;~/Library/Logs/TextMateGetBundles.log &amp;
+else
+ERR=$(cat &lt;&lt;-AS | iconv -f UTF-8 -t MACROMAN | osascript -- 2&gt;&amp;1 1&gt;/dev/null
+tell application "TextMate" to activate
+tell application "System Events" to tell process "TextMate" to tell menu bar 1 to tell menu bar item "Window" to tell menu "Window" to click menu item "TextMate — GetBundles" 
+AS
+)
+[[ ! -z $ERR ]] &amp;&amp; echo "GetBundles is already running"
+fi</string>
+	<key>input</key>
+	<string>none</string>
+	<key>name</key>
+	<string>Get Bundles</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>uuid</key>
+	<string>A3156F4D-D08B-4A40-9842-2ADF68DAF9BE</string>
+</dict>
+</plist>

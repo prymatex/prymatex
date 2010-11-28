@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;?php echo input_file_tag('${1:field_name}'${2:, array(${0})}) ?&gt;</string>
+	<key>name</key>
+	<string>input_file_tag</string>
+	<key>scope</key>
+	<string>text.html</string>
+	<key>tabTrigger</key>
+	<string>input_file_tag</string>
+	<key>uuid</key>
+	<string>7AC449F2-6DDD-4500-B139-04FC3633CD9A</string>
+</dict>
+</plist>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>contactEmailRot13</key>
+	<string>zoyfun@tznvy.pbz</string>
+	<key>contactName</key>
+	<string>Michail Pishchagin</string>
+	<key>description</key>
+	<string>&lt;a href="http://www.cs.queensu.ca/~thurston/ragel/"&gt;Ragel&lt;/a&gt; compiles finite state machines from regular languages into executable C, C++, Objective-C, or D code.</string>
+	<key>name</key>
+	<string>Ragel</string>
+	<key>uuid</key>
+	<string>CE1CE629-A9D6-4918-94C9-824D527276FD</string>
+</dict>
+</plist>

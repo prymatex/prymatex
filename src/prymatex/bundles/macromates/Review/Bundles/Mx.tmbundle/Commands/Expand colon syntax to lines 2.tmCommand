@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/php
+&lt;?php
+$help ="
+	! USAGE: Takes a line like this
+	! F1 -&gt;  q1:17, NA
+	! and expands variables using colon syntax
+	! F1 -&gt;  q1, NA
+	! F1 -&gt;  q2, NA
+	! ..
+	! F1 -&gt;  q17, NA
+	! 
+	! if n=1:1 is found, then the expansion also replaces all instances of n
+	! qn &lt;-&gt; qn, en=1:17,   NA
+	! q1 &lt;-&gt; q1, e1,   NA 
+	! q2 &lt;-&gt; q2, e2,   NA
+	! also expands q1 -&gt; c(1,2,3), en, NA";
+$debug = 0;
+if ($debug) {
+	echo "&lt;pre&gt;";
+	// $input ="F1 -&gt;  q1:17, NA";
+	// $input = "qn=1:17 &lt;-&gt; qn, en,   NA";
+	// $input = "F4 -&gt; qn=16:20, en, NA
+	// F5 -&gt; qn=21:25, en, NA";
+	// $input = "qn &lt;-&gt; qn, en=1:17,   NA";
+	// $input = "F1 -&gt;  c(q2,q8,q13,q18,q24,q29),    F1n,   NA";
+	$input = "F2 -&gt; c(q1,q2,q4,q5,q7,q8,q9,q11,q12,q13,q14,q15,q18,q20,q24,q31,q32), F1n, NA";
+	echo "you gave me\n &lt;em&gt;&amp;ldquo;$input&amp;rdquo;&lt;/em&gt;\n";
+} else {
+	// $input = file_get_contents('php://stdin');
+	$input = $_ENV["TM_SELECTED_TEXT"];	
+	echo "# $input\n";
+}
+
+if (empty($input)) {
+	// help 
+	echo $help;
+	die();
+}
+
+$aInput = explode("\n", $input);
+$o = "";
+
+function F_BY_cList($o,$input, $equalsMarker ){
+	// F2 BY c(q1,q2,q3), n
+	// print_r($equalsMarker);
+	$cPhraseToDelete = $equalsMarker[0]; // i.e., "n=1:12"
+	$aList           = explode(",", $equalsMarker[1]); // i.e., "n=1:12"
+	ereg("(^.*) +(c\(.*\)), *(.*), *(.*$)\n?", $input, $aFound);
+	// print_r($aFound);
+	$o    .= "\n";
+	foreach ($aList as $key =&gt; $value) {
+		ereg("(^.*)(n$)", $aFound[3], $aParts);
+		// print_r($aParts);
+		if ( 	$aParts[2]=='n' ) {
+			$o.= "$aFound[1] $value, $aParts[1]$value, $aFound[4]\n";
+		} else {
+			$o.= "$aFound[1], $value, $aFound[3], $aFound[4]\n";
+		}
+	}
+		return $o;
+}
+
+function X_by_Y_with_colon_n($input, $equalsMarker){
+	// print_r($equalsMarker);
+	// Array (
+	//     [0] =&gt; n=1:17
+	//     [1] =&gt; n
+	// )
+	$replacePhrase   = $equalsMarker[0]; // i.e., "n=1:12"
+	$replaceConstant = $equalsMarker[1]; // i.e., "n"
+	// get from and to
+	ereg("^(.*=)([0-9]+):([0-9]+)(.*$)", $input, $aPartsFound);
+	//print_r($aPartsFound);
+	$from  = $aPartsFound[2];
+	$to    = ($aPartsFound[3])+1;
+	$o     .= "\n";
+	$input = str_replace($replacePhrase, $replaceConstant, $input);
+	for ($i = $from; $i &lt; $to; $i++) { 
+		$o.= str_replace($replaceConstant, $i, $input) . "\n";
+	}
+		return $o;
+}
+
+function F1_BY_A_colon_B($input){
+	// F1 BY  q1:17
+	ereg("(^.*)([0-9]+):([0-9]+)(.*$)", $input, $aFound);
+	if (empty($aFound)){
+		echo "this input is bad:&lt;br&gt;$input&lt;br&gt;";
+		die();
+	}
+	$from = $aFound[2];
+	$to   = ($aFound[3])+1;
+	$o   .= "\n";
+	for ($i = $from; $i &lt; $to; $i++) { 
+		$o.= $aFound[1]. $i. $aFound[4]. "\n";
+	}
+	return $o;
+}
+
+foreach ($aInput as $key =&gt; $input) {
+	if (ereg ("c\((.*)\)", $input, $equalsMarker) ) { // handle collection syntax. 
+		// F2 BY c(q1,q2,q3), n
+		$o = F_BY_cList($o,$input, $equalsMarker);
+	} elseif (ereg ("([a-zA-Z])=[0-9]+:[0-9]+", $input, $equalsMarker) ) { //handle n=1:10 syntax
+		$o = X_by_Y_with_colon_n($input, $equalsMarker);
+	} else {
+		$o = F1_BY_A_colon_B($input);
+	}
+}
+echo $o;
+?&gt;</string>
+	<key>fallbackInput</key>
+	<string>line</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>^E</string>
+	<key>name</key>
+	<string>Expand F1-&gt;  qn=1:5 , en, NA</string>
+	<key>output</key>
+	<string>replaceSelectedText</string>
+	<key>scope</key>
+	<string>source.mx, source.r</string>
+	<key>uuid</key>
+	<string>4C158675-E586-49DB-8A02-35F7D36D861A</string>
+</dict>
+</plist>

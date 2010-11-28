@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>saveModifiedFiles</string>
+	<key>command</key>
+	<string>require_cmd "${TM_SVK:=svk}" "If you have installed svk, then you need to either update your &lt;tt&gt;PATH&lt;/tt&gt; or set the &lt;tt&gt;TM_SVK&lt;/tt&gt; shell variable (e.g. in Preferences / Advanced)"
+
+CommitWindow="$TM_SUPPORT_PATH/bin/CommitWindow.app/Contents/MacOS/CommitWindow"
+export CommitWindow
+
+TM_SVK="${TM_SVK:=svk}"
+export TM_SVK
+
+ruby -- "${TM_BUNDLE_SUPPORT}/svk_commit.rb"
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^~A</string>
+	<key>name</key>
+	<string>Commit</string>
+	<key>output</key>
+	<string>showAsHTML</string>
+	<key>uuid</key>
+	<string>C03C7374-C371-11D9-AAA6-000A95BCAFA8</string>
+</dict>
+</plist>
