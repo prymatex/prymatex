@@ -1,5 +1,11 @@
 cdef extern from "includes/oniguruma.h":
+
+    #
+    # Type definitions
+    #
+    
     #cdef static ONIG_CHAR_TABLE_SIZE = 255
+    
     ctypedef char OnigUChar
     ctypedef OnigUChar UChar
     ctypedef long OnigCodePoint
@@ -146,29 +152,13 @@ cdef extern from "includes/oniguruma.h":
         OnigOptionType  option
         OnigCaseFoldType   case_fold_flag
     
-    int onig_init ()
-    
-    OnigRegion* onig_region_new ()
-    
-    
-    int onig_new (OnigRegex*, OnigUChar* pattern, OnigUChar* pattern_end, 
-                    OnigOptionType option, 
-                    OnigEncoding enc, 
-                    OnigSyntax syntax, 
-                    OnigErrorInfo* einfo)
-    
-    char* onig_version ()
-    
-    # Search
-    int onig_search ( Regex, UChar* str, UChar* end, UChar* start,
-                        UChar* range, OnigRegion* region,
-                        OnigOptionType option )
-    
-    #char[255] onig_error_string
+    # Error string
     cdef char onig_error_string[255]
     
-    
+    #
     # Syntaxes
+    #
+    
     OnigSyntaxType OnigSyntaxASIS
     OnigSyntaxType OnigSyntaxPosixBasic
     OnigSyntaxType OnigSyntaxPosixExtended
@@ -180,8 +170,10 @@ cdef extern from "includes/oniguruma.h":
     OnigSyntaxType OnigSyntaxPerl_NG
     OnigSyntaxType OnigSyntaxRuby
     
-    
+    #
     # Encodings
+    #
+    
     OnigEncodingType OnigEncodingASCII
     OnigEncodingType OnigEncodingISO_8859_1
     OnigEncodingType OnigEncodingISO_8859_2
@@ -213,3 +205,61 @@ cdef extern from "includes/oniguruma.h":
     OnigEncodingType OnigEncodingCP1251
     OnigEncodingType OnigEncodingBIG5
     OnigEncodingType OnigEncodingGB18030
+    
+    #
+    # Function signatures
+    #
+    
+    # Oniguruma Native API
+    int onig_init ()
+    int onig_error_code_to_str (OnigUChar* s, int err_code, ...)
+    #void onig_set_warn_func (OnigWarnFunc f)
+    #void onig_set_verb_warn_func (OnigWarnFunc f)
+    int onig_new (OnigRegex*,  OnigUChar* pattern,  OnigUChar* pattern_end, OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax, OnigErrorInfo* einfo)
+    int onig_new_deluxe (OnigRegex* reg,  OnigUChar* pattern,  OnigUChar* pattern_end, OnigCompileInfo* ci, OnigErrorInfo* einfo)
+    void onig_free (OnigRegex)
+    int onig_recompile (OnigRegex,  OnigUChar* pattern,  OnigUChar* pattern_end, OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax, OnigErrorInfo* einfo)
+    int onig_recompile_deluxe (OnigRegex reg,  OnigUChar* pattern,  OnigUChar* pattern_end, OnigCompileInfo* ci, OnigErrorInfo* einfo)
+    int onig_search (OnigRegex,  OnigUChar* str,  OnigUChar* end,  OnigUChar* start,  OnigUChar* range, OnigRegion* region, OnigOptionType option)
+    int onig_match (OnigRegex,  OnigUChar* str,  OnigUChar* end,  OnigUChar* at, OnigRegion* region, OnigOptionType option)
+    OnigRegion* onig_region_new ()
+    void onig_region_init (OnigRegion* region)
+    void onig_region_free (OnigRegion* region, int free_self)
+    void onig_region_copy (OnigRegion* to, OnigRegion* from_)
+    void onig_region_clear (OnigRegion* region)
+    int onig_region_resize (OnigRegion* region, int n)
+    int onig_region_set (OnigRegion* region, int at, int beg, int end)
+    int onig_name_to_group_numbers (OnigRegex reg,  OnigUChar* name,  OnigUChar* name_end, int** nums)
+    int onig_name_to_backref_number (OnigRegex reg,  OnigUChar* name,  OnigUChar* name_end, OnigRegion *region)
+    int onig_foreach_name (OnigRegex reg, int (*func)( OnigUChar*,  OnigUChar*,int,int*,OnigRegex,void*), void* arg)
+    int onig_number_of_names (OnigRegex reg)
+    int onig_number_of_captures (OnigRegex reg)
+    int onig_number_of_capture_histories (OnigRegex reg)
+    OnigCaptureTreeNode* onig_get_capture_tree (OnigRegion* region)
+    int onig_capture_tree_traverse (OnigRegion* region, int at, int(*callback_func)(int,int,int,int,int,void*), void* arg)
+    int onig_noname_group_capture_is_active (OnigRegex reg)
+    OnigEncoding onig_get_encoding (OnigRegex reg)
+    OnigOptionType onig_get_options (OnigRegex reg)
+    OnigCaseFoldType onig_get_case_fold_flag (OnigRegex reg)
+    OnigSyntaxType* onig_get_syntax (OnigRegex reg)
+    int onig_set_default_syntax (OnigSyntaxType* syntax)
+    void onig_copy_syntax (OnigSyntaxType* to, OnigSyntaxType* from_)
+    unsigned int onig_get_syntax_op (OnigSyntaxType* syntax)
+    unsigned int onig_get_syntax_op2 (OnigSyntaxType* syntax)
+    unsigned int onig_get_syntax_behavior (OnigSyntaxType* syntax)
+    OnigOptionType onig_get_syntax_options (OnigSyntaxType* syntax)
+    void onig_set_syntax_op (OnigSyntaxType* syntax, unsigned int op)
+    void onig_set_syntax_op2 (OnigSyntaxType* syntax, unsigned int op2)
+    void onig_set_syntax_behavior (OnigSyntaxType* syntax, unsigned int behavior)
+    void onig_set_syntax_options (OnigSyntaxType* syntax, OnigOptionType options)
+    int onig_set_meta_char (OnigSyntaxType* syntax, unsigned int what, OnigCodePoint code)
+    void onig_copy_encoding (OnigEncoding to, OnigEncoding from_)
+    OnigCaseFoldType onig_get_default_case_fold_flag ()
+    int onig_set_default_case_fold_flag (OnigCaseFoldType case_fold_flag)
+    unsigned int onig_get_match_stack_limit_size ()
+    int onig_set_match_stack_limit_size (unsigned int size)
+    int onig_end ()
+    char* onig_version ()
+    char* onig_copyright ()
+
+        
