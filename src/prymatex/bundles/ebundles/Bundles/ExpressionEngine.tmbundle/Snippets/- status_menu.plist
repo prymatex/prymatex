@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{status_menu}
+&lt;${1:p}&gt;${2:Status}&lt;br /&gt;
+&lt;select name="status"&gt;
+{select_options}
+&lt;/select&gt;
+&lt;/${1:p}&gt;
+{/status_menu}
+$0</string>
+	<key>name</key>
+	<string>- status_menu</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>2725A4E4-EC14-4934-8A51-F20791892045</string>
+</dict>
+</plist>

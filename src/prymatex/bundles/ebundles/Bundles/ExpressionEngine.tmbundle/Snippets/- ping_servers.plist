@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{ping_servers}
+&lt;${1:p}&gt;${2:Ping Servers}&lt;br /&gt;
+{ping_row}
+&lt;input type="checkbox" name="ping[]" value="{ping_value}" {ping_checked} /&gt; {ping_server_name}&lt;br /&gt;
+{/ping_row}
+&lt;/${1:p}&gt;
+{/ping_servers}
+$0</string>
+	<key>name</key>
+	<string>- ping_servers</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>236924CE-7F42-41F0-9C4B-910E8EC2E50C</string>
+</dict>
+</plist>

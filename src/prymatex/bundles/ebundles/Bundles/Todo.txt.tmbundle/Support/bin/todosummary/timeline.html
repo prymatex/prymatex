@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+    <script src="http://simile.mit.edu/timeline/api/timeline-api.js"
+    type="text/javascript"></script>
+    <script src="http://simile.mit.edu/timeline/examples/examples.js"
+    type="text/javascript"></script>
+    <script type="text/javascript">  
+    var tl;
+function onLoad() {
+  var eventSource = new Timeline.DefaultEventSource();
+  var theme = Timeline.ClassicTheme.create()
+  var bandInfos = [
+    Timeline.createBandInfo({
+        eventSource:    eventSource,
+        date:           "Jul 01 2006 00:00:00 GMT",
+        width:          "90%", 
+        intervalUnit:   Timeline.DateTime.DAY, 
+        intervalPixels: 210,
+        theme: theme
+    }),
+    Timeline.createBandInfo({
+        showEventText:  false,
+        eventSource:    eventSource,
+        date:           "Jul 01 2006 00:00:00 GMT",
+        width:          "10%", 
+        intervalUnit:   Timeline.DateTime.MONTH, 
+        intervalPixels: 200,
+        theme: theme
+    })
+  ];
+  bandInfos[1].syncWith = 0;
+  bandInfos[1].highlight = true;
+
+  tl = Timeline.create(document.getElementById("my-timeline"), bandInfos);
+  Timeline.loadXML("events.xml",
+                   function(xml, url) { eventSource.loadXML(xml, url); });
+    setupFilterHighlightControls(document.getElementById("controls"), tl, [0], theme);
+}
+
+var resizeTimerID = null;
+function onResize() {
+    if (resizeTimerID == null) {
+        resizeTimerID = window.setTimeout(function() {
+            resizeTimerID = null;
+            tl.layout();
+        }, 500);
+    }
+}
+    </script>
+    </head>
+    <body onload="onLoad();" onresize="onResize();">
+    <h1>Timeline using the <a href="http://simile.mit.edu/timeline/">Timeline</a> widget from <a href="http://simile.mit.edu/">Simile</a></h1>
+    <div id="my-timeline" style="height: 400px; border: 1px solid #aaa"></div>
+    <div class="controls" id="controls">
+
+    </div>
+    </body>
+</html>

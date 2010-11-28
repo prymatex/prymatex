@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Toggle Single-line / Multi-line Rule</string>
+        <key>uuid</key>
+        <string>CD7A0BA0-8D43-4905-BA40-91B11D261E79</string>
+        <key>input</key>
+        <string>selection</string>
+        <key>output</key>
+        <string>replaceSelectedText</string>
+        <key>command</key>
+        <string>#!/usr/bin/env ruby
+
+if ENV['TM_SOFT_TABS'] == 'NO'
+  tab = "\t"
+else
+  tab = " " * ENV['TM_TAB_SIZE'].to_i
+end
+
+print case str = STDIN.read
+  
+  # Expand
+  when /\A\{(.*)\}\z/
+    "{\n#{tab}" + $1.strip.gsub("; ", ";\n#{tab}") + "\n}"
+  
+    # Collapse
+  when /\A\{(.*)\}\z/m
+    ("{" + $1.gsub("\n", " ") + "}").gsub(/\s{2,}/, " ")
+  
+  # Default case
+  else str
+    
+end
+</string>
+        <key>fallbackInput</key>
+        <string>scope</string>
+        <key>scope</key>
+        <string>meta.property-list.css</string>
+        <key>keyEquivalent</key>
+        <string>^q</string>
+    </dict>
+</plist>

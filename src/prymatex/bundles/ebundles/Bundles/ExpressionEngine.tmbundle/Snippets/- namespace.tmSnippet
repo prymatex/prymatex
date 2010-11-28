@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>[[${1:Namespace_label}:${2:Article title}]]</string>
+	<key>name</key>
+	<string>- namespace</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>6B3B557E-60AF-429A-BA8D-0D1AFF7059B7</string>
+</dict>
+</plist>

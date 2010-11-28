@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;${1:p}&gt;${2:Expiration Date}&lt;br /&gt;
+&lt;input type="text" name="expiration_date" value="{expiration_date}" maxlength="${3:23}" size="${4:25}" /&gt;&lt;/${1:p}&gt;
+$0</string>
+	<key>name</key>
+	<string>- expiration date</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>BA3E2B72-4E72-4536-A7E3-ABC62E951BBB</string>
+</dict>
+</plist>

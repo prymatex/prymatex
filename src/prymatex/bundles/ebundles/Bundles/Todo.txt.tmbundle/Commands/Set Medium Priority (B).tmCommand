@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Set Medium Priority (B)</string>
+        <key>uuid</key>
+        <string>2F5E76EC-D79B-4896-A350-A4F8FAF071FC</string>
+        <key>input</key>
+        <string>selection</string>
+        <key>output</key>
+        <string>replaceSelectedText</string>
+        <key>command</key>
+        <string>#!/usr/bin/env ruby
+
+for line in STDIN.readlines
+  if line =~ /^\(B\)\s((?m).*)/
+    print $1
+  elsif line =~ /^\(.\)((?m).*)/
+    print "(B)#{$1}"
+  else
+    print "(B) #{line}"
+  end
+end
+</string>
+        <key>keyEquivalent</key>
+        <string>@"</string>
+        <key>scope</key>
+        <string>text.todotxt</string>
+        <key>fallbackInput</key>
+        <string>line</string>
+    </dict>
+</plist>

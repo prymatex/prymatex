@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+        <string>newfile=`cygpath -w ${TM_FILEPATH/%.js/_compressed.js}`
+file=`cygpath -w &quot;$TM_FILEPATH&quot;`
+rhino=`cygpath -w &quot;$TM_BUNDLE_SUPPORT/bin/custom_rhino.jar&quot;`
+java -jar &quot;$rhino&quot; -c &quot;$file&quot; &gt; &quot;$newfile&quot; 2&gt;&amp;1
+
+CD=&quot;$TM_SUPPORT_PATH/bin/CocoaDialog.app/Contents/MacOS/CocoaDialog&quot;
+rv=`&quot;$CD&quot; msgbox --text &quot;A compressed JS $newfile has been created.&quot; --button1 &quot;Ok&quot;`
+
+</string>
+	<key>input</key>
+	<string>document</string>
+	<key>keyEquivalent</key>
+	<string>^@c</string>
+	<key>name</key>
+	<string>Compress (current file)</string>
+	<key>output</key>
+        <string>discard</string>
+	<key>scope</key>
+	<string>source.js, source.prototype.js</string>
+	<key>uuid</key>
+	<string>0B51E320-D218-4352-8AEF-096B3232E818</string>
+</dict>
+</plist>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;${1:p}&gt;${2:URL Title}&lt;br /&gt;
+&lt;input type="text" name="url_title" id="url_title" value="{url_title}" size="${3:50}" maxlength="${4:75}" /&gt;&lt;/${1:p}&gt;
+$0</string>
+	<key>name</key>
+	<string>- url_title</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>AB68F890-75A0-43C2-9BCF-B7C0FFCBF2E3</string>
+</dict>
+</plist>

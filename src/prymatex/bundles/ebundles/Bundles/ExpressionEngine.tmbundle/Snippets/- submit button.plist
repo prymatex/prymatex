@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;input type="submit" name="submit" value="Submit" /&gt;
+$0</string>
+	<key>name</key>
+	<string>- submit button</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>D0C5324A-BA8B-4CAB-8F09-5CC391185386</string>
+</dict>
+</plist>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Table generator</string>
+        <key>uuid</key>
+        <string>A7B5B3FC-FD69-4ECB-BB31-1C659A0FFA02</string>
+        <key>content</key>
+        <string>${0:Build a table with ${1:rows} and ${2:columns} ${3:and an alternating row class}
+|"$TM_BUNDLE_SUPPORT/lib/build_table.rb"}</string>
+        <key>scope</key>
+        <string>text.html</string>
+        <key>tabTrigger</key>
+        <string>tabgen</string>
+    </dict>
+</plist>

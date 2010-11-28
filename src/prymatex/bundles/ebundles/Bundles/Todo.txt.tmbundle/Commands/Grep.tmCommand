@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Grep</string>
+        <key>uuid</key>
+        <string>D472767E-2D47-40B8-8D7F-F434A34E8CAA</string>
+        <key>input</key>
+        <string>document</string>
+        <key>output</key>
+        <string>showAsHTML</string>
+        <key>command</key>
+        <string>#!/usr/bin/env ruby
+require ENV['TM_SUPPORT_PATH'] + "/lib/exit_codes"
+
+# Get the text to search for
+text = ""
+if (ENV.has_key?("TM_SELECTED_TEXT"))
+  text = ENV["TM_SELECTED_TEXT"]
+elsif (ENV.has_key?("TM_CURRENT_WORD"))
+  text = ENV["TM_CURRENT_WORD"]
+end
+
+if text.empty?
+  TextMate.exit_show_tool_tip "No search text"
+end
+
+lines = STDIN.readlines
+linenum = 1
+for line in lines
+  if line =~ /#{text}/ then
+    print "&lt;a href=\"txmt://open/?line=#{linenum}\"&gt;#{linenum}&lt;/a&gt; "
+    print line
+    print "&lt;br&gt;"
+  end
+  linenum += 1
+end
+
+</string>
+        <key>scope</key>
+        <string></string>
+    </dict>
+</plist>

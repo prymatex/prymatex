@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Todo.txt</string>
+        <key>uuid</key>
+        <string>AF1E00C9-0A00-4325-ADEC-4FB1C32B89AE</string>
+        <key>description</key>
+        <string>Support for the &lt;a href="http://todotxt.com"&gt;todo.txt&lt;/a&gt; plain text todo list format</string>
+        <key>mainMenu</key>
+        <dict>
+            <key>items</key>
+            <array>
+                <string>22BC5126-91F9-4BFA-A534-5BB9C3387337</string>
+                <string>2DFE9543-FDF7-4AC9-88F2-6001183FFF24</string>
+                <string>58B6C35C-26BE-45DF-928C-7353EA407800</string>
+                <string>------------------------------------</string>
+                <string>D472767E-2D47-40B8-8D7F-F434A34E8CAA</string>
+                <string>DB7A234F-213D-45B1-9E51-2F85D9CC8778</string>
+                <string>B4A2334D-5FC4-4CA9-8F67-BC33A3B564D0</string>
+                <string>------------------------------------</string>
+                <string>E8F6A9B2-257C-4EDB-820E-337FC4DA8BE8</string>
+            </array>
+            <key>submenus</key>
+            <dict>
+                <key>2DFE9543-FDF7-4AC9-88F2-6001183FFF24</key>
+                <dict>
+                    <key>items</key>
+                    <array>
+                        <string>FD645459-1350-4215-BA79-1378F83114BD</string>
+                        <string>2F5E76EC-D79B-4896-A350-A4F8FAF071FC</string>
+                        <string>81A5DB7A-6C24-45F8-B3EB-2155C98175B3</string>
+                        <string>------------------------------------</string>
+                        <string>18915A5C-31CF-4C7C-9A8E-0B258E3D371E</string>
+                        <string>59CF9EEB-15EF-4B27-9C26-16E0C2B4F617</string>
+                    </array>
+                    <key>name</key>
+                    <string>Priority</string>
+                </dict>
+            </dict>
+        </dict>
+    </dict>
+</plist>

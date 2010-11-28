@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>AutoHotKey</string>
+        <key>uuid</key>
+        <string>8A22DD55-70FC-44EC-87CB-8601A1F55F65</string>
+        <key>mainMenu</key>
+        <dict>
+            <key>items</key>
+            <array>
+                <string>A5264735-29D6-4ED2-91D7-DD97DFEB65A4</string>
+            </array>
+        </dict>
+    </dict>
+</plist>

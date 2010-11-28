@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>End of line</string>
+        <key>uuid</key>
+        <string>BDD6157F-8235-4430-A648-C431412E783C</string>
+        <key>e_commands</key>
+        <array>
+            <dict>
+                <key>command</key>
+                <string>RunCommandMode</string>
+                <key>arguments</key>
+                <array>
+                    <array>
+                        <string>command</string>
+                        <string>$</string>
+                    </array>
+                </array>
+            </dict>
+            <dict>
+                <key>command</key>
+                <string>RunCommandMode</string>
+                <key>arguments</key>
+                <array>
+                    <array>
+                        <string>command</string>
+                        <string>i</string>
+                    </array>
+                </array>
+            </dict>
+        </array>
+        <key>keyEquivalent</key>
+        <string>@e</string>
+    </dict>
+</plist>

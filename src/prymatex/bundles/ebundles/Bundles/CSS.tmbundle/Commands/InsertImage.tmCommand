@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Insert Image</string>
+        <key>uuid</key>
+        <string>3FC9E954-55C4-4223-836E-1C26E5EED831</string>
+        <key>input</key>
+        <string>selection</string>
+        <key>output</key>
+        <string>afterSelectedText</string>
+        <key>command</key>
+        <string>#!/usr/bin/env ruby
+
+abort unless ENV[&apos;TM_PROJECT_DIRECTORY&apos;] &amp;&amp; ENV[&apos;TM_FILEPATH&apos;]
+
+SUPPORT = ENV[&apos;TM_SUPPORT_PATH&apos;]
+DIALOG  = SUPPORT + &apos;/bin/CocoaDialog.exe&apos;
+
+require &apos;pathname&apos;
+require &apos;find&apos;
+
+images = []
+menu   = []
+
+# Find all images within a project and stuff them into
+# an array (images) of hashes.
+Find.find(ENV[&apos;TM_PROJECT_DIRECTORY&apos;]) do |f|
+  file_name = File.basename(f)
+  if /\.(gif|jpg|png)$/ =~ file_name
+  	images &lt;&lt; {
+  		:title =&gt; file_name,
+  		:path  =&gt; Pathname.new(f).relative_path_from(Pathname.new(ENV[&apos;TM_FILEPATH&apos;]).parent).to_s 
+  	}
+  end
+end
+abort if images.empty?
+
+images = images.sort_by { |image| image[:title] }
+
+# If there are less than 10 images within a project, use
+# a popup menu; otherwise, use a dropdown.
+if images.length &lt; 10 then
+  images.each_with_index do |image, i|
+    menu &lt;&lt; %(&quot;&amp;#{i+1}  #{image[:title]}&quot; )
+  end
+  selected = `\&quot;#{DIALOG}\&quot; menu --items #{menu}`.to_i - 1
+else
+  images.each do |image|
+    menu &lt;&lt; %(&quot;#{image[:title]}&quot; )
+  end
+  text = %{--text &quot;Choose an image&quot;}
+  button1 = %{--button1 &quot;Cancel&quot;}
+  button2 = %{--button2 &quot;Select Image&quot;}
+  result = `\&quot;#{DIALOG}\&quot; dropdown #{button2} #{button1} #{text} --items #{menu}`.split(&quot;\n&quot;)
+  abort if result[0].to_i == 1
+  selected = result[1].to_i
+end
+
+print %{url(#{images[selected][:path]})}</string>
+        <key>keyEquivalent</key>
+        <string>^i</string>
+        <key>scope</key>
+        <string>source.css</string>
+        <key>beforeRunningCommand</key>
+        <string>saveActiveFile</string>
+    </dict>
+</plist>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{exp:simple_commerce:purchase entry_id="$1" success="${2:site/success}"${3: parameters}}
+{title}
+$0
+{/exp:simple_commerce:purchase}
+</string>
+	<key>name</key>
+	<string>exp:simple_commerce:purchase</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>tabTrigger</key>
+	<string>purchase</string>
+	<key>uuid</key>
+	<string>8B857E8B-31DA-4F33-BA5B-3AE8D8EDA419</string>
+</dict>
+</plist>

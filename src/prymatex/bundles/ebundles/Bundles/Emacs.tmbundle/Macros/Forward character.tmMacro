@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Forward character</string>
+        <key>uuid</key>
+        <string>31D25978-6096-4E14-8096-C6988B407C29</string>
+        <key>e_commands</key>
+        <array>
+            <dict>
+                <key>command</key>
+                <string>CursorRight</string>
+                <key>arguments</key>
+                <array>
+                    <array>
+                        <string>select</string>
+                    </array>
+                </array>
+            </dict>
+        </array>
+        <key>keyEquivalent</key>
+        <string>@f</string>
+    </dict>
+</plist>

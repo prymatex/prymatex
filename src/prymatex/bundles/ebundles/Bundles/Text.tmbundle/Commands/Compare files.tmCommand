@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Compare files</string>
+        <key>uuid</key>
+        <string>CDD479E7-30F6-4FA5-86E0-58185CD3644D</string>
+        <key>input</key>
+        <string>none</string>
+        <key>output</key>
+        <string>afterSelectedText</string>
+        <key>command</key>
+        <string>#!/usr/bin/perl
+
+use strict;
+
+my @compare_cmd = `CocoaDialog standard-dropdown --title \&quot;Select Compare Tool\&quot; --items \&quot;Tkdiff\&quot; \&quot;Beyond Compare\&quot; \&quot;WinDiff\&quot; --no-newline`;
+
+my @selected_files = split(&quot;\&apos; \&apos;&quot;, $ENV{TM_SELECTED_FILES} );
+if (scalar @selected_files == 2){
+  $selected_files[0] =~ s/\&apos;//g;
+  $selected_files[1] =~ s/\&apos;//g;
+  my $file1 = `cygpath -w \&quot;$selected_files[0]\&quot;`;
+  my $file2 = `cygpath -w \&quot;$selected_files[1]\&quot;`;
+  chomp($file1);
+  chomp($file2);
+  if ($compare_cmd[1] == 0){
+    system(&quot;tkdiff \&quot;$file1\&quot; \&quot;$file2\&quot;&quot;);
+  }
+  elsif ($compare_cmd[1] == 1){
+    system(&quot;BC2.exe \&quot;$file1\&quot; \&quot;$file2\&quot;&quot;);
+  }
+  elsif ($compare_cmd[1] == 2){
+    system(&quot;WinDiff.Exe \&quot;$file1\&quot; \&quot;$file2\&quot;&quot;);
+  }
+}
+else {
+  print &quot;Select two files in the project view...&quot;;
+}</string>
+        <key>keyEquivalent</key>
+        <string>@^c</string>
+    </dict>
+</plist>

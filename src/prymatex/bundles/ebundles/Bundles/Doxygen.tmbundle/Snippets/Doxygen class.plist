@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>/** \brief  ${3:undocumented class}
+	
+	${4:undocumented class}
+	
+© Copyright `date +%Y` $TM_ORGANIZATION_NAME - ${TM_AUTHOR:`niutil -readprop / "/users/$USER" realname`}. All Rights Reserved.
+
+	\author ${TM_AUTHOR:`niutil -readprop / "/users/$USER" realname`} $TM_ORGANIZATION_NAME
+	\author \$LastChangedBy\$
+	\date `date +%Y-%m-%d`
+	\date \$LastChangedDate\$
+	\version \$Rev\$
+	\sa
+**/
+$1class $2 {
+	$5var \$${6:var}; //!&lt; ${7:undocumented class variable}
+
+	/** 
+	\brief class $2 constructor
+	
+	\author ${TM_AUTHOR:`niutil -readprop / "/users/$USER" realname`} $TM_ORGANIZATION_NAME
+	\date `date +%Y-%m-%d`
+	\param $8 ${9:description of parameter}
+	
+	\return
+	\sa
+	**/
+	$1function $2 ($8) {$0
+	} // END $1function $2
+
+	
+} // END $1class $2
+
+</string>
+	<key>name</key>
+	<string>Class</string>
+	<key>scope</key>
+	<string>source.php</string>
+	<key>tabTrigger</key>
+	<string>dxc</string>
+	<key>uuid</key>
+	<string>7DD602B8-C3E0-11D9-BDD3-001124776DD2</string>
+</dict>
+</plist>

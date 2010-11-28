@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>beforeRunningCommand</key>
+        <string>nop</string>
+        <key>command</key>
+        <string>#!/usr/bin/env ruby -w&#x0A;require ENV[&apos;TM_SUPPORT_PATH&apos;] + &quot;/lib/exit_codes.rb&quot;&#x0A;COCOA_DIALOG = &quot;#{ENV[&apos;TM_SUPPORT_PATH&apos;]}/bin/CocoaDialog&quot;&#x0A;selection = STDIN.read&#x0A;IO.popen(&quot;aspell -a&quot;, &apos;w+&apos;) do |aspell|&#x0A;  aspell.puts(selection)&#x0A;  aspell.close_write&#x0A;  to_skip = []&#x0A;  aspell.each do |check|&#x0A;    if check =~ /^\&amp;/&#x0A;      data, raw_suggestions = check.split(&quot;:&quot;)&#x0A;      signal, original, count, offset = data.split&#x0A;      next if to_skip.include?(original)&#x0A;      suggestions = &quot;&quot;&#x0A;      raw_suggestions.split(&apos;, &apos;).each { |s| suggestions += &quot;\&quot;#{s.chomp}\&quot; &quot; }&#x0A;      choice=%x(&quot;#{COCOA_DIALOG}&quot; dropdown \&#x0A;        --title &quot;Misspelled Word&quot; \&#x0A;        --text &quot;There are #{count} suggestions for &apos;#{original}&apos;:&quot; \&#x0A;        --string-output \&#x0A;        --items #{suggestions} \&#x0A;        --button1 &quot;Replace&quot; --button2 &quot;Skip&quot; --button3 &quot;Add to dictionary&quot;) # No room for a &quot;Cancel&quot; button&#x0A;      button, replacement = choice.split(&quot; &quot;, 2)&#x0A;      replacement.chomp!&#x0A;      case button&#x0A;        when &quot;Replace&quot;&#x0A;          selection.gsub!(/#{original}/, replacement) # Replace done globally so all instances of original replaced&#x0A;        when &quot;Add&quot;&#x0A;          `echo -e &quot;*#{original}\n#&quot; | aspell -a`&#x0A;          `&quot;#{COCOA_DIALOG}&quot; ok-msgbox \&#x0A;            --text &quot;Added &apos;#{original}&apos; to your personal dictionary.&quot; \&#x0A;            --no-cancel --timeout 2`&#x0A;          to_skip.push(original)&#x0A;      end&#x0A;    end&#x0A;  end&#x0A;end&#x0A;print selection</string>
+        <key>fallbackInput</key>
+        <string>word</string>
+        <key>input</key>
+        <string>selection</string>
+        <key>name</key>
+        <string>Check Spelling of Word/Selection</string>
+        <key>output</key>
+        <string>replaceSelectedText</string>
+        <key>keyEquivalent</key>
+        <string>@;</string>
+        <key>uuid</key>
+        <string>DF1BEA6F-02E4-4220-B1E0-9DDC06CACA7F</string>
+    </dict>
+</plist>

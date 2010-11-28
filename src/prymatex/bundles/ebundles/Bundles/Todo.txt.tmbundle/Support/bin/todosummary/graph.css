@@ -1,0 +1,39 @@
+text{
+    font-family:sans-serif;
+    font-size:10pt;
+    font-weight:normal;
+}
+
+.segment1{
+    fill:green;
+}
+
+.segment2{
+    fill:gray;
+}
+
+line{
+    stroke-width:2;
+    stroke:black;
+}
+
+.tick {
+    stroke-width:1;
+}
+
+.line1{
+    stroke:red;
+}
+
+.line2{
+    stroke:black;
+}
+
+.label{
+    text-anchor:middle;
+}
+
+polyline{
+    fill:none;
+    stroke-width:2;
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>beforeRunningCommand</key>
+        <string>nop</string>
+        <key>command</key>
+        <string>#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import sys, os
+sys.path.append(os.environ["TM_BUNDLE_SUPPORT"])
+
+from zencoding import zen_core as zen_coding
+from zen_editor import ZenEditor
+
+editor = ZenEditor()
+zen_coding.run_action('next_edit_point', editor)</string>
+        <key>input</key>
+        <string>none</string>
+        <key>keyEquivalent</key>
+        <string>^~</string>
+        <key>name</key>
+        <string>Next Edit Point</string>
+        <key>output</key>
+        <string>discard</string>
+        <key>uuid</key>
+        <string>FB08A10D-F5C9-4D60-9A02-856835FFF42E</string>
+        <key>scope</key>
+        <string></string>
+    </dict>
+</plist>

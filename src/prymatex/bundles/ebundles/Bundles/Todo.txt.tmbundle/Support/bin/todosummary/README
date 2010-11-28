@@ -1,0 +1,32 @@
+This package contains two ways to get an HTML summary of the todo.txt, done.txt
+and report.txt files produced by Gina Trapani's excellent todo.txt
+system(http://todotxt.com)
+
+The first way is to run 'python todo/html.py' with python-2.3 or later.  This
+will find the files referenced in your .todo file and produce a 'todo.html'
+file in the current directory with a few tables describing their contents.  If
+you have elementtree(http://effbot.org/zone/element-index.htm) installed it
+will also produce a few svg graphs and include them in the html.  Just run the
+command and open todo.html to see the results.  If you have elementtree
+installed and would prefer not to see the svg, run 'python todo/html.py html'
+instead.
+
+The second way is to run 'python todo/server.py'.  This will start a little web
+server on port 8080 that serves up the html and svg produced by the first
+command.  This has the advantage of reading your todo files whenever you load
+the page so you don't have to go through the two step process of running
+'python todo/html.py' and opening the resulting file in a browser to get the
+current status.  The server uses elementtree for svg, web.py(http://webpy.org)
+to do the heavy http lifting, and beaker(http://beaker.groovie.org) for
+sessions so you'll need to have all installed for it to work. You can set the
+port of the server as an additional argument to the command.  'python
+todo/server.py 1234' runs the server on port 1234.
+
+Both methods use gradient.png and graph.css so this will work best if you run
+the commands from the base directory of the distribution(ie where this README
+file lives).
+
+Let me know if you have any problems or suggestions.
+
+Charlie Groves
+charlie.groves@gmail.com

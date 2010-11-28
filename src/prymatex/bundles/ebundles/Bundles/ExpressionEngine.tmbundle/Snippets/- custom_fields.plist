@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{custom_fields}
+&lt;${1:p}&gt;{if required}${2:* }{/if}{field_label}&lt;br /&gt;
+
+{if textarea}
+&lt;textarea name="{field_name}" cols="${3:50}" rows="{rows}" onclick="setFieldName(this.name)"&gt;{field_data}&lt;/textarea&gt;
+{/if}
+
+{if textinput}
+&lt;input type="text" name="{field_name}" value="{field_data}" maxlength="{maxlength}" size="${4:50}" onclick="setFieldName(this.name)" /&gt;
+{/if}
+
+{if pulldown}
+&lt;select name="{field_name}"&gt;
+{options}&lt;option value="{option_value}"{selected}&gt;{option_name}&lt;/options&gt;{/options}
+&lt;/select&gt;
+{/if}
+&lt;/${1:p}&gt;
+{/custom_fields}
+$0</string>
+	<key>name</key>
+	<string>- custom_fields</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>6A4FDAFD-559E-480E-B779-CF1F1FC2FE2E</string>
+</dict>
+</plist>

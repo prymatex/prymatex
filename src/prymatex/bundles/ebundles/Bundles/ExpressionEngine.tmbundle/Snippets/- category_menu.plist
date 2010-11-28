@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{category_menu}
+&lt;${1:p}&gt;${2:Categories}&lt;br /&gt;
+&lt;select name="category[]" size="${3:4}"${4: multiple="multiple"}&gt;
+{select_options}
+&lt;/select&gt;
+&lt;/${1:p}&gt;
+{/category_menu}
+$0</string>
+	<key>name</key>
+	<string>- category_menu</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>E8C88A64-6A0D-4135-9973-CD765716FA05</string>
+</dict>
+</plist>

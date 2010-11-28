@@ -1,0 +1,43 @@
+16:18:56: Debug: Hostname: ALEXANDER
+16:18:57: Debug: Full Hostname: alexander
+16:18:57: Debug: Started server on 192.168.2.2:4000 (alexander)
+16:18:57: Debug: 46 - 8721|Jim Sadlek|jsadlek@creehan.com|31-08-2006
+16:18:59: Debug: New menu 27
+16:18:59: Debug: items added 31
+16:19:00: Debug: Syntax HTML includes unknown syntax: source.smarty
+16:19:00: Debug: WARNING: group_matcher source.smarty.embedded.html is empty!
+16:19:01: Debug: Syntax Shell Script (Bash) includes unknown syntax: source.applescript
+16:19:01: Debug: WARNING: group_matcher string.unquoted.heredoc.no-indent.applescript.shell is empty!
+16:19:01: Debug: Syntax Shell Script (Bash) includes unknown syntax: source.applescript
+16:19:01: Debug: WARNING: group_matcher string.unquoted.heredoc.applescript.shell is empty!
+16:19:01: Debug: ZeroconfBrowse Add:
+16:19:01: Debug:   Name: Administrator
+16:19:01: Debug:   Interface: 3
+16:19:01: Debug:   Host: alexander
+16:19:01: Debug:   Port: 4000
+16:19:01: Debug:   IP: 192.168.52.1
+16:19:01: Debug:    key: txtvers
+16:19:01: Debug:    key: id
+16:19:01: Debug: ZeroconfBrowse Add:
+16:19:01: Debug:   Name: Administrator
+16:19:01: Debug:   Interface: 16777221
+16:19:01: Debug:   Host: alexander
+16:19:01: Debug:   Port: 4000
+16:19:01: Debug:   IP: 192.168.52.1
+16:19:01: Debug:    key: txtvers
+16:19:01: Debug:    key: id
+16:19:01: Debug: ZeroconfBrowse Add:
+16:19:01: Debug:   Name: Administrator
+16:19:01: Debug:   Interface: 2
+16:19:02: Debug:   Host: alexander
+16:19:02: Debug:   Port: 4000
+16:19:02: Debug:   IP: 192.168.52.1
+16:19:02: Debug:    key: txtvers
+16:19:02: Debug:    key: id
+16:19:02: Debug: cxSYNC_CONNECT:
+16:19:02: Debug:   cxHost: alexander
+16:19:02: Debug:   cxPort: 4000
+16:19:02: Debug:   cxIP: 192.168.52.1
+16:19:03: Debug: Connect Failed: 192.168.52.1:4000
+16:19:07: Debug: C:\wxWidgets-2.6.2\src\msw\clipbrd.cpp(571): 'OleFlushClipboard' failed with error 0x80004005 (unspecified error).
+16:19:07: Debug: OnClose

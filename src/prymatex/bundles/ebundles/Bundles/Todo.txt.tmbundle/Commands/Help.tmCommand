@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Help</string>
+        <key>uuid</key>
+        <string>E8F6A9B2-257C-4EDB-820E-337FC4DA8BE8</string>
+        <key>input</key>
+        <string>none</string>
+        <key>output</key>
+        <string>discard</string>
+        <key>command</key>
+        <string>open "http://todotxt.com"</string>
+    </dict>
+</plist>

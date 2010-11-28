@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;a href="{smileys_url}" onclick="window.open(this.href, '_blank', 'width=600,height=440');return false;" onkeypress="this.onclick()"&gt;${1:Smileys}&lt;/a&gt;
+$0</string>
+	<key>name</key>
+	<string>- smileys</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>4831D336-ABD1-4A51-B835-E1C3C158FF37</string>
+</dict>
+</plist>

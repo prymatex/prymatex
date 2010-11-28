@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{exp:wiki base_path="${1:wiki/index}" ${2:parameters}}
+$0</string>
+	<key>name</key>
+	<string>exp:wiki</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>tabTrigger</key>
+	<string>wiki</string>
+	<key>uuid</key>
+	<string>D594F6DA-88AB-4EE7-92AF-49BAFB9CB301</string>
+</dict>
+</plist>

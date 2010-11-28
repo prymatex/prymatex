@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{reverse_related_entries orderby="${1:title}" ${2:parameters}}
+$0
+{/reverse_related_entries}</string>
+	<key>name</key>
+	<string>- reverse_related_entries</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>tabTrigger</key>
+	<string>reverse</string>
+	<key>uuid</key>
+	<string>C682A616-B55D-4771-BF19-2DC364A4F86F</string>
+</dict>
+</plist>

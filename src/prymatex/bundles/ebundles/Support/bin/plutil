@@ -1,0 +1,67 @@
+#!/usr/bin/ruby -wKU
+
+# == Synopsis
+#   Ruby port of MacOS plist utility
+# == Examples
+#   plist -convert fmt filename
+#
+#   Reads any supported format (xml1, binary1 or openstep, but
+#   only xml1 currently supported) and outputs in chosen format
+# == Usage 
+#   plist [options] file
+# == Options
+#   -help          Displays help message
+#   -convert fmt   Convert plist file to this format
+#   -o path        Output path name
+#
+require 'pp'
+
+def convert(ifile, ofile, type)
+  require "#{ENV['TM_SUPPORT_PATH']}/lib/osx/plist"
+  ofile ||= ifile
+  type ||= "xml1"
+  
+  pl = if ifile=='-'
+    OSX::PropertyList.load(STDIN)
+  else
+    File.open(ifile, "rb") { |io| OSX::PropertyList.load(io) }
+  end
+
+  if ofile=='-'
+    print pl.to_plist(type)
+  else
+    File.open(ofile, "wb") { |io| OSX::PropertyList.dump(io, pl, type) }
+  end
+end
+
+def usage
+  require 'rdoc/usage'
+  RDoc::usage
+end
+
+def parse(args)
+  options = Hash.new
+  files = Array.new
+  while !args.empty?
+    opt = args.shift
+    if opt == '-convert'
+      options[:convert] = args.shift
+    elsif opt == '-o'
+      options[:output] = args.shift
+    elsif opt == '-s'
+      # just ignore it
+    elsif opt == '--'
+      files.concat(args)
+      args.clear
+    elsif opt =~ /^-./
+      usage
+    else
+      files << opt
+    end
+  end
+
+  usage if !options[:convert] || files.length!=1
+  files.each { |file| convert(file, options[:output], options[:convert]) }
+end
+
+options = parse(ARGV)

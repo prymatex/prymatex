@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Due Date</string>
+        <key>uuid</key>
+        <string>58B6C35C-26BE-45DF-928C-7353EA407800</string>
+        <key>tabTrigger</key>
+        <string>due</string>
+        <key>content</key>
+        <string>due:${1:tommorow|ruby -e "require 'chronic'; print Chronic.parse(STDIN.read, :guess =&gt; false).begin.strftime('%F')"}</string>
+        <key>scope</key>
+        <string>text.todotxt</string>
+    </dict>
+</plist>

@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+if [ $# -ne 0 ]
+then
+  echo "Sorry, no command-line arguments supported yet" 1>&2
+  exit 1
+fi
+
+# should be -convert openstep, but our plutil doesn't support this yet, so stick with xml1 for now
+plutil -convert xml1 -- -

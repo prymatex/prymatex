@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;input type="week" id="$2"${TM_XHTML}&gt;$0</string>
+	<key>name</key>
+	<string>input:week</string>
+	<key>scope</key>
+	<string>text.html</string>
+	<key>tabTrigger</key>
+	<string>input:week</string>
+	<key>uuid</key>
+	<string>2AF4D654-6ED4-4555-B923-A6C98DAD4694</string>
+</dict>
+</plist>

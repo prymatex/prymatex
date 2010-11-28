@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;bdo dir="ltr"&gt;$0&lt;/bdo&gt;</string>
+	<key>name</key>
+	<string>bdo:l</string>
+	<key>scope</key>
+	<string>text.html</string>
+	<key>tabTrigger</key>
+	<string>bdo:l</string>
+	<key>uuid</key>
+	<string>A801251B-452D-4D10-862C-FB0080B7DAC4</string>
+</dict>
+</plist>

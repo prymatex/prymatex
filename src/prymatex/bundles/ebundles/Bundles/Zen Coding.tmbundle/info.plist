@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Zen Coding</string>
+        <key>uuid</key>
+        <string>B2B32343-BDBC-45A3-8E73-E55E9FAE380F</string>
+        <key>mainMenu</key>
+        <dict>
+            <key>items</key>
+            <array>
+                <string>1B3928AC-1FDA-4956-9002-90D8C17D3B77</string>
+                <string>105BE989-88C7-49CA-97C3-129896C58E46</string>
+                <string>------------------------------------</string>
+                <string>FB08A10D-F5C9-4D60-9A02-856835FFF42E</string>
+                <string>4C1466AA-6D21-455B-96D2-92703E52243E</string>
+                <string>------------------------------------</string>
+                <string>ED4EF391-BCBE-47FE-B410-9FC17C7E8956</string>
+                <string>2B411677-7940-46E1-9778-97171757F042</string>
+                <string>A597F040-1288-4070-9D43-7FAE56387F7C</string>
+                <string>4B63181D-B998-499C-998C-CB8CEAB24297</string>
+                <string>------------------------------------</string>
+                <string>DAFA5849-AEB2-4EA6-B787-A4738080326E</string>
+                <string>6563592F-263A-4516-BD44-93875E2E288C</string>
+                <string>CEA165CD-6B90-48AC-A0BC-3BA67EBB605A</string>
+            </array>
+        </dict>
+    </dict>
+</plist>

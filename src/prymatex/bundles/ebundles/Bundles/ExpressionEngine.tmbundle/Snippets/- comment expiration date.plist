@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;${1:p}&gt;${2:Comment Expiration Date}&lt;br /&gt;
+&lt;input type="text" name="comment_expiration_date" value="{comment_expiration_date}" maxlength="${3:23}" size="${4:25}" /&gt;&lt;/${1:p}&gt;
+$0</string>
+	<key>name</key>
+	<string>- comment expiration date</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>71C485E6-F649-450B-B19D-599DCD19EF6C</string>
+</dict>
+</plist>

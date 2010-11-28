@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Complete Task</string>
+        <key>uuid</key>
+        <string>22BC5126-91F9-4BFA-A534-5BB9C3387337</string>
+        <key>input</key>
+        <string>selection</string>
+        <key>output</key>
+        <string>replaceSelectedText</string>
+        <key>command</key>
+        <string>#!/usr/bin/env ruby
+require 'date'
+ 
+for line in STDIN.readlines
+  if line =~ /^x\s(\d{4}-\d{2}-\d{2}\s)?(.*)/
+    print $2 #uncomplete
+  else
+    print  "x #{Date.today} #{line}"
+  end
+end</string>
+        <key>fallbackInput</key>
+        <string>line</string>
+        <key>keyEquivalent</key>
+        <string>@X</string>
+        <key>scope</key>
+        <string></string>
+    </dict>
+</plist>

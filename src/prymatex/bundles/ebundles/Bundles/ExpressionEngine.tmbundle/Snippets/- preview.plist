@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{preview}
+&lt;${1:h1}&gt;{title}&lt;/${1:h1}&gt;
+{display_custom_fields}
+{/preview}
+$0</string>
+	<key>name</key>
+	<string>- preview</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>AC2A8CB8-513D-4BB9-A41F-EA13EA1C479A</string>
+</dict>
+</plist>

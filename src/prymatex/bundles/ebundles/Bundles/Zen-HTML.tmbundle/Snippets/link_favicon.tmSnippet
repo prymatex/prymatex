@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;link rel="shortcut icon" type="image/x-icon" href="${1:favicon.ico}"${TM_XHTML}&gt;$0</string>
+	<key>name</key>
+	<string>link:favicon</string>
+	<key>scope</key>
+	<string>text.html</string>
+	<key>tabTrigger</key>
+	<string>link:favicon</string>
+	<key>uuid</key>
+	<string>C27B471E-5DEC-4A75-BFE9-D05876459BC6</string>
+</dict>
+</plist>

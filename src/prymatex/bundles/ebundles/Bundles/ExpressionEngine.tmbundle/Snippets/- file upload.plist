@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;a href="{upload_url}" onclick="window.open(this.href, '_blank', 'width=400,height=60');return false;" onkeypress="this.onclick()"&gt;${1:File Upload}&lt;/a&gt;
+$0</string>
+	<key>name</key>
+	<string>- file upload</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>24EC7CF0-531A-4931-BDE2-086928EFE083</string>
+</dict>
+</plist>

@@ -1,0 +1,22 @@
+2007/07/02 18:34:03 Starting cygwin install, version 2.524
+2007/07/02 18:34:03 Current Directory: C:\Program Files\e
+2007/07/02 18:34:03 
+Command Line Options:
+ -D --download                          Download from internet
+ -L --local-install                     Install from local directory
+ -s --site                              Download site
+ -R --root                              Root installation directory
+ -p --package                           Packages to include
+ -q --quiet-mode                        Unattended setup mode
+ -h --help                              print help
+ -l --local-package-dir                 Local package directory
+ -r --no-replaceonreboot                Disable replacing in-use files on next
+                                        reboot.
+ -n --no-shortcuts                      Disable creation of desktop and start
+                                        menu shortcuts
+ -N --no-startmenu                      Disable creation of start menu shortcut
+ -d --no-desktop                        Disable creation of desktop shortcut
+ -A --disable-buggy-antivirus           Disable known or suspected buggy anti
+                                        virus software packages during
+                                        execution.
+Ending cygwin install

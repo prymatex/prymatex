@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+      <key>description</key>
+      <string>Support for &lt;a href="http://en.wikipedia.org/wiki/Batch_file"&gt;MS-DOS Batch files&lt;/a&gt;.</string>
+      <key>name</key>
+        <string>MSDOS batch file</string>
+        <key>uuid</key>
+        <string>3CC11C3F-C124-4AC2-85F8-B8EE17F9EFB9</string>
+    </dict>
+</plist>

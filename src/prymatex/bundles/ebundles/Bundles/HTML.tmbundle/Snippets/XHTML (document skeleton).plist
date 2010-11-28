@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>content</key>
+        <string>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;
+&lt;html&gt;
+	&lt;head&gt;
+		&lt;meta http-equiv="Content-type" content="text/html; charset=utf-8" /&gt;
+		&lt;title&gt;${1:${TM_FILENAME/((.+)\..*)?/(?2:$2:Page Title)/}}&lt;/title&gt;
+		&lt;link rel="${3:stylesheet}" href="${4:/css/master.css}" type="text/css" media="${5:screen}" title="${6:no title}" charset="${7:utf-8}" /&gt;
+	&lt;/head&gt;
+	&lt;body&gt;
+		$0
+	&lt;/body&gt;
+&lt;/html&gt;</string>
+        <key>name</key>
+        <string>XHTML Document Skeleton</string>
+        <key>scope</key>
+        <string>text.html</string>
+        <key>tabTrigger</key>
+        <string>skel</string>
+        <key>uuid</key>
+        <string>6013E6BC-5EBF-475B-886A-15EE195A4302</string>
+    </dict>
+</plist>

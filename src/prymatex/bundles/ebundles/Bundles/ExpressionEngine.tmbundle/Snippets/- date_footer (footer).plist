@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>{date_footer display="${1:daily}"}
+&lt;${2:p}&gt;$3&lt;/${2}&gt;
+{/date_footer}
+$0</string>
+	<key>name</key>
+	<string>- date_footer</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>tabTrigger</key>
+	<string>footer</string>
+	<key>uuid</key>
+	<string>0B09D872-29C2-4B28-823E-6E6F01B3701D</string>
+</dict>
+</plist>

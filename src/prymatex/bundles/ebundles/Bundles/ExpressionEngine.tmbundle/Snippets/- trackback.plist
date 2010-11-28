@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;${1:p}&gt;${2:Trackback URLs}&lt;br /&gt;
+&lt;textarea name="trackback_urls" cols="${3:50}" rows="${4:5}"&gt;{trackback_urls}&lt;/textarea&gt;&lt;/${1:p}&gt;
+$0</string>
+	<key>name</key>
+	<string>- trackback</string>
+	<key>scope</key>
+	<string>text.html, text.xhtml</string>
+	<key>uuid</key>
+	<string>0F758636-99BA-430B-A804-A4D91579E60F</string>
+</dict>
+</plist>

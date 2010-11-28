@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>&lt;map name="$1"&gt;
+	&lt;area shape="$2" coords="$3" href="$4" alt="$5"${TM_XHTML}&gt;$0
+&lt;/map&gt;</string>
+	<key>name</key>
+	<string>map +</string>
+	<key>scope</key>
+	<string>text.html</string>
+	<key>tabTrigger</key>
+	<string>map+</string>
+	<key>uuid</key>
+	<string>4132FAA9-8CB7-4438-B5DA-BACE42DF7625</string>
+</dict>
+</plist>

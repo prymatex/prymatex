@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>Insert Missing Includes</string>
+        <key>uuid</key>
+        <string>C00F2C81-E087-452F-ABE0-BD7386E20345</string>
+        <key>input</key>
+        <string>document</string>
+        <key>output</key>
+        <string>replaceDocument</string>
+        <key>command</key>
+        <string>&quot;$TM_BUNDLE_SUPPORT/bin/insert_missing_includes_cygwin.rb&quot;
+</string>
+        <key>scope</key>
+        <string>source.c, source.c++</string>
+    </dict>
+</plist>

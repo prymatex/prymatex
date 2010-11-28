@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>beforeRunningCommand</key>
+        <string>nop</string>
+        <key>command</key>
+        <string>#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import sys, os
+sys.path.append(os.environ["TM_BUNDLE_SUPPORT"])
+
+from zencoding import zen_core as zen_coding
+from zen_editor import ZenEditor
+
+editor = ZenEditor()
+zen_coding.run_action('expand_abbreviation', editor)</string>
+        <key>fallbackInput</key>
+        <string>line</string>
+        <key>input</key>
+        <string>none</string>
+        <key>keyEquivalent</key>
+        <string>@e</string>
+        <key>name</key>
+        <string>Expand Abbreviation</string>
+        <key>output</key>
+        <string>discard</string>
+        <key>scope</key>
+        <string></string>
+        <key>uuid</key>
+        <string>1B3928AC-1FDA-4956-9002-90D8C17D3B77</string>
+    </dict>
+</plist>
