@@ -33,4 +33,7 @@ clean:
 
 re:	clean all
 
+test: all
+	@echo "Testing Oniguruma Binding, you should see onig version and copyrigh message"
+	@python -c "import pyonig; print pyonig.VERSION; print pyonig.COPYRIGHT"
 
