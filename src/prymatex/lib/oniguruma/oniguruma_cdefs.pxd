@@ -158,7 +158,7 @@ cdef extern from "includes/oniguruma.h":
     #
     # Syntaxes
     #
-    
+    OnigSyntaxType OnigDefaultSyntax
     OnigSyntaxType OnigSyntaxASIS
     OnigSyntaxType OnigSyntaxPosixBasic
     OnigSyntaxType OnigSyntaxPosixExtended

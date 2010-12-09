@@ -11,9 +11,11 @@ all: cython
 
 cython: pyonig.so
 
-pyonig.c: pyonig.pyx oniguruma_consts.py
+pyonig.c: pyonig.pyx oniguruma_consts.py oniguruma_synenc.pxd
 	cython pyonig.pyx
 
+oniguruma_synenc.pxd: includes/oniguruma.h
+	./gen_syn_enc.py -f -o $@ $^
 
 oniguruma_consts.py: includes/oniguruma.h
 	@echo "Converting .H defs to python"
@@ -29,7 +31,7 @@ pyonig.so: pyonig.o
 	@echo "-----------------------------------------------------------"
 
 clean:
-	@rm -rf pyonig.so pyonig.o pyonig.c pyonig.pxd oniguruma_consts.py
+	@rm -rf pyonig.so pyonig.o pyonig.c pyonig.pxd oniguruma_consts.py oniguruma_synenc.pxd
 
 re:	clean all
 
