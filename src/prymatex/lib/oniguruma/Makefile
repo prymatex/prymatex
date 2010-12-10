@@ -11,11 +11,9 @@ all: cython
 
 cython: pyonig.so
 
-pyonig.c: pyonig.pyx oniguruma_consts.py oniguruma_synenc.pxd
+pyonig.c: pyonig.pyx oniguruma_consts.py 
 	cython pyonig.pyx
 
-oniguruma_synenc.pxd: includes/oniguruma.h
-	./gen_syn_enc.py -f -o $@ $^
 
 oniguruma_consts.py: includes/oniguruma.h
 	@echo "Converting .H defs to python"

@@ -262,4 +262,3 @@ cdef extern from "includes/oniguruma.h":
     char* onig_version ()
     char* onig_copyright ()
 
-        

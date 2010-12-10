@@ -9,9 +9,7 @@ __doc__ = '''
 from oniguruma_consts import *
 from oniguruma_cdefs cimport *
 #from oniguruma_synenc cimport *
-#
-#
-#
+
 
 cdef extern from "stdlib.h":
     ctypedef unsigned long size_t
@@ -39,7 +37,11 @@ cdef class Match:
 MAX_ERROR_MESSAGE_LEN = 255
 
 
+class RegexError(Exception):
+    pass
 
+class EncodingException(Exception):
+    pass
 
 cdef class Regex:
     '''
@@ -48,11 +50,11 @@ cdef class Regex:
     cdef OnigRegex oregexp
     cdef public char* pattern
     cdef public int options
-
+    cdef public name_count
     cdef OnigUChar error_msg[255]
 
     def __init__(self, char *pattern, int options = OPTION_NONE, 
-                 encoding = None, syntax = None,):
+                 int encoding = ENCODING_ASCII, int syntax = 0):
         '''
         Creates a regular expression instance.
         '''
@@ -64,12 +66,15 @@ cdef class Regex:
         cdef int end = <long>self.pattern + strlen( self.pattern )
         
         r = onig_new( &self.oregexp, <OnigUChar *> self.pattern, <OnigUChar *>end, 
-                        options, &OnigEncodingASCII, &OnigDefaultSyntax, &einfo)
+                        options, int2encoding( encoding ), 
+                        < OnigSyntaxType* > &OnigDefaultSyntax, &einfo)
                         
         if r != NORMAL:
             onig_error_code_to_str(self.error_msg, r, einfo)
-            raise Exception("Error de compilacion %s" % error_message)
-    
+            raise Exception(<char *>self.error_msg)
+            
+        self.name_count = onig_number_of_names(self.oregexp)
+        
     def enc_name(self):
         '''
         Returns the enoding name
@@ -82,15 +87,12 @@ cdef class Regex:
         '''
         cdef OnigRegion *region
         cdef int r
-        cdef char *end
-        cdef char *start
-        cdef char *range
+        cdef char *end, *start, *range,
         cdef char *string = strdup(original)
         
         region = onig_region_new()
         
         end = string + len(string)
-        print "Lenght %d" % len(string)
         start = string
         range = end
         s = string
@@ -98,66 +100,120 @@ cdef class Regex:
         r = onig_search( self.oregexp, string, end, start, range, region,
                         OPTION_NONE)
         if r >= 0:
+            
+            if onig_number_of_names(self.oregexp):
+                return "There are names"
+            else:
+                return "No names"
+                
             free(string)
+            onig_region_free(region, 1 )
             return r
             
         elif r == MISMATCH:
             free(string)
+            onig_region_free(region, 1 )
             return None
         else:
             onig_error_code_to_str(self.error_msg, r)
             free(string)
+            onig_region_free(region, 1 )
             raise Exception(s)
 
+    def _make_match(self, string):
+        ''' Returns the match '''
+        pass
+        
     def __str__(self):
         return "<ORegex %s>" % self.pattern
 
 
-
+def set_default_syntax():
+    pass
+    
+def get_default_syntax():
+    pass
+    
 # Module initialization
+onig_init()
 VERSION = onig_version()
 COPYRIGHT = onig_copyright()
 
-# Cython definition of oniguruma encodings
-cdef OnigEncodingType[30] _onig_encodings
-_onig_encodings[:] = [
-        OnigEncodingASCII,
-        OnigEncodingISO_8859_1,
-        OnigEncodingISO_8859_2,
-        OnigEncodingISO_8859_3,
-        OnigEncodingISO_8859_4,
-        OnigEncodingISO_8859_5,
-        OnigEncodingISO_8859_6,
-        OnigEncodingISO_8859_7,
-        OnigEncodingISO_8859_8,
-        OnigEncodingISO_8859_9,
-        OnigEncodingISO_8859_10,
-        OnigEncodingISO_8859_11,
-        OnigEncodingISO_8859_13,
-        OnigEncodingISO_8859_14,
-        OnigEncodingISO_8859_15,
-        OnigEncodingISO_8859_16,
-        OnigEncodingUTF8,
-        OnigEncodingUTF16_BE,
-        OnigEncodingUTF16_LE,
-        OnigEncodingUTF32_BE,
-        OnigEncodingUTF32_LE,
-        OnigEncodingEUC_JP,
-        OnigEncodingEUC_TW,
-        OnigEncodingEUC_KR,
-        OnigEncodingEUC_CN,
-        OnigEncodingSJIS,
-        #OnigEncodingKOI8,
-        OnigEncodingKOI8_R,
-        OnigEncodingCP1251,
-        OnigEncodingBIG5,
-        OnigEncodingGB18030,
-]
-ENCODING_NAMES = []
-cdef _get_encoding_names():
-    global ENCODING_NAMES 
-    for i in range(30):
-         name = "%s" % _onig_encodings[i].name
-         ENCODING_NAMES.append(name)
-          
-_get_encoding_names()
+# Python's re module compatibility layer
+
+def compile(pattern, flags):
+    pass
+    
+    
+    
+
+
+
+
+cdef OnigEncoding int2encoding(int enc):
+    '''
+    There must be a less verbose way to acomplish this.
+    '''
+    if enc == ENCODING_ASCII:
+        return &OnigEncodingASCII
+    elif enc == ENCODING_ISO_8859_1:
+        return &OnigEncodingISO_8859_1
+    elif enc == ENCODING_ISO_8859_2:
+        return &OnigEncodingISO_8859_2
+    elif enc == ENCODING_ISO_8859_3:
+        return &OnigEncodingISO_8859_3
+    elif enc == ENCODING_ISO_8859_4:
+        return &OnigEncodingISO_8859_4
+    elif enc == ENCODING_ISO_8859_5:
+        return &OnigEncodingISO_8859_5
+    elif enc == ENCODING_ISO_8859_6:
+        return &OnigEncodingISO_8859_6
+    elif enc == ENCODING_ISO_8859_7:
+        return &OnigEncodingISO_8859_7
+    elif enc == ENCODING_ISO_8859_8:
+        return &OnigEncodingISO_8859_8
+    elif enc == ENCODING_ISO_8859_9:
+        return &OnigEncodingISO_8859_9
+    elif enc == ENCODING_ISO_8859_10:
+        return &OnigEncodingISO_8859_10
+    elif enc == ENCODING_ISO_8859_11:
+        return &OnigEncodingISO_8859_11
+    elif enc == ENCODING_ISO_8859_13:
+        return &OnigEncodingISO_8859_13
+    elif enc == ENCODING_ISO_8859_14:
+        return &OnigEncodingISO_8859_14
+    elif enc == ENCODING_ISO_8859_15:
+        return &OnigEncodingISO_8859_15
+    elif enc == ENCODING_ISO_8859_16:
+        return &OnigEncodingISO_8859_16
+    elif enc == ENCODING_UTF8:
+        return &OnigEncodingUTF8
+    elif enc == ENCODING_UTF16_BE:
+        return &OnigEncodingUTF16_BE
+    elif enc == ENCODING_UTF16_LE:
+        return &OnigEncodingUTF16_LE
+    elif enc == ENCODING_UTF32_BE:
+        return &OnigEncodingUTF32_BE
+    elif enc == ENCODING_UTF32_LE:
+        return &OnigEncodingUTF32_LE
+    elif enc == ENCODING_EUC_JP:
+        return &OnigEncodingEUC_JP
+    elif enc == ENCODING_EUC_TW:
+        return &OnigEncodingEUC_TW
+    elif enc == ENCODING_EUC_KR:
+        return &OnigEncodingEUC_KR
+    elif enc == ENCODING_EUC_CN:
+        return &OnigEncodingEUC_CN
+    elif enc == ENCODING_SJIS:
+        return &OnigEncodingSJIS
+    # Undefined symbol in Ubuntu 10.10 :(
+    #elif enc == ENCODING_KOI8_R:
+    #    return &OnigEncodingKOI8
+    elif enc == ENCODING_CP1251:
+        return &OnigEncodingKOI8_R
+    elif enc == ENCODING_BIG5:
+        return &OnigEncodingBIG5
+    elif enc == ENCODING_GB18030:
+        return &OnigEncodingGB18030
+    raise EncodingException("Encoding number %d not supported" % enc)
+    
