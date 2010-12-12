@@ -1,3 +1,7 @@
+# Some Eclipse files
 .project
 .pydevproject
 private
+
+# Nohup output
+*.out
