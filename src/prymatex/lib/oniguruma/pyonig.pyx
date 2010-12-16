@@ -8,40 +8,31 @@ __doc__ = '''
 
 from oniguruma_consts import *
 from oniguruma_cdefs cimport *
-#from oniguruma_synenc cimport *
 
-
-cdef extern from "stdlib.h":
-    ctypedef unsigned long size_t
-    void free(void *ptr)
-    void *malloc(size_t size)
-    void *realloc(void *ptr, size_t size)
-    size_t strlen(char *s)
-    char *strcpy(char *dest, char *src)
-    char *strdup(char *from_)
-    int printf(char *fmt, ...)
-
-from libc cimport stdlib
-
-# This structure should be something like
-cdef class Match:
-    '''
-    Matched data
-    '''
-    def __cinit__(self):
-        pass
-
-    def __len__(self):
-        return 0
 
 MAX_ERROR_MESSAGE_LEN = 255
-
 
 class RegexError(Exception):
     pass
 
 class EncodingException(Exception):
     pass
+
+# This structure should be something like
+cdef class Match:
+    '''
+    Matched data
+    '''
+    #cdef public matches = []
+    def __cinit__(self, reg, char *orginal):
+        pass
+        
+
+    def __len__(self):
+        return 0
+
+    def __str__(self):
+        return "<Match data at %x" % hash(self)
 
 cdef class Regex:
     '''
@@ -54,11 +45,12 @@ cdef class Regex:
     cdef OnigUChar error_msg[255]
 
     def __init__(self, char *pattern, int options = OPTION_NONE, 
+
                  int encoding = ENCODING_ASCII, int syntax = 0):
         '''
         Creates a regular expression instance.
         '''
-
+        raise EncodignException("A")
         self.pattern = strdup(pattern)
         self.options = options
         cdef OnigErrorInfo einfo
@@ -68,7 +60,7 @@ cdef class Regex:
         r = onig_new( &self.oregexp, <OnigUChar *> self.pattern, <OnigUChar *>end, 
                         options, int2encoding( encoding ), 
                         < OnigSyntaxType* > &OnigDefaultSyntax, &einfo)
-                        
+
         if r != NORMAL:
             onig_error_code_to_str(self.error_msg, r, einfo)
             raise Exception(<char *>self.error_msg)
@@ -85,6 +77,11 @@ cdef class Regex:
         '''
         Match. Returns a iterable match
         '''
+        m = self._make_match(original)
+        return m
+
+    def _make_match(self, char *original):
+        ''' Returns the match '''
         cdef OnigRegion *region
         cdef int r
         cdef char *end, *start, *range,
@@ -102,10 +99,11 @@ cdef class Regex:
         if r >= 0:
             
             if onig_number_of_names(self.oregexp):
-                return "There are names"
+                print "There are names"
             else:
-                return "No names"
-                
+                print "No names"
+            print "Regions: %d" % region.num_regs
+            
             free(string)
             onig_region_free(region, 1 )
             return r
@@ -119,10 +117,6 @@ cdef class Regex:
             free(string)
             onig_region_free(region, 1 )
             raise Exception(s)
-
-    def _make_match(self, string):
-        ''' Returns the match '''
-        pass
         
     def __str__(self):
         return "<ORegex %s>" % self.pattern
@@ -152,6 +146,7 @@ def compile(pattern, flags):
 
 cdef OnigEncoding int2encoding(int enc):
     '''
+    Translates an integer constant into a Encoding
     There must be a less verbose way to acomplish this.
     '''
     if enc == ENCODING_ASCII:
@@ -216,4 +211,5 @@ cdef OnigEncoding int2encoding(int enc):
     elif enc == ENCODING_GB18030:
         return &OnigEncodingGB18030
     raise EncodingException("Encoding number %d not supported" % enc)
-    
+ 
+   

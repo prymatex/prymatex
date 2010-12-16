@@ -4,7 +4,9 @@
 '''
 Created on 23/11/2010
 
-Converts .h definitions to Cython pxd definitions
+Converts .h definitions to Cython pxd definitions.
+Diclaimer: It's highly oriented to oniguruma way of doing things.
+
 @see http://docs.cython.org/src/tutorial/pxd_files.html
 
 @author: defo
@@ -13,7 +15,7 @@ import sys
 import re
 from optparse import OptionParser
 from os.path import exists
-
+import operator
 # Some exceptions
 class ConfigException(Exception):
     pass
@@ -29,6 +31,52 @@ def largest_word(iterable):
         if cur_len > max_length: cur_len
     return max_length
 
+## {{{ http://code.activestate.com/recipes/52549/ (r3)
+class curry:
+    def __init__(self, fun, *args, **kwargs):
+        self.fun = fun
+        self.pending = args[:]
+        self.kwargs = kwargs.copy()
+
+    def __call__(self, *args, **kwargs):
+        if kwargs and self.kwargs:
+            kw = self.kwargs.copy()
+            kw.update(kwargs)
+        else:
+            kw = kwargs or self.kwargs
+
+        return self.fun(*(self.pending + args), **kw)
+## end of http://code.activestate.com/recipes/52549/ }}}
+
+class hash(dict):
+    ''' Javascript-like object '''
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+
+def wrap_in_comment(line_or_lines):
+    '''
+    Wraps a string in comments plus some fancy heading
+    '''
+    lines = line_or_lines.split('\n')
+    max_len = max(map(len, lines))
+    size = max_len + 2
+    line = '# %s\n' % ('-' * size, )
+    line_block = [ "# %s\n" % l for l in lines ]
+    return "%(line)s%(text)s%(line)s" % { 'line' : line,
+    'text': ''.join(line_block)}
+
+    
+
+from datetime import datetime
+
+
+HEADING = wrap_in_comment('''
+This file was automatically generated, please do not edit.
+Any modifications will be lost after a new h2cython call
+Generated on %s''' % (datetime.now().strftime("%x at %X")))
+
+
+                                           
 
 class HeaderFileParser(object):
     '''
@@ -80,6 +128,7 @@ class HeaderFileParser(object):
     # Loaded form the values dict passed in the __init__ method
     remove_from_name_regexes = []
     
+    
     def __init__(self, file_or_name, config, output = sys.stdout):
         '''
         @param file_or_name: File or name
@@ -101,8 +150,34 @@ class HeaderFileParser(object):
         self.values = {} # Values
         self.order = [] # Name - Value sociation, celan data
         self.pending_keys = [] # Values that could not yet be processed
-        self.pending_dict = {} # The values 
+        self.pending_dict = {} # The values
+        
+        self._match_collectors = {}
+        
+        self.add_match_collector('encoding',
+                               re.compile('''
+                               \#define\s+ONIG_(?P<name>ENCODING_[_\w\d]+)\s+\(\&[\d\w]+\)
+                               ''', re.VERBOSE)) 
     
+    
+    def add_match_collector(self, name, regex):
+        '''
+        @param name: The name of the enumeration
+        @param regex: A regex to detect these enum in lines
+        @param initial: Initial value
+        @param inc_fx: A callable with 2 arguments, the current value, ant the\
+                       the match. Should return the next value.
+                       By default it's a operator.add
+        '''
+        
+            
+        if name in self._match_collectors:
+            raise ConfigException("Duplicate name")
+        
+        self._match_collectors[name] = hash(
+                                      regex = regex,
+                                      collected = [] ,
+                                      )
     
     def parse(self):
         '''
@@ -112,23 +187,30 @@ class HeaderFileParser(object):
             self.process_line(line)
             
             
-    
-    def process_line(self, line):
+    def search_constant_definition(self, line):
         match = self.regex.match( line.strip('\n') )
         if not match:
             return
         name = match.group('name')
         raw_value = match.group('value')
         comment = match.group('comment')
-        
-        
-#        if name == "ONIG_OPTION_NONE":
-#            from ipdb import set_trace; set_trace()
-            
         clean_value = self.clean_value(raw_value)
          
         if self.is_valid_constant(clean_value):
             self[name] = clean_value
+            
+    def search_enumeration(self, line):
+        for _name, config in self._match_collectors.iteritems():
+            match = config.regex.match(line)
+            if match:
+                config.collected.append(match.group('name'))
+    
+    def process_line(self, line):
+        
+        if not self.search_constant_definition(line):
+            # To 
+            self.search_enumeration(line)
+        
     
     def clean_value(self, value):
         '''
@@ -188,21 +270,39 @@ class HeaderFileParser(object):
             yield name, self.values[name]
             
     
-    def as_pxd(self, output = None):
+    
+    
+    def as_pxd(self, output = None, heading = HEADING):
         '''
         Writes to output the resulting pxd file
+        @param output: A file like object
+        @param heading: A heading to prepend to the text output
         '''
         
         if not output:
             output = self.output
-            
+        
+        output.write(HEADING)
+        
+        
         width = largest_word(self.order) + 1
         format = "%-" + str(width) + "s = %s\n"
             
         for name, value in self.iter_clean():
             output.write(format % (name, value))
         
-        
+        for name, data in self._match_collectors.iteritems():
+            if not data.collected:
+                sys.stderr.write("No definitions for %s\n" % name)
+                continue
+            
+            heading = wrap_in_comment("Definitions for %s" % name)
+            output.write(heading)
+            
+            for n, element in enumerate(data.collected):
+                output.write("%s = %d\n" % (element, n))
+            #sys.stderr.write("n = %d" % n)
+            
     
     def iter_clean(self):
         '''
@@ -251,7 +351,7 @@ def handle_file(fp, cfg, output = sys.stdout):
         total = converted + rejected
         conv_stat = float(rejected) / converted 
         sys.stderr.write("-"*50+"\n")
-        sys.stderr.write("Definitions that could not be decoded were")
+        sys.stderr.write("Definitions which could not be decoded were")
         sys.stderr.write(" (%d from %d %2.2f%%)\n" % (rejected, total, 
                                                     conv_stat))
         for name, value in parser.iter_pending():

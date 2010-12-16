@@ -262,3 +262,16 @@ cdef extern from "includes/oniguruma.h":
     char* onig_version ()
     char* onig_copyright ()
 
+# Some stdlib defs
+
+cdef extern from "stdlib.h":
+    ctypedef unsigned long size_t
+    void free(void *ptr)
+    void *malloc(size_t size)
+    void *realloc(void *ptr, size_t size)
+    size_t strlen(char *s)
+    char *strcpy(char *dest, char *src)
+    char *strdup(char *from_)
+    int printf(char *fmt, ...)
+
+from libc cimport stdlib
