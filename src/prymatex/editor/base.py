@@ -85,17 +85,6 @@ class PMXCodeEdit(QPlainTextEdit):
     It holds the highlighter
     '''
 
-    # Key substition map, for example when you type (, it should insert
-    # a (${cursor})
-    SUBST_MAP = {
-        Qt.Key_ParenLeft: ("()", PREVIOUS_CHAR, ),
-        Qt.Key_BraceLeft: ("{}", PREVIOUS_CHAR, ),
-        Qt.Key_BracketLeft: ("[]", PREVIOUS_CHAR, ),
-        Qt.Key_QuoteDbl: ('""', PREVIOUS_CHAR, ),
-        Qt.Key_Apostrophe: ("''", PREVIOUS_CHAR, ),
-        #Qt.Key_Less: ("<>", PREVIOUS_CHAR, ),
-    }
-    
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
@@ -105,7 +94,16 @@ class PMXCodeEdit(QPlainTextEdit):
         self.__last_save_time = None
         self.__soft_tabs = True
         self.__tab_length = 4
-    
+        self.character_actions = {}
+
+        self.character_actions.update({
+            '(': '(${selection})',
+            '[': '[${selection}]',
+            "{": "{${selection}}",
+            '"': '"${selection}"',
+            "'": "'${selection}'",
+            
+        })
     
     @property
     def index(self):
@@ -303,18 +301,11 @@ class PMXCodeEdit(QPlainTextEdit):
         cursor = self.textCursor()
 
         doc = self.document()
-        start_block_pos, end_block_pos = cursor.selectionStart(), cursor.selectionEnd()
-        start_block, end_block = map(doc.findBlock, (start_block_pos, end_block_pos))
-        blocknum_start, blocknum_end = start_block.blockNumber(), end_block.blockNumber()
-
-        blocknum_diff = blocknum_end - blocknum_start
-
 
         if key == Qt.Key_Tab:
             self.indent()
         elif key == Qt.Key_Backtab:
             self.unindent()
-        # elif key == 16777220 and doc.blockCount() == 1:
         elif key == Qt.Key_Enter and doc.blockCount() == 1:
             #Esto es un enter y es el primer blocke que tiene el documento
             try:
@@ -326,20 +317,39 @@ class PMXCodeEdit(QPlainTextEdit):
             except:
                 #logger.information("Error guessing syntax, maybe debuging?")
                 print "Error guessing syntax, maybe debuging?"
-                
-        elif key in self.SUBST_MAP and not cursor.hasSelection():
-            text, movement = self.SUBST_MAP[key]
-            cursor.beginEditBlock()
-            cursor.insertText(text)
-            for action_params in movement:
-                mode, anchor, amount = action_params
-                cursor.movePosition(mode, anchor, amount)
-            cursor.endEditBlock()
-            self.setTextCursor(cursor)
+
+        # Handle special keys such as ", (, [ and {
+        elif key < 255 and chr(key) in self.character_actions:
+            key_chr = chr(key)
+            self.perform_character_action( self.character_actions[ key_chr ] )
             
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
-        
+
+    def perform_character_action(self, substition):
+        try:
+            text_start, text_end = substition.split('${selection}')
+        except:
+            print "Bad subsitution for %s" % subsitution
+            return
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        if cursor.hasSelection():
+            text = cursor.selectedText()
+            cursor.insertText(text_start)
+            cursor.insertText(text)
+            cursor.insertText(text_end)
+            
+        else:
+            cursor.insertText(text_start)
+            cursor.insertText(text_end)
+            cursor.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
+            self.setTextCursor(cursor)
+
+        cursor.endEditBlock()
+
+
+    # TODO: Word wrapping fix
     def indent(self):
         '''
         Indents text
