@@ -378,12 +378,13 @@ class PMXCodeEdit(QPlainTextEdit):
                     #logger.information("Error guessing syntax, maybe debuging?")
                     print "Error guessing syntax, maybe debuging?"
             else:
-                if cursor.atBlockEnd():
-                    cursor.movePosition(QTextCursor.StartOfLine, QTextCursor.KeepAnchor, 1)
-                    text = self.blockIndentation(cursor.block())
-                    QPlainTextEdit.keyPressEvent(self, key_event)
-                    if text:
-                        self.textCursor().insertText(text)
+                
+                cursor.movePosition(QTextCursor.StartOfLine, QTextCursor.KeepAnchor, 1)
+                text = self.blockIndentation(cursor.block())
+                QPlainTextEdit.keyPressEvent(self, key_event)
+                if text:
+                    self.textCursor().insertText(text)
+                
 
         # Handle special keys such as ", (, [ and {
         elif key < 255 and chr(key) in self.character_actions:
