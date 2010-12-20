@@ -8,6 +8,7 @@ from PyQt4.QtCore import Qt
 
 from logging import getLogger
 import sys
+import traceback
 
 #PMX Libs
 if __name__ == "__main__":
@@ -67,23 +68,16 @@ class FileBuffer(QObject):
         return v
 
 
-PREVIOUS_CHAR = [
-    (QTextCursor.PreviousCharacter, QTextCursor.MoveAnchor, 1),
-]    
 
 
-SUBSTITUTIONS = {'(': '(${selection})',
-                 '[': '[${selection}]',
-                 '{': '{\n\t${selection\n}',
-                 '"': '"${selection}"',
-                 "'": "'${selection}'",
-                 }
 class PMXCodeEdit(QPlainTextEdit):
     '''
     The GUI element which holds the editor.
     It has a document
     It holds the highlighter
     '''
+
+    MATCHES = ("()", "{}", "[]", "''", '""', )
 
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
@@ -303,13 +297,35 @@ class PMXCodeEdit(QPlainTextEdit):
         print debug_key(key_event)
         
         cursor = self.textCursor()
-
         doc = self.document()
 
         if key == Qt.Key_Tab:
             self.indent()
         elif key == Qt.Key_Backtab:
             self.unindent()
+        elif key == Qt.Key_Backspace:
+            if not cursor.hasSelection():
+                cursor_left = QTextCursor(cursor)
+                cursor_right = QTextCursor(cursor)
+                cursor_left.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)
+                cursor_right.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor,1)
+                try:
+                    text_arround = "%s%s" % (cursor_left.selectedText(),
+                                                cursor_right.selectedText())
+
+                    if text_arround in self.MATCHES:
+                        cursor_left.removeSelectedText()
+                        cursor_right.removeSelectedText()
+                    else:
+                        QPlainTextEdit.keyPressEvent(self, key_event)
+                except Exception, e:
+                    #traceback.print_exc()
+                    QPlainTextEdit.keyPressEvent(self, key_event)
+                
+                
+            else:
+                QPlainTextEdit.keyPressEvent(self, key_event)
+                
         elif key == Qt.Key_Enter and doc.blockCount() == 1:
             #Esto es un enter y es el primer blocke que tiene el documento
             try:
@@ -417,7 +433,7 @@ if __name__ == "__main__":
     app.logger = {}
     win = PMXCodeEdit()
     win.setGeometry(40,20,600,400)
-    win.setFont(QFont("Verdana", 15))
+    win.setFont(QFont("Verdana", 12))
     # Testing
     win.setPlainText("This is a block " 
     "of text\n"
