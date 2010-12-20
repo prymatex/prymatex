@@ -9,6 +9,7 @@ from PyQt4.QtCore import Qt, SIGNAL
 from logging import getLogger
 import sys
 import traceback
+import re
 
 #PMX Libs
 if __name__ == "__main__":
@@ -27,6 +28,8 @@ logger = getLogger(__name__)
 
 
 KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) if keyname.startswith('Key_')])
+
+
 
 
 def debug_key(key_event):
@@ -312,7 +315,8 @@ class PMXCodeEdit(QPlainTextEdit):
         self.fontMetrics()
         font_width = self.fontMetrics().width(' ')
         line_width = font_width * text.length()
-        char_number = point.x() / font_width
+        # Cast to int if Py > 3.x
+        char_number = int(point.x() / font_width)
         char_number_delta = char_number - text.length()
         if char_number_delta > 0:
             # Insert some empty characters
@@ -361,17 +365,25 @@ class PMXCodeEdit(QPlainTextEdit):
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 
-        elif key == Qt.Key_Enter and doc.blockCount() == 1:
-            #Esto es un enter y es el primer blocke que tiene el documento
-            try:
-                text = doc.firstBlock().text()
-                syntax = find_syntax_by_first_line(text)
-                if syntax != None:
-                    self.set_syntax(syntax)
-                    self.parent().currentEditorChange.emit(self)
-            except:
-                #logger.information("Error guessing syntax, maybe debuging?")
-                print "Error guessing syntax, maybe debuging?"
+        elif key == Qt.Key_Return:
+            if doc.blockCount() == 1:
+                #Esto es un enter y es el primer blocke que tiene el documento
+                try:
+                    text = doc.firstBlock().text()
+                    syntax = find_syntax_by_first_line(text)
+                    if syntax != None:
+                        self.set_syntax(syntax)
+                        self.parent().currentEditorChange.emit(self)
+                except:
+                    #logger.information("Error guessing syntax, maybe debuging?")
+                    print "Error guessing syntax, maybe debuging?"
+            else:
+                if cursor.atBlockEnd():
+                    cursor.movePosition(QTextCursor.StartOfLine, QTextCursor.KeepAnchor, 1)
+                    text = self.blockIndentation(cursor.block())
+                    QPlainTextEdit.keyPressEvent(self, key_event)
+                    if text:
+                        self.textCursor().insertText(text)
 
         # Handle special keys such as ", (, [ and {
         elif key < 255 and chr(key) in self.character_actions:
@@ -380,6 +392,18 @@ class PMXCodeEdit(QPlainTextEdit):
             
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
+
+
+    WHITESPACE_RE = re.compile(r'(?P<whitespace>\s+)\S')
+    @classmethod
+    def blockIndentation(cls, block):
+        '''
+        @return The amount of indetation used in a block of text
+        '''
+        block_text = unicode(block.text())
+        m = cls.WHITESPACE_RE.match(block_text)
+        if m:
+            return m.group('whitespace')
 
     def perform_character_action(self, substition):
         try:
