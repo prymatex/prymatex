@@ -93,7 +93,7 @@ class PMXCodeEdit(QPlainTextEdit):
         Qt.Key_BracketLeft: ("[]", PREVIOUS_CHAR, ),
         Qt.Key_QuoteDbl: ('""', PREVIOUS_CHAR, ),
         Qt.Key_Apostrophe: ("''", PREVIOUS_CHAR, ),
-        Qt.Key_Less: ("<>", PREVIOUS_CHAR, ),
+        #Qt.Key_Less: ("<>", PREVIOUS_CHAR, ),
     }
     
     def __init__(self, parent = None):
@@ -280,17 +280,19 @@ class PMXCodeEdit(QPlainTextEdit):
         '''
         Returns the block where the slection starts
         '''
-        if not self.hasSelection():
+        cursor = self.textCursor()
+        if not cursor.hasSelection():
             return -1
-        return self.document().findBlock( cursor.selectionStart() )
+        return self.document().findBlock( cursor.selectionStart() ).blockNumber()
         
     def selectionBlockEnd(self):
         '''
         Returns the block number where the selection ends
         '''
-        if not self.hasSelection():
+        cursor = self.textCursor()
+        if not cursor.hasSelection():
             return -1
-        return self.document().findBlock( cursor.selectionEnd() )
+        return self.document().findBlock( cursor.selectionEnd() ).blockNumber()
 
     
         
@@ -310,15 +312,10 @@ class PMXCodeEdit(QPlainTextEdit):
         blocknum_diff = blocknum_end - blocknum_start
 
 
-        # All keys in http://doc.trolltech.com/qtjambi-4.4/html/com/trolltech/qt/core/Qt.Key.html
         if key == Qt.Key_Tab:
-            
-            if key_event.modifiers() & Qt.ShiftModifier:
-                self.unindent()
-            else:
-                self.indent()
-
-
+            self.indent()
+        elif key == Qt.Key_Backtab:
+            self.unindent()
         # elif key == 16777220 and doc.blockCount() == 1:
         elif key == Qt.Key_Enter and doc.blockCount() == 1:
             #Esto es un enter y es el primer blocke que tiene el documento
@@ -349,24 +346,26 @@ class PMXCodeEdit(QPlainTextEdit):
         '''
         Indents text
         '''
-        print "Indent"
-        blocknum_diff = self.selectionBlockEnd() - self.selectionBlockEnd()
-        
+        block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
+        print ">>> Indent (%d blocks)" % block_count
+        cursor = self.textCursor()
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)
+        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
         new_cursor.movePosition(QTextCursor.StartOfBlock)
-        for _i in range(blocknum_diff +1):
+        for _i in range(block_count):
+            
             new_cursor.insertText(self.indent_text)
             new_cursor.movePosition(QTextCursor.NextBlock)
             
-        self.setTextCursor(new_cursor)
+        self.setTextCursor(cursor)
         cursor.endEditBlock()
         
     def unindent(self):
         '''
         Unindents text
         '''
-        print "Unindent"
+        print "<<< Unindent"
 
     
 
@@ -378,7 +377,12 @@ if __name__ == "__main__":
     win = PMXCodeEdit()
     win.setGeometry(40,20,600,400)
     win.setFont(QFont("Verdana", 15))
-    
+    # Testing
+    win.setPlainText("This is a block " 
+    "of text\n"
+    "that should treated\n"
+    "as a block when you press tab key")
+    win.selectAll()
     win.show()
     sys.exit(app.exec_())
     
