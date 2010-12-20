@@ -296,8 +296,6 @@ class PMXCodeEdit(QPlainTextEdit):
 
     
         
-    
-        
     def keyPressEvent(self, key_event):
         key = key_event.key()
         print debug_key(key_event)
@@ -365,7 +363,36 @@ class PMXCodeEdit(QPlainTextEdit):
         '''
         Unindents text
         '''
-        print "<<< Unindent"
+        block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
+        print "<<< Unindent (%d blocks)" % block_count
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        new_cursor = QTextCursor(cursor)
+        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
+        new_cursor.movePosition(QTextCursor.StartOfBlock)
+
+        # Check if all lines can have enough indetation
+        for i in range(block_count):
+            if not new_cursor.block().text().startsWith(self.indent_text):
+                new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, i)
+                cursor.endEditBlock()
+                print "Can't unindent"
+                return
+            new_cursor.movePosition(QTextCursor.NextBlock)
+
+        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
+        new_cursor.movePosition(QTextCursor.StartOfBlock)
+        for _i in range(block_count):
+            if self.soft_tabs:
+                for _j in range(self.tab_length):
+                    new_cursor.deleteChar()
+            else:
+                new_cursor.deleteChar()
+                    
+            new_cursor.movePosition(QTextCursor.NextBlock)
+            
+            self.setTextCursor(cursor)
+        cursor.endEditBlock()
 
     
 
