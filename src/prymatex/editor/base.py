@@ -3,8 +3,8 @@
 #
 from PyQt4.QtCore import QRect, QObject
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
-from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption
-from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction
+from PyQt4.QtCore import Qt, SIGNAL
 
 from logging import getLogger
 import sys
@@ -68,6 +68,8 @@ class FileBuffer(QObject):
         return v
 
 
+_counter = 0
+
 
 
 class PMXCodeEdit(QPlainTextEdit):
@@ -102,6 +104,8 @@ class PMXCodeEdit(QPlainTextEdit):
             "'": "'${selection}'",
             
         })
+        self.setupActions()
+        
     
     @property
     def index(self):
@@ -138,6 +142,13 @@ class PMXCodeEdit(QPlainTextEdit):
             return '\t'
         else:
             return ' ' * self.tab_length
+
+    @property
+    def path(self):
+        return self.__path
+    @path.setter
+    def path(self, value):
+        self.__path = value
             
     
     
@@ -166,6 +177,25 @@ class PMXCodeEdit(QPlainTextEdit):
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
         #self.connect(self, SIGNAL("cursorPositionChanged()"), self.notifyCursorChange)
         self.setWindowTitle(self.__class__.__name__)
+
+    def setupActions(self):
+        self.actionIndent = QAction(_("Increase indentation"), self )
+        self.connect(self.actionIndent, SIGNAL("triggered()"), self.indent)
+        self.actionUnindent = QAction(_("Decrease indentation"), self )
+        self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
+
+    def contextMenuEvent(self, event):
+        '''
+        '''
+        menu = self.createStandardContextMenu()
+        
+        menu.addAction(self.actionIndent)
+        menu.addAction(self.actionUnindent)
+        self.actionUnindent.setEnabled(self.can_unindent())
+            
+
+        menu.exec_(event.globalPos());
+        del menu
         
     def lineNumberAreaWidth(self):
         # si tiene folding tengo que sumar mas 10
@@ -250,27 +280,6 @@ class PMXCodeEdit(QPlainTextEdit):
             elif r == QMessageBox.No:
                 return True # Can close, discard changes
         return True
-    
-        
-    def path(): #@NoSelf
-        def fget(self):
-            return self.__path
-        def fset(self, path):
-            self.__path = path
-            
-        return locals()
-    path = property(**path())
-    
-    
-    def contextMenuEvent(self, event):
-        menu = self.createStandardContextMenu()
-        a = menu.addAction(_("My Menu Item"))
-        self.connect(self, )
-        
-        menu.exec_(event.globalPos());
-        del menu
-    
-    
     
     def selectionBlockStart(self):
         '''
@@ -388,11 +397,29 @@ class PMXCodeEdit(QPlainTextEdit):
             
         self.setTextCursor(cursor)
         cursor.endEditBlock()
-        
+
+    def can_unindent(self):
+        '''
+        Check if un-indetation is possible
+        @returns True if indentation is possible, false otherwise
+        '''
+        block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
+        new_cursor = QTextCursor( self.textCursor() )
+        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
+        new_cursor.movePosition(QTextCursor.StartOfBlock)
+        for i in range(block_count):
+            if not new_cursor.block().text().startsWith(self.indent_text):
+                new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, i)
+                return False
+        del new_cursor
+        return True
+    
     def unindent(self):
         '''
-        Unindents text
+        Unindents text, fails if can_unindent() returns False
         '''
+        if not self.can_unindent():
+            return
         block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
         print "<<< Unindent (%d blocks)" % block_count
         cursor = self.textCursor()
@@ -401,17 +428,6 @@ class PMXCodeEdit(QPlainTextEdit):
         new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
         new_cursor.movePosition(QTextCursor.StartOfBlock)
 
-        # Check if all lines can have enough indetation
-        for i in range(block_count):
-            if not new_cursor.block().text().startsWith(self.indent_text):
-                new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, i)
-                cursor.endEditBlock()
-                print "Can't unindent"
-                return
-            new_cursor.movePosition(QTextCursor.NextBlock)
-
-        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
-        new_cursor.movePosition(QTextCursor.StartOfBlock)
         for _i in range(block_count):
             if self.soft_tabs:
                 for _j in range(self.tab_length):
@@ -423,8 +439,6 @@ class PMXCodeEdit(QPlainTextEdit):
             
             self.setTextCursor(cursor)
         cursor.endEditBlock()
-
-    
 
 
 if __name__ == "__main__":
