@@ -192,7 +192,6 @@ class PMXCodeEdit(QPlainTextEdit):
         menu.addAction(self.actionIndent)
         menu.addAction(self.actionUnindent)
         self.actionUnindent.setEnabled(self.can_unindent())
-            
 
         menu.exec_(event.globalPos());
         del menu
@@ -299,8 +298,35 @@ class PMXCodeEdit(QPlainTextEdit):
             return -1
         return self.document().findBlock( cursor.selectionEnd() ).blockNumber()
 
-    
+    def mousePressEvent(self, mouse_event):
+        self.inserSpacesUpToPoint(mouse_event.pos())
         
+        super(PMXCodeEdit, self).mousePressEvent(mouse_event)
+
+    def inserSpacesUpToPoint(self, point, spacing_character = ' '):
+        cursor = self.cursorForPosition(point)
+        block = cursor.block()
+        if not block.isValid():
+            return
+        text = block.text()
+        self.fontMetrics()
+        font_width = self.fontMetrics().width(' ')
+        line_width = font_width * text.length()
+        char_number = point.x() / font_width
+        char_number_delta = char_number - text.length()
+        if char_number_delta > 0:
+            # Insert some empty characters
+            cursor.beginEditBlock()
+            cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor, 1)
+            #print "Inserting", char_number_delta
+            cursor.insertText(spacing_character * char_number_delta)
+            cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor, 1)
+            cursor.endEditBlock()
+            self.setTextCursor(cursor)
+            
+        #print block.blockNumber(), ":", text, line_width, "px"
+        #print char_number, text.length()
+    
     def keyPressEvent(self, key_event):
         key = key_event.key()
         print debug_key(key_event)
@@ -447,12 +473,13 @@ if __name__ == "__main__":
     app.logger = {}
     win = PMXCodeEdit()
     win.setGeometry(40,20,600,400)
-    win.setFont(QFont("Verdana", 12))
+    win.setFont(QFont("Monospace", 12))
     # Testing
-    win.setPlainText("This is a block " 
-    "of text\n"
-    "that should treated\n"
-    "as a block when you press tab key")
+    win.setPlainText("PMXCodeEdit features\n"
+    "--------------------\n"
+    " * Block indent and unindent\n"
+    " * String autoquote and smart unquotation\n"
+    "\t* Bracket autoclose\n")
     win.selectAll()
     win.show()
     sys.exit(app.exec_())
