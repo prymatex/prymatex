@@ -3,7 +3,7 @@
 #
 from PyQt4.QtCore import QRect, QObject
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
-from PyQt4.QtGui import QFileDialog, QTextCursor
+from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption
 from PyQt4.QtCore import Qt
 
 from logging import getLogger
@@ -95,6 +95,10 @@ class PMXCodeEdit(QPlainTextEdit):
         self.__soft_tabs = True
         self.__tab_length = 4
         self.character_actions = {}
+        
+        option = QTextOption()
+        option.setFlags(QTextOption.ShowTabsAndSpaces)
+        self.document().setDefaultTextOption(option)
 
         self.character_actions.update({
             '(': '(${selection})',
