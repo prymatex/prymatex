@@ -67,17 +67,17 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     # Proxy creation
     def createProxies(self):
         from prymatex.gui.proxy import TabWidgetProxy, CurrentEditorProxy
-        self._tab_widget = TabWidgetProxy(self)
-        self._editor = CurrentEditorProxy(self)
+        self._tab_widget_proxy = TabWidgetProxy(self)
+        self._editor_proxy = CurrentEditorProxy(self)
 
     # Expose a simple interfase for QActions to perform tasks on
     @property
-    def tab_widget(self):
-        return self._tab_widget
+    def tab_widget_proxy(self):
+        return self._tab_widget_proxy
         
     @property
-    def editor(self):
-        return self._editor
+    def editor_proxy(self):
+        return self._editor_proxy
     
     def setup_logging(self):
         from logwidget import LogDockWidget
@@ -166,10 +166,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        #self.tabWidgetEditors.addTab(QTextEdit(), "New Tab %d" % self.counter)
-        #self.counter += 1
-        logger.info("New")
-        self.tabWidgetEditors.appendEmptyTab()
+        self.tab_widget_proxy.addNewTab()
+        
     
     @pyqtSignature('')
     def on_actionClose_triggered(self):
@@ -181,28 +179,13 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
+        self.tab_widget_proxy.focusNextTab()
         
-        curr = self.tabWidgetEditors.currentIndex()
-        count = self.tabWidgetEditors.count()
-        
-        if curr < count -1:
-            prox = curr +1
-        else:
-            prox = 0
-        self.tabWidgetEditors.setCurrentIndex(prox)
-        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+
         
     @pyqtSignature('')
     def on_actionPrevious_Tab_triggered(self):
-        curr = self.tabWidgetEditors.currentIndex()
-        count = self.tabWidgetEditors.count()
-        
-        if curr > 0:
-            prox = curr -1
-        else:
-            prox = count -1
-        self.tabWidgetEditors.setCurrentIndex(prox)
-        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+        self.tab_widget_proxy.focusPrevTab()
         
     @pyqtSignature('')
     def on_actionAboutApp_triggered(self):
@@ -246,7 +229,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         if not fs:
             return
         for path in fs:
-            self.tab_widget.openFile(path)
+            self.tab_widget_proxy.openFile(path)
             #self.tabWidgetEditors.openLocalFile(path)
     
     @pyqtSignature('')
@@ -294,6 +277,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @pyqtSignature('')
     def on_actionZoom_In_triggered(self):
         self.tabWidgetEditors.currentWidget().zoomIn()
+        #self.
     
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
@@ -327,33 +311,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     @pyqtSignature('')
     def on_actionMove_Tab_Left_triggered(self):
-        if self.tabWidgetEditors.count() == 1:
-            return
-        count = self.tabWidgetEditors.count()
-        index = self.tabWidgetEditors.currentIndex()
-        text = self.tabWidgetEditors.tabText(index)       
-        widget = self.tabWidgetEditors.currentWidget()
-        self.tabWidgetEditors.removeTab(index)
-        index -= 1
-        if index < 0:
-            index = count
-        self.tabWidgetEditors.insertTab(index, widget, text)
-        self.tabWidgetEditors.setCurrentWidget(widget)
+        self.tab_widget_proxy.moveTabLeft()
     
     @pyqtSignature('')    
     def on_actionMove_Tab_Right_triggered(self):
-        if self.tabWidgetEditors.count() == 1:
-            return
-        count = self.tabWidgetEditors.count()
-        index = self.tabWidgetEditors.currentIndex()
-        text = self.tabWidgetEditors.tabText(index)       
-        widget = self.tabWidgetEditors.currentWidget()
-        self.tabWidgetEditors.removeTab(index)
-        index += 1
-        if index >= count:
-            index = 0
-        self.tabWidgetEditors.insertTab(index, widget, text)
-        self.tabWidgetEditors.setCurrentWidget(widget)
+        self.tab_widget_proxy.moveTabRight()
     
     #===========================================================================
     # Dumb code :/
