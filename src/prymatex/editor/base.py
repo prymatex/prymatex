@@ -93,12 +93,14 @@ class PMXCodeEdit(QPlainTextEdit):
         self.__last_save_time = None
         self.__soft_tabs = True
         self.__tab_length = 4
-        self.character_actions = {}
+        
         
         option = QTextOption()
         option.setFlags(QTextOption.ShowTabsAndSpaces)
         self.document().setDefaultTextOption(option)
 
+        # Actions performed when a key is pressed
+        self.character_actions = {}
         self.character_actions.update({
             '(': '(${selection})',
             '[': '[${selection}]',
@@ -135,6 +137,7 @@ class PMXCodeEdit(QPlainTextEdit):
     @property
     def tab_length(self):
         return self.__tab_length
+        
     @tab_length.setter
     def tab_length(self, value):
         self.__tab_length = value
@@ -495,19 +498,24 @@ class PMXCodeEdit(QPlainTextEdit):
 
 
 if __name__ == "__main__":
-    from PyQt4.QtGui import QApplication, QFont
+    from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout
+    from PyQt4.QtGui import QPushButton
     app = QApplication(sys.argv)
     app.logger = {}
-    win = PMXCodeEdit()
+    win = QWidget()
     win.setGeometry(40,20,600,400)
-    win.setFont(QFont("Monospace", 12))
+    win.setLayout(QVBoxLayout())
+    win.layout().addWidget(QPushButton("X"))
+    edit = PMXCodeEdit()
+    win.layout().addWidget(edit)
+    edit.setFont(QFont("Monospace", 12))
     # Testing
-    win.setPlainText("PMXCodeEdit features\n"
+    edit.setPlainText("PMXCodeEdit features\n"
     "--------------------\n"
     " * Block indent and unindent\n"
     " * String autoquote and smart unquotation\n"
     "\t* Bracket autoclose\n")
-    win.selectAll()
+    edit.selectAll()
     win.show()
     sys.exit(app.exec_())
     
