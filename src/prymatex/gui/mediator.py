@@ -1,28 +1,33 @@
+'''
+Mediator which deals with the current tab and the current editor.
+
+'''
+
 from PyQt4.Qt import *
 from logging import getLogger
 
 logger = getLogger(__file__)
 
-class BaseProxy(QObject):
+class BaseMediator(QObject):
     '''
-    Base proxy for 
+    Base mediator
     '''
     def __init__(self, parent):
-        super(BaseProxy, self).__init__(parent)
+        super(BaseMediator, self).__init__(parent)
 
     @property
     def widget(self):
         return self.parent()
 
 
-class TabWidgetProxy(BaseProxy):
+class TabWidgetMediator(BaseMediator):
     '''
-    Proxies current TabWidget
+    Mediates with the current TabWidget
     '''
     
     def openFile(self, path):
         #self.widget.centralWidget()
-        print "Proxy Open File", path
+        print "Medaitor Open File", path
 
     @property
     def current_tabs_widget(self):
@@ -112,8 +117,8 @@ class TabWidgetProxy(BaseProxy):
         self.current_tabs_widget.setCurrentWidget(widget)
 
 
-class CurrentEditorProxy(BaseProxy):
+class CurrentEditorMediator(BaseMediator):
     '''
-    Proxies current editor
+    Mediates with the current editor
     '''
     pass

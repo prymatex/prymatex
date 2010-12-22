@@ -29,7 +29,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         # Initialize graphical elements
         self.setupUi(self)
         # Create proxies
-        self.createProxies()
+        self.createMediators()
         
         self.setWindowTitle(_(u"Prymatex Text Editor"))
 
@@ -65,19 +65,19 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
 
     # Proxy creation
-    def createProxies(self):
-        from prymatex.gui.proxy import TabWidgetProxy, CurrentEditorProxy
-        self._tab_widget_proxy = TabWidgetProxy(self)
-        self._editor_proxy = CurrentEditorProxy(self)
+    def createMediators(self):
+        from prymatex.gui.mediator import TabWidgetMediator, CurrentEditorMediator
+        self._tab_widget_mediator = TabWidgetMediator(self)
+        self._editor_mediator = CurrentEditorMediator(self)
 
     # Expose a simple interfase for QActions to perform tasks on
     @property
-    def tab_widget_proxy(self):
-        return self._tab_widget_proxy
+    def tab_widget_mediator(self):
+        return self._tab_widget_mediator
         
     @property
-    def editor_proxy(self):
-        return self._editor_proxy
+    def editor_mediator(self):
+        return self._editor_mediator
     
     def setup_logging(self):
         from logwidget import LogDockWidget
@@ -166,7 +166,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        self.tab_widget_proxy.addNewTab()
+        self.tab_widget_mediator.addNewTab()
         
     
     @pyqtSignature('')
@@ -179,13 +179,13 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
-        self.tab_widget_proxy.focusNextTab()
+        self.tab_widget_mediator.focusNextTab()
         
 
         
     @pyqtSignature('')
     def on_actionPrevious_Tab_triggered(self):
-        self.tab_widget_proxy.focusPrevTab()
+        self.tab_widget_mediator.focusPrevTab()
         
     @pyqtSignature('')
     def on_actionAboutApp_triggered(self):
@@ -229,7 +229,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         if not fs:
             return
         for path in fs:
-            self.tab_widget_proxy.openFile(path)
+            self.tab_widget_mediator.openFile(path)
             #self.tabWidgetEditors.openLocalFile(path)
     
     @pyqtSignature('')
@@ -311,11 +311,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     @pyqtSignature('')
     def on_actionMove_Tab_Left_triggered(self):
-        self.tab_widget_proxy.moveTabLeft()
+        self.tab_widget_mediator.moveTabLeft()
     
     @pyqtSignature('')    
     def on_actionMove_Tab_Right_triggered(self):
-        self.tab_widget_proxy.moveTabRight()
+        self.tab_widget_mediator.moveTabRight()
     
     #===========================================================================
     # Dumb code :/
