@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Tue Dec 21 20:23:43 2010
+# Created: Wed Dec 22 00:16:15 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -272,6 +272,10 @@ class Ui_MainWindow(object):
         self.actionNew_from_template = QtGui.QAction(MainWindow)
         self.actionNew_from_template.setEnabled(False)
         self.actionNew_from_template.setObjectName("actionNew_from_template")
+        self.actionSplit_Vertically = QtGui.QAction(MainWindow)
+        self.actionSplit_Vertically.setObjectName("actionSplit_Vertically")
+        self.actionSplit_Horizontally = QtGui.QAction(MainWindow)
+        self.actionSplit_Horizontally.setObjectName("actionSplit_Horizontally")
         self.menuFile.addAction(self.actionNewTab)
         self.menuFile.addAction(self.actionNew_from_template)
         self.menuFile.addAction(self.actionOpen)
@@ -289,6 +293,9 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionZoom_In)
         self.menuView.addAction(self.actionZoom_Out)
         self.menuView.addSeparator()
+        self.menuView.addAction(self.actionSplit_Vertically)
+        self.menuView.addAction(self.actionSplit_Horizontally)
+        self.menuView.addSeparator()
         self.menuView.addAction(self.actionFocus_Editor)
         self.menuView.addAction(self.actionShow_Line_Numbers)
         self.menuView.addAction(self.actionShow_Folding)
@@ -298,7 +305,6 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionShow_Project_Dock)
         self.menuView.addAction(self.actionShow_Symbol_List)
         self.menuView.addAction(self.actionShow_Output)
-        self.menuView.addSeparator()
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionShow_Current_Scope)
         self.menuView.addSeparator()
@@ -509,6 +515,8 @@ class Ui_MainWindow(object):
         self.actionShow_Log_Window.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Shows logs from the application and its plugins", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Log_Window.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+L", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew_from_template.setText(QtGui.QApplication.translate("MainWindow", "New from template", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSplit_Vertically.setText(QtGui.QApplication.translate("MainWindow", "Split Vertically", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSplit_Horizontally.setText(QtGui.QApplication.translate("MainWindow", "Split Horizontally", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
 from tabwidget import PMXTabWidget

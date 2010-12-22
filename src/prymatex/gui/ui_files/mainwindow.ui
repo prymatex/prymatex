@@ -55,6 +55,9 @@
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
     <addaction name="separator"/>
+    <addaction name="actionSplit_Vertically"/>
+    <addaction name="actionSplit_Horizontally"/>
+    <addaction name="separator"/>
     <addaction name="actionFocus_Editor"/>
     <addaction name="actionShow_Line_Numbers"/>
     <addaction name="actionShow_Folding"/>
@@ -64,7 +67,6 @@
     <addaction name="actionShow_Project_Dock"/>
     <addaction name="actionShow_Symbol_List"/>
     <addaction name="actionShow_Output"/>
-    <addaction name="separator"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Current_Scope"/>
     <addaction name="separator"/>
@@ -820,6 +822,16 @@
    </property>
    <property name="text">
     <string>New from template</string>
+   </property>
+  </action>
+  <action name="actionSplit_Vertically">
+   <property name="text">
+    <string>Split Vertically</string>
+   </property>
+  </action>
+  <action name="actionSplit_Horizontally">
+   <property name="text">
+    <string>Split Horizontally</string>
    </property>
   </action>
  </widget>

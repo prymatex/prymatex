@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="actions">
+    <file>resources/actions/view-split-left-right.png</file>
+    <file>resources/actions/view-split-top-bottom.png</file>
     <file>resources/actions/configure.png</file>
     <file>resources/actions/edit-copy.png</file>
     <file>resources/actions/edit-cut.png</file>
