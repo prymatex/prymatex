@@ -10,13 +10,17 @@ from logging import getLogger
 import sys
 import traceback
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 #PMX Libs
 if __name__ == "__main__":
     from os.path import *
     pmx_base = abspath(join(dirname(__file__), '..', '..'))
     sys.path.append(pmx_base)
-
+else:
+    pass
 from prymatex.editor.sidearea import PMXSideArea
 
 
@@ -82,7 +86,7 @@ class PMXCodeEdit(QPlainTextEdit):
     It holds the highlighter
     '''
 
-    MATCHES = ("()", "{}", "[]", "''", '""', )
+    PAIRS_MATCH_REMOVE = ("()", "{}", "[]", "''", '""', )
 
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
@@ -336,7 +340,7 @@ class PMXCodeEdit(QPlainTextEdit):
     
     def keyPressEvent(self, key_event):
         key = key_event.key()
-        print debug_key(key_event)
+        logger.debug(debug_key(key_event))
         
         cursor = self.textCursor()
         doc = self.document()
@@ -355,7 +359,7 @@ class PMXCodeEdit(QPlainTextEdit):
                     text_arround = "%s%s" % (cursor_left.selectedText(),
                                                 cursor_right.selectedText())
 
-                    if text_arround in self.MATCHES:
+                    if text_arround in self.PAIRS_MATCH_REMOVE:
                         cursor_left.removeSelectedText()
                         cursor_right.removeSelectedText()
                     else:
