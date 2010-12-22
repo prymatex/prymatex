@@ -112,26 +112,22 @@ class PMXCodeEdit(QPlainTextEdit):
     def keyPressEvent(self, event):
         key = event.key()
         cursor = self.textCursor()
-        con_shift = event.modifiers() & Qt.ShiftModifier
         
         doc = self.document()
         start_block_pos, end_block_pos = cursor.selectionStart(), cursor.selectionEnd()
         start_block, end_block = map(doc.findBlock, (start_block_pos, end_block_pos)) 
         blocknum_start, blocknum_end = start_block.blockNumber(), end_block.blockNumber()
         
-        #start_pos, end_pos = 
         blocknum_diff = blocknum_end - blocknum_start 
-          
-#        print doc.findBlock().blockNumber() 
-#        print doc.findBlock().blockNumber()
-        
+         
+      
         # All keys in http://doc.trolltech.com/qtjambi-4.4/html/com/trolltech/qt/core/Qt.Key.html
         if key == Qt.Key_Tab:
-            if con_shift:
+            if event.modifiers() & Qt.ShiftModifier:
                 print "A"
                 return
             elif blocknum_diff:
-                
+                print "Moving block"
                 cursor.beginEditBlock()
                 cursor.movePosition(QTextCursor.StartOfBlock)
                 for _i in range(blocknum_diff +1):

@@ -34,6 +34,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionNewTab"/>
+    <addaction name="actionNew_from_template"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
@@ -811,6 +812,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+L</string>
+   </property>
+  </action>
+  <action name="actionNew_from_template">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>New from template</string>
    </property>
   </action>
  </widget>

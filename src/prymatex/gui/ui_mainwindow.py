@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Sun Nov 21 21:27:32 2010
+# Created: Tue Dec 21 20:23:43 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -269,7 +269,11 @@ class Ui_MainWindow(object):
         self.actionShow_Log_Window = QtGui.QAction(MainWindow)
         self.actionShow_Log_Window.setCheckable(True)
         self.actionShow_Log_Window.setObjectName("actionShow_Log_Window")
+        self.actionNew_from_template = QtGui.QAction(MainWindow)
+        self.actionNew_from_template.setEnabled(False)
+        self.actionNew_from_template.setObjectName("actionNew_from_template")
         self.menuFile.addAction(self.actionNewTab)
+        self.menuFile.addAction(self.actionNew_from_template)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSave_As)
@@ -504,6 +508,7 @@ class Ui_MainWindow(object):
         self.actionShow_Log_Window.setStatusTip(QtGui.QApplication.translate("MainWindow", "Displays Log Messages", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Log_Window.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Shows logs from the application and its plugins", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Log_Window.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+L", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNew_from_template.setText(QtGui.QApplication.translate("MainWindow", "New from template", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
 from tabwidget import PMXTabWidget
