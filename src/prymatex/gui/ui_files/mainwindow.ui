@@ -141,6 +141,8 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionDevelopers_Documentation"/>
+    <addaction name="separator"/>
     <addaction name="actionReport_Bug"/>
     <addaction name="actionTranslate_this_application"/>
     <addaction name="actionProject_Homepage"/>
@@ -825,13 +827,26 @@
    </property>
   </action>
   <action name="actionSplit_Vertically">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/actions/resources/actions/view-split-top-bottom.png</normaloff>:/actions/resources/actions/view-split-top-bottom.png</iconset>
+   </property>
    <property name="text">
     <string>Split Vertically</string>
    </property>
   </action>
   <action name="actionSplit_Horizontally">
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/actions/resources/actions/view-split-left-right.png</normaloff>:/actions/resources/actions/view-split-left-right.png</iconset>
+   </property>
    <property name="text">
     <string>Split Horizontally</string>
+   </property>
+  </action>
+  <action name="actionDevelopers_Documentation">
+   <property name="text">
+    <string>Developers Documentation</string>
    </property>
   </action>
  </widget>

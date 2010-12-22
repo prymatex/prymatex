@@ -1,10 +1,22 @@
 # -*- encoding: utf-8 -*-
 
-#
-from PyQt4.QtCore import QRect, QObject
-from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
-from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction
-from PyQt4.QtCore import Qt, SIGNAL
+# Qt imports
+from PyQt4.QtCore import QRect
+from PyQt4.QtCore import QObject
+from PyQt4.QtCore import Qt
+from PyQt4.QtCore import SIGNAL
+from PyQt4.QtGui import QPlainTextEdit
+from PyQt4.QtGui import QTextEdit
+from PyQt4.QtGui import QColor
+from PyQt4.QtGui import QTextFormat
+from PyQt4.QtGui import QMessageBox
+from PyQt4.QtGui import QFileDialog
+from PyQt4.QtGui import QTextCursor
+from PyQt4.QtGui import QTextOption
+from PyQt4.QtGui import QAction
+from PyQt4.QtGui import QWidget
+
+
 
 from logging import getLogger
 import sys
@@ -500,6 +512,25 @@ class PMXCodeEdit(QPlainTextEdit):
             self.setTextCursor(cursor)
         cursor.endEditBlock()
 
+class PMXEditorWidget(QWidget):
+    '''
+    
+    '''
+    def __init__(self, parent):
+        self.setupUi()
+
+
+    def setupUi(self):
+        self.code_edit = PMXCodeEdit(self)
+        #self.find_replace_pane = 
+
+    def showFindReplace(self):
+        pass
+
+    def hideFindReplace(self):
+        pass
+
+    
 
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout
