@@ -31,7 +31,20 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="lineFind"/>
+      <widget class="QLineEdit" name="lineFind">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="1" column="1">
       <widget class="QLineEdit" name="lineEdit_2"/>
@@ -144,6 +157,13 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="pushReplaceAlll">
        <property name="text">
         <string>Replace All</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QPushButton" name="pushOptions">
+       <property name="text">
+        <string>Options</string>
        </property>
       </widget>
      </item>

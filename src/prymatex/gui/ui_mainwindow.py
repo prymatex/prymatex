@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Wed Dec 22 16:24:46 2010
+# Created: Wed Dec 22 00:16:15 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -273,17 +273,9 @@ class Ui_MainWindow(object):
         self.actionNew_from_template.setEnabled(False)
         self.actionNew_from_template.setObjectName("actionNew_from_template")
         self.actionSplit_Vertically = QtGui.QAction(MainWindow)
-        icon23 = QtGui.QIcon()
-        icon23.addPixmap(QtGui.QPixmap(":/actions/resources/actions/view-split-top-bottom.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionSplit_Vertically.setIcon(icon23)
         self.actionSplit_Vertically.setObjectName("actionSplit_Vertically")
         self.actionSplit_Horizontally = QtGui.QAction(MainWindow)
-        icon24 = QtGui.QIcon()
-        icon24.addPixmap(QtGui.QPixmap(":/actions/resources/actions/view-split-left-right.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionSplit_Horizontally.setIcon(icon24)
         self.actionSplit_Horizontally.setObjectName("actionSplit_Horizontally")
-        self.actionDevelopers_Documentation = QtGui.QAction(MainWindow)
-        self.actionDevelopers_Documentation.setObjectName("actionDevelopers_Documentation")
         self.menuFile.addAction(self.actionNewTab)
         self.menuFile.addAction(self.actionNew_from_template)
         self.menuFile.addAction(self.actionOpen)
@@ -352,8 +344,6 @@ class Ui_MainWindow(object):
         self.menuNavigation.addAction(self.actionGo_To_Symbol)
         self.menuNavigation.addAction(self.actionGo_To_Matching_Bracket)
         self.menuNavigation.addAction(self.actionGo_To_Line)
-        self.menuHelp.addAction(self.actionDevelopers_Documentation)
-        self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.actionReport_Bug)
         self.menuHelp.addAction(self.actionTranslate_this_application)
         self.menuHelp.addAction(self.actionProject_Homepage)
@@ -527,7 +517,6 @@ class Ui_MainWindow(object):
         self.actionNew_from_template.setText(QtGui.QApplication.translate("MainWindow", "New from template", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSplit_Vertically.setText(QtGui.QApplication.translate("MainWindow", "Split Vertically", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSplit_Horizontally.setText(QtGui.QApplication.translate("MainWindow", "Split Horizontally", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionDevelopers_Documentation.setText(QtGui.QApplication.translate("MainWindow", "Developers Documentation", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
 from tabwidget import PMXTabWidget

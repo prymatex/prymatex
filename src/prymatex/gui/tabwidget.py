@@ -5,15 +5,11 @@
 
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
 from PyQt4.QtCore import QString, SIGNAL, Qt
-from prymatex.editor import PMXCodeEdit
+from prymatex.gui.editor import PMXCodeEdit
 
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import *
 import itertools
-
-from logging import getLogger
-
-logger = getLogger(__name__)
 
 class PMXTabWidget(QTabWidget):
     EDIT_TAB_WIDGET = PMXCodeEdit
@@ -34,11 +30,7 @@ class PMXTabWidget(QTabWidget):
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
         self.currentChanged.connect(self.on_current_changed)
-        self.createCornerWidget()
-
-    def createCornerWidget(self):
-        ''' Creates the push
-        '''
+        
         self.buttonTabList = QPushButton(self)
         self.buttonTabList.setObjectName("buttonTabList")
         self.buttonTabList.setToolTip(_("Tab list"))
@@ -46,7 +38,7 @@ class PMXTabWidget(QTabWidget):
         self.buttonTabList.setIcon(QIcon(":/actions/resources/actions/view-close.png"))
         self.buttonTabList.setStyleSheet('''
             QPushButton {
-                padding: 3px;
+                padding: 5px;
             }
         ''')
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
@@ -63,9 +55,8 @@ class PMXTabWidget(QTabWidget):
     def on_current_changed(self, index):
         self.currentEditorChange.emit(self.widget(index))
         
-    def mouseDoubleClickEvent(self, mouse_event):
-        if mouse_event.button() & Qt.LeftButton:
-            self.appendEmptyTab()
+    def mouseDoubleClickEvent(self, event):
+        self.appendEmptyTab()
     
     def getEditor(self, *largs, **kwargs):
         '''
@@ -165,15 +156,10 @@ class PMXTabWidget(QTabWidget):
             widget.actionMenuTab.setChecked(True)
             
     def indexChanged(self, index):
-        '''
-        Informs the mediator that the current index has changed
-        '''
-        
         #if index >= 0:
         #    widget = self.widget(index)
         #    widget.actionMenuTab.setChecked(True)
-        logger.debug("Changed to index %d", index)
-        print index
+        pass
     
     def tabInserted(self, index):
         '''
@@ -209,4 +195,11 @@ class PMWTabsMenu(QMenu):
     def updateShortcuts(self):
         for action, shortcut in itertools.izip(self.actions(), self.shortcuts):
             action.setShortcut(shortcut)
+        
+    
+
+
+    
+        
+        
         

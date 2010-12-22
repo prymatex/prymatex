@@ -20,35 +20,10 @@ class BaseMediator(QObject):
         return self.parent()
 
 
-NO_SPLIT   = 0
-SPLIT_VERT = 1
-SPLIT_HORI = 2
-
 class TabWidgetMediator(BaseMediator):
     '''
-    Mediates with the current TabWidget.
-    If the screen is splitted this object proviedes a simple interface
-    with the current active widget.
-
-
-    Actions -----------> Mediator ------------------
-                                                    |
-                                                    v
-                                             *---------------------*
-                                             | Current Tab Wideget |
-                                             *---------------------*
-                                             | Could be in a       |
-                                             | QSplitter           |
-                                             *---------------------*
-                                              
+    Mediates with the current TabWidget
     '''
-
-    def __init__(self, parent):
-        super(TabWidgetMediator, self).__init__(parent)
-        #self.connect(self.current_tabs_widget, SIGNAL('tab
-
-    def get_factory_for_file(path):
-        pass
     
     def openFile(self, path):
         #self.widget.centralWidget()
@@ -66,18 +41,21 @@ class TabWidgetMediator(BaseMediator):
         return []
         
     def addNewTab(self):
+        self.current_tabs_widget.appendEmptyTab()
         
-        widget = self.current_tabs_widget.appendEmptyTab()
+        #def appendEmptyTab(self):
+        #'''
+        #Creates a new empty tab and returns it
+        #'''
         
-
-    current_split = NO_SPLIT
-    
-    def splitHorizontally(self):
-        logger.debug("Split V")
+        #editor = self.getEditor()
+        ## Title should be filled after tab insertion
+        #index = self.addTab(editor, editor.title)
         
-        
-    def splitVertically(self):
-        logger.debug("Split V")
+        #self.setCurrentIndex(index)
+        #if self.count() == 1:
+            #editor.setFocus(Qt.TabFocusReason)
+            #return editor
     
     def focusNextTab(self):
         '''

@@ -1,22 +1,10 @@
 # -*- encoding: utf-8 -*-
 
-# Qt imports
-from PyQt4.QtCore import QRect
-from PyQt4.QtCore import QObject
-from PyQt4.QtCore import Qt
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import QPlainTextEdit
-from PyQt4.QtGui import QTextEdit
-from PyQt4.QtGui import QColor
-from PyQt4.QtGui import QTextFormat
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QFileDialog
-from PyQt4.QtGui import QTextCursor
-from PyQt4.QtGui import QTextOption
-from PyQt4.QtGui import QAction
-from PyQt4.QtGui import QWidget
-
-
+#
+from PyQt4.QtCore import QRect, QObject
+from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
+from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction
+from PyQt4.QtCore import Qt, SIGNAL
 
 from logging import getLogger
 import sys
@@ -29,11 +17,11 @@ logger = logging.getLogger(__name__)
 #PMX Libs
 if __name__ == "__main__":
     from os.path import *
-    pmx_base = abspath(join(dirname(__file__), '..', '..'))
+    pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
     sys.path.append(pmx_base)
 else:
     pass
-from prymatex.editor.sidearea import PMXSideArea
+from prymatex.gui.editor.sidearea import PMXSideArea
 
 
 #TODO: i18n
@@ -512,25 +500,6 @@ class PMXCodeEdit(QPlainTextEdit):
             self.setTextCursor(cursor)
         cursor.endEditBlock()
 
-class PMXEditorWidget(QWidget):
-    '''
-    
-    '''
-    def __init__(self, parent):
-        self.setupUi()
-
-
-    def setupUi(self):
-        self.code_edit = PMXCodeEdit(self)
-        #self.find_replace_pane = 
-
-    def showFindReplace(self):
-        pass
-
-    def hideFindReplace(self):
-        pass
-
-    
 
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout
@@ -540,7 +509,7 @@ if __name__ == "__main__":
     win = QWidget()
     win.setGeometry(40,20,600,400)
     win.setLayout(QVBoxLayout())
-    win.layout().addWidget(QPushButton("X"))
+    win.layout().addWidget(QPushButton("FindReplace"))
     edit = PMXCodeEdit()
     win.layout().addWidget(edit)
     edit.setFont(QFont("Monospace", 12))

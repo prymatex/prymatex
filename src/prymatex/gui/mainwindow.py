@@ -22,9 +22,7 @@ from prymatex.lib.textmate.bundle import TMMenuNode, MENU_SPACE
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
-    '''
-    MainWindow class
-    '''
+
     
     def __init__(self):
         QMainWindow.__init__(self)
@@ -318,15 +316,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @pyqtSignature('')    
     def on_actionMove_Tab_Right_triggered(self):
         self.tab_widget_mediator.moveTabRight()
-
-
-    @pyqtSignature('')
-    def on_actionSplit_Vertically_triggered(self):
-        self.tab_widget_mediator.splitVertically()
-
-    @pyqtSignature('')
-    def on_actionSplit_Horizontally_triggered(self):
-        self.tab_widget_mediator.splitHorizontally()
     
     #===========================================================================
     # Dumb code :/
