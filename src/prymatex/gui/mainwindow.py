@@ -22,10 +22,14 @@ from prymatex.lib.textmate.bundle import TMMenuNode, MENU_SPACE
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
+
     
     def __init__(self):
         QMainWindow.__init__(self)
+        # Initialize graphical elements
         self.setupUi(self)
+        # Create proxies
+        self.createProxies()
         
         self.setWindowTitle(_(u"Prymatex Text Editor"))
 
@@ -59,6 +63,21 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #self.actionShowFSPane.setChecked(True)
         self.prevent_menu_lock()
         
+
+    # Proxy creation
+    def createProxies(self):
+        from prymatex.gui.proxy import TabWidgetProxy, CurrentEditorProxy
+        self._tab_widget = TabWidgetProxy(self)
+        self._editor = CurrentEditorProxy(self)
+
+    # Expose a simple interfase for QActions to perform tasks on
+    @property
+    def tab_widget(self):
+        return self._tab_widget
+        
+    @property
+    def editor(self):
+        return self._editor
     
     def setup_logging(self):
         from logwidget import LogDockWidget
@@ -227,7 +246,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         if not fs:
             return
         for path in fs:
-            self.tabWidgetEditors.openLocalFile(path)
+            self.tab_widget.openFile(path)
+            #self.tabWidgetEditors.openLocalFile(path)
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
