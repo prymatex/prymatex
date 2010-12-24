@@ -3,8 +3,12 @@
 #
 from PyQt4.QtCore import QRect, QObject
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
-from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction
-from PyQt4.QtCore import Qt, SIGNAL
+from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction, QWidget
+from PyQt4.QtGui import QMenu, QVBoxLayout, QFont
+from PyQt4.QtGui import QKeySequence
+from PyQt4.QtCore import Qt, SIGNAL, QMetaObject, pyqtSignature
+
+
 
 from logging import getLogger
 import sys
@@ -19,6 +23,8 @@ if __name__ == "__main__":
     from os.path import *
     pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
     sys.path.append(pmx_base)
+    sys.path.append('../..')
+    #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
 else:
     pass
 from prymatex.gui.editor.sidearea import PMXSideArea
@@ -425,14 +431,23 @@ class PMXCodeEdit(QPlainTextEdit):
         cursor.beginEditBlock()
         if cursor.hasSelection():
             text = cursor.selectedText()
+            cursor.beginEditBlock()
             cursor.insertText(text_start)
             cursor.insertText(text)
+            cursor.endEditBlock()
+
+            cursor.beginEditBlock()
             cursor.insertText(text_end)
-            
+            cursor.endEditBlock()
         else:
+            cursor.beginEditBlock()
             cursor.insertText(text_start)
+            cursor.endEditBlock()
+            
+            cursor.beginEditBlock()
             cursor.insertText(text_end)
             cursor.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
+            cursor.endEditBlock()
             self.setTextCursor(cursor)
 
         cursor.endEditBlock()
@@ -499,27 +514,33 @@ class PMXCodeEdit(QPlainTextEdit):
             
             self.setTextCursor(cursor)
         cursor.endEditBlock()
+        
+from prymatex.gui.ui_findreplace import Ui_FindReplace
 
+class PMXFindReplacePane(QWidget, Ui_FindReplace):
 
-if __name__ == "__main__":
-    from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout
-    from PyQt4.QtGui import QPushButton
-    app = QApplication(sys.argv)
-    app.logger = {}
-    win = QWidget()
-    win.setGeometry(40,20,600,400)
-    win.setLayout(QVBoxLayout())
-    win.layout().addWidget(QPushButton("FindReplace"))
-    edit = PMXCodeEdit()
-    win.layout().addWidget(edit)
-    edit.setFont(QFont("Monospace", 12))
-    # Testing
-    edit.setPlainText("PMXCodeEdit features\n"
-    "--------------------\n"
-    " * Block indent and unindent\n"
-    " * String autoquote and smart unquotation\n"
-    "\t* Bracket autoclose\n")
-    edit.selectAll()
-    win.show()
-    sys.exit(app.exec_())
-    
+    def __init__(self, parent):
+        super(PMXFindReplacePane, self).__init__(parent)
+        self.setupUi(self) # Inherited
+        self.setupActions()
+        self.setupMenu()
+        self.pushOptions.setMenu(self.menuOptions)
+
+    def setupActions(self):
+        self.actionWholeWord = QAction(self.trUtf8("Match whole word only"), self)
+        self.actionWholeWord.setCheckable(True)
+        self.actionCaseSensitive =  QAction(self.trUtf8("Case sensitive"), self)
+        self.actionCaseSensitive.setCheckable(True)
+        self.actionRegex = QAction(self.trUtf8("Regex"), self)
+        self.actionRegex.setCheckable(True)
+        
+    def setupMenu(self):
+        self.menuOptions = QMenu(self)
+        self.menuOptions.addAction(self.actionWholeWord)
+        self.menuOptions.addAction(self.actionCaseSensitive)
+        self.menuOptions.addAction(self.actionRegex)
+
+    def keyPressEvent(self, key_event):
+        if key_event.key() == Qt.Key_Escape:
+            self.hide()
+        

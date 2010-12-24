@@ -27,28 +27,58 @@ from ui_editorwidget import Ui_EditorWidget
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def __init__(self, parent):
         super(PMXEditorWidget, self).__init__(parent)
+        self.setupActions()
         self.setupUi(self)
+        #self.connectActionToGui()
         self.setupFindReplaceWidget()
         #self.findreplaceWidget.hide()
         self.codeEdit.setFont(QFont("Monospace", 12))
 
-        # Test
-        if not parent:
-            print "Creando QAction del find"
-            self.actionFind = QAction("find", self)
-            self.codeEdit.addAction(self.actionFind)
-            self.actionFind.setShortcut(QKeySequence("Ctrl+F"))
-            self.connect(self.actionFind, SIGNAL("triggered()"), self.openFindreplaceWidget) # Test
+        self.codeEdit.addAction(self.actionFind)
+        self.codeEdit.addAction(self.actionReplace)
+
+        self.findreplaceWidget.hide()
+
+    def setupActions(self):
+        # Search
+        self.actionFind = QAction("&Find", self)
+        self.actionFind.setObjectName("actionFind")
+        self.actionFind.setShortcut(QKeySequence(self.trUtf8("Ctrl+F")))
+        # Replace
+        self.actionReplace = QAction(self.trUtf8("Find and &Replce"), self)
+        self.actionReplace.setObjectName("actionReplace")
+        self.actionReplace.setShortcut(QKeySequence(self.trUtf8("Ctrl+R")))
 
 
-    def setupAction(self):
-        pass
 
     
-    def openFindreplaceWidget(self):
+    def on_actionFind_triggered(self):
+        self.hideReplaceWidgets()
         self.findreplaceWidget.show()
         self.comboFind.setFocus(Qt.MouseFocusReason)
-    
+
+
+    def on_actionReplace_triggered(self):
+        self.showReplaceWidgets()
+        self.findreplaceWidget.show()
+        self.comboFind.setFocus(Qt.MouseFocusReason)
+        
+
+
+    #TODO: @diego Too complex? Would it be better to make it more explicit?
+    @property
+    def replaceWidgets(self):
+        return map(lambda name: getattr(self, name), ("labelReplaceWith", "comboReplace",
+                                                      "pushReplaceAndFindPrevious",
+                                                      "pushReplaceAndFindNext",
+                                                      "pushReplaceAll"))
+    def hideReplaceWidgets(self):
+        map(lambda w: w.hide(), self.replaceWidgets)
+
+    def showReplaceWidgets(self):
+        map(lambda w: w.show(), self.replaceWidgets)
+
+        
     def setupFindReplaceWidget(self):
         self.actionRegex = QAction(self.trUtf8("Use &regular expressions"),self)
         self.actionRegex.setCheckable(True)

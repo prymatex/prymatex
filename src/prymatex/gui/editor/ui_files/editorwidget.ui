@@ -23,13 +23,16 @@
    <item>
     <widget class="QWidget" name="findreplaceWidget" native="true">
      <layout class="QGridLayout" name="gridLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMaximumSize</enum>
+      </property>
       <property name="margin">
        <number>0</number>
       </property>
       <item row="0" column="0">
        <widget class="QLabel" name="labelFind">
         <property name="text">
-         <string>FInd:</string>
+         <string>Find:</string>
         </property>
        </widget>
       </item>
@@ -50,7 +53,11 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
-         <string>&lt;</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../res.qrc">
+          <normaloff>:/actions/resources/actions/go-previous.png</normaloff>:/actions/resources/actions/go-previous.png</iconset>
         </property>
        </widget>
       </item>
@@ -71,7 +78,11 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Next&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
-         <string>&gt;</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../res.qrc">
+          <normaloff>:/actions/resources/actions/go-next.png</normaloff>:/actions/resources/actions/go-next.png</iconset>
         </property>
        </widget>
       </item>
@@ -79,6 +90,10 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushOptions">
         <property name="text">
          <string>&amp;Options</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../res.qrc">
+          <normaloff>:/actions/resources/actions/configure.png</normaloff>:/actions/resources/actions/configure.png</iconset>
         </property>
        </widget>
       </item>
@@ -133,7 +148,11 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Replace &amp;amp; Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
-         <string>&lt;</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../res.qrc">
+          <normaloff>:/actions/resources/actions/go-previous.png</normaloff>:/actions/resources/actions/go-previous.png</iconset>
         </property>
        </widget>
       </item>
@@ -147,12 +166,16 @@ p, li { white-space: pre-wrap; }
          </font>
         </property>
         <property name="text">
-         <string>&gt;</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../res.qrc">
+          <normaloff>:/actions/resources/actions/go-next.png</normaloff>:/actions/resources/actions/go-next.png</iconset>
         </property>
        </widget>
       </item>
       <item row="1" column="5">
-       <widget class="QPushButton" name="pushReplaceAlll">
+       <widget class="QPushButton" name="pushReplaceAll">
         <property name="text">
          <string>Replace &amp;All</string>
         </property>
@@ -172,7 +195,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="PMXReplaceBox" name="comboBox">
+       <widget class="PMXReplaceBox" name="comboReplace">
         <property name="editable">
          <bool>true</bool>
         </property>
