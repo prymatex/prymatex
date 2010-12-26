@@ -12,8 +12,6 @@ from prymatex.gui.utils import *
 import itertools
 
 class PMXTabWidget(QTabWidget):
-    EDIT_TAB_WIDGET = PMXCodeEdit
-    UNTITLED_LABEL = _("New File %s")
     
     #Signal
     currentEditorChange = pyqtSignal(PMXCodeEdit)
@@ -58,18 +56,8 @@ class PMXTabWidget(QTabWidget):
     def mouseDoubleClickEvent(self, event):
         self.appendEmptyTab()
     
-    def getEditor(self, *largs, **kwargs):
-        '''
-        Editor Factory
-        '''
-        editor =  self.EDIT_TAB_WIDGET(self, *largs, **kwargs)
-        
-        # TODO: Poner esto en configuración
-        font = QFont()
-        font.setFamily('Consolas')
-        font.setPointSize(11)
-        editor.setFont(font)
-        return editor
+    
+
     
     def on_syntax_change(self, syntax):
         editor = self.currentWidget()
@@ -112,7 +100,8 @@ class PMXTabWidget(QTabWidget):
         '''
         Creates a new empty tab and returns it
         '''
-        editor = self.getEditor()
+        from prymatex.gui.editor.widget import PMXEditorWidget
+        editor =PMXEditorWidget.getEditor(self)
         # Title should be filled after tab insertion
         index = self.addTab(editor, editor.title)
         
@@ -127,11 +116,7 @@ class PMXTabWidget(QTabWidget):
         Asks the editor to be closed
         '''
         editor = self.widget(index)
-        count = self.count() 
-        if count == 1 and not editor.path and not editor.document().isModified():
-            return
-        elif count == 0:
-            return
+        count = self.count()
         if editor.requestClose():
             self.removeTab(index)
             return True
