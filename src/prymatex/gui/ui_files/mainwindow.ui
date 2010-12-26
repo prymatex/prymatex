@@ -17,7 +17,7 @@
    <iconset resource="../../res.qrc">
     <normaloff>:/icons/resources/icons/Prymatex_Logo.png</normaloff>:/icons/resources/icons/Prymatex_Logo.png</iconset>
   </property>
-  <widget class="PMXTabWidget" name="tabWidgetEditors">
+  <widget class="QWidget" name="foo">
    <layout class="QVBoxLayout" name="verticalLayout"/>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -836,12 +836,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>PMXTabWidget</class>
-   <extends>QWidget</extends>
-   <header>tabwidget</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>PMXStatusBar</class>
    <extends>QStatusBar</extends>

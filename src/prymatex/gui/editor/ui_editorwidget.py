@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/editorwidget.ui'
 #
-# Created: Fri Dec 24 11:39:04 2010
+# Created: Fri Dec 24 11:47:07 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -50,6 +50,7 @@ class Ui_EditorWidget(object):
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/actions/resources/actions/go-next.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushReplace.setIcon(icon1)
+        self.pushReplace.setAutoDefault(True)
         self.pushReplace.setObjectName("pushReplace")
         self.gridLayout.addWidget(self.pushReplace, 0, 4, 1, 1)
         self.pushOptions = QtGui.QPushButton(self.findreplaceWidget)
@@ -92,6 +93,7 @@ class Ui_EditorWidget(object):
         self.pushReplaceAndFindNext.setObjectName("pushReplaceAndFindNext")
         self.gridLayout.addWidget(self.pushReplaceAndFindNext, 1, 4, 1, 1)
         self.pushReplaceAll = QtGui.QPushButton(self.findreplaceWidget)
+        self.pushReplaceAll.setFlat(True)
         self.pushReplaceAll.setObjectName("pushReplaceAll")
         self.gridLayout.addWidget(self.pushReplaceAll, 1, 5, 1, 1)
         self.comboFind = PMXFindBox(self.findreplaceWidget)
@@ -110,7 +112,7 @@ class Ui_EditorWidget(object):
 
     def retranslateUi(self, EditorWidget):
         EditorWidget.setWindowTitle(QtGui.QApplication.translate("EditorWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelFind.setText(QtGui.QApplication.translate("EditorWidget", "FInd:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelFind.setText(QtGui.QApplication.translate("EditorWidget", "Find:", None, QtGui.QApplication.UnicodeUTF8))
         self.pushFindPrevious.setToolTip(QtGui.QApplication.translate("EditorWidget", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

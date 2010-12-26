@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
-# encoding: utf-8
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from pprint import pformat
+
+if __name__ == "__main__":
+    import sys
+    from os.path import join
+    sys.path.append(join('..', '..'))
+    
+    
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget , PMWTabsMenu
 from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
+from layoutmanager import PMXLayoutManager
 from prymatex.gui.mixins.common import CenterWidget
 from prymatex.config.configdialog import PMXConfigDialog
 from prymatex.gui.panes.outputpanel import PMXOutputDock
@@ -16,6 +23,7 @@ from prymatex.gui.panes.symbols import PMXSymboldListDock
 from prymatex.gui.panes.bundles import PMXBundleEditorDock
 from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.filterdlg import PMXFilterDialog
+
 import itertools
 import logging
 from prymatex.lib.textmate.bundle import TMMenuNode, MENU_SPACE
@@ -28,19 +36,20 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         QMainWindow.__init__(self)
         # Initialize graphical elements
         self.setupUi(self)
-        # Create proxies
-        self.createMediators()
         
-        self.setWindowTitle(_(u"Prymatex Text Editor"))
+        self.setWindowTitle(self.trUtf8(u"Prymatex Text Editor"))
 
         #Conectar tabs con status y status con tabs
-        self.statusbar.syntaxMenu.syntaxChange.connect(self.tabWidgetEditors.on_syntax_change)
-        self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
+        #self.statusbar.syntaxMenu.syntaxChange.connect(self.tabWidgetEditors.on_syntax_change)
+        #self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
         
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
-        self.setCentralWidget(self.tabWidgetEditors)
-        self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
-        self.actionGroupTabs.addMenu(self.menuPanes)
+        
+        self.layoutManager = PMXLayoutManager(self)
+        self.setCentralWidget(self.layoutManager)
+        #self.setCentralWidget(self.tabWidgetEditors)
+        #self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
+        #self.actionGroupTabs.addMenu(self.menuPanes)
         
         self.setup_panes()
         self.setup_logging()
@@ -58,26 +67,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
         self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
-        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+        #self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
         #self.actionShowFSPane.setChecked(True)
         self.prevent_menu_lock()
-        
 
-    # Proxy creation
-    def createMediators(self):
-        from prymatex.gui.mediator import TabWidgetMediator, CurrentEditorMediator
-        self._tab_widget_mediator = TabWidgetMediator(self)
-        self._editor_mediator = CurrentEditorMediator(self)
 
-    # Expose a simple interfase for QActions to perform tasks on
-    @property
-    def tab_widget_mediator(self):
-        return self._tab_widget_mediator
-        
-    @property
-    def editor_mediator(self):
-        return self._editor_mediator
     
     def setup_logging(self):
         from logwidget import LogDockWidget

@@ -20,7 +20,10 @@ class PMXTabWidget(QTabWidget):
     
     def __init__(self, parent):
         QTabWidget.__init__(self, parent)
+        
+        self.setupActions() # Call it at first so the QMetaObject.connectSlotsByName is called in the setupUi
         self.setupUi()
+
         if not self.count():
             self.appendEmptyTab()
         
@@ -40,24 +43,89 @@ class PMXTabWidget(QTabWidget):
             }
         ''')
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
-    
+        
+
+        
     def setupUi(self):
         self.setTabsClosable(True)
         self.setMovable(True)
+        QMetaObject.connectSlotsByName(self)
         
-    def untitled_label(self):
-        counter = self.counter
-        self.counter += 1
-        return self.UNTITLED_LABEL % counter
-    
+    def setupActions(self):
+        '''
+        QAction setup. Some of these actions are used for the context menus
+        '''
+        self.actionNewTab = QAction(self.trUtf8("&New tab"), self)
+        self.actionNewTab.setObjectName("actionNewTab")
+        
+        self.actionCloseAll = QAction(self.trUtf8("Close &All"), self)
+        self.actionCloseAll.setObjectName("actionCloseAll")
+        
+        self.actionCloseOthers = QAction(self.trUtf8("Close &Others"), self)
+        self.actionCloseOthers.setObjectName("actionCloseOthers")
+        
+        self.actionCloseTab = QAction(self.trUtf8("&Close"), self)
+        self.actionCloseTab.setObjectName("actionCloseTab")
+
+        self.actionOrderTabsByName = QAction(self.trUtf8("Order by &name"), self)
+        self.actionOrderTabsByName.setObjectName("actionOrderTabsByName")
+        
+        self.actionOrderOpenOrder = QAction(self.trUtf8("Order by Open Order"), self)
+        self.actionOrderOpenOrder.setObjectName("actionOrderOpenOrder")
+        
+        self.actionOrderByURL = QAction(self.trUtf8("Order by &URL"), self)
+        self.actionOrderByURL.setObjectName("actionOrderByURL")
+
+    @pyqtSignature("")
+    def on_actionCloseAll_triggered(self):
+        QMessageBox.information(self, "", "Close All")
+
+        
     def on_current_changed(self, index):
+        '''
+        TODO: Resync all menus
+        '''
         self.currentEditorChange.emit(self.widget(index))
         
-    def mouseDoubleClickEvent(self, event):
-        self.appendEmptyTab()
-    
-    
+    def mouseDoubleClickEvent(self, mouse_event):
+        '''
+        Opens a new tab when double-clicking on the tab bar
+        '''
+        if mouse_event.button() == Qt.LeftButton:
+            self.appendEmptyTab()
 
+    def widgetFromTabPos(self, point):
+        '''
+        Returns the widget at a point
+        '''
+        # http://lists.trolltech.com/qt-interest/2006-02/msg01471.html
+        tabBar = self.tabBar()
+        for index in range(self.count()):
+            if tabBar.tabRect( index ).contains( point ):
+                return self.widget( index )
+    
+    def contextMenuEvent(self, context_event):
+        '''
+        Event
+        '''
+        pos = context_event.pos()
+        widget = self.widgetFromTabPos( pos )
+        if not widget:
+            m = QMenu()
+            m.addAction(self.actionNewTab)
+            m.addSeparator()
+            m.addAction(self.actionCloseTab)
+            m.addAction(self.actionCloseAll)
+            m.addAction(self.actionCloseOthers)
+            m.addSeparator()
+            m_order = m.addMenu(self.trUtf8("Tab &Order"))
+            m_order.addAction(self.actionOrderTabsByName)
+            m_order.addAction(self.actionOrderOpenOrder)
+            m_order.addAction(self.actionOrderByURL)
+            
+            m.exec_( context_event.globalPos() )
+        else:
+            widget
     
     def on_syntax_change(self, syntax):
         editor = self.currentWidget()

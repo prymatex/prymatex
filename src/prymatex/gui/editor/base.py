@@ -514,33 +514,3 @@ class PMXCodeEdit(QPlainTextEdit):
             
             self.setTextCursor(cursor)
         cursor.endEditBlock()
-        
-from prymatex.gui.ui_findreplace import Ui_FindReplace
-
-class PMXFindReplacePane(QWidget, Ui_FindReplace):
-
-    def __init__(self, parent):
-        super(PMXFindReplacePane, self).__init__(parent)
-        self.setupUi(self) # Inherited
-        self.setupActions()
-        self.setupMenu()
-        self.pushOptions.setMenu(self.menuOptions)
-
-    def setupActions(self):
-        self.actionWholeWord = QAction(self.trUtf8("Match whole word only"), self)
-        self.actionWholeWord.setCheckable(True)
-        self.actionCaseSensitive =  QAction(self.trUtf8("Case sensitive"), self)
-        self.actionCaseSensitive.setCheckable(True)
-        self.actionRegex = QAction(self.trUtf8("Regex"), self)
-        self.actionRegex.setCheckable(True)
-        
-    def setupMenu(self):
-        self.menuOptions = QMenu(self)
-        self.menuOptions.addAction(self.actionWholeWord)
-        self.menuOptions.addAction(self.actionCaseSensitive)
-        self.menuOptions.addAction(self.actionRegex)
-
-    def keyPressEvent(self, key_event):
-        if key_event.key() == Qt.Key_Escape:
-            self.hide()
-        

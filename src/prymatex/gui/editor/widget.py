@@ -1,6 +1,7 @@
 '''
 '''
 from PyQt4.QtGui import QWidget, QAction, QMenu, QKeySequence
+from PyQt4.QtGui import QFont, QMessageBox
 from PyQt4.QtCore import SIGNAL, Qt
 from logging import getLogger
 import sys
@@ -23,8 +24,21 @@ else:
 
 from ui_editorwidget import Ui_EditorWidget
 
+_counter = 0
+
+def untitled_cunter():
+    '''
+    Genreates a sequence of numbers for the untitled documents
+    Each call produces an incremental number
+    '''
+    global _counter
+    tmp =  _counter
+    _counter += 1
+    return tmp
+    
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
+    
     def __init__(self, parent):
         super(PMXEditorWidget, self).__init__(parent)
         self.setupActions()
@@ -38,6 +52,29 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.codeEdit.addAction(self.actionReplace)
 
         self.findreplaceWidget.hide()
+
+    @classmethod
+    def getEditor(cls, parent,  path = None):
+        '''
+        Factory for the default text editor
+        '''
+        assert isinstance(parent, QWidget), self.trUtf8("You didn't pass a valid parent: %s" % parnet)
+        return PMXEditorWidget(parent)
+
+    @classmethod
+    def registerEditor(cls, editor_cls):
+        '''
+        Register an edior class.
+        
+        '''
+        pass
+
+
+    
+    @property
+    def title(self):
+        doc_title = unicode(self.trUtf8("Untitled %d"))
+        return  doc_title % untitled_cunter()
 
     def setupActions(self):
         # Search
@@ -98,6 +135,14 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
 
     def on_pushCloseFindreplace_pressed(self):
         self.findreplaceWidget.hide()
+
+    def requestClose(self, *largs):
+        
+        if self.codeEdit.document().isModified():
+            QMessageBox.information(self, "", "AA")
+        else:
+            return True
+        
         
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout

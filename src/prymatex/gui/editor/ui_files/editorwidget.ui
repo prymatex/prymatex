@@ -84,6 +84,9 @@ p, li { white-space: pre-wrap; }
          <iconset resource="../../../res.qrc">
           <normaloff>:/actions/resources/actions/go-next.png</normaloff>:/actions/resources/actions/go-next.png</iconset>
         </property>
+        <property name="autoDefault">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="5">
@@ -178,6 +181,9 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushReplaceAll">
         <property name="text">
          <string>Replace &amp;All</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

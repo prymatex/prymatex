@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Wed Dec 22 00:16:15 2010
+# Created: Sat Dec 25 12:31:43 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -16,10 +16,11 @@ class Ui_MainWindow(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/resources/icons/Prymatex_Logo.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
-        self.tabWidgetEditors = PMXTabWidget(MainWindow)
-        self.tabWidgetEditors.setObjectName("tabWidgetEditors")
-        self.verticalLayout = QtGui.QVBoxLayout(self.tabWidgetEditors)
+        self.foo = QtGui.QWidget(MainWindow)
+        self.foo.setObjectName("foo")
+        self.verticalLayout = QtGui.QVBoxLayout(self.foo)
         self.verticalLayout.setObjectName("verticalLayout")
+        MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menubar.setObjectName("menubar")
@@ -519,7 +520,6 @@ class Ui_MainWindow(object):
         self.actionSplit_Horizontally.setText(QtGui.QApplication.translate("MainWindow", "Split Horizontally", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
-from tabwidget import PMXTabWidget
 import res_rc
 
 if __name__ == "__main__":
