@@ -192,6 +192,16 @@ class PMXTabWidget(QTabWidget):
                                  <p>Some exception data:</p>
                                  <pre>%s</pre>""", path, unicode(e)[:40]))
     
+    def openFile(self, path):
+        '''
+        Creates a tab with the file contents and returns it
+        '''
+        from prymatex.gui.editor.widget import PMXEditorWidget
+        editor = PMXEditorWidget.getEditor(self, path)
+        self.addTab(editor, '...')
+        return editor
+        
+    
     def appendEmptyTab(self):
         '''
         Creates a new empty tab and returns it
@@ -199,19 +209,22 @@ class PMXTabWidget(QTabWidget):
         from prymatex.gui.editor.widget import PMXEditorWidget
         editor = PMXEditorWidget.getEditor(self)
         # Title should be filled after tab insertion
-        index = self.addTab(editor, '...')
-        
-        self.setCurrentIndex(index)
-        if self.count() == 1:
-            editor.setFocus(Qt.MouseFocusReason)
+        self.addTab(editor, '...')
         return editor
     
-    def addTab(self, widget, title):
+    def addTab(self, widget, title, autoFocus = True):
         ''' Overrides QTabWidget.addTab(page, title) so that
         afterInsertion is called '''
         index = super(PMXTabWidget, self).addTab(widget, title)
+        
+        if autoFocus:
+            self.setCurrentIndex(index)
+            if self.count() == 1:
+                widget.setFocus(Qt.MouseFocusReason)
+                
         if hasattr(widget, 'afterInsertion'):
             widget.afterInsertion(self, index)
+            
         return index
         
     

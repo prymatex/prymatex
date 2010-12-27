@@ -97,8 +97,13 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         Factory for the default text editor
         '''
-        assert isinstance(parent, QWidget), self.trUtf8("You didn't pass a valid parent: %s" % parnet)
-        return PMXEditorWidget(parent)
+        assert isinstance(parent, QWidget), cls.trUtf8("You didn't pass a valid parent: %s" % parent)
+
+        editor = PMXEditorWidget(parent)
+        if path:
+            editor.open(path)
+            
+        return editor
 
     @classmethod
     def registerEditor(cls, editor_cls):
@@ -248,6 +253,17 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
             if self.path:
                 return self.do_save()
         return False
+    
+    def open(self, path):
+        '''
+        Read file contents
+        '''
+        f = open(path, 'r')
+        content = f.read()
+        f.close()
+        self.codeEdit.setPlainText(content)
+        return len(content)
+        
     
     #===========================================================================
     # Events
