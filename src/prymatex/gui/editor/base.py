@@ -5,10 +5,8 @@ from PyQt4.QtCore import QRect, QObject
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
 from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction, QWidget
 from PyQt4.QtGui import QMenu, QVBoxLayout, QFont
-from PyQt4.QtGui import QKeySequence
+from PyQt4.QtGui import QKeySequence, QColor
 from PyQt4.QtCore import Qt, SIGNAL, QMetaObject, pyqtSignature
-
-
 
 from logging import getLogger
 import sys
@@ -20,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 #PMX Libs
 if __name__ == "__main__":
-    from os.path import *
+    from os.path import join, dirname, abspath
     pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
     sys.path.append(pmx_base)
     sys.path.append('../..')
@@ -217,6 +215,9 @@ class PMXCodeEdit(QPlainTextEdit):
         super(PMXCodeEdit, self).mousePressEvent(mouse_event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
+        '''
+        Inserts whitespace up to a point
+        '''
         cursor = self.cursorForPosition(point)
         block = cursor.block()
         if not block.isValid():
@@ -242,6 +243,10 @@ class PMXCodeEdit(QPlainTextEdit):
         #print char_number, text.length()
     
     def keyPressEvent(self, key_event):
+        '''
+        This method is called whenever a key is pressed. The key code is
+        stored in key_event.key()
+        '''
         key = key_event.key()
         logger.debug(debug_key(key_event))
         
@@ -357,6 +362,11 @@ class PMXCodeEdit(QPlainTextEdit):
     WHITESPACE_RE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)    
     @classmethod
     def textWhitespace(cls, text):
+        '''
+        Gets text whitespace
+        @param text: Text, QTextCursor o QTextBlock instance
+        @return: The text whitespace
+        '''
         if isinstance(text, QTextCursor):
             text = text.block().text()
         elif isinstance(text, QTextBlock):
@@ -369,6 +379,7 @@ class PMXCodeEdit(QPlainTextEdit):
             return ''
         
     # TODO: Word wrapping fix
+    # TODO: Correct whitespace mix
     def indent(self):
         '''
         Indents text, it take cares of block selections.
@@ -390,18 +401,16 @@ class PMXCodeEdit(QPlainTextEdit):
                 
                 if not len(curr_indent):
                     # No indentation yet, so insert all chars
-                    print "No indentation yet"                
+                                    
                     indent_text = self.indent_text
                 else:
                     if self.soft_tabs:
                         # How many characters left?
                         n = self.tab_length - (len(curr_indent) % self.tab_length)
-                        print "n ->", n
                         indent_text = n * ' '
                     else:
                         indent_text = self.indent_text
                         
-            print u"Inserting %s «%s» %s" % (len(indent_text), indent_text, self.soft_tabs)
             new_cursor.insertText(indent_text)
             new_cursor.movePosition(QTextCursor.NextBlock)
             

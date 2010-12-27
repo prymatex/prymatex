@@ -3,6 +3,7 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from pprint import pformat
+from prymatex.gui.editor.base import PMXCodeEdit
 
 if __name__ == "__main__":
     import sys
@@ -159,29 +160,42 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     counter = 0
     
+    #===========================================================================
+    # Shortcuts
+    #===========================================================================
+    
+    @property
+    def currentTabWidget(self):
+        ''' Shortcut to the current editor (bypass layoutManager) '''
+        return self.layoutManager.currentTabWidget
+    
+    @property
+    def currentEditor(self):
+        return self.currentTabWidget.currentWidget()
+    
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        self.tab_widget_mediator.addNewTab()
+        self.currentTabWidget.appendEmptyTab()
 
     
     
     @pyqtSignature('')
     def on_actionClose_triggered(self):
-        index = self.tabWidgetEditors.currentIndex()
-        self.tabWidgetEditors.closeTab(index)
-        if self.tabWidgetEditors.count():
-            self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+        index = self.currentTabWidget.currentIndex()
+        self.currentTabWidget.closeTab(index)
+        if self.currentTabWidget.count():
+            self.currentTabWidget.currentWidget().setFocus(Qt.TabFocusReason)
 
     
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
-        self.tab_widget_mediator.focusNextTab()
+        self.currentTabWidget.focusNextTab()
         
 
         
     @pyqtSignature('')
     def on_actionPrevious_Tab_triggered(self):
-        self.tab_widget_mediator.focusPrevTab()
+        self.currentTabWidget.focusPrevTab()
         
     @pyqtSignature('')
     def on_actionAboutApp_triggered(self):
@@ -225,7 +239,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         if not fs:
             return
         for path in fs:
-            self.tab_widget_mediator.openFile(path)
+            #PMXCodeEdit.get
+            self.currentTabWidget.openFile(path)
             #self.tabWidgetEditors.openLocalFile(path)
     
     @pyqtSignature('')
@@ -247,11 +262,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        self.editor.save()
+        self.currentEditor.save()
     
     @pyqtSignature('')
     def on_actionSaveAs_triggered(self):
-        self.editor.save(save_as = True)
+        self.currentEditor.save(save_as = True)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
@@ -276,12 +291,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
     @pyqtSignature('')
     def on_actionZoom_In_triggered(self):
-        self.editor.zoomIn()
+        self.currentEditor.zoomIn()
         
     
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
-        self.editor.zoomOut()
+        self.currentEditor.zoomOut()
     
     @pyqtSignature('')
     def on_actionFocus_Editor_triggered(self):
@@ -388,6 +403,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         def to_upper(s):
             return unicode(s).upper()
         self.current_editor.replaceCursorText(to_upper)
+        
+    @pyqtSignature('')
+    def on_actionFind_triggered(self):
+        self.currentEditor.actionFind.trigger()
+        
+    @pyqtSignature('')
+    def on_actionFind_Replace_triggered(self):
+        self.currentEditor.actionReplace.trigger()
     
 
 class PMXTabActionGroup(QActionGroup):

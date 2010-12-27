@@ -382,26 +382,7 @@ class PMXCodeEdit(QPlainTextEdit):
             bottom = top + int(self.blockBoundingRect(block).height())
             blockNumber += 1
 
-    MAX_POINT_SIZE = 24
-    MIN_POINT_SIZE = 6
-    
-    def zoomIn(self):
-        font = self.font()
-        pt_size = font.pointSize()
-        if pt_size < self.MAX_POINT_SIZE:
-            pt_size += 1
-            font.setPointSize(pt_size)
-            print pt_size
-        self.setFont(font)
-    
-    def zoomOut(self):
-        font = self.font()
-        pt_size = font.pointSize()
-        if pt_size > self.MIN_POINT_SIZE:
-            pt_size -=  1
-            font.setPointSize(pt_size)
-            print pt_size
-        self.setFont(font)
+
 
 class EditorTabAction(QAction):
     def __init__(self, title, parent):

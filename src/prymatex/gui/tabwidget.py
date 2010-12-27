@@ -197,14 +197,23 @@ class PMXTabWidget(QTabWidget):
         Creates a new empty tab and returns it
         '''
         from prymatex.gui.editor.widget import PMXEditorWidget
-        editor =PMXEditorWidget.getEditor(self)
+        editor = PMXEditorWidget.getEditor(self)
         # Title should be filled after tab insertion
-        index = self.addTab(editor, editor.title)
+        index = self.addTab(editor, '...')
         
         self.setCurrentIndex(index)
         if self.count() == 1:
             editor.setFocus(Qt.MouseFocusReason)
         return editor
+    
+    def addTab(self, widget, title):
+        ''' Overrides QTabWidget.addTab(page, title) so that
+        afterInsertion is called '''
+        index = super(PMXTabWidget, self).addTab(widget, title)
+        if hasattr(widget, 'afterInsertion'):
+            widget.afterInsertion(self, index)
+        return index
+        
     
     
     def closeTab(self, index):

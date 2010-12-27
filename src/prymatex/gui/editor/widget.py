@@ -1,12 +1,13 @@
 '''
 '''
 from PyQt4.QtGui import QWidget, QAction, QMenu, QKeySequence
-from PyQt4.QtGui import QFont, QMessageBox, QFileDialog
+from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor
 from PyQt4.QtCore import SIGNAL, Qt
 from logging import getLogger
 import sys
 import traceback
 import re
+import os
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,12 +25,15 @@ from ui_editorwidget import Ui_EditorWidget
 
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
-    _counter = 0 
+    _counter = 0
+    __path = None
+    __title = None
+     
     def __init__(self, parent):
         super(PMXEditorWidget, self).__init__(parent)
         self.setupActions()
         self.setupUi(self)
-        #self.connectActionToGui()
+        
         self.setupFindReplaceWidget()
         #self.findreplaceWidget.hide()
         self.codeEdit.setFont(QFont("Monospace", 12))
@@ -39,7 +43,54 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
 
         self.findreplaceWidget.hide()
         
+    COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
+    COLOR_NORMAL = QColor("black")
+    
+    def on_codeEdit_modificationChanged(self, modified):
+        if modified:
+            self.title = "%s *" % self.title
+            self.setTabTextColor(self.COLOR_MODIFIED)
+        else:
+            if self.title.endswith(' *'):
+                self.title = self.title[:-2] 
+            self.setTabTextColor(self.COLOR_NORMAL)
         
+    @property
+    def path(self):
+        return self.__path
+    
+    @path.setter
+    def path(self, value):
+        self.__path = unicode(value)
+        self.title = os.path.basename(self.__path)
+        
+    @property
+    def title(self):
+        if not self.__title:
+            self.__title = unicode(self.trUtf8("Untitled %d")) % self.counter() 
+        return  self.__title
+    
+    @property
+    def index(self):
+        return self.tabwidget.indexOf(self)
+    
+    @property
+    def tabwidget(self):
+        return self.parent().parent()
+    
+    
+    def setTabTextColor(self, color):
+        self.tabwidget.tabBar().setTabTextColor(self.index, color)
+        
+    @title.setter
+    def title(self, value):
+        self.__title = value
+        self.tabwidget.setTabText(self.index, self.__title)
+         
+    
+    #===========================================================================
+    # Factory methods
+    #===========================================================================
     
     @classmethod
     def getEditor(cls, parent,  path = None):
@@ -63,10 +114,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         cls._counter += 1
         return v
         
-    @property
-    def title(self):
-        doc_title = unicode(self.trUtf8("Untitled %d"))
-        return  doc_title % self.counter()
 
     def setupActions(self):
         # Search
@@ -183,6 +230,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         #TODO: Check exceptions, for example, disk full.
         n = f.write(buffer_contents)
         f.close()
+        self.codeEdit.document().setModified(False)
         return n
      
     
@@ -200,7 +248,15 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
             if self.path:
                 return self.do_save()
         return False
-        
+    
+    #===========================================================================
+    # Events
+    #===========================================================================
+    
+    def afterInsertion(self, tab_widget, index):
+        ''' Callback '''
+        tab_widget.setTabText(index, self.title)
+    
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout
     from PyQt4.QtGui import QPushButton
