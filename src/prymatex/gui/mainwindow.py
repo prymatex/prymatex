@@ -162,7 +162,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
         self.tab_widget_mediator.addNewTab()
-        
+
+    
     
     @pyqtSignature('')
     def on_actionClose_triggered(self):
@@ -237,16 +238,20 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         webbrowser.open(qApp.instance().projectUrl)
     
     @property
-    def current_editor(self):
-        return self.tabWidgetEditors.currentWidget()
+    def editor(self):
+        '''
+        Current Editor
+        '''
+        self.layoutManager.currentEditor()
+        #return self.tabWidgetEditors.currentWidget()
         
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        self.current_editor.save()
+        self.editor.save()
     
     @pyqtSignature('')
     def on_actionSaveAs_triggered(self):
-        self.current_editor.save(save_as = True)
+        self.editor.save(save_as = True)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
@@ -271,12 +276,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
     @pyqtSignature('')
     def on_actionZoom_In_triggered(self):
-        self.tabWidgetEditors.currentWidget().zoomIn()
-        #self.
+        self.editor.zoomIn()
+        
     
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
-        self.tabWidgetEditors.currentWidget().zoomOut()
+        self.editor.zoomOut()
     
     @pyqtSignature('')
     def on_actionFocus_Editor_triggered(self):

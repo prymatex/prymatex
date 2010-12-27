@@ -57,68 +57,21 @@ class TabWidgetMediator(BaseMediator):
             #editor.setFocus(Qt.TabFocusReason)
             #return editor
     
-    def focusNextTab(self):
-        '''
-        Focus next tab
-        '''
-        curr = self.current_tabs_widget.currentIndex()
-        count = self.current_tabs_widget.count()
 
-        if curr < count -1:
-            prox = curr +1
-        else:
-            prox = 0
-        self.current_tabs_widget.setCurrentIndex(prox)
-        self.current_tabs_widget.currentWidget().setFocus( Qt.TabFocusReason )
-
-    def focusPrevTab(self):
-        curr = self.current_tabs_widget.currentIndex()
-        count = self.current_tabs_widget.count()
-
-        if curr > 0:
-            prox = curr -1
-        else:
-            prox = count -1
-        self.current_tabs_widget.setCurrentIndex(prox)
-        self.current_tabs_widget.currentWidget().setFocus(Qt.TabFocusReason)
-
-    
-
-    def moveTabLeft(self):
-        ''' Moves the current tab to the left '''
-        if self.current_tabs_widget.count() == 1:
-            return
-        count = self.current_tabs_widget.count()
-        index = self.current_tabs_widget.currentIndex()
-        text = self.current_tabs_widget.tabText(index)
-        widget = self.current_tabs_widget.currentWidget()
-        self.current_tabs_widget.removeTab(index)
-        index -= 1
-        if index < 0:
-            index = count
-        self.current_tabs_widget.insertTab(index, widget, text)
-        self.current_tabs_widget.setCurrentWidget(widget)
-
-    def moveTabRight(self):
-        '''
-        Moves the current tab to the right
-        '''
-        if self.current_tabs_widget.count() == 1:
-            return
-        count = self.current_tabs_widget.count()
-        index = self.current_tabs_widget.currentIndex()
-        text = self.current_tabs_widget.tabText(index)
-        widget = self.current_tabs_widget.currentWidget()
-        self.current_tabs_widget.removeTab(index)
-        index += 1
-        if index >= count:
-            index = 0
-        self.current_tabs_widget.insertTab(index, widget, text)
-        self.current_tabs_widget.setCurrentWidget(widget)
 
 
 class CurrentEditorMediator(BaseMediator):
     '''
     Mediates with the current editor
     '''
-    pass
+    curosrPositionChange = pyqtSignal(int, int, name = "cursorPositionChange(int,int)")
+    undoAvailable = pyqtSignal(name = "cursorPositionChange(int,int)")
+    copyAvailable = pyqtSignal(bool)
+    #void    currentCharFormatChanged ( const QTextCharFormat & f )
+    #void    cursorPositionChanged ()
+    redoAvailable = pyqtSignal(bool available )
+    selectionChanged = pyqtSignal()
+    #void    textChanged ()
+    undoAvailable = pyqtSignal( bool)
+    
+    

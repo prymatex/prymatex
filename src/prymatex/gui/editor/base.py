@@ -25,22 +25,16 @@ if __name__ == "__main__":
     sys.path.append(pmx_base)
     sys.path.append('../..')
     #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
-else:
-    pass
+
 from prymatex.gui.editor.sidearea import PMXSideArea
 
-
-#TODO: i18n
-_ = lambda s: s
 
 # Create the logger instance
 logger = getLogger(__name__)
 
-
-KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) if keyname.startswith('Key_')])
-
-
-
+# Key press debugging 
+KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
+                  if keyname.startswith('Key_')])
 
 def debug_key(key_event):
     ''' Prevents hair loss when debuging what the hell is going on '''
@@ -56,34 +50,11 @@ def debug_key(key_event):
     if modifiers & Qt.ShiftModifier:
         mods.append("ShiftModifier")
     
-    return "%s <%s> Code: %d chr(%d) = %s" % (KEY_NAMES[key],  ", ".join(mods), key, key,
-                                              key < 255 and chr(key) or 'N/A')
-
-
-
-
-class FileBuffer(QObject):
-    '''
-    
-    '''
-    _counter = 0
-    def __init__(self, file_name = None):
-        pass
-    
-    def get_header(self):        
-        return _("Untitled %d" % self.get_untitled_counter())
-    
-    @classmethod
-    def get_untitled_counter(cls):
-        ''' Contador '''
-        v = FileBuffer._counter
-        FileBuffer._counter += 1
-        return v
-
+    return "%s <%s> Code: %d chr(%d) = %s" % (KEY_NAMES[key],  ", ".join(mods), 
+                                              key, key, key < 255 and chr(key) 
+                                              or 'N/A')
 
 _counter = 0
-
-
 
 class PMXCodeEdit(QPlainTextEdit):
     '''
@@ -98,13 +69,12 @@ class PMXCodeEdit(QPlainTextEdit):
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
         self.setupUi()
-        self.__title = _("Untitled docuemnt")
-        self.__path = ''
+        self.__title = self.trUtf8("Untitled docuemnt")
         self.__last_save_time = None
         self.__soft_tabs = True
         self.__tab_length = 4
         
-        
+        # TODO: Load from config
         option = QTextOption()
         option.setFlags(QTextOption.ShowTabsAndSpaces)
         self.document().setDefaultTextOption(option)
@@ -140,6 +110,7 @@ class PMXCodeEdit(QPlainTextEdit):
     @property
     def soft_tabs(self):
         return self.__soft_tabs
+    
     @soft_tabs.setter
     def soft_tabs(self, value):
         self.__soft_tabs = value
@@ -159,29 +130,6 @@ class PMXCodeEdit(QPlainTextEdit):
         else:
             return ' ' * self.tab_length
 
-    @property
-    def path(self):
-        return self.__path
-    @path.setter
-    def path(self, value):
-        self.__path = value
-            
-    
-    
-    def setTitle(self, title):
-        '''
-        Sets the tab title
-        
-        '''
-        print "Seteo del título"
-        tabwidget = self.parent()
-        print "tabwidget", tabwidget
-        tabwidget.setTabText(0, title)
-        
-         
-        #tabwidget.setTabText()  
-        #self.parent().setWindowTitle(title)
-    
     def setupUi(self):
         
         self.updateLineNumberAreaWidth(0)
@@ -195,9 +143,9 @@ class PMXCodeEdit(QPlainTextEdit):
         self.setWindowTitle(self.__class__.__name__)
 
     def setupActions(self):
-        self.actionIndent = QAction(_("Increase indentation"), self )
+        self.actionIndent = QAction(self.trUtf8("Increase indentation"), self )
         self.connect(self.actionIndent, SIGNAL("triggered()"), self.indent)
-        self.actionUnindent = QAction(_("Decrease indentation"), self )
+        self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
         self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
 
     def contextMenuEvent(self, event):
@@ -246,56 +194,6 @@ class PMXCodeEdit(QPlainTextEdit):
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
     
-    def do_save(self):
-        '''
-        This method is call to actually save the file, the path has to be
-        set.
-        '''
-        assert self.path, _("No path defined!")
-        buffer_contents = str(self.document().toPlainText())
-        f = open(str(self.path), 'w')
-        #TODO: Check exceptions, for example, disk full.
-        f.write(buffer_contents)
-        f.close()
-     
-    
-    def save(self):
-        '''
-        Save the document.
-        do_save() actually saves the document, but it should no be called
-        directly because it expects self.path to be defined.
-        '''
-        if self.path:
-            return self.do_save()
-        else:
-            self.path = QFileDialog.getSaveFileName(self, _("Save file as..."))
-            if self.path:
-                return self.do_save()
-        return False
-            
-    
-    
-    
-    def requestClose(self):
-        '''
-        When a editor has to be closed this method is called
-        @returns true when it's safe to remove the editor wdiget, the user has been prompted
-        for save
-        '''
-        if self.document().isModified():
-            r = QMessageBox.question(self, _("Save changes?"), 
-                                     _("Save changes for this file"),
-                                     QMessageBox.Save | QMessageBox.Cancel | QMessageBox.No,
-                                     QMessageBox.Cancel)
-            
-            if r == QMessageBox.Save:
-                return self.save()
-            elif r == QMessageBox.Cancel:
-                return False
-            elif r == QMessageBox.No:
-                return True # Can close, discard changes
-        return True
-    
     def selectionBlockStart(self):
         '''
         Returns the block where the slection starts
@@ -316,7 +214,6 @@ class PMXCodeEdit(QPlainTextEdit):
 
     def mousePressEvent(self, mouse_event):
         self.inserSpacesUpToPoint(mouse_event.pos())
-        
         super(PMXCodeEdit, self).mousePressEvent(mouse_event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
@@ -393,11 +290,16 @@ class PMXCodeEdit(QPlainTextEdit):
 
             #TODO: Manage thrugh config
             if True:
-                cursor.movePosition(QTextCursor.StartOfLine, QTextCursor.KeepAnchor, 1)
-                text = self.blockIndentation(cursor.block())
-                QPlainTextEdit.keyPressEvent(self, key_event)
-                if text:
-                    self.textCursor().insertText(text)
+                if cursor.atBlockStart():
+                    # Do not indent
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                else:
+                    cursor.movePosition(QTextCursor.StartOfLine, 
+                                        QTextCursor.KeepAnchor, 1)
+                    text = self.textWhitespace( cursor )
+                    QPlainTextEdit.keyPressEvent(self, key_event)
+                    if text:
+                        self.textCursor().insertText(text)
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
 
@@ -410,18 +312,13 @@ class PMXCodeEdit(QPlainTextEdit):
             QPlainTextEdit.keyPressEvent(self, key_event)
 
 
-    WHITESPACE_RE = re.compile(r'(?P<whitespace>\s+)\S')
-    @classmethod
-    def blockIndentation(cls, block):
-        '''
-        @return The amount of indetation used in a block of text
-        '''
-        block_text = unicode(block.text())
-        m = cls.WHITESPACE_RE.match(block_text)
-        if m:
-            return m.group('whitespace')
 
+    
     def perform_character_action(self, substition):
+        '''
+        Substitutions when some characters are typed.
+        These substitutions are held in a dictionary
+        '''
         try:
             text_start, text_end = substition.split('${selection}')
         except:
@@ -452,22 +349,60 @@ class PMXCodeEdit(QPlainTextEdit):
 
         cursor.endEditBlock()
 
-
+    
+    #===========================================================================
+    # Text Indentation
+    #===========================================================================
+    
+    WHITESPACE_RE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)    
+    @classmethod
+    def textWhitespace(cls, text):
+        if isinstance(text, QTextCursor):
+            text = text.block().text()
+        elif isinstance(text, QTextBlock):
+            text = text.text()
+        match = cls.WHITESPACE_RE.match(unicode(text))
+        try:
+            ws = match.group('whitespace')
+            return ws
+        except AttributeError:
+            return ''
+        
     # TODO: Word wrapping fix
     def indent(self):
         '''
-        Indents text
+        Indents text, it take cares of block selections.
         '''
         block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
-        print ">>> Indent (%d blocks)" % block_count
+        
         cursor = self.textCursor()
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)
         new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
         new_cursor.movePosition(QTextCursor.StartOfBlock)
         for _i in range(block_count):
-            
-            new_cursor.insertText(self.indent_text)
+
+            # If the text is not inserted
+            if self.indent_text == '\t':
+                indent_text = '\t'
+            else:
+                curr_indent = self.textWhitespace( new_cursor )
+                
+                if not len(curr_indent):
+                    # No indentation yet, so insert all chars
+                    print "No indentation yet"                
+                    indent_text = self.indent_text
+                else:
+                    if self.soft_tabs:
+                        # How many characters left?
+                        n = self.tab_length - (len(curr_indent) % self.tab_length)
+                        print "n ->", n
+                        indent_text = n * ' '
+                    else:
+                        indent_text = self.indent_text
+                        
+            print u"Inserting %s «%s» %s" % (len(indent_text), indent_text, self.soft_tabs)
+            new_cursor.insertText(indent_text)
             new_cursor.movePosition(QTextCursor.NextBlock)
             
         self.setTextCursor(cursor)

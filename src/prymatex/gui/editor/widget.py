@@ -1,7 +1,7 @@
 '''
 '''
 from PyQt4.QtGui import QWidget, QAction, QMenu, QKeySequence
-from PyQt4.QtGui import QFont, QMessageBox
+from PyQt4.QtGui import QFont, QMessageBox, QFileDialog
 from PyQt4.QtCore import SIGNAL, Qt
 from logging import getLogger
 import sys
@@ -11,34 +11,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-#PMX Libs
+# Path correction for standalone test
 if __name__ == "__main__":
-    from os.path import *
+    from os.path import abspath, join, dirname
     pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
     sys.path.append(pmx_base)
     sys.path.append('../..')
     #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
-else:
-    pass
 
-
+# Qt Designer's gui
 from ui_editorwidget import Ui_EditorWidget
 
-_counter = 0
-
-def untitled_cunter():
-    '''
-    Genreates a sequence of numbers for the untitled documents
-    Each call produces an incremental number
-    '''
-    global _counter
-    tmp =  _counter
-    _counter += 1
-    return tmp
-    
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
-    
+    _counter = 0 
     def __init__(self, parent):
         super(PMXEditorWidget, self).__init__(parent)
         self.setupActions()
@@ -52,7 +38,9 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.codeEdit.addAction(self.actionReplace)
 
         self.findreplaceWidget.hide()
-
+        
+        
+    
     @classmethod
     def getEditor(cls, parent,  path = None):
         '''
@@ -69,22 +57,27 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         pass
 
-
-    
+    @classmethod
+    def counter(cls):
+        v = cls._counter
+        cls._counter += 1
+        return v
+        
     @property
     def title(self):
         doc_title = unicode(self.trUtf8("Untitled %d"))
-        return  doc_title % untitled_cunter()
+        return  doc_title % self.counter()
 
     def setupActions(self):
         # Search
         self.actionFind = QAction("&Find", self)
         self.actionFind.setObjectName("actionFind")
-        self.actionFind.setShortcut(QKeySequence(self.trUtf8("Ctrl+F")))
+        
+        #self.actionFind.setShortcut(QKeySequence(self.trUtf8("Ctrl+F")))
         # Replace
         self.actionReplace = QAction(self.trUtf8("Find and &Replce"), self)
         self.actionReplace.setObjectName("actionReplace")
-        self.actionReplace.setShortcut(QKeySequence(self.trUtf8("Ctrl+R")))
+        #self.actionReplace.setShortcut(QKeySequence(self.trUtf8("Ctrl+R")))
 
 
 
@@ -136,13 +129,77 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def on_pushCloseFindreplace_pressed(self):
         self.findreplaceWidget.hide()
 
-    def requestClose(self, *largs):
-        
-        if self.codeEdit.document().isModified():
-            QMessageBox.information(self, "", "AA")
+    def requestClose(self):
+        '''
+        When a editor has to be closed this method is called
+        @returns true when it's safe to remove the editor wdiget, the user has been prompted
+        for save
+        '''
+        doc = self.codeEdit.document()
+        if doc.isModified():
+            r = QMessageBox.question(self, self.trUtf8("Save changes?"), 
+                                     self.trUtf8("Save changes for this file"),
+                                     QMessageBox.Save | QMessageBox.Cancel | QMessageBox.No,
+                                     QMessageBox.Cancel)
+            
+            if r == QMessageBox.Save:
+                return self.save()
+            elif r == QMessageBox.Cancel:
+                return False
+            elif r == QMessageBox.No:
+                return True # Can close, discard changes
+        return True
+
+    MAX_POINT_SIZE = 24
+    MIN_POINT_SIZE = 6
+
+    def zoomIn(self):
+        font = self.editor.font()
+        pt_size = font.pointSize()
+        if pt_size < self.MAX_POINT_SIZE:
+            pt_size += 1
+            font.setPointSize(pt_size)
+        self.editor.setFont(font)
+
+    def zoomOut(self):
+        font = self.editor.font()
+        pt_size = font.pointSize()
+        if pt_size > self.MIN_POINT_SIZE:
+            pt_size -=  1
+            font.setPointSize(pt_size)
+        self.editor.setFont(font)
+    
+    #===========================================================================
+    # File Operations
+    #===========================================================================
+    def do_save(self):
+        '''
+        This method is call to actually save the file, the path has to be
+        set.
+        '''
+        assert self.path, self.trUtf8("No path defined!")
+        buffer_contents = str(self.codeEdit.document().toPlainText())
+        f = open(str(self.path), 'w')
+        #TODO: Check exceptions, for example, disk full.
+        n = f.write(buffer_contents)
+        f.close()
+        return n
+     
+    
+    def save(self):
+        '''
+        Save the document.
+        do_save() actually saves the document, but it should no be called
+        directly because it expects self.path to be defined.
+        '''
+        if self.path:
+            return self.do_save()
         else:
-            return True
-        
+            self.path = QFileDialog.getSaveFileName(self, 
+                                                    self.trUtf8("Save file as..."))
+            if self.path:
+                return self.do_save()
+        return False
         
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout

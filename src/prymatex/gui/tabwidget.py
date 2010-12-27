@@ -79,8 +79,33 @@ class PMXTabWidget(QTabWidget):
     @pyqtSignature("")
     def on_actionCloseAll_triggered(self):
         QMessageBox.information(self, "", "Close All")
-
         
+    @pyqtSignature("")
+    def on_actionNewTab_triggered(self):
+        self.appendEmptyTab()
+
+    @pyqtSignature("")
+    def on_actionCloseAll_triggered(self):
+        for index in range(self.count()):
+            if not self.closeTab(0):
+                return
+
+    @pyqtSignature("")
+    def on_actionCloseTab_triggered(self):
+        self.closeTab(self.currentIndex())
+
+    @pyqtSignature("")
+    def on_actionCloseOthers_triggered(self):
+        current_index = self.currentIndex()
+        for index in range(current_index):
+            if not self.closeTab(0):
+                return
+        for index in range(1, self.count()):
+            if not self.closeTab(1):
+                return
+
+
+    
     def on_current_changed(self, index):
         '''
         TODO: Resync all menus
@@ -109,23 +134,26 @@ class PMXTabWidget(QTabWidget):
         Event
         '''
         pos = context_event.pos()
-        widget = self.widgetFromTabPos( pos )
-        if not widget:
-            m = QMenu()
-            m.addAction(self.actionNewTab)
-            m.addSeparator()
-            m.addAction(self.actionCloseTab)
-            m.addAction(self.actionCloseAll)
-            m.addAction(self.actionCloseOthers)
-            m.addSeparator()
-            m_order = m.addMenu(self.trUtf8("Tab &Order"))
-            m_order.addAction(self.actionOrderTabsByName)
-            m_order.addAction(self.actionOrderOpenOrder)
-            m_order.addAction(self.actionOrderByURL)
-            
-            m.exec_( context_event.globalPos() )
-        else:
-            widget
+        m = QMenu()
+        m.addAction(self.actionNewTab)
+        m.addSeparator()
+        m.addAction(self.actionCloseTab)
+        m.addAction(self.actionCloseAll)
+        m.addAction(self.actionCloseOthers)
+        m.addSeparator()
+        m_order = m.addMenu(self.trUtf8("Tab &Order"))
+        m_order.addAction(self.actionOrderTabsByName)
+        m_order.addAction(self.actionOrderOpenOrder)
+        m_order.addAction(self.actionOrderByURL)
+
+        m.exec_( context_event.globalPos() )
+
+        # Separate menus when clicking on a tab?
+        # widget = self.widgetFromTabPos( pos )
+        #if not widget:
+        #
+        #else:
+        #    widget
     
     def on_syntax_change(self, syntax):
         editor = self.currentWidget()
@@ -175,7 +203,7 @@ class PMXTabWidget(QTabWidget):
         
         self.setCurrentIndex(index)
         if self.count() == 1:
-            editor.setFocus(Qt.TabFocusReason)
+            editor.setFocus(Qt.MouseFocusReason)
         return editor
     
     
@@ -205,8 +233,8 @@ class PMXTabWidget(QTabWidget):
             self.appendEmptyTab()
         # 
         widget = self.currentWidget()
-        if not widget.actionMenuTab.isChecked():
-            widget.actionMenuTab.setChecked(True)
+        #if not widget.actionMenuTab.isChecked():
+        #    widget.actionMenuTab.setChecked(True)
             
     def indexChanged(self, index):
         #if index >= 0:
@@ -223,6 +251,65 @@ class PMXTabWidget(QTabWidget):
             widget.afterInsertionEvent()
         if not self.count():
             widget.actionMenuTab.setChecked(True)
+
+    def focusNextTab(self):
+        '''
+        Focus next tab
+        '''
+        curr = self.currentIndex()
+        count = self.count()
+
+        if curr < count -1:
+            prox = curr +1
+        else:
+            prox = 0
+        self.setCurrentIndex(prox)
+        self.currentWidget().setFocus( Qt.TabFocusReason )
+
+    def focusPrevTab(self):
+        curr = self.currentIndex()
+        count = self.count()
+
+        if curr > 0:
+            prox = curr -1
+        else:
+            prox = count -1
+        self.setCurrentIndex(prox)
+        self.currentWidget().setFocus(Qt.TabFocusReason)
+
+
+
+    def moveTabLeft(self):
+        ''' Moves the current tab to the left '''
+        if self.count() == 1:
+            return
+        count = self.count()
+        index = self.currentIndex()
+        text = self.tabText(index)
+        widget = self.currentWidget()
+        self.removeTab(index)
+        index -= 1
+        if index < 0:
+            index = count
+        self.insertTab(index, widget, text)
+        self.setCurrentWidget(widget)
+
+    def moveTabRight(self):
+        '''
+        Moves the current tab to the right
+        '''
+        if self.count() == 1:
+            return
+        count = self.count()
+        index = self.currentIndex()
+        text = self.tabText(index)
+        widget = self.currentWidget()
+        self.removeTab(index)
+        index += 1
+        if index >= count:
+            index = 0
+        self.insertTab(index, widget, text)
+        self.setCurrentWidget(widget)
 
 class PMWTabsMenu(QMenu):
     '''
@@ -250,9 +337,4 @@ class PMWTabsMenu(QMenu):
             action.setShortcut(shortcut)
         
     
-
-
-    
-        
-        
-        
+     
