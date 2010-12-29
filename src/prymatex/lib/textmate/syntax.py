@@ -6,9 +6,13 @@
         content, name, scope, keyEquivalent, tabTrigger
 '''
 
-import re
+import ponyguruma as onig
+import ipdb
 
 TM_SYNTAXES = {}
+OPTIONS = onig.OPTION_CAPTURE_GROUP
+
+onig_compile = onig.Regexp.factory(OPTIONS)
 
 ######################### SyntaxProcessor #################################
 
@@ -74,7 +78,7 @@ class TMScoreManager(object):
     def score(self, search_scope, reference_scope):
         maxi = 0
         for scope in search_scope.split( ',' ):
-            arrays = re.compile("\B-").split(scope)
+            arrays = onig_compile("\B-").split(scope)
             if len(arrays) == 1:
                 maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
             elif len(arrays) > 1:
@@ -98,7 +102,7 @@ class TMScoreManager(object):
     def score_array(self, search_array, reference_array):
         pending = search_array
         current = reference_array[-1]
-        reg = re.compile( "^%s" % re.escape( pending[-1] ))
+        reg = onig_compile( "^%s" % onig.escape( pending[-1] ))
         multiplier = self.START_VALUE
         result = 0
         while len(pending) > 0 and current:
@@ -108,7 +112,7 @@ class TMScoreManager(object):
                 result += point_score * multiplier
                 pending.pop()
                 if len(pending) > 0:
-                    reg = re.compile( "^%s" % re.escape( pending[-1] ) )
+                    reg = onig_compile( "^%s" % onig.escape( pending[-1] ) )
             multiplier = multiplier / self.BASE
             reference_array.pop()
             current = reference_array and reference_array[-1] or None
@@ -131,7 +135,7 @@ class TMSyntaxProxy(object):
         #TODO: else raise exception
     
     def __proxy(self):
-        if re.compile('^#').match(self.proxy):
+        if onig_compile('^#').match(self.proxy):
             if hasattr(self.syntax, 'repository') and self.syntax.repository.has_key(self.proxy[1:]):  
                 return self.syntax.repository[self.proxy[1:]]
         elif self.proxy == '$self':
@@ -142,8 +146,6 @@ class TMSyntaxProxy(object):
             return self.syntax.syntaxes[self.proxy]
 
 class TMSyntaxNode(object):
-    OPTIONS = re.UNICODE
-    
     def __init__(self, hash, syntax = None, name_space = 'default'):
         for k in ['syntax', 'firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 
                   'begin', 'content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent',
@@ -159,22 +161,9 @@ class TMSyntaxNode(object):
             if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 'begin']:
                 try:
                     # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
-                    value = value.replace('?i:', '(?i)')
-                    value = value.replace('?x:', '(?x)')
-                    value = value.replace('?+', '?')
-                    value = value.replace('*+', '*')
-                    value = value.replace('++', '+')
-                    #value = value.replace('?<=', '(?<=)')
-                    setattr(self, key, re.compile( value ))
+                    setattr(self, key, onig_compile( value ))
                 except:
-                    try:
-                        value = value.replace('?<=', '(?<=)')
-                        value = value.replace('?>', '')
-                        value = value.replace('?+', '')
-                        setattr(self, key, re.compile( value ))
-                    except:
-                        #print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
-                        pass
+                    print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
             elif key in ['content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:
@@ -185,8 +174,7 @@ class TMSyntaxNode(object):
             elif key in ['patterns']:
                 self.create_children(value)
             else:
-                pass
-                #print u'Ignoring: %s: %s' % (key, value)
+                print u'Ignoring: %s: %s' % (key, value)
                 
     @property
     def syntaxes(self):
@@ -255,12 +243,12 @@ class TMSyntaxNode(object):
         
         if captures:
             for key, value in captures:
-                if re.compile('^\d*$').match(key):
-                    if int(key) <= len(match.groups()):
+                if onig_compile('^\d*$').match(key):
+                    if int(key) <= len(match.groups):
                         matches.append([int(key), match.span(int(key)), value['name']])
                 else:
-                    if match.groups().index( key ):
-                        matches.append([match.groups().index( key ), match.groupdict()[ key ], value['name']])
+                    if match.groups[ key ]:
+                        matches.append([match.groups[ key ], match.groupdict[ key ], value['name']])
         return matches
       
     def match_first(self, string, position):
@@ -287,10 +275,10 @@ class TMSyntaxNode(object):
         def d_match(mobj):
             print "d_match"
             index = mobj.group(0)
-            return match.groupdict(index)
-        regstring = re.sub(re.compile('\\\\([1-9])'), g_match, regstring)
-        regstring = re.sub(re.compile('\\\\k<(.*?)>'), d_match, regstring)
-        return re.compile( regstring, re.UNICODE).search( string, position )
+            return match.groupdict[index]
+        regstring = onig_compile('\\\\([1-9])').sub(g_match, regstring)
+        regstring = onig_compile('\\\\k<(.*?)>').sub(d_match, regstring)
+        return onig_compile( regstring ).match( string, position )
     
     def match_first_son(self, string, position):
         match = (None, None)
@@ -370,8 +358,6 @@ def parse_file(filename, name_space = 'default'):
     return TMSyntaxNode(data, None, name_space)
 
 if __name__ == '__main__':
-    import ipdb
-
-    python = parse_file('../../../prymatex/resources/Bundles/CSS.tmbundle/Syntaxes/CSS.plist', 'python')
+    python = parse_file('../../bundles/ebundles/Bundles/Python.tmbundle/Syntaxes/Python.tmLanguage', 'python')
     p = TMDebugSyntaxProcessor()
-    print python.parse('div.algo { text-align: centar; }', p)
+    print python.parse('valor = {"hola": 1, "mundo": lambda x: x * 3}', p)

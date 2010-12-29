@@ -17,7 +17,7 @@ if __name__ == "__main__":
     sys.path.append(pmx_base)
 
 from prymatex.editor.sidearea import PMXSideArea
-
+from prymatex.editor.syntax import PMXSyntaxProcessor, PMXSyntaxFormatter
 
 #TODO: i18n
 _ = lambda s: s
@@ -91,6 +91,7 @@ class PMXCodeEdit(QPlainTextEdit):
         self.__soft_tabs = True
         self.__tab_length = 4
         self.character_actions = {}
+        self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
         
         option = QTextOption()
         option.setFlags(QTextOption.ShowTabsAndSpaces)
@@ -106,6 +107,8 @@ class PMXCodeEdit(QPlainTextEdit):
         })
         self.setupActions()
         
+    def set_syntax(self, syntax):
+        self.syntax_processor.set_syntax(syntax)
     
     @property
     def index(self):
@@ -118,6 +121,7 @@ class PMXCodeEdit(QPlainTextEdit):
     @property
     def title(self):
         return self.__title
+        
     @title.setter
     def title(self, value):
         self.__title = value
@@ -377,7 +381,6 @@ class PMXCodeEdit(QPlainTextEdit):
         elif key < 255 and chr(key) in self.character_actions:
             key_chr = chr(key)
             self.perform_character_action( self.character_actions[ key_chr ] )
-            
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
 
@@ -394,7 +397,6 @@ class PMXCodeEdit(QPlainTextEdit):
             cursor.insertText(text_start)
             cursor.insertText(text)
             cursor.insertText(text_end)
-            
         else:
             cursor.insertText(text_start)
             cursor.insertText(text_end)
@@ -402,7 +404,6 @@ class PMXCodeEdit(QPlainTextEdit):
             self.setTextCursor(cursor)
 
         cursor.endEditBlock()
-
 
     # TODO: Word wrapping fix
     def indent(self):
