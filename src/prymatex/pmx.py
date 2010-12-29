@@ -18,7 +18,7 @@ def main(argv = sys.argv):
     GUI entry point.
     '''
   
-    from prymatex import app
+    from prymatex.core import app
     from prymatex.lib import exceptions
     # TODO: Implement quit and restart
     while True:
