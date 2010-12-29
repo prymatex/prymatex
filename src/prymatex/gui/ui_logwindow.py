@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/logwindow.ui'
 #
-# Created: Sun Nov 21 23:52:11 2010
+# Created: Sun Dec 26 14:34:32 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,11 +12,12 @@ from PyQt4 import QtCore, QtGui
 class Ui_LogWidget(object):
     def setupUi(self, LogWidget):
         LogWidget.setObjectName("LogWidget")
-        LogWidget.resize(400, 300)
+        LogWidget.resize(400, 103)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/actions/resources/actions/document-preview.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         LogWidget.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(LogWidget)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")

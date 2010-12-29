@@ -4,7 +4,7 @@ QRC_FILES=$(shell find ./ -iname "*.qrc")
 .PHONY: gui
 
 
-all: oniguruma resources gui
+all: resources gui
 
 	${MAKE} -C config
 gui: 
@@ -20,9 +20,5 @@ re_res: clean_res resources
 res_rc.py: res.qrc
 	pyrcc4 -py2 $^ -o $@
 	@du -hcs $@ | tail -n1
-
-oniguruma:
-	$(MAKE) -C lib/oniguruma
-
 
 

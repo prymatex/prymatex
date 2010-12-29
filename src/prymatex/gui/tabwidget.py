@@ -5,15 +5,13 @@
 
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
 from PyQt4.QtCore import QString, SIGNAL, Qt
-from prymatex.editor import PMXCodeEdit
+from prymatex.gui.editor import PMXCodeEdit
 
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.utils import *
 import itertools
 
 class PMXTabWidget(QTabWidget):
-    EDIT_TAB_WIDGET = PMXCodeEdit
-    UNTITLED_LABEL = _("New File %s")
     
     #Signal
     currentEditorChange = pyqtSignal(PMXCodeEdit)
@@ -22,7 +20,10 @@ class PMXTabWidget(QTabWidget):
     
     def __init__(self, parent):
         QTabWidget.__init__(self, parent)
+        
+        self.setupActions() # Call it at first so the QMetaObject.connectSlotsByName is called in the setupUi
         self.setupUi()
+
         if not self.count():
             self.appendEmptyTab()
         
@@ -42,34 +43,117 @@ class PMXTabWidget(QTabWidget):
             }
         ''')
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
-    
+        
+
+        
     def setupUi(self):
         self.setTabsClosable(True)
         self.setMovable(True)
+        QMetaObject.connectSlotsByName(self)
         
-    def untitled_label(self):
-        counter = self.counter
-        self.counter += 1
-        return self.UNTITLED_LABEL % counter
+    def setupActions(self):
+        '''
+        QAction setup. Some of these actions are used for the context menus
+        '''
+        self.actionNewTab = QAction(self.trUtf8("&New tab"), self)
+        self.actionNewTab.setObjectName("actionNewTab")
+        
+        self.actionCloseAll = QAction(self.trUtf8("Close &All"), self)
+        self.actionCloseAll.setObjectName("actionCloseAll")
+        
+        self.actionCloseOthers = QAction(self.trUtf8("Close &Others"), self)
+        self.actionCloseOthers.setObjectName("actionCloseOthers")
+        
+        self.actionCloseTab = QAction(self.trUtf8("&Close"), self)
+        self.actionCloseTab.setObjectName("actionCloseTab")
+
+        self.actionOrderTabsByName = QAction(self.trUtf8("Order by &name"), self)
+        self.actionOrderTabsByName.setObjectName("actionOrderTabsByName")
+        
+        self.actionOrderOpenOrder = QAction(self.trUtf8("Order by Open Order"), self)
+        self.actionOrderOpenOrder.setObjectName("actionOrderOpenOrder")
+        
+        self.actionOrderByURL = QAction(self.trUtf8("Order by &URL"), self)
+        self.actionOrderByURL.setObjectName("actionOrderByURL")
+
+    @pyqtSignature("")
+    def on_actionCloseAll_triggered(self):
+        QMessageBox.information(self, "", "Close All")
+        
+    @pyqtSignature("")
+    def on_actionNewTab_triggered(self):
+        self.appendEmptyTab()
+
+    @pyqtSignature("")
+    def on_actionCloseAll_triggered(self):
+        for index in range(self.count()):
+            if not self.closeTab(0):
+                return
+
+    @pyqtSignature("")
+    def on_actionCloseTab_triggered(self):
+        self.closeTab(self.currentIndex())
+
+    @pyqtSignature("")
+    def on_actionCloseOthers_triggered(self):
+        current_index = self.currentIndex()
+        for index in range(current_index):
+            if not self.closeTab(0):
+                return
+        for index in range(1, self.count()):
+            if not self.closeTab(1):
+                return
+
+
     
     def on_current_changed(self, index):
+        '''
+        TODO: Resync all menus
+        '''
         self.currentEditorChange.emit(self.widget(index))
         
-    def mouseDoubleClickEvent(self, event):
-        self.appendEmptyTab()
+    def mouseDoubleClickEvent(self, mouse_event):
+        '''
+        Opens a new tab when double-clicking on the tab bar
+        '''
+        if mouse_event.button() == Qt.LeftButton:
+            self.appendEmptyTab()
+
+    def widgetFromTabPos(self, point):
+        '''
+        Returns the widget at a point
+        '''
+        # http://lists.trolltech.com/qt-interest/2006-02/msg01471.html
+        tabBar = self.tabBar()
+        for index in range(self.count()):
+            if tabBar.tabRect( index ).contains( point ):
+                return self.widget( index )
     
-    def getEditor(self, *largs, **kwargs):
+    def contextMenuEvent(self, context_event):
         '''
-        Editor Factory
+        Event
         '''
-        editor =  self.EDIT_TAB_WIDGET(self, *largs, **kwargs)
-        
-        # TODO: Poner esto en configuración
-        font = QFont()
-        font.setFamily('Consolas')
-        font.setPointSize(11)
-        editor.setFont(font)
-        return editor
+        pos = context_event.pos()
+        m = QMenu()
+        m.addAction(self.actionNewTab)
+        m.addSeparator()
+        m.addAction(self.actionCloseTab)
+        m.addAction(self.actionCloseAll)
+        m.addAction(self.actionCloseOthers)
+        m.addSeparator()
+        m_order = m.addMenu(self.trUtf8("Tab &Order"))
+        m_order.addAction(self.actionOrderTabsByName)
+        m_order.addAction(self.actionOrderOpenOrder)
+        m_order.addAction(self.actionOrderByURL)
+
+        m.exec_( context_event.globalPos() )
+
+        # Separate menus when clicking on a tab?
+        # widget = self.widgetFromTabPos( pos )
+        #if not widget:
+        #
+        #else:
+        #    widget
     
     def on_syntax_change(self, syntax):
         editor = self.currentWidget()
@@ -108,18 +192,41 @@ class PMXTabWidget(QTabWidget):
                                  <p>Some exception data:</p>
                                  <pre>%s</pre>""", path, unicode(e)[:40]))
     
+    def openFile(self, path):
+        '''
+        Creates a tab with the file contents and returns it
+        '''
+        from prymatex.gui.editor.widget import PMXEditorWidget
+        editor = PMXEditorWidget.getEditor(self, path)
+        self.addTab(editor, '...')
+        return editor
+        
+    
     def appendEmptyTab(self):
         '''
         Creates a new empty tab and returns it
         '''
-        editor = self.getEditor()
+        from prymatex.gui.editor.widget import PMXEditorWidget
+        editor = PMXEditorWidget.getEditor(self)
         # Title should be filled after tab insertion
-        index = self.addTab(editor, editor.title)
-        
-        self.setCurrentIndex(index)
-        if self.count() == 1:
-            editor.setFocus(Qt.TabFocusReason)
+        self.addTab(editor, '...')
         return editor
+    
+    def addTab(self, widget, title, autoFocus = True):
+        ''' Overrides QTabWidget.addTab(page, title) so that
+        afterInsertion is called '''
+        index = super(PMXTabWidget, self).addTab(widget, title)
+        
+        if autoFocus:
+            self.setCurrentIndex(index)
+            if self.count() == 1:
+                widget.setFocus(Qt.MouseFocusReason)
+                
+        if hasattr(widget, 'afterInsertion'):
+            widget.afterInsertion(self, index)
+            
+        return index
+        
     
     
     def closeTab(self, index):
@@ -127,11 +234,7 @@ class PMXTabWidget(QTabWidget):
         Asks the editor to be closed
         '''
         editor = self.widget(index)
-        count = self.count() 
-        if count == 1 and not editor.path and not editor.document().isModified():
-            return
-        elif count == 0:
-            return
+        count = self.count()
         if editor.requestClose():
             self.removeTab(index)
             return True
@@ -152,8 +255,8 @@ class PMXTabWidget(QTabWidget):
             self.appendEmptyTab()
         # 
         widget = self.currentWidget()
-        if not widget.actionMenuTab.isChecked():
-            widget.actionMenuTab.setChecked(True)
+        #if not widget.actionMenuTab.isChecked():
+        #    widget.actionMenuTab.setChecked(True)
             
     def indexChanged(self, index):
         #if index >= 0:
@@ -170,6 +273,65 @@ class PMXTabWidget(QTabWidget):
             widget.afterInsertionEvent()
         if not self.count():
             widget.actionMenuTab.setChecked(True)
+
+    def focusNextTab(self):
+        '''
+        Focus next tab
+        '''
+        curr = self.currentIndex()
+        count = self.count()
+
+        if curr < count -1:
+            prox = curr +1
+        else:
+            prox = 0
+        self.setCurrentIndex(prox)
+        self.currentWidget().setFocus( Qt.TabFocusReason )
+
+    def focusPrevTab(self):
+        curr = self.currentIndex()
+        count = self.count()
+
+        if curr > 0:
+            prox = curr -1
+        else:
+            prox = count -1
+        self.setCurrentIndex(prox)
+        self.currentWidget().setFocus(Qt.TabFocusReason)
+
+
+
+    def moveTabLeft(self):
+        ''' Moves the current tab to the left '''
+        if self.count() == 1:
+            return
+        count = self.count()
+        index = self.currentIndex()
+        text = self.tabText(index)
+        widget = self.currentWidget()
+        self.removeTab(index)
+        index -= 1
+        if index < 0:
+            index = count
+        self.insertTab(index, widget, text)
+        self.setCurrentWidget(widget)
+
+    def moveTabRight(self):
+        '''
+        Moves the current tab to the right
+        '''
+        if self.count() == 1:
+            return
+        count = self.count()
+        index = self.currentIndex()
+        text = self.tabText(index)
+        widget = self.currentWidget()
+        self.removeTab(index)
+        index += 1
+        if index >= count:
+            index = 0
+        self.insertTab(index, widget, text)
+        self.setCurrentWidget(widget)
 
 class PMWTabsMenu(QMenu):
     '''
@@ -197,9 +359,4 @@ class PMWTabsMenu(QMenu):
             action.setShortcut(shortcut)
         
     
-
-
-    
-        
-        
-        
+     

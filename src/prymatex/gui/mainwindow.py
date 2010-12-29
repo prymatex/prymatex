@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
-# encoding: utf-8
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from pprint import pformat
+from prymatex.gui.editor.base import PMXCodeEdit
+
+if __name__ == "__main__":
+    import sys
+    from os.path import join
+    sys.path.append(join('..', '..'))
+    
+    
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget , PMWTabsMenu
 from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
+from layoutmanager import PMXLayoutManager
 from prymatex.gui.mixins.common import CenterWidget
 from prymatex.config.configdialog import PMXConfigDialog
 from prymatex.gui.panes.outputpanel import PMXOutputDock
@@ -16,27 +24,33 @@ from prymatex.gui.panes.symbols import PMXSymboldListDock
 from prymatex.gui.panes.bundles import PMXBundleEditorDock
 from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.filterdlg import PMXFilterDialog
+
 import itertools
 import logging
 from prymatex.lib.textmate.bundle import TMMenuNode, MENU_SPACE
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
+
     
     def __init__(self):
         QMainWindow.__init__(self)
+        # Initialize graphical elements
         self.setupUi(self)
         
-        self.setWindowTitle(_(u"Prymatex Text Editor"))
+        self.setWindowTitle(self.trUtf8(u"Prymatex Text Editor"))
 
         #Conectar tabs con status y status con tabs
-        self.statusbar.syntaxMenu.syntaxChange.connect(self.tabWidgetEditors.on_syntax_change)
-        self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
+        #self.statusbar.syntaxMenu.syntaxChange.connect(self.tabWidgetEditors.on_syntax_change)
+        #self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
         
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
-        self.setCentralWidget(self.tabWidgetEditors)
-        self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
-        self.actionGroupTabs.addMenu(self.menuPanes)
+        
+        self.layoutManager = PMXLayoutManager(self)
+        self.setCentralWidget(self.layoutManager)
+        #self.setCentralWidget(self.tabWidgetEditors)
+        #self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
+        #self.actionGroupTabs.addMenu(self.menuPanes)
         
         self.setup_panes()
         self.setup_logging()
@@ -54,11 +68,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
         self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
-        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+        #self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
         #self.actionShowFSPane.setChecked(True)
         self.prevent_menu_lock()
-        
+
+
     
     def setup_logging(self):
         from logwidget import LogDockWidget
@@ -145,45 +160,42 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     counter = 0
     
+    #===========================================================================
+    # Shortcuts
+    #===========================================================================
+    
+    @property
+    def currentTabWidget(self):
+        ''' Shortcut to the current editor (bypass layoutManager) '''
+        return self.layoutManager.currentTabWidget
+    
+    @property
+    def currentEditor(self):
+        return self.currentTabWidget.currentWidget()
+    
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        #self.tabWidgetEditors.addTab(QTextEdit(), "New Tab %d" % self.counter)
-        #self.counter += 1
-        logger.info("New")
-        self.tabWidgetEditors.appendEmptyTab()
+        self.currentTabWidget.appendEmptyTab()
+
+    
     
     @pyqtSignature('')
     def on_actionClose_triggered(self):
-        index = self.tabWidgetEditors.currentIndex()
-        self.tabWidgetEditors.closeTab(index)
-        if self.tabWidgetEditors.count():
-            self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+        index = self.currentTabWidget.currentIndex()
+        self.currentTabWidget.closeTab(index)
+        if self.currentTabWidget.count():
+            self.currentTabWidget.currentWidget().setFocus(Qt.TabFocusReason)
 
     
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
+        self.currentTabWidget.focusNextTab()
         
-        curr = self.tabWidgetEditors.currentIndex()
-        count = self.tabWidgetEditors.count()
-        
-        if curr < count -1:
-            prox = curr +1
-        else:
-            prox = 0
-        self.tabWidgetEditors.setCurrentIndex(prox)
-        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+
         
     @pyqtSignature('')
     def on_actionPrevious_Tab_triggered(self):
-        curr = self.tabWidgetEditors.currentIndex()
-        count = self.tabWidgetEditors.count()
-        
-        if curr > 0:
-            prox = curr -1
-        else:
-            prox = count -1
-        self.tabWidgetEditors.setCurrentIndex(prox)
-        self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
+        self.currentTabWidget.focusPrevTab()
         
     @pyqtSignature('')
     def on_actionAboutApp_triggered(self):
@@ -227,7 +239,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         if not fs:
             return
         for path in fs:
-            self.tabWidgetEditors.openLocalFile(path)
+            #PMXCodeEdit.get
+            self.currentTabWidget.openFile(path)
+            #self.tabWidgetEditors.openLocalFile(path)
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
@@ -239,16 +253,20 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         webbrowser.open(qApp.instance().projectUrl)
     
     @property
-    def current_editor(self):
-        return self.tabWidgetEditors.currentWidget()
+    def editor(self):
+        '''
+        Current Editor
+        '''
+        self.layoutManager.currentEditor()
+        #return self.tabWidgetEditors.currentWidget()
         
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        self.current_editor.save()
+        self.currentEditor.save()
     
     @pyqtSignature('')
     def on_actionSaveAs_triggered(self):
-        self.current_editor.save(save_as = True)
+        self.currentEditor.save(save_as = True)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
@@ -273,11 +291,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
     @pyqtSignature('')
     def on_actionZoom_In_triggered(self):
-        self.tabWidgetEditors.currentWidget().zoomIn()
+        self.currentEditor.zoomIn()
+        
     
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
-        self.tabWidgetEditors.currentWidget().zoomOut()
+        self.currentEditor.zoomOut()
     
     @pyqtSignature('')
     def on_actionFocus_Editor_triggered(self):
@@ -307,33 +326,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     @pyqtSignature('')
     def on_actionMove_Tab_Left_triggered(self):
-        if self.tabWidgetEditors.count() == 1:
-            return
-        count = self.tabWidgetEditors.count()
-        index = self.tabWidgetEditors.currentIndex()
-        text = self.tabWidgetEditors.tabText(index)       
-        widget = self.tabWidgetEditors.currentWidget()
-        self.tabWidgetEditors.removeTab(index)
-        index -= 1
-        if index < 0:
-            index = count
-        self.tabWidgetEditors.insertTab(index, widget, text)
-        self.tabWidgetEditors.setCurrentWidget(widget)
+        self.tab_widget_mediator.moveTabLeft()
     
     @pyqtSignature('')    
     def on_actionMove_Tab_Right_triggered(self):
-        if self.tabWidgetEditors.count() == 1:
-            return
-        count = self.tabWidgetEditors.count()
-        index = self.tabWidgetEditors.currentIndex()
-        text = self.tabWidgetEditors.tabText(index)       
-        widget = self.tabWidgetEditors.currentWidget()
-        self.tabWidgetEditors.removeTab(index)
-        index += 1
-        if index >= count:
-            index = 0
-        self.tabWidgetEditors.insertTab(index, widget, text)
-        self.tabWidgetEditors.setCurrentWidget(widget)
+        self.tab_widget_mediator.moveTabRight()
     
     #===========================================================================
     # Dumb code :/
@@ -406,6 +403,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         def to_upper(s):
             return unicode(s).upper()
         self.current_editor.replaceCursorText(to_upper)
+        
+    @pyqtSignature('')
+    def on_actionFind_triggered(self):
+        self.currentEditor.actionFind.trigger()
+        
+    @pyqtSignature('')
+    def on_actionFind_Replace_triggered(self):
+        self.currentEditor.actionReplace.trigger()
     
 
 class PMXTabActionGroup(QActionGroup):

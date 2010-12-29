@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Sun Nov 21 21:27:32 2010
+# Created: Sat Dec 25 12:31:43 2010
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -16,10 +16,11 @@ class Ui_MainWindow(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icons/resources/icons/Prymatex_Logo.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
-        self.tabWidgetEditors = PMXTabWidget(MainWindow)
-        self.tabWidgetEditors.setObjectName("tabWidgetEditors")
-        self.verticalLayout = QtGui.QVBoxLayout(self.tabWidgetEditors)
+        self.foo = QtGui.QWidget(MainWindow)
+        self.foo.setObjectName("foo")
+        self.verticalLayout = QtGui.QVBoxLayout(self.foo)
         self.verticalLayout.setObjectName("verticalLayout")
+        MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menubar.setObjectName("menubar")
@@ -269,7 +270,15 @@ class Ui_MainWindow(object):
         self.actionShow_Log_Window = QtGui.QAction(MainWindow)
         self.actionShow_Log_Window.setCheckable(True)
         self.actionShow_Log_Window.setObjectName("actionShow_Log_Window")
+        self.actionNew_from_template = QtGui.QAction(MainWindow)
+        self.actionNew_from_template.setEnabled(False)
+        self.actionNew_from_template.setObjectName("actionNew_from_template")
+        self.actionSplit_Vertically = QtGui.QAction(MainWindow)
+        self.actionSplit_Vertically.setObjectName("actionSplit_Vertically")
+        self.actionSplit_Horizontally = QtGui.QAction(MainWindow)
+        self.actionSplit_Horizontally.setObjectName("actionSplit_Horizontally")
         self.menuFile.addAction(self.actionNewTab)
+        self.menuFile.addAction(self.actionNew_from_template)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSave_As)
@@ -285,6 +294,9 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionZoom_In)
         self.menuView.addAction(self.actionZoom_Out)
         self.menuView.addSeparator()
+        self.menuView.addAction(self.actionSplit_Vertically)
+        self.menuView.addAction(self.actionSplit_Horizontally)
+        self.menuView.addSeparator()
         self.menuView.addAction(self.actionFocus_Editor)
         self.menuView.addAction(self.actionShow_Line_Numbers)
         self.menuView.addAction(self.actionShow_Folding)
@@ -294,7 +306,6 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionShow_Project_Dock)
         self.menuView.addAction(self.actionShow_Symbol_List)
         self.menuView.addAction(self.actionShow_Output)
-        self.menuView.addSeparator()
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionShow_Current_Scope)
         self.menuView.addSeparator()
@@ -504,9 +515,11 @@ class Ui_MainWindow(object):
         self.actionShow_Log_Window.setStatusTip(QtGui.QApplication.translate("MainWindow", "Displays Log Messages", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Log_Window.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Shows logs from the application and its plugins", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Log_Window.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+L", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNew_from_template.setText(QtGui.QApplication.translate("MainWindow", "New from template", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSplit_Vertically.setText(QtGui.QApplication.translate("MainWindow", "Split Vertically", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSplit_Horizontally.setText(QtGui.QApplication.translate("MainWindow", "Split Horizontally", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
-from tabwidget import PMXTabWidget
 import res_rc
 
 if __name__ == "__main__":

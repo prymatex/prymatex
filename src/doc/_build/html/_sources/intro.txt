@@ -1,0 +1,58 @@
+Prymatex Fundamentals
+=====================
+
+Prymaetex 
+
+Mediator
+''''''''
+
+Mediator pattern [*]_ [*]_.
+
+
+
+
+.. [*] http://pages.cpsc.ucalgary.ca/~heatond/mediator/
+.. [*] http://entitycrisis.blogspot.com/2007/07/mediator-pattern-in-python.html
+
+
+.. graphviz::
+
+    digraph Mediators {
+        
+        subgraph clusterA {
+            label = "Menu actions"
+            openfile [
+                label =  "actionOpenFile",
+            ];
+            actionUndo
+            
+        }
+        subgraph clusterB {
+            label = "Mediators"
+            currentTabWidget
+            currentEditor
+        }
+        
+        openfile -> currentTabWidget [label = "openFile"];
+
+        
+        subgraph clusterC {
+            label = "Actual Widgets"
+            tabWidget1
+            tabWidget2
+            PMXCodeEdit1
+        }
+
+        currentTabWidget -> tabWidget1 [label = "???"]
+        tabWidget1 -> PMXCodeEdit1
+        PMXCodeEdit1 -> currentEditor [label = "undoAvailable()"]
+        currentEditor -> actionUndo [label = "setEnabled()"]
+
+    }
+
+Signals
+'''''''
+
+
+
+

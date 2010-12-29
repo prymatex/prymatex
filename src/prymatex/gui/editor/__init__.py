@@ -1,0 +1,1 @@
+from prymatex.gui.editor.base import PMXCodeEdit
