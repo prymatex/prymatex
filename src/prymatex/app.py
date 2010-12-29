@@ -13,6 +13,10 @@ from optparse import OptionParser
 
 BASE_PATH = dirname(__file__)
 
+# ipdb handling
+import sys
+sys_excepthook = sys.excepthook
+
 class PMXApplication(QApplication):
     '''
     The application instance.
@@ -67,6 +71,10 @@ class PMXApplication(QApplication):
         
         self.createWindows(files_to_open)
         
+        if not self.options.ipdb_excepthook:
+            sys.excepthook = sys_excepthook
+        else:
+            import ipdb
     @property
     def options(self):
         ''' Commandline options '''

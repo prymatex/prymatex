@@ -40,3 +40,10 @@ parser.add_option('-D', '--devel', dest='devel', action='store_true', default=Fa
 # Cache should be used by default to store bundle and plugin cache
 parser.add_option('-n', '--no-cache', dest='cache', action='store_true', default=False,
                   help=u'Disable Bundle caché')
+
+parser.add_option('-x', '--no-ipdb', dest="ipdb_excepthook", 
+                  action="store_false", help="Disable ipdb stacktrace",
+                  default=False)
+
+parser.add_option('-i', '--ipdb', dest="ipdb_excepthook", 
+                  action="store_true", help="Enable ipdb stacktrace")

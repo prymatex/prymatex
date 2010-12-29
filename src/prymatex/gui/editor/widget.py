@@ -10,7 +10,7 @@ import re
 import os
 import logging
 from prymatex.gui.tabwidget import PMXTabWidget
-
+#from prymatex.lib.deco import logresult
 logger = logging.getLogger(__name__)
 
 # Path correction for standalone test
@@ -32,7 +32,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     __title = None
     
     def __init__(self, parent, path = None):
+        assert isinstance(parent, PMXTabWidget), "PMXEditorWidget can only be"\
+                                                 " used with PMXTabWidget as"\
+                                                 " parent."
         super(PMXEditorWidget, self).__init__(parent)
+        
         self.setupActions()
         self.setupUi(self)
         
@@ -46,21 +50,29 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.findreplaceWidget.hide()
         
         self.path = path
-        
-        self.readFileContents()
+        #from ipdb import set_trace; set_trace()
+        if self.path is not None:
+            self.readFileContents()
         
     COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
     COLOR_NORMAL = QColor("black")
     
     def on_codeEdit_modificationChanged(self, modified):
         if modified:
-            self.title = "%s *" % self.title
+            self.tooltip = self.trUtf8("Modified")
             self.setTabTextColor(self.COLOR_MODIFIED)
         else:
-            if self.title.endswith(' *'):
-                self.title = self.title[:-2] 
+            self.tooltip = self.trUtf8("") 
             self.setTabTextColor(self.COLOR_NORMAL)
-        
+    
+    @property
+    def tooltip(self):
+        return self.parent().parent().tabToolTip(self.index)
+    
+    @tooltip.setter
+    def tooltip(self, value):
+        self.parent().parent().setTabToolTip(self.index, value)
+    
     @property
     def path(self):
         return self.__path
@@ -82,11 +94,13 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     
     @property
     def index(self):
-        return self.tabwidget.indexOf(self)
+        return self.parent().indexOf(self)
     
     @property
     def tabwidget(self):
+        
         return self.parent().parent()
+        
     
     
     def setTabTextColor(self, color):
@@ -95,7 +109,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     @title.setter
     def title(self, value):
         self.__title = value
-        self.tabwidget.setTabText(self.index, self.__title)
+        self.parent().setTabText(self.index, self.__title)
          
     
     #===========================================================================
@@ -108,11 +122,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         Factory for the default text editor
         '''
         assert isinstance(parent, PMXTabWidget), cls.trUtf8("You didn't pass a valid parent: %s" % parent)
-
-        editor = PMXEditorWidget(parent)
-        if path:
-            editor.open(path)
-            
+        editor = PMXEditorWidget(parent, path)
         return editor
 
     @classmethod
@@ -275,7 +285,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         Read file contents
         '''
         self.path = path
-        self.readFileContents()
+        #self.readFileContents()
     
     READ_SIZE = 1024 * 64 # 64K
     def readFileContents(self):
@@ -284,14 +294,20 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         self.codeEdit.setEnabled(False)
         self.codeEdit.clear()
-        size, read = os.path.getsize(self.path), 0
-        f = open(self.path, 'r')
-        while size >= read:
-            content = f.read(self.READ_SIZE)
-            read += len(content)
-            self.codeEdit.insertPlainText(content)
-            logger.debug("%d bytes read from %s", read, self.path)
-        f.close()
+        try:
+            size, read = os.path.getsize(self.path), 0
+        except OSError:
+            logger.debug("Could not open %s", self.path)
+        else:
+            # Let's read
+            f = open(self.path, 'r')
+            while size >= read:
+                content = f.read(self.READ_SIZE)
+                read += len(content)
+                self.codeEdit.insertPlainText(content)
+                logger.debug("%d bytes read from %s", read, self.path)
+            f.close()
+            
         self.codeEdit.setEnabled(True)
     
     

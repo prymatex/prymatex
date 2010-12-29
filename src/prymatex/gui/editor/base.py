@@ -72,7 +72,11 @@ class PMXCodeEdit(QPlainTextEdit):
         self.__soft_tabs = True
         self.__tab_length = 4
         self.character_actions = {}
-        self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
+        try:
+            formater = PMXSyntaxFormatter.load_from_textmate_theme('LAZY')
+            self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = formater)
+        except:
+            logger.debug("Could not set syntax")
         
         # TODO: Load from config
         option = QTextOption()
