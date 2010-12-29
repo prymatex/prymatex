@@ -102,8 +102,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
         self.declareEvent('cursorPositionChangedEvent()') 
                           
+        self.connect(self, SIGNAL('cursorPositionChanged()'), self.sendCursorPosChange)
         
-        
+    def sendCursorPosChange(self):
+        c = self.textCursor()
+        line  = c.blockNumber()
+        col = c.columnNumber()
+        self.cursorPositionChangedEvent(line, col)
         
         
     def set_syntax(self, syntax):
@@ -404,7 +409,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         Indents text, it take cares of block selections.
         '''
         
-        self.cursorPositionChangedEvent(1, 2, 5)
+        
         
         block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
         

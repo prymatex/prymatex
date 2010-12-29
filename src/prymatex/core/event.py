@@ -20,20 +20,23 @@ except:
 			return cls.generator.next()
 
 class PMXEvent(QEvent):
-	def __init__(self, sender):
+	def __init__(self, source, largs, kwargs):
 		super(PMXEvent, self).__init__(self.TYPE)
-		self.sender = sender
+		self.source = source
+		self.largs, self.kwargs = largs, kwargs
 
 class PMXEventSender(object):
 	#__metaclass__ = PMXEventBase
-	def __init__(self, event_class, sender):
+	def __init__(self, event_class, source):
 		self.event_class = event_class
-		self.sender = sender
+		self.source = source
 		
 	def __call__(self, *largs, **kwargs):
 		
-		event = self.event_class(sender = self.sender)
-		QApplication.postEvent(self.sender, event)
+		event = self.event_class(source = self.source, 
+								largs = largs,
+								kwargs = kwargs)
+		QApplication.postEvent(self.source, event)
 		
 	@staticmethod
 	def eventFactory(name):

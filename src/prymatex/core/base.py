@@ -22,7 +22,7 @@ class PMXObject(QObject):
 		event_class = EVENT_CLASSES.setdefault(name, 
 											PMXEventSender.eventFactory(name))
 		
-		sender = PMXEventSender(event_class = event_class, sender = self)
+		sender = PMXEventSender(event_class = event_class, source = self)
 		setattr(self, name, sender)
 		return sender
 

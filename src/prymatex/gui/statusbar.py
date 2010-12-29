@@ -84,7 +84,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
     def __init__(self, parent ):
         QStatusBar.__init__(self, parent)
         #self.lineLabel = PWMStatusLabel(_("Line: %6d", 0), self)
-        self.lineLabel = QLabel("Line %d %d", self)
+        self.lineLabel = QLabel("Line %d", self)
         self.columnLabel = PWMStatusLabel(_("Column: %6d", 0), self)
         self.langComboBox = PWMStatusLabel(_("Lang"), self)
         self.indentModeComboBox = PWMStatusLabel(_("Indent Mode"),
@@ -122,8 +122,12 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.connect(self.root, SIGNAL('cursorPositionChangedEvent'),
                      self.updatePosition )
     
-    def updatePosition(self, *largs, **kwargs):
-        print "updatePosition", largs, kwargs 
+    def updatePosition(self, source, line, col):
+        self.lineLabel.setText("Line: %d" % line)
+        self.columnLabel.setText("Col: %d" % col)
+        
+        
+         
     def updateCursorPos(self, col, row):
         '''  Called by the main window '''
         self.lineLabel.setText(_("Line: %6d", row))

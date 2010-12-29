@@ -312,13 +312,14 @@ class PMXApplication(QApplication):
         if event.type() > QEvent.User:
             w = receiver
             while(w):
-                print ('Type of w is %s', type(w))
+                # DEBUG
+                #print ('Type of w is %s', type(w))
                 if is_sip_wrapped(w):
                     res = w.customEvent(event)
                     if res and event.isAccepted():
                         return res
                     elif w.receivers(event.signal) != 0:    
-                        w.emit(event.signal)
+                        w.emit(event.signal, event.source, *event.largs)
                 w = w.parent()
         return super(PMXApplication, self).notify(receiver, event)
 
