@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # encoding: utf-8
 from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
-from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import SIGNAL, QEvent
 
 from os.path import join, exists, isdir, isabs
 
@@ -16,7 +16,6 @@ BASE_PATH = dirname(__file__)
 # ipdb handling
 import sys
 sys_excepthook = sys.excepthook
-
 class PMXApplication(QApplication):
     '''
     The application instance.
@@ -302,6 +301,18 @@ class PMXApplication(QApplication):
         else:
             from prymatex.lib.os import get_homedir
             return get_homedir()
-    
+
+	def notify(self, receiver, event):
+		'''
+		Notify with propagation for customEvent
+		'''
+        if event.type() > QEvent.User:
+            w = receiver
+            while(w):
+                res = w.customEvent(event);
+                if res and event.isAccepted():
+                    return res
+                w = w.parent()
+        return super(PMXApplication, self).notify(receiver, event)
 
 import res_rc
