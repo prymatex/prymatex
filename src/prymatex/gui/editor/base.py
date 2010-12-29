@@ -13,6 +13,7 @@ import sys
 import traceback
 import re
 import logging
+from prymatex.core.base import PMXObject
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,7 @@ def debug_key(key_event):
 
 _counter = 0
 
-class PMXCodeEdit(QPlainTextEdit):
+class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     The GUI element which holds the editor.
     It has a document
@@ -94,6 +95,16 @@ class PMXCodeEdit(QPlainTextEdit):
             
         })
         self.setupActions()
+        
+        #=======================================================================
+        # Events
+        #=======================================================================
+        
+        self.declareEvent('cursorPositionChangedEvent()') 
+                          
+        
+        
+        
         
     def set_syntax(self, syntax):
         self.syntax_processor.set_syntax(syntax)
@@ -392,6 +403,9 @@ class PMXCodeEdit(QPlainTextEdit):
         '''
         Indents text, it take cares of block selections.
         '''
+        
+        self.cursorPositionChangedEvent(1, 2, 5)
+        
         block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
         
         cursor = self.textCursor()

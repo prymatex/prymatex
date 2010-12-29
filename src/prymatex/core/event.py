@@ -3,6 +3,8 @@
 
 try:
 	from PyQt4.QtCore import QEvent
+	from PyQt4.Qt import QApplication
+	from PyQt4.QtCore import SIGNAL
 except:
 	#MOCK
 	def infinite_generator(initial = 65535):
@@ -17,18 +19,27 @@ except:
 		def registerEventType(cls):
 			return cls.generator.next()
 
-class PMXEventBase(type):
-	def __new__(cls, name, bases, attrs):
-		new_class = super(PMXEventBase, cls).__new__(cls, name, bases, attrs)
-		setattr(new_class, "TYPE", QEvent.registerEventType())
-		return new_class
-
 class PMXEvent(QEvent):
-	__metaclass__ = PMXEventBase
+	def __init__(self, sender):
+		super(PMXEvent, self).__init__(self.TYPE)
+		self.sender = sender
 
-	def post(self):
-		pass
-	
+class PMXEventSender(object):
+	#__metaclass__ = PMXEventBase
+	def __init__(self, event_class, sender):
+		self.event_class = event_class
+		self.sender = sender
+		
+	def __call__(self, *largs, **kwargs):
+		
+		event = self.event_class(sender = self.sender)
+		QApplication.postEvent(self.sender, event)
+		
+	@staticmethod
+	def eventFactory(name):
+		return type(name, (PMXEvent, ), {'TYPE': QEvent.registerEventType(),
+										'signal': SIGNAL(name)})
+		
 def main():
 	e1 = type("MyEvent", (PMXEvent, ), {})
 	e2 = type("MyOtherEvent", (PMXEvent, ), {})

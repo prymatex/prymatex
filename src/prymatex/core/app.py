@@ -13,6 +13,8 @@ from optparse import OptionParser
 
 BASE_PATH = dirname(__file__)
 
+from logging import getLogger
+logger = getLogger(__name__)
 
 # ipdb handling
 import sys
@@ -303,17 +305,30 @@ class PMXApplication(QApplication):
             from prymatex.lib.os import get_homedir
             return get_homedir()
 
-	def notify(self, receiver, event):
-		'''
-		Notify with propagation for customEvent
-		'''
+    def notify(self, receiver, event):
+        '''
+    	Notify with propagation for customEvent
+    	'''
         if event.type() > QEvent.User:
             w = receiver
             while(w):
-                res = w.customEvent(event);
-                if res and event.isAccepted():
-                    return res
+                print ('Type of w is %s', type(w))
+                if is_sip_wrapped(w):
+                    res = w.customEvent(event)
+                    if res and event.isAccepted():
+                        return res
+                    elif w.receivers(event.signal) != 0:    
+                        w.emit(event.signal)
                 w = w.parent()
         return super(PMXApplication, self).notify(receiver, event)
 
+
+def is_sip_wrapped(instance):
+    try:
+        instance.sender()
+    except RuntimeError:
+        return False
+    return True
+    
+    
 import res_rc

@@ -10,6 +10,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
 from prymatex.lib.textmate.syntax import TM_SYNTAXES, TMSyntaxNode
+from prymatex.core.base import PMXObject
 
 class QuickSyntaxSwitchDialog(QDialog):
     def __init__(self, parent = None):
@@ -78,11 +79,12 @@ class PMXSyntaxMenu(QComboBox):
         else:
             self.setCurrentIndex(0)
             
-class PMXStatusBar(QStatusBar):
+class PMXStatusBar(QStatusBar, PMXObject):
     
     def __init__(self, parent ):
         QStatusBar.__init__(self, parent)
-        self.lineLabel = PWMStatusLabel(_("Line: %6d", 0), self)
+        #self.lineLabel = PWMStatusLabel(_("Line: %6d", 0), self)
+        self.lineLabel = QLabel("Line %d %d", self)
         self.columnLabel = PWMStatusLabel(_("Column: %6d", 0), self)
         self.langComboBox = PWMStatusLabel(_("Lang"), self)
         self.indentModeComboBox = PWMStatusLabel(_("Indent Mode"),
@@ -116,7 +118,12 @@ class PMXStatusBar(QStatusBar):
         self.addPermanentWidget(self.langComboBox)
         self.addPermanentWidget(self.indentModeComboBox)
         self.addPermanentWidget(self.indentWidthComboBox)
+        
+        self.connect(self.root, SIGNAL('cursorPositionChangedEvent'),
+                     self.updatePosition )
     
+    def updatePosition(self, *largs, **kwargs):
+        print "updatePosition", largs, kwargs 
     def updateCursorPos(self, col, row):
         '''  Called by the main window '''
         self.lineLabel.setText(_("Line: %6d", row))
