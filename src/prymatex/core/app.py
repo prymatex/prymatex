@@ -13,6 +13,7 @@ from optparse import OptionParser
 
 BASE_PATH = dirname(__file__)
 
+
 # ipdb handling
 import sys
 sys_excepthook = sys.excepthook
@@ -178,7 +179,7 @@ class PMXApplication(QApplication):
     def init_resources(self):
         if not self.__res_mngr:
             from prymatex.resmgr import ResourceManager
-            self.__res_mngr = ResourceManager(BASE_PATH)
+            self.__res_mngr = ResourceManager()
         
     def init_config(self):
         if not self.__config:

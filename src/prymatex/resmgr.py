@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# FIXME: Deprecate
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -20,7 +20,7 @@ class ResourceManager(QObject):
         '''
         '''
         self.path = path or os.path.dirname(__file__)
-        print path
+        logger.info("Resources located in: %s", self.path)
         self.current_theme = self.available_themes[0]
         
     
