@@ -25,7 +25,7 @@ if __name__ == "__main__":
     #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
 
 from prymatex.gui.editor.sidearea import PMXSideArea
-
+from prymatex.gui.editor.syntax import PMXSyntaxProcessor, PMXSyntaxFormatter
 
 # Create the logger instance
 logger = getLogger(__name__)

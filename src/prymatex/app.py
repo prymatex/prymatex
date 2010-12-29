@@ -13,16 +13,6 @@ from optparse import OptionParser
 
 BASE_PATH = dirname(__file__)
 
-def infinite_generator(initial = 0):
-    ''' A simple integer generator for unique
-    endless sequences, such as "Untitled %d" files and such
-    '''
-    while True:
-        yield initial
-        initial += 1 
-
-
-
 class PMXApplication(QApplication):
     '''
     The application instance.
