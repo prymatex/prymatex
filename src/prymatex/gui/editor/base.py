@@ -24,12 +24,7 @@ if __name__ == "__main__":
     sys.path.append('../..')
     #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
 
-<<<<<<< HEAD:src/prymatex/editor/base.py
-from prymatex.editor.sidearea import PMXSideArea
-from prymatex.editor.syntax import PMXSyntaxProcessor, PMXSyntaxFormatter
-=======
 from prymatex.gui.editor.sidearea import PMXSideArea
->>>>>>> 00dd00e193306bb6337aa5480145572bd7b5bff3:src/prymatex/gui/editor/base.py
 
 
 # Create the logger instance
@@ -76,11 +71,8 @@ class PMXCodeEdit(QPlainTextEdit):
         self.__last_save_time = None
         self.__soft_tabs = True
         self.__tab_length = 4
-<<<<<<< HEAD:src/prymatex/editor/base.py
         self.character_actions = {}
         self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = PMXSyntaxFormatter.load_from_textmate_theme('LAZY'))
-=======
->>>>>>> 00dd00e193306bb6337aa5480145572bd7b5bff3:src/prymatex/gui/editor/base.py
         
         # TODO: Load from config
         option = QTextOption()
@@ -352,10 +344,7 @@ class PMXCodeEdit(QPlainTextEdit):
 
             cursor.beginEditBlock()
             cursor.insertText(text_end)
-<<<<<<< HEAD:src/prymatex/editor/base.py
-=======
             cursor.endEditBlock()
->>>>>>> 00dd00e193306bb6337aa5480145572bd7b5bff3:src/prymatex/gui/editor/base.py
         else:
             cursor.beginEditBlock()
             cursor.insertText(text_start)
@@ -369,8 +358,6 @@ class PMXCodeEdit(QPlainTextEdit):
 
         cursor.endEditBlock()
 
-<<<<<<< HEAD:src/prymatex/editor/base.py
-=======
     
     #===========================================================================
     # Text Indentation
@@ -395,7 +382,6 @@ class PMXCodeEdit(QPlainTextEdit):
         except AttributeError:
             return ''
         
->>>>>>> 00dd00e193306bb6337aa5480145572bd7b5bff3:src/prymatex/gui/editor/base.py
     # TODO: Word wrapping fix
     # TODO: Correct whitespace mix
     def indent(self):

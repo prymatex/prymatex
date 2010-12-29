@@ -31,7 +31,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     __path = None
     __title = None
     
-    def __init__(self, parent):
+    def __init__(self, parent, path = None):
         super(PMXEditorWidget, self).__init__(parent)
         self.setupActions()
         self.setupUi(self)
@@ -44,6 +44,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.codeEdit.addAction(self.actionReplace)
 
         self.findreplaceWidget.hide()
+        
+        self.path = path
+        
+        self.readFileContents()
         
     COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
     COLOR_NORMAL = QColor("black")
@@ -270,11 +274,30 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         Read file contents
         '''
-        f = open(path, 'r')
-        content = f.read()
+        self.path = path
+        self.readFileContents()
+    
+    READ_SIZE = 1024 * 64 # 64K
+    def readFileContents(self):
+        '''
+        Reads file contents
+        '''
+        self.codeEdit.setEnabled(False)
+        self.codeEdit.clear()
+        size, read = os.path.getsize(self.path), 0
+        f = open(self.path, 'r')
+        while size >= read:
+            content = f.read(self.READ_SIZE)
+            read += len(content)
+            self.codeEdit.insertPlainText(content)
+            logger.debug("%d bytes read from %s", read, self.path)
         f.close()
-        self.codeEdit.setPlainText(content)
-        return len(content)
+        self.codeEdit.setEnabled(True)
+    
+    
+        
+        
+            
         
     
     #===========================================================================
@@ -282,7 +305,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     #===========================================================================
     
     def afterInsertion(self, tab_widget, index):
-        ''' Callback '''
+        ''' Callback when the tab is inserted '''
         tab_widget.setTabText(index, self.title)
     
 if __name__ == "__main__":

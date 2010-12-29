@@ -33,7 +33,13 @@ logger = logging.getLogger(__name__)
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     
-    def __init__(self):
+    def __init__(self, files_to_open):
+        '''
+        The main window
+        @param parent: The QObject parent, in this case it should be the QApp
+        @param files_to_open: The set of files to be opened when the window
+                              is shown in the screen.
+        '''
         QMainWindow.__init__(self)
         # Initialize graphical elements
         self.setupUi(self)
@@ -76,6 +82,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     
     def setup_logging(self):
+        '''
+        Logging window setup
+        '''
         from logwidget import LogDockWidget
         self.log_dock_widget = LogDockWidget(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.log_dock_widget)
