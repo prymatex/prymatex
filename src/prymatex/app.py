@@ -7,7 +7,7 @@ from os.path import join, exists, isdir, isabs
 
 from os import getpid, unlink, getcwd
 from os.path import dirname, abspath
-from prymatex.lib.deco import printtime, logtime
+from prymatex.lib import  deco
 
 from optparse import OptionParser
 
@@ -34,18 +34,19 @@ class PMXApplication(QApplication):
     __res_mngr = None
     __logger = None
     
+    
+    
     #@printtime
-    @logtime
-    def __init__(self, arguments, logger = None):
+    @deco.logtime
+    def __init__(self, argv, logger = None):
         '''
         Inicialización de la aplicación.
         '''
-        QApplication.__init__(self, arguments)
+        QApplication.__init__(self, argv)
         # Logger setup
         self.setup_logging()
         from prymatex.optargs import parser
-        self.options, args = parser.parse_args(arguments) # Options are readonly
-        files_to_open = args[1:]
+        self.__options, files_to_open = parser.parse_args(argv[1:]) 
         
         # Some init's
         self.init_application_params()
@@ -62,21 +63,42 @@ class PMXApplication(QApplication):
         
         self.check_single_instance()
         
-        # Settings
-        
+        #Settings
+        #TODO: Settings
         
         # Bundles and Stuff
         self.load_texmate_themes()
         self.load_texmate_bundles()
         
-        from prymatex.gui.mainwindow import PMXMainWindow
-        self.main_window = PMXMainWindow()
-        self.splash.finish(self.main_window)
-        self.main_window.show()
-        
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
+        
+        # Creates the GUI
+        
+        self.createWindows(files_to_open)
+        
+    @property
+    def options(self):
+        ''' Commandline options '''
+        return self.__options
+        
     
+    def createWindows(self, files_to_open):
+        '''
+        Creates the windows
+        '''
+        from prymatex.gui.mainwindow import PMXMainWindow
+        self.windows = []
+        first_window = PMXMainWindow( files_to_open )
+        self.splash.finish(first_window)
+        first_window.show()
+        self.windows.append(first_window)   # Could it be possible to hold it in
+                                            # its childrens?
+        
+        self.connect(first_window, SIGNAL("destroyed(QObject)"), self.destroyWindow)
+    
+    def destroyWindow(self, qobject):
+        pass
     @property
     def logger(self):
         return self.__logger
@@ -133,29 +155,6 @@ class PMXApplication(QApplication):
         
         opts, files = parser.parse_args(argv)
     
-    @property
-    def untitled_counter(self):
-        '''
-        Returns current untitled counter value.
-        '''
-        return self.__untitled_counter
-    
-    def get_inc_untitled_counter(self):
-        '''
-        Gets the untitled counter
-        '''
-        v = self.__untitled_counter
-        self.__untitled_counter += 1
-        return v
-        
-    def _get_current_editor(self):
-        '''
-        Shortcut al editor actual
-        '''
-        return self.main_window.tabWidgetEditors.currentWidget()
-        
-    
-    current_editor = property(_get_current_editor)
     
     def init_application_params(self):
         import prymatex
@@ -246,7 +245,7 @@ class PMXApplication(QApplication):
         QApplication.processEvents()
     
     # Decorador para imprimir cuanto tarda
-    @logtime
+    @deco.logtime
     def load_texmate_bundles(self):
         from prymatex.lib.textmate import load_textmate_bundles
         from prymatex.lib.i18n import ugettext as _
@@ -305,6 +304,6 @@ class PMXApplication(QApplication):
         else:
             from prymatex.lib.os import get_homedir
             return get_homedir()
-
+    
 
 import res_rc

@@ -9,6 +9,7 @@ import traceback
 import re
 import os
 import logging
+from prymatex.gui.tabwidget import PMXTabWidget
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +27,10 @@ from ui_editorwidget import Ui_EditorWidget
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
     _counter = 0
+    _time = None # Modification time
     __path = None
     __title = None
-     
+    
     def __init__(self, parent):
         super(PMXEditorWidget, self).__init__(parent)
         self.setupActions()
@@ -36,7 +38,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
         self.setupFindReplaceWidget()
         #self.findreplaceWidget.hide()
-        self.codeEdit.setFont(QFont("Monospace", 12))
+        self.codeEdit.setFont(QFont("Monospace", 10))
 
         self.codeEdit.addAction(self.actionFind)
         self.codeEdit.addAction(self.actionReplace)
@@ -67,7 +69,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     @property
     def title(self):
         if not self.__title:
-            self.__title = unicode(self.trUtf8("Untitled %d")) % self.counter() 
+            count = self.counter()
+            if not count:
+                self.__title = unicode(self.trUtf8("Untitled file"))
+            else: 
+                self.__title = unicode(self.trUtf8("Untitled file (%d)")) % count
         return  self.__title
     
     @property
@@ -97,7 +103,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         Factory for the default text editor
         '''
-        assert isinstance(parent, QWidget), cls.trUtf8("You didn't pass a valid parent: %s" % parent)
+        assert isinstance(parent, PMXTabWidget), cls.trUtf8("You didn't pass a valid parent: %s" % parent)
 
         editor = PMXEditorWidget(parent)
         if path:
@@ -115,6 +121,9 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
 
     @classmethod
     def counter(cls):
+        '''
+        An infinite incremental counter to name untitled files
+        '''
         v = cls._counter
         cls._counter += 1
         return v
@@ -206,20 +215,22 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     MIN_POINT_SIZE = 6
 
     def zoomIn(self):
-        font = self.editor.font()
+        font = self.codeEdit.font()
         pt_size = font.pointSize()
         if pt_size < self.MAX_POINT_SIZE:
             pt_size += 1
             font.setPointSize(pt_size)
-        self.editor.setFont(font)
+            logger.debug("Font size is now %d points", pt_size)
+        self.codeEdit.setFont(font)
 
     def zoomOut(self):
-        font = self.editor.font()
+        font = self.codeEdit.font()
         pt_size = font.pointSize()
         if pt_size > self.MIN_POINT_SIZE:
             pt_size -=  1
             font.setPointSize(pt_size)
-        self.editor.setFont(font)
+            logger.debug("Font size is now %d points", pt_size)
+        self.codeEdit.setFont(font)
     
     #===========================================================================
     # File Operations
@@ -248,9 +259,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         if self.path:
             return self.do_save()
         else:
-            self.path = QFileDialog.getSaveFileName(self, 
-                                                    self.trUtf8("Save file as..."))
-            if self.path:
+            path = QFileDialog.getSaveFileName(self,
+                                                self.trUtf8("Save file as..."))
+            if path:
+                self.path = path
                 return self.do_save()
         return False
     
