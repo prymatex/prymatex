@@ -58,8 +58,11 @@ _counter = 0
 class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     The GUI element which holds the editor.
-    It has a document
-    It holds the highlighter
+    This class acts as a buffer for text, it does not know anything about
+    the underlying filesystem.
+    
+    It holds the highlighter and the folding
+    
     '''
 
     PAIRS_MATCH_REMOVE = ("()", "{}", "[]", "''", '""', )
@@ -68,8 +71,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
         self.setupUi()
-        self.__title = self.trUtf8("Untitled docuemnt")
-        self.__last_save_time = None
         self.__soft_tabs = True
         self.__tab_length = 4
         self.character_actions = {}
@@ -100,7 +101,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         # Events
         #=======================================================================
         
-        self.declareEvent('cursorPositionChangedEvent()') 
+        self.declareEvent('cursorPositionChangedEvent()')
+        #self.declareActionEvent(self.undoAvailable)
+        #self.declareActionEvent(self.copyAvailable)
                           
         self.connect(self, SIGNAL('cursorPositionChanged()'), self.sendCursorPosChange)
         
@@ -122,13 +125,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         tab_widget = self.parent()
         return tab_widget.indexOf(self)
 
-    @property
-    def title(self):
-        return self.__title
-        
-    @title.setter
-    def title(self, value):
-        self.__title = value
 
     @property
     def soft_tabs(self):
