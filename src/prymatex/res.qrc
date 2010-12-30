@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="actions">
+    <file>resources/mimetypes/x-office-document.png</file>
     <file>resources/actions/view-split-left-right.png</file>
     <file>resources/actions/view-split-top-bottom.png</file>
     <file>resources/actions/configure.png</file>
