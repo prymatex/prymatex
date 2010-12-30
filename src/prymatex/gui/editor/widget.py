@@ -2,7 +2,7 @@
 '''
 from PyQt4.QtGui import QWidget, QAction, QMenu, QKeySequence
 from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor
-from PyQt4.QtCore import SIGNAL, Qt
+from PyQt4.QtCore import SIGNAL, Qt, QString
 from logging import getLogger
 import sys
 import traceback
@@ -49,10 +49,9 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
 
         self.findreplaceWidget.hide()
         
-        self.path = path
-        #from ipdb import set_trace; set_trace()
-        if self.path is not None:
-            self.readFileContents()
+        if path:
+            self.open(path)
+            
         
     COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
     COLOR_NORMAL = QColor("black")
@@ -67,11 +66,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     
     @property
     def tooltip(self):
-        return self.parent().parent().tabToolTip(self.index)
+        return self.tabwidget.tabToolTip(self.index)
     
     @tooltip.setter
     def tooltip(self, value):
-        self.parent().parent().setTabToolTip(self.index, value)
+        self.tabwidget.setTabToolTip(self.index, value)
     
     @property
     def path(self):
@@ -79,8 +78,13 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     
     @path.setter
     def path(self, value):
-        self.__path = unicode(value)
-        self.title = os.path.basename(self.__path)
+        if isinstance(value, (basestring, QString)):
+            self.__path = unicode(value)
+        elif value is None:
+            self.__path = None
+        else:
+            raise ValueError("Path can't be a %s" % type(value))
+        
         
     @property
     def title(self):
@@ -92,24 +96,30 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                 self.__title = unicode(self.trUtf8("Untitled file (%d)")) % count
         return  self.__title
     
+    @title.setter
+    def title(self, value):
+        self.__title = value
+        self.tabwidget.SetTabTitle(self.index, value)
+    
     @property
     def index(self):
         return self.parent().indexOf(self)
     
     @property
     def tabwidget(self):
+        # This is very ugly :(
+        w = self.parent()
+        while not isinstance(w, PMXTabWidget):
+            w = w.parent()
+        return w
         
-        return self.parent().parent()
-        
-    
-    
     def setTabTextColor(self, color):
         self.tabwidget.tabBar().setTabTextColor(self.index, color)
         
     @title.setter
     def title(self, value):
         self.__title = value
-        self.parent().setTabText(self.index, self.__title)
+        self.tabwidget.setTabText(self.index, self.title)
          
     
     #===========================================================================
@@ -254,13 +264,15 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         This method is call to actually save the file, the path has to be
         set.
         '''
-        assert self.path, self.trUtf8("No path defined!")
-        buffer_contents = str(self.codeEdit.document().toPlainText())
+        assert self.path is not None, self.trUtf8("No path defined!")
+        print "File is: %s (%s)" % (self.path, type(self.path))
+        buffer_contents = unicode(self.codeEdit.document().toPlainText())
         f = open(str(self.path), 'w')
         #TODO: Check exceptions, for example, disk full.
         n = f.write(buffer_contents)
         f.close()
         self.codeEdit.document().setModified(False)
+        self.update_title()
         return n
      
     
@@ -280,12 +292,16 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                 return self.do_save()
         return False
     
+    def update_title(self):
+        self.title = os.path.basename(self.path)
+    
     def open(self, path):
         '''
         Read file contents
         '''
         self.path = path
-        #self.readFileContents()
+        self.readFileContents()
+        self.update_title() 
     
     READ_SIZE = 1024 * 64 # 64K
     def readFileContents(self):
@@ -295,23 +311,30 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.codeEdit.setEnabled(False)
         self.codeEdit.clear()
         try:
-            size, read = os.path.getsize(self.path), 0
+            size, read_count = os.path.getsize(self.path), 0
+            assert size > 0
         except OSError:
             logger.debug("Could not open %s", self.path)
+        except AssertionError:
+            logger.debug("Empty file")
         else:
-            # Let's read
-            f = open(self.path, 'r')
-            while size >= read:
-                content = f.read(self.READ_SIZE)
-                read += len(content)
-                self.codeEdit.insertPlainText(content)
-                logger.debug("%d bytes read from %s", read, self.path)
-            f.close()
             
+            f = open(self.path, 'r')
+            while size > read_count :
+                content = f.read(self.READ_SIZE)
+                read_count += len(content)
+                self.codeEdit.insertPlainText(content)
+                #logger.debug("%d bytes read_count from %s", read_count, self.path)
+            f.close()
+            self.codeEdit.document().setModified(False)
         self.codeEdit.setEnabled(True)
     
-    
-        
+    def writeBufferContents(self):
+        '''
+        Writes contents from the buffer into the file specified by
+        self.path
+        '''
+        raise NotImplementedError()
         
             
         
