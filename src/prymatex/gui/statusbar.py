@@ -9,7 +9,7 @@ Some of the widgets defined here are:
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
-from prymatex.lib.textmate.syntax import TM_SYNTAXES, TMSyntaxNode
+from prymatex.bundles.syntax import TM_SYNTAXES, TMSyntaxNode
 from prymatex.core.base import PMXObject
 
 class QuickSyntaxSwitchDialog(QDialog):

@@ -8,6 +8,8 @@ from glob import glob
 from PyQt4.Qt import QTextCharFormat, QColor, QFont
 from xml.parsers.expat import ExpatError
 
+#TODO: mover a algo que sea propio para themes fuerda de bundles
+
 TM_THEMES = {}
 #TODO: No me gusta como esta este temes muy pegado al parser y como se arman los estilos, 
 #quiza dejar esto como un themes de textmate y crear un objeto que los interprete y cree nuestro sistema de estilos

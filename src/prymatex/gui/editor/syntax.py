@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QColor, QFont
-from prymatex.lib.textmate.syntax import TMSyntaxProcessor, TMScoreManager
-from prymatex.lib.textmate.theme import TM_THEMES
+from prymatex.bundles.syntax import TMSyntaxProcessor, TMScoreManager
+from prymatex.bundles.theme import TM_THEMES
 
 class PMXSyntaxFormatter(object):
     def __init__(self):

@@ -1,7 +1,7 @@
 import os
 from glob import glob
 import plistlib
-from prymatex.lib.textmate import command, macro, snippet, syntax, template 
+from prymatex.bundles import command, macro, snippet, syntax, template 
 from xml.parsers.expat import ExpatError
 
 TM_BUNDLES = {}

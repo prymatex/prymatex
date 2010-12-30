@@ -11,8 +11,8 @@ class MyMousePressEvent(QtCore.QEvent):
         self.sender = sender
 
 class MyPushButton(QtGui.QPushButton):
-    def __init__(self, name, parent):
-        super(QtGui.QPushButton, self).__init__(name, parent)
+    def __init__(self, text, parent):
+        super(QtGui.QPushButton, self).__init__(text, parent)
     
     def mousePressEvent(self, event):
         QtGui.QApplication.postEvent(self, MyMousePressEvent(self))
