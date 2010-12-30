@@ -1,9 +1,12 @@
 # Some Eclipse files
 .project
 .pydevproject
+.settings
 private
 
 # Nohup output
 *.out
 # Logging output
 messages.log
+# Kate temps
+*.*~

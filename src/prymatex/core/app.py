@@ -7,7 +7,7 @@ from os.path import join, exists, isdir, isabs
 
 from os import getpid, unlink, getcwd
 from os.path import dirname, abspath
-from prymatex.lib import  deco
+from prymatex.lib import deco
 
 from optparse import OptionParser
 
@@ -208,7 +208,7 @@ class PMXApplication(QApplication):
         Crea una lista de los paths abslutos de donde se cargan
         bundles y lanza un hilo para cargarlos.
         '''
-        from prymatex.lib.textmate.loader import PMXBundleLoaderThread
+        from prymatex.bundles.loader import PMXBundleLoaderThread
         
         path_list = []
         for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
@@ -223,7 +223,7 @@ class PMXApplication(QApplication):
         '''
         Load textmate Bundles and Themes
         '''
-        from prymatex.lib.textmate import load_textmate_themes
+        from prymatex.bundles import load_textmate_themes
         from prymatex.lib.i18n import ugettext as _
         if not all(map(lambda x: hasattr(self.config, x), ('TEXTMATE_THEMES_PATHS',
                                                            'TEXTMATE_BUNDLES_PATHS' ))):
@@ -247,7 +247,7 @@ class PMXApplication(QApplication):
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def load_texmate_bundles(self):
-        from prymatex.lib.textmate import load_textmate_bundles
+        from prymatex.bundles import load_textmate_bundles
         from prymatex.lib.i18n import ugettext as _
         bundles = 0
         splash = self.splash
