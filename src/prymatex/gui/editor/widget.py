@@ -1,7 +1,7 @@
 '''
 '''
-from PyQt4.QtGui import QWidget, QAction, QMenu, QKeySequence
-from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor
+from PyQt4.QtGui import QWidget, QAction, QMenu, QKeySequence, qApp
+from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor,QIcon
 from PyQt4.QtCore import SIGNAL, Qt, QString
 from logging import getLogger
 import sys
@@ -24,6 +24,13 @@ if __name__ == "__main__":
 # Qt Designer's gui
 from ui_editorwidget import Ui_EditorWidget
 
+#===============================================================================
+# Icons
+#===============================================================================
+ICON_FILE_STATUS_NORMAL = QIcon(qApp.instance().trUtf8(''
+':/actions/resources/mimetypes/x-office-document.png'))
+ICON_FILE_STATUS_MODIFIED = QIcon(qApp.instance().trUtf8(
+':/actions/resources/actions/document-save-all.png'))
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
     _counter = 0
@@ -46,7 +53,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
 
         self.codeEdit.addAction(self.actionFind)
         self.codeEdit.addAction(self.actionReplace)
-
+        
         self.findreplaceWidget.hide()
         
         if path:
@@ -59,9 +66,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def on_codeEdit_modificationChanged(self, modified):
         if modified:
             self.tooltip = self.trUtf8("Modified")
+            self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_MODIFIED)
             self.setTabTextColor(self.COLOR_MODIFIED)
         else:
-            self.tooltip = self.trUtf8("") 
+            self.tooltip = self.trUtf8("")
+            self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_NORMAL)
             self.setTabTextColor(self.COLOR_NORMAL)
     
     @property
@@ -318,7 +327,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         except AssertionError:
             logger.debug("Empty file")
         else:
-            
+            self.codeEdit.document().setUndoRedoEnabled(False)
             f = open(self.path, 'r')
             while size > read_count :
                 content = f.read(self.READ_SIZE)
@@ -327,6 +336,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                 #logger.debug("%d bytes read_count from %s", read_count, self.path)
             f.close()
             self.codeEdit.document().setModified(False)
+            self.codeEdit.document().setUndoRedoEnabled(True)
         self.codeEdit.setEnabled(True)
     
     def writeBufferContents(self):
@@ -337,15 +347,14 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         raise NotImplementedError()
         
             
-        
-    
     #===========================================================================
-    # Events
+    # Callbacks
     #===========================================================================
     
     def afterInsertion(self, tab_widget, index):
         ''' Callback when the tab is inserted '''
         tab_widget.setTabText(index, self.title)
+        tab_widget.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
     
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout
