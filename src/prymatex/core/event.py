@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 try:
-	from PyQt4.QtCore import QEvent
-	from PyQt4.Qt import QApplication
+	from PyQt4.QtCore import QEvent, QObject
+	from PyQt4.Qt import QApplication, QAction
 	from PyQt4.QtCore import SIGNAL
 except:
 	#MOCK
@@ -25,11 +25,18 @@ class PMXEvent(QEvent):
 		self.source = source
 		self.largs, self.kwargs = largs, kwargs
 
-class PMXEventSender(object):
+class PMXEventSender(QObject):
+	'''
+	Sends an event whenever it's called, it should be attached
+	to a QObject.
+	'''
 	#__metaclass__ = PMXEventBase
-	def __init__(self, event_class, source):
+	def __init__(self, event_class, source, action = None):
 		self.event_class = event_class
 		self.source = source
+		if action:
+			assert isinstance(action, QAction)
+			self.connect(action, SIGNAL('triggered()'), self)
 		
 	def __call__(self, *largs, **kwargs):
 		
