@@ -5,3 +5,5 @@ private
 
 # Nohup output
 *.out
+# Logging output
+messages.log
