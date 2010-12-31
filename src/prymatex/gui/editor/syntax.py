@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QColor, QFont
-from prymatex.bundles.syntax import TMSyntaxProcessor, TMScoreManager
-from prymatex.bundles.theme import TM_THEMES
+from prymatex.bundles.syntax import PMXSyntaxProcessor, PMXScoreManager
+from prymatex.bundles.theme import PMX_THEMES
 
 class PMXSyntaxFormatter(object):
     def __init__(self):
-        self.score = TMScoreManager()
+        self.score = PMXScoreManager()
         self.styles = {}
         self.default = None
         self.formats = {}
@@ -44,8 +44,8 @@ class PMXSyntaxFormatter(object):
     
     @classmethod
     def load_from_textmate_theme(cls, theme_name):
-        assert theme_name in TM_THEMES, 'No textmate theme for %s' % theme_name
-        theme = TM_THEMES[theme_name] 
+        assert theme_name in PMX_THEMES, 'No textmate theme for %s' % theme_name
+        theme = PMX_THEMES[theme_name] 
         ss = PMXSyntaxFormatter()
         ss.default = cls.build_format_from_style(theme.default)
         for scope, style in theme.items():
@@ -84,7 +84,7 @@ class PMXBlockUserData(QTextBlockUserData):
         else:
             raise Exception("WTF? muchos tokens")
         
-class PMXSyntaxProcessor(QSyntaxHighlighter, TMSyntaxProcessor):
+class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
     

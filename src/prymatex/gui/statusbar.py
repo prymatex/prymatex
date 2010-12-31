@@ -9,7 +9,7 @@ Some of the widgets defined here are:
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
-from prymatex.bundles.syntax import TM_SYNTAXES, TMSyntaxNode
+from prymatex.bundles.syntax import PMX_SYNTAXES, PMXSyntax
 from prymatex.core.base import PMXObject
 
 class QuickSyntaxSwitchDialog(QDialog):
@@ -29,8 +29,6 @@ class QuickSyntaxSwitchDialog(QDialog):
         
         self.setLayout(layout)
         
-        
-
 class PWMStatusLabel(QLabel):
     def __init__(self, text, parent, default = 0, *options):
         QLabel.__init__(self, text, parent)
@@ -57,7 +55,7 @@ class PWMStatusLabel(QLabel):
     
 class PMXSyntaxMenu(QComboBox):
     # TODO: Seleccionar la última sintaxis utilizada
-    syntaxChange = pyqtSignal(TMSyntaxNode)
+    syntaxChange = pyqtSignal(PMXSyntax)
     
     def __init__(self, parent = None):
         QComboBox.__init__(self, parent)
@@ -105,7 +103,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.syntaxMenu = PMXSyntaxMenu(self)
         
         syntaxes = []
-        for name_space in TM_SYNTAXES.values():
+        for name_space in PMX_SYNTAXES.values():
             syntaxes.extend(name_space.values())
         
         syntaxes = sorted(syntaxes, lambda a, b: cmp(a.name, b.name))

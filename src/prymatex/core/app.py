@@ -223,7 +223,7 @@ class PMXApplication(QApplication):
         '''
         Load textmate Bundles and Themes
         '''
-        from prymatex.bundles import load_textmate_themes
+        from prymatex.bundles import load_prymatex_themes
         from prymatex.lib.i18n import ugettext as _
         if not all(map(lambda x: hasattr(self.config, x), ('TEXTMATE_THEMES_PATHS',
                                                            'TEXTMATE_BUNDLES_PATHS' ))):
@@ -236,7 +236,7 @@ class PMXApplication(QApplication):
             if isdir(dirname):
                 if not isabs(dirname):
                     dirname = join(getcwd(), dirname)
-                themes += load_textmate_themes(dirname)
+                themes += load_prymatex_themes(dirname)
                 
             else:
                 self.logger.warning("The theme dir does not exist: %s", dirname)
@@ -247,7 +247,7 @@ class PMXApplication(QApplication):
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def load_texmate_bundles(self):
-        from prymatex.bundles import load_textmate_bundles
+        from prymatex.bundles import load_prymatex_bundles
         from prymatex.lib.i18n import ugettext as _
         bundles = 0
         splash = self.splash
@@ -262,7 +262,7 @@ class PMXApplication(QApplication):
             if isdir(dirname):
                 if not isabs(dirname):
                     dirname = join(getcwd(), dirname) 
-                bundles += load_textmate_bundles(dirname, before_load_callback)
+                bundles += load_prymatex_bundles(dirname, before_load_callback)
             else:
                 self.logger.warning("The theme dir does not exist")
                 
@@ -323,13 +323,11 @@ class PMXApplication(QApplication):
                 w = w.parent()
         return super(PMXApplication, self).notify(receiver, event)
 
-
 def is_sip_wrapped(instance):
     try:
         instance.sender()
     except RuntimeError:
         return False
     return True
-    
     
 import res_rc

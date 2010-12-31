@@ -7,16 +7,15 @@
 '''
 
 import ponyguruma as onig
-import ipdb
 
-TM_SYNTAXES = {}
+PMX_SYNTAXES = {}
+
 OPTIONS = onig.OPTION_CAPTURE_GROUP
-
 onig_compile = onig.Regexp.factory(OPTIONS)
 
 ######################### SyntaxProcessor #################################
 
-class TMSyntaxProcessor(object):
+class PMXSyntaxProcessor(object):
     '''
         Syntax Processor, clase base para los procesadores de sintaxis
     '''
@@ -38,7 +37,7 @@ class TMSyntaxProcessor(object):
     def end_parsing(self, name):
         pass
 
-class TMDebugSyntaxProcessor(TMSyntaxProcessor):
+class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self):
         self.line_number = 0
         self.printable_line = ''
@@ -66,7 +65,7 @@ class TMDebugSyntaxProcessor(TMSyntaxProcessor):
 
 ################################## ScoreManager ###################################
 
-class TMScoreManager(object):
+class PMXScoreManager(object):
     POINT_DEPTH    = 4
     NESTING_DEPTH  = 40
     START_VALUE    = 2 ** ( POINT_DEPTH * NESTING_DEPTH )
@@ -122,7 +121,7 @@ class TMScoreManager(object):
 
 ############################## Syntax ######################################
 
-class TMSyntaxProxy(object):
+class PMXSyntaxProxy(object):
     def __init__(self, hash, syntax):
         self.syntax = syntax
         self.proxy = hash['include']
@@ -145,17 +144,13 @@ class TMSyntaxProxy(object):
         else:
             return self.syntax.syntaxes[self.proxy]
 
-class TMSyntaxNode(object):
+class PMXSyntaxNode(object):
     def __init__(self, hash, syntax = None, name_space = 'default'):
         for k in ['syntax', 'firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 
                   'begin', 'content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent',
                   'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
             setattr(self, k, None)
         self.name_space = name_space
-        TM_SYNTAXES.setdefault(self.name_space, {})
-        #Definicion de un scope
-        if 'scopeName' in hash:
-            TM_SYNTAXES[self.name_space][hash['scopeName']] = self 
         self.syntax = syntax or self
         for key, value in hash.iteritems():
             if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 'begin']:
@@ -163,7 +158,8 @@ class TMSyntaxNode(object):
                     # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
                     setattr(self, key, onig_compile( value ))
                 except:
-                    print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
+                    pass
+                    #print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
             elif key in ['content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:
@@ -174,11 +170,15 @@ class TMSyntaxNode(object):
             elif key in ['patterns']:
                 self.create_children(value)
             else:
-                print u'Ignoring: %s: %s' % (key, value)
+                pass
+                #print u'Ignoring: %s: %s' % (key, value)
                 
     @property
     def syntaxes(self):
-        return TM_SYNTAXES[self.name_space]
+        syntaxes = {}
+        for key, value in PMX_SYNTAXES[self.name_space].iteritems():
+            syntaxes[key] = value.parser
+        return syntaxes
     
     def parse(self, string, processor = None):
         if processor:
@@ -194,17 +194,17 @@ class TMSyntaxNode(object):
         self.repository = {}
         for key, value in repository.iteritems():
             if 'include' in value:
-                self.repository[key] = TMSyntaxProxy( value, self.syntax )
+                self.repository[key] = PMXSyntaxProxy( value, self.syntax )
             else:
-                self.repository[key] = TMSyntaxNode( value, self.syntax, self.name_space )
+                self.repository[key] = PMXSyntaxNode( value, self.syntax, self.name_space )
 
     def create_children(self, patterns):
         self.patterns = []
         for p in patterns:
             if 'include' in p:
-                self.patterns.append(TMSyntaxProxy( p, self.syntax ))
+                self.patterns.append(PMXSyntaxProxy( p, self.syntax ))
             else:
-                self.patterns.append(TMSyntaxNode( p, self.syntax, self.name_space ))
+                self.patterns.append(PMXSyntaxNode( p, self.syntax, self.name_space ))
     
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
@@ -346,18 +346,50 @@ class TMSyntaxNode(object):
             position = end_pos
         return position
 
+class PMXSyntax(object):
+    def __init__(self, hash, name_space = 'default'):
+        global PMX_SYNTAXES
+        for k in ['comment', 'firstLineMatch', 'name', 'foldingStartMarker', 'scopeName', 'keyEquivalent', 'foldingStopMarker', 'fileTypes']:
+            setattr(self, k, None)
+        self.name_space = name_space
+        self.hash = hash
+        
+        PMX_SYNTAXES.setdefault(self.name_space, {})
+        #Definicion de un scope
+        if 'scopeName' not in self.hash:
+            raise Exception("Syntax don't have scopeName")
+        PMX_SYNTAXES[self.name_space][self.hash['scopeName']] = self
+        
+        for key, value in hash.iteritems():
+            if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
+                setattr(self, key, onig_compile( value ))
+            elif key in ['comment', 'fileTypes', 'name', 'scopeName', 'keyEquivalent']:
+                setattr(self, key, value )
+
+    @property
+    def parser(self):
+        if not hasattr(self, '_parser'):
+            setattr(self, '_parser', PMXSyntaxNode(self.hash, None, self.name_space))
+        return self._parser
+
+    #Deprecated        
+    def parse(self, string, processor = None):
+        return self.parser.parse(string, processor)
+
 def find_syntax_by_first_line(line):
-    for _, syntaxes in TM_SYNTAXES.iteritems():
+    for _, syntaxes in PMX_SYNTAXES.iteritems():
         for _, syntax in syntaxes.iteritems():
             if syntax.firstLineMatch != None and syntax.firstLineMatch.match(line):
                 return syntax
 
-def parse_file(filename, name_space = 'default'):
+def parse_file(filename):
     import plistlib
     data = plistlib.readPlist(filename)
-    return TMSyntaxNode(data, None, name_space)
+    return PMXSyntax(data)
 
 if __name__ == '__main__':
-    python = parse_file('../../bundles/ebundles/Bundles/Python.tmbundle/Syntaxes/Python.tmLanguage', 'python')
-    p = TMDebugSyntaxProcessor()
+    parse_file('../share/Bundles/C.tmbundle/Syntaxes/OpenGL.plist')
+    parse_file('../share/Bundles/C.tmbundle/Syntaxes/C++.plist')
+    python = parse_file('../share/Bundles/C.tmbundle/Syntaxes/C.plist')
+    p = PMXDebugSyntaxProcessor()
     print python.parse('valor = {"hola": 1, "mundo": lambda x: x * 3}', p)

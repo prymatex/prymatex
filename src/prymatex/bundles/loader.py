@@ -7,7 +7,7 @@ from PyQt4.QtGui import qApp
 from os.path import abspath, join
 import os
 from glob import glob
-from bundle import load_textmate_bundle
+from bundle import load_prymatex_bundle
 
 def path2bundlename(path):
     if path.endswith(os.sep):
@@ -38,7 +38,7 @@ class PMXBundleLoaderThread(QThread):
             for bundle_path in bundles:
                 name = path2bundlename(bundle_path) 
                 try:
-                    bundle = load_textmate_bundle(bundle_path)
+                    bundle = load_prymatex_bundle(bundle_path)
                 except:
          #           qApp.emit(SIGNAL('bundleFailed'), name)
                     pass
