@@ -8,6 +8,15 @@
     <file>resources/actions/edit-cut.png</file>
     <file>resources/actions/edit-delete.png</file>
     <file>resources/actions/edit-find.png</file>
+    <file>resources/actions/debug-run.png</file>
+    <file>resources/actions/debug-step-out.png</file>
+    <file>resources/actions/debug-execute-from-cursor.png</file>
+    <file>resources/actions/debug-execute-to-cursor.png</file>
+    <file>resources/actions/debug-run-cursor.png</file>
+    <file>resources/actions/debug-step-into.png</file>
+    <file>resources/actions/debug-step-over.png</file>
+    <file>resources/actions/debug-step-instruction.png</file>
+    <file>resources/actions/debug-step-into-instruction.png</file>
     <file>resources/actions/edit-find-project.png</file>
     <file>resources/actions/edit-find-replace.png</file>
     <file>resources/actions/edit-paste.png</file>
