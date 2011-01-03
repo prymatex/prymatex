@@ -12,21 +12,6 @@ from prymatex.gui.panes.ui_fspane import Ui_FSPane
 import logging
 
 logger = logging.getLogger(__name__)
-#class QActionPushButton(QPushButton):
-#    
-#    def __init__(self, action):
-#        assert isinstance(action, QAction)
-#        QPushButton.__init__(self)
-#        self._action = action
-#        self.copyParams()
-#        self.connect(self, SIGNAL("pressed()"), self._action, SLOT("trigger()"))
-#        
-#    def copyParams(self):
-#        self.setText(self._action.text())
-##        setTextOrig = self._action.setText
-#        self.setIcon(self._action.icon())
-#        self.setToolTip(self._action.toolTip())
-#    
 
 
 class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin):
@@ -38,59 +23,7 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin):
         self.setupUi(self)
         start_dir = qApp.instance().startDirectory()
         self.tree.setRootIndex(self.tree.model().index(start_dir))
-#        
-#    def setupGui(self):
-#        mainlayout = QVBoxLayout()
-#        layoutButtons = QHBoxLayout()
-#        layoutButtons.setObjectName('layoutButtons')
-#        # Oneliner Watchout!! Sorry
-#        self.actionUp = QAction(_("Up"), self)
-#        self.actionUp.setObjectName('actionUp')
-#        self.buttonUp = QActionPushButton(self.actionUp)
-#        self.buttonUp.setObjectName('buttonUp')
-#        layoutButtons.addWidget(self.buttonUp)
-#        
-#        self.buttonFilter = QPushButton(_("F"), self)
-#        self.buttonFilter.setObjectName("buttonFilter")
-#        self.buttonFilter.setToolTip("Filter Settings")
-#        layoutButtons.addWidget(self.buttonFilter)
-#        
-#        self.buttonSyncTabFile = QPushButton(_("S"), self)
-#        self.buttonSyncTabFile.setToolTip(_("Sync opened file"))
-#        self.buttonSyncTabFile.setObjectName("buttonSyncTabFile")
-#        # Keeping it simple
-#        #self.buttonSyncTabFile.setCheckable(True)
-#        layoutButtons.addWidget(self.buttonSyncTabFile)
-#        self.setMaximumWidth(200)
-#        
-#        self.buttonBackRoot = QPushButton(_("<-"), self)
-#        self.buttonBackRoot.setToolTip(_("Back to previous location"))
-#        self.buttonBackRoot.setEnabled(False)
-#        self.buttonBackRoot.setObjectName("buttonBackRoot")
-#        layoutButtons.addWidget(self.buttonBackRoot)
-#        
-#        self.buttonNextRoot = QPushButton(_("->"), self)
-#        self.buttonNextRoot.setToolTip(_("Next location"))
-#        self.buttonNextRoot.setObjectName("buttonNextkRoot")
-#        layoutButtons.addWidget(self.buttonNextRoot)  
-#        
-#        self.buttonCollapseAll = QPushButton(_("-"), self)
-#        self.buttonCollapseAll.setObjectName("buttonCollapseAll")
-#        self.buttonCollapseAll.setToolTip(_("Collapse All"))
-#        layoutButtons.addWidget(self.buttonCollapseAll)
-#        
-#        layoutButtons.addStretch(1)
-#        
-#        mainlayout.addLayout(layoutButtons)
-#        self.tree = FSTree(self)
-#        
-#        mainlayout.addWidget(self.tree)
-#        self.setLayout(mainlayout)
-        
-#        self.setStyleSheet('''
-#            QPushButton {
-#            }
-#        ''')
+
     @pyqtSignature('')
     def on_buttonSyncTabFile_pressed(self):
         #logger.info("Sync tab requested")

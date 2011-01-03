@@ -6,6 +6,7 @@ import os
 import shutil
 from os.path import join, abspath, isfile, isdir, dirname
 import logging
+
 logger = logging.getLogger(__name__)
 
 class FSTree(QTreeView):
@@ -105,13 +106,16 @@ class FSTree(QTreeView):
         data = unicode(self.model().filePath(index))
         print data
         if os.path.isfile(data):
-            mainwin = self.parent().parent().parent()
-            mainwin.tabWidgetEditors.openLocalFile(data)
+            self.mainwindow.centralWidget().openLocalFile(data)
+            
         if os.path.isdir(data):
             if self.model().hasChildren(index):
                 print "Cerpeta"
-                
-    
+
+    @property
+    def mainwindow(self):
+        return self.parent().parent().parent()
+        
     def goUp(self):
         current_top = unicode(self.model().filePath(self.rootIndex()))
         #self.tree.setRootIndex(self.tree.model().index(QDir.currentPath()))
