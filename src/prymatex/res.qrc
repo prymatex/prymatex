@@ -1,5 +1,36 @@
 <RCC>
   <qresource prefix="actions">
+    <file>resources/actions/go-down-search.png</file>
+    <file>resources/actions/go-jump-declaration.png</file>
+    <file>resources/actions/go-up.png</file>
+    <file>resources/actions/go-jump.png</file>
+    <file>resources/actions/go-up-search.png</file>
+    <file>resources/actions/go-next.png</file>
+    <file>resources/actions/go-last-view-page.png</file>
+    <file>resources/actions/go-next-view.png</file>
+    <file>resources/actions/go-first.png</file>
+    <file>resources/actions/go-bottom.png</file>
+    <file>resources/actions/go-next-context.png</file>
+    <file>resources/actions/go-previous.png</file>
+    <file>resources/actions/go-last-view.png</file>
+    <file>resources/actions/go-first-view-page.png</file>
+    <file>resources/actions/go-top.png</file>
+    <file>resources/actions/go-first-view.png</file>
+    <file>resources/actions/go-down.png</file>
+    <file>resources/actions/go-next-use.png</file>
+    <file>resources/actions/go-previous-view-page.png</file>
+    <file>resources/actions/go-previous-use.png</file>
+    <file>resources/actions/go-last.png</file>
+    <file>resources/actions/go-next-view-page.png</file>
+    <file>resources/actions/go-jump-locationbar.png</file>
+    <file>resources/actions/go-home.png</file>
+    <file>resources/actions/go-previous-view.png</file>
+    <file>resources/actions/go-jump-definition.png</file>
+    <file>resources/actions/go-jump-today.png</file>
+    <file>resources/actions/go-previous-context.png</file>
+    <file>resources/actions/folder-sync.png</file>
+    <file>resources/actions/view-filter.png</file>
+    <file>resources/actions/draw-arrow-up.png</file>
     <file>resources/mimetypes/x-office-document.png</file>
     <file>resources/actions/view-split-left-right.png</file>
     <file>resources/actions/view-split-top-bottom.png</file>
