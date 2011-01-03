@@ -4,19 +4,31 @@ Prymatex Text Editor
 What is Prymatex
 ================
 
-Pryamtex is a simple and flexible text editor. Even though it's meant for
-programmers (since its primary goal is to be useful for its authors), we
-belive it might be helpful for those who whant a snappy GUI which wraps 
-Unix utilites. 
+Pryamtex is a simple and flexible text editor. It's written in PyQt4 and
+it's main aim is to support TextMate bundles.
 
 Why Prymatex?
 =============
 
-Most modern IDE eat a lot of RAM. Most modern GUIs are quite powerful, take
-Eclipse or NetBeans for instance.
+There are thouthands of text editors out there, and many of them are
+foused on writting code, just to name a few, Notepad++, Kate, Gedit,
+Scribes, etc.
 
-Python is a singular language, it's fun and it can be used for simple automation
-tasks and for big system architectures, with lots of layers and high complexity.
+These editors are great, but the way they are way they're extended is
+complex for non C/C++ programmers. That's where TextMate cames into place.
+It allows to define syntaxes and tools in a very simple way plus there
+are lots of these extensions (actually called Bundles) maintained by
+enthuisasts. From Ruby on Rails, to OpenGL programming, these bundles come
+with 3 basic components:
+
+    * **Syntax** An extensible syntax format (allowing inclusion/usage, ie: PHP includes HTML and JS)
+
+    * **Commands** They're like what we all know as marcros
+
+    * **Snippets** Pieces of text that can be tirggered in certain situations
+
+    * **Templates** File templates
+    
 
 
 Main Objectives
