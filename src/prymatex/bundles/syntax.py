@@ -286,7 +286,7 @@ class PMXSyntax(object):
             setattr(self, key, value)
 
         if hash:
-            print "Command '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+            print "Syntax '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
             
         PMX_SYNTAXES.setdefault(self.name_space, {})
         if self.scopeName == None:

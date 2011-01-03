@@ -24,9 +24,9 @@ class PMXCommand(object):
     def __init__(self, hash, name_space = 'default'):
         global PMX_COMMANDS
         self.name_space = name_space
-        for key in [    'name', 'fileCaptureRegister', 'columnCaptureRegister',
-                        'lineCaptureRegister', 'scope', 'command', 'capturePattern', 'output',
-                        'keyEquivalent', 'input', 'beforeRunningCommand', 'autoScrollOutput',
+        for key in [    'name', 'fileCaptureRegister', 'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
+                        'lineCaptureRegister', 'scope', 'command', 'capturePattern', 'output', 'dontFollowNewOutput',
+                        'keyEquivalent', 'input', 'beforeRunningCommand', 'autoScrollOutput', 'tabTrigger', 'bundlePath',
                         'winCommand', 'fallbackInput', 'captureFormatString' ]:
             setattr(self, key, hash.pop(key, None))
         
@@ -45,9 +45,8 @@ def parse_file(filename):
     import plistlib
     data = plistlib.readPlist(filename)
     return PMXCommand(data)
-		
+
 if __name__ == '__main__':
-    import os
     from glob import glob
     files = glob(os.path.join('../share/Bundles/Python.tmbundle/Commands', '*'))
     for f in files:

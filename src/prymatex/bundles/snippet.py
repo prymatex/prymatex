@@ -11,7 +11,7 @@ class PMXSnippet(object):
     def __init__(self, hash, name_space = 'default'):
         
         self.name_space = name_space
-        for key in [    'name', 'content', 'scope', 'tabTrigger', 'keyEquivalent' ]:
+        for key in [    'name', 'content', 'scope', 'tabTrigger', 'keyEquivalent', 'disableAutoIndent', 'inputPattern', 'bundlePath' ]:
             setattr(self, key, hash.pop(key, None))
         
         if hash:

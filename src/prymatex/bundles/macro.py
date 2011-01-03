@@ -13,9 +13,9 @@ class PMXMacro(object):
     def __init__(self, hash, name_space = 'default'):
         global PMX_MACROS
         self.name_space = name_space
-        for key in [    'name', 'beforeRunningCommand', 'command', 'output', 'input',
-                        'scope', 'keyEquivalent', 'winCommand', 'fileCaptureRegister',
-                        'lineCaptureRegister', 'capturePattern', 'captureFormatString',
+        for key in [    'name', 'beforeRunningCommand', 'command', 'output', 'input', 'commands', 'tabTrigger',
+                        'scope', 'keyEquivalent', 'winCommand', 'fileCaptureRegister', 'scopeType',
+                        'lineCaptureRegister', 'capturePattern', 'captureFormatString', 'useGlobalClipboard',
                         'columnCaptureRegister', 'autoScrollOutput', 'fallbackInput']:
             setattr(self, key, hash.pop(key, None))
         

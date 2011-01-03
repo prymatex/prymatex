@@ -1,7 +1,8 @@
 import os
 from glob import glob
 import plistlib
-from prymatex.bundles import command, macro, snippet, syntax, template 
+if __name__ != "__main__":
+    from prymatex.bundles import command, macro, snippet, syntax 
 from xml.parsers.expat import ExpatError
 
 PMX_BUNDLES = {}
@@ -69,6 +70,10 @@ def load_prymatex_bundle(bundle_path):
     Carga un bundle
     @return: bundle cargado
     '''
+    BUNDLE_ELEMENTS = {'Syntaxes': syntax.PMXSyntax,
+                       'Snippets': snippet.PMXSnippet,
+                       'Macros': macro.PMXMacro,
+                       'Commands': command.PMXCommand}
     info_file = os.path.join(bundle_path, 'info.plist')
     try:
         data = plistlib.readPlist(info_file)
@@ -76,63 +81,19 @@ def load_prymatex_bundle(bundle_path):
     except ExpatError:
         raise
     
-    #Syntaxes
-    files = glob(os.path.join(bundle_path, 'Syntaxes', '*'))
-    for sf in files:
-        #Quito plis con caracteres raros.
-        try:
-            data = plistlib.readPlist(sf)
-            uuid = data.pop('uuid')
-            s = syntax.PMXSyntax(data, 'prymatex')
-            bundle.menu[uuid] = s
-        except ExpatError:
-            pass
+    for path, klass in BUNDLE_ELEMENTS.iteritems():
+        files = glob(os.path.join(bundle_path, path, '*'))
+        for sf in files:
+            #Quito plis con caracteres raros.
+            try:
+                data = plistlib.readPlist(sf)
+                uuid = data.pop('uuid')
+                bundleUUID = data.pop('bundleUUID', None)
+                e = klass(data, 'prymatex')
+                bundle.menu[uuid] = e
+            except ExpatError:
+                pass
     
-    #Snippets
-    files = glob(os.path.join(bundle_path, 'Snippets', '*'))
-    for sf in files:
-        #Quito plis con caracteres raros.
-        try:
-            data = plistlib.readPlist(sf)
-            uuid = data.pop('uuid')
-            s = snippet.PMXSnippet(data, bundle.name)
-            bundle.menu[uuid] = s
-        except ExpatError:
-            pass
-    
-    #Macros
-    files = glob(os.path.join(bundle_path, 'Macros', '*'))
-    for sf in files:
-        #Quito plis con caracteres raros.
-        try:
-            data = plistlib.readPlist(sf)
-            uuid = data.pop('uuid')
-            m = macro.PMXMacro(data, bundle.name)
-            bundle.menu[uuid] = m
-        except ExpatError:
-            pass
-    
-    #Commands
-    files = glob(os.path.join(bundle_path, 'Commands', '*'))
-    for sf in files:
-        #Quito plis con caracteres raros.
-        try:
-            data = plistlib.readPlist(sf)
-            uuid = data.pop('uuid')
-            c = command.PMXCommand(data, bundle.name)
-            bundle.menu[uuid] = c
-        except ExpatError:
-            pass
-    
-    #Templates
-    #syntax_files = glob(os.path.join(bundle_path, 'Templates', '*'))
-    #for sf in syntax_files:
-        #Quito plis con caracteres raros.
-        #try:
-            #data = plistlib.readPlist(sf)
-            #template.Template(data, bundle.name)
-        #except ExpatError:addMenu
-            #pass
     return bundle
 
 from os.path import basename
@@ -155,6 +116,8 @@ def load_prymatex_bundles(path, after_load_callback = None):
     return counter
 
 if __name__ == '__main__':
-    bundle = load_prymatex_bundle('../../../prymatex/resources/Bundles/Python.tmbundle')
+    import command, macro, snippet, syntax
+    bundle = load_prymatex_bundle('../share/Bundles/Python.tmbundle')
     from pprint import pprint
+    pprint(bundle.uuid)
     pprint(bundle.menu.main)
