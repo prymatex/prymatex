@@ -82,8 +82,8 @@ class PMXStatusBar(QStatusBar, PMXObject):
     def __init__(self, parent ):
         QStatusBar.__init__(self, parent)
         #self.lineLabel = PWMStatusLabel(_("Line: %6d", 0), self)
-        self.lineLabel = QLabel("Line %d", self)
-        self.columnLabel = PWMStatusLabel(_("Column: %6d", 0), self)
+        self.lineColLabel = QLabel("Line: %5d Col: %5d" % (0, 0) , self)
+        self.lineColLabel.setFont(QFont("Monospace"))
         self.langComboBox = PWMStatusLabel(_("Lang"), self)
         self.indentModeComboBox = PWMStatusLabel(_("Indent Mode"),
                                                  self, 0,
@@ -111,8 +111,8 @@ class PMXStatusBar(QStatusBar, PMXObject):
             self.syntaxMenu.addItem(syntax.name, userData=QVariant(syntax))
             
         self.addPermanentWidget(self.syntaxMenu)
-        self.addPermanentWidget(self.lineLabel)
-        self.addPermanentWidget(self.columnLabel)
+        self.addPermanentWidget(self.lineColLabel)
+        
         self.addPermanentWidget(self.langComboBox)
         self.addPermanentWidget(self.indentModeComboBox)
         self.addPermanentWidget(self.indentWidthComboBox)
@@ -121,8 +121,9 @@ class PMXStatusBar(QStatusBar, PMXObject):
                      self.updatePosition )
     
     def updatePosition(self, source, line, col):
-        self.lineLabel.setText("Line: %d" % line)
-        self.columnLabel.setText("Col: %d" % col)
+        
+        self.lineColLabel.setText("Line: %5d Col: %5d" % (line, col))
+
         
         
          
