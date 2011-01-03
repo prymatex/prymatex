@@ -18,7 +18,11 @@
     <normaloff>:/icons/resources/icons/Prymatex_Logo.png</normaloff>:/icons/resources/icons/Prymatex_Logo.png</iconset>
   </property>
   <widget class="QWidget" name="foo">
-   <layout class="QVBoxLayout" name="verticalLayout"/>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="PMXTabWidget" name="tabWidget"/>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -71,6 +75,11 @@
     <addaction name="actionShow_Current_Scope"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Log_Window"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_Whitespace"/>
+    <addaction name="actionShow_Indentation"/>
+    <addaction name="actionEOL"/>
+    <addaction name="actionWord_Warp"/>
    </widget>
    <widget class="QMenu" name="menuText">
     <property name="title">
@@ -95,6 +104,8 @@
     <addaction name="separator"/>
     <addaction name="actionFilter_Through_Command"/>
     <addaction name="actionRun_selection"/>
+    <addaction name="separator"/>
+    <addaction name="actionFree_Editing"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -834,12 +845,68 @@
     <string>Split Horizontally</string>
    </property>
   </action>
+  <action name="actionView_Whitespace">
+   <property name="text">
+    <string>View Whitespace</string>
+   </property>
+  </action>
+  <action name="actionView_Indentation">
+   <property name="text">
+    <string>View Indentation</string>
+   </property>
+  </action>
+  <action name="actionShow_Whitespace">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Whitespace</string>
+   </property>
+  </action>
+  <action name="actionShow_Indentation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Indentation</string>
+   </property>
+  </action>
+  <action name="actionEOL">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show End of Line (EOL)</string>
+   </property>
+  </action>
+  <action name="actionWord_Warp">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Word Warp</string>
+   </property>
+  </action>
+  <action name="actionFree_Editing">
+   <property name="text">
+    <string>Free Editing</string>
+   </property>
+   <property name="statusTip">
+    <string>Enables the cursor to be positioned anywhere in the editor</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
    <class>PMXStatusBar</class>
    <extends>QStatusBar</extends>
    <header>statusbar</header>
+  </customwidget>
+  <customwidget>
+   <class>PMXTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>tabwidget</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

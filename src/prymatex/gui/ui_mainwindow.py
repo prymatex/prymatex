@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Sat Dec 25 12:31:43 2010
+# Created: Mon Jan  3 09:23:40 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,6 +20,9 @@ class Ui_MainWindow(object):
         self.foo.setObjectName("foo")
         self.verticalLayout = QtGui.QVBoxLayout(self.foo)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.tabWidget = PMXTabWidget(self.foo)
+        self.tabWidget.setObjectName("tabWidget")
+        self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
@@ -277,6 +280,24 @@ class Ui_MainWindow(object):
         self.actionSplit_Vertically.setObjectName("actionSplit_Vertically")
         self.actionSplit_Horizontally = QtGui.QAction(MainWindow)
         self.actionSplit_Horizontally.setObjectName("actionSplit_Horizontally")
+        self.actionView_Whitespace = QtGui.QAction(MainWindow)
+        self.actionView_Whitespace.setObjectName("actionView_Whitespace")
+        self.actionView_Indentation = QtGui.QAction(MainWindow)
+        self.actionView_Indentation.setObjectName("actionView_Indentation")
+        self.actionShow_Whitespace = QtGui.QAction(MainWindow)
+        self.actionShow_Whitespace.setCheckable(True)
+        self.actionShow_Whitespace.setObjectName("actionShow_Whitespace")
+        self.actionShow_Indentation = QtGui.QAction(MainWindow)
+        self.actionShow_Indentation.setCheckable(True)
+        self.actionShow_Indentation.setObjectName("actionShow_Indentation")
+        self.actionEOL = QtGui.QAction(MainWindow)
+        self.actionEOL.setCheckable(True)
+        self.actionEOL.setObjectName("actionEOL")
+        self.actionWord_Warp = QtGui.QAction(MainWindow)
+        self.actionWord_Warp.setCheckable(True)
+        self.actionWord_Warp.setObjectName("actionWord_Warp")
+        self.actionFree_Editing = QtGui.QAction(MainWindow)
+        self.actionFree_Editing.setObjectName("actionFree_Editing")
         self.menuFile.addAction(self.actionNewTab)
         self.menuFile.addAction(self.actionNew_from_template)
         self.menuFile.addAction(self.actionOpen)
@@ -310,6 +331,11 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionShow_Current_Scope)
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionShow_Log_Window)
+        self.menuView.addSeparator()
+        self.menuView.addAction(self.actionShow_Whitespace)
+        self.menuView.addAction(self.actionShow_Indentation)
+        self.menuView.addAction(self.actionEOL)
+        self.menuView.addAction(self.actionWord_Warp)
         self.menuConvert.addAction(self.actionTo_UPPERCASE)
         self.menuConvert.addAction(self.actionTo_lowercase)
         self.menuConvert.addAction(self.actionTo_TitleCase)
@@ -324,6 +350,8 @@ class Ui_MainWindow(object):
         self.menuText.addSeparator()
         self.menuText.addAction(self.actionFilter_Through_Command)
         self.menuText.addAction(self.actionRun_selection)
+        self.menuText.addSeparator()
+        self.menuText.addAction(self.actionFree_Editing)
         self.menuRun.addAction(self.actionThis_file)
         self.menuRun.addAction(self.actionWith_options)
         self.menuTools.addAction(self.menuRun.menuAction())
@@ -518,8 +546,17 @@ class Ui_MainWindow(object):
         self.actionNew_from_template.setText(QtGui.QApplication.translate("MainWindow", "New from template", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSplit_Vertically.setText(QtGui.QApplication.translate("MainWindow", "Split Vertically", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSplit_Horizontally.setText(QtGui.QApplication.translate("MainWindow", "Split Horizontally", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionView_Whitespace.setText(QtGui.QApplication.translate("MainWindow", "View Whitespace", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionView_Indentation.setText(QtGui.QApplication.translate("MainWindow", "View Indentation", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShow_Whitespace.setText(QtGui.QApplication.translate("MainWindow", "Show Whitespace", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShow_Indentation.setText(QtGui.QApplication.translate("MainWindow", "Show Indentation", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionEOL.setText(QtGui.QApplication.translate("MainWindow", "Show End of Line (EOL)", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWord_Warp.setText(QtGui.QApplication.translate("MainWindow", "Word Warp", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionFree_Editing.setText(QtGui.QApplication.translate("MainWindow", "Free Editing", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionFree_Editing.setStatusTip(QtGui.QApplication.translate("MainWindow", "Enables the cursor to be positioned anywhere in the editor", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
+from tabwidget import PMXTabWidget
 import res_rc
 
 if __name__ == "__main__":
