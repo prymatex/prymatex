@@ -121,46 +121,21 @@ class PMXScoreManager(object):
 
 ############################## Syntax ######################################
 
-class PMXSyntaxProxy(object):
-    def __init__(self, hash, syntax):
-        self.syntax = syntax
-        self.proxy = hash['include']
-    
-    def __getattr__(self, name):
-        if self.proxy:
-            proxy_value = self.__proxy()
-            if proxy_value:
-                return getattr(proxy_value, name)
-        #TODO: else raise exception
-    
-    def __proxy(self):
-        if onig_compile('^#').match(self.proxy):
-            if hasattr(self.syntax, 'repository') and self.syntax.repository.has_key(self.proxy[1:]):  
-                return self.syntax.repository[self.proxy[1:]]
-        elif self.proxy == '$self':
-            return self.syntax
-        elif self.proxy == '$base':
-            return self.syntax
-        else:
-            return self.syntax.syntaxes[self.proxy]
-
 class PMXSyntaxNode(object):
-    def __init__(self, hash, syntax = None, name_space = 'default'):
-        for k in ['syntax', 'firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 
-                  'begin', 'content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent',
-                  'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
+    def __init__(self, hash, syntax):
+        for k in [  'syntax', 'match', 'begin', 'content', 'name', 'contentName', 'end',
+                    'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
             setattr(self, k, None)
-        self.name_space = name_space
-        self.syntax = syntax or self
+        self.syntax = syntax
         for key, value in hash.iteritems():
-            if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker', 'match', 'begin']:
+            if key in ['match', 'begin']:
                 try:
                     # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
                     setattr(self, key, onig_compile( value ))
                 except:
                     pass
                     #print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
-            elif key in ['content', 'fileTypes', 'name', 'contentName', 'end', 'scopeName', 'keyEquivalent']:
+            elif key in ['content', 'name', 'contentName', 'end']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:
                 value = sorted(value.items(), key=lambda v: int(v[0]))
@@ -172,23 +147,6 @@ class PMXSyntaxNode(object):
             else:
                 pass
                 #print u'Ignoring: %s: %s' % (key, value)
-                
-    @property
-    def syntaxes(self):
-        syntaxes = {}
-        for key, value in PMX_SYNTAXES[self.name_space].iteritems():
-            syntaxes[key] = value.parser
-        return syntaxes
-    
-    def parse(self, string, processor = None):
-        if processor:
-            processor.start_parsing(self.scopeName)
-        stack = [[self, None]]
-        for line in string.splitlines():
-            self.parse_line(stack, line, processor)
-        if processor:
-            processor.end_parsing(self.scopeName)
-        return stack
     
     def parse_repository(self, repository):
         self.repository = {}
@@ -196,7 +154,7 @@ class PMXSyntaxNode(object):
             if 'include' in value:
                 self.repository[key] = PMXSyntaxProxy( value, self.syntax )
             else:
-                self.repository[key] = PMXSyntaxNode( value, self.syntax, self.name_space )
+                self.repository[key] = PMXSyntaxNode( value, self.syntax )
 
     def create_children(self, patterns):
         self.patterns = []
@@ -204,7 +162,7 @@ class PMXSyntaxNode(object):
             if 'include' in p:
                 self.patterns.append(PMXSyntaxProxy( p, self.syntax ))
             else:
-                self.patterns.append(PMXSyntaxNode( p, self.syntax, self.name_space ))
+                self.patterns.append(PMXSyntaxNode( p, self.syntax ))
     
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
@@ -290,11 +248,77 @@ class PMXSyntaxNode(object):
                         match = tmatch
         return match
 
+class PMXSyntaxProxy(object):
+    def __init__(self, hash, syntax):
+        self.syntax = syntax
+        self.proxy = hash['include']
+    
+    def __getattr__(self, name):
+        if self.proxy:
+            proxy_value = self.__proxy()
+            if proxy_value:
+                return getattr(proxy_value, name)
+        #TODO: else raise exception
+    
+    def __proxy(self):
+        if onig_compile('^#').match(self.proxy):
+            grammar = self.syntax.grammar
+            if hasattr(grammar, 'repository') and grammar.repository.has_key(self.proxy[1:]):  
+                return grammar.repository[self.proxy[1:]]
+        elif self.proxy == '$self':
+            return self.syntax.grammar
+        elif self.proxy == '$base':
+            return self.syntax.grammar
+        else:
+            return self.syntax.syntaxes[self.proxy].grammar
+        
+class PMXSyntax(object):
+    def __init__(self, hash, name_space = 'default'):
+        global PMX_SYNTAXES
+        self.hash = hash
+        self.name_space = name_space
+        for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'name', 
+                        'scopeName', 'keyEquivalent', 'foldingStopMarker', 'fileTypes']:
+            value = self.hash.pop(key, None)
+            if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
+                #Compiled keys
+                value = onig_compile( value )
+            setattr(self, key, value)
+
+        if hash:
+            print "Syntax '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+            
+        PMX_SYNTAXES.setdefault(self.name_space, {})
+        if self.scopeName == None:
+            raise Exception("Syntax don't have scopeName")
+        PMX_SYNTAXES[self.name_space][self.scopeName] = self
+
+    @property
+    def syntaxes(self):
+        return PMX_SYNTAXES[self.name_space]
+
+    @property
+    def grammar(self):
+        if not hasattr(self, '_grammar'):
+            setattr(self, '_grammar', PMXSyntaxNode(self.hash, self ))
+        return self._grammar
+
+    def parse(self, string, processor = None):
+        if processor:
+            processor.start_parsing(self.scopeName)
+        stack = [[self.grammar, None]]
+        for line in string.splitlines():
+            self.parse_line(stack, line, processor)
+        if processor:
+            processor.end_parsing(self.scopeName)
+        return stack
+
     def parse_line(self, stack, line, processor):
         if processor:
             processor.new_line(line)
         top, match = stack[-1]
         position = 0
+        grammar = self.grammar
         
         while True:
             if top.patterns:
@@ -312,9 +336,9 @@ class PMXSyntaxNode(object):
                 if top.contentName and processor:
                     processor.close_tag(top.contentName, start_pos)
                 if processor:
-                    self.parse_captures('captures', top, pattern_match, processor)
+                    grammar.parse_captures('captures', top, pattern_match, processor)
                 if processor:
-                    self.parse_captures('endCaptures', top, pattern_match, processor)
+                    grammar.parse_captures('endCaptures', top, pattern_match, processor)
                 if top.name and processor:
                     processor.close_tag( top.name, end_pos)
                 stack.pop()
@@ -328,9 +352,9 @@ class PMXSyntaxNode(object):
                     if pattern.name and processor:
                         processor.open_tag(pattern.name, start_pos)
                     if processor:    
-                        self.parse_captures('captures', pattern, pattern_match, processor)
+                        grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if processor:
-                        self.parse_captures('beginCaptures', pattern, pattern_match, processor)
+                        grammar.parse_captures('beginCaptures', pattern, pattern_match, processor)
                     if pattern.contentName and processor:
                         processor.open_tag(pattern.contentName, end_pos)
                     top = pattern
@@ -340,42 +364,12 @@ class PMXSyntaxNode(object):
                     if pattern.name and processor:
                         processor.open_tag(pattern.name, start_pos)
                     if processor:
-                        self.parse_captures('captures', pattern, pattern_match, processor)
+                        grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if pattern.name and processor:
                         processor.close_tag(pattern.name, end_pos)
             position = end_pos
         return position
-
-class PMXSyntax(object):
-    def __init__(self, hash, name_space = 'default'):
-        global PMX_SYNTAXES
-        for k in ['comment', 'firstLineMatch', 'name', 'foldingStartMarker', 'scopeName', 'keyEquivalent', 'foldingStopMarker', 'fileTypes']:
-            setattr(self, k, None)
-        self.name_space = name_space
-        self.hash = hash
         
-        PMX_SYNTAXES.setdefault(self.name_space, {})
-        #Definicion de un scope
-        if 'scopeName' not in self.hash:
-            raise Exception("Syntax don't have scopeName")
-        PMX_SYNTAXES[self.name_space][self.hash['scopeName']] = self
-        
-        for key, value in hash.iteritems():
-            if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
-                setattr(self, key, onig_compile( value ))
-            elif key in ['comment', 'fileTypes', 'name', 'scopeName', 'keyEquivalent']:
-                setattr(self, key, value )
-
-    @property
-    def parser(self):
-        if not hasattr(self, '_parser'):
-            setattr(self, '_parser', PMXSyntaxNode(self.hash, None, self.name_space))
-        return self._parser
-
-    #Deprecated        
-    def parse(self, string, processor = None):
-        return self.parser.parse(string, processor)
-
 def find_syntax_by_first_line(line):
     for _, syntaxes in PMX_SYNTAXES.iteritems():
         for _, syntax in syntaxes.iteritems():
@@ -388,8 +382,11 @@ def parse_file(filename):
     return PMXSyntax(data)
 
 if __name__ == '__main__':
-    parse_file('../share/Bundles/C.tmbundle/Syntaxes/OpenGL.plist')
-    parse_file('../share/Bundles/C.tmbundle/Syntaxes/C++.plist')
-    python = parse_file('../share/Bundles/C.tmbundle/Syntaxes/C.plist')
+    import os
+    from glob import glob
+    files = glob(os.path.join('../share/Bundles/C.tmbundle/Syntaxes', '*'))
+    for f in files:
+        syntax = parse_file(f)
     p = PMXDebugSyntaxProcessor()
-    print python.parse('valor = {"hola": 1, "mundo": lambda x: x * 3}', p)
+    print PMX_SYNTAXES
+    print PMX_SYNTAXES['default']['source.c++'].parse('function pepe(char *uno) { valor = 1; }', p)
