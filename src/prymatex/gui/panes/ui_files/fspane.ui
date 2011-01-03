@@ -37,6 +37,15 @@
         <iconset resource="../../../res.qrc">
          <normaloff>:/actions/resources/actions/go-top.png</normaloff>:/actions/resources/actions/go-top.png</iconset>
        </property>
+       <property name="iconSize">
+        <size>
+         <width>12</width>
+         <height>12</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -44,6 +53,15 @@
        <property name="icon">
         <iconset resource="../../../res.qrc">
          <normaloff>:/actions/resources/actions/go-previous-view.png</normaloff>:/actions/resources/actions/go-previous-view.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>12</width>
+         <height>12</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -53,6 +71,15 @@
         <iconset resource="../../../res.qrc">
          <normaloff>:/actions/resources/actions/view-filter.png</normaloff>:/actions/resources/actions/view-filter.png</iconset>
        </property>
+       <property name="iconSize">
+        <size>
+         <width>12</width>
+         <height>12</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -61,6 +88,15 @@
         <iconset resource="../../../res.qrc">
          <normaloff>:/actions/resources/actions/system-switch-user.png</normaloff>:/actions/resources/actions/system-switch-user.png</iconset>
        </property>
+       <property name="iconSize">
+        <size>
+         <width>12</width>
+         <height>12</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -68,6 +104,15 @@
        <property name="icon">
         <iconset resource="../../../res.qrc">
          <normaloff>:/actions/resources/actions/debug-step-into.png</normaloff>:/actions/resources/actions/debug-step-into.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>12</width>
+         <height>12</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

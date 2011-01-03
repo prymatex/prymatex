@@ -12,7 +12,7 @@ if __name__ == "__main__":
     
     
 from prymatex.lib.i18n import ugettext as _
-from prymatex.gui.tabwidget import PMXTabWidget , PMWTabsMenu
+from prymatex.gui.tabwidget import PMXTabWidget , PMXTabsMenu
 from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 

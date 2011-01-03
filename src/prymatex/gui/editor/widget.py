@@ -9,7 +9,7 @@ import traceback
 import re
 import os
 import logging
-from prymatex.gui.tabwidget import PMXTabWidget
+
 #from prymatex.lib.deco import logresult
 logger = logging.getLogger(__name__)
 
@@ -39,6 +39,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     __title = None
     
     def __init__(self, parent, path = None):
+        from prymatex.gui.tabwidget import PMXTabWidget
         assert isinstance(parent, PMXTabWidget), "PMXEditorWidget can only be"\
                                                  " used with PMXTabWidget as"\
                                                  " parent."
@@ -117,6 +118,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     @property
     def tabwidget(self):
         # This is very ugly :(
+        from prymatex.gui.tabwidget import PMXTabWidget
         w = self.parent()
         while not isinstance(w, PMXTabWidget):
             w = w.parent()
@@ -140,6 +142,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         Factory for the default text editor
         '''
+        from prymatex.gui.tabwidget import PMXTabWidget
         assert isinstance(parent, PMXTabWidget), cls.trUtf8("You didn't pass a valid parent: %s" % parent)
         editor = PMXEditorWidget(parent, path)
         return editor
@@ -310,7 +313,8 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         self.path = path
         self.readFileContents()
-        self.update_title() 
+        self.update_title()
+        # Maybe emit a signal?
     
     READ_SIZE = 1024 * 64 # 64K
     def readFileContents(self):
@@ -345,8 +349,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.path
         '''
         raise NotImplementedError()
+
+    @property
+    def modfified(self):
+        return self.codeEdit.document().isModified()
         
-            
     #===========================================================================
     # Callbacks
     #===========================================================================
@@ -355,7 +362,9 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         ''' Callback when the tab is inserted '''
         tab_widget.setTabText(index, self.title)
         tab_widget.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
-    
+
+
+
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication, QFont, QWidget, QVBoxLayout
     from PyQt4.QtGui import QPushButton
@@ -364,3 +373,4 @@ if __name__ == "__main__":
     win = PMXEditorWidget(None) # No Parent
     win.show()
     sys.exit(app.exec_())
+   

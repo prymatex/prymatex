@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/fspane.ui'
 #
-# Created: Mon Jan  3 09:17:00 2011
+# Created: Mon Jan  3 13:16:01 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,30 +28,40 @@ class Ui_FSPane(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/actions/resources/actions/go-top.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonUp.setIcon(icon)
+        self.buttonUp.setIconSize(QtCore.QSize(12, 12))
+        self.buttonUp.setFlat(True)
         self.buttonUp.setObjectName("buttonUp")
         self.horizontalLayout.addWidget(self.buttonUp)
         self.buttonBackRoot = QtGui.QPushButton(FSPane)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/actions/resources/actions/go-previous-view.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonBackRoot.setIcon(icon1)
+        self.buttonBackRoot.setIconSize(QtCore.QSize(12, 12))
+        self.buttonBackRoot.setFlat(True)
         self.buttonBackRoot.setObjectName("buttonBackRoot")
         self.horizontalLayout.addWidget(self.buttonBackRoot)
         self.buttonFilter = QtGui.QPushButton(FSPane)
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(":/actions/resources/actions/view-filter.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonFilter.setIcon(icon2)
+        self.buttonFilter.setIconSize(QtCore.QSize(12, 12))
+        self.buttonFilter.setFlat(True)
         self.buttonFilter.setObjectName("buttonFilter")
         self.horizontalLayout.addWidget(self.buttonFilter)
         self.buttonSyncTabFile = QtGui.QPushButton(FSPane)
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(":/actions/resources/actions/system-switch-user.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonSyncTabFile.setIcon(icon3)
+        self.buttonSyncTabFile.setIconSize(QtCore.QSize(12, 12))
+        self.buttonSyncTabFile.setFlat(True)
         self.buttonSyncTabFile.setObjectName("buttonSyncTabFile")
         self.horizontalLayout.addWidget(self.buttonSyncTabFile)
         self.buttonCollapseAll = QtGui.QPushButton(FSPane)
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(":/actions/resources/actions/debug-step-into.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCollapseAll.setIcon(icon4)
+        self.buttonCollapseAll.setIconSize(QtCore.QSize(12, 12))
+        self.buttonCollapseAll.setFlat(True)
         self.buttonCollapseAll.setObjectName("buttonCollapseAll")
         self.horizontalLayout.addWidget(self.buttonCollapseAll)
         spacerItem = QtGui.QSpacerItem(10, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

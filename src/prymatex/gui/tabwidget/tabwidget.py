@@ -5,16 +5,16 @@
 
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
 from PyQt4.QtCore import QString, SIGNAL, Qt
-from prymatex.gui.editor import PMXCodeEdit
-
-from prymatex.lib.i18n import ugettext as _
-from prymatex.gui.utils import *
 import itertools
+
+from prymatex.gui.utils import *
+from prymatex.gui.editor.widget import PMXEditorWidget
+
 
 class PMXTabWidget(QTabWidget):
     
     #Signal
-    currentEditorChange = pyqtSignal(PMXCodeEdit)
+    currentEditorChange = pyqtSignal(PMXEditorWidget)
 
     counter = 1
     
@@ -34,7 +34,7 @@ class PMXTabWidget(QTabWidget):
         
         self.buttonTabList = QPushButton(self)
         self.buttonTabList.setObjectName("buttonTabList")
-        self.buttonTabList.setToolTip(_("Tab list"))
+        self.buttonTabList.setToolTip(self.trUtf8("Tab list"))
         self.buttonTabList.setShortcut(text_to_KeySequence("Ctrl+Tab"))
         self.buttonTabList.setIcon(QIcon(":/actions/resources/actions/view-close.png"))
         self.buttonTabList.setStyleSheet('''
@@ -158,37 +158,71 @@ class PMXTabWidget(QTabWidget):
     def on_syntax_change(self, syntax):
         editor = self.currentWidget()
         editor.set_syntax(syntax)
+
+    #----------------------------------------------------------------------------------
+    # Widget acces and Python collection emulation
+    #----------------------------------------------------------------------------------
+    def openedFileMap(self):
+        '''
+        @returns: A path -> widget for every editor in the tab widget
+        '''
         
+        d = {}
+        for editor in self.editors:
+            if editor.path:
+                d[unicode(editor.path)] = editor
+        return d
+
+    @property
+    def editors(self):
+        ''' List of PMXEditorWidget insances in the tab widget '''
+        l = []
+        for i in range(self.count):
+            tab = self.widget(i)
+            if isinstance(tab, PMXEditorWidget):
+                l.append( tab ) # It's and editor
+        return l
+
+    def __len__(self):
+        return self.count()
+        
+    def __getitem__(self, index):
+        assert isinstance(index, int)
+        if index < 0 or index > len(self):
+            raise IndexError("%s-nth widget does not exist in %s" % (index, self) )
+        return self.widget( index )
+
+    
+                
     def openLocalFile(self, path):
         '''
-        Abre un archivo en una tab
+        Opens a file in a tab, tries to reuse an empty one if it's
+        focused
+        @param path: A local file path
         '''
         try:
             count = self.count()
-            # Primero hay que buscar si no está abierto
-            if count:
-                for i in range(self.count()):
-                    editor = self.widget(i)
-                    if path == editor.path:
-                        self.setCurrentWidget(editor)
-                        return tabWidgetEditors
+            try:
+                first_editor = self.editors[0]
+            except IndexError:
+                first_editor = None
+            # Is there any tab opened?
+            if path in self.openedFileMap():
+                logger.info("%s is already opened", path)
+                self.openedFileMap()[path].setFocus(Qt.MouseFocusReason)
+                return
             
-            if count == 1 and not self.widget(0).document().isModified() and \
-                not self.widget(0).path:
-                #print "Reutilizando vacio"
-                editor = self.widget(0)
-                
-                editor.path = path
-                editor.afterInsertionEvent()
+            elif count == 1 and first_editor and not first_editor.modified and not first_editor.path:
+                first_editor.open(path)
                 editor.getFocus()
                 
             else:
                 editor = self.getEditor(path)
-                index = self.addTab(editor, _("Loading..."))
+                index = self.addTab(editor, self.trUtf8("Loading..."))
                 self.setCurrentIndex(index)
         except UnicodeDecodeError, e:
-            QMessageBox.critical(self, _("Could not decode file %s", path), 
-                                 _("""<p>File %s could not be decoded</p>
+            QMessageBox.critical(self, self.trUtf8("Could not decode file %s", path),
+                                 self.trUtf8("""<p>File %s could not be decoded</p>
                                  <p>Some exception data:</p>
                                  <pre>%s</pre>""", path, unicode(e)[:40]))
     
@@ -206,7 +240,7 @@ class PMXTabWidget(QTabWidget):
         '''
         Creates a new empty tab and returns it
         '''
-        from prymatex.gui.editor.widget import PMXEditorWidget
+        
         editor = PMXEditorWidget.getEditor(self)
         # Title should be filled after tab insertion
         self.addTab(editor, '...')
@@ -333,7 +367,20 @@ class PMXTabWidget(QTabWidget):
         self.insertTab(index, widget, text)
         self.setCurrentWidget(widget)
 
-class PMWTabsMenu(QMenu):
+
+
+
+class PMXTabWidgetIterator(object):
+    ''' Iterates over the tab widget's widgets '''
+    def __init__(self, tabwidget):
+        self.count, self.current = tabwidget.count(), 0
+        self.tabwidget = tabwidget
+        
+    def next(self):
+        pass
+        
+
+class PMXTabsMenu(QMenu):
     '''
     A menu that keeps only one action active
     '''
@@ -359,4 +406,3 @@ class PMWTabsMenu(QMenu):
             action.setShortcut(shortcut)
         
     
-     
