@@ -15,7 +15,7 @@ from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget , PMWTabsMenu
 from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
-from layoutmanager import PMXLayoutManager
+
 from prymatex.gui.mixins.common import CenterWidget
 from prymatex.config.configdialog import PMXConfigDialog
 from prymatex.gui.panes.outputpanel import PMXOutputDock
@@ -51,10 +51,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
         
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
-        
-        self.layoutManager = PMXLayoutManager(self)
-        self.setCentralWidget(self.layoutManager)
-        #self.setCentralWidget(self.tabWidgetEditors)
+        tabWidget = PMXTabWidget(self)
+        self.setCentralWidget( tabWidget )
         #self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
         #self.actionGroupTabs.addMenu(self.menuPanes)
         
@@ -110,23 +108,23 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
         self.paneFileSystem.hide()
         self.paneFileSystem.associateAction(self.actionShow_File_System_Pane,
-                                            _("Show Filesystem Panel"),
-                                            _("Hide Filesystem Panel"))
+                                            self.trUtf8("Show Filesystem Panel"),
+                                            self.trUtf8("Hide Filesystem Panel"))
         
         
         self.paneOutput = PMXOutputDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
         self.paneOutput.hide()
         self.paneOutput.associateAction(self.actionShow_Output,
-                                        _("Show Output"),
-                                        _("Hide output"))
+                                        self.trUtf8("Show Output"),
+                                        self.trUtf8("Hide output"))
         
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
         self.paneProject.hide()
         self.paneProject.associateAction(self.actionShow_Project_Dock,
-                                         _("Show Project"),
-                                         _("Hide project"))
+                                         self.trUtf8("Show Project"),
+                                         self.trUtf8("Hide project"))
         
         self.paneSymbolList = PMXSymboldListDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
@@ -176,7 +174,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @property
     def currentTabWidget(self):
         ''' Shortcut to the current editor (bypass layoutManager) '''
-        return self.layoutManager.currentTabWidget
+        return self.centralWidget()
     
     @property
     def currentEditor(self):
@@ -184,31 +182,31 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        self.currentTabWidget.appendEmptyTab()
+        self.centralWidget().appendEmptyTab()
 
     
     
     @pyqtSignature('')
     def on_actionClose_triggered(self):
-        index = self.currentTabWidget.currentIndex()
-        self.currentTabWidget.closeTab(index)
-        if self.currentTabWidget.count():
-            self.currentTabWidget.currentWidget().setFocus(Qt.TabFocusReason)
+        index = self.centralWidget().currentIndex()
+        self.centralWidget().closeTab(index)
+        if self.centralWidget().count():
+            self.centralWidget().currentWidget().setFocus(Qt.TabFocusReason)
 
     
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
-        self.currentTabWidget.focusNextTab()
+        self.centralWidget().focusNextTab()
         
 
         
     @pyqtSignature('')
     def on_actionPrevious_Tab_triggered(self):
-        self.currentTabWidget.focusPrevTab()
+        self.centralWidget().focusPrevTab()
         
     @pyqtSignature('')
     def on_actionAboutApp_triggered(self):
-        QMessageBox.about(self, _("About"), _("""
+        QMessageBox.about(self, self.trUtf8("About"), self.trUtf8("""
         <h3>Prymatex Text Editor</h3>
         <p>(c) 2010 Xurix</p>
         <p><h4>Authors:</h4>
@@ -243,13 +241,13 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @pyqtSignature('')
     def on_actionOpen_triggered(self):
         #qApp.instance().startDirectory()
-        fs = QFileDialog.getOpenFileNames(self, _("Select Files to Open"),
+        fs = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
                                             qApp.instance().startDirectory())
         if not fs:
             return
         for path in fs:
             #PMXCodeEdit.get
-            self.currentTabWidget.openFile(path)
+            self.centralWidget().openFile(path)
             #self.tabWidgetEditors.openLocalFile(path)
     
     @pyqtSignature('')
@@ -266,7 +264,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         '''
         Current Editor
         '''
-        self.layoutManager.currentEditor()
+        self.centralWidget().currentEditor()
         #return self.tabWidgetEditors.currentWidget()
         
     @pyqtSignature('')
@@ -281,7 +279,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def on_actionSaveAll_triggered(self):
         for i in range(0, self.tabWidgetEditors.count()):
             if not self.tabWidgetEditors.widget(i).save():
-                self.statusBar().showMessage(_("Not all documents were saved"), 1000)
+                self.statusBar().showMessage(self.trUtf8("Not all documents were saved"), 1000)
                 break
     
     @pyqtSignature('')
@@ -364,7 +362,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             editor = self.tabWidgetEditors.appendEmptyTab()
             editor.appendPlainText(text)
         else:
-            self.mainwindow.statusbar.showMessage(_("Nothing to paste."))
+            self.mainwindow.statusbar.showMessage(self.trUtf8("Nothing to paste."))
           
 
     @pyqtSignature('')
