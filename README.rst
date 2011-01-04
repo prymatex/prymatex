@@ -61,8 +61,8 @@ The requirements to run pryamtex are:
 
 * Python 2.6
 * PyQt4 >= 4.5
-* Oniguruma (this library may be bundled with this app)
+* Ponyguruma
     
 Additional libraries may be needed for specific plugins. Most TextMate bundles
-should as long as you fulfill its requirements (i.e. php cli for php, or make
+should work as long as you fulfill its requirements (i.e. php cli for php, or make
 binary for C projects, and so on).
