@@ -2,7 +2,9 @@ import os
 from glob import glob
 import plistlib
 if __name__ != "__main__":
-    from prymatex.bundles import command, macro, snippet, syntax 
+    from prymatex.bundles import command, macro, snippet, syntax
+else:
+    import command, macro, snippet, syntax
 from xml.parsers.expat import ExpatError
 
 PMX_BUNDLES = {}
@@ -30,7 +32,6 @@ class PMXMenuNode(object):
         raise KeyError(key)
     
     def __setitem__(self, key, menu):
-        #TODO: Ver si esta en exclude o en deleted
         if key in self.main:
             self.main[key] = menu
         else:
@@ -42,8 +43,6 @@ class PMXMenuNode(object):
         items = self.items
         if self.excludedItems:
             items = filter(lambda x: not x in self.excludedItems, items)
-        if hasattr(self, 'deleted') and self.deleted:
-            items = filter(lambda x: not x in self.deleted, items)
         for item in items:
             if item != MENU_SPACE:
                 yield (item, self[item])
@@ -53,18 +52,18 @@ class PMXMenuNode(object):
 class PMXBundle(object):
     def __init__(self, hash):
         global PMX_BUNDLES
-        self.uuid = hash.get('uuid')
-        self.name = hash.get('name')
-        self.description = hash.get('description')
-        self.contact = {'Name': hash.get('contactName'), 'Email': hash.get('contactEmailRot13') }
-        if 'mainMenu' in hash:
-            self.menu = PMXMenuNode('main', **hash.get('mainMenu'))
-            self.menu.deleted = hash.get('deleted', [])
-            self.menu.ordering = hash.get('ordering', [])
-        else:
-            self.menu = {}
-        PMX_BUNDLES[self.name] = self
 
+        for key in [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]:
+            value = hash.pop(key, None)
+            if key == 'mainMenu' and value != None:
+                value = PMXMenuNode(self.name, **value)
+            setattr(self, key, value)
+        
+        if hash:
+            print "Bundle '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+        
+        PMX_BUNDLES[self.name] = self
+    
 def load_prymatex_bundle(bundle_path):
     '''
     Carga un bundle
@@ -78,9 +77,9 @@ def load_prymatex_bundle(bundle_path):
     try:
         data = plistlib.readPlist(info_file)
         bundle = PMXBundle(data)
-    except ExpatError:
-        raise
-    
+    except Exception:
+        print "Error en bundle %s" % info_file
+        
     for path, klass in BUNDLE_ELEMENTS.iteritems():
         files = glob(os.path.join(bundle_path, path, '*'))
         for sf in files:
@@ -90,9 +89,9 @@ def load_prymatex_bundle(bundle_path):
                 uuid = data.pop('uuid')
                 bundleUUID = data.pop('bundleUUID', None)
                 e = klass(data, 'prymatex')
-                bundle.menu[uuid] = e
-            except ExpatError:
-                print "%s has parsing errors" % sf
+                bundle.mainMenu[uuid] = e
+            except Exception:
+                print "Error en %s para %s" % (klass.__name__, sf)
     
     return bundle
 
@@ -116,8 +115,8 @@ def load_prymatex_bundles(path, after_load_callback = None):
     return counter
 
 if __name__ == '__main__':
-    import command, macro, snippet, syntax
-    bundle = load_prymatex_bundle('../share/Bundles/Python.tmbundle')
-    from pprint import pprint
-    pprint(bundle.uuid)
-    pprint(bundle.menu.main)
+    for file in glob(os.path.join('../share/Bundles/', '*')):
+        load_prymatex_bundle(file)
+    p = syntax.PMXDebugSyntaxProcessor()
+    print PMX_BUNDLES['Python'].mainMenu.main
+    syntax.PMX_SYNTAXES['prymatex']['source.python'].parse('a = {"uno": 1, "dos": lambda x: x + 1}', p)

@@ -7,11 +7,11 @@
 '''
 
 import ponyguruma as onig
+from ponyguruma.constants import OPTION_CAPTURE_GROUP, ENCODING_UTF8
 
 PMX_SYNTAXES = {}
 
-OPTIONS = onig.OPTION_CAPTURE_GROUP
-onig_compile = onig.Regexp.factory(OPTIONS)
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, encoding = ENCODING_UTF8)
 
 ######################### SyntaxProcessor #################################
 
@@ -193,12 +193,6 @@ class PMXSyntaxNode(object):
         matches = []
         captures = getattr(self, name)
         
-        ''' if key =~ /^\d*$/
-                matches << [key.to_i, match.offset( key.to_i ), value["name"]] if key.to_i < match.size
-            else
-                matches << [match.to_index( key.to_sym ), match.offset( key.to_sym), value["name"]] if match.to_index( key.to_sym )
-        '''
-        
         if captures:
             for key, value in captures:
                 if onig_compile('^\d*$').match(key):
@@ -236,7 +230,7 @@ class PMXSyntaxNode(object):
             return match.groupdict[index]
         regstring = onig_compile('\\\\([1-9])').sub(g_match, regstring)
         regstring = onig_compile('\\\\k<(.*?)>').sub(d_match, regstring)
-        return onig_compile( regstring ).match( string, position )
+        return onig_compile( regstring ).search( string, position )
     
     def match_first_son(self, string, position):
         match = (None, None)
