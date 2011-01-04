@@ -92,7 +92,7 @@ def load_prymatex_bundle(bundle_path):
                 e = klass(data, 'prymatex')
                 bundle.menu[uuid] = e
             except ExpatError:
-                pass
+                print "%s has parsing errors" % sf
     
     return bundle
 
