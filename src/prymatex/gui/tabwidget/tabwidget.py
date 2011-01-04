@@ -177,7 +177,7 @@ class PMXTabWidget(QTabWidget):
     def editors(self):
         ''' List of PMXEditorWidget insances in the tab widget '''
         l = []
-        for i in range(self.count):
+        for i in range(len(self)):
             tab = self.widget(i)
             if isinstance(tab, PMXEditorWidget):
                 l.append( tab ) # It's and editor
@@ -217,9 +217,10 @@ class PMXTabWidget(QTabWidget):
                 editor.getFocus()
                 
             else:
-                editor = self.getEditor(path)
-                index = self.addTab(editor, self.trUtf8("Loading..."))
-                self.setCurrentIndex(index)
+                pass
+                #editor = self.getEditor(path)
+                #index = self.addTab(editor, self.trUtf8("Loading..."))
+                #self.setCurrentIndex(index)
         except UnicodeDecodeError, e:
             QMessageBox.critical(self, self.trUtf8("Could not decode file %s", path),
                                  self.trUtf8("""<p>File %s could not be decoded</p>
@@ -354,15 +355,15 @@ class PMXTabWidget(QTabWidget):
         '''
         Moves the current tab to the right
         '''
-        if self.count() == 1:
+        tab_count = len(self)
+        if tab_count == 1:
             return
-        count = self.count()
         index = self.currentIndex()
         text = self.tabText(index)
         widget = self.currentWidget()
         self.removeTab(index)
         index += 1
-        if index >= count:
+        if index >= tab_count:
             index = 0
         self.insertTab(index, widget, text)
         self.setCurrentWidget(widget)
