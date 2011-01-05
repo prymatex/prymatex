@@ -8,22 +8,21 @@
 '''
 import os
 import sys
-#import logging
-#from optparse import OptionParser
-basepath = os.path.dirname(__file__)
-sys.path.append(os.path.join(basepath, '..'))
 
-def main(argv = sys.argv):
+PRYMATEX_BASEPATH = os.path.dirname(__file__)
+sys.path.append(os.path.join(PRYMATEX_BASEPATH, '..'))
+
+def main(args):
     '''
     GUI entry point.
     '''
-
     from prymatex.core import app
     from prymatex.lib import exceptions
+            
     # TODO: Implement quit and restart
     while True:
         try:
-            myapp = app.PMXApplication(argv)
+            myapp = app.PMXApplication(args)
             #myapp.logger = logger 
         except exceptions.AlreadyRunningError, e:
             return e.RETURN_VALUE
@@ -37,5 +36,5 @@ def main(argv = sys.argv):
 
 if __name__ == '__main__':
     # create logger with "spam_application"
-    sys.exit(main())
+    sys.exit(main(sys.argv))
 
