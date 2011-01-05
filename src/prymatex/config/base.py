@@ -12,9 +12,8 @@ def get_prymatex_user_path():
     return path
 
 PRIMATEX_BASE_PATH = get_prymatex_base_path()
-print PRIMATEX_BASE_PATH
 PRIMATEX_USER_PATH = get_prymatex_user_path()
-PRYMATEX_SETTINGS_FILE = os.path.join(PRIMATEX_BASE_PATH , "settings.plist")
+PRYMATEX_SETTINGS_FILE = os.path.join(PRIMATEX_USER_PATH , "settings.plist")
 
 PROTECTED_KEYS = ('_wrapped_dict', )
 
@@ -79,8 +78,9 @@ class Settings(SettingsNode):
     '''
     Configuración gerarquica basada en diccionarios.
     '''
-    TEXTMATE_BUNDLES_PATH = [os.path.join(PRIMATEX_BASE_PATH, 'resources', 'Bundles'), os.path.join(PRIMATEX_USER_PATH, 'Bundles')]
-    TEXTMATE_THEMES_PATH = [os.path.join(PRIMATEX_BASE_PATH, 'resources', 'Themes'), os.path.join(PRIMATEX_USER_PATH, 'Themes')]
+    PMX_BUNDLES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'share', 'Bundles')
+    PMX_THEMES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'share', 'Themes')
+    PMX_SUPPORT_PATH = os.path.join(PRIMATEX_BASE_PATH, 'share', 'Support')
     
     def __init__(self, parent = None, **defaults):
         if os.path.exists(PRYMATEX_SETTINGS_FILE):

@@ -9,10 +9,6 @@ from os import getpid, unlink, getcwd
 from os.path import dirname, abspath
 from prymatex.lib import deco
 
-from optparse import OptionParser
-
-BASE_PATH = dirname(__file__)
-
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -30,19 +26,18 @@ class PMXApplication(QApplication):
     __res_mngr = None
     __logger = None
     
-    
-    
     #@printtime
     @deco.logtime
-    def __init__(self, argv, logger = None):
+    def __init__(self, args, logger = None):
         '''
         Inicialización de la aplicación.
         '''
-        QApplication.__init__(self, argv)
+        QApplication.__init__(self, args)
         # Logger setup
-        self.setup_logging()
+        self.setup_logging() 
+        
         from prymatex.optargs import parser
-        self.__options, files_to_open = parser.parse_args(argv[1:]) 
+        self.__options, files_to_open = parser.parse_args(args[1:])
         
         # Some init's
         self.init_application_params()
@@ -70,13 +65,13 @@ class PMXApplication(QApplication):
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
         
         # Creates the GUI
-        
         self.createWindows(files_to_open)
         
         if not self.options.ipdb_excepthook:
             sys.excepthook = sys_excepthook
         else:
             import ipdb
+
     @property
     def options(self):
         ''' Commandline options '''
@@ -135,33 +130,13 @@ class PMXApplication(QApplication):
         logger.addHandler(qth)
         logger.info("Application startup")
         self.logger = logger
-        
-    
-    def parse_args(self, args):
-        '''
-        Parse command line arguments through optparse library.
-        
-        This parsing could halt the application.
-        '''
-        parser = OptionParser(version = self.applicationVersion(),
-                                description = self.applicationName(), 
-                                prog = 'prymatex', 
-                                epilog = "")
-    
-        parser.add_option('-s', '--session', dest="session",
-                          help="Name of the session")
-        parser.add_option('-l', '--last', dest="last",
-                          help="Load last session")
-        
-        opts, files = parser.parse_args(argv)
-    
     
     def init_application_params(self):
-        import prymatex
-        self.setApplicationName(prymatex.PRODUCT_NAME)
-        self.setApplicationVersion(prymatex.VERSION) # hg stuff?
+        from prymatex import version
+        self.setApplicationName(version.__doc__)
+        self.setApplicationVersion(version.__version__) # hg stuff?
         self.setOrganizationDomain("org")
-        self.projectUrl = prymatex.PROJECT_HOME    
+        self.projectUrl = version.__url__    
     
     @property
     def lock_filename(self):
@@ -203,44 +178,16 @@ class PMXApplication(QApplication):
         '''
         return self.__res_mngr
     
-    def deferred_load_texmate_bundles(self):
-        '''
-        Crea una lista de los paths abslutos de donde se cargan
-        bundles y lanza un hilo para cargarlos.
-        '''
-        from prymatex.bundles.loader import PMXBundleLoaderThread
-        
-        path_list = []
-        for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
-            if isdir(dirname):
-                if not isabs(dirname):
-                    dirname = join(getcwd(), dirname)
-                path_list.append(dirname)
-        self.bundle_thread = PMXBundleLoaderThread(path_list, self)
-        self.bundle_thread.start()
-    
     def load_texmate_themes(self):
         '''
         Load textmate Bundles and Themes
         '''
         from prymatex.bundles import load_prymatex_themes
         from prymatex.lib.i18n import ugettext as _
-        if not all(map(lambda x: hasattr(self.config, x), ('TEXTMATE_THEMES_PATHS',
-                                                           'TEXTMATE_BUNDLES_PATHS' ))):
-            QMessageBox.critical(self, _("Fatal Error"), 
-                                 _("No bundle dirs have been found in config file."))
         
         self.splash.showMessage(_("Loading themes..."))
-        themes = 0
-        for dirname in self.config.TEXTMATE_THEMES_PATHS:
-            if isdir(dirname):
-                if not isabs(dirname):
-                    dirname = join(getcwd(), dirname)
-                themes += load_prymatex_themes(dirname)
-                
-            else:
-                self.logger.warning("The theme dir does not exist: %s", dirname)
-            
+        themes = load_prymatex_themes(self.config.PMX_THEMES_PATH)
+        
         self.splash.showMessage(_("%d themes loaded", themes))
         QApplication.processEvents()
     
@@ -257,14 +204,17 @@ class PMXApplication(QApplication):
                                  name, counter, total, progress))
             QApplication.processEvents()
             
-        for dirname in self.config.TEXTMATE_BUNDLES_PATHS:
-            self.splash.showMessage(_("Loading bundles..."))
-            if isdir(dirname):
-                if not isabs(dirname):
-                    dirname = join(getcwd(), dirname) 
-                bundles += load_prymatex_bundles(dirname, before_load_callback)
-            else:
-                self.logger.warning("The theme dir does not exist")
+        self.splash.showMessage(_("Loading bundles..."))
+        bundles += load_prymatex_bundles(self.config.PMX_BUNDLES_PATH, before_load_callback)
+        #Cargar bundles de usuario
+        #for dirname in self.config.PMX_BUNDLES_PATH:
+        #    self.splash.showMessage(_("Loading bundles..."))
+        #    if isdir(dirname):
+        #        if not isabs(dirname):
+        #            dirname = join(getcwd(), dirname) 
+        #        
+        #    else:
+        #        self.logger.warning("The theme dir does not exist")
                 
         QApplication.processEvents()
         

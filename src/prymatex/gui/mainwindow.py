@@ -142,7 +142,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     def add_menu_item(self, parent_menu, item):
         if isinstance(item, PMXMenuNode):
-            menu = QMenu(item.name)
+            menu = QMenu(item.name, parent_menu)
             parent_menu.addMenu(menu)
             for _, i in item.iteritems():
                 self.add_menu_item(menu, i)
@@ -159,8 +159,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             menu = QMenu(name, self)
             self.menuBundles.addMenu(menu)
             bundle = bundles[name]
-            for _, item in bundle.menu.iteritems():
-                self.add_menu_item(menu, item)  
+            if bundle.mainMenu != None:
+                for _, item in bundle.mainMenu.iteritems():
+                    self.add_menu_item(menu, item)  
                 
     def on_actionQuit_triggered(self):
         QApplication.quit()
