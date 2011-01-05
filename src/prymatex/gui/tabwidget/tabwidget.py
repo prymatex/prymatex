@@ -9,7 +9,7 @@ import itertools
 
 from prymatex.gui.utils import *
 from prymatex.gui.editor.widget import PMXEditorWidget
-
+from choosetab import ChooseTabDialog
 
 class PMXTabWidget(QTabWidget):
     
@@ -43,6 +43,9 @@ class PMXTabWidget(QTabWidget):
             }
         ''')
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
+
+
+        self.chooseFileDlg = QDialog()
         
 
         

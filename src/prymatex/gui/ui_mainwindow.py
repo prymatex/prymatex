@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Mon Jan  3 09:23:40 2011
+# Created: Mon Jan  3 21:27:46 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -241,8 +241,8 @@ class Ui_MainWindow(object):
         self.actionA.setObjectName("actionA")
         self.actionGo_To_Header_Source = QtGui.QAction(MainWindow)
         self.actionGo_To_Header_Source.setObjectName("actionGo_To_Header_Source")
-        self.actionGo_To_FIle = QtGui.QAction(MainWindow)
-        self.actionGo_To_FIle.setObjectName("actionGo_To_FIle")
+        self.actionGo_To_File = QtGui.QAction(MainWindow)
+        self.actionGo_To_File.setObjectName("actionGo_To_File")
         self.actionGo_To_Symbol = QtGui.QAction(MainWindow)
         self.actionGo_To_Symbol.setObjectName("actionGo_To_Symbol")
         self.actionGo_To_Matching_Bracket = QtGui.QAction(MainWindow)
@@ -369,7 +369,7 @@ class Ui_MainWindow(object):
         self.menuNavigation.addAction(self.menuPanes.menuAction())
         self.menuNavigation.addSeparator()
         self.menuNavigation.addAction(self.actionGo_To_Header_Source)
-        self.menuNavigation.addAction(self.actionGo_To_FIle)
+        self.menuNavigation.addAction(self.actionGo_To_File)
         self.menuNavigation.addAction(self.actionGo_To_Symbol)
         self.menuNavigation.addAction(self.actionGo_To_Matching_Bracket)
         self.menuNavigation.addAction(self.actionGo_To_Line)
@@ -522,7 +522,8 @@ class Ui_MainWindow(object):
         self.actionMove_Tab_Right.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+PgDown", None, QtGui.QApplication.UnicodeUTF8))
         self.actionA.setText(QtGui.QApplication.translate("MainWindow", "No Pane", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGo_To_Header_Source.setText(QtGui.QApplication.translate("MainWindow", "Go To Header/Source", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionGo_To_FIle.setText(QtGui.QApplication.translate("MainWindow", "Go To FIle", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionGo_To_File.setText(QtGui.QApplication.translate("MainWindow", "Go To FIle", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionGo_To_File.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+E", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGo_To_Symbol.setText(QtGui.QApplication.translate("MainWindow", "Go To Symbol", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGo_To_Matching_Bracket.setText(QtGui.QApplication.translate("MainWindow", "Go To Matching Bracket", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGo_To_Matching_Bracket.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+B", None, QtGui.QApplication.UnicodeUTF8))

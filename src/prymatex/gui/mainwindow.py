@@ -369,7 +369,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def on_actionGo_To_Line_triggered(self):
         editor = self.tabWidgetEditors.currentWidget()
         editor.showGoToLineDialog()
-        
+
+    @pyqtSignature('')
+    def on_actionGo_To_File_triggered(self):
+        '''
+        Triggers 
+        '''
+        self.centralWidget().chooseFileDlg.exec_()
+    
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
         scope = self.tabWidgetEditors.currentWidget().get_current_scope()

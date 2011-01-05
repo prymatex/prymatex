@@ -143,7 +143,7 @@
     <addaction name="menuPanes"/>
     <addaction name="separator"/>
     <addaction name="actionGo_To_Header_Source"/>
-    <addaction name="actionGo_To_FIle"/>
+    <addaction name="actionGo_To_File"/>
     <addaction name="actionGo_To_Symbol"/>
     <addaction name="actionGo_To_Matching_Bracket"/>
     <addaction name="actionGo_To_Line"/>
@@ -728,9 +728,12 @@
     <string>Go To Header/Source</string>
    </property>
   </action>
-  <action name="actionGo_To_FIle">
+  <action name="actionGo_To_File">
    <property name="text">
     <string>Go To FIle</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionGo_To_Symbol">
@@ -888,6 +891,9 @@
    </property>
   </action>
   <action name="actionFree_Editing">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Free Editing</string>
    </property>
