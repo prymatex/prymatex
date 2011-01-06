@@ -482,3 +482,19 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             
             self.setTextCursor(cursor)
         cursor.endEditBlock()
+
+    MAX_FONT_POINT_SIZE = 32
+    MIN_FONT_POINT_SIZE = 6
+    
+    @property
+    def font_size(self):
+        font = self.font()
+        pt_size = font.pointSize()
+        return pt_size
+
+    @font_size.setter
+    def font_size(self, value):
+        font = self.font()
+        font.setPointSize(value)
+        self.setFont(font)
+        

@@ -247,26 +247,15 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                 return True # Can close, discard changes
         return True
 
-    MAX_POINT_SIZE = 24
-    MIN_POINT_SIZE = 6
-
     def zoomIn(self):
-        font = self.codeEdit.font()
-        pt_size = font.pointSize()
-        if pt_size < self.MAX_POINT_SIZE:
-            pt_size += 1
-            font.setPointSize(pt_size)
-            logger.debug("Font size is now %d points", pt_size)
-        self.codeEdit.setFont(font)
+        if self.codeEdit.font_size < self.codeEdit.MAX_FONT_POINT_SIZE:
+            self.codeEdit.font_size += 1
+
 
     def zoomOut(self):
-        font = self.codeEdit.font()
-        pt_size = font.pointSize()
-        if pt_size > self.MIN_POINT_SIZE:
-            pt_size -=  1
-            font.setPointSize(pt_size)
-            logger.debug("Font size is now %d points", pt_size)
-        self.codeEdit.setFont(font)
+        if self.codeEdit.font_size > self.codeEdit.MIN_FONT_POINT_SIZE:
+            self.codeEdit.font_size -= 1
+            
     
     #===========================================================================
     # File Operations
