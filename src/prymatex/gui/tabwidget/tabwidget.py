@@ -10,11 +10,9 @@ import itertools
 from prymatex.gui.utils import *
 from prymatex.gui.editor.widget import PMXEditorWidget
 from choosetab import ChooseTabDialog
+from prymatex.core.base import PMXObject
 
-class PMXTabWidget(QTabWidget):
-    
-    #Signal
-    currentEditorChange = pyqtSignal(PMXEditorWidget)
+class PMXTabWidget(QTabWidget, PMXObject):
 
     counter = 1
     
@@ -27,11 +25,6 @@ class PMXTabWidget(QTabWidget):
         if not self.count():
             self.appendEmptyTab()
         
-        
-        self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
-        self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
-        self.currentChanged.connect(self.on_current_changed)
-        
         self.buttonTabList = QPushButton(self)
         self.buttonTabList.setObjectName("buttonTabList")
         self.buttonTabList.setToolTip(self.trUtf8("Tab list"))
@@ -43,12 +36,22 @@ class PMXTabWidget(QTabWidget):
             }
         ''')
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
-
-
         self.chooseFileDlg = QDialog()
+        self.declareEvents()
+        self.setSignals()
+    
+    def setSignals(self):
+        #External events
+        self.connect(self.root, SIGNAL('statusBarSytnaxChangedEvent'), self.updateEditorSyntax )
         
+        #Internal signals
+        self.currentChanged.connect(self.on_current_changed)
+        self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
+        self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
+        
+    def declareEvents(self):
+        self.declareEvent('tabWidgetEditorChangedEvent()')
 
-        
     def setupUi(self):
         self.setTabsClosable(True)
         self.setMovable(True)
@@ -106,14 +109,12 @@ class PMXTabWidget(QTabWidget):
         for index in range(1, self.count()):
             if not self.closeTab(1):
                 return
-
-
     
     def on_current_changed(self, index):
         '''
         TODO: Resync all menus
         '''
-        self.currentEditorChange.emit(self.widget(index))
+        self.tabWidgetEditorChangedEvent(self.widget(index))
         
     def mouseDoubleClickEvent(self, mouse_event):
         '''
@@ -158,10 +159,6 @@ class PMXTabWidget(QTabWidget):
         #else:
         #    widget
     
-    def on_syntax_change(self, syntax):
-        editor = self.currentWidget()
-        editor.set_syntax(syntax)
-
     #----------------------------------------------------------------------------------
     # Widget acces and Python collection emulation
     #----------------------------------------------------------------------------------
@@ -194,9 +191,7 @@ class PMXTabWidget(QTabWidget):
         if index < 0 or index > len(self):
             raise IndexError("%s-nth widget does not exist in %s" % (index, self) )
         return self.widget( index )
-
-    
-                
+        
     def openLocalFile(self, path):
         '''
         Opens a file in a tab, tries to reuse an empty one if it's
@@ -265,7 +260,9 @@ class PMXTabWidget(QTabWidget):
             
         return index
         
-    
+    def updateEditorSyntax(self, source, syntax):
+        editor_widget = self.currentWidget()
+        editor_widget.codeEdit.set_syntax(syntax)
     
     def closeTab(self, index):
         '''

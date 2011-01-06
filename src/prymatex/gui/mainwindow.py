@@ -380,9 +380,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
-        scope = self.tabWidgetEditors.currentWidget().get_current_scope()
-        folding = self.tabWidgetEditors.currentWidget().get_current_folding()
-        self.statusBar().showMessage("%d - %s" % (folding, scope))
+        scope = self.currentEditor.codeEdit.get_current_scope()
+        self.statusBar().showMessage("%s" % (scope))
         
     @pyqtSignature('')
     def on_actionTo_iNVERT_cASE_triggered(self):
