@@ -48,4 +48,14 @@ class PMXBundleLoaderThread(QThread):
                 # Intentamos que nos se freeze la interfase
                 qApp.processEvents()
         
-        
+               for bundle_path in bundles:
+                name = path2bundlename(bundle_path) 
+                try:
+                    bundle = load_prymatex_bundle(bundle_path)
+                except:
+         #           qApp.emit(SIGNAL('bundleFailed'), name)
+                    pass
+                else:
+                    #qApp.emit(SIGNAL('bundleLoaded'), name, bundle)
+                    pass
+                #

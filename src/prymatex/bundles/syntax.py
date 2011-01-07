@@ -3,11 +3,13 @@
 
 '''
     Syntax's module
-        content, name, scope, keyEquivalent, tabTrigger
+    http://manual.macromates.com/en/language_grammars.html
+    http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
 '''
 
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
+from prymatex.bundles.base import PMXBundleItem
 
 PMX_SYNTAXES = {}
 
@@ -21,12 +23,7 @@ class PMXSyntaxNode(object):
         self.syntax = syntax
         for key, value in hash.iteritems():
             if key in ['match', 'begin']:
-                try:
-                    # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
-                    setattr(self, key, onig_compile( value ))
-                except:
-                    pass
-                    #print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
+                setattr(self, key, onig_compile( value ))
             elif key in ['content', 'name', 'contentName', 'end']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:
@@ -37,8 +34,7 @@ class PMXSyntaxNode(object):
             elif key in ['patterns']:
                 self.create_children(value)
             else:
-                pass
-                #print u'Ignoring: %s: %s' % (key, value)
+                print u'%s ignoring %s: %s' % (self.__class__.__name__, key, value)
     
     def parse_repository(self, repository):
         self.repository = {}
@@ -158,14 +154,12 @@ class PMXSyntaxProxy(object):
         else:
             return self.syntax.syntaxes[self.proxy].grammar
         
-class PMXSyntax(object):
+class PMXSyntax(PMXBundleItem):
     def __init__(self, hash, name_space = 'default'):
-        global PMX_SYNTAXES
-        self.hash = hash
-        self.name_space = name_space
-        for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'name', 
-                        'scopeName', 'keyEquivalent', 'foldingStopMarker', 'fileTypes']:
-            value = self.hash.pop(key, None)
+        super(PMXSyntax, self).__init__(hash, name_space)
+        for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository',
+                        'keyEquivalent', 'foldingStopMarker', 'fileTypes', 'patterns']:
+            value = hash.pop(key, None)
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                 #Compiled keys
                 value = onig_compile( value )
@@ -186,7 +180,7 @@ class PMXSyntax(object):
     @property
     def grammar(self):
         if not hasattr(self, '_grammar'):
-            setattr(self, '_grammar', PMXSyntaxNode(self.hash, self ))
+            setattr(self, '_grammar', PMXSyntaxNode({ 'repository': self.repository, 'repository': self.patterns} , self ))
         return self._grammar
 
     def parse(self, string, processor = None):
@@ -277,3 +271,4 @@ if __name__ == '__main__':
         syntax = parse_file(f)
     p = PMXDebugSyntaxProcessor()
     print PMX_SYNTAXES
+atch != None and syntax

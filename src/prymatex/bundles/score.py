@@ -58,3 +58,23 @@ class PMXScoreManager(object):
         if len(pending) > 0:
             result = 0
         return result
+
+if __name__ == "__main__":
+    sp = PMXScoreManager()
+    reference_scope = 'text.html.basic source.php.embedded.html string.quoted.double.php'
+      
+    print 0, "!=", sp.score( 'source.php string', reference_scope )
+    print 0, "!=", sp.score( 'text.html source.php', reference_scope )
+    print 0, "==", sp.score( 'string source.php', reference_scope )
+    print 0, "==", sp.score( 'source.php text.html', reference_scope )
+      
+    print 0, "==", sp.score( 'text.html source.php - string', reference_scope )
+    print 0, "!=", sp.score( 'text.html source.php - ruby', reference_scope )
+      
+    print sp.score( '', reference_scope ), " > ", sp.score( 'source.php', reference_scope )
+    print sp.score( 'string', reference_scope ), " > ", sp.score( 'source.php', reference_scope ) 
+    print sp.score( 'text source string', reference_scope ), " > ", sp.score( 'source string', reference_scope )
+    print sp.scoreseference_scope )
+      
+    print 0, "==", sp.score( 'text.html source.php - string', reference_scope )
+    print 0, "!=", sp.score( 'text.html source.php - 

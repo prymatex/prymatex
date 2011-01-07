@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Macro's module
-        content, name, scope, keyEquivalent, tabTrigger
+    Template's module
+    http://manual.macromates.com/en/templates
 '''
 from pprint import pprint
 
@@ -32,4 +32,6 @@ if __name__ == '__main__':
     from glob import glob
     files = glob(os.path.join('../share/Bundles/C.tmbundle/Templates', '*'))
     for f in files:
-        command = parse_file(f)
+        command = parse_file(f)       
+            if hash:
+              
