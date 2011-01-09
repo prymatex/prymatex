@@ -26,12 +26,10 @@ def parse_file(filename):
     import plistlib
     data = plistlib.readPlist(filename)
     return PMXTemplate(data)
-		
+
 if __name__ == '__main__':
     import os
     from glob import glob
     files = glob(os.path.join('../share/Bundles/C.tmbundle/Templates', '*'))
     for f in files:
-        command = parse_file(f)       
-            if hash:
-              
+        command = parse_file(f)              

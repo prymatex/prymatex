@@ -11,9 +11,9 @@ def get_prymatex_user_path():
         os.makedirs(path)
     return path
 
-PRIMATEX_BASE_PATH = get_prymatex_base_path()
-PRIMATEX_USER_PATH = get_prymatex_user_path()
-PRYMATEX_SETTINGS_FILE = os.path.join(PRIMATEX_USER_PATH , "settings.plist")
+PMX_BASE_PATH = get_prymatex_base_path()
+PMX_USER_PATH = get_prymatex_user_path()
+PMX_SETTINGS_FILE = os.path.join(PMX_USER_PATH , "settings.plist")
 
 PROTECTED_KEYS = ('_wrapped_dict', )
 
@@ -78,19 +78,19 @@ class Settings(SettingsNode):
     '''
     Configuración gerarquica basada en diccionarios.
     '''
-    PMX_BUNDLES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'share', 'Bundles')
-    PMX_THEMES_PATH = os.path.join(PRIMATEX_BASE_PATH, 'share', 'Themes')
-    PMX_SUPPORT_PATH = os.path.join(PRIMATEX_BASE_PATH, 'share', 'Support')
+    PMX_BUNDLES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Bundles')
+    PMX_THEMES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Themes')
+    PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
     
     def __init__(self, parent = None, **defaults):
-        if os.path.exists(PRYMATEX_SETTINGS_FILE):
-            wrapped_dict = plistlib.readPlist(PRYMATEX_SETTINGS_FILE)
+        if os.path.exists(PMX_SETTINGS_FILE):
+            wrapped_dict = plistlib.readPlist(PMX_SETTINGS_FILE)
         else:
             wrapped_dict = {}
         super(Settings, self).__init__(wrapped_dict)
         
     def save(self):
         obj = self.to_python()
-        plistlib.writePlist(obj, PRYMATEX_SETTINGS_FILE)
+        plistlib.writePlist(obj, PMX_SETTINGS_FILE)
 
 settings = Settings()

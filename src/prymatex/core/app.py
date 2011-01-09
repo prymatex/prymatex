@@ -205,7 +205,7 @@ class PMXApplication(QApplication):
             QApplication.processEvents()
             
         self.splash.showMessage(_("Loading bundles..."))
-        bundles += load_prymatex_bundles(self.config.PMX_BUNDLES_PATH, before_load_callback)
+        bundles += load_prymatex_bundles(before_load_callback)
         #Cargar bundles de usuario
         #for dirname in self.config.PMX_BUNDLES_PATH:
         #    self.splash.showMessage(_("Loading bundles..."))

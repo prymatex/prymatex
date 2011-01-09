@@ -56,11 +56,6 @@ def main():
     from pprint import pprint
     print load_prymatex_themes('../../resources/Themes')
     pprint(PMX_THEMES['Blackboard'].scopes)
+
 if __name__ == '__main__':
-    main()ad_prymatex_themes(path):
-    search_path = join(abspath(path), '*.tmTheme')
-    paths = glob(search_path)
-    counter = 0
-    for path in paths:
-        try:
-            data = plistl
+    main()

@@ -59,6 +59,4 @@ if __name__ == '__main__':
     for f in files:
         command = parse_file(f)
         print command.name
-        command.execute(environment)name__ == '__main__':
-    from glob import glob
-    files = glob(os.path.j
+        command.execute(environment)

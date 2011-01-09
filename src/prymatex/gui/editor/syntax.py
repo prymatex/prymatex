@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QColor, QFont
-from prymatex.bundles.syntax import PMXSyntaxProcessor, PMXScoreManager
+from prymatex.bundles.processor import PMXSyntaxProcessor
+from prymatex.bundles.score import PMXScoreManager
 from prymatex.bundles.theme import PMX_THEMES
 
 class PMXSyntaxFormatter(object):

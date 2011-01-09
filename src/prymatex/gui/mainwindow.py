@@ -27,7 +27,7 @@ from prymatex.gui.filterdlg import PMXFilterDialog
 
 import itertools
 import logging
-from prymatex.bundles.base import PMXMenuNode, MENU_SPACE
+from prymatex.bundles.base import PMXMenuNode
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
@@ -67,8 +67,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.center()
         
         # Una vez centrada la ventana caramos los mnues
-        from prymatex.bundles.base import PMX_BUNDLES
-        self.add_bundles_to_menu(PMX_BUNDLES)
+        from prymatex.bundles.base import PMXBundle
+        self.add_bundles_to_menu(PMXBundle.BUNDLES)
         
         self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
@@ -146,7 +146,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             parent_menu.addMenu(menu)
             for _, i in item.iteritems():
                 self.add_menu_item(menu, i)
-        elif item == MENU_SPACE:
+        elif item == PMXMenuNode.MENU_SPACE:
             parent_menu.addSeparator()
         elif item and item.name:
             action = QAction(item.name, self)

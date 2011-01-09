@@ -7,7 +7,6 @@ from PyQt4.QtGui import qApp
 from os.path import abspath, join
 import os
 from glob import glob
-from bundle import load_prymatex_bundle
 
 def path2bundlename(path):
     if path.endswith(os.sep):
@@ -34,28 +33,3 @@ class PMXBundleLoaderThread(QThread):
         #    for bundle_path in bundles:
         #        qApp.emit(SIGNAL('bundleAvailable'), path2bundlename(bundle_path))
                 
-            # Con eso se podrían llenar los menus
-            for bundle_path in bundles:
-                name = path2bundlename(bundle_path) 
-                try:
-                    bundle = load_prymatex_bundle(bundle_path)
-                except:
-         #           qApp.emit(SIGNAL('bundleFailed'), name)
-                    pass
-                else:
-                    #qApp.emit(SIGNAL('bundleLoaded'), name, bundle)
-                    pass
-                # Intentamos que nos se freeze la interfase
-                qApp.processEvents()
-        
-               for bundle_path in bundles:
-                name = path2bundlename(bundle_path) 
-                try:
-                    bundle = load_prymatex_bundle(bundle_path)
-                except:
-         #           qApp.emit(SIGNAL('bundleFailed'), name)
-                    pass
-                else:
-                    #qApp.emit(SIGNAL('bundleLoaded'), name, bundle)
-                    pass
-                #

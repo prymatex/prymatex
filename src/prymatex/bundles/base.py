@@ -1,13 +1,6 @@
-import os
+import os, plistlib
 from glob import glob
-import plistlib
-
-if __name__ == "__main__":
-    import sys
-    sys.path.append(os.path.abspath('../..'))
-
 from xml.parsers.expat import ExpatError
-from prymatex.bundles.score import PMXScoreManager
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -16,15 +9,13 @@ from prymatex.bundles.score import PMXScoreManager
     http://manual.macromates.com/en/scope_selectors.html
 '''
 
-PMX_BUNDLES = {}
-
-MENU_SPACE = '-' * 36
 class PMXMenuNode(object):
+    MENU_SPACE = '-' * 36
     def __init__(self, name = '', items = [], excludedItems = [], submenus = {}):
         self.name = name
         self.items = items
         self.excludedItems = excludedItems
-        self.main = dict(map(lambda i: (i, None), filter(lambda x: x != MENU_SPACE, self.items)))
+        self.main = dict(map(lambda i: (i, None), filter(lambda x: x != self.MENU_SPACE, self.items)))
         for uuid, submenu in submenus.iteritems():
             self[uuid] = PMXMenuNode(**submenu)
 
@@ -53,18 +44,17 @@ class PMXMenuNode(object):
         if self.excludedItems:
             items = filter(lambda x: not x in self.excludedItems, items)
         for item in items:
-            if item != MENU_SPACE:
+            if item != self.MENU_SPACE:
                 yield (item, self[item])
             else:
-                yield (MENU_SPACE, MENU_SPACE)
+                yield (self.MENU_SPACE, self.MENU_SPACE)
         
 class PMXBundle(object):
+    BUNDLES = {}
     tabTriggers = {}
     keyEquivalents = {}
     
     def __init__(self, hash):
-        global PMX_BUNDLES
-
         for key in [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]:
             value = hash.pop(key, None)
             if key == 'mainMenu' and value != None:
@@ -73,8 +63,6 @@ class PMXBundle(object):
         
         if hash:
             print "Bundle '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
-        
-        PMX_BUNDLES[self.uuid] = self
     
     def addItem(self, item):
         self.mainMenu[item.uuid] = item
@@ -83,67 +71,46 @@ class PMXBundle(object):
         if (hasattr(item, "keyEquivalent")  and item.keyEquivalent != None):
             self.__class__.keyEquivalents.setdefault(item.keyEquivalent, []).append(item)
     
+    @staticmethod
+    def loadBundle(path, elements, name_space = 'prymatex'):
+        info_file = os.path.join(path, 'info.plist')
+        try:
+            data = plistlib.readPlist(info_file)
+            bundle = PMXBundle(data)
+        except Exception:
+            print "Error en bundle %s" % info_file
+        
+        for name, pattern, klass in elements:
+            files = glob(os.path.join(path, pattern))
+            for sf in files:
+                #Quito plis con caracteres raros.
+                try:
+                    data = plistlib.readPlist(sf)
+                    item = klass(data, name_space)
+                    bundle.addItem(item)
+                except Exception, e:
+                    pass
+                    #print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
+        PMXBundle.BUNDLES[bundle.uuid] = bundle    
+        return bundle
+    
 class PMXBundleItem(object):
     def __init__(self, hash, name_space):
         self.name_space = name_space
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
-
-def load_prymatex_bundle(bundle_path):
-    '''
-    Carga un bundle
-    @return: bundle cargado
-    '''
-    from prymatex.bundles import command, macro, snippet, syntax, preference
-    BUNDLE_ELEMENTS = {'Syntaxes': syntax.PMXSyntax,
-                       'Snippets': snippet.PMXSnippet,
-                       'Macros': macro.PMXMacro,
-                       'Commands': command.PMXCommand,
-                       'Preferences': preference.PMXPreference}
-    info_file = os.path.join(bundle_path, 'info.plist')
-    try:
-        data = plistlib.readPlist(info_file)
-        bundle = PMXBundle(data)
-    except Exception:
-        print "Error en bundle %s" % info_file
-        
-    for path, klass in BUNDLE_ELEMENTS.iteritems():
-        files = glob(os.path.join(bundle_path, path, '*'))
-        for sf in files:
-            #Quito plis con caracteres raros.
-            try:
-                data = plistlib.readPlist(sf)
-                item = klass(data, 'prymatex')
-                bundle.addItem(item)
-            except Exception, e:
-                pass
-                #print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
     
-    return bundle
-
-from os.path import basename
-
-def load_prymatex_bundles(path, after_load_callback = None):
-    '''
-    Forma simple de cargar los bundles de manera no diferida
-    @return: Canidad de bundles cargados
-    '''
-    paths = glob(os.path.join(path, '*.tmbundle'))
-    counter = 0
-    total = len(paths)
-    for bundle_path in paths:
-        if callable(after_load_callback):
-            after_load_callback(counter = counter, total = total, 
-                                name = basename(bundle_path).split('.')[0])
-        load_prymatex_bundle(bundle_path)
-        counter += 1
-        
-    return counter
-
 if __name__ == '__main__':
     from prymatex.bundles import command, macro, snippet, syntax, preference
+    elements = (('Syntax', 'Syntaxes/*', syntax.PMXSyntax)
+                   ('Snippet', 'Snippets/*', snippet.PMXSnippet)
+                   ('Macro', 'Macros/*', macro.PMXMacro)
+                   ('Command', 'Commands/*', command.PMXCommand)
+                   ('Preference', 'Preferences/*', preference.PMXPreference)
+                   )
+    
     for file in glob(os.path.join('../share/Bundles/', '*')):
-        load_prymatex_bundle(file)
+        PMXBundle.loadBundle(file, elements)
     
     #items = PMXBundle.tabTriggers["class"]
     #sp = PMXScoreManager()
@@ -167,10 +134,6 @@ if __name__ == '__main__':
         if items:
             print "%s" % ", ".join(map(lambda item: item.name, items))
     print "%s: %s" % biggest
-    
-   and), value)
-        if items:
-            print "%s" % ", ".join(map(lambda item: item.name, items))
             
     print "%s: %s" % biggest
     biggest = (None, [])
@@ -179,4 +142,4 @@ if __name__ == '__main__':
             biggest = (key, value)
         items = filter(lambda item: isinstance(item, snippet.PMXSnippet), value)
         if items:
-            print "%s" % ", ".join(map(lambda item: item.na
+            print "%s" % ", ".join(map(lambda item: item.name, items))

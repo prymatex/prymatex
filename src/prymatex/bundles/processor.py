@@ -50,7 +50,4 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
 
     def end_parsing(self, name):
         print '}%s' % name
-rint self.pprint( '', '{ %d - %s' % (position, name), position + len(self.line_marks))
-
-    def close_tag(self, name, position):
-        print self.pprint( '', '} %d - %s' % (p
+        
