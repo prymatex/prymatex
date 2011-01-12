@@ -3,123 +3,17 @@
 
 '''
     Syntax's module
-        content, name, scope, keyEquivalent, tabTrigger
+    http://manual.macromates.com/en/language_grammars.html
+    http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
 '''
 
 import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP, ENCODING_UTF8
+from ponyguruma.constants import OPTION_CAPTURE_GROUP
+from prymatex.bundles.base import PMXBundleItem
 
 PMX_SYNTAXES = {}
 
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, encoding = ENCODING_UTF8)
-
-######################### SyntaxProcessor #################################
-
-class PMXSyntaxProcessor(object):
-    '''
-        Syntax Processor, clase base para los procesadores de sintaxis
-    '''
-    def __init__(self):
-        pass
-
-    def open_tag(self, name, position):
-        pass
-
-    def close_tag(self, name, position):
-        pass
-
-    def new_line(self, line):
-        pass
-
-    def start_parsing(self, name):
-        pass
-
-    def end_parsing(self, name):
-        pass
-
-class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
-    def __init__(self):
-        self.line_number = 0
-        self.printable_line = ''
-
-    def pprint(self, line, string, position = 0):
-        line = line[:position] + string + line[position:]
-        return line
-
-    def open_tag(self, name, position):
-        print self.pprint( '', '{ %d - %s' % (position, name), position + len(self.line_marks))
-
-    def close_tag(self, name, position):
-        print self.pprint( '', '} %d - %s' % (position, name), position + len(self.line_marks))
-
-    def new_line(self, line):
-        self.line_number += 1
-        self.line_marks = '[%04s] ' % self.line_number
-        print '%s%s' % (self.line_marks, line)
-
-    def start_parsing(self, name):
-        print '{%s' % name
-
-    def end_parsing(self, name):
-        print '}%s' % name
-
-################################## ScoreManager ###################################
-
-class PMXScoreManager(object):
-    POINT_DEPTH    = 4
-    NESTING_DEPTH  = 40
-    START_VALUE    = 2 ** ( POINT_DEPTH * NESTING_DEPTH )
-    BASE           = 2 ** POINT_DEPTH
-      
-    def __init__(self):
-        self.scores = {}
-    
-    def score(self, search_scope, reference_scope):
-        maxi = 0
-        for scope in search_scope.split( ',' ):
-            arrays = onig_compile("\B-").split(scope)
-            if len(arrays) == 1:
-                maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
-            elif len(arrays) > 1:
-                excluded = False
-                for a in arrays[1:]:
-                    if self.score_term( a, reference_scope ) > 0:
-                        excluded = True
-                        break
-                if not excluded:
-                    maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
-            elif len(arrays) < 1:
-                raise Exception("Error in scope string: '%s' %s is not a valid number of operands" % (search_scope, len(arrays)))
-        return maxi
-    
-    def score_term(self, search_scope, reference_scope):
-        if not (self.scores.has_key(reference_scope) and self.scores[reference_scope].has_key(search_scope)):
-            self.scores.setdefault(reference_scope, {})
-            self.scores[reference_scope][search_scope] = self.score_array( search_scope.split(' '), reference_scope.split( ' ' ) )
-        return self.scores[reference_scope][search_scope]
-      
-    def score_array(self, search_array, reference_array):
-        pending = search_array
-        current = reference_array[-1]
-        reg = onig_compile( "^%s" % onig.escape( pending[-1] ))
-        multiplier = self.START_VALUE
-        result = 0
-        while len(pending) > 0 and current:
-            match = reg.match(current)
-            if match:
-                point_score = (2 ** self.POINT_DEPTH) - current.count( '.' ) + match.group().count( '.' )
-                result += point_score * multiplier
-                pending.pop()
-                if len(pending) > 0:
-                    reg = onig_compile( "^%s" % onig.escape( pending[-1] ) )
-            multiplier = multiplier / self.BASE
-            reference_array.pop()
-            current = reference_array and reference_array[-1] or None
-        if len(pending) > 0:
-            result = 0
-        return result
-
-############################## Syntax ######################################
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
 class PMXSyntaxNode(object):
     def __init__(self, hash, syntax):
@@ -129,12 +23,7 @@ class PMXSyntaxNode(object):
         self.syntax = syntax
         for key, value in hash.iteritems():
             if key in ['match', 'begin']:
-                try:
-                    # TODO: Estos replace hay que sacarlos si usamos el motor de expreciones de la dll
-                    setattr(self, key, onig_compile( value ))
-                except:
-                    pass
-                    #print 'Parsing error in %s - %s:%s' % (self.syntax.scopeName, key, value)
+                setattr(self, key, onig_compile( value ))
             elif key in ['content', 'name', 'contentName', 'end']:
                 setattr(self, key, value )
             elif key in ['captures', 'beginCaptures', 'endCaptures']:
@@ -145,8 +34,7 @@ class PMXSyntaxNode(object):
             elif key in ['patterns']:
                 self.create_children(value)
             else:
-                pass
-                #print u'Ignoring: %s: %s' % (key, value)
+                print u'%s ignoring %s: %s' % (self.__class__.__name__, key, value)
     
     def parse_repository(self, repository):
         self.repository = {}
@@ -266,14 +154,12 @@ class PMXSyntaxProxy(object):
         else:
             return self.syntax.syntaxes[self.proxy].grammar
         
-class PMXSyntax(object):
+class PMXSyntax(PMXBundleItem):
     def __init__(self, hash, name_space = 'default'):
-        global PMX_SYNTAXES
-        self.hash = hash
-        self.name_space = name_space
-        for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'name', 
-                        'scopeName', 'keyEquivalent', 'foldingStopMarker', 'fileTypes']:
-            value = self.hash.pop(key, None)
+        super(PMXSyntax, self).__init__(hash, name_space)
+        for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository',
+                        'keyEquivalent', 'foldingStopMarker', 'fileTypes', 'patterns']:
+            value = hash.pop(key, None)
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                 #Compiled keys
                 value = onig_compile( value )
@@ -294,7 +180,7 @@ class PMXSyntax(object):
     @property
     def grammar(self):
         if not hasattr(self, '_grammar'):
-            setattr(self, '_grammar', PMXSyntaxNode(self.hash, self ))
+            setattr(self, '_grammar', PMXSyntaxNode({ 'repository': self.repository, 'repository': self.patterns} , self ))
         return self._grammar
 
     def parse(self, string, processor = None):
@@ -372,15 +258,15 @@ def find_syntax_by_first_line(line):
 
 def parse_file(filename):
     import plistlib
+    from pprint import pprint
     data = plistlib.readPlist(filename)
+    pprint(data)
     return PMXSyntax(data)
 
 if __name__ == '__main__':
     import os
     from glob import glob
-    files = glob(os.path.join('../share/Bundles/C.tmbundle/Syntaxes', '*'))
+    files = glob(os.path.join('../share/Bundles/Bundle Development.tmbundle/Syntaxes', '*'))
     for f in files:
         syntax = parse_file(f)
-    p = PMXDebugSyntaxProcessor()
     print PMX_SYNTAXES
-    print PMX_SYNTAXES['default']['source.c++'].parse('function pepe(char *uno) { valor = 1; }', p)

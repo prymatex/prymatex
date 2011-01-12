@@ -98,21 +98,28 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         })
         self.setupActions()
         
-        #=======================================================================
-        # Events
-        #=======================================================================
-        
-        self.declareEvent('cursorPositionChangedEvent()')
-        #self.declareActionEvent(self.undoAvailable)
-        #self.declareActionEvent(self.copyAvailable)
-                          
+        self.setSignals()
+        self.declareEvents()
+
+    #=======================================================================
+    # Signals and Events
+    #=======================================================================
+    def setSignals(self):
         self.connect(self, SIGNAL('cursorPositionChanged()'), self.sendCursorPosChange)
+        
+    def declareEvents(self):
+        self.declareEvent('editorCursorPositionChangedEvent()')
+        
+    def get_current_scope(self):
+        cursor = self.textCursor()
+        user_data = cursor.block().userData()
+        return user_data and user_data.get_scope_at(cursor.columnNumber()) or ""
         
     def sendCursorPosChange(self):
         c = self.textCursor()
         line  = c.blockNumber()
         col = c.columnNumber()
-        self.cursorPositionChangedEvent(line, col)
+        self.editorCursorPositionChangedEvent(line, col)
         
         
     def set_syntax(self, syntax):
@@ -125,7 +132,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         tab_widget = self.parent()
         return tab_widget.indexOf(self)
-
 
     @property
     def soft_tabs(self):

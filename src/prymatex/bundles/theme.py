@@ -56,5 +56,6 @@ def main():
     from pprint import pprint
     print load_prymatex_themes('../../resources/Themes')
     pprint(PMX_THEMES['Blackboard'].scopes)
+
 if __name__ == '__main__':
     main()

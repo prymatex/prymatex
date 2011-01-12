@@ -11,23 +11,6 @@ from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
 from prymatex.bundles.syntax import PMX_SYNTAXES, PMXSyntax
 from prymatex.core.base import PMXObject
-
-class QuickSyntaxSwitchDialog(QDialog):
-    def __init__(self, parent = None):
-        '''
-        Una idea para seleccionar rápidamente la sintaxis
-        '''
-        QDialog.__init__(self, parent)
-        self.setWindowTitle("Quick Syntax Switch")
-        layout = QVBoxLayout()
-        lineEdit = QLineEdit()
-        completer = QCompleter(['python', 'python and django', 'C', 'C++'], lineEdit)
-        completer.setCaseSensitivity(Qt.CaseInsensitive)
-        lineEdit.setCompleter(completer)
-        layout.addWidget(QLabel("Select Syntax and press Intro"))
-        layout.addWidget(lineEdit)
-        
-        self.setLayout(layout)
         
 class PWMStatusLabel(QLabel):
     def __init__(self, text, parent, default = 0, *options):
@@ -74,46 +57,17 @@ class PMXCursorPositionLabel(QWidget):
     def update(self, col, line):
         self.postionLabel.setText(self.text_format % (col, line))
 
-        
-class PMXSyntaxMenu(QComboBox):
-    # TODO: Seleccionar la última sintaxis utilizada
-    syntaxChange = pyqtSignal(PMXSyntax)
-    
-    def __init__(self, parent = None):
-        QComboBox.__init__(self, parent)
-        self.addItem("No syntax", userData=QVariant(None))
-        self.connect(self, SIGNAL('currentIndexChanged(int)'), self.setSyntax)
-        #self.setEditable(True)
-        
-    def setSyntax(self, index):
-        syntax = self.itemData(index).toPyObject()
-        if syntax:
-            syntax.syntax_menu_index = index
-        self.syntaxChange.emit(syntax)
-        
-    def on_current_editor_changed(self, editor):
-        # TODO: Enable
-        #syntax = editor.syntax_processor.syntax
-        syntax = None
-        if syntax != None:
-            self.setCurrentIndex(syntax.syntax_menu_index)
-        else:
-            self.setCurrentIndex(0)
-
 class PMXSymbolBox(QComboBox):
     def __init__(self, parent):
-        super(PMXSymbolBox, self).__init__(parent)
-        
+        super(PMXSymbolBox, self).__init__(parent)        
             
 class PMXStatusBar(QStatusBar, PMXObject):
     
     def __init__(self, parent ):
         QStatusBar.__init__(self, parent)
-        #self.lineLabel = PWMStatusLabel(_("Line: %6d", 0), self)
-        #self.lineColLabel = QLabel("Line: %5d Col: %5d" % (0, 0) , self)
+        
         self.lineColLabel = PMXCursorPositionLabel(self)
-        #self.lineColLabel.setFont(QFont("Monospace"))
-        self.langComboBox = PWMStatusLabel(_("Lang"), self)
+
         self.indentModeComboBox = PWMStatusLabel(_("Indent Mode"),
                                                  self, 0,
                                                 (_('Soft Tabs'), 0),
@@ -129,47 +83,46 @@ class PMXStatusBar(QStatusBar, PMXObject):
                                                   )
         
         
-        self.syntaxMenu = PMXSyntaxMenu(self)
+        self.syntaxMenu = QComboBox(self)
         
         syntaxes = []
         for name_space in PMX_SYNTAXES.values():
             syntaxes.extend(name_space.values())
         
         syntaxes = sorted(syntaxes, lambda a, b: cmp(a.name, b.name))
+        #No syntax
+        self.syntaxMenu.addItem("No syntax", userData = QVariant(None))
         for syntax in syntaxes:
             self.syntaxMenu.addItem(syntax.name, userData=QVariant(syntax))
             
         self.addPermanentWidget(self.syntaxMenu)
         self.addPermanentWidget(self.lineColLabel)
         
-        self.addPermanentWidget(self.langComboBox)
         self.addPermanentWidget(self.indentModeComboBox)
         self.addPermanentWidget(self.indentWidthComboBox)
+        self.declareEvents()
+        self.setSignals()
+            
+    def setSignals(self):
+        #External events
+        self.connect(self.root, SIGNAL('editorCursorPositionChangedEvent'), self.updatePosition )
+        self.connect(self.root, SIGNAL('tabWidgetEditorChangedEvent'), self.updateEditor )
         
-        self.connect(self.root, SIGNAL('cursorPositionChangedEvent'),
-                     self.updatePosition )
+        #Internal signals
+        self.connect(self.syntaxMenu, SIGNAL('currentIndexChanged(int)'), self.sendStatusBarSyntaxChanged)
+        
+    def declareEvents(self):
+        self.declareEvent('statusBarSytnaxChangedEvent()')
     
+    def sendStatusBarSyntaxChanged(self, index):
+        syntax = self.syntaxMenu.itemData(index).toPyObject()
+        self.statusBarSytnaxChangedEvent(syntax)
+        
     def updatePosition(self, source, line, col):
-        
-        #self.lineColLabel.setText("Line: %5d Col: %5d" % (line, col))
         self.lineColLabel.update(col, line)
-
-        
-        
-         
-    def updateCursorPos(self, col, row):
-        '''  Called by the main window '''
-        self.lineLabel.setText(_("Line: %6d", row))
-        self.columnLabel.setText(_("Column: %6d", col))
-        
-        self.setStyleSheet('''
-            QLabel { border-left: 1px solid #000;
-                    font-family: Monospace; }
-        ''')
     
-if __name__ == "__main__":
-    import sys
-    app = QApplication(sys.argv)
-    dlg = QuickSyntaxSwitchDialog(None)
-    dlg.exec_()
-    
+    def updateEditor(self, source, editor):
+        if editor != None:
+            self.syntaxMenu.setCurrentIndex(0)
+        else:
+            self.syntaxMenu.setCurrentIndex(0)

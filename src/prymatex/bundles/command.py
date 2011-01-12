@@ -16,30 +16,32 @@
             TM_SELECTED_TEXT
 '''
 import os, stat, tempfile
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
+from prymatex.bundles.base import PMXBundleItem
 
-PMX_COMMANDS = {}
-
-class PMXCommand(object):
-    def __init__(self, hash, name_space = 'default'):
-        global PMX_COMMANDS
-        self.name_space = name_space
-        for key in [    'name', 'fileCaptureRegister', 'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
-                        'lineCaptureRegister', 'scope', 'command', 'capturePattern', 'output', 'dontFollowNewOutput',
-                        'keyEquivalent', 'input', 'beforeRunningCommand', 'autoScrollOutput', 'tabTrigger', 'bundlePath',
-                        'winCommand', 'fallbackInput', 'captureFormatString' ]:
+class PMXCommand(PMXBundleItem):
+    def __init__(self, hash, name_space = "default"):
+        super(PMXCommand, self).__init__(hash, name_space)
+        for key in [    'fileCaptureRegister', 'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
+                        'lineCaptureRegister', 'command', 'capturePattern', 'output', 'dontFollowNewOutput',
+                        'input', 'beforeRunningCommand', 'autoScrollOutput', 'bundlePath', 'standardInput',
+                        'winCommand', 'fallbackInput', 'captureFormatString', 'standardOutput', 'beforeRunningScript' ]:
             setattr(self, key, hash.pop(key, None))
         
         if hash:
             print "Command '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
         
-        PMX_COMMANDS.setdefault(self.name_space, {})
-        
-    def execute(self):
-        descriptor, name = tempfile.mkstemp()
+    def execute(self, environment):
+        texto = "a = {'uno': 1, 'dos': 2}"
+        descriptor, name = tempfile.mkstemp(prefix='pmx')
         os.write(descriptor, self.command.encode('utf8'))
         os.chmod(name, stat.S_IEXEC)
-        Popen([name], env = {"TM_LINE_NUMBER": "1"})
+        process = Popen([name], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment)
+        process.stdin.write(texto)
+        process.stdin.close();
+        print process.stdout.read()
+        process.stdout.close()
+        #os.unlink(name)
         
 def parse_file(filename):
     import plistlib
@@ -49,7 +51,12 @@ def parse_file(filename):
 if __name__ == '__main__':
     from glob import glob
     files = glob(os.path.join('../share/Bundles/Python.tmbundle/Commands', '*'))
+    environment = { "TM_BUNDLE_SUPPORT": "../share/Bundles/Python.tmbundle/Support",
+                    "TM_SUPPORT_PATH": "../share/Support",
+                    "TM_CURRENT_WORD": "def",
+                    "TM_LINE_NUMBER": "2"}
+    environment.update(os.environ)
     for f in files:
         command = parse_file(f)
         print command.name
-        command.execute()
+        command.execute(environment)

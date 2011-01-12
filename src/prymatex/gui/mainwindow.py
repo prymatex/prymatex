@@ -27,7 +27,7 @@ from prymatex.gui.filterdlg import PMXFilterDialog
 
 import itertools
 import logging
-from prymatex.bundles.base import PMXMenuNode, MENU_SPACE
+from prymatex.bundles.base import PMXMenuNode
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
@@ -67,8 +67,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.center()
         
         # Una vez centrada la ventana caramos los mnues
-        from prymatex.bundles.base import PMX_BUNDLES
-        self.add_bundles_to_menu(PMX_BUNDLES)
+        from prymatex.bundles.base import PMXBundle
+        self.add_bundles_to_menu(PMXBundle.BUNDLES)
         
         self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
@@ -146,7 +146,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             parent_menu.addMenu(menu)
             for _, i in item.iteritems():
                 self.add_menu_item(menu, i)
-        elif item == MENU_SPACE:
+        elif item == PMXMenuNode.MENU_SPACE:
             parent_menu.addSeparator()
         elif item and item.name:
             action = QAction(item.name, self)
@@ -380,9 +380,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
-        scope = self.tabWidgetEditors.currentWidget().get_current_scope()
-        folding = self.tabWidgetEditors.currentWidget().get_current_folding()
-        self.statusBar().showMessage("%d - %s" % (folding, scope))
+        scope = self.currentEditor.codeEdit.get_current_scope()
+        self.statusBar().showMessage("%s" % (scope))
         
     @pyqtSignature('')
     def on_actionTo_iNVERT_cASE_triggered(self):
