@@ -97,7 +97,7 @@ def load_prymatex_bundle(bundle_path):
 
 from os.path import basename
 
-def load_prymatex_bundles(path, after_load_callback = None):
+def load_prymatex_bundles(path, after_load_callback = None, whitelist = None, blacklist = None):
     '''
     Forma simple de cargar los bundles de manera no diferida
     @return: Canidad de bundles cargados
