@@ -18,8 +18,9 @@ sys_excepthook = sys.excepthook
 class PMXApplication(QApplication):
     '''
     The application instance.
-    It's loaded only one time for every application instance, so some counters
-    and shared data that need to be correctly updaded upon close are held here.
+    There can't be two apps running simultaneously, since configuration issues
+    may occur.
+    The application loads the TM Bundles and Themes.
     '''
     
     __config = None
