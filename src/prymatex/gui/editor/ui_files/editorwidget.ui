@@ -21,6 +21,66 @@
     <widget class="PMXCodeEdit" name="codeEdit"/>
    </item>
    <item>
+    <widget class="QWidget" name="gotolineWidget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Go to line:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinLineNumbers"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushGoToLine">
+        <property name="text">
+         <string>Go</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../res.qrc">
+          <normaloff>:/actions/resources/actions/go-next-view.png</normaloff>:/actions/resources/actions/go-next-view.png</iconset>
+        </property>
+        <property name="autoDefault">
+         <bool>true</bool>
+        </property>
+        <property name="default">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>154</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushCloseFindreplace_2">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../res.qrc">
+          <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QWidget" name="findreplaceWidget" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <property name="sizeConstraint">
@@ -232,5 +292,22 @@ p, li { white-space: pre-wrap; }
  <resources>
   <include location="../../../res.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushCloseFindreplace_2</sender>
+   <signal>pressed()</signal>
+   <receiver>gotolineWidget</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>681</x>
+     <y>401</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>626</x>
+     <y>394</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
