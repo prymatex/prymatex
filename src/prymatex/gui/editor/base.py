@@ -72,8 +72,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
         self.setupUi()
-        self.__soft_tabs = True
-        self.__tab_length = 4
         self.character_actions = {}
         try:
             formater = PMXSyntaxFormatter.load_from_textmate_theme('LAZY')
@@ -100,6 +98,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
         self.setSignals()
         self.declareEvents()
+        
+    class Meta(object):
+        settings = ('editor', {
+                        'soft_tabs': True,
+                        'tab_length': 4}
+                        )
 
     #=======================================================================
     # Signals and Events
@@ -132,22 +136,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         tab_widget = self.parent()
         return tab_widget.indexOf(self)
-
-    @property
-    def soft_tabs(self):
-        return self.__soft_tabs
-    
-    @soft_tabs.setter
-    def soft_tabs(self, value):
-        self.__soft_tabs = value
-
-    @property
-    def tab_length(self):
-        return self.__tab_length
-        
-    @tab_length.setter
-    def tab_length(self, value):
-        self.__tab_length = value
 
     @property
     def indent_text(self):

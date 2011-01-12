@@ -15,8 +15,6 @@ PMX_BASE_PATH = get_prymatex_base_path()
 PMX_USER_PATH = get_prymatex_user_path()
 PMX_SETTINGS_FILE = os.path.join(PMX_USER_PATH , "settings.plist")
 
-PROTECTED_KEYS = ('_wrapped_dict', '_setting')
-
 class Setting(object):
     def __init__(self, name, value = None, default = None):
         self.name = name
@@ -32,7 +30,7 @@ class Setting(object):
         setattr(cls, self.name, self)
         
     def __get__(self, instance, instance_type = None):
-        if instance == None:
+        if instance == None or not callable(self.fget):
             return self.value or self.default
         elif hasattr(self, 'fget'):
             return self.fget(instance)
@@ -98,7 +96,7 @@ class SettingsNode(object):
         for setting in self.__dict__['__wrapped_items'].values():
             setting.contribute_to_class(cls)
     
-    def add_instance(self, instance):
+    def configure(self, instance):
         self.__dict__['__instances'].append(instance)
     
 class Settings(SettingsNode):
@@ -122,30 +120,25 @@ class Settings(SettingsNode):
 
 settings = Settings()
 
-class PMXOptions(object):
-    def __init__(self, options=None):
-        self.settings = getattr(options, 'settings', None)
-        self.events = getattr(options, 'events', None)
-
-class PersonaBase(type):
-    def __new__(cls, name, bases, attrs):
-        new_class = super(PersonaBase, cls).__new__(cls, name, bases, attrs)
-        opts = new_class._meta = PMXOptions(getattr(new_class, 'Meta', None))
-        if opts.settings:
-            sns = settings
-            for base in bases:
-                if hasattr(base._meta, 'settings') and base._meta.settings != None:
-                    sns = getattr(sns, base._meta.settings[0])
-            class_settings = sns.setdefault(*opts.settings)
-            class_settings.add_to_class(new_class)
-        return new_class
-
 if __name__ == "__main__":
+    class PersonaBase(type):
+        def __new__(cls, name, bases, attrs):
+            new_class = super(PersonaBase, cls).__new__(cls, name, bases, attrs)
+            opts = new_class._meta = PMXOptions(getattr(new_class, 'Meta', None))
+            if opts.settings:
+                sns = settings
+                for base in bases:
+                    if hasattr(base._meta, 'settings') and base._meta.settings != None:
+                        sns = getattr(sns, base._meta.settings[0])
+                class_settings = sns.setdefault(*opts.settings)
+                class_settings.add_to_class(new_class)
+            return new_class
+        
     class Persona():
         __metaclass__ = PersonaBase
         def __init__(self, nombre):
             self.nombre = nombre
-            self.settings.add_instance(self)
+            self.settings.configure(self)
 
     class Empleado(Persona):
         def __init__(self, nombre):

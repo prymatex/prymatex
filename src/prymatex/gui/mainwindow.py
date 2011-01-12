@@ -380,6 +380,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
+        from prymatex.config.base import settings
+        settings.editor.tab_length += 1
+        settings.save()
         scope = self.currentEditor.codeEdit.get_current_scope()
         self.statusBar().showMessage("%s" % (scope))
         
