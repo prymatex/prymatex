@@ -158,7 +158,6 @@ if __name__ == "__main__":
             print "poniendo cargo" 
             self._cargo = cargo
             
-        @property
         def sueldo(self):
             return self._sueldo
 
@@ -182,4 +181,4 @@ if __name__ == "__main__":
     j = Jefe("Caho")
     e = Empleado("Caho")
     settings.empleado.sueldo = 8000
-    print j.sueldo
+    print e.sueldo
