@@ -1,6 +1,11 @@
 # -*- encoding: utf-8 -*-
 
 #
+import sys
+import traceback
+import re
+import logging
+
 from PyQt4.QtCore import QRect, QObject
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
 from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction, QWidget
@@ -8,12 +13,8 @@ from PyQt4.QtGui import QMenu, QVBoxLayout, QFont
 from PyQt4.QtGui import QKeySequence, QColor
 from PyQt4.QtCore import Qt, SIGNAL, QMetaObject, pyqtSignature
 
-from logging import getLogger
-import sys
-import traceback
-import re
-import logging
 from prymatex.core.base import PMXObject
+from prymatex.core.config import Setting
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +29,6 @@ if __name__ == "__main__":
 from prymatex.gui.editor.sidearea import PMXSideArea
 from prymatex.bundles.syntax import find_syntax_by_first_line
 from prymatex.gui.editor.syntax import PMXSyntaxProcessor, PMXSyntaxFormatter
-
-# Create the logger instance
-logger = getLogger(__name__)
 
 # Key press debugging 
 KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
@@ -67,6 +65,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
 
     PAIRS_MATCH_REMOVE = ("()", "{}", "[]", "''", '""', )
+    
+    #-----------------------------------
+    # Settings
+    #-----------------------------------
+    soft_tabs = Setting(default = True)
+    tab_length = Setting(default = 4)
 
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
@@ -98,12 +102,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
         self.setSignals()
         self.declareEvents()
+        self.configure()
         
     class Meta(object):
-        settings = ('editor', {
-                        'soft_tabs': True,
-                        'tab_length': 4}
-                        )
+        settings = 'editor'
 
     #=======================================================================
     # Signals and Events

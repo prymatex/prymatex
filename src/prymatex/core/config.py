@@ -15,89 +15,54 @@ PMX_BASE_PATH = get_prymatex_base_path()
 PMX_USER_PATH = get_prymatex_user_path()
 PMX_SETTINGS_FILE = os.path.join(PMX_USER_PATH , "settings.plist")
 
-class Setting(object):
-    def __init__(self, name, value = None, default = None):
-        self.name = name
-        self.value = value
-        self.default = default
-    
-    def to_python(self):
-        return self.value
-
-    def contribute_to_class(self, cls):
-        self.fget = getattr(cls, self.name, None)
-        self.fset = getattr(cls, "set%s" % self.name.title(), None)
-        setattr(cls, self.name, self)
-        
-    def __get__(self, instance, instance_type = None):
-        if instance == None or not callable(self.fget):
-            return self.value or self.default
-        elif hasattr(self, 'fget'):
-            return self.fget(instance)
-    
-    def __set__(self, instance, value):
-        if isinstance(instance, Setting):
-            self.value = value
-        else:
-            self.fset(instance, value)
-
 class SettingsNode(object):
-    def __init__(self, items = {}, subitems = {}):
-        __wrapped_items = {}
-        __wrapped_subitems = {}
-        for key, value in items.iteritems():
-            __wrapped_items[key] = Setting(key, value = value)
-        for key, value in subitems.iteritems():
-            __wrapped_subitems[key] = SettingsNode(**value)
-        self.__dict__['__wrapped_items'] = __wrapped_items
-        self.__dict__['__wrapped_subitems'] = __wrapped_subitems
-        self.__dict__['__instances'] = []
+    def __init__(self, hash = {}):
+        self.__dict__['__wrapped_values'] = dict()
+        self.__dict__['__wrapped_defaults'] = dict()
+        self.__dict__['__listeners'] = []
+        for key, value in hash.iteritems():
+            setattr(self, key, value)
     
     def __setattr__(self, name, value):
-        if name in self.__dict__['__wrapped_items'].keys():
-            item = self.__dict__['__wrapped_items'][name]
-            item.__set__(item, value)
-            for instance in self.__dict__['__instances']:
-                item.__set__(instance, value)
-        else:
-            raise AttributeError
+        if isinstance(value, dict) and value.has_key('type') and value['type'] == "SettingsNode":
+            value = SettingsNode(value)
+        self.__dict__['__wrapped_values'][name] = value
+        for listener in self.__dict__['__listeners']:
+            setattr(listener, name, value)
     
-    def __getattr__(self, name, default = None):
-        if self.__dict__['__wrapped_items'].has_key(name):
-            item = self.__dict__['__wrapped_items'][name]
-            return item.__get__(item)
-        elif self.__dict__['__wrapped_subitems'].has_key(name):
-            return self.__dict__['__wrapped_subitems'][name]
-        elif default != None:
-            return default
-        raise AttributeError
-            
-    def setdefault(self, name, defaults = {}):
-        node = self.__dict__['__wrapped_subitems'].setdefault(name, SettingsNode())
-        for k, v in defaults.iteritems():
-            if node.__dict__['__wrapped_items'].has_key(k):
-                node.__dict__['__wrapped_items'][k].default = v
-            else:
-                node.__dict__['__wrapped_items'][k] = Setting(k, default = v)
-        return node
-
+    def __getattr__(self, name, default = None): 
+        try:
+            return self.get_value_for(name)
+        except KeyError:
+            if default == None:
+                setattr(self, name, SettingsNode())
+                return self.__dict__['__wrapped_values'][name]
+        return default
+    
+    def __getitem__(self, name):
+        return self.__dict__['__wrapped_values'][name]
+    
+    def __setitem__(self, name, value):
+        self.__dict__['__wrapped_defaults'][name] = value
+    
+    def get_value_for(self, name):
+        if self.__dict__['__wrapped_values'].has_key(name):
+            return self.__dict__['__wrapped_values'][name]
+        elif self.__dict__['__wrapped_defaults'].has_key(name):
+            return self.__dict__['__wrapped_defaults'][name]
+        raise KeyError()
+    
+    def add_listener(self, listener):
+        self.__dict__['__listeners'].append(listener)
+    
     def to_python(self):
-        result = {}
-        items = filter(lambda t: t[1], map(lambda (k, v): (k, v.to_python()), self.__dict__['__wrapped_items'].iteritems()))
-        subitems = filter(lambda t: t[1], map(lambda (k, v): (k, v.to_python()), self.__dict__['__wrapped_subitems'].iteritems()))
-        if items:
-            result['items'] = dict(items)
-        if subitems:
-            result['subitems'] = dict(subitems)
-        return result
-    
-    def add_to_class(self, cls):
-        setattr(cls, 'settings', self)
-        for setting in self.__dict__['__wrapped_items'].values():
-            setting.contribute_to_class(cls)
-    
-    def configure(self, instance):
-        self.__dict__['__instances'].append(instance)
+        ret = {'type': self.__class__.__name__}
+        for k, v in self.__dict__['__wrapped_values'].iteritems():
+            if hasattr(v, 'to_python'):
+                ret[k] = v.to_python()
+            else:
+                ret[k] = v
+        return ret
     
 class Settings(SettingsNode):
     '''
@@ -107,12 +72,12 @@ class Settings(SettingsNode):
     PMX_THEMES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Themes')
     PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
     
-    def __init__(self, **defaults):
+    def __init__(self, parent = None, **defaults):
         if os.path.exists(PMX_SETTINGS_FILE):
-            wrapped = plistlib.readPlist(PMX_SETTINGS_FILE)
+            wrapped_dict = plistlib.readPlist(PMX_SETTINGS_FILE)
         else:
-            wrapped = {}
-        super(Settings, self).__init__(**wrapped)
+            wrapped_dict = {}
+        super(Settings, self).__init__(wrapped_dict)
         
     def save(self):
         obj = self.to_python()
@@ -120,58 +85,103 @@ class Settings(SettingsNode):
 
 settings = Settings()
 
-if __name__ == "__main__":
+class Setting(object):
+    def __init__(self, default = None):
+        self.__value = None
+        self.__default = default
+    
+    def get_value(self):
+        return self.__value or self.__default
+    
+    def set_value(self, value):
+        self.__value = value
+    
+    value = property(get_value, set_value)
+    
+    def contribute_to_class(self, cls, name):
+        self.name = name
+        try:
+            self.__value = cls._meta.settings[self.name]
+        except KeyError:
+            cls._meta.settings[self.name] = self.__default
+        
+        self.fget = getattr(cls, self.name, None)
+        self.fset = getattr(cls, "set%s" % self.name.title(), None)
+        setattr(cls, self.name, self)
+        
+    def __get__(self, instance, instance_type = None):
+        if instance != None:
+            return self.value
+        elif self.fget != None:
+            return self.fget(instance)
+    
+    def __set__(self, instance, value):
+        if instance != None:
+            self.__value = value
+        if self.fset != None:
+            self.fset(instance, self.__value)
+
+if __name__ == "__main__":    
+    class PMXOptions(object):
+        def __init__(self, options=None):
+            self.settings = settings
+            space = getattr(options, 'settings', None)
+            if space != None:
+                spaces = space.split('.')
+                for s in spaces:
+                    self.settings = getattr(self.settings, s)
+            self.events = getattr(options, 'events', None)
+    
     class PersonaBase(type):
         def __new__(cls, name, bases, attrs):
-            new_class = super(PersonaBase, cls).__new__(cls, name, bases, attrs)
-            opts = new_class._meta = PMXOptions(getattr(new_class, 'Meta', None))
-            if opts.settings:
-                sns = settings
-                for base in bases:
-                    if hasattr(base._meta, 'settings') and base._meta.settings != None:
-                        sns = getattr(sns, base._meta.settings[0])
-                class_settings = sns.setdefault(*opts.settings)
-                class_settings.add_to_class(new_class)
+            module = attrs.pop('__module__')
+            new_class = super(PersonaBase, cls).__new__(cls, name, bases, { '__module__': module })
+            opts = PMXOptions(attrs.get('Meta', None))
+            new_class.add_to_class('_meta', opts)
+            for name, attr in attrs.iteritems():
+                new_class.add_to_class(name, attr)
             return new_class
+
+        def add_to_class(cls, name, value):
+            if hasattr(value, 'contribute_to_class'):
+                value.contribute_to_class(cls, name)
+            else:
+                setattr(cls, name, value)
         
     class Persona():
         __metaclass__ = PersonaBase
         def __init__(self, nombre):
             self.nombre = nombre
-            self.settings.configure(self)
-
+            self.configure()
+        
+        def configure(self):
+            self._meta.settings.add_listener(self)
+        
     class Empleado(Persona):
+        cargo = Setting(default = 'Programador Jr.')
+        sueldo = Setting(default = 100)
+        
         def __init__(self, nombre):
             super(Empleado, self).__init__(nombre)
 
-        def cargo(self): 
-            return self._cargo
-        
-        def setCargo(self, cargo):
-            print "poniendo cargo" 
-            self._cargo = cargo
-            
-        def sueldo(self):
-            return self._sueldo
-
-        def setSueldo(self, sueldo):
-            print "poniendo sueldo"
-            self._sueldo = sueldo
-
         class Meta(object):
             events = ('uno', 'dos', )
-            settings = ('empleado', {   'cargo': 'Programador Jr.',
-                                        'sueldo': 100 })
+            settings = 'empleado'
             
     class Jefe(Empleado):
+        sueldo = Setting(default = 200)
+        
         def __init__(self, nombre):
             super(Jefe, self).__init__(nombre)
             
         class Meta(object):
             events = ('uno', 'dos', )
-            settings = ('jefe', { 'sueldo': 200 })
+            settings = 'empleado.jefe'
     
     j = Jefe("Caho")
     e = Empleado("Caho")
-    settings.empleado.sueldo = 8000
-    print e.sueldo
+    settings.empleado.jefe.cargo = "Cachin comodin"
+    settings.empleado.sueldo = 4000
+    settings.empleado.jefe.sueldo = 5000
+    print e.sueldo, j.sueldo
+    print e.cargo, j.cargo

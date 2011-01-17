@@ -160,7 +160,7 @@ class PMXApplication(QApplication):
         
     def init_config(self):
         if not self.__config:
-            from prymatex.config import settings
+            from prymatex.core.config import settings
             self.__config = settings
             
     @property

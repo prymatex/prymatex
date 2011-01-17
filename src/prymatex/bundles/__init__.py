@@ -8,7 +8,7 @@ if __name__ == "__main__":
 from glob import glob
 from prymatex.bundles import command, macro, snippet, syntax, preference
 from prymatex.bundles.base import PMXBundle
-from prymatex.config import settings
+from prymatex.core.config import settings
 
 #BundleItemName, BundlePattern, BundleItemClass
 BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*', syntax.PMXSyntax),

@@ -5,7 +5,7 @@ from PyQt4.QtCore import QObject, pyqtWrapperType
 import sip
 import re
 from prymatex.core.event import PMXEvent, PMXEventSender
-from prymatex.config.base import settings
+from prymatex.core.config import settings
 METHOD_RE = re.compile('(?P<name>[\w\d_]+)(:?\((?P<args>.*)\))?', re.IGNORECASE)
 
 class InvalidEventSignature(Exception):
@@ -15,24 +15,36 @@ EVENT_CLASSES = {}
 
 class PMXOptions(object):
     def __init__(self, options=None):
-        self.settings = getattr(options, 'settings', None)
+        self.settings = settings
+        space = getattr(options, 'settings', None)
+        if space != None:
+            spaces = space.split('.')
+            for s in spaces:
+                self.settings = getattr(self.settings, s)
         self.events = getattr(options, 'events', None)
 
 class PMXObjectBase(pyqtWrapperType):
     def __new__(cls, name, bases, attrs):
-        new_class = super(PMXObjectBase, cls).__new__(cls, name, bases, attrs)
-        opts = new_class._meta = PMXOptions(getattr(new_class, 'Meta', None))
-        if opts.settings:
-            sns = settings
-            for base in bases:
-                if hasattr(base, '_meta') and hasattr(base._meta, 'settings') and base._meta.settings != None:
-                    sns = getattr(sns, base._meta.settings[0])
-            class_settings = sns.setdefault(*opts.settings)
-            class_settings.add_to_class(new_class)
-        return new_class
+	    module = attrs.pop('__module__')
+	    new_class = super(PMXObjectBase, cls).__new__(cls, name, bases, { '__module__': module })
+	    opts = PMXOptions(attrs.get('Meta', None))
+	    new_class.add_to_class('_meta', opts)
+	    for name, attr in attrs.iteritems():
+	    	new_class.add_to_class(name, attr)
+	    return new_class
+
+    def add_to_class(cls, name, value):
+        if hasattr(value, 'contribute_to_class'):
+            value.contribute_to_class(cls, name)
+        else:
+            setattr(cls, name, value)
 
 class PMXObject(QObject):
     __metaclass__ = PMXObjectBase
+
+    def configure(self):
+        print self._meta.settings
+        self._meta.settings.add_listener(self)
     
     def declareEvent(self, signature):
         global EVENT_CLASSES
