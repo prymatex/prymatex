@@ -269,4 +269,5 @@ if __name__ == '__main__':
     files = glob(os.path.join('../share/Bundles/Bundle Development.tmbundle/Syntaxes', '*'))
     for f in files:
         syntax = parse_file(f)
-    print PMX_SYNTAXES
+    print PMX_SYNTAXES):
+            if syntax.firstLineMatch != None and syntax
