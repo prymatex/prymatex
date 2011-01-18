@@ -14,6 +14,10 @@
             TM_DIRECTORY,
             TM_BUNDLE_SUPPORT: Support dentro del bundle
             TM_SELECTED_TEXT
+    * El cuadrado fatidico es la tecla window que es la @ en las fuentes
+    * Control es ^
+    * Shift es la @
+    
 '''
 import os, stat, tempfile
 from subprocess import Popen, PIPE, STDOUT
@@ -59,4 +63,14 @@ if __name__ == '__main__':
     for f in files:
         command = parse_file(f)
         print command.name
-        command.execute(environment)
+        command.execute(environment)name__ == '__main__':
+    from glob import glob
+    files = glob(os.path.join('../share/Bundles/Python.tmbundle/Commands', '*'))
+    environment = { "TM_BUNDLE_SUPPORT": "../share/Bundles/Python.tmbundle/Support",
+                    "TM_SUPPORT_PATH": "../share/Support",
+                    "TM_CURRENT_WORD": "def",
+                    "TM_LINE_NUMBER": "2"}
+    environment.update(os.environ)
+    for f in files:
+        command = parse_file(f)
+        print comman

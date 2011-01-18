@@ -17,7 +17,7 @@ from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 
 from prymatex.gui.mixins.common import CenterWidget
-from prymatex.config.configdialog import PMXConfigDialog
+#from prymatex.config.configdialog import PMXConfigDialog
 from prymatex.gui.panes.outputpanel import PMXOutputDock
 from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
@@ -70,7 +70,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         from prymatex.bundles.base import PMXBundle
         self.add_bundles_to_menu(PMXBundle.BUNDLES)
         
-        self.dialogConfig = PMXConfigDialog(self)
+        #self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
         #self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
@@ -380,7 +380,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
-        from prymatex.config.base import settings
+        from prymatex.core.config import settings
         settings.editor.tab_length += 1
         settings.save()
         scope = self.current_editor.codeEdit.get_current_scope()

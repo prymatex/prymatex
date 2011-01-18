@@ -33,4 +33,9 @@ def load_prymatex_themes(after_load_callback = None):
     return 0
 
 if __name__ == "__main__":
-    load_prymatex_bundles()
+    load_prymatex_bundles()  paths = glob(os.path.join(settings.PMX_BUNDLES_PATH, '*.tmbundle'))
+    counter = 0
+    total = len(paths)
+    for path in paths:
+        if callable(after_load_callback):
+            after_load_callback(counter = counter, total = total, name = os.path.basename(path).sp

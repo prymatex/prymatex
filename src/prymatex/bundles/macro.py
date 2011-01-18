@@ -18,4 +18,5 @@ class PMXMacro(PMXBundleItem):
             setattr(self, key, hash.pop(key, None))
         
         if hash:
-            print "Macro '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+            print "Macro '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))unningCommand', 'command', 'output', 'input', 'commands', 
+                        'winCommand', 'fileCaptureRegister', 'scopeType', 
