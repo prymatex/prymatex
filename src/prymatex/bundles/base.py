@@ -79,12 +79,15 @@ class PMXBundle(object):
             print "Bundle '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
     
     def addItem(self, item):
-        self.mainMenu[item.uuid] = item
-        if (item.tabTrigger != None):
-            self.__class__.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
-        if (item.keyEquivalent != None):
-            self.__class__.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
-    
+        if self.mainMenu != None:
+            self.mainMenu[item.uuid] = item
+        if item.tabTrigger != None:
+            PMXBundle.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
+        if item.keyEquivalent != None:
+            PMXBundle.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
+        # I'm four father
+        item.bundle = self
+            
     def addSyntax(self, syntax):
         self.addItem(syntax)
         self.syntaxes.append(syntax)
@@ -104,7 +107,7 @@ class PMXBundle(object):
     def addPreference(self, preference):
         self.addItem(preference)
         self.preferences.append(preference)
-        self.__class__.PREFERENCES.setdefault(preference.scope, []).append(preference)
+        PMXBundle.PREFERENCES.setdefault(preference.scope, []).append(preference)
             
     @staticmethod
     def loadBundle(path, elements, name_space = 'prymatex'):
@@ -112,8 +115,9 @@ class PMXBundle(object):
         try:
             data = plistlib.readPlist(info_file)
             bundle = PMXBundle(data)
-        except Exception:
-            print "Error en bundle %s" % info_file
+        except Exception, e:
+            print "Error en bundle %s (%s)" % (info_file, e)
+            
         
         for name, pattern, klass in elements:
             files = glob(os.path.join(path, pattern))
@@ -129,6 +133,12 @@ class PMXBundle(object):
         PMXBundle.BUNDLES[bundle.uuid] = bundle
         return bundle
     
+    @classmethod
+    def getBundleByName(cls, name):
+        for uuid, bundle in cls.BUNDLES.iteritems():
+            if bundle.name == name:
+                return bundle
+                
 class PMXBundleItem(object):
     def __init__(self, hash, name_space):
         self.name_space = name_space
@@ -142,15 +152,7 @@ if __name__ == '__main__':
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
     
-    items = PMXBundle.PREFERENCES
-    sp = PMXScoreManager()
-    reference_scope = 'source.c++'
-    for p in PMXBundle.PREFERENCES[None]:
-        print p.settings
-    for key, values in filter(lambda (key, value): key and sp.score( key, reference_scope ) != 0, items.iteritems()):
-        for p in values:
-            print p.settings
-    pprint(PMXBundle.KEY_EQUIVALENTS)
-    pprint(map(lambda e: e.name, PMXBundle.KEY_EQUIVALENTS['^~V']))
-    ', '*')):
-        PMXBundle.loadBun
+    bundle = PMXBundle.getBundleByName('Python')
+    for snippet in bundle.snippets:
+        snippet.compile()
+          

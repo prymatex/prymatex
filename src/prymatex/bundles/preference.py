@@ -31,6 +31,3 @@ class PMXPreference(PMXBundleItem):
         super(PMXPreference, self).__init__(hash, name_space)
         for key in [ 'settings' ]:
             setattr(self, key, hash.pop(key, None))
-    ow. For more information see auto-paired characters.
-
-    shellVariables — an array of key/value pairs. See context dependent var

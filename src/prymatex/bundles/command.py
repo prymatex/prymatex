@@ -14,9 +14,12 @@
             TM_DIRECTORY,
             TM_BUNDLE_SUPPORT: Support dentro del bundle
             TM_SELECTED_TEXT
-    * El cuadrado fatidico es la tecla window que es la @ en las fuentes
+    * Meta -> (cinta de 4 esquinas) -> arroba (@)
     * Control es ^
-    * Shift es la @
+    * Shift es la $
+    * Backspace -> ^?
+    * supr -> ?M-^\?
+    * Alt -> ~
     
 '''
 import os, stat, tempfile
@@ -49,7 +52,7 @@ class PMXCommand(PMXBundleItem):
         
 def parse_file(filename):
     import plistlib
-    data = plistlib.readPlist(filename)
+    data = plistlib.readPlistFromString(filename)
     return PMXCommand(data)
 
 if __name__ == '__main__':
@@ -63,14 +66,4 @@ if __name__ == '__main__':
     for f in files:
         command = parse_file(f)
         print command.name
-        command.execute(environment)name__ == '__main__':
-    from glob import glob
-    files = glob(os.path.join('../share/Bundles/Python.tmbundle/Commands', '*'))
-    environment = { "TM_BUNDLE_SUPPORT": "../share/Bundles/Python.tmbundle/Support",
-                    "TM_SUPPORT_PATH": "../share/Support",
-                    "TM_CURRENT_WORD": "def",
-                    "TM_LINE_NUMBER": "2"}
-    environment.update(os.environ)
-    for f in files:
-        command = parse_file(f)
-        print comman
+        command.execute(environment)
