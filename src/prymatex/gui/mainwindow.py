@@ -81,7 +81,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     def setup_logging(self):
         '''
-        Logging window setup
+        Logging Sub-Window setup
+        TODO: Fix speed issues when a big amount of events is presented
         '''
         from logwidget import LogDockWidget
         self.log_dock_widget = LogDockWidget(self)
@@ -178,8 +179,13 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         return self.centralWidget()
     
     @property
-    def currentEditor(self):
-        return self.currentTabWidget.currentWidget()
+    def current_editor(self):
+        #return self.currentTabWidget.currentWidget() # Old layout manager code
+        editor = self.tabWidget.currentWidget()
+        print editor
+        return editor
+
+
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
@@ -260,21 +266,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         import webbrowser
         webbrowser.open(qApp.instance().projectUrl)
     
-    @property
-    def editor(self):
-        '''
-        Current Editor
-        '''
-        self.centralWidget().currentEditor()
-        #return self.tabWidgetEditors.currentWidget()
-        
+       
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        self.currentEditor.save()
+        self.current_editor.save()
     
     @pyqtSignature('')
     def on_actionSaveAs_triggered(self):
-        self.currentEditor.save(save_as = True)
+        self.current_editor.save(save_as = True)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
@@ -299,12 +298,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
     @pyqtSignature('')
     def on_actionZoom_In_triggered(self):
-        self.currentEditor.zoomIn()
+        self.current_editor.zoomIn()
         
     
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
-        self.currentEditor.zoomOut()
+        self.current_editor.zoomOut()
     
     @pyqtSignature('')
     def on_actionFocus_Editor_triggered(self):
@@ -368,8 +367,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     @pyqtSignature('')
     def on_actionGo_To_Line_triggered(self):
-        editor = self.tabWidgetEditors.currentWidget()
-        editor.showGoToLineDialog()
+        #editor = self.tabWidgetEditors.currentWidget()
+        #editor.showGoToLineDialog()
+        self.current_editor.gotolineWidget.show()
 
     @pyqtSignature('')
     def on_actionGo_To_File_triggered(self):
@@ -383,7 +383,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         from prymatex.config.base import settings
         settings.editor.tab_length += 1
         settings.save()
-        scope = self.currentEditor.codeEdit.get_current_scope()
+        scope = self.current_editor.codeEdit.get_current_scope()
         self.statusBar().showMessage("%s" % (scope))
         
     @pyqtSignature('')
@@ -423,11 +423,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
     @pyqtSignature('')
     def on_actionFind_triggered(self):
-        self.currentEditor.actionFind.trigger()
+        self.current_editor.actionFind.trigger()
         
     @pyqtSignature('')
     def on_actionFind_Replace_triggered(self):
-        self.currentEditor.actionReplace.trigger()
+        self.current_editor.actionReplace.trigger()
     
 
 class PMXTabActionGroup(QActionGroup):
