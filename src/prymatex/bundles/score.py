@@ -74,4 +74,5 @@ if __name__ == "__main__":
     print sp.score( '', reference_scope ), " > ", sp.score( 'source.php', reference_scope )
     print sp.score( 'string', reference_scope ), " > ", sp.score( 'source.php', reference_scope ) 
     print sp.score( 'text source string', reference_scope ), " > ", sp.score( 'source string', reference_scope )
-    
+      
+    print 0, "==", sp.score( 'text.html source.php - string', reference_scope )

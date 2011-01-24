@@ -5,57 +5,78 @@ import os #, #glob,
 import plistlib
 from os.path import join, abspath
 from glob import glob
-from PyQt4.Qt import QTextCharFormat, QColor, QFont
 from xml.parsers.expat import ExpatError
+# for run as main
+if __name__ == "__main__":
+    import sys
+    sys.path.append(os.path.abspath('../..'))
+from prymatex.bundles.score import PMXScoreManager
 
-#TODO: mover a algo que sea propio para themes fuerda de bundles
+'''
+    caret, foreground, selection, invisibles, lineHighlight, gutter, background
+'''
 
-PMX_THEMES = {}
-#TODO: No me gusta como esta este temes muy pegado al parser y como se arman los estilos, 
-#quiza dejar esto como un themes de textmate y crear un objeto que los interprete y cree nuestro sistema de estilos
-class PMXTheme(object):
+class PMXStyle(object):
     def __init__(self, hash):
-        self.name = hash.get('name')
-        self.author = hash.get('author')
-        self.styles = hash.get('settings')
-        self.default = self.styles.pop(0)
-        PMX_THEMES[self.name] = self
+        for key in [    'scope', 'name', 'settings' ]:
+            setattr(self, key, hash.pop(key, None))
         
-    def get_style(self, scope):
-        for style in self.styles:
-            if style['scope'] == scope: 
-                return style['settings']
-    
-    def get_default_style(self):
-        return self.default['settings']
-    
-    def get_style_or_default(self, scope):
-        return self.get_style(scope) or self.get_default_style()
-    
-    @property
-    def scopes(self):
-        return map(lambda style: style['scope'], self.styles)
-    
-    def items(self):
-        return map(lambda style: (style['scope'], style['settings']), self.styles)
-        
-def load_prymatex_themes(path):
-    search_path = join(abspath(path), '*.tmTheme')
-    paths = glob(search_path)
-    counter = 0
-    for path in paths:
-        try:
-            data = plistlib.readPlist(os.path.abspath(path))
-            PMXTheme(data)
-        except ExpatError:
-            pass
-        counter += 1
-    return counter
+        if hash:
+            print "Style has more values (%s)" % (', '.join(hash.keys()))
 
+class PMXTheme(object):
+    THEMES = {}
+    scores = PMXScoreManager()
+    
+    def __init__(self, hash):
+        self.sytles = []
+        for key in [    'uuid', 'name', 'comment', 'author', 'settings' ]:
+            value = hash.pop(key, None)
+            if key == 'settings':
+                self.default = PMXStyle(value[0])
+                for setting in value[1:]:
+                    self.sytles.append(PMXStyle(setting))
+            else:
+                setattr(self, key, value)
+
+        if hash:
+            print "Bundle '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+
+    @staticmethod
+    def loadTheme(path):
+        try:
+            data = plistlib.readPlist(path)
+            theme = PMXTheme(data)
+        except Exception, e:
+            print "Error en bundle %s (%s)" % (path, e)
+
+        PMXTheme.THEMES[theme.uuid] = theme
+        return theme
+        
+    @classmethod
+    def getThemeByName(cls, name):
+        for uuid, theme in cls.THEMES.iteritems():
+            if theme.name == name:
+                return theme
+
+    def getStyle(self, scope):
+        base = self.default.settings
+        styles = []
+        for style in self.sytles:
+            if style.scope != None:
+                score = self.scores.score(scope, style.scope)
+                if score != 0:
+                    styles.append((score, style))
+        styles.sort(key = lambda t: t[0])
+        for score, style in styles:
+            base.update(style.settings)
+        return base
+    
 def main():
-    from pprint import pprint
-    print load_prymatex_themes('../../resources/Themes')
-    pprint(PMX_THEMES['Blackboard'].scopes)
+    for file in glob(os.path.join('../share/Themes/', '*')):
+        PMXTheme.loadTheme(file)
+    theme = PMXTheme.getThemeByName('Twilight')
+    print theme.getStyle('source.python meta.class.python')
 
 if __name__ == '__main__':
     main()

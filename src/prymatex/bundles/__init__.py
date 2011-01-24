@@ -8,7 +8,8 @@ if __name__ == "__main__":
 from glob import glob
 from prymatex.bundles import command, macro, snippet, syntax, preference
 from prymatex.bundles.base import PMXBundle
-from prymatex.core.config import settings
+from prymatex.bundles.theme import PMXTheme
+from prymatex.config import settings
 
 #BundleItemName, BundlePattern, BundleItemClass
 BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*', syntax.PMXSyntax),
@@ -30,7 +31,12 @@ def load_prymatex_bundles(after_load_callback = None):
     return counter
 
 def load_prymatex_themes(after_load_callback = None):
-    return 0
-
-if __name__ == "__main__":
-    load_prymatex_bundles()
+    paths = glob(os.path.join(settings.PMX_THEMES_PATH, '*.tmTheme'))
+    counter = 0
+    total = len(paths)
+    for path in paths:
+        if callable(after_load_callback):
+            after_load_callback(counter = counter, total = total, name = os.path.basename(path).split('.')[0])
+        PMXTheme.loadTheme(path)
+        counter += 1
+    return counter
