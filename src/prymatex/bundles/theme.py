@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os #, #glob, 
 import plistlib
-from os.path import join, abspath
-from glob import glob
+from copy import copy
 from xml.parsers.expat import ExpatError
 # for run as main
 if __name__ == "__main__":
-    import sys
+    import sys, os
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
 
@@ -23,7 +21,18 @@ class PMXStyle(object):
         
         if hash:
             print "Style has more values (%s)" % (', '.join(hash.keys()))
-
+            
+    def __getitem__(self, name):
+        return self.settings[name]
+    
+    def __copy__(self):
+        values = {'scope': self.scope, 'name': self.name, 'settings': copy(self.settings)}
+        obj = PMXStyle(values)
+        return obj
+        
+    def update(self, other):
+        self.settings.update(other.settings)
+    
 class PMXTheme(object):
     THEMES = {}
     scores = PMXScoreManager()
@@ -60,7 +69,7 @@ class PMXTheme(object):
                 return theme
 
     def getStyle(self, scope):
-        base = self.default.settings
+        base = copy(self.default)
         styles = []
         for style in self.sytles:
             if style.scope != None:
@@ -69,14 +78,18 @@ class PMXTheme(object):
                     styles.append((score, style))
         styles.sort(key = lambda t: t[0])
         for score, style in styles:
-            base.update(style.settings)
+            base.update(style)
         return base
     
 def main():
+    import os 
+    from glob import glob
+    import prymatex.bundles
     for file in glob(os.path.join('../share/Themes/', '*')):
         PMXTheme.loadTheme(file)
     theme = PMXTheme.getThemeByName('Twilight')
-    print theme.getStyle('source.python meta.class.python')
+    style = theme.getStyle('source.python meta.class.python')
+    print style.QTextFormat
 
 if __name__ == '__main__':
     main()
