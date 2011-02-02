@@ -133,23 +133,16 @@ class TextNode(Node):
 
 class PMXSnippetProcessor(PMXSyntaxProcessor):
     def __init__(self):
-        self.lines = []
+        pass
         
     def open_tag(self, name, start):
-        self.stack.append((name, start))
+        pass
 
     def close_tag(self, name, end):
-        start = 0
-        for index in range(len(self.stack))[::-1]:
-            if name == self.stack[index][0]:
-                _, start = self.stack.pop(index)
-                break
-        self.elements.append((name, start, end))
+        pass
 
     def new_line(self, line):
-        self.lines.append([])
-        self.elements = self.lines[-1]
-        self.stack = []
+        pass
 
     def start_parsing(self, name):
         pass
@@ -165,13 +158,6 @@ class PMXSnippet(PMXBundleItem):
             setattr(self, key, hash.pop(key, None))
     
     def compile(self):
-        processor = PMXSnippetProcessor()
+        processor = PMXDebugSyntaxProcessor()
         self.parser.parse(self.content, processor)
         text = self.content.splitlines()
-        lines = processor.lines
-        
-        if len(lines) != len(text):
-            raise Exception()
-        for index in xrange(len(text)):
-            for chunk in lines[index]:
-                print "%s (%d, %d)" % chunk, text[index][chunk[1]:chunk[2]]
