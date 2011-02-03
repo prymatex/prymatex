@@ -9,6 +9,7 @@ if __name__ == "__main__":
     import sys, os
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
+from prymatex.bundles.qtadapter import buildQTextFormat
 
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
@@ -21,9 +22,12 @@ class PMXStyle(object):
         
         if hash:
             print "Style has more values (%s)" % (', '.join(hash.keys()))
-            
+
     def __getitem__(self, name):
         return self.settings[name]
+    
+    def __contains__(self, name):
+        return name in self.settings
     
     def __copy__(self):
         values = {'scope': self.scope, 'name': self.name, 'settings': copy(self.settings)}
@@ -32,6 +36,10 @@ class PMXStyle(object):
         
     def update(self, other):
         self.settings.update(other.settings)
+    
+    @property
+    def QTextFormat(self):
+        return buildQTextFormat(self)
     
 class PMXTheme(object):
     THEMES = {}
@@ -73,7 +81,7 @@ class PMXTheme(object):
         styles = []
         for style in self.sytles:
             if style.scope != None:
-                score = self.scores.score(scope, style.scope)
+                score = self.scores.score(style.scope, scope)
                 if score != 0:
                     styles.append((score, style))
         styles.sort(key = lambda t: t[0])

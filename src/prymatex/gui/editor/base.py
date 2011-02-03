@@ -28,7 +28,8 @@ if __name__ == "__main__":
 
 from prymatex.gui.editor.sidearea import PMXSideArea
 from prymatex.bundles.syntax import find_syntax_by_first_line
-from prymatex.gui.editor.syntax import PMXSyntaxProcessor, PMXSyntaxFormatter
+from prymatex.gui.editor.syntax import PMXSyntaxProcessor
+from prymatex.bundles.theme import PMXTheme
 
 # Key press debugging 
 KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
@@ -71,6 +72,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #-----------------------------------
     soft_tabs = Setting(default = True)
     tab_length = Setting(default = 4)
+    theme_name = Setting(default = 'IDLE')
 
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
@@ -78,7 +80,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.setupUi()
         self.character_actions = {}
         try:
-            formater = PMXSyntaxFormatter.load_from_textmate_theme('LAZY')
+            formater = PMXTheme.getThemeByName(self.theme_name)
             self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = formater)
         except:
             logger.debug("Could not set syntax")

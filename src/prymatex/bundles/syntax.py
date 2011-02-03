@@ -180,7 +180,12 @@ class PMXSyntax(PMXBundleItem):
     @property
     def grammar(self):
         if not hasattr(self, '_grammar'):
-            setattr(self, '_grammar', PMXSyntaxNode({ 'repository': self.repository, 'patterns': self.patterns} , self ))
+            hash = {}
+            if self.repository != None:
+                hash['repository'] = self.repository
+            if self.patterns != None:
+                hash['patterns'] = self.patterns
+            setattr(self, '_grammar', PMXSyntaxNode(hash , self ))
         return self._grammar
 
     def parse(self, string, processor = None):

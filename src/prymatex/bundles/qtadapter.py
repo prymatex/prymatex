@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from PyQt4.Qt import QTextCharFormat, QColor, QFont
+
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
 '''
