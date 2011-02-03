@@ -16,11 +16,12 @@ from prymatex.bundles.syntax import PMXSyntax
 SNIPPET_SYNTAX = {'name': 'Snippet',
 'patterns': [{'match': '\\\\(\\\\|\\$|`)',
                'name': 'constant.character.escape.snippet'},
-              {'captures': {'1': {'name': 'keyword.tabstop.snippet'}},
-               'match': '\\$(\\d+)',
-               'name': 'meta.structure.tabstop.snippet'},
+              {'match': '\\$(\\d+)',
+               'captures': {'1': {'name': 'keyword.tabstop.snippet'}},
+               'name': 'meta.referred.tabstop.snippet'},
               {'begin': '\\$\\{(\\d+):',
                'beginCaptures': {'1': {'name': 'keyword.tabstop.snippet'}},
+               'contentName': 'string.default',
                'end': '\\}',
                'name': 'meta.structure.tabstop.snippet',
                'patterns': [{'include': '$self'}]},
@@ -77,78 +78,94 @@ SNIPPET_SYNTAX = {'name': 'Snippet',
 
 #Snippet nodes
 class Node(object):
-    child_nodelists = ('nodelist',)
-
+    def __init__(self, name):
+        self.name = name
+        
     def render(self, context):
         "Return the node rendered as a string"
         pass
-
-    def __iter__(self):
-        yield self
-
-    def get_nodes_by_type(self, nodetype):
-        "Return a list of all nodes (within this node and its nodelist) of the given type"
-        nodes = []
-        if isinstance(self, nodetype):
-            nodes.append(self)
-        for attr in self.child_nodelists:
-            nodelist = getattr(self, attr, None)
-            if nodelist:
-                nodes.extend(nodelist.get_nodes_by_type(nodetype))
-        return nodes
-
+    
 class NodeList(list):
-    # Set to True the first time a non-TextNode is inserted by
-    # extend_nodelist().
-    contains_nontext = False
+    def __init__(self, name):
+        super(NodeList, self).__init__()
+        self.name = name
 
-    def render(self, context):
-        bits = []
-        for node in self:
-            if isinstance(node, Node):
-                bits.append(self.render_node(node, context))
-            else:
-                bits.append(node)
-        return mark_safe(''.join([force_unicode(b) for b in bits]))
-
-    def get_nodes_by_type(self, nodetype):
-        "Return a list of all nodes of the given type"
-        nodes = []
-        for node in self:
-            nodes.extend(node.get_nodes_by_type(nodetype))
-        return nodes
-
-    def render_node(self, node, context):
-        return node.render(context)
+    def append(self, element):
+        element.parent = self
+        super(NodeList, self).append(element)
+        return element
 
 class TextNode(Node):
-    def __init__(self, s):
-        self.s = s
+    def __init__(self, name, text):
+        super(TextNode, self).__init__(name)
+        self.text = text
 
     def __repr__(self):
-        return "<Text Node: '%s'>" % smart_str(self.s[:25], 'ascii', errors='replace')
-
-    def render(self, context):
-        return self.s
-
-class PMXSnippetProcessor(PMXSyntaxProcessor):
-    def __init__(self):
-        pass
+        return "<%s Node: '%s'>" % (self.name, self.text)
         
-    def open_tag(self, name, start):
-        pass
+    def render(self, context):
+        return self.text
 
+class RegexpNode(Node):
+    def __init__(self, name):
+        self.regexp = None
+        self.format = None
+        self.options = None
+
+class TabstopNode(NodeList):
+    def __init__(self, name):
+        super(TabstopNode, self).__init__(name)
+        self.index = 0
+        
+    def __repr__(self):
+        return "<TabstopNode %d: '%s'>" % (self.index, super(NodeList, self).__repr__())
+
+class ShellNode(NodeList):
+    pass
+    
+class PMXSnippetProcessor(PMXSyntaxProcessor):
+    def __init__(self, snippet, text):
+        self.snippet = snippet
+        self.text = text
+        self.line = 0
+        self.node = NodeList("snippet")
+
+    def open_tag(self, name, start):
+        if name == 'meta.structure.tabstop.snippet':
+            self.node.append(TextNode("string", self.current[self.index:start]))
+            self.node = self.node.append(TabstopNode(name))
+        elif name == 'string.regexp':
+            self.node = self.node.append(RegexpNode(name, self.current[self.index:end]))
+        elif name == 'string.interpolated.shell.snippet':
+            self.node = self.node.append(ShellNode(name))
+        self.index = start
+        
     def close_tag(self, name, end):
-        pass
+        if name == 'meta.structure.tabstop.snippet':
+            self.node = self.node.parent
+        elif name == 'keyword.tabstop.snippet':
+            self.node.index = int(self.current[self.index:end])
+        elif name == 'string.default':
+            self.node.append(TextNode(name, self.current[self.index:end]))
+        elif name == 'string.regexp':
+            self.node = self.node.append(RegexpNode(name, self.current[self.index:end]))
+        elif name == 'string.interpolated.shell.snippet':
+            self.node.append(TextNode(name, self.current[self.index:end]))
+            self.node = self.node.parent
+        self.index = end
 
     def new_line(self, line):
-        pass
+        self.current = self.text[self.line]
+        self.line += 1
+        self.index = 0
+        if getattr(self.node, 'name') != "snippet":
+            self.node.append(TextNode(self.node.name, self.current[self.index:]))
 
     def start_parsing(self, name):
-        pass
+        print "start", self.node
 
     def end_parsing(self, name):
-        pass
+        print "end", self.node
 
 class PMXSnippet(PMXBundleItem):
     parser = PMXSyntax(SNIPPET_SYNTAX)
@@ -158,6 +175,8 @@ class PMXSnippet(PMXBundleItem):
             setattr(self, key, hash.pop(key, None))
     
     def compile(self):
-        processor = PMXDebugSyntaxProcessor()
-        self.parser.parse(self.content, processor)
         text = self.content.splitlines()
+        processor = PMXDebugSyntaxProcessor()
+        #processor = PMXSnippetProcessor(self, text)
+        self.parser.parse(self.content, processor)
+  

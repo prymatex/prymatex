@@ -185,6 +185,18 @@ class PMXBundleItem(object):
         self.name_space = name_space
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
+
+def test_preferences():
+    bundle = PMXBundle.getBundleByName('Python')
+    print PMXPreference.getSettings(bundle.getPreferences('source.python'))
+
+def test_snippets():
+    bundle = PMXBundle.getBundleByName('Python')
+    for snippet in bundle.snippets:
+        if snippet.name == 'New Class':
+            print snippet.content
+        #if snippet.name == 'New Function':
+            snippet.compile()
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLE_ELEMENTS
@@ -192,7 +204,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    
-    bundle = PMXBundle.getBundleByName('Python')
-    print PMXPreference.getSettings(bundle.getPreferences('source.python'))
-    
+    test_snippets()
