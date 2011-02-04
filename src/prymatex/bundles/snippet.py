@@ -13,7 +13,7 @@ from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor, PMXDebugSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
 
-SNIPPET_SYNTAX = {'name': 'Snippet',
+SNIPPET_SYNTAX = {
 'patterns': [{'match': '\\\\(\\\\|\\$|`)',
                'name': 'constant.character.escape.snippet'},
               {'match': '\\$(\\d+)',
@@ -72,9 +72,8 @@ SNIPPET_SYNTAX = {'name': 'Snippet',
                                  'endCaptures': {'0': {'name': 'entity.name.function.snippet'}},
                                  'patterns': [{'include': '#escaped_char'},
                                               {'include': '#replacements'},
-                                              {'include': '#condition'}]}},
- 'scopeName': 'text.snippet',
- 'uuid': 'C611D263-828B-4B18-8844-E6F0BE2BF7F1'}
+                                              {'include': '#condition'}]}}
+ }
 
 #Snippet nodes
 class Node(object):

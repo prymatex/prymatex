@@ -27,9 +27,9 @@ if __name__ == "__main__":
     #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
 
 from prymatex.gui.editor.sidearea import PMXSideArea
-from prymatex.bundles.syntax import find_syntax_by_first_line
 from prymatex.gui.editor.syntax import PMXSyntaxProcessor
 from prymatex.bundles.theme import PMXTheme
+from prymatex.bundles.syntax import PMXSyntax
 
 # Key press debugging 
 KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
@@ -117,6 +117,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
     def declareEvents(self):
         self.declareEvent('editorCursorPositionChangedEvent()')
+        self.declareEvent('editorSetSyntaxEvent()')
         
     def get_current_scope(self):
         cursor = self.textCursor()
@@ -129,10 +130,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         col = c.columnNumber()
         self.editorCursorPositionChangedEvent(line, col)
         
-        
-    def set_syntax(self, syntax):
+    def setSyntax(self, syntax):
         self.syntax_processor.set_syntax(syntax)
+        self.editorSetSyntaxEvent(syntax)
     
+    @property
+    def syntax(self):
+        return self.syntax_processor.syntax
+        
     @property
     def index(self):
         '''
@@ -305,13 +310,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 #Esto es un enter y es el primer blocke que tiene el documento
                 try:
                     text = doc.firstBlock().text()
-                    syntax = find_syntax_by_first_line(text)
+                    syntax = PMXSyntax.findSyntaxByFirstLine(unicode(text))
                     if syntax != None:
-                        self.set_syntax(syntax)
-                        self.parent().currentEditorChange.emit(self)
-                except:
+                        self.setSyntax(syntax)
+                except Exception as e:
                     #logger.information("Error guessing syntax, maybe debuging?")
-                    print "Error guessing syntax, maybe debuging?"
+                    print e
 
             #TODO: Manage thrugh config
             if True:

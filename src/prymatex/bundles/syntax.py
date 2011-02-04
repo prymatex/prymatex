@@ -10,8 +10,7 @@
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
-
-PMX_SYNTAXES = {}
+from prymatex.bundles.score import PMXScoreManager
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
@@ -155,6 +154,7 @@ class PMXSyntaxProxy(object):
             return self.syntax.syntaxes[self.proxy].grammar
         
 class PMXSyntax(PMXBundleItem):
+    SYNTAXES = {}
     def __init__(self, hash, name_space = 'default'):
         super(PMXSyntax, self).__init__(hash, name_space)
         for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository',
@@ -168,14 +168,13 @@ class PMXSyntax(PMXBundleItem):
         if hash:
             print "Syntax '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
             
-        PMX_SYNTAXES.setdefault(self.name_space, {})
-        if self.scopeName == None:
-            raise Exception("Syntax don't have scopeName")
-        PMX_SYNTAXES[self.name_space][self.scopeName] = self
+        PMXSyntax.SYNTAXES.setdefault(self.name_space, {})
+        if self.scopeName != None:
+            PMXSyntax.SYNTAXES[self.name_space][self.scopeName] = self
 
     @property
     def syntaxes(self):
-        return PMX_SYNTAXES[self.name_space]
+        return PMXSyntax.SYNTAXES[self.name_space]
 
     @property
     def grammar(self):
@@ -255,12 +254,49 @@ class PMXSyntax(PMXBundleItem):
             position = end_pos
         return position
         
-def find_syntax_by_first_line(line):
-    for _, syntaxes in PMX_SYNTAXES.iteritems():
-        for _, syntax in syntaxes.iteritems():
-            if syntax.firstLineMatch != None and syntax.firstLineMatch.match(line):
-                return syntax
-
+    @classmethod
+    def findSyntaxByFirstLine(cls, line):
+        for _, syntaxes in cls.SYNTAXES.iteritems():
+            for _, syntax in syntaxes.iteritems():
+                if syntax.firstLineMatch != None and syntax.firstLineMatch.match(line):
+                    return syntax
+                
+    @classmethod
+    def getSyntaxesByName(cls, name):
+        stxs = []
+        for _, syntaxes in cls.SYNTAXES.iteritems():
+            for _, syntax in syntaxes.iteritems():
+                if syntax.name == name:
+                    stxs.append(syntax)
+        return stxs
+    
+    @classmethod
+    def getSyntaxByName(cls, name):
+        #TODO: if more than one, throw Exception
+        return cls.getSyntaxesByName(name)[0]
+    
+    @classmethod
+    def getSyntaxesByScope(cls, scope):
+        stxs = []
+        scores = PMXScoreManager()
+        for _, syntaxes in cls.SYNTAXES.iteritems():
+            for _, syntax in syntaxes.iteritems():
+                score = scores.score(scope, syntax.scopeName)
+                if score != 0:
+                    stxs.append((score, syntax))
+        stxs.sort(key = lambda t: t[0])
+        return map(lambda (score, stx): stx, stxs)
+    
+    @classmethod
+    def getSyntaxesNames(cls, sort = False):
+        stxs = []
+        for _, syntaxes in cls.SYNTAXES.iteritems():
+            for _, syntax in syntaxes.iteritems():
+                stxs.append(syntax.name)
+        if sort:
+            return sorted(stxs)
+        return stxs
+                
 def parse_file(filename):
     import plistlib
     from pprint import pprint
@@ -274,4 +310,4 @@ if __name__ == '__main__':
     files = glob(os.path.join('../share/Bundles/Bundle Development.tmbundle/Syntaxes', '*'))
     for f in files:
         syntax = parse_file(f)
-    print PMX_SYNTAXES
+    print PMXSyntax.SYNTAXES

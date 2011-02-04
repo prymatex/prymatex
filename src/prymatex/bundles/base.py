@@ -3,6 +3,7 @@
 
 import os, plistlib
 from glob import glob
+from copy import deepcopy
 from xml.parsers.expat import ExpatError
 
 # for run as main
@@ -110,6 +111,11 @@ class PMXBundle(object):
         self.addItem(preference)
         self.preferences.append(preference)
         PMXBundle.PREFERENCES.setdefault(preference.scope, []).append(preference)
+    
+    def getSyntaxByName(self, name):
+        for syntax in self.syntaxes:
+            if syntax.name == name:
+                return syntax
 
     @staticmethod
     def loadBundle(path, elements, name_space = 'prymatex'):
@@ -152,7 +158,7 @@ class PMXBundle(object):
                 preferences.append((score, cls.PREFERENCES[key]))
         preferences.sort(key = lambda t: t[0])
         result = []
-        for s, ps in preferences:
+        for _, ps in preferences:
             result.extend(ps)
         return result
 
@@ -182,11 +188,16 @@ class PMXBundle(object):
 
 class PMXBundleItem(object):
     def __init__(self, hash, name_space):
+        self.hash = deepcopy(hash)
         self.name_space = name_space
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
 
+#----------------------------------------
+# Tests
+#----------------------------------------
 def test_preferences():
+    from prymatex.bundles.preference import PMXPreference
     bundle = PMXBundle.getBundleByName('Python')
     print PMXPreference.getSettings(bundle.getPreferences('source.python'))
 
@@ -197,11 +208,20 @@ def test_snippets():
             print snippet.content
         #if snippet.name == 'New Function':
             snippet.compile()
+            
+def print_snippet_syntax():
+    bundle = PMXBundle.getBundleByName('Bundle Development')
+    syntax = bundle.getSyntaxByName("Snippet")
+    print syntax.hash
+    
+def test_syntaxes():
+    from prymatex.bundles.syntax import PMXSyntax
+    print PMXSyntax.getSyntaxesByScope("text")
+    print PMXSyntax.getSyntaxesNames()
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLE_ELEMENTS
-    from prymatex.bundles.preference import PMXPreference
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    test_snippets()
+    test_syntaxes()
