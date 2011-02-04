@@ -114,7 +114,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
         '''
         TODO: Resync all menus
         '''
-        self.tabWidgetEditorChangedEvent(self.widget(index))
+        self.tabWidgetEditorChangedEvent(self.widget(index).codeEdit)
         
     def mouseDoubleClickEvent(self, mouse_event):
         '''
