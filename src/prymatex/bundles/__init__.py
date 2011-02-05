@@ -6,8 +6,10 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath('../..'))
 
 from glob import glob
-from prymatex.bundles import command, macro, snippet, syntax, preference
+from prymatex.bundles import command, snippet, syntax, preference, macro
 from prymatex.bundles.base import PMXBundle
+from prymatex.bundles.theme import PMXTheme, PMXStyle
+from prymatex.bundles.qtadapter import buildQTextFormat
 from prymatex.core.config import settings
 
 #BundleItemName, BundlePattern, BundleItemClass
@@ -30,7 +32,12 @@ def load_prymatex_bundles(after_load_callback = None):
     return counter
 
 def load_prymatex_themes(after_load_callback = None):
-    return 0
-
-if __name__ == "__main__":
-    load_prymatex_bundles()
+    paths = glob(os.path.join(settings.PMX_THEMES_PATH, '*.tmTheme'))
+    counter = 0
+    total = len(paths)
+    for path in paths:
+        if callable(after_load_callback):
+            after_load_callback(counter = counter, total = total, name = os.path.basename(path).split('.')[0])
+        PMXTheme.loadTheme(path)
+        counter += 1
+    return counter

@@ -1,57 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QColor, QFont
 from prymatex.bundles.processor import PMXSyntaxProcessor
-from prymatex.bundles.score import PMXScoreManager
-from prymatex.bundles.theme import PMX_THEMES
-
-class PMXSyntaxFormatter(object):
-    def __init__(self):
-        self.score = PMXScoreManager()
-        self.styles = {}
-        self.default = None
-        self.formats = {}
-    
-    def add_format(self, scope, format):
-        self.styles[scope] = format
-    
-    def get_format(self, scope):
-        if not (self.formats.has_key(scope)):
-            self.formats[scope] = self.__search_format( scope )
-        return self.formats[scope]
-    
-    def __search_format(self, reference_scope):
-        score, format = 0, self.default 
-        for search_scope in self.styles.keys():
-            tmp_score, tmp_format = self.score.score(search_scope, reference_scope), self.styles[search_scope]
-            if tmp_score > score:
-                score, format = tmp_score, tmp_format
-        return format
-    
-    @classmethod
-    def build_format_from_style(cls, style):
-        format = QTextCharFormat()
-        if 'foreground' in style:
-            format.setForeground(QColor(style['foreground']))
-        if 'background' in style:
-            format.setBackground(QColor(style['background']))
-        if 'fontStyle' in style:
-            if style['fontStyle'] == 'bold':
-                format.setFontWeight(QFont.Bold)
-            elif style['fontStyle'] == 'underline':
-                format.setFontUnderline(True)
-            elif style['fontStyle'] == 'italic':
-                format.setFontItalic(True)
-        return format
-    
-    @classmethod
-    def load_from_textmate_theme(cls, theme_name):
-        assert theme_name in PMX_THEMES, 'No textmate theme for %s' % theme_name
-        theme = PMX_THEMES[theme_name] 
-        ss = PMXSyntaxFormatter()
-        ss.default = cls.build_format_from_style(theme.default)
-        for scope, style in theme.items():
-            ss.add_format(scope, cls.build_format_from_style(style))
-        return ss
 
 class PMXBlockToken(object):
     def __init__(self, begin, end, scopes):
@@ -125,7 +74,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         if self.discard_lines == 0:
             scopes = " ".join(self.scopes)
             self.user_data.add_token(PMXBlockToken(begin, end, scopes))
-            self.setFormat(begin, end - begin, self.formatter.get_format(scopes))
+            self.setFormat(begin, end - begin, self.formatter.getStyle(scopes).QTextFormat)
         self.line_position = end
     
     def new_line(self, line):

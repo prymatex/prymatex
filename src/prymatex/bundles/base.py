@@ -9,6 +9,7 @@ from xml.parsers.expat import ExpatError
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
+from prymatex.bundles.score import PMXScoreManager
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -56,12 +57,13 @@ class PMXMenuNode(object):
                 yield (item, self[item])
             else:
                 yield (self.MENU_SPACE, self.MENU_SPACE)
-        
+
 class PMXBundle(object):
     BUNDLES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
     PREFERENCES = {}
+    scores = PMXScoreManager()
     
     def __init__(self, hash):
         for key in [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]:
@@ -77,7 +79,7 @@ class PMXBundle(object):
         
         if hash:
             print "Bundle '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
-    
+
     def addItem(self, item):
         if self.mainMenu != None:
             self.mainMenu[item.uuid] = item
@@ -87,28 +89,28 @@ class PMXBundle(object):
             PMXBundle.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
         # I'm four father
         item.bundle = self
-            
+
     def addSyntax(self, syntax):
         self.addItem(syntax)
         self.syntaxes.append(syntax)
-        
+
     def addSnippet(self, snippet):
         self.addItem(snippet)
         self.snippets.append(snippet)
-    
+
     def addMacro(self, macro):
         self.addItem(macro)
         self.macros.append(macro)
-        
+
     def addCommand(self, command):
         self.addItem(command)
         self.commands.append(command)
-        
+
     def addPreference(self, preference):
         self.addItem(preference)
         self.preferences.append(preference)
         PMXBundle.PREFERENCES.setdefault(preference.scope, []).append(preference)
-            
+
     @staticmethod
     def loadBundle(path, elements, name_space = 'prymatex'):
         info_file = os.path.join(path, 'info.plist')
@@ -118,7 +120,6 @@ class PMXBundle(object):
         except Exception, e:
             print "Error en bundle %s (%s)" % (info_file, e)
             
-        
         for name, pattern, klass in elements:
             files = glob(os.path.join(path, pattern))
             for sf in files:
@@ -132,27 +133,75 @@ class PMXBundle(object):
                     print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
         PMXBundle.BUNDLES[bundle.uuid] = bundle
         return bundle
-    
+
     @classmethod
     def getBundleByName(cls, name):
         for uuid, bundle in cls.BUNDLES.iteritems():
             if bundle.name == name:
                 return bundle
-                
+
+    @classmethod
+    def getPreferences(cls, scope):
+        preferences = []
+        for key in cls.PREFERENCES.keys():
+            if key == None:
+                score = 1
+            else:
+                score = cls.scores.score(scope, key)
+            if score != 0:
+                preferences.append((score, cls.PREFERENCES[key]))
+        preferences.sort(key = lambda t: t[0])
+        result = []
+        for s, ps in preferences:
+            result.extend(ps)
+        return result
+
+    @classmethod
+    def getTabTriggerItem(cls, keyword, scope):
+        items = []
+        if cls.TAB_TRIGGERS.has_key(keyword):
+            for item in cls.TAB_TRIGGERS[keyword]:
+                score = cls.scores.score(scope, item.scope)
+                if score != 0:
+                    items.append((score, item))
+            items.sort(key = lambda t: t[0])
+            items = map(lambda (score, item): item, items)
+        return items
+            
+    @classmethod
+    def getKeyEquivalentItem(cls, key, scope):
+        items = []
+        if cls.KEY_EQUIVALENTS.has_key(key):
+            for item in cls.KEY_EQUIVALENTS[key]:
+                score = cls.scores.score(scope, item.scope)
+                if score != 0:
+                    items.append((score, item))
+            items.sort(key = lambda t: t[0])
+            items = map(lambda (score, item): item, items)
+        return items
+
 class PMXBundleItem(object):
     def __init__(self, hash, name_space):
         self.name_space = name_space
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
+
+def test_preferences():
+    bundle = PMXBundle.getBundleByName('Python')
+    print PMXPreference.getSettings(bundle.getPreferences('source.python'))
+
+def test_snippets():
+    bundle = PMXBundle.getBundleByName('Python')
+    for snippet in bundle.snippets:
+        if snippet.name == 'New Class':
+            print snippet.content
+        #if snippet.name == 'New Function':
+            snippet.compile()
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLE_ELEMENTS
-    from prymatex.bundles.score import PMXScoreManager
+    from prymatex.bundles.preference import PMXPreference
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    
-    bundle = PMXBundle.getBundleByName('Python')
-    for snippet in bundle.snippets:
-        snippet.compile()
-          
+    test_snippets()

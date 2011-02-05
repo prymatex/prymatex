@@ -23,11 +23,30 @@
     shellVariables — an array of key/value pairs. See context dependent variables.
     spellChecking — set to 0/1 to disable/enable spell checking.
 '''
-
+import ponyguruma as onig
+from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
+
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
+
+class PMXSetting(dict):
+    def __init__(self, hash):
+        for key in [    'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
+            if hash.has_key(key):
+                hash[key] = onig_compile( hash[key] )
+
+        super(PMXSetting, self).__init__(hash)
 
 class PMXPreference(PMXBundleItem):
     def __init__(self, hash, name_space = "default"):
         super(PMXPreference, self).__init__(hash, name_space)
         for key in [ 'settings' ]:
-            setattr(self, key, hash.pop(key, None))
+            if key == 'settings':
+                setattr(self, key, PMXSetting(hash.pop(key)))
+
+    @staticmethod
+    def getSettings(preferences):
+        settings = {}
+        for p in preferences:
+            settings.update(p.settings)
+        return settings

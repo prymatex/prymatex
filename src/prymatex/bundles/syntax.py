@@ -180,7 +180,12 @@ class PMXSyntax(PMXBundleItem):
     @property
     def grammar(self):
         if not hasattr(self, '_grammar'):
-            setattr(self, '_grammar', PMXSyntaxNode({ 'repository': self.repository, 'patterns': self.patterns} , self ))
+            hash = {}
+            if self.repository != None:
+                hash['repository'] = self.repository
+            if self.patterns != None:
+                hash['patterns'] = self.patterns
+            setattr(self, '_grammar', PMXSyntaxNode(hash , self ))
         return self._grammar
 
     def parse(self, string, processor = None):
@@ -269,3 +274,4 @@ if __name__ == '__main__':
     files = glob(os.path.join('../share/Bundles/Bundle Development.tmbundle/Syntaxes', '*'))
     for f in files:
         syntax = parse_file(f)
+    print PMX_SYNTAXES
