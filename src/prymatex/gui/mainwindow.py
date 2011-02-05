@@ -247,9 +247,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         if not fs:
             return
         for path in fs:
-            #PMXCodeEdit.get
             self.centralWidget().openFile(path)
-            #self.tabWidgetEditors.openLocalFile(path)
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
@@ -380,7 +378,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
-        scope = self.currentEditor.codeEdit.get_current_scope()
+        scope = self.currentEditor.codeEdit.getCurrentScope()
         self.statusBar().showMessage("%s" % (scope))
         
     @pyqtSignature('')

@@ -10,11 +10,12 @@ from PyQt4.QtCore import QRect, QObject
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
 from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction, QWidget
 from PyQt4.QtGui import QMenu, QVBoxLayout, QFont
-from PyQt4.QtGui import QKeySequence, QColor
+from PyQt4.QtGui import QKeySequence, QColor, QPalette
 from PyQt4.QtCore import Qt, SIGNAL, QMetaObject, pyqtSignature
 
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
+from prymatex.bundles import PMXBundle, PMXPreference
 
 logger = logging.getLogger(__name__)
 
@@ -72,18 +73,28 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #-----------------------------------
     soft_tabs = Setting(default = True)
     tab_length = Setting(default = 4)
-    theme_name = Setting(default = 'IDLE')
+    font = Setting(default = {"name": "Monospace", "size": 10}, 
+                   fset = lambda self, value: self.setFont(QFont(value["name"], value["size"]))
+                   )
+    
+    def setTheme(self, name):
+        theme = PMXTheme.getThemeByName(self.theme_name)
+        self.syntax_processor.formatter = theme
+        style = theme.getStyle()
+        palette = self.palette()
+        palette.setColor(QPalette.Active, QPalette.Text, style.getQColor('foreground'))
+        palette.setColor(QPalette.Active, QPalette.Base, style.getQColor('background'))
+        self.setPalette(palette)
+        
+    theme_name = Setting(default = 'iPlastic', fset = setTheme)
 
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
         self.setupUi()
         self.character_actions = {}
-        try:
-            formater = PMXTheme.getThemeByName(self.theme_name)
-            self.syntax_processor = PMXSyntaxProcessor(self.document(), formatter = formater)
-        except:
-            logger.debug("Could not set syntax")
+        
+        self.syntax_processor = PMXSyntaxProcessor(self.document())
         
         # TODO: Load from config
         option = QTextOption()
@@ -119,10 +130,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.declareEvent('editorCursorPositionChangedEvent()')
         self.declareEvent('editorSetSyntaxEvent()')
         
-    def get_current_scope(self):
+    def getCurrentScope(self):
         cursor = self.textCursor()
         user_data = cursor.block().userData()
-        return user_data and user_data.get_scope_at(cursor.columnNumber()) or ""
+        return user_data and user_data.getScopeAtPosition(cursor.columnNumber()) or ""
         
     def sendCursorPosChange(self):
         c = self.textCursor()
@@ -273,10 +284,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         stored in key_event.key()
         '''
         key = key_event.key()
-        logger.debug(debug_key(key_event))
-        
         cursor = self.textCursor()
         doc = self.document()
+        text = cursor.block().text()
+        
+        scope = self.getCurrentScope()
+        preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
+        
+        print preferences
+        #logger.debug(debug_key(key_event))
 
         if key == Qt.Key_Tab:
             self.indent()
@@ -300,22 +316,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 except Exception, e:
                     #traceback.print_exc()
                     QPlainTextEdit.keyPressEvent(self, key_event)
-                
-                
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 
         elif key == Qt.Key_Return:
             if doc.blockCount() == 1:
                 #Esto es un enter y es el primer blocke que tiene el documento
-                try:
-                    text = doc.firstBlock().text()
-                    syntax = PMXSyntax.findSyntaxByFirstLine(unicode(text))
-                    if syntax != None:
-                        self.setSyntax(syntax)
-                except Exception as e:
-                    #logger.information("Error guessing syntax, maybe debuging?")
-                    print e
+                text = doc.firstBlock().text()
+                syntax = PMXSyntax.findSyntaxByFirstLine(unicode(text))
+                if syntax != None:
+                    self.setSyntax(syntax)
 
             #TODO: Manage thrugh config
             if True:
@@ -323,8 +333,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                     # Do not indent
                     return QPlainTextEdit.keyPressEvent(self, key_event)
                 else:
-                    cursor.movePosition(QTextCursor.StartOfLine, 
-                                        QTextCursor.KeepAnchor, 1)
+                    cursor.movePosition(QTextCursor.StartOfLine, QTextCursor.KeepAnchor, 1)
                     text = self.textWhitespace( cursor )
                     QPlainTextEdit.keyPressEvent(self, key_event)
                     if text:
@@ -338,9 +347,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.perform_character_action( self.character_actions[ key_chr ] )
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
-
-
-
     
     def perform_character_action(self, substition):
         '''
@@ -374,10 +380,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             cursor.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
             cursor.endEditBlock()
             self.setTextCursor(cursor)
-
         cursor.endEditBlock()
 
-    
     #===========================================================================
     # Text Indentation
     #===========================================================================
@@ -407,11 +411,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         Indents text, it take cares of block selections.
         '''
-        
-        
-        
         block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
-        
         cursor = self.textCursor()
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)

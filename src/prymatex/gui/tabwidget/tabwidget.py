@@ -229,7 +229,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
         '''
         Creates a tab with the file contents and returns it
         '''
-        from prymatex.gui.editor.widget import PMXEditorWidget
         editor = PMXEditorWidget.getEditor(self, path)
         self.addTab(editor, '...')
         return editor
@@ -262,7 +261,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
         
     def updateEditorSyntax(self, source, syntax):
         editor_widget = self.currentWidget()
-        editor_widget.codeEdit.set_syntax(syntax)
+        editor_widget.codeEdit.setSyntax(syntax)
     
     def closeTab(self, index):
         '''

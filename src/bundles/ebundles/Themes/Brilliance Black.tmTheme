@@ -3,7 +3,7 @@
 <plist version="1.0">
     <dict>
         <key>comment</key>
-        <string>Thomas Aylott * subtleGradient.com</string>
+        <string>Thomas Aylott subtleGradient.com</string>
         <key>name</key>
         <string>Brilliance Black</string>
         <key>settings</key>
@@ -72,7 +72,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String</string>
+                <string>String</string>
                 <key>scope</key>
                 <string>string -meta.tag -meta.doctype -string.regexp -string.literal -string.interpolated -string.quoted.literal -string.unquoted, variable.parameter.misc.css, text string source string, string.unquoted string, string.regexp string</string>
                 <key>settings</key>
@@ -85,7 +85,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String Punctuation</string>
+                <string>String Punctuation</string>
                 <key>scope</key>
                 <string>punctuation.definition.string -meta.tag</string>
                 <key>settings</key>
@@ -96,7 +96,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String Punctuation II</string>
+                <string>String Punctuation II</string>
                 <key>scope</key>
                 <string>string.regexp punctuation.definition.string, string.quoted.literal punctuation.definition.string, string.quoted.double.ruby.mod punctuation.definition.string</string>
                 <key>settings</key>
@@ -107,7 +107,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String Literal</string>
+                <string>String Literal</string>
                 <key>scope</key>
                 <string>string.quoted.literal, string.quoted.double.ruby.mod</string>
                 <key>settings</key>
@@ -120,7 +120,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String Unquoted</string>
+                <string>String Unquoted</string>
                 <key>scope</key>
                 <string>string.unquoted -string.unquoted.embedded, string.quoted.double.multiline, meta.scope.heredoc</string>
                 <key>settings</key>
@@ -131,7 +131,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String Interpolated</string>
+                <string>String Interpolated</string>
                 <key>scope</key>
                 <string>string.interpolated</string>
                 <key>settings</key>
@@ -144,7 +144,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String RegEx</string>
+                <string>String RegEx</string>
                 <key>scope</key>
                 <string>string.regexp</string>
                 <key>settings</key>
@@ -157,7 +157,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String RegEx Group 1</string>
+                <string>String RegEx Group 1</string>
                 <key>scope</key>
                 <string>string.regexp.group</string>
                 <key>settings</key>
@@ -168,7 +168,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String RegEx Group 2</string>
+                <string>String RegEx Group 2</string>
                 <key>scope</key>
                 <string>string.regexp.group string.regexp.group </string>
                 <key>settings</key>
@@ -181,7 +181,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String RegEx Group 3</string>
+                <string>String RegEx Group 3</string>
                 <key>scope</key>
                 <string>string.regexp.group string.regexp.group string.regexp.group </string>
                 <key>settings</key>
@@ -194,7 +194,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String RegEx Group 4</string>
+                <string>String RegEx Group 4</string>
                 <key>scope</key>
                 <string>string.regexp.group string.regexp.group string.regexp.group string.regexp.group </string>
                 <key>settings</key>
@@ -207,7 +207,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String RegEx Character-Class</string>
+                <string>String RegEx Character-Class</string>
                 <key>scope</key>
                 <string>string.regexp.character-class</string>
                 <key>settings</key>
@@ -220,7 +220,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ String RegEx Arbitrary-Repitition</string>
+                <string>String RegEx Arbitrary-Repitition</string>
                 <key>scope</key>
                 <string>string.regexp.arbitrary-repitition</string>
                 <key>settings</key>
@@ -233,7 +233,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ Meta Group Assertion Regexp </string>
+                <string>Meta Group Assertion Regexp </string>
                 <key>scope</key>
                 <string>meta.group.assertion.regexp </string>
                 <key>settings</key>
@@ -244,7 +244,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ Meta Assertion</string>
+                <string>Meta Assertion</string>
                 <key>scope</key>
                 <string>meta.assertion, meta.group.assertion keyword.control.group.regexp</string>
                 <key>settings</key>
@@ -255,7 +255,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ Number</string>
+                <string>Number</string>
                 <key>scope</key>
                 <string>constant.numeric</string>
                 <key>settings</key>
@@ -266,7 +266,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ Character constant</string>
+                <string>Character constant</string>
                 <key>scope</key>
                 <string>constant.character</string>
                 <key>settings</key>
@@ -277,7 +277,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ Built-in constant</string>
+                <string>Built-in constant</string>
                 <key>scope</key>
                 <string>constant.language, keyword.other.unit, constant.other.java, constant.other.unit</string>
                 <key>settings</key>
@@ -288,7 +288,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ Built-in constant+</string>
+                <string>Built-in constant+</string>
                 <key>scope</key>
                 <string>constant.language.pseudo-variable</string>
                 <key>settings</key>
@@ -301,7 +301,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ User-defined constant</string>
+                <string>User-defined constant</string>
                 <key>scope</key>
                 <string>constant.other, constant.block</string>
                 <key>settings</key>
@@ -312,7 +312,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ Library constant</string>
+                <string>Library constant</string>
                 <key>scope</key>
                 <string>support.constant, constant.name</string>
                 <key>settings</key>
@@ -442,7 +442,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Storage</string>
+                <string>Storage</string>
                 <key>scope</key>
                 <string>storage -storage.modifier</string>
                 <key>settings</key>
@@ -453,7 +453,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Entity Name Preprocessor</string>
+                <string>Entity Name Preprocessor</string>
                 <key>scope</key>
                 <string>other.preprocessor, entity.name.preprocessor</string>
                 <key>settings</key>
@@ -464,7 +464,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>~ variable.language.this.js.prototype</string>
+                <string>variable.language.this.js.prototype</string>
                 <key>scope</key>
                 <string>variable.language.this.js</string>
                 <key>settings</key>
@@ -475,7 +475,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Storage Modifier</string>
+                <string>Storage Modifier</string>
                 <key>scope</key>
                 <string>storage.modifier</string>
                 <key>settings</key>
@@ -486,7 +486,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Class name</string>
+                <string>Class name</string>
                 <key>scope</key>
                 <string>entity.name.class, entity.name.type.class</string>
                 <key>settings</key>
@@ -497,7 +497,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Class</string>
+                <string>Class</string>
                 <key>scope</key>
                 <string>meta.class -meta.class.instance, declaration.class, meta.definition.class, declaration.module</string>
                 <key>settings</key>
@@ -510,7 +510,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Library class/type</string>
+                <string>Library class/type</string>
                 <key>scope</key>
                 <string>support.type, support.class</string>
                 <key>settings</key>
@@ -523,7 +523,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Instance</string>
+                <string>Instance</string>
                 <key>scope</key>
                 <string>entity.name.instance</string>
                 <key>settings</key>
@@ -534,7 +534,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Instance.constructor</string>
+                <string>Instance.constructor</string>
                 <key>scope</key>
                 <string>meta.class.instance.constructor</string>
                 <key>settings</key>
@@ -545,7 +545,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Inherited class</string>
+                <string>Inherited class</string>
                 <key>scope</key>
                 <string>entity.other.inherited-class, entity.name.module</string>
                 <key>settings</key>
@@ -558,7 +558,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Class Method</string>
+                <string>Class Method</string>
                 <key>scope</key>
                 <string>object.property.function, meta.definition.method</string>
                 <key>settings</key>
@@ -569,7 +569,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Function</string>
+                <string>Function</string>
                 <key>scope</key>
                 <string>meta.function, meta.property.function, declaration.function</string>
                 <key>settings</key>
@@ -582,7 +582,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>$ Function name</string>
+                <string>Function name</string>
                 <key>scope</key>
                 <string>entity.name.function, entity.name.preprocessor</string>
                 <key>settings</key>
@@ -715,13 +715,13 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* HTML</string>
+                <string>HTML</string>
                 <key>settings</key>
                 <dict />
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Doctype</string>
+                <string>Tag Doctype</string>
                 <key>scope</key>
                 <string>meta.doctype, meta.tag.sgml-declaration.doctype, meta.tag.sgml.doctype</string>
                 <key>settings</key>
@@ -734,7 +734,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag</string>
+                <string>Tag</string>
                 <key>scope</key>
                 <string>meta.tag</string>
                 <key>settings</key>
@@ -745,7 +745,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Structure</string>
+                <string>Tag Structure</string>
                 <key>scope</key>
                 <string>meta.tag.structure, meta.tag.segment</string>
                 <key>settings</key>
@@ -758,7 +758,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Block</string>
+                <string>Tag Block</string>
                 <key>scope</key>
                 <string>meta.tag.block, meta.tag.xml, meta.tag.key</string>
                 <key>settings</key>
@@ -771,7 +771,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Inline</string>
+                <string>Tag Inline</string>
                 <key>scope</key>
                 <string>meta.tag.inline</string>
                 <key>settings</key>
@@ -795,7 +795,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Other</string>
+                <string>Tag Other</string>
                 <key>scope</key>
                 <string>meta.tag.other, entity.name.tag.style, source entity.other.attribute-name -text.html.basic.embedded , entity.name.tag.script, meta.tag.block.script</string>
                 <key>settings</key>
@@ -808,7 +808,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Form</string>
+                <string>Tag Form</string>
                 <key>scope</key>
                 <string>meta.tag.form, meta.tag.block.form</string>
                 <key>settings</key>
@@ -821,7 +821,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Meta</string>
+                <string>Tag Meta</string>
                 <key>scope</key>
                 <string>meta.tag.meta</string>
                 <key>settings</key>
@@ -834,7 +834,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Block Head</string>
+                <string>Tag Block Head</string>
                 <key>scope</key>
                 <string>meta.section.html.head</string>
                 <key>settings</key>
@@ -845,7 +845,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag Block Form</string>
+                <string>Tag Block Form</string>
                 <key>scope</key>
                 <string>meta.section.html.form</string>
                 <key>settings</key>
@@ -856,7 +856,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* XML Tag</string>
+                <string>XML Tag</string>
                 <key>scope</key>
                 <string>meta.tag.xml</string>
                 <key>settings</key>
@@ -867,7 +867,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag name</string>
+                <string>Tag name</string>
                 <key>scope</key>
                 <string>entity.name.tag</string>
                 <key>settings</key>
@@ -878,7 +878,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag attribute</string>
+                <string>Tag attribute</string>
                 <key>scope</key>
                 <string>entity.other.attribute-name</string>
                 <key>settings</key>
@@ -889,7 +889,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* Tag value</string>
+                <string>Tag value</string>
                 <key>scope</key>
                 <string>meta.tag string -source -punctuation, text source text meta.tag string -punctuation</string>
                 <key>settings</key>
@@ -1071,7 +1071,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ CSS</string>
+                <string>CSS</string>
                 <key>scope</key>
                 <string>source.css</string>
                 <key>settings</key>
@@ -1079,7 +1079,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ Selector</string>
+                <string>Selector</string>
                 <key>scope</key>
                 <string>meta.selector</string>
                 <key>settings</key>
@@ -1092,7 +1092,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ Attribute-Match</string>
+                <string>Attribute-Match</string>
                 <key>scope</key>
                 <string>meta.attribute-match.css</string>
                 <key>settings</key>
@@ -1105,7 +1105,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ Pseudo-Class</string>
+                <string>Pseudo-Class</string>
                 <key>scope</key>
                 <string>entity.other.attribute-name.pseudo-class, entity.other.attribute-name.tag.pseudo-class</string>
                 <key>settings</key>
@@ -1116,7 +1116,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ Class</string>
+                <string>Class</string>
                 <key>scope</key>
                 <string>meta.selector entity.other.attribute-name.class</string>
                 <key>settings</key>
@@ -1127,7 +1127,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ ID</string>
+                <string>ID</string>
                 <key>scope</key>
                 <string>meta.selector entity.other.attribute-name.id</string>
                 <key>settings</key>
@@ -1138,7 +1138,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ Tag</string>
+                <string>Tag</string>
                 <key>scope</key>
                 <string>meta.selector entity.name.tag</string>
                 <key>settings</key>
@@ -1151,7 +1151,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ Tag Wildcard</string>
+                <string>Tag Wildcard</string>
                 <key>scope</key>
                 <string>entity.name.tag.wildcard, entity.other.attribute-name.universal</string>
                 <key>settings</key>
@@ -1164,7 +1164,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ meta.property-list</string>
+                <string>meta.property-list</string>
                 <key>scope</key>
                 <string>meta.property-list</string>
                 <key>settings</key>
@@ -1177,7 +1177,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ meta.property-name</string>
+                <string>meta.property-name</string>
                 <key>scope</key>
                 <string>meta.property-name</string>
                 <key>settings</key>
@@ -1190,7 +1190,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ support.type.property-name</string>
+                <string>support.type.property-name</string>
                 <key>scope</key>
                 <string>support.type.property-name</string>
                 <key>settings</key>
@@ -1205,7 +1205,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>§ meta.property-value</string>
+                <string>meta.property-value</string>
                 <key>scope</key>
                 <string>meta.property-value</string>
                 <key>settings</key>
@@ -1577,7 +1577,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Source</string>
+                <string>Source</string>
                 <key>scope</key>
                 <string>source</string>
                 <key>settings</key>
@@ -1590,7 +1590,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ meta.brace.erb</string>
+                <string>meta.brace.erb</string>
                 <key>scope</key>
                 <string>meta.brace.erb</string>
                 <key>settings</key>
@@ -1601,7 +1601,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Source String Source</string>
+                <string>Source String Source</string>
                 <key>scope</key>
                 <string>source string source</string>
                 <key>settings</key>
@@ -1614,7 +1614,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Source String Interpolated Source</string>
+                <string>Source String Interpolated Source</string>
                 <key>scope</key>
                 <string>source string.interpolated source</string>
                 <key>settings</key>
@@ -1627,7 +1627,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Source Embeded Source</string>
+                <string>Source Embeded Source</string>
                 <key>scope</key>
                 <string>source.java.embedded</string>
                 <key>settings</key>
@@ -1638,7 +1638,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Text</string>
+                <string>Text</string>
                 <key>scope</key>
                 <string>text -text.xml.strict</string>
                 <key>settings</key>
@@ -1649,7 +1649,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Text Source</string>
+                <string>Text Source</string>
                 <key>scope</key>
                 <string>text source, meta.scope.django.template</string>
                 <key>settings</key>
@@ -1662,13 +1662,13 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Text Source Text String</string>
+                <string>Text Source Text String</string>
                 <key>settings</key>
                 <dict />
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Text String Source</string>
+                <string>Text String Source</string>
                 <key>scope</key>
                 <string>text string source</string>
                 <key>settings</key>
@@ -1679,21 +1679,15 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Text Source String Source</string>
+                <string>Text Source String Source</string>
                 <key>settings</key>
                 <dict />
             </dict>
             <dict>
                 <key>name</key>
-                <string>◊ Text String Source String Source</string>
+                <string>Text String Source String Source</string>
                 <key>scope</key>
                 <string>text string source string source</string>
-                <key>settings</key>
-                <dict />
-            </dict>
-            <dict>
-                <key>name</key>
-                <string>—————————————————</string>
                 <key>settings</key>
                 <dict />
             </dict>
@@ -1777,7 +1771,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>* HTML Comment</string>
+                <string>HTML Comment</string>
                 <key>scope</key>
                 <string>text comment.block -source</string>
                 <key>settings</key>
@@ -1785,12 +1779,6 @@
                     <key>fontStyle</key>
                     <string>italic</string>
                 </dict>
-            </dict>
-            <dict>
-                <key>name</key>
-                <string>—————————————————</string>
-                <key>settings</key>
-                <dict />
             </dict>
             <dict>
                 <key>name</key>
@@ -1859,12 +1847,6 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>—————————————————</string>
-                <key>settings</key>
-                <dict />
-            </dict>
-            <dict>
-                <key>name</key>
                 <string>meta.delimiter</string>
                 <key>scope</key>
                 <string>punctuation.terminator, meta.delimiter, punctuation.delimiter.method</string>
@@ -1912,12 +1894,6 @@
                     <key>foreground</key>
                     <string>#803D00</string>
                 </dict>
-            </dict>
-            <dict>
-                <key>name</key>
-                <string>—————————————————</string>
-                <key>settings</key>
-                <dict />
             </dict>
             <dict>
                 <key>name</key>
@@ -1970,12 +1946,6 @@
                     <key>foreground</key>
                     <string>#803D00</string>
                 </dict>
-            </dict>
-            <dict>
-                <key>name</key>
-                <string>—————————————————</string>
-                <key>settings</key>
-                <dict />
             </dict>
             <dict>
                 <key>name</key>
@@ -2091,7 +2061,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.source.embedded</string>
+                <string>meta.source.embedded</string>
                 <key>scope</key>
                 <string>meta.source.embedded, entity.other.django.tagbraces</string>
                 <key>settings</key>
@@ -2104,7 +2074,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces.round JS</string>
+                <string>meta.group.braces.round JS</string>
                 <key>scope</key>
                 <string>source.js meta.group.braces.round, meta.scope.heredoc</string>
                 <key>settings</key>
@@ -2112,7 +2082,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 1</string>
+                <string>meta.group.braces 1</string>
                 <key>scope</key>
                 <string>meta.odd-tab.group1, meta.group.braces, meta.block.slate, text.xml.strict meta.tag</string>
                 <key>settings</key>
@@ -2123,7 +2093,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 2</string>
+                <string>meta.group.braces 2</string>
                 <key>scope</key>
                 <string>meta.even-tab.group2, meta.group.braces meta.group.braces, meta.block.slate meta.block.slate, text.xml.strict meta.tag meta.tag, meta.group.braces meta.group.braces</string>
                 <key>settings</key>
@@ -2134,7 +2104,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 3</string>
+                <string>meta.group.braces 3</string>
                 <key>scope</key>
                 <string>meta.odd-tab.group3, meta.group.braces meta.group.braces meta.group.braces , meta.block.slate meta.block.slate meta.block.slate , text.xml.strict meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces</string>
                 <key>settings</key>
@@ -2145,7 +2115,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 4</string>
+                <string>meta.group.braces 4</string>
                 <key>scope</key>
                 <string>meta.even-tab.group4, meta.group.braces meta.group.braces meta.group.braces meta.group.braces , meta.block.slate meta.block.slate meta.block.slate meta.block.slate , text.xml.strict meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces</string>
                 <key>settings</key>
@@ -2156,7 +2126,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 5</string>
+                <string>meta.group.braces 5</string>
                 <key>scope</key>
                 <string>meta.odd-tab.group5, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces , meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate , text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces</string>
                 <key>settings</key>
@@ -2167,7 +2137,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 6</string>
+                <string>meta.group.braces 6</string>
                 <key>scope</key>
                 <string>meta.even-tab.group6, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces , meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate , text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces</string>
                 <key>settings</key>
@@ -2178,7 +2148,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 7</string>
+                <string>meta.group.braces 7</string>
                 <key>scope</key>
                 <string>meta.odd-tab.group7, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces , meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate , text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces</string>
                 <key>settings</key>
@@ -2189,7 +2159,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 8</string>
+                <string>meta.group.braces 8</string>
                 <key>scope</key>
                 <string>meta.even-tab.group8, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces , meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate , text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces</string>
                 <key>settings</key>
@@ -2200,7 +2170,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.group.braces 9</string>
+                <string>meta.group.braces 9</string>
                 <key>scope</key>
                 <string>meta.odd-tab.group11, meta.odd-tab.group10, meta.odd-tab.group9, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces , meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate meta.block.slate , text.xml.strict meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag meta.tag, meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces meta.group.braces</string>
                 <key>settings</key>
@@ -2211,7 +2181,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.block.slate </string>
+                <string>meta.block.slate </string>
                 <key>scope</key>
                 <string>meta.block.slate</string>
                 <key>settings</key>
@@ -2222,7 +2192,7 @@
             </dict>
             <dict>
                 <key>name</key>
-                <string>º meta.block.content.slate </string>
+                <string>meta.block.content.slate </string>
                 <key>scope</key>
                 <string>meta.block.content.slate </string>
                 <key>settings</key>

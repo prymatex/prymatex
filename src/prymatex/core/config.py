@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 import os, plistlib
+from copy import copy
 
 def get_prymatex_base_path():
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -55,6 +56,12 @@ class SettingsNode(object):
     def add_listener(self, listener):
         self.__dict__['__listeners'].append(listener)
     
+    def configure(self, listener):
+        sets = copy(self.__dict__['__wrapped_defaults'])
+        sets.update(self.__dict__['__wrapped_values'])
+        for key, value in sets.iteritems():
+            setattr(listener, key, value)
+    
     def to_python(self):
         ret = {'type': self.__class__.__name__}
         for k, v in self.__dict__['__wrapped_values'].iteritems():
@@ -86,9 +93,10 @@ class Settings(SettingsNode):
 settings = Settings()
 
 class Setting(object):
-    def __init__(self, default = None):
+    def __init__(self, default = None, fset = None):
         self.__value = None
         self.__default = default
+        self.__fset = fset
     
     def get_value(self):
         return self.__value or self.__default
@@ -105,23 +113,22 @@ class Setting(object):
         except KeyError:
             cls._meta.settings[self.name] = self.__default
         
-        self.fget = getattr(cls, self.name, None)
-        self.fset = getattr(cls, "set%s" % self.name.title(), None)
+        if self.__fset == None:
+            #try form the class
+            self.__fset = getattr(cls, "set%s" % self.name.title(), None)
         setattr(cls, self.name, self)
         
     def __get__(self, instance, instance_type = None):
         if instance != None:
             return self.value
-        elif self.fget != None:
-            return self.fget(instance)
     
     def __set__(self, instance, value):
         if instance != None:
             self.__value = value
-        if self.fset != None:
-            self.fset(instance, self.__value)
+        if self.__fset != None:
+            self.__fset(instance, self.__value)
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     class PMXOptions(object):
         def __init__(self, options=None):
             self.settings = settings

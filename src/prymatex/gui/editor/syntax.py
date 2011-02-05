@@ -27,7 +27,7 @@ class PMXBlockUserData(QTextBlockUserData):
     def add_token(self, token):
         self.tokens.append(token)
         
-    def get_scope_at(self, pos):
+    def getScopeAtPosition(self, pos):
         tokens = filter(lambda t: t.begin <= pos < t.end, self.tokens)
         if len(tokens) == 1:
             return tokens[-1].scopes

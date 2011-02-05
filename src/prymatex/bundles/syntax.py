@@ -260,6 +260,15 @@ class PMXSyntax(PMXBundleItem):
             for _, syntax in syntaxes.iteritems():
                 if syntax.firstLineMatch != None and syntax.firstLineMatch.match(line):
                     return syntax
+    
+    @classmethod
+    def findSyntaxByFileType(cls, path):
+        for _, syntaxes in cls.SYNTAXES.iteritems():
+            for _, syntax in syntaxes.iteritems():
+                if type(syntax.fileTypes) == list:
+                    for t in syntax.fileTypes:
+                        if path.endswith(t):
+                            return syntax
                 
     @classmethod
     def getSyntaxesByName(cls, name):
@@ -273,7 +282,9 @@ class PMXSyntax(PMXBundleItem):
     @classmethod
     def getSyntaxByName(cls, name):
         #TODO: if more than one, throw Exception
-        return cls.getSyntaxesByName(name)[0]
+        stxs = cls.getSyntaxesByName(name)
+        if stxs:
+            return stxs[0]
     
     @classmethod
     def getSyntaxesByScope(cls, scope):
