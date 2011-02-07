@@ -204,13 +204,11 @@ def test_preferences():
 def test_snippets():
     bundle = PMXBundle.getBundleByName('Python')
     for snippet in bundle.snippets:
-        snippet.compile()
-        try: 
-            snippet.taborder[1].write("Persona")
-            snippet.taborder[2].write("myid")
-        except:
-            pass
-        print snippet
+        if snippet.name == "New Class":
+            print snippet.content
+            snippet.compile()
+            snippet.taborder[4].write("Pepe")
+            print snippet
             
 def print_snippet_syntax():
     bundle = PMXBundle.getBundleByName('Bundle Development')

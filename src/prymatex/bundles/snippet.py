@@ -27,11 +27,12 @@ SNIPPET_SYNTAX = {
                'end': '\\}',
                'name': 'meta.structure.placeholder.snippet',
                'patterns': [{'include': '$self'}]},
+              #Transformation
               {'begin': '\\$\\{(\\d+)/',
-               'beginCaptures': {'1': {'name': 'keyword.placeholder.snippet'}},
+               'beginCaptures': {'1': {'name': 'keyword.transformation.snippet'}},
                'contentName': 'string.regexp',
                'end': '\\}',
-               'name': 'meta.structure.placeholder.snippet',
+               'name': 'meta.structure.transformation.snippet',
                'patterns': [{'include': '#escaped_char'},
                             {'include': '#substitution'}]},
               # Variables 
@@ -103,6 +104,9 @@ class Node(object):
         elif name == 'meta.structure.variable.snippet':
             node = Variable(name, self)
             self.children.append(node)
+        elif name == 'meta.structure.transformation.snippet':
+            node = Transformation(name, self)
+            self.children.append(node)
         if node == None:
             print "no puedo con %s" % name
         return node
@@ -120,10 +124,7 @@ class Node(object):
             if (hasattr(node, 'get_nodes_by_type')):
                 nodes.extend(node.get_nodes_by_type(nodetype))
         return nodes
-        
-    def write(self, text):
-        self.children = [text]
-        
+
 class Tabstop(Node):
     def open(self, name, text):
         node = self
@@ -172,6 +173,21 @@ class Placeholder(Node):
         self.children = [text]
         for mirror in self.mirrors:
             mirror.write(text)
+            
+class Transformation(Node):
+    def open(self, name, text):
+        node = self
+        if name == 'string.regexp':
+            node = Regexp(name, self)
+            self.children.append(node)
+        return node
+        
+    def close(self, name, text):
+        if name == 'meta.structure.transformation.snippet':
+            return self.parent
+        elif name == 'keyword.transformation.snippet':
+            self.index = int(text)
+        return self
         
 class Variable(Node):
     def open(self, name, text):
@@ -210,7 +226,7 @@ class Regexp(Node):
         elif name == 'string.regexp.options':
             self.options = text
         return self
-        
+
 class Shell(Node):
     def open(self, name, text):
         node = self
