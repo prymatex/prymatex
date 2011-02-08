@@ -6,18 +6,21 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath('../..'))
 
 from glob import glob
-from prymatex.bundles import command, snippet, syntax, preference, macro
+from prymatex.bundles import snippet, macro
+from prymatex.bundles.syntax import PMXSyntax
+from prymatex.bundles.preference import PMXPreference
+from prymatex.bundles.command import PMXCommand
 from prymatex.bundles.base import PMXBundle
 from prymatex.bundles.theme import PMXTheme, PMXStyle
 from prymatex.bundles.qtadapter import buildQTextFormat
 from prymatex.core.config import settings
 
 #BundleItemName, BundlePattern, BundleItemClass
-BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*', syntax.PMXSyntax),
+BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*', PMXSyntax),
                    ('Snippet', 'Snippets/*', snippet.PMXSnippet),
                    ('Macro', 'Macros/*', macro.PMXMacro),
-                   ('Command', 'Commands/*', command.PMXCommand),
-                   ('Preference', 'Preferences/*', preference.PMXPreference)
+                   ('Command', 'Commands/*', PMXCommand),
+                   ('Preference', 'Preferences/*', PMXPreference)
                    )
 
 def load_prymatex_bundles(after_load_callback = None):

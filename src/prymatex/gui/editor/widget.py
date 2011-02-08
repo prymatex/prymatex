@@ -25,6 +25,7 @@ if __name__ == "__main__":
 
 # Qt Designer's gui
 from ui_editorwidget import Ui_EditorWidget
+from prymatex.bundles import PMXSyntax
 
 #===============================================================================
 # Icons
@@ -50,14 +51,13 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                                                  " used with PMXTabWidget as"\
                                                  " parent."
         super(PMXEditorWidget, self).__init__(parent)
+        self.path = path
         
         self.setupActions()
         self.setupUi(self)
         
         self.setupFindReplaceWidget()
-        #self.findreplaceWidget.hide()
-        self.codeEdit.setFont(QFont("Monospace", 10))
-
+        
         self.codeEdit.addAction(self.actionFind)
         self.codeEdit.addAction(self.actionReplace)
 
@@ -65,9 +65,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.findreplaceWidget.hide()
         self.gotolineWidget.hide()
         
-        if path:
-            self.open(path)
-            
+        if self.path:
+            self.readFileContents()
+            self.updateTitle()
+            self.setSyntax()
         
     COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
     COLOR_NORMAL = QColor("black")
@@ -102,7 +103,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
             self.__path = None
         else:
             raise ValueError("Path can't be a %s" % type(value))
-        
         
     @property
     def title(self):
@@ -172,7 +172,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         cls._counter += 1
         return v
         
-
     def setupActions(self):
         # Search
         self.actionFind = QAction("&Find", self)
@@ -301,17 +300,8 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                 return self.do_save()
         return False
     
-    def update_title(self):
+    def updateTitle(self):
         self.title = os.path.basename(self.path)
-    
-    def open(self, path):
-        '''
-        Read file contents
-        '''
-        self.path = path
-        self.readFileContents()
-        self.update_title()
-        # Maybe emit a signal?
     
     READ_SIZE = 1024 * 64 # 64K
     def readFileContents(self):
@@ -347,6 +337,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         raise NotImplementedError()
 
+    def setSyntax(self):
+        syntax = PMXSyntax.findSyntaxByFileType(self.path)
+        self.codeEdit.setSyntax(syntax)
+        
     @property
     def modfified(self):
         return self.codeEdit.document().isModified()

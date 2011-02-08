@@ -25,13 +25,13 @@ class PMXOptions(object):
 
 class PMXObjectBase(pyqtWrapperType):
     def __new__(cls, name, bases, attrs):
-	    module = attrs.pop('__module__')
-	    new_class = super(PMXObjectBase, cls).__new__(cls, name, bases, { '__module__': module })
-	    opts = PMXOptions(attrs.get('Meta', None))
-	    new_class.add_to_class('_meta', opts)
-	    for name, attr in attrs.iteritems():
-	    	new_class.add_to_class(name, attr)
-	    return new_class
+        module = attrs.pop('__module__')
+        new_class = super(PMXObjectBase, cls).__new__(cls, name, bases, { '__module__': module })
+        opts = PMXOptions(attrs.get('Meta', None))
+        new_class.add_to_class('_meta', opts)
+        for name, attr in attrs.iteritems():
+            new_class.add_to_class(name, attr)
+        return new_class
 
     def add_to_class(cls, name, value):
         if hasattr(value, 'contribute_to_class'):
@@ -43,8 +43,8 @@ class PMXObject(QObject):
     __metaclass__ = PMXObjectBase
 
     def configure(self):
-        print self._meta.settings
         self._meta.settings.add_listener(self)
+        self._meta.settings.configure(self)
     
     def declareEvent(self, signature):
         global EVENT_CLASSES

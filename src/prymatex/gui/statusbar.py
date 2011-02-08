@@ -9,7 +9,7 @@ Some of the widgets defined here are:
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.lib.i18n import ugettext as _
-from prymatex.bundles.syntax import PMX_SYNTAXES, PMXSyntax
+from prymatex.bundles.syntax import PMXSyntax
 from prymatex.core.base import PMXObject
         
 class PWMStatusLabel(QLabel):
@@ -85,15 +85,10 @@ class PMXStatusBar(QStatusBar, PMXObject):
         
         self.syntaxMenu = QComboBox(self)
         
-        syntaxes = []
-        for name_space in PMX_SYNTAXES.values():
-            syntaxes.extend(name_space.values())
-        
-        syntaxes = sorted(syntaxes, lambda a, b: cmp(a.name, b.name))
         #No syntax
-        self.syntaxMenu.addItem("No syntax", userData = QVariant(None))
-        for syntax in syntaxes:
-            self.syntaxMenu.addItem(syntax.name, userData=QVariant(syntax))
+        self.syntaxMenu.addItem("No syntax")
+        for name in PMXSyntax.getSyntaxesNames(sort = True):
+            self.syntaxMenu.addItem(name)
             
         self.addPermanentWidget(self.syntaxMenu)
         self.addPermanentWidget(self.lineColLabel)
@@ -106,23 +101,28 @@ class PMXStatusBar(QStatusBar, PMXObject):
     def setSignals(self):
         #External events
         self.connect(self.root, SIGNAL('editorCursorPositionChangedEvent'), self.updatePosition )
+        self.connect(self.root, SIGNAL('editorSetSyntaxEvent'), self.updateSyntax )
         self.connect(self.root, SIGNAL('tabWidgetEditorChangedEvent'), self.updateEditor )
         
         #Internal signals
-        self.connect(self.syntaxMenu, SIGNAL('currentIndexChanged(int)'), self.sendStatusBarSyntaxChanged)
+        self.connect(self.syntaxMenu, SIGNAL('currentIndexChanged(QString)'), self.sendStatusBarSyntaxChanged)
         
     def declareEvents(self):
         self.declareEvent('statusBarSytnaxChangedEvent()')
     
-    def sendStatusBarSyntaxChanged(self, index):
-        syntax = self.syntaxMenu.itemData(index).toPyObject()
+    def sendStatusBarSyntaxChanged(self, name):
+        syntax = PMXSyntax.getSyntaxByName(str(name))
         self.statusBarSytnaxChangedEvent(syntax)
         
     def updatePosition(self, source, line, col):
         self.lineColLabel.update(col, line)
     
     def updateEditor(self, source, editor):
-        if editor != None:
-            self.syntaxMenu.setCurrentIndex(0)
+        self.updateSyntax(source, editor.syntax)
+    
+    def updateSyntax(self, source, syntax):
+        if syntax != None:
+            index = self.syntaxMenu.findText(syntax.name, Qt.MatchExactly)
+            self.syntaxMenu.setCurrentIndex(index)
         else:
             self.syntaxMenu.setCurrentIndex(0)

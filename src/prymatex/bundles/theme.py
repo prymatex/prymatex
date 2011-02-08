@@ -9,7 +9,7 @@ if __name__ == "__main__":
     import sys, os
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
-from prymatex.bundles.qtadapter import buildQTextFormat
+from prymatex.bundles.qtadapter import buildQTextFormat, buildQColor
 
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
@@ -40,6 +40,9 @@ class PMXStyle(object):
     @property
     def QTextFormat(self):
         return buildQTextFormat(self)
+    
+    def getQColor(self, item):
+        return buildQColor(self[item])
     
 class PMXTheme(object):
     THEMES = {}
@@ -76,8 +79,10 @@ class PMXTheme(object):
             if theme.name == name:
                 return theme
 
-    def getStyle(self, scope):
+    def getStyle(self, scope = None):
         base = copy(self.default)
+        if scope == None:
+            return base
         styles = []
         for style in self.sytles:
             if style.scope != None:
