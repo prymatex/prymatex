@@ -83,9 +83,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         style = theme.getStyle()
         foreground = style.getQColor('foreground')
         background = style.getQColor('background')
+        selection = style.getQColor('selection')
+        invisibles = style.getQColor('invisibles')
         palette = self.palette()
         palette.setColor(QPalette.Active, QPalette.Text, foreground)
         palette.setColor(QPalette.Active, QPalette.Base, background)
+        palette.setColor(QPalette.Active, QPalette.Highlight, selection)
+        palette.setColor(QPalette.Active, QPalette.AlternateBase, invisibles)
         self.setPalette(palette)
         self.side_area.foreground = foreground 
         self.side_area.background = background
