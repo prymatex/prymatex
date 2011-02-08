@@ -29,10 +29,11 @@ class PMXBlockUserData(QTextBlockUserData):
         
     def getScopeAtPosition(self, pos):
         tokens = filter(lambda t: t.begin <= pos < t.end, self.tokens)
-        if len(tokens) == 1:
+        if len(tokens) >= 1:
             return tokens[-1].scopes
-        else:
-            raise Exception("WTF? muchos tokens")
+        return ""
+        #else:
+        #    raise Exception("WTF? muchos tokens")
         
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0

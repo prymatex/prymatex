@@ -14,9 +14,9 @@ from prymatex.bundles.processor import PMXSyntaxProcessor, PMXDebugSyntaxProcess
 from prymatex.bundles.syntax import PMXSyntax
 
 import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP
+from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY
 
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, syntax = SYNTAX_RUBY)
 
 SNIPPET_SYNTAX = {
  'patterns': [{'match': '\\\\(\\\\|\\$|`)',

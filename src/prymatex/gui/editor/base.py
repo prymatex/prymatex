@@ -297,7 +297,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         scope = self.getCurrentScope()
         preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
         
-        print preferences
+        #print preferences
         #logger.debug(debug_key(key_event))
 
         if key == Qt.Key_Tab:
