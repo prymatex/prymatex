@@ -202,13 +202,12 @@ def test_preferences():
     print PMXPreference.getSettings(bundle.getPreferences('source.python'))
 
 def test_snippets():
-    bundle = PMXBundle.getBundleByName('Python')
+    bundle = PMXBundle.getBundleByName('C')
     for snippet in bundle.snippets:
-        if snippet.name == "New Class":
             print snippet.content
             snippet.compile()
-            snippet.write(4, "uno, dos, tres")
             print snippet
+            print "-"*20
             
 def print_snippet_syntax():
     bundle = PMXBundle.getBundleByName('Bundle Development')

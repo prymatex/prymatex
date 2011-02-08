@@ -15,7 +15,6 @@ from prymatex.bundles.syntax import PMXSyntax
 
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
-import ipdb
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
@@ -65,23 +64,14 @@ SNIPPET_SYNTAX = {
                               'beginCaptures': {'1': {'name': 'string.regexp.condition'}},
                               'contentName': 'text.condition',
                               'end': '\\)',
-                              'name': 'meta.structure.condition.regexp',
-                              'patterns': [{'include': '#replacements'},
-                                           {'begin': ':',
-                                            'beginCaptures': {'0': {'name': 'string.regexp.condition'}},
-                                            'end': '(?=\\))',
-                                            'name': 'meta.structure.condition.regexp',
-                                            'patterns': [{'include': '#replacements'}]}]},
+                              'name': 'meta.structure.condition.regexp'},
                 'escaped_char': {'match': '\\\\[/\\\\]',
                                  'name': 'constant.character.escape.regex'},
-                'replacements': {'match': '\\$\\d|\\\\[uUILE]',
-                                 'name': 'string.regexp.replacement'},
                 'substitution': {'begin': '/',
-                                 'contentName': 'text.substitution',
+                                 'contentName': 'string.regexp.format',
                                  'end': '/([mg]?)',
                                  'endCaptures': {'1': {'name': 'string.regexp.options'}},
                                  'patterns': [{'include': '#escaped_char'},
-                                              {'include': '#replacements'},
                                               {'include': '#condition'}]}},
 }
 
@@ -108,7 +98,7 @@ class Node(object):
     
     def __contain__(self, element):
         if isinstance(element, str):
-            return false
+            return False
         else:
             return element in self.children
     
@@ -222,7 +212,7 @@ class Transformation(Node):
         text = ""
         if self.placeholder != None:
             text = str(self.placeholder)
-        return self.children[0].transform(text)
+        return "".join(self.children[0].transform(text))
     
     def open(self, name, text):
         node = self
@@ -266,66 +256,38 @@ class Regexp(Node):
     def __init__(self, parent = None):
         super(Regexp, self).__init__(parent)
         self.pattern = ""
+        self.format = ""
         self.options = ""
+        self.condition = None
+
+    def __str__(self):
+        return "%s/%s/%s" % (self.pattern, self.format, self.options)
 
     def open(self, name, text):
         node = self
         #FIXME: Correct syntax
-        if name == 'text.substitution':
+        if name == 'string.regexp.format':
             self.pattern = onig_compile(text[:-1])
-            node = Substitution(self)
-            self.append(node)
         return node
 
     def close(self, name, text):
         if name == 'string.regexp':
             return self.parent
+        elif name == 'string.regexp.format' and text:
+            self.format = text
         elif name == 'string.regexp.options':
             self.options = text
-        return self
-    
-    def sub(self, match):
-        return self.children[0].sub(match)
-            
-    def transform(self, text):
-        return self.pattern.sub(lambda match: self.sub(match), text)
-
-class Substitution(Node):
-    def open(self, name, text):
-        node = self
-        if name == 'meta.structure.condition.regexp':
-            node = Condition(self)
-            self.append(node)
-        return node
-    
-    def close(self, name, text):
-        if name == 'text.substitution':
-            self.append(text)
-            return self.parent
-        return self
-        
-    def sub(self, match):
-        if isinstance(self.children[0], Condition):
-            print dir(match[2])
-            return str(self.children[0]) + match[self.children[0].index]
-        else:
-            return str(self)
-
-class Condition(Node):
-    def open(self, name, text):
-        node = self
-        print "open", name, text
-        return node
-    
-    def close(self, name, text):
-        print "close", name, text
-        if name == 'meta.structure.condition.regexp':
-            return self.parent
         elif name == 'string.regexp.condition':
-            self.index = int(text)
+            self.condition = int(text)
         elif name == 'text.condition':
-            self.append(text)
+            self.format = text
         return self
+    
+    def transform(self, text):
+        if self.condition != None:
+            return self.pattern.sub(lambda match: self.format.replace("$%d" % self.condition, match[self.condition]), text)
+        else:
+            return self.pattern.sub(self.format, text)
         
 class Shell(Node):
     def open(self, name, text):
@@ -359,8 +321,10 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
         self.index = end
 
     def new_line(self, line):
-        if self.current != None and self.index != len(self.current):
-            self.node.append(self.current[self.index:len(self.current)] + "\n")
+        if self.current != None:
+            if self.index != len(self.current):
+                self.node.append(self.current[self.index:len(self.current)])
+            self.node.append("\\n")
         self.current = line
         self.index = 0
         
