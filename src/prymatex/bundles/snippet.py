@@ -13,6 +13,11 @@ from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor, PMXDebugSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
 
+import ponyguruma as onig
+from ponyguruma.constants import OPTION_CAPTURE_GROUP
+
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
+
 SNIPPET_SYNTAX = {
  'patterns': [{'match': '\\\\(\\\\|\\$|`)',
                'name': 'constant.character.escape.snippet'},
@@ -81,38 +86,46 @@ SNIPPET_SYNTAX = {
 
 #Snippet nodes
 class Node(object):
-    def __init__(self, name, parent = None):
-        self.name = name
+    def __init__(self, parent = None):
         self.parent = parent
         self.children = []
     
+    def append(self, element):
+        self.children.append(element)
+    
+    def clear(self):
+        self.children = []
+        
+    def __iter__(self):
+        return iter(self.children)
+    
     def __str__(self):
         string = ""
-        for child in self.children:
+        for child in self:
             string += str(child)
         return string
         
     def open(self, name, text):
-        self.children.append(text)
+        self.append(text)
         node = self
         if name == 'meta.structure.tabstop.snippet':
-            node = Tabstop(name, self)
-            self.children.append(node)
+            node = Tabstop(self)
+            self.append(node)
         elif name == 'meta.structure.placeholder.snippet':
-            node = Placeholder(name, self)
-            self.children.append(node)
+            node = Placeholder(self)
+            self.append(node)
         elif name == 'meta.structure.variable.snippet':
-            node = Variable(name, self)
-            self.children.append(node)
+            node = Variable(self)
+            self.append(node)
         elif name == 'meta.structure.transformation.snippet':
-            node = Transformation(name, self)
-            self.children.append(node)
+            node = Transformation(self)
+            self.append(node)
         if node == None:
             print "no puedo con %s" % name
         return node
         
     def close(self, name, text):
-        self.children.append(text)
+        self.append(text)
         return self
 
     def get_nodes_by_type(self, nodetype):
@@ -120,12 +133,22 @@ class Node(object):
         nodes = []
         if isinstance(self, nodetype):
             nodes.append(self)
-        for node in self.children:
+        for node in self:
             if (hasattr(node, 'get_nodes_by_type')):
                 nodes.extend(node.get_nodes_by_type(nodetype))
         return nodes
 
 class Tabstop(Node):
+    def __init__(self, parent = None):
+        super(Tabstop, self).__init__(parent)
+        self.placeholder = None
+        
+    def __str__(self):
+        if self.placeholder != None:
+            return str(self.placeholder)
+        else:
+            return ""
+        
     def open(self, name, text):
         node = self
         return node
@@ -137,27 +160,33 @@ class Tabstop(Node):
             self.index = int(text)
         return self
 
+    def taborder(self, taborder):
+        if self.index in taborder and isinstance(taborder[self.index], Placeholder):
+            self.placeholder = taborder[self.index]
+            self.placeholder.mirrors.append(self)
+        elif self.index not in taborder:
+            taborder[self.index] = self
+        return taborder
+
 class Placeholder(Node):
-    def __init__(self, name, parent = None):
-        super(Placeholder, self).__init__(name, parent)
+    def __init__(self, parent = None):
+        super(Placeholder, self).__init__(parent)
         self.mirrors = []
+        self.transformations = []
 
     def open(self, name, text):
         node = self
         if name == 'meta.structure.tabstop.snippet':
-            self.children.append(text)
-            node = Tabstop(name, self)
-            self.children.append(node)
+            self.append(text)
+            node = Tabstop(self)
+            self.append(node)
         elif name == 'meta.structure.placeholder.snippet':
-            self.children.append(text)
-            node = Placeholder(name, self)
-            self.children.append(node)
-        elif name == 'string.regexp':
-            node = Regexp(name, self)
-            self.children.append(node)
+            self.append(text)
+            node = Placeholder(self)
+            self.append(node)
         elif name == 'string.interpolated.shell.snippet':
-            node = Shell(name, self)
-            self.children.append(node)
+            node = Shell(self)
+            self.append(node)
         return node
 
     def close(self, name, text):
@@ -166,20 +195,36 @@ class Placeholder(Node):
         elif name == 'keyword.placeholder.snippet':
             self.index = int(text)
         elif name == 'string.default':
-            self.children.append(text)
+            self.append(text)
         return self
 
+    def taborder(self, taborder):
+        if self.index in taborder and isinstance(taborder[self.index], Tabstop):
+            self.mirrors.append(taborder[self.index])
+            self.mirrors[-1].placeholder = self
+            taborder[self.index] = self
+        elif self.index in taborder and isinstance(taborder[self.index], Transformation):
+            self.transformations.append(taborder[self.index])
+            self.transformations[-1].placeholder = self
+            taborder[self.index] = self
+        elif self.index not in taborder:
+            taborder[self.index] = self
+        return taborder
+
     def write(self, text):
-        self.children = [text]
-        for mirror in self.mirrors:
-            mirror.write(text)
+        self.clear()
+        self.append(text)
             
 class Transformation(Node):
+    def __init__(self, parent = None):
+        super(Transformation, self).__init__(parent)
+        self.placeholder = None
+    
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
-            node = Regexp(name, self)
-            self.children.append(node)
+            node = Regexp(self)
+            self.append(node)
         return node
         
     def close(self, name, text):
@@ -188,13 +233,21 @@ class Transformation(Node):
         elif name == 'keyword.transformation.snippet':
             self.index = int(text)
         return self
+    
+    def taborder(self, taborder):
+        if self.index in taborder and isinstance(taborder[self.index], Placeholder):
+            self.placeholder = taborder[self.index]
+            self.placeholder.append(self)
+        elif self.index not in taborder:
+            taborder[self.index] = self
+        return taborder        
         
 class Variable(Node):
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
-            node = Regexp(name, self)
-            self.children.append(node)
+            node = Regexp(self)
+            self.append(node)
         return node
         
     def close(self, name, text):
@@ -203,37 +256,40 @@ class Variable(Node):
         elif name == 'string.env.snippet':
             self.string = text
         elif name == 'string.default':
-            self.children.append(text)
+            self.append(text)
         return self
 
 class Regexp(Node):
-    def __init__(self, name, parent = None):
-        super(Regexp, self).__init__(name, parent)
+    def __init__(self, parent = None):
+        super(Regexp, self).__init__(parent)
         self.pattern = ""
         self.options = ""
         
     def open(self, name, text):
         node = self
         if name == 'text.substitution':
-            self.pattern = text
+            self.pattern = onig_compile(text)
         return node
         
     def close(self, name, text):
         if name == 'string.regexp':
             return self.parent
         elif name == 'text.substitution':
-            self.children.append(text)
+            self.append(text)
         elif name == 'string.regexp.options':
             self.options = text
         return self
-
+    
+    def transform(self, text):
+        return self.pattern.sub(lambda match: self.children[0], text)
+         
 class Shell(Node):
     def open(self, name, text):
         node = self
         return node
         
     def close(self, name, text):
-        self.children.append(text)
+        self.append(text)
         if name == 'string.interpolated.shell.snippet':
             return self.parent
         return self
@@ -242,6 +298,7 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
     def __init__(self):
         self.current = None
         self.node = Node("root")
+        self.taborder = {}
 
     def open_tag(self, name, start):
         token = self.current[self.index:start]
@@ -251,11 +308,13 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
     def close_tag(self, name, end):
         token = self.current[self.index:end]
         self.node = self.node.close(name, token)
+        if hasattr(self.node, 'taborder'):
+            self.taborder = self.node.taborder(self.taborder)
         self.index = end
 
     def new_line(self, line):
         if self.current != None and self.index != len(self.current):
-            self.node.children.append(self.current[self.index:len(self.current)] + "\n")
+            self.node.append(self.current[self.index:len(self.current)] + "\n")
         self.current = line
         self.index = 0
         
@@ -279,18 +338,10 @@ class PMXSnippet(PMXBundleItem):
         processor = PMXSnippetProcessor()
         self.parser.parse(self.content, processor)
         self.node = processor.node
-        self.resolve()
+        self.taborder = processor.taborder
     
-    def resolve(self):
-        tabstops = map(lambda t: (t.index, t), self.node.get_nodes_by_type(Tabstop))
-        taborder = placeholders = map(lambda p: (p.index, p), self.node.get_nodes_by_type(Placeholder))
-        for po, placeholder in placeholders:
-            for to, tabstop in tabstops:
-                if po == to:
-                    placeholder.mirrors.append(tabstop)
-        others = set(map(lambda (o, t): o, tabstops)).difference(map(lambda (o, t): o, taborder))
-        taborder.extend(filter(lambda (o, t): o in others, tabstops))
-        self.taborder = map(lambda (order, node): node, sorted(taborder, key = lambda (order, _): order))
+    def write(self, taborder, text):
+        self.taborder[taborder].write(text)
 
     def __str__(self):
         return str(self.node)

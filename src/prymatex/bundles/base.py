@@ -207,7 +207,7 @@ def test_snippets():
         if snippet.name == "New Class":
             print snippet.content
             snippet.compile()
-            snippet.taborder[4].write("Pepe")
+            snippet.write(1, "Persona")
             print snippet
             
 def print_snippet_syntax():

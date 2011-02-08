@@ -5,7 +5,8 @@ class PMXSideArea(QWidget):
     def __init__(self, editor):
         super(PMXSideArea, self).__init__(editor)
         self.editor = editor
-        print qApp.instance().logger
+        self.foreground = Qt.black
+        self.background = Qt.white
     
     def sizeHint(self):
         return QSize(self.editor.lineNumberAreaWidth(), 0)
@@ -13,10 +14,9 @@ class PMXSideArea(QWidget):
     def paintEvent(self, event):
         self.lineNumberAreaPaintEvent(event)
         
-    
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self)
-        painter.fillRect(event.rect(), Qt.white)
+        painter.fillRect(event.rect(), self.background)
         
         block = self.editor.firstVisibleBlock()
         current_block = self.editor.document().findBlock(self.editor.textCursor().position())
@@ -28,7 +28,7 @@ class PMXSideArea(QWidget):
         while block.isValid() and top < event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(blockNumber + 1)
-                painter.setPen(Qt.lightGray)
+                painter.setPen(self.foreground)
                 font = painter.font()
                 font.setBold(block == current_block)
                 painter.setFont(font)
