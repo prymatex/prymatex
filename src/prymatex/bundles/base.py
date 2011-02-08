@@ -202,17 +202,17 @@ def test_preferences():
     print PMXPreference.getSettings(bundle.getPreferences('source.python'))
 
 def test_snippets():
-    bundle = PMXBundle.getBundleByName('Python')
+    bundle = PMXBundle.getBundleByName('C')
     for snippet in bundle.snippets:
-        if snippet.name == 'New Class':
             print snippet.content
-        #if snippet.name == 'New Function':
             snippet.compile()
+            print snippet
+            print "-"*20
             
 def print_snippet_syntax():
     bundle = PMXBundle.getBundleByName('Bundle Development')
     syntax = bundle.getSyntaxByName("Snippet")
-    print syntax.hash
+    pprint(syntax.hash)
     
 def test_syntaxes():
     from prymatex.bundles.syntax import PMXSyntax
@@ -224,4 +224,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    test_syntaxes()
+    test_snippets()

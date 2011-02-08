@@ -81,10 +81,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         theme = PMXTheme.getThemeByName(self.theme_name)
         self.syntax_processor.formatter = theme
         style = theme.getStyle()
+        foreground = style.getQColor('foreground')
+        background = style.getQColor('background')
+        selection = style.getQColor('selection')
+        invisibles = style.getQColor('invisibles')
         palette = self.palette()
-        palette.setColor(QPalette.Active, QPalette.Text, style.getQColor('foreground'))
-        palette.setColor(QPalette.Active, QPalette.Base, style.getQColor('background'))
+        palette.setColor(QPalette.Active, QPalette.Text, foreground)
+        palette.setColor(QPalette.Active, QPalette.Base, background)
+        palette.setColor(QPalette.Active, QPalette.Highlight, selection)
+        palette.setColor(QPalette.Active, QPalette.AlternateBase, invisibles)
         self.setPalette(palette)
+        self.side_area.foreground = foreground 
+        self.side_area.background = background
+        self.line_highlight = style.getQColor('lineHighlight')
+        self.highlightCurrentLine()
         
     theme_name = Setting(default = 'iPlastic', fset = setTheme)
 
@@ -97,9 +107,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.syntax_processor = PMXSyntaxProcessor(self.document())
         
         # TODO: Load from config
-        option = QTextOption()
-        option.setFlags(QTextOption.ShowTabsAndSpaces)
-        self.document().setDefaultTextOption(option)
+        #option = QTextOption()
+        #option.setFlags(QTextOption.ShowTabsAndSpaces)
+        #self.document().setDefaultTextOption(option)
 
         # Actions performed when a key is pressed
         self.character_actions = {}
@@ -167,7 +177,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def setupUi(self):
         
         self.updateLineNumberAreaWidth(0)
-        self.highlightCurrentLine()
         
         #Connects
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
@@ -218,10 +227,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         extraSelections = []
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
-            #e8f2fe
-            color = QColor(232, 242, 25)
-            lineColor = QColor(color).lighter(180)
-            selection.format.setBackground(lineColor);
+            selection.format.setBackground(self.line_highlight);
             selection.format.setProperty(QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
