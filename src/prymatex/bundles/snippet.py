@@ -15,6 +15,7 @@ from prymatex.bundles.syntax import PMXSyntax
 
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
+import ipdb
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
@@ -60,10 +61,10 @@ SNIPPET_SYNTAX = {
               {'begin': '`',
                'end': '`',
                'name': 'string.interpolated.shell.snippet'}],
- 'repository': {'condition': {'begin': '\\(\\?\\d:',
-                              'beginCaptures': {'0': {'name': 'string.regexp.condition'}},
+ 'repository': {'condition': {'begin': '\\(\\?(\\d):',
+                              'beginCaptures': {'1': {'name': 'string.regexp.condition'}},
+                              'contentName': 'text.condition',
                               'end': '\\)',
-                              'endCaptures': {'0': {'name': 'string.regexp.condition'}},
                               'name': 'meta.structure.condition.regexp',
                               'patterns': [{'include': '#replacements'},
                                            {'begin': ':',
@@ -104,7 +105,13 @@ class Node(object):
         for child in self:
             string += str(child)
         return string
-        
+    
+    def __contain__(self, element):
+        if isinstance(element, str):
+            return false
+        else:
+            return element in self.children
+    
     def open(self, name, text):
         self.append(text)
         node = self
@@ -160,19 +167,17 @@ class Tabstop(Node):
             self.index = int(text)
         return self
 
-    def taborder(self, taborder):
-        if self.index in taborder and isinstance(taborder[self.index], Placeholder):
-            self.placeholder = taborder[self.index]
-            self.placeholder.mirrors.append(self)
-        elif self.index not in taborder:
-            taborder[self.index] = self
-        return taborder
+    def taborder(self, container):
+        if type(container) == list:
+            container.append(self)
+        else:
+            self.placeholder = container
+        return container
 
 class Placeholder(Node):
     def __init__(self, parent = None):
         super(Placeholder, self).__init__(parent)
         self.mirrors = []
-        self.transformations = []
 
     def open(self, name, text):
         node = self
@@ -198,18 +203,11 @@ class Placeholder(Node):
             self.append(text)
         return self
 
-    def taborder(self, taborder):
-        if self.index in taborder and isinstance(taborder[self.index], Tabstop):
-            self.mirrors.append(taborder[self.index])
-            self.mirrors[-1].placeholder = self
-            taborder[self.index] = self
-        elif self.index in taborder and isinstance(taborder[self.index], Transformation):
-            self.transformations.append(taborder[self.index])
-            self.transformations[-1].placeholder = self
-            taborder[self.index] = self
-        elif self.index not in taborder:
-            taborder[self.index] = self
-        return taborder
+    def taborder(self, container):
+        if type(container) == list and container:
+            for element in container:
+                element.placeholder = self
+        return self
 
     def write(self, text):
         self.clear()
@@ -219,6 +217,12 @@ class Transformation(Node):
     def __init__(self, parent = None):
         super(Transformation, self).__init__(parent)
         self.placeholder = None
+    
+    def __str__(self):
+        text = ""
+        if self.placeholder != None:
+            text = str(self.placeholder)
+        return self.children[0].transform(text)
     
     def open(self, name, text):
         node = self
@@ -234,13 +238,12 @@ class Transformation(Node):
             self.index = int(text)
         return self
     
-    def taborder(self, taborder):
-        if self.index in taborder and isinstance(taborder[self.index], Placeholder):
-            self.placeholder = taborder[self.index]
-            self.placeholder.append(self)
-        elif self.index not in taborder:
-            taborder[self.index] = self
-        return taborder        
+    def taborder(self, container):
+        if type(container) == list:
+            container.append(self)
+        else:
+            self.placeholder = container
+        return container
         
 class Variable(Node):
     def open(self, name, text):
@@ -264,25 +267,66 @@ class Regexp(Node):
         super(Regexp, self).__init__(parent)
         self.pattern = ""
         self.options = ""
-        
+
     def open(self, name, text):
         node = self
+        #FIXME: Correct syntax
         if name == 'text.substitution':
-            self.pattern = onig_compile(text)
+            self.pattern = onig_compile(text[:-1])
+            node = Substitution(self)
+            self.append(node)
         return node
-        
+
     def close(self, name, text):
         if name == 'string.regexp':
             return self.parent
-        elif name == 'text.substitution':
-            self.append(text)
         elif name == 'string.regexp.options':
             self.options = text
         return self
     
+    def sub(self, match):
+        return self.children[0].sub(match)
+            
     def transform(self, text):
-        return self.pattern.sub(lambda match: self.children[0], text)
-         
+        return self.pattern.sub(lambda match: self.sub(match), text)
+
+class Substitution(Node):
+    def open(self, name, text):
+        node = self
+        if name == 'meta.structure.condition.regexp':
+            node = Condition(self)
+            self.append(node)
+        return node
+    
+    def close(self, name, text):
+        if name == 'text.substitution':
+            self.append(text)
+            return self.parent
+        return self
+        
+    def sub(self, match):
+        if isinstance(self.children[0], Condition):
+            print dir(match[2])
+            return str(self.children[0]) + match[self.children[0].index]
+        else:
+            return str(self)
+
+class Condition(Node):
+    def open(self, name, text):
+        node = self
+        print "open", name, text
+        return node
+    
+    def close(self, name, text):
+        print "close", name, text
+        if name == 'meta.structure.condition.regexp':
+            return self.parent
+        elif name == 'string.regexp.condition':
+            self.index = int(text)
+        elif name == 'text.condition':
+            self.append(text)
+        return self
+        
 class Shell(Node):
     def open(self, name, text):
         node = self
@@ -308,8 +352,10 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
     def close_tag(self, name, end):
         token = self.current[self.index:end]
         self.node = self.node.close(name, token)
-        if hasattr(self.node, 'taborder'):
-            self.taborder = self.node.taborder(self.taborder)
+        if hasattr(self.node, 'index') and callable(getattr(self.node, 'taborder', None)):
+            container = self.taborder.setdefault(self.node.index, [])
+            if (self.node != container and self.node not in container):
+                self.taborder[self.node.index] = self.node.taborder(container)
         self.index = end
 
     def new_line(self, line):

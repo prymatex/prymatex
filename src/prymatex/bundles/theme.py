@@ -12,7 +12,7 @@ from prymatex.bundles.score import PMXScoreManager
 from prymatex.bundles.qtadapter import buildQTextFormat, buildQColor
 
 '''
-    caret, foreground, selection, invisibles, lineHighlight, gutter, background
+    caret = Cursor, foreground, selection, invisibles, lineHighlight, gutter, background
 '''
 
 class PMXStyle(object):
