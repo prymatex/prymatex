@@ -4,6 +4,12 @@
 '''
     Snippte's module
 '''
+from copy import deepcopy
+import ponyguruma as onig
+from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY
+
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, syntax = SYNTAX_RUBY)
+
 # for run as main
 if __name__ == "__main__":
     import os, sys
@@ -12,11 +18,6 @@ if __name__ == "__main__":
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor, PMXDebugSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
-
-import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY
-
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, syntax = SYNTAX_RUBY)
 
 SNIPPET_SYNTAX = {
  'patterns': [{'match': '\\\\(\\\\|\\$|`)',
@@ -80,13 +81,7 @@ class Node(object):
     def __init__(self, parent = None):
         self.parent = parent
         self.children = []
-    
-    def append(self, element):
-        self.children.append(element)
-    
-    def clear(self):
-        self.children = []
-        
+
     def __iter__(self):
         return iter(self.children)
     
@@ -101,7 +96,29 @@ class Node(object):
             return False
         else:
             return element in self.children
+        
+    def append(self, element):
+        self.children.append(element)
     
+    def clear(self):
+        self.children = []
+    
+    def open(self, name, text):
+        pass
+    def close(self, name, text):
+        pass
+    
+class Snippet(Node):
+    def __deepcopy__(self, memo):
+        node = Snippet(memo["parent"])
+        memo["parent"] = node
+        for child in self.children:
+            if isinstance(child, Node):
+                node.children.append(deepcopy(child, memo))
+            else:
+                node.children.append(child)
+        return node
+        
     def open(self, name, text):
         self.append(text)
         node = self
@@ -125,26 +142,31 @@ class Node(object):
         self.append(text)
         return self
 
-    def get_nodes_by_type(self, nodetype):
-        "Return a list of all nodes (within this node and its nodelist) of the given type"
-        nodes = []
-        if isinstance(self, nodetype):
-            nodes.append(self)
-        for node in self:
-            if (hasattr(node, 'get_nodes_by_type')):
-                nodes.extend(node.get_nodes_by_type(nodetype))
-        return nodes
-
 class Tabstop(Node):
     def __init__(self, parent = None):
         super(Tabstop, self).__init__(parent)
         self.placeholder = None
+        self.index = None
         
     def __str__(self):
         if self.placeholder != None:
             return str(self.placeholder)
         else:
             return ""
+
+    def __deepcopy__(self, memo):
+        node = Tabstop(memo["parent"])
+        memo["parent"] = node
+        for child in self.children:
+            if isinstance(child, Node):
+                node.children.append(deepcopy(child, memo))
+            else:
+                node.children.append(child)
+        node.index = self.index
+        container = memo["taborder"].setdefault(node.index, [])
+        if (node != container and node not in container):
+            memo["taborder"][node.index] = node.taborder(container)
+        return node
         
     def open(self, name, text):
         node = self
@@ -167,8 +189,22 @@ class Tabstop(Node):
 class Placeholder(Node):
     def __init__(self, parent = None):
         super(Placeholder, self).__init__(parent)
-        self.mirrors = []
-
+        self.index = None
+        
+    def __deepcopy__(self, memo):
+        node = Placeholder(memo["parent"])
+        memo["parent"] = node
+        for child in self.children:
+            if isinstance(child, Node):
+                node.children.append(deepcopy(child, memo))
+            else:
+                node.children.append(child)
+        node.index = self.index
+        container = memo["taborder"].setdefault(node.index, [])
+        if (node != container and node not in container):
+            memo["taborder"][node.index] = node.taborder(container)
+        return node
+        
     def open(self, name, text):
         node = self
         if name == 'meta.structure.tabstop.snippet':
@@ -207,13 +243,28 @@ class Transformation(Node):
     def __init__(self, parent = None):
         super(Transformation, self).__init__(parent)
         self.placeholder = None
+        self.index = None
     
     def __str__(self):
         text = ""
         if self.placeholder != None:
             text = str(self.placeholder)
         return "".join(self.children[0].transform(text))
-    
+
+    def __deepcopy__(self, memo):
+        node = Transformation(memo["parent"])
+        memo["parent"] = node
+        for child in self.children:
+            if isinstance(child, Node):
+                node.children.append(deepcopy(child, memo))
+            else:
+                node.children.append(child)
+        node.index = self.index
+        container = memo["taborder"].setdefault(node.index, [])
+        if (node != container and node not in container):
+            memo["taborder"][node.index] = node.taborder(container)
+        return node
+        
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
@@ -236,6 +287,16 @@ class Transformation(Node):
         return container
         
 class Variable(Node):
+    def __deepcopy__(self, memo):
+        node = Variable(memo["parent"])
+        memo["parent"] = node
+        for child in self.children:
+            if isinstance(child, Node):
+                node.children.append(deepcopy(child, memo))
+            else:
+                node.children.append(child)
+        return node
+        
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
@@ -255,14 +316,28 @@ class Variable(Node):
 class Regexp(Node):
     def __init__(self, parent = None):
         super(Regexp, self).__init__(parent)
-        self.pattern = ""
-        self.format = ""
-        self.options = ""
+        self.pattern = None
+        self.format = None
+        self.options = None
         self.condition = None
 
     def __str__(self):
         return "%s/%s/%s" % (self.pattern, self.format, self.options)
 
+    def __deepcopy__(self, memo):
+        node = Regexp(memo["parent"])
+        memo["parent"] = node
+        for child in self.children:
+            if isinstance(child, Node):
+                node.children.append(deepcopy(child, memo))
+            else:
+                node.children.append(child)
+        node.pattern = self.pattern
+        node.format = self.format
+        node.options = self.options
+        node.condition = self.condition
+        return node
+        
     def open(self, name, text):
         node = self
         #FIXME: Correct syntax
@@ -303,7 +378,7 @@ class Shell(Node):
 class PMXSnippetProcessor(PMXSyntaxProcessor):
     def __init__(self):
         self.current = None
-        self.node = Node("root")
+        self.node = Snippet()
         self.taborder = {}
 
     def open_tag(self, name, start):
@@ -341,17 +416,32 @@ class PMXSnippet(PMXBundleItem):
         super(PMXSnippet, self).__init__(hash, name_space)
         for key in [    'content', 'disableAutoIndent', 'inputPattern', 'bundlePath' ]:
             setattr(self, key, hash.pop(key, None))
+        self.snippet = None
+        self.taborder = None
+        
+    def __deepcopy__(self, memo):
+        snippet = PMXSnippet(self.hash, self.name_space)
+        memo["snippet"] = deepcopy(self.snippet, memo)
+        return snippet
     
+    def __str__(self):
+        return str(self.snippet)
+    
+    def clone(self):
+        memo = {"parent": None, "snippet": None, "taborder": {}}
+        new = deepcopy(self, memo)
+        new.snippet = memo["snippet"]
+        new.taborder = memo["taborder"]
+        return new
+        
     def compile(self):
         text = self.content.splitlines()
         processor = PMXDebugSyntaxProcessor()
         processor = PMXSnippetProcessor()
         self.parser.parse(self.content, processor)
-        self.node = processor.node
+        self.snippet = processor.node
         self.taborder = processor.taborder
     
-    def write(self, taborder, text):
-        self.taborder[taborder].write(text)
-
-    def __str__(self):
-        return str(self.node)
+    def write(self, index, text):
+        if index in self.taborder:
+            self.taborder[index].write(text)

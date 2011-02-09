@@ -221,12 +221,21 @@ def test_preferences():
     print PMXPreference.getSettings(bundle.getPreferences('source.python'))
 
 def test_snippets():
-    bundle = PMXBundle.getBundleByName('C')
+    bundle = PMXBundle.getBundleByName('Python')
     for snippet in bundle.snippets:
-            print snippet.content
             snippet.compile()
+            print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
+            print "Origin:"
             print snippet
-            print "-"*20
+            print "Clone:"
+            clon = snippet.clone()
+            clon.write(1, "Foo")
+            clon.write(2, "Bar")
+            clon.write(4, "bar, foo, bar")
+            print clon
+            print "Origin:"
+            print snippet
+            print "-"*30, "\n"
             
 def print_snippet_syntax():
     bundle = PMXBundle.getBundleByName('Bundle Development')
@@ -243,4 +252,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    #test_snippets()
+    test_snippets()
