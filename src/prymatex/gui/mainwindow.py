@@ -67,8 +67,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.center()
         
         # Una vez centrada la ventana caramos los mnues
-        from prymatex.bundles.base import PMXBundle
-        self.add_bundles_to_menu(PMXBundle.BUNDLES)
+        self.addBundlesToMenu()
         
         #self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
@@ -139,29 +138,27 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #raise NotImplementedError("Do we need them?")
         pass
     
-    
-    def add_menu_item(self, parent_menu, item):
+    def addMenuItem(self, parent_menu, item):
         if isinstance(item, PMXMenuNode):
             menu = QMenu(item.name, parent_menu)
             parent_menu.addMenu(menu)
             for _, i in item.iteritems():
-                self.add_menu_item(menu, i)
+                self.addMenuItem(menu, i)
         elif item == PMXMenuNode.MENU_SPACE:
             parent_menu.addSeparator()
-        elif item and item.name:
+        elif item != None and item.name:
             action = QAction(item.name, self)
             parent_menu.addAction(action)
             
-    def add_bundles_to_menu(self, bundles):
-        names = sorted(bundles.keys())
+    def addBundlesToMenu(self):
+        from prymatex.bundles.base import PMXBundle
         #assert isinstance(bundles, TMMenuNode), "No me pasaste bundles"
-        for name in names:
-            menu = QMenu(name, self)
+        for bundle in PMXBundle.BUNDLES.values():
+            menu = QMenu(bundle.name, self)
             self.menuBundles.addMenu(menu)
-            bundle = bundles[name]
             if bundle.mainMenu != None:
                 for _, item in bundle.mainMenu.iteritems():
-                    self.add_menu_item(menu, item)  
+                    self.addMenuItem(menu, item)  
                 
     def on_actionQuit_triggered(self):
         QApplication.quit()

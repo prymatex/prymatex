@@ -6,7 +6,6 @@
 '''
 from copy import deepcopy
 import ponyguruma as onig
-import ipdb
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, syntax = SYNTAX_RUBY)
@@ -113,7 +112,6 @@ class Node(object):
             if child == element:
                 break;
             if '\\n' in child:
-                ipdb.set_trace()
                 index = ( 0, index[1] + 1 )
             else:
                 index = ( index[0] + len(child), index[1] )
