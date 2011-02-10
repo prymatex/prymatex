@@ -6,6 +6,7 @@
 '''
 from copy import deepcopy
 import ponyguruma as onig
+import ipdb
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, syntax = SYNTAX_RUBY)
@@ -96,15 +97,36 @@ class Node(object):
             return False
         else:
             return element in self.children
-        
+    
+    def __len__(self):
+        return reduce(lambda x, y: x + y, map(lambda e: len(e), self.children), 0)
+    
     def append(self, element):
         self.children.append(element)
     
     def clear(self):
         self.children = []
     
+    def position(self, element):
+        index = (0, 0)
+        for child in self.children:
+            if child == element:
+                break;
+            if '\\n' in child:
+                ipdb.set_trace()
+                index = ( 0, index[1] + 1 )
+            else:
+                index = ( index[0] + len(child), index[1] )
+        return index
+    
+    def resolve(self, context):
+        for child in self.children:
+            if hasattr(child, 'resolve'):
+                child.resolve(context)
+
     def open(self, name, text):
         pass
+
     def close(self, name, text):
         pass
     
@@ -265,6 +287,9 @@ class Transformation(Node):
             memo["taborder"][node.index] = node.taborder(container)
         return node
         
+    def __len__(self):
+        return len(str(self))
+    
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
@@ -287,6 +312,10 @@ class Transformation(Node):
         return container
         
 class Variable(Node):
+    def __init__(self, parent = None):
+        super(Variable, self).__init__(parent)
+        self.env = None
+
     def __deepcopy__(self, memo):
         node = Variable(memo["parent"])
         memo["parent"] = node
@@ -308,7 +337,7 @@ class Variable(Node):
         if name == 'meta.structure.variable.snippet':
             return self.parent
         elif name == 'string.env.snippet':
-            self.string = text
+            self.env = text
         elif name == 'string.default':
             self.append(text)
         return self
@@ -418,6 +447,7 @@ class PMXSnippet(PMXBundleItem):
             setattr(self, key, hash.pop(key, None))
         self.snippet = None
         self.taborder = None
+        self.index = 1
         
     def __deepcopy__(self, memo):
         snippet = PMXSnippet(self.hash, self.name_space)
@@ -427,13 +457,42 @@ class PMXSnippet(PMXBundleItem):
     def __str__(self):
         return str(self.snippet)
     
+    def __len__(self):
+        return len(self.snippet)
+    
+    def current(self):
+        if self.index > len(self.taborder) - 1:
+            return 0 in self.taborder and self.taborder[0] or None
+        else:
+            return self.taborder[self.index]
+        
+    def next(self):
+        if self.index >= len(self.taborder) - 1:
+            return 0 in self.taborder and self.taborder[0] or None
+        else:
+            self.index += 1
+            return self.taborder[self.index]
+        
+    def previous(self):
+        if self.index < 1:
+            return self.taborder[1]
+        else:
+            self.index -= 1
+            return self.taborder[self.index]
+    
+    def position(self, tabstop):
+        return self.snippet.position(tabstop)
+        
     def clone(self):
         memo = {"parent": None, "snippet": None, "taborder": {}}
         new = deepcopy(self, memo)
         new.snippet = memo["snippet"]
         new.taborder = memo["taborder"]
         return new
-        
+    
+    def resolve(self, context):
+        self.snippet.resolve(context)
+    
     def compile(self):
         text = self.content.splitlines()
         processor = PMXDebugSyntaxProcessor()

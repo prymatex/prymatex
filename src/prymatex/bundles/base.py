@@ -223,17 +223,18 @@ def test_preferences():
 def test_snippets():
     bundle = PMXBundle.getBundleByName('Python')
     for snippet in bundle.snippets:
+        if snippet.name == "New Class":
             snippet.compile()
             print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
-            print "Origin:"
+            print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
             print snippet
-            print "Clone:"
             clon = snippet.clone()
             clon.write(1, "Foo")
             clon.write(2, "Bar")
             clon.write(4, "bar, foo, bar")
+            print "Clone: ", len(clon), clon.next(), clon.position(clon.current())
             print clon
-            print "Origin:"
+            print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
             print snippet
             print "-"*30, "\n"
             
