@@ -293,8 +293,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         key = key_event.key()
         character = key < 255 and chr(key) or None
         cursor = self.textCursor()
-        x = cursor.blockNumber()
-        y = cursor.columnNumber()
+#        x = cursor.blockNumber()
+#        y = cursor.columnNumber()
         doc = self.document()
         text = unicode(cursor.block().text())
         
@@ -338,21 +338,21 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                     self.setSyntax(syntax)
                     
             if "decreaseIndentPattern" in preferences and preferences["decreaseIndentPattern"].match(text):
-                print "decreaseIndentPattern"
+                logger.debug("decreaseIndentPattern")
                 self.decreaseIndent(indentation)
                 indentation = self.identationWhitespace(text)
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
             elif "increaseIndentPattern" in preferences and preferences["increaseIndentPattern"].match(text):
-                print "increaseIndentPattern"
+                logger.debug("increaseIndentPattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.increaseIndent(indentation)
             elif "indentNextLinePattern" in preferences and preferences["indentNextLinePattern"].match(text):
-                print "indentNextLinePattern"
+                logger.debug("indentNextLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
             elif "unIndentedLinePattern" in preferences and preferences["unIndentedLinePattern"].match(text):
-                print "unIndentedLinePattern"
+                logger.debug("unIndentedLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
@@ -361,6 +361,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         # Handle smart typing pairs
         elif character in smart_typing_test:
             self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
+        elif character == '%':
+            snippets = PMXBundle.getTabTriggerItem("class", scope)
+            print snippets
+            if snippets:
+                snippet = snippets[0]
+                snippet.compile()
+                cursor.beginEditBlock()
+                cursor.insertText(str(snippet))
+                cursor.endEditBlock()
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
     

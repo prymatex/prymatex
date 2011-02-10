@@ -426,7 +426,7 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
         if self.current != None:
             if self.index != len(self.current):
                 self.node.append(self.current[self.index:len(self.current)])
-            self.node.append("\\n")
+            self.node.append("\n")
         self.current = line
         self.index = 0
         
