@@ -108,8 +108,7 @@ class PMXSyntaxNode(object):
     def match_end(self, string, match, position):
         regstring = self.end[:]
         def g_match(mobj):
-            print "g_match"
-            index = mobj.group(0)
+            index = int(mobj.group(0)[1:])
             return match.group(index)
         def d_match(mobj):
             print "d_match"

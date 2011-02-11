@@ -65,9 +65,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     It holds the highlighter and the folding
     
     '''
-
-    PAIRS_MATCH_REMOVE = ("()", "{}", "[]", "''", '""', )
     
+    PATTERNS = { "WHITESPACE": re.compile(r'^(?P<whitespace>\s+)', re.UNICODE),
+                 "LASTWORLD": re.compile("^.*\s(?P<world>\w+)")}
+
     #-----------------------------------
     # Settings
     #-----------------------------------
@@ -290,18 +291,22 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         stored in key_event.key()
         '''
         key = key_event.key()
+        character = key < 255 and chr(key) or None
         cursor = self.textCursor()
+#        x = cursor.blockNumber()
+#        y = cursor.columnNumber()
         doc = self.document()
-        text = cursor.block().text()
+        text = unicode(cursor.block().text())
         
         scope = self.getCurrentScope()
         preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
+        smart_typing_test = map(lambda pair: pair[0], preferences["smartTypingPairs"])
+        indentation = self.identationWhitespace(text)
         
-        print preferences
         #logger.debug(debug_key(key_event))
 
         if key == Qt.Key_Tab:
-            self.indent()
+            self.indent(self.soft_tabs and ' ' * self.tab_length or '\t')
         elif key == Qt.Key_Backtab:
             self.unindent()
         elif key == Qt.Key_Backspace:
@@ -314,7 +319,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                     text_arround = "%s%s" % (cursor_left.selectedText(),
                                                 cursor_right.selectedText())
 
-                    if text_arround in self.PAIRS_MATCH_REMOVE:
+                    if text_arround in map(lambda pair: "%s%s" % (pair[0], pair[1]), preferences["smartTypingPairs"]):
                         cursor_left.removeSelectedText()
                         cursor_right.removeSelectedText()
                     else:
@@ -328,61 +333,70 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         elif key == Qt.Key_Return:
             if doc.blockCount() == 1:
                 #Esto es un enter y es el primer blocke que tiene el documento
-                text = doc.firstBlock().text()
-                syntax = PMXSyntax.findSyntaxByFirstLine(unicode(text))
+                syntax = PMXSyntax.findSyntaxByFirstLine(text)
                 if syntax != None:
                     self.setSyntax(syntax)
-
-            #TODO: Manage thrugh config
-            if True:
-                if cursor.atBlockStart():
-                    # Do not indent
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
-                else:
-                    cursor.movePosition(QTextCursor.StartOfLine, QTextCursor.KeepAnchor, 1)
-                    text = self.textWhitespace( cursor )
-                    QPlainTextEdit.keyPressEvent(self, key_event)
-                    if text:
-                        self.textCursor().insertText(text)
+                    
+            if "decreaseIndentPattern" in preferences and preferences["decreaseIndentPattern"].match(text):
+                logger.debug("decreaseIndentPattern")
+                self.decreaseIndent(indentation)
+                indentation = self.identationWhitespace(text)
+                QPlainTextEdit.keyPressEvent(self, key_event)
+                self.indent(indentation)
+            elif "increaseIndentPattern" in preferences and preferences["increaseIndentPattern"].match(text):
+                logger.debug("increaseIndentPattern")
+                QPlainTextEdit.keyPressEvent(self, key_event)
+                self.increaseIndent(indentation)
+            elif "indentNextLinePattern" in preferences and preferences["indentNextLinePattern"].match(text):
+                logger.debug("indentNextLinePattern")
+                QPlainTextEdit.keyPressEvent(self, key_event)
+                self.indent(indentation)
+            elif "unIndentedLinePattern" in preferences and preferences["unIndentedLinePattern"].match(text):
+                logger.debug("unIndentedLinePattern")
+                QPlainTextEdit.keyPressEvent(self, key_event)
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
+                self.indent(indentation)
 
-        # Handle special keys such as ", (, [ and {
-        elif key < 255 and chr(key) in self.character_actions:
-            key_chr = chr(key)
-            self.perform_character_action( self.character_actions[ key_chr ] )
+        # Handle smart typing pairs
+        elif character in smart_typing_test:
+            self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
+        elif character == '%':
+            snippets = PMXBundle.getTabTriggerItem("class", scope)
+            print snippets
+            if snippets:
+                snippet = snippets[0]
+                snippet.compile()
+                cursor.beginEditBlock()
+                cursor.insertText(str(snippet))
+                cursor.endEditBlock()
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
     
-    def perform_character_action(self, substition):
+    def performCharacterAction(self, pair):
         '''
         Substitutions when some characters are typed.
         These substitutions are held in a dictionary
         '''
-        try:
-            text_start, text_end = substition.split('${selection}')
-        except:
-            print "Bad subsitution for %s" % subsitution
-            return
         cursor = self.textCursor()
         cursor.beginEditBlock()
         if cursor.hasSelection():
             text = cursor.selectedText()
             cursor.beginEditBlock()
-            cursor.insertText(text_start)
+            cursor.insertText(pair[0])
             cursor.insertText(text)
             cursor.endEditBlock()
 
             cursor.beginEditBlock()
-            cursor.insertText(text_end)
+            cursor.insertText(pair[1])
             cursor.endEditBlock()
         else:
             cursor.beginEditBlock()
-            cursor.insertText(text_start)
+            cursor.insertText(pair[0])
             cursor.endEditBlock()
             
             cursor.beginEditBlock()
-            cursor.insertText(text_end)
+            cursor.insertText(pair[1])
             cursor.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
             cursor.endEditBlock()
             self.setTextCursor(cursor)
@@ -392,28 +406,29 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Text Indentation
     #===========================================================================
     
-    WHITESPACE_RE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)    
     @classmethod
-    def textWhitespace(cls, text):
+    def identationWhitespace(cls, text):
         '''
         Gets text whitespace
         @param text: Text, QTextCursor o QTextBlock instance
         @return: The text whitespace
         '''
-        if isinstance(text, QTextCursor):
-            text = text.block().text()
-        elif isinstance(text, QTextBlock):
-            text = text.text()
-        match = cls.WHITESPACE_RE.match(unicode(text))
+        match = cls.PATTERNS["WHITESPACE"].match(text)
         try:
             ws = match.group('whitespace')
             return ws
         except AttributeError:
             return ''
+    
+    def increaseIndent(self, indentation):
+        self.indent(indentation + (self.soft_tabs and ' ' * self.tab_length or '\t'))
+    
+    def decreaseIndent(self, identation):
+        self.unindent()
         
     # TODO: Word wrapping fix
     # TODO: Correct whitespace mix
-    def indent(self):
+    def indent(self, indentation):
         '''
         Indents text, it take cares of block selections.
         '''
@@ -424,28 +439,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
         new_cursor.movePosition(QTextCursor.StartOfBlock)
         for _i in range(block_count):
-
-            # If the text is not inserted
-            if self.indent_text == '\t':
-                indent_text = '\t'
-            else:
-                curr_indent = self.textWhitespace( new_cursor )
-                
-                if not len(curr_indent):
-                    # No indentation yet, so insert all chars
-                                    
-                    indent_text = self.indent_text
-                else:
-                    if self.soft_tabs:
-                        # How many characters left?
-                        n = self.tab_length - (len(curr_indent) % self.tab_length)
-                        indent_text = n * ' '
-                    else:
-                        indent_text = self.indent_text
-                        
-            new_cursor.insertText(indent_text)
+            new_cursor.insertText(indentation)
             new_cursor.movePosition(QTextCursor.NextBlock)
-            
         self.setTextCursor(cursor)
         cursor.endEditBlock()
 
@@ -472,7 +467,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if not self.can_unindent():
             return
         block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
-        print "<<< Unindent (%d blocks)" % block_count
         cursor = self.textCursor()
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)

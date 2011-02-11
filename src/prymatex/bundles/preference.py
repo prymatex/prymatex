@@ -42,7 +42,7 @@ class PMXPreference(PMXBundleItem):
         super(PMXPreference, self).__init__(hash, name_space)
         for key in [ 'settings' ]:
             if key == 'settings':
-                setattr(self, key, PMXSetting(hash.pop(key)))
+                setattr(self, key, PMXSetting(hash.pop(key, {})))
 
     @staticmethod
     def buildSettings(preferences):

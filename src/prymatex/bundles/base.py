@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, plistlib
+import os, re, plistlib
 from glob import glob
 from copy import deepcopy
 from xml.parsers.expat import ExpatError
@@ -18,6 +18,15 @@ from prymatex.bundles.score import PMXScoreManager
     http://blog.macromates.com/2005/introduction-to-scopes/
     http://manual.macromates.com/en/scope_selectors.html
 '''
+
+RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                 u'|' + \
+                 u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                  (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
+
+RE_XML_ILLEGAL = re.compile(RE_XML_ILLEGAL)
 
 class PMXMenuNode(object):
     MENU_SPACE = '-' * 36
@@ -124,13 +133,23 @@ class PMXBundle(object):
             data = plistlib.readPlist(info_file)
             bundle = PMXBundle(data)
         except Exception, e:
-            print "Error en bundle %s (%s)" % (info_file, e)
+            print "Error in bundle %s (%s)" % (info_file, e)
             
         for name, pattern, klass in elements:
             files = glob(os.path.join(path, pattern))
             for sf in files:
                 try:
                     data = plistlib.readPlist(sf)
+                except Exception, e:
+                    data = open(sf).read()
+                    for match in RE_XML_ILLEGAL.finditer(data):
+                        data = data[:match.start()] + "?" + data[match.end():]
+                    try:
+                        data = plistlib.readPlistFromString(data)
+                    except ExpatError, e:
+                        print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
+                        continue;
+                try:
                     item = klass(data, name_space)
                     method = getattr(bundle, "add" + name, None)
                     if method != None:
@@ -202,12 +221,22 @@ def test_preferences():
     print PMXPreference.getSettings(bundle.getPreferences('source.python'))
 
 def test_snippets():
-    bundle = PMXBundle.getBundleByName('C')
+    bundle = PMXBundle.getBundleByName('Python')
     for snippet in bundle.snippets:
-            print snippet.content
+        if snippet.name == "New Class":
             snippet.compile()
+            print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
+            print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
             print snippet
-            print "-"*20
+            clon = snippet.clone()
+            clon.write(1, "Foo")
+            clon.write(2, "Bar")
+            clon.write(4, "bar, foo, bar")
+            print "Clone: ", len(clon), clon.next(), clon.position(clon.current())
+            print clon
+            print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
+            print snippet
+            print "-"*30, "\n"
             
 def print_snippet_syntax():
     bundle = PMXBundle.getBundleByName('Bundle Development')
