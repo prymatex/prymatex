@@ -1,12 +1,18 @@
 from PyQt4.QtGui import QWidget, QPainter, qApp
 from PyQt4.QtCore import Qt, QSize
+from PyQt4.Qt import QColor
+from prymatex.core.config import Setting
 
 class PMXSideArea(QWidget):
+    foreground = Setting(default = QColor(170, 170, 170))
+    background = Setting(default = QColor(227, 227, 227))
+    
     def __init__(self, editor):
         super(PMXSideArea, self).__init__(editor)
         self.editor = editor
-        self.foreground = Qt.black
-        self.background = Qt.white
+    
+    class Meta:
+        setting = "editor.sidebar"
     
     def sizeHint(self):
         return QSize(self.editor.lineNumberAreaWidth(), 0)

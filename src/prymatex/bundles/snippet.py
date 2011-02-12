@@ -101,6 +101,8 @@ class Node(object):
         return reduce(lambda x, y: x + y, map(lambda e: len(e), self.children), 0)
     
     def append(self, element):
+        if type(element) == str:
+            element = element.replace('\\n', '\n').replace('\\t', '\t')
         self.children.append(element)
     
     def clear(self):
@@ -111,7 +113,7 @@ class Node(object):
         for child in self.children:
             if child == element:
                 break;
-            if '\\n' in child:
+            if '\n' in child:
                 index = ( 0, index[1] + 1 )
             else:
                 index = ( index[0] + len(child), index[1] )
@@ -134,9 +136,9 @@ class Snippet(Node):
         memo["parent"] = node
         for child in self.children:
             if isinstance(child, Node):
-                node.children.append(deepcopy(child, memo))
+                node.append(deepcopy(child, memo))
             else:
-                node.children.append(child)
+                node.append(child)
         return node
         
     def open(self, name, text):
@@ -179,9 +181,9 @@ class Tabstop(Node):
         memo["parent"] = node
         for child in self.children:
             if isinstance(child, Node):
-                node.children.append(deepcopy(child, memo))
+                node.append(deepcopy(child, memo))
             else:
-                node.children.append(child)
+                node.append(child)
         node.index = self.index
         container = memo["taborder"].setdefault(node.index, [])
         if (node != container and node not in container):
@@ -216,9 +218,9 @@ class Placeholder(Node):
         memo["parent"] = node
         for child in self.children:
             if isinstance(child, Node):
-                node.children.append(deepcopy(child, memo))
+                node.append(deepcopy(child, memo))
             else:
-                node.children.append(child)
+                node.append(child)
         node.index = self.index
         container = memo["taborder"].setdefault(node.index, [])
         if (node != container and node not in container):
@@ -276,9 +278,9 @@ class Transformation(Node):
         memo["parent"] = node
         for child in self.children:
             if isinstance(child, Node):
-                node.children.append(deepcopy(child, memo))
+                node.append(deepcopy(child, memo))
             else:
-                node.children.append(child)
+                node.append(child)
         node.index = self.index
         container = memo["taborder"].setdefault(node.index, [])
         if (node != container and node not in container):
@@ -319,9 +321,9 @@ class Variable(Node):
         memo["parent"] = node
         for child in self.children:
             if isinstance(child, Node):
-                node.children.append(deepcopy(child, memo))
+                node.append(deepcopy(child, memo))
             else:
-                node.children.append(child)
+                node.append(child)
         return node
         
     def open(self, name, text):
@@ -356,9 +358,9 @@ class Regexp(Node):
         memo["parent"] = node
         for child in self.children:
             if isinstance(child, Node):
-                node.children.append(deepcopy(child, memo))
+                node.append(deepcopy(child, memo))
             else:
-                node.children.append(child)
+                node.append(child)
         node.pattern = self.pattern
         node.format = self.format
         node.options = self.options
@@ -376,13 +378,13 @@ class Regexp(Node):
         if name == 'string.regexp':
             return self.parent
         elif name == 'string.regexp.format' and text:
-            self.format = text
+            self.format = text.replace('\\n', '\n').replace('\\t', '\t')
         elif name == 'string.regexp.options':
             self.options = text
         elif name == 'string.regexp.condition':
             self.condition = int(text)
         elif name == 'text.condition':
-            self.format = text
+            self.format = text.replace('\\n', '\n').replace('\\t', '\t')
         return self
     
     def transform(self, text):
