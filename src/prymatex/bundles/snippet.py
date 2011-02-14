@@ -4,11 +4,13 @@
 '''
     Snippte's module
 '''
+import os, stat, tempfile
 from copy import deepcopy
+from subprocess import Popen, PIPE, STDOUT
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY
 
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, syntax = SYNTAX_RUBY)
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
 # for run as main
 if __name__ == "__main__":
@@ -39,8 +41,7 @@ SNIPPET_SYNTAX = {
                'contentName': 'string.regexp',
                'end': '\\}',
                'name': 'meta.structure.transformation.snippet',
-               'patterns': [{'include': '#escaped_char'},
-                            {'include': '#substitution'}]},
+               'patterns': [{'include': '#substitution'}]},
               # Variables 
               {'match': '\\$([a-zA-Z_][a-zA-Z0-9_]*)',
                'captures': {'1': {'name': 'string.env.snippet'}},
@@ -55,25 +56,22 @@ SNIPPET_SYNTAX = {
                'beginCaptures': {'1': {'name': 'string.env.snippet'}},
                'contentName': 'string.regexp',
                'end': '\\}',
-               'name': 'meta.structure.substitution.snippet',
-               'patterns': [{'include': '#escaped_char'},
-                            {'include': '#substitution'}]},
+               'name': 'meta.structure.variable.snippet',
+               'patterns': [{'include': '#substitution'}]},
               {'begin': '`',
                'end': '`',
+               'contentName': 'string.script',
                'name': 'string.interpolated.shell.snippet'}],
  'repository': {'condition': {'begin': '\\(\\?(\\d):',
                               'beginCaptures': {'1': {'name': 'string.regexp.condition'}},
                               'contentName': 'text.condition',
                               'end': '\\)',
                               'name': 'meta.structure.condition.regexp'},
-                'escaped_char': {'match': '\\\\[/\\\\]',
-                                 'name': 'constant.character.escape.regex'},
                 'substitution': {'begin': '/',
                                  'contentName': 'string.regexp.format',
                                  'end': '/([mg]?)',
                                  'endCaptures': {'1': {'name': 'string.regexp.options'}},
-                                 'patterns': [{'include': '#escaped_char'},
-                                              {'include': '#condition'}]}},
+                                 'patterns': [{'include': '#condition'}]}},
 }
 
 #Snippet nodes
@@ -119,10 +117,12 @@ class Node(object):
                 index = ( index[0] + len(child), index[1] )
         return index
     
-    def resolve(self, context):
-        for child in self.children:
-            if hasattr(child, 'resolve'):
-                child.resolve(context)
+    def resolve(self, indentation, tabreplacement, environment):
+        for index in xrange(len(self.children)):
+            if type(self.children[index]) == str:
+                self.children[index] = self.children[index].replace('\n', '\n' + indentation).replace('\t', tabreplacement)
+            else:
+                self.children[index].resolve(indentation, tabreplacement, environment)
 
     def open(self, name, text):
         pass
@@ -155,6 +155,9 @@ class Snippet(Node):
             self.append(node)
         elif name == 'meta.structure.transformation.snippet':
             node = Transformation(self)
+            self.append(node)
+        elif name == 'string.interpolated.shell.snippet':
+            node = Shell(self)
             self.append(node)
         if node == None:
             print "no puedo con %s" % name
@@ -266,12 +269,13 @@ class Transformation(Node):
         super(Transformation, self).__init__(parent)
         self.placeholder = None
         self.index = None
+        self.regexp = None
     
     def __str__(self):
         text = ""
         if self.placeholder != None:
             text = str(self.placeholder)
-        return "".join(self.children[0].transform(text))
+        return "".join(self.regexp.transform(text))
 
     def __deepcopy__(self, memo):
         node = Transformation(memo["parent"])
@@ -282,6 +286,7 @@ class Transformation(Node):
             else:
                 node.append(child)
         node.index = self.index
+        node.regexp = self.regexp
         container = memo["taborder"].setdefault(node.index, [])
         if (node != container and node not in container):
             memo["taborder"][node.index] = node.taborder(container)
@@ -293,8 +298,7 @@ class Transformation(Node):
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
-            node = Regexp(self)
-            self.append(node)
+            node = self.regexp = Regexp(self)
         return node
         
     def close(self, name, text):
@@ -311,10 +315,15 @@ class Transformation(Node):
             self.placeholder = container
         return container
         
+    def resolve(self, indentation, tabreplacement, environment):
+        if self.regexp != None:
+            self.regexp.resolve(indentation, tabreplacement, environment)    
+        
 class Variable(Node):
     def __init__(self, parent = None):
         super(Variable, self).__init__(parent)
-        self.env = None
+        self.name = None
+        self.regexp = None
 
     def __deepcopy__(self, memo):
         node = Variable(memo["parent"])
@@ -324,24 +333,40 @@ class Variable(Node):
                 node.append(deepcopy(child, memo))
             else:
                 node.append(child)
+        node.name = self.name
+        node.regexp = self.regexp
         return node
-        
+
+    def __str__(self):
+        text = "".join(self.children)
+        if self.regexp != None:
+            return "".join(self.regexp.transform(text))
+        else:
+            return text
+
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
-            node = Regexp(self)
+            node = self.regexp = Regexp(self)
             self.append(node)
         return node
-        
+
     def close(self, name, text):
         if name == 'meta.structure.variable.snippet':
             return self.parent
         elif name == 'string.env.snippet':
-            self.env = text
+            self.name = text
         elif name == 'string.default':
             self.append(text)
         return self
-
+    
+    def resolve(self, indentation, tabreplacement, environment):
+        if self.name in environment:
+            self.clear()
+            self.append(environment[self.name])
+        if self.regexp != None:
+            self.regexp.resolve(indentation, tabreplacement, environment)
+        
 class Regexp(Node):
     def __init__(self, parent = None):
         super(Regexp, self).__init__(parent)
@@ -362,48 +387,101 @@ class Regexp(Node):
             else:
                 node.append(child)
         node.pattern = self.pattern
-        node.format = self.format
         node.options = self.options
-        node.condition = self.condition
         return node
         
     def open(self, name, text):
         node = self
-        #FIXME: Correct syntax
         if name == 'string.regexp.format':
             self.pattern = onig_compile(text[:-1])
+        elif name == 'meta.structure.condition.regexp':
+            node = Condition(self)
+            self.append(node)
         return node
 
     def close(self, name, text):
         if name == 'string.regexp':
             return self.parent
         elif name == 'string.regexp.format' and text:
-            self.format = text.replace('\\n', '\n').replace('\\t', '\t')
+            self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
         elif name == 'string.regexp.options':
             self.options = text
-        elif name == 'string.regexp.condition':
-            self.condition = int(text)
-        elif name == 'text.condition':
-            self.format = text.replace('\\n', '\n').replace('\\t', '\t')
         return self
-    
+
     def transform(self, text):
-        if self.condition != None:
-            return self.pattern.sub(lambda match: self.format.replace("$%d" % self.condition, match[self.condition]), text)
-        else:
-            return self.pattern.sub(self.format, text)
+        text = ""
+        for child in self.children:
+            match = self.pattern.search(text)
+            if type(child) == str:
+                text += self.substitute(child, match)
+            else:
+                text += self.pattern.sub(child.substitute, text)
+                #return self.pattern.sub(lambda match: self.format.replace("$%d" % self.condition, match[self.condition]), text)
+        return text
         
+    def substitute(self, string, match):
+        values = onig_compile("\$(\d+)").split(string)
+        for index in xrange(len(values), 1):
+            values[index] = match[index]
+        return "".join(values)
+    
 class Shell(Node):
+    def open(self, name, text):
+        node = self
+        if name == 'string.script':
+            self.append(text[1:])
+        return node
+        
+    def close(self, name, text):
+        if name == 'string.interpolated.shell.snippet':
+            return self.parent
+        elif name == 'string.script':
+            self.append(text)
+        return self
+
+    def resolve(self, indentation, tabreplacement, environment):
+        descriptor, name = tempfile.mkstemp(prefix='pmx')
+        os.write(descriptor, str(self).encode('utf8'))
+        os.chmod(name, stat.S_IEXEC)
+        process = Popen([name], stdout=PIPE, stderr=STDOUT, env = environment)
+        self.clear()
+        result = process.stdout.read()
+        self.append(result.strip())
+        process.stdout.close()
+
+class Condition(Node):
+    def __init__(self, parent = None):
+        super(Condition, self).__init__(parent)
+        self.index = None
+        self.format = None
+        
     def open(self, name, text):
         node = self
         return node
         
     def close(self, name, text):
-        self.append(text)
-        if name == 'string.interpolated.shell.snippet':
+        if name == 'meta.structure.condition.regexp':
             return self.parent
+        elif name == 'string.regexp.condition':
+            self.index = int(text)
+        elif name == 'text.condition':
+            self.format = text.replace('\\n', '\n').replace('\\t', '\t')
         return self
-        
+    
+    def substitute(self, match):
+        if match:
+            print repr(match[0])
+        values = onig_compile("\$(\d+)").split(self.format)
+        if match and match.groups[self.index]:
+            print match.groups[self.index]
+            for index in xrange(len(values), 1):
+                print values[index]
+                values[index] = match[index]
+        return "".join(values)
+            
+    def resolve(self, indentation, tabreplacement, environment):
+        self.format = self.format.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
+
 class PMXSnippetProcessor(PMXSyntaxProcessor):
     def __init__(self):
         self.current = None
@@ -490,8 +568,8 @@ class PMXSnippet(PMXBundleItem):
         new.taborder = memo["taborder"]
         return new
     
-    def resolve(self, context):
-        self.snippet.resolve(context)
+    def resolve(self, indentation, tabreplacement, environment):
+        self.snippet.resolve(indentation, tabreplacement, environment)
     
     def compile(self):
         text = self.content.splitlines()
