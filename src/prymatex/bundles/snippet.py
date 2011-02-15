@@ -211,6 +211,7 @@ class Placeholder(Node):
     def __init__(self, parent = None):
         super(Placeholder, self).__init__(parent)
         self.index = None
+        self.placeholder = None
         
     def __deepcopy__(self, memo):
         node = Placeholder(memo["parent"])
@@ -225,6 +226,11 @@ class Placeholder(Node):
         if (node != container and node not in container):
             memo["taborder"][node.index] = node.taborder(container)
         return node
+
+    def __str__(self):
+        if self.placeholder != None:
+            return str(self.placeholder)
+        return super(Placeholder, self).__str__()
         
     def open(self, name, text):
         node = self
@@ -239,6 +245,9 @@ class Placeholder(Node):
         elif name == 'string.interpolated.shell.snippet':
             node = Shell(self)
             self.append(node)
+        elif name == 'meta.structure.variable.snippet':
+            node = Variable(self)
+            self.append(node)
         return node
 
     def close(self, name, text):
@@ -251,9 +260,12 @@ class Placeholder(Node):
         return self
 
     def taborder(self, container):
-        if type(container) == list and container:
+        if isinstance(container, list) and container:
             for element in container:
                 element.placeholder = self
+        elif isinstance(container, Placeholder):
+            self.placeholder = container
+            return container
         return self
 
     def write(self, text):
@@ -405,6 +417,7 @@ class Regexp(Node):
         if name == 'string.regexp.format':
             self.pattern = onig_compile(text[:-1])
         elif name == 'meta.structure.condition.regexp':
+            self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
             node = Condition(self)
             self.append(node)
         return node
@@ -412,7 +425,7 @@ class Regexp(Node):
     def close(self, name, text):
         if name == 'string.regexp':
             return self.parent
-        elif name == 'string.regexp.format' and text:
+        elif name == 'string.regexp.format':
             self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
         elif name == 'string.regexp.options':
             self.options = text
@@ -421,17 +434,14 @@ class Regexp(Node):
     def transform(self, text):
         result = ""
         for child in self.children:
-            if isinstance(child, (str, unicode)):
-                match = self.pattern.match(text)
-                result += self.substitute(child, match)
-            else:
-                if self.options != None and 'g' in self.options:
-                    matches = self.pattern.find(text)
-                    for match in matches:
-                        result += child.substitute(match)
+            matches = self.pattern.find(text)
+            for match in matches:
+                if isinstance(child, (str, unicode)):
+                    result += self.substitute(child, match)
                 else:
-                    match = self.pattern.match(text)
                     result += child.substitute(match)
+                if self.options == None or 'g' not in self.options:
+                    break;
         return result
         
     def substitute(self, string, match):
@@ -551,8 +561,9 @@ class PMXSnippet(PMXBundleItem):
         return len(self.snippet)
     
     def add_taborder(self, taborder):
+        print taborder
         keys = taborder.keys()
-        self.taborder = [None for _ in range(max(keys) + 1)]
+        self.taborder = [None for _ in range(len(keys) + 1)]
         for key in keys:
             if key in taborder:
                 if isinstance(taborder[key], list):
@@ -561,15 +572,17 @@ class PMXSnippet(PMXBundleItem):
                     self.taborder[key] = taborder[key]
 
     def current(self):
-        return self.taborder[self.index % len(self.taborder)]
+        return self.taborder[self.index]
 
     def next(self):
-        self.index += 1
-        return self.taborder[self.index % len(self.taborder)]
+        self.index = (self.index + 1) % len(self.taborder)
+        return self.taborder[self.index]
 
     def previous(self):
         self.index -= 1
-        return self.taborder[self.index % len(self.taborder)]
+        if self.index < 0:
+            self.index = len(self.taborder)
+        return self.taborder[self.index]
     
     def position(self, tabstop):
         return self.snippet.position(tabstop, self.start)
@@ -593,5 +606,5 @@ class PMXSnippet(PMXBundleItem):
         self.add_taborder(processor.taborder)
     
     def write(self, index, text):
-        if self.taborder[index] != None:
+        if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "write"):
             self.taborder[index].write(text)

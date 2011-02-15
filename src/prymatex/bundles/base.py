@@ -225,10 +225,10 @@ def test_snippets():
     bundle = PMXBundle.getBundleByName('Python')
     for snippet in bundle.snippets:
         #if snippet.name.startswith("Itemize Lines"):
-        if snippet.name.startswith("New Class"):
+        #if snippet.name.startswith("New Class"):
             print snippet.content
             snippet.compile()
-            snippet.resolve("nnnn", "tttt", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "cacho"})
+            snippet.resolve("nnnn", "tttt", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "cachoacho"})
             print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
             print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
             print snippet
@@ -238,11 +238,6 @@ def test_snippets():
             clon.write(4, "bar, foo, bar")
             print "Clone: ", len(clon), clon.next(), clon.position(clon.current())
             print clon
-            print clon.next(), clon.position(clon.current())
-            print clon.next(), clon.position(clon.current())
-            print clon.next(), clon.position(clon.current())
-            print clon.next(), clon.position(clon.current())
-            print clon.next(), clon.position(clon.current())
             print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
             print snippet
             print "-"*30, "\n"
