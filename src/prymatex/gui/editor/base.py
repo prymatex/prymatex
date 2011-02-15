@@ -65,6 +65,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     
     WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
+    SPLITWORDS = re.compile(r'\s', re.UNICODE)
 
     #-----------------------------------
     # Settings
@@ -97,19 +98,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
-        self.setupUi()
-        
         self.processor = PMXSyntaxProcessor(self.document())
-        
+        self.snippet = None
         # TODO: Load from config
         #option = QTextOption()
         #option.setFlags(QTextOption.ShowTabsAndSpaces)
         #self.document().setDefaultTextOption(option)
 
         # Actions performed when a key is pressed
+        self.setupUi()
         self.setupActions()
-        
-        self.setSignals()
+        self.connectSignals()
         self.declareEvents()
         self.configure()
         
@@ -119,12 +118,25 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     # Signals and Events
     #=======================================================================
-    def setSignals(self):
-        self.connect(self, SIGNAL('cursorPositionChanged()'), self.sendCursorPosChange)
+    def setupUi(self):
+        #self.updateLineNumberAreaWidth(0)
+        self.setWindowTitle(self.__class__.__name__)
+        
+    def connectSignals(self):
+        self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
+        self.updateRequest.connect(self.updateLineNumberArea)
+        self.cursorPositionChanged.connect(self.sendCursorPosChange)
+        self.cursorPositionChanged.connect(self.highlightCurrentLine)
         
     def declareEvents(self):
         self.declareEvent('editorCursorPositionChangedEvent()')
         self.declareEvent('editorSetSyntaxEvent()')
+
+    def setupActions(self):
+        self.actionIndent = QAction(self.trUtf8("Increase indentation"), self )
+        self.connect(self.actionIndent, SIGNAL("triggered()"), self.indent)
+        self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
+        self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
         
     def getCurrentScope(self):
         cursor = self.textCursor()
@@ -159,23 +171,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             return '\t'
         else:
             return ' ' * self.tab_length
-
-    def setupUi(self):
-        
-        self.updateLineNumberAreaWidth(0)
-        
-        #Connects
-        self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
-        self.updateRequest.connect(self.updateLineNumberArea)
-        self.cursorPositionChanged.connect(self.highlightCurrentLine)
-        #self.connect(self, SIGNAL("cursorPositionChanged()"), self.notifyCursorChange)
-        self.setWindowTitle(self.__class__.__name__)
-
-    def setupActions(self):
-        self.actionIndent = QAction(self.trUtf8("Increase indentation"), self )
-        self.connect(self.actionIndent, SIGNAL("triggered()"), self.indent)
-        self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
-        self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
 
     def contextMenuEvent(self, event):
         '''
@@ -270,16 +265,56 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #print block.blockNumber(), ":", text, line_width, "px"
         #print char_number, text.length()
     
+    def keyPressSnippetEvent(self, key_event):
+        key = key_event.key()
+        cursor = self.textCursor()
+        
+        if key == Qt.Key_Tab or key == Qt.Key_Backtab:
+            if key == Qt.Key_Tab:
+                placeholder = self.snippet.next()
+            else:
+                placeholder = self.snippet.previous()
+            index = self.snippet.position(placeholder)
+            block = self.document().findBlockByNumber(index[0])
+            cursor.setPosition(block.position() + index[1])
+            cursor.setPosition(block.position() + cursor.columnNumber() + len(placeholder), QTextCursor.KeepAnchor)
+            self.setTextCursor(cursor)
+        elif key == Qt.Key_Return:
+            self.snippet = None 
+            QPlainTextEdit.keyPressEvent(self, key_event)
+        else:
+            starts = self.snippet.starts
+            ends = self.snippet.ends
+            QPlainTextEdit.keyPressEvent(self, key_event)
+            placeholder = self.snippet.current()
+            index = self.snippet.position(placeholder)
+            block = self.document().findBlockByNumber(index[0])
+            placeholder.write(unicode(block.text())[index[1]: cursor.columnNumber()])
+            block = self.document().findBlockByNumber(starts[0])
+            cursor.setPosition(block.position() + starts[1])
+            block = self.document().findBlockByNumber(ends[0])
+            cursor.setPosition(block.position() + ends[1], QTextCursor.KeepAnchor)
+            cursor.removeSelectedText();
+            cursor.insertText(str(self.snippet))
+            index = self.snippet.position(placeholder)
+            block = self.document().findBlockByNumber(index[0])
+            cursor.setPosition(block.position() + index[1] + len(placeholder))
+            self.setTextCursor(cursor)
+    
     def keyPressEvent(self, key_event):
         '''
         This method is called whenever a key is pressed. The key code is
         stored in key_event.key()
         '''
+        
+        if self.snippet != None:
+            return self.keyPressSnippetEvent(key_event)
+        
         key = key_event.key()
         character = key < 255 and chr(key) or None
         cursor = self.textCursor()
-#        x = cursor.blockNumber()
-#        y = cursor.columnNumber()
+        x = cursor.blockNumber()
+        y = cursor.columnNumber()
         doc = self.document()
         text = unicode(cursor.block().text())
         
@@ -291,7 +326,24 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #logger.debug(debug_key(key_event))
 
         if key == Qt.Key_Tab:
-            self.indent(self.soft_tabs and ' ' * self.tab_length or '\t')
+            #Find for tabtrigger in bundles
+            words = self.SPLITWORDS.split(text[:y])
+            word = words and words[-1] or ""
+            tab = self.soft_tabs and ' ' * self.tab_length or '\t'
+            if scope and word:
+                snippets = PMXBundle.getTabTriggerItem(word, scope)
+                if snippets:
+                    snippet = self.prepareSnippet(indentation, tab, (x , y - len(word)), snippets)
+                    if snippet != None:
+                        self.snippet = snippet
+                        for _ in range(len(word)):
+                            cursor.deletePreviousChar()
+                        cursor.insertText(str(snippet))
+                        return self.keyPressSnippetEvent(key_event)
+            else:
+                cursor.beginEditBlock()
+                cursor.insertText(tab)
+                cursor.endEditBlock()
         elif key == Qt.Key_Backtab:
             self.unindent()
         elif key == Qt.Key_Backspace:
@@ -346,20 +398,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         # Handle smart typing pairs
         elif character in smart_typing_test:
             self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
-        elif character == '%':
-            snippets = PMXBundle.getTabTriggerItem("class", scope)
-            print snippets
-            if snippets:
-                snippet = snippets[0]
-                snippet.compile()
-                clone = snippet.clone()
-                clone.resolve(indentation, self.soft_tabs and ' ' * self.tab_length or '\t', {})
-                cursor.beginEditBlock()
-                cursor.insertText(str(clone))
-                cursor.endEditBlock()
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
     
+    def prepareSnippet(self, indentation, tab, start, snippets):
+        #TODO: Seleccionar uno
+        snippet = snippets[0]
+        snippet.resolve(indentation, tab, start, {})
+        return snippet
+            
     def performCharacterAction(self, pair):
         '''
         Substitutions when some characters are typed.
@@ -423,7 +470,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)
-        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
+        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count - 1)
         new_cursor.movePosition(QTextCursor.StartOfBlock)
         for _i in range(block_count):
             new_cursor.insertText(indentation)
