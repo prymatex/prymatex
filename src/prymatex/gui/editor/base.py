@@ -6,12 +6,10 @@ import traceback
 import re
 import logging
 
-from PyQt4.QtCore import QRect, QObject
-from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QColor, QTextFormat, QMessageBox
-from PyQt4.QtGui import QFileDialog, QTextCursor, QTextOption, QAction, QWidget
-from PyQt4.QtGui import QMenu, QVBoxLayout, QFont
-from PyQt4.QtGui import QKeySequence, QColor, QPalette
-from PyQt4.QtCore import Qt, SIGNAL, QMetaObject, pyqtSignature
+from PyQt4.QtCore import QRect
+from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat
+from PyQt4.QtGui import QTextCursor, QAction, QFont, QPalette
+from PyQt4.QtCore import Qt, SIGNAL
 
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
@@ -66,8 +64,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     '''
     
-    PATTERNS = { "WHITESPACE": re.compile(r'^(?P<whitespace>\s+)', re.UNICODE),
-                 "LASTWORLD": re.compile("^.*\s(?P<world>\w+)")}
+    WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 
     #-----------------------------------
     # Settings
@@ -80,7 +77,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     def setTheme(self, name):
         theme = PMXTheme.getThemeByName(self.theme_name)
-        self.syntax_processor.formatter = theme
+        self.processor.formatter = theme
         style = theme.getStyle()
         foreground = style.getQColor('foreground')
         background = style.getQColor('background')
@@ -92,20 +89,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         palette.setColor(QPalette.Active, QPalette.Highlight, selection)
         palette.setColor(QPalette.Active, QPalette.AlternateBase, invisibles)
         self.setPalette(palette)
-        self.side_area.foreground = foreground 
-        self.side_area.background = background
         self.line_highlight = style.getQColor('lineHighlight')
         self.highlightCurrentLine()
         
-    theme_name = Setting(default = 'iPlastic', fset = setTheme)
+    theme_name = Setting(default = 'Twilight', fset = setTheme)
 
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
         self.setupUi()
-        self.character_actions = {}
         
-        self.syntax_processor = PMXSyntaxProcessor(self.document())
+        self.processor = PMXSyntaxProcessor(self.document())
         
         # TODO: Load from config
         #option = QTextOption()
@@ -113,15 +107,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #self.document().setDefaultTextOption(option)
 
         # Actions performed when a key is pressed
-        self.character_actions = {}
-        self.character_actions.update({
-            '(': '(${selection})',
-            '[': '[${selection}]',
-            "{": "{${selection}}",
-            '"': '"${selection}"',
-            "'": "'${selection}'",
-            
-        })
         self.setupActions()
         
         self.setSignals()
@@ -153,12 +138,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.editorCursorPositionChangedEvent(line, col)
         
     def setSyntax(self, syntax):
-        self.syntax_processor.set_syntax(syntax)
+        self.processor.syntax = syntax
         self.editorSetSyntaxEvent(syntax)
     
     @property
     def syntax(self):
-        return self.syntax_processor.syntax
+        return self.processor.syntax
         
     @property
     def index(self):
@@ -350,7 +335,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             elif "indentNextLinePattern" in preferences and preferences["indentNextLinePattern"].match(text):
                 logger.debug("indentNextLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
-                self.indent(indentation)
+                self.increaseIndent(indentation)
             elif "unIndentedLinePattern" in preferences and preferences["unIndentedLinePattern"].match(text):
                 logger.debug("unIndentedLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
@@ -367,8 +352,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             if snippets:
                 snippet = snippets[0]
                 snippet.compile()
+                clone = snippet.clone()
+                clone.resolve(indentation, self.soft_tabs and ' ' * self.tab_length or '\t', {})
                 cursor.beginEditBlock()
-                cursor.insertText(str(snippet))
+                cursor.insertText(str(clone))
                 cursor.endEditBlock()
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
@@ -413,7 +400,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         @param text: Text, QTextCursor o QTextBlock instance
         @return: The text whitespace
         '''
-        match = cls.PATTERNS["WHITESPACE"].match(text)
+        match = cls.WHITESPACE.match(text)
         try:
             ws = match.group('whitespace')
             return ws

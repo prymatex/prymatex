@@ -2,15 +2,6 @@
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QColor, QFont
 from prymatex.bundles.processor import PMXSyntaxProcessor
 
-class PMXBlockToken(object):
-    def __init__(self, begin, end, scopes):
-        self.begin = begin
-        self.end = end
-        self.scopes = scopes
-
-    def __str__(self):
-        return '<token: Position: (%d, %d) Scopes: "%s...">' % (self.begin, self.end, self.scopes)
-
 class PMXBlockUserData(QTextBlockUserData):
     FOLDING_NONE = 0
     FOLDING_START = 1
@@ -18,22 +9,18 @@ class PMXBlockUserData(QTextBlockUserData):
     
     def __init__(self):
         QTextBlockUserData.__init__(self)
-        self.tokens = []
+        self.scopes = []
         self.folding = self.FOLDING_NONE
     
     def __str__(self):
         return ' '.join(map(str, self.tokens))
     
-    def add_token(self, token):
-        self.tokens.append(token)
+    def addScope(self, begin, end, scope):
+        for pos in xrange(end - begin):
+            self.scopes.insert(begin + pos, scope)
         
     def getScopeAtPosition(self, pos):
-        tokens = filter(lambda t: t.begin <= pos < t.end, self.tokens)
-        if len(tokens) >= 1:
-            return tokens[-1].scopes
-        return ""
-        #else:
-        #    raise Exception("WTF? muchos tokens")
+        return self.scopes[pos]
         
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
@@ -41,8 +28,8 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     
     def __init__(self, doc, syntax = None, formatter = None):
         QSyntaxHighlighter.__init__(self, doc)
-        self.syntax = syntax
-        self.formatter = formatter
+        self.__syntax = None
+        self.__formatter = None
     
     def collect_previous_text(self, current):
         text = [ current ]
@@ -66,15 +53,20 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
             self.discard_lines = 0
         self.syntax.parse(text, self)
     
-    def set_syntax(self, syntax):
-        self.syntax =  syntax
+    def getSyntax(self):
+        return self.__syntax
+    
+    def setSyntax(self, syntax):
+        self.__syntax =  syntax
         self.rehighlight()
+    
+    syntax = property(getSyntax, setSyntax)
     
     def add_token(self, end):
         begin = self.line_position
         if self.discard_lines == 0:
             scopes = " ".join(self.scopes)
-            self.user_data.add_token(PMXBlockToken(begin, end, scopes))
+            self.user_data.addScope(begin, end, scopes)
             self.setFormat(begin, end - begin, self.formatter.getStyle(scopes).QTextFormat)
         self.line_position = end
     
@@ -99,7 +91,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.add_token(position)
         self.scopes.pop()
 
-    def folding_marker(self):
+    def foldingMarker(self):
         if hasattr(self.syntax, 'foldingStartMarker') and self.syntax.foldingStartMarker.match(unicode(self.currentBlock().text())):
             self.user_data.folding = self.user_data.FOLDING_START
         elif hasattr(self.syntax, 'foldingStopMarker') and self.syntax.foldingStopMarker.match(unicode(self.currentBlock().text())):
@@ -115,5 +107,5 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
             self.setCurrentBlockState(self.MULTI_LINE)
         self.add_token(self.currentBlock().length())
         self.scopes.pop()
-        self.folding_marker()
+        self.foldingMarker()
         self.setCurrentBlockUserData(self.user_data)
