@@ -352,8 +352,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             if snippets:
                 snippet = snippets[0]
                 snippet.compile()
+                clone = snippet.clone()
+                clone.resolve(indentation, self.soft_tabs and ' ' * self.tab_length or '\t', {})
                 cursor.beginEditBlock()
-                cursor.insertText(str(snippet))
+                cursor.insertText(str(clone))
                 cursor.endEditBlock()
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)

@@ -99,7 +99,7 @@ class Node(object):
         return reduce(lambda x, y: x + y, map(lambda e: len(e), self.children), 0)
     
     def append(self, element):
-        if type(element) == str:
+        if isinstance(element, (str, unicode)):
             element = element.replace('\\n', '\n').replace('\\t', '\t')
         self.children.append(element)
     
@@ -112,14 +112,14 @@ class Node(object):
             if child == element:
                 break;
             if '\n' in child:
-                index = ( 0, index[1] + 1 )
+                index = ( len(child) - 1, index[1] + 1 )
             else:
                 index = ( index[0] + len(child), index[1] )
         return index
     
     def resolve(self, indentation, tabreplacement, environment):
         for index in xrange(len(self.children)):
-            if type(self.children[index]) == str:
+            if isinstance(self.children[index], (str, unicode)):
                 self.children[index] = self.children[index].replace('\n', '\n' + indentation).replace('\t', tabreplacement)
             else:
                 self.children[index].resolve(indentation, tabreplacement, environment)
@@ -409,15 +409,21 @@ class Regexp(Node):
         return self
 
     def transform(self, text):
-        text = ""
+        result = ""
         for child in self.children:
-            match = self.pattern.search(text)
-            if type(child) == str:
-                text += self.substitute(child, match)
+            if isinstance(child, (str, unicode)):
+                match = self.pattern.match(text)
+                result += self.substitute(child, match)
             else:
-                text += self.pattern.sub(child.substitute, text)
+                if self.options != None and 'g' in self.options:
+                    matches = self.pattern.find(text)
+                    for match in matches:
+                        result += child.substitute(match)
+                else:
+                    match = self.pattern.match(text)
+                    result += child.substitute(match)
                 #return self.pattern.sub(lambda match: self.format.replace("$%d" % self.condition, match[self.condition]), text)
-        return text
+        return result
         
     def substitute(self, string, match):
         values = onig_compile("\$(\d+)").split(string)
@@ -469,14 +475,10 @@ class Condition(Node):
         return self
     
     def substitute(self, match):
-        if match:
-            print repr(match[0])
         values = onig_compile("\$(\d+)").split(self.format)
-        if match and match.groups[self.index]:
-            print match.groups[self.index]
-            for index in xrange(len(values), 1):
-                print values[index]
-                values[index] = match[index]
+        if match and match[self.index] != None:
+            for index in xrange(1, len(values), 2):
+                values[index] = match[int(values[index])]
         return "".join(values)
             
     def resolve(self, indentation, tabreplacement, environment):
