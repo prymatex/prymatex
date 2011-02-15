@@ -89,12 +89,6 @@ class Node(object):
             string += str(child)
         return string
     
-    def __contain__(self, element):
-        if isinstance(element, str):
-            return False
-        else:
-            return element in self.children
-    
     def __len__(self):
         return reduce(lambda x, y: x + y, map(lambda e: len(e), self.children), 0)
     
@@ -106,15 +100,17 @@ class Node(object):
     def clear(self):
         self.children = []
     
-    def position(self, element):
-        index = (0, 0)
+    def position(self, element, index):
         for child in self.children:
             if child == element:
                 break;
-            if '\n' in child:
-                index = ( len(child) - 1, index[1] + 1 )
+            if isinstance(child, (str, unicode)):
+                if '\n' in child:
+                    index = ( len(child.split('\n')[-1]), index[1] + len(child.split('\n')) - 1 )
+                else:
+                    index = ( index[0] + len(child), index[1] )
             else:
-                index = ( index[0] + len(child), index[1] )
+                index = child.position(element, index)
         return index
     
     def resolve(self, indentation, tabreplacement, environment):
@@ -294,7 +290,15 @@ class Transformation(Node):
         
     def __len__(self):
         return len(str(self))
-    
+
+    def position(self, element, index):
+        value = str(self)
+        if '\n' in value:
+            index = ( len(value.split('\n')[-1]), index[1] + len(value.split('\n')) - 1 )
+        else:
+            index = ( index[0] + len(value), index[1] )
+        return index
+        
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
@@ -343,12 +347,19 @@ class Variable(Node):
             return "".join(self.regexp.transform(text))
         else:
             return text
-
+            
+    def position(self, element, index):
+        value = str(self)
+        if '\n' in value:
+            index = ( len(value.split('\n')[-1]), index[1] + len(value.split('\n')) - 1 )
+        else:
+            index = ( index[0] + len(value), index[1] )
+        return index
+        
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
             node = self.regexp = Regexp(self)
-            self.append(node)
         return node
 
     def close(self, name, text):
@@ -371,7 +382,6 @@ class Regexp(Node):
     def __init__(self, parent = None):
         super(Regexp, self).__init__(parent)
         self.pattern = None
-        self.format = None
         self.options = None
         self.condition = None
 
@@ -389,7 +399,7 @@ class Regexp(Node):
         node.pattern = self.pattern
         node.options = self.options
         return node
-        
+
     def open(self, name, text):
         node = self
         if name == 'string.regexp.format':
@@ -422,7 +432,6 @@ class Regexp(Node):
                 else:
                     match = self.pattern.match(text)
                     result += child.substitute(match)
-                #return self.pattern.sub(lambda match: self.format.replace("$%d" % self.condition, match[self.condition]), text)
         return result
         
     def substitute(self, string, match):
@@ -460,7 +469,7 @@ class Condition(Node):
         super(Condition, self).__init__(parent)
         self.index = None
         self.format = None
-        
+
     def open(self, name, text):
         node = self
         return node
@@ -518,7 +527,7 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
     def end_parsing(self, name):
         token = self.current[self.index:len(self.current)]
         self.node.close(name, token)
-        
+
 class PMXSnippet(PMXBundleItem):
     parser = PMXSyntax(SNIPPET_SYNTAX)
     def __init__(self, hash, name_space = "default"):
@@ -528,6 +537,7 @@ class PMXSnippet(PMXBundleItem):
         self.snippet = None
         self.taborder = None
         self.index = 1
+        self.start = (0, 0)
         
     def __deepcopy__(self, memo):
         snippet = PMXSnippet(self.hash, self.name_space)
@@ -540,34 +550,35 @@ class PMXSnippet(PMXBundleItem):
     def __len__(self):
         return len(self.snippet)
     
+    def add_taborder(self, taborder):
+        keys = taborder.keys()
+        self.taborder = [None for _ in range(max(keys) + 1)]
+        for key in keys:
+            if key in taborder:
+                if isinstance(taborder[key], list):
+                    self.taborder[key] = taborder[key][0]
+                else:
+                    self.taborder[key] = taborder[key]
+
     def current(self):
-        if self.index > len(self.taborder) - 1:
-            return 0 in self.taborder and self.taborder[0] or None
-        else:
-            return self.taborder[self.index]
-        
+        return self.taborder[self.index % len(self.taborder)]
+
     def next(self):
-        if self.index >= len(self.taborder) - 1:
-            return 0 in self.taborder and self.taborder[0] or None
-        else:
-            self.index += 1
-            return self.taborder[self.index]
-        
+        self.index += 1
+        return self.taborder[self.index % len(self.taborder)]
+
     def previous(self):
-        if self.index < 1:
-            return self.taborder[1]
-        else:
-            self.index -= 1
-            return self.taborder[self.index]
+        self.index -= 1
+        return self.taborder[self.index % len(self.taborder)]
     
     def position(self, tabstop):
-        return self.snippet.position(tabstop)
+        return self.snippet.position(tabstop, self.start)
         
     def clone(self):
         memo = {"parent": None, "snippet": None, "taborder": {}}
         new = deepcopy(self, memo)
         new.snippet = memo["snippet"]
-        new.taborder = memo["taborder"]
+        new.add_taborder(memo["taborder"])
         return new
     
     def resolve(self, indentation, tabreplacement, environment):
@@ -579,8 +590,8 @@ class PMXSnippet(PMXBundleItem):
         processor = PMXSnippetProcessor()
         self.parser.parse(self.content, processor)
         self.snippet = processor.node
-        self.taborder = processor.taborder
+        self.add_taborder(processor.taborder)
     
     def write(self, index, text):
-        if index in self.taborder:
+        if self.taborder[index] != None:
             self.taborder[index].write(text)
