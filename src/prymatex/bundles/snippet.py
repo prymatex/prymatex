@@ -152,30 +152,40 @@ class Snippet(Node):
         return node
         
     def open(self, name, text):
-        self.append(text)
         node = self
         if name == 'meta.structure.tabstop.snippet':
+            self.append(text)
             node = Tabstop(self)
             self.append(node)
         elif name == 'meta.structure.placeholder.snippet':
+            self.append(text)
             node = Placeholder(self)
             self.append(node)
         elif name == 'meta.structure.variable.snippet':
+            self.append(text)
             node = Variable(self)
             self.append(node)
         elif name == 'meta.structure.transformation.snippet':
+            self.append(text)
             node = Transformation(self)
             self.append(node)
         elif name == 'string.interpolated.shell.snippet':
+            self.append(text)
             node = Shell(self)
             self.append(node)
+        elif name == 'keyword.escape.snippet':
+            pass
         else:
+            self.append(text)
             print "Snippet open", name, text
         return node
         
     def close(self, name, text):
-        self.append(text)
-        print "Snippet close", name, text
+        if name == 'keyword.escape.snippet':
+            self.append(text)
+        else:
+            self.append(text)
+            print "Snippet close", name, text
         return self
 
 class Tabstop(Node):
@@ -279,6 +289,8 @@ class Placeholder(Node):
         elif name == 'keyword.placeholder.snippet':
             self.index = int(text)
         elif name == 'string.default':
+            self.append(text)
+        elif name == 'keyword.escape.snippet':
             self.append(text)
         else:
             print "Placeholder close", name, text
@@ -625,7 +637,7 @@ class PMXSnippet(PMXBundleItem):
     
     @property
     def ends(self):
-        return self.position(None)
+        return self.position()
     
     def clone(self):
         memo = {"parent": None, "snippet": None, "taborder": {}}
@@ -658,7 +670,7 @@ class PMXSnippet(PMXBundleItem):
             # if holder == None then is the end of taborders
             if holder == None: return None
             holder_index = self.position(holder)
-            if holder_index[0] == index[0] and holder_index[1] <= index[1] < holder_index[1] + len(holder):
+            if holder_index[0] == index[0] and holder_index[1] <= index[1] <= holder_index[1] + len(holder):
                 return holder
         return None
     
@@ -678,7 +690,7 @@ class PMXSnippet(PMXBundleItem):
             self.index -= 1
         return self.taborder[self.index]
     
-    def position(self, tabstop):
+    def position(self, tabstop = None):
         return self.snippet.position(tabstop, self.starts)
     
     def resolve(self, indentation, tabreplacement, starts, environment):

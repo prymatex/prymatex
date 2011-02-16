@@ -268,38 +268,65 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def keyPressSnippetEvent(self, key_event):
         key = key_event.key()
         cursor = self.textCursor()
-        
+        row = cursor.blockNumber()
+        column = cursor.columnNumber()
+
         if key == Qt.Key_Tab or key == Qt.Key_Backtab:
-            if key == Qt.Key_Tab:
-                placeholder = self.snippet.next()
+            if not cursor.hasSelection():
+                holder = self.snippet.current()
+            elif key == Qt.Key_Tab:
+                holder = self.snippet.next()
             else:
-                placeholder = self.snippet.previous()
-            index = self.snippet.position(placeholder)
+                holder = self.snippet.previous()
+            if holder == None:
+                #The end
+                index = self.snippet.ends
+                #FIXME:
+                holder = ""
+            else:
+                index = self.snippet.position(holder)
             block = self.document().findBlockByNumber(index[0])
             cursor.setPosition(block.position() + index[1])
-            cursor.setPosition(block.position() + cursor.columnNumber() + len(placeholder), QTextCursor.KeepAnchor)
+            cursor.setPosition(block.position() + cursor.columnNumber() + len(holder), QTextCursor.KeepAnchor)
             self.setTextCursor(cursor)
-        elif key == Qt.Key_Return:
-            self.snippet = None 
-            QPlainTextEdit.keyPressEvent(self, key_event)
         else:
             starts = self.snippet.starts
             ends = self.snippet.ends
+            holder = self.snippet.getHolder((row, column))
             QPlainTextEdit.keyPressEvent(self, key_event)
-            placeholder = self.snippet.current()
-            index = self.snippet.position(placeholder)
-            block = self.document().findBlockByNumber(index[0])
-            placeholder.write(unicode(block.text())[index[1]: cursor.columnNumber()])
-            block = self.document().findBlockByNumber(starts[0])
-            cursor.setPosition(block.position() + starts[1])
-            block = self.document().findBlockByNumber(ends[0])
-            cursor.setPosition(block.position() + ends[1], QTextCursor.KeepAnchor)
-            cursor.removeSelectedText();
-            cursor.insertText(str(self.snippet))
-            index = self.snippet.position(placeholder)
-            block = self.document().findBlockByNumber(index[0])
-            cursor.setPosition(block.position() + index[1] + len(placeholder))
-            self.setTextCursor(cursor)
+            if holder != None:
+                index = self.snippet.position(holder)
+                block = self.document().findBlockByNumber(index[0])
+                holder.write(unicode(block.text())[index[1]: cursor.columnNumber()])
+                block = self.document().findBlockByNumber(starts[0])
+                cursor.setPosition(block.position() + starts[1])
+                block = self.document().findBlockByNumber(ends[0])
+                cursor.setPosition(block.position() + ends[1], QTextCursor.KeepAnchor)
+                cursor.removeSelectedText();
+                cursor.insertText(str(self.snippet))
+                index = self.snippet.position(holder)
+                block = self.document().findBlockByNumber(index[0])
+                cursor.setPosition(block.position() + index[1] + len(holder))
+                self.setTextCursor(cursor)
+            else:
+                self.snippet = None
+            
+    def insertSnippet(self, trigger, snippet):
+        #TODO: si es mas de uno seleccionar uno, si no selecciona retornar falso
+        snippet = snippet[0]
+        tab = self.soft_tabs and ' ' * self.tab_length or '\t'
+        cursor = self.textCursor()
+        row = cursor.blockNumber()
+        column = cursor.columnNumber()
+        text = unicode(cursor.block().text())
+        indentation = self.identationWhitespace(text)
+        
+        snippet.resolve(indentation, tab, (row , column - len(trigger)), {})
+        self.snippet = snippet
+        for _ in range(len(trigger)):
+            cursor.deletePreviousChar()
+        cursor.insertText(str(snippet))
+        return True
     
     def keyPressEvent(self, key_event):
         '''
@@ -318,6 +345,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         doc = self.document()
         text = unicode(cursor.block().text())
         
+        #Esta es la clave para indexar los snippets en lugar de tanto quilombo
+        print cursor.block().position() + cursor.columnNumber()
+        
         scope = self.getCurrentScope()
         preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
         smart_typing_test = map(lambda pair: pair[0], preferences["smartTypingPairs"])
@@ -332,14 +362,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             tab = self.soft_tabs and ' ' * self.tab_length or '\t'
             if scope and word:
                 snippets = PMXBundle.getTabTriggerItem(word, scope)
-                if snippets:
-                    snippet = self.prepareSnippet(indentation, tab, (x , y - len(word)), snippets)
-                    if snippet != None:
-                        self.snippet = snippet
-                        for _ in range(len(word)):
-                            cursor.deletePreviousChar()
-                        cursor.insertText(str(snippet))
-                        return self.keyPressSnippetEvent(key_event)
+                if snippets and self.insertSnippet(word, snippets):
+                    return self.keyPressSnippetEvent(key_event)
             else:
                 cursor.beginEditBlock()
                 cursor.insertText(tab)
@@ -400,12 +424,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
-    
-    def prepareSnippet(self, indentation, tab, start, snippets):
-        #TODO: Seleccionar uno
-        snippet = snippets[0]
-        snippet.resolve(indentation, tab, start, {})
-        return snippet
             
     def performCharacterAction(self, pair):
         '''
