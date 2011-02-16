@@ -70,15 +70,16 @@ SNIPPET_SYNTAX = {
                               'contentName': 'text.condition',
                               'end': '\\)',
                               'name': 'meta.structure.condition.regexp',
-                              'patterns': [{'include': '#replacements'},
+                              'patterns': [#{'include': '#replacements'},
                                            {'begin': ':',
                                             'end': '(?=\\))',
                                             'name': 'meta.structure.condition.regexp',
-                                            'patterns': [{'include': '#replacements'}]}]},
+                                            #'patterns': [{'include': '#replacements'}]
+                                            }]},
                 'escaped_char': {'match': '\\\\[/\\\\]',
                                  'name': 'constant.character.escape.regexp'},
-                'replacements': {'match': '\\$\\d|\\\\[uUILE]',
-                                 'name': 'string.regexp.replacement'},
+                #'replacements': {'match': '\\$\\d|\\\\[uUILE]',
+                #                 'name': 'string.regexp.replacement'},
                 'substitution': {'begin': '/',
                                  'contentName': 'string.regexp.format',
                                  'end': '/([mg]?)',
@@ -552,11 +553,12 @@ class Condition(Node):
         return self
     
     def substitute(self, match):
-        if match and match[child.index] != None:
+        if match and match[self.index] != None:
             values = onig_compile("\$(\d+)").split(self.format)
             for index in xrange(1, len(values), 2):
                 values[index] = match[int(values[index])]
             return "".join(values)
+        return ""
             
     def resolve(self, indentation, tabreplacement, environment):
         self.format = self.format.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
@@ -615,12 +617,15 @@ class PMXSnippet(PMXBundleItem):
     def __str__(self):
         return str(self.snippet)
     
+    def __unicode__(self):
+        return unicode(self.snippet)
+    
     def __len__(self):
         return len(self.snippet)
     
     @property
     def ends(self):
-        return self.snippet.position(None, self.starts)
+        return self.position(None)
     
     def clone(self):
         memo = {"parent": None, "snippet": None, "taborder": {}}
@@ -639,27 +644,38 @@ class PMXSnippet(PMXBundleItem):
         self.addTaborder(processor.taborder)
     
     def addTaborder(self, taborder):
+        self.taborder = []
+        last = taborder.pop(0, None)
         keys = taborder.keys()
-        num = keys and max(keys) or 0
-        self.taborder = [None for _ in range(num + 1)]
+        keys.sort()
         for key in keys:
-            if key in taborder:
-                if isinstance(taborder[key], list):
-                    self.taborder[key] = taborder[key][0]
-                else:
-                    self.taborder[key] = taborder[key]
+            self.taborder.append(taborder.pop(key))
+        self.taborder.append(last)
 
+    def getHolder(self, index):
+        ''' Return the placeholder for index, where index = (row, column)'''
+        for holder in self.taborder:
+            # if holder == None then is the end of taborders
+            if holder == None: return None
+            holder_index = self.position(holder)
+            if holder_index[0] == index[0] and holder_index[1] <= index[1] < holder_index[1] + len(holder):
+                return holder
+        return None
+    
+    def setCurrentHolder(self, holder):
+        self.index = self.taborder.index(holder)
+    
     def current(self):
         return self.taborder[self.index]
 
     def next(self):
-        self.index = (self.index + 1) % len(self.taborder)
+        if self.index < len(self.taborder) - 1:
+            self.index += 1
         return self.taborder[self.index]
 
     def previous(self):
-        self.index -= 1
-        if self.index < 0:
-            self.index = len(self.taborder) - 1
+        if self.index > 0:
+            self.index -= 1
         return self.taborder[self.index]
     
     def position(self, tabstop):
