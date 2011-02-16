@@ -42,7 +42,8 @@ SNIPPET_SYNTAX = {
                'contentName': 'string.regexp',
                'end': '\\}',
                'name': 'meta.structure.transformation.snippet',
-               'patterns': [{'include': '#substitution'}]},
+               'patterns': [{'include': '#escaped_char'},
+                            {'include': '#substitution'}]},
               # Variables 
               {'match': '\\$([a-zA-Z_][a-zA-Z0-9_]*)',
                'captures': {'1': {'name': 'string.env.snippet'}},
@@ -68,9 +69,17 @@ SNIPPET_SYNTAX = {
                               'beginCaptures': {'1': {'name': 'string.regexp.condition'}},
                               'contentName': 'text.condition',
                               'end': '\\)',
-                              'name': 'meta.structure.condition.regexp'},
+                              'name': 'meta.structure.condition.regexp',
+                              'patterns': [#{'include': '#replacements'},
+                                           {'begin': ':',
+                                            'end': '(?=\\))',
+                                            'name': 'meta.structure.condition.regexp',
+                                            #'patterns': [{'include': '#replacements'}]
+                                            }]},
                 'escaped_char': {'match': '\\\\[/\\\\]',
-                                 'name': 'constant.character.escape.regex'},
+                                 'name': 'constant.character.escape.regexp'},
+                #'replacements': {'match': '\\$\\d|\\\\[uUILE]',
+                #                 'name': 'string.regexp.replacement'},
                 'substitution': {'begin': '/',
                                  'contentName': 'string.regexp.format',
                                  'end': '/([mg]?)',
@@ -161,11 +170,12 @@ class Snippet(Node):
             node = Shell(self)
             self.append(node)
         else:
-            print "no, tratado", name, text
+            print "Snippet open", name, text
         return node
         
     def close(self, name, text):
         self.append(text)
+        print "Snippet close", name, text
         return self
 
 class Tabstop(Node):
@@ -196,6 +206,7 @@ class Tabstop(Node):
         
     def open(self, name, text):
         node = self
+        print "Tabstop open", name, text
         return node
         
     def close(self, name, text):
@@ -204,7 +215,7 @@ class Tabstop(Node):
         elif name == 'keyword.tabstop.snippet':
             self.index = int(text)
         else:
-            print "no, tratado", name, text
+            print "Tabstop close", name, text
         return self
 
     def taborder(self, container):
@@ -259,7 +270,7 @@ class Placeholder(Node):
             node = Variable(self)
             self.append(node)
         else:
-            print "no, tratado", name, text
+            print "Placeholder open", name, text
         return node
 
     def close(self, name, text):
@@ -270,7 +281,7 @@ class Placeholder(Node):
         elif name == 'string.default':
             self.append(text)
         else:
-            print "no, tratado", name, text
+            print "Placeholder close", name, text
         return self
 
     def taborder(self, container):
@@ -330,7 +341,7 @@ class Transformation(Node):
         if name == 'string.regexp':
             node = self.regexp = Regexp(self)
         else:
-            print "no, tratado", name, text
+            print "Transformation open", name, text
         return node
         
     def close(self, name, text):
@@ -339,7 +350,7 @@ class Transformation(Node):
         elif name == 'keyword.transformation.snippet':
             self.index = int(text)
         else:
-            print "no, tratado", name, text
+            print "Transformation close", name, text
         return self
     
     def taborder(self, container):
@@ -391,7 +402,7 @@ class Variable(Node):
         if name == 'string.regexp':
             node = self.regexp = Regexp(self)
         else:
-            print "no, tratado", name, text
+            print "Variable, open", name, text
         return node
 
     def close(self, name, text):
@@ -415,7 +426,7 @@ class Variable(Node):
 class Regexp(Node):
     def __init__(self, parent = None):
         super(Regexp, self).__init__(parent)
-        self.pattern = None
+        self.pattern = ""
         self.options = None
 
     def __deepcopy__(self, memo):
@@ -433,13 +444,20 @@ class Regexp(Node):
     def open(self, name, text):
         node = self
         if name == 'string.regexp.format':
-            self.pattern = onig_compile(text[:-1])
+            self.pattern += text[:-1];
+            self.pattern = onig_compile(self.pattern)
         elif name == 'meta.structure.condition.regexp':
             self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
             node = Condition(self)
             self.append(node)
+        elif name == 'constant.character.escape.regexp':
+            #Escape in pattern
+            if isinstance(self.pattern, (str, unicode)):
+                self.pattern += text
+            else:
+                self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
         else:
-            print "no, tratado", name, text
+            print "Regexp open", name, text
         return node
 
     def close(self, name, text):
@@ -449,8 +467,14 @@ class Regexp(Node):
             self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
         elif name == 'string.regexp.options':
             self.options = text
+        elif name == 'constant.character.escape.regexp':
+            #Escape in pattern
+            if isinstance(self.pattern, (str, unicode)):
+                self.pattern += text
+            else:
+                self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
         else:
-            print "no, tratado", name, text
+            print "Regexp close", name, text
         return self
 
     def transform(self, text):
@@ -460,7 +484,7 @@ class Regexp(Node):
             for match in matches:
                 if isinstance(child, (str, unicode)):
                     result += self.substitute(child, match)
-                elif match and match[child.index] != None:
+                else:
                     result += child.substitute(match)
                 if self.options == None or 'g' not in self.options:
                     break;
@@ -468,7 +492,7 @@ class Regexp(Node):
         
     def substitute(self, string, match):
         values = onig_compile("\$(\d+)").split(string)
-        for index in xrange(len(values), 1):
+        for index in xrange(1, len(values), 2):
             values[index] = match[index]
         return "".join(values)
     
@@ -477,6 +501,8 @@ class Shell(Node):
         node = self
         if name == 'string.script':
             self.append(text[1:])
+        else:
+            print "Shell open", name, text
         return node
         
     def close(self, name, text):
@@ -485,7 +511,7 @@ class Shell(Node):
         elif name == 'string.script':
             self.append(text)
         else:
-            print "no, tratado", name, text
+            print "Shell close", name, text
         return self
 
     def resolve(self, indentation, tabreplacement, environment):
@@ -502,7 +528,7 @@ class Condition(Node):
     def __init__(self, parent = None):
         super(Condition, self).__init__(parent)
         self.index = None
-        self.format = None
+        self.format = ""
 
     def __deepcopy__(self, memo):
         node = Condition(memo["parent"])
@@ -512,6 +538,7 @@ class Condition(Node):
 
     def open(self, name, text):
         node = self
+        print "Condition open", name, text
         return node
         
     def close(self, name, text):
@@ -520,16 +547,18 @@ class Condition(Node):
         elif name == 'string.regexp.condition':
             self.index = int(text)
         elif name == 'text.condition':
-            self.format = text.replace('\\n', '\n').replace('\\t', '\t')
+            self.format += text.replace('\\n', '\n').replace('\\t', '\t')
         else:
-            print "no, tratado", name, text
+            print "Condition close", name, text
         return self
     
     def substitute(self, match):
-        values = onig_compile("\$(\d+)").split(self.format)
-        for index in xrange(1, len(values), 2):
-            values[index] = match[int(values[index])]
-        return "".join(values)
+        if match and match[self.index] != None:
+            values = onig_compile("\$(\d+)").split(self.format)
+            for index in xrange(1, len(values), 2):
+                values[index] = match[int(values[index])]
+            return "".join(values)
+        return ""
             
     def resolve(self, indentation, tabreplacement, environment):
         self.format = self.format.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
@@ -588,12 +617,15 @@ class PMXSnippet(PMXBundleItem):
     def __str__(self):
         return str(self.snippet)
     
+    def __unicode__(self):
+        return unicode(self.snippet)
+    
     def __len__(self):
         return len(self.snippet)
     
     @property
     def ends(self):
-        return self.snippet.position(None, self.starts)
+        return self.position(None)
     
     def clone(self):
         memo = {"parent": None, "snippet": None, "taborder": {}}
@@ -612,27 +644,38 @@ class PMXSnippet(PMXBundleItem):
         self.addTaborder(processor.taborder)
     
     def addTaborder(self, taborder):
+        self.taborder = []
+        last = taborder.pop(0, None)
         keys = taborder.keys()
-        num = keys and max(keys) or 0
-        self.taborder = [None for _ in range(num + 1)]
+        keys.sort()
         for key in keys:
-            if key in taborder:
-                if isinstance(taborder[key], list):
-                    self.taborder[key] = taborder[key][0]
-                else:
-                    self.taborder[key] = taborder[key]
+            self.taborder.append(taborder.pop(key))
+        self.taborder.append(last)
 
+    def getHolder(self, index):
+        ''' Return the placeholder for index, where index = (row, column)'''
+        for holder in self.taborder:
+            # if holder == None then is the end of taborders
+            if holder == None: return None
+            holder_index = self.position(holder)
+            if holder_index[0] == index[0] and holder_index[1] <= index[1] < holder_index[1] + len(holder):
+                return holder
+        return None
+    
+    def setCurrentHolder(self, holder):
+        self.index = self.taborder.index(holder)
+    
     def current(self):
         return self.taborder[self.index]
 
     def next(self):
-        self.index = (self.index + 1) % len(self.taborder)
+        if self.index < len(self.taborder) - 1:
+            self.index += 1
         return self.taborder[self.index]
 
     def previous(self):
-        self.index -= 1
-        if self.index < 0:
-            self.index = len(self.taborder) - 1
+        if self.index > 0:
+            self.index -= 1
         return self.taborder[self.index]
     
     def position(self, tabstop):

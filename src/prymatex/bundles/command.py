@@ -11,6 +11,7 @@
             TM_SELECTED_SCOPE:
             TM_CURRENT_WORD:
             TM_FILEPATH,
+            TM_FILENAME,
             TM_DIRECTORY,
             TM_BUNDLE_SUPPORT: Support dentro del bundle
             TM_SELECTED_TEXT
