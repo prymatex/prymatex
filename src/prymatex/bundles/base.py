@@ -186,11 +186,13 @@ class PMXBundle(object):
         items = []
         if cls.TAB_TRIGGERS.has_key(keyword):
             for item in cls.TAB_TRIGGERS[keyword]:
-                score = cls.scores.score(scope, item.scope)
+                if not item.ready():
+                    item.compile()
+                score = cls.scores.score(item.scope, scope)
                 if score != 0:
                     items.append((score, item))
             items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item, items)
+            items = map(lambda (score, item): item.clone(), items)
         return items
             
     @classmethod
@@ -198,11 +200,13 @@ class PMXBundle(object):
         items = []
         if cls.KEY_EQUIVALENTS.has_key(key):
             for item in cls.KEY_EQUIVALENTS[key]:
+                if not item.ready():
+                    item.compile()
                 score = cls.scores.score(scope, item.scope)
                 if score != 0:
                     items.append((score, item))
             items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item, items)
+            items = map(lambda (score, item): item.clone(), items)
         return items
 
 class PMXBundleItem(object):
@@ -211,7 +215,15 @@ class PMXBundleItem(object):
         self.name_space = name_space
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
-
+            
+    def clone(self):
+        return self
+    
+    def ready(self):
+        return True
+    
+    def compile(self):
+        pass
 #----------------------------------------
 # Tests
 #----------------------------------------
@@ -222,13 +234,13 @@ def test_preferences():
 
 def test_snippets():
     #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('Python')
+    bundle = PMXBundle.getBundleByName('HTML')
     for snippet in bundle.snippets:
         #if snippet.name.startswith("Itemize Lines"):
-        #if snippet.name.startswith("New Class"):
-            print snippet.content
+        if snippet.name.startswith("Strong"):
+            print snippet.name, snippet.content
             snippet.compile()
-            snippet.resolve("nnnn", "tttt", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "cachoacho"})
+            snippet.resolve("nnnn", "tttt", (0, 0), {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "cachoacho"})
             print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
             print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
             print snippet

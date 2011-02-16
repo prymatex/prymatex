@@ -22,7 +22,8 @@ from prymatex.bundles.processor import PMXSyntaxProcessor, PMXDebugSyntaxProcess
 from prymatex.bundles.syntax import PMXSyntax
 
 SNIPPET_SYNTAX = {
- 'patterns': [{'match': '\\\\(\\\\|\\$|`)',
+ 'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
+               'match': '\\\\(\\\\|\\$|`)',
                'name': 'constant.character.escape.snippet'},
               #TabStop
               {'captures': {'1': {'name': 'keyword.tabstop.snippet'}},
@@ -57,7 +58,8 @@ SNIPPET_SYNTAX = {
                'contentName': 'string.regexp',
                'end': '\\}',
                'name': 'meta.structure.variable.snippet',
-               'patterns': [{'include': '#substitution'}]},
+               'patterns': [{'include': '#escaped_char'},
+                            {'include': '#substitution'}]},
               {'begin': '`',
                'end': '`',
                'contentName': 'string.script',
@@ -67,11 +69,14 @@ SNIPPET_SYNTAX = {
                               'contentName': 'text.condition',
                               'end': '\\)',
                               'name': 'meta.structure.condition.regexp'},
+                'escaped_char': {'match': '\\\\[/\\\\]',
+                                 'name': 'constant.character.escape.regex'},
                 'substitution': {'begin': '/',
                                  'contentName': 'string.regexp.format',
                                  'end': '/([mg]?)',
                                  'endCaptures': {'1': {'name': 'string.regexp.options'}},
-                                 'patterns': [{'include': '#condition'}]}},
+                                 'patterns': [{'include': '#escaped_char'},
+                                              {'include': '#condition'}]}},
 }
 
 #Snippet nodes
@@ -106,9 +111,9 @@ class Node(object):
                 break;
             if isinstance(child, (str, unicode)):
                 if '\n' in child:
-                    index = ( len(child.split('\n')[-1]), index[1] + len(child.split('\n')) - 1 )
+                    index = ( index[0] + len(child.split('\n')) - 1, len(child.split('\n')[-1]) )
                 else:
-                    index = ( index[0] + len(child), index[1] )
+                    index = ( index[0], index[1] + len(child) )
             else:
                 index = child.position(element, index)
         return index
@@ -155,8 +160,8 @@ class Snippet(Node):
         elif name == 'string.interpolated.shell.snippet':
             node = Shell(self)
             self.append(node)
-        if node == None:
-            print "no puedo con %s" % name
+        else:
+            print "no, tratado", name, text
         return node
         
     def close(self, name, text):
@@ -198,6 +203,8 @@ class Tabstop(Node):
             return self.parent
         elif name == 'keyword.tabstop.snippet':
             self.index = int(text)
+        else:
+            print "no, tratado", name, text
         return self
 
     def taborder(self, container):
@@ -231,7 +238,10 @@ class Placeholder(Node):
         if self.placeholder != None:
             return str(self.placeholder)
         return super(Placeholder, self).__str__()
-        
+    
+    def __len__(self):
+        return len(str(self))
+    
     def open(self, name, text):
         node = self
         if name == 'meta.structure.tabstop.snippet':
@@ -248,6 +258,8 @@ class Placeholder(Node):
         elif name == 'meta.structure.variable.snippet':
             node = Variable(self)
             self.append(node)
+        else:
+            print "no, tratado", name, text
         return node
 
     def close(self, name, text):
@@ -257,6 +269,8 @@ class Placeholder(Node):
             self.index = int(text)
         elif name == 'string.default':
             self.append(text)
+        else:
+            print "no, tratado", name, text
         return self
 
     def taborder(self, container):
@@ -294,7 +308,7 @@ class Transformation(Node):
             else:
                 node.append(child)
         node.index = self.index
-        node.regexp = self.regexp
+        node.regexp = deepcopy(self.regexp, memo)
         container = memo["taborder"].setdefault(node.index, [])
         if (node != container and node not in container):
             memo["taborder"][node.index] = node.taborder(container)
@@ -306,15 +320,17 @@ class Transformation(Node):
     def position(self, element, index):
         value = str(self)
         if '\n' in value:
-            index = ( len(value.split('\n')[-1]), index[1] + len(value.split('\n')) - 1 )
+            index = ( index[0] + len(value.split('\n')) - 1, len(value.split('\n')[-1]) )
         else:
-            index = ( index[0] + len(value), index[1] )
+            index = ( index[0], index[1] + len(value) )
         return index
         
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
             node = self.regexp = Regexp(self)
+        else:
+            print "no, tratado", name, text
         return node
         
     def close(self, name, text):
@@ -322,6 +338,8 @@ class Transformation(Node):
             return self.parent
         elif name == 'keyword.transformation.snippet':
             self.index = int(text)
+        else:
+            print "no, tratado", name, text
         return self
     
     def taborder(self, container):
@@ -350,7 +368,7 @@ class Variable(Node):
             else:
                 node.append(child)
         node.name = self.name
-        node.regexp = self.regexp
+        node.regexp = deepcopy(self.regexp, memo)
         return node
 
     def __str__(self):
@@ -363,15 +381,17 @@ class Variable(Node):
     def position(self, element, index):
         value = str(self)
         if '\n' in value:
-            index = ( len(value.split('\n')[-1]), index[1] + len(value.split('\n')) - 1 )
+            index = ( index[0] + len(value.split('\n')) - 1, len(value.split('\n')[-1]))
         else:
-            index = ( index[0] + len(value), index[1] )
+            index = ( index[0], index[1] + len(value))
         return index
         
     def open(self, name, text):
         node = self
         if name == 'string.regexp':
             node = self.regexp = Regexp(self)
+        else:
+            print "no, tratado", name, text
         return node
 
     def close(self, name, text):
@@ -381,6 +401,8 @@ class Variable(Node):
             self.name = text
         elif name == 'string.default':
             self.append(text)
+        else:
+            print "no, tratado", name, text
         return self
     
     def resolve(self, indentation, tabreplacement, environment):
@@ -395,10 +417,6 @@ class Regexp(Node):
         super(Regexp, self).__init__(parent)
         self.pattern = None
         self.options = None
-        self.condition = None
-
-    def __str__(self):
-        return "%s/%s/%s" % (self.pattern, self.format, self.options)
 
     def __deepcopy__(self, memo):
         node = Regexp(memo["parent"])
@@ -420,6 +438,8 @@ class Regexp(Node):
             self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
             node = Condition(self)
             self.append(node)
+        else:
+            print "no, tratado", name, text
         return node
 
     def close(self, name, text):
@@ -429,6 +449,8 @@ class Regexp(Node):
             self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
         elif name == 'string.regexp.options':
             self.options = text
+        else:
+            print "no, tratado", name, text
         return self
 
     def transform(self, text):
@@ -438,7 +460,7 @@ class Regexp(Node):
             for match in matches:
                 if isinstance(child, (str, unicode)):
                     result += self.substitute(child, match)
-                else:
+                elif match and match[child.index] != None:
                     result += child.substitute(match)
                 if self.options == None or 'g' not in self.options:
                     break;
@@ -462,6 +484,8 @@ class Shell(Node):
             return self.parent
         elif name == 'string.script':
             self.append(text)
+        else:
+            print "no, tratado", name, text
         return self
 
     def resolve(self, indentation, tabreplacement, environment):
@@ -480,6 +504,12 @@ class Condition(Node):
         self.index = None
         self.format = None
 
+    def __deepcopy__(self, memo):
+        node = Condition(memo["parent"])
+        node.index = self.index
+        node.format = self.format
+        return node
+
     def open(self, name, text):
         node = self
         return node
@@ -491,13 +521,14 @@ class Condition(Node):
             self.index = int(text)
         elif name == 'text.condition':
             self.format = text.replace('\\n', '\n').replace('\\t', '\t')
+        else:
+            print "no, tratado", name, text
         return self
     
     def substitute(self, match):
         values = onig_compile("\$(\d+)").split(self.format)
-        if match and match[self.index] != None:
-            for index in xrange(1, len(values), 2):
-                values[index] = match[int(values[index])]
+        for index in xrange(1, len(values), 2):
+            values[index] = match[int(values[index])]
         return "".join(values)
             
     def resolve(self, indentation, tabreplacement, environment):
@@ -546,8 +577,8 @@ class PMXSnippet(PMXBundleItem):
             setattr(self, key, hash.pop(key, None))
         self.snippet = None
         self.taborder = None
-        self.index = 1
-        self.start = (0, 0)
+        self.index = 0
+        self.starts = (0, 0)
         
     def __deepcopy__(self, memo):
         snippet = PMXSnippet(self.hash, self.name_space)
@@ -560,10 +591,30 @@ class PMXSnippet(PMXBundleItem):
     def __len__(self):
         return len(self.snippet)
     
-    def add_taborder(self, taborder):
-        print taborder
+    @property
+    def ends(self):
+        return self.snippet.position(None, self.starts)
+    
+    def clone(self):
+        memo = {"parent": None, "snippet": None, "taborder": {}}
+        new = deepcopy(self, memo)
+        new.snippet = memo["snippet"]
+        new.addTaborder(memo["taborder"])
+        return new
+    
+    def ready(self):
+        return self.snippet != None
+    
+    def compile(self):
+        processor = PMXSnippetProcessor()
+        self.parser.parse(self.content, processor)
+        self.snippet = processor.node
+        self.addTaborder(processor.taborder)
+    
+    def addTaborder(self, taborder):
         keys = taborder.keys()
-        self.taborder = [None for _ in range(len(keys) + 1)]
+        num = keys and max(keys) or 0
+        self.taborder = [None for _ in range(num + 1)]
         for key in keys:
             if key in taborder:
                 if isinstance(taborder[key], list):
@@ -581,29 +632,15 @@ class PMXSnippet(PMXBundleItem):
     def previous(self):
         self.index -= 1
         if self.index < 0:
-            self.index = len(self.taborder)
+            self.index = len(self.taborder) - 1
         return self.taborder[self.index]
     
     def position(self, tabstop):
-        return self.snippet.position(tabstop, self.start)
-        
-    def clone(self):
-        memo = {"parent": None, "snippet": None, "taborder": {}}
-        new = deepcopy(self, memo)
-        new.snippet = memo["snippet"]
-        new.add_taborder(memo["taborder"])
-        return new
+        return self.snippet.position(tabstop, self.starts)
     
-    def resolve(self, indentation, tabreplacement, environment):
+    def resolve(self, indentation, tabreplacement, starts, environment):
+        self.starts = starts
         self.snippet.resolve(indentation, tabreplacement, environment)
-    
-    def compile(self):
-        text = self.content.splitlines()
-        processor = PMXDebugSyntaxProcessor()
-        processor = PMXSnippetProcessor()
-        self.parser.parse(self.content, processor)
-        self.snippet = processor.node
-        self.add_taborder(processor.taborder)
     
     def write(self, index, text):
         if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "write"):
