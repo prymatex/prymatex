@@ -234,13 +234,13 @@ def test_preferences():
 
 def test_snippets():
     #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('HTML')
+    bundle = PMXBundle.getBundleByName('C')
     for snippet in bundle.snippets:
         #if snippet.name.startswith("Itemize Lines"):
-        if snippet.name.startswith("Strong"):
+        #if snippet.name.startswith("Strong"):
             print snippet.name, snippet.content
             snippet.compile()
-            snippet.resolve("nnnn", "tttt", (0, 0), {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "cachoacho"})
+            snippet.resolve("nnnn", "tttt", (0, 0), {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "<strong>pepe</strong>"})
             print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
             print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
             print snippet
