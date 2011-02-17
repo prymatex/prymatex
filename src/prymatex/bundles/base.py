@@ -233,32 +233,25 @@ def test_preferences():
     print PMXPreference.getSettings(bundle.getPreferences('source.python'))
 
 def test_snippets():
-    #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('Python')
+    bundle = PMXBundle.getBundleByName('LaTeX')
+    #bundle = PMXBundle.getBundleByName('Python')
     for snippet in bundle.snippets:
         #if snippet.name.startswith("Itemize Lines"):
         #if snippet.name.startswith("New Class"):
+            print snippet.content
             snippet.compile()
-            snippet.resolve("", "    ", (0, 0), {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "<strong>pepe</strong>"})
+            snippet.resolve("", "    ", 0, {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "<strong>pepe</strong>"})
             print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
             print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
-            print snippet
-            print "In (0, 6)", snippet.getHolder((0, 6))
-            print "In (0, 14)", snippet.getHolder((0, 14))
-            print "In (0, 15)", snippet.getHolder((0, 15))
-            print "In (2, 24)", snippet.getHolder((2, 24))
+            print snippet, snippet.ends
             clon = snippet.clone()
             clon.write(0, "Foo")
             clon.write(1, "Bar")
             clon.write(3, "bar, foo, bar")
             print "Clone: ", len(clon), clon.next(), clon.position(clon.current())
-            print clon
-            print "In (0, 6)", clon.getHolder((0, 6))
-            print "In (0, 14)", clon.getHolder((0, 14))
-            print "In (0, 15)", clon.getHolder((0, 15))
-            print "In (2, 24)", clon.getHolder((2, 24))
+            print clon, clon.ends
             print "Origin: ", len(snippet), snippet.next(), snippet.position(snippet.current())
-            print snippet
+            print snippet, snippet.ends
             print "-"*30, "\n"
             
 def print_snippet_syntax():
