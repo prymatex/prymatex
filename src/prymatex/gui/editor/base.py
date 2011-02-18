@@ -357,12 +357,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def selectBundleItem(self, key_event, trigger, items):
         cursor = self.textCursor()
         menu = QMenu()
+        def insertItemTrigger(item):
+            self.insertBundleItem(trigger, item)
+            self.keyPressSnippetEvent(key_event)
         for item in items:
-            action = menu.addAction(item.name)  
-            @action.triggered.connect  
-            def insertItem():
-                self.insertBundleItem(trigger, item)
-                self.keyPressSnippetEvent(key_event)
+            action = menu.addAction(item.name)
+            receiver = lambda item = item: insertItemTrigger(item)
+            self.connect(action, SIGNAL('triggered()'), receiver)
         point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
         menu.exec_(point)
     
@@ -459,12 +460,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             character = unicode(key_event.text())
             #Find for getKeyEquivalentItem in bundles
             if scope:
+                #TODO: mejorar esto, cuando es de un key event no pasamos character ni le damos importancia al key_event
                 items = PMXBundle.getKeyEquivalentItem(character, scope)
                 if len(items) > 1:
                     self.selectBundleItem(key_event, character, items)
+                    return
                 elif items:
                     self.insertBundleItem(character, items[0])
                     self.keyPressSnippetEvent(key_event)
+                    return
             # Handle smart typing pairs
             if character in smart_typing_test:
                 self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
