@@ -142,7 +142,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def getCurrentScope(self):
         cursor = self.textCursor()
         user_data = cursor.block().userData()
-        return user_data and user_data.getScopeAtPosition(cursor.columnNumber())
+        return user_data and user_data.getScopeAtPosition(cursor.columnNumber()) or ""
         
     def sendCursorPosChange(self):
         c = self.textCursor()
