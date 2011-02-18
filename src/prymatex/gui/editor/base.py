@@ -268,64 +268,65 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def keyPressSnippetEvent(self, key_event):
         key = key_event.key()
         cursor = self.textCursor()
-        row = cursor.blockNumber()
-        column = cursor.columnNumber()
-
+        
         if key == Qt.Key_Tab or key == Qt.Key_Backtab:
-            if not cursor.hasSelection():
-                holder = self.snippet.current()
-            elif key == Qt.Key_Tab:
+            if key == Qt.Key_Tab:
                 holder = self.snippet.next()
             else:
                 holder = self.snippet.previous()
             if holder == None:
-                #The end
-                index = self.snippet.ends
-                #FIXME:
-                holder = ""
+                cursor.setPosition(self.snippet.ends)
             else:
-                index = self.snippet.position(holder)
-            block = self.document().findBlockByNumber(index[0])
-            cursor.setPosition(block.position() + index[1])
-            cursor.setPosition(block.position() + cursor.columnNumber() + len(holder), QTextCursor.KeepAnchor)
+                index = holder.position()
+                cursor.setPosition(index)
+                cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
             self.setTextCursor(cursor)
-        else:
+        elif key == Qt.Key_Backspace or key_event.text() != "":
             starts = self.snippet.starts
             ends = self.snippet.ends
-            holder = self.snippet.getHolder((row, column))
-            QPlainTextEdit.keyPressEvent(self, key_event)
-            if holder != None:
-                index = self.snippet.position(holder)
-                block = self.document().findBlockByNumber(index[0])
-                holder.write(unicode(block.text())[index[1]: cursor.columnNumber()])
-                block = self.document().findBlockByNumber(starts[0])
-                cursor.setPosition(block.position() + starts[1])
-                block = self.document().findBlockByNumber(ends[0])
-                cursor.setPosition(block.position() + ends[1], QTextCursor.KeepAnchor)
+            (index, holder) = self.snippet.getHolder(cursor.position())
+            position = cursor.position()
+            if holder != None and hasattr(holder, 'insert'):
+                if key == Qt.Key_Backspace:
+                    if cursor.hasSelection():
+                        holder.clear()
+                        position = holder.position()
+                    else:
+                        holder.remove(position - index)
+                        position -= 2
+                else:
+                    if cursor.hasSelection():
+                        holder.clear()
+                        position = index
+                    holder.insert(key_event.text(), position - index)
+                cursor.setPosition(starts)
+                cursor.setPosition(ends, QTextCursor.KeepAnchor)
                 cursor.removeSelectedText();
                 cursor.insertText(str(self.snippet))
-                index = self.snippet.position(holder)
-                block = self.document().findBlockByNumber(index[0])
-                cursor.setPosition(block.position() + index[1] + len(holder))
+                self.snippet.ends = cursor.position()
+                cursor.setPosition(position + 1)
                 self.setTextCursor(cursor)
             else:
                 self.snippet = None
+                QPlainTextEdit.keyPressEvent(self, key_event)
+        else:
+            QPlainTextEdit.keyPressEvent(self, key_event)
             
     def insertSnippet(self, trigger, snippet):
         #TODO: si es mas de uno seleccionar uno, si no selecciona retornar falso
         snippet = snippet[0]
         tab = self.soft_tabs and ' ' * self.tab_length or '\t'
         cursor = self.textCursor()
-        row = cursor.blockNumber()
-        column = cursor.columnNumber()
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
         
-        snippet.resolve(indentation, tab, (row , column - len(trigger)), {})
-        self.snippet = snippet
+        snippet.resolve(indentation, tab, {})
         for _ in range(len(trigger)):
             cursor.deletePreviousChar()
+        snippet.starts = cursor.position()
         cursor.insertText(str(snippet))
+        snippet.ends = cursor.position()
+        self.snippet = snippet
         return True
     
     def keyPressEvent(self, key_event):
@@ -344,9 +345,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         y = cursor.columnNumber()
         doc = self.document()
         text = unicode(cursor.block().text())
-        
-        #Esta es la clave para indexar los snippets en lugar de tanto quilombo
-        print cursor.block().position() + cursor.columnNumber()
         
         scope = self.getCurrentScope()
         preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))

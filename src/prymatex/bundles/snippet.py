@@ -8,17 +8,17 @@ import os, stat, tempfile
 from copy import deepcopy
 from subprocess import Popen, PIPE, STDOUT
 import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY
+from ponyguruma.constants import OPTION_CAPTURE_GROUP
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
 # for run as main
 if __name__ == "__main__":
-    import os, sys
+    import sys
     sys.path.append(os.path.abspath('../..'))
     
 from prymatex.bundles.base import PMXBundleItem
-from prymatex.bundles.processor import PMXSyntaxProcessor, PMXDebugSyntaxProcessor
+from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
 
 SNIPPET_SYNTAX = {
@@ -151,13 +151,22 @@ class NodeList(list):
     def __len__(self):
         return len(str(self))
     
+    def __contains__(self, element):
+        contains = False
+        for child in self:
+            if child == element:
+                return True
+            elif isinstance(child, NodeList) and element in child:
+                return True
+        return contains
+    
     def append(self, element):
         if isinstance(element, (str, unicode)):
             element = TextNode(element, self)
         super(NodeList, self).append(element)
     
     def clear(self):
-        for child in self:
+        while self:
             self.pop()
     
     def resolve(self, indentation, tabreplacement, environment):
@@ -179,15 +188,36 @@ class NodeList(list):
             self.append(text)
             print "%s close %s %s" % (self.__class__.__name__, scope, text)
         return self
-
+    
 #Snippet root
 class Snippet(NodeList):
+    def __init__(self, scope, parent = None):
+        super(Snippet, self).__init__(scope, parent)
+        self.__starts = None
+        self.__ends = None
+    
     def __deepcopy__(self, memo):
         node = Snippet(self.scope, memo["parent"])
         memo["parent"] = node
         for child in self:
             node.append(deepcopy(child, memo))
         return node
+    
+    def setStarts(self, value):
+        self.__starts = value
+        
+    def getStarts(self):
+        return (self.__starts != None) and self.__starts or 0
+    
+    starts = property(getStarts, setStarts)
+    
+    def setEnds(self, value):
+        self.__ends = value
+        
+    def getEnds(self):
+        return (self.__ends != None) and self.__ends or len(self)
+    
+    ends = property(getEnds, setEnds)
         
     def open(self, scope, text):
         node = self
@@ -223,15 +253,20 @@ class Snippet(NodeList):
             return super(Snippet, self).open(scope, text)
         return node
         
-    def position(self, element, index):
-        for child in self:
-            if child == element:
-                break;
-            if hasattr(child, 'position'):
-                index = child.position(element, index)
-            else:
-                index += len(child)
-        return index
+    def position(self, element):
+        pos = self.starts
+        def index(holder, element):
+            val = 0
+            for child in holder:
+                if child == element:
+                    break
+                elif isinstance(child, Snippet) and element in child:
+                    val += index(child, element)
+                    break
+                else:
+                    val += len(child)
+            return val
+        return pos + index(self, element)
 
 #Snippet structures
 class StructureTabstop(Node):
@@ -262,6 +297,12 @@ class StructureTabstop(Node):
             return super(StructureTabstop, self).close(scope, text)
         return node
 
+    def position(self):
+        root = self.parent
+        while (root.parent != None):
+            root = root.parent
+        return root.position(self)
+    
     def taborder(self, container):
         if type(container) == list:
             container.append(self)
@@ -308,10 +349,24 @@ class StructurePlaceholder(Snippet):
             return container
         return self
 
-    def write(self, text):
+    def position(self):
+        root = self.parent
+        while (root.parent != None):
+            root = root.parent
+        return root.position(self)
+    
+    def insert(self, character, position):
+        text = str(self)
+        text = text[:position] + character + text[position:]
         self.clear()
         self.append(text)
-            
+    
+    def remove(self, position):
+        text = str(self)
+        text = text[:position - 1] + text[position:]
+        self.clear()
+        self.append(text)
+        
 class StructureTransformation(Node):
     def __init__(self, scope, parent = None):
         super(StructureTransformation, self).__init__(scope, parent)
@@ -381,8 +436,8 @@ class VariableTabstop(Node):
         if scope == 'string.env.snippet':
             self.name = text
         else:
-            super(VariableTabstop, self).close(scope, text)
-        return self
+            return super(VariableTabstop, self).close(scope, text)
+        return node
     
     def resolve(self, indentation, tabreplacement, environment):
         if self.name in environment:
@@ -410,8 +465,8 @@ class VariablePlaceholder(Snippet):
         if scope == 'string.env.snippet':
             self.name = text
         else:
-            super(VariablePlaceholder, self).close(scope, text)
-        return self
+            return super(VariablePlaceholder, self).close(scope, text)
+        return node
     
     def resolve(self, indentation, tabreplacement, environment):
         if self.name in environment:
@@ -447,8 +502,8 @@ class VariableTransformation(Node):
         if scope == 'string.env.snippet':
             self.name = text
         else:
-            super(VariableTransformation, self).close(scope, text)
-        return self
+            return super(VariableTransformation, self).close(scope, text)
+        return node
     
     def resolve(self, indentation, tabreplacement, environment):
         if self.name in environment:
@@ -618,8 +673,7 @@ class PMXSnippet(PMXBundleItem):
             setattr(self, key, hash.pop(key, None))
         self.snippet = None
         self.taborder = None
-        self.index = 0
-        self.starts = 0
+        self.index = -1
         
     def __deepcopy__(self, memo):
         snippet = PMXSnippet(self.hash, self.name_space)
@@ -635,9 +689,21 @@ class PMXSnippet(PMXBundleItem):
     def __len__(self):
         return len(self.snippet)
     
-    @property
-    def ends(self):
-        return self.position()
+    def setStarts(self, value):
+        self.snippet.starts = value
+        
+    def getStarts(self):
+        return self.snippet.starts
+    
+    starts = property(getStarts, setStarts)
+    
+    def setEnds(self, value):
+        self.snippet.ends = value
+        
+    def getEnds(self):
+        return self.snippet.ends
+    
+    ends = property(getEnds, setEnds) 
     
     def clone(self):
         memo = {"parent": None, "snippet": None, "taborder": {}}
@@ -658,6 +724,8 @@ class PMXSnippet(PMXBundleItem):
     def addTaborder(self, taborder):
         self.taborder = []
         last = taborder.pop(0, None)
+        if (type(last) == list):
+            last = last[0]
         keys = taborder.keys()
         keys.sort()
         for key in keys:
@@ -668,35 +736,37 @@ class PMXSnippet(PMXBundleItem):
         ''' Return the placeholder for index, where index = (row, column)'''
         for holder in self.taborder:
             # if holder == None then is the end of taborders
-            if holder == None: return None
-            index = self.position(holder)
+            if holder == None: return (0, None)
+            index = holder.position()
             if index <= position <= index + len(holder):
-                return holder
-        return None
+                return (index, holder)
+        return (0, None)
     
     def setCurrentHolder(self, holder):
         self.index = self.taborder.index(holder)
     
     def current(self):
+        if self.index == -1:
+            self.index = 0
         return self.taborder[self.index]
 
     def next(self):
         if self.index < len(self.taborder) - 1:
             self.index += 1
+        while self.taborder[self.index] != None and self.taborder[self.index] not in self.snippet:
+            self.taborder.pop(self.index)
         return self.taborder[self.index]
 
     def previous(self):
         if self.index > 0:
             self.index -= 1
+        while self.taborder[self.index] not in self.snippet:
+            self.taborder.pop(self.index)
         return self.taborder[self.index]
     
-    def position(self, tabstop = None):
-        return self.snippet.position(tabstop, self.starts)
-    
-    def resolve(self, indentation, tabreplacement, starts, environment):
-        self.starts = starts
+    def resolve(self, indentation, tabreplacement, environment):
         self.snippet.resolve(indentation, tabreplacement, environment)
     
     def write(self, index, text):
         if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "write"):
-            self.taborder[index].write(text)
+            self.taborder[index].insert(text, 0)
