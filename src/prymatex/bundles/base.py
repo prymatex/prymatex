@@ -188,6 +188,7 @@ class PMXBundle(object):
             for item in cls.TAB_TRIGGERS[keyword]:
                 if not item.ready():
                     item.compile()
+                #score = cls.scores.score(scope, item.scope)
                 score = cls.scores.score(item.scope, scope)
                 if score != 0:
                     items.append((score, item))
@@ -203,6 +204,7 @@ class PMXBundle(object):
                 if not item.ready():
                     item.compile()
                 score = cls.scores.score(item.scope, scope)
+                #score = cls.scores.score(scope, item.scope)
                 if score != 0:
                     items.append((score, item))
             items.sort(key = lambda t: t[0])

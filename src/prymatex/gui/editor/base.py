@@ -455,26 +455,24 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
-
-        # Handle smart typing pairs
-        elif character in smart_typing_test:
-            self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
         elif key_event.text() != "":
+            character = unicode(key_event.text())
             #Find for getKeyEquivalentItem in bundles
             if scope:
-                items = PMXBundle.getKeyEquivalentItem(key_event.text(), scope)
+                items = PMXBundle.getKeyEquivalentItem(character, scope)
                 if len(items) > 1:
-                    self.selectBundleItem(key_event, key_event.text(), items)
+                    self.selectBundleItem(key_event, character, items)
                 elif items:
-                    self.insertBundleItem(key_event.text(), items[0])
+                    self.insertBundleItem(character, items[0])
                     self.keyPressSnippetEvent(key_event)
-                else:
-                    QPlainTextEdit.keyPressEvent(self, key_event)
+            # Handle smart typing pairs
+            if character in smart_typing_test:
+                self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
-            
+
     def performCharacterAction(self, pair):
         '''
         Substitutions when some characters are typed.
