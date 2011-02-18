@@ -20,7 +20,10 @@ class PMXBlockUserData(QTextBlockUserData):
             self.scopes.insert(begin + pos, scope)
         
     def getScopeAtPosition(self, pos):
-        return self.scopes[pos]
+        if pos < len(self.scopes):
+            return self.scopes[pos]
+        else:
+            return ""
         
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0

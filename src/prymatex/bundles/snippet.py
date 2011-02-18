@@ -676,7 +676,7 @@ class PMXSnippet(PMXBundleItem):
         self.index = -1
         
     def __deepcopy__(self, memo):
-        snippet = PMXSnippet(self.hash, self.name_space)
+        snippet = PMXSnippet(deepcopy(self.hash), deepcopy(self.name_space))
         memo["snippet"] = deepcopy(self.snippet, memo)
         return snippet
     

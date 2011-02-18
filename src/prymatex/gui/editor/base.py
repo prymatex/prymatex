@@ -7,7 +7,7 @@ import re
 import logging
 
 from PyQt4.QtCore import QRect
-from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat
+from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu
 from PyQt4.QtGui import QTextCursor, QAction, QFont, QPalette
 from PyQt4.QtCore import Qt, SIGNAL
 
@@ -93,8 +93,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.line_highlight = style.getQColor('lineHighlight')
         self.highlightCurrentLine()
         
-    theme_name = Setting(default = 'Twilight', fset = setTheme)
-
+    #theme_name = Setting(default = 'Twilight', fset = setTheme)
+    theme_name = Setting(default = 'Pastels on Dark', fset = setTheme)
+    
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.side_area = PMXSideArea(self)
@@ -141,7 +142,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def getCurrentScope(self):
         cursor = self.textCursor()
         user_data = cursor.block().userData()
-        return user_data and user_data.getScopeAtPosition(cursor.columnNumber()) or ""
+        return user_data and user_data.getScopeAtPosition(cursor.columnNumber())
         
     def sendCursorPosChange(self):
         c = self.textCursor()
@@ -313,8 +314,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             QPlainTextEdit.keyPressEvent(self, key_event)
             
     def insertSnippet(self, trigger, snippet):
-        #TODO: si es mas de uno seleccionar uno, si no selecciona retornar falso
-        snippet = snippet[0]
         tab = self.soft_tabs and ' ' * self.tab_length or '\t'
         cursor = self.textCursor()
         text = unicode(cursor.block().text())
@@ -327,7 +326,18 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor.insertText(str(snippet))
         snippet.ends = cursor.position()
         self.snippet = snippet
-        return True
+    
+    def selectSnippet(self, key_event, trigger, snippets):
+        cursor = self.textCursor()
+        menu = QMenu()
+        for snippet in snippets:
+            action = menu.addAction(snippet.name)  
+            @action.triggered.connect  
+            def insertSnippet():
+                self.insertSnippet(trigger, snippet)
+                self.keyPressSnippetEvent(key_event)
+        point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
+        menu.exec_(point)
     
     def keyPressEvent(self, key_event):
         '''
@@ -360,8 +370,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             tab = self.soft_tabs and ' ' * self.tab_length or '\t'
             if scope and word:
                 snippets = PMXBundle.getTabTriggerItem(word, scope)
-                if snippets and self.insertSnippet(word, snippets):
-                    return self.keyPressSnippetEvent(key_event)
+                if len(snippets) > 1:
+                    self.selectSnippet(key_event, word, snippets)
+                elif snippets:
+                    self.insertSnippet(word, snippets[0])
+                    self.keyPressSnippetEvent(key_event)
             else:
                 cursor.beginEditBlock()
                 cursor.insertText(tab)
