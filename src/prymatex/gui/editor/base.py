@@ -13,7 +13,7 @@ from PyQt4.QtCore import Qt, SIGNAL
 
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
-from prymatex.bundles import PMXBundle, PMXPreference
+from prymatex.bundles import PMXBundle, PMXPreference, PMXSnippet
 
 logger = logging.getLogger(__name__)
 
@@ -141,8 +141,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
     def getCurrentScope(self):
         cursor = self.textCursor()
-        user_data = cursor.block().userData()
-        return user_data and user_data.getScopeAtPosition(cursor.columnNumber()) or ""
+        block = cursor.block()
+        user_data = block.userData()
+        if user_data == None:
+            return ""
+        if not bool(user_data) and block.userState() == self.processor.MULTI_LINE:
+            while not bool(block.userData()):
+                block = block.previous()
+            return block.userData().getLastScope()
+        return user_data.getScopeAtPosition(cursor.columnNumber())
         
     def sendCursorPosChange(self):
         c = self.textCursor()
@@ -313,28 +320,48 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
             
-    def insertSnippet(self, trigger, snippet):
+    def insertBundleItem(self, trigger, item):
+        ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
+            environment
+            TM_CURRENT_LINE,
+            TM_SUPPORT_PATH: Support dentro de textmate
+            TM_INPUT_START_LINE_INDEX,
+            TM_LINE_INDEX: 
+            TM_LINE_NUMBER: Numero de linea
+            TM_SELECTED_SCOPE:
+            TM_CURRENT_WORD:
+            TM_FILEPATH,
+            TM_FILENAME,
+            TM_DIRECTORY,
+            TM_BUNDLE_SUPPORT: Support dentro del bundle
+            TM_SELECTED_TEXT
+        '''
         tab = self.soft_tabs and ' ' * self.tab_length or '\t'
         cursor = self.textCursor()
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
         
-        snippet.resolve(indentation, tab, {})
+        env = {'TM_CURRENT_LINE': '', 'TM_SUPPORT_PATH': '', 'TM_INPUT_START_LINE_INDEX': '', 'TM_LINE_INDEX': '', 
+               'TM_LINE_NUMBER': '', 'TM_SELECTED_SCOPE': '', 'TM_CURRENT_WORD': '', 'TM_FILEPATH': '', 'TM_FILENAME': '',
+               'TM_DIRECTORY': '', 'TM_BUNDLE_SUPPORT': '', 'TM_SELECTED_TEXT': '' }
+        
+        item.resolve(indentation, tab, env)
         for _ in range(len(trigger)):
             cursor.deletePreviousChar()
-        snippet.starts = cursor.position()
-        cursor.insertText(str(snippet))
-        snippet.ends = cursor.position()
-        self.snippet = snippet
+        item.starts = cursor.position()
+        cursor.insertText(str(item))
+        item.ends = cursor.position()
+        if isinstance(item, PMXSnippet):
+            self.snippet = item
     
-    def selectSnippet(self, key_event, trigger, snippets):
+    def selectBundleItem(self, key_event, trigger, items):
         cursor = self.textCursor()
         menu = QMenu()
-        for snippet in snippets:
-            action = menu.addAction(snippet.name)  
+        for item in items:
+            action = menu.addAction(item.name)  
             @action.triggered.connect  
-            def insertSnippet():
-                self.insertSnippet(trigger, snippet)
+            def insertItem():
+                self.insertBundleItem(trigger, item)
                 self.keyPressSnippetEvent(key_event)
         point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
         menu.exec_(point)
@@ -364,16 +391,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #logger.debug(debug_key(key_event))
 
         if key == Qt.Key_Tab:
-            #Find for tabtrigger in bundles
+            #Find for getTabTriggerItem in bundles
             words = self.SPLITWORDS.split(text[:y])
             word = words and words[-1] or ""
             tab = self.soft_tabs and ' ' * self.tab_length or '\t'
             if scope and word:
                 snippets = PMXBundle.getTabTriggerItem(word, scope)
                 if len(snippets) > 1:
-                    self.selectSnippet(key_event, word, snippets)
+                    self.selectBundleItem(key_event, word, snippets)
                 elif snippets:
-                    self.insertSnippet(word, snippets[0])
+                    self.insertBundleItem(word, snippets[0])
                     self.keyPressSnippetEvent(key_event)
             else:
                 cursor.beginEditBlock()
@@ -401,7 +428,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                     QPlainTextEdit.keyPressEvent(self, key_event)
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
-                
         elif key == Qt.Key_Return:
             if doc.blockCount() == 1:
                 #Esto es un enter y es el primer blocke que tiene el documento
@@ -433,6 +459,19 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         # Handle smart typing pairs
         elif character in smart_typing_test:
             self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
+        elif key_event.text() != "":
+            #Find for getKeyEquivalentItem in bundles
+            if scope:
+                items = PMXBundle.getKeyEquivalentItem(key_event.text(), scope)
+                if len(items) > 1:
+                    self.selectBundleItem(key_event, key_event.text(), items)
+                elif items:
+                    self.insertBundleItem(key_event.text(), items[0])
+                    self.keyPressSnippetEvent(key_event)
+                else:
+                    QPlainTextEdit.keyPressEvent(self, key_event)
+            else:
+                QPlainTextEdit.keyPressEvent(self, key_event)
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
             

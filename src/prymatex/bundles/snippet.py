@@ -589,9 +589,11 @@ class Shell(NodeList):
     
     def resolve(self, indentation, tabreplacement, environment):
         descriptor, name = tempfile.mkstemp(prefix='pmx')
-        os.write(descriptor, str(self).encode('utf8'))
-        os.chmod(name, stat.S_IEXEC)
-        process = Popen([name], stdout=PIPE, stderr=STDOUT, env = environment)
+        file = os.fdopen(descriptor, 'w+')
+        file.write(str(self).encode('utf8'))
+        file.close()
+        os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
+        process = Popen([name], stdout=PIPE, stderr=STDOUT, env = environment, shell=True)
         self.clear()
         result = process.stdout.read()
         self.append(result.strip())
