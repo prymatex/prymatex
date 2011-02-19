@@ -6,8 +6,9 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath('../..'))
 
 from glob import glob
-from prymatex.bundles import snippet, macro
+from prymatex.bundles import macro
 from prymatex.bundles.syntax import PMXSyntax
+from prymatex.bundles.snippet import PMXSnippet
 from prymatex.bundles.preference import PMXPreference
 from prymatex.bundles.command import PMXCommand
 from prymatex.bundles.base import PMXBundle
@@ -17,7 +18,7 @@ from prymatex.core.config import settings
 
 #BundleItemName, BundlePattern, BundleItemClass
 BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*', PMXSyntax),
-                   ('Snippet', 'Snippets/*', snippet.PMXSnippet),
+                   ('Snippet', 'Snippets/*', PMXSnippet),
                    ('Macro', 'Macros/*', macro.PMXMacro),
                    ('Command', 'Commands/*', PMXCommand),
                    ('Preference', 'Preferences/*', PMXPreference)

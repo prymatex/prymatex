@@ -188,6 +188,7 @@ class PMXBundle(object):
             for item in cls.TAB_TRIGGERS[keyword]:
                 if not item.ready():
                     item.compile()
+                #score = cls.scores.score(scope, item.scope)
                 score = cls.scores.score(item.scope, scope)
                 if score != 0:
                     items.append((score, item))
@@ -202,7 +203,8 @@ class PMXBundle(object):
             for item in cls.KEY_EQUIVALENTS[key]:
                 if not item.ready():
                     item.compile()
-                score = cls.scores.score(scope, item.scope)
+                score = cls.scores.score(item.scope, scope)
+                #score = cls.scores.score(scope, item.scope)
                 if score != 0:
                     items.append((score, item))
             items.sort(key = lambda t: t[0])
@@ -237,22 +239,22 @@ def test_snippets():
     bundle = PMXBundle.getBundleByName('Python')
     for snippet in bundle.snippets:
         #if snippet.name.startswith("Itemize Lines"):
-        if snippet.name.startswith("Try"):
+        #if snippet.name.startswith("Try"):
             print snippet.name
             snippet.compile()
-            snippet.resolve("", "    ", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "<strong>pepe</strong>"})
+            snippet.resolve("", "    ", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex"})
             print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
-            print "Origin: ", len(snippet), snippet.next(), snippet.current().position()
+            print "Origin: ", len(snippet), snippet.next()
             print snippet.taborder
             print snippet, snippet.ends
             clon = snippet.clone()
             clon.write(0, "Foo")
             clon.write(1, "Bar")
             clon.write(3, "bar, foo, bar")
-            print "Clone: ", len(clon), clon.next(), clon.current().position()
+            print "Clone: ", len(clon), clon.next()
             print clon.taborder
             print clon, clon.ends
-            print "Origin: ", len(snippet), snippet.next(), snippet.current().position()
+            print "Origin: ", len(snippet), snippet.next()
             print clon.taborder
             print snippet, snippet.ends
             print "-"*30, "\n"

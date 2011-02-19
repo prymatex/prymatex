@@ -12,18 +12,18 @@ class PMXBlockUserData(QTextBlockUserData):
         self.scopes = []
         self.folding = self.FOLDING_NONE
     
-    def __str__(self):
-        return ' '.join(map(str, self.tokens))
+    def __nonzero__(self):
+        return bool(self.scopes)
+    
+    def getLastScope(self):
+        return self.scopes[-1]
     
     def addScope(self, begin, end, scope):
         for pos in xrange(end - begin):
             self.scopes.insert(begin + pos, scope)
         
     def getScopeAtPosition(self, pos):
-        if pos < len(self.scopes):
-            return self.scopes[pos]
-        else:
-            return ""
+        return self.scopes[pos]
         
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
