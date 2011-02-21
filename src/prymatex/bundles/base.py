@@ -11,6 +11,7 @@ if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
+from prymatex.core.config import settings
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -75,12 +76,13 @@ class PMXBundle(object):
     PREFERENCES = {}
     scores = PMXScoreManager()
     
-    def __init__(self, hash):
+    def __init__(self, hash, path):
         for key in [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]:
             value = hash.pop(key, None)
             if key == 'mainMenu' and value != None:
                 value = PMXMenuNode(self.name, **value)
             setattr(self, key, value)
+        self.path = path
         self.syntaxes = []
         self.snippets = []
         self.macros = []
@@ -126,15 +128,22 @@ class PMXBundle(object):
             if syntax.name == name:
                 return syntax
 
+    def getBundleSupportPath(self):
+        return os.path.join(self.path, 'Support')
+
     @staticmethod
     def loadBundle(path, elements, name_space = 'prymatex'):
         info_file = os.path.join(path, 'info.plist')
         try:
             data = plistlib.readPlist(info_file)
-            bundle = PMXBundle(data)
+            bundle = PMXBundle(data, path)
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
-            
+        
+        #Disabled?
+        if bundle.uuid in settings.disabled_bundles:
+            return
+        
         for name, pattern, klass in elements:
             files = glob(os.path.join(path, pattern))
             for sf in files:

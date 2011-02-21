@@ -71,7 +71,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Settings
     #-----------------------------------
     soft_tabs = Setting(default = True)
-    tab_length = Setting(default = 4)
+    tab_size = Setting(default = 4)
     font = Setting(default = {"name": "Monospace", "size": 10}, 
                    fset = lambda self, value: self.setFont(QFont(value["name"], value["size"]))
                    )
@@ -178,7 +178,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if not self.soft_tabs:
             return '\t'
         else:
-            return ' ' * self.tab_length
+            return ' ' * self.tab_size
 
     def contextMenuEvent(self, event):
         '''
@@ -319,33 +319,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 QPlainTextEdit.keyPressEvent(self, key_event)
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
-            
+
     def insertBundleItem(self, trigger, item):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
-            environment
-            TM_CURRENT_LINE,
-            TM_SUPPORT_PATH: Support dentro de textmate
-            TM_INPUT_START_LINE_INDEX,
-            TM_LINE_INDEX: 
-            TM_LINE_NUMBER: Numero de linea
-            TM_SELECTED_SCOPE:
-            TM_CURRENT_WORD:
-            TM_FILEPATH,
-            TM_FILENAME,
-            TM_DIRECTORY,
-            TM_BUNDLE_SUPPORT: Support dentro del bundle
-            TM_SELECTED_TEXT
         '''
-        tab = self.soft_tabs and ' ' * self.tab_length or '\t'
+        tab = self.soft_tabs and ' ' * self.tab_size or '\t'
         cursor = self.textCursor()
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
-        
-        env = {'TM_CURRENT_LINE': '', 'TM_SUPPORT_PATH': '', 'TM_INPUT_START_LINE_INDEX': '', 'TM_LINE_INDEX': '', 
-               'TM_LINE_NUMBER': '', 'TM_SELECTED_SCOPE': '', 'TM_CURRENT_WORD': '', 'TM_FILEPATH': '', 'TM_FILENAME': '',
-               'TM_DIRECTORY': '', 'TM_BUNDLE_SUPPORT': '', 'TM_SELECTED_TEXT': '' }
-        
-        item.resolve(indentation, tab, env)
+
+        item.resolve(indentation, tab, self.buildBundleItemEnvironment(item = item, word = trigger))
         for _ in range(len(trigger)):
             cursor.deletePreviousChar()
         item.starts = cursor.position()
@@ -369,8 +352,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     def keyPressEvent(self, key_event):
         '''
-        This method is called whenever a key is pressed. The key code is
-        stored in key_event.key()
+        This method is called whenever a key is pressed. The key code is stored in key_event.key()
         '''
         
         if self.snippet != None:
@@ -382,20 +364,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         x = cursor.blockNumber()
         y = cursor.columnNumber()
         doc = self.document()
-        text = unicode(cursor.block().text())
+        line = unicode(cursor.block().text())
         
         scope = self.getCurrentScope()
         preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
         smart_typing_test = map(lambda pair: pair[0], preferences["smartTypingPairs"])
-        indentation = self.identationWhitespace(text)
+        indentation = self.identationWhitespace(line)
         
         #logger.debug(debug_key(key_event))
 
         if key == Qt.Key_Tab:
             #Find for getTabTriggerItem in bundles
-            words = self.SPLITWORDS.split(text[:y])
+            words = self.SPLITWORDS.split(line[:y])
             word = words and words[-1] or ""
-            tab = self.soft_tabs and ' ' * self.tab_length or '\t'
+            tab = self.soft_tabs and ' ' * self.tab_size or '\t'
             if scope and word:
                 snippets = PMXBundle.getTabTriggerItem(word, scope)
                 if len(snippets) > 1:
@@ -432,25 +414,25 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         elif key == Qt.Key_Return:
             if doc.blockCount() == 1:
                 #Esto es un enter y es el primer blocke que tiene el documento
-                syntax = PMXSyntax.findSyntaxByFirstLine(text)
+                syntax = PMXSyntax.findSyntaxByFirstLine(line)
                 if syntax != None:
                     self.setSyntax(syntax)
                     
-            if "decreaseIndentPattern" in preferences and preferences["decreaseIndentPattern"].match(text):
+            if "decreaseIndentPattern" in preferences and preferences["decreaseIndentPattern"].match(line):
                 logger.debug("decreaseIndentPattern")
                 self.decreaseIndent(indentation)
-                indentation = self.identationWhitespace(text)
+                indentation = self.identationWhitespace(line)
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
-            elif "increaseIndentPattern" in preferences and preferences["increaseIndentPattern"].match(text):
+            elif "increaseIndentPattern" in preferences and preferences["increaseIndentPattern"].match(line):
                 logger.debug("increaseIndentPattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.increaseIndent(indentation)
-            elif "indentNextLinePattern" in preferences and preferences["indentNextLinePattern"].match(text):
+            elif "indentNextLinePattern" in preferences and preferences["indentNextLinePattern"].match(line):
                 logger.debug("indentNextLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.increaseIndent(indentation)
-            elif "unIndentedLinePattern" in preferences and preferences["unIndentedLinePattern"].match(text):
+            elif "unIndentedLinePattern" in preferences and preferences["unIndentedLinePattern"].match(line):
                 logger.debug("unIndentedLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
             else:
@@ -506,6 +488,47 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.setTextCursor(cursor)
         cursor.endEditBlock()
 
+    def buildBundleItemEnvironment(self, item = None, word = ""):
+        ''' environment
+            http://manual.macromates.com/en/environment_variables.html
+            TM_CURRENT_LINE,
+            TM_SUPPORT_PATH: Support dentro de textmate
+            TM_INPUT_START_LINE_INDEX,
+            TM_LINE_INDEX: 
+            TM_LINE_NUMBER: Numero de linea
+            TM_SELECTED_SCOPE:
+            TM_CURRENT_WORD:
+            TM_FILEPATH,
+            TM_FILENAME,
+            TM_SCOPE,
+            TM_PROJECT_DIRECTORY,
+            TM_DIRECTORY,
+            TM_SELECTED_FILES,
+            TM_SELECTED_FILE,
+            TM_BUNDLE_SUPPORT: Support dentro del bundle
+            TM_SELECTED_TEXT,
+            TM_SOFT_TABS,
+            TM_TAB_SIZE,
+        '''
+        cursor = self.textCursor()
+        line = unicode(cursor.block().text())
+        env = {'TM_CURRENT_LINE': line,
+               'TM_SUPPORT_PATH': self._meta.settings['PMX_SUPPORT_PATH'],
+               'TM_INPUT_START_LINE_INDEX': '',
+               'TM_LINE_INDEX': '', 
+               'TM_LINE_NUMBER': '', 
+               'TM_SELECTED_SCOPE': self.getCurrentScope(), 
+               'TM_CURRENT_WORD': word,
+               'TM_FILEPATH': '',
+               'TM_FILENAME': '',
+               'TM_DIRECTORY': '',
+               'TM_SOFT_TABS': self.soft_tabs and 'YES' or 'NO',
+               'TM_TAB_SIZE': self.tab_size,
+               'TM_BUNDLE_SUPPORT': item.bundle.getBundleSupportPath(),
+               'TM_SELECTED_TEXT': cursor.selectedText() }
+        env.update(self._meta.settings['static_variables'])
+        return env
+        
     #===========================================================================
     # Text Indentation
     #===========================================================================
@@ -525,7 +548,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             return ''
     
     def increaseIndent(self, indentation):
-        self.indent(indentation + (self.soft_tabs and ' ' * self.tab_length or '\t'))
+        self.indent(indentation + (self.soft_tabs and ' ' * self.tab_size or '\t'))
     
     def decreaseIndent(self, identation):
         self.unindent()
@@ -579,7 +602,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
 
         for _i in range(block_count):
             if self.soft_tabs:
-                for _j in range(self.tab_length):
+                for _j in range(self.tab_size):
                     new_cursor.deleteChar()
             else:
                 new_cursor.deleteChar()
