@@ -278,7 +278,9 @@ def print_snippet_syntax():
     
 def test_syntaxes():
     from prymatex.bundles.syntax import PMXSyntax
-    print PMXSyntax.getSyntaxesByScope("text")
+    from prymatex.bundles.processor import PMXDebugSyntaxProcessor
+    syntax = PMXSyntax.getSyntaxesByName("LaTeX")
+    syntax[0].parse("item", PMXDebugSyntaxProcessor())
     print PMXSyntax.getSyntaxesNames()
 
 def print_commands():
@@ -290,4 +292,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    print_commands()
+    test_syntaxes()

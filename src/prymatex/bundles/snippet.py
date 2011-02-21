@@ -75,10 +75,10 @@ SNIPPET_SYNTAX = {
                               'contentName': 'text.condition',
                               'end': '\\)',
                               'name': 'meta.structure.condition.regexp',
-                              'patterns': [#{'include': '#replacements'},
+                              'patterns': [{'include': '#escaped_char'},
                                            {'begin': ':',
                                             'end': '(?=\\))',
-                                            'name': 'meta.structure.condition.regexp',
+                                            'name': 'else.condition',
                                             #'patterns': [{'include': '#replacements'}]
                                             }]},
                 'escaped_char': {'match': '\\\\[/\\\\]',
@@ -604,19 +604,32 @@ class Condition(Node):
         super(Condition, self).__init__(scope, parent)
         self.index = None
         self.format = ""
+        self.other = ""
 
     def __deepcopy__(self, memo):
         node = Condition(self.scope, memo["parent"])
         node.index = self.index
         node.format = self.format
         return node
-        
+    
+    def open(self, scope, text):
+        node = self
+        if scope == 'else.condition':
+            self.format += text.replace('\\n', '\n').replace('\\t', '\t')
+        elif scope == 'constant.character.escape.regexp':
+            print "se esta escapando", text
+        else:
+            return super(Condition, self).open(scope, text)
+        return node
+    
     def close(self, scope, text):
         node = self
         if scope == 'string.regexp.condition':
             self.index = int(text)
         elif scope == 'text.condition':
             self.format += text.replace('\\n', '\n').replace('\\t', '\t')
+        elif scope == 'else.condition':
+            self.other += text.replace('\\n', '\n').replace('\\t', '\t')
         else:
             return super(Condition, self).close(scope, text)
         return node
