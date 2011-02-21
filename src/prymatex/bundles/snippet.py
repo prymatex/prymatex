@@ -680,6 +680,7 @@ class PMXSnippet(PMXBundleItem):
     def __deepcopy__(self, memo):
         snippet = PMXSnippet(deepcopy(self.hash), deepcopy(self.name_space))
         memo["snippet"] = deepcopy(self.snippet, memo)
+        snippet.bundle = self.bundle
         return snippet
     
     def __str__(self):
@@ -735,14 +736,15 @@ class PMXSnippet(PMXBundleItem):
         self.taborder.append(last)
 
     def getHolder(self, position):
-        ''' Return the placeholder for index, where index = (row, column)'''
+        ''' Return the placeholder for position, where starts > position > ends'''
+        found = (0, None)
         for holder in self.taborder:
             # if holder == None then is the end of taborders
             if holder == None: return (0, None)
             index = holder.position()
-            if index <= position <= index + len(holder):
-                return (index, holder)
-        return (0, None)
+            if index <= position <= index + len(holder) and (found[1] == None or len(holder) < len(found[1])):
+                found = (index, holder)
+        return found
     
     def setCurrentHolder(self, holder):
         self.index = self.taborder.index(holder)

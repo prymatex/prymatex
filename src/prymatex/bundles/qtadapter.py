@@ -2,9 +2,16 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4.Qt import QTextCharFormat, QColor, QFont
+from PyQt4.QtCore import Qt 
 
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
+    * Meta -> (cinta de 4 esquinas) -> arroba (@)
+    * Control es ^
+    * Shift es la $
+    * Backspace -> ^?
+    * supr -> ?M-^\?
+    * Alt -> ~
 '''
 
 #caret, foreground, selection, invisibles, lineHighlight, gutter, background
@@ -36,4 +43,19 @@ def buildQTextFormat(style):
     return format
     
 def buildKeyEquivalentPattern(key_event):
-    return "^$K"
+    value = key_event.text()
+    if value != "": return value
+    modifiers = key_event.modifiers()
+    print modifiers
+    key = key_event.key()
+    if modifiers & Qt.ControlModifier:
+        value += "^"
+    if modifiers & Qt.AltModifier:
+        value += "~"
+    if modifiers & Qt.ShiftModifier:
+        value += "$"
+    if modifiers & Qt.MetaModifier:
+        value += "@"
+    if key < 255:
+        value += chr(key) 
+    return value

@@ -12,6 +12,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
 from prymatex.core.config import settings
+from prymatex.bundles.qtadapter import buildKeyEquivalentPattern
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -206,8 +207,10 @@ class PMXBundle(object):
         return items
             
     @classmethod
-    def getKeyEquivalentItem(cls, key, scope):
+    def getKeyEquivalentItem(cls, key_event, scope):
         items = []
+        key = buildKeyEquivalentPattern(key_event)
+        print key
         if cls.KEY_EQUIVALENTS.has_key(key):
             for item in cls.KEY_EQUIVALENTS[key]:
                 if not item.ready():
@@ -226,7 +229,7 @@ class PMXBundleItem(object):
         self.name_space = name_space
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
-            
+          
     def clone(self):
         return self
     
@@ -277,10 +280,14 @@ def test_syntaxes():
     from prymatex.bundles.syntax import PMXSyntax
     print PMXSyntax.getSyntaxesByScope("text")
     print PMXSyntax.getSyntaxesNames()
+
+def print_commands():
+    from pprint import pprint
+    pprint(PMXBundle.KEY_EQUIVALENTS)
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLE_ELEMENTS
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    test_snippets()
+    print_commands()
