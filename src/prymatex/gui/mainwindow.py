@@ -31,6 +31,10 @@ from prymatex.bundles.base import PMXMenuNode
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
+    '''
+    Prymatex main window, it holds a currentEditor property which
+    grants access to the focused editor.
+    '''
 
     
     def __init__(self, files_to_open):
@@ -182,13 +186,15 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def currentTabWidget(self):
         ''' Shortcut to the current editor (bypass layoutManager) '''
         return self.centralWidget()
-    
+
+    # TODO: Fix, just grep and replace
     @property
     def current_editor(self):
         #return self.currentTabWidget.currentWidget() # Old layout manager code
         editor = self.tabWidget.currentWidget()
-        print editor
         return editor
+
+    currentEditor = current_editor
 
 
     
