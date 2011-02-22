@@ -242,8 +242,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         return self.document().findBlock( cursor.selectionEnd() ).blockNumber()
 
     def mousePressEvent(self, mouse_event):
-        # TOOD: This should be activated only when free editing is enabled
-        # self.inserSpacesUpToPoint(mouse_event.pos())
+        self.inserSpacesUpToPoint(mouse_event.pos())
         super(PMXCodeEdit, self).mousePressEvent(mouse_event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
@@ -290,36 +289,65 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(index)
                 cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
             self.setTextCursor(cursor)
-        elif key == Qt.Key_Backspace or key_event.text() != "":
+        elif key == Qt.Key_Backspace:
             starts = self.snippet.starts
             ends = self.snippet.ends
-            (index, holder) = self.snippet.getHolder(cursor.position())
-            position = cursor.position()
-            if holder != None and hasattr(holder, 'insert'):
-                self.snippet.setCurrentHolder(holder)
-                if key == Qt.Key_Backspace:
-                    if cursor.hasSelection():
-                        holder.clear()
-                        position = holder.position()
-                    else:
-                        holder.remove(position - index)
-                        position -= 1
+            if cursor.hasSelection():
+                (index, holder) = self.snippet.getHolder(cursor.selectionStart(), cursor.selectionEnd())
+                if holder == None or not hasattr(holder, 'insert'):
+                    self.snippet = None
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
                 else:
-                    if cursor.hasSelection():
-                        holder.clear()
-                        position = index
-                    holder.insert(key_event.text(), position - index)
-                    position += holder.position() - index + 1
-                cursor.setPosition(starts)
-                cursor.setPosition(ends, QTextCursor.KeepAnchor)
-                cursor.removeSelectedText();
-                cursor.insertText(str(self.snippet))
-                self.snippet.ends = cursor.position()
-                cursor.setPosition(position)
-                self.setTextCursor(cursor)
+                    self.snippet.setCurrentHolder(holder)
+                holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
+                position = cursor.selectionStart()
             else:
-                self.snippet = None
-                QPlainTextEdit.keyPressEvent(self, key_event)
+                (index, holder) = self.snippet.getHolder(cursor.position())
+                if holder == None or not hasattr(holder, 'insert'):
+                    self.snippet = None
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                else:
+                    self.snippet.setCurrentHolder(holder)
+                holder.remove(cursor.position() - index - 1, cursor.position() - index)
+                position = cursor.position() - 1
+            #Ajuste
+            position += (holder.position() - index)
+            cursor.setPosition(starts)
+            cursor.setPosition(ends, QTextCursor.KeepAnchor)
+            cursor.removeSelectedText();
+            cursor.insertText(str(self.snippet))
+            self.snippet.ends = cursor.position()
+            cursor.setPosition(position)
+            self.setTextCursor(cursor)
+        elif key_event.text() != "":
+            starts = self.snippet.starts
+            ends = self.snippet.ends
+            if cursor.hasSelection():
+                (index, holder) = self.snippet.getHolder(cursor.selectionStart(), cursor.selectionEnd())
+                if holder == None or not hasattr(holder, 'insert'):
+                    self.snippet = None
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                else:
+                    self.snippet.setCurrentHolder(holder)
+                holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
+                position = cursor.selectionStart()
+            else:
+                (index, holder) = self.snippet.getHolder(cursor.position())
+                if holder == None or not hasattr(holder, 'insert'):
+                    self.snippet = None
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                else:
+                    self.snippet.setCurrentHolder(holder)
+                position = cursor.position()
+            holder.insert(key_event.text(), position - index)
+            position += holder.position() - index + 1
+            cursor.setPosition(starts)
+            cursor.setPosition(ends, QTextCursor.KeepAnchor)
+            cursor.removeSelectedText();
+            cursor.insertText(str(self.snippet))
+            self.snippet.ends = cursor.position()
+            cursor.setPosition(position)
+            self.setTextCursor(cursor)
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
 

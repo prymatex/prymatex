@@ -79,8 +79,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
         #self.actionShowFSPane.setChecked(True)
         self.prevent_menu_lock()
-
-
     
     def setup_logging(self):
         '''
@@ -146,7 +144,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def insertBundleItem(self, item):
         if not item.ready():
             item.compile()
-        self.currentEditor.codeEdit.insertBundleItem(item.clone())
+        self.currentEditor.insertBundleItem(item.clone())
         
     def addMenuItem(self, parent_menu, item):
         if isinstance(item, PMXMenuNode):
@@ -158,9 +156,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             parent_menu.addSeparator()
         elif item != None and item.name:
             action = QAction(item.name, self)
-            shortcut = item.getKeySequence()
-            if shortcut != None:
-                action.setShortcut(shortcut)
+            #shortcut = item.getKeySequence()
+            #if shortcut != None:
+            #    action.setShortcut(shortcut)
             receiver = lambda item = item: self.insertBundleItem(item)
             self.connect(action, SIGNAL('triggered()'), receiver)
             parent_menu.addAction(action)
@@ -198,8 +196,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     currentEditor = current_editor
 
-
-    
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
         self.centralWidget().appendEmptyTab()
@@ -391,7 +387,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
-        scope = self.currentEditor.codeEdit.getCurrentScope()
+        scope = self.currentEditor.getCurrentScope()
         self.statusBar().showMessage("%s" % (scope))
         
     @pyqtSignature('')

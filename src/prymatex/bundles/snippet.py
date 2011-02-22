@@ -276,12 +276,13 @@ class StructureTabstop(Node):
         super(StructureTabstop, self).__init__(scope, parent)
         self.placeholder = None
         self.index = None
+        self.content = ""
 
     def __str__(self):
         if self.placeholder != None:
             return str(self.placeholder)
         else:
-            return ""
+            return self.content
 
     def __deepcopy__(self, memo):
         node = StructureTabstop(self.scope, memo["parent"])
@@ -311,7 +312,18 @@ class StructureTabstop(Node):
         else:
             self.placeholder = container
         return container
-
+    
+    def insert(self, character, position):
+        text = str(self)
+        text = text[:position] + character + text[position:]
+        self.content = text
+    
+    def remove(self, start, end = None):
+        end = end != None and end or start
+        text = str(self)
+        text = text[:start] + text[end:]
+        self.content = text
+        
 class StructurePlaceholder(Snippet):
     def __init__(self, scope, parent = None):
         super(StructurePlaceholder, self).__init__(scope, parent)
@@ -363,9 +375,10 @@ class StructurePlaceholder(Snippet):
         self.clear()
         self.append(text)
     
-    def remove(self, position):
+    def remove(self, start, end = None):
+        end = end != None and end or start
         text = str(self)
-        text = text[:position - 1] + text[position:]
+        text = text[:start] + text[end:]
         self.clear()
         self.append(text)
         
@@ -572,19 +585,11 @@ class Regexp(NodeList):
                     break;
         return result
     
-class Shell(NodeList):
-    def open(self, scope, text):
-        node = self
-        if scope == 'string.script':
-            self.append(text[1:])
-        else:
-            return super(Shell, self).open(scope, text)
-        return node
-    
+class Shell(NodeList):    
     def close(self, scope, text):
         node = self
         if scope == 'string.script':
-            self.append(text[1:])
+            self.append(text)
         else:
             return super(Shell, self).close(scope, text)
         return node
@@ -762,14 +767,15 @@ class PMXSnippet(PMXBundleItem):
             self.taborder.append(holder)
         self.taborder.append(last)
 
-    def getHolder(self, position):
+    def getHolder(self, start, end = None):
         ''' Return the placeholder for position, where starts > position > ends'''
+        end = end != None and end or start
         found = (0, None)
         for holder in self.taborder:
             # if holder == None then is the end of taborders
             if holder == None: return (0, None)
             index = holder.position()
-            if index <= position <= index + len(holder) and (found[1] == None or len(holder) < len(found[1])):
+            if index <= start <= index + len(holder) and index <= end <= index + len(holder) and (found[1] == None or len(holder) < len(found[1])):
                 found = (index, holder)
         return found
     
