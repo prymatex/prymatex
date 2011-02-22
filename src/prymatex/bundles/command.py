@@ -19,16 +19,19 @@ class PMXCommand(PMXBundleItem):
         
         if hash:
             print "Command '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+        self.value = ""
         
-    def execute(self, environment):
+    def __str__(self):
+        return self.value
+    
+    def resolve(self, indentation, tabreplacement, environment):
         descriptor, name = tempfile.mkstemp(prefix='pmx')
         file = os.fdopen(descriptor, 'w+')
         file.write(self.command.encode('utf8'))
         file.close()
         os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
         process = Popen([name], stdout=PIPE, stderr=STDOUT, env = environment, shell=True)
-        result = process.stdout.read()
-        print result
+        self.value = process.stdout.read()
         
 def parse_file(filename):
     import plistlib

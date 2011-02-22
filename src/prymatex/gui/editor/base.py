@@ -2,7 +2,6 @@
 
 #
 import sys
-import traceback
 import re
 import logging
 
@@ -87,6 +86,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         palette = self.palette()
         palette.setColor(QPalette.Active, QPalette.Text, foreground)
         palette.setColor(QPalette.Active, QPalette.Base, background)
+        palette.setColor(QPalette.Inactive, QPalette.Base, background)
         palette.setColor(QPalette.Active, QPalette.Highlight, selection)
         palette.setColor(QPalette.Active, QPalette.AlternateBase, invisibles)
         self.setPalette(palette)
@@ -322,14 +322,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
 
-    def insertBundleItem(self, trigger, item):
+    def insertBundleItem(self, item, trigger = ""):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
         tab = self.soft_tabs and ' ' * self.tab_size or '\t'
         cursor = self.textCursor()
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
-
         item.resolve(indentation, tab, self.buildBundleItemEnvironment(item = item, word = trigger))
         if isinstance(item, PMXSnippet):
             for _ in range(len(trigger)):
@@ -354,12 +353,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             #puede ser un comando
             pass
     
-    def selectBundleItem(self, trigger, items):
+    def selectBundleItem(self, items, trigger = ""):
         cursor = self.textCursor()
         menu = QMenu()
         for item in items:
             action = menu.addAction(item.name)
-            receiver = lambda item = item: self.insertBundleItem(trigger, item)
+            receiver = lambda item = item: self.insertBundleItem(item, trigger)
             self.connect(action, SIGNAL('triggered()'), receiver)
         point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
         menu.exec_(point)
@@ -395,9 +394,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             if scope and word:
                 snippets = PMXBundle.getTabTriggerItem(word, scope)
                 if len(snippets) > 1:
-                    self.selectBundleItem(word, snippets)
+                    self.selectBundleItem(snippets, word)
                 elif snippets:
-                    self.insertBundleItem(word, snippets[0])
+                    self.insertBundleItem(snippets[0], word)
             else:
                 cursor.beginEditBlock()
                 cursor.insertText(tab)
@@ -458,10 +457,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 #TODO: mejorar esto, cuando es de un key event no pasamos character ni le damos importancia al key_event
                 items = PMXBundle.getKeyEquivalentItem(key_event, scope)
                 if len(items) > 1:
-                    self.selectBundleItem(character, items)
+                    self.selectBundleItem(items, character)
                     return
                 elif items:
-                    self.insertBundleItem(character, items[0])
+                    self.insertBundleItem(items[0], character)
                     return
             # Handle smart typing pairs
             if character in smart_typing_test:
@@ -539,7 +538,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                'TM_BUNDLE_SUPPORT': item.bundle.getBundleSupportPath(),
                'TM_SELECTED_TEXT': str(cursor.selectedText()) }
         env.update(self._meta.settings['static_variables'])
-        print env
         return env
         
     #===========================================================================

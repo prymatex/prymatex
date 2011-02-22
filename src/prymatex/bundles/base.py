@@ -238,6 +238,9 @@ class PMXBundleItem(object):
     
     def compile(self):
         pass
+    
+    def resolve(self, indentation, tabreplacement, environment):
+        pass
 #----------------------------------------
 # Tests
 #----------------------------------------
