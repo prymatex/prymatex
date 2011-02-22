@@ -75,19 +75,22 @@ SNIPPET_SYNTAX = {
                               'contentName': 'text.condition',
                               'end': '\\)',
                               'name': 'meta.structure.condition.regexp',
-                              'patterns': [{'include': '#escaped_char'},
+                              'patterns': [{'include': '#escaped_cond'},
                                            {'begin': ':',
                                             'end': '(?=\\))',
-                                            'name': 'else.condition',
-                                            #'patterns': [{'include': '#replacements'}]
+                                            'contentName': 'otherwise.condition',
+                                            'patterns': [{'include': '#escaped_cond'}]
                                             }]},
-                'escaped_char': {'match': '\\\\[/\\\\]',
+                'escaped_cond': {'captures': {'1': {'name': 'keyword.escape.condition'}},
+                                 'match': '\\\\(\\))',
+                                 'name': 'constant.character.escape.condition'},
+                'escaped_char': {'match': '\\\\[/\\\\\\}\\{]',
                                  'name': 'constant.character.escape.regexp'},
                 #'replacements': {'match': '\\$\\d|\\\\[uUILE]',
                 #                 'name': 'string.regexp.replacement'},
                 'substitution': {'begin': '/',
                                  'contentName': 'string.regexp.format',
-                                 'end': '/([mg]?)',
+                                 'end': '/([mg]?)/?',
                                  'endCaptures': {'1': {'name': 'string.regexp.options'}},
                                  'patterns': [{'include': '#escaped_char'},
                                               {'include': '#condition'}]}},
@@ -152,13 +155,12 @@ class NodeList(list):
         return len(str(self))
     
     def __contains__(self, element):
-        contains = False
         for child in self:
             if child == element:
                 return True
             elif isinstance(child, NodeList) and element in child:
                 return True
-        return contains
+        return False
     
     def append(self, element):
         if isinstance(element, (str, unicode)):
@@ -603,21 +605,23 @@ class Condition(Node):
     def __init__(self, scope, parent = None):
         super(Condition, self).__init__(scope, parent)
         self.index = None
-        self.format = ""
-        self.other = ""
-
+        self.insertion = ""
+        self.otherwise = ""
+        self.current = ""
+        
     def __deepcopy__(self, memo):
         node = Condition(self.scope, memo["parent"])
         node.index = self.index
-        node.format = self.format
+        node.insertion = self.insertion
+        node.otherwise = self.otherwise
         return node
     
     def open(self, scope, text):
         node = self
-        if scope == 'else.condition':
-            self.format += text.replace('\\n', '\n').replace('\\t', '\t')
-        elif scope == 'constant.character.escape.regexp':
-            print "se esta escapando", text
+        if scope == 'otherwise.condition':
+            self.current += text[:-1].replace('\\n', '\n').replace('\\t', '\t')
+            self.insertion = self.current
+            self.current = ""
         else:
             return super(Condition, self).open(scope, text)
         return node
@@ -626,24 +630,31 @@ class Condition(Node):
         node = self
         if scope == 'string.regexp.condition':
             self.index = int(text)
-        elif scope == 'text.condition':
-            self.format += text.replace('\\n', '\n').replace('\\t', '\t')
-        elif scope == 'else.condition':
-            self.other += text.replace('\\n', '\n').replace('\\t', '\t')
+        elif scope == 'text.condition' and self.insertion == "":
+            self.current += text.replace('\\n', '\n').replace('\\t', '\t')
+            self.insertion = self.current
+        elif scope == 'keyword.escape.condition':
+            self.current += text.replace('\\n', '\n').replace('\\t', '\t')
+        elif scope == 'otherwise.condition':
+            self.current += text.replace('\\n', '\n').replace('\\t', '\t')
+            self.otherwise = self.current
+            self.current = ""
         else:
             return super(Condition, self).close(scope, text)
         return node
     
     def substitute(self, match):
         if match and match[self.index] != None:
-            values = onig_compile("\$(\d+)").split(self.format)
-            for index in xrange(1, len(values), 2):
-                values[index] = match[int(values[index])]
-            return "".join(values)
-        return ""
+            values = onig_compile("\$(\d+)").split(self.insertion)
+        else:
+            values = onig_compile("\$(\d+)").split(self.otherwise)
+        for index in xrange(1, len(values), 2):
+            value = match[int(values[index])]
+            values[index] = value != None and value or ""
+        return "".join(values)
             
     def resolve(self, indentation, tabreplacement, environment):
-        self.format = self.format.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
+        self.insertion = self.insertion.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
 
 class PMXSnippetProcessor(PMXSyntaxProcessor):
     def __init__(self):
@@ -740,12 +751,15 @@ class PMXSnippet(PMXBundleItem):
     def addTaborder(self, taborder):
         self.taborder = []
         last = taborder.pop(0, None)
-        if (type(last) == list):
-            last = last[0]
+        if type(last) == list:
+            last = last.pop()
         keys = taborder.keys()
         keys.sort()
         for key in keys:
-            self.taborder.append(taborder.pop(key))
+            holder = taborder.pop(key)
+            if type(holder) == list:
+                holder = holder.pop()
+            self.taborder.append(holder)
         self.taborder.append(last)
 
     def getHolder(self, position):
@@ -785,5 +799,6 @@ class PMXSnippet(PMXBundleItem):
         self.snippet.resolve(indentation, tabreplacement, environment)
     
     def write(self, index, text):
-        if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "write"):
+        if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "insert"):
+            self.taborder[index].clear()
             self.taborder[index].insert(text, 0)
