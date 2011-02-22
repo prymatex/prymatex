@@ -252,27 +252,22 @@ def test_preferences():
 def test_snippets():
     #bundle = PMXBundle.getBundleByName('LaTeX')
     bundle = PMXBundle.getBundleByName('Python')
+    #bundle = PMXBundle.getBundleByName('C')
     for snippet in bundle.snippets:
         #if snippet.name.startswith("Itemize Lines"):
-        #if snippet.name.startswith("Try"):
+        #if snippet.name.startswith("Sub Sub"):
             print snippet.name
             snippet.compile()
             snippet.resolve("", "    ", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex"})
             print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
             print "Origin: ", len(snippet), snippet.next()
-            print snippet.taborder
             print snippet, snippet.ends
             clon = snippet.clone()
             clon.write(0, "Foo")
-            clon.write(1, "Bar")
+            clon.write(1, "Bar %d algo %n pepe %s")
             clon.write(3, "bar, foo, bar")
             print "Clone: ", len(clon), clon.next()
-            print clon.taborder
             print clon, clon.ends
-            print "Origin: ", len(snippet), snippet.next()
-            print clon.taborder
-            print snippet, snippet.ends
-            print "-"*30, "\n"
             
 def print_snippet_syntax():
     bundle = PMXBundle.getBundleByName('Bundle Development')
@@ -295,4 +290,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    test_syntaxes()
+    test_snippets()
