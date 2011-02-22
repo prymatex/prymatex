@@ -54,7 +54,6 @@ def buildKeySequence(nemonic):
         result[result.index('@')] = Qt.MetaModifier
     if result and isinstance(result[-1], (str, unicode)):
         result[-1] = ord(result[-1])
-    print result
     return reduce(lambda x, y: x + y, result, 0)
     
 def buildKeyEquivalentPattern(key_event):
