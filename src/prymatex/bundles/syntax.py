@@ -8,7 +8,7 @@
 '''
 
 import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP
+from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY, ENCODING_UTF8
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.score import PMXScoreManager
 
@@ -21,19 +21,23 @@ class PMXSyntaxNode(object):
             setattr(self, k, None)
         self.syntax = syntax
         for key, value in hash.iteritems():
-            if key in ['match', 'begin']:
-                setattr(self, key, onig_compile( value ))
-            elif key in ['content', 'name', 'contentName', 'end']:
-                setattr(self, key, value )
-            elif key in ['captures', 'beginCaptures', 'endCaptures']:
-                value = sorted(value.items(), key=lambda v: int(v[0]))
-                setattr(self, key, value)
-            elif key == 'repository':
-                self.parse_repository(value)
-            elif key in ['patterns']:
-                self.create_children(value)
-            else:
-                print u'%s ignoring %s: %s' % (self.__class__.__name__, key, value)
+            try:
+                if key in ['match', 'begin']:
+                    setattr(self, key, onig_compile( value ))
+                elif key in ['content', 'name', 'contentName', 'end']:
+                    setattr(self, key, value )
+                elif key in ['captures', 'beginCaptures', 'endCaptures']:
+                    value = sorted(value.items(), key=lambda v: int(v[0]))
+                    setattr(self, key, value)
+                elif key == 'repository':
+                    self.parse_repository(value)
+                elif key in ['patterns']:
+                    self.create_children(value)
+                else:
+                    print u'%s ignoring %s: %s' % (self.__class__.__name__, key, value)
+            except TypeError, e:
+                #an encoding can only be given for non-unicode patterns
+                print e
     
     def parse_repository(self, repository):
         self.repository = {}

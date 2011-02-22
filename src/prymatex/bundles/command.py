@@ -2,26 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Command's module
-    Env:    TM_CURRENT_LINE,
-            TM_SUPPORT_PATH: Support dentro de textmate
-            TM_INPUT_START_LINE_INDEX,
-            TM_LINE_INDEX: 
-            TM_LINE_NUMBER: Numero de linea
-            TM_SELECTED_SCOPE:
-            TM_CURRENT_WORD:
-            TM_FILEPATH,
-            TM_FILENAME,
-            TM_DIRECTORY,
-            TM_BUNDLE_SUPPORT: Support dentro del bundle
-            TM_SELECTED_TEXT
-    * Meta -> (cinta de 4 esquinas) -> arroba (@)
-    * Control es ^
-    * Shift es la $
-    * Backspace -> ^?
-    * supr -> ?M-^\?
-    * Alt -> ~
-    
+    Command's module    
 '''
 import os, stat, tempfile
 from subprocess import Popen, PIPE, STDOUT
@@ -38,18 +19,19 @@ class PMXCommand(PMXBundleItem):
         
         if hash:
             print "Command '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+        self.value = ""
         
-    def execute(self, environment):
-        texto = "a = {'uno': 1, 'dos': 2}"
+    def __str__(self):
+        return self.value
+    
+    def resolve(self, indentation, tabreplacement, environment):
         descriptor, name = tempfile.mkstemp(prefix='pmx')
-        os.write(descriptor, self.command.encode('utf8'))
-        os.chmod(name, stat.S_IEXEC)
-        process = Popen([name], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment)
-        process.stdin.write(texto)
-        process.stdin.close();
-        print process.stdout.read()
-        process.stdout.close()
-        #os.unlink(name)
+        file = os.fdopen(descriptor, 'w+')
+        file.write(self.command.encode('utf8'))
+        file.close()
+        os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
+        process = Popen([name], stdout=PIPE, stderr=STDOUT, env = environment, shell=True)
+        self.value = process.stdout.read()
         
 def parse_file(filename):
     import plistlib

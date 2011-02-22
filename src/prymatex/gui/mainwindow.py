@@ -139,6 +139,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #raise NotImplementedError("Do we need them?")
         pass
     
+    def insertBundleItem(self, item):
+        if not item.ready():
+            item.compile()
+        self.currentEditor.codeEdit.insertBundleItem(item.clone())
+        
     def addMenuItem(self, parent_menu, item):
         if isinstance(item, PMXMenuNode):
             menu = QMenu(item.name, parent_menu)
@@ -149,7 +154,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             parent_menu.addSeparator()
         elif item != None and item.name:
             action = QAction(item.name, self)
+            receiver = lambda item = item: self.insertBundleItem(item)
+            self.connect(action, SIGNAL('triggered()'), receiver)
             parent_menu.addAction(action)
+            
             
     def addBundlesToMenu(self):
         from prymatex.bundles.base import PMXBundle
