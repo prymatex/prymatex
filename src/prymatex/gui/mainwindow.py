@@ -153,10 +153,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             parent_menu.addSeparator()
         elif item != None and item.name:
             action = QAction(item.name, self)
+            shortcut = item.getKeySequence()
+            if shortcut != None:
+                action.setShortcut(shortcut)
             receiver = lambda item = item: self.insertBundleItem(item)
             self.connect(action, SIGNAL('triggered()'), receiver)
             parent_menu.addAction(action)
-            
             
     def addBundlesToMenu(self):
         from prymatex.bundles.base import PMXBundle

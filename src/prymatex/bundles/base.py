@@ -12,7 +12,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
 from prymatex.core.config import settings
-from prymatex.bundles.qtadapter import buildKeyEquivalentPattern
+from prymatex.bundles.qtadapter import buildKeyEquivalentPattern, buildKeySequence
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -229,7 +229,11 @@ class PMXBundleItem(object):
         self.name_space = name_space
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
-          
+    
+    def getKeySequence(self):
+        if self.keyEquivalent != None:
+            return buildKeySequence(self.keyEquivalent)
+    
     def clone(self):
         return self
     

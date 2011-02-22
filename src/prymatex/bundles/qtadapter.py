@@ -41,6 +41,21 @@ def buildQTextFormat(style):
         elif style['fontStyle'] == 'italic':
             format.setFontItalic(True)
     return format
+
+def buildKeySequence(nemonic):
+    result = list(nemonic)
+    if '^' in nemonic:
+        result[result.index('^')] = Qt.ControlModifier
+    if '~' in result:
+        result[result.index('~')] = Qt.AltModifier
+    if '$' in result:
+        result[result.index('$')] = Qt.ShiftModifier
+    if '@' in result:
+        result[result.index('@')] = Qt.MetaModifier
+    if result and isinstance(result[-1], (str, unicode)):
+        result[-1] = ord(result[-1])
+    print result
+    return reduce(lambda x, y: x + y, result, 0)
     
 def buildKeyEquivalentPattern(key_event):
     value = key_event.text()
