@@ -1,5 +1,7 @@
 '''
+Code Editor Widget.
 '''
+
 from PyQt4.QtGui import QWidget, QAction, QMenu, QKeySequence, qApp
 from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor,QIcon
 from PyQt4.QtCore import SIGNAL, Qt, QString
@@ -34,6 +36,10 @@ ICON_FILE_STATUS_MODIFIED = QIcon(qApp.instance().trUtf8(
 ':/actions/resources/actions/document-save-all.png'))
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
+    '''
+    It implements the logic needed for gui defined in ui_files/editorwidget.ui
+    This logic includes Go To Line and Find action behaviour.
+    '''
     _counter = 0
     _time = None # Modification time
     __path = None
@@ -54,8 +60,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
         self.codeEdit.addAction(self.actionFind)
         self.codeEdit.addAction(self.actionReplace)
-        
+
+        # Hide some widgets
         self.findreplaceWidget.hide()
+        self.gotolineWidget.hide()
         
         if self.path:
             self.readFileContents()

@@ -242,7 +242,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         return self.document().findBlock( cursor.selectionEnd() ).blockNumber()
 
     def mousePressEvent(self, mouse_event):
-        self.inserSpacesUpToPoint(mouse_event.pos())
+        # TOOD: This should be activated only when free editing is enabled
+        # self.inserSpacesUpToPoint(mouse_event.pos())
         super(PMXCodeEdit, self).mousePressEvent(mouse_event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
