@@ -344,6 +344,14 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     @property
     def modfified(self):
         return self.codeEdit.document().isModified()
+    
+    
+    def update_title(self):
+        '''
+        Tell the tab holder to update the title
+        '''
+        print self.parent()
+        
         
     #===========================================================================
     # Callbacks

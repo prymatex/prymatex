@@ -44,7 +44,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         @param files_to_open: The set of files to be opened when the window
                               is shown in the screen.
         '''
-        QMainWindow.__init__(self)
+        super(PMXMainWindow, self).__init__()
         # Initialize graphical elements
         self.setupUi(self)
         
@@ -191,9 +191,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @property
     def current_editor(self):
         #return self.currentTabWidget.currentWidget() # Old layout manager code
-        editor = self.tabWidget.currentWidget()
-        return editor
-
+        editor_widget = self.currentTabWidget.currentWidget()
+        return editor_widget.codeEdit
+        
     currentEditor = current_editor
 
     @pyqtSignature('')
