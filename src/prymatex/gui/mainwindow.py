@@ -155,7 +155,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         elif item == PMXMenuNode.MENU_SPACE:
             parent_menu.addSeparator()
         elif item != None and item.name:
-            action = QAction(item.name, self)
+            action = QAction(item.buildMenuTextEntry(), self)
             #shortcut = item.getKeySequence()
             #if shortcut != None:
             #    action.setShortcut(shortcut)

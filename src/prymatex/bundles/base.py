@@ -101,8 +101,7 @@ class PMXBundle(object):
             PMXBundle.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
             keyseq = buildKeySequence(item.keyEquivalent)
-            PMXBundle.KEY_SEQUENCE.setdefault(keyseq, []).append(item)
-            PMXBundle.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
+            PMXBundle.KEY_EQUIVALENTS.setdefault((item.keyEquivalent, keyseq), []).append(item)
         # I'm four father
         item.bundle = self
 
@@ -233,6 +232,15 @@ class PMXBundleItem(object):
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
     
+    def buildMenuTextEntry(self):
+        text = unicode(self.name)
+        if self.tabTrigger != None:
+            text += u" (%s⇥)" % (self.tabTrigger)
+        if self.keyEquivalent != None:
+            text += u" (%s)" % (self.keyEquivalent)
+        return text
+        
+    
     def clone(self):
         return self
     
@@ -325,10 +333,14 @@ def test_syntaxes():
 def print_commands():
     from pprint import pprint
     pprint(PMXBundle.KEY_EQUIVALENTS)
+
+def test_keys():
+    from pprint import pprint
+    pprint(PMXBundle.KEY_EQUIVALENTS)
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLE_ELEMENTS
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    test_commands()
+    test_keys()
