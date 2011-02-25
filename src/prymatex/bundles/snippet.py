@@ -4,25 +4,17 @@
 '''
     Snippte's module
 '''
-import os, stat, tempfile
-import logging
+import os, stat, tempfile, logging
 from copy import deepcopy
 from subprocess import Popen, PIPE, STDOUT
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
-
-logger = logging.getLogger(__name__)
-
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
-
-# for run as main
-if __name__ == "__main__":
-    import sys
-    sys.path.append(os.path.abspath('../..'))
-    
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
+
+logger = logging.getLogger(__name__)
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
 SNIPPET_SYNTAX = {
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
@@ -836,7 +828,7 @@ class PMXSnippet(PMXBundleItem):
             self.taborder.pop(self.index)
         return self.taborder[self.index]
     
-    def resolve(self, indentation, tabreplacement, environment):
+    def resolve(self, indentation = "", tabreplacement = "\t", environment = {}):
         self.snippet.resolve(indentation, tabreplacement, environment)
     
     def write(self, index, text):

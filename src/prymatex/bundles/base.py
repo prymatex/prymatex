@@ -239,11 +239,11 @@ class PMXBundleItem(object):
     
     def ready(self):
         return True
-    
+
     def compile(self):
         pass
-    
-    def resolve(self, indentation, tabreplacement, environment):
+
+    def resolve(self, **kwargs):
         pass
 #----------------------------------------
 # Tests
@@ -263,7 +263,9 @@ def test_snippets():
                 #if snippet.name.startswith("Itemize Lines"):
                 #if snippet.name.startswith("Convert Tabs To Table"):
                     snippet.compile()
-                    snippet.resolve("", "    ", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "uno\tdos\tcuatro\t"})
+                    snippet.resolve(indentation = "",
+                                    tabreplacement = "    ",
+                                    environment = {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "uno\tdos\tcuatro\t"})
                     #print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
                     #print "Origin: ", len(snippet), snippet.next()
                     #print snippet, snippet.ends
@@ -275,6 +277,40 @@ def test_snippets():
                 print bundle.name, snippet.name, e
                 errors += 1
     print errors
+
+def test_commands():
+    #bundle = PMXBundle.getBundleByName('LaTeX')
+    bundle = PMXBundle.getBundleByName('SQL')
+    errors = 0
+    #for bundle in PMXBundle.BUNDLES.values():
+    for command in bundle.commands:
+        try:
+            #if snippet.name.startswith("Itemize Lines"):
+            #if snippet.name.startswith("Convert Tabs To Table"):
+                command.compile()
+                env = {'TM_CURRENT_LINE': 'TM_CURRENT_LINE',
+                   'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
+                   'TM_INPUT_START_LINE_INDEX': '',
+                   'TM_LINE_INDEX': '', 
+                   'TM_LINE_NUMBER': '', 
+                   'TM_SELECTED_SCOPE': 'TM_SELECTED_SCOPE', 
+                   'TM_CURRENT_WORD': 'TM_CURRENT_WORD',
+                   'TM_FILEPATH': '',
+                   'TM_FILENAME': '',
+                   'TM_DIRECTORY': '',
+                   'TM_SOFT_TABS': 'YES',
+                   'TM_TAB_SIZE': "TM_TAB_SIZE",
+                   'TM_BUNDLE_SUPPORT': bundle.getBundleSupportPath(),
+                   'TM_SELECTED_TEXT': "TM_SELECTED_TEXT" }
+                print env['TM_SUPPORT_PATH']
+                print env['TM_BUNDLE_SUPPORT']
+                command.resolve(environment = env)
+                print command.name, command
+        except Exception, e:
+            print bundle.name, command.name, e
+            errors += 1
+    print errors
+    
 def print_snippet_syntax():
     bundle = PMXBundle.getBundleByName('Bundle Development')
     syntax = bundle.getSyntaxByName("Snippet")
@@ -296,4 +332,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    test_snippets()
+    test_commands()

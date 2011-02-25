@@ -10,7 +10,7 @@ def get_prymatex_user_path():
     path = os.path.join(os.path.expanduser("~"), ".prymatex")
     if not os.path.exists(path):
         os.makedirs(path)
-    return path
+    return os.path.abspath(path)
 
 PMX_BASE_PATH = get_prymatex_base_path()
 PMX_USER_PATH = get_prymatex_user_path()
