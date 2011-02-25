@@ -294,7 +294,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             ends = self.snippet.ends
             if cursor.hasSelection():
                 (index, holder) = self.snippet.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-                if holder == None or not hasattr(holder, 'insert'):
+                if holder == None:
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
                 else:
@@ -303,7 +303,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 position = cursor.selectionStart()
             else:
                 (index, holder) = self.snippet.getHolder(cursor.position())
-                if holder == None or not hasattr(holder, 'insert'):
+                if holder == None:
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
                 else:
@@ -324,7 +324,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             ends = self.snippet.ends
             if cursor.hasSelection():
                 (index, holder) = self.snippet.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-                if holder == None or not hasattr(holder, 'insert'):
+                if holder == None:
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
                 else:
@@ -333,13 +333,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 position = cursor.selectionStart()
             else:
                 (index, holder) = self.snippet.getHolder(cursor.position())
-                if holder == None or not hasattr(holder, 'insert'):
+                if holder == None:
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
                 else:
                     self.snippet.setCurrentHolder(holder)
                 position = cursor.position()
-            holder.insert(key_event.text(), position - index)
+            holder.insert(unicode(key_event.text()), position - index)
             position += holder.position() - index + 1
             cursor.setPosition(starts)
             cursor.setPosition(ends, QTextCursor.KeepAnchor)
@@ -358,7 +358,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
-        item.resolve(indentation, tab, self.buildBundleItemEnvironment(item = item, word = trigger))
+        item.resolve(indentation = indentation,
+                     tabreplacement = tab,
+                     environment = self.buildBundleItemEnvironment(item = item, word = trigger))
         if isinstance(item, PMXSnippet):
             for _ in range(len(trigger)):
                 cursor.deletePreviousChar()

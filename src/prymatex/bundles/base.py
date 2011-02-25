@@ -74,6 +74,7 @@ class PMXBundle(object):
     BUNDLES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
+    KEY_SEQUENCE = {}
     PREFERENCES = {}
     scores = PMXScoreManager()
     
@@ -99,6 +100,8 @@ class PMXBundle(object):
         if item.tabTrigger != None:
             PMXBundle.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
+            keyseq = buildKeySequence(item.keyEquivalent)
+            PMXBundle.KEY_SEQUENCE.setdefault(keyseq, []).append(item)
             PMXBundle.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
         # I'm four father
         item.bundle = self
@@ -229,10 +232,6 @@ class PMXBundleItem(object):
         self.name_space = name_space
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.pop(key, None))
-    
-    def getKeySequence(self):
-        if self.keyEquivalent != None:
-            return buildKeySequence(self.keyEquivalent)
     
     def clone(self):
         return self
