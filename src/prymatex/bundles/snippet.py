@@ -312,17 +312,6 @@ class StructureTabstop(Node):
         else:
             self.placeholder = container
         return container
-    
-    def insert(self, character, position):
-        text = str(self)
-        text = text[:position] + character + text[position:]
-        self.content = text
-    
-    def remove(self, start, end = None):
-        end = end != None and end or start
-        text = str(self)
-        text = text[:start] + text[end:]
-        self.content = text
         
 class StructurePlaceholder(Snippet):
     def __init__(self, scope, parent = None):
@@ -606,6 +595,18 @@ class Shell(NodeList):
         self.append(result.strip())
         process.stdout.close()
 
+def uppercase(text):
+    titles = text.split('\u')
+    text = "".join([titles[0]] + map(lambda txt: txt[0].upper() + txt[1:], titles[0:]))
+    uppers = text.split('\U')
+    text = "".join([uppers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].upper() + txt[txt.find('\E') + 2:] or txt.upper(), uppers ))
+    return text
+
+def lowercase(text):
+    lowers = text.split('\L')
+    text = "".join([lowers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].lower() + txt[txt.find('\E') + 2:] or txt.lower(), lowers ))
+    return text
+
 class Condition(Node):
     def __init__(self, scope, parent = None):
         super(Condition, self).__init__(scope, parent)
@@ -656,7 +657,13 @@ class Condition(Node):
         for index in xrange(1, len(values), 2):
             value = match[int(values[index])]
             values[index] = value != None and value or ""
-        return "".join(values)
+        text = "".join(values)
+        if any(map(lambda r: text.find(r) != -1, ['\u', '\U'])):
+            text = uppercase(text)
+        if any(map(lambda r: text.find(r) != -1, ['\L'])):
+            text = lowercase(text)
+        print text
+        return text
             
     def resolve(self, indentation, tabreplacement, environment):
         self.insertion = self.insertion.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
