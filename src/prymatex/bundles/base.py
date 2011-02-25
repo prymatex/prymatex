@@ -255,24 +255,26 @@ def test_preferences():
 
 def test_snippets():
     #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('Python')
-    #bundle = PMXBundle.getBundleByName('C')
-    for snippet in bundle.snippets:
-        #if snippet.name.startswith("Itemize Lines"):
-        #if snippet.name.startswith("Sub Sub"):
-            print snippet.name
-            snippet.compile()
-            snippet.resolve("", "    ", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex"})
-            print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
-            print "Origin: ", len(snippet), snippet.next()
-            print snippet, snippet.ends
-            clon = snippet.clone()
-            clon.write(0, "Foo")
-            clon.write(1, "Bar %d algo %n pepe %s")
-            clon.write(3, "bar, foo, bar")
-            print "Clone: ", len(clon), clon.next()
-            print clon, clon.ends
-            
+    #bundle = PMXBundle.getBundleByName('Python')
+    errors = 0
+    for bundle in PMXBundle.BUNDLES.values():
+        for snippet in bundle.snippets:
+            try:
+                #if snippet.name.startswith("Itemize Lines"):
+                #if snippet.name.startswith("Convert Tabs To Table"):
+                    snippet.compile()
+                    snippet.resolve("", "    ", {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "uno\tdos\tcuatro\t"})
+                    #print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
+                    #print "Origin: ", len(snippet), snippet.next()
+                    #print snippet, snippet.ends
+                    #clon = snippet.clone()
+                    #clon.write(0, "Bar %s algo pepe")
+                    #print "Clone: ", len(clon), clon.next()
+                    #print clon, clon.ends
+            except Exception, e:
+                print bundle.name, snippet.name, e
+                errors += 1
+    print errors
 def print_snippet_syntax():
     bundle = PMXBundle.getBundleByName('Bundle Development')
     syntax = bundle.getSyntaxByName("Snippet")

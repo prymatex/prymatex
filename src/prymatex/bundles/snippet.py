@@ -5,10 +5,13 @@
     Snippte's module
 '''
 import os, stat, tempfile
+import logging
 from copy import deepcopy
 from subprocess import Popen, PIPE, STDOUT
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
+
+logger = logging.getLogger(__name__)
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
@@ -109,14 +112,14 @@ class Node(object):
         pass
 
     def open(self, scope, text):
-        print "%s open %s %s" % (self.__class__.__name__, scope, text)
+        logger.debug("%s open %s %s" % (self.__class__.__name__, scope, text))
         return self
 
     def close(self, scope, text):
         if scope == self.scope:
             return self.parent
         else:
-            print "%s close %s %s" % (self.__class__.__name__, scope, text)
+            logger.debug("%s close %s %s" % (self.__class__.__name__, scope, text))
         return self
 
 class TextNode(Node):
@@ -178,7 +181,8 @@ class NodeList(list):
     def open(self, scope, text):
         if scope == 'constant.character.escape.snippet':
             self.append(text)
-        print "%s open %s %s" % (self.__class__.__name__, scope, text)
+        else:
+            logger.debug("%s open %s %s" % (self.__class__.__name__, scope, text))
         return self
 
     def close(self, scope, text):
@@ -188,7 +192,7 @@ class NodeList(list):
             self.append(text)
         else:
             self.append(text)
-            print "%s close %s %s" % (self.__class__.__name__, scope, text)
+            logger.debug("%s close %s %s" % (self.__class__.__name__, scope, text))
         return self
     
 #Snippet root
@@ -313,6 +317,20 @@ class StructureTabstop(Node):
             self.placeholder = container
         return container
         
+    def insert(self, character, position):
+        text = str(self)
+        text = text[:position] + character + text[position:]
+        self.content = text
+    
+    def remove(self, start, end = None):
+        end = end != None and end or start
+        text = str(self)
+        text = text[:start] + text[end:]
+        self.content = text
+    
+    def clear(self):
+        self.content = ""
+    
 class StructurePlaceholder(Snippet):
     def __init__(self, scope, parent = None):
         super(StructurePlaceholder, self).__init__(scope, parent)
@@ -662,9 +680,11 @@ class Condition(Node):
             text = uppercase(text)
         if any(map(lambda r: text.find(r) != -1, ['\L'])):
             text = lowercase(text)
-        print text
         return text
-            
+
+    def append(self, element):
+        self.current += element.replace('\\n', '\n').replace('\\t', '\t')
+        
     def resolve(self, indentation, tabreplacement, environment):
         self.insertion = self.insertion.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
 
@@ -770,7 +790,15 @@ class PMXSnippet(PMXBundleItem):
         for key in keys:
             holder = taborder.pop(key)
             if type(holder) == list:
-                holder = holder.pop()
+                if len(holder) == 1:
+                    holder = holder.pop()
+                else:
+                    #Esto puede dar un error pero me interesa ver si hay casos asi
+                    tabstop = filter(lambda node: isinstance(node, StructureTabstop), holder).pop()
+                    transformations = filter(lambda node: isinstance(node, StructureTransformation), holder)
+                    for transformation in transformations:
+                        transformation.placeholder = tabstop
+                    holder = tabstop
             self.taborder.append(holder)
         self.taborder.append(last)
 
