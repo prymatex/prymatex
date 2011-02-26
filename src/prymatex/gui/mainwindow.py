@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
+import itertools
+import logging
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from pprint import pformat
-from prymatex.gui.editor.base import PMXCodeEdit
-
-if __name__ == "__main__":
-    import sys
-    from os.path import join
-    sys.path.append(join('..', '..'))
-    
+from prymatex.gui.editor.base import PMXCodeEdit    
     
 from prymatex.lib.i18n import ugettext as _
 from prymatex.gui.tabwidget import PMXTabWidget , PMXTabsMenu
@@ -25,9 +21,7 @@ from prymatex.gui.panes.bundles import PMXBundleEditorDock
 from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.filterdlg import PMXFilterDialog
 
-import itertools
-import logging
-from prymatex.bundles.base import PMXMenuNode
+from prymatex.bundles import PMXBundle, PMXMenuNode
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
@@ -70,8 +64,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
         self.center()
         
-        # Una vez centrada la ventana caramos los mnues
+        # Una vez centrada la ventana caramos los menues
         self.addBundlesToMenu()
+        self.addBundlesShortcuts()
         
         #self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
@@ -164,15 +159,21 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             parent_menu.addAction(action)
             
     def addBundlesToMenu(self):
-        from prymatex.bundles.base import PMXBundle
-        #assert isinstance(bundles, TMMenuNode), "No me pasaste bundles"
         for bundle in PMXBundle.BUNDLES.values():
             menu = QMenu(bundle.name, self)
             self.menuBundles.addMenu(menu)
             if bundle.mainMenu != None:
                 for _, item in bundle.mainMenu.iteritems():
                     self.addMenuItem(menu, item)  
-                
+    
+    def down(self, *args, **kwargs):
+        print "activado", args, kwargs
+    
+    def addBundlesShortcuts(self):
+        shortcut = QShortcut(self)
+        shortcut.setKey("Ctrl+D")
+        self.connect(shortcut, SIGNAL("activated()"), self.down)
+        
     def on_actionQuit_triggered(self):
         QApplication.quit()
     

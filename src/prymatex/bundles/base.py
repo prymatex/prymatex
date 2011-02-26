@@ -212,7 +212,6 @@ class PMXBundle(object):
     def getKeyEquivalentItem(cls, key_event, scope):
         items = []
         key = buildKeyEquivalentPattern(key_event)
-        print key
         if cls.KEY_EQUIVALENTS.has_key(key):
             for item in cls.KEY_EQUIVALENTS[key]:
                 if not item.ready():
@@ -239,7 +238,6 @@ class PMXBundleItem(object):
         if self.keyEquivalent != None:
             text += u" (%s)" % (self.keyEquivalent)
         return text
-        
     
     def clone(self):
         return self

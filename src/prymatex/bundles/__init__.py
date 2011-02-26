@@ -11,7 +11,7 @@ from prymatex.bundles.syntax import PMXSyntax
 from prymatex.bundles.snippet import PMXSnippet
 from prymatex.bundles.preference import PMXPreference
 from prymatex.bundles.command import PMXCommand
-from prymatex.bundles.base import PMXBundle
+from prymatex.bundles.base import PMXBundle, PMXMenuNode
 from prymatex.bundles.theme import PMXTheme, PMXStyle
 from prymatex.bundles.qtadapter import buildQTextFormat
 from prymatex.core.config import settings

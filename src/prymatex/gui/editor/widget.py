@@ -68,7 +68,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         if self.path:
             self.readFileContents()
             self.updateTitle()
-            self.setSyntax()
+            #self.setSyntax()
         
     COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
     COLOR_NORMAL = QColor("black")

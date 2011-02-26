@@ -483,16 +483,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.indent(indentation)
         elif key_event.text() != "":
             character = unicode(key_event.text())
-            #Find for getKeyEquivalentItem in bundles
-            if scope:
-                #TODO: mejorar esto, cuando es de un key event no pasamos character ni le damos importancia al key_event
-                items = PMXBundle.getKeyEquivalentItem(key_event, scope)
-                if len(items) > 1:
-                    self.selectBundleItem(items, character)
-                    return
-                elif items:
-                    self.insertBundleItem(items[0], character)
-                    return
             # Handle smart typing pairs
             if character in smart_typing_test:
                 self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
