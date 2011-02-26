@@ -42,7 +42,7 @@ SNIPPET_SYNTAX = {
                             {'include': '#substitution'}]},
               # Variables
               #TabStop
-              {'match': '\\$([a-zA-Z_][a-zA-Z0-9_]*)',
+              {'match': '\\${?([a-zA-Z_][a-zA-Z0-9_]*)}?',
                'captures': {'1': {'name': 'string.env.snippet'}},
                'name': 'variable.tabstop.snippet'},
               #Placeholder
@@ -542,7 +542,7 @@ class Regexp(NodeList):
     def open(self, scope, text):
         node = self
         if scope == 'string.regexp.format':
-            self.pattern += text[:-1];
+            self.pattern += text[:-1]
             self.pattern = onig_compile(self.pattern)
         elif scope == 'meta.structure.condition.regexp':
             self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
@@ -582,6 +582,9 @@ class Regexp(NodeList):
                 result += child.substitute(match)
                 if self.options == None or 'g' not in self.options:
                     break;
+            else:
+                if isinstance(child, TextNode) and str(child) == '':
+                    result += text
         return result
     
 class Shell(NodeList):    

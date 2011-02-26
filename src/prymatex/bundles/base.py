@@ -285,27 +285,27 @@ def test_preferences():
 
 def test_snippets():
     #bundle = PMXBundle.getBundleByName('LaTeX')
-    #bundle = PMXBundle.getBundleByName('Python')
+    bundle = PMXBundle.getBundleByName('HTML')
     errors = 0
-    for bundle in PMXBundle.BUNDLES.values():
-        for snippet in bundle.snippets:
-            try:
-                #if snippet.name.startswith("Itemize Lines"):
-                #if snippet.name.startswith("Convert Tabs To Table"):
-                    snippet.compile()
-                    snippet.resolve(indentation = "",
-                                    tabreplacement = "    ",
-                                    environment = {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "uno\tdos\tcuatro\t"})
-                    #print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
-                    #print "Origin: ", len(snippet), snippet.next()
-                    #print snippet, snippet.ends
-                    #clon = snippet.clone()
-                    #clon.write(0, "Bar %s algo pepe")
-                    #print "Clone: ", len(clon), clon.next()
-                    #print clon, clon.ends
-            except Exception, e:
-                print bundle.name, snippet.name, e
-                errors += 1
+    #for bundle in PMXBundle.BUNDLES.values():
+    for snippet in bundle.snippets:
+        try:
+            #if snippet.name.startswith("Itemize Lines"):
+            #if snippet.name.startswith("Wrap Selection"):
+                snippet.compile()
+                snippet.resolve(indentation = "",
+                                tabreplacement = "    ",
+                                environment = {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "uno\tdos\tcuatro\t"})
+                print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
+                print "Origin: ", len(snippet), snippet.next()
+                print snippet, snippet.ends
+                clon = snippet.clone()
+                clon.write(0, "Bar %s algo pepe")
+                print "Clone: ", len(clon), clon.next()
+                print clon, clon.ends
+        except Exception, e:
+            print bundle.name, snippet.name, e
+            errors += 1
     print errors
 
 def test_commands():
@@ -366,4 +366,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('../share/Bundles/', '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
-    test_keys()
+    test_snippets()

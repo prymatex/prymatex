@@ -552,6 +552,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                'TM_BUNDLE_SUPPORT': item.bundle.getBundleSupportPath(),
                'TM_SELECTED_TEXT': str(cursor.selectedText()) }
         env.update(self._meta.settings['static_variables'])
+        print env
         return env
         
     #===========================================================================
