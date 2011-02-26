@@ -145,7 +145,7 @@ class PMXBundle(object):
             bundle = PMXBundle(data, path)
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
-        
+            return
         #Disabled?
         if bundle.uuid in settings.disabled_bundles:
             return
