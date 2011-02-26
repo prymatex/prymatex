@@ -12,7 +12,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
 from prymatex.core.config import settings
-from prymatex.bundles.qtadapter import buildKeyEquivalentPattern, buildKeySequence
+from prymatex.bundles.qtadapter import buildKeyEquivalentString, buildKeySequence
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -101,7 +101,10 @@ class PMXBundle(object):
             PMXBundle.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
             keyseq = buildKeySequence(item.keyEquivalent)
-            PMXBundle.KEY_EQUIVALENTS.setdefault((item.keyEquivalent, keyseq), []).append(item)
+            if keyseq > 255:
+                PMXBundle.KEY_SEQUENCE.setdefault(keyseq, []).append(item)
+            else:
+                PMXBundle.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
         # I'm four father
         item.bundle = self
 
@@ -173,7 +176,7 @@ class PMXBundle(object):
 
     @classmethod
     def getBundleByName(cls, name):
-        for uuid, bundle in cls.BUNDLES.iteritems():
+        for _, bundle in cls.BUNDLES.iteritems():
             if bundle.name == name:
                 return bundle
 
@@ -181,7 +184,7 @@ class PMXBundle(object):
     def getPreferences(cls, scope):
         preferences = []
         for key in cls.PREFERENCES.keys():
-            if key == None:
+            if key == "":
                 score = 1
             else:
                 score = cls.scores.score(scope, key)
@@ -209,11 +212,10 @@ class PMXBundle(object):
         return items
             
     @classmethod
-    def getKeyEquivalentItem(cls, key_event, scope):
+    def getKeyEquivalentItem(cls, character, scope):
         items = []
-        key = buildKeyEquivalentPattern(key_event)
-        if cls.KEY_EQUIVALENTS.has_key(key):
-            for item in cls.KEY_EQUIVALENTS[key]:
+        if cls.KEY_EQUIVALENTS.has_key(character):
+            for item in cls.KEY_EQUIVALENTS[character]:
                 if not item.ready():
                     item.compile()
                 score = cls.scores.score(item.scope, scope)
@@ -224,6 +226,21 @@ class PMXBundle(object):
             items = map(lambda (score, item): item.clone(), items)
         return items
 
+    @classmethod
+    def getKeySequenceItem(cls, key, scope):
+        items = []
+        if cls.KEY_SEQUENCE.has_key(key):
+            for item in cls.KEY_SEQUENCE[key]:
+                if not item.ready():
+                    item.compile()
+                score = cls.scores.score(item.scope, scope)
+                #score = cls.scores.score(scope, item.scope)
+                if score != 0:
+                    items.append((score, item))
+            items.sort(key = lambda t: t[0])
+            items = map(lambda (score, item): item.clone(), items)
+        return items
+    
 class PMXBundleItem(object):
     def __init__(self, hash, name_space):
         self.hash = deepcopy(hash)
@@ -234,10 +251,18 @@ class PMXBundleItem(object):
     def buildMenuTextEntry(self):
         text = unicode(self.name)
         if self.tabTrigger != None:
-            text += u" (%s⇥)" % (self.tabTrigger)
+            text += u" \t %s⇥" % (self.tabTrigger)
         if self.keyEquivalent != None:
-            text += u" (%s)" % (self.keyEquivalent)
+            text += u" \t %s" % (buildKeyEquivalentString(self.keyEquivalent))
         return text
+    
+    def getScope(self):
+        return self.__scope != None and self.__scope or "" 
+        
+    def setScope(self, scope):
+        self.__scope = scope
+    
+    scope = property(getScope, setScope)
     
     def clone(self):
         return self

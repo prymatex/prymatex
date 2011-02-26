@@ -13,6 +13,7 @@ from PyQt4.QtCore import Qt, SIGNAL
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
 from prymatex.bundles import PMXBundle, PMXPreference, PMXSnippet
+from prymatex.bundles.command import PMXCommand
 
 logger = logging.getLogger(__name__)
 
@@ -67,10 +68,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     SPLITWORDS = re.compile(r'\s', re.UNICODE)
 
     #-----------------------------------
-    # Settings
+    # Settings and config
     #-----------------------------------
     soft_tabs = Setting(default = True)
     tab_size = Setting(default = 4)
+    @property
+    def tabKeyBehavior(self):
+        return self.soft_tabs and u' ' * self.tab_size or u'\t'
     font = Setting(default = {"name": "Monospace", "size": 10}, 
                    fset = lambda self, value: self.setFont(QFont(value["name"], value["size"]))
                    )
@@ -288,26 +292,22 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 index = holder.position()
                 cursor.setPosition(index)
                 cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
-            self.setTextCursor(cursor)
+            self.setTextCursor(cursor)    
         elif key == Qt.Key_Backspace:
             starts = self.snippet.starts
             ends = self.snippet.ends
             if cursor.hasSelection():
-                (index, holder) = self.snippet.getHolder(cursor.selectionStart(), cursor.selectionEnd())
+                (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
                 if holder == None:
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
-                else:
-                    self.snippet.setCurrentHolder(holder)
                 holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
                 position = cursor.selectionStart()
             else:
-                (index, holder) = self.snippet.getHolder(cursor.position())
+                (index, holder) = self.snippet.setDefaultHolder(cursor.position())
                 if holder == None:
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
-                else:
-                    self.snippet.setCurrentHolder(holder)
                 holder.remove(cursor.position() - index - 1, cursor.position() - index)
                 position = cursor.position() - 1
             #Ajuste
@@ -323,21 +323,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             starts = self.snippet.starts
             ends = self.snippet.ends
             if cursor.hasSelection():
-                (index, holder) = self.snippet.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-                if holder == None:
+                (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
+                if holder == None or (key == Qt.Key_Return and holder.last):
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
-                else:
-                    self.snippet.setCurrentHolder(holder)
                 holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
                 position = cursor.selectionStart()
             else:
-                (index, holder) = self.snippet.getHolder(cursor.position())
-                if holder == None:
+                (index, holder) = self.snippet.setDefaultHolder(cursor.position())
+                if holder == None or (key == Qt.Key_Return and holder.last):
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
-                else:
-                    self.snippet.setCurrentHolder(holder)
                 position = cursor.position()
             holder.insert(unicode(key_event.text()), position - index)
             position += holder.position() - index + 1
@@ -354,14 +350,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def insertBundleItem(self, item, trigger = ""):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
-        tab = self.soft_tabs and ' ' * self.tab_size or '\t'
         cursor = self.textCursor()
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
-        item.resolve(indentation = indentation,
-                     tabreplacement = tab,
-                     environment = self.buildBundleItemEnvironment(item = item, word = trigger))
         if isinstance(item, PMXSnippet):
+            item.resolve(indentation = indentation,
+                     tabreplacement = self.tabKeyBehavior,
+                     environment = self.buildBundleItemEnvironment(item = item, word = trigger))
             for _ in range(len(trigger)):
                 cursor.deletePreviousChar()
             #Set starts
@@ -380,9 +375,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             else:
                 cursor.setPosition(item.ends)
             self.setTextCursor(cursor)
-        else:
-            #puede ser un comando
-            pass
+        elif isinstance(item, PMXCommand):
+            item.resolve(environment = self.buildBundleItemEnvironment(item = item, word = trigger))
+            print item.name, str(item)
     
     def selectBundleItem(self, items, trigger = ""):
         cursor = self.textCursor()
@@ -404,24 +399,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
         key = key_event.key()
         cursor = self.textCursor()
-        y = cursor.columnNumber()
         doc = self.document()
         line = unicode(cursor.block().text())
-        
-        scope = self.getCurrentScope()
-        preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
-        smart_typing_test = map(lambda pair: pair[0], preferences["smartTypingPairs"])
-        indentation = self.identationWhitespace(line)
-        #items = PMXBundle.getKeyEquivalentItem(key_event, scope)
         
         #print key_event.text() == '\n' and "\\n" or key_event.text()
         #logger.debug(debug_key(key_event))
 
         if key == Qt.Key_Tab:
             #Find for getTabTriggerItem in bundles
-            words = self.SPLITWORDS.split(line[:y])
+            scope = self.getCurrentScope()
+            words = self.SPLITWORDS.split(line[:cursor.columnNumber()])
             word = words and words[-1] or ""
-            tab = self.soft_tabs and ' ' * self.tab_size or '\t'
             if scope and word:
                 snippets = PMXBundle.getTabTriggerItem(word, scope)
                 if len(snippets) > 1:
@@ -430,7 +418,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                     self.insertBundleItem(snippets[0], word)
             else:
                 cursor.beginEditBlock()
-                cursor.insertText(tab)
+                cursor.insertText(self.tabKeyBehavior)
                 cursor.endEditBlock()
         elif key == Qt.Key_Backtab:
             self.unindent()
@@ -441,16 +429,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor_left.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)
                 cursor_right.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor,1)
                 try:
-                    text_arround = "%s%s" % (cursor_left.selectedText(),
-                                                cursor_right.selectedText())
-
+                    scope = self.getCurrentScope()
+                    preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
+                    text_arround = "%s%s" % (cursor_left.selectedText(), cursor_right.selectedText())
                     if text_arround in map(lambda pair: "%s%s" % (pair[0], pair[1]), preferences["smartTypingPairs"]):
                         cursor_left.removeSelectedText()
                         cursor_right.removeSelectedText()
                     else:
                         QPlainTextEdit.keyPressEvent(self, key_event)
-                except Exception, e:
-                    #traceback.print_exc()
+                except Exception:
                     QPlainTextEdit.keyPressEvent(self, key_event)
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
@@ -460,7 +447,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 syntax = PMXSyntax.findSyntaxByFirstLine(line)
                 if syntax != None:
                     self.setSyntax(syntax)
-                    
+            
+            scope = self.getCurrentScope()
+            preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
+            indentation = self.identationWhitespace(line)
             if "decreaseIndentPattern" in preferences and preferences["decreaseIndentPattern"].match(line):
                 logger.debug("decreaseIndentPattern")
                 self.decreaseIndent(indentation)
@@ -482,6 +472,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
         elif key_event.text() != "":
+            scope = self.getCurrentScope()
+            preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
+            smart_typing_test = map(lambda pair: pair[0], preferences["smartTypingPairs"])
             character = unicode(key_event.text())
             # Handle smart typing pairs
             if character in smart_typing_test:
@@ -547,8 +540,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         env = {'TM_CURRENT_LINE': line,
                'TM_SUPPORT_PATH': self._meta.settings['PMX_SUPPORT_PATH'],
                'TM_INPUT_START_LINE_INDEX': '',
-               'TM_LINE_INDEX': '', 
-               'TM_LINE_NUMBER': '', 
+               'TM_LINE_INDEX': str(cursor.columnNumber()), 
+               'TM_LINE_NUMBER': str(cursor.block().blockNumber()), 
                'TM_SELECTED_SCOPE': self.getCurrentScope(), 
                'TM_CURRENT_WORD': word,
                'TM_FILEPATH': '',
@@ -580,7 +573,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             return ''
     
     def increaseIndent(self, indentation):
-        self.indent(indentation + (self.soft_tabs and ' ' * self.tab_size or '\t'))
+        self.indent(indentation + (self.tabKeyBehavior))
     
     def decreaseIndent(self, identation):
         self.unindent()

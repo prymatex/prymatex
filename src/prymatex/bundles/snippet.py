@@ -800,14 +800,22 @@ class PMXSnippet(PMXBundleItem):
         found = (0, None)
         for holder in self.taborder:
             # if holder == None then is the end of taborders
-            if holder == None: return found
+            if holder == None: break
             index = holder.position()
             if index <= start <= index + len(holder) and index <= end <= index + len(holder) and (found[1] == None or len(holder) < len(found[1])):
                 found = (index, holder)
+        if found[1] != None:
+            setattr(found[1], 'last', found[1] == self.taborder[-1])
         return found
     
     def setCurrentHolder(self, holder):
         self.index = self.taborder.index(holder)
+    
+    def setDefaultHolder(self, start, end = None):
+        (index, holder) = self.getHolder(start, end)
+        if holder != None:
+            self.setCurrentHolder(holder)
+        return (index, holder)
     
     def current(self):
         if self.index == -1:

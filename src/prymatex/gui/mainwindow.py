@@ -136,7 +136,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #raise NotImplementedError("Do we need them?")
         pass
     
-    def insertBundleItem(self, item):
+    def menuBundleItemActionTriggered(self, item):
         if not item.ready():
             item.compile()
         self.currentEditor.insertBundleItem(item.clone())
@@ -151,10 +151,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             parent_menu.addSeparator()
         elif item != None and item.name:
             action = QAction(item.buildMenuTextEntry(), self)
-            #shortcut = item.getKeySequence()
-            #if shortcut != None:
-            #    action.setShortcut(shortcut)
-            receiver = lambda item = item: self.insertBundleItem(item)
+            receiver = lambda item = item: self.menuBundleItemActionTriggered(item)
             self.connect(action, SIGNAL('triggered()'), receiver)
             parent_menu.addAction(action)
             
@@ -166,13 +163,23 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
                 for _, item in bundle.mainMenu.iteritems():
                     self.addMenuItem(menu, item)  
     
-    def down(self, *args, **kwargs):
-        print "activado", args, kwargs
+    def shortcutBundleItemActivated(self, key):
+        editor = self.currentEditor
+        scope = editor.getCurrentScope()
+        if scope:
+            items = PMXBundle.getKeySequenceItem(key, scope)
+            print items
+            if len(items) > 1:
+                editor.selectBundleItem(items)
+            elif items:
+                editor.insertBundleItem(items[0])
     
     def addBundlesShortcuts(self):
-        shortcut = QShortcut(self)
-        shortcut.setKey("Ctrl+D")
-        self.connect(shortcut, SIGNAL("activated()"), self.down)
+        for keyseq in PMXBundle.KEY_SEQUENCE.keys():
+            shortcut = QShortcut(self)
+            shortcut.setKey(keyseq)
+            receiver = lambda key = keyseq: self.shortcutBundleItemActivated(key)
+            self.connect(shortcut, SIGNAL("activated()"), receiver)
         
     def on_actionQuit_triggered(self):
         QApplication.quit()

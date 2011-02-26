@@ -95,9 +95,9 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.scopes.pop()
 
     def foldingMarker(self):
-        if hasattr(self.syntax, 'foldingStartMarker') and self.syntax.foldingStartMarker.match(unicode(self.currentBlock().text())):
+        if self.syntax.foldingStartMarker != None and self.syntax.foldingStartMarker.match(unicode(self.currentBlock().text())):
             self.user_data.folding = self.user_data.FOLDING_START
-        elif hasattr(self.syntax, 'foldingStopMarker') and self.syntax.foldingStopMarker.match(unicode(self.currentBlock().text())):
+        elif self.syntax.foldingStopMarker != None and self.syntax.foldingStopMarker.match(unicode(self.currentBlock().text())):
             self.user_data.folding = self.user_data.FOLDING_STOP
         else: 
             self.user_data.folding = self.user_data.FOLDING_NONE

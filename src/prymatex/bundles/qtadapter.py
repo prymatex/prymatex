@@ -56,20 +56,24 @@ def buildKeySequence(nemonic):
         result[-1] = ord(result[-1])
     return reduce(lambda x, y: x + y, result, 0)
     
-def buildKeyEquivalentPattern(key_event):
-    value = key_event.text()
-    if value != "": return value
-    modifiers = key_event.modifiers()
-    print modifiers
-    key = key_event.key()
-    if modifiers & Qt.ControlModifier:
-        value += "^"
-    if modifiers & Qt.AltModifier:
-        value += "~"
-    if modifiers & Qt.ShiftModifier:
-        value += "$"
-    if modifiers & Qt.MetaModifier:
-        value += "@"
-    if key < 255:
-        value += chr(key) 
-    return value
+def buildKeyEquivalentString(key):
+    values = list(key)
+    string = []
+    if u"^" in key:
+        string.append(u"Ctrl")
+        values.remove(u"^")
+    if u"~" in key:
+        string.append(u"Alt")
+        values.remove(u"~")
+    if u"$" in key:
+        string.append(u"Shift")
+        values.remove(u"$")
+    if u"@" in key:
+        string.append(u"Meta")
+        values.remove(u"@")
+    if len(values) == 1:
+        string.append(values.pop())
+    elif len(values) > 1:
+        print values
+        raise Exception("mal") 
+    return "+".join(string)
