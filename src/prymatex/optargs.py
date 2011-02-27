@@ -49,3 +49,7 @@ parser.add_option('-x', '--no-ipdb', dest="ipdb_excepthook",
 
 parser.add_option('-i', '--ipdb', dest="ipdb_excepthook", 
                   action="store_true", help="Enable ipdb stacktrace")
+
+
+parser.add_option('-p', '--profile', dest='cProfile', default = None,
+                  help = "Run profiling for prymatex session")

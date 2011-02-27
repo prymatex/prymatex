@@ -59,8 +59,7 @@ class PMXApplication(QApplication):
         #TODO: Settings
         
         # Bundles and Stuff
-        self.load_texmate_themes()
-        self.load_texmate_bundles()
+        self.load_textmate_stuff()
         
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
@@ -68,11 +67,17 @@ class PMXApplication(QApplication):
         # Creates the GUI
         self.createWindows(files_to_open)
         
+        # TODO: Fix
         if not self.options.ipdb_excepthook:
             sys.excepthook = sys_excepthook
         else:
             import ipdb
-
+    
+    def load_textmate_stuff(self):
+        self.load_texmate_themes()
+        self.load_texmate_bundles()
+    
+    
     @property
     def options(self):
         ''' Commandline options '''
