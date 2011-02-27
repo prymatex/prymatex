@@ -156,7 +156,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             parent_menu.addAction(action)
             
     def addBundlesToMenu(self):
-        for bundle in PMXBundle.BUNDLES.values():
+        name_order = lambda b1, b2: cmp(b1.name, b2.name)
+        
+        for bundle in sorted(PMXBundle.BUNDLES.values(), name_order):
             menu = QMenu(bundle.name, self)
             self.menuBundles.addMenu(menu)
             if bundle.mainMenu != None:
