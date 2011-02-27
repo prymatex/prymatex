@@ -42,7 +42,7 @@ SNIPPET_SYNTAX = {
                             {'include': '#substitution'}]},
               # Variables
               #TabStop
-              {'match': '\\${?([a-zA-Z_][a-zA-Z0-9_]*)}?',
+              {'match': '\\$([a-zA-Z_][a-zA-Z0-9_]*)|\\${([a-zA-Z_][a-zA-Z0-9_]*)}',
                'captures': {'1': {'name': 'string.env.snippet'}},
                'name': 'variable.tabstop.snippet'},
               #Placeholder
