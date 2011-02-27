@@ -582,9 +582,6 @@ class Regexp(NodeList):
                 result += child.substitute(match)
                 if self.options == None or 'g' not in self.options:
                     break;
-            else:
-                if isinstance(child, TextNode) and str(child) == '':
-                    result += text
         return result
     
 class Shell(NodeList):    
