@@ -17,7 +17,9 @@ PMX_USER_PATH = get_prymatex_user_path()
 PMX_SETTINGS_FILE = os.path.join(PMX_USER_PATH , "settings.plist")
 
 DEFAULT = {
-    'static_variables': {},
+    'static_variables': {
+                         'TM_XHTML': '/'
+                         },
     'disabled_bundles': []
 }
 

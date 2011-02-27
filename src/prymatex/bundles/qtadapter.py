@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import string
 from PyQt4.Qt import QTextCharFormat, QColor, QFont
-from PyQt4.QtCore import Qt 
+from PyQt4.QtCore import Qt
 
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
@@ -43,37 +43,49 @@ def buildQTextFormat(style):
     return format
 
 def buildKeySequence(nemonic):
-    result = list(nemonic)
+    values = list(nemonic)
+    sequence = []
     if '^' in nemonic:
-        result[result.index('^')] = Qt.CTRL
-    if '~' in result:
-        result[result.index('~')] = Qt.ALT
-    if '$' in result:
-        result[result.index('$')] = Qt.SHIFT
-    if '@' in result:
-        result[result.index('@')] = Qt.META
-    if result and isinstance(result[-1], (str, unicode)):
-        result[-1] = ord(result[-1])
-    return reduce(lambda x, y: x + y, result, 0)
+        sequence.append(Qt.CTRL)
+        values.remove('^')
+    if '~' in nemonic:
+        sequence.append(Qt.ALT)
+        values.remove('~')
+    if '$' in nemonic:
+        sequence.append(Qt.SHIFT)
+        values.remove('$')
+    if '@' in nemonic:
+        sequence.append(Qt.META)
+        values.remove('@')
+    if len(values) == 1:
+        char = values.pop()
+        if char in string.ascii_uppercase:
+            sequence.append(Qt.SHIFT)
+        sequence.append(ord(char.upper()))
+    elif len(values) > 1:
+        raise Exception("mal")
+    return sum(sequence)
     
 def buildKeyEquivalentString(key):
     values = list(key)
-    string = []
+    equivalent = []
     if u"^" in key:
-        string.append(u"Ctrl")
+        equivalent.append(u"Ctrl")
         values.remove(u"^")
     if u"~" in key:
-        string.append(u"Alt")
+        equivalent.append(u"Alt")
         values.remove(u"~")
     if u"$" in key:
-        string.append(u"Shift")
+        equivalent.append(u"Shift")
         values.remove(u"$")
     if u"@" in key:
-        string.append(u"Meta")
+        equivalent.append(u"Meta")
         values.remove(u"@")
     if len(values) == 1:
-        string.append(values.pop())
+        char = values.pop()
+        if char in string.ascii_uppercase:
+            equivalent.append(u"Shift")
+        equivalent.append(char.upper())
     elif len(values) > 1:
-        print values
         raise Exception("mal") 
-    return "+".join(string)
+    return "+".join(equivalent)
