@@ -45,13 +45,13 @@ def buildQTextFormat(style):
 def buildKeySequence(nemonic):
     result = list(nemonic)
     if '^' in nemonic:
-        result[result.index('^')] = Qt.ControlModifier
+        result[result.index('^')] = Qt.CTRL
     if '~' in result:
-        result[result.index('~')] = Qt.AltModifier
+        result[result.index('~')] = Qt.ALT
     if '$' in result:
-        result[result.index('$')] = Qt.ShiftModifier
+        result[result.index('$')] = Qt.SHIFT
     if '@' in result:
-        result[result.index('@')] = Qt.MetaModifier
+        result[result.index('@')] = Qt.META
     if result and isinstance(result[-1], (str, unicode)):
         result[-1] = ord(result[-1])
     return reduce(lambda x, y: x + y, result, 0)
