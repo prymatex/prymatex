@@ -80,7 +80,9 @@ class PMXApplication(QApplication):
     
     @property
     def options(self):
-        ''' Commandline options '''
+        ''' These options are defined in
+        prymatex.optargs and are hold by the
+        application instance '''
         return self.__options
         
     
@@ -286,4 +288,4 @@ def is_sip_wrapped(instance):
         return False
     return True
     
-import res_rc
+import res_rc #@UnresolvedImport @UnusedImport

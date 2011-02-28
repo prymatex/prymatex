@@ -1,19 +1,22 @@
 # -*- encoding: utf-8 -*-
 
 #
-import sys
-import re
-import logging
-
-from PyQt4.QtCore import QRect
-from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu
-from PyQt4.QtGui import QTextCursor, QAction, QFont, QPalette
-from PyQt4.QtCore import Qt, SIGNAL
-
-from prymatex.core.base import PMXObject
-from prymatex.core.config import Setting
+from PyQt4.QtCore import QRect, Qt, SIGNAL
+from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
+    QTextCursor, QAction, QFont, QPalette
 from prymatex.bundles import PMXBundle, PMXPreference, PMXSnippet
 from prymatex.bundles.command import PMXCommand
+from prymatex.bundles.syntax import PMXSyntax
+from prymatex.bundles.theme import PMXTheme
+from prymatex.core.base import PMXObject
+from prymatex.core.config import Setting
+from prymatex.gui.editor.sidearea import PMXSideArea
+from prymatex.gui.editor.syntax import PMXSyntaxProcessor
+from prymatex.lib import profilehooks
+import logging
+import re
+import sys
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +28,6 @@ if __name__ == "__main__":
     sys.path.append('../..')
     #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
 
-from prymatex.gui.editor.sidearea import PMXSideArea
-from prymatex.gui.editor.syntax import PMXSyntaxProcessor
-from prymatex.bundles.theme import PMXTheme
-from prymatex.bundles.syntax import PMXSyntax
 
 # Key press debugging 
 KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
@@ -54,6 +53,8 @@ def debug_key(key_event):
 
 _counter = 0
 
+
+
 class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     The GUI element which holds the editor.
@@ -78,6 +79,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     font = Setting(default = {"name": "Monospace", "size": 10}, 
                    fset = lambda self, value: self.setFont(QFont(value["name"], value["size"]))
                    )
+    
     
     def setTheme(self, name):
         theme = PMXTheme.getThemeByName(self.theme_name)

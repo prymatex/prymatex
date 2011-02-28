@@ -1,4 +1,7 @@
 LOCK
+*.profile
+*.orig
+build
 .*
 test.py
 lib/oniguruma

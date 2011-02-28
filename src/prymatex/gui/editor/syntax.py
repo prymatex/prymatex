@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, QColor, QFont
+from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, \
+    QColor, QFont
+from PyQt4.QtGui import qApp
 from prymatex.bundles.processor import PMXSyntaxProcessor
+from prymatex.lib.profilehooks import profile
+
 
 class PMXBlockUserData(QTextBlockUserData):
     FOLDING_NONE = 0
@@ -24,7 +28,8 @@ class PMXBlockUserData(QTextBlockUserData):
         
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
-        
+
+
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
@@ -44,6 +49,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         text.reverse()
         return text
     
+    
     def highlightBlock(self, text):
         if not self.syntax:
             return
@@ -55,6 +61,12 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         else:  
             self.discard_lines = 0
         self.syntax.parse(text, self)
+    
+    if qApp.instance().options.profile:
+        print "INFO: Profiling", highlightBlock
+        highlightBlock = profile(highlightBlock)
+    
+    
     
     def getSyntax(self):
         return self.__syntax

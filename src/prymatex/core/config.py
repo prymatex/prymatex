@@ -177,7 +177,7 @@ if __name__ == "__main__":
                 new_class.add_to_class(name, attr)
             return new_class
 
-        def add_to_class(cls, name, value):
+        def add_to_class(cls, name, value): #@NoSelf
             if hasattr(value, 'contribute_to_class'):
                 value.contribute_to_class(cls, name)
             else:

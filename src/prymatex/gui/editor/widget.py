@@ -2,15 +2,17 @@
 Code Editor Widget.
 '''
 
-from PyQt4.QtGui import QWidget, QAction, QMenu, QKeySequence, qApp
-from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor,QIcon
 from PyQt4.QtCore import SIGNAL, Qt, QString
+from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, \
+    QAction, QMenu, QKeySequence, qApp
 from logging import getLogger
+from prymatex.bundles import PMXSyntax
+from ui_editorwidget import Ui_EditorWidget
+import logging
+import os
+import re
 import sys
 import traceback
-import re
-import os
-import logging
 
 #from prymatex.lib.deco import logresult
 logger = logging.getLogger(__name__)
@@ -24,8 +26,6 @@ if __name__ == "__main__":
     #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
 
 # Qt Designer's gui
-from ui_editorwidget import Ui_EditorWidget
-from prymatex.bundles import PMXSyntax
 
 #===============================================================================
 # Icons

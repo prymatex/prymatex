@@ -6,11 +6,11 @@ Some of the widgets defined here are:
     * Syntax selector
     * 
 '''
-from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from prymatex.lib.i18n import ugettext as _
+from PyQt4.QtGui import *
 from prymatex.bundles.syntax import PMXSyntax
 from prymatex.core.base import PMXObject
+from prymatex.lib.i18n import ugettext as _
         
 class PWMStatusLabel(QLabel):
     def __init__(self, text, parent, default = 0, *options):

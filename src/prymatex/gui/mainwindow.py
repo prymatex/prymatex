@@ -1,27 +1,27 @@
 # -*- coding: utf-8 -*-
-import itertools
-import logging
-
-from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 from pprint import pformat
-from prymatex.gui.editor.base import PMXCodeEdit    
-    
-from prymatex.lib.i18n import ugettext as _
-from prymatex.gui.tabwidget import PMXTabWidget , PMXTabsMenu
-from prymatex.gui.panes.fspane import PMXFSPaneDock
-from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
-
+from prymatex.bundles import PMXBundle, PMXMenuNode
+from prymatex.gui.editor.base import PMXCodeEdit
+from prymatex.gui.filterdlg import PMXFilterDialog
 from prymatex.gui.mixins.common import CenterWidget
-#from prymatex.config.configdialog import PMXConfigDialog
+from prymatex.gui.panes.bundles import PMXBundleEditorDock
+from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.panes.outputpanel import PMXOutputDock
 from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
-from prymatex.gui.panes.bundles import PMXBundleEditorDock
+from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
 from prymatex.gui.ui_mainwindow import Ui_MainWindow
-from prymatex.gui.filterdlg import PMXFilterDialog
+from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
+from prymatex.lib.i18n import ugettext as _
+import itertools
+import logging
 
-from prymatex.bundles import PMXBundle, PMXMenuNode
+    
+
+#from prymatex.config.configdialog import PMXConfigDialog
+
 logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
