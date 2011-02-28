@@ -51,5 +51,13 @@ parser.add_option('-i', '--ipdb', dest="ipdb_excepthook",
                   action="store_true", help="Enable ipdb stacktrace")
 
 
-parser.add_option('-p', '--profile', dest='profile', default = False,
+parser.add_option('-p', '--profile', dest='profile_enabled',
+                  action="store_true",
+                  default = False,
                   help = "Run profiling for prymatex session")
+
+parser.add_option('-e', '--profile-entries', dest='profile_entries',
+                  action="store",
+                  type = int, 
+                  default = 0,
+                  help = "Define profiling entries, assumes -p")

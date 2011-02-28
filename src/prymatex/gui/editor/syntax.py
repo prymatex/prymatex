@@ -62,9 +62,10 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
             self.discard_lines = 0
         self.syntax.parse(text, self)
     
-    if qApp.instance().options.profile:
+    if qApp.instance().options.profile_enabled:
+        entries = qApp.instance().options.profile_entries 
         print "INFO: Profiling", highlightBlock
-        highlightBlock = profile(highlightBlock)
+        highlightBlock = profile(highlightBlock, entries = entries)
     
     
     
