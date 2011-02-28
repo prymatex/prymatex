@@ -23,7 +23,7 @@ SNIPPET_SYNTAX = {
               #Structures
               #TabStop
               {'captures': {'1': {'name': 'keyword.tabstop.snippet'}},
-               'match': '\\$(\\d+)',
+               'match': '\\$(\\d+)|\\${(\\d+)}',
                'name': 'structure.tabstop.snippet'},
               #Placeholder
               {'begin': '\\$\\{(\\d+):',
@@ -127,12 +127,6 @@ class TextNode(Node):
         
     def resolve(self, indentation, tabreplacement, environment):
         self.text = self.text.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
-
-    def substitute(self, match):
-        values = onig_compile("\$(\d+)").split(self.text)
-        for index in xrange(1, len(values), 2):
-            values[index] = match[index]
-        return "".join(values)            
 
 class NodeList(list):
     def __init__(self, scope, parent = None):
@@ -525,6 +519,8 @@ class VariableTransformation(Node):
         self.regexp.resolve(indentation, tabreplacement, environment)
 
 class Regexp(NodeList):
+    _repl_re = onig_compile(r"\$(?:(\d+)|g<(.+?)>)")
+    
     def __init__(self, scope, parent = None):
         super(Regexp, self).__init__(scope, parent)
         self.pattern = ""
@@ -573,15 +569,58 @@ class Regexp(NodeList):
         else:
             return super(Regexp, self).close(scope, text)
         return node
+    
+    @staticmethod
+    def uppercase(text):
+        titles = text.split('\u')
+        text = "".join([titles[0]] + map(lambda txt: txt[0].upper() + txt[1:], titles[0:]))
+        uppers = text.split('\U')
+        text = "".join([uppers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].upper() + txt[txt.find('\E') + 2:] or txt.upper(), uppers ))
+        return text
 
+    @staticmethod
+    def lowercase(text):
+        lowers = text.split('\L')
+        text = "".join([lowers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].lower() + txt[txt.find('\E') + 2:] or txt.lower(), lowers ))
+        return text
+    
+    def expand(self, m, template):
+        def handle(match):
+            numeric, named = match.groups
+            if numeric:
+                return m.group(int(numeric))
+            return m.group(named)
+        return self._repl_re.sub(handle, template)
+        
     def transform(self, text):
         result = ""
         for child in self:
-            matches = self.pattern.find(text)
-            for match in matches:
-                result += child.substitute(match)
-                if self.options == None or 'g' not in self.options:
-                    break;
+            if isinstance(child, TextNode):
+                repl = str(child)
+                if '$' in repl:
+                    repl = lambda m, r=repl: self.expand(m, r)
+                else:
+                    repl = lambda m, r=repl: r
+                result += self.pattern.sub(repl, text)
+            elif isinstance(child, Condition):
+                for match in self.pattern.find(text):
+                    if match[child.index] != None:
+                        repl = child.insertion
+                    else:
+                        repl = child.otherwise
+                    if repl == None:
+                        break
+                    if '$' in repl:
+                        repl = lambda m, r=repl: self.expand(m, r)
+                    else:
+                        repl = lambda m, r=repl: r
+                    result += self.pattern.sub(repl, str(match))
+                    if self.options == None or 'g' not in self.options:
+                        break;
+        if any(map(lambda r: result.find(r) != -1, ['\u', '\U'])):
+            result = Regexp.uppercase(result)
+        if any(map(lambda r: result.find(r) != -1, ['\L'])):
+            result = Regexp.lowercase(result)
         return result
     
 class Shell(NodeList):    
@@ -605,24 +644,12 @@ class Shell(NodeList):
         self.append(result.strip())
         process.stdout.close()
 
-def uppercase(text):
-    titles = text.split('\u')
-    text = "".join([titles[0]] + map(lambda txt: txt[0].upper() + txt[1:], titles[0:]))
-    uppers = text.split('\U')
-    text = "".join([uppers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].upper() + txt[txt.find('\E') + 2:] or txt.upper(), uppers ))
-    return text
-
-def lowercase(text):
-    lowers = text.split('\L')
-    text = "".join([lowers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].lower() + txt[txt.find('\E') + 2:] or txt.lower(), lowers ))
-    return text
-
 class Condition(Node):
     def __init__(self, scope, parent = None):
         super(Condition, self).__init__(scope, parent)
         self.index = None
-        self.insertion = ""
-        self.otherwise = ""
+        self.insertion = None
+        self.otherwise = None
         self.current = ""
         
     def __deepcopy__(self, memo):
@@ -646,7 +673,7 @@ class Condition(Node):
         node = self
         if scope == 'string.regexp.condition':
             self.index = int(text)
-        elif scope == 'text.condition' and self.insertion == "":
+        elif scope == 'text.condition' and self.insertion == None:
             self.current += text.replace('\\n', '\n').replace('\\t', '\t')
             self.insertion = self.current
         elif scope == 'keyword.escape.condition':
@@ -659,21 +686,6 @@ class Condition(Node):
             return super(Condition, self).close(scope, text)
         return node
     
-    def substitute(self, match):
-        if match and match[self.index] != None:
-            values = onig_compile("\$(\d+)").split(self.insertion)
-        else:
-            values = onig_compile("\$(\d+)").split(self.otherwise)
-        for index in xrange(1, len(values), 2):
-            value = match[int(values[index])]
-            values[index] = value != None and value or ""
-        text = "".join(values)
-        if any(map(lambda r: text.find(r) != -1, ['\u', '\U'])):
-            text = uppercase(text)
-        if any(map(lambda r: text.find(r) != -1, ['\L'])):
-            text = lowercase(text)
-        return text
-
     def append(self, element):
         self.current += element.replace('\\n', '\n').replace('\\t', '\t')
         

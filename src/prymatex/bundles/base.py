@@ -285,13 +285,13 @@ def test_preferences():
 
 def test_snippets():
     #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('HTML')
+    bundle = PMXBundle.getBundleByName('Zen HTML')
     errors = 0
     #for bundle in PMXBundle.BUNDLES.values():
     for snippet in bundle.snippets:
         try:
             #if snippet.name.startswith("Itemize Lines"):
-            #if snippet.name.startswith("Wrap Selection"):
+            #if snippet.name.startswith("Chapter"):
                 snippet.compile()
                 snippet.resolve(indentation = "",
                                 tabreplacement = "    ",
@@ -299,13 +299,16 @@ def test_snippets():
                 print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
                 print "Origin: ", len(snippet), snippet.next()
                 print snippet, snippet.ends
-                clon = snippet.clone()
-                clon.write(0, "Bar %s algo pepe")
-                print "Clone: ", len(clon), clon.next()
-                print clon, clon.ends
+                #clon = snippet.clone()
+                #clon.write(0, "Un Capitulo Nuevo")
+                #print "Clone: ", len(clon), clon.next()
+                #print clon, clon.ends
         except Exception, e:
             print bundle.name, snippet.name, e
             errors += 1
+            if "'ascii' codec can't encode" not in str(e):
+                import sys
+                sys.exit(0)
     print errors
 
 def test_commands():
