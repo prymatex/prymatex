@@ -29,7 +29,6 @@ class PMXBlockUserData(QTextBlockUserData):
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
 
-
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
@@ -38,7 +37,21 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         QSyntaxHighlighter.__init__(self, doc)
         self.__syntax = None
         self.__formatter = None
+
+    def getSyntax(self):
+        return self.__syntax
+    def setSyntax(self, syntax):
+        self.__syntax =  syntax
+        self.rehighlight()
+    syntax = property(getSyntax, setSyntax)
     
+    def getFormatter(self):
+        return self.__formatter
+    def setFormatter(self, syntax):
+        self.__formatter =  syntax
+        self.rehighlight()
+    formatter = property(getFormatter, setFormatter)
+
     def collect_previous_text(self, current):
         text = [ current ]
         block = self.currentBlock().previous()
@@ -66,17 +79,6 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         entries = qApp.instance().options.profile_entries 
         print "INFO: Profiling", highlightBlock
         highlightBlock = profile(highlightBlock, entries = entries)
-    
-    
-    
-    def getSyntax(self):
-        return self.__syntax
-    
-    def setSyntax(self, syntax):
-        self.__syntax =  syntax
-        self.rehighlight()
-    
-    syntax = property(getSyntax, setSyntax)
     
     def add_token(self, end):
         begin = self.line_position

@@ -11,6 +11,7 @@ from prymatex.bundles.syntax import PMXSyntax
 from prymatex.bundles.snippet import PMXSnippet
 from prymatex.bundles.preference import PMXPreference
 from prymatex.bundles.command import PMXCommand
+from prymatex.bundles.template import PMXTemplate
 from prymatex.bundles.base import PMXBundle, PMXMenuNode
 from prymatex.bundles.theme import PMXTheme, PMXStyle
 from prymatex.bundles.qtadapter import buildQTextFormat
@@ -21,7 +22,8 @@ BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*', PMXSyntax),
                    ('Snippet', 'Snippets/*', PMXSnippet),
                    ('Macro', 'Macros/*', PMXMacro),
                    ('Command', 'Commands/*', PMXCommand),
-                   ('Preference', 'Preferences/*', PMXPreference)
+                   ('Preference', 'Preferences/*', PMXPreference),
+                   ('Template', 'Templates/*', PMXTemplate)
                    )
 
 def load_prymatex_bundles(after_load_callback = None):

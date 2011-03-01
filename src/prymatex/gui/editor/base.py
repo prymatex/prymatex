@@ -381,6 +381,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         elif isinstance(item, PMXCommand):
             item.resolve(environment = self.buildBundleItemEnvironment(item = item, word = trigger))
             print item.name, str(item)
+        elif isinstance(item, PMXSyntax):
+            self.setSyntax(item)
     
     def selectBundleItem(self, items, trigger = ""):
         cursor = self.textCursor()
