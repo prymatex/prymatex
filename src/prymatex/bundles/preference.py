@@ -34,15 +34,15 @@ class PMXSetting(dict):
         for key in [    'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
             if hash.has_key(key):
                 hash[key] = onig_compile( hash[key] )
-
+                
         super(PMXSetting, self).__init__(hash)
 
 class PMXPreference(PMXBundleItem):
-    def __init__(self, hash, name_space = "default"):
-        super(PMXPreference, self).__init__(hash, name_space)
+    def __init__(self, hash, name_space = "default", path = None):
+        super(PMXPreference, self).__init__(hash, name_space, path)
         for key in [ 'settings' ]:
             if key == 'settings':
-                setattr(self, key, PMXSetting(hash.pop(key, {})))
+                setattr(self, key, PMXSetting(hash.get(key, {})))
 
     @staticmethod
     def buildSettings(preferences):

@@ -8,13 +8,12 @@ import os, stat, tempfile, logging
 from copy import deepcopy
 from subprocess import Popen, PIPE, STDOUT
 import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP
+from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_DONT_CAPTURE_GROUP, OPTION_MULTILINE
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
 
 logger = logging.getLogger(__name__)
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
 SNIPPET_SYNTAX = {
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
@@ -519,7 +518,7 @@ class VariableTransformation(Node):
         self.regexp.resolve(indentation, tabreplacement, environment)
 
 class Regexp(NodeList):
-    _repl_re = onig_compile(r"\$(?:(\d+)|g<(.+?)>)")
+    _repl_re = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)(r"\$(?:(\d+)|g<(.+?)>)")
     
     def __init__(self, scope, parent = None):
         super(Regexp, self).__init__(scope, parent)
@@ -539,7 +538,6 @@ class Regexp(NodeList):
         node = self
         if scope == 'string.regexp.format':
             self.pattern += text[:-1]
-            self.pattern = onig_compile(self.pattern)
         elif scope == 'meta.structure.condition.regexp':
             self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
             node = Condition(scope, self)
@@ -591,8 +589,8 @@ class Regexp(NodeList):
             def handle(match):
                 numeric, named = match.groups
                 if numeric:
-                    return m.group(int(numeric))
-                return m.group(named)
+                    return m.group(int(numeric)) or ""
+                return m.group(named) or ""
             return Regexp._repl_re.sub(handle, template)
         if '$' in text:
             repl = lambda m, r = text: expand(m, r)
@@ -607,22 +605,34 @@ class Regexp(NodeList):
                 repl = self.prepare_replacement(str(child))
                 result += self.pattern.sub(repl, text)
             elif isinstance(child, Condition):
+                position = 0
                 for match in self.pattern.find(text):
-                    if match[child.index] != None:
-                        repl = child.insertion
-                    else:
-                        repl = child.otherwise
+                    repl = match[child.index] != None and child.insertion or child.otherwise
                     if repl == None:
-                        break
+                        continue
                     repl = self.prepare_replacement(repl)
                     result += self.pattern.sub(repl, str(match))
-                    if self.options == None or 'g' not in self.options:
-                        break;
+                    if not self.option_global:
+                        break
         if any(map(lambda r: result.find(r) != -1, ['\u', '\U'])):
             result = Regexp.uppercase(result)
         if any(map(lambda r: result.find(r) != -1, ['\L'])):
             result = Regexp.lowercase(result)
         return result
+    
+    @property
+    def option_global(self):
+        return self.options != None and 'g' in self.options or False
+    
+    @property
+    def option_multiline(self):
+        return self.options != None and 'm' in self.options or False
+        
+    def resolve(self, indentation, tabreplacement, environment):
+        flags = [OPTION_CAPTURE_GROUP]
+        if self.option_multiline:
+            flags.append(OPTION_MULTILINE)
+        self.pattern = onig.Regexp.factory(flags = reduce(lambda x, y: x | y, flags, 0))(self.pattern)
     
 class Shell(NodeList):    
     def close(self, scope, text):
@@ -730,16 +740,16 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
 
 class PMXSnippet(PMXBundleItem):
     parser = PMXSyntax(SNIPPET_SYNTAX)
-    def __init__(self, hash, name_space = "default"):
-        super(PMXSnippet, self).__init__(hash, name_space)
+    def __init__(self, hash, name_space = "default", path = None):
+        super(PMXSnippet, self).__init__(hash, name_space, path)
         for key in [    'content', 'disableAutoIndent', 'inputPattern', 'bundlePath' ]:
-            setattr(self, key, hash.pop(key, None))
+            setattr(self, key, hash.get(key, None))
         self.snippet = None
         self.taborder = None
         self.index = -1
         
     def __deepcopy__(self, memo):
-        snippet = PMXSnippet(deepcopy(self.hash), deepcopy(self.name_space))
+        snippet = PMXSnippet(self.hash, self.name_space)
         memo["snippet"] = deepcopy(self.snippet, memo)
         snippet.bundle = self.bundle
         return snippet

@@ -13,16 +13,13 @@ if __name__ == "__main__":
 from prymatex.bundles.base import PMXBundleItem
 
 class PMXCommand(PMXBundleItem):
-    def __init__(self, hash, name_space = "default"):
-        super(PMXCommand, self).__init__(hash, name_space)
+    def __init__(self, hash, name_space = "default", path = None):
+        super(PMXCommand, self).__init__(hash, name_space, path)
         for key in [    'fileCaptureRegister', 'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
                         'lineCaptureRegister', 'command', 'capturePattern', 'output', 'dontFollowNewOutput',
                         'input', 'beforeRunningCommand', 'autoScrollOutput', 'bundlePath', 'standardInput',
                         'winCommand', 'fallbackInput', 'captureFormatString', 'standardOutput', 'beforeRunningScript' ]:
-            setattr(self, key, hash.pop(key, None))
-        
-        if hash:
-            print "Command '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+            setattr(self, key, hash.get(key, None))
         self.value = ""
         
     def __str__(self):

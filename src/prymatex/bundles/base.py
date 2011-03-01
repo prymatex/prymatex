@@ -78,7 +78,7 @@ class PMXBundle(object):
     PREFERENCES = {}
     scores = PMXScoreManager()
     
-    def __init__(self, hash, path):
+    def __init__(self, hash, path = None):
         for key in [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]:
             value = hash.pop(key, None)
             if key == 'mainMenu' and value != None:
@@ -146,6 +146,7 @@ class PMXBundle(object):
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
             return
+
         #Disabled?
         if bundle.uuid in settings.disabled_bundles:
             return
@@ -165,7 +166,7 @@ class PMXBundle(object):
                         print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
                         continue;
                 try:
-                    item = klass(data, name_space)
+                    item = klass(data, name_space, sf)
                     method = getattr(bundle, "add" + name, None)
                     if method != None:
                         method(item)
@@ -242,11 +243,12 @@ class PMXBundle(object):
         return items
     
 class PMXBundleItem(object):
-    def __init__(self, hash, name_space):
+    def __init__(self, hash, name_space, path = None):
         self.hash = deepcopy(hash)
         self.name_space = name_space
+        self.path = path
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
-            setattr(self, key, hash.pop(key, None))
+            setattr(self, key, hash.get(key, None))
     
     def buildMenuTextEntry(self):
         text = unicode(self.name)
@@ -284,8 +286,8 @@ def test_preferences():
     print PMXPreference.getSettings(bundle.getPreferences('source.python'))
 
 def test_snippets():
-    #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('Python')
+    bundle = PMXBundle.getBundleByName('LaTeX')
+    #bundle = PMXBundle.getBundleByName('Python')
     errors = 0
     #for bundle in PMXBundle.BUNDLES.values():
     for snippet in bundle.snippets:
@@ -296,7 +298,8 @@ def test_snippets():
                 snippet.resolve(indentation = "",
                                 tabreplacement = "    ",
                                 environment = {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "uno\tdos\tcuatro\t"})
-                print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
+                print "-" * 10, " Bundle ", bundle.name, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 10
+                print snippet.path
                 print "Origin: ", len(snippet), snippet.next()
                 print snippet, snippet.ends
                 clon = snippet.clone()
@@ -313,36 +316,36 @@ def test_snippets():
     print errors
 
 def test_commands():
-    #bundle = PMXBundle.getBundleByName('LaTeX')
+    bundle = PMXBundle.getBundleByName('LaTeX')
     #bundle = PMXBundle.getBundleByName('SQL')
     errors = 0
-    for bundle in PMXBundle.BUNDLES.values():
-        for command in bundle.commands:
-            try:
-                #if snippet.name.startswith("Itemize Lines"):
-                #if snippet.name.startswith("Convert Tabs To Table"):
-                    command.compile()
-                    env = {'TM_CURRENT_LINE': 'TM_CURRENT_LINE',
-                       'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
-                       'TM_INPUT_START_LINE_INDEX': '',
-                       'TM_LINE_INDEX': '', 
-                       'TM_LINE_NUMBER': '', 
-                       'TM_SELECTED_SCOPE': 'TM_SELECTED_SCOPE', 
-                       'TM_CURRENT_WORD': 'TM_CURRENT_WORD',
-                       'TM_FILEPATH': '',
-                       'TM_FILENAME': '',
-                       'TM_DIRECTORY': '',
-                       'TM_SOFT_TABS': 'YES',
-                       'TM_TAB_SIZE': "TM_TAB_SIZE",
-                       'TM_BUNDLE_SUPPORT': bundle.getBundleSupportPath(),
-                       'TM_SELECTED_TEXT': "TM_SELECTED_TEXT" }
-                    print env['TM_SUPPORT_PATH']
-                    print env['TM_BUNDLE_SUPPORT']
-                    command.resolve(environment = env)
-                    print command.name, command
-            except Exception, e:
-                print bundle.name, command.name, e
-                errors += 1
+    #for bundle in PMXBundle.BUNDLES.values():
+    for command in bundle.commands:
+        try:
+            #if snippet.name.startswith("Itemize Lines"):
+            #if snippet.name.startswith("Convert Tabs To Table"):
+                command.compile()
+                env = {'TM_CURRENT_LINE': 'TM_CURRENT_LINE',
+                   'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
+                   'TM_INPUT_START_LINE_INDEX': '',
+                   'TM_LINE_INDEX': '', 
+                   'TM_LINE_NUMBER': '', 
+                   'TM_SELECTED_SCOPE': 'TM_SELECTED_SCOPE', 
+                   'TM_CURRENT_WORD': 'TM_CURRENT_WORD',
+                   'TM_FILEPATH': '',
+                   'TM_FILENAME': '',
+                   'TM_DIRECTORY': '',
+                   'TM_SOFT_TABS': 'YES',
+                   'TM_TAB_SIZE': "TM_TAB_SIZE",
+                   'TM_BUNDLE_SUPPORT': bundle.getBundleSupportPath(),
+                   'TM_SELECTED_TEXT': "TM_SELECTED_TEXT" }
+                print env['TM_SUPPORT_PATH']
+                print env['TM_BUNDLE_SUPPORT']
+                command.resolve(environment = env)
+                print command.name, command
+        except Exception, e:
+            print bundle.name, command.name, e
+            errors += 1
     print errors
     
 def print_snippet_syntax():

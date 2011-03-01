@@ -158,19 +158,16 @@ class PMXSyntaxProxy(object):
         
 class PMXSyntax(PMXBundleItem):
     SYNTAXES = {}
-    def __init__(self, hash, name_space = 'default'):
-        super(PMXSyntax, self).__init__(hash, name_space)
+    def __init__(self, hash, name_space = 'default', path = None):
+        super(PMXSyntax, self).__init__(hash, name_space, path)
         for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository',
                         'keyEquivalent', 'foldingStopMarker', 'fileTypes', 'patterns']:
-            value = hash.pop(key, None)
+            value = hash.get(key, None)
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                 #Compiled keys
                 value = onig_compile( value )
             setattr(self, key, value)
 
-        if hash:
-            print "Syntax '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
-            
         PMXSyntax.SYNTAXES.setdefault(self.name_space, {})
         if self.scopeName != None:
             PMXSyntax.SYNTAXES[self.name_space][self.scopeName] = self
