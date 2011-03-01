@@ -168,6 +168,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def shortcutBundleItemActivated(self, key):
         editor = self.currentEditor
         scope = editor.getCurrentScope()
+        print key
         if scope:
             items = PMXBundle.getKeySequenceItem(key, scope)
             print items
@@ -178,10 +179,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     def addBundlesShortcuts(self):
         for keyseq in PMXBundle.KEY_SEQUENCE.keys():
-            shortcut = QShortcut(self)
-            shortcut.setKey(keyseq)
             receiver = lambda key = keyseq: self.shortcutBundleItemActivated(key)
-            self.connect(shortcut, SIGNAL("activated()"), receiver)
+            QShortcut(QKeySequence(keyseq), self, receiver)
         
     def on_actionQuit_triggered(self):
         QApplication.quit()
