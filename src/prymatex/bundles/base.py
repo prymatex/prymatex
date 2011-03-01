@@ -285,13 +285,13 @@ def test_preferences():
 
 def test_snippets():
     #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('Zen HTML')
+    bundle = PMXBundle.getBundleByName('Python')
     errors = 0
     #for bundle in PMXBundle.BUNDLES.values():
     for snippet in bundle.snippets:
         try:
             #if snippet.name.startswith("Itemize Lines"):
-            #if snippet.name.startswith("Chapter"):
+            #if snippet.name.startswith("belongs_to"):
                 snippet.compile()
                 snippet.resolve(indentation = "",
                                 tabreplacement = "    ",
@@ -299,49 +299,50 @@ def test_snippets():
                 print "-" * 15, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 15
                 print "Origin: ", len(snippet), snippet.next()
                 print snippet, snippet.ends
-                #clon = snippet.clone()
-                #clon.write(0, "Un Capitulo Nuevo")
-                #print "Clone: ", len(clon), clon.next()
-                #print clon, clon.ends
+                clon = snippet.clone()
+                clon.write(0, "Un Capitulo Nuevo")
+                print "Clone: ", len(clon), clon.next()
+                print clon, clon.ends
         except Exception, e:
             print bundle.name, snippet.name, e
             errors += 1
             if "'ascii' codec can't encode" not in str(e):
-                import sys
+                import sys, traceback
+                traceback.print_exc()
                 sys.exit(0)
     print errors
 
 def test_commands():
     #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('SQL')
+    #bundle = PMXBundle.getBundleByName('SQL')
     errors = 0
-    #for bundle in PMXBundle.BUNDLES.values():
-    for command in bundle.commands:
-        try:
-            #if snippet.name.startswith("Itemize Lines"):
-            #if snippet.name.startswith("Convert Tabs To Table"):
-                command.compile()
-                env = {'TM_CURRENT_LINE': 'TM_CURRENT_LINE',
-                   'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
-                   'TM_INPUT_START_LINE_INDEX': '',
-                   'TM_LINE_INDEX': '', 
-                   'TM_LINE_NUMBER': '', 
-                   'TM_SELECTED_SCOPE': 'TM_SELECTED_SCOPE', 
-                   'TM_CURRENT_WORD': 'TM_CURRENT_WORD',
-                   'TM_FILEPATH': '',
-                   'TM_FILENAME': '',
-                   'TM_DIRECTORY': '',
-                   'TM_SOFT_TABS': 'YES',
-                   'TM_TAB_SIZE': "TM_TAB_SIZE",
-                   'TM_BUNDLE_SUPPORT': bundle.getBundleSupportPath(),
-                   'TM_SELECTED_TEXT': "TM_SELECTED_TEXT" }
-                print env['TM_SUPPORT_PATH']
-                print env['TM_BUNDLE_SUPPORT']
-                command.resolve(environment = env)
-                print command.name, command
-        except Exception, e:
-            print bundle.name, command.name, e
-            errors += 1
+    for bundle in PMXBundle.BUNDLES.values():
+        for command in bundle.commands:
+            try:
+                #if snippet.name.startswith("Itemize Lines"):
+                #if snippet.name.startswith("Convert Tabs To Table"):
+                    command.compile()
+                    env = {'TM_CURRENT_LINE': 'TM_CURRENT_LINE',
+                       'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
+                       'TM_INPUT_START_LINE_INDEX': '',
+                       'TM_LINE_INDEX': '', 
+                       'TM_LINE_NUMBER': '', 
+                       'TM_SELECTED_SCOPE': 'TM_SELECTED_SCOPE', 
+                       'TM_CURRENT_WORD': 'TM_CURRENT_WORD',
+                       'TM_FILEPATH': '',
+                       'TM_FILENAME': '',
+                       'TM_DIRECTORY': '',
+                       'TM_SOFT_TABS': 'YES',
+                       'TM_TAB_SIZE': "TM_TAB_SIZE",
+                       'TM_BUNDLE_SUPPORT': bundle.getBundleSupportPath(),
+                       'TM_SELECTED_TEXT': "TM_SELECTED_TEXT" }
+                    print env['TM_SUPPORT_PATH']
+                    print env['TM_BUNDLE_SUPPORT']
+                    command.resolve(environment = env)
+                    print command.name, command
+            except Exception, e:
+                print bundle.name, command.name, e
+                errors += 1
     print errors
     
 def print_snippet_syntax():

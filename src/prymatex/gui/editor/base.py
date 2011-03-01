@@ -294,8 +294,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 index = holder.position()
                 cursor.setPosition(index)
                 cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
-            self.setTextCursor(cursor)    
-        elif key == Qt.Key_Backspace:
+            self.setTextCursor(cursor)
+        elif key == Qt.Key_Backspace or key == Qt.Key_Del:
             starts = self.snippet.starts
             ends = self.snippet.ends
             if cursor.hasSelection():
@@ -310,8 +310,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 if holder == None:
                     self.snippet = None
                     return QPlainTextEdit.keyPressEvent(self, key_event)
-                holder.remove(cursor.position() - index - 1, cursor.position() - index)
-                position = cursor.position() - 1
+                offset = key == Qt.Key_Backspace and 1 or 0
+                holder.remove(cursor.position() - index - offset, cursor.position() - index)
+                position = cursor.position() - offset
             #Ajuste
             position += (holder.position() - index)
             cursor.setPosition(starts)

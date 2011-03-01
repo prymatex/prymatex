@@ -573,7 +573,7 @@ class Regexp(NodeList):
     @staticmethod
     def uppercase(text):
         titles = text.split('\u')
-        text = "".join([titles[0]] + map(lambda txt: txt[0].upper() + txt[1:], titles[0:]))
+        text = "".join([titles[0]] + map(lambda txt: txt[0].upper() + txt[1:], titles[1:]))
         uppers = text.split('\U')
         text = "".join([uppers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].upper() + txt[txt.find('\E') + 2:] or txt.upper(), uppers ))
         return text
@@ -584,23 +584,27 @@ class Regexp(NodeList):
         text = "".join([lowers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].lower() + txt[txt.find('\E') + 2:] or txt.lower(), lowers ))
         return text
     
-    def expand(self, m, template):
-        def handle(match):
-            numeric, named = match.groups
-            if numeric:
-                return m.group(int(numeric))
-            return m.group(named)
-        return self._repl_re.sub(handle, template)
-        
+    @staticmethod
+    def prepare_replacement(text):
+        repl = None
+        def expand(m, template):
+            def handle(match):
+                numeric, named = match.groups
+                if numeric:
+                    return m.group(int(numeric))
+                return m.group(named)
+            return Regexp._repl_re.sub(handle, template)
+        if '$' in text:
+            repl = lambda m, r = text: expand(m, r)
+        else:
+            repl = lambda m, r = text: r
+        return repl
+
     def transform(self, text):
         result = ""
         for child in self:
             if isinstance(child, TextNode):
-                repl = str(child)
-                if '$' in repl:
-                    repl = lambda m, r=repl: self.expand(m, r)
-                else:
-                    repl = lambda m, r=repl: r
+                repl = self.prepare_replacement(str(child))
                 result += self.pattern.sub(repl, text)
             elif isinstance(child, Condition):
                 for match in self.pattern.find(text):
@@ -610,10 +614,7 @@ class Regexp(NodeList):
                         repl = child.otherwise
                     if repl == None:
                         break
-                    if '$' in repl:
-                        repl = lambda m, r=repl: self.expand(m, r)
-                    else:
-                        repl = lambda m, r=repl: r
+                    repl = self.prepare_replacement(repl)
                     result += self.pattern.sub(repl, str(match))
                     if self.options == None or 'g' not in self.options:
                         break;
