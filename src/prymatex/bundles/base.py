@@ -290,11 +290,6 @@ class PMXBundleItem(object):
 #----------------------------------------
 # Tests
 #----------------------------------------
-def test_preferences():
-    from prymatex.bundles.preference import PMXPreference
-    bundle = PMXBundle.getBundleByName('Python')
-    print PMXPreference.getSettings(bundle.getPreferences('source.python'))
-
 def test_snippets():
     bundle = PMXBundle.getBundleByName('LaTeX')
     #bundle = PMXBundle.getBundleByName('Python')

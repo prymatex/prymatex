@@ -33,8 +33,6 @@ class PMXSyntaxNode(object):
                     self.parse_repository(value)
                 elif key in ['patterns']:
                     self.create_children(value)
-                else:
-                    print u'%s ignoring %s: %s' % (self.__class__.__name__, key, value)
             except TypeError, e:
                 #an encoding can only be given for non-unicode patterns
                 print e

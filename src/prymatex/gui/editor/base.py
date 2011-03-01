@@ -3,7 +3,7 @@
 #
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
-    QTextCursor, QAction, QFont, QPalette
+    QTextCursor, QAction, QFont, QPalette, QToolTip
 from prymatex.bundles import PMXBundle, PMXPreference, PMXSnippet
 from prymatex.bundles.command import PMXCommand
 from prymatex.bundles.syntax import PMXSyntax
@@ -386,9 +386,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.setTextCursor(cursor)
         elif isinstance(item, PMXCommand):
             item.resolve(environment = self.buildBundleItemEnvironment(item = item, word = trigger))
-            print item.name, str(item)
+            item.execute(self)
         elif isinstance(item, PMXSyntax):
             self.setSyntax(item)
+    
+    def showTooltip(self, string):
+        cursor = self.textCursor()
+        tool_tip = QToolTip()
+        point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
+        tool_tip.showText(point, string, self)
     
     def selectBundleItem(self, items, trigger = ""):
         cursor = self.textCursor()
@@ -462,21 +468,22 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             scope = self.getCurrentScope()
             preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
             indentation = self.identationWhitespace(line)
-            if "decreaseIndentPattern" in preferences and preferences["decreaseIndentPattern"].match(line):
+            #TODO: Move identation to preferences
+            if preferences["decreaseIndentPattern"] != None and preferences["decreaseIndentPattern"].match(line):
                 logger.debug("decreaseIndentPattern")
                 self.decreaseIndent(indentation)
                 indentation = self.identationWhitespace(line)
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
-            elif "increaseIndentPattern" in preferences and preferences["increaseIndentPattern"].match(line):
+            elif preferences["increaseIndentPattern"] != None in preferences and preferences["increaseIndentPattern"].match(line):
                 logger.debug("increaseIndentPattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.increaseIndent(indentation)
-            elif "indentNextLinePattern" in preferences and preferences["indentNextLinePattern"].match(line):
+            elif preferences["indentNextLinePattern"] != None in preferences and preferences["indentNextLinePattern"].match(line):
                 logger.debug("indentNextLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.increaseIndent(indentation)
-            elif "unIndentedLinePattern" in preferences and preferences["unIndentedLinePattern"].match(line):
+            elif preferences["unIndentedLinePattern"] != None in preferences and preferences["unIndentedLinePattern"].match(line):
                 logger.debug("unIndentedLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
             else:

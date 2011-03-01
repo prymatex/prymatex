@@ -35,21 +35,8 @@ class PMXCommand(PMXBundleItem):
         process.stdin.close()
         self.value = process.stdout.read()
         process.stdout.close()
-
-def parse_file(filename):
-    import plistlib
-    data = plistlib.readPlist(filename)
-    return PMXCommand(data)
-
-if __name__ == '__main__':
-    from glob import glob
-    files = glob(os.path.join('../share/Bundles/Python.tmbundle/Commands', '*'))
-    environment = { "TM_BUNDLE_SUPPORT": "../share/Bundles/Python.tmbundle/Support",
-                    "TM_SUPPORT_PATH": "../share/Support",
-                    "TM_CURRENT_WORD": "def",
-                    "TM_LINE_NUMBER": "2"}
-    environment.update(os.environ)
-    for f in files:
-        command = parse_file(f)
-        print command.name
-        command.resolve(environment = environment)
+    
+    def execute(self, parent):
+        if self.output != None and self.output == 'showAsTooltip':
+            parent.showTooltip(self.value)
+    

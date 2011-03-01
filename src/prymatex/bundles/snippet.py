@@ -605,7 +605,6 @@ class Regexp(NodeList):
                 repl = self.prepare_replacement(str(child))
                 result += self.pattern.sub(repl, text)
             elif isinstance(child, Condition):
-                position = 0
                 for match in self.pattern.find(text):
                     repl = match[child.index] != None and child.insertion or child.otherwise
                     if repl == None:
