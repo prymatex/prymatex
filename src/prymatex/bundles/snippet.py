@@ -633,6 +633,7 @@ class Regexp(NodeList):
         if self.option_multiline:
             flags.append(OPTION_MULTILINE)
         self.pattern = onig.Regexp.factory(flags = reduce(lambda x, y: x | y, flags, 0))(self.pattern)
+        super(Regexp, self).resolve(indentation, tabreplacement, environment)
     
 class Shell(NodeList):    
     def close(self, scope, text):

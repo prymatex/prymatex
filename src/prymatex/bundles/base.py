@@ -182,7 +182,7 @@ class PMXBundle(object):
     def getPreferences(cls, scope):
         preferences = []
         for key in cls.PREFERENCES.keys():
-            if key == "":
+            if key == None:
                 score = 1
             else:
                 score = cls.scores.score(scope, key)
@@ -201,10 +201,12 @@ class PMXBundle(object):
             for item in cls.TAB_TRIGGERS[keyword]:
                 if not item.ready():
                     item.compile()
-                #score = cls.scores.score(scope, item.scope)
-                score = cls.scores.score(item.scope, scope)
-                if score != 0:
-                    items.append((score, item))
+                if item.scope == None:
+                    items.append((1, item))
+                else:
+                    score = cls.scores.score(item.scope, scope)
+                    if score != 0:
+                        items.append((score, item))
             items.sort(key = lambda t: t[0])
             items = map(lambda (score, item): item.clone(), items)
         return items
@@ -216,10 +218,12 @@ class PMXBundle(object):
             for item in cls.KEY_EQUIVALENTS[character]:
                 if not item.ready():
                     item.compile()
-                score = cls.scores.score(item.scope, scope)
-                #score = cls.scores.score(scope, item.scope)
-                if score != 0:
-                    items.append((score, item))
+                if item.scope == None:
+                    items.append((1, item))
+                else:
+                    score = cls.scores.score(item.scope, scope)
+                    if score != 0:
+                        items.append((score, item))
             items.sort(key = lambda t: t[0])
             items = map(lambda (score, item): item.clone(), items)
         return items
@@ -231,10 +235,12 @@ class PMXBundle(object):
             for item in cls.KEY_SEQUENCE[key]:
                 if not item.ready():
                     item.compile()
-                score = cls.scores.score(item.scope, scope)
-                #score = cls.scores.score(scope, item.scope)
-                if score != 0:
-                    items.append((score, item))
+                if item.scope == None:
+                    items.append((1, item))
+                else:
+                    score = cls.scores.score(item.scope, scope)
+                    if score != 0:
+                        items.append((score, item))
             items.sort(key = lambda t: t[0])
             items = map(lambda (score, item): item.clone(), items)
         return items
@@ -269,14 +275,6 @@ class PMXBundleItem(object):
         if self.keyEquivalent != None:
             text += u" \t %s" % (buildKeyEquivalentString(self.keyEquivalent))
         return text
-    
-    def getScope(self):
-        return self.__scope != None and self.__scope or "" 
-        
-    def setScope(self, scope):
-        self.__scope = scope
-    
-    scope = property(getScope, setScope)
     
     def clone(self):
         return self

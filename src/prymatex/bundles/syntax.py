@@ -299,11 +299,29 @@ class PMXSyntax(PMXBundleItem):
         return map(lambda (score, stx): stx, stxs)
     
     @classmethod
+    def getSyntaxes(cls):
+        stxs = []
+        for syntaxes in cls.SYNTAXES.values():
+            for syntax in syntaxes.values():
+                stxs.append(syntax)
+        return stxs
+    
+    @classmethod
     def getSyntaxesNames(cls, sort = False):
         stxs = []
-        for _, syntaxes in cls.SYNTAXES.iteritems():
-            for _, syntax in syntaxes.iteritems():
+        for syntaxes in cls.SYNTAXES.values():
+            for syntax in syntaxes.values():
                 stxs.append(syntax.name)
+        if sort:
+            return sorted(stxs)
+        return stxs
+    
+    @classmethod
+    def getSyntaxesMenuTextEntry(cls, sort = False):
+        stxs = []
+        for syntaxes in cls.SYNTAXES.values():
+            for syntax in syntaxes.values():
+                stxs.append(syntax.buildMenuTextEntry())
         if sort:
             return sorted(stxs)
         return stxs

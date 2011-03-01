@@ -168,14 +168,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def shortcutBundleItemActivated(self, key):
         editor = self.currentEditor
         scope = editor.getCurrentScope()
-        print key
-        if scope:
-            items = PMXBundle.getKeySequenceItem(key, scope)
-            print items
-            if len(items) > 1:
-                editor.selectBundleItem(items)
-            elif items:
-                editor.insertBundleItem(items[0])
+        items = PMXBundle.getKeySequenceItem(key, scope)
+        if len(items) > 1:
+            editor.selectBundleItem(items)
+        elif items:
+            editor.insertBundleItem(items[0])
     
     def addBundlesShortcuts(self):
         for keyseq in PMXBundle.KEY_SEQUENCE.keys():
