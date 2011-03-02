@@ -287,6 +287,7 @@ class PMXBundleItem(object):
 
     def resolve(self, **kwargs):
         pass
+
 #----------------------------------------
 # Tests
 #----------------------------------------
@@ -374,12 +375,22 @@ def test_keys():
     pprint(PMXBundle.KEY_EQUIVALENTS)
     
 def test_templates():
+    import os
+    for template in PMXBundle.TEMPLATES:
+        template.resolve(os.environ)
+
+def test_bundle_elements():
     from pprint import pprint
+    pprint(PMXBundle.BUNDLES)
+    pprint(PMXBundle.TAB_TRIGGERS)
+    pprint(PMXBundle.KEY_EQUIVALENTS)
     pprint(PMXBundle.KEY_SEQUENCE)
+    pprint(PMXBundle.PREFERENCES)
+    pprint(PMXBundle.TEMPLATES)
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLE_ELEMENTS
     from pprint import pprint
-    for file in glob(os.path.join('../share/Bundles/', '*')):
+    for file in glob(os.path.join(settings['PMX_BUNDLES_PATH'], '*')):
         PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
     test_templates()

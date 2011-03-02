@@ -18,7 +18,18 @@ class PMXTemplate(PMXBundleItem):
         super(PMXTemplate, self).__init__(hash, name_space, path)
         for key in [    'command', 'extension']:
             setattr(self, key, hash.get(key, None))
-
+            
+    def resolve(self, environment = {}):
+        descriptor, name = tempfile.mkstemp(prefix='pmx')
+        file = os.fdopen(descriptor, 'w+')
+        file.write(self.command.encode('utf8'))
+        file.close()
+        os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
+        process = Popen([name], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment, shell=True)
+        process.stdin.close()
+        print process.stdout.read()
+        process.stdout.close()
+        
     @classmethod
     def loadBundleItem(cls, path, name_space = 'prymatex'):
         info_file = os.path.join(path, 'info.plist')

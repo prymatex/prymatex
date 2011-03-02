@@ -18,11 +18,11 @@ from prymatex.bundles.qtadapter import buildQTextFormat
 from prymatex.core.config import settings
 
 #BundleItemName, BundlePattern, BundleItemClass
-BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*', PMXSyntax),
-                   ('Snippet', 'Snippets/*', PMXSnippet),
-                   ('Macro', 'Macros/*', PMXMacro),
-                   ('Command', 'Commands/*', PMXCommand),
-                   ('Preference', 'Preferences/*', PMXPreference),
+BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*.tmLanguage', PMXSyntax),
+                   ('Snippet', 'Snippets/*.tmSnippet', PMXSnippet),
+                   ('Macro', 'Macros/*.tmMacro', PMXMacro),
+                   ('Command', 'Commands/*.tmCommand', PMXCommand),
+                   ('Preference', 'Preferences/*.tmPreferences', PMXPreference),
                    ('Template', 'Templates/*', PMXTemplate)
                    )
 
