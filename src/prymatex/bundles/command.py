@@ -39,4 +39,7 @@ class PMXCommand(PMXBundleItem):
     def execute(self, parent):
         if self.output != None and self.output == 'showAsTooltip':
             parent.showTooltip(self.value)
+        if self.output != None and self.output == 'showAsHTML':
+            print "html", self.value
+            parent.showHtml(self.value)
     

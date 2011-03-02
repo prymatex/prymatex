@@ -4,6 +4,7 @@
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QToolTip
+from PyQt4.QtWebKit import QWebView
 from prymatex.bundles import PMXBundle, PMXPreference, PMXSnippet
 from prymatex.bundles.command import PMXCommand
 from prymatex.bundles.syntax import PMXSyntax
@@ -390,11 +391,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         elif isinstance(item, PMXSyntax):
             self.setSyntax(item)
     
+    def showHtml(self, string):
+        view = QWebView()
+        view.setHtml(string)
+        view.show()
+    
     def showTooltip(self, string):
         cursor = self.textCursor()
-        tool_tip = QToolTip()
         point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
-        tool_tip.showText(point, string, self)
+        QToolTip.showText(point, string, self)
     
     def selectBundleItem(self, items, trigger = ""):
         cursor = self.textCursor()
@@ -560,7 +565,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                'TM_INPUT_START_LINE_INDEX': '',
                'TM_LINE_INDEX': str(cursor.columnNumber()), 
                'TM_LINE_NUMBER': str(cursor.block().blockNumber()), 
-               'TM_SELECTED_SCOPE': self.getCurrentScope(), 
+               'TM_SELECTED_SCOPE': self.getCurrentScope(),
+               'TM_SCOPE': self.getCurrentScope(),
                'TM_CURRENT_WORD': word,
                'TM_FILEPATH': '',
                'TM_FILENAME': '',
