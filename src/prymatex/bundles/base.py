@@ -3,7 +3,7 @@
 
 import os, re, plistlib
 from glob import glob
-from copy import deepcopy
+from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
 
 # for run as main
@@ -321,6 +321,28 @@ def test_snippets():
                 sys.exit(0)
     print errors
 
+def buildEnvironment(bundle = None):
+    env = deepcopy(os.environ)
+    env.update({'TM_CURRENT_LINE': 'TM_CURRENT_LINE',
+           'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
+           'TM_INPUT_START_LINE_INDEX': '',
+           'TM_LINE_INDEX': '', 
+           'TM_LINE_NUMBER': '', 
+           'TM_SELECTED_SCOPE': 'TM_SELECTED_SCOPE', 
+           'TM_CURRENT_WORD': 'TM_CURRENT_WORD',
+           'TM_FILEPATH': '',
+           'TM_FILENAME': '',
+           'TM_PROJECT_DIRECTORY': '',
+           'TM_DIRECTORY': '',
+           'TM_SOFT_TABS': 'YES',
+           'TM_TAB_SIZE': "TM_TAB_SIZE",
+           'TM_BUNDLE_SUPPORT': bundle != None and bundle.getBundleSupportPath() or '',
+           'TM_SELECTED_TEXT': "TM_SELECTED_TEXT"})
+    env.update(settings['static_variables'])
+    #Append TM_BUNDLE_SUPPORT TM_SUPPORT_PATH and to PATH
+    env['PATH'] = env['PATH'] + ':' + env['TM_BUNDLE_SUPPORT'] + '/bin:' + env['TM_SUPPORT_PATH'] + '/bin'
+    return env
+    
 def test_commands():
     bundle = PMXBundle.getBundleByName('LaTeX')
     #bundle = PMXBundle.getBundleByName('SQL')
@@ -331,23 +353,7 @@ def test_commands():
             #if snippet.name.startswith("Itemize Lines"):
             #if snippet.name.startswith("Convert Tabs To Table"):
                 command.compile()
-                env = {'TM_CURRENT_LINE': 'TM_CURRENT_LINE',
-                   'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
-                   'TM_INPUT_START_LINE_INDEX': '',
-                   'TM_LINE_INDEX': '', 
-                   'TM_LINE_NUMBER': '', 
-                   'TM_SELECTED_SCOPE': 'TM_SELECTED_SCOPE', 
-                   'TM_CURRENT_WORD': 'TM_CURRENT_WORD',
-                   'TM_FILEPATH': '',
-                   'TM_FILENAME': '',
-                   'TM_DIRECTORY': '',
-                   'TM_SOFT_TABS': 'YES',
-                   'TM_TAB_SIZE': "TM_TAB_SIZE",
-                   'TM_BUNDLE_SUPPORT': bundle.getBundleSupportPath(),
-                   'TM_SELECTED_TEXT': "TM_SELECTED_TEXT" }
-                print env['TM_SUPPORT_PATH']
-                print env['TM_BUNDLE_SUPPORT']
-                command.resolve(environment = env)
+                command.resolve(environment = buildEnvironment(bundle = bundle))
                 print command.name, command
         except Exception, e:
             print bundle.name, command.name, e
@@ -375,9 +381,13 @@ def test_keys():
     pprint(PMXBundle.KEY_EQUIVALENTS)
     
 def test_templates():
-    import os
+    DIRECTORY = '/home/dvanhaaster/workspace/'
     for template in PMXBundle.TEMPLATES:
-        template.resolve(os.environ)
+        environment = buildEnvironment(bundle = template.bundle)
+        environment['TM_NEW_FILE'] = DIRECTORY + template.name + '.' + template.extension
+        environment['TM_NEW_FILE_BASENAME'] = template.name
+        environment['TM_NEW_FILE_DIRECTORY'] = DIRECTORY
+        template.resolve(environment)
 
 def test_bundle_elements():
     from pprint import pprint
