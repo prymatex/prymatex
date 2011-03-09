@@ -31,11 +31,17 @@ def load_prymatex_bundles(after_load_callback = None):
     counter = 0
     total = len(paths)
     for path in paths:
-        if callable(after_load_callback):
-            after_load_callback(counter = counter, total = total, name = os.path.basename(path).split('.')[0])
-        PMXBundle.loadBundle(path, BUNDLE_ELEMENTS, 'pryamtex')
+        bundle = PMXBundle.loadBundle(path, BUNDLE_ELEMENTS, 'pryamtex')
+        if bundle and callable(after_load_callback):
+            after_load_callback(counter = counter, 
+                                total = total, 
+                                name = bundle.name,
+                                bundle = bundle)
+
         counter += 1
     return counter
+
+
 
 def load_prymatex_themes(after_load_callback = None):
     paths = glob(os.path.join(settings.PMX_THEMES_PATH, '*.tmTheme'))

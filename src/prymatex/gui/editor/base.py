@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 
-#
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QToolTip
@@ -20,15 +19,6 @@ import sys
 
 
 logger = logging.getLogger(__name__)
-
-#PMX Libs
-if __name__ == "__main__":
-    from os.path import join, dirname, abspath
-    pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
-    sys.path.append(pmx_base)
-    sys.path.append('../..')
-    #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
-
 
 # Key press debugging 
 KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
@@ -74,13 +64,30 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #-----------------------------------
     soft_tabs = Setting(default = True)
     tab_size = Setting(default = 4)
-    @property
-    def tabKeyBehavior(self):
-        return self.soft_tabs and u' ' * self.tab_size or u'\t'
     font = Setting(default = {"name": "Monospace", "size": 10}, 
                    fset = lambda self, value: self.setFont(QFont(value["name"], value["size"]))
                    )
     
+    def __init__(self, parent = None):
+        super(PMXCodeEdit, self).__init__(parent)
+        self.side_area = PMXSideArea(self)
+        self.processor = PMXSyntaxProcessor(self.document())
+        self.snippet = None
+        # TODO: Load from config
+        #option = QTextOption()
+        #option.setFlags(QTextOption.ShowTabsAndSpaces)
+        #self.document().setDefaultTextOption(option)
+
+        # Actions performed when a key is pressed
+        self.setupUi()
+        self.setupActions()
+        self.connectSignals()
+        self.declareEvents()
+        self.configure()
+        
+    @property
+    def tabKeyBehavior(self):
+        return self.soft_tabs and u' ' * self.tab_size or u'\t'
     
     def setTheme(self, name):
         theme = PMXTheme.getThemeByName(self.theme_name)
@@ -103,22 +110,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #theme_name = Setting(default = 'Twilight', fset = setTheme)
     theme_name = Setting(default = 'Pastels on Dark', fset = setTheme)
     
-    def __init__(self, parent = None):
-        super(PMXCodeEdit, self).__init__(parent)
-        self.side_area = PMXSideArea(self)
-        self.processor = PMXSyntaxProcessor(self.document())
-        self.snippet = None
-        # TODO: Load from config
-        #option = QTextOption()
-        #option.setFlags(QTextOption.ShowTabsAndSpaces)
-        #self.document().setDefaultTextOption(option)
-
-        # Actions performed when a key is pressed
-        self.setupUi()
-        self.setupActions()
-        self.connectSignals()
-        self.declareEvents()
-        self.configure()
         
     class Meta(object):
         settings = 'editor'
@@ -145,7 +136,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.connect(self.actionIndent, SIGNAL("triggered()"), self.indent)
         self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
         self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
+        self.actionFind = QAction(self.trUtf8("Find"), self)
         
+        
+    
+                     
     def getCurrentScope(self):
         cursor = self.textCursor()
         block = cursor.block()

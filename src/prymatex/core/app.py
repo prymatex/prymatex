@@ -206,14 +206,14 @@ class PMXApplication(QApplication):
         from prymatex.lib.i18n import ugettext as _
         bundles = 0
         splash = self.splash
-        def before_load_callback(counter, total, name):
+        def update_splash(counter, total, name, **kwargs):
             progress = (float(counter) / total) * 100
             splash.showMessage(_("Loading bundle %s\n%4d of %4d (%.d%%)", 
                                  name, counter, total, progress))
             QApplication.processEvents()
             
         self.splash.showMessage(_("Loading bundles..."))
-        bundles += load_prymatex_bundles(before_load_callback)
+        bundles += load_prymatex_bundles(update_splash)
         #Cargar bundles de usuario
         #for dirname in self.config.PMX_BUNDLES_PATH:
         #    self.splash.showMessage(_("Loading bundles..."))
