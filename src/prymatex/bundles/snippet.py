@@ -739,6 +739,8 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
         self.node.close(name, token)
 
 class PMXSnippet(PMXBundleItem):
+    path_patterns = ['Snippets/*.tmSnippet', 'Snippets/*.plist']
+    bundle_collection = 'snippets'
     parser = PMXSyntax(SNIPPET_SYNTAX)
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXSnippet, self).__init__(hash, name_space, path)

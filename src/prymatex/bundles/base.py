@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, re, plistlib
+import os, re, plistlib, ipdb
 from glob import glob
 from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
@@ -93,11 +93,8 @@ class PMXBundle(object):
         self.commands = []
         self.preferences = []
         self.templates = []
-        
-        if hash:
-            print "Bundle '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
 
-    def addItem(self, item):
+    def addBundleItem(self, item):
         if self.mainMenu != None:
             self.mainMenu[item.uuid] = item
         if item.tabTrigger != None:
@@ -109,33 +106,7 @@ class PMXBundle(object):
             else:
                 PMXBundle.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
         # I'm four father
-        item.bundle = self
-
-    def addSyntax(self, syntax):
-        self.addItem(syntax)
-        self.syntaxes.append(syntax)
-
-    def addSnippet(self, snippet):
-        self.addItem(snippet)
-        self.snippets.append(snippet)
-
-    def addMacro(self, macro):
-        self.addItem(macro)
-        self.macros.append(macro)
-
-    def addCommand(self, command):
-        self.addItem(command)
-        self.commands.append(command)
-
-    def addPreference(self, preference):
-        self.addItem(preference)
-        self.preferences.append(preference)
-        PMXBundle.PREFERENCES.setdefault(preference.scope, []).append(preference)
-    
-    def addTemplate(self, template):
-        self.addItem(template)
-        self.templates.append(template)
-        PMXBundle.TEMPLATES.append(template)
+        item.setBundle(self)
     
     def getSyntaxByName(self, name):
         for syntax in self.syntaxes:
@@ -146,7 +117,7 @@ class PMXBundle(object):
         return os.path.join(self.path, 'Support')
 
     @classmethod
-    def loadBundle(cls, path, elements, name_space = 'prymatex'):
+    def loadBundle(cls, path, classes, name_space = 'prymatex'):
         info_file = os.path.join(path, 'info.plist')
         try:
             data = plistlib.readPlist(info_file)
@@ -158,17 +129,17 @@ class PMXBundle(object):
         #Disabled?
         if bundle.uuid in settings.disabled_bundles:
             return
-        
-        for name, pattern, klass in elements:
-            files = glob(os.path.join(path, pattern))
-            for sf in files:
-                try:
-                    item = klass.loadBundleItem(sf, name_space)
-                    method = getattr(bundle, "add" + name, None)
-                    if item != None and method != None:
-                        method(item)
-                except Exception, e:
-                    print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
+            
+        for klass in classes:
+            for pattern in klass.path_patterns:
+                files = glob(os.path.join(path, pattern))
+                for sf in files:
+                    try:
+                        item = klass.loadBundleItem(sf, name_space)
+                        if item != None:
+                            bundle.addBundleItem(item)
+                    except Exception, e:
+                        print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
         cls.BUNDLES[bundle.uuid] = bundle
         return bundle
 
@@ -246,13 +217,23 @@ class PMXBundle(object):
         return items
     
 class PMXBundleItem(object):
+    path_patterns = []
+    bundle_collection = ""
     def __init__(self, hash, name_space, path = None):
         self.hash = deepcopy(hash)
         self.name_space = name_space
         self.path = path
+        self.bundle = None
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.get(key, None))
     
+    def setBundle(self, bundle):
+        self.bundle = bundle
+        if self.bundle_collection:
+            collection = getattr(bundle, self.bundle_collection, None)
+            if collection != None:
+                collection.append(self)
+        
     @classmethod
     def loadBundleItem(cls, path, name_space = 'prymatex'):
         try:
@@ -399,8 +380,8 @@ def test_bundle_elements():
     pprint(PMXBundle.TEMPLATES)
     
 if __name__ == '__main__':
-    from prymatex.bundles import BUNDLE_ELEMENTS
+    from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
     for file in glob(os.path.join(settings['PMX_BUNDLES_PATH'], '*')):
-        PMXBundle.loadBundle(file, BUNDLE_ELEMENTS)
+        PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
     test_templates()

@@ -155,6 +155,8 @@ class PMXSyntaxProxy(object):
             return self.syntax.syntaxes[self.proxy].grammar
         
 class PMXSyntax(PMXBundleItem):
+    path_patterns = ['Syntaxes/*.tmLanguage', 'Syntaxes/*.plist']
+    bundle_collection = 'syntaxes'
     SYNTAXES = {}
     def __init__(self, hash, name_space = 'default', path = None):
         super(PMXSyntax, self).__init__(hash, name_space, path)

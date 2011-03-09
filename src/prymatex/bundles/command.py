@@ -13,6 +13,8 @@ if __name__ == "__main__":
 from prymatex.bundles.base import PMXBundleItem
 
 class PMXCommand(PMXBundleItem):
+    path_patterns = ['Commands/*.tmCommand', 'Commands/*.plist']
+    bundle_collection = 'commands'
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXCommand, self).__init__(hash, name_space, path)
         for key in [    'fileCaptureRegister', 'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',

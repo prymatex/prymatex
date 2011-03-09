@@ -18,11 +18,17 @@ if __name__ == "__main__":
 from prymatex.bundles.base import PMXBundleItem
 
 class PMXTemplate(PMXBundleItem):
+    path_patterns = ['Templates/*']
+    bundle_collection = 'templates'
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXTemplate, self).__init__(hash, name_space, path)
         for key in [    'command', 'extension']:
             setattr(self, key, hash.get(key, None))
-            
+    
+    def setBundle(self, bundle):
+        super(PMXTemplate, self).setBundle(bundle)
+        bundle.TEMPLATES.append(self)
+    
     def resolve(self, environment = {}):
         origWD = os.getcwd() # remember our original working directory
         os.chdir(self.path)

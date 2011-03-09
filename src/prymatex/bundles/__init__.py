@@ -18,20 +18,14 @@ from prymatex.bundles.qtadapter import buildQTextFormat
 from prymatex.core.config import settings
 
 #BundleItemName, BundlePattern, BundleItemClass
-BUNDLE_ELEMENTS = (('Syntax', 'Syntaxes/*.tmLanguage', PMXSyntax),
-                   ('Snippet', 'Snippets/*.tmSnippet', PMXSnippet),
-                   ('Macro', 'Macros/*.tmMacro', PMXMacro),
-                   ('Command', 'Commands/*.tmCommand', PMXCommand),
-                   ('Preference', 'Preferences/*.tmPreferences', PMXPreference),
-                   ('Template', 'Templates/*', PMXTemplate)
-                   )
+BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate ]
 
 def load_prymatex_bundles(after_load_callback = None):
     paths = glob(os.path.join(settings.PMX_BUNDLES_PATH, '*.tmbundle'))
     counter = 0
     total = len(paths)
     for path in paths:
-        bundle = PMXBundle.loadBundle(path, BUNDLE_ELEMENTS, 'pryamtex')
+        bundle = PMXBundle.loadBundle(path, BUNDLEITEM_CLASSES, 'pryamtex')
         if bundle and callable(after_load_callback):
             after_load_callback(counter = counter, 
                                 total = total, 

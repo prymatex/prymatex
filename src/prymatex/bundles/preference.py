@@ -51,12 +51,18 @@ class PMXSetting(dict):
         super(PMXSetting, self).__init__(hash)
 
 class PMXPreference(PMXBundleItem):
+    path_patterns = ['Preferences/*.tmPreferences', 'Preferences/*.plist']
+    bundle_collection = 'preferences'
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXPreference, self).__init__(hash, name_space, path)
         for key in [ 'settings' ]:
             if key == 'settings':
                 setattr(self, key, PMXSetting(hash.get(key, {})))
 
+    def setBundle(self, bundle):
+        super(PMXPreference, self).setBundle(bundle)
+        bundle.PREFERENCES.setdefault(self.scope, []).append(self)
+    
     @staticmethod
     def buildSettings(preferences):
         settings = DEFAULT_SETTINGS
