@@ -394,7 +394,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def showTooltip(self, string):
         cursor = self.textCursor()
         point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
-        QToolTip.showText(point, string, self)
+        QToolTip.showText(point, string.strip(), self)
     
     def selectBundleItem(self, items, trigger = ""):
         cursor = self.textCursor()
