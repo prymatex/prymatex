@@ -163,6 +163,17 @@
     <file>resources/places/user-trash.png</file>
     <file>resources/icons/Prymatex_Logo.png</file>
   </qresource>
+  <qresource prefix="bundles">
+    <file>resources/icons/command.png</file>
+    <file>resources/icons/drag.png</file>
+    <file>resources/icons/language.png</file>
+    <file>resources/icons/menu.png</file>
+    <file>resources/icons/snippet.png</file>
+    <file>resources/icons/perference.png</file>
+    <file>resources/icons/bundle.png</file>
+    <file>resources/icons/template.png</file>
+    <file>resources/icons/language.png</file>
+  </qresource>
   <qresource prefix="images">
     <file>resources/prymatex/Prymatex_Splash.svg</file>
   </qresource>

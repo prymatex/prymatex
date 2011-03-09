@@ -7,6 +7,7 @@ QRC_FILES=$(shell find ./ -iname "*.qrc")
 all: resources gui
 
 	${MAKE} -C config
+	${MAKE} -C resources/svg
 gui: 
 	${MAKE} -C gui
 
