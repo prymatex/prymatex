@@ -10,7 +10,7 @@ from prymatex.bundles.syntax import PMXSyntax
 from prymatex.bundles.theme import PMXTheme
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
-from prymatex.gui.editor.sidearea import PMXSideArea
+from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.syntax import PMXSyntaxProcessor
 from prymatex.lib import profilehooks
 import logging
@@ -70,7 +70,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
-        self.side_area = PMXSideArea(self)
+        self.sidebar = PMXSidebar(self)
         self.processor = PMXSyntaxProcessor(self.document())
         self.snippet = None
         # TODO: Load from config
@@ -196,23 +196,23 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
     def lineNumberAreaWidth(self):
         # si tiene folding tengo que sumar mas 10
-        return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + 10
+        return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + self.sidebar.bookmarkArea + self.sidebar.foldArea 
         
     def updateLineNumberAreaWidth(self, newBlockCount):
         self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
     
     def updateLineNumberArea(self, rect, dy):
         if dy:
-            self.side_area.scroll(0, dy);
+            self.sidebar.scroll(0, dy);
         else:
-            self.side_area.update(0, rect.y(), self.side_area.width(), rect.height());
+            self.sidebar.update(0, rect.y(), self.sidebar.width(), rect.height());
         if (rect.contains(self.viewport().rect())):
             self.updateLineNumberAreaWidth(0)
     
     def resizeEvent(self, event):
         super(PMXCodeEdit, self).resizeEvent(event)
         cr = self.contentsRect()
-        self.side_area.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+        self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
         
     def highlightCurrentLine(self):
         extraSelections = []
