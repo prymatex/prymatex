@@ -1,0 +1,551 @@
+#------------------------------------------------------------------------------
+# Java
+
+0	short		0xcafe
+>2	short		0xbabe		mime:application/java
+
+
+#------------------------------------------------------------------------------
+# audio
+
+0       beshort         &0xfff0         mime:audio/x-mp
+# MPEG 1.0
+>1      byte&0x08       =0x08           \b
+# Layer 3
+>>1     byte            &0x02           \b3
+>>>2    byte&0xf0       =0x10           rate:32/kBits
+>>>2    byte&0xf0       =0x20           rate:40/kBits
+>>>2    byte&0xf0       =0x30           rate:48/kBits
+>>>2    byte&0xf0       =0x40           rate:56/kBits
+>>>2    byte&0xf0       =0x50           rate:64/kBits
+>>>2    byte&0xf0       =0x60           rate:80/kBits
+>>>2    byte&0xf0       =0x70           rate:96/kBits
+>>>2    byte&0xf0       =0x80           rate:112/kBits
+>>>2    byte&0xf0       =0x90           rate:128/kBits
+>>>2    byte&0xf0       =0xA0           rate:160/kBits
+>>>2    byte&0xf0       =0xB0           rate:192/kBits
+>>>2    byte&0xf0       =0xC0           rate:224/kBits
+>>>2    byte&0xf0       =0xD0           rate:256/kBits
+>>>2    byte&0xf0       =0xE0           rate:320/kBits
+# Layer 2
+>>1     byte            &0x04           \b2
+>>>2    byte&0xf0       =0x10           rate:32/kBits
+>>>2    byte&0xf0       =0x20           rate:48/kBits
+>>>2    byte&0xf0       =0x30           rate:56/kBits
+>>>2    byte&0xf0       =0x40           rate:64/kBits
+>>>2    byte&0xf0       =0x50           rate:80/kBits
+>>>2    byte&0xf0       =0x60           rate:96/kBits
+>>>2    byte&0xf0       =0x70           rate:112/kBits
+>>>2    byte&0xf0       =0x80           rate:128/kBits
+>>>2    byte&0xf0       =0x90           rate:160/kBits
+>>>2    byte&0xf0       =0xA0           rate:192/kBits
+>>>2    byte&0xf0       =0xB0           rate:224/kBits
+>>>2    byte&0xf0       =0xC0           rate:256/kBits
+>>>2    byte&0xf0       =0xD0           rate:320/kBits
+>>>2    byte&0xf0       =0xE0           rate:384/kBits
+# freq
+>>2     byte&0x0C       =0x00           freq:44.1/kHz
+>>2     byte&0x0C       =0x04           freq:48/kHz
+>>2     byte&0x0C       =0x08           freq:32/kHz
+# MPEG 2.0
+>1      byte&0x08       =0x00           \b
+# Layer 3
+>>1     byte            &0x02           \b3
+# Layer 2
+>>1     byte            &0x04           \b2
+>>2     byte&0xf0       =0x10           rate:8 kBits
+>>2     byte&0xf0       =0x20           rate:16/kBits
+>>2     byte&0xf0       =0x30           rate:24/kBits
+>>2     byte&0xf0       =0x40           rate:32/kBits
+>>2     byte&0xf0       =0x50           rate:40/kBits
+>>2     byte&0xf0       =0x60           rate:48/kBits
+>>2     byte&0xf0       =0x70           rate:56/kBits
+>>2     byte&0xf0       =0x80           rate:64/kBits
+>>2     byte&0xf0       =0x90           rate:80/kBits
+>>2     byte&0xf0       =0xA0           rate:96/kBits
+>>2     byte&0xf0       =0xB0           rate:112/kBits
+>>2     byte&0xf0       =0xC0           rate:128/kBits
+>>2     byte&0xf0       =0xD0           rate:144/kBits
+>>2     byte&0xf0       =0xE0           rate:160/kBits
+# freq
+>>2     byte&0x0C       =0x00           freq:22.05/kHz
+>>2     byte&0x0C       =0x04           freq:24/kHz
+>>2     byte&0x0C       =0x08           freq:16/kHz
+# misc
+>3      byte&0xC0       =0x00           misc:Stereo
+>3      byte&0xC0       =0x40           misc:JStereo
+>3      byte&0xC0       =0x80           misc:Dual-Ch
+>3      byte&0xC0       =0xC0           misc:Mono
+
+
+# Sun/NeXT audio data
+0	string		.snd
+>12	belong		1		mime:audio/basic
+>12	belong		2		mime:audio/basic
+>12	belong		3		mime:audio/basic
+>12	belong		4		mime:audio/basic
+>12	belong		5		mime:audio/basic
+>12	belong		6		mime:audio/basic
+>12	belong		7		mime:audio/basic
+
+>12	belong		23		mime:audio/x-adpcm
+
+>16     lelong          >0              freq:%d/Hz
+>20     belong          1               misc:mono,
+>20     belong          2               misc:stereo
+
+
+# DEC systems (e.g. DECstation 5000) use a variant of the Sun/NeXT format
+# that uses little-endian encoding and has a different magic number
+# (0x0064732E in little-endian encoding).
+0	lelong		0x0064732E	
+>12	lelong		1		mime:audio/x-dec-basic
+>12	lelong		2		mime:audio/x-dec-basic
+>12	lelong		3		mime:audio/x-dec-basic
+>12	lelong		4		mime:audio/x-dec-basic
+>12	lelong		5		mime:audio/x-dec-basic
+>12	lelong		6		mime:audio/x-dec-basic
+>12	lelong		7		mime:audio/x-dec-basic
+#                                       compressed (G.721 ADPCM)
+>12	lelong		23		mime:audio/x-dec-adpcm
+
+>16     lelong          >0              freq:%d/Hz
+>20     belong          1               misc:mono,
+>20     belong          2               misc:stereo
+
+
+# Bytes 0-3 of AIFF, AIFF-C, & 8SVX audio files are "FORM"
+8	string		AIFF		mime:audio/x-aiff	
+8	string		AIFC		mime:audio/x-aiff	
+8	string		8SVX		mime:audio/x-aiff	
+
+# Creative Labs AUDIO stuff
+#					Standard MIDI data
+0	string	MThd			mime:audio/unknown	
+0	string	CTMF			mime:audio/unknown	
+0	string	SBI			mime:audio/unknown	
+0	string	Creative\ Voice\ File	mime:audio/unknown	
+
+# [GRR 950115:  is this also Creative Labs?  Guessing that first line
+0	long		0x4e54524b	mime:audio/MultiTrack
+0	string		NTRK		mime:audio/MultiTrack
+
+# Microsoft WAVE format (*.wav)
+# [GRR 950115:  probably all of the shorts and longs should be leshort/lelong]
+#					Microsoft RIFF
+0	string		RIFF		mime:audio/unknown	
+#					- WAVE format
+>8	string		WAVE		mime:audio/x-wav	
+>8	string		AVI		mime:video/x-msvideo
+0	belong		0x2e7261fd	mime:application/x-realaudio
+0	string		.RMF		mime:application/x-realaudio
+
+# MPEG Layer 3 sound files
+0       belong          0xfffb          mime:audio/x-mp3
+0	string		ID3		mime:audio/x-mp3
+0	string		OggS		mime:audio/x-ogg
+
+
+# Extended MOD format (*.emd) (Greg Roelofs, newt@uchicago.edu); NOT TESTED
+0       string          EMOD            mime:audio/x-mod	emod
+0       string          MTM             mime:audio/x-mod	MultiTracker
+
+#
+# Taken from loader code from mikmod version 2.14
+# by Steve McIntyre (stevem@chiark.greenend.org.uk)
+0       string  JN              	mime:audio/x-mod applicaiton:669
+0       string  MAS_UTrack_V00		mime:audio/x-mod
+>14     string  >/0             	mime:application:ultratracker_1.%.1s
+0       string  UN05			mime:audio/x-mod application:MikMod
+0       string  Extended\ Module:	mime:audio/x-mod application:Fasttracker_II
+21      string  !SCREAM!		mime:audio/x-mod application:Screamtracker_2
+1080    string  M.K.			mime:audio/x-mod channel:4 application:Protracker
+1080    string  M!K!			mime:audio/x-mod channel:4 application:Protracker
+1080    string  FLT4			mime:audio/x-mod channel:4 application:Startracker
+1080    string  4CHN			mime:audio/x-mod channel:4 application:Fasttracker
+1080    string  6CHN			mime:audio/x-mod channel:4 application:Fasttracker
+1080    string  8CHN			mime:audio/x-mod channel:4 application:Fasttracker
+1080    string  CD81			mime:audio/x-mod channel:4 application:Oktalyzer
+1080    string  OKTA			mime:audio/x-mod channel:8 application:Oktalyzer
+1080    string  16CN			mime:channel:16 application:Taketracker
+1080    string  32CN			mime:channel:32 application:Taketracker
+
+
+# Various
+
+0	string		/*\ XPM		mime:image/x-xpm	encoding:7/bit
+16	beshort		0x3d3d		mime:image/x-3ds
+0       string  =BLENDER		mime:image/blender3D
+
+#					C or REXX program text
+0	string		/*		mime:text/x-c
+0	string		//		mime:text/x-c++
+
+#------------------------------------------------------------------------------
+# commands
+
+0       string          #!/bin/sh               mime:application/x-shellscript
+0       string          #!\ /bin/sh             mime:application/x-shellscript
+0       string          #!/bin/csh              mime:application/x-shellscript
+0       string          #!\ /bin/csh            mime:application/x-shellscript
+
+0       string          #!/bin/ksh              mime:application/x-shellscript
+0       string          #!\ /bin/ksh            mime:application/x-shellscript
+0       string          #!/bin/tcsh             mime:application/x-shellscript
+0       string          #!\ /bin/tcsh           mime:application/x-shellscript
+0       string          #!/usr/local/tcsh       mime:application/x-shellscript
+0       string          #!\ /usr/local/tcsh     mime:application/x-shellscript
+0       string          #!/usr/local/bin/tcsh   mime:application/x-shellscript
+0       string          #!\ /usr/local/bin/tcsh mime:application/x-shellscript
+
+0       string          #!/bin/bash    		mime:application/x-shellscript
+0       string          #!\ /bin/bash           mime:application/x-shellscript
+0       string          #!/usr/local/bin/bash   mime:application/x-shellscript
+0       string          #!\ /usr/local/bin/bash mime:application/x-shellscript
+
+0       string          #!/usr/local/bin/zsh    mime:application/x-shellscript
+0       string          #!\ /usr/local/bin/zsh  mime:application/x-shellscript
+0       string          #!/usr/local/bin/ash    mime:application/x-shellscript
+0       string          #!\ /usr/local/bin/ash  mime:application/x-shellscript
+0       string          #!/bin/nawk             mime:application/x-nawk
+0       string          #!\ /bin/nawk           mime:application/x-nawk
+0       string          #!/usr/bin/nawk         mime:application/x-nawk
+0       string          #!\ /usr/bin/nawk       mime:application/x-nawk
+0       string          #!/usr/local/bin/nawk   mime:application/x-nawk
+0       string          #!\ /usr/local/bin/nawk mime:application/x-nawk
+0       string          #!/bin/gawk             mime:application/x-gawk
+0       string          #!\ /bin/gawk           mime:application/x-gawk
+0       string          #!/usr/bin/gawk         mime:application/x-gawk
+0       string          #!\ /usr/bin/gawk       mime:application/x-gawk
+0       string          #!/usr/local/bin/gawk   mime:application/x-gawk
+0       string          #!\ /usr/local/bin/gawk mime:application/x-gawk
+#
+0       string          #!/bin/awk              mime:application/x-awk
+0       string          #!\ /bin/awk            mime:application/x-awk
+0       string          #!/usr/bin/awk          mime:application/x-awk
+0       string          #!\ /usr/bin/awk        mime:application/x-awk
+0       string          BEGIN                   mime:application/x-awk
+
+0       string          #!/bin/perl                     mime:application/x-perl
+0       string          #!\ /bin/perl                   mime:application/x-perl
+#0       string          eval\ "exec\ /bin/perl          mime:application/x-perl
+0       string          #!/usr/bin/perl                 mime:application/x-perl
+0       string          #!\ /usr/bin/perl               mime:application/x-perl
+#0       string          eval\ "exec\ /usr/bin/perl      mime:application/x-perl
+0       string          #!/usr/local/bin/perl           mime:application/x-perl
+0       string          #!\ /usr/local/bin/perl         mime:application/x-perl
+#0       string          eval\ "exec\ /usr/local/bin/perl mime:application/x-perl
+
+0       string          #!/bin/python                      mime:application/x-python
+0       string          #!\ /bin/python                    mime:application/x-python
+#0       string          eval\ "exec\ /bin/python           mime:application/x-python
+0       string          #!/usr/bin/python                  mime:application/x-python
+0       string          #!\ /usr/bin/python                mime:application/x-python
+#0       string          eval\ "exec\ /usr/bin/python       mime:application/x-python
+0       string          #!/usr/local/bin/python            mime:application/x-python
+0       string          #!\ /usr/local/bin/python          mime:application/x-python
+#0       string          eval\ "exec\ /usr/local/bin/python mime:application/x-python
+
+# compressers
+0	string		\037\235	mime:application/x-compress
+0       string          \037\213	mime:application/x-gzip
+0	string		PK\003\004	mime:application/x-zip
+0	string		BZh		mime:application/x-bzip2
+0	string		BZ		mime:application/x-bzip
+
+# According to gzip.h, this is the correct byte order for packed data.
+0	string		\037\036	mime:application/octet-stream
+0	short		017437		mime:application/octet-stream
+0	short		0x1fff		mime:application/octet-stream
+0	string		\377\037	mime:application/octet-stream
+0	short		0145405		mime:application/octet-stream
+
+257	string		ustar\0			mime:application/x-tar	posix
+257	string		ustar\040\040\0		mime:application/x-tar	gnu
+
+0	short		070707		mime:application/x-cpio
+0	short		0143561		mime:application/x-cpio	swapped
+
+0	string		=<ar>		mime:application/x-archive
+0	string		!<arch>		mime:application/x-archive
+>8	string		debian		mime:application/x-debian-package
+>68	string		>\n		mime:format:%s
+>136	ledate		x		mime:created:%s
+
+# RPM
+
+0       beshort         0xedab
+>2      beshort         0xeedb          mime:application/x-rpm
+
+0	lelong&0x8080ffff	0x0000081a	mime:application/x-arc	lzw
+0	lelong&0x8080ffff	0x0000091a	mime:application/x-arc	squashed
+0	lelong&0x8080ffff	0x0000021a	mime:application/x-arc	uncompressed
+0	lelong&0x8080ffff	0x0000031a	mime:application/x-arc	packed
+0	lelong&0x8080ffff	0x0000041a	mime:application/x-arc	squeezed
+0	lelong&0x8080ffff	0x0000061a	mime:application/x-arc	crunched
+
+# ARJ archiver
+0	leshort		0xea60			mime:application/x-arj
+>8	byte		&0x04			mime:multi-volume:yes
+>34	string		x			name:%s
+>7	byte		0			os:MS-DOS
+>7	byte		1			os:PRIMOS
+>7	byte		2			os:Unix
+>7	byte		3			os:Amiga
+>7	byte		4			os:Macintosh
+>7	byte		5			os:OS/2
+>7	byte		6			os:Apple_][_GS
+>7	byte		7			os:Atari_ST
+>7	byte		8			os:NeXT
+>7	byte		9			os:VAX/VMS
+
+20	lelong		0xfdc4a7dc		mime:application/zoo
+0	string		SQSH			mime:application/x-squish
+0	string		UC2\x1a			mime:application/uc2
+
+# LHARC/LHA archiver (Greg Roelofs, newt@uchicago.edu)
+2	string	-lh0-				mime:application/x-lharc	lh0
+2	string	-lh1-				mime:application/x-lharc	lh1
+2	string	-lz4-				mime:application/x-lharc	lz4
+2	string	-lz5-				mime:application/x-lharc	lz5
+2	string	-lzs-				mime:application/x-lha	lzs
+2	string	-lh\ -				mime:application/x-lha	lh
+2	string	-lhd-				mime:application/x-lha	lhd
+2	string	-lh2-				mime:application/x-lha	lh2
+2	string	-lh3-				mime:application/x-lha	lh3
+2	string	-lh4-				mime:application/x-lha	lh4
+2	string	-lh5-				mime:application/x-lha	lh5
+2	string	-lh6-				mime:application/x-lha	lh6
+2	string	-lh7-				mime:application/x-lha	lh7
+0	string	Rar!				mime:application/x-rar	rar
+0	string	MSCF\0\0\0\0			mime:application/x-cab
+10	string	#\ This\ is\ a\ shell\ archive	application/octet-stream	x-shell
+
+# FrameMaker
+#
+0	string		\<MakerFile		mime:application/x-frame
+0	string		\<MIFFile		mime:application/x-frame
+0	string		\<MakerDictionary	mime:application/x-frame
+0	string		\<MakerScreenFon	mime:application/x-frame
+0	string		\<MML			mime:application/x-frame
+0	string		\<Book			mime:application/x-frame
+0	string		\<Maker			mime:application/x-frame
+
+# HTML
+0	string		\<HEAD	mime:text/html
+0	string		\<head	mime:text/html
+0	string		\<TITLE	mime:text/html
+0	string		\<title	mime:text/html
+0       string          \<html	mime:text/html
+0       string          \<HTML	mime:text/html
+0	string		\<!--	mime:text/html
+0	string		\<h1	mime:text/html
+0	string		\<H1	mime:text/html
+0	string		\<!doctype\ HTML	mime:text/html
+0	string		\<!DOCTYPE\ HTML	mime:text/html
+0	string		\<!doctype\ html	mime:text/html
+
+# Image
+
+0	string		P1		mime:image/x-portable-bitmap	encoding:7/bit
+0	string		P2		mime:image/x-portable-greymap	encoding:7/bit
+0	string		P3		mime:image/x-portable-pixmap	encoding:7/bit
+0	string		P4		mime:image/x-portable-bitmap
+0	string		P5		mime:image/x-portable-greymap
+0	string		P6		mime:image/x-portable-pixmap
+
+0	string		IIN1		mime:image/x-niff
+0	string		MM		mime:image/tiff
+0	string		II		mime:image/tiff
+
+0	string		GIF94z		mime:image/unknown
+0	string		FGF95a		mime:image/unknown
+0	string		PBF		mime:image/unknown
+
+0	string		GIF		mime:image/gif
+>6      leshort         >0              width:%hd
+>8      leshort         >0              heigth:%hd
+
+0		beshort		0xffd8		mime:image/jpeg
+>11		byte		x		version:%d.
+>12		byte		x		\b%02d
+# Impossible to get the size with the magic format
+
+0	string		BM		mime:image/bmp
+>18	lelong		x		width:%ld
+>22	lelong		x		heigth:%ld
+
+# various lisp types, from Daniel Quinlan (quinlan@yggdrasil.com)
+0	string	;;			mime:text/plain	8bit
+0	string	\012(			mime:application/x-elc
+0	string	;ELC\023\000\000\000	mime:application/x-elc
+
+# News
+0	string		Relay-Version: 	mime:message/rfc822	encoding:7/bit
+0	string		#!\ rnews	mime:message/rfc822	encoding:7/bit
+0	string		N#!\ rnews	mime:message/rfc822	encoding:7/bit
+0	string		Forward\ to 	mime:message/rfc822	encoding:7/bit
+0	string		Pipe\ to 	mime:message/rfc822	encoding:7/bit
+0	string		Return-Path:	mime:message/rfc822	encoding:7/bit
+0	string		Path:		mime:message/news	encoding:8/bit
+0	string		Xref:		mime:message/news	encoding:8/bit
+0	string		From:		mime:message/rfc822	encoding:7/bit
+0	string		Article 	mime:message/news	encoding:8/bit
+
+# MS-word
+0	string		\376\067\0\043			mime:application/msword
+0	string		\320\317\021\340\241\261	mime:application/msword
+0	string		\333\245-\0\0\0			mime:application/msword
+
+# PostScript
+0	string		%!		mime:application/postscript
+0	string		\004%!		mime:application/postscript
+
+# Acrobat
+0	string		%PDF-		mime:application/pdf
+
+#
+38	string		Spreadsheet	mime:application/x-sc
+0	string		\367\002	mime:application/x-dvi
+2	string		\000\021	mime:application/x-tex-tfm
+2	string		\000\022	mime:application/x-tex-tfm
+0	leshort		0x02f7		mime:application/x-dvi
+
+# RTF - Rich Text Format
+0	string		{\\rtf		mime:text/rtf
+
+# MPEG file
+0	belong		0x000001b3			mime:video/mpeg
+>4	beshort&0xfff0	x				width:%d
+>5	beshort&0x0fff	x				height:%d
+0	belong		0x000001ba			mime:video/mpeg
+
+# MPEG transport file
+0	belong&0xFF5FFF1F	0x47400010		mime:video/x-mpeg-transport-stream
+>188	byte			!0x47			corrupted:yes
+
+# FLI animation format
+4	leshort		0xAF11				mime:video/fli
+>6	leshort		x				frame:%d
+>8	leshort		x				width:%d
+>10	leshort		x				height:%d
+>12	leshort		x				depth:%d
+>16	leshort		x				tick:%d
+
+
+# FLC animation format
+4	leshort		0xAF12				mime:video/flc
+>6	leshort		x				frame:%d
+>8	leshort		x				width:%d
+>10	leshort		x				height:%d
+>12	leshort		x				depth:%d
+>16	leshort		x				tick:%d
+
+# AVI
+>8	string		AVI\ 				mime:video/avi
+
+# SGI and Apple formats
+0	string		MOVI				mime:video/sgi
+4	string		moov				mime:video/quicktime	moov
+4	string		mdat				mime:video/quicktime	mdat
+
+# Microsoft Advanced Streaming Format (ASF) <mpruett@sgi.com>
+0	belong		0x3026b275			mime:application/octet-stream x-asf
+
+# DIF digital video file format <mpruett@sgi.com>
+0	belong&0xffffff00	0x1f070000		mime:video/dif-
+>4	byte			&0x01			dvcpro
+>4	byte			^0x01			dv
+>3	byte			&0x80			pal
+>3	byte			^0x80			ntsc
+
+# Databases
+0       belong  0x13579ace      mime:application/x-gdbm
+0       lelong  0x13579ace      mime:application/x-gdbm
+0       string  GDBM            mime:application/x-gdbm
+0       belong  0x061561        mime:application/x-dbm
+0       string  RRD             mime:application/x-rddtool
+
+# Executables
+0       string          \177ELF 
+>4      byte            0
+>4      byte            1
+>4      byte            2
+>5      byte            0
+>5      byte            1
+>>16    leshort         0
+>>16    leshort         1               mime:application/x-object
+>>16    leshort         2               mime:application/x-executable
+>>16    leshort         3               mime:application/x-sharedlib
+>>16    leshort         4               mime:application/x-coredump
+
+# DOS
+0	string		MZ		mime:application/x-dosexec
+
+# KDE
+0		string	[KDE\ Desktop\ Entry]	mime:application/x-kdelnk
+0		string	\#\ KDE\ Config\ File	mime:application/x-kdelnk
+0		string	\#\ xmcd                mime:text/xmcd
+
+#
+0       string          #\ PaCkAgE\ DaTaStReAm  mime:application/x-svr4-package
+
+#PNG Image Format
+0	string		\x89PNG			mime:image/png
+
+#XCF
+0       string          gimp\ xcf               mime:image/xcf
+>9      string          file                    version:0
+>9      string          v                       version:
+>>10    string          >\0                     %s
+>14     belong          x                       width:%lu
+>18     belong          x                       heigth:%lu
+>22     belong          0                       color:RGB
+>22     belong          1                       color:greyscale
+>22     belong          2                       color:indexed
+
+0	belong		0x000003f3		mime:application/x-amiga-executable
+0	belong		0x000003e7		mime:application/x-amiga-library
+
+0       string          FORM
+>8      string          AIFF            mime:audio/iff
+>8      string          AIFC            mime:audio/iff
+>8      string          ILBMBMHD        mime:image/ilbm
+>>20    beshort         x               width:%d
+>>22    beshort         x               heigth:%d
+>8      string          RGBN            mime:image/iff
+>8      string          RGB8            mime:image/iff
+
+
+1       belong&0xfff7ffff       0x01010000      mime:image/targa
+1       belong&0xfff7ffff       0x00020000      mime:image/targa
+1       belong&0xfff7ffff       0x00030000      mime:image/targa
+
+0       string          P1                      mime:image/pgm
+0       string          P2                      mime:image/pgm
+0       string          P3                      mime:image/ppm
+0       string          P4                      mime:image/pvm
+0       string          P5                      mime:image/pgm
+0       string          P6                      mime:image/ppm
+0       string          P7                      mime:image/pam
+
+0       string          \x89PNG			mime:image/png
+>4      belong          !0x0d0a1a0a		corrupted:yes
+>4      belong          0x0d0a1a0a
+>>16    belong          x               	width:%ld
+>>20    belong          x               	heigth:%ld
+>>24    byte            x               	depth:%d
+>>25    byte            0               	color:grayscale
+>>25    byte            2			color:RGB
+>>25    byte            3               	color:colormap
+>>25    byte            6			color:RGBA
+>>28    byte            0			interlaced:no
+>>28    byte            1			interlaced:yes
+1       string          PNG			mime:image/png corrupted:yes
+
+
+# diff
+0       string          diff\                           mime:application/diff
+0       string          ***\                            mime:application/diff
+0       string          Only\ in\                       mime:application/diff
+0       string          Common\ subdirectories:\        mime:application/diff
