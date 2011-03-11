@@ -14,10 +14,13 @@
    <string>Log</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../res.qrc">
+   <iconset>
     <normaloff>:/actions/resources/actions/document-preview.png</normaloff>:/actions/resources/actions/document-preview.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>2</number>
+   </property>
    <property name="margin">
     <number>0</number>
    </property>
@@ -29,7 +32,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/edit-delete.png</normaloff>:/actions/resources/actions/edit-delete.png</iconset>
        </property>
       </widget>
@@ -40,7 +43,7 @@
         <string>Filter</string>
        </property>
        <property name="icon">
-        <iconset resource="../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/view-filter.png</normaloff>:/actions/resources/actions/view-filter.png</iconset>
        </property>
       </widget>

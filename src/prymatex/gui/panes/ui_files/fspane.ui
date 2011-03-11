@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>265</width>
+    <width>282</width>
     <height>457</height>
    </rect>
   </property>
@@ -21,7 +21,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>-1</number>
+    <number>2</number>
    </property>
    <property name="margin">
     <number>0</number>
@@ -40,7 +40,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/go-up.png</normaloff>:/actions/resources/actions/go-up.png</iconset>
        </property>
        <property name="iconSize">
@@ -60,7 +60,7 @@
         <string>Go previous place</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/go-previous.png</normaloff>:/actions/resources/actions/go-previous.png</iconset>
        </property>
        <property name="iconSize">
@@ -83,7 +83,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/go-next.png</normaloff>:/actions/resources/actions/go-next.png</iconset>
        </property>
        <property name="flat">
@@ -97,7 +97,7 @@
         <string>Filter settings</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/view-filter.png</normaloff>:/actions/resources/actions/view-filter.png</iconset>
        </property>
        <property name="iconSize">
@@ -117,7 +117,7 @@
         <string>Sync folder with current editor file path</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/system-switch-user.png</normaloff>:/actions/resources/actions/system-switch-user.png</iconset>
        </property>
        <property name="iconSize">
@@ -137,7 +137,7 @@
         <string>Collapse Folder</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/debug-step-into.png</normaloff>:/actions/resources/actions/debug-step-into.png</iconset>
        </property>
        <property name="iconSize">
@@ -160,7 +160,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/help-hint.png</normaloff>:/actions/resources/actions/help-hint.png</iconset>
        </property>
        <property name="checkable">
@@ -219,7 +219,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/icons/resources/emblems/emblem-favorite.png</normaloff>:/icons/resources/emblems/emblem-favorite.png</iconset>
        </property>
        <property name="flat">

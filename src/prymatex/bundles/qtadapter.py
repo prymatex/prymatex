@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import string
-from PyQt4.Qt import QTextCharFormat, QColor, QFont
-from PyQt4.QtCore import Qt
+#from PyQt4.Qt import QTextCharFormat, QColor, QFont
+#from PyQt4.QtCore import Qt
+
+#Mock
+class Qt(object):
+    CTRL = 10000000
+    ALT = 1000000
+    META = 100000
+    SHIFT = 10000
 
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background

@@ -7,13 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>503</width>
-    <height>290</height>
+    <height>291</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>File System Panel Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="margin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">

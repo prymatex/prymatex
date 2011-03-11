@@ -14,16 +14,10 @@
    <string>Close Multiple Files</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>4</number>
+   <property name="spacing">
+    <number>2</number>
    </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>4</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -58,7 +52,7 @@ Do you want to save them?</string>
         <string>Save &amp;Selected</string>
        </property>
        <property name="icon">
-        <iconset resource="../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/document-save-all.png</normaloff>:/actions/resources/actions/document-save-all.png</iconset>
        </property>
       </widget>
@@ -69,7 +63,7 @@ Do you want to save them?</string>
         <string>Do &amp;not save</string>
        </property>
        <property name="icon">
-        <iconset resource="../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/edit-delete.png</normaloff>:/actions/resources/actions/edit-delete.png</iconset>
        </property>
       </widget>
@@ -80,7 +74,7 @@ Do you want to save them?</string>
         <string>&amp;Cancel</string>
        </property>
        <property name="icon">
-        <iconset resource="../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
        </property>
       </widget>
