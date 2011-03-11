@@ -2,43 +2,49 @@
 
 # Form implementation generated from reading ui file 'ui_files/logwindow.ui'
 #
-# Created: Sun Dec 26 14:34:32 2010
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Fri Mar 11 16:23:36 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
 
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
+
 class Ui_LogWidget(object):
     def setupUi(self, LogWidget):
-        LogWidget.setObjectName("LogWidget")
+        LogWidget.setObjectName(_fromUtf8("LogWidget"))
         LogWidget.resize(400, 103)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/actions/resources/actions/document-preview.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/document-preview.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         LogWidget.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(LogWidget)
+        self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.Clear = QtGui.QPushButton(LogWidget)
-        self.Clear.setText("")
+        self.Clear.setText(_fromUtf8(""))
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/actions/resources/actions/edit-delete.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/edit-delete.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Clear.setIcon(icon1)
-        self.Clear.setObjectName("Clear")
+        self.Clear.setObjectName(_fromUtf8("Clear"))
         self.horizontalLayout.addWidget(self.Clear)
         self.pushButton_2 = QtGui.QPushButton(LogWidget)
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/actions/resources/actions/view-filter.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/view-filter.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_2.setIcon(icon2)
-        self.pushButton_2.setObjectName("pushButton_2")
+        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
         self.horizontalLayout.addWidget(self.pushButton_2)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.textEdit = QtGui.QTextEdit(LogWidget)
-        self.textEdit.setObjectName("textEdit")
+        self.textEdit.setObjectName(_fromUtf8("textEdit"))
         self.verticalLayout.addWidget(self.textEdit)
 
         self.retranslateUi(LogWidget)

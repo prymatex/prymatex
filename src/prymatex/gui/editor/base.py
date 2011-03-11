@@ -509,7 +509,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.setTextCursor(cursor)
         elif isinstance(item, PMXCommand):
             item.resolve(environment = self.buildEnvironment(item))
-            item.execute(self)
+            item.execute(self.root)
         elif isinstance(item, PMXSyntax):
             self.setSyntax(item)
 
@@ -549,16 +549,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         });
         env.update(self._meta.settings['static_variables'])
         return env
-
-    def showHtml(self, string):
-        view = QWebView()
-        view.setHtml(string)
-        view.show()
-    
-    def showTooltip(self, string):
-        cursor = self.textCursor()
-        point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
-        QToolTip.showText(point, string.strip(), self)
 
     #==========================================================================
     # Folding

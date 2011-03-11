@@ -28,6 +28,7 @@ class PMXCommand(PMXBundleItem):
         return self.value
     
     def resolve(self, environment = {}):
+        print environment
         descriptor, name = tempfile.mkstemp(prefix='pmx')
         file = os.fdopen(descriptor, 'w+')
         file.write(self.command.encode('utf8'))

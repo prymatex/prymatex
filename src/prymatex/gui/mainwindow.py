@@ -11,6 +11,7 @@ from prymatex.gui.panes.fspane import PMXFSPaneDock
 from prymatex.gui.panes.outputpanel import PMXOutputDock
 from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
+from prymatex.gui.panes.browser import PMXBrowserPaneDock
 from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
 from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
@@ -108,20 +109,19 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
                                             self.trUtf8("Show Filesystem Panel"),
                                             self.trUtf8("Hide Filesystem Panel"))
         
-        
         self.paneOutput = PMXOutputDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
         self.paneOutput.hide()
         self.paneOutput.associateAction(self.actionShow_Output,
                                         self.trUtf8("Show Output"),
-                                        self.trUtf8("Hide output"))
+                                        self.trUtf8("Hide Output"))
         
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
         self.paneProject.hide()
         self.paneProject.associateAction(self.actionShow_Project_Dock,
                                          self.trUtf8("Show Project"),
-                                         self.trUtf8("Hide project"))
+                                         self.trUtf8("Hide Project"))
         
         self.paneSymbolList = PMXSymboldListDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
@@ -132,10 +132,16 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneBundleEditor)
         self.paneBundleEditor.hide()
         
-    def setup_toolbars(self):
-        #raise NotImplementedError("Do we need them?")
-        pass
-    
+        self.paneBrowser = PMXBrowserPaneDock(self)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneBrowser)
+        self.paneBrowser.hide()
+        self.paneBrowser.associateAction(self.actionShow_Browser_Dock,
+                                         self.trUtf8("Show Browser"),
+                                         self.trUtf8("Hide Browser"))
+        
+    #====================================================================
+    # Bundle Items
+    #====================================================================
     def menuBundleItemActionTriggered(self, item):
         if not item.ready():
             item.compile()
@@ -178,7 +184,20 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         for keyseq in PMXBundle.KEY_SEQUENCE.keys():
             receiver = lambda key = keyseq: self.shortcutBundleItemActivated(key)
             QShortcut(QKeySequence(keyseq), self, receiver)
-        
+    
+    #====================================================================
+    # Command outputs
+    #====================================================================
+    def showHtml(self, string):
+        self.paneBrowser.setHtml(string)
+        self.paneBrowser.show()
+    
+    def showTooltip(self, string):
+        cursor = self.currentEditor.textCursor()
+        point = self.currentEditor.viewport().mapToGlobal(self.currentEditor.cursorRect(cursor).bottomRight())
+        QToolTip.showText(point, string.strip(), self.currentEditor)
+
+    
     def on_actionQuit_triggered(self):
         QApplication.quit()
     

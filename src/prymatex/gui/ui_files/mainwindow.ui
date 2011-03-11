@@ -71,6 +71,7 @@
     <addaction name="actionShow_Project_Dock"/>
     <addaction name="actionShow_Symbol_List"/>
     <addaction name="actionShow_Output"/>
+    <addaction name="actionShow_Browser_Dock"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Current_Scope"/>
     <addaction name="separator"/>
@@ -899,6 +900,14 @@
    </property>
    <property name="statusTip">
     <string>Enables the cursor to be positioned anywhere in the editor</string>
+   </property>
+  </action>
+  <action name="actionShow_Browser_Dock">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Browser</string>
    </property>
   </action>
  </widget>

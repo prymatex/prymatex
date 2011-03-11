@@ -2,41 +2,49 @@
 
 # Form implementation generated from reading ui file 'ui_files/project.ui'
 #
-# Created: Mon Feb 22 21:01:44 2010
-#      by: PyQt4 UI code generator 4.7
+# Created: Fri Mar 11 16:23:37 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
 
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
+
 class Ui_ProjectPane(object):
     def setupUi(self, ProjectPane):
-        ProjectPane.setObjectName("ProjectPane")
+        ProjectPane.setObjectName(_fromUtf8("ProjectPane"))
         ProjectPane.resize(213, 464)
         self.verticalLayout = QtGui.QVBoxLayout(ProjectPane)
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.treeProject = QtGui.QTreeView(ProjectPane)
-        self.treeProject.setObjectName("treeProject")
+        self.treeProject.setObjectName(_fromUtf8("treeProject"))
         self.verticalLayout.addWidget(self.treeProject)
         self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.buttonAdd = QtGui.QPushButton(ProjectPane)
+        self.buttonAdd.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/resources/actions/list-add.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/resources/actions/list-add.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonAdd.setIcon(icon)
-        self.buttonAdd.setObjectName("buttonAdd")
+        self.buttonAdd.setObjectName(_fromUtf8("buttonAdd"))
         self.horizontalLayout.addWidget(self.buttonAdd)
         self.buttonRemove = QtGui.QPushButton(ProjectPane)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/resources/actions/list-remove.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/resources/actions/list-remove.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonRemove.setIcon(icon1)
-        self.buttonRemove.setObjectName("buttonRemove")
+        self.buttonRemove.setObjectName(_fromUtf8("buttonRemove"))
         self.horizontalLayout.addWidget(self.buttonRemove)
         self.buttonSettings = QtGui.QPushButton(ProjectPane)
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/resources/actions/configure.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/resources/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonSettings.setIcon(icon2)
-        self.buttonSettings.setObjectName("buttonSettings")
+        self.buttonSettings.setObjectName(_fromUtf8("buttonSettings"))
         self.horizontalLayout.addWidget(self.buttonSettings)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
