@@ -649,6 +649,7 @@ class Shell(NodeList):
         file.write(str(self).encode('utf8'))
         file.close()
         os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
+        print environment
         process = Popen([name], stdout=PIPE, stderr=STDOUT, env = environment, shell=True)
         self.clear()
         result = process.stdout.read()

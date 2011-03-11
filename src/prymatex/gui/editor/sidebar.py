@@ -58,27 +58,27 @@ class PMXSidebar(QWidget):
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 1,
                     str(line_count))
 
-            #Bookmarks
-            if line_count in self.editor.bookmarks:
-                painter.drawPixmap(1,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.bookmarkFlagIcon.height(),
-                    self.bookmarkFlagIcon)
-
-            user_data = block.userData()
-            if user_data != None:
-                if user_data.folding == PMXBlockUserData.FOLDING_START:
-                    if block.blockNumber() in self.editor.folded:
+                #Bookmarks
+                if line_count in self.editor.bookmarks:
+                    painter.drawPixmap(1,
+                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.bookmarkFlagIcon.height(),
+                        self.bookmarkFlagIcon)
+    
+                user_data = block.userData()
+                if user_data != None:
+                    if user_data.folding == PMXBlockUserData.FOLDING_START:
+                        if block.blockNumber() in self.editor.folded:
+                            painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
+                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
+                                self.foldingCollapsedIcon)
+                        else:
+                            painter.drawPixmap(self.width() - self.foldingTopIcon.width() - 1,
+                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingTopIcon.height(),
+                                self.foldingTopIcon)
+                    elif user_data.folding == PMXBlockUserData.FOLDING_STOP:
                         painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
                             round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
-                            self.foldingCollapsedIcon)
-                    else:
-                        painter.drawPixmap(self.width() - self.foldingTopIcon.width() - 1,
-                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingTopIcon.height(),
-                            self.foldingTopIcon)
-                elif user_data.folding == PMXBlockUserData.FOLDING_STOP:
-                    painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
-                        self.foldingBottomIcon)
+                            self.foldingBottomIcon)
             
             block = block.next()
 

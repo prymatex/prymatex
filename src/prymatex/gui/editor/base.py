@@ -56,6 +56,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
     SPLITWORDS = re.compile(r'\s', re.UNICODE)
+    WORD = re.compile(r'\w+', re.UNICODE)
 
     #=======================================================================
     # Settings, config and init
@@ -237,10 +238,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
 
     def mouseMoveEvent(self, event):
         position = event.pos()
-        cursor = self.cursorForPosition(position)
-        block = cursor.block()
         QToolTip.showText(self.mapToGlobal(position), "Cacho", self)
-        super(Editor, self).mouseMoveEvent(event)
+        super(PMXCodeEdit, self).mouseMoveEvent(event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
         '''
@@ -487,11 +486,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
         if isinstance(item, PMXSnippet):
+            for _ in range(len(trigger)):
+                cursor.deletePreviousChar()
             item.resolve(indentation = indentation,
                      tabreplacement = self.tabKeyBehavior,
                      environment = self.buildEnvironment(item))
-            for _ in range(len(trigger)):
-                cursor.deletePreviousChar()
             #Set starts
             item.starts = cursor.position()
             #Insert Snippet
@@ -529,7 +528,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         line = str(cursor.block().text())
         current_word = ""
         try:
-            match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), pattern.finditer(line)).pop()
+            match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
             current_word = line[match.start():match.end()]
         except IndexError:
             current_word = ""
@@ -570,14 +569,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self._fold(line_number)
         else:
             self._unfold(line_number)
-
         self.update()
         self.sidebar.update()
     
     def _fold(self, line_number):
         startBlock = self.document().findBlockByNumber(line_number - 1)
         endPos = self._find_fold_closing(startBlock)
-        endBlock = self.document().findBlockByNumber(endPos)
+        endBlock = self.document().findBlockByNumber(endPos + 1)
 
         block = startBlock.next()
         while block.isValid() and block != endBlock:
@@ -586,7 +584,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             block = block.next()
 
         self.folded.append(startBlock.blockNumber())
-        self.document().markContentsDirty(startBlock.position(), endPos)
+        self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def _unfold(self, line_number):
         startBlock = self.document().findBlockByNumber(line_number - 1)
@@ -598,7 +596,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             block.setVisible(True)
             block.setLineCount(block.layout().lineCount())
             endPos = block.position() + block.length()
-            if block.blockNumber() in self.foldedBlocks:
+            if block.blockNumber() in self.folded:
                 close = self._find_fold_closing(block)
                 block = self.document().findBlockByNumber(close)
             else:
