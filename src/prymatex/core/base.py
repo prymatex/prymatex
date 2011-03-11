@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4.QtCore import QObject, pyqtWrapperType
-import sip
 import re
-from prymatex.core.event import PMXEvent, PMXEventSender
-from prymatex.core.config import settings
+from prymatex.core.event import PMXEventSender
+from PyQt4.QtGui import qApp
 METHOD_RE = re.compile('(?P<name>[\w\d_]+)(:?\((?P<args>.*)\))?', re.IGNORECASE)
 
 class InvalidEventSignature(Exception):
 	pass
+
+settings = qApp.instance().settings
 
 EVENT_CLASSES = {}
 

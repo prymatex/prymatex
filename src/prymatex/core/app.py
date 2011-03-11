@@ -10,6 +10,7 @@ from os.path import dirname, abspath
 from prymatex.lib import deco
 
 from logging import getLogger
+from prymatex.core.config import Settings
 logger = getLogger(__name__)
 
 # ipdb handling
@@ -40,9 +41,9 @@ class PMXApplication(QApplication):
         from prymatex.optargs import parser
         self.__options, files_to_open = parser.parse_args(args[1:])
         
+        self.settings = Settings(self.options.profile)
         # Some init's
         self.init_application_params()
-        self.init_config()
         self.init_resources()
         self.res_mngr.loadStyleSheet()
         
@@ -158,19 +159,14 @@ class PMXApplication(QApplication):
     
     def save_config(self):
         self.logger.info("Save config")
-        self.config.save()
+        self.settings.save()
         self.logger.info("Config saved")
     
     def init_resources(self):
         if not self.__res_mngr:
             from prymatex.resmgr import ResourceManager
             self.__res_mngr = ResourceManager()
-        
-    def init_config(self):
-        if not self.__config:
-            from prymatex.core.config import settings
-            self.__config = settings
-            
+                
     @property
     def config(self):
         '''
@@ -194,7 +190,7 @@ class PMXApplication(QApplication):
         from prymatex.lib.i18n import ugettext as _
         
         self.splash.showMessage(_("Loading themes..."))
-        themes = load_prymatex_themes(self.config.PMX_THEMES_PATH)
+        themes = load_prymatex_themes(self.settings.PMX_THEMES_PATH)
         
         self.splash.showMessage(_("%d themes loaded", themes))
         QApplication.processEvents()
@@ -215,7 +211,7 @@ class PMXApplication(QApplication):
         self.splash.showMessage(_("Loading bundles..."))
         bundles += load_prymatex_bundles(update_splash)
         #Cargar bundles de usuario
-        #for dirname in self.config.PMX_BUNDLES_PATH:
+        #for dirname in self.settings.PMX_BUNDLES_PATH:
         #    self.splash.showMessage(_("Loading bundles..."))
         #    if isdir(dirname):
         #        if not isabs(dirname):

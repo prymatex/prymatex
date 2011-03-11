@@ -14,7 +14,6 @@ def get_prymatex_user_path():
 
 PMX_BASE_PATH = get_prymatex_base_path()
 PMX_USER_PATH = get_prymatex_user_path()
-PMX_SETTINGS_FILE = os.path.join(PMX_USER_PATH , "settings.plist")
 
 DEFAULT = {
     'static_variables': {
@@ -92,9 +91,10 @@ class Settings(SettingsNode):
     PMX_THEMES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Themes')
     PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
     
-    def __init__(self, parent = None, **defaults):
-        if os.path.exists(PMX_SETTINGS_FILE):
-            wrapped_dict = plistlib.readPlist(PMX_SETTINGS_FILE)
+    def __init__(self, profile):
+        self.__dict__['settings_file'] = os.path.join(PMX_USER_PATH, profile.lower() + ".plist")
+        if os.path.exists(self.__dict__['settings_file']):
+            wrapped_dict = plistlib.readPlist(self.__dict__['settings_file'])
         else:
             wrapped_dict = DEFAULT
         super(Settings, self).__init__(wrapped_dict)
@@ -116,9 +116,7 @@ class Settings(SettingsNode):
 
     def save(self):
         obj = self.to_python()
-        plistlib.writePlist(obj, PMX_SETTINGS_FILE)
-
-settings = Settings()
+        plistlib.writePlist(obj, self.__dict__['settings_file'])
 
 class Setting(object):
     def __init__(self, default = None, fset = None):
@@ -155,6 +153,8 @@ class Setting(object):
             self.__value = value
         if self.__fset != None:
             self.__fset(instance, self.__value)
+
+settings = Settings('default')
 
 if __name__ == "__main__":    
     class PMXOptions(object):
