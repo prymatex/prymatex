@@ -29,6 +29,13 @@ class PMXTemplate(PMXBundleItem):
         super(PMXTemplate, self).setBundle(bundle)
         bundle.TEMPLATES.append(self)
     
+    def buildEnvironment(self, directory = ""):
+        env = super(PMXTemplate, self).buildEnvironment()
+        env['TM_NEW_FILE'] = directory + self.name + '.' + self.extension
+        env['TM_NEW_FILE_BASENAME'] = self.name
+        env['TM_NEW_FILE_DIRECTORY'] = directory
+        return env
+    
     def resolve(self, environment = {}):
         origWD = os.getcwd() # remember our original working directory
         os.chdir(self.path)

@@ -13,7 +13,7 @@ from prymatex.bundles.theme import PMXTheme
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
 from prymatex.gui.editor.sidebar import PMXSidebar
-from prymatex.gui.editor.syntax import PMXSyntaxProcessor
+from prymatex.gui.editor.syntax import PMXSyntaxProcessor, PMXBlockUserData
 from prymatex.lib import profilehooks
 
 logger = logging.getLogger(__name__)
@@ -57,33 +57,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
     SPLITWORDS = re.compile(r'\s', re.UNICODE)
 
-    #-----------------------------------
-    # Settings and config
-    #-----------------------------------
+    #=======================================================================
+    # Settings, config and init
+    #=======================================================================
     soft_tabs = Setting(default = True)
     tab_size = Setting(default = 4)
     font = Setting(default = {"name": "Monospace", "size": 10}, 
                    fset = lambda self, value: self.setFont(QFont(value["name"], value["size"]))
                    )
     
-    def __init__(self, parent = None):
-        super(PMXCodeEdit, self).__init__(parent)
-        self.sidebar = PMXSidebar(self)
-        self.processor = PMXSyntaxProcessor(self.document())
-        self.bookmarks = []
-        self.snippet = None
-        # TODO: Load from config
-        #option = QTextOption()
-        #option.setFlags(QTextOption.ShowTabsAndSpaces)
-        #self.document().setDefaultTextOption(option)
-
-        # Actions performed when a key is pressed
-        self.setupUi()
-        self.setupActions()
-        self.connectSignals()
-        self.declareEvents()
-        self.configure()
-        
     @property
     def tabKeyBehavior(self):
         return self.soft_tabs and u' ' * self.tab_size or u'\t'
@@ -109,12 +91,30 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #theme_name = Setting(default = 'Twilight', fset = setTheme)
     theme_name = Setting(default = 'Pastels on Dark', fset = setTheme)
     
-        
     class Meta(object):
         settings = 'editor'
+    
+    def __init__(self, parent = None):
+        super(PMXCodeEdit, self).__init__(parent)
+        self.sidebar = PMXSidebar(self)
+        self.processor = PMXSyntaxProcessor(self.document())
+        self.bookmarks = []
+        self.folded = []
+        self.snippet = None
+        # TODO: Load from config
+        #option = QTextOption()
+        #option.setFlags(QTextOption.ShowTabsAndSpaces)
+        #self.document().setDefaultTextOption(option)
 
+        # Actions performed when a key is pressed
+        self.setupUi()
+        self.setupActions()
+        self.connectSignals()
+        self.declareEvents()
+        self.configure()
+    
     #=======================================================================
-    # Signals and Events
+    # Connect Signals and Declare Events
     #=======================================================================
     def setupUi(self):
         #self.updateLineNumberAreaWidth(0)
@@ -136,10 +136,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
         self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
         self.actionFind = QAction(self.trUtf8("Find"), self)
-        
-        
-    
-                     
+
     def getCurrentScope(self):
         cursor = self.textCursor()
         block = cursor.block()
@@ -168,22 +165,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
     @property
     def index(self):
-        '''
-        Returns this tab index
-        '''
         tab_widget = self.parent()
         return tab_widget.indexOf(self)
 
-    @property
-    def indent_text(self):
-        if not self.soft_tabs:
-            return '\t'
-        else:
-            return ' ' * self.tab_size
-
     def contextMenuEvent(self, event):
-        '''
-        '''
         menu = self.createStandardContextMenu()
         
         menu.addAction(self.actionIndent)
@@ -241,10 +226,21 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if not cursor.hasSelection():
             return -1
         return self.document().findBlock( cursor.selectionEnd() ).blockNumber()
-
+    
+    #=======================================================================
+    # Mouse Events
+    #=======================================================================
+    
     def mousePressEvent(self, mouse_event):
         self.inserSpacesUpToPoint(mouse_event.pos())
         super(PMXCodeEdit, self).mousePressEvent(mouse_event)
+
+    def mouseMoveEvent(self, event):
+        position = event.pos()
+        cursor = self.cursorForPosition(position)
+        block = cursor.block()
+        QToolTip.showText(self.mapToGlobal(position), "Cacho", self)
+        super(Editor, self).mouseMoveEvent(event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
         '''
@@ -274,136 +270,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #print block.blockNumber(), ":", text, line_width, "px"
         #print char_number, text.length()
     
-    def keyPressSnippetEvent(self, key_event):
-        key = key_event.key()
-        cursor = self.textCursor()
-        
-        if key == Qt.Key_Tab or key == Qt.Key_Backtab:
-            if key == Qt.Key_Tab:
-                holder = self.snippet.next()
-            else:
-                holder = self.snippet.previous()
-            if holder == None:
-                cursor.setPosition(self.snippet.ends)
-            else:
-                index = holder.position()
-                cursor.setPosition(index)
-                cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
-            self.setTextCursor(cursor)
-        elif key == Qt.Key_Backspace or key == Qt.Key_Delete:
-            starts = self.snippet.starts
-            ends = self.snippet.ends
-            if cursor.hasSelection():
-                (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
-                if holder == None:
-                    self.snippet = None
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
-                holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
-                position = cursor.selectionStart()
-            else:
-                if key == Qt.Key_Delete:
-                    (index, holder) = self.snippet.setDefaultHolder(cursor.position() + 1)
-                else:
-                    (index, holder) = self.snippet.setDefaultHolder(cursor.position())
-                if holder == None:
-                    self.snippet = None
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
-                if key == Qt.Key_Delete:
-                    holder.remove(cursor.position() - index, cursor.position() - index + 1)
-                    position = cursor.position()
-                else:
-                    holder.remove(cursor.position() - index - 1, cursor.position() - index)
-                    position = cursor.position() - 1
-            #Ajuste
-            position += (holder.position() - index)
-            cursor.setPosition(starts)
-            cursor.setPosition(ends, QTextCursor.KeepAnchor)
-            cursor.removeSelectedText();
-            cursor.insertText(str(self.snippet))
-            self.snippet.ends = cursor.position()
-            cursor.setPosition(position)
-            self.setTextCursor(cursor)
-        elif key_event.text() != "":
-            starts = self.snippet.starts
-            ends = self.snippet.ends
-            if cursor.hasSelection():
-                (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
-                if holder == None or (key == Qt.Key_Return and holder.last):
-                    self.snippet = None
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
-                holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
-                position = cursor.selectionStart()
-            else:
-                (index, holder) = self.snippet.setDefaultHolder(cursor.position())
-                if holder == None or (key == Qt.Key_Return and holder.last):
-                    self.snippet = None
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
-                position = cursor.position()
-            holder.insert(unicode(key_event.text()), position - index)
-            position += holder.position() - index + 1
-            cursor.setPosition(starts)
-            cursor.setPosition(ends, QTextCursor.KeepAnchor)
-            cursor.removeSelectedText();
-            cursor.insertText(str(self.snippet))
-            self.snippet.ends = cursor.position()
-            cursor.setPosition(position)
-            self.setTextCursor(cursor)
-        else:
-            QPlainTextEdit.keyPressEvent(self, key_event)
-
-    def insertBundleItem(self, item, trigger = ""):
-        ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
-        '''
-        cursor = self.textCursor()
-        text = unicode(cursor.block().text())
-        indentation = self.identationWhitespace(text)
-        if isinstance(item, PMXSnippet):
-            item.resolve(indentation = indentation,
-                     tabreplacement = self.tabKeyBehavior,
-                     environment = self.buildBundleItemEnvironment(item = item, word = trigger))
-            for _ in range(len(trigger)):
-                cursor.deletePreviousChar()
-            #Set starts
-            item.starts = cursor.position()
-            #Insert Snippet
-            #TODO: que no sea por str sino un un render o algo de eso
-            cursor.insertText(str(item))
-            #Set end
-            item.ends = cursor.position()
-            holder = item.next()
-            if holder != None:
-                index = holder.position()
-                cursor.setPosition(index)
-                cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
-                self.snippet = item
-            else:
-                cursor.setPosition(item.ends)
-            self.setTextCursor(cursor)
-        elif isinstance(item, PMXCommand):
-            item.resolve(environment = self.buildBundleItemEnvironment(item = item, word = trigger))
-            item.execute(self)
-        elif isinstance(item, PMXSyntax):
-            self.setSyntax(item)
-    
-    def showHtml(self, string):
-        view = QWebView()
-        view.setHtml(string)
-        view.show()
-    
-    def showTooltip(self, string):
-        cursor = self.textCursor()
-        point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
-        QToolTip.showText(point, string.strip(), self)
-    
-    def selectBundleItem(self, items, trigger = ""):
-        cursor = self.textCursor()
-        menu = QMenu()
-        for item in items:
-            action = menu.addAction(item.name)
-            receiver = lambda item = item: self.insertBundleItem(item, trigger)
-            self.connect(action, SIGNAL('triggered()'), receiver)
-        point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
-        menu.exec_(point)
+    #=======================================================================
+    # Keyboard Events
+    #=======================================================================
     
     def keyPressEvent(self, key_event):
         '''
@@ -501,6 +370,83 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             QPlainTextEdit.keyPressEvent(self, key_event)
 
+    def keyPressSnippetEvent(self, key_event):
+        key = key_event.key()
+        cursor = self.textCursor()
+        
+        if key == Qt.Key_Tab or key == Qt.Key_Backtab:
+            if key == Qt.Key_Tab:
+                holder = self.snippet.next()
+            else:
+                holder = self.snippet.previous()
+            if holder == None:
+                cursor.setPosition(self.snippet.ends)
+            else:
+                index = holder.position()
+                cursor.setPosition(index)
+                cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
+            self.setTextCursor(cursor)
+        elif key == Qt.Key_Backspace or key == Qt.Key_Delete:
+            starts = self.snippet.starts
+            ends = self.snippet.ends
+            if cursor.hasSelection():
+                (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
+                if holder == None:
+                    self.snippet = None
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
+                position = cursor.selectionStart()
+            else:
+                if key == Qt.Key_Delete:
+                    (index, holder) = self.snippet.setDefaultHolder(cursor.position() + 1)
+                else:
+                    (index, holder) = self.snippet.setDefaultHolder(cursor.position())
+                if holder == None:
+                    self.snippet = None
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                if key == Qt.Key_Delete:
+                    holder.remove(cursor.position() - index, cursor.position() - index + 1)
+                    position = cursor.position()
+                else:
+                    holder.remove(cursor.position() - index - 1, cursor.position() - index)
+                    position = cursor.position() - 1
+            #Ajuste
+            position += (holder.position() - index)
+            cursor.setPosition(starts)
+            cursor.setPosition(ends, QTextCursor.KeepAnchor)
+            cursor.removeSelectedText();
+            cursor.insertText(str(self.snippet))
+            self.snippet.ends = cursor.position()
+            cursor.setPosition(position)
+            self.setTextCursor(cursor)
+        elif key_event.text() != "":
+            starts = self.snippet.starts
+            ends = self.snippet.ends
+            if cursor.hasSelection():
+                (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
+                if holder == None or (key == Qt.Key_Return and holder.last):
+                    self.snippet = None
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
+                position = cursor.selectionStart()
+            else:
+                (index, holder) = self.snippet.setDefaultHolder(cursor.position())
+                if holder == None or (key == Qt.Key_Return and holder.last):
+                    self.snippet = None
+                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                position = cursor.position()
+            holder.insert(unicode(key_event.text()), position - index)
+            position += holder.position() - index + 1
+            cursor.setPosition(starts)
+            cursor.setPosition(ends, QTextCursor.KeepAnchor)
+            cursor.removeSelectedText();
+            cursor.insertText(str(self.snippet))
+            self.snippet.ends = cursor.position()
+            cursor.setPosition(position)
+            self.setTextCursor(cursor)
+        else:
+            QPlainTextEdit.keyPressEvent(self, key_event)
+
     def performCharacterAction(self, pair):
         '''
         Substitutions when some characters are typed.
@@ -530,58 +476,168 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.setTextCursor(cursor)
         cursor.endEditBlock()
 
-    def buildBundleItemEnvironment(self, item = None, word = ""):
-        ''' environment
-            http://manual.macromates.com/en/environment_variables.html
-            TM_CURRENT_LINE,
-            TM_SUPPORT_PATH: Support dentro de textmate
-            TM_INPUT_START_LINE_INDEX,
-            TM_LINE_INDEX: 
-            TM_LINE_NUMBER: Numero de linea
-            TM_SELECTED_SCOPE:
-            TM_CURRENT_WORD:
-            TM_FILEPATH,
-            TM_FILENAME,
-            TM_SCOPE,
-            TM_PROJECT_DIRECTORY,
-            TM_DIRECTORY,
-            TM_SELECTED_FILES,
-            TM_SELECTED_FILE,
-            TM_BUNDLE_SUPPORT: Support dentro del bundle
-            TM_SELECTED_TEXT,
-            TM_SOFT_TABS,
-            TM_TAB_SIZE,
+    #==========================================================================
+    # BundleItems
+    #==========================================================================
+
+    def insertBundleItem(self, item, trigger = ""):
+        ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
         cursor = self.textCursor()
+        text = unicode(cursor.block().text())
+        indentation = self.identationWhitespace(text)
+        if isinstance(item, PMXSnippet):
+            item.resolve(indentation = indentation,
+                     tabreplacement = self.tabKeyBehavior,
+                     environment = self.buildEnvironment(item))
+            for _ in range(len(trigger)):
+                cursor.deletePreviousChar()
+            #Set starts
+            item.starts = cursor.position()
+            #Insert Snippet
+            #TODO: que no sea por str sino un un render o algo de eso
+            cursor.insertText(str(item))
+            #Set end
+            item.ends = cursor.position()
+            holder = item.next()
+            if holder != None:
+                index = holder.position()
+                cursor.setPosition(index)
+                cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
+                self.snippet = item
+            else:
+                cursor.setPosition(item.ends)
+            self.setTextCursor(cursor)
+        elif isinstance(item, PMXCommand):
+            item.resolve(environment = self.buildEnvironment(item))
+            item.execute(self)
+        elif isinstance(item, PMXSyntax):
+            self.setSyntax(item)
+
+    def selectBundleItem(self, items, trigger = ""):
+        cursor = self.textCursor()
+        menu = QMenu()
+        for item in items:
+            action = menu.addAction(item.name)
+            receiver = lambda item = item: self.insertBundleItem(item, trigger)
+            self.connect(action, SIGNAL('triggered()'), receiver)
+        point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
+        menu.exec_(point)
+    
+    def buildEnvironment(self, item):
+        cursor = self.textCursor()
         line = str(cursor.block().text())
-        env = {'TM_CURRENT_LINE': line,
-               'TM_SUPPORT_PATH': self._meta.settings['PMX_SUPPORT_PATH'],
-               'TM_INPUT_START_LINE_INDEX': '',
-               'TM_LINE_INDEX': str(cursor.columnNumber()), 
-               'TM_LINE_NUMBER': str(cursor.block().blockNumber()), 
-               'TM_SELECTED_SCOPE': self.getCurrentScope(),
-               'TM_SCOPE': self.getCurrentScope(),
-               'TM_CURRENT_WORD': word,
-               'TM_FILEPATH': '',
-               'TM_FILENAME': '',
-               'TM_DIRECTORY': '',
-               'TM_SOFT_TABS': self.soft_tabs and 'YES' or 'NO',
-               'TM_TAB_SIZE': str(self.tab_size),
-               'TM_BUNDLE_SUPPORT': item.bundle.getBundleSupportPath(),
-               'TM_SELECTED_TEXT': str(cursor.selectedText()) }
+        current_word = ""
+        try:
+            match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), pattern.finditer(line)).pop()
+            current_word = line[match.start():match.end()]
+        except IndexError:
+            current_word = ""
+        env = item.buildEnvironment()
+        env.update({
+                'TM_CURRENT_LINE': line,
+                'TM_INPUT_START_LINE_INDEX': '',
+                'TM_LINE_INDEX': str(cursor.columnNumber()), 
+                'TM_LINE_NUMBER': str(cursor.block().blockNumber()), 
+                'TM_SCOPE': self.getCurrentScope(),
+                'TM_CURRENT_WORD': current_word,
+                'TM_FILEPATH': '',
+                'TM_FILENAME': '',
+                'TM_DIRECTORY': '',
+                'TM_SOFT_TABS': self.soft_tabs and 'YES' or 'NO',
+                'TM_TAB_SIZE': str(self.tab_size),
+                'TM_SELECTED_TEXT': str(cursor.selectedText())
+        });
         env.update(self._meta.settings['static_variables'])
         return env
+
+    def showHtml(self, string):
+        view = QWebView()
+        view.setHtml(string)
+        view.show()
     
-    def codeFolding(self, line_number):
-        print "folding", line_number
-        
+    def showTooltip(self, string):
+        cursor = self.textCursor()
+        point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
+        QToolTip.showText(point, string.strip(), self)
+
+    #==========================================================================
+    # Folding
+    #==========================================================================
+    
+    def codeFoldingEvent(self, line_number):
+        if self._is_folded(line_number):
+            self._fold(line_number)
+        else:
+            self._unfold(line_number)
+
+        self.update()
+        self.sidebar.update()
+    
+    def _fold(self, line_number):
+        startBlock = self.document().findBlockByNumber(line_number - 1)
+        endPos = self._find_fold_closing(startBlock)
+        endBlock = self.document().findBlockByNumber(endPos)
+
+        block = startBlock.next()
+        while block.isValid() and block != endBlock:
+            block.setVisible(False)
+            block.setLineCount(0)
+            block = block.next()
+
+        self.folded.append(startBlock.blockNumber())
+        self.document().markContentsDirty(startBlock.position(), endPos)
+
+    def _unfold(self, line_number):
+        startBlock = self.document().findBlockByNumber(line_number - 1)
+        endPos = self._find_fold_closing(startBlock)
+        endBlock = self.document().findBlockByNumber(endPos)
+
+        block = startBlock.next()
+        while block.isValid() and block != endBlock:
+            block.setVisible(True)
+            block.setLineCount(block.layout().lineCount())
+            endPos = block.position() + block.length()
+            if block.blockNumber() in self.foldedBlocks:
+                close = self._find_fold_closing(block)
+                block = self.document().findBlockByNumber(close)
+            else:
+                block = block.next()
+
+        self.folded.remove(startBlock.blockNumber())
+        self.document().markContentsDirty(startBlock.position(), endPos)
+
+    def _is_folded(self, line):
+        block = self.document().findBlockByNumber(line)
+        if not block.isValid():
+            return False
+        return block.isVisible()
+    
+    def _find_fold_closing(self, block):
+        block = block.next()
+        while block.isValid():
+            user_data = block.userData()
+            if user_data.folding == PMXBlockUserData.FOLDING_STOP:
+                return block.blockNumber()
+            block = block.next()
+        return block.previous().blockNumber()
+
+    #==========================================================================
+    # Bookmarks
+    #==========================================================================
+    
     def codeBookmark(self, line_number):
         if line_number in self.bookmarks:
             self.bookmarks.remove(line_number)
         else:
             index = bisect(self.bookmarks, line_number)
             self.bookmarks.insert(index, line_number)
-        self.sidebar.repaint()
+        self.sidebar.update()
+    
+    def goToLine(self, lineno):
+        cursor = self.textCursor()
+        cursor.setPosition(self.document().findBlockByLineNumber(lineno).position())
+        self.setTextCursor(cursor)
     
     #===========================================================================
     # Text Indentation
@@ -635,7 +691,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
         new_cursor.movePosition(QTextCursor.StartOfBlock)
         for i in range(block_count):
-            if not new_cursor.block().text().startsWith(self.indent_text):
+            if not new_cursor.block().text().startsWith(self.tabKeyBehavior):
                 new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, i)
                 return False
         del new_cursor

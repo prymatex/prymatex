@@ -87,6 +87,7 @@ class Settings(SettingsNode):
     '''
     Configuración gerarquica basada en diccionarios.
     '''
+    PMX_APP_PATH = PMX_BASE_PATH = PMX_BASE_PATH
     PMX_BUNDLES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Bundles')
     PMX_THEMES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Themes')
     PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')

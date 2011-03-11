@@ -107,7 +107,19 @@ class PMXBundle(object):
                 PMXBundle.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
         # I'm four father
         item.setBundle(self)
-    
+
+    def buildEnvironment(self):
+        env = deepcopy(os.environ)
+        env.update({
+            'TM_APP_PATH': settings['PMX_APP_PATH'],
+            'TM_BUNDLE_PATH': self.path,
+            'TM_BUNDLE_SUPPORT': self.getBundleSupportPath(),
+            'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
+        });
+        #Append TM_BUNDLE_SUPPORT TM_SUPPORT_PATH and to PATH
+        env['PATH'] = env['PATH'] + ':' + env['TM_BUNDLE_SUPPORT'] + '/bin:' + env['TM_SUPPORT_PATH'] + '/bin'
+        return env
+        
     def getSyntaxByName(self, name):
         for syntax in self.syntaxes:
             if syntax.name == name:
@@ -233,7 +245,11 @@ class PMXBundleItem(object):
             collection = getattr(bundle, self.bundle_collection, None)
             if collection != None:
                 collection.append(self)
-        
+    
+    def buildEnvironment(self, **kwargs):
+        env = self.bundle.buildEnvironment()
+        return env
+    
     @classmethod
     def loadBundleItem(cls, path, name_space = 'prymatex'):
         try:
@@ -320,8 +336,6 @@ def buildEnvironment(bundle = None):
            'TM_BUNDLE_SUPPORT': bundle != None and bundle.getBundleSupportPath() or '',
            'TM_SELECTED_TEXT': "TM_SELECTED_TEXT"})
     env.update(settings['static_variables'])
-    #Append TM_BUNDLE_SUPPORT TM_SUPPORT_PATH and to PATH
-    env['PATH'] = env['PATH'] + ':' + env['TM_BUNDLE_SUPPORT'] + '/bin:' + env['TM_SUPPORT_PATH'] + '/bin'
     return env
     
 def test_commands():
@@ -364,10 +378,7 @@ def test_keys():
 def test_templates():
     DIRECTORY = '/home/dvanhaaster/workspace/'
     for template in PMXBundle.TEMPLATES:
-        environment = buildEnvironment(bundle = template.bundle)
-        environment['TM_NEW_FILE'] = DIRECTORY + template.name + '.' + template.extension
-        environment['TM_NEW_FILE_BASENAME'] = template.name
-        environment['TM_NEW_FILE_DIRECTORY'] = DIRECTORY
+        environment = template.buildEnvironment(directory = DIRECTORY)
         template.resolve(environment)
 
 def test_bundle_elements():
