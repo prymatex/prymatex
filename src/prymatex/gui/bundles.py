@@ -11,7 +11,6 @@ if __name__ == '__main__':
     sys.path.append(abspath(join(pth, '../..')))
     sys.path.append(abspath(join(pth, '..')))
     
-import prymatex #@UnresolvedImport
 from prymatex.core.config import settings
 print settings.PMX_BUNDLES_PATH
 from prymatex.bundles.base import PMXBundle

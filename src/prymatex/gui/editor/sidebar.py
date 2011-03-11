@@ -58,6 +58,12 @@ class PMXSidebar(QWidget):
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 1,
                     str(line_count))
 
+            #Bookmarks
+            if line_count in self.edit.bookmarks:
+                painter.drawPixmap(1,
+                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.bookmarkFlagIcon.height(),
+                    self.bookmarkFlagIcon)
+
             user_data = block.userData()
             if user_data != None:
                 if user_data.folding == PMXBlockUserData.FOLDING_START and block.isVisible():
@@ -72,11 +78,6 @@ class PMXSidebar(QWidget):
                     painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
                         round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
                         self.foldingCollapsedIcon)
-                else:
-                    #Para joder
-                    painter.drawPixmap(1,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.bookmarkFlagIcon.height(),
-                        self.bookmarkFlagIcon)
             
             block = block.next()
 
@@ -86,28 +87,29 @@ class PMXSidebar(QWidget):
         QWidget.paintEvent(self, event)
 
     def mousePressEvent(self, event):
-        if self.foldArea > 0:
-            xofs = self.width() - self.foldArea
-            font_metrics = QFontMetrics(self.edit.document().defaultFont())
-            fh = font_metrics.lineSpacing()
-            ys = event.posF().y()
-            lineNumber = 0
+        xofs = self.width() - self.foldArea
+        xobs = self.bookmarkArea
+        font_metrics = QFontMetrics(self.edit.document().defaultFont())
+        fh = font_metrics.lineSpacing()
+        ys = event.posF().y()
+        lineNumber = 0
 
+        if event.pos().x() > xofs or event.pos().x() < xobs:
+            block = self.edit.firstVisibleBlock()
+            viewport_offset = self.edit.contentOffset()
+            page_bottom = self.edit.viewport().height()
+            while block.isValid():
+                position = self.edit.blockBoundingGeometry(block).topLeft() + viewport_offset
+                if position.y() > page_bottom:
+                    break
+                if position.y() < ys and (position.y() + fh) > ys:
+                    lineNumber = block.blockNumber() + 1
+                    break
+                block = block.next()
             if event.pos().x() > xofs:
-                block = self.edit.firstVisibleBlock()
-                viewport_offset = self.edit.contentOffset()
-                page_bottom = self.edit.viewport().height()
-                while block.isValid():
-                    position = self.edit.blockBoundingGeometry(block).topLeft() + viewport_offset
-                    if position.y() > page_bottom:
-                        break
-                    if position.y() < ys and (position.y() + fh) > ys:
-                        lineNumber = block.blockNumber() + 1
-                        break
-
-                    block = block.next()
-            if lineNumber > 0:
-                self.edit.code_folding_event(lineNumber)
+                self.edit.codeFolding(lineNumber)
+            else:
+                self.edit.codeBookmark(lineNumber)
 
 """
 class PMXSideArea(QWidget):

@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 
+import re, sys, logging
+from bisect import bisect
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QToolTip
@@ -13,10 +15,6 @@ from prymatex.core.config import Setting
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.syntax import PMXSyntaxProcessor
 from prymatex.lib import profilehooks
-import logging
-import re
-import sys
-
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +70,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         super(PMXCodeEdit, self).__init__(parent)
         self.sidebar = PMXSidebar(self)
         self.processor = PMXSyntaxProcessor(self.document())
+        self.bookmarks = []
         self.snippet = None
         # TODO: Load from config
         #option = QTextOption()
@@ -572,7 +571,18 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                'TM_SELECTED_TEXT': str(cursor.selectedText()) }
         env.update(self._meta.settings['static_variables'])
         return env
+    
+    def codeFolding(self, line_number):
+        print "folding", line_number
         
+    def codeBookmark(self, line_number):
+        if line_number in self.bookmarks:
+            self.bookmarks.remove(line_number)
+        else:
+            index = bisect(self.bookmarks, line_number)
+            self.bookmarks.insert(index, line_number)
+        self.sidebar.repaint()
+    
     #===========================================================================
     # Text Indentation
     #===========================================================================
