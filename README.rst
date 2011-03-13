@@ -10,7 +10,7 @@ it's main aim is to support TextMate bundles.
 Why Prymatex?
 =============
 
-There are thouthands of text editors out there, and many of them are
+There are thousands of text editors out there, and many of them are
 foused on writting code, just to name a few, Notepad++, Kate, Gedit,
 Scribes, etc.
 
