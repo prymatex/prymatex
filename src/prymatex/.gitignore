@@ -5,3 +5,7 @@ build
 .*
 test.py
 lib/oniguruma
+*.tmp
+*.old
+*~
+delete-me
