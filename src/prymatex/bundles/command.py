@@ -70,9 +70,9 @@ class PMXCommand(PMXBundleItem):
                         'input', 'beforeRunningCommand', 'autoScrollOutput', 'bundlePath', 'standardInput',
                         'winCommand', 'fallbackInput', 'captureFormatString', 'standardOutput', 'beforeRunningScript' ]:
             setattr(self, key, hash.get(key, None))
-        self.value = ""
+        self.value = u""
         
-    def __str__(self):
+    def __unicode__(self):
         return self.value
     
     def resolve(self, environment = {}):
@@ -81,7 +81,8 @@ class PMXCommand(PMXBundleItem):
         shell.execute(file)
         if self.input == 'document':
             shell.stdin.write("un documento\n muy chulo\npepe")
-        print shell.read()
+        exit_code, self.value = shell.read()
+        print exit_code, self.value
         PMXShell.deleteFile(file)
     
     def execute(self, parent):

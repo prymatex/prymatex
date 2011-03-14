@@ -660,7 +660,7 @@
     <string>Toggle Bookmark</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+B</string>
+    <string>Meta+F12</string>
    </property>
   </action>
   <action name="actionNext_Bookmark">
@@ -668,7 +668,7 @@
     <string>Next Bookmark</string>
    </property>
    <property name="shortcut">
-    <string>F2</string>
+    <string>Meta+Alt+F12</string>
    </property>
   </action>
   <action name="actionPrevious_Bookmark">
@@ -676,7 +676,7 @@
     <string>Previous Bookmark</string>
    </property>
    <property name="shortcut">
-    <string>Shift+F3</string>
+    <string>Meta+Shift+F12</string>
    </property>
   </action>
   <action name="actionRemove_All_Bookmarks">
@@ -684,7 +684,7 @@
     <string>Remove All Bookmarks</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+F3</string>
+    <string>Meta+Ctrl+F12</string>
    </property>
   </action>
   <action name="actionNext_Tab">

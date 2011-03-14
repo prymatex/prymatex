@@ -225,8 +225,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def on_actionNewTab_triggered(self):
         self.centralWidget().appendEmptyTab()
 
-    
-    
     @pyqtSignature('')
     def on_actionClose_triggered(self):
         index = self.centralWidget().currentIndex()
@@ -461,6 +459,28 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def on_actionFind_Replace_triggered(self):
         self.current_editor.actionReplace.trigger()
     
+    #============================================================
+    # Bookmarks
+    #============================================================
+    @pyqtSignature('')
+    def on_actionToggle_Bookmark_triggered(self):
+        editor = self.currentEditor
+        editor.toggleBookmark(editor.textCursor().block().blockNumber() + 1)
+    
+    @pyqtSignature('')
+    def on_actionNext_Bookmark_triggered(self):
+        editor = self.currentEditor
+        editor.bookmarkNext(editor.textCursor().block().blockNumber() + 1)
+
+    @pyqtSignature('')
+    def on_actionPrevious_Bookmark_triggered(self):
+        editor = self.currentEditor
+        editor.bookmarkPrevious(editor.textCursor().block().blockNumber() + 1)
+    
+    @pyqtSignature('')
+    def on_actionRemove_All_Bookmarks_triggered(self):
+        editor = self.currentEditor
+        editor.removeBookmarks()
 
 class PMXTabActionGroup(QActionGroup):
     '''
