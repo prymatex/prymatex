@@ -33,8 +33,9 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
     
-    def __init__(self, doc, syntax = None, formatter = None):
-        QSyntaxHighlighter.__init__(self, doc)
+    def __init__(self, editor):
+        QSyntaxHighlighter.__init__(self, editor.document())
+        self.editor = editor
         self.__syntax = None
         self.__formatter = None
 
@@ -52,7 +53,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.rehighlight()
     formatter = property(getFormatter, setFormatter)
 
-    def collect_previous_text(self, current):
+    def collectPreviousText(self, current):
         text = [ current ]
         block = self.currentBlock().previous()
         
@@ -62,13 +63,12 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         text.reverse()
         return text
     
-    
     def highlightBlock(self, text):
         if not self.syntax:
             return
         text = unicode(text)
         if self.previousBlockState() == self.MULTI_LINE:
-            text = self.collect_previous_text(text)
+            text = self.collectPreviousText(text)
             self.discard_lines = len(text)
             text = "\n".join( text )
         else:  
@@ -110,13 +110,18 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.scopes.pop()
 
     def foldingMarker(self):
-        if self.syntax.foldingStartMarker != None and self.syntax.foldingStartMarker.match(unicode(self.currentBlock().text())):
-            self.user_data.folding = self.user_data.FOLDING_START
-        elif self.syntax.foldingStopMarker != None and self.syntax.foldingStopMarker.match(unicode(self.currentBlock().text())):
-            self.user_data.folding = self.user_data.FOLDING_STOP
-        else: 
-            self.user_data.folding = self.user_data.FOLDING_NONE
-        
+        line = unicode(self.currentBlock().text())
+        if self.syntax.foldingStartMarker != None and self.syntax.foldingStartMarker.match(line):
+            self.user_data.folding = PMXBlockUserData.FOLDING_START
+        elif self.syntax.foldingStopMarker != None and self.syntax.foldingStopMarker.match(line):
+            if line.strip() == "":
+                block = self.currentBlock().previous()
+                while block.userData() != None and block.userData().folding == PMXBlockUserData.FOLDING_NONE:
+                    block = block.previous()
+                if block.userData() != None and block.userData().folding != PMXBlockUserData.FOLDING_STOP:
+                    self.user_data.folding = PMXBlockUserData.FOLDING_STOP
+            else:
+                self.user_data.folding = PMXBlockUserData.FOLDING_STOP
     #END
     def end_parsing(self, scope):
         if self.scopes[-1] == scope:

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Fri Mar 11 16:51:51 2011
+# Created: Mon Mar 14 17:50:16 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -515,13 +515,13 @@ class Ui_MainWindow(object):
         self.actionThis_file.setText(QtGui.QApplication.translate("MainWindow", "This file", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWith_options.setText(QtGui.QApplication.translate("MainWindow", "with options...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionToggle_Bookmark.setText(QtGui.QApplication.translate("MainWindow", "Toggle Bookmark", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionToggle_Bookmark.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+B", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionToggle_Bookmark.setShortcut(QtGui.QApplication.translate("MainWindow", "Meta+F12", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNext_Bookmark.setText(QtGui.QApplication.translate("MainWindow", "Next Bookmark", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionNext_Bookmark.setShortcut(QtGui.QApplication.translate("MainWindow", "F2", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNext_Bookmark.setShortcut(QtGui.QApplication.translate("MainWindow", "Meta+Alt+F12", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPrevious_Bookmark.setText(QtGui.QApplication.translate("MainWindow", "Previous Bookmark", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionPrevious_Bookmark.setShortcut(QtGui.QApplication.translate("MainWindow", "Shift+F3", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPrevious_Bookmark.setShortcut(QtGui.QApplication.translate("MainWindow", "Meta+Shift+F12", None, QtGui.QApplication.UnicodeUTF8))
         self.actionRemove_All_Bookmarks.setText(QtGui.QApplication.translate("MainWindow", "Remove All Bookmarks", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionRemove_All_Bookmarks.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+F3", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRemove_All_Bookmarks.setShortcut(QtGui.QApplication.translate("MainWindow", "Meta+Ctrl+F12", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNext_Tab.setText(QtGui.QApplication.translate("MainWindow", "Next Tab", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNext_Tab.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+PgDown", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPrevious_Tab.setText(QtGui.QApplication.translate("MainWindow", "Previous Tab", None, QtGui.QApplication.UnicodeUTF8))
