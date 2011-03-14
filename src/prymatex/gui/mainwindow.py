@@ -286,8 +286,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
                                             qApp.instance().startDirectory())
         if not fs:
             return
+        files = qApp.instance().file_manager.openFiles(fs)
+        
+        
         for path in fs:
-            self.centralWidget().openFile(path)
+            
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
