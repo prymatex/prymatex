@@ -11,6 +11,8 @@ from prymatex.lib import deco
 
 from logging import getLogger
 from prymatex.core.config import Settings
+from prymatex.core.exceptions import APIUsageError
+
 logger = getLogger(__name__)
 
 # ipdb handling
@@ -24,9 +26,23 @@ class PMXApplication(QApplication):
     The application loads the TM Bundles and Themes.
     '''
     
-    __config = None
-    __res_mngr = None
+    #===========================================================================
+    # Settings 
+    # Saved when the application is about to close
+    #===========================================================================
+    __settings = None
+    #===========================================================================
+    # Logger, deprecated in favour of module level logger
+    #===========================================================================
     __logger = None
+    #===========================================================================
+    # Command Line Arguments
+    #===========================================================================
+    __options = None 
+    #===========================================================================
+    # File manager
+    #===========================================================================
+    __file_manager = None
     
     #@printtime
     @deco.logtime
@@ -38,26 +54,21 @@ class PMXApplication(QApplication):
         # Logger setup
         self.setup_logging() 
         
-        from prymatex.optargs import parser
-        self.__options, files_to_open = parser.parse_args(args[1:])
+        files_to_open = self.parse_app_arguments(args)
         
         self.settings = Settings(self.options.profile)
+        
         # Some init's
         self.init_application_params()
-        self.init_resources()
-        self.res_mngr.loadStyleSheet()
         
-        self.__untitled_counter = 0
+        #self.res_mngr.loadStyleSheet()
         
-        self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))
-        self.splash.show()
+        self.setup_splash()
+        
         
         self.setWindowIcon(QIcon(":/resources/icons/Prymatex_Logo.png"))
         
         self.check_single_instance()
-        
-        #Settings
-        #TODO: Settings
         
         # Bundles and Stuff
         self.load_textmate_stuff()
@@ -65,6 +76,7 @@ class PMXApplication(QApplication):
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
         
+        self.setup_file_manager()
         # Creates the GUI
         self.createWindows(files_to_open)
         
@@ -74,19 +86,54 @@ class PMXApplication(QApplication):
         else:
             import ipdb
     
+    def setup_profile(self):
+        pass
+    
+    def parse_app_arguments(self, arguments):
+        '''
+        Stores the application parameters in the options property
+        and returns the list of flies to open.
+        @return: List of files to open
+        '''
+        from prymatex.optargs import parser
+        self.__options, files_to_open = parser.parse_args(arguments)
+        return files_to_open
+        
     def load_textmate_stuff(self):
         self.load_texmate_themes()
         self.load_texmate_bundles()
+        
+    def setup_splash(self):
+        self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))
+        self.splash.show()
     
+    def setup_file_manager(self):
+        from prymatex.core.filemanager import PMXFileManager
+        self.__file_manager = PMXFileManager(self)
     
     @property
     def options(self):
-        ''' These options are defined in
-        prymatex.optargs and are hold by the
-        application instance '''
+        ''' Application arguments defined in prymatex.optparse'''
         return self.__options
-        
     
+    @options.setter
+    def options(self, options):
+        if not self.__options:
+            self.__options = options
+        else:
+            raise APIUsageError("PMXApplication.options can't be defined twice!")
+    
+    @property
+    def file_manager(self):
+        return self.__file_manager
+    
+    @file_manager.setter
+    def file_manager(self, value):
+        assert self.__file_manager is None
+        from prymatex.core.filemanager import PMXFileManager
+        assert isinstance(value, PMXFileManager)
+        self.__file_manager = value
+        
     def createWindows(self, files_to_open):
         '''
         Creates the windows
@@ -149,7 +196,8 @@ class PMXApplication(QApplication):
     
     @property
     def lock_filename(self):
-        return join(self.res_mngr.path, 'LOCK') 
+        base_path = dirname(abspath(__file__))
+        return join(base_path,  'LOCK')
     
     def cleanup(self):
         try:
@@ -158,30 +206,24 @@ class PMXApplication(QApplication):
             pass
     
     def save_config(self):
-        self.logger.info("Save config")
         self.settings.save()
-        self.logger.info("Config saved")
+        logger.info("Config saved to %s" % self.settings)
     
-    def init_resources(self):
-        if not self.__res_mngr:
-            from prymatex.resmgr import ResourceManager
-            self.__res_mngr = ResourceManager()
-                
-    @property
-    def config(self):
-        '''
-        Retorna un objeto que soporta xxx.yyy.zzz
-        y que puede propagar señales ante edición.
-        '''
-        return self.__config
+    
+    def commitData(self):
+        print "Commit data"
         
-    @property
-    def res_mngr(self):
-        '''
-        Retorna el administrador de recursos
-        '''
-        return self.__res_mngr
-    
+    def saveState(self, session_manager):
+        print "Save state", session_manager
+        
+#    @property
+#    def config(self):
+#        '''
+#        Retorna un objeto que soporta xxx.yyy.zzz
+#        y que puede propagar señales ante edición.
+#        '''
+#        return self.__config
+        
     def load_texmate_themes(self):
         '''
         Load textmate Bundles and Themes

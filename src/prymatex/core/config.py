@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 import os, plistlib
 from copy import copy
+from apport.chroot import relpath
 
 def get_prymatex_base_path():
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -99,7 +100,16 @@ class Settings(SettingsNode):
         else:
             wrapped_dict = DEFAULT
         super(Settings, self).__init__(wrapped_dict)
-        
+    
+    def get_property(self, name, default = None):
+        ''' Get a property which is not handled by the __getattr__ protocol '''
+        try:
+            return self.__dict__.get(name)
+        except KeyError:
+            if default:
+                return None
+            raise
+    
     def __getitem__(self, key):
         if self.__class__.__dict__.has_key(key):
             return self.__class__.__dict__[key]
@@ -118,6 +128,14 @@ class Settings(SettingsNode):
     def save(self):
         obj = self.to_python()
         plistlib.writePlist(obj, self.__dict__['settings_file'])
+        
+    def __str__(self):
+        import prymatex
+        from os.path import relpath
+        pth = relpath(self.get_property('settings_file', ''), prymatex.__path__[0])
+        return '<%s object from %s at 0x%x>' % (type(self).__name__, pth, hash(self))
+    
+    __unicode__ = __str__
 
 class Setting(object):
     def __init__(self, default = None, fset = None):

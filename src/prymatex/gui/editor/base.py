@@ -63,7 +63,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     soft_tabs = Setting(default = True)
     tab_size = Setting(default = 4)
-    font = Setting(default = {"name": "Monospace", "size": 10}, 
+    _font = Setting(default = {"name": "Monospace", "size": 10}, 
                    fset = lambda self, value: self.setFont(QFont(value["name"], value["size"]))
                    )
     
@@ -113,7 +113,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.connectSignals()
         self.declareEvents()
         self.configure()
-    
+        print self._font
+        
     #=======================================================================
     # Connect Signals and Declare Events
     #=======================================================================
