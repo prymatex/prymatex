@@ -644,13 +644,14 @@ class Shell(NodeList):
         return node
     
     def resolve(self, indentation, tabreplacement, environment):
+        file = PMXShell.makeExecutableTempFile(str(self))
         shell = PMXShell(environment)
-        print str(self)
-        shell.stdin.write(str(self))
-        shell.stdin.close()
+        shell.execute(file)
+        _, value = shell.read()
+        value = value.strip()
+        PMXShell.deleteFile(file)
         self.clear()
-        self.append(shell.stdout.read())
-        shell.stdout.close()
+        self.append(value.replace('\n', '\n' + indentation).replace('\t', tabreplacement))
 
 class Condition(Node):
     def __init__(self, scope, parent = None):
