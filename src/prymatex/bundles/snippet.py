@@ -4,14 +4,14 @@
 '''
     Snippte's module
 '''
-import os, stat, tempfile, logging
+import logging
 from copy import deepcopy
-from subprocess import Popen, PIPE, STDOUT
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_DONT_CAPTURE_GROUP, OPTION_MULTILINE
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
+from prymatex.bundles.command import PMXShell
 
 logger = logging.getLogger(__name__)
 
@@ -644,16 +644,13 @@ class Shell(NodeList):
         return node
     
     def resolve(self, indentation, tabreplacement, environment):
-        descriptor, name = tempfile.mkstemp(prefix='pmx')
-        file = os.fdopen(descriptor, 'w+')
-        file.write(str(self).encode('utf8'))
-        file.close()
-        os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
-        process = Popen([name], stdout=PIPE, stderr=STDOUT, env = environment, shell=True)
+        shell = PMXShell(environment)
+        print str(self)
+        shell.stdin.write(str(self))
+        shell.stdin.close()
         self.clear()
-        result = process.stdout.read()
-        self.append(result.strip())
-        process.stdout.close()
+        self.append(shell.stdout.read())
+        shell.stdout.close()
 
 class Condition(Node):
     def __init__(self, scope, parent = None):

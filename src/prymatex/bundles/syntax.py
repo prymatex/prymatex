@@ -160,8 +160,8 @@ class PMXSyntax(PMXBundleItem):
     SYNTAXES = {}
     def __init__(self, hash, name_space = 'default', path = None):
         super(PMXSyntax, self).__init__(hash, name_space, path)
-        for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository',
-                        'keyEquivalent', 'foldingStopMarker', 'fileTypes', 'patterns']:
+        for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName',
+                        'repository', 'foldingStopMarker', 'fileTypes', 'patterns']:
             value = hash.get(key, None)
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                 #Compiled keys
