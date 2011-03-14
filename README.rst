@@ -4,13 +4,13 @@ Prymatex Text Editor
 What is Prymatex
 ================
 
-Pryamtex is a simple and flexible text editor. It's written in PyQt4 and
+Prymatex is a simple and flexible text editor. It's written in PyQt4 and
 it's main aim is to support TextMate bundles.
 
 Why Prymatex?
 =============
 
-There are thouthands of text editors out there, and many of them are
+There are thousands of text editors out there, and many of them are
 foused on writting code, just to name a few, Notepad++, Kate, Gedit,
 Scribes, etc.
 
