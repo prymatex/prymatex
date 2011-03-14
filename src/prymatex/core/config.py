@@ -2,7 +2,6 @@
 #-*- encoding: utf-8 -*-
 import os, plistlib
 from copy import copy
-from apport.chroot import relpath
 
 def get_prymatex_base_path():
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
