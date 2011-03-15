@@ -487,6 +487,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
         if isinstance(item, PMXSnippet):
+            #Snippet Item needs compile and clone
+            if not item.ready:
+                item.compile()
+            item = item.clone()
             for _ in range(len(trigger)):
                 cursor.deletePreviousChar()
             item.resolve(indentation = indentation,

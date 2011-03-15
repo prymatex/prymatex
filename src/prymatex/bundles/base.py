@@ -180,8 +180,6 @@ class PMXBundle(object):
         items = []
         if cls.TAB_TRIGGERS.has_key(keyword):
             for item in cls.TAB_TRIGGERS[keyword]:
-                if not item.ready():
-                    item.compile()
                 if item.scope == None:
                     items.append((1, item))
                 else:
@@ -189,7 +187,7 @@ class PMXBundle(object):
                     if score != 0:
                         items.append((score, item))
             items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item.clone(), items)
+            items = map(lambda (score, item): item, items)
         return items
             
     @classmethod
@@ -197,8 +195,6 @@ class PMXBundle(object):
         items = []
         if cls.KEY_EQUIVALENTS.has_key(character):
             for item in cls.KEY_EQUIVALENTS[character]:
-                if not item.ready():
-                    item.compile()
                 if item.scope == None:
                     items.append((1, item))
                 else:
@@ -206,7 +202,7 @@ class PMXBundle(object):
                     if score != 0:
                         items.append((score, item))
             items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item.clone(), items)
+            items = map(lambda (score, item): item, items)
         return items
 
     @classmethod
@@ -271,15 +267,6 @@ class PMXBundleItem(object):
             text += u" \t %s" % (buildKeyEquivalentString(self.keyEquivalent))
         return text
     
-    def clone(self):
-        return self
-    
-    def ready(self):
-        return True
-
-    def compile(self):
-        pass
-
     def resolve(self, **kwargs):
         pass
 
