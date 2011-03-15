@@ -210,8 +210,6 @@ class PMXBundle(object):
         items = []
         if cls.KEY_SEQUENCE.has_key(key):
             for item in cls.KEY_SEQUENCE[key]:
-                if not item.ready():
-                    item.compile()
                 if item.scope == None:
                     items.append((1, item))
                 else:
@@ -219,7 +217,7 @@ class PMXBundle(object):
                     if score != 0:
                         items.append((score, item))
             items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item.clone(), items)
+            items = map(lambda (score, item): item, items)
         return items
     
 class PMXBundleItem(object):
@@ -267,7 +265,7 @@ class PMXBundleItem(object):
             text += u" \t %s" % (buildKeyEquivalentString(self.keyEquivalent))
         return text
     
-    def resolve(self, **kwargs):
+    def resolve(self, *args, **kwargs):
         pass
 
 #----------------------------------------

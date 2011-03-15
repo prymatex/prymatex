@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Mon Mar 14 17:50:16 2011
+# Created: Tue Mar 15 18:51:01 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -30,7 +30,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 18))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -279,7 +279,7 @@ class Ui_MainWindow(object):
         self.actionShow_Log_Window.setCheckable(True)
         self.actionShow_Log_Window.setObjectName(_fromUtf8("actionShow_Log_Window"))
         self.actionNew_from_template = QtGui.QAction(MainWindow)
-        self.actionNew_from_template.setEnabled(False)
+        self.actionNew_from_template.setEnabled(True)
         self.actionNew_from_template.setObjectName(_fromUtf8("actionNew_from_template"))
         self.actionSplit_Vertically = QtGui.QAction(MainWindow)
         self.actionSplit_Vertically.setObjectName(_fromUtf8("actionSplit_Vertically"))
@@ -554,7 +554,8 @@ class Ui_MainWindow(object):
         self.actionShow_Log_Window.setStatusTip(QtGui.QApplication.translate("MainWindow", "Displays Log Messages", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Log_Window.setWhatsThis(QtGui.QApplication.translate("MainWindow", "Shows logs from the application and its plugins", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Log_Window.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+L", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionNew_from_template.setText(QtGui.QApplication.translate("MainWindow", "New from template", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNew_from_template.setText(QtGui.QApplication.translate("MainWindow", "New From Template", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNew_from_template.setShortcut(QtGui.QApplication.translate("MainWindow", "Meta+Shift+N", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSplit_Vertically.setText(QtGui.QApplication.translate("MainWindow", "Split Vertically", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSplit_Horizontally.setText(QtGui.QApplication.translate("MainWindow", "Split Horizontally", None, QtGui.QApplication.UnicodeUTF8))
         self.actionView_Whitespace.setText(QtGui.QApplication.translate("MainWindow", "View Whitespace", None, QtGui.QApplication.UnicodeUTF8))

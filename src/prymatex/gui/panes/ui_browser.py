@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/browser.ui'
 #
-# Created: Mon Mar 14 17:02:50 2011
+# Created: Tue Mar 15 18:52:36 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,33 +14,36 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_Browser(object):
-    def setupUi(self, Browser):
-        Browser.setObjectName(_fromUtf8("Browser"))
-        Browser.resize(501, 438)
-        self.verticalLayout = QtGui.QVBoxLayout(Browser)
+class Ui_BrowserPane(object):
+    def setupUi(self, BrowserPane):
+        BrowserPane.setObjectName(_fromUtf8("BrowserPane"))
+        BrowserPane.resize(400, 300)
+        self.dockWidgetContents = QtGui.QWidget()
+        self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.view = QtWebKit.QWebView(Browser)
-        self.view.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
-        self.view.setObjectName(_fromUtf8("view"))
-        self.verticalLayout.addWidget(self.view)
+        self.webView = QtWebKit.QWebView(self.dockWidgetContents)
+        self.webView.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
+        self.webView.setObjectName(_fromUtf8("webView"))
+        self.verticalLayout.addWidget(self.webView)
+        BrowserPane.setWidget(self.dockWidgetContents)
 
-        self.retranslateUi(Browser)
-        QtCore.QMetaObject.connectSlotsByName(Browser)
+        self.retranslateUi(BrowserPane)
+        QtCore.QMetaObject.connectSlotsByName(BrowserPane)
 
-    def retranslateUi(self, Browser):
-        Browser.setWindowTitle(QtGui.QApplication.translate("Browser", "Form", None, QtGui.QApplication.UnicodeUTF8))
+    def retranslateUi(self, BrowserPane):
+        BrowserPane.setWindowTitle(QtGui.QApplication.translate("BrowserPane", "Browser Panel", None, QtGui.QApplication.UnicodeUTF8))
 
 from PyQt4 import QtWebKit
 
 if __name__ == "__main__":
     import sys
     app = QtGui.QApplication(sys.argv)
-    Browser = QtGui.QWidget()
-    ui = Ui_Browser()
-    ui.setupUi(Browser)
-    Browser.show()
+    BrowserPane = QtGui.QDockWidget()
+    ui = Ui_BrowserPane()
+    ui.setupUi(BrowserPane)
+    BrowserPane.show()
     sys.exit(app.exec_())
 
