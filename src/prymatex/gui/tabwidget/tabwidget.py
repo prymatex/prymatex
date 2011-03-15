@@ -247,6 +247,8 @@ class PMXTabWidget(QTabWidget, PMXObject):
     def addTab(self, widget, title, autoFocus = True):
         ''' Overrides QTabWidget.addTab(page, title) so that
         afterInsertion is called '''
+        
+        widget.setParent(self)
         index = super(PMXTabWidget, self).addTab(widget, title)
         
         if autoFocus:

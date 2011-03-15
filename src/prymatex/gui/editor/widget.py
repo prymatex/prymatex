@@ -13,6 +13,7 @@ import os
 import re
 import sys
 import traceback
+from prymatex.core.exceptions import APIUsageError
 
 #from prymatex.lib.deco import logresult
 logger = logging.getLogger(__name__)
@@ -42,16 +43,13 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     '''
     _counter = 0
     _time = None # Modification time
-    __path = None
     __title = None
     
-    def __init__(self, parent, path = None):
-        from prymatex.gui.tabwidget import PMXTabWidget
-        assert isinstance(parent, PMXTabWidget), "PMXEditorWidget can only be"\
-                                                 " used with PMXTabWidget as"\
-                                                 " parent."
-        super(PMXEditorWidget, self).__init__(parent)
-        self.path = path
+    def __init__(self, pmx_file):
+        '''
+        PMXEditorWidget instances gain Qt's parent attribute on PMXTabWidget.addTab() 
+        '''
+        super(PMXEditorWidget, self).__init__(None)
         
         self.setupActions()
         self.setupUi(self)
@@ -65,9 +63,9 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.findreplaceWidget.hide()
         self.gotolineWidget.hide()
         
-        if self.path:
-            self.readFileContents()
-            self.updateTitle()
+#        if self.path:
+#            self.readFileContents()
+#            self.updateTitle()
             #self.setSyntax()
         
     COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
@@ -146,22 +144,25 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     #===========================================================================
     
     @classmethod
-    def getEditor(cls, parent,  path = None):
+    def getEditor(cls, pmx_file):
         '''
-        Factory for the default text editor
+        Factory for the editors.
+        PMXEditorWidget.registerEditor( editor )
+        @param pmx_file: A PMXFile object, you can get it from qApp.instance().file_manager
         '''
-        from prymatex.gui.tabwidget import PMXTabWidget
-        assert isinstance(parent, PMXTabWidget), cls.trUtf8("You didn't pass a valid parent: %s" % parent)
-        editor = PMXEditorWidget(parent, path)
+        #TODO: Something with the pmx_file_instance
+        from prymatex.core.filemanager import PMXFile
+        if isinstance(pmx_file, PMXFile):
+            raise APIUsageError("%s is not a valid file" % pmx_file) 
+        editor = PMXEditorWidget(pmx_file)
         return editor
 
     @classmethod
     def registerEditor(cls, editor_cls):
         '''
         Register an edior class.
-        
         '''
-        pass
+        raise NotImplementedError("No implemented")
 
     @classmethod
     def counter(cls):

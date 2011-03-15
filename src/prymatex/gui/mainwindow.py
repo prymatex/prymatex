@@ -18,6 +18,7 @@ from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.lib.i18n import ugettext as _
 import itertools
 import logging
+from prymatex.gui.editor.widget import PMXEditorWidget
 
     
 
@@ -279,6 +280,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             
     @pyqtSignature('')
     def on_actionOpen_triggered(self):
+        '''
+        Opens one or more files
+        '''
         #qApp.instance().startDirectory()
         fs = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
                                             qApp.instance().startDirectory())
@@ -286,8 +290,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             return
         files = qApp.instance().file_manager.openFiles(fs)
         
-        
-        for path in fs:
+        for pmx_file in files:
+            editor = PMXEditorWidget.getEditor(pmx_file)
+            self.tabWidget.addTab(editor, pmx_file.filename)
+            
             
     
     @pyqtSignature('')
