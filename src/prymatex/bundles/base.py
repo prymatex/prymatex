@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, re, plistlib, ipdb
+import os, re, plistlib
 from glob import glob
 from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
@@ -116,8 +116,6 @@ class PMXBundle(object):
             'TM_BUNDLE_SUPPORT': self.getBundleSupportPath(),
             'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
         });
-        #Append TM_BUNDLE_SUPPORT TM_SUPPORT_PATH and to PATH
-        env['PATH'] = env['PATH'] + ':' + env['TM_BUNDLE_SUPPORT'] + '/bin:' + env['TM_SUPPORT_PATH'] + '/bin'
         return env
         
     def getSyntaxByName(self, name):
@@ -182,8 +180,6 @@ class PMXBundle(object):
         items = []
         if cls.TAB_TRIGGERS.has_key(keyword):
             for item in cls.TAB_TRIGGERS[keyword]:
-                if not item.ready():
-                    item.compile()
                 if item.scope == None:
                     items.append((1, item))
                 else:
@@ -191,7 +187,7 @@ class PMXBundle(object):
                     if score != 0:
                         items.append((score, item))
             items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item.clone(), items)
+            items = map(lambda (score, item): item, items)
         return items
             
     @classmethod
@@ -199,8 +195,6 @@ class PMXBundle(object):
         items = []
         if cls.KEY_EQUIVALENTS.has_key(character):
             for item in cls.KEY_EQUIVALENTS[character]:
-                if not item.ready():
-                    item.compile()
                 if item.scope == None:
                     items.append((1, item))
                 else:
@@ -208,7 +202,7 @@ class PMXBundle(object):
                     if score != 0:
                         items.append((score, item))
             items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item.clone(), items)
+            items = map(lambda (score, item): item, items)
         return items
 
     @classmethod
@@ -273,15 +267,6 @@ class PMXBundleItem(object):
             text += u" \t %s" % (buildKeyEquivalentString(self.keyEquivalent))
         return text
     
-    def clone(self):
-        return self
-    
-    def ready(self):
-        return True
-
-    def compile(self):
-        pass
-
     def resolve(self, **kwargs):
         pass
 
@@ -289,8 +274,8 @@ class PMXBundleItem(object):
 # Tests
 #----------------------------------------
 def test_snippets():
-    bundle = PMXBundle.getBundleByName('LaTeX')
-    #bundle = PMXBundle.getBundleByName('Python')
+    #bundle = PMXBundle.getBundleByName('LaTeX')
+    bundle = PMXBundle.getBundleByName('Python')
     errors = 0
     #for bundle in PMXBundle.BUNDLES.values():
     for snippet in bundle.snippets:
@@ -318,40 +303,23 @@ def test_snippets():
                 sys.exit(0)
     print errors
 
-def buildEnvironment(bundle = None):
-    env = deepcopy(os.environ)
-    env.update({'TM_CURRENT_LINE': 'TM_CURRENT_LINE',
-           'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
-           'TM_INPUT_START_LINE_INDEX': '',
-           'TM_LINE_INDEX': '', 
-           'TM_LINE_NUMBER': '', 
-           'TM_SELECTED_SCOPE': 'TM_SELECTED_SCOPE', 
-           'TM_CURRENT_WORD': 'TM_CURRENT_WORD',
-           'TM_FILEPATH': '',
-           'TM_FILENAME': '',
-           'TM_PROJECT_DIRECTORY': '',
-           'TM_DIRECTORY': '',
-           'TM_SOFT_TABS': 'YES',
-           'TM_TAB_SIZE': "TM_TAB_SIZE",
-           'TM_BUNDLE_SUPPORT': bundle != None and bundle.getBundleSupportPath() or '',
-           'TM_SELECTED_TEXT': "TM_SELECTED_TEXT"})
-    env.update(settings['static_variables'])
-    return env
-    
 def test_commands():
-    bundle = PMXBundle.getBundleByName('LaTeX')
+    bundle = PMXBundle.getBundleByName('PHP')
     #bundle = PMXBundle.getBundleByName('SQL')
     errors = 0
     #for bundle in PMXBundle.BUNDLES.values():
     for command in bundle.commands:
         try:
-            #if snippet.name.startswith("Itemize Lines"):
+            if command.name.startswith("Validate Syntax"):
+                env = command.buildEnvironment()
+                env["TM_CURRENT_WORD"] = "echo"
+                env["PHP_MANUAL_LOCATION"] = "http://www.php.net/download-docs.php"
             #if snippet.name.startswith("Convert Tabs To Table"):
-                command.compile()
-                command.resolve(environment = buildEnvironment(bundle = bundle))
-                print command.name, command
+                print command.name, command.path
+                command.resolve(env)
+                print command
         except Exception, e:
-            print bundle.name, command.name, e
+            print command.path, e
             errors += 1
     print errors
     
@@ -395,4 +363,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join(settings['PMX_BUNDLES_PATH'], '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_templates()
+    test_snippets()

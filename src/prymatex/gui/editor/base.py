@@ -98,7 +98,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.sidebar = PMXSidebar(self)
-        self.processor = PMXSyntaxProcessor(self.document())
+        self.processor = PMXSyntaxProcessor(self)
         self.bookmarks = []
         self.folded = []
         self.snippet = None
@@ -419,7 +419,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
-        elif key_event.text() != "":
+        elif 0x20 <= key <= 0x3E0:
             starts = self.snippet.starts
             ends = self.snippet.ends
             if cursor.hasSelection():
@@ -487,6 +487,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         text = unicode(cursor.block().text())
         indentation = self.identationWhitespace(text)
         if isinstance(item, PMXSnippet):
+            #Snippet Item needs compile and clone
+            if not item.ready:
+                item.compile()
+            item = item.clone()
             for _ in range(len(trigger)):
                 cursor.deletePreviousChar()
             item.resolve(indentation = indentation,
@@ -615,7 +619,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Bookmarks
     #==========================================================================
     
-    def codeBookmark(self, line_number):
+    def toggleBookmark(self, line_number):
         if line_number in self.bookmarks:
             self.bookmarks.remove(line_number)
         else:
@@ -623,9 +627,28 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.bookmarks.insert(index, line_number)
         self.sidebar.update()
     
+    def removeBookmarks(self):
+        self.bookmarks = []
+        self.sidebar.update()
+    
+    def bookmarkNext(self, line_number):
+        index = bisect(self.bookmarks, line_number)
+        if index < len(self.bookmarks):
+            self.goToLine(self.bookmarks[index])
+        else:
+            self.goToLine(self.bookmarks[0])
+    
+    def bookmarkPrevious(self, line_number):
+        if line_number in self.bookmarks:
+            index = self.bookmarks.index(line_number)
+        else:
+            index = bisect(self.bookmarks, line_number)
+        if index < len(self.bookmarks):
+            self.goToLine(self.bookmarks[index - 1])
+    
     def goToLine(self, lineno):
         cursor = self.textCursor()
-        cursor.setPosition(self.document().findBlockByLineNumber(lineno).position())
+        cursor.setPosition(self.document().findBlockByNumber(lineno - 1).position())
         self.setTextCursor(cursor)
     
     #===========================================================================

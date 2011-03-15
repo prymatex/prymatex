@@ -110,7 +110,7 @@ class PMXSidebar(QWidget):
             if event.pos().x() > xofs:
                 self.editor.codeFoldingEvent(lineNumber)
             else:
-                self.editor.codeBookmark(lineNumber)
+                self.editor.toggleBookmark(lineNumber)
 
 """
 class PMXSideArea(QWidget):

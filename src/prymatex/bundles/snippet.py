@@ -4,14 +4,14 @@
 '''
     Snippte's module
 '''
-import os, stat, tempfile, logging
+import logging
 from copy import deepcopy
-from subprocess import Popen, PIPE, STDOUT
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_DONT_CAPTURE_GROUP, OPTION_MULTILINE
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
+from prymatex.bundles.command import PMXShell
 
 logger = logging.getLogger(__name__)
 
@@ -644,16 +644,14 @@ class Shell(NodeList):
         return node
     
     def resolve(self, indentation, tabreplacement, environment):
-        descriptor, name = tempfile.mkstemp(prefix='pmx')
-        file = os.fdopen(descriptor, 'w+')
-        file.write(str(self).encode('utf8'))
-        file.close()
-        os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
-        process = Popen([name], stdout=PIPE, stderr=STDOUT, env = environment, shell=True)
+        file = PMXShell.makeExecutableTempFile(str(self))
+        shell = PMXShell(environment)
+        shell.execute(file)
+        _, value = shell.read()
+        value = value.strip()
+        PMXShell.deleteFile(file)
         self.clear()
-        result = process.stdout.read()
-        self.append(result.strip())
-        process.stdout.close()
+        self.append(value.replace('\n', '\n' + indentation).replace('\t', tabreplacement))
 
 class Condition(Node):
     def __init__(self, scope, parent = None):
@@ -764,7 +762,27 @@ class PMXSnippet(PMXBundleItem):
     
     def __len__(self):
         return len(self.snippet)
+
+    def clone(self):
+        memo = {"parent": None, "snippet": None, "taborder": {}}
+        new = deepcopy(self, memo)
+        new.snippet = memo["snippet"]
+        new.addTaborder(memo["taborder"])
+        return new
     
+    @property
+    def ready(self):
+        return self.snippet != None
+    
+    def compile(self):
+        processor = PMXSnippetProcessor()
+        self.parser.parse(self.content, processor)
+        self.snippet = processor.node
+        self.addTaborder(processor.taborder)
+
+    def resolve(self, indentation = "", tabreplacement = "\t", environment = {}):
+        self.snippet.resolve(indentation, tabreplacement, environment)
+        
     def setStarts(self, value):
         self.snippet.starts = value
         
@@ -780,22 +798,6 @@ class PMXSnippet(PMXBundleItem):
         return self.snippet.ends
     
     ends = property(getEnds, setEnds) 
-    
-    def clone(self):
-        memo = {"parent": None, "snippet": None, "taborder": {}}
-        new = deepcopy(self, memo)
-        new.snippet = memo["snippet"]
-        new.addTaborder(memo["taborder"])
-        return new
-    
-    def ready(self):
-        return self.snippet != None
-    
-    def compile(self):
-        processor = PMXSnippetProcessor()
-        self.parser.parse(self.content, processor)
-        self.snippet = processor.node
-        self.addTaborder(processor.taborder)
     
     def addTaborder(self, taborder):
         self.taborder = []
@@ -860,9 +862,6 @@ class PMXSnippet(PMXBundleItem):
         while self.taborder[self.index] not in self.snippet:
             self.taborder.pop(self.index)
         return self.taborder[self.index]
-    
-    def resolve(self, indentation = "", tabreplacement = "\t", environment = {}):
-        self.snippet.resolve(indentation, tabreplacement, environment)
     
     def write(self, index, text):
         if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "insert"):
