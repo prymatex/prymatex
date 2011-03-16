@@ -143,9 +143,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     # Bundle Items
     #====================================================================
     def menuBundleItemActionTriggered(self, item):
-        if not item.ready():
-            item.compile()
-        self.currentEditor.insertBundleItem(item.clone())
+        self.currentEditor.insertBundleItem(item)
         
     def addMenuItem(self, parent_menu, item):
         if isinstance(item, PMXMenuNode):
