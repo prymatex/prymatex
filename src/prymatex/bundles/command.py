@@ -33,7 +33,7 @@ class PMXShell(Popen):
     FUNCTIONS = [  'exit_discard', 'exit_replace_text', 'exit_replace_document', 'exit_insert_text', 'exit_insert_snippet',
                'exit_show_html', 'exit_show_tool_tip', 'exit_create_new_document', 'require_cmd', 'rescan_project', 'pre']
     def __init__(self, environment):
-        super(PMXShell, self).__init__(["/bin/bash"], stdin=PIPE, stdout=PIPE, stderr=PIPE, env = environment)
+        super(PMXShell, self).__init__(["/bin/bash"], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment)
         self.execute("source " + self.INIT_SCRIPT)
         for function in self.FUNCTIONS:
             self.execute("export -f  %s" % function)
@@ -75,12 +75,20 @@ class PMXCommand(PMXBundleItem):
     def __unicode__(self):
         return self.value
     
-    def resolve(self, environment = {}):
+    def resolve(self, document, character, environment = {}):
         file = PMXShell.makeExecutableTempFile(self.command)
         shell = PMXShell(environment)
         shell.execute(file)
         if self.input == 'document':
-            shell.stdin.write("un documento\n muy chulo\npepe")
+            shell.stdin.write(document)
+        if self.input == 'line':
+            shell.stdin.write(environment['TM_CURRENT_LINE'])
+        if self.input == 'character':
+            shell.stdin.write(character)
+        if self.input == 'scope':
+            shell.stdin.write(environment['TM_SCOPE'])
+        if self.input == 'word':
+            shell.stdin.write(environment['TM_CURRENT_WORD'])
         exit_code, self.value = shell.read()
         print exit_code, self.value
         PMXShell.deleteFile(file)
@@ -89,6 +97,5 @@ class PMXCommand(PMXBundleItem):
         if self.output != None and self.output == 'showAsTooltip':
             parent.showTooltip(self.value)
         if self.output != None and self.output == 'showAsHTML':
-            print "html", self.value
             parent.showHtml(self.value)
     

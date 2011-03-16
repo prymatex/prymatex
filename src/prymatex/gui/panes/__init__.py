@@ -14,11 +14,8 @@ class PaneDockBase(QDockWidget):
         
         self.action = action
         self.text_show, self.text_hide = text_show, text_hide
-        text = self.isHidden() and text_show or text_hide
-        
         self.connect(self.action, SIGNAL("toggled(bool)"), self.toggleDock)
-        
-        
+          
     def showEvent(self, event):
         QDockWidget.showEvent(self, event)
         self.emitWidgetShown(True)

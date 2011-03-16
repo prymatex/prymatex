@@ -287,9 +287,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         doc = self.document()
         line = unicode(cursor.block().text())
         
-        #print key_event.text() == '\n' and "\\n" or key_event.text()
-        #logger.debug(debug_key(key_event))
-
         if key == Qt.Key_Tab:
             #Find for getTabTriggerItem in bundles
             scope = self.getCurrentScope()
@@ -484,14 +481,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
         cursor = self.textCursor()
-        text = unicode(cursor.block().text())
-        indentation = self.identationWhitespace(text)
+        line = unicode(cursor.block().text())
+        indentation = self.identationWhitespace(line)
         if isinstance(item, PMXSnippet):
+            #Snippet Item needs compile and clone
+            if not item.ready:
+                item.compile()
+            item = item.clone()
             for _ in range(len(trigger)):
                 cursor.deletePreviousChar()
-            item.resolve(indentation = indentation,
-                     tabreplacement = self.tabKeyBehavior,
-                     environment = self.buildEnvironment(item))
+            item.resolve(indentation = indentation, tabreplacement = self.tabKeyBehavior, environment = self.buildEnvironment(item))
             #Set starts
             item.starts = cursor.position()
             #Insert Snippet
@@ -509,7 +508,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(item.ends)
             self.setTextCursor(cursor)
         elif isinstance(item, PMXCommand):
-            item.resolve(environment = self.buildEnvironment(item))
+            print line, cursor.columnNumber()
+            item.resolve(unicode(self.toPlainText()), line[cursor.columnNumber() - 1], environment = self.buildEnvironment(item))
             item.execute(self.root)
         elif isinstance(item, PMXSyntax):
             self.setSyntax(item)
@@ -526,8 +526,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     def buildEnvironment(self, item):
         cursor = self.textCursor()
-        line = str(cursor.block().text())
-        current_word = ""
+        line = unicode(cursor.block().text())
+        scope = self.getCurrentScope()
+        preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
         try:
             match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
             current_word = line[match.start():match.end()]
@@ -536,19 +537,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         env = item.buildEnvironment()
         env.update({
                 'TM_CURRENT_LINE': line,
-                'TM_INPUT_START_LINE_INDEX': '',
-                'TM_LINE_INDEX': str(cursor.columnNumber()), 
-                'TM_LINE_NUMBER': str(cursor.block().blockNumber()), 
-                'TM_SCOPE': self.getCurrentScope(),
-                'TM_CURRENT_WORD': current_word,
-                'TM_FILEPATH': '',
-                'TM_FILENAME': '',
-                'TM_DIRECTORY': '',
-                'TM_SOFT_TABS': self.soft_tabs and 'YES' or 'NO',
-                'TM_TAB_SIZE': str(self.tab_size),
-                'TM_SELECTED_TEXT': str(cursor.selectedText())
+                'TM_INPUT_START_LINE_INDEX': u'',
+                'TM_LINE_INDEX': unicode(cursor.columnNumber()), 
+                'TM_LINE_NUMBER': unicode(cursor.block().blockNumber()), 
+                'TM_SCOPE': unicode(scope),
+                'TM_CURRENT_WORD': unicode(current_word),
+                'TM_FILEPATH': u'',
+                'TM_FILENAME': u'',
+                'TM_DIRECTORY': u'',
+                'TM_SOFT_TABS': self.soft_tabs and u'YES' or u'NO',
+                'TM_TAB_SIZE': unicode(self.tab_size),
+                'TM_SELECTED_TEXT': unicode(cursor.selectedText().replace(u'\u2029', '\n'))
         });
         env.update(self._meta.settings['static_variables'])
+        env.update(preferences['shellVariables'])
         return env
 
     #==========================================================================

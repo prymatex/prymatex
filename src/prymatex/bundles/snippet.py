@@ -762,7 +762,27 @@ class PMXSnippet(PMXBundleItem):
     
     def __len__(self):
         return len(self.snippet)
+
+    def clone(self):
+        memo = {"parent": None, "snippet": None, "taborder": {}}
+        new = deepcopy(self, memo)
+        new.snippet = memo["snippet"]
+        new.addTaborder(memo["taborder"])
+        return new
     
+    @property
+    def ready(self):
+        return self.snippet != None
+    
+    def compile(self):
+        processor = PMXSnippetProcessor()
+        self.parser.parse(self.content, processor)
+        self.snippet = processor.node
+        self.addTaborder(processor.taborder)
+
+    def resolve(self, indentation = "", tabreplacement = "\t", environment = {}):
+        self.snippet.resolve(indentation, tabreplacement, environment)
+        
     def setStarts(self, value):
         self.snippet.starts = value
         
@@ -778,22 +798,6 @@ class PMXSnippet(PMXBundleItem):
         return self.snippet.ends
     
     ends = property(getEnds, setEnds) 
-    
-    def clone(self):
-        memo = {"parent": None, "snippet": None, "taborder": {}}
-        new = deepcopy(self, memo)
-        new.snippet = memo["snippet"]
-        new.addTaborder(memo["taborder"])
-        return new
-    
-    def ready(self):
-        return self.snippet != None
-    
-    def compile(self):
-        processor = PMXSnippetProcessor()
-        self.parser.parse(self.content, processor)
-        self.snippet = processor.node
-        self.addTaborder(processor.taborder)
     
     def addTaborder(self, taborder):
         self.taborder = []
@@ -858,9 +862,6 @@ class PMXSnippet(PMXBundleItem):
         while self.taborder[self.index] not in self.snippet:
             self.taborder.pop(self.index)
         return self.taborder[self.index]
-    
-    def resolve(self, indentation = "", tabreplacement = "\t", environment = {}):
-        self.snippet.resolve(indentation, tabreplacement, environment)
     
     def write(self, index, text):
         if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "insert"):
