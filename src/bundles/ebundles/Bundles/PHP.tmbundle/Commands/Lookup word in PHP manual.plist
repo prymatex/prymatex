@@ -4,8 +4,6 @@
 <dict>
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
-	<key>bundlePath</key>
-	<string>/Users/kumar/Library/Application Support/TextMate/Bundles/Custom.tmbundle</string>
 	<key>command</key>
 	<string>if grep &lt;&lt;&lt;${TM_CURRENT_WORD:-!} -Esq '^[a-zA-Z0-9_]+$'
 	then

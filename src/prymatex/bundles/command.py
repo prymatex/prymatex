@@ -10,6 +10,8 @@ from subprocess import Popen, PIPE, STDOUT
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
+import ponyguruma as onig
+from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.core.config import settings
 '''
@@ -21,12 +23,22 @@ input:
     character
     scope
 output:
+200 exit_discard
+201 exit_replace_text
+202 exit_replace_document
+203 exit_insert_text
+204 exit_insert_snippet
+205 exit_show_html
+206 exit_show_tool_tip
+207 exit_create_new_document
     showAsHTML
     showAsTooltip
     insertAsSnippet
     replaceSelectedText
     replaceDocument
 '''
+
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
 class PMXShell(Popen):
     INIT_SCRIPT = settings.PMX_SUPPORT_PATH + '/lib/bash_init.sh'
@@ -65,11 +77,16 @@ class PMXCommand(PMXBundleItem):
     bundle_collection = 'commands'
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXCommand, self).__init__(hash, name_space, path)
-        for key in [    'fileCaptureRegister', 'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
-                        'lineCaptureRegister', 'command', 'capturePattern', 'output', 'dontFollowNewOutput',
-                        'input', 'beforeRunningCommand', 'autoScrollOutput', 'bundlePath', 'standardInput',
-                        'winCommand', 'fallbackInput', 'captureFormatString', 'standardOutput', 'beforeRunningScript' ]:
-            setattr(self, key, hash.get(key, None))
+        for key in [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
+                        'command', 'winCommand', 'linuxCommand',                                #System based Command
+                        'capturePattern', 'fileCaptureRegister',
+                        'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
+                        'lineCaptureRegister', 'dontFollowNewOutput',
+                        'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]:
+            value = hash.get(key, None)
+            if value != None and key in [    'capturePattern' ]:
+                value = onig_compile( value )
+            setattr(self, key, value)
         self.value = u""
         
     def __unicode__(self):
