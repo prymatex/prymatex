@@ -51,17 +51,6 @@ if os =~ /^10\.(5|6)/
 else
   active.each {|p| `open -a #{e_sh(p)} #{e_sh(url)}` }
 end</string>
-	<key>winCommand</key>
-	<string>#!/usr/bin/env ruby
-
-require &apos;win32ole&apos;
-filename = ENV[&apos;TM_FILEPATH&apos;].delete &apos;\\&apos;
-urlfile = %x[cygpath -m &quot;#{filename}&quot;].chomp.capitalize
-url = &quot;file:///&quot; &lt;&lt; urlfile
-ie = WIN32OLE.new(&apos;InternetExplorer.Application&apos;)
-ie.Visible = true
-ie.Navigate2(&quot;#{url}&quot;)
-</string> 
 	<key>input</key>
 	<string>none</string>
 	<key>name</key>

@@ -67,7 +67,7 @@ class PMXSidebar(QWidget):
                 user_data = block.userData()
                 if user_data != None:
                     if user_data.folding == PMXBlockUserData.FOLDING_START:
-                        if block.blockNumber() in self.editor.folded:
+                        if line_count in self.editor.folded:
                             painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
                                 round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
                                 self.foldingCollapsedIcon)

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QTextCharFormat, \
-    QColor, QFont
+from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
 from PyQt4.QtGui import qApp
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.lib.profilehooks import profile
@@ -8,8 +7,8 @@ from prymatex.lib.profilehooks import profile
 
 class PMXBlockUserData(QTextBlockUserData):
     FOLDING_NONE = 0
-    FOLDING_START = 1
-    FOLDING_STOP = -1
+    FOLDING_START = -1
+    FOLDING_STOP = -2
     
     def __init__(self):
         QTextBlockUserData.__init__(self)
