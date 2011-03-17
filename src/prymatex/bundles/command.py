@@ -87,32 +87,49 @@ class PMXCommand(PMXBundleItem):
             if value != None and key in [    'capturePattern' ]:
                 value = onig_compile( value )
             setattr(self, key, value)
-        self.value = u""
+
+    def getSystemCommand(self):
+        if self.winCommand != None and 'Window' in os.environ['OS']:
+            return self.winCommand
+        elif self.linuxCommand != None and 'Window' not in os.environ['OS']:
+            return self.linuxCommand
+        else:
+            return self.command
+    
+    def getInputText(self, document, character, environment):
+        def switch(input):
+            if not input: return ""
+            if input == 'document':
+                return document
+            if input == 'line':
+                return environment['TM_CURRENT_LINE']
+            if input == 'character':
+                return character
+            if input == 'scope':
+                return environment['TM_SCOPE']
+            if input == 'selected':
+                return environment['TM_SELECTED_TEXT']
+            if input == 'word':
+                return environment['TM_CURRENT_WORD']
+            return ""
+        return switch(self.input) or switch(self.fallbackInput) or switch(self.standardInput)
+
+    def __del__():
+        PMXShell.deleteFile(self.temp_command_file)
         
-    def __unicode__(self):
-        return self.value
-    
     def resolve(self, document, character, environment = {}):
-        file = PMXShell.makeExecutableTempFile(self.command)
-        shell = PMXShell(environment)
-        shell.execute(file)
-        if self.input == 'document':
-            shell.stdin.write(document)
-        if self.input == 'line':
-            shell.stdin.write(environment['TM_CURRENT_LINE'])
-        if self.input == 'character':
-            shell.stdin.write(character)
-        if self.input == 'scope':
-            shell.stdin.write(environment['TM_SCOPE'])
-        if self.input == 'word':
-            shell.stdin.write(environment['TM_CURRENT_WORD'])
-        exit_code, self.value = shell.read()
-        print exit_code, self.value
-        PMXShell.deleteFile(file)
+        self.temp_command_file = PMXShell.makeExecutableTempFile(self.getSystemCommand())
+        self.shell_interpreter = PMXShell(environment)
+        self.input_text = self.getInputText(document, character, environment)
     
-    def execute(self, parent):
+    def execute(self, foutputs):
+        self.shell_interpreter.execute(self.temp_command_file)
+        if self.input_text != "":
+            self.shell_interpreter.stdin.write(self.input_text)
+        exit_code, text = self.shell_interpreter.read()
         if self.output != None and self.output == 'showAsTooltip':
-            parent.showTooltip(self.value)
+            parent.showTooltip(text)
         if self.output != None and self.output == 'showAsHTML':
-            parent.showHtml(self.value)
-    
+            parent.showHtml(text)
+        #Podria borrar este archivo cuando de borra el objeto
+        PMXShell.deleteFile(self.temp_command_file)
