@@ -163,8 +163,26 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def addBundlesToMenu(self):
         name_order = lambda b1, b2: cmp(b1.name, b2.name)
         
+        used = []
+        BANNED_ACCEL = ' \t'
+        def get_name_with_accel(name):
+            
+            for index, char in enumerate(name):
+                if char in BANNED_ACCEL:
+                    continue
+                char = char.lower()
+                # Not so nice
+                #return name[0:index] + '&' + name[index:]
+                if not char in used:
+                    used.append(char)
+                    new_name = name[0:index] + '&' + name[index:]
+                    return new_name
+            return name        
+        
         for bundle in sorted(PMXBundle.BUNDLES.values(), name_order):
-            menu = QMenu(bundle.name, self)
+            
+            menu = QMenu(get_name_with_accel(bundle.name), self)
+            
             self.menuBundles.addMenu(menu)
             if bundle.mainMenu != None:
                 for _, item in bundle.mainMenu.iteritems():
