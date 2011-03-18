@@ -436,7 +436,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             position += holder.position() - index + 1
             cursor.setPosition(starts)
             cursor.setPosition(ends, QTextCursor.KeepAnchor)
-            cursor.removeSelectedText();
+            cursor.removeSelectedText()
             cursor.insertText(str(self.snippet))
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
@@ -508,9 +508,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(item.ends)
             self.setTextCursor(cursor)
         elif isinstance(item, PMXCommand):
-            print line, cursor.columnNumber()
             item.resolve(unicode(self.toPlainText()), line[cursor.columnNumber() - 1], environment = self.buildEnvironment(item))
-            item.execute(self.root)
+            functions = {
+                         'replaceSelectedText': self.replaceSelectedText,
+                         'replaceDocument': self.replaceDocument,
+                         'insertText': self.insertText,
+                         'insertAsSnippet': self.insertSnippet,
+                         'showAsHTML': self.root.showHtml,
+                         'showAsTooltip': self.root.showTooltip,
+                         'createNewDocument': self.root.createNewDocument,
+                         }
+            item.execute(functions)
         elif isinstance(item, PMXSyntax):
             self.setSyntax(item)
 
@@ -552,6 +560,34 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         env.update(self._meta.settings['static_variables'])
         env.update(preferences['shellVariables'])
         return env
+
+    #==========================================================================
+    # Commands
+    #==========================================================================
+    
+    def replaceSelectedText(self, string):
+        cursor = self.textCursor()
+        position = cursor.selectionStart()
+        cursor.removeSelectedText()
+        cursor.setPosition(position)
+        cursor.insertText(string)
+        self.setTextCursor(cursor)
+        
+    def replaceDocument(self, string):
+        print "replace document", string
+        
+    def insertText(self, string):
+        print "insert text", string
+        
+    def insertSnippet(self, snippet):
+        '''Create a new snippet and insert'''
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            position = cursor.selectionStart()
+            cursor.removeSelectedText()
+            cursor.setPosition(position)
+            self.setTextCursor(cursor)
+        self.insertBundleItem(snippet, "")
 
     #==========================================================================
     # Folding
