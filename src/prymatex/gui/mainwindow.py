@@ -194,8 +194,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         cursor = self.currentEditor.textCursor()
         point = self.currentEditor.viewport().mapToGlobal(self.currentEditor.cursorRect(cursor).bottomRight())
         QToolTip.showText(point, string.strip(), self.currentEditor)
-
     
+    def createNewDocument(self, string):
+        print "Nuevo documento", string
+            
     def on_actionQuit_triggered(self):
         QApplication.quit()
     

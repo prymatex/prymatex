@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Tue Mar 15 18:51:01 2011
+# Created: Thu Mar 17 23:09:48 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -30,7 +30,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 18))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -564,6 +564,7 @@ class Ui_MainWindow(object):
         self.actionShow_Indentation.setText(QtGui.QApplication.translate("MainWindow", "Show Indentation", None, QtGui.QApplication.UnicodeUTF8))
         self.actionEOL.setText(QtGui.QApplication.translate("MainWindow", "Show End of Line (EOL)", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWord_Warp.setText(QtGui.QApplication.translate("MainWindow", "Word Warp", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionWord_Warp.setShortcut(QtGui.QApplication.translate("MainWindow", "Meta+&", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFree_Editing.setText(QtGui.QApplication.translate("MainWindow", "Free Editing", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFree_Editing.setStatusTip(QtGui.QApplication.translate("MainWindow", "Enables the cursor to be positioned anywhere in the editor", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Browser_Dock.setText(QtGui.QApplication.translate("MainWindow", "Show Browser", None, QtGui.QApplication.UnicodeUTF8))

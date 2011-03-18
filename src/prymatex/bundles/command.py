@@ -75,6 +75,16 @@ class PMXShell(Popen):
 class PMXCommand(PMXBundleItem):
     path_patterns = ['Commands/*.tmCommand', 'Commands/*.plist']
     bundle_collection = 'commands'
+    exit_codes = {
+                  200: 'discard',
+                  201: 'replaceSelectedText',
+                  202: 'replaceDocument',
+                  203: 'insertText',
+                  204: 'insertAsSnippet',
+                  205: 'showAsHTML',
+                  206: 'showAsTooltip',
+                  207: 'createNewDocument'
+                  }
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXCommand, self).__init__(hash, name_space, path)
         for key in [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
@@ -107,14 +117,41 @@ class PMXCommand(PMXBundleItem):
                 return character
             if input == 'scope':
                 return environment['TM_SCOPE']
-            if input == 'selected':
+            if input == 'selection':
                 return environment['TM_SELECTED_TEXT']
             if input == 'word':
                 return environment['TM_CURRENT_WORD']
             return ""
         return switch(self.input) or switch(self.fallbackInput) or switch(self.standardInput)
 
-    def __del__():
+    def getOutputFunction(self, code, functions):
+        ''' showAsHTML
+            showAsTooltip
+            insertAsSnippet
+            replaceSelectedText
+            replaceDocument
+        '''
+        type = ''
+        if self.output != 'showAsHTML' and code != 0 and code in self.exit_codes:
+            type = self.exit_codes[code]
+        else:
+            type = self.output
+        if type in functions:
+            return type, functions[type]
+        def discard(text):
+            print 'discard', text
+        return 'discard', discard
+    
+    def buildOutputArgument(self, output, text):
+        from prymatex.bundles.snippet import PMXSnippet
+        if output == 'insertAsSnippet':
+            snippet = PMXSnippet({ 'content': text})
+            snippet.bundle = self.bundle
+            return snippet
+        else:
+            return text.strip()
+        
+    def __del__(self):
         PMXShell.deleteFile(self.temp_command_file)
         
     def resolve(self, document, character, environment = {}):
@@ -122,14 +159,14 @@ class PMXCommand(PMXBundleItem):
         self.shell_interpreter = PMXShell(environment)
         self.input_text = self.getInputText(document, character, environment)
     
-    def execute(self, foutputs):
+    def execute(self, output_functions):
         self.shell_interpreter.execute(self.temp_command_file)
         if self.input_text != "":
             self.shell_interpreter.stdin.write(self.input_text)
         exit_code, text = self.shell_interpreter.read()
-        if self.output != None and self.output == 'showAsTooltip':
-            parent.showTooltip(text)
-        if self.output != None and self.output == 'showAsHTML':
-            parent.showHtml(text)
+
+        type, function = self.getOutputFunction(exit_code, output_functions)
+        function(self.buildOutputArgument(type, text))
+        
         #Podria borrar este archivo cuando de borra el objeto
-        PMXShell.deleteFile(self.temp_command_file)
+        #PMXShell.deleteFile(self.temp_command_file)

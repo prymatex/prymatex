@@ -65,7 +65,9 @@ def buildKeySequence(nemonic):
     elif len(values) > 1:
         raise Exception("mal")
     return sum(sequence)
-    
+
+CHARACTER_REPLACES = {'&': '&&'}
+
 def buildKeyEquivalentString(key):
     values = list(key)
     equivalent = []
@@ -85,7 +87,10 @@ def buildKeyEquivalentString(key):
         char = values.pop()
         if char in string.ascii_uppercase:
             equivalent.append(u"Shift")
-        equivalent.append(char.upper())
+        char = char.upper()
+        if char in CHARACTER_REPLACES:
+            char = CHARACTER_REPLACES[char]
+        equivalent.append(char)
     elif len(values) > 1:
         raise Exception("mal") 
     return "+".join(equivalent)
