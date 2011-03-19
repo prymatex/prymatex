@@ -16,16 +16,20 @@ class PMXFile(QObject):
     fileChanged = pyqtSignal(QString)
     fileRenamed = pyqtSignal(QString)
     
+    _path = None
+    
+    BUFFER_SIZE = 2 << 20
+    
     def __init__(self, parent, path = None):
         assert isinstance(parent, PMXFileManager), ("PMXFile should have a PMXFileManager"
                                                     "instance as parent. PMXFileManager is "
                                                     "a singleton property on "
                                                     "PMXApplication.file_manager")
-        QObject.__init__(parent)
+        super(PMXFile, self).__init__(parent)
         self.path = self.path
         
     def suggestedFileName(self, editor_suffix = None):
-        return "Untitled file"
+        return "untitled"
     
     @property
     def mtime(self):
@@ -36,13 +40,41 @@ class PMXFile(QObject):
     
     @property
     def path(self):
-        return self.path
+        return self._path
     
     @path.setter
     def path(self, value):
-        self.path = value
-        self.pathChange.emit(value)
+        self._path = abspath(value)
+        self.fileRenamed.emit('hoa')
+    
+    @property
+    def filename(self):
+        return basename(self.path)
+    
+    @property
+    def directory(self):
+        return dirname(self.path)
+    
+    @property
+    def expect_file_changes(self):
+        return self._expect_file_changes
         
+    @expect_file_changes.setter
+    def expect_file_changes(self, value):
+        self._expect_file_changes = True
+    
+    
+    def write(self, buffer):
+        f = open(self.path, 'w')
+        f.write(buffer)
+        f.close()
+        self.fileChanged.emit(self.path)
+#        for frm, to in zip(range(0, ), range()):
+#            print frm, to
+#            buffer[frm:to]
+#            qApp.instance().processEvents()
+        
+    
 class PMXFileManager(PMXObject):
     '''
     A singleton which used for 
@@ -70,6 +102,7 @@ class PMXFileManager(PMXObject):
                 raise
             else:
                 self.file_history.append(path)
+                
         return finstances
             
     def recentFiles(self):
