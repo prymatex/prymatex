@@ -50,14 +50,19 @@ class PMXShell(Popen):
         for function in self.FUNCTIONS:
             self.execute("export -f  %s" % function)
         
-    def execute(self, command):
+    def execute(self, line, input = None):
+        if input != None:
+            command = 'echo "' + input + '" | ' + line
+        else:
+            command = line 
         self.stdin.write(command + "\n")
 
     def read(self):
         self.stdin.close()
         value = self.stdout.read()
         self.stdout.close()
-        return (self.wait(), value)
+        code = self.wait()
+        return (code, value)
         
     @staticmethod
     def makeExecutableTempFile(content):
@@ -98,6 +103,12 @@ class PMXCommand(PMXBundleItem):
                 value = onig_compile( value )
             setattr(self, key, value)
 
+    @property
+    def sheebang(self):
+        command = self.getSystemCommand()
+        line = command.split()[0]
+        return line.startsWith("#!")
+        
     def getSystemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:
             return self.winCommand
@@ -117,7 +128,7 @@ class PMXCommand(PMXBundleItem):
                 return character
             if input == 'scope':
                 return environment['TM_SCOPE']
-            if input == 'selection':
+            if input == 'selection' and 'TM_SELECTED_TEXT' in environment:
                 return environment['TM_SELECTED_TEXT']
             if input == 'word':
                 return environment['TM_CURRENT_WORD']
@@ -132,6 +143,7 @@ class PMXCommand(PMXBundleItem):
             replaceDocument
         '''
         type = ''
+        print code
         if self.output != 'showAsHTML' and code != 0 and code in self.exit_codes:
             type = self.exit_codes[code]
         else:
@@ -148,8 +160,10 @@ class PMXCommand(PMXBundleItem):
             snippet = PMXSnippet({ 'content': text})
             snippet.bundle = self.bundle
             return snippet
-        else:
+        elif output == 'showAsTooltip':
             return text.strip()
+        else:
+            return text
         
     def __del__(self):
         PMXShell.deleteFile(self.temp_command_file)
@@ -160,9 +174,8 @@ class PMXCommand(PMXBundleItem):
         self.input_text = self.getInputText(document, character, environment)
     
     def execute(self, output_functions):
-        self.shell_interpreter.execute(self.temp_command_file)
-        if self.input_text != "":
-            self.shell_interpreter.stdin.write(self.input_text)
+        for line in self.input_text.split():
+            self.shell_interpreter.execute(self.temp_command_file, line)
         exit_code, text = self.shell_interpreter.read()
 
         type, function = self.getOutputFunction(exit_code, output_functions)
