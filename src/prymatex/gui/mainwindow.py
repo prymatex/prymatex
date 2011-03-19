@@ -234,12 +234,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     # TODO: Fix, just grep and replace
     @property
     def current_editor(self):
-        #return self.currentTabWidget.currentWidget() # Old layout manager code
-        editor_widget = self.currentTabWidget.currentWidget()
-        return editor_widget.codeEdit
-        
-    currentEditor = current_editor
+        return self.current_editor_widget.codeEdit
+    currentEditor = current_editor # Alias
 
+    @property
+    def current_editor_widget(self):
+        return self.currentTabWidget.currentWidget()
+    currentEditorWidget = current_editor_widget
+    
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
         self.centralWidget().appendEmptyTab()
@@ -273,7 +275,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             <li>diegomvh</li>
             <li>locurask</li>
         </ul>
-        <a href="">Homepage</a>
+        <a href="http://d3f0.github.com/prymatex">Homepage</a>
         <p>Version %s</p>
         </p>
         """, qApp.instance().applicationVersion()))
@@ -326,7 +328,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
        
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        self.current_editor.save()
+        self.current_editor_widget.request_save()
     
     @pyqtSignature('')
     def on_actionSaveAs_triggered(self):
