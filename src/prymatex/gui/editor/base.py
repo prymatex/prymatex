@@ -332,12 +332,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             
             scope = self.getCurrentScope()
             preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
-            indentation = self.identationWhitespace(line)
-            #TODO: Move identation to preferences
+            indentation = self.indentationWhitespace(line)
+            #TODO: Move indentation to preferences
             if preferences["decreaseIndentPattern"] != None and preferences["decreaseIndentPattern"].match(line):
                 logger.debug("decreaseIndentPattern")
                 self.decreaseIndent(indentation)
-                indentation = self.identationWhitespace(line)
+                indentation = self.indentationWhitespace(line)
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
             elif preferences["increaseIndentPattern"] != None in preferences and preferences["increaseIndentPattern"].match(line):
@@ -436,7 +436,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             position += holder.position() - index + 1
             cursor.setPosition(starts)
             cursor.setPosition(ends, QTextCursor.KeepAnchor)
-            cursor.removeSelectedText();
+            cursor.removeSelectedText()
             cursor.insertText(str(self.snippet))
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
@@ -482,7 +482,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
-        indentation = self.identationWhitespace(line)
+        indentation = self.indentationWhitespace(line)
         if isinstance(item, PMXSnippet):
             #Snippet Item needs compile and clone
             if not item.ready:
@@ -508,9 +508,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(item.ends)
             self.setTextCursor(cursor)
         elif isinstance(item, PMXCommand):
-            print line, cursor.columnNumber()
             item.resolve(unicode(self.toPlainText()), line[cursor.columnNumber() - 1], environment = self.buildEnvironment(item))
-            item.execute(self.root)
+            functions = {
+                         'replaceSelectedText': self.replaceSelectedText,
+                         'replaceDocument': self.replaceDocument,
+                         'insertText': self.insertText,
+                         'insertAsSnippet': self.insertSnippet,
+                         'showAsHTML': self.root.showHtml,
+                         'showAsTooltip': self.root.showTooltip,
+                         'createNewDocument': self.root.createNewDocument,
+                         }
+            item.execute(functions)
         elif isinstance(item, PMXSyntax):
             self.setSyntax(item)
 
@@ -554,34 +562,63 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         return env
 
     #==========================================================================
+    # Commands
+    #==========================================================================
+    
+    def replaceSelectedText(self, string):
+        cursor = self.textCursor()
+        position = cursor.selectionStart()
+        cursor.removeSelectedText()
+        cursor.setPosition(position)
+        cursor.insertText(string)
+        self.setTextCursor(cursor)
+        
+    def replaceDocument(self, string):
+        print "replace document", string
+        
+    def insertText(self, string):
+        print "insert text", string
+        
+    def insertSnippet(self, snippet):
+        '''Create a new snippet and insert'''
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            position = cursor.selectionStart()
+            cursor.removeSelectedText()
+            cursor.setPosition(position)
+            self.setTextCursor(cursor)
+        self.insertBundleItem(snippet, "")
+
+    #==========================================================================
     # Folding
     #==========================================================================
     
     def codeFoldingEvent(self, line_number):
-        if self._is_folded(line_number):
-            self._fold(line_number)
-        else:
+        if line_number in self.folded:
             self._unfold(line_number)
+        else:
+            self._fold(line_number)
         self.update()
         self.sidebar.update()
     
     def _fold(self, line_number):
         startBlock = self.document().findBlockByNumber(line_number - 1)
-        endPos = self._find_fold_closing(startBlock)
-        endBlock = self.document().findBlockByNumber(endPos + 1)
+        endBlock = self._find_block_fold_closing(startBlock)
 
-        block = startBlock.next()
+        block = startBlock
         while block.isValid() and block != endBlock:
-            block.setVisible(False)
-            block.setLineCount(0)
             block = block.next()
-
-        self.folded.append(startBlock.blockNumber())
+            user_data = block.userData()
+            user_data.folding += 1
+            block.setVisible(user_data.folding == PMXBlockUserData.FOLDING_NONE)
+            block = block.next()
+        
+        self.folded.append(line_number)
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def _unfold(self, line_number):
-        startBlock = self.document().findBlockByNumber(line_number - 1)
-        endPos = self._find_fold_closing(startBlock)
+        '''startBlock = self.document().findBlockByNumber(line_number - 1)
+        endPos = self._find_block_fold_closing(startBlock)
         endBlock = self.document().findBlockByNumber(endPos)
 
         block = startBlock.next()
@@ -594,25 +631,29 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 block = self.document().findBlockByNumber(close)
             else:
                 block = block.next()
+        '''
+        self.folded.remove(line_number)
+        #self.document().markContentsDirty(startBlock.position(), endPos)
 
-        self.folded.remove(startBlock.blockNumber())
-        self.document().markContentsDirty(startBlock.position(), endPos)
-
-    def _is_folded(self, line):
-        block = self.document().findBlockByNumber(line)
-        if not block.isValid():
-            return False
-        return block.isVisible()
-    
-    def _find_fold_closing(self, block):
-        block = block.next()
-        while block.isValid():
-            user_data = block.userData()
-            if user_data.folding == PMXBlockUserData.FOLDING_STOP:
-                return block.blockNumber()
-            block = block.next()
-        return block.previous().blockNumber()
-
+    def _find_block_fold_closing(self, start):
+        text = unicode(start.text())
+        start_indent = len(self.indentationWhitespace(text))
+        end = start
+        if start.userData().folding == PMXBlockUserData.FOLDING_START:
+            #Find Next
+            while end.userData().folding == PMXBlockUserData.FOLDING_STOP:
+                end_indent = len(self.indentationWhitespace(unicode(end.text())))
+                if end.userData().folding == PMXBlockUserData.FOLDING_START and start_indent >= end_indent:
+                    break 
+                end = end.next()
+        else:
+            #Find Previous
+            while end.userData().folding == PMXBlockUserData.FOLDING_START:
+                end_indent = len(self.indentationWhitespace(unicode(end.text())))
+                if end.userData().folding == PMXBlockUserData.FOLDING_STOP and start_indent >= end_indent:
+                    break
+                end = end.previous()
+        return end
     #==========================================================================
     # Bookmarks
     #==========================================================================
@@ -654,7 +695,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #===========================================================================
     
     @classmethod
-    def identationWhitespace(cls, text):
+    def indentationWhitespace(cls, text):
         '''
         Gets text whitespace
         @param text: Text, QTextCursor o QTextBlock instance
@@ -670,7 +711,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def increaseIndent(self, indentation):
         self.indent(indentation + (self.tabKeyBehavior))
     
-    def decreaseIndent(self, identation):
+    def decreaseIndent(self, indentation):
         self.unindent()
         
     # TODO: Word wrapping fix

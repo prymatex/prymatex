@@ -10,6 +10,8 @@ from subprocess import Popen, PIPE, STDOUT
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
+import ponyguruma as onig
+from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.core.config import settings
 '''
@@ -21,12 +23,22 @@ input:
     character
     scope
 output:
+200 exit_discard
+201 exit_replace_text
+202 exit_replace_document
+203 exit_insert_text
+204 exit_insert_snippet
+205 exit_show_html
+206 exit_show_tool_tip
+207 exit_create_new_document
     showAsHTML
     showAsTooltip
     insertAsSnippet
     replaceSelectedText
     replaceDocument
 '''
+
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
 class PMXShell(Popen):
     INIT_SCRIPT = settings.PMX_SUPPORT_PATH + '/lib/bash_init.sh'
@@ -63,39 +75,98 @@ class PMXShell(Popen):
 class PMXCommand(PMXBundleItem):
     path_patterns = ['Commands/*.tmCommand', 'Commands/*.plist']
     bundle_collection = 'commands'
+    exit_codes = {
+                  200: 'discard',
+                  201: 'replaceSelectedText',
+                  202: 'replaceDocument',
+                  203: 'insertText',
+                  204: 'insertAsSnippet',
+                  205: 'showAsHTML',
+                  206: 'showAsTooltip',
+                  207: 'createNewDocument'
+                  }
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXCommand, self).__init__(hash, name_space, path)
-        for key in [    'fileCaptureRegister', 'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
-                        'lineCaptureRegister', 'command', 'capturePattern', 'output', 'dontFollowNewOutput',
-                        'input', 'beforeRunningCommand', 'autoScrollOutput', 'bundlePath', 'standardInput',
-                        'winCommand', 'fallbackInput', 'captureFormatString', 'standardOutput', 'beforeRunningScript' ]:
-            setattr(self, key, hash.get(key, None))
-        self.value = u""
+        for key in [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
+                        'command', 'winCommand', 'linuxCommand',                                #System based Command
+                        'capturePattern', 'fileCaptureRegister',
+                        'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
+                        'lineCaptureRegister', 'dontFollowNewOutput',
+                        'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]:
+            value = hash.get(key, None)
+            if value != None and key in [    'capturePattern' ]:
+                value = onig_compile( value )
+            setattr(self, key, value)
+
+    def getSystemCommand(self):
+        if self.winCommand != None and 'Window' in os.environ['OS']:
+            return self.winCommand
+        elif self.linuxCommand != None and 'Window' not in os.environ['OS']:
+            return self.linuxCommand
+        else:
+            return self.command
+    
+    def getInputText(self, document, character, environment):
+        def switch(input):
+            if not input: return ""
+            if input == 'document':
+                return document
+            if input == 'line':
+                return environment['TM_CURRENT_LINE']
+            if input == 'character':
+                return character
+            if input == 'scope':
+                return environment['TM_SCOPE']
+            if input == 'selection':
+                return environment['TM_SELECTED_TEXT']
+            if input == 'word':
+                return environment['TM_CURRENT_WORD']
+            return ""
+        return switch(self.input) or switch(self.fallbackInput) or switch(self.standardInput)
+
+    def getOutputFunction(self, code, functions):
+        ''' showAsHTML
+            showAsTooltip
+            insertAsSnippet
+            replaceSelectedText
+            replaceDocument
+        '''
+        type = ''
+        if self.output != 'showAsHTML' and code != 0 and code in self.exit_codes:
+            type = self.exit_codes[code]
+        else:
+            type = self.output
+        if type in functions:
+            return type, functions[type]
+        def discard(text):
+            print 'discard', text
+        return 'discard', discard
+    
+    def buildOutputArgument(self, output, text):
+        from prymatex.bundles.snippet import PMXSnippet
+        if output == 'insertAsSnippet':
+            snippet = PMXSnippet({ 'content': text})
+            snippet.bundle = self.bundle
+            return snippet
+        else:
+            return text.strip()
         
-    def __unicode__(self):
-        return self.value
-    
+    def __del__(self):
+        PMXShell.deleteFile(self.temp_command_file)
+        
     def resolve(self, document, character, environment = {}):
-        file = PMXShell.makeExecutableTempFile(self.command)
-        shell = PMXShell(environment)
-        shell.execute(file)
-        if self.input == 'document':
-            shell.stdin.write(document)
-        if self.input == 'line':
-            shell.stdin.write(environment['TM_CURRENT_LINE'])
-        if self.input == 'character':
-            shell.stdin.write(character)
-        if self.input == 'scope':
-            shell.stdin.write(environment['TM_SCOPE'])
-        if self.input == 'word':
-            shell.stdin.write(environment['TM_CURRENT_WORD'])
-        exit_code, self.value = shell.read()
-        print exit_code, self.value
-        PMXShell.deleteFile(file)
+        self.temp_command_file = PMXShell.makeExecutableTempFile(self.getSystemCommand())
+        self.shell_interpreter = PMXShell(environment)
+        self.input_text = self.getInputText(document, character, environment)
     
-    def execute(self, parent):
-        if self.output != None and self.output == 'showAsTooltip':
-            parent.showTooltip(self.value)
-        if self.output != None and self.output == 'showAsHTML':
-            parent.showHtml(self.value)
-    
+    def execute(self, output_functions):
+        self.shell_interpreter.execute(self.temp_command_file)
+        if self.input_text != "":
+            self.shell_interpreter.stdin.write(self.input_text)
+        exit_code, text = self.shell_interpreter.read()
+
+        type, function = self.getOutputFunction(exit_code, output_functions)
+        function(self.buildOutputArgument(type, text))
+        
+        #Podria borrar este archivo cuando de borra el objeto
+        #PMXShell.deleteFile(self.temp_command_file)

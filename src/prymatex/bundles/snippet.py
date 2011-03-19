@@ -76,7 +76,7 @@ SNIPPET_SYNTAX = {
                                             'patterns': [{'include': '#escaped_cond'}]
                                             }]},
                 'escaped_cond': {'captures': {'1': {'name': 'keyword.escape.condition'}},
-                                 'match': '\\\\(\\))',
+                                 'match': '\\\\([/\\)])',
                                  'name': 'constant.character.escape.condition'},
                 'escaped_char': {'match': '\\\\[/\\\\\\}\\{]',
                                  'name': 'constant.character.escape.regexp'},
@@ -674,6 +674,8 @@ class Condition(Node):
             self.current += text[:-1].replace('\\n', '\n').replace('\\t', '\t')
             self.insertion = self.current
             self.current = ""
+        elif scope == 'constant.character.escape.condition':
+            self.current += text.replace('\\n', '\n').replace('\\t', '\t')
         else:
             return super(Condition, self).open(scope, text)
         return node
@@ -742,7 +744,7 @@ class PMXSnippet(PMXBundleItem):
     parser = PMXSyntax(SNIPPET_SYNTAX)
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXSnippet, self).__init__(hash, name_space, path)
-        for key in [    'content', 'disableAutoIndent', 'inputPattern', 'bundlePath' ]:
+        for key in [    'content', 'disableAutoIndent', 'inputPattern' ]:
             setattr(self, key, hash.get(key, None))
         self.snippet = None
         self.taborder = None

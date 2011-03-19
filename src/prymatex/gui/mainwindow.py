@@ -18,6 +18,7 @@ from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.lib.i18n import ugettext as _
 import itertools
 import logging
+from prymatex.gui.editor.widget import PMXEditorWidget
 
     
 
@@ -162,8 +163,26 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def addBundlesToMenu(self):
         name_order = lambda b1, b2: cmp(b1.name, b2.name)
         
+        used = []
+        BANNED_ACCEL = ' \t'
+        def get_name_with_accel(name):
+            
+            for index, char in enumerate(name):
+                if char in BANNED_ACCEL:
+                    continue
+                char = char.lower()
+                # Not so nice
+                #return name[0:index] + '&' + name[index:]
+                if not char in used:
+                    used.append(char)
+                    new_name = name[0:index] + '&' + name[index:]
+                    return new_name
+            return name        
+        
         for bundle in sorted(PMXBundle.BUNDLES.values(), name_order):
-            menu = QMenu(bundle.name, self)
+            
+            menu = QMenu(get_name_with_accel(bundle.name), self)
+            
             self.menuBundles.addMenu(menu)
             if bundle.mainMenu != None:
                 for _, item in bundle.mainMenu.iteritems():
@@ -194,8 +213,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         cursor = self.currentEditor.textCursor()
         point = self.currentEditor.viewport().mapToGlobal(self.currentEditor.cursorRect(cursor).bottomRight())
         QToolTip.showText(point, string.strip(), self.currentEditor)
-
     
+    def createNewDocument(self, string):
+        print "Nuevo documento", string
+            
     def on_actionQuit_triggered(self):
         QApplication.quit()
     
@@ -277,13 +298,21 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             
     @pyqtSignature('')
     def on_actionOpen_triggered(self):
+        '''
+        Opens one or more files
+        '''
         #qApp.instance().startDirectory()
         fs = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
                                             qApp.instance().startDirectory())
         if not fs:
             return
-        for path in fs:
-            self.centralWidget().openFile(path)
+        files = qApp.instance().file_manager.openFiles(fs)
+        
+        for pmx_file in files:
+            editor = PMXEditorWidget.getEditor(pmx_file)
+            self.tabWidget.addTab(editor, pmx_file.filename)
+            
+            
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
