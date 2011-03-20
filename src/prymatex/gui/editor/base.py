@@ -89,8 +89,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.line_highlight = style.getQColor('lineHighlight')
         self.highlightCurrentLine()
         
-    #theme_name = Setting(default = 'Twilight', fset = setTheme)
-    theme_name = Setting(default = 'Pastels on Dark', fset = setTheme)
+    theme_name = Setting(default = 'Twilight', fset = setTheme)
+    #theme_name = Setting(default = 'Pastels on Dark', fset = setTheme)
     
     class Meta(object):
         settings = 'editor'
@@ -280,7 +280,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         
         if self.snippet != None:
-            return self.keyPressSnippetEvent(key_event)
+            key_event = self.keyPressSnippetEvent(key_event)
+            if key_event == None:
+                return
         
         key = key_event.key()
         cursor = self.textCursor()
@@ -295,13 +297,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             if scope and word:
                 snippets = PMXBundle.getTabTriggerItem(word, scope)
                 if len(snippets) > 1:
-                    self.selectBundleItem(snippets, word)
+                    return self.selectBundleItem(snippets, tabTrigger = True)
                 elif snippets:
-                    self.insertBundleItem(snippets[0], word)
-            else:
-                cursor.beginEditBlock()
-                cursor.insertText(self.tabKeyBehavior)
-                cursor.endEditBlock()
+                    return self.insertBundleItem(snippets[0], tabTrigger = True)
+            cursor.beginEditBlock()
+            cursor.insertText(self.tabKeyBehavior)
+            cursor.endEditBlock()
         elif key == Qt.Key_Backtab:
             self.unindent()
         elif key == Qt.Key_Backspace:
@@ -372,6 +373,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         
         if key == Qt.Key_Tab or key == Qt.Key_Backtab:
+            (index, holder) = self.snippet.setDefaultHolder(cursor.position())
+            if holder == None:
+                self.snippet = None
+                return key_event
             if key == Qt.Key_Tab:
                 holder = self.snippet.next()
             else:
@@ -390,7 +395,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
                 if holder == None:
                     self.snippet = None
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                    return key_event
                 holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
                 position = cursor.selectionStart()
             else:
@@ -400,7 +405,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                     (index, holder) = self.snippet.setDefaultHolder(cursor.position())
                 if holder == None:
                     self.snippet = None
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                    return key_event
                 if key == Qt.Key_Delete:
                     holder.remove(cursor.position() - index, cursor.position() - index + 1)
                     position = cursor.position()
@@ -421,16 +426,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             ends = self.snippet.ends
             if cursor.hasSelection():
                 (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
-                if holder == None or (key == Qt.Key_Return and holder.last):
+                if holder == None or holder.last:
                     self.snippet = None
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                    return key_event
                 holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
                 position = cursor.selectionStart()
             else:
                 (index, holder) = self.snippet.setDefaultHolder(cursor.position())
-                if holder == None or (key == Qt.Key_Return and holder.last):
+                if holder == None or holder.last:
                     self.snippet = None
-                    return QPlainTextEdit.keyPressEvent(self, key_event)
+                    return key_event
                 position = cursor.position()
             holder.insert(unicode(key_event.text()), position - index)
             position += holder.position() - index + 1
@@ -442,7 +447,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             cursor.setPosition(position)
             self.setTextCursor(cursor)
         else:
-            QPlainTextEdit.keyPressEvent(self, key_event)
+            return key_event
 
     def performCharacterAction(self, pair):
         '''
@@ -477,19 +482,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # BundleItems
     #==========================================================================
 
-    def insertBundleItem(self, item, trigger = ""):
+    def insertBundleItem(self, item, tabTrigger = False):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         indentation = self.indentationWhitespace(line)
+        if tabTrigger and item.tabTrigger != None:
+            for _ in range(len(item.tabTrigger)):
+                cursor.deletePreviousChar()
         if isinstance(item, PMXSnippet):
             #Snippet Item needs compile and clone
             if not item.ready:
                 item.compile()
             item = item.clone()
-            for _ in range(len(trigger)):
-                cursor.deletePreviousChar()
             item.resolve(indentation = indentation, tabreplacement = self.tabKeyBehavior, environment = self.buildEnvironment(item))
             #Set starts
             item.starts = cursor.position()
@@ -508,28 +514,33 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(item.ends)
             self.setTextCursor(cursor)
         elif isinstance(item, PMXCommand):
-            item.resolve(unicode(self.toPlainText()), line[cursor.columnNumber() - 1], environment = self.buildEnvironment(item))
+            char = line and line[cursor.columnNumber() - 1] or ""
+            item.resolve(unicode(self.toPlainText()), char, environment = self.buildEnvironment(item))
             functions = {
                          'replaceSelectedText': self.replaceSelectedText,
                          'replaceDocument': self.replaceDocument,
                          'insertText': self.insertText,
+                         'afterSelectedText': self.afterSelectedText,
                          'insertAsSnippet': self.insertSnippet,
                          'showAsHTML': self.root.showHtml,
                          'showAsTooltip': self.root.showTooltip,
-                         'createNewDocument': self.root.createNewDocument,
+                         'createNewDocument': self.root.createNewDocument
                          }
             item.execute(functions)
         elif isinstance(item, PMXSyntax):
             self.setSyntax(item)
 
-    def selectBundleItem(self, items, trigger = ""):
-        cursor = self.textCursor()
+    def selectBundleItem(self, items, tabTrigger = False):
+        syntax = any(map(lambda item: isinstance(item, PMXSyntax), items))
         menu = QMenu()
-        for item in items:
-            action = menu.addAction(item.name)
-            receiver = lambda item = item: self.insertBundleItem(item, trigger)
+        for index, item in enumerate(items):
+            action = menu.addAction(item.name + "\t &" + str(index + 1))
+            receiver = lambda item = item: self.insertBundleItem(item, tabTrigger = tabTrigger)
             self.connect(action, SIGNAL('triggered()'), receiver)
-        point = self.viewport().mapToGlobal(self.cursorRect(cursor).bottomRight())
+        if syntax:
+            point = self.root.cursor().pos()
+        else:
+            point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
     
     def buildEnvironment(self, item):
@@ -550,13 +561,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 'TM_LINE_NUMBER': unicode(cursor.block().blockNumber()), 
                 'TM_SCOPE': unicode(scope),
                 'TM_CURRENT_WORD': unicode(current_word),
-                'TM_FILEPATH': u'',
-                'TM_FILENAME': u'',
-                'TM_DIRECTORY': u'',
                 'TM_SOFT_TABS': self.soft_tabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': unicode(self.tab_size),
-                'TM_SELECTED_TEXT': unicode(cursor.selectedText().replace(u'\u2029', '\n'))
         });
+        if self.parent().file.path != None:
+            env['TM_FILEPATH'] = unicode(self.parent().file.path)
+            env['TM_FILENAME'] = unicode(self.parent().file.filename)
+            env['TM_DIRECTORY'] = unicode(self.parent().file.directory)
+        if cursor.hasSelection():
+            env['TM_SELECTED_TEXT'] = unicode(cursor.selectedText().replace(u'\u2029', '\n'))
         env.update(self._meta.settings['static_variables'])
         env.update(preferences['shellVariables'])
         return env
@@ -577,8 +590,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         print "replace document", string
         
     def insertText(self, string):
-        print "insert text", string
-        
+        cursor = self.textCursor()
+        cursor.insertText(string)
+    
+    def afterSelectedText(self, string):
+        cursor = self.textCursor()
+        position = cursor.selectionEnd()
+        cursor.setPosition(position)
+        cursor.insertText(string)
+    
     def insertSnippet(self, snippet):
         '''Create a new snippet and insert'''
         cursor = self.textCursor()
@@ -587,7 +607,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             cursor.removeSelectedText()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
-        self.insertBundleItem(snippet, "")
+        self.insertBundleItem(snippet)
 
     #==========================================================================
     # Folding
@@ -636,23 +656,25 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #self.document().markContentsDirty(startBlock.position(), endPos)
 
     def _find_block_fold_closing(self, start):
-        text = unicode(start.text())
-        start_indent = len(self.indentationWhitespace(text))
         end = start
         if start.userData().folding == PMXBlockUserData.FOLDING_START:
             #Find Next
-            while end.userData().folding == PMXBlockUserData.FOLDING_STOP:
-                end_indent = len(self.indentationWhitespace(unicode(end.text())))
-                if end.userData().folding == PMXBlockUserData.FOLDING_START and start_indent >= end_indent:
-                    break 
+            start_counter = 0
+            while end.userData().folding != PMXBlockUserData.FOLDING_STOP or (end.userData().folding == PMXBlockUserData.FOLDING_STOP and start_counter != 0):
                 end = end.next()
+                if end.userDate().folding == PMXBlockUserData.FOLDING_START:
+                    start_counter += 1
+                elif end.userDate().folding == PMXBlockUserData.FOLDING_STOP:
+                    start_counter -= 1
         else:
             #Find Previous
-            while end.userData().folding == PMXBlockUserData.FOLDING_START:
-                end_indent = len(self.indentationWhitespace(unicode(end.text())))
-                if end.userData().folding == PMXBlockUserData.FOLDING_STOP and start_indent >= end_indent:
-                    break
+            end_counter = 0
+            while end.userData().folding != PMXBlockUserData.FOLDING_START or (end.userData().folding == PMXBlockUserData.FOLDING_START and end_counter != 0):
                 end = end.previous()
+                if end.userDate().folding == PMXBlockUserData.FOLDING_STOP:
+                    end_counter += 1
+                elif end.userDate().folding == PMXBlockUserData.FOLDING_START:
+                    end_counter -= 1
         return end
     #==========================================================================
     # Bookmarks

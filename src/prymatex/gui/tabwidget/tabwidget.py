@@ -11,6 +11,9 @@ from prymatex.gui.utils import *
 from prymatex.gui.editor.widget import PMXEditorWidget
 from choosetab import ChooseTabDialog
 from prymatex.core.base import PMXObject
+import logging
+
+logger = logging.getLogger(__name__)
 
 class PMXTabWidget(QTabWidget, PMXObject):
 
@@ -238,8 +241,8 @@ class PMXTabWidget(QTabWidget, PMXObject):
         '''
         Creates a new empty tab and returns it
         '''
-        
-        editor = PMXEditorWidget.getEditor(self)
+        empty_file = qApp.instance().file_manager.getEmptyFile()
+        editor = PMXEditorWidget.getEditor(empty_file)
         # Title should be filled after tab insertion
         self.addTab(editor, '...')
         return editor
@@ -368,8 +371,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
             index = 0
         self.insertTab(index, widget, text)
         self.setCurrentWidget(widget)
-
-
 
 
 class PMXTabWidgetIterator(object):
