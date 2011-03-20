@@ -13,6 +13,8 @@ import os
 import re
 import sys
 import traceback
+from prymatex.core.exceptions import APIUsageError
+
 
 #from prymatex.lib.deco import logresult
 logger = logging.getLogger(__name__)
@@ -40,18 +42,21 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     It implements the logic needed for gui defined in ui_files/editorwidget.ui
     This logic includes Go To Line and Find action behaviour.
     '''
+    
+    COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
+    COLOR_NORMAL = QColor("black")
+    
     _counter = 0
     _time = None # Modification time
-    __path = None
     __title = None
+    _file = None
     
-    def __init__(self, parent, path = None):
-        from prymatex.gui.tabwidget import PMXTabWidget
-        assert isinstance(parent, PMXTabWidget), "PMXEditorWidget can only be"\
-                                                 " used with PMXTabWidget as"\
-                                                 " parent."
-        super(PMXEditorWidget, self).__init__(parent)
-        self.path = path
+    
+    def __init__(self, pmx_file):
+        '''
+        PMXEditorWidget instances gain Qt's parent attribute on PMXTabWidget.addTab() 
+        '''
+        super(PMXEditorWidget, self).__init__(None)
         
         self.setupActions()
         self.setupUi(self)
@@ -65,13 +70,22 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.findreplaceWidget.hide()
         self.gotolineWidget.hide()
         
-        if self.path:
-            self.readFileContents()
-            self.updateTitle()
-            #self.setSyntax()
+        self.file = pmx_file
         
-    COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
-    COLOR_NORMAL = QColor("black")
+    
+    @property
+    def file(self):
+        return self._file
+    
+    @file.setter
+    def file(self, file):
+        if self._file is not None:
+            raise APIUsageError("Can't set file twice")
+        from prymatex.core.filemanager import PMXFile
+        if not isinstance(file, PMXFile):
+            raise APIUsageError("%s is not an instance of PMXFile" % file)
+        self._file = file
+    
     
     def on_codeEdit_modificationChanged(self, modified):
         if modified:
@@ -146,22 +160,25 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     #===========================================================================
     
     @classmethod
-    def getEditor(cls, parent,  path = None):
+    def getEditor(cls, pmx_file):
         '''
-        Factory for the default text editor
+        Factory for the editors.
+        PMXEditorWidget.registerEditor( editor )
+        @param pmx_file: A PMXFile object, you can get it from qApp.instance().file_manager
         '''
-        from prymatex.gui.tabwidget import PMXTabWidget
-        assert isinstance(parent, PMXTabWidget), cls.trUtf8("You didn't pass a valid parent: %s" % parent)
-        editor = PMXEditorWidget(parent, path)
+        #TODO: Something with the pmx_file_instance
+        from prymatex.core.filemanager import PMXFile
+        if not isinstance(pmx_file, PMXFile):
+            raise APIUsageError("%s is not a valid file" % pmx_file) 
+        editor = PMXEditorWidget(pmx_file)
         return editor
 
     @classmethod
     def registerEditor(cls, editor_cls):
         '''
         Register an edior class.
-        
         '''
-        pass
+        raise NotImplementedError("No implemented")
 
     @classmethod
     def counter(cls):
@@ -267,38 +284,54 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     #===========================================================================
     # File Operations
     #===========================================================================
-    def do_save(self):
+    def save(self):
         '''
         This method is call to actually save the file, the path has to be
         set.
         '''
-        assert self.path is not None, self.trUtf8("No path defined!")
-        print "File is: %s (%s)" % (self.path, type(self.path))
         buffer_contents = unicode(self.codeEdit.document().toPlainText())
-        f = open(str(self.path), 'w')
+        promise = self.file.write(buffer_contents)
+        #f = open(str(self.path), 'w')
         #TODO: Check exceptions, for example, disk full.
-        n = f.write(buffer_contents)
-        f.close()
-        self.codeEdit.document().setModified(False)
-        self.update_title()
-        return n
+        #n = f.write(buffer_contents)
+        #f.close()
+        #self.codeEdit.document().setModified(False)
+        #self.update_title()
+        #return n
      
     
-    def save(self):
+    def request_save(self):
         '''
         Save the document.
         do_save() actually saves the document, but it should no be called
         directly because it expects self.path to be defined.
         '''
-        if self.path:
-            return self.do_save()
-        else:
-            path = QFileDialog.getSaveFileName(self,
-                                                self.trUtf8("Save file as..."))
-            if path:
-                self.path = path
-                return self.do_save()
-        return False
+        print "Save"
+        from os.path import join
+        if  not self.file.path:
+            
+            syntax = self.codeEdit.syntax
+            save_path = unicode(qApp.instance().applicationDirPath())
+            suggested_filename = self.file.suggestedFileName()
+            
+            if syntax:
+                suffix = syntax.fileTypes[0]
+                print "Suffix  is", suffix
+                filetypes = '%s (%s)' % (syntax.name, ' '.join(["*.%s" % f for f in syntax.fileTypes]))
+                suggested_filename = join(save_path, "%s.%s" % (suggested_filename, suffix))
+                
+            else:
+                filetypes = 'Text files (*.*)'
+            
+            pth = QFileDialog.getSaveFileName(self, self.trUtf8("Save file"),
+                                        suggested_filename,
+                                        filetypes
+                                        )
+            if pth:
+                self.file.path = pth
+                
+        self.save()
+
     
     def updateTitle(self):
         self.title = os.path.basename(self.path)

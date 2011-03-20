@@ -18,6 +18,7 @@ from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.lib.i18n import ugettext as _
 import itertools
 import logging
+from prymatex.gui.editor.widget import PMXEditorWidget
 
     
 
@@ -162,8 +163,26 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     def addBundlesToMenu(self):
         name_order = lambda b1, b2: cmp(b1.name, b2.name)
         
+        used = []
+        BANNED_ACCEL = ' \t'
+        def get_name_with_accel(name):
+            
+            for index, char in enumerate(name):
+                if char in BANNED_ACCEL:
+                    continue
+                char = char.lower()
+                # Not so nice
+                #return name[0:index] + '&' + name[index:]
+                if not char in used:
+                    used.append(char)
+                    new_name = name[0:index] + '&' + name[index:]
+                    return new_name
+            return name        
+        
         for bundle in sorted(PMXBundle.BUNDLES.values(), name_order):
-            menu = QMenu(bundle.name, self)
+            
+            menu = QMenu(get_name_with_accel(bundle.name), self)
+            
             self.menuBundles.addMenu(menu)
             if bundle.mainMenu != None:
                 for _, item in bundle.mainMenu.iteritems():
@@ -215,12 +234,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     # TODO: Fix, just grep and replace
     @property
     def current_editor(self):
-        #return self.currentTabWidget.currentWidget() # Old layout manager code
-        editor_widget = self.currentTabWidget.currentWidget()
-        return editor_widget.codeEdit
-        
-    currentEditor = current_editor
+        return self.current_editor_widget.codeEdit
+    currentEditor = current_editor # Alias
 
+    @property
+    def current_editor_widget(self):
+        return self.currentTabWidget.currentWidget()
+    currentEditorWidget = current_editor_widget
+    
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
         self.centralWidget().appendEmptyTab()
@@ -254,7 +275,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             <li>diegomvh</li>
             <li>locurask</li>
         </ul>
-        <a href="">Homepage</a>
+        <a href="http://d3f0.github.com/prymatex">Homepage</a>
         <p>Version %s</p>
         </p>
         """, qApp.instance().applicationVersion()))
@@ -279,13 +300,21 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             
     @pyqtSignature('')
     def on_actionOpen_triggered(self):
+        '''
+        Opens one or more files
+        '''
         #qApp.instance().startDirectory()
         fs = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
                                             qApp.instance().startDirectory())
         if not fs:
             return
-        for path in fs:
-            self.centralWidget().openFile(path)
+        files = qApp.instance().file_manager.openFiles(fs)
+        
+        for pmx_file in files:
+            editor = PMXEditorWidget.getEditor(pmx_file)
+            self.tabWidget.addTab(editor, pmx_file.filename)
+            
+            
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
@@ -299,7 +328,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
        
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        self.current_editor.save()
+        self.current_editor_widget.request_save()
     
     @pyqtSignature('')
     def on_actionSaveAs_triggered(self):
