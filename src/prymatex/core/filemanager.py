@@ -26,7 +26,8 @@ class PMXFile(QObject):
                                                     "a singleton property on "
                                                     "PMXApplication.file_manager")
         super(PMXFile, self).__init__(parent)
-        self.path = self.path
+        if path != None:
+            self.path = self.path
         
     def suggestedFileName(self, editor_suffix = None):
         return "untitled"
@@ -44,7 +45,7 @@ class PMXFile(QObject):
     
     @path.setter
     def path(self, value):
-        self._path = abspath(value)
+        self._path = abspath(unicode(value))
         self.fileRenamed.emit('hoa')
     
     @property

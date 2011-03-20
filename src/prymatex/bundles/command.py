@@ -54,7 +54,7 @@ class PMXShell(Popen):
         if input != None:
             command = 'echo "' + input + '" | ' + line
         else:
-            command = line 
+            command = line
         self.stdin.write(command + "\n")
 
     def read(self):
@@ -107,7 +107,7 @@ class PMXCommand(PMXBundleItem):
     def sheebang(self):
         command = self.getSystemCommand()
         line = command.split()[0]
-        return line.startsWith("#!")
+        return line.startswith("#!")
         
     def getSystemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:
@@ -165,20 +165,27 @@ class PMXCommand(PMXBundleItem):
         else:
             return text
         
-    def __del__(self):
-        PMXShell.deleteFile(self.temp_command_file)
-        
     def resolve(self, document, character, environment = {}):
         self.temp_command_file = PMXShell.makeExecutableTempFile(self.getSystemCommand())
-        self.shell_interpreter = PMXShell(environment)
+        if self.sheebang:
+            self.shell_interpreter = Popen([self.temp_command_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment)
+        else:
+            self.shell_interpreter = PMXShell(environment)
         self.input_text = self.getInputText(document, character, environment)
     
     def execute(self, output_functions):
-        for line in self.input_text.split():
-            self.shell_interpreter.execute(self.temp_command_file, line)
-        exit_code, text = self.shell_interpreter.read()
+        if self.sheebang:
+            self.shell_interpreter.stdin.write(self.input_text)
+            self.shell_interpreter.stdin.close()
+            text = self.shell_interpreter.stdout.read()
+            self.shell_interpreter.stdout.close()
+            exit_code = self.shell_interpreter.wait()
+        else:
+            self.shell_interpreter.execute(self.temp_command_file, self.input_text)
+            exit_code, text = self.shell_interpreter.read() 
 
         type, function = self.getOutputFunction(exit_code, output_functions)
+        print type, function, self.buildOutputArgument(type, text)
         function(self.buildOutputArgument(type, text))
         
         #Podria borrar este archivo cuando de borra el objeto
