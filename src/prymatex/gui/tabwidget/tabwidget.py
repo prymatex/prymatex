@@ -12,15 +12,19 @@ from prymatex.gui.editor.widget import PMXEditorWidget
 from choosetab import ChooseTabDialog
 from prymatex.core.base import PMXObject
 import logging
+from prymatex.core.exceptions import APIUsageError
 
 logger = logging.getLogger(__name__)
 
 class PMXTabWidget(QTabWidget, PMXObject):
-
-    counter = 1
-    
+    '''
+    TabWidget holds the editors.
+    It overrides Qt's addTab() method, titles are put through
+    callbacks
+    '''
     def __init__(self, parent):
-        QTabWidget.__init__(self, parent)
+        print "Insntanciando tab widget con parent", parent
+        super(PMXTabWidget, self).__init__(parent)
         
         self.setupActions() # Call it at first so the QMetaObject.connectSlotsByName is called in the setupUi
         self.setupUi()
@@ -85,10 +89,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
         self.actionOrderByURL = QAction(self.trUtf8("Order by &URL"), self)
         self.actionOrderByURL.setObjectName("actionOrderByURL")
 
-    @pyqtSignature("")
-    def on_actionCloseAll_triggered(self):
-        QMessageBox.information(self, "", "Close All")
-        
     @pyqtSignature("")
     def on_actionNewTab_triggered(self):
         self.appendEmptyTab()
@@ -195,75 +195,67 @@ class PMXTabWidget(QTabWidget, PMXObject):
             raise IndexError("%s-nth widget does not exist in %s" % (index, self) )
         return self.widget( index )
         
-    def openLocalFile(self, path):
-        '''
-        Opens a file in a tab, tries to reuse an empty one if it's
-        focused
-        @param path: A local file path
-        '''
-        try:
-            count = self.count()
-            try:
-                first_editor = self.editors[0]
-            except IndexError:
-                first_editor = None
-            # Is there any tab opened?
-            if path in self.openedFileMap():
-                logger.info("%s is already opened", path)
-                self.openedFileMap()[path].setFocus(Qt.MouseFocusReason)
-                return
-            
-            elif count == 1 and first_editor and not first_editor.modified and not first_editor.path:
-                first_editor.open(path)
-                editor.getFocus()
-                
-            else:
-                pass
-                #editor = self.getEditor(path)
-                #index = self.addTab(editor, self.trUtf8("Loading..."))
-                #self.setCurrentIndex(index)
-        except UnicodeDecodeError, e:
-            QMessageBox.critical(self, self.trUtf8("Could not decode file %s", path),
-                                 self.trUtf8("""<p>File %s could not be decoded</p>
-                                 <p>Some exception data:</p>
-                                 <pre>%s</pre>""", path, unicode(e)[:40]))
-    
-    def openFile(self, path):
-        '''
-        Creates a tab with the file contents and returns it
-        '''
-        editor = PMXEditorWidget.getEditor(self, path)
-        self.addTab(editor, '...')
-        return editor
-        
     
     def appendEmptyTab(self):
         '''
         Creates a new empty tab and returns it
         '''
-        empty_file = qApp.instance().file_manager.getEmptyFile()
+        #print "** appendEmptyTab called!"
+        #import traceback
+        #traceback.print_stack()
+        file_manager = qApp.instance().file_manager
+        empty_file = file_manager.getEmptyFile()
         editor = PMXEditorWidget.getEditor(empty_file)
         # Title should be filled after tab insertion
-        self.addTab(editor, '...')
+        self.addTab(editor)
         return editor
     
-    def addTab(self, widget, title, autoFocus = True):
+    def addTab(self, widget, autoFocus = True):
         ''' Overrides QTabWidget.addTab(page, title) so that
         afterInsertion is called '''
+        if type(autoFocus) is not bool:
+            raise APIUsageError("addTab received somethign wierd as autoFoucs %s (should be bool)" % autoFocus)
         
         widget.setParent(self)
+        title = widget.file.filename
+        #print "Adding %s with title %s" % (widget, title)
         index = super(PMXTabWidget, self).addTab(widget, title)
         
+        
+        widget.fileTitleUpdate.connect(self.updateTabInfo)
         if autoFocus:
             self.setCurrentIndex(index)
             if self.count() == 1:
                 widget.setFocus(Qt.MouseFocusReason)
-                
+        
         if hasattr(widget, 'afterInsertion'):
             widget.afterInsertion(self, index)
             
         return index
+    
+    def updateTabInfo(self):
+        #print "Update", self.sender()
+        editor = self.sender()
+        editor_index = self.indexOf(editor)
+        self.setTabText(editor_index, editor.file.filename)
+        # Tooltip
+        if editor.file.path:
+            path = self.trUtf8("Not saved yet")
+        else:
+            path = editor.file.path
+        if editor.codeEdit.syntax:
+            syntax = editor.codeEdit.syntax.name
+        else:
+            syntax = "Not selected"
+             
+        self.setTabToolTip(editor_index, unicode(self.trUtf8(''
+             'Path: %(path)s\n'
+             'Syntax: %(syntax)s'
+        '')).strip() % dict(path = path, syntax = syntax))
         
+    
+        
+    
     def updateEditorSyntax(self, source, syntax):
         editor_widget = self.currentWidget()
         editor_widget.codeEdit.setSyntax(syntax)

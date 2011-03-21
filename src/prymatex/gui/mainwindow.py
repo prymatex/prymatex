@@ -51,8 +51,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
         
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
-        tabWidget = PMXTabWidget(self)
-        self.setCentralWidget( tabWidget )
+        #self.tabWidget = PMXTabWidget(self)
+        #self.setCentralWidget( self.tabWidget )
+        print "Foo is", self.foo, self.tabWidget
+        
         #self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
         #self.actionGroupTabs.addMenu(self.menuPanes)
         
@@ -229,7 +231,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @property
     def currentTabWidget(self):
         ''' Shortcut to the current editor (bypass layoutManager) '''
-        return self.centralWidget()
+        #return self.centralWidget()
+        return self.tabWidget
 
     # TODO: Fix, just grep and replace
     @property
@@ -244,7 +247,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        self.centralWidget().appendEmptyTab()
+        self.tabWidget.appendEmptyTab()
 
     @pyqtSignature('')
     def on_actionClose_triggered(self):
@@ -303,16 +306,16 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         '''
         Opens one or more files
         '''
-        #qApp.instance().startDirectory()
-        fs = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
-                                            qApp.instance().startDirectory())
-        if not fs:
-            return
-        files = qApp.instance().file_manager.openFiles(fs)
-        
-        for pmx_file in files:
+        start_directory = qApp.instance().startDirectory()
+        files_to_open = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
+                                            start_directory)
+        file_manager = qApp.instance().file_manager
+        for path in files_to_open:
+            if file_manager.isOpened(path):
+                continue 
+            pmx_file = file_manager.openFile(path)
             editor = PMXEditorWidget.getEditor(pmx_file)
-            self.tabWidget.addTab(editor, pmx_file.filename)
+            self.tabWidget.addTab(editor, True)
             
             
     

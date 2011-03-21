@@ -2,9 +2,10 @@
 Code Editor Widget.
 '''
 
-from PyQt4.QtCore import SIGNAL, Qt, QString
+from PyQt4.QtCore import SIGNAL, Qt, QString, pyqtSignal
 from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, \
     QAction, QMenu, QKeySequence, qApp
+
 from logging import getLogger
 from prymatex.bundles import PMXSyntax
 from ui_editorwidget import Ui_EditorWidget
@@ -13,6 +14,7 @@ import os
 import re
 import sys
 import traceback
+from prymatex.core.filemanager import PMXFile
 from prymatex.core.exceptions import APIUsageError
 
 
@@ -51,6 +53,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     __title = None
     _file = None
     
+    fileTitleUpdate = pyqtSignal(PMXFile)
     
     def __init__(self, pmx_file):
         '''
@@ -85,6 +88,13 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         if not isinstance(file, PMXFile):
             raise APIUsageError("%s is not an instance of PMXFile" % file)
         self._file = file
+        self._file.fileChanged.connect( self.fileChanged )
+        
+    
+    def fileChanged(self):
+        self.fileTitleUpdate.emit(self.file)
+        
+    
     
     
     def on_codeEdit_modificationChanged(self, modified):
@@ -290,14 +300,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         set.
         '''
         buffer_contents = unicode(self.codeEdit.document().toPlainText())
-        promise = self.file.write(buffer_contents)
-        #f = open(str(self.path), 'w')
         #TODO: Check exceptions, for example, disk full.
-        #n = f.write(buffer_contents)
-        #f.close()
-        #self.codeEdit.document().setModified(False)
-        #self.update_title()
-        #return n
+        promise = self.file.write(buffer_contents)
+        logger.debug("Buffer saved to %s" % self.file.path)
+        
      
     
     def request_save(self):
@@ -308,7 +314,8 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         print "Save"
         from os.path import join
-        if  not self.file.path:
+        print self.file.path
+        if self.file.path is None:
             
             syntax = self.codeEdit.syntax
             save_path = unicode(qApp.instance().applicationDirPath())
@@ -378,13 +385,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def modfified(self):
         return self.codeEdit.document().isModified()
     
-    
-    def update_title(self):
-        '''
-        Tell the tab holder to update the title
-        '''
-        print self.parent()
-        
         
     #===========================================================================
     # Callbacks
@@ -392,8 +392,12 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     
     def afterInsertion(self, tab_widget, index):
         ''' Callback when the tab is inserted '''
-        tab_widget.setTabText(index, self.title)
         tab_widget.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
+        # TODO: Settings tab's text should be made by the PMXTabWidget
+        self.fileTitleUpdate.emit(self.file)
+        #title = self.file.filename or self.file.suggestedFileName()
+        #print title
+        #tab_widget.setTabText(index, title)
 
 
 
@@ -405,4 +409,4 @@ if __name__ == "__main__":
     win = PMXEditorWidget(None) # No Parent
     win.show()
     sys.exit(app.exec_())
-   
+
