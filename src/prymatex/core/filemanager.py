@@ -16,7 +16,7 @@ class PMXFile(QObject):
     #===========================================================================
     # Signals
     #===========================================================================
-    fileChanged = pyqtSignal(QString)
+    fileSaved = pyqtSignal(QString)
     fileRenamed = pyqtSignal(QString)
     
     _path = None
@@ -81,7 +81,7 @@ class PMXFile(QObject):
         f = open(self.path, 'w')
         f.write(buffer)
         f.close()
-        self.fileChanged.emit(self.path)
+        self.fileSaved.emit(self.path)
         
     
 #        for frm, to in zip(range(0, ), range()):

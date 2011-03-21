@@ -251,21 +251,21 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
 
     @pyqtSignature('')
     def on_actionClose_triggered(self):
-        index = self.centralWidget().currentIndex()
-        self.centralWidget().closeTab(index)
-        if self.centralWidget().count():
-            self.centralWidget().currentWidget().setFocus(Qt.TabFocusReason)
+        index = self.tabWidget.currentIndex()
+        self.tabWidget.closeTab(index)
+        if self.tabWidget.count():
+            self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
 
     
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
-        self.centralWidget().focusNextTab()
+        self.tabWidget.focusNextTab()
         
 
         
     @pyqtSignature('')
     def on_actionPrevious_Tab_triggered(self):
-        self.centralWidget().focusPrevTab()
+        self.tabWidget.focusPrevTab()
         
     @pyqtSignature('')
     def on_actionAboutApp_triggered(self):
@@ -334,14 +334,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.current_editor_widget.request_save()
     
     @pyqtSignature('')
-    def on_actionSaveAs_triggered(self):
-        self.current_editor.save(save_as = True)
+    def on_actionSave_As_triggered(self):
+        self.current_editor_widget.request_save(save_as = True)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
         for i in range(0, self.tabWidgetEditors.count()):
-            if not self.tabWidgetEditors.widget(i).save():
-                self.statusBar().showMessage(self.trUtf8("Not all documents were saved"), 1000)
+            if not self.tabWidgetEditors.widget(i).reqquest_save():
+                #self.statusBar().showMessage(self.trUtf8("Not all documents were saved"), 1000)
                 break
     
     @pyqtSignature('')
@@ -438,7 +438,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         '''
         Triggers 
         '''
-        self.centralWidget().chooseFileDlg.exec_()
+        self.tabWidget.chooseFileDlg.exec_()
     
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):

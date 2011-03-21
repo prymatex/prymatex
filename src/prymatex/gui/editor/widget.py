@@ -88,15 +88,14 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         if not isinstance(file, PMXFile):
             raise APIUsageError("%s is not an instance of PMXFile" % file)
         self._file = file
-        self._file.fileChanged.connect( self.fileChanged )
+        self._file.fileSaved.connect( self.fileSaved )
         
     
-    def fileChanged(self):
+    def fileSaved(self):
+        self.codeEdit.document().setModified(False)
         self.fileTitleUpdate.emit(self.file)
-        
     
-    
-    
+    # TODO: Move this thing up to tabwidget
     def on_codeEdit_modificationChanged(self, modified):
         if modified:
             self.tooltip = self.trUtf8("Modified")
@@ -306,7 +305,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
      
     
-    def request_save(self):
+    def request_save(self, save_as = False):
         '''
         Save the document.
         do_save() actually saves the document, but it should no be called
@@ -315,20 +314,25 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         print "Save"
         from os.path import join
         print self.file.path
-        if self.file.path is None:
+        if self.file.path is None or save_as:
             
             syntax = self.codeEdit.syntax
             save_path = unicode(qApp.instance().applicationDirPath())
             suggested_filename = self.file.suggestedFileName()
             
+            
             if syntax:
                 suffix = syntax.fileTypes[0]
                 print "Suffix  is", suffix
                 filetypes = '%s (%s)' % (syntax.name, ' '.join(["*.%s" % f for f in syntax.fileTypes]))
-                suggested_filename = join(save_path, "%s.%s" % (suggested_filename, suffix))
-                
             else:
                 filetypes = 'Text files (*.*)'
+                suffix = None
+                
+            if save_as:
+                suggested_filename = self.file.path
+            else:
+                suggested_filename = join(save_path, "%s.%s" % (suggested_filename, suffix))
             
             pth = QFileDialog.getSaveFileName(self, self.trUtf8("Save file"),
                                         suggested_filename,
