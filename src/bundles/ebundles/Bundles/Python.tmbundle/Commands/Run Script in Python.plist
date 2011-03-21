@@ -42,23 +42,5 @@ APPLESCRIPT
 	<string>source.python</string>
 	<key>uuid</key>
 	<string>1EFE7452-E7BC-4662-874B-8E4C0FCCF45B</string>
-    <key>winCommand</key>
-    <string>#!/bin/bash
-[[ -z "$TM_FILEPATH" ]] &amp;&amp; TM_TMPFILE=$(mktemp -t pythonInTerm)
-: "${TM_FILEPATH:=$TM_TMPFILE}"; cat &gt;"$TM_FILEPATH"
-
-TPY=${TM_PYTHON:-pythonw}
-
-esc () {
-STR="$1" ruby &lt;&lt;"RUBY"
-   str = ENV['STR']
-   str = str.gsub(/'/, "'\\\\''")
-   str = str.gsub(/[\\"]/, '\\\\\\0')
-   print "'#{str}'"
-RUBY
-}
-
-run rxvt -e bash -c "clear; cd '${TM_DIRECTORY}'; ${TPY} '${TM_FILEPATH}'; rm -f '${TM_TMPFILE}'; echo Press enter to continue...; read clear"
-</string>
 </dict>
 </plist>

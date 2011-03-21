@@ -72,11 +72,81 @@
 require ENV['TM_SUPPORT_PATH'] + '/lib/io'
 require 'fcntl'
 
+module PTree # Process Tree Construction
+    module_function
+
+    def build
+        list = %x{ps -axww -o "pid,ppid,command="}.sub(/^.*$\n/, '')
+
+    all_nodes = { }
+    all_nodes[0] = { :pid => 0, :cmd => 'System Startup', :children => [ ] }
+
+        list.each do |line|
+            abort "Syntax error: #{line}" unless line =~ /^\s*(\d+)\s+(\d+)\s+(.*)$/
+      all_nodes[$1.to_i] = { :pid => $1.to_i, :ppid => $2.to_i, :cmd => $3, :children => [ ] }
+        end
+
+    all_nodes.each do |pid, process|
+      next if pid == 0
+      abort "Inconsistent Process Tree: parent (#{process[:ppid]}) for pid #{pid} does not exist" unless all_nodes.has_key? process[:ppid]
+      all_nodes[process[:ppid]][:children] << process
+    end
+
+        all_nodes[0]
+    end
+
+    def find(tree, pid)
+        return tree if tree[:pid] == pid
+
+        tree[:children].each do |child|
+            res = find(child, pid)
+            return res unless res.nil?
+        end
+
+        nil
+    end
+
+    def traverse(tree, &block)
+        tree[:children].each { |child| traverse(child, &block) }
+        block.call(tree)
+    end
+end
+
+def pid_exists?(pid)
+    %x{ps >/dev/null -xp #{pid}}
+    $? == 0
+end
+
+def kill_and_wait(pid)
+    begin
+        Process.kill("INT", pid)
+        20.times { return unless pid_exists?(pid); sleep 0.02 }
+        Process.kill("TERM", pid)
+        20.times { return unless pid_exists?(pid); sleep 0.02 }
+        Process.kill("KILL", pid)
+    rescue
+        # process doesn't exist anymore
+    end
+end
+
+def setup_kill_handler(pid, &block)
+    Signal.trap("USR1") do
+        did_kill = false
+        PTree.traverse(PTree.find(PTree.build, pid)) do |node|
+            if !did_kill && pid_exists?(node[:pid])
+                block.call("^C: #{node[:cmd]} (pid: #{node[:pid]})\n", :err)
+                kill_and_wait(node[:pid])
+                did_kill = true
+            end
+        end
+	end
+end
+
 module TextMate
   module Process
     class << self
 
-#      TM_INTERACTIVE_INPUT_DYLIB = ENV['TM_SUPPORT_PATH'] + '/lib/tm_interactive_input.dylib'
+      TM_INTERACTIVE_INPUT_DYLIB = ENV['TM_SUPPORT_PATH'] + '/lib/tm_interactive_input.dylib'
       def run(*cmd, &block)
 
         cmd.flatten!
@@ -87,6 +157,7 @@ module TextMate
           :granularity => :line,
           :input => nil,
           :env => nil,
+          :watch_fds => { },
         }
 
         options.merge! cmd.pop if cmd.last.is_a? Hash
@@ -98,7 +169,8 @@ module TextMate
         io[0][0].fcntl(6, ENV['TM_PID'].to_i) if ENV.has_key? 'TM_PID'
 
         pid = fork {
-
+          at_exit { exit! }
+          
           STDIN.reopen(io[0][0])
           STDOUT.reopen(io[1][1])
           STDERR.reopen(io[2][1])
@@ -107,34 +179,27 @@ module TextMate
 
           options[:env].each { |k,v| ENV[k] = v } unless options[:env].nil?
 
-#          if options[:interactive_input] and File.exists? TM_INTERACTIVE_INPUT_DYLIB
-#            dil = ENV['DYLD_INSERT_LIBRARIES']
-#            if dil.nil? or dil.empty?
-#              ENV['DYLD_INSERT_LIBRARIES'] = TM_INTERACTIVE_INPUT_DYLIB
-#            elsif not dil.include? TM_INTERACTIVE_INPUT_DYLIB
-#              ENV['DYLD_INSERT_LIBRARIES'] = "#{TM_INTERACTIVE_INPUT_DYLIB}:#{dil}"
-#            end
+          if options[:interactive_input] and File.exists? TM_INTERACTIVE_INPUT_DYLIB
+            dil = ENV['DYLD_INSERT_LIBRARIES']
+            if dil.nil? or dil.empty?
+              ENV['DYLD_INSERT_LIBRARIES'] = TM_INTERACTIVE_INPUT_DYLIB
+            elsif not dil.include? TM_INTERACTIVE_INPUT_DYLIB
+              ENV['DYLD_INSERT_LIBRARIES'] = "#{TM_INTERACTIVE_INPUT_DYLIB}:#{dil}"
+            end
 
-#            ENV['DYLD_FORCE_FLAT_NAMESPACE'] = "1"
-#            ENV['TM_INTERACTIVE_INPUT'] = "AUTO" + ((options[:echo]) ? "|ECHO" : "")
-#          end
+            ENV['DYLD_FORCE_FLAT_NAMESPACE'] = "1"
+            ENV['TM_INTERACTIVE_INPUT'] = "AUTO" + ((options[:echo]) ? "|ECHO" : "")
+          end
 
           exec(*cmd.compact)
         }
 
-        %w[INT TERM].each do |signal|
-          trap(signal) do
-            begin
-              Process.kill("KILL", pid)
-              sleep 0.5
-              Process.kill("TERM", pid)
-            rescue
-              # process doesn't exist anymore
-            end
-          end
-        end
-
         [ io[0][0], io[1][1], io[2][1] ].each { |fd| fd.close }
+
+        if echo_fd = ENV['TM_INTERACTIVE_INPUT_ECHO_FD']
+          ::IO.for_fd(echo_fd.to_i).close
+          ENV.delete('TM_INTERACTIVE_INPUT_ECHO_FD')
+        end
 
         if options[:input].nil?
           io[0][1].close
@@ -157,7 +222,9 @@ module TextMate
         previous_sync = IO.sync
         IO.sync = true unless options[:granularity] == :line
 
-        IO.exhaust(:out => io[1][0], :err => io[2][0], &block)
+        setup_kill_handler(pid, &block)
+
+        IO.exhaust(options[:watch_fds].merge(:out => io[1][0], :err => io[2][0]), &block)
         ::Process.waitpid(pid)
 
         IO.blocksize = previous_block_size

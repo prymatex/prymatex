@@ -421,7 +421,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
-        elif 0x20 <= key <= 0x3E0:
+        elif 0x20 <= key <= 0x7E: #Para latin poner otra cosa
             starts = self.snippet.starts
             ends = self.snippet.ends
             if cursor.hasSelection():

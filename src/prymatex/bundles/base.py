@@ -166,7 +166,7 @@ class PMXBundle(object):
             if key == None:
                 score = 1
             else:
-                score = cls.scores.score(scope, key)
+                score = cls.scores.score(key, scope)
             if score != 0:
                 preferences.append((score, cls.PREFERENCES[key]))
         preferences.sort(key = lambda t: t[0])

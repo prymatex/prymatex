@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require ENV['TM_SUPPORT_PATH'] + '/lib/ui.rb'
 
 module TextMate
@@ -9,6 +11,8 @@ module TextMate
 
         begin
           block.call
+        rescue SystemExit => e
+          # not sure why this is an exception!?!
         rescue Exception => e
           TextMate::UI.alert(:warning, "Error Running Command", "The script failed with the following exception:\n\n#{pretty_print_exception e}", "OK")
         end
