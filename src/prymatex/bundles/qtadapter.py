@@ -52,6 +52,7 @@ QTCHARCODES = {9: Qt.Key_Backspace,
                63236: Qt.Key_F3,
                63238: Qt.Key_F3,
                63240: Qt.Key_F5,
+               63272: Qt.Key_F7,
                63302: Qt.Key_F3}
 
 def buildKeySequence(nemonic):
@@ -96,6 +97,7 @@ CHARACTER_REPLACES = { ' ': u'Space',
                        63236: u'F1',
                        63238: u'F3',
                        63240: u'F5',
+                       63272: u'F7',
                        63302: u'F1'}
 
 def buildKeyEquivalentString(key):
