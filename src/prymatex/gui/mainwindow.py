@@ -309,15 +309,20 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         start_directory = qApp.instance().startDirectory()
         files_to_open = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
                                             start_directory)
-        file_manager = qApp.instance().file_manager
+        
         for path in files_to_open:
-            if file_manager.isOpened(path):
-                continue 
-            pmx_file = file_manager.openFile(path)
-            editor = PMXEditorWidget.getEditor(pmx_file)
-            self.tabWidget.addTab(editor, True)
+            self.openFile(path, auto_focus = True)
             
             
+            
+    def openFile(self, url_or_path, auto_focus = False):
+        file_manager = qApp.instance().file_manager
+        if file_manager.isOpened(url_or_path):
+            return
+        pmx_file = file_manager.openFile(url_or_path)
+        editor = PMXEditorWidget.getEditor(pmx_file)
+        self.tabWidget.addTab(editor, auto_focus)
+        return editor
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
