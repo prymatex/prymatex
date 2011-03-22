@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>112</height>
+    <height>115</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,7 +47,7 @@
        <item>
         <widget class="QPushButton" name="buttonChoose">
          <property name="text">
-          <string>Choose</string>
+          <string>Ch&amp;oose</string>
          </property>
         </widget>
        </item>
@@ -86,7 +86,7 @@
      <item>
       <widget class="QPushButton" name="buttonCancel">
        <property name="text">
-        <string>&amp;Cancel</string>
+        <string>C&amp;ancel</string>
        </property>
        <property name="icon">
         <iconset resource="../../res.qrc">
@@ -97,7 +97,7 @@
      <item>
       <widget class="QPushButton" name="buttonCreate">
        <property name="text">
-        <string>Create</string>
+        <string>&amp;Create</string>
        </property>
        <property name="icon">
         <iconset resource="../../res.qrc">

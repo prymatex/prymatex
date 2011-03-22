@@ -44,8 +44,10 @@ class PMXTemplate(PMXBundleItem):
         file.write(self.command.encode('utf8'))
         file.close()
         os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
-        Popen([name], env = environment, shell=True)
+        proc = Popen([name], env = environment, shell=True)
+        proc.wait()
         os.chdir(origWD) # get back to our original working directory
+        
         
     @classmethod
     def loadBundleItem(cls, path, name_space = 'prymatex'):

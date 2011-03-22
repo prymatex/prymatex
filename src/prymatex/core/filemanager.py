@@ -2,12 +2,14 @@
 This module is inspired in QtCretor FileManager instance
 '''
 
-from PyQt4.QtCore import QObject, pyqtSignal, QString
+from PyQt4.QtCore import QObject, pyqtSignal, QString 
+from PyQt4.QtCore import Qt
 from prymatex.lib.magic import magic
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
 from os.path import *
-from prymatex.core.exceptions import APIUsageError
+from prymatex.core.exceptions import APIUsageError, FileDoesNotExistError
+import codecs
 
 # TODO: Cross-platform implementation, you might not have rights to write
 MAGIC_FILE = join(dirname(abspath(magic.__file__)), 'magic.linux')
@@ -80,7 +82,8 @@ class PMXFile(QObject):
     
     def write(self, buffer):
         try:
-            f = open(self.path, 'w')
+            #f = open(self.path, 'w')
+            f = codecs.open(self.path, 'w', 'utf-8')
         except IOError, e:
             self.fileSaveError(str(e))
         f.write(buffer)
@@ -90,7 +93,8 @@ class PMXFile(QObject):
     def read(self):
         if not self.path:
             return None
-        f = open(self.path)
+        #f = open(self.path)
+        f = codecs.open(self.path, 'r', 'utf-8')
         data = f.read()
         f.close()
         return data
@@ -138,12 +142,15 @@ class PMXFileManager(PMXObject):
     
     def openFile(self, filepath):
         '''
-        Opens a file
+        PMXFile factory
+        @raise FileDoesNotExistError: If provided path does not exists
         '''
         if self.isOpened(filepath):
             return self.opened_files[filepath]
-        pmx_file = PMXFile(self, filepath)
+        if not exists(filepath):
+            raise FileDoesNotExistError(filepath)
         
+        pmx_file = PMXFile(self, filepath)
         
         self.opened_files[filepath] = pmx_file
         self.filedOpened.emit(pmx_file)

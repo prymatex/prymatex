@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/newtemplate.ui'
 #
-# Created: Mon Mar 21 23:09:20 2011
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Tue Mar 22 14:42:05 2011
+#      by: PyQt4 UI code generator 4.8.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,7 +18,7 @@ class Ui_NewFromTemplateDialog(object):
     def setupUi(self, NewFromTemplateDialog):
         NewFromTemplateDialog.setObjectName(_fromUtf8("NewFromTemplateDialog"))
         NewFromTemplateDialog.setWindowModality(QtCore.Qt.WindowModal)
-        NewFromTemplateDialog.resize(450, 112)
+        NewFromTemplateDialog.resize(450, 115)
         self.verticalLayout = QtGui.QVBoxLayout(NewFromTemplateDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -81,10 +81,10 @@ class Ui_NewFromTemplateDialog(object):
         NewFromTemplateDialog.setWindowTitle(QtGui.QApplication.translate("NewFromTemplateDialog", "New From Template", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Template:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Location:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonChoose.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Choose", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonChoose.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Ch&oose", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "File Name:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCancel.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "&Cancel", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCreate.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Create", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCancel.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "C&ancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCreate.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "&Create", None, QtGui.QApplication.UnicodeUTF8))
 
 import res_rc
 

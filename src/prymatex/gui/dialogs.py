@@ -2,8 +2,8 @@
 from PyQt4.Qt import QDialog, QVBoxLayout, QPushButton, QFileDialog, QVariant
 from PyQt4.QtCore import pyqtSignal, QDir
 from PyQt4.Qt import SIGNAL
-from PyQt4.QtGui import QCompleter, QFileSystemModel, QMessageBox
-from os.path import isdir
+from PyQt4.QtGui import QCompleter, QFileSystemModel, QMessageBox, qApp
+from os.path import isdir, abspath
 from prymatex.bundles import PMXBundle
 from prymatex.gui.ui_multiclose import Ui_SaveMultipleDialog
 from prymatex.gui.ui_newtemplate import Ui_NewFromTemplateDialog
@@ -35,6 +35,7 @@ class NewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog):
         self.lineLocation.setCompleter(self.completerFileSystem)
         for template in PMXBundle.TEMPLATES:
             self.comboTemplates.addItem(template.name, userData = QVariant(template))
+        self.buttonCreate.setDefault(True)
     
     def on_buttonChoose_pressed(self):
         path = QFileDialog.getExistingDirectory(self, self.trUtf8("Choose Location for Template"))
@@ -78,6 +79,9 @@ class NewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog):
     
     def exec_(self):
         self.lineFileName.setText('')
+        start_directory = qApp.instance().startDirectory()
+        start_directory = abspath(start_directory)
+        self.lineLocation.setText(start_directory)
         self.check_valid_location()
         super(NewFromTemplateDialog, self).exec_()
         
