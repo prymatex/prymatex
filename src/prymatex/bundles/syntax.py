@@ -169,6 +169,7 @@ class PMXSyntax(PMXBundleItem):
                     value = onig_compile( value )
                 except TypeError, e:
                     #an encoding can only be given for non-unicode patterns
+                    value = None
                     print self.name, key, e
             setattr(self, key, value)
 

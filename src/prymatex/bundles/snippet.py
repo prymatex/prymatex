@@ -571,15 +571,18 @@ class Regexp(NodeList):
     @staticmethod
     def uppercase(text):
         titles = text.split('\u')
-        text = "".join([titles[0]] + map(lambda txt: txt[0].upper() + txt[1:], titles[1:]))
+        if len(titles) > 1:
+            text = "".join([titles[0]] + map(lambda txt: txt[0].upper() + txt[1:], titles[1:]))
         uppers = text.split('\U')
-        text = "".join([uppers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].upper() + txt[txt.find('\E') + 2:] or txt.upper(), uppers ))
+        if len(uppers) > 1:
+            text = "".join([uppers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].upper() + txt[txt.find('\E') + 2:] or txt.upper(), uppers ))
         return text
 
     @staticmethod
     def lowercase(text):
         lowers = text.split('\L')
-        text = "".join([lowers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].lower() + txt[txt.find('\E') + 2:] or txt.lower(), lowers ))
+        if len(lowers) > 1:
+            text = "".join([lowers[0]] + map(lambda txt: txt.find('\E') != -1 and txt[:txt.find('\E')].lower() + txt[txt.find('\E') + 2:] or txt.lower(), lowers ))
         return text
     
     @staticmethod
