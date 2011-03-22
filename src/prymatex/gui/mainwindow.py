@@ -19,8 +19,7 @@ from prymatex.lib.i18n import ugettext as _
 import itertools
 import logging
 from prymatex.gui.editor.widget import PMXEditorWidget
-
-    
+from prymatex.gui.dialogs import NewFromTemplateDialog
 
 #from prymatex.config.configdialog import PMXConfigDialog
 
@@ -51,6 +50,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
         
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
+        self.NewFromTemplateDialog = NewFromTemplateDialog(self)
+        
+        self.NewFromTemplateDialog.newFileCreated.connect(self.newFileFromTemplate)
+        
         #self.tabWidget = PMXTabWidget(self)
         #self.setCentralWidget( self.tabWidget )
         print "Foo is", self.foo, self.tabWidget
@@ -487,6 +490,19 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @pyqtSignature('')
     def on_actionFind_Replace_triggered(self):
         self.current_editor.actionReplace.trigger()
+    
+    #===========================================================
+    # Templates
+    #===========================================================
+    def newFileFromTemplate(self, path):
+        file_manager = qApp.instance().file_manager
+        pmx_file = file_manager.openFile(path)
+        editor = PMXEditorWidget.getEditor(pmx_file)
+        self.tabWidget.addTab(editor, True)
+    
+    @pyqtSignature('')
+    def on_actionNew_from_template_triggered(self):
+        self.NewFromTemplateDialog.exec_()
     
     #============================================================
     # Bookmarks
