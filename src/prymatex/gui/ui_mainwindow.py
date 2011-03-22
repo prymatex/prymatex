@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Thu Mar 17 23:09:48 2011
+# Created: Mon Mar 21 22:58:03 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -280,6 +280,7 @@ class Ui_MainWindow(object):
         self.actionShow_Log_Window.setObjectName(_fromUtf8("actionShow_Log_Window"))
         self.actionNew_from_template = QtGui.QAction(MainWindow)
         self.actionNew_from_template.setEnabled(True)
+        self.actionNew_from_template.setIcon(icon1)
         self.actionNew_from_template.setObjectName(_fromUtf8("actionNew_from_template"))
         self.actionSplit_Vertically = QtGui.QAction(MainWindow)
         self.actionSplit_Vertically.setObjectName(_fromUtf8("actionSplit_Vertically"))
@@ -564,7 +565,6 @@ class Ui_MainWindow(object):
         self.actionShow_Indentation.setText(QtGui.QApplication.translate("MainWindow", "Show Indentation", None, QtGui.QApplication.UnicodeUTF8))
         self.actionEOL.setText(QtGui.QApplication.translate("MainWindow", "Show End of Line (EOL)", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWord_Warp.setText(QtGui.QApplication.translate("MainWindow", "Word Warp", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionWord_Warp.setShortcut(QtGui.QApplication.translate("MainWindow", "Meta+&", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFree_Editing.setText(QtGui.QApplication.translate("MainWindow", "Free Editing", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFree_Editing.setStatusTip(QtGui.QApplication.translate("MainWindow", "Enables the cursor to be positioned anywhere in the editor", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Browser_Dock.setText(QtGui.QApplication.translate("MainWindow", "Show Browser", None, QtGui.QApplication.UnicodeUTF8))
