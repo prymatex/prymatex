@@ -18,6 +18,7 @@ class PMXFile(QObject):
     #===========================================================================
     fileSaved = pyqtSignal(QString)
     fileRenamed = pyqtSignal(QString)
+    fileSaveError = pyqtSignal(QString)
     
     _path = None
     
@@ -78,12 +79,21 @@ class PMXFile(QObject):
         self._expect_file_changes = True
     
     def write(self, buffer):
-        f = open(self.path, 'w')
+        try:
+            f = open(self.path, 'w')
+        except IOError, e:
+            self.fileSaveError(str(e))
         f.write(buffer)
         f.close()
         self.fileSaved.emit(self.path)
         
-    
+    def read(self):
+        if not self.path:
+            return None
+        f = open(self.path)
+        data = f.read()
+        f.close()
+        return data
 #        for frm, to in zip(range(0, ), range()):
 #            print frm, to
 #            buffer[frm:to]

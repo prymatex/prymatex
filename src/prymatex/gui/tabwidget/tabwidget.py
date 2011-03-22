@@ -16,6 +16,11 @@ from prymatex.core.exceptions import APIUsageError
 
 logger = logging.getLogger(__name__)
 
+ICON_FILE_STATUS_NORMAL = QIcon(qApp.instance().trUtf8(''
+':/actions/resources/mimetypes/x-office-document.png'))
+ICON_FILE_STATUS_MODIFIED = QIcon(qApp.instance().trUtf8(
+':/actions/resources/actions/document-save-all.png'))
+
 class PMXTabWidget(QTabWidget, PMXObject):
     '''
     TabWidget holds the editors.
@@ -44,7 +49,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
         ''')
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
         self.chooseFileDlg = QDialog()
-        self.declareEvents()
         self.setSignals()
     
     def setSignals(self):
@@ -56,8 +60,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
         
-    def declareEvents(self):
-        self.declareEvent('tabWidgetEditorChangedEvent()')
 
     def setupUi(self):
         self.setTabsClosable(True)
@@ -117,7 +119,10 @@ class PMXTabWidget(QTabWidget, PMXObject):
         '''
         TODO: Resync all menus
         '''
-        self.tabWidgetEditorChangedEvent(self.widget(index).codeEdit)
+        editor = self.widget(index)
+        #if hasattr(editor, 'codeEdit'):
+            #editor.codeEdit.foucs(QFocusEvent.Mouse)
+        #self.tabWidgetEditorChangedEvent(self.widget(index).codeEdit)
         
     def mouseDoubleClickEvent(self, mouse_event):
         '''
@@ -221,22 +226,28 @@ class PMXTabWidget(QTabWidget, PMXObject):
         #print "Adding %s with title %s" % (widget, title)
         index = super(PMXTabWidget, self).addTab(widget, title)
         
+        self.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
         
         widget.fileTitleUpdate.connect(self.updateTabInfo)
+        widget.fileStatusModified.connect(self.editorModified)
+        widget.fileStatusSynced.connect(self.editorSynced)
+        
         if autoFocus:
             self.setCurrentIndex(index)
             if self.count() == 1:
                 widget.setFocus(Qt.MouseFocusReason)
         
         if hasattr(widget, 'afterInsertion'):
+            print "->>>Llamando el afterInsertion de ", widget
             widget.afterInsertion(self, index)
             
         return index
     
-    def updateTabInfo(self):
-        #print "Update", self.sender()
-        editor = self.sender()
-        editor_index = self.indexOf(editor)
+    def updateTabInfo(self, editor_index):
+        print "updateTabInfo", editor_index
+        
+        editor = self.widget(editor_index)
+        #editor_index = self.indexOf(editor)
         self.setTabText(editor_index, editor.file.filename)
         # Tooltip
         if editor.file.path:
@@ -253,7 +264,13 @@ class PMXTabWidget(QTabWidget, PMXObject):
              'Syntax: %(syntax)s'
         '')).strip() % dict(path = path, syntax = syntax))
         
+    def editorModified(self, editor):
+        #print "Editor modified", editor
+        self.setTabIcon(self.indexOf(editor), ICON_FILE_STATUS_MODIFIED)
+            #self.setTabTextColor(self.COLOR_NORMAL)
     
+    def editorSynced(self, editor):
+        self.setTabIcon(self.indexOf(editor), ICON_FILE_STATUS_NORMAL)
         
     
     def updateEditorSyntax(self, source, syntax):

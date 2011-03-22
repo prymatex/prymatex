@@ -1,10 +1,11 @@
+#encoding: utf-8
 '''
 Code Editor Widget.
 '''
 
 from PyQt4.QtCore import SIGNAL, Qt, QString, pyqtSignal
 from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, \
-    QAction, QMenu, QKeySequence, qApp
+    QAction, QMenu, QKeySequence, qApp, QFocusEvent
 
 from logging import getLogger
 from prymatex.bundles import PMXSyntax
@@ -34,10 +35,7 @@ if __name__ == "__main__":
 #===============================================================================
 # Icons
 #===============================================================================
-ICON_FILE_STATUS_NORMAL = QIcon(qApp.instance().trUtf8(''
-':/actions/resources/mimetypes/x-office-document.png'))
-ICON_FILE_STATUS_MODIFIED = QIcon(qApp.instance().trUtf8(
-':/actions/resources/actions/document-save-all.png'))
+
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
     '''
@@ -53,7 +51,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     __title = None
     _file = None
     
-    fileTitleUpdate = pyqtSignal(PMXFile)
+    fileTitleUpdate = pyqtSignal(int)
+    fileStatusModified = pyqtSignal(object)
+    fileStatusSynced = pyqtSignal(object)
+    fileStatusOutOfSync = pyqtSignal(object)
+    fileStatusDeleted = pyqtSignal(object)
     
     def __init__(self, pmx_file):
         '''
@@ -75,6 +77,12 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
         self.file = pmx_file
         
+        # TODO: Asyncronous I/O
+        
+        self.codeEdit.setPlainText(self.file.read() or '')
+        
+    def focusInEvent(self, event):
+        self.codeEdit.setFocus(Qt.MouseFocusReason)
     
     @property
     def file(self):
@@ -97,14 +105,19 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     
     # TODO: Move this thing up to tabwidget
     def on_codeEdit_modificationChanged(self, modified):
+        
         if modified:
-            self.tooltip = self.trUtf8("Modified")
-            self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_MODIFIED)
-            self.setTabTextColor(self.COLOR_MODIFIED)
+            self.fileStatusModified.emit(self)
+            
+            #self.tooltip = self.trUtf8("Modified")
+            #self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_MODIFIED)
+            #self.setTabTextColor(self.COLOR_MODIFIED)
         else:
-            self.tooltip = self.trUtf8("")
-            self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_NORMAL)
-            self.setTabTextColor(self.COLOR_NORMAL)
+            self.fileStatusSynced.emit(self)
+            
+            #self.tooltip = self.trUtf8("")
+            #self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_NORMAL)
+            #self.setTabTextColor(self.COLOR_NORMAL)
     
     @property
     def tooltip(self):
@@ -344,42 +357,39 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.save()
 
     
-    def updateTitle(self):
-        self.title = os.path.basename(self.path)
-    
-    READ_SIZE = 1024 * 64 # 64K
-    def readFileContents(self):
-        '''
-        Reads file contents
-        '''
-        self.codeEdit.setEnabled(False)
-        self.codeEdit.clear()
-        try:
-            size, read_count = os.path.getsize(self.path), 0
-            assert size > 0
-        except OSError:
-            logger.debug("Could not open %s", self.path)
-        except AssertionError:
-            logger.debug("Empty file")
-        else:
-            self.codeEdit.document().setUndoRedoEnabled(False)
-            f = open(self.path, 'r')
-            while size > read_count :
-                content = f.read(self.READ_SIZE)
-                read_count += len(content)
-                self.codeEdit.insertPlainText(content)
-                #logger.debug("%d bytes read_count from %s", read_count, self.path)
-            f.close()
-            self.codeEdit.document().setModified(False)
-            self.codeEdit.document().setUndoRedoEnabled(True)
-        self.codeEdit.setEnabled(True)
-    
-    def writeBufferContents(self):
-        '''
-        Writes contents from the buffer into the file specified by
-        self.path
-        '''
-        raise NotImplementedError()
+#    READ_SIZE = 1024 * 64 # 64K
+#    def readFileContents(self):
+#        '''
+#        Reads file contents
+#        '''
+#        self.codeEdit.setEnabled(False)
+#        self.codeEdit.clear()
+#        try:
+#            size, read_count = os.path.getsize(self.path), 0
+#            assert size > 0
+#        except OSError:
+#            logger.debug("Could not open %s", self.path)
+#        except AssertionError:
+#            logger.debug("Empty file")
+#        else:
+#            self.codeEdit.document().setUndoRedoEnabled(False)
+#            f = open(self.path, 'r')
+#            while size > read_count :
+#                content = f.read(self.READ_SIZE)
+#                read_count += len(content)
+#                self.codeEdit.insertPlainText(content)
+#                #logger.debug("%d bytes read_count from %s", read_count, self.path)
+#            f.close()
+#            self.codeEdit.document().setModified(False)
+#            self.codeEdit.document().setUndoRedoEnabled(True)
+#        self.codeEdit.setEnabled(True)
+#    
+#    def writeBufferContents(self):
+#        '''
+#        Writes contents from the buffer into the file specified by
+#        self.path
+#        '''
+#        raise NotImplementedError()
 
     def setSyntax(self):
         syntax = PMXSyntax.findSyntaxByFileType(self.path)
@@ -396,13 +406,8 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     
     def afterInsertion(self, tab_widget, index):
         ''' Callback when the tab is inserted '''
-        tab_widget.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
-        # TODO: Settings tab's text should be made by the PMXTabWidget
-        self.fileTitleUpdate.emit(self.file)
-        #title = self.file.filename or self.file.suggestedFileName()
-        #print title
-        #tab_widget.setTabText(index, title)
-
+        self.fileTitleUpdate.emit( self.index )
+        
 
 
 if __name__ == "__main__":
