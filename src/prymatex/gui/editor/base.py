@@ -564,6 +564,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 'TM_SOFT_TABS': self.soft_tabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': unicode(self.tab_size),
         });
+        if self.syntax != None:
+            env['TM_MODE'] = unicode(self.syntax.name)
         if self.parent().file.path != None:
             env['TM_FILEPATH'] = unicode(self.parent().file.path)
             env['TM_FILENAME'] = unicode(self.parent().file.filename)
