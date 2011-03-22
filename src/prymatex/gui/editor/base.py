@@ -89,8 +89,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.line_highlight = style.getQColor('lineHighlight')
         self.highlightCurrentLine()
         
-    theme_name = Setting(default = 'Twilight', fset = setTheme)
-    #theme_name = Setting(default = 'Pastels on Dark', fset = setTheme)
+    #theme_name = Setting(default = 'Twilight', fset = setTheme)
+    theme_name = Setting(default = 'iPlastic', fset = setTheme)
     
     class Meta(object):
         settings = 'editor'
