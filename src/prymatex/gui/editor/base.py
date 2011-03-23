@@ -89,8 +89,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.line_highlight = style.getQColor('lineHighlight')
         self.highlightCurrentLine()
         
-    theme_name = Setting(default = 'Twilight', fset = setTheme)
-    #theme_name = Setting(default = 'Pastels on Dark', fset = setTheme)
+    #theme_name = Setting(default = 'Twilight', fset = setTheme)
+    theme_name = Setting(default = 'iPlastic', fset = setTheme)
     
     class Meta(object):
         settings = 'editor'
@@ -421,7 +421,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
-        elif 0x20 <= key <= 0x3E0:
+        elif 0x20 <= key <= 0x7E: #Para latin poner otra cosa
             starts = self.snippet.starts
             ends = self.snippet.ends
             if cursor.hasSelection():
@@ -564,6 +564,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 'TM_SOFT_TABS': self.soft_tabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': unicode(self.tab_size),
         });
+        if self.syntax != None:
+            env['TM_MODE'] = unicode(self.syntax.name)
         if self.parent().file.path != None:
             env['TM_FILEPATH'] = unicode(self.parent().file.path)
             env['TM_FILENAME'] = unicode(self.parent().file.filename)

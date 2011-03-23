@@ -1,6 +1,7 @@
 import os
 
 # for run as main
+# https://github.com/textmate
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))

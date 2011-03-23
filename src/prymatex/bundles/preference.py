@@ -48,6 +48,11 @@ class PMXSetting(dict):
         for key in [    'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
             if hash.has_key(key):
                 hash[key] = onig_compile( hash[key] )
+        if 'shellVariables' in hash:
+            variables = hash['shellVariables']
+            hash['shellVariables'] = {}
+            for variable in variables:
+                hash['shellVariables'][variable['name']] = variable['value']
         super(PMXSetting, self).__init__(hash)
 
 class PMXPreference(PMXBundleItem):

@@ -2,19 +2,25 @@
 This module is inspired in QtCretor FileManager instance
 '''
 
-from PyQt4.QtCore import QObject, pyqtSignal, QString
+from PyQt4.QtCore import QObject, pyqtSignal, QString 
+from PyQt4.QtCore import Qt
 from prymatex.lib.magic import magic
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
 from os.path import *
+from prymatex.core.exceptions import APIUsageError, FileDoesNotExistError
+import codecs
 
+# TODO: Cross-platform implementation, you might not have rights to write
 MAGIC_FILE = join(dirname(abspath(magic.__file__)), 'magic.linux')
+
 class PMXFile(QObject):
     #===========================================================================
     # Signals
     #===========================================================================
-    fileChanged = pyqtSignal(QString)
+    fileSaved = pyqtSignal(QString)
     fileRenamed = pyqtSignal(QString)
+    fileSaveError = pyqtSignal(QString)
     
     _path = None
     
@@ -26,11 +32,11 @@ class PMXFile(QObject):
                                                     "a singleton property on "
                                                     "PMXApplication.file_manager")
         super(PMXFile, self).__init__(parent)
-        if path != None:
-            self.path = self.path
+        self.path = path
         
     def suggestedFileName(self, editor_suffix = None):
-        return "untitled"
+        title = unicode(self.trUtf8("Untitled file %d"))
+        return  title % self.parent().empty_file_counter
     
     @property
     def mtime(self):
@@ -45,17 +51,27 @@ class PMXFile(QObject):
     
     @path.setter
     def path(self, value):
-        self._path = abspath(unicode(value))
-        self.fileRenamed.emit('hoa')
+        if value is None:
+            if self._path:
+                raise APIUsageError("Can't change file path from %s to %s" % (self._path, value))
+            self._path  = value
+        else:
+            abs_path = abspath(unicode(value))
+            self._path = abs_path
+            self.fileRenamed.emit(abs_path)
     
     @property
     def filename(self):
+        if not self.path:
+            return self.suggestedFileName()
         return basename(self.path)
     
     @property
     def directory(self):
         return dirname(self.path)
     
+    
+    # Taken from Qt creator, it should disable some modification signals
     @property
     def expect_file_changes(self):
         return self._expect_file_changes
@@ -64,22 +80,41 @@ class PMXFile(QObject):
     def expect_file_changes(self, value):
         self._expect_file_changes = True
     
-    
     def write(self, buffer):
-        f = open(self.path, 'w')
+        try:
+            #f = open(self.path, 'w')
+            f = codecs.open(self.path, 'w', 'utf-8')
+        except IOError, e:
+            self.fileSaveError(str(e))
         f.write(buffer)
         f.close()
-        self.fileChanged.emit(self.path)
+        self.fileSaved.emit(self.path)
+        
+    def read(self):
+        if not self.path:
+            return None
+        #f = open(self.path)
+        f = codecs.open(self.path, 'r', 'utf-8')
+        data = f.read()
+        f.close()
+        return data
 #        for frm, to in zip(range(0, ), range()):
 #            print frm, to
 #            buffer[frm:to]
 #            qApp.instance().processEvents()
-        
+    
+    def __str__(self):
+        return "<PMXFile on %s>" % self.path or "no path yet"
+    
+    __unicode__ = __repr__ = __str__
     
 class PMXFileManager(PMXObject):
     '''
     A singleton which used for 
     '''
+    
+    filedOpened = pyqtSignal(PMXFile) # A new file has been opened
+    
     class Meta:
         settings = 'core.filemanager'
     
@@ -89,23 +124,38 @@ class PMXFileManager(PMXObject):
         QObject.__init__(self, parent)
         
         self.magic = magic.Magic(MAGIC_FILE, 'delete-me')
+        self.opened_files = {}
+        self.empty_file_counter = 0 
+    
+    def isOpened(self, filepath):
+        if filepath in self.opened_files:
+            return True
+        return False
+    
     
     def getEmptyFile(self):
         ''' Returns a QFile '''
-        return PMXFile(self)
+        pmx_file =  PMXFile(self)
+        self.empty_file_counter += 1
+        return pmx_file
     
-    def openFiles(self, files):
-        finstances = []
-        for path in files:
-            try:
-                finstances.append(PMXFile(self, path))
-            except Exception, _e:
-                raise
-            else:
-                self.file_history.append(path)
-                
-        return finstances
-            
+    
+    def openFile(self, filepath):
+        '''
+        PMXFile factory
+        @raise FileDoesNotExistError: If provided path does not exists
+        '''
+        if self.isOpened(filepath):
+            return self.opened_files[filepath]
+        if not exists(filepath):
+            raise FileDoesNotExistError(filepath)
+        
+        pmx_file = PMXFile(self, filepath)
+        
+        self.opened_files[filepath] = pmx_file
+        self.filedOpened.emit(pmx_file)
+        return pmx_file
+    
     def recentFiles(self):
         return []
     

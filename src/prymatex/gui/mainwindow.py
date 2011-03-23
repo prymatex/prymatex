@@ -19,8 +19,7 @@ from prymatex.lib.i18n import ugettext as _
 import itertools
 import logging
 from prymatex.gui.editor.widget import PMXEditorWidget
-
-    
+from prymatex.gui.dialogs import NewFromTemplateDialog
 
 #from prymatex.config.configdialog import PMXConfigDialog
 
@@ -51,8 +50,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         #self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
         
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
-        tabWidget = PMXTabWidget(self)
-        self.setCentralWidget( tabWidget )
+        self.NewFromTemplateDialog = NewFromTemplateDialog(self)
+        
+        self.NewFromTemplateDialog.newFileCreated.connect(self.newFileFromTemplate)
+        
+        #self.tabWidget = PMXTabWidget(self)
+        #self.setCentralWidget( self.tabWidget )
+        print "Foo is", self.foo, self.tabWidget
+        
         #self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
         #self.actionGroupTabs.addMenu(self.menuPanes)
         
@@ -229,7 +234,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @property
     def currentTabWidget(self):
         ''' Shortcut to the current editor (bypass layoutManager) '''
-        return self.centralWidget()
+        #return self.centralWidget()
+        return self.tabWidget
 
     # TODO: Fix, just grep and replace
     @property
@@ -244,25 +250,25 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        self.centralWidget().appendEmptyTab()
+        self.tabWidget.appendEmptyTab()
 
     @pyqtSignature('')
     def on_actionClose_triggered(self):
-        index = self.centralWidget().currentIndex()
-        self.centralWidget().closeTab(index)
-        if self.centralWidget().count():
-            self.centralWidget().currentWidget().setFocus(Qt.TabFocusReason)
+        index = self.tabWidget.currentIndex()
+        self.tabWidget.closeTab(index)
+        if self.tabWidget.count():
+            self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
 
     
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
-        self.centralWidget().focusNextTab()
+        self.tabWidget.focusNextTab()
         
 
         
     @pyqtSignature('')
     def on_actionPrevious_Tab_triggered(self):
-        self.centralWidget().focusPrevTab()
+        self.tabWidget.focusPrevTab()
         
     @pyqtSignature('')
     def on_actionAboutApp_triggered(self):
@@ -303,18 +309,23 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         '''
         Opens one or more files
         '''
-        #qApp.instance().startDirectory()
-        fs = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
-                                            qApp.instance().startDirectory())
-        if not fs:
-            return
-        files = qApp.instance().file_manager.openFiles(fs)
+        start_directory = qApp.instance().startDirectory()
+        files_to_open = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
+                                            start_directory)
         
-        for pmx_file in files:
-            editor = PMXEditorWidget.getEditor(pmx_file)
-            self.tabWidget.addTab(editor, pmx_file.filename)
+        for path in files_to_open:
+            self.openFile(path, auto_focus = True)
             
             
+            
+    def openFile(self, url_or_path, auto_focus = False):
+        file_manager = qApp.instance().file_manager
+        if file_manager.isOpened(url_or_path):
+            return
+        pmx_file = file_manager.openFile(url_or_path)
+        editor = PMXEditorWidget.getEditor(pmx_file)
+        self.tabWidget.addTab(editor, auto_focus)
+        return editor
     
     @pyqtSignature('')
     def on_actionAboutQt_triggered(self):
@@ -331,14 +342,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         self.current_editor_widget.request_save()
     
     @pyqtSignature('')
-    def on_actionSaveAs_triggered(self):
-        self.current_editor.save(save_as = True)
+    def on_actionSave_As_triggered(self):
+        self.current_editor_widget.request_save(save_as = True)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
         for i in range(0, self.tabWidgetEditors.count()):
-            if not self.tabWidgetEditors.widget(i).save():
-                self.statusBar().showMessage(self.trUtf8("Not all documents were saved"), 1000)
+            if not self.tabWidgetEditors.widget(i).reqquest_save():
+                #self.statusBar().showMessage(self.trUtf8("Not all documents were saved"), 1000)
                 break
     
     @pyqtSignature('')
@@ -435,7 +446,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         '''
         Triggers 
         '''
-        self.centralWidget().chooseFileDlg.exec_()
+        self.tabWidget.chooseFileDlg.exec_()
     
     @pyqtSignature('')
     def on_actionShow_Current_Scope_triggered(self):
@@ -484,6 +495,19 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     @pyqtSignature('')
     def on_actionFind_Replace_triggered(self):
         self.current_editor.actionReplace.trigger()
+    
+    #===========================================================
+    # Templates
+    #===========================================================
+    def newFileFromTemplate(self, path):
+        file_manager = qApp.instance().file_manager
+        pmx_file = file_manager.openFile(path)
+        editor = PMXEditorWidget.getEditor(pmx_file)
+        self.tabWidget.addTab(editor, True)
+    
+    @pyqtSignature('')
+    def on_actionNew_from_template_triggered(self):
+        self.NewFromTemplateDialog.exec_()
     
     #============================================================
     # Bookmarks

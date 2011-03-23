@@ -4,9 +4,9 @@
 '''
     Template's module
     http://manual.macromates.com/en/templates
-    TM_NEW_FILE — the full path, including the name of the file to be generated (i.e. the one the user entered in the GUI).
-    TM_NEW_FILE_BASENAME — the base name of the file to be generated. If TM_NEW_FILE is /tmp/foo.txt then this variable would be foo without the folder name and the file extension.
-    TM_NEW_FILE_DIRECTORY — the folder name of the file to be generated.
+    TM_NEW_FILE ï¿½ the full path, including the name of the file to be generated (i.e. the one the user entered in the GUI).
+    TM_NEW_FILE_BASENAME ï¿½ the base name of the file to be generated. If TM_NEW_FILE is /tmp/foo.txt then this variable would be foo without the folder name and the file extension.
+    TM_NEW_FILE_DIRECTORY ï¿½ the folder name of the file to be generated.
 '''
 
 import os, stat, plistlib, tempfile
@@ -29,10 +29,10 @@ class PMXTemplate(PMXBundleItem):
         super(PMXTemplate, self).setBundle(bundle)
         bundle.TEMPLATES.append(self)
     
-    def buildEnvironment(self, directory = ""):
+    def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()
-        env['TM_NEW_FILE'] = directory + self.name + '.' + self.extension
-        env['TM_NEW_FILE_BASENAME'] = self.name
+        env['TM_NEW_FILE'] = os.path.join(directory, name + '.' + self.extension)
+        env['TM_NEW_FILE_BASENAME'] = name
         env['TM_NEW_FILE_DIRECTORY'] = directory
         return env
     
@@ -44,11 +44,10 @@ class PMXTemplate(PMXBundleItem):
         file.write(self.command.encode('utf8'))
         file.close()
         os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
-        process = Popen([name], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment, shell=True)
-        process.stdin.close()
-        print process.stdout.read()
-        process.stdout.close()
+        proc = Popen([name], env = environment, shell=True)
+        proc.wait()
         os.chdir(origWD) # get back to our original working directory
+        
         
     @classmethod
     def loadBundleItem(cls, path, name_space = 'prymatex'):

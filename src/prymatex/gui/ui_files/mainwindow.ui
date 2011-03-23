@@ -835,6 +835,10 @@
    <property name="enabled">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/actions/resources/actions/document-new.png</normaloff>:/actions/resources/actions/document-new.png</iconset>
+   </property>
    <property name="text">
     <string>New From Template</string>
    </property>

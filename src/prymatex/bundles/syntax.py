@@ -165,7 +165,12 @@ class PMXSyntax(PMXBundleItem):
             value = hash.get(key, None)
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                 #Compiled keys
-                value = onig_compile( value )
+                try:
+                    value = onig_compile( value )
+                except TypeError, e:
+                    #an encoding can only be given for non-unicode patterns
+                    value = None
+                    print self.name, key, e
             setattr(self, key, value)
 
         PMXSyntax.SYNTAXES.setdefault(self.name_space, {})

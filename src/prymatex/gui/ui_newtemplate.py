@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/newtemplate.ui'
 #
-# Created: Tue Mar 15 18:51:02 2011
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Tue Mar 22 14:42:05 2011
+#      by: PyQt4 UI code generator 4.8.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -17,7 +17,8 @@ except AttributeError:
 class Ui_NewFromTemplateDialog(object):
     def setupUi(self, NewFromTemplateDialog):
         NewFromTemplateDialog.setObjectName(_fromUtf8("NewFromTemplateDialog"))
-        NewFromTemplateDialog.resize(467, 113)
+        NewFromTemplateDialog.setWindowModality(QtCore.Qt.WindowModal)
+        NewFromTemplateDialog.resize(450, 115)
         self.verticalLayout = QtGui.QVBoxLayout(NewFromTemplateDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -32,9 +33,9 @@ class Ui_NewFromTemplateDialog(object):
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_2)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
-        self.lineEdit_2 = QtGui.QLineEdit(NewFromTemplateDialog)
-        self.lineEdit_2.setObjectName(_fromUtf8("lineEdit_2"))
-        self.horizontalLayout_5.addWidget(self.lineEdit_2)
+        self.lineLocation = QtGui.QLineEdit(NewFromTemplateDialog)
+        self.lineLocation.setObjectName(_fromUtf8("lineLocation"))
+        self.horizontalLayout_5.addWidget(self.lineLocation)
         self.buttonChoose = QtGui.QPushButton(NewFromTemplateDialog)
         self.buttonChoose.setObjectName(_fromUtf8("buttonChoose"))
         self.horizontalLayout_5.addWidget(self.buttonChoose)
@@ -42,12 +43,12 @@ class Ui_NewFromTemplateDialog(object):
         self.label = QtGui.QLabel(NewFromTemplateDialog)
         self.label.setObjectName(_fromUtf8("label"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
-        self.lineEdit = QtGui.QLineEdit(NewFromTemplateDialog)
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.lineEdit)
-        self.comboBox = QtGui.QComboBox(NewFromTemplateDialog)
-        self.comboBox.setObjectName(_fromUtf8("comboBox"))
-        self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBox)
+        self.lineFileName = QtGui.QLineEdit(NewFromTemplateDialog)
+        self.lineFileName.setObjectName(_fromUtf8("lineFileName"))
+        self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.lineFileName)
+        self.comboTemplates = QtGui.QComboBox(NewFromTemplateDialog)
+        self.comboTemplates.setObjectName(_fromUtf8("comboTemplates"))
+        self.formLayout_2.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboTemplates)
         self.verticalLayout.addLayout(self.formLayout_2)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -61,7 +62,7 @@ class Ui_NewFromTemplateDialog(object):
         self.horizontalLayout.addWidget(self.buttonCancel)
         self.buttonCreate = QtGui.QPushButton(NewFromTemplateDialog)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/edit-delete.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCreate.setIcon(icon1)
         self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
         self.horizontalLayout.addWidget(self.buttonCreate)
@@ -70,15 +71,20 @@ class Ui_NewFromTemplateDialog(object):
         self.retranslateUi(NewFromTemplateDialog)
         QtCore.QObject.connect(self.buttonCancel, QtCore.SIGNAL(_fromUtf8("clicked()")), NewFromTemplateDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(NewFromTemplateDialog)
+        NewFromTemplateDialog.setTabOrder(self.lineFileName, self.lineLocation)
+        NewFromTemplateDialog.setTabOrder(self.lineLocation, self.comboTemplates)
+        NewFromTemplateDialog.setTabOrder(self.comboTemplates, self.buttonChoose)
+        NewFromTemplateDialog.setTabOrder(self.buttonChoose, self.buttonCreate)
+        NewFromTemplateDialog.setTabOrder(self.buttonCreate, self.buttonCancel)
 
     def retranslateUi(self, NewFromTemplateDialog):
         NewFromTemplateDialog.setWindowTitle(QtGui.QApplication.translate("NewFromTemplateDialog", "New From Template", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Template:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Location:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonChoose.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Choose", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonChoose.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Ch&oose", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "File Name:", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCancel.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "&Cancel", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCreate.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "Create", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCancel.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "C&ancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCreate.setText(QtGui.QApplication.translate("NewFromTemplateDialog", "&Create", None, QtGui.QApplication.UnicodeUTF8))
 
 import res_rc
 

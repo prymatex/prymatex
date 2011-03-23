@@ -1,10 +1,12 @@
+#encoding: utf-8
 '''
 Code Editor Widget.
 '''
 
-from PyQt4.QtCore import SIGNAL, Qt, QString
+from PyQt4.QtCore import SIGNAL, Qt, QString, pyqtSignal
 from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, \
-    QAction, QMenu, QKeySequence, qApp
+    QAction, QMenu, QKeySequence, qApp, QFocusEvent
+
 from logging import getLogger
 from prymatex.bundles import PMXSyntax
 from ui_editorwidget import Ui_EditorWidget
@@ -13,6 +15,7 @@ import os
 import re
 import sys
 import traceback
+from prymatex.core.filemanager import PMXFile
 from prymatex.core.exceptions import APIUsageError
 
 
@@ -32,10 +35,7 @@ if __name__ == "__main__":
 #===============================================================================
 # Icons
 #===============================================================================
-ICON_FILE_STATUS_NORMAL = QIcon(qApp.instance().trUtf8(''
-':/actions/resources/mimetypes/x-office-document.png'))
-ICON_FILE_STATUS_MODIFIED = QIcon(qApp.instance().trUtf8(
-':/actions/resources/actions/document-save-all.png'))
+
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
     '''
@@ -51,6 +51,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     __title = None
     _file = None
     
+    fileTitleUpdate = pyqtSignal(int)
+    fileStatusModified = pyqtSignal(object)
+    fileStatusSynced = pyqtSignal(object)
+    fileStatusOutOfSync = pyqtSignal(object)
+    fileStatusDeleted = pyqtSignal(object)
     
     def __init__(self, pmx_file):
         '''
@@ -72,6 +77,12 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
         self.file = pmx_file
         
+        # TODO: Asyncronous I/O
+        
+        self.codeEdit.setPlainText(self.file.read() or '')
+        
+    def focusInEvent(self, event):
+        self.codeEdit.setFocus(Qt.MouseFocusReason)
     
     @property
     def file(self):
@@ -85,17 +96,28 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         if not isinstance(file, PMXFile):
             raise APIUsageError("%s is not an instance of PMXFile" % file)
         self._file = file
+        self._file.fileSaved.connect( self.fileSaved )
+        
     
+    def fileSaved(self):
+        self.codeEdit.document().setModified(False)
+        self.fileTitleUpdate.emit(self.file)
     
+    # TODO: Move this thing up to tabwidget
     def on_codeEdit_modificationChanged(self, modified):
+        
         if modified:
-            self.tooltip = self.trUtf8("Modified")
-            self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_MODIFIED)
-            self.setTabTextColor(self.COLOR_MODIFIED)
+            self.fileStatusModified.emit(self)
+            
+            #self.tooltip = self.trUtf8("Modified")
+            #self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_MODIFIED)
+            #self.setTabTextColor(self.COLOR_MODIFIED)
         else:
-            self.tooltip = self.trUtf8("")
-            self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_NORMAL)
-            self.setTabTextColor(self.COLOR_NORMAL)
+            self.fileStatusSynced.emit(self)
+            
+            #self.tooltip = self.trUtf8("")
+            #self.tabwidget.setTabIcon(self.index, ICON_FILE_STATUS_NORMAL)
+            #self.setTabTextColor(self.COLOR_NORMAL)
     
     @property
     def tooltip(self):
@@ -290,17 +312,13 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         set.
         '''
         buffer_contents = unicode(self.codeEdit.document().toPlainText())
-        promise = self.file.write(buffer_contents)
-        #f = open(str(self.path), 'w')
         #TODO: Check exceptions, for example, disk full.
-        #n = f.write(buffer_contents)
-        #f.close()
-        #self.codeEdit.document().setModified(False)
-        #self.update_title()
-        #return n
+        promise = self.file.write(buffer_contents)
+        logger.debug("Buffer saved to %s" % self.file.path)
+        
      
     
-    def request_save(self):
+    def request_save(self, save_as = False):
         '''
         Save the document.
         do_save() actually saves the document, but it should no be called
@@ -308,20 +326,26 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         print "Save"
         from os.path import join
-        if  not self.file.path:
+        print self.file.path
+        if self.file.path is None or save_as:
             
             syntax = self.codeEdit.syntax
             save_path = unicode(qApp.instance().applicationDirPath())
             suggested_filename = self.file.suggestedFileName()
             
+            
             if syntax:
                 suffix = syntax.fileTypes[0]
                 print "Suffix  is", suffix
                 filetypes = '%s (%s)' % (syntax.name, ' '.join(["*.%s" % f for f in syntax.fileTypes]))
-                suggested_filename = join(save_path, "%s.%s" % (suggested_filename, suffix))
-                
             else:
                 filetypes = 'Text files (*.*)'
+                suffix = None
+                
+            if save_as:
+                suggested_filename = self.file.path
+            else:
+                suggested_filename = join(save_path, "%s.%s" % (suggested_filename, suffix))
             
             pth = QFileDialog.getSaveFileName(self, self.trUtf8("Save file"),
                                         suggested_filename,
@@ -333,42 +357,39 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.save()
 
     
-    def updateTitle(self):
-        self.title = os.path.basename(self.path)
-    
-    READ_SIZE = 1024 * 64 # 64K
-    def readFileContents(self):
-        '''
-        Reads file contents
-        '''
-        self.codeEdit.setEnabled(False)
-        self.codeEdit.clear()
-        try:
-            size, read_count = os.path.getsize(self.path), 0
-            assert size > 0
-        except OSError:
-            logger.debug("Could not open %s", self.path)
-        except AssertionError:
-            logger.debug("Empty file")
-        else:
-            self.codeEdit.document().setUndoRedoEnabled(False)
-            f = open(self.path, 'r')
-            while size > read_count :
-                content = f.read(self.READ_SIZE)
-                read_count += len(content)
-                self.codeEdit.insertPlainText(content)
-                #logger.debug("%d bytes read_count from %s", read_count, self.path)
-            f.close()
-            self.codeEdit.document().setModified(False)
-            self.codeEdit.document().setUndoRedoEnabled(True)
-        self.codeEdit.setEnabled(True)
-    
-    def writeBufferContents(self):
-        '''
-        Writes contents from the buffer into the file specified by
-        self.path
-        '''
-        raise NotImplementedError()
+#    READ_SIZE = 1024 * 64 # 64K
+#    def readFileContents(self):
+#        '''
+#        Reads file contents
+#        '''
+#        self.codeEdit.setEnabled(False)
+#        self.codeEdit.clear()
+#        try:
+#            size, read_count = os.path.getsize(self.path), 0
+#            assert size > 0
+#        except OSError:
+#            logger.debug("Could not open %s", self.path)
+#        except AssertionError:
+#            logger.debug("Empty file")
+#        else:
+#            self.codeEdit.document().setUndoRedoEnabled(False)
+#            f = open(self.path, 'r')
+#            while size > read_count :
+#                content = f.read(self.READ_SIZE)
+#                read_count += len(content)
+#                self.codeEdit.insertPlainText(content)
+#                #logger.debug("%d bytes read_count from %s", read_count, self.path)
+#            f.close()
+#            self.codeEdit.document().setModified(False)
+#            self.codeEdit.document().setUndoRedoEnabled(True)
+#        self.codeEdit.setEnabled(True)
+#    
+#    def writeBufferContents(self):
+#        '''
+#        Writes contents from the buffer into the file specified by
+#        self.path
+#        '''
+#        raise NotImplementedError()
 
     def setSyntax(self):
         syntax = PMXSyntax.findSyntaxByFileType(self.path)
@@ -378,13 +399,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def modfified(self):
         return self.codeEdit.document().isModified()
     
-    
-    def update_title(self):
-        '''
-        Tell the tab holder to update the title
-        '''
-        print self.parent()
-        
         
     #===========================================================================
     # Callbacks
@@ -392,9 +406,8 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     
     def afterInsertion(self, tab_widget, index):
         ''' Callback when the tab is inserted '''
-        tab_widget.setTabText(index, self.title)
-        tab_widget.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
-
+        self.fileTitleUpdate.emit( self.index )
+        
 
 
 if __name__ == "__main__":
@@ -405,4 +418,4 @@ if __name__ == "__main__":
     win = PMXEditorWidget(None) # No Parent
     win.show()
     sys.exit(app.exec_())
-   
+

@@ -1,5 +1,8 @@
 # coding: utf-8
 
+def _(m):
+    from PyQt4.QtGui import qApp
+    return unicode(qApp.instance().trUtf8(m))
 
 class APIUsageError(Exception):
     '''
@@ -7,3 +10,10 @@ class APIUsageError(Exception):
     used
     '''
     pass
+
+class FileDoesNotExistError(Exception):
+    def __init__(self, path):
+        self.path = path
+        super(FileDoesNotExistError, self).__init__(_("%s does not exist") % path)
+        
+    
