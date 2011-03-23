@@ -11,7 +11,8 @@ from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_DONT_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
-from prymatex.bundles.command import PMXShell
+from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, deleteFile
+from subprocess import Popen, PIPE, STDOUT
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +122,9 @@ class TextNode(Node):
     def __str__(self):
         return self.text
 
+    def render(self):
+        return self.text
+    
     def __deepcopy__(self, memo):
         return TextNode(self.text, memo["parent"])
         
@@ -149,6 +153,12 @@ class NodeList(list):
             elif isinstance(child, NodeList) and element in child:
                 return True
         return False
+    
+    def render(self):
+        string = ""
+        for child in self:
+            string += child.render()
+        return string
     
     def append(self, element):
         if isinstance(element, (str, unicode)):
@@ -647,14 +657,16 @@ class Shell(NodeList):
         return node
     
     def resolve(self, indentation, tabreplacement, environment):
-        file = PMXShell.makeExecutableTempFile(str(self))
-        shell = PMXShell(environment)
-        shell.execute(file)
-        _, value = shell.read()
-        value = value.strip()
-        PMXShell.deleteFile(file)
+        command = ensureShellScript(self.render())
+        temp_command_file = makeExecutableTempFile(command)
+        process = Popen([temp_command_file], stdout=PIPE, stderr=STDOUT, env = environment)
+        text = process.stdout.read()
+        text = text.strip()
+        process.stdout.close()
+        exit_code = process.wait()
+        deleteFile(temp_command_file)
         self.clear()
-        self.append(value.replace('\n', '\n' + indentation).replace('\t', tabreplacement))
+        self.append(text.replace('\n', '\n' + indentation).replace('\t', tabreplacement))
 
 class Condition(Node):
     def __init__(self, scope, parent = None):
