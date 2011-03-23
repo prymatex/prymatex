@@ -1,0 +1,26 @@
+import os, stat, tempfile
+from prymatex.core.config import settings
+
+BASH_SCRIPT = '''#!/bin/bash
+source %s/lib/bash_init.sh
+%%s''' % settings.PMX_SUPPORT_PATH
+
+def has_shebang(text):
+    line = text.split()[0]
+    return line.startswith("#!")
+    
+def ensureShellScript(text):
+    if not has_shebang(text):
+        text = BASH_SCRIPT % text
+    return text
+
+def makeExecutableTempFile(content):
+    descriptor, name = tempfile.mkstemp(prefix='pmx')
+    file = os.fdopen(descriptor, 'w+')
+    file.write(content.encode('utf8'))
+    file.close()
+    os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
+    return name
+    
+def deleteFile(file):
+    return os.unlink(file)

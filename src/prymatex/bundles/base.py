@@ -109,7 +109,7 @@ class PMXBundle(object):
         item.setBundle(self)
 
     def buildEnvironment(self):
-        env = deepcopy(os.environ)
+        env = {}
         env.update({
             'TM_APP_PATH': settings['PMX_APP_PATH'],
             'TM_BUNDLE_PATH': self.path,
@@ -302,20 +302,20 @@ def test_snippets():
     print errors
 
 def test_commands():
-    bundle = PMXBundle.getBundleByName('PHP')
+    bundle = PMXBundle.getBundleByName('Python')
     #bundle = PMXBundle.getBundleByName('SQL')
     errors = 0
     #for bundle in PMXBundle.BUNDLES.values():
     for command in bundle.commands:
         try:
-            if command.name.startswith("Validate Syntax"):
+            #if command.name.startswith("Validate Syntax"):
                 env = command.buildEnvironment()
                 env["TM_CURRENT_WORD"] = "echo"
                 env["PHP_MANUAL_LOCATION"] = "http://www.php.net/download-docs.php"
             #if snippet.name.startswith("Convert Tabs To Table"):
                 print command.name, command.path
-                command.resolve(env)
-                print command
+                command.resolve(u"print 'ú'", u"d", env)
+                command.execute({})
         except Exception, e:
             print command.path, e
             errors += 1
@@ -355,10 +355,16 @@ def test_bundle_elements():
     pprint(PMXBundle.KEY_SEQUENCE)
     pprint(PMXBundle.PREFERENCES)
     pprint(PMXBundle.TEMPLATES)
+
+def test_preferences():
+    from prymatex.bundles.preference import PMXPreference
+    env = {}
+    env.update(PMXPreference.buildSettings(PMXBundle.getPreferences('text.html')))
+    print env
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
     for file in glob(os.path.join(settings['PMX_BUNDLES_PATH'], '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_snippets()
+    test_commands()
