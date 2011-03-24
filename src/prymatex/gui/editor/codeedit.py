@@ -113,7 +113,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.connectSignals()
         self.declareEvents()
         self.configure()
-        print self._font
+        
         
     #=======================================================================
     # Connect Signals and Declare Events

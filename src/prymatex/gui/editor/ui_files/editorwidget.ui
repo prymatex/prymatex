@@ -276,7 +276,7 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>PMXCodeEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header>base</header>
+   <header>codeedit</header>
   </customwidget>
   <customwidget>
    <class>PMXFindBox</class>
