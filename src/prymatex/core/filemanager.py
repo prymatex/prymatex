@@ -105,6 +105,33 @@ class PMXFile(QObject):
     
     def __str__(self):
         return "<PMXFile on %s>" % self.path or "no path yet"
+
+#    TODO: Check if we can implement this this as a generator
+#    READ_SIZE = 1024 * 64 # 64K
+#    def readFileContents(self, buffer):
+#        '''
+#        Reads file contents
+#        '''
+#        try:
+#            size, read_count = os.path.getsize(self.path), 0
+#            assert size > 0
+#        except OSError:
+#            logger.debug("Could not open %s", self.path)
+#        except AssertionError:
+#            logger.debug("Empty file")
+#        else:
+#            f = open(self.path, 'r')
+#            while size > read_count :
+#                content = f.read(self.READ_SIZE)
+#                read_count += len(content)
+#                self.codeEdit.insertPlainText(content)
+#                #logger.debug("%d bytes read_count from %s", read_count, self.path)
+#            f.close()
+#            self.codeEdit.document().setModified(False)
+#            self.codeEdit.document().setUndoRedoEnabled(True)
+#        self.codeEdit.setEnabled(True)
+#    
+
     
     __unicode__ = __repr__ = __str__
     

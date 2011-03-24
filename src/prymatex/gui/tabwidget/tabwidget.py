@@ -210,7 +210,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
         #traceback.print_stack()
         file_manager = qApp.instance().file_manager
         empty_file = file_manager.getEmptyFile()
-        editor = PMXEditorWidget.getEditor(empty_file)
+        editor = PMXEditorWidget.editorFactory(empty_file)
         # Title should be filled after tab insertion
         self.addTab(editor)
         return editor
@@ -219,16 +219,19 @@ class PMXTabWidget(QTabWidget, PMXObject):
         ''' Overrides QTabWidget.addTab(page, title) so that
         afterInsertion is called '''
         if type(autoFocus) is not bool:
+            # Detect old API calls
             raise APIUsageError("addTab received somethign wierd as autoFoucs %s (should be bool)" % autoFocus)
         
         widget.setParent(self)
         title = widget.file.filename
         #print "Adding %s with title %s" % (widget, title)
-        index = super(PMXTabWidget, self).addTab(widget, title)
+        index = super(PMXTabWidget, self).addTab(widget, '...')
         
         self.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
         
         widget.fileTitleUpdate.connect(self.updateTabInfo)
+        self.connect(widget, SIGNAL('fileTitleUpdate()'), self.updateTabInfo)
+        
         widget.fileStatusModified.connect(self.editorModified)
         widget.fileStatusSynced.connect(self.editorSynced)
         
@@ -236,18 +239,18 @@ class PMXTabWidget(QTabWidget, PMXObject):
             self.setCurrentIndex(index)
             if self.count() == 1:
                 widget.setFocus(Qt.MouseFocusReason)
-        
-        if hasattr(widget, 'afterInsertion'):
-            print "->>>Llamando el afterInsertion de ", widget
-            widget.afterInsertion(self, index)
-            
+    
         return index
     
-    def updateTabInfo(self, editor_index):
-        print "updateTabInfo", editor_index
+    def updateTabInfo(self):
+        print "*"*40
+        print "updateTabInfo", self.sender()
+        print "*"*40
+        return
+        #editor = self.widget(editor_index)
+        editor = self.sender()
+        editor_index = self.indexOf(editor)
         
-        editor = self.widget(editor_index)
-        #editor_index = self.indexOf(editor)
         self.setTabText(editor_index, editor.file.filename)
         # Tooltip
         if editor.file.path:
@@ -317,11 +320,10 @@ class PMXTabWidget(QTabWidget, PMXObject):
         Lets the widget know when it has been inserted
         '''
         widget = self.widget(index)
-        if hasattr(widget, 'afterInsertionEvent' ):
-            widget.afterInsertionEvent()
-        if not self.count():
-            widget.actionMenuTab.setChecked(True)
-
+        if hasattr(widget, 'afterInsertionCallback' ):
+            widget.afterInsertionCallback() # Editor at least should update title
+                                            # through updateTitle signal
+            
     def focusNextTab(self):
         '''
         Focus next tab
