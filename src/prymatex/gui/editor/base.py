@@ -498,7 +498,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             item = item.clone()
             item.resolve(indentation = indentation, tabreplacement = self.tabKeyBehavior, environment = self.buildEnvironment(item))
             #Set starts
-            item.starts = cursor.position()
+            if cursor.hasSelection():
+                item.starts = cursor.selectionStart()
+            else:
+                item.starts = cursor.position()
             #Insert Snippet
             #TODO: que no sea por str sino un un render o algo de eso
             cursor.insertText(str(item))
@@ -580,7 +583,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Commands
     #==========================================================================
     
-    def replaceSelectedText(self, string):
+    def replaceSelectedText(self, input, string):
         cursor = self.textCursor()
         position = cursor.selectionStart()
         cursor.removeSelectedText()
@@ -588,27 +591,32 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor.insertText(string)
         self.setTextCursor(cursor)
         
-    def replaceDocument(self, string):
+    def replaceDocument(self, input, string):
         print "replace document", string
         
-    def insertText(self, string):
+    def insertText(self, input, string):
         cursor = self.textCursor()
         cursor.insertText(string)
     
-    def afterSelectedText(self, string):
+    def afterSelectedText(self, input, string):
         cursor = self.textCursor()
         position = cursor.selectionEnd()
         cursor.setPosition(position)
         cursor.insertText(string)
     
-    def insertSnippet(self, snippet):
+    def insertSnippet(self, input, snippet):
         '''Create a new snippet and insert'''
         cursor = self.textCursor()
-        if cursor.hasSelection():
+        if input == 'selection' and cursor.hasSelection():
             position = cursor.selectionStart()
             cursor.removeSelectedText()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
+        elif input == 'word':
+            line = unicode(cursor.block().text())
+            match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
+            current_word = line[match.start():match.end()]
+            print "TODO: borrar la palabra", current_word
         self.insertBundleItem(snippet)
 
     #==========================================================================

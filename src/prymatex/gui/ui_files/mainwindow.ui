@@ -559,10 +559,7 @@
      <normaloff>:/resources/actions/format-indent-less.png</normaloff>:/resources/actions/format-indent-less.png</iconset>
    </property>
    <property name="text">
-    <string>Shilft Left</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+&lt;</string>
+    <string>Shift Left</string>
    </property>
   </action>
   <action name="actionShift_Right">
@@ -572,9 +569,6 @@
    </property>
    <property name="text">
     <string>Shift Right</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+&gt;</string>
    </property>
   </action>
   <action name="actionTo_UPPERCASE">

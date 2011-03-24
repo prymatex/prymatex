@@ -54,22 +54,26 @@ class PMXCommand(PMXBundleItem):
     
     def getInputText(self, document, character, environment):
         def switch(input):
-            if not input: return ""
+            if not input: return "", u""
             if input == 'document':
-                return document
+                return 'document', document
             if input == 'line':
-                return environment['TM_CURRENT_LINE']
+                return 'line', environment['TM_CURRENT_LINE']
             if input == 'character':
-                return character
+                return 'character', character
             if input == 'scope':
-                return environment['TM_SCOPE']
+                return 'scope', environment['TM_SCOPE']
             if input == 'selection' and 'TM_SELECTED_TEXT' in environment:
-                return environment['TM_SELECTED_TEXT']
+                return 'selection', environment['TM_SELECTED_TEXT']
             if input == 'word':
-                return environment['TM_CURRENT_WORD']
-            return u""
-        text = switch(self.input) or switch(self.fallbackInput) or switch(self.standardInput)
-        return text.encode("utf-8")
+                return 'word', environment['TM_CURRENT_WORD']
+            return "", u""
+        input, text = switch(self.input)
+        if not text:
+            input, text = switch(self.fallbackInput)
+        if not text:
+            input, text = switch(self.standardInput)
+        return input, text.encode("utf-8")
 
     def getOutputFunction(self, code, functions):
         ''' showAsHTML
@@ -85,25 +89,26 @@ class PMXCommand(PMXBundleItem):
             type = self.output
         if type in functions:
             return type, functions[type]
-        def discard(text):
-            print 'discard', text
+        def discard(input, text):
+            print 'discard', input, text
         return 'discard', discard
     
     def buildOutputArgument(self, output, text):
-        text = text.decode('utf-8')
         if output == 'insertAsSnippet':
             snippet = PMXSnippet({ 'content': text})
             snippet.bundle = self.bundle
             return snippet
         elif output == 'showAsTooltip':
-            return text.strip()
+            return text.strip().decode('utf-8')
         else:
-            return text
+            return text.decode('utf-8')
         
     def resolve(self, document, character, environment = {}):
-        self.input_text = self.getInputText(document, character, environment)
+        self.input_current, self.input_text = self.getInputText(document, character, environment)
         command = ensureShellScript(self.getSystemCommand())
         self.temp_command_file = makeExecutableTempFile(command)
+        environment.update(os.environ)
+        environment['PATH'] = environment['PATH'] + ':' + environment['TM_BUNDLE_SUPPORT'] + '/bin:' + environment['TM_SUPPORT_PATH'] + '/bin'  
         self.command_process = Popen([self.temp_command_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment)
     
     def execute(self, output_functions):
@@ -114,8 +119,8 @@ class PMXCommand(PMXBundleItem):
         exit_code = self.command_process.wait()
         
         type, function = self.getOutputFunction(exit_code, output_functions)
-        print type, function, self.buildOutputArgument(type, text)
-        function(self.buildOutputArgument(type, text))
+        print self.bundle.name, self.name, self.temp_command_file, type, text
+        function(self.input_current, self.buildOutputArgument(type, text))
         
         #Podria borrar este archivo cuando de borra el objeto
         #deleteFile(self.temp_command_file)
