@@ -72,7 +72,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
             text = "\n".join( text )
         else:  
             self.discard_lines = 0
-        self.syntax.parse(text, self)
+        self.syntax.parse(text.encode("utf-8"), self)
     
     if qApp.instance().options.profile_enabled:
         entries = qApp.instance().options.profile_entries 

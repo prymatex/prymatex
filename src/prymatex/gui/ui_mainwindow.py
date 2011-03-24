@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Mon Mar 21 22:58:03 2011
+# Created: Thu Mar 24 03:02:27 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -495,10 +495,8 @@ class Ui_MainWindow(object):
         self.actionShow_Output.setShortcut(QtGui.QApplication.translate("MainWindow", "Shift+F6", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Current_Scope.setText(QtGui.QApplication.translate("MainWindow", "Show Current Scope", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Current_Scope.setShortcut(QtGui.QApplication.translate("MainWindow", "Alt+Shift+S", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionShilft_Left.setText(QtGui.QApplication.translate("MainWindow", "Shilft Left", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionShilft_Left.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+<", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionShilft_Left.setText(QtGui.QApplication.translate("MainWindow", "Shift Left", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShift_Right.setText(QtGui.QApplication.translate("MainWindow", "Shift Right", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionShift_Right.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+>", None, QtGui.QApplication.UnicodeUTF8))
         self.actionTo_UPPERCASE.setText(QtGui.QApplication.translate("MainWindow", "To UPPERCASE", None, QtGui.QApplication.UnicodeUTF8))
         self.actionTo_lowercase.setText(QtGui.QApplication.translate("MainWindow", "To lowercase", None, QtGui.QApplication.UnicodeUTF8))
         self.actionTo_TitleCase.setText(QtGui.QApplication.translate("MainWindow", "To TitleCase", None, QtGui.QApplication.UnicodeUTF8))

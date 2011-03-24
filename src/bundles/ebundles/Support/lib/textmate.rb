@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
+
 require "#{ENV['TM_SUPPORT_PATH']}/lib/osx/plist"
 require "#{ENV['TM_SUPPORT_PATH']}/lib/escape"
 require "#{ENV['TM_SUPPORT_PATH']}/lib/exit_codes"
@@ -9,9 +11,11 @@ module TextMate
 
   class << self
     def app_path
-      app_dir = File.expand_path(ENV['TM_SUPPORT_PATH']+'/..')
-      return app_dir if File.directory? app_dir
-      raise AppPathNotFoundException
+      ENV['TM_APP_PATH'] || %x{ps -xwwp "$TM_PID" -o "command="}.sub(%r{(.app)/Contents/MacOS/.*\n}, '\1')
+    end
+
+    def app_name
+      return %x{ps -cxwwp "$TM_PID" -o "command="}.chomp
     end
 
     def go_to(options = {})
@@ -25,7 +29,7 @@ module TextMate
     end
 
     def require_cmd(command, message = nil)
-      if `which "#{command} 2>/dev/null"`.empty?
+      if `which "#{command}"`.empty?
         require ENV['TM_SUPPORT_PATH'] + '/lib/tm/htmloutput'
         
         TextMate::HTMLOutput.show(
@@ -36,11 +40,15 @@ module TextMate
             <h3 class="error">Unable to locate <tt>#{command}</tt></h3>
 
             <p>#{message || "To succesfully run this action you need to
-            install <tt>«#{command}»</tt>. If you know that it is already
+            install <tt>Â«#{command}Â»</tt>. If you know that it is already
             installed on your system, you instead need to update
-            your search path."}</p>
+            your search path.</p>
 
-            <p>For diagnostic purposes, the paths searched for <tt>«#{command}»</tt> were:</p>
+            <p>The manual has a section about
+            <a href=\"help:anchor='search_path'%20bookID='TextMate%20Help'\">
+            how to update your search path</a>."}</p>
+
+            <p>For diagnostic purposes, the paths searched for <tt>Â«#{command}Â»</tt> were:</p>
 
             <ul>
               #{`echo $PATH`.gsub(/:/, "\n").gsub(/^(.*)$/, "<li>\\&</li>")}
@@ -52,6 +60,30 @@ module TextMate
       end
     end
 
+    def require_env_var(env_var, message = nil)
+      unless ENV.has_key? env_var
+        require ENV['TM_SUPPORT_PATH'] + '/lib/tm/htmloutput'
+        TextMate::HTMLOutput.show(
+          :title      => "Environment Variable Not Set",
+          :sub_title  => "Environment Variable Not Set - #{env_var}"
+        ) do |io|
+          io << <<-HTML
+            <h3 class="error">The environment variable <tt>#{env_var}</tt> is unset.</h3>
+
+            <p>#{message || "To succesfully run this action you need to
+            set the <tt>Â«#{env_var}Â»</tt> environment variable. If you know that it is already
+            installed on your system, you instead need to update
+            your search path."}</p>
+
+            <p>The manual has a section about
+            <a href=\"help:anchor='static_variables'%20bookID='TextMate%20Help'\">
+            setting environment variables</a>.</p>
+          HTML
+        end
+        TextMate.exit_show_html
+      end
+    end
+    
     def min_support(version)
       actual_version = ::IO.read(ENV['TM_SUPPORT_PATH'] + '/version').to_i
       if actual_version < version then
@@ -92,10 +124,8 @@ module TextMate
 
     def prefs_for_key (key)
       prefs_file = "#{ENV['HOME']}/Library/Preferences/com.macromates.textmate.plist"
-      if File.exist?(prefs_file) then
-        File.open(prefs_file) do |f|
-          return OSX::PropertyList::load(f)[key]
-        end
+      File.open(prefs_file) do |f|
+        return OSX::PropertyList::load(f)[key]
       end
     end
 
