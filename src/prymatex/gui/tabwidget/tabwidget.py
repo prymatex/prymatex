@@ -296,8 +296,8 @@ class PMXTabWidget(QTabWidget, PMXObject):
         '''
         widget = self.widget(index)
         retval = QTabWidget.removeTab(self, index)
-        if hasattr(widget, 'afterRemoveEvent' ):
-            widget.afterRemoveEvent()
+        if hasattr(widget, 'afterRemoveCallback' ):
+            widget.afterRemoveCallback()
         return retval
     
     def tabRemoved(self, index):

@@ -81,6 +81,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         # TODO: Asyncronous I/O
         
         self.codeEdit.setPlainText(self.file.read() or '')
+        self.destroyed.connect(self.releaseFile)
+        
+    def releaseFile(self):
+        print "Release file"
         
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)
@@ -325,7 +329,9 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         QTimer.singleShot(0, self.fileTitleUpdate.emit)
         # Does not work, signal is never emited :(
         #self.fileTitleUpdate.emit()
-        
+    
+    def afterRemoveCallback(self):
+        print "Removed"
 
 
 if __name__ == "__main__":

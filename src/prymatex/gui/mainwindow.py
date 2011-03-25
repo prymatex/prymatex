@@ -330,7 +330,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         except FileDoesNotExistError, e:
             QMessageBox.critical(self, "File not found", "%s" % e, QMessageBox.Ok)
             return
-        editor = PMXEditorWidget.getEditor(pmx_file)
+        editor = PMXEditorWidget.editorFactory(pmx_file)
         self.tabWidget.addTab(editor, auto_focus)
         return editor
     
