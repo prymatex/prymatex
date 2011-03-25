@@ -18,7 +18,7 @@ from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.lib.i18n import ugettext as _
 import itertools
 import logging
-from prymatex.gui.editor.widget import PMXEditorWidget
+from prymatex.gui.editor import PMXEditorWidget
 from prymatex.gui.dialogs import NewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
 

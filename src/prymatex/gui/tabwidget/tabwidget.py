@@ -8,7 +8,7 @@ from PyQt4.QtCore import QString, SIGNAL, Qt
 import itertools
 
 from prymatex.gui.utils import *
-from prymatex.gui.editor.widget import PMXEditorWidget
+from prymatex.gui.editor import PMXEditorWidget
 from choosetab import ChooseTabDialog
 from prymatex.core.base import PMXObject
 import logging
@@ -216,8 +216,10 @@ class PMXTabWidget(QTabWidget, PMXObject):
         return editor
     
     def addTab(self, widget, autoFocus = True):
-        ''' Overrides QTabWidget.addTab(page, title) so that
-        afterInsertion is called '''
+        ''' 
+        Overrides QTabWidget.addTab(page, title) so that
+        afterInsertion is called 
+        '''
         if type(autoFocus) is not bool:
             # Detect old API calls
             raise APIUsageError("addTab received somethign wierd as autoFoucs %s (should be bool)" % autoFocus)
@@ -230,7 +232,9 @@ class PMXTabWidget(QTabWidget, PMXObject):
         self.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
         
         widget.fileTitleUpdate.connect(self.updateTabInfo)
-        self.connect(widget, SIGNAL('fileTitleUpdate()'), self.updateTabInfo)
+        
+        widget.fileTitleUpdate.connect(self.updateTabInfo)
+        #self.connect(widget, SIGNAL('fileTitleUpdate()'), self.updateTabInfo)
         
         widget.fileStatusModified.connect(self.editorModified)
         widget.fileStatusSynced.connect(self.editorSynced)
@@ -243,11 +247,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
         return index
     
     def updateTabInfo(self):
-        print "*"*40
-        print "updateTabInfo", self.sender()
-        print "*"*40
-        return
-        #editor = self.widget(editor_index)
         editor = self.sender()
         editor_index = self.indexOf(editor)
         
