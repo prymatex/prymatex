@@ -37,22 +37,28 @@ This diagram show Prymatex architecture
 
 	digraph foo {
 		graph [
-			rankdir = "LR"
+			//rankdir = "LR",
+			fontsize = 5
 		];
 		node [ shape = "record" ];
-		"app" [label = "PMXApplication|settings"];
-		"file manager" [label = "PMXFileManager|opened_files = \{\}"];
-		"file" [label = "PMXFile" ];
-		"window" [label = "PMXMainWindow|" ];
+		// Nodes
+		"app" [label = "PMXApplication\nsettings"];
+		"file manager" [label = "PMXFileManager\nopened_files = \{\}"];
+		"file" [label = "PMXFile\nsave()\nread()\nwrite()\n" ];
+		"window" [label = "PMXMainWindow\n" ];
 		"tab widget" [label = "PMXTabWidget"];
-		"editor widget" [label = "PMXEditorWidget"];
+		"editor widget" [label = "PMXEditorWidget\neditorFactory(cls...)\
+		\nregisterEditor(cls,...)"];
+		"code edit" [ label = "PMXCodeEdit" ];
+		
+		// Arrows
 		"file" -> "file manager" [label = "parent"];
 		"app" -> "window" [label = "holds"];
 		"app" -> "file manager";
 		"editor widget" -> "tab widget" [label = "parent"];
 		"editor widget" -> "file" [label = "file"];
-		
-		
+		"tab widget" -> "window" [label = "parent" ];
+		"code edit" -> "editor widget" [label = "parent" ];
 		
 		
 	}
