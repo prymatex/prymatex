@@ -13,6 +13,7 @@ Contents:
 
    intro
    application
+   bundles
    configuration
    pyqt
 
