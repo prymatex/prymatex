@@ -1,6 +1,8 @@
 import os, stat, tempfile
 from prymatex.core.config import settings
 
+DIALOG = settings.PMX_SUPPORT_PATH + '/bin/CocoaDialog.app/Contents/MacOS/CocoaDialog'
+
 BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh
 %%s''' % settings.PMX_SUPPORT_PATH
@@ -32,10 +34,18 @@ def ensureShellScript(text):
 def makeExecutableTempFile(content):
     descriptor, name = tempfile.mkstemp(prefix='pmx')
     file = os.fdopen(descriptor, 'w+')
-    file.write(content.encode('utf8'))
+    file.write(content.encode('utf-8'))
     file.close()
     os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
     return name
     
 def deleteFile(file):
     return os.unlink(file)
+
+def ensureEnvironment(environment):
+    codingenv = { 'DIALOG': DIALOG }
+    for key, value in os.environ.iteritems():
+        codingenv[key] = value[:]
+    for key, value in environment.iteritems():
+        codingenv[key] = value.encode('utf-8')
+    return codingenv

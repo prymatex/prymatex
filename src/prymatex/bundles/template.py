@@ -4,13 +4,12 @@
 '''
     Template's module
     http://manual.macromates.com/en/templates
-    TM_NEW_FILE � the full path, including the name of the file to be generated (i.e. the one the user entered in the GUI).
-    TM_NEW_FILE_BASENAME � the base name of the file to be generated. If TM_NEW_FILE is /tmp/foo.txt then this variable would be foo without the folder name and the file extension.
-    TM_NEW_FILE_DIRECTORY � the folder name of the file to be generated.
 '''
 
-import os, stat, plistlib, tempfile
-from subprocess import Popen, PIPE, STDOUT
+import os, plistlib
+from subprocess import Popen
+from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile,\
+    ensureEnvironment, deleteFile
 # for run as main
 if __name__ == "__main__":
     import sys
@@ -39,15 +38,14 @@ class PMXTemplate(PMXBundleItem):
     def resolve(self, environment = {}):
         origWD = os.getcwd() # remember our original working directory
         os.chdir(self.path)
-        descriptor, name = tempfile.mkstemp(prefix='pmx')
-        file = os.fdopen(descriptor, 'w+')
-        file.write(self.command.encode('utf8'))
-        file.close()
-        os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
-        proc = Popen([name], env = environment, shell=True)
-        proc.wait()
-        os.chdir(origWD) # get back to our original working directory
         
+        command = ensureShellScript(self.command)
+        temp_file = makeExecutableTempFile(command)  
+        process = Popen([ temp_file ], env = ensureEnvironment(environment))
+        process.wait()
+        
+        deleteFile(temp_file)
+        os.chdir(origWD) # get back to our original working directory
         
     @classmethod
     def loadBundleItem(cls, path, name_space = 'prymatex'):

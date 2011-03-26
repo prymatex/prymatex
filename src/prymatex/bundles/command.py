@@ -14,7 +14,7 @@ import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.snippet import PMXSnippet
-from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, deleteFile
+from prymatex.bundles.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile, deleteFile
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
@@ -105,11 +105,13 @@ class PMXCommand(PMXBundleItem):
         
     def resolve(self, document, character, environment = {}):
         self.input_current, self.input_text = self.getInputText(document, character, environment)
+        if self.input_current == 'world':
+            environment['TM_INPUT_START_LINE_INDEX'] = environment['TM_CURRENT_WORD_INDEX'] 
         command = ensureShellScript(self.getSystemCommand())
-        self.temp_command_file = makeExecutableTempFile(command)
-        environment.update(os.environ)
-        environment['PATH'] = environment['PATH'] + ':' + environment['TM_BUNDLE_SUPPORT'] + '/bin:' + environment['TM_SUPPORT_PATH'] + '/bin'  
-        self.command_process = Popen([self.temp_command_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment)
+        self.temp_command_file = makeExecutableTempFile(command)  
+        self.command_process = Popen([  self.temp_command_file],
+                                        stdin=PIPE, stdout=PIPE, stderr=STDOUT, 
+                                        env = ensureEnvironment(environment))
     
     def execute(self, output_functions):
         self.command_process.stdin.write(self.input_text)

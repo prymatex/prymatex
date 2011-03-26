@@ -54,7 +54,7 @@ class PMXSetting(dict):
             for variable in variables:
                 hash['shellVariables'][variable['name']] = variable['value']
         super(PMXSetting, self).__init__(hash)
-
+        
 class PMXPreference(PMXBundleItem):
     path_patterns = ['Preferences/*.tmPreferences', 'Preferences/*.plist']
     bundle_collection = 'preferences'
@@ -72,5 +72,12 @@ class PMXPreference(PMXBundleItem):
     def buildSettings(preferences):
         settings = DEFAULT_SETTINGS
         for p in preferences:
-            settings.update(p.settings)
+            if 'shellVariables' in p.settings:
+                for key, value in p.settings.iteritems():
+                    if key == 'shellVariables':
+                        settings['shellVariables'].update(value)
+                    else:
+                        settings[key] = value
+            else:
+                settings.update(p.settings)
         return settings

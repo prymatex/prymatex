@@ -72,7 +72,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
             text = "\n".join( text )
         else:  
             self.discard_lines = 0
-        self.syntax.parse(text.encode("utf-8"), self)
+        self.syntax.parse(text, self)
     
     if qApp.instance().options.profile_enabled:
         entries = qApp.instance().options.profile_entries 
@@ -109,7 +109,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.scopes.pop()
 
     def foldingMarker(self):
-        line = unicode(self.currentBlock().text())
+        line = unicode(self.currentBlock().text()).encode('utf-8')
         if self.syntax.foldingStartMarker != None and self.syntax.foldingStartMarker.match(line):
             self.user_data.folding = PMXBlockUserData.FOLDING_START
         elif self.syntax.foldingStopMarker != None and self.syntax.foldingStopMarker.match(line):

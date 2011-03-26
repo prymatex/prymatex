@@ -416,7 +416,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             position += (holder.position() - index)
             cursor.setPosition(starts)
             cursor.setPosition(ends, QTextCursor.KeepAnchor)
-            cursor.removeSelectedText();
             cursor.insertText(str(self.snippet))
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
@@ -441,7 +440,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             position += holder.position() - index + 1
             cursor.setPosition(starts)
             cursor.setPosition(ends, QTextCursor.KeepAnchor)
-            cursor.removeSelectedText()
             cursor.insertText(str(self.snippet))
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
@@ -482,12 +480,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # BundleItems
     #==========================================================================
 
-    def insertBundleItem(self, item, tabTrigger = False):
+    def insertBundleItem(self, item, tabTrigger = False, indent = True):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
-        indentation = self.indentationWhitespace(line)
+        indentation = indent and self.indentationWhitespace(line) or ""
         if tabTrigger and item.tabTrigger != None:
             for _ in range(len(item.tabTrigger)):
                 cursor.deletePreviousChar()
@@ -554,19 +552,21 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         try:
             match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
             current_word = line[match.start():match.end()]
+            current_word_index = match.start()
         except IndexError:
             current_word = ""
         env = item.buildEnvironment()
         env.update({
                 'TM_CURRENT_LINE': line,
-                'TM_INPUT_START_LINE_INDEX': u'',
                 'TM_LINE_INDEX': unicode(cursor.columnNumber()), 
                 'TM_LINE_NUMBER': unicode(cursor.block().blockNumber()), 
                 'TM_SCOPE': unicode(scope),
-                'TM_CURRENT_WORD': unicode(current_word),
                 'TM_SOFT_TABS': self.soft_tabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': unicode(self.tab_size),
         });
+        if current_word != "":
+            env['TM_CURRENT_WORD'] = unicode(current_word)
+            env['TM_CURRENT_WORD_INDEX'] = unicode(current_word_index)
         if self.syntax != None:
             env['TM_MODE'] = unicode(self.syntax.name)
         if self.parent().file.path != None:
@@ -616,8 +616,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             line = unicode(cursor.block().text())
             match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
             current_word = line[match.start():match.end()]
-            print "TODO: borrar la palabra", current_word
-        self.insertBundleItem(snippet)
+            index = cursor.columnNumber() - match.start()
+            for _ in range(index):
+                cursor.deletePreviousChar()
+            for _ in range(len(current_word) - index):
+                cursor.deleteChar()
+        self.insertBundleItem(snippet, indent = False)
 
     #==========================================================================
     # Folding

@@ -8,11 +8,11 @@
 '''
 
 import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP, SYNTAX_RUBY, ENCODING_UTF8
+from ponyguruma.constants import OPTION_CAPTURE_GROUP, ENCODING_UTF8
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.score import PMXScoreManager
 
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
+onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, encoding = ENCODING_UTF8)
 
 class PMXSyntaxNode(object):
     def __init__(self, hash, syntax):
@@ -196,6 +196,7 @@ class PMXSyntax(PMXBundleItem):
         if processor:
             processor.start_parsing(self.scopeName)
         stack = [[self.grammar, None]]
+        string = string.encode('utf-8')
         for line in string.splitlines():
             self.parse_line(stack, line, processor)
         if processor:
@@ -261,6 +262,7 @@ class PMXSyntax(PMXBundleItem):
         
     @classmethod
     def findSyntaxByFirstLine(cls, line):
+        line = line.encode('utf-8')
         for _, syntaxes in cls.SYNTAXES.iteritems():
             for _, syntax in syntaxes.iteritems():
                 if syntax.firstLineMatch != None and syntax.firstLineMatch.match(line):
