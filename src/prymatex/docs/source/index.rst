@@ -1,5 +1,5 @@
 .. Prymatex documentation master file, created by
-   sphinx-quickstart on Mon Oct  4 09:59:47 2010.
+   sphinx-quickstart on Sat Mar 26 12:41:39 2011.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -12,7 +12,9 @@ Contents:
    :maxdepth: 2
 
    intro
-   writing_plugins
+   application
+   configuration
+   pyqt
 
 Indices and tables
 ==================
