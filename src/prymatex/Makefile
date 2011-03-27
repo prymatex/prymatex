@@ -1,12 +1,10 @@
 
 QRC_FILES=$(shell find ./ -iname "*.qrc")
 
-.PHONY: gui
+.PHONY: gui doc
 
 
 all: resources gui
-
-	${MAKE} -C config
 	${MAKE} -C resources/svg
 gui: 
 	${MAKE} -C gui
@@ -22,4 +20,6 @@ res_rc.py: res.qrc
 	pyrcc4 -py2 $^ -o $@
 	@du -hcs $@ | tail -n1
 
+doc:
+	$(MAKE) -C ../../docs html
 

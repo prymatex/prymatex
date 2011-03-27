@@ -4,6 +4,7 @@ from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
 from PyQt4.QtCore import SIGNAL, QEvent
 
 from os.path import join, exists, isdir, isabs
+import os
 
 from os import getpid, unlink, getcwd
 from os.path import dirname, abspath
@@ -167,7 +168,11 @@ class PMXApplication(QApplication):
         logger = logging.getLogger("")
         logger.setLevel(logging.DEBUG)
         # create file handler which logs even debug messages
-        fh = logging.FileHandler("messages.log")
+        try:
+            fh = logging.FileHandler("messages.log")
+        except IOError:
+            fh =  logging.FileHandler("/tmp/messages.log")
+        
         fh.setLevel(logging.DEBUG)
         # create console handler with a higher log level
         ch = logging.StreamHandler()
@@ -298,8 +303,9 @@ class PMXApplication(QApplication):
         if self.options.startdir and exists(self.options.startdir):
             return abspath(self.options.startdir)
         else:
-            from prymatex.lib.os import get_homedir
-            return get_homedir()
+            #from prymatex.lib.os import get_homedir
+            #return get_homedir()
+            return os.getcwd()
 
     def notify(self, receiver, event):
         '''

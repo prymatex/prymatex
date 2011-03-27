@@ -13,7 +13,7 @@ on Linux plaform. We're testing it on Ubuntu 10.10 and Gentoo Linux.
 Requirements
 ------------
 
-Running 
+Running (using prymatex). 
 
 	* Linux
 		
@@ -36,3 +36,24 @@ Running
 	
 	* **Bundles**
 	
+Development (improving prymatex or creating new bunldes)
+--------------------------------------------------------
+
+All the previous sections plus
+	
+	* GNU Make
+	
+		You probably have this tool already in you system, just type ``make``
+		and you should see something link this::
+		
+			make: *** No targets specified and no makefile found.  Stop.
+		
+		Otherwise install it with::
+		
+			sudo apt-get install make
+
+	* PyQt4 develompent tools
+	
+		.. code-block:: bash
+		
+			sudo apt-get install pyqt4-dev-tools
