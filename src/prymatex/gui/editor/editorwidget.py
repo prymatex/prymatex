@@ -331,7 +331,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         #self.fileTitleUpdate.emit()
     
     def afterRemoveCallback(self):
-        print "Removed"
+        self.file.references -= 1
 
 
 if __name__ == "__main__":
