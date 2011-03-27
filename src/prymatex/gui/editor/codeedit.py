@@ -14,7 +14,6 @@ from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.syntax import PMXSyntaxProcessor, PMXBlockUserData
-from prymatex.lib import profilehooks
 
 logger = logging.getLogger(__name__)
 
