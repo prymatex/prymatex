@@ -2,7 +2,9 @@
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
 from PyQt4.QtGui import qApp
 from prymatex.bundles.processor import PMXSyntaxProcessor
-from prymatex.lib.profilehooks import profile
+
+from logging import getLogger
+logger = getLogger(__file__)
 
 
 class PMXBlockUserData(QTextBlockUserData):
@@ -76,8 +78,13 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     
     if qApp.instance().options.profile_enabled:
         entries = qApp.instance().options.profile_entries 
-        print "INFO: Profiling", highlightBlock
-        highlightBlock = profile(highlightBlock, entries = entries)
+        try:
+            from prymatex.lib.profilehooks import profile
+        except ImportError, e:
+            logger.debug("Profile enabled but could not be imported")
+            logger.info("Error was: %s", unicode(e))
+        else:
+            highlightBlock = profile(highlightBlock, entries = entries)
     
     def add_token(self, end):
         begin = self.line_position
