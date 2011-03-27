@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    intro
+   using_pmx
    application
    bundles
    configuration

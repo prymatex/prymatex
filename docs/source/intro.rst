@@ -24,9 +24,7 @@ A little bit of history about Prymatex
 --------------------------------------
 
 
-
-
-
+TODO
 
 Prymatex Architecture Overview
 ------------------------------
@@ -35,14 +33,24 @@ This diagram show Prymatex architecture
 
 .. graphviz::
 
-	digraph foo {
-		graph [
-			//rankdir = "LR",
-			fontsize = 5
-		];
+	digraph G {
+		
+		fontname = "Bitstream Vera Sans"
+        fontsize = 8
+
+        node [
+                fontname = "Bitstream Vera Sans"
+                fontsize = 8
+                shape = "record"
+        ]
+
+        edge [
+                fontname = "Bitstream Vera Sans"
+                fontsize = 8
+        ]
 		node [ shape = "record" ];
 		// Nodes
-		"app" [label = "PMXApplication\nsettings"];
+		"app" [label = "PMXApplication|settings"];
 		"file manager" [label = "PMXFileManager\nopened_files = \{\}"];
 		"file" [label = "PMXFile\nsave()\nread()\nwrite()\n" ];
 		"window" [label = "PMXMainWindow\n" ];
@@ -62,3 +70,9 @@ This diagram show Prymatex architecture
 		
 		
 	}
+	
+	
+.. inheritance-diagram:: prymatex.core.app.PMXApplication
+
+
+

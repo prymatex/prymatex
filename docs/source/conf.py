@@ -27,6 +27,7 @@ import sys, os
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
               'sphinx.ext.graphviz',
+              'sphinx.ext.inheritance_diagram',
               ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -216,3 +217,10 @@ man_pages = [
     ('index', 'prymatex', u'Prymatex Documentation',
      [u'Defossé Nahuel, van Haaster Diego, Petenello Pablo'], 1)
 ]
+
+from os.path import *
+pth = abspath(dirname(__file__))
+pth = abspath(join(pth, '..', '..', 'src'))
+sys.path.append(pth)
+sys.stdout.write("%s\n" % pth)
+import prymatex
