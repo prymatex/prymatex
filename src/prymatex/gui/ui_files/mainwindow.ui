@@ -120,7 +120,7 @@
      <addaction name="actionWith_options"/>
     </widget>
     <addaction name="menuRun"/>
-    <addaction name="actionTermial"/>
+    <addaction name="actionTerminal"/>
     <addaction name="actionFile_browser"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
@@ -629,9 +629,9 @@
     <string>Alt+Shift+R</string>
    </property>
   </action>
-  <action name="actionTermial">
+  <action name="actionTerminal">
    <property name="text">
-    <string>Termial</string>
+    <string>Terminal</string>
    </property>
   </action>
   <action name="actionFile_browser">
