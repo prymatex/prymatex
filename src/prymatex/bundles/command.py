@@ -65,7 +65,7 @@ class PMXCommand(PMXBundleItem):
                 return 'scope', environment['TM_SCOPE']
             if input == 'selection' and 'TM_SELECTED_TEXT' in environment:
                 return 'selection', environment['TM_SELECTED_TEXT']
-            if input == 'word':
+            if input == 'word' and 'TM_CURRENT_WORD' in environment::
                 return 'word', environment['TM_CURRENT_WORD']
             return "", u""
         input, text = switch(self.input)
