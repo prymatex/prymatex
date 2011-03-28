@@ -17,7 +17,9 @@ class PMXScoreManager(object):
     def score(self, search_scope, reference_scope):
         maxi = 0
         for scope in search_scope.split( ',' ):
-            arrays = re.compile("\B-").split(scope)
+            arrays =  re.compile("\B-").split(scope)
+            #remove space
+            arrays = map(lambda scope: scope.strip(), arrays)
             if len(arrays) == 1:
                 maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
             elif len(arrays) > 1:

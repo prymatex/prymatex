@@ -11,6 +11,9 @@ from os.path import *
 from prymatex.core.exceptions import APIUsageError, FileDoesNotExistError
 import codecs
 
+from logging import getLogger
+logger = getLogger(__file__)
+
 # TODO: Cross-platform implementation, you might not have rights to write
 MAGIC_FILE = join(dirname(abspath(magic.__file__)), 'magic.linux')
 
@@ -21,8 +24,11 @@ class PMXFile(QObject):
     fileSaved = pyqtSignal(QString)
     fileRenamed = pyqtSignal(QString)
     fileSaveError = pyqtSignal(QString)
+    fileLostReference = pyqtSignal()
+    
     
     _path = None
+    _references = 0
     
     BUFFER_SIZE = 2 << 20
     
@@ -33,6 +39,21 @@ class PMXFile(QObject):
                                                     "PMXApplication.file_manager")
         super(PMXFile, self).__init__(parent)
         self.path = path
+        self.fileLostReference.connect(parent.fileUnused)
+        self.destroyed.connect(self.fileDestroyed)
+    
+    
+    @property
+    def references(self):
+        return self._references
+    
+    @references.setter
+    def references(self, value):
+        assert type(value) in (int, )
+        self._references = value
+        if self._references == 0:
+            self.fileLostReference.emit()
+            
         
     def suggestedFileName(self, editor_suffix = None):
         title = unicode(self.trUtf8("Untitled file %d"))
@@ -103,8 +124,38 @@ class PMXFile(QObject):
 #            buffer[frm:to]
 #            qApp.instance().processEvents()
     
+    def fileDestroyed(self):
+        logger.debug("%s is being destoyed")
+    
     def __str__(self):
         return "<PMXFile on %s>" % self.path or "no path yet"
+
+#    TODO: Check if we can implement this this as a generator
+#    READ_SIZE = 1024 * 64 # 64K
+#    def readFileContents(self, buffer):
+#        '''
+#        Reads file contents
+#        '''
+#        try:
+#            size, read_count = os.path.getsize(self.path), 0
+#            assert size > 0
+#        except OSError:
+#            logger.debug("Could not open %s", self.path)
+#        except AssertionError:
+#            logger.debug("Empty file")
+#        else:
+#            f = open(self.path, 'r')
+#            while size > read_count :
+#                content = f.read(self.READ_SIZE)
+#                read_count += len(content)
+#                self.codeEdit.insertPlainText(content)
+#                #logger.debug("%d bytes read_count from %s", read_count, self.path)
+#            f.close()
+#            self.codeEdit.document().setModified(False)
+#            self.codeEdit.document().setUndoRedoEnabled(True)
+#        self.codeEdit.setEnabled(True)
+#    
+
     
     __unicode__ = __repr__ = __str__
     
@@ -137,23 +188,38 @@ class PMXFileManager(PMXObject):
         ''' Returns a QFile '''
         pmx_file =  PMXFile(self)
         self.empty_file_counter += 1
+        pmx_file.references = 1
         return pmx_file
     
+    def fileUnused(self):
+        ''' Signal receiver for '''
+        pmx_file = self.sender()
+        print self.opened_files
+        if pmx_file.path:
+            pmx_file = self.opened_files.pop(pmx_file.path)
+            del pmx_file
+            
+        
+        
     
     def openFile(self, filepath):
         '''
         PMXFile factory
         @raise FileDoesNotExistError: If provided path does not exists
         '''
+        filepath = unicode(filepath) # QString -> unicode 
         if self.isOpened(filepath):
+            pmx_file = self.opened_files[filepath]
+            pmx_file.references += 1
             return self.opened_files[filepath]
         if not exists(filepath):
             raise FileDoesNotExistError(filepath)
         
         pmx_file = PMXFile(self, filepath)
-        
+        pmx_file.references += 1
         self.opened_files[filepath] = pmx_file
         self.filedOpened.emit(pmx_file)
+        
         return pmx_file
     
     def recentFiles(self):

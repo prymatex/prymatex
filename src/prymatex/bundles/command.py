@@ -4,7 +4,7 @@
 '''
     Command's module    
 '''
-import os, stat, tempfile
+import os
 from subprocess import Popen, PIPE, STDOUT
 # for run as main
 if __name__ == "__main__":
@@ -13,70 +13,11 @@ if __name__ == "__main__":
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
-from prymatex.core.config import settings
-'''
-These functions only work when the initial output option is not set as "Show as HTML". The list of functions is as follows:
-input:
-    document
-    line
-    word
-    character
-    scope
-output:
-200 exit_discard
-201 exit_replace_text
-202 exit_replace_document
-203 exit_insert_text
-204 exit_insert_snippet
-205 exit_show_html
-206 exit_show_tool_tip
-207 exit_create_new_document
-    showAsHTML
-    showAsTooltip
-    insertAsSnippet
-    replaceSelectedText
-    replaceDocument
-'''
+from prymatex.bundles.snippet import PMXSnippet
+from prymatex.bundles.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile, deleteFile
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
-class PMXShell(Popen):
-    INIT_SCRIPT = settings.PMX_SUPPORT_PATH + '/lib/bash_init.sh'
-    FUNCTIONS = [  'exit_discard', 'exit_replace_text', 'exit_replace_document', 'exit_insert_text', 'exit_insert_snippet',
-               'exit_show_html', 'exit_show_tool_tip', 'exit_create_new_document', 'require_cmd', 'rescan_project', 'pre']
-    def __init__(self, environment):
-        super(PMXShell, self).__init__(["/bin/bash"], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment)
-        self.execute("source " + self.INIT_SCRIPT)
-        for function in self.FUNCTIONS:
-            self.execute("export -f  %s" % function)
-        
-    def execute(self, line, input = None):
-        if input != None:
-            command = 'echo "' + input + '" | ' + line
-        else:
-            command = line
-        self.stdin.write(command + "\n")
-
-    def read(self):
-        self.stdin.close()
-        value = self.stdout.read()
-        self.stdout.close()
-        code = self.wait()
-        return (code, value)
-        
-    @staticmethod
-    def makeExecutableTempFile(content):
-        descriptor, name = tempfile.mkstemp(prefix='pmx')
-        file = os.fdopen(descriptor, 'w+')
-        file.write(content.encode('utf8'))
-        file.close()
-        os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
-        return name
-
-    @staticmethod
-    def deleteFile(file):
-        return os.unlink(file)
-        
 class PMXCommand(PMXBundleItem):
     path_patterns = ['Commands/*.tmCommand', 'Commands/*.plist']
     bundle_collection = 'commands'
@@ -103,12 +44,6 @@ class PMXCommand(PMXBundleItem):
                 value = onig_compile( value )
             setattr(self, key, value)
 
-    @property
-    def sheebang(self):
-        command = self.getSystemCommand()
-        line = command.split()[0]
-        return line.startswith("#!")
-        
     def getSystemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:
             return self.winCommand
@@ -119,21 +54,26 @@ class PMXCommand(PMXBundleItem):
     
     def getInputText(self, document, character, environment):
         def switch(input):
-            if not input: return ""
+            if not input: return "", u""
             if input == 'document':
-                return document
+                return 'document', document
             if input == 'line':
-                return environment['TM_CURRENT_LINE']
+                return 'line', environment['TM_CURRENT_LINE']
             if input == 'character':
-                return character
+                return 'character', character
             if input == 'scope':
-                return environment['TM_SCOPE']
+                return 'scope', environment['TM_SCOPE']
             if input == 'selection' and 'TM_SELECTED_TEXT' in environment:
-                return environment['TM_SELECTED_TEXT']
+                return 'selection', environment['TM_SELECTED_TEXT']
             if input == 'word':
-                return environment['TM_CURRENT_WORD']
-            return ""
-        return switch(self.input) or switch(self.fallbackInput) or switch(self.standardInput)
+                return 'word', environment['TM_CURRENT_WORD']
+            return "", u""
+        input, text = switch(self.input)
+        if not text:
+            input, text = switch(self.fallbackInput)
+        if not text:
+            input, text = switch(self.standardInput)
+        return input, text.encode("utf-8")
 
     def getOutputFunction(self, code, functions):
         ''' showAsHTML
@@ -143,50 +83,46 @@ class PMXCommand(PMXBundleItem):
             replaceDocument
         '''
         type = ''
-        print code
         if self.output != 'showAsHTML' and code != 0 and code in self.exit_codes:
             type = self.exit_codes[code]
         else:
             type = self.output
         if type in functions:
             return type, functions[type]
-        def discard(text):
-            print 'discard', text
+        def discard(input, text):
+            print 'discard', input, text
         return 'discard', discard
     
     def buildOutputArgument(self, output, text):
-        from prymatex.bundles.snippet import PMXSnippet
         if output == 'insertAsSnippet':
             snippet = PMXSnippet({ 'content': text})
             snippet.bundle = self.bundle
             return snippet
         elif output == 'showAsTooltip':
-            return text.strip()
+            return text.strip().decode('utf-8')
         else:
-            return text
+            return text.decode('utf-8')
         
     def resolve(self, document, character, environment = {}):
-        self.temp_command_file = PMXShell.makeExecutableTempFile(self.getSystemCommand())
-        if self.sheebang:
-            self.shell_interpreter = Popen([self.temp_command_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = environment)
-        else:
-            self.shell_interpreter = PMXShell(environment)
-        self.input_text = self.getInputText(document, character, environment)
+        self.input_current, self.input_text = self.getInputText(document, character, environment)
+        if self.input_current == 'world':
+            environment['TM_INPUT_START_LINE_INDEX'] = environment['TM_CURRENT_WORD_INDEX'] 
+        command = ensureShellScript(self.getSystemCommand())
+        self.temp_command_file = makeExecutableTempFile(command)  
+        self.command_process = Popen([  self.temp_command_file],
+                                        stdin=PIPE, stdout=PIPE, stderr=STDOUT, 
+                                        env = ensureEnvironment(environment))
     
     def execute(self, output_functions):
-        if self.sheebang:
-            self.shell_interpreter.stdin.write(self.input_text)
-            self.shell_interpreter.stdin.close()
-            text = self.shell_interpreter.stdout.read()
-            self.shell_interpreter.stdout.close()
-            exit_code = self.shell_interpreter.wait()
-        else:
-            self.shell_interpreter.execute(self.temp_command_file, self.input_text)
-            exit_code, text = self.shell_interpreter.read() 
-
+        self.command_process.stdin.write(self.input_text)
+        self.command_process.stdin.close()
+        text = self.command_process.stdout.read()
+        self.command_process.stdout.close()
+        exit_code = self.command_process.wait()
+        
         type, function = self.getOutputFunction(exit_code, output_functions)
-        print type, function, self.buildOutputArgument(type, text)
-        function(self.buildOutputArgument(type, text))
+        print self.bundle.name, self.name, self.temp_command_file, type, text
+        function(self.input_current, self.buildOutputArgument(type, text))
         
         #Podria borrar este archivo cuando de borra el objeto
-        #PMXShell.deleteFile(self.temp_command_file)
+        #deleteFile(self.temp_command_file)

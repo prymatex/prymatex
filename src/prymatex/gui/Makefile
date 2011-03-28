@@ -8,7 +8,7 @@ UI_BASE=ui_files
 UI_FILES=$(notdir $(shell ls ${UI_BASE}/*.ui))
 PY_FILES=$(patsubst %.ui,ui_%.py,${UI_FILES})
 
-all: ${PY_FILES} editor
+all: ${PY_FILES} editor config
 	${MAKE} -C panes
 	
 ui_%.py: ui_files/%.ui
@@ -19,6 +19,9 @@ clean:
 
 editor:
 	$(MAKE) -C editor
+
+config:
+	$(MAKE) -c config
 re: clean all
 
 help:

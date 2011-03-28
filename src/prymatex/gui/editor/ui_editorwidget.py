@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/editorwidget.ui'
 #
-# Created: Thu Jan 13 12:17:37 2011
+# Created: Thu Mar 24 12:55:28 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,9 +23,9 @@ class Ui_EditorWidget(object):
         self.gotolineWidget.setObjectName("gotolineWidget")
         self.horizontalLayout = QtGui.QHBoxLayout(self.gotolineWidget)
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.label = QtGui.QLabel(self.gotolineWidget)
-        self.label.setObjectName("label")
-        self.horizontalLayout.addWidget(self.label)
+        self.labelGoToLine = QtGui.QLabel(self.gotolineWidget)
+        self.labelGoToLine.setObjectName("labelGoToLine")
+        self.horizontalLayout.addWidget(self.labelGoToLine)
         self.spinLineNumbers = QtGui.QSpinBox(self.gotolineWidget)
         self.spinLineNumbers.setObjectName("spinLineNumbers")
         self.horizontalLayout.addWidget(self.spinLineNumbers)
@@ -140,7 +140,7 @@ class Ui_EditorWidget(object):
 
     def retranslateUi(self, EditorWidget):
         EditorWidget.setWindowTitle(QtGui.QApplication.translate("EditorWidget", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("EditorWidget", "Go to line:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelGoToLine.setText(QtGui.QApplication.translate("EditorWidget", "Go to line:", None, QtGui.QApplication.UnicodeUTF8))
         self.pushGoToLine.setText(QtGui.QApplication.translate("EditorWidget", "Go", None, QtGui.QApplication.UnicodeUTF8))
         self.labelFind.setText(QtGui.QApplication.translate("EditorWidget", "Find:", None, QtGui.QApplication.UnicodeUTF8))
         self.pushFindPrevious.setToolTip(QtGui.QApplication.translate("EditorWidget", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
@@ -162,7 +162,7 @@ class Ui_EditorWidget(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Replace &amp; Find Previous</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.pushReplaceAll.setText(QtGui.QApplication.translate("EditorWidget", "Replace &All", None, QtGui.QApplication.UnicodeUTF8))
 
-from base import PMXCodeEdit
+from codeedit import PMXCodeEdit
 from searchwidgets import PMXReplaceBox, PMXFindBox
 import res_rc
 

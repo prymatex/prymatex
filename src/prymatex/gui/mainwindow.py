@@ -3,7 +3,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from pprint import pformat
 from prymatex.bundles import PMXBundle, PMXMenuNode
-from prymatex.gui.editor.base import PMXCodeEdit
+from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
 from prymatex.gui.mixins.common import CenterWidget
 from prymatex.gui.panes.bundles import PMXBundleEditorDock
@@ -18,8 +18,9 @@ from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.lib.i18n import ugettext as _
 import itertools
 import logging
-from prymatex.gui.editor.widget import PMXEditorWidget
+from prymatex.gui.editor import PMXEditorWidget
 from prymatex.gui.dialogs import NewFromTemplateDialog
+from prymatex.core.exceptions import FileDoesNotExistError
 
 #from prymatex.config.configdialog import PMXConfigDialog
 
@@ -210,16 +211,16 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     #====================================================================
     # Command outputs
     #====================================================================
-    def showHtml(self, string):
+    def showHtml(self, input, string):
         self.paneBrowser.setHtml(string)
         self.paneBrowser.show()
     
-    def showTooltip(self, string):
+    def showTooltip(self, input, string):
         cursor = self.currentEditor.textCursor()
         point = self.currentEditor.viewport().mapToGlobal(self.currentEditor.cursorRect(cursor).bottomRight())
         QToolTip.showText(point, string.strip(), self.currentEditor)
     
-    def createNewDocument(self, string):
+    def createNewDocument(self, input, string):
         print "Nuevo documento", string
             
     def on_actionQuit_triggered(self):
@@ -316,14 +317,20 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         for path in files_to_open:
             self.openFile(path, auto_focus = True)
             
+    
+    def handleUrl(self, url):
+        raise NotImplementedError("txmt://open?line=14&url=file:///...")
             
-            
-    def openFile(self, url_or_path, auto_focus = False):
+    def openFile(self, path, auto_focus = False):
         file_manager = qApp.instance().file_manager
-        if file_manager.isOpened(url_or_path):
+        if file_manager.isOpened(path):
             return
-        pmx_file = file_manager.openFile(url_or_path)
-        editor = PMXEditorWidget.getEditor(pmx_file)
+        try:
+            pmx_file = file_manager.openFile(path)
+        except FileDoesNotExistError, e:
+            QMessageBox.critical(self, "File not found", "%s" % e, QMessageBox.Ok)
+            return
+        editor = PMXEditorWidget.editorFactory(pmx_file)
         self.tabWidget.addTab(editor, auto_focus)
         return editor
     
@@ -500,10 +507,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     # Templates
     #===========================================================
     def newFileFromTemplate(self, path):
-        file_manager = qApp.instance().file_manager
-        pmx_file = file_manager.openFile(path)
-        editor = PMXEditorWidget.getEditor(pmx_file)
-        self.tabWidget.addTab(editor, True)
+        self.openFile(path, auto_focus=True)
     
     @pyqtSignature('')
     def on_actionNew_from_template_triggered(self):
