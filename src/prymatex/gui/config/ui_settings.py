@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/settings.ui'
 #
-# Created: Mon Mar 28 14:21:46 2011
+# Created: Mon Mar 28 19:14:21 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,22 +67,33 @@ class Ui_PMXSettingsDialog(object):
         self.container = QtGui.QWidget(self.mainContainer)
         self.container.setObjectName("container")
         self.verticalLayout_3.addWidget(self.container)
+        self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem)
+        self.pushApply = QtGui.QPushButton(self.mainContainer)
+        self.pushApply.setObjectName("pushApply")
+        self.horizontalLayout_2.addWidget(self.pushApply)
+        self.pushDiscard = QtGui.QPushButton(self.mainContainer)
+        self.pushDiscard.setObjectName("pushDiscard")
+        self.horizontalLayout_2.addWidget(self.pushDiscard)
+        self.pushClose = QtGui.QPushButton(self.mainContainer)
+        self.pushClose.setObjectName("pushClose")
+        self.horizontalLayout_2.addWidget(self.pushClose)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addWidget(self.splitter)
-        self.buttonBox = QtGui.QDialogButtonBox(PMXSettingsDialog)
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName("buttonBox")
-        self.verticalLayout_2.addWidget(self.buttonBox)
 
         self.retranslateUi(PMXSettingsDialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), PMXSettingsDialog.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), PMXSettingsDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(PMXSettingsDialog)
 
     def retranslateUi(self, PMXSettingsDialog):
         PMXSettingsDialog.setWindowTitle(QtGui.QApplication.translate("PMXSettingsDialog", "Prymatex Settings", None, QtGui.QApplication.UnicodeUTF8))
         self.labelFilter.setText(QtGui.QApplication.translate("PMXSettingsDialog", "Filter", None, QtGui.QApplication.UnicodeUTF8))
         self.labelTitle.setText(QtGui.QApplication.translate("PMXSettingsDialog", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushApply.setText(QtGui.QApplication.translate("PMXSettingsDialog", "&Apply", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushDiscard.setText(QtGui.QApplication.translate("PMXSettingsDialog", "&Discard", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushClose.setText(QtGui.QApplication.translate("PMXSettingsDialog", "&Close", None, QtGui.QApplication.UnicodeUTF8))
 
 from prymatex.gui.config.widgets import PMXConfigTreeView
 import res_rc

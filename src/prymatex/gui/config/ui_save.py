@@ -2,25 +2,20 @@
 
 # Form implementation generated from reading ui file 'ui_files/save.ui'
 #
-# Created: Mon Mar 28 18:45:09 2011
-#      by: PyQt4 UI code generator 4.8.1
+# Created: Mon Mar 28 19:14:21 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    _fromUtf8 = lambda s: s
-
 class Ui_Save(object):
     def setupUi(self, Save):
-        Save.setObjectName(_fromUtf8("Save"))
+        Save.setObjectName("Save")
         Save.resize(400, 300)
         self.checkBox = QtGui.QCheckBox(Save)
         self.checkBox.setGeometry(QtCore.QRect(40, 30, 87, 21))
-        self.checkBox.setObjectName(_fromUtf8("checkBox"))
+        self.checkBox.setObjectName("checkBox")
 
         self.retranslateUi(Save)
         QtCore.QMetaObject.connectSlotsByName(Save)
