@@ -12,7 +12,7 @@ class PMXConfigTreeView(QTreeView):
         self.setHeaderHidden(True)
         
     def currentChanged(self, new, old):
-        model = self.model()
+        model = self.model()#.sourceModel()
         new, old = map( lambda indx: model.itemFromIndex(indx), (new, old))
         print new, old, map(type, [old, new])
         self.widgetChanged.emit(new.widget_index)
@@ -38,4 +38,8 @@ class PMXGeneralWidget(QWidget, Ui_General):
         self.setupUi(self)
         
         
-        
+from ui_save import Ui_Save 
+class PMXSaveWidget(QWidget, Ui_Save):
+    def __init__(self, parent = None):
+        super(PMXSaveWidget, self).__init__(parent)
+        self.setupUi(self)

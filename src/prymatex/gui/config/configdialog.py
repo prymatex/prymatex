@@ -32,6 +32,7 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog):
         self.proxy_model.setSourceModel(self.model)
         
         self.treeView.setModel(self.proxy_model)
+        self.treeView.setModel(self.model)
         self.treeView.widgetChanged.connect(self.changeWidget)
         #self.model.setHeaderData(0, Qt.Horizontal, self.trUtf8("Option"))
         self.stackLayout = QStackedLayout()
@@ -72,4 +73,3 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog):
         self.model.appendRow(item)
         
 
-    
