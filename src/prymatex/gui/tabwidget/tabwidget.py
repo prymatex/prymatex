@@ -13,6 +13,7 @@ from choosetab import ChooseTabDialog
 from prymatex.core.base import PMXObject
 import logging
 from prymatex.core.exceptions import APIUsageError
+from prymatex.core.filemanager import PMXFile
 
 logger = logging.getLogger(__name__)
 
@@ -195,12 +196,40 @@ class PMXTabWidget(QTabWidget, PMXObject):
         return self.count()
         
     def __getitem__(self, index):
-        assert isinstance(index, int)
-        if index < 0 or index > len(self):
-            raise IndexError("%s-nth widget does not exist in %s" % (index, self) )
-        return self.widget( index )
+        if type(index) in (int, ):
+            if index < 0 or index > len(self):
+                raise IndexError("%s-nth widget does not exist in %s" % (index, self) )
+            return self.widget( index )
+        elif isinstance(index, PMXFile):
+            for i in range(len(self)):
+                tab = self.widget(i)
+                if isinstance(tab, PMXEditorWidget):
+                    if tab.file == index:
+                        return tab
+            raise KeyError("%s has no %s file" % (self, index))
+        raise APIUsageError("%s only supports integer and PMXFile indexes" % (type(self).__name__))
         
+    def __contains__(self, other):
+        
+        assert isinstance(other, PMXFile)
+        for i in range(len(self)):
+            tab = self.widget(i)
+            if isinstance(tab, PMXEditorWidget):
+                if tab.file == other:
+                    return True
+        return False
     
+    def focusEditor(self, editor):
+        
+        for i in range(len(self)):
+            tab = self.widget(i)
+            if isinstance(tab, PMXEditorWidget):
+                if tab == editor:
+                    self.setCurrentIndex(i)
+                    tab.setFocus(Qt.MouseFocusReason)
+                    return
+        raise APIUsageError("Could not foucs %s in %s" % (editor, self))
+        
     def appendEmptyTab(self):
         '''
         Creates a new empty tab and returns it
@@ -220,6 +249,13 @@ class PMXTabWidget(QTabWidget, PMXObject):
         Overrides QTabWidget.addTab(page, title) so that
         afterInsertion is called 
         '''
+        if len(self) == 1:
+            editor = self[0]
+            
+            if editor.file.path is None and not editor.modified:
+                print "Editor unico", editor.file.path, editor.modified
+                self.removeTab(1)
+                    
         if type(autoFocus) is not bool:
             # Detect old API calls
             raise APIUsageError("addTab received somethign wierd as autoFoucs %s (should be bool)" % autoFocus)
