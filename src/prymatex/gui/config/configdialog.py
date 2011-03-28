@@ -19,32 +19,28 @@ class PMXNetworkConfigWidget(QWidget):
         super(PMXNetworkConfigWidget, self).__init__()
         
 
+
+
 class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog):
     def __init__(self):
         super(PMXSettingsDialog, self).__init__()
         self.setupUi(self)
         self.model = QStandardItemModel()
-        self.treeView.setModel(self.model)
+        self.model = QStandardItemModel(self)
+        
+        self.proxy_model = QSortFilterProxyModel(self)
+        self.proxy_model.setSourceModel(self.model)
+        
+        self.treeView.setModel(self.proxy_model)
         self.treeView.widgetChanged.connect(self.changeWidget)
-        self.model.setHeaderData(0, Qt.Horizontal, self.trUtf8("Option"))
+        #self.model.setHeaderData(0, Qt.Horizontal, self.trUtf8("Option"))
         self.stackLayout = QStackedLayout()
         self.container.setLayout(self.stackLayout)
         
-        #self.treeView.selectionChanged.connect(self.itemChanged)
-#        from ui_font_and_theme import Ui_Form
-#        class ThemeSettings(QWidget, Ui_Form):
-#            def __init__(self):
-#                super(ThemeSettings, self).__init__()
-#                self.setupUi(self)
-#                
-#        self.register("Theme", ThemeSettings())
-#        
-#        self.register("Editor", QLabel("Hola"))
-#        self.register("Network", QLabel("Chau"))
-#        self.register("Bundles", QLabel("Chau"))
-#        self.register("Save", QLabel("<b>TODO</b>"))
-#        self.register("Keyboard Shortcuts", QLabel("<b>TODO</b>"))
-#        self.register("Plugins", QLabel("<b>TODO</b>"))
+        self.lineFilter.textChanged.connect(self.filterItems)
+        
+    def filterItems(self, txt):
+        self.proxy_model.setFilterRegExp(QRegExp(txt, Qt.CaseInsensitive))
     
     def exec_(self):
         center(self)

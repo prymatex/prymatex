@@ -32,6 +32,7 @@ class PMXApplication(QApplication):
     # Saved when the application is about to close
     #===========================================================================
     __settings = None
+    __configdialog = None
     #===========================================================================
     # Logger, deprecated in favour of module level logger
     #===========================================================================
@@ -78,6 +79,8 @@ class PMXApplication(QApplication):
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
         
         self.setup_file_manager()
+        # Config dialog
+        self.setup_configdialog()
         # Creates the GUI
         self.createWindows(files_to_open)
         
@@ -89,6 +92,22 @@ class PMXApplication(QApplication):
     
     def setup_profile(self):
         pass
+    
+    
+    def setup_configdialog(self):
+        from prymatex.gui.config import  PMXSettingsDialog
+        configdialog = PMXSettingsDialog()
+        from prymatex.gui.config.widgets import PMXGeneralWidget,\
+                                                PMXThemeConfigWidget,\
+                                                PMXUpdatesWidget
+        configdialog.register(PMXGeneralWidget())
+        configdialog.register(PMXThemeConfigWidget())
+        configdialog.register(PMXUpdatesWidget())
+        self.__configdialog = configdialog
+    
+    @property
+    def configdialog(self):
+        return self.__configdialog
     
     def parse_app_arguments(self, arguments):
         '''
@@ -147,10 +166,10 @@ class PMXApplication(QApplication):
         self.windows.append(first_window)   # Could it be possible to hold it in
                                             # its childrens?
         
-        self.connect(first_window, SIGNAL("destroyed(QObject)"), self.destroyWindow)
     
-    def destroyWindow(self, qobject):
-        pass
+    
+    
+    
     @property
     def logger(self):
         return self.__logger

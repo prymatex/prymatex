@@ -8,6 +8,8 @@ class PMXConfigTreeView(QTreeView):
     
     def __init__(self, parent = None):
         super(PMXConfigTreeView, self).__init__(parent)
+        self.setAnimated(True)
+        self.setHeaderHidden(True)
         
     def currentChanged(self, new, old):
         model = self.model()
