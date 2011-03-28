@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/settings.ui'
 #
-# Created: Mon Mar 28 11:37:08 2011
+# Created: Mon Mar 28 14:21:46 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -45,33 +45,28 @@ class Ui_PMXSettingsDialog(object):
         self.treeView.setLineWidth(0)
         self.treeView.setObjectName("treeView")
         self.verticalLayout.addWidget(self.treeView)
-        self.horizontalLayout_2 = QtGui.QHBoxLayout()
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem)
-        self.pushExpand = QtGui.QPushButton(self.layoutWidget)
-        self.pushExpand.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/actions/resources/actions/list-add.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushExpand.setIcon(icon1)
-        self.pushExpand.setObjectName("pushExpand")
-        self.horizontalLayout_2.addWidget(self.pushExpand)
-        self.pushShrink = QtGui.QPushButton(self.layoutWidget)
-        self.pushShrink.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/actions/resources/actions/list-remove.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushShrink.setIcon(icon2)
-        self.pushShrink.setObjectName("pushShrink")
-        self.horizontalLayout_2.addWidget(self.pushShrink)
-        self.verticalLayout.addLayout(self.horizontalLayout_2)
-        self.container = QtGui.QWidget(self.splitter)
+        self.mainContainer = QtGui.QWidget(self.splitter)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.container.sizePolicy().hasHeightForWidth())
-        self.container.setSizePolicy(sizePolicy)
-        self.container.setMinimumSize(QtCore.QSize(470, 0))
+        sizePolicy.setHeightForWidth(self.mainContainer.sizePolicy().hasHeightForWidth())
+        self.mainContainer.setSizePolicy(sizePolicy)
+        self.mainContainer.setMinimumSize(QtCore.QSize(470, 0))
+        self.mainContainer.setObjectName("mainContainer")
+        self.verticalLayout_3 = QtGui.QVBoxLayout(self.mainContainer)
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.labelTitle = QtGui.QLabel(self.mainContainer)
+        self.labelTitle.setMaximumSize(QtCore.QSize(16777215, 40))
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        font.setWeight(75)
+        font.setBold(True)
+        self.labelTitle.setFont(font)
+        self.labelTitle.setObjectName("labelTitle")
+        self.verticalLayout_3.addWidget(self.labelTitle)
+        self.container = QtGui.QWidget(self.mainContainer)
         self.container.setObjectName("container")
+        self.verticalLayout_3.addWidget(self.container)
         self.verticalLayout_2.addWidget(self.splitter)
         self.buttonBox = QtGui.QDialogButtonBox(PMXSettingsDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -87,6 +82,7 @@ class Ui_PMXSettingsDialog(object):
     def retranslateUi(self, PMXSettingsDialog):
         PMXSettingsDialog.setWindowTitle(QtGui.QApplication.translate("PMXSettingsDialog", "Prymatex Settings", None, QtGui.QApplication.UnicodeUTF8))
         self.labelFilter.setText(QtGui.QApplication.translate("PMXSettingsDialog", "Filter", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelTitle.setText(QtGui.QApplication.translate("PMXSettingsDialog", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
 
 from prymatex.gui.config.widgets import PMXConfigTreeView
 import res_rc
