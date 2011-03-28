@@ -322,16 +322,23 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         raise NotImplementedError("txmt://open?line=14&url=file:///...")
             
     def openFile(self, path, auto_focus = False):
+        '''
+        Opens a file or focus its editor
+        '''
         file_manager = qApp.instance().file_manager
-        if file_manager.isOpened(path):
-            return
         try:
             pmx_file = file_manager.openFile(path)
         except FileDoesNotExistError, e:
             QMessageBox.critical(self, "File not found", "%s" % e, QMessageBox.Ok)
             return
-        editor = PMXEditorWidget.editorFactory(pmx_file)
-        self.tabWidget.addTab(editor, auto_focus)
+        if not pmx_file in self.tabWidget:
+            editor = PMXEditorWidget.editorFactory(pmx_file)
+            self.tabWidget.addTab(editor)
+        else:
+            editor = self.tabWidget[pmx_file]
+             
+        self.tabWidget.focusEditor(editor)
+        
         return editor
     
     @pyqtSignature('')
@@ -422,7 +429,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
     
     @pyqtSignature('')
     def on_actionPreferences_triggered(self):
-        self.dialogConfig.exec_()
+        qApp.instance().configdialog.exec_()
     
     def notifyCursorChange(self, editor, row, col):
         ''' Called by editors '''
