@@ -31,10 +31,6 @@ onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 DEFAULT_SETTINGS = { 'completions': [],
                      'completionCommand': '',
                      'disableDefaultCompletion': 0,
-                     'decreaseIndentPattern': None,
-                     'increaseIndentPattern': None,
-                     'indentNextLinePattern': None,
-                     'unIndentedLinePattern': None,
                      'showInSymbolList': 0,
                      'symbolTransformation': '',
                      'highlightPairs': [],
@@ -48,11 +44,6 @@ class PMXSetting(dict):
         for key in [    'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
             if hash.has_key(key):
                 hash[key] = onig_compile( hash[key] )
-        if 'shellVariables' in hash:
-            variables = hash['shellVariables']
-            hash['shellVariables'] = {}
-            for variable in variables:
-                hash['shellVariables'][variable['name']] = variable['value']
         super(PMXSetting, self).__init__(hash)
         
 class PMXPreference(PMXBundleItem):
@@ -72,12 +63,5 @@ class PMXPreference(PMXBundleItem):
     def buildSettings(preferences):
         settings = PMXSetting(DEFAULT_SETTINGS)
         for p in preferences:
-            if 'shellVariables' in p.settings:
-                for key, value in p.settings.iteritems():
-                    if key == 'shellVariables':
-                        settings['shellVariables'].update(value)
-                    else:
-                        settings[key] = value
-            else:
-                settings.update(p.settings)
+            settings.update(p.settings)
         return settings

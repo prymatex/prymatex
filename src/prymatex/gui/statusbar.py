@@ -100,9 +100,9 @@ class PMXStatusBar(QStatusBar, PMXObject):
             
     def setSignals(self):
         #External events
-        self.connect(self.root, SIGNAL('editorCursorPositionChangedEvent'), self.updatePosition )
-        self.connect(self.root, SIGNAL('editorSetSyntaxEvent'), self.updateSyntax )
-        self.connect(self.root, SIGNAL('tabWidgetEditorChangedEvent'), self.updateEditor )
+        self.connect(self.mainwindow, SIGNAL('editorCursorPositionChangedEvent'), self.updatePosition )
+        self.connect(self.mainwindow, SIGNAL('editorSetSyntaxEvent'), self.updateSyntax )
+        self.connect(self.mainwindow, SIGNAL('tabWidgetEditorChangedEvent'), self.updateEditor )
         
         #Internal signals
         self.connect(self.syntaxMenu, SIGNAL('currentIndexChanged(QString)'), self.sendStatusBarSyntaxChanged)

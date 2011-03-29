@@ -1,10 +1,9 @@
-from PyQt4.QtCore import QTimer, QVariant, SIGNAL
-from PyQt4.QtGui import *
+from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-from PyQt4.QtWebKit import QWebView
 
 from prymatex.gui.panes import PaneDockBase
 from prymatex.gui.panes.ui_browser import Ui_BrowserPane
+from prymatex.core.base import PMXObject
 
 #http://diotavelli.net/PyQtWiki/SampleCode
 '''
@@ -24,15 +23,16 @@ if 'http_proxy' in os.environ:
             '''
 
 js = """
-TextMate.system = fundtion(command) {
+TextMate.system = function(command) {
+    alert(command);
     var ok = this._system(command);
     if (ok) return _systemWrapper;
 }
 """
 
-class NetworkAccessManager(QNetworkAccessManager):
-    def __init__(self, old_manager):
-        QNetworkAccessManager.__init__(self)
+class NetworkAccessManager(QNetworkAccessManager, PMXObject):
+    def __init__(self, parent, old_manager):
+        super(NetworkAccessManager, self).__init__(parent)
         self.old_manager = old_manager
         self.setCache(old_manager.cache())
         self.setCookieJar(old_manager.cookieJar())
@@ -40,12 +40,11 @@ class NetworkAccessManager(QNetworkAccessManager):
         self.setProxyFactory(old_manager.proxyFactory())
     
     def createRequest(self, operation, request, data):
-        #txmt://open?«arguments»
-            #url — the actual file to open (i.e. a file://… URL), if you leave out this argument, the frontmost document is implied.
-            #line — line number to go to (one based).
-            #column — column number to go to (one based).
+        print operation
+        print request
+        print data
         if request.url().scheme() == "txmt":
-            print "txmt"
+            self.mainwindow.openUrl(request.url())
         return QNetworkAccessManager.createRequest(self, operation, request, data)
 
 class SystemWrapper(QObject):
@@ -53,8 +52,8 @@ class SystemWrapper(QObject):
         QObject.__init__(self)
         self.process = process
     
-    @pyqtSignature("open(int)")
-    def open(self, flags):
+    @pyqtSignature("write(int)")
+    def write(self, flags):
         pass
     
     @pyqtSignature("close()")
@@ -68,7 +67,7 @@ class TextMate(QObject):
     
     @pyqtSignature("system(QString)")
     def _system(self, command):
-        self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(path))
+        self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(''))
         return True
     
     def isBusy(self):
@@ -81,7 +80,7 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
         self.setupUi(self)
         #New manager
         old_manager = self.webView.page().networkAccessManager()
-        new_manager = NetworkAccessManager(old_manager)
+        new_manager = NetworkAccessManager(self, old_manager)
         self.webView.page().setNetworkAccessManager(new_manager)
         self.webView.loadFinished[bool].connect(self.prepareJavaScript)
     

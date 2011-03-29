@@ -4,6 +4,7 @@
 from PyQt4.QtCore import QObject, pyqtWrapperType
 import re
 from prymatex.core.event import PMXEventSender
+from prymatex.core.config import SettingsGroup
 from PyQt4.QtGui import qApp
 METHOD_RE = re.compile('(?P<name>[\w\d_]+)(:?\((?P<args>.*)\))?', re.IGNORECASE)
 
@@ -16,7 +17,7 @@ EVENT_CLASSES = {}
 
 class PMXOptions(object):
     def __init__(self, options):
-        self.settings = getattr(options, 'settings', None)
+        self.settings = SettingsGroup(getattr(options, 'settings', ''))
         self.events = getattr(options, 'events', None)
 
 class PMXObjectBase(pyqtWrapperType):
@@ -30,8 +31,8 @@ class PMXObjectBase(pyqtWrapperType):
         return new_class
 
     def add_to_class(cls, name, value):
-        if hasattr(value, 'contribute_to_class'):
-            value.contribute_to_class(cls, name)
+        if hasattr(value, 'contributeToClass'):
+            value.contributeToClass(cls, name)
         else:
             setattr(cls, name, value)
 
@@ -39,7 +40,7 @@ class PMXObject(QObject):
     __metaclass__ = PMXObjectBase
 
     def configure(self):
-        self._meta.settings.add_listener(self)
+        self._meta.settings.addListener(self)
         self._meta.settings.configure(self)
     
     def declareEvent(self, signature):
@@ -58,8 +59,8 @@ class PMXObject(QObject):
         pass
     
     @property
-    def root(self):
-        root = self
-        while root.parent():
-            root = root.parent()
-        return root
+    def mainwindow(self):
+        main = self
+        while main.parent() != None:
+            main = main.parent()
+        return main

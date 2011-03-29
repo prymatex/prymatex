@@ -54,7 +54,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
     
     def setSignals(self):
         #External events
-        self.connect(self.root, SIGNAL('statusBarSytnaxChangedEvent'), self.updateEditorSyntax )
+        self.connect(self.mainwindow, SIGNAL('statusBarSytnaxChangedEvent'), self.updateEditorSyntax )
         
         #Internal signals
         self.currentChanged.connect(self.on_current_changed)
