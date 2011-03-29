@@ -15,13 +15,8 @@ settings = qApp.instance().settings
 EVENT_CLASSES = {}
 
 class PMXOptions(object):
-    def __init__(self, options=None):
-        self.settings = settings
-        space = getattr(options, 'settings', None)
-        if space != None:
-            spaces = space.split('.')
-            for s in spaces:
-                self.settings = getattr(self.settings, s)
+    def __init__(self, options):
+        self.settings = getattr(options, 'settings', None)
         self.events = getattr(options, 'events', None)
 
 class PMXObjectBase(pyqtWrapperType):

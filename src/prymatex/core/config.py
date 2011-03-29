@@ -137,18 +137,8 @@ class Settings(SettingsNode):
     __unicode__ = __str__
 
 class Setting(object):
-    def __init__(self, default = None, fset = None):
-        self.__value = None
+    def __init__(self, default = None):
         self.__default = default
-        self.__fset = fset
-    
-    def get_value(self):
-        return self.__value or self.__default
-    
-    def set_value(self, value):
-        self.__value = value
-    
-    value = property(get_value, set_value)
     
     def contribute_to_class(self, cls, name):
         self.name = name
@@ -157,10 +147,11 @@ class Setting(object):
         except KeyError:
             cls._meta.settings[self.name] = self.__default
         
-        if self.__fset == None:
-            #try form the class
-            self.__fset = getattr(cls, "set%s" % self.name.title(), None)
-        setattr(cls, self.name, self)
+        if hasattr(cls, name):
+            print "tiene getter"
+        if hasattr(cls, "set" + name.title()):
+            print "tiene setter"
+        setattr(cls, name, self)
         
     def __get__(self, instance, instance_type = None):
         if instance != None:
