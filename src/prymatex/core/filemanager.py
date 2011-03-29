@@ -167,7 +167,7 @@ class PMXFileManager(PMXObject):
     filedOpened = pyqtSignal(PMXFile) # A new file has been opened
     
     class Meta:
-        settings = 'core.filemanager'
+        settings = 'filemanager'
     
     file_history = Setting(default = [])
     
@@ -179,6 +179,7 @@ class PMXFileManager(PMXObject):
         self.empty_file_counter = 0 
     
     def isOpened(self, filepath):
+        filepath = abspath(filepath)
         if filepath in self.opened_files:
             return True
         return False

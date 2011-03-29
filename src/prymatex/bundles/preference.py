@@ -70,7 +70,7 @@ class PMXPreference(PMXBundleItem):
     
     @staticmethod
     def buildSettings(preferences):
-        settings = DEFAULT_SETTINGS
+        settings = PMXSetting(DEFAULT_SETTINGS)
         for p in preferences:
             if 'shellVariables' in p.settings:
                 for key, value in p.settings.iteritems():

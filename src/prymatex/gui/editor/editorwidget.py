@@ -140,7 +140,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
     def setTabTextColor(self, color):
         self.tabwidget.tabBar().setTabTextColor(self.index, color)
-        
+    
+    @property
+    def modified(self):
+        return self.codeEdit.document().isModified()
+    
     #===========================================================================
     # Factory methods
     #===========================================================================

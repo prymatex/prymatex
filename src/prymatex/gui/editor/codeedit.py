@@ -278,6 +278,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
         '''
         
+        #Check for snippet
         if self.snippet != None:
             key_event = self.keyPressSnippetEvent(key_event)
             if key_event == None:

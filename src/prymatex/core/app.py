@@ -4,6 +4,7 @@ from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
 from PyQt4.QtCore import SIGNAL, QEvent
 
 from os.path import join, exists, isdir, isabs
+import os
 
 from os import getpid, unlink, getcwd
 from os.path import dirname, abspath
@@ -31,6 +32,7 @@ class PMXApplication(QApplication):
     # Saved when the application is about to close
     #===========================================================================
     __settings = None
+    __configdialog = None
     #===========================================================================
     # Logger, deprecated in favour of module level logger
     #===========================================================================
@@ -77,6 +79,8 @@ class PMXApplication(QApplication):
         self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
         
         self.setup_file_manager()
+        # Config dialog
+        self.setup_configdialog()
         # Creates the GUI
         self.createWindows(files_to_open)
         
@@ -88,6 +92,22 @@ class PMXApplication(QApplication):
     
     def setup_profile(self):
         pass
+    
+    
+    def setup_configdialog(self):
+        from prymatex.gui.config import  PMXSettingsDialog
+        configdialog = PMXSettingsDialog()
+        from prymatex.gui.config.widgets import PMXGeneralWidget,\
+                                                PMXThemeConfigWidget,\
+                                                PMXUpdatesWidget
+        configdialog.register(PMXGeneralWidget())
+        configdialog.register(PMXThemeConfigWidget())
+        configdialog.register(PMXUpdatesWidget())
+        self.__configdialog = configdialog
+    
+    @property
+    def configdialog(self):
+        return self.__configdialog
     
     def parse_app_arguments(self, arguments):
         '''
@@ -146,10 +166,10 @@ class PMXApplication(QApplication):
         self.windows.append(first_window)   # Could it be possible to hold it in
                                             # its childrens?
         
-        self.connect(first_window, SIGNAL("destroyed(QObject)"), self.destroyWindow)
     
-    def destroyWindow(self, qobject):
-        pass
+    
+    
+    
     @property
     def logger(self):
         return self.__logger
@@ -167,7 +187,11 @@ class PMXApplication(QApplication):
         logger = logging.getLogger("")
         logger.setLevel(logging.DEBUG)
         # create file handler which logs even debug messages
-        fh = logging.FileHandler("messages.log")
+        try:
+            fh = logging.FileHandler("messages.log")
+        except IOError:
+            fh =  logging.FileHandler("/tmp/messages.log")
+        
         fh.setLevel(logging.DEBUG)
         # create console handler with a higher log level
         ch = logging.StreamHandler()
@@ -298,8 +322,9 @@ class PMXApplication(QApplication):
         if self.options.startdir and exists(self.options.startdir):
             return abspath(self.options.startdir)
         else:
-            from prymatex.lib.os import get_homedir
-            return get_homedir()
+            #from prymatex.lib.os import get_homedir
+            #return get_homedir()
+            return os.getcwd()
 
     def notify(self, receiver, event):
         '''

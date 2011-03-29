@@ -10,6 +10,20 @@ Oringinally called Crossmates [*]_ , we decided to change its name after serious
 development took off.
 
 
+Prymatex main goal is to support TextMate's bundles [*]_, these bundles provide
+syntax definition, code snippets, file templates and commands, among 
+other things. There are a lot of bundles out there, 
+most of them maintained by TextMate community.
+
+There are some TextMate clones already, such as eTextEditor and InType, that bring
+TextMate's magic into Microsoft Windows world, although they can be used under Linux
+with wine, emulation is not an option for serious development and Prymatex authors
+main operating system is Linux :P.
+
+
+
+
+.. [*] Read on about TextMate bundles and how we implement them in TodoInserBundleSction
 
 .. _TextMate: http://macromates.com
 
@@ -50,14 +64,26 @@ This diagram show Prymatex architecture
         ]
 		node [ shape = "record" ];
 		// Nodes
-		"app" [label = "PMXApplication|settings"];
-		"file manager" [label = "PMXFileManager\nopened_files = \{\}"];
-		"file" [label = "PMXFile\nsave()\nread()\nwrite()\n" ];
-		"window" [label = "PMXMainWindow\n" ];
-		"tab widget" [label = "PMXTabWidget"];
-		"editor widget" [label = "PMXEditorWidget\neditorFactory(cls...)\
-		\nregisterEditor(cls,...)"];
-		"code edit" [ label = "PMXCodeEdit" ];
+		"app" [label = "{PMXApplication|settings}"];
+		"file manager" [label = "{PMXFileManager\
+		|opened_files = \{\}}"];
+		
+		"file" [label = "{PMXFile|\
+		path|\
+		save()\n\
+		read()\n\
+		write()\n\
+		fileSaved(QString) [singal] \n\
+    	fileRenamed(QString)[signal]\n\
+    	fileSaveError(QString) [signal]\n\
+    	fileLostReference() [signal]\n\
+		}" ];
+		
+		"window" [label = "{PMXMainWindow|tabWidget}" ];
+		"tab widget" [label = "{PMXTabWidget|}"];
+		"editor widget" [label = "{PMXEditorWidget|editorFactory(cls...)\
+		\nregisterEditor(cls,...)|}"];
+		"code edit" [ label = "{PMXCodeEdit|}" ];
 		
 		// Arrows
 		"file" -> "file manager" [label = "parent"];
@@ -71,7 +97,7 @@ This diagram show Prymatex architecture
 		
 	}
 	
-	
+
 .. inheritance-diagram:: prymatex.core.app.PMXApplication
 
 
