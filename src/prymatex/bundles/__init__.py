@@ -11,7 +11,7 @@ from prymatex.bundles.macro import PMXMacro
 from prymatex.bundles.syntax import PMXSyntax
 from prymatex.bundles.snippet import PMXSnippet
 from prymatex.bundles.preference import PMXPreference
-from prymatex.bundles.command import PMXCommand
+from prymatex.bundles.command import PMXCommand, PMXDragCommand
 from prymatex.bundles.template import PMXTemplate
 from prymatex.bundles.base import PMXBundle, PMXMenuNode
 from prymatex.bundles.theme import PMXTheme, PMXStyle
@@ -19,7 +19,7 @@ from prymatex.bundles.qtadapter import buildQTextFormat
 from prymatex.core.config import settings
 
 #BundleItemName, BundlePattern, BundleItemClass
-BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate ]
+BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
 def load_prymatex_bundles(after_load_callback = None):
     paths = glob(os.path.join(settings.PMX_BUNDLES_PATH, '*.tmbundle'))

@@ -75,6 +75,7 @@ class PMXBundle(object):
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
     KEY_SEQUENCE = {}
+    DRAGS = {}
     PREFERENCES = {}
     TEMPLATES = []
     scores = PMXScoreManager()
