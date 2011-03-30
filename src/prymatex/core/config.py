@@ -14,27 +14,31 @@ def get_prymatex_user_path():
 
 PMX_BASE_PATH = get_prymatex_base_path()
 PMX_USER_PATH = get_prymatex_user_path()
-PMX_APP_PATH = PMX_BASE_PATH = PMX_BASE_PATH
+PMX_APP_PATH = PMX_BASE_PATH
 PMX_BUNDLES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Bundles')
 PMX_THEMES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Themes')
 PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
 
-settings = QSettings(os.path.join(PMX_USER_PATH, 'settings.ini'), QSettings.IniFormat)
-    
 class SettingsGroup(object):
-    def __init__(self, name):
+    def __init__(self, name, qsettings):
         self.name = name
         self.listeners = []
         self.settings = {}
-    
-    def sync(self):
-        settings.sync()
-        
+        self.qsettings = qsettings
+            
     def setValue(self, name, value):
-        settings.beginGroup(self.name)
-        settings.setValue(name, value)
-        settings.endGroup()
+        self.qsettings.beginGroup(self.name)
+        self.qsettings.setValue(name, value)
+        self.qsettings.endGroup()
+        for listener in self.listeners:
+            setattr(listener, name, value)
     
+    def value(self, name):
+        self.qsettings.beginGroup(self.name)
+        value = self.qsettings.value(name)
+        self.qsettings.endGroup()
+        return value.toPyObject()
+        
     def addSetting(self, setting):
         self.settings[setting.name] = setting
         
@@ -43,25 +47,58 @@ class SettingsGroup(object):
     
     def configure(self, obj):
         for key, setting in self.settings.iteritems():
-            value = setting.__get__(obj)
+            value = self.value(key)
+            if not value:
+                if setting.fget != None and setting.default == None:
+                    value = setting.fget(obj)
+                elif setting.default != None:
+                    value = setting.default
+            else:
+                if setting.default != None:
+                    value = type(setting.default)(value)
             setattr(obj, key, value)
-        
+
+    def sync(self):
+        for key, setting in self.settings.iteritems():
+            if setting.default == None and self.listeners:
+                self.qsettings.beginGroup(self.name)
+                self.qsettings.setValue(key, setting.__get__(self.listeners[0]))
+                self.qsettings.endGroup()
+                
 class Setting(object):
     def __init__(self, default = None):
-        self.__default = default
+        self.default = default
+        self.value = None
         
     def contributeToClass(self, cls, name):
         self.name = name
-        self.__fget = getattr(cls, name, None)
-        self.__fset = getattr(cls, "set" + name.title(), None)
+        self.fget = getattr(cls, name, None)
+        self.fset = getattr(cls, "set" + name.title(), None)
+        if self.default == None and self.fget == None:
+            raise Exception("Value?")
         cls._meta.settings.addSetting(self)
         setattr(cls, name, self)
-        
+    
     def __get__(self, instance, instance_type = None):
-        if self.__fget != None and self.__default == None:
-            return self.__fget(instance)
-        return self.__default
+        return self.value
         
     def __set__(self, instance, value):
-        if self.__fset != None:
-            self.__fset(instance, value)
+        self.value = value
+        if self.fset != None:
+            self.fset(instance, value)
+            
+class PMXSettings(object):
+    GROUPS = {}
+    def __init__(self, profile):
+        self.qsettings = QSettings(os.path.join(PMX_USER_PATH, 'settings.ini'), QSettings.IniFormat)
+    
+    def getGroup(self, name):
+        if name not in self.GROUPS:
+            self.GROUPS[name] = SettingsGroup(name, self.qsettings)
+        return self.GROUPS[name]
+    
+    def sync(self):
+        #Save capture values from qt
+        for group in self.GROUPS.values():
+            group.sync()
+        self.qsettings.sync()

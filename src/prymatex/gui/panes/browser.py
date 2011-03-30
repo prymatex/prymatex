@@ -4,6 +4,7 @@ from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRepl
 from prymatex.gui.panes import PaneDockBase
 from prymatex.gui.panes.ui_browser import Ui_BrowserPane
 from prymatex.core.base import PMXObject
+from prymatex.core.config import Setting
 
 #http://diotavelli.net/PyQtWiki/SampleCode
 '''
@@ -74,7 +75,9 @@ class TextMate(QObject):
         return False
     readAll = pyqtProperty("bool", isBusy)
     
-class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
+class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
+    geometry = Setting()
+    
     def __init__(self, parent):
         PaneDockBase.__init__(self, parent)
         self.setupUi(self)
@@ -83,7 +86,11 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
         new_manager = NetworkAccessManager(self, old_manager)
         self.webView.page().setNetworkAccessManager(new_manager)
         self.webView.loadFinished[bool].connect(self.prepareJavaScript)
-    
+        self.configure()
+
+    class Meta():
+        settings = 'browser'
+            
     def prepareJavaScript(self, ready):
         if not ready:
             return
@@ -92,4 +99,3 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
     
     def setHtml(self, string):
         self.webView.setHtml(string)
-

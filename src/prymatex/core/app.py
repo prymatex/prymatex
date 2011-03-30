@@ -11,7 +11,7 @@ from os.path import dirname, abspath
 from prymatex.lib import deco
 
 from logging import getLogger
-from prymatex.core.config import SettingsGroup, PMX_THEMES_PATH
+from prymatex.core.config import PMXSettings, PMX_THEMES_PATH
 from prymatex.core.exceptions import APIUsageError
 
 logger = getLogger(__name__)
@@ -58,8 +58,7 @@ class PMXApplication(QApplication):
         
         files_to_open = self.parse_app_arguments(args)
         
-        self.settings = SettingsGroup('general')
-        self.settings.setValue('diabled_bundles', [1,2,3,3])
+        self.settings = PMXSettings('default')
         
         # Some init's
         self.init_application_params()

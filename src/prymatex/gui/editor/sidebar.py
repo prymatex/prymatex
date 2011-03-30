@@ -24,6 +24,7 @@ class PMXSidebar(QWidget, PMXObject):
         self.foldingCollapsedIcon.load(":/sidebar/resources/sidebar/folding-collapsed.png")
         self.bookmarkFlagIcon = QPixmap()
         self.bookmarkFlagIcon.load(":/sidebar/resources/sidebar/bookmark-flag.png")
+        self.configure()
 
     class Meta(object):
         settings = 'editor.sidebar'
