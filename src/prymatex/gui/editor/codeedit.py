@@ -6,7 +6,7 @@ from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QToolTip
 from PyQt4.QtWebKit import QWebView
-from prymatex.bundles import PMXBundle, PMXPreference, PMXSnippet
+from prymatex.bundles import PMXBundle, PMXSnippet
 from prymatex.bundles.command import PMXCommand
 from prymatex.bundles.syntax import PMXSyntax
 from prymatex.bundles.theme import PMXTheme
@@ -310,9 +310,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor_right.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor,1)
                 try:
                     scope = self.getCurrentScope()
-                    preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
+                    preferences = PMXBundle.getPreferenceSettings(scope)
                     text_arround = "%s%s" % (cursor_left.selectedText(), cursor_right.selectedText())
-                    if text_arround in map(lambda pair: "%s%s" % (pair[0], pair[1]), preferences["smartTypingPairs"]):
+                    if text_arround in map(lambda pair: "%s%s" % (pair[0], pair[1]), preferences.smartTypingPairs):
                         cursor_left.removeSelectedText()
                         cursor_right.removeSelectedText()
                     else:
@@ -356,12 +356,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             '''
         elif key_event.text() != "":
             scope = self.getCurrentScope()
-            preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
-            smart_typing_test = map(lambda pair: pair[0], preferences["smartTypingPairs"])
+            preferences = PMXBundle.getPreferenceSettings(scope)
+            smart_typing_test = map(lambda pair: pair[0], preferences.smartTypingPairs)
             character = unicode(key_event.text())
             # Handle smart typing pairs
             if character in smart_typing_test:
-                self.performCharacterAction( preferences["smartTypingPairs"][smart_typing_test.index(character)])
+                self.performCharacterAction( preferences.smartTypingPairs[smart_typing_test.index(character)])
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
         else:
@@ -547,7 +547,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
-        preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
+        preferences = PMXBundle.getPreferenceSettings(scope)
         try:
             match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
             current_word = line[match.start():match.end()]
@@ -575,7 +575,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = unicode(cursor.selectedText().replace(u'\u2029', '\n'))
         #env.update(self._meta.settings['static_variables'])
-        env.update(preferences['shellVariables'])
+        env.update(preferences.shellVariables)
         return env
 
     #==========================================================================
