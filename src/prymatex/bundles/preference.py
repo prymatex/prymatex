@@ -43,6 +43,11 @@ class PMXPreferenceSettings(object):
     KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
                 'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking',
                 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
+    INDENT_NONE = 0
+    INDENT_INCREASE = 1
+    INDENT_DECREASE = 2
+    INDENT_NEXTLINE = 3
+    UNINDENT = 4
     def __init__(self, hash):
         for key in self.KEYS:
             value = hash.get(key, None)
@@ -61,7 +66,23 @@ class PMXPreferenceSettings(object):
                     self.shellVariables.update(other.shellVariables)
                 else:
                     setattr(self, key, value)
-
+    
+    def indent(self, line):
+        #IncreasePattern on return indent nextline
+        #DecreasePattern evaluate line to decrease, no requiere del return
+        #IncreaseOnlyNextLine on return indent nextline only
+        #IgnoringLines evaluate line to unindent, no require el return
+        if self.decreaseIndentPattern != None and self.decreaseIndentPattern.match(line):
+            return self.INDENT_DECREASE
+        elif self.increaseIndentPattern != None and self.increaseIndentPattern.match(line):
+            return self.INDENT_INCREASE
+        elif self.indentNextLinePattern != None and self.indentNextLinePattern.match(line):
+            return self.INDENT_NEXTLINE
+        elif self.unIndentedLinePattern != None and self.unIndentedLinePattern.match(line):
+            return self.UNINDENT
+        else:
+            return self.INDENT_NONE
+    
 class PMXPreference(PMXBundleItem):
     path_patterns = ['Preferences/*.tmPreferences', 'Preferences/*.plist']
     bundle_collection = 'preferences'
