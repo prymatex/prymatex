@@ -17,7 +17,7 @@ EVENT_CLASSES = {}
 
 class PMXOptions(object):
     def __init__(self, options):
-        self.settings = SettingsGroup(getattr(options, 'settings', ''))
+        self.settings = settings.getGroup(getattr(options, 'settings', ''))
         self.events = getattr(options, 'events', None)
 
 class PMXObjectBase(pyqtWrapperType):

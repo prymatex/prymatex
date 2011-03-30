@@ -340,13 +340,22 @@ def print_snippet_syntax():
 def test_syntaxes():
     from prymatex.bundles.syntax import PMXSyntax
     from prymatex.bundles.processor import PMXDebugSyntaxProcessor
-    syntax = PMXSyntax.getSyntaxesByName("LaTeX")
-    syntax[0].parse("item", PMXDebugSyntaxProcessor())
+    syntax = PMXSyntax.getSyntaxesByName("Python")
+    syntax[0].parse("class Persona(", PMXDebugSyntaxProcessor())
     print PMXSyntax.getSyntaxesNames()
 
 def print_commands():
-    from pprint import pprint
-    pprint(PMXBundle.KEY_EQUIVALENTS)
+    from prymatex.bundles.snippet import PMXSnippet
+    for key, values in PMXBundle.KEY_EQUIVALENTS.iteritems():
+        print key, chr(key)
+        if 0 == key:
+            for value in values:
+                print value.bundle.name, value.scope
+                if isinstance(value, PMXSnippet):
+                    print value.content
+                else:
+                    print value
+        
 
 def test_keys():
     from pprint import pprint
@@ -369,14 +378,13 @@ def test_bundle_elements():
 
 def test_preferences():
     from time import time
-    settings = PMXBundle.getPreferenceSettings('source.python')
+    settings = PMXBundle.getPreferenceSettings('source.c++')
     for key in settings.KEYS:
         print key, getattr(settings, key)
-    
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
     for file in glob(os.path.join(PMX_BUNDLES_PATH, '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_preferences()
+    print_commands()

@@ -62,7 +62,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     soft_tabs = Setting(default = True)
     tab_size = Setting(default = 4)
-    font = Setting(default = QFont("Monospace", 10))
+    font = Setting()
     
     @property
     def tabKeyBehavior(self):
@@ -109,8 +109,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.connectSignals()
         self.declareEvents()
         self.configure()
-        
-        
+
     #=======================================================================
     # Connect Signals and Declare Events
     #=======================================================================
@@ -327,33 +326,22 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 syntax = PMXSyntax.findSyntaxByFirstLine(line)
                 if syntax != None:
                     self.setSyntax(syntax)
-            QPlainTextEdit.keyPressEvent(self, key_event)
-            '''
+
+            #QPlainTextEdit.keyPressEvent(self, key_event)
             scope = self.getCurrentScope()
-            preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
-            indentation = self.indentationWhitespace(line)
-            #TODO: Move indentation to preferences
-            if preferences["decreaseIndentPattern"] != None and preferences["decreaseIndentPattern"].match(line):
-                logger.debug("decreaseIndentPattern")
-                self.decreaseIndent(indentation)
-                indentation = self.indentationWhitespace(line)
-                QPlainTextEdit.keyPressEvent(self, key_event)
-                self.indent(indentation)
-            elif preferences["increaseIndentPattern"] != None in preferences and preferences["increaseIndentPattern"].match(line):
+            settings = PMXBundle.getPreferenceSettings(scope)
+            acction = settings.indent(line)
+            if acction == settings.INDENT_INCREASE
                 logger.debug("increaseIndentPattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.increaseIndent(indentation)
-            elif preferences["indentNextLinePattern"] != None in preferences and preferences["indentNextLinePattern"].match(line):
+            elif acction == settings.INDENT_NEXTLINE:
                 logger.debug("indentNextLinePattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.increaseIndent(indentation)
-            elif preferences["unIndentedLinePattern"] != None in preferences and preferences["unIndentedLinePattern"].match(line):
-                logger.debug("unIndentedLinePattern")
-                QPlainTextEdit.keyPressEvent(self, key_event)
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
-            '''
         elif key_event.text() != "":
             scope = self.getCurrentScope()
             preferences = PMXBundle.getPreferenceSettings(scope)
