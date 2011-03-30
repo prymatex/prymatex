@@ -11,7 +11,7 @@ if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
-from prymatex.core.config import PMX_APP_PATH, PMX_SUPPORT_PATH
+from prymatex.core.config import PMX_APP_PATH, PMX_SUPPORT_PATH, PMX_BUNDLES_PATH
 from prymatex.bundles.qtadapter import buildKeyEquivalentString, buildKeySequence
 
 '''
@@ -78,6 +78,7 @@ class PMXBundle(object):
     DRAGS = {}
     PREFERENCES = {}
     TEMPLATES = []
+    SETTINGS_CACHE = {}
     scores = PMXScoreManager()
     
     def __init__(self, hash, name_space, path = None):
@@ -175,6 +176,15 @@ class PMXBundle(object):
         for _, ps in preferences:
             result.extend(ps)
         return result
+
+    @classmethod
+    def getPreferenceSettings(cls, scope):
+        #TODO: retrive the __class__ is ugly
+        klass = cls.PREFERENCES.values()[0][0].__class__
+        if scope not in cls.SETTINGS_CACHE:
+            preferences = cls.getPreferences(scope)
+            cls.SETTINGS_CACHE[scope] = klass.buildSettings(preferences)
+        return cls.SETTINGS_CACHE[scope]
 
     @classmethod
     def getTabTriggerItem(cls, keyword, scope):
@@ -358,14 +368,15 @@ def test_bundle_elements():
     pprint(PMXBundle.TEMPLATES)
 
 def test_preferences():
-    from prymatex.bundles.preference import PMXPreference
-    env = {}
-    env.update(PMXPreference.buildSettings(PMXBundle.getPreferences('text.html')))
-    print env
+    from time import time
+    settings = PMXBundle.getPreferenceSettings('source.python')
+    for key in settings.KEYS:
+        print key, getattr(settings, key)
+    
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
-    for file in glob(os.path.join(settings['PMX_BUNDLES_PATH'], '*')):
+    for file in glob(os.path.join(PMX_BUNDLES_PATH, '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_commands()
+    test_preferences()
