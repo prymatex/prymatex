@@ -39,13 +39,50 @@ DEFAULT_SETTINGS = { 'completions': [],
                      'spellChecking': 0
                       }
 
-class PMXSetting(dict):
+class PMXPreferenceSettings(object):
+    KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
+                'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking',
+                'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
+    INDENT_NONE = 0
+    INDENT_INCREASE = 1
+    INDENT_DECREASE = 2
+    INDENT_NEXTLINE = 3
+    UNINDENT = 4
     def __init__(self, hash):
-        for key in [    'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
-            if hash.has_key(key):
-                hash[key] = onig_compile( hash[key] )
-        super(PMXSetting, self).__init__(hash)
-        
+        for key in self.KEYS:
+            value = hash.get(key, None)
+            if value != None:
+                if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
+                    value = onig_compile( value )
+                elif key in [ 'shellVariables' ]:
+                    value = dict(map(lambda d: (d['name'], d['value']), value))
+            setattr(self, key, value)
+            
+    def combine(self, other):
+        for key in self.KEYS:
+            value = getattr(other, key, None)
+            if value != None:
+                if key in ['shellVariables']:
+                    self.shellVariables.update(other.shellVariables)
+                else:
+                    setattr(self, key, value)
+    
+    def indent(self, line):
+        #IncreasePattern on return indent nextline
+        #DecreasePattern evaluate line to decrease, no requiere del return
+        #IncreaseOnlyNextLine on return indent nextline only
+        #IgnoringLines evaluate line to unindent, no require el return
+        if self.decreaseIndentPattern != None and self.decreaseIndentPattern.match(line):
+            return self.INDENT_DECREASE
+        elif self.increaseIndentPattern != None and self.increaseIndentPattern.match(line):
+            return self.INDENT_INCREASE
+        elif self.indentNextLinePattern != None and self.indentNextLinePattern.match(line):
+            return self.INDENT_NEXTLINE
+        elif self.unIndentedLinePattern != None and self.unIndentedLinePattern.match(line):
+            return self.UNINDENT
+        else:
+            return self.INDENT_NONE
+    
 class PMXPreference(PMXBundleItem):
     path_patterns = ['Preferences/*.tmPreferences', 'Preferences/*.plist']
     bundle_collection = 'preferences'
@@ -53,7 +90,7 @@ class PMXPreference(PMXBundleItem):
         super(PMXPreference, self).__init__(hash, name_space, path)
         for key in [ 'settings' ]:
             if key == 'settings':
-                setattr(self, key, PMXSetting(hash.get(key, {})))
+                setattr(self, key, PMXPreferenceSettings(hash.get(key, {})))
 
     def setBundle(self, bundle):
         super(PMXPreference, self).setBundle(bundle)
@@ -61,7 +98,7 @@ class PMXPreference(PMXBundleItem):
     
     @staticmethod
     def buildSettings(preferences):
-        settings = PMXSetting(DEFAULT_SETTINGS)
+        settings = PMXPreferenceSettings(DEFAULT_SETTINGS)
         for p in preferences:
-            settings.update(p.settings)
+            settings.combine(p.settings)
         return settings
