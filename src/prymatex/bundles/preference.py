@@ -62,10 +62,7 @@ class PMXPreferenceSettings(object):
         for key in self.KEYS:
             value = getattr(other, key, None)
             if value != None:
-                if key in ['shellVariables']:
-                    self.shellVariables.update(other.shellVariables)
-                else:
-                    setattr(self, key, value)
+                setattr(self, key, value)
     
     def indent(self, line):
         #IncreasePattern on return indent nextline
