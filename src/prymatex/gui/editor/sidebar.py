@@ -3,9 +3,10 @@ from PyQt4.Qt import QColor, QSize
 from prymatex.core.config import Setting
 from prymatex.gui.editor.syntax import PMXBlockUserData
 from prymatex import res_rc
+from prymatex.core.base import PMXObject
 
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
-class PMXSidebar(QWidget):
+class PMXSidebar(QWidget, PMXObject):
     foreground = Setting(default = QColor(170, 170, 170))
     background = Setting(default = QColor(227, 227, 227))
     
@@ -24,6 +25,9 @@ class PMXSidebar(QWidget):
         self.bookmarkFlagIcon = QPixmap()
         self.bookmarkFlagIcon.load(":/sidebar/resources/sidebar/bookmark-flag.png")
 
+    class Meta(object):
+        settings = 'editor.sidebar'
+        
     def sizeHint(self):
         return QSize(self.editor.lineNumberAreaWidth(), 0)
 

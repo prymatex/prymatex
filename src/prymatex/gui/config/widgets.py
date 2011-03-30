@@ -1,6 +1,10 @@
-from PyQt4.QtGui import QTreeView, QWidget
+from PyQt4.QtGui import QTreeView, QWidget, qApp
+from PyQt4.Qt import QString
 
 from PyQt4.QtCore import pyqtSignal, pyqtSignature
+
+settings = qApp.instance().settings
+
 class PMXConfigTreeView(QTreeView):
     _model = None
     
@@ -16,14 +20,20 @@ class PMXConfigTreeView(QTreeView):
         new, old = map( lambda indx: model.itemFromIndex(indx), (new, old))
         print new, old, map(type, [old, new])
         self.widgetChanged.emit(new.widget_index)
-        
 
+from ui_font_and_theme import Ui_FontThemeConfig
+from prymatex.bundles import PMXTheme
 
-from ui_font_and_theme import Ui_FontThemeConfig 
 class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
     def __init__(self, parent = None):
         super(PMXThemeConfigWidget, self).__init__(parent)
         self.setupUi(self)
+        for theme in PMXTheme.THEMES.values():
+            self.comboThemes.addItem(theme.name)
+        self.comboThemes.currentIndexChanged[QString].connect(self.themesChanged)
+                                 
+    def themesChanged(self, name):
+        settings.editor.theme_name = unicode(name)
 
 from ui_updates import Ui_Updates
 class PMXUpdatesWidget(QWidget, Ui_Updates):

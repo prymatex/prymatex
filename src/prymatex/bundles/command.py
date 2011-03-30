@@ -65,7 +65,7 @@ class PMXCommand(PMXBundleItem):
                 return 'scope', environment['TM_SCOPE']
             if input == 'selection' and 'TM_SELECTED_TEXT' in environment:
                 return 'selection', environment['TM_SELECTED_TEXT']
-            if input == 'word' and 'TM_CURRENT_WORD' in environment::
+            if input == 'word' and 'TM_CURRENT_WORD' in environment:
                 return 'word', environment['TM_CURRENT_WORD']
             return "", u""
         input, text = switch(self.input)
@@ -126,3 +126,21 @@ class PMXCommand(PMXBundleItem):
         
         #Podria borrar este archivo cuando de borra el objeto
         #deleteFile(self.temp_command_file)
+
+class PMXDragCommand(PMXCommand):
+    path_patterns = ['DragCommands/*.tmCommand', 'DragCommands/*.plist']
+    def __init__(self, hash, name_space = "default", path = None):
+        super(PMXDragCommand, self).__init__(hash, name_space, path)
+        for key in [    'draggedFileExtensions' ]:
+            setattr(self, key, hash.get(key, None))
+
+    def buildEnvironment(self, directory = "", name = ""):
+        env = super(PMXDragCommand, self).buildEnvironment()
+        # TM_DROPPED_FILE — relative path of the file dropped (relative to the document directory, which is also set as the current directory).
+        env['TM_DROPPED_FILE'] = os.path.join(directory)
+        #TM_DROPPED_FILEPATH — the absolute path of the file dropped.
+        env['TM_DROPPED_FILEPATH'] = os.path.join(directory)
+        #TM_MODIFIER_FLAGS — the modifier keys which were held down when the file got dropped.
+        #This is a bitwise OR in the form: SHIFT|CONTROL|OPTION|COMMAND (in case all modifiers were down).
+        env['TM_MODIFIER_FLAGS'] = directory
+        return env

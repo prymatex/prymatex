@@ -62,16 +62,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     soft_tabs = Setting(default = True)
     tab_size = Setting(default = 4)
-    _font = Setting(default = {"name": "Monospace", "size": 10}, 
-                   fset = lambda self, value: self.setFont(QFont(value["name"], value["size"]))
-                   )
+    font = Setting(default = QFont("Monospace", 10))
     
     @property
     def tabKeyBehavior(self):
         return self.soft_tabs and u' ' * self.tab_size or u'\t'
     
     def setTheme(self, name):
-        theme = PMXTheme.getThemeByName(self.theme_name)
+        theme = PMXTheme.getThemeByName(name)
         self.processor.formatter = theme
         style = theme.getStyle()
         foreground = style.getQColor('foreground')
@@ -88,8 +86,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.line_highlight = style.getQColor('lineHighlight')
         self.highlightCurrentLine()
         
-    #theme_name = Setting(default = 'Twilight', fset = setTheme)
-    theme_name = Setting(default = 'iPlastic', fset = setTheme)
+    theme = Setting(default = 'Twilight')
     
     class Meta(object):
         settings = 'editor'
@@ -330,7 +327,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 syntax = PMXSyntax.findSyntaxByFirstLine(line)
                 if syntax != None:
                     self.setSyntax(syntax)
-            
+            QPlainTextEdit.keyPressEvent(self, key_event)
+            '''
             scope = self.getCurrentScope()
             preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
             indentation = self.indentationWhitespace(line)
@@ -355,6 +353,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             else:
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.indent(indentation)
+            '''
         elif key_event.text() != "":
             scope = self.getCurrentScope()
             preferences = PMXPreference.buildSettings(PMXBundle.getPreferences(scope))
@@ -523,9 +522,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                          'insertText': self.insertText,
                          'afterSelectedText': self.afterSelectedText,
                          'insertAsSnippet': self.insertSnippet,
-                         'showAsHTML': self.root.showHtml,
-                         'showAsTooltip': self.root.showTooltip,
-                         'createNewDocument': self.root.createNewDocument
+                         'showAsHTML': self.mainwindow.showHtml,
+                         'showAsTooltip': self.mainwindow.showTooltip,
+                         'createNewDocument': self.mainwindow.createNewDocument
                          }
             item.execute(functions)
         elif isinstance(item, PMXSyntax):
@@ -539,7 +538,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             receiver = lambda item = item: self.insertBundleItem(item, tabTrigger = tabTrigger)
             self.connect(action, SIGNAL('triggered()'), receiver)
         if syntax:
-            point = self.root.cursor().pos()
+            point = self.mainwindow.cursor().pos()
         else:
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
@@ -575,7 +574,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_DIRECTORY'] = unicode(self.parent().file.directory)
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = unicode(cursor.selectedText().replace(u'\u2029', '\n'))
-        env.update(self._meta.settings['static_variables'])
+        #env.update(self._meta.settings['static_variables'])
         env.update(preferences['shellVariables'])
         return env
 
@@ -724,6 +723,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def goToLine(self, lineno):
         cursor = self.textCursor()
         cursor.setPosition(self.document().findBlockByNumber(lineno - 1).position())
+        self.setTextCursor(cursor)
+    
+    def goToColumn(self, column):
+        cursor = self.textCursor()
+        cursor.setPosition(cursor.block().position() + column)
         self.setTextCursor(cursor)
     
     #===========================================================================

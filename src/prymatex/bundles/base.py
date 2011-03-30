@@ -11,7 +11,7 @@ if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
-from prymatex.core.config import settings
+from prymatex.core.config import PMX_APP_PATH, PMX_SUPPORT_PATH
 from prymatex.bundles.qtadapter import buildKeyEquivalentString, buildKeySequence
 
 '''
@@ -75,6 +75,7 @@ class PMXBundle(object):
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
     KEY_SEQUENCE = {}
+    DRAGS = {}
     PREFERENCES = {}
     TEMPLATES = []
     scores = PMXScoreManager()
@@ -111,10 +112,10 @@ class PMXBundle(object):
     def buildEnvironment(self):
         env = {}
         env.update({
-            'TM_APP_PATH': settings['PMX_APP_PATH'],
+            'TM_APP_PATH': PMX_APP_PATH,
             'TM_BUNDLE_PATH': self.path,
             'TM_BUNDLE_SUPPORT': self.getBundleSupportPath(),
-            'TM_SUPPORT_PATH': settings['PMX_SUPPORT_PATH'],
+            'TM_SUPPORT_PATH': PMX_SUPPORT_PATH,
         });
         return env
         
@@ -137,8 +138,8 @@ class PMXBundle(object):
             return
 
         #Disabled?
-        if bundle.uuid in settings.disabled_bundles:
-            return
+        #if bundle.uuid in settings.disabled_bundles:
+        #    return
             
         for klass in classes:
             for pattern in klass.path_patterns:

@@ -75,7 +75,7 @@ class PMXTheme(object):
         
     @classmethod
     def getThemeByName(cls, name):
-        for uuid, theme in cls.THEMES.iteritems():
+        for theme in cls.THEMES.values():
             if theme.name == name:
                 return theme
 
@@ -93,16 +93,3 @@ class PMXTheme(object):
         for score, style in styles:
             base.update(style)
         return base
-    
-def main():
-    import os 
-    from glob import glob
-    import prymatex.bundles
-    for file in glob(os.path.join('../share/Themes/', '*')):
-        PMXTheme.loadTheme(file)
-    theme = PMXTheme.getThemeByName('Twilight')
-    style = theme.getStyle('source.python meta.class.python')
-    print style.QTextFormat
-
-if __name__ == '__main__':
-    main()

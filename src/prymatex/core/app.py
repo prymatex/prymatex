@@ -11,7 +11,7 @@ from os.path import dirname, abspath
 from prymatex.lib import deco
 
 from logging import getLogger
-from prymatex.core.config import Settings
+from prymatex.core.config import SettingsGroup, PMX_THEMES_PATH
 from prymatex.core.exceptions import APIUsageError
 
 logger = getLogger(__name__)
@@ -58,7 +58,8 @@ class PMXApplication(QApplication):
         
         files_to_open = self.parse_app_arguments(args)
         
-        self.settings = Settings(self.options.profile)
+        self.settings = SettingsGroup('general')
+        self.settings.setValue('diabled_bundles', [1,2,3,3])
         
         # Some init's
         self.init_application_params()
@@ -76,7 +77,7 @@ class PMXApplication(QApplication):
         self.load_textmate_stuff()
         
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
-        self.connect(self, SIGNAL('aboutToQuit()'), self.save_config)
+        self.aboutToQuit.connect(self.settings.sync)
         
         self.setup_file_manager()
         # Config dialog
@@ -231,11 +232,6 @@ class PMXApplication(QApplication):
         except:
             pass
     
-    def save_config(self):
-        self.settings.save()
-        logger.info("Config saved to %s" % self.settings)
-    
-    
     def commitData(self):
         print "Commit data"
         
@@ -258,7 +254,7 @@ class PMXApplication(QApplication):
         from prymatex.lib.i18n import ugettext as _
         
         self.splash.showMessage(_("Loading themes..."))
-        themes = load_prymatex_themes(self.settings.PMX_THEMES_PATH)
+        themes = load_prymatex_themes(PMX_THEMES_PATH)
         
         self.splash.showMessage(_("%d themes loaded", themes))
         QApplication.processEvents()

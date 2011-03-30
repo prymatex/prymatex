@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from PyQt4.QtCore import QUrl
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from pprint import pformat
@@ -21,18 +22,18 @@ import logging
 from prymatex.gui.editor import PMXEditorWidget
 from prymatex.gui.dialogs import NewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
+from prymatex.core.base import PMXObject
 
 #from prymatex.config.configdialog import PMXConfigDialog
 
 logger = logging.getLogger(__name__)
 
-class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
+class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     '''
     Prymatex main window, it holds a currentEditor property which
     grants access to the focused editor.
     '''
 
-    
     def __init__(self, files_to_open):
         '''
         The main window
@@ -57,7 +58,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
         
         #self.tabWidget = PMXTabWidget(self)
         #self.setCentralWidget( self.tabWidget )
-        print "Foo is", self.foo, self.tabWidget
         
         #self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
         #self.actionGroupTabs.addMenu(self.menuPanes)
@@ -318,8 +318,19 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             self.openFile(path, auto_focus = True)
             
     
-    def handleUrl(self, url):
-        raise NotImplementedError("txmt://open?line=14&url=file:///...")
+    def openUrl(self, url):
+        if isinstance(url, (str, unicode)):
+            url = QUrl(url)
+        source = url.queryItemValue('url')
+        if source:
+            source = QUrl(source)
+            editor = self.openFile(source.path())
+            line = url.queryItemValue('line')
+            if line:
+                editor.codeEdit.goToLine(int(line))
+            column = url.queryItemValue('column')
+            if column:
+                editor.codeEdit.goToColumn(int(column))
             
     def openFile(self, path, auto_focus = False):
         '''
@@ -336,9 +347,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget):
             self.tabWidget.addTab(editor)
         else:
             editor = self.tabWidget[pmx_file]
-             
         self.tabWidget.focusEditor(editor)
-        
         return editor
     
     @pyqtSignature('')

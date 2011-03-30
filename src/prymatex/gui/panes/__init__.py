@@ -38,3 +38,6 @@ class PaneDockBase(QDockWidget):
             if not self.isHidden():
                 self.hide()
             self.action.setText(self.text_show)
+
+    class Meta:
+        settings = 'session' 

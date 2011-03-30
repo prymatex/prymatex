@@ -1,14 +1,14 @@
 import os, stat, tempfile
-from prymatex.core.config import settings
+from prymatex.core.config import PMX_SUPPORT_PATH
 
-DIALOG = settings.PMX_SUPPORT_PATH + '/bin/CocoaDialog.app/Contents/MacOS/CocoaDialog'
+DIALOG = PMX_SUPPORT_PATH + '/bin/CocoaDialog.app/Contents/MacOS/CocoaDialog'
 
 BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh
-%%s''' % settings.PMX_SUPPORT_PATH
+%%s''' % PMX_SUPPORT_PATH
 
 ENV_SCRIPT = '''#!%s/bin/shebang %%s
-%%s''' % settings.PMX_SUPPORT_PATH
+%%s''' % PMX_SUPPORT_PATH
 
 def has_shebang(text):
     line = text.split()[0]

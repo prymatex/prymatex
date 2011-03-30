@@ -11,18 +11,18 @@ from prymatex.bundles.macro import PMXMacro
 from prymatex.bundles.syntax import PMXSyntax
 from prymatex.bundles.snippet import PMXSnippet
 from prymatex.bundles.preference import PMXPreference
-from prymatex.bundles.command import PMXCommand
+from prymatex.bundles.command import PMXCommand, PMXDragCommand
 from prymatex.bundles.template import PMXTemplate
 from prymatex.bundles.base import PMXBundle, PMXMenuNode
 from prymatex.bundles.theme import PMXTheme, PMXStyle
 from prymatex.bundles.qtadapter import buildQTextFormat
-from prymatex.core.config import settings
+from prymatex.core.config import PMX_THEMES_PATH, PMX_BUNDLES_PATH
 
 #BundleItemName, BundlePattern, BundleItemClass
-BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate ]
+BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
 def load_prymatex_bundles(after_load_callback = None):
-    paths = glob(os.path.join(settings.PMX_BUNDLES_PATH, '*.tmbundle'))
+    paths = glob(os.path.join(PMX_BUNDLES_PATH, '*.tmbundle'))
     counter = 0
     total = len(paths)
     for path in paths:
@@ -39,7 +39,7 @@ def load_prymatex_bundles(after_load_callback = None):
 
 
 def load_prymatex_themes(after_load_callback = None):
-    paths = glob(os.path.join(settings.PMX_THEMES_PATH, '*.tmTheme'))
+    paths = glob(os.path.join(PMX_THEMES_PATH, '*.tmTheme'))
     counter = 0
     total = len(paths)
     for path in paths:
