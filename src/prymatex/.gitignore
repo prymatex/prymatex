@@ -9,3 +9,4 @@ lib/oniguruma
 *.old
 *~
 delete-me
+sshot*

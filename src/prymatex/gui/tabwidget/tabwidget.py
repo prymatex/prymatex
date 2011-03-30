@@ -28,6 +28,10 @@ class PMXTabWidget(QTabWidget, PMXObject):
     It overrides Qt's addTab() method, titles are put through
     callbacks
     '''
+    
+    currentEditorChanged = pyqtSignal(QWidget)
+    
+    
     def __init__(self, parent):
         print "Insntanciando tab widget con parent", parent
         super(PMXTabWidget, self).__init__(parent)
@@ -348,7 +352,10 @@ class PMXTabWidget(QTabWidget, PMXObject):
         #if index >= 0:
         #    widget = self.widget(index)
         #    widget.actionMenuTab.setChecked(True)
-        pass
+        editor = self.widget(index)
+        if editor:
+            self.currentEditorChanged.emit(editor)
+        
     
     def tabInserted(self, index):
         '''

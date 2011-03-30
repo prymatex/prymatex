@@ -60,9 +60,10 @@ class LogDockWidget(QDockWidget, Ui_LogWidget, ShownByQAction):
         logger.info("Level changed to %s", new_level)
         
 
-    #def keyPressEvent(self, event):
-    #    if event.key() == Qt.Key_Escape:
-    #        self.hide() 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.hide()
+	super(LogDockWidget, self).keyPressEvent(event)
 
 from logging.handlers import BufferingHandler
 

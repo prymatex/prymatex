@@ -8,6 +8,7 @@
 '''
 import os
 import sys
+from traceback import format_exc
 
 PRYMATEX_BASEPATH = os.path.dirname(__file__)
 sys.path.append(os.path.join(PRYMATEX_BASEPATH, '..'))
@@ -26,6 +27,23 @@ def main(args):
             #myapp.logger = logger 
         except exceptions.AlreadyRunningError, e:
             return e.RETURN_VALUE
+        except Exception, e:
+            traceback = format_exc()
+            
+            # Something went very bad
+            # tell the user something about the emergency
+            from prymatex.gui.emergency import PMXExceptionExplantaionDialog
+            #from PyQt4.QtGui import qApp
+            #myapp = PMXEmergencyApplication()
+            dlg = PMXExceptionExplantaionDialog(traceback_text=traceback)
+            #dlg.exec_()
+            #qApp.exec_()
+            #raise e
+            #from PyQt4.QtGui import QDialog
+            #dlg = QDialog()
+            dlg.exec_()
+            
+            raise e
         retval = myapp.exec_()
         if retval == 3:
             del myapp

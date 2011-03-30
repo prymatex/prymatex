@@ -1,19 +1,29 @@
 # coding: utf-8
 from PyQt4.QtGui import QTreeView, QDirModel, QMenu, QAction, QMessageBox, qApp
-from PyQt4.QtGui import QInputDialog
-from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature
+from PyQt4.QtGui import QInputDialog, QApplication
+from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL
 import os
 import shutil
 from os.path import join, abspath, isfile, isdir, dirname
 import logging
+from prymatex.gui.editor.editorwidget import PMXEditorWidget
+from prymatex.core.base import PMXObject
 
 logger = logging.getLogger(__name__)
 
-class FSTree(QTreeView):
+class FSTree(QTreeView, PMXObject):
+    '''
+    File tree panel
+    '''
+    
     def __init__(self, parent):
         QTreeView.__init__(self, parent)
-        self.dirmodelFiles = QDirModel(self)
         
+        #fs_pane = self.parent()
+        #self.connect(fs_pane.buttonSyncTabFile, SIGNAL('toggle(bool)'), self.followWidgetFoucs)
+        
+               
+        self.dirmodelFiles = QDirModel(self)
         self.createMenus()        
 
         self.setModel(self.dirmodelFiles)
@@ -22,8 +32,25 @@ class FSTree(QTreeView):
         self.setAnimated(False)
         self.setIndentation(20)
         self.setSortingEnabled(True)
+        self.mainwindow.tabWidget.currentEditorChanged.connect(self.focusWidgetPath)
         self.setExpandsOnDoubleClick(True)
         QMetaObject.connectSlotsByName(self)
+    
+    def followWidgetFoucs(self, follow):
+        print "Follow", follow
+        
+    def focusWidgetPath(self, widget):
+        '''
+        Editor has been hanged in the main window
+        '''
+        if not self.parent().buttonSyncTabFile.isChecked():
+            print "No sincronizando"
+            return
+        if isinstance(widget, (PMXEditorWidget, )):
+            if widget.file.path:
+                path = widget.file.path
+                index = self.model().index(path)
+                self.setCurrentIndex(index) 
     
     def createMenus(self):
         from prymatex.lib.i18n import ugettext as _
@@ -42,6 +69,7 @@ class FSTree(QTreeView):
         # Actions for those menus
         self.actionCopyPathToClipBoard = QAction(_("Copy Path To &Clipboard"), self)
         self.actionCopyPathToClipBoard.setObjectName("actionCopyPathToClipBoard")
+        self.actionCopyPathToClipBoard.triggered.connect(self.copyPathToClipboard)
         self.menuFile.addAction(self.actionCopyPathToClipBoard)
         
         self.actionRename = QAction(_("&Rename"), self)
@@ -96,19 +124,25 @@ class FSTree(QTreeView):
         self.defaultMenu.addMenu(self.menuNewFileSystemElement)
         self.defaultMenu.addAction(self.actionRefresh)
         #self.defaultMenu.addAction()
-        
+    
+    def copyPathToClipboard(self):
+        paths = map(self.model().filePath, self.selectedIndexes())
+        if len(paths) == 1:
+            QApplication.clipboard().setText(paths[0])
+            
+    
     def mouseDoubleClickEvent(self, event):
         if event.button() != Qt.LeftButton:
             return
         QTreeView.mouseDoubleClickEvent(self, event)
         
         index = self.indexAt(event.pos())
-        data = unicode(self.model().filePath(index))
-        print data
-        if os.path.isfile(data):
-            self.mainwindow.centralWidget().openLocalFile(data)
+        path = unicode(self.model().filePath(index))
+        print path
+        if os.path.isfile(path):
+            self.mainwindow.openFile(path)
             
-        if os.path.isdir(data):
+        if os.path.isdir(path):
             if self.model().hasChildren(index):
                 print "Cerpeta"
 
