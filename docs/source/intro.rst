@@ -45,6 +45,11 @@ Prymatex Architecture Overview
 
 This diagram show Prymatex architecture
 
+.. 
+	UML idea from
+	http://www.ffnn.nl/pages/articles/media/uml-diagrams-using-graphviz-dot.php
+
+
 .. graphviz::
 
 	digraph G {
@@ -69,21 +74,38 @@ This diagram show Prymatex architecture
 		|opened_files = \{\}}"];
 		
 		"file" [label = "{PMXFile|\
-		path|\
-		save()\n\
-		read()\n\
-		write()\n\
-		fileSaved(QString) [singal] \n\
-    	fileRenamed(QString)[signal]\n\
-    	fileSaveError(QString) [signal]\n\
-    	fileLostReference() [signal]\n\
-		}" ];
+			path|\
+			save()\n\
+			read()\n\
+			write()\n\
+			fileSaved(QString) [singal] \n\
+	    	fileRenamed(QString)[signal]\n\
+	    	fileSaveError(QString) [signal]\n\
+	    	fileLostReference() [signal]\n\
+			}" ];
 		
 		"window" [label = "{PMXMainWindow|tabWidget}" ];
 		"tab widget" [label = "{PMXTabWidget|}"];
 		"editor widget" [label = "{PMXEditorWidget|editorFactory(cls...)\
 		\nregisterEditor(cls,...)|}"];
-		"code edit" [ label = "{PMXCodeEdit|}" ];
+		
+		"code edit" [ label = "{PMXCodeEdit|\
+			syntax|\
+			}" ];
+		
+		
+		subgraph clusterAnimalImpl {
+			label = "prymatex.bundles"
+			
+			"bundle" [label = "{PMXBundle||}"]
+			"syntax" [label = "{PMXSyntax||}"]
+		
+		}
+		
+		
+		"syntax" -> "bundle" [headlabel="1..n" taillabel=""]
+		
+		
 		
 		// Arrows
 		"file" -> "file manager" [label = "parent"];
@@ -93,6 +115,8 @@ This diagram show Prymatex architecture
 		"editor widget" -> "file" [label = "file"];
 		"tab widget" -> "window" [label = "parent" ];
 		"code edit" -> "editor widget" [label = "parent" ];
+		
+		"code edit" -> "syntax" [label = "syntax"];
 		
 		
 	}
