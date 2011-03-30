@@ -343,7 +343,15 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             QMessageBox.critical(self, "File not found", "%s" % e, QMessageBox.Ok)
             return
         if not pmx_file in self.tabWidget:
-            editor = PMXEditorWidget.editorFactory(pmx_file)
+            try:
+                editor = PMXEditorWidget.editorFactory(pmx_file)
+            except Exception, e:
+                import traceback
+                QMessageBox.critical(self, "Error %s" % type(e).__name__, 
+                                     "<i>Error al abrir el archivo</i><br/>"
+                                     "<pre>%s</pre>" % traceback.format_exc(), )
+                del pmx_file
+                return
             self.tabWidget.addTab(editor)
         else:
             editor = self.tabWidget[pmx_file]
@@ -375,9 +383,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                 #self.statusBar().showMessage(self.trUtf8("Not all documents were saved"), 1000)
                 break
     
-    @pyqtSignature('')
-    def on_actionTakeScreenshot_triggered(self):
-        QTimer.singleShot(1000, self, SLOT('takeScreenShot()'))
+    def on_actionTake_Screenshot_triggered(self):
+        self.takeScreenShot()
         
     @pyqtSignature('takeScreenShot()')
     def takeScreenShot(self):
@@ -387,16 +394,15 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         now = datetime.now()
         name = now.strftime('sshot-%Y-%m-%d-%H_%M_%S') + '.' + format
         pxm.save(name, format)
-        self.statusBar().showMessage("Screenshot saved as %s" % name)
+        self.statusBar().showMessage("Screenshot saved as <a>%s</a>" % name)
         
     @pyqtSignature('')
     def on_actionZoom_In_triggered(self):
-        self.current_editor.zoomIn()
-        
+        self.current_editor_widget.zoomIn()
     
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
-        self.current_editor.zoomOut()
+        self.current_editor_widget.zoomOut()
     
     @pyqtSignature('')
     def on_actionFocus_Editor_triggered(self):
@@ -426,11 +432,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
 
     @pyqtSignature('')
     def on_actionMove_Tab_Left_triggered(self):
-        self.tab_widget_mediator.moveTabLeft()
+        self.tabWidget.moveTabLeft()
     
     @pyqtSignature('')    
     def on_actionMove_Tab_Right_triggered(self):
-        self.tab_widget_mediator.moveTabRight()
+        self.tabWidget.moveTabRight()
     
     #===========================================================================
     # Dumb code :/
