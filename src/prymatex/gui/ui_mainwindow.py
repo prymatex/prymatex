@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Sun Mar 27 18:20:07 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Wed Mar 30 14:09:21 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 22))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -303,6 +303,8 @@ class Ui_MainWindow(object):
         self.actionShow_Browser_Dock = QtGui.QAction(MainWindow)
         self.actionShow_Browser_Dock.setCheckable(True)
         self.actionShow_Browser_Dock.setObjectName("actionShow_Browser_Dock")
+        self.actionRead_documentation = QtGui.QAction(MainWindow)
+        self.actionRead_documentation.setObjectName("actionRead_documentation")
         self.menuFile.addAction(self.actionNewTab)
         self.menuFile.addAction(self.actionNew_from_template)
         self.menuFile.addAction(self.actionOpen)
@@ -382,9 +384,11 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.actionReport_Bug)
         self.menuHelp.addAction(self.actionTranslate_this_application)
         self.menuHelp.addAction(self.actionProject_Homepage)
+        self.menuHelp.addAction(self.actionRead_documentation)
+        self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.actionTake_Screenshot)
-        self.menuHelp.addAction(self.actionAbout_this_application)
         self.menuHelp.addAction(self.actionAbout_Qt)
+        self.menuHelp.addAction(self.actionAbout_this_application)
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
         self.menuEdit.addSeparator()
@@ -533,12 +537,12 @@ class Ui_MainWindow(object):
         self.actionGo_To_Matching_Bracket.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+B", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGo_To_Line.setText(QtGui.QApplication.translate("MainWindow", "Go To Line", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGo_To_Line.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+G", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionReport_Bug.setText(QtGui.QApplication.translate("MainWindow", "Report Bug", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionTranslate_this_application.setText(QtGui.QApplication.translate("MainWindow", "Translate this application", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionProject_Homepage.setText(QtGui.QApplication.translate("MainWindow", "Project Homepage", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionTake_Screenshot.setText(QtGui.QApplication.translate("MainWindow", "Take Screenshot", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionAbout_this_application.setText(QtGui.QApplication.translate("MainWindow", "About this application", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionAbout_Qt.setText(QtGui.QApplication.translate("MainWindow", "About Qt", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionReport_Bug.setText(QtGui.QApplication.translate("MainWindow", "Report &Bug", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionTranslate_this_application.setText(QtGui.QApplication.translate("MainWindow", "&Translate this application", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionProject_Homepage.setText(QtGui.QApplication.translate("MainWindow", "Project &Homepage", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionTake_Screenshot.setText(QtGui.QApplication.translate("MainWindow", "Take &Screenshot", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionAbout_this_application.setText(QtGui.QApplication.translate("MainWindow", "&About this application", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionAbout_Qt.setText(QtGui.QApplication.translate("MainWindow", "About &Qt", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Bundle_Editor.setText(QtGui.QApplication.translate("MainWindow", "Show Bundle Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSelect_Bundle_Item.setText(QtGui.QApplication.translate("MainWindow", "Select Bundle Item", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSelect_Bundle_Item.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Alt+T", None, QtGui.QApplication.UnicodeUTF8))
@@ -561,6 +565,7 @@ class Ui_MainWindow(object):
         self.actionFree_Editing.setText(QtGui.QApplication.translate("MainWindow", "Free Editing", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFree_Editing.setStatusTip(QtGui.QApplication.translate("MainWindow", "Enables the cursor to be positioned anywhere in the editor", None, QtGui.QApplication.UnicodeUTF8))
         self.actionShow_Browser_Dock.setText(QtGui.QApplication.translate("MainWindow", "Show Browser", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRead_documentation.setText(QtGui.QApplication.translate("MainWindow", "Read &documentation", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
 from tabwidget import PMXTabWidget

@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -156,9 +156,11 @@
     <addaction name="actionReport_Bug"/>
     <addaction name="actionTranslate_this_application"/>
     <addaction name="actionProject_Homepage"/>
+    <addaction name="actionRead_documentation"/>
+    <addaction name="separator"/>
     <addaction name="actionTake_Screenshot"/>
-    <addaction name="actionAbout_this_application"/>
     <addaction name="actionAbout_Qt"/>
+    <addaction name="actionAbout_this_application"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -754,32 +756,32 @@
   </action>
   <action name="actionReport_Bug">
    <property name="text">
-    <string>Report Bug</string>
+    <string>Report &amp;Bug</string>
    </property>
   </action>
   <action name="actionTranslate_this_application">
    <property name="text">
-    <string>Translate this application</string>
+    <string>&amp;Translate this application</string>
    </property>
   </action>
   <action name="actionProject_Homepage">
    <property name="text">
-    <string>Project Homepage</string>
+    <string>Project &amp;Homepage</string>
    </property>
   </action>
   <action name="actionTake_Screenshot">
    <property name="text">
-    <string>Take Screenshot</string>
+    <string>Take &amp;Screenshot</string>
    </property>
   </action>
   <action name="actionAbout_this_application">
    <property name="text">
-    <string>About this application</string>
+    <string>&amp;About this application</string>
    </property>
   </action>
   <action name="actionAbout_Qt">
    <property name="text">
-    <string>About Qt</string>
+    <string>About &amp;Qt</string>
    </property>
   </action>
   <action name="actionShow_Bundle_Editor">
@@ -909,6 +911,11 @@
    </property>
    <property name="text">
     <string>Show Browser</string>
+   </property>
+  </action>
+  <action name="actionRead_documentation">
+   <property name="text">
+    <string>Read &amp;documentation</string>
    </property>
   </action>
  </widget>

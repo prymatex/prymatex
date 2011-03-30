@@ -359,8 +359,15 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         return editor
     
     @pyqtSignature('')
-    def on_actionAboutQt_triggered(self):
+    def on_actionAbout_Qt_triggered(self):
         qApp.aboutQt()
+    
+    @pyqtSignature('')
+    def on_actionAbout_this_application_triggered(self):
+        QMessageBox.information(self, self.trUtf8("About Prymatex"), 
+                                self.trUtf8("<h3>Prymatex</h3>"
+                                "<p>A general purpouse Text Editor</p>")
+                                )
     
     @pyqtSignature('')
     def on_actionProjectHomePage_triggered(self):
