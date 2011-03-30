@@ -62,7 +62,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     soft_tabs = Setting(default = True)
     tab_size = Setting(default = 4)
-    font = Setting()
+    font = Setting(default = QFont('Monospace', 10))
     
     @property
     def tabKeyBehavior(self):
