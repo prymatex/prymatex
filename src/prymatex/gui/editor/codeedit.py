@@ -331,7 +331,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             scope = self.getCurrentScope()
             settings = PMXBundle.getPreferenceSettings(scope)
             acction = settings.indent(line)
-            if acction == settings.INDENT_INCREASE
+            indentation = self.indentationWhitespace(line)
+            if acction == settings.INDENT_INCREASE:
                 logger.debug("increaseIndentPattern")
                 QPlainTextEdit.keyPressEvent(self, key_event)
                 self.increaseIndent(indentation)
