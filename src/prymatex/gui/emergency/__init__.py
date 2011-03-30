@@ -16,3 +16,4 @@ class PMXExceptionExplantaionDialog(QDialog, Ui_CrashDialog):
     def on_pushCopyTraceback_pressed(self):
         clipboard = qApp.instance().clipboard()
         clipboard.setText(self.textEdit.toPlainText())
+        

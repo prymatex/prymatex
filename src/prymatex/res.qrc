@@ -101,6 +101,7 @@
     <file>resources/actions/document-save.png</file>
   </qresource>
   <qresource prefix="icons">
+    <file>resources/banners/crash.png</file>
     <file>resources/icons/Prymatex_Logo.png</file>
   </qresource>
   <qresource prefix="bundles">

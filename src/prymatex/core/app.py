@@ -99,10 +99,12 @@ class PMXApplication(QApplication):
         configdialog = PMXSettingsDialog()
         from prymatex.gui.config.widgets import PMXGeneralWidget,\
                                                 PMXThemeConfigWidget,\
-                                                PMXUpdatesWidget
+                                                PMXUpdatesWidget,\
+                                                PMXSaveWidget
         configdialog.register(PMXGeneralWidget())
         configdialog.register(PMXThemeConfigWidget())
         configdialog.register(PMXUpdatesWidget())
+        configdialog.register(PMXSaveWidget())
         self.__configdialog = configdialog
     
     @property
