@@ -445,7 +445,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             syntax = PMXSyntax.findSyntaxByFirstLine(line)
             if syntax != None:
                 self.setSyntax(syntax)
-                return True
         return False
     
     def keyReturnPressIndentEvent(self, key_event):
@@ -475,9 +474,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         return False
     
     def keyOtherPressIndentEvent(self, key_event):
-        super(PMXCodeEdit, self).keyPressEvent(key_event)
+        key = key_event.key()
+        if key > 256:
+            return False
+        character = chr(key)
         cursor = self.textCursor()
-        current_line = unicode(cursor.block().text())
+        current_line = unicode(cursor.block().text()) + character
         scope = self.getCurrentScope()
         settings = PMXBundle.getPreferenceSettings(scope)
         acction = settings.indent(current_line)
@@ -488,9 +490,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 previous_indentation = self.indentationWhitespace(previous_block.text())
                 if current_indentation == previous_indentation:
                     self.unindent()
+                    return True
         elif acction == settings.UNINDENT:
             print "unident"
-        return True
+        return False
     
     def keyOtherPressSmartTypingEvent(self, key_event):
         cursor = self.textCursor()
