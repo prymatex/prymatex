@@ -1,4 +1,6 @@
-from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty
+import codecs
+
+from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant, SIGNAL
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 from prymatex.gui.panes import PaneDockBase
@@ -23,13 +25,35 @@ if 'http_proxy' in os.environ:
             proxy_url.password()))
             '''
 
-js = """
-TextMate.system = function(command) {
-    alert(command);
-    var ok = this._system(command);
-    if (ok) return _systemWrapper;
-}
-"""
+class TmFileReply(QNetworkReply):
+    def __init__(self, parent, url, operation):
+        super(TmFileReply, self).__init__(parent)
+        file = codecs.open(url.path(), 'r', 'utf-8')
+        self.content = file.read().encode('utf-8')
+        self.offset = 0
+        
+        self.setHeader(QNetworkRequest.ContentTypeHeader, QVariant("text/html; charset=utf-8"))
+        self.setHeader(QNetworkRequest.ContentLengthHeader, QVariant(len(self.content)))
+        QTimer.singleShot(0, self, SIGNAL("readyRead()"))
+        QTimer.singleShot(0, self, SIGNAL("finished()"))
+        self.open(self.ReadOnly | self.Unbuffered)
+        self.setUrl(url)
+    
+    def abort(self):
+        pass
+    
+    def bytesAvailable(self):
+        return len(self.content) - self.offset
+    
+    def isSequential(self):
+        return True
+    
+    def readData(self, maxSize):
+        if self.offset < len(self.content):
+            end = min(self.offset + maxSize, len(self.content))
+            data = self.content[self.offset:end]
+            self.offset = end
+            return data
 
 class NetworkAccessManager(QNetworkAccessManager, PMXObject):
     def __init__(self, parent, old_manager):
@@ -46,7 +70,18 @@ class NetworkAccessManager(QNetworkAccessManager, PMXObject):
         print data
         if request.url().scheme() == "txmt":
             self.mainwindow.openUrl(request.url())
+        elif request.url().scheme() == "tm-file" and operation == self.GetOperation:
+            reply = TmFileReply(self, request.url(), self.GetOperation)
+            return reply
         return QNetworkAccessManager.createRequest(self, operation, request, data)
+
+js = """
+TextMate.system = function(command) {
+    alert(command);
+    var ok = this._system(command);
+    if (ok) return _systemWrapper;
+}
+"""
 
 class SystemWrapper(QObject):
     def __init__(self, process):
@@ -76,8 +111,6 @@ class TextMate(QObject):
     readAll = pyqtProperty("bool", isBusy)
     
 class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
-    geometry = Setting()
-    
     def __init__(self, parent):
         PaneDockBase.__init__(self, parent)
         self.setupUi(self)
@@ -87,9 +120,6 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
         self.webView.page().setNetworkAccessManager(new_manager)
         self.webView.loadFinished[bool].connect(self.prepareJavaScript)
         self.configure()
-
-    class Meta():
-        settings = 'browser'
             
     def prepareJavaScript(self, ready):
         if not ready:

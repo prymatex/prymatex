@@ -455,9 +455,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         acction = settings.indent(line)
         indentation = self.indentationWhitespace(line)
         if acction == settings.INDENT_INCREASE:
+            print "increase"
             super(PMXCodeEdit, self).keyPressEvent(key_event)
             self.increaseIndent(indentation)
         elif acction == settings.INDENT_NEXTLINE:
+            print "increasenext"
             super(PMXCodeEdit, self).keyPressEvent(key_event)
             self.increaseIndent(indentation)
         else:
@@ -471,8 +473,24 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     def keyOtherPressBundleItemEvent(self, key_event):
         return False
+    
     def keyOtherPressIndentEvent(self, key_event):
-        return False
+        super(PMXCodeEdit, self).keyPressEvent(key_event)
+        cursor = self.textCursor()
+        current_line = unicode(cursor.block().text())
+        scope = self.getCurrentScope()
+        settings = PMXBundle.getPreferenceSettings(scope)
+        acction = settings.indent(current_line)
+        if acction == settings.INDENT_DECREASE:
+            previous_block = cursor.block().previous()
+            if previous_block:
+                current_indentation = self.indentationWhitespace(current_line)
+                previous_indentation = self.indentationWhitespace(previous_block.text())
+                if current_indentation == previous_indentation:
+                    self.unindent()
+        elif acction == settings.UNINDENT:
+            print "unident"
+        return True
     
     def keyOtherPressSmartTypingEvent(self, key_event):
         cursor = self.textCursor()

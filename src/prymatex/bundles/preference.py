@@ -61,9 +61,11 @@ class PMXPreferenceSettings(object):
     def combine(self, other):
         for key in self.KEYS:
             value = getattr(other, key, None)
-            if value != None:
+            if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
                 setattr(self, key, value)
-    
+            elif value != None:
+                setattr(self, key, value)
+
     def indent(self, line):
         #IncreasePattern on return indent nextline
         #DecreasePattern evaluate line to decrease, no requiere del return

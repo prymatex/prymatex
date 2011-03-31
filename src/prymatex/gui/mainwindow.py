@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import itertools
+import logging
 from PyQt4.QtCore import QUrl
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from pprint import pformat
 from prymatex.bundles import PMXBundle, PMXMenuNode
 from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
@@ -17,8 +18,6 @@ from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
 from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.lib.i18n import ugettext as _
-import itertools
-import logging
 from prymatex.gui.editor import PMXEditorWidget
 from prymatex.gui.dialogs import NewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
