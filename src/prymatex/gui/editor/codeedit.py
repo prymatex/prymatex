@@ -626,7 +626,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Commands
     #==========================================================================
     
-    def replaceSelectedText(self, input, string):
+    def replaceSelectedText(self, string, **kwargs):
         cursor = self.textCursor()
         position = cursor.selectionStart()
         cursor.removeSelectedText()
@@ -634,20 +634,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor.insertText(string)
         self.setTextCursor(cursor)
         
-    def replaceDocument(self, input, string):
+    def replaceDocument(self, string, **kwargs):
         print "replace document", string
         
-    def insertText(self, input, string):
+    def insertText(self, string, **kwargs):
         cursor = self.textCursor()
         cursor.insertText(string)
     
-    def afterSelectedText(self, input, string):
+    def afterSelectedText(self, string, **kwargs):
         cursor = self.textCursor()
         position = cursor.selectionEnd()
         cursor.setPosition(position)
         cursor.insertText(string)
     
-    def insertSnippet(self, input, snippet):
+    def insertSnippet(self, snippet, **kwargs):
         '''Create a new snippet and insert'''
         cursor = self.textCursor()
         if input == 'selection' and cursor.hasSelection():

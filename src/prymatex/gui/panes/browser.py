@@ -7,6 +7,8 @@ from prymatex.gui.panes import PaneDockBase
 from prymatex.gui.panes.ui_browser import Ui_BrowserPane
 from prymatex.core.base import PMXObject
 from prymatex.core.config import Setting
+from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
+from subprocess import Popen, PIPE, STDOUT
 
 #http://diotavelli.net/PyQtWiki/SampleCode
 '''
@@ -65,9 +67,6 @@ class NetworkAccessManager(QNetworkAccessManager, PMXObject):
         self.setProxyFactory(old_manager.proxyFactory())
     
     def createRequest(self, operation, request, data):
-        print operation
-        print request
-        print data
         if request.url().scheme() == "txmt":
             self.mainwindow.openUrl(request.url())
         elif request.url().scheme() == "tm-file" and operation == self.GetOperation:
@@ -76,17 +75,17 @@ class NetworkAccessManager(QNetworkAccessManager, PMXObject):
         return QNetworkAccessManager.createRequest(self, operation, request, data)
 
 js = """
-TextMate.system = function(command) {
-    alert(command);
-    var ok = this._system(command);
-    if (ok) return _systemWrapper;
+TextMate.system = function(command, callback) {
+    this._system(command);
+    return _systemWrapper;
 }
 """
 
 class SystemWrapper(QObject):
-    def __init__(self, process):
+    def __init__(self, process, temp_file):
         QObject.__init__(self)
         self.process = process
+        self.temp_file = temp_file
     
     @pyqtSignature("write(int)")
     def write(self, flags):
@@ -96,21 +95,34 @@ class SystemWrapper(QObject):
     def close(self):
         pass
 
+    def outputString(self):
+        self.process.stdin.close()
+        text = self.process.stdout.read()
+        self.process.stdout.close()
+        exit_code = self.process.wait()
+        deleteFile(self.temp_file)
+        return text
+    outputString = pyqtProperty("QString", outputString)
+    
 class TextMate(QObject):
-    def __init__(self, mainFrame):
+    def __init__(self, mainFrame, bundleItem = None):
         QObject.__init__(self)
         self.mainFrame = mainFrame
-    
-    @pyqtSignature("system(QString)")
+        self.bundleItem = bundleItem
+        
+    @pyqtSignature("_system(QString)")
     def _system(self, command):
-        self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(''))
-        return True
+        environment = self.bundleItem != None and self.bundleItem.buildEnvironment() or {}
+        command = ensureShellScript(unicode(command))
+        temp_file = makeExecutableTempFile(command)
+        process = Popen([temp_file], stdout=PIPE, stdin=PIPE, stderr=STDOUT, env = ensureEnvironment(environment))
+        self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, temp_file))
     
     def isBusy(self):
-        return False
-    readAll = pyqtProperty("bool", isBusy)
+        return True
+    isBusy = pyqtProperty("bool", isBusy)
     
-class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
+class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
     def __init__(self, parent):
         PaneDockBase.__init__(self, parent)
         self.setupUi(self)
@@ -119,13 +131,14 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
         new_manager = NetworkAccessManager(self, old_manager)
         self.webView.page().setNetworkAccessManager(new_manager)
         self.webView.loadFinished[bool].connect(self.prepareJavaScript)
-        self.configure()
+        self.bundleItem = None
             
     def prepareJavaScript(self, ready):
         if not ready:
             return
-        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame()))
+        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame(), self.bundleItem))
         self.webView.page().mainFrame().evaluateJavaScript(js)
     
-    def setHtml(self, string):
+    def setHtml(self, string, bundleItem):
+        self.bundleItem = bundleItem
         self.webView.setHtml(string)

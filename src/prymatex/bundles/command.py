@@ -122,7 +122,8 @@ class PMXCommand(PMXBundleItem):
         
         type, function = self.getOutputFunction(exit_code, output_functions)
         print self.bundle.name, self.name, self.temp_command_file, type, text
-        function(self.input_current, self.buildOutputArgument(type, text))
+        
+        function(self.buildOutputArgument(type, text), input = self.input_current, command = self)
         
         #Podria borrar este archivo cuando de borra el objeto
         #deleteFile(self.temp_command_file)
@@ -136,11 +137,11 @@ class PMXDragCommand(PMXCommand):
 
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXDragCommand, self).buildEnvironment()
-        # TM_DROPPED_FILE — relative path of the file dropped (relative to the document directory, which is also set as the current directory).
+        # TM_DROPPED_FILE ï¿½ relative path of the file dropped (relative to the document directory, which is also set as the current directory).
         env['TM_DROPPED_FILE'] = os.path.join(directory)
-        #TM_DROPPED_FILEPATH — the absolute path of the file dropped.
+        #TM_DROPPED_FILEPATH ï¿½ the absolute path of the file dropped.
         env['TM_DROPPED_FILEPATH'] = os.path.join(directory)
-        #TM_MODIFIER_FLAGS — the modifier keys which were held down when the file got dropped.
+        #TM_MODIFIER_FLAGS ï¿½ the modifier keys which were held down when the file got dropped.
         #This is a bitwise OR in the form: SHIFT|CONTROL|OPTION|COMMAND (in case all modifiers were down).
         env['TM_MODIFIER_FLAGS'] = directory
         return env

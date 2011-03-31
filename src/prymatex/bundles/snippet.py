@@ -11,7 +11,7 @@ from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_DONT_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
-from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, deleteFile
+from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
 
 logger = logging.getLogger(__name__)
@@ -659,7 +659,7 @@ class Shell(NodeList):
     def resolve(self, indentation, tabreplacement, environment):
         command = ensureShellScript(self.render())
         temp_command_file = makeExecutableTempFile(command)
-        process = Popen([temp_command_file], stdout=PIPE, stderr=STDOUT, env = environment)
+        process = Popen([temp_command_file], stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(environment))
         text = process.stdout.read()
         text = text.strip()
         process.stdout.close()
