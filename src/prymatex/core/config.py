@@ -97,6 +97,13 @@ class PMXSettings(object):
             self.GROUPS[name] = SettingsGroup(name, self.qsettings)
         return self.GROUPS[name]
     
+    def setValue(self, name, value):
+        self.qsettings.setValue(name, value)
+    
+    def value(self, name):
+        value = self.qsettings.value(name)
+        return value.toPyObject()
+
     def sync(self):
         #Save capture values from qt
         for group in self.GROUPS.values():

@@ -59,7 +59,8 @@ class PMXApplication(QApplication):
         files_to_open = self.parse_app_arguments(args)
         
         self.settings = PMXSettings('default')
-        
+        self.settings.setValue('auto_save', True)
+        self.settings.setValue('auto_save_interval', 30)
         # Some init's
         self.init_application_params()
         
