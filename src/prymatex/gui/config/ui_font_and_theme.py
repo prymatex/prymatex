@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/font_and_theme.ui'
 #
-# Created: Mon Mar 28 19:14:20 2011
+# Created: Thu Mar 31 09:45:10 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,6 +13,9 @@ class Ui_FontThemeConfig(object):
     def setupUi(self, FontThemeConfig):
         FontThemeConfig.setObjectName("FontThemeConfig")
         FontThemeConfig.resize(518, 467)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/actions/resources/actions/format-font-size-more.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        FontThemeConfig.setWindowIcon(icon)
         self.verticalLayout_2 = QtGui.QVBoxLayout(FontThemeConfig)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -136,6 +139,7 @@ class Ui_FontThemeConfig(object):
         self.label_9.setText(QtGui.QApplication.translate("FontThemeConfig", "Scope Selector", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox.setText(QtGui.QApplication.translate("FontThemeConfig", "Antialias", None, QtGui.QApplication.UnicodeUTF8))
 
+import res_rc
 
 if __name__ == "__main__":
     import sys

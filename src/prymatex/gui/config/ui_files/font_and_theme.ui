@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Font and Theme</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../../res.qrc">
+    <normaloff>:/actions/resources/actions/format-font-size-more.png</normaloff>:/actions/resources/actions/format-font-size-more.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -209,6 +213,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

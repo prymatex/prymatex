@@ -22,6 +22,10 @@ class PMXNetworkConfigWidget(QWidget):
 
 
 class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog):
+    '''
+    Settings dialog, it's hold by the application under
+    configdialog property
+    '''
     def __init__(self):
         super(PMXSettingsDialog, self).__init__()
         self.setupUi(self)
@@ -70,6 +74,17 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog):
         '''
         index = self.stackLayout.addWidget(widget)
         item = PMXSettingsItem(widget.windowTitle(), widget_index = index)
+        icon = widget.windowIcon()
+        if not icon.isNull():
+            item.setIcon(icon)
         self.model.appendRow(item)
         
+    def on_pushClose_pressed(self):
+        self.reject()
+        
+    def on_pushDiscard_pressed(self):
+        QMessageBox.information(self, "Discard", "Discards changes<br/>TODO")
+        
+    def on_pushApply_pressed(self):
+        QMessageBox.information(self, "Apply", "Apply changes<br/>TODO")
 

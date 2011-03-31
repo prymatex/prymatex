@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/logwidget.ui'
 #
-# Created: Mon Nov 22 17:01:34 2010
+# Created: Thu Mar 31 09:44:47 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!

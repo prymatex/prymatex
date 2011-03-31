@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Network Settings</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../../res.qrc">
+    <normaloff>:/actions/resources/actions/document-open-remote.png</normaloff>:/actions/resources/actions/document-open-remote.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QComboBox" name="comboProxyType">
@@ -109,7 +113,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>checkBox</sender>

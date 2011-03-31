@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>General</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../../res.qrc">
+    <normaloff>:/icons/resources/icons/Prymatex_Logo.png</normaloff>:/icons/resources/icons/Prymatex_Logo.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QCheckBox" name="checkBox">
@@ -26,6 +30,48 @@
      <property name="text">
       <string>Show right margin indicator</string>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Window Title</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1" colspan="2">
+       <widget class="QComboBox" name="comboBox">
+        <item>
+         <property name="text">
+          <string>Application Name</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Current File - Application Name</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Current Project - Current File</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QCheckBox" name="checkBox_3">
+        <property name="text">
+         <string>Use file name instead of path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Format</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -43,6 +89,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

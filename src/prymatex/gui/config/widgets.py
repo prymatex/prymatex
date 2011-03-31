@@ -1,4 +1,4 @@
-from PyQt4.QtGui import QTreeView, QWidget, qApp
+from PyQt4.QtGui import *
 from PyQt4.Qt import QString
 
 from PyQt4.QtCore import pyqtSignal, pyqtSignature
@@ -20,6 +20,22 @@ class PMXConfigTreeView(QTreeView):
         new, old = map( lambda indx: model.itemFromIndex(indx), (new, old))
         print new, old, map(type, [old, new])
         self.widgetChanged.emit(new.widget_index)
+
+#===============================================================================
+# 
+#===============================================================================
+CONFIG_WIDGETS = (QLineEdit, QSpinBox, QCheckBox,)
+
+filter_config_widgets = lambda ws: filter(lambda w: isinstance(w, CONFIG_WIDGETS), ws)
+
+class PMXConfigBaseWidget(QWidget):
+    _widgets = None
+    
+    @property
+    def all_widgets(self):
+        if not self._widgets:
+            self._widgets = filter_config_widgets(self.children())
+        return self._widgets
 
 from ui_font_and_theme import Ui_FontThemeConfig
 from prymatex.bundles import PMXTheme
@@ -53,3 +69,20 @@ class PMXSaveWidget(QWidget, Ui_Save):
     def __init__(self, parent = None):
         super(PMXSaveWidget, self).__init__(parent)
         self.setupUi(self)
+        
+from ui_network import Ui_Network
+class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network):
+    def __init__(self, parent = None):
+        super(PMXNetworkWidget, self).__init__(parent)
+        self.setupUi(self)
+        self.comboProxyType.currentIndexChanged[QString].connect(self.changeProxyType)
+   
+    
+    def changeProxyType(self, proxy_type):
+        proxy_type = unicode(proxy_type).lower()
+        
+        if proxy_type.count("no proxy"):
+            map(lambda w: w.setEnabled(False), self.all_widgets)
+        else:
+            map(lambda w: w.setEnabled(True), self.all_widgets)
+        
