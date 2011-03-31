@@ -47,7 +47,7 @@ class PMXCommand(PMXBundleItem):
     def getSystemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:
             return self.winCommand
-        elif self.linuxCommand != None and 'Window' not in os.environ['OS']:
+        elif self.linuxCommand != None:
             return self.linuxCommand
         else:
             return self.command
@@ -89,8 +89,8 @@ class PMXCommand(PMXBundleItem):
             type = self.output
         if type in functions:
             return type, functions[type]
-        def discard(input, text):
-            print 'discard', input, text
+        def discard(text, **kwargs):
+            print 'discard', text, kwargs
         return 'discard', discard
     
     def buildOutputArgument(self, output, text):
