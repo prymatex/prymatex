@@ -62,6 +62,9 @@
         <property name="text">
          <string>Use file name instead of path</string>
         </property>
+        <property name="setting" stdset="0">
+         <string>editor.pepe</string>
+        </property>
        </widget>
       </item>
       <item row="0" column="0">
