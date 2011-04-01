@@ -188,48 +188,52 @@ class PMXBundle(object):
 
     @classmethod
     def getTabTriggerItem(cls, keyword, scope):
-        items = []
+        with_scope = []
+        without_scope = []
         if cls.TAB_TRIGGERS.has_key(keyword):
             for item in cls.TAB_TRIGGERS[keyword]:
                 if item.scope == None:
-                    items.append((1, item))
+                    without_scope.append(item)
                 else:
                     score = cls.scores.score(item.scope, scope)
                     if score != 0:
-                        items.append((score, item))
-            items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item, items)
-        return items
+                        with_scope.append((score, item))
+            with_scope.sort(key = lambda t: t[0])
+            with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope
             
     @classmethod
     def getKeyEquivalentItem(cls, character, scope):
-        items = []
+        with_scope = []
+        without_scope = []
         if cls.KEY_EQUIVALENTS.has_key(character):
             for item in cls.KEY_EQUIVALENTS[character]:
                 if item.scope == None:
-                    items.append((1, item))
+                    without_scope.append(item)
                 else:
                     score = cls.scores.score(item.scope, scope)
                     if score != 0:
-                        items.append((score, item))
-            items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item, items)
-        return items
+                        with_scope.append((score, item))
+            with_scope.sort(key = lambda t: t[0], reverse = True)
+            with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope
 
     @classmethod
     def getKeySequenceItem(cls, key, scope):
-        items = []
+        with_scope = []
+        without_scope = []
         if cls.KEY_SEQUENCE.has_key(key):
             for item in cls.KEY_SEQUENCE[key]:
                 if item.scope == None:
-                    items.append((1, item))
+                    without_scope.append(item)
                 else:
                     score = cls.scores.score(item.scope, scope)
                     if score != 0:
-                        items.append((score, item))
-            items.sort(key = lambda t: t[0])
-            items = map(lambda (score, item): item, items)
-        return items
+                        with_scope.append((score, item))
+            with_scope.sort(key = lambda t: t[0])
+            with_scope = map(lambda (score, item): item, with_scope)
+        print without_scope
+        return with_scope
     
 class PMXBundleItem(object):
     path_patterns = []
@@ -381,10 +385,15 @@ def test_preferences():
     settings = PMXBundle.getPreferenceSettings('source.c++')
     for key in settings.KEYS:
         print key, getattr(settings, key)
+
+def test_queryItems():
+    from prymatex.bundles.qtadapter import Qt
+    print PMXBundle.getTabTriggerItem('class', 'source.python')
+    print PMXBundle.getKeySequenceItem(Qt.CTRL + ord('H'), 'text.html')
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
     for file in glob(os.path.join(PMX_BUNDLES_PATH, '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    print_commands()
+    test_queryItems()
