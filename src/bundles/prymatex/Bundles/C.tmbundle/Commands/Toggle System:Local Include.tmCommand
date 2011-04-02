@@ -5,18 +5,27 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>sort -f|uniq</string>
+	<string>#!/usr/bin/env ruby
+
+print case str = STDIN.read
+  when /\A"(.*)"\z/m then "&lt;" + $1 + "&gt;"
+  when /\A&lt;(.*)&gt;\z/m then '"' + $1 + '"'
+  else str
+end
+</string>
 	<key>fallbackInput</key>
-	<string>document</string>
+	<string>scope</string>
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string></string>
+	<string>^"</string>
 	<key>name</key>
-	<string>Sort Lines &amp; Remove Duplicates</string>
+	<string>Toggle System/Local Include</string>
 	<key>output</key>
 	<string>replaceSelectedText</string>
+	<key>scope</key>
+	<string>string.quoted.double.include.c, string.quoted.other.lt-gt.include.c</string>
 	<key>uuid</key>
-	<string>3010E2A8-6E4F-11D9-A18D-000D93589AF6</string>
+	<string>E8D80809-0CDE-4E57-AC2A-8C22DFF353EE</string>
 </dict>
 </plist>
