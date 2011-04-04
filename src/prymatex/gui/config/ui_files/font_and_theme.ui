@@ -28,12 +28,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="lineFont">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushChangeFont">
        <property name="text">
-        <string>Change Font</string>
+        <string>&amp;Change Font</string>
        </property>
       </widget>
      </item>

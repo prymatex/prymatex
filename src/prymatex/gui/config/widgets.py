@@ -41,13 +41,37 @@ from ui_font_and_theme import Ui_FontThemeConfig
 from prymatex.bundles import PMXTheme
 
 class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
+    '''
+    Changes font and theme
+    '''
     def __init__(self, parent = None):
         super(PMXThemeConfigWidget, self).__init__(parent)
         self.setupUi(self)
         for theme in PMXTheme.THEMES.values():
             self.comboThemes.addItem(theme.name)
         self.comboThemes.currentIndexChanged[QString].connect(self.themesChanged)
-                                 
+        self.settings = qApp.instance().settings.getGroup('editor')
+        self.syncFont()
+        
+    def on_pushChangeFont_pressed(self):
+        font, ok = QFontDialog.getFont(QFont(), self, self.trUtf8("Select editor font"))
+        if ok:
+            self.settings.font = font
+            self.syncFont()
+    
+    def syncFont(self):
+        '''
+        Syncs font with the lineEdit
+        '''
+        
+        try:
+            font = self.settings.font
+        except Exception, _e:
+            print "Can't get settings font"
+            font = QFont()
+        self.lineFont.setFont(font)
+        self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
+    
     def themesChanged(self, name):
         settings.editor.theme_name = unicode(name)
 

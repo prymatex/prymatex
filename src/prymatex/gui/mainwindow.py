@@ -81,6 +81,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
         #self.actionShowFSPane.setChecked(True)
         self.prevent_menu_lock()
+        
+        for file in files_to_open:
+            print "Opening file", file
+            self.openFile(file)
     
     def setup_logging(self):
         '''
@@ -345,12 +349,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             try:
                 editor = PMXEditorWidget.editorFactory(pmx_file)
             except Exception, e:
-                import traceback
-                QMessageBox.critical(self, "Error %s" % type(e).__name__, 
-                                     "<i>Error al abrir el archivo</i><br/>"
-                                     "<pre>%s</pre>" % traceback.format_exc(), )
-                del pmx_file
-                return
+                from prymatex.gui.emergency import PMXTraceBackDialog
+                PMXTraceBackDialog(e).exec_()
+                #del pmx_file
+                return 
             self.tabWidget.addTab(editor)
         else:
             editor = self.tabWidget[pmx_file]

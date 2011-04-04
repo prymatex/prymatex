@@ -581,7 +581,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         syntax = any(map(lambda item: isinstance(item, PMXSyntax), items))
         menu = QMenu()
         for index, item in enumerate(items):
-            action = menu.addAction(item.name + "\t &" + str(index + 1))
+            action = menu.addAction(item.buildMenuTextEntry("&" + str(index + 1)))
             receiver = lambda item = item: self.insertBundleItem(item, tabTrigger = tabTrigger)
             self.connect(action, SIGNAL('triggered()'), receiver)
         if syntax:
@@ -630,15 +630,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #==========================================================================
     
     def replaceSelectedText(self, string, **kwargs):
-        cursor = self.textCursor()
-        position = cursor.selectionStart()
-        cursor.removeSelectedText()
-        cursor.setPosition(position)
-        cursor.insertText(string)
-        self.setTextCursor(cursor)
+        if 'input' in kwargs and kwargs['input'] == 'document':
+            self.replaceDocument(string, **kwargs)
+        else:
+            cursor = self.textCursor()
+            position = cursor.selectionStart()
+            cursor.insertText(string)
+            cursor.setPosition(position, position + len(string))
+            self.setTextCursor(cursor)
         
     def replaceDocument(self, string, **kwargs):
-        print "replace document", string
+        self.document().setPlainText(string)
         
     def insertText(self, string, **kwargs):
         cursor = self.textCursor()

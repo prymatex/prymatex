@@ -1,6 +1,7 @@
 from ui_settings import Ui_PMXSettingsDialog
 from PyQt4.Qt import *
 from prymatex.gui.editor import center
+from prymatex.gui.mixins.common import CenterWidget
 
 class PMXSettingsItem(QStandardItem):
     def __init__(self, name, widget_index, parent = None):
@@ -21,7 +22,7 @@ class PMXNetworkConfigWidget(QWidget):
 
 
 
-class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog):
+class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog, CenterWidget):
     '''
     Settings dialog, it's hold by the application under
     configdialog property
@@ -44,15 +45,25 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog):
         
         self.lineFilter.textChanged.connect(self.filterItems)
         
+        # Focus first item
+    
+    
+    
+    def focusFirst(self):
+        index = self.model.index(0, 0)
+        self.model.itemFromIndex(index)
+        self.treeView.setCurrentIndex(index)
+    
     def filterItems(self, txt):
         self.proxy_model.setFilterRegExp(QRegExp(txt, Qt.CaseInsensitive))
     
     def exec_(self):
         center(self)
-        index = self.model.index(0, 0)
-        self.model.itemFromIndex(index)
-        self.treeView.setCurrentIndex(index)
-        
+        # No selection?
+        if not len(self.treeView.selectedIndexes()):
+            # Select first tree element then...
+            self.focusFirst()
+            self.center()
         super(PMXSettingsDialog, self).exec_()
     
     def changeWidget(self, index):

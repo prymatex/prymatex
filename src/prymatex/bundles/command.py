@@ -123,7 +123,11 @@ class PMXCommand(PMXBundleItem):
         type, function = self.getOutputFunction(exit_code, output_functions)
         print self.bundle.name, self.name, self.temp_command_file, type, text
         
-        function(self.buildOutputArgument(type, text), input = self.input_current, command = self)
+        kwargs = {'command': self}
+        if self.input_current:
+            kwargs['input'] = self.input_current
+            
+        function(self.buildOutputArgument(type, text), **kwargs)
         
         #Podria borrar este archivo cuando de borra el objeto
         #deleteFile(self.temp_command_file)

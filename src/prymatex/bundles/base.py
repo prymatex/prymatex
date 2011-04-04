@@ -163,19 +163,22 @@ class PMXBundle(object):
 
     @classmethod
     def getPreferences(cls, scope):
-        preferences = []
+        with_scope = []
+        without_scope = []
         for key in cls.PREFERENCES.keys():
             if key == None:
-                score = 1
+                without_scope.extend(cls.PREFERENCES[key])
             else:
                 score = cls.scores.score(key, scope)
-            if score != 0:
-                preferences.append((score, cls.PREFERENCES[key]))
-        preferences.sort(key = lambda t: t[0])
-        result = []
-        for _, ps in preferences:
-            result.extend(ps)
-        return result
+                if score != 0:
+                    with_scope.append((score, cls.PREFERENCES[key]))
+        with_scope.sort(key = lambda t: t[0], reverse = True)
+        preferences = map(lambda (score, item): item, with_scope)
+        with_scope = []
+        for p in preferences:
+            with_scope.extend(p)
+        print with_scope, without_scope
+        return with_scope and with_scope or without_scope
 
     @classmethod
     def getPreferenceSettings(cls, scope):
@@ -198,9 +201,10 @@ class PMXBundle(object):
                     score = cls.scores.score(item.scope, scope)
                     if score != 0:
                         with_scope.append((score, item))
-            with_scope.sort(key = lambda t: t[0])
+            with_scope.sort(key = lambda t: t[0], reverse = True)
             with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope
+        print with_scope, without_scope
+        return with_scope and with_scope or without_scope
             
     @classmethod
     def getKeyEquivalentItem(cls, character, scope):
@@ -216,7 +220,8 @@ class PMXBundle(object):
                         with_scope.append((score, item))
             with_scope.sort(key = lambda t: t[0], reverse = True)
             with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope
+        print with_scope, without_scope
+        return with_scope and with_scope or without_scope
 
     @classmethod
     def getKeySequenceItem(cls, key, scope):
@@ -230,10 +235,10 @@ class PMXBundle(object):
                     score = cls.scores.score(item.scope, scope)
                     if score != 0:
                         with_scope.append((score, item))
-            with_scope.sort(key = lambda t: t[0])
+            with_scope.sort(key = lambda t: t[0], reverse = True)
             with_scope = map(lambda (score, item): item, with_scope)
-        print without_scope
-        return with_scope
+        print with_scope, without_scope
+        return with_scope and with_scope or without_scope
     
 class PMXBundleItem(object):
     path_patterns = []
@@ -272,13 +277,14 @@ class PMXBundleItem(object):
             except ExpatError, e:
                 print "Error in %s for %s (%s)" % (cls.__name__, path, e)
 
-    def buildMenuTextEntry(self):
-        text = unicode(self.name)
-        if self.tabTrigger != None:
-            text += u" \t %s⇥" % (self.tabTrigger)
-        if self.keyEquivalent != None:
-            text += u" \t %s" % (buildKeyEquivalentString(self.keyEquivalent))
-        return text
+    def buildMenuTextEntry(self, nemonic = ''):
+        text = unicode(self.name).replace('&', '&&')
+        if not nemonic:
+            if self.tabTrigger != None:
+                nemonic = u" \t %s⇥" % (self.tabTrigger.replace('&', '&&'))
+            if self.keyEquivalent != None:
+                nemonic = u" \t %s" % (buildKeyEquivalentString(self.keyEquivalent))
+        return text + u"\t" + nemonic
     
     def resolve(self, *args, **kwargs):
         pass
