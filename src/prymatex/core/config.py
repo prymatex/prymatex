@@ -49,38 +49,50 @@ class SettingsGroup(object):
         for key, setting in self.settings.iteritems():
             value = self.value(key)
             if not value:
-                if setting.fget != None and setting.default == None:
-                    value = setting.fget(obj)
-                elif setting.default != None:
-                    value = setting.default
+                value = setting.getDefault(obj)
             else:
-                if setting.default != None:
-                    value = type(setting.default)(value)
+                value = setting.toPyType(value)
             setattr(obj, key, value)
 
     def sync(self):
         for key, setting in self.settings.iteritems():
             if setting.default == None and self.listeners:
                 self.qsettings.beginGroup(self.name)
-                self.qsettings.setValue(key, setting.__get__(self.listeners[0]))
+                self.qsettings.setValue(key, setting.getDefault(self.listeners[0]))
                 self.qsettings.endGroup()
                 
-class Setting(object):
-    def __init__(self, default = None):
+class pmxConfigPorperty(object):
+    def __init__(self, default = None, fset = None):
         self.default = default
-        self.value = None
+        self.fset = fset
+    
+    def getDefault(self, obj):
+        if self.default != None:
+            return self.default
+        elif self.fget != None:
+            return self.fget(obj)
+        raise Exception("No value for %s" % self.name)
+        
+    def toPyType(self, obj)
+        if self.default != None:
+            obj_type = type(self.default)
+        elif self.fget != None:
+            obj_type = type(self.fget(obj))
+        return obj_type(obj)
         
     def contributeToClass(self, cls, name):
         self.name = name
         self.fget = getattr(cls, name, None)
         self.fset = getattr(cls, "set" + name.title(), None)
-        if self.default == None and self.fget == None:
-            raise Exception("Value?")
         cls._meta.settings.addSetting(self)
         setattr(cls, name, self)
     
+    def __call__(self, function):
+        self.fset = function
+        return self
+        
     def __get__(self, instance, instance_type = None):
-        return self.value
+        return hasattr(self, 'value') and self.value or self.default
         
     def __set__(self, instance, value):
         self.value = value
