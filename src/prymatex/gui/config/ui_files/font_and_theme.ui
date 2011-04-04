@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Font and Theme</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../../res.qrc">
+    <normaloff>:/actions/resources/actions/format-font-size-more.png</normaloff>:/actions/resources/actions/format-font-size-more.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -24,12 +28,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="lineFont">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushChangeFont">
        <property name="text">
-        <string>Change Font</string>
+        <string>&amp;Change Font</string>
        </property>
       </widget>
      </item>
@@ -209,6 +217,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../res.qrc"/>
+ </resources>
  <connections/>
 </ui>

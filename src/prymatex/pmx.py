@@ -32,10 +32,10 @@ def main(args):
             
             # Something went very bad
             # tell the user something about the emergency
-            from prymatex.gui.emergency import PMXExceptionExplantaionDialog
+            from prymatex.gui.emergency import PMXCrashDialog
             #from PyQt4.QtGui import qApp
             #myapp = PMXEmergencyApplication()
-            dlg = PMXExceptionExplantaionDialog(traceback_text=traceback)
+            dlg = PMXCrashDialog(traceback_text=traceback)
             #dlg.exec_()
             #qApp.exec_()
             #raise e

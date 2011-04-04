@@ -324,8 +324,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
         Asks the editor to be closed
         '''
         editor = self.widget(index)
-        count = self.count()
-        if editor.requestClose():
+        if editor.request_close():
             self.removeTab(index)
             return True
         return False

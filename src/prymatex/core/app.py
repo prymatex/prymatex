@@ -5,19 +5,19 @@ from PyQt4.QtCore import SIGNAL, QEvent
 
 from os.path import join, exists, isdir, isabs
 import os
-
+import sys
 from os import getpid, unlink, getcwd
 from os.path import dirname, abspath
 from prymatex.lib import deco
 
-from logging import getLogger
 from prymatex.core.config import PMXSettings, PMX_THEMES_PATH
 from prymatex.core.exceptions import APIUsageError
 
+from logging import getLogger
 logger = getLogger(__name__)
 
 # ipdb handling
-import sys
+
 sys_excepthook = sys.excepthook
 class PMXApplication(QApplication):
     '''
@@ -101,11 +101,15 @@ class PMXApplication(QApplication):
         from prymatex.gui.config.widgets import PMXGeneralWidget,\
                                                 PMXThemeConfigWidget,\
                                                 PMXUpdatesWidget,\
-                                                PMXSaveWidget
+                                                PMXSaveWidget,\
+                                                PMXNetworkWidget
+                                                
+                                                
         configdialog.register(PMXGeneralWidget())
         configdialog.register(PMXThemeConfigWidget())
         configdialog.register(PMXUpdatesWidget())
         configdialog.register(PMXSaveWidget())
+        configdialog.register(PMXNetworkWidget())
         self.__configdialog = configdialog
     
     @property

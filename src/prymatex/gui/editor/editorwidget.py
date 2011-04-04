@@ -231,7 +231,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def on_pushCloseFindreplace_pressed(self):
         self.findreplaceWidget.hide()
 
-    def requestClose(self):
+    def request_close(self):
         '''
         When a editor has to be closed this method is called
         @returns true when it's safe to remove the editor wdiget, the user has been prompted
@@ -245,7 +245,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                                      QMessageBox.Cancel)
             
             if r == QMessageBox.Save:
-                return self.save()
+                return self.request_save()
             elif r == QMessageBox.Cancel:
                 return False
             elif r == QMessageBox.No:
@@ -275,44 +275,53 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         promise = self.file.write(buffer_contents)
         logger.debug("Buffer saved to %s" % self.file.path)
         
-     
+    
+    def propmpt_file(self, title = None):
+        '''
+        Prompts the user for a file name
+        @return: filepath {unicode,str,QString} or None if the action is cancelled
+        '''
+        if not title:
+            title = self.trUtf8("Save file...")
+            
+        syntax = self.codeEdit.syntax
+        save_path = unicode(qApp.instance().startDirectory())
+        suggested_filename = self.file.suggestedFileName()
+        
+        if syntax:
+            suffix = syntax.fileTypes[0]
+            filetypes = '%s (%s)' % (syntax.name, ' '.join(["*.%s" % f for f in syntax.fileTypes]))
+        else:
+            filetypes = 'Text files (*.*)'
+            suffix = 'txt'
+            
+        if self.file.path:
+            suggested_filename = self.file.path
+        else:
+            suggested_filename = join(save_path, suffix and "%s.%s" % (suggested_filename, 
+                                                                        suffix) or suggested_filename)
+        
+        pth = QFileDialog.getSaveFileName( self, title, suggested_filename, filetypes )
+        return pth
     
     def request_save(self, save_as = False):
         '''
-        Save the document.
+        Saves the document asking the user for the required information.
         do_save() actually saves the document, but it should no be called
         directly because it expects self.path to be defined.
+        @param save_as: Indicates filename has to be supplied
         '''
-        
-        if self.file.path is None or save_as:
-            
-            syntax = self.codeEdit.syntax
-            save_path = unicode(qApp.instance().startDirectory())
-            suggested_filename = self.file.suggestedFileName()
-            logger.debug("Saving file to %s", suggested_filename)
-            
-            if syntax:
-                suffix = syntax.fileTypes[0]
-                print "Suffix  is", suffix
-                filetypes = '%s (%s)' % (syntax.name, ' '.join(["*.%s" % f for f in syntax.fileTypes]))
-            else:
-                filetypes = 'Text files (*.*)'
-                suffix = None
-                
-            if save_as:
-                suggested_filename = self.file.path
-            else:
-                suggested_filename = join(save_path, suffix and "%s.%s" % (suggested_filename, 
-                                                                            suffix) or suggested_filename)
-            
-            pth = QFileDialog.getSaveFileName(self, self.trUtf8("Save file"),
-                                        suggested_filename,
-                                        filetypes
-                                        )
-            if pth:
-                self.file.path = pth
-                
+        title = self.trUtf8("Save file")
+        if save_as:
+            title = self.trUtf8("Save file as")
+        if save_as or self.file.path is None:
+            path = self.propmpt_file(title = title)
+            if not path:
+                logger.info("User cancelled save dialg")
+                return False
+            self.file.path = path
         self.save()
+            
 
 
     def setSyntax(self):
