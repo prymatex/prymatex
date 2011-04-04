@@ -598,29 +598,27 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         try:
             match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
             current_word = line[match.start():match.end()]
-            current_word_index = match.start()
         except IndexError:
             current_word = ""
         env = item.buildEnvironment()
         env.update({
                 'TM_CURRENT_LINE': line,
-                'TM_LINE_INDEX': unicode(cursor.columnNumber()), 
-                'TM_LINE_NUMBER': unicode(cursor.block().blockNumber()), 
-                'TM_SCOPE': unicode(scope),
+                'TM_LINE_INDEX': cursor.columnNumber(), 
+                'TM_LINE_NUMBER': cursor.block().blockNumber() + 1, 
+                'TM_SCOPE': scope,
                 'TM_SOFT_TABS': self.soft_tabs and u'YES' or u'NO',
-                'TM_TAB_SIZE': unicode(self.tab_size),
+                'TM_TAB_SIZE': self.tab_size,
         });
         if current_word != "":
-            env['TM_CURRENT_WORD'] = unicode(current_word)
-            env['TM_CURRENT_WORD_INDEX'] = unicode(current_word_index)
+            env['TM_CURRENT_WORD'] = current_word
         if self.syntax != None:
-            env['TM_MODE'] = unicode(self.syntax.name)
+            env['TM_MODE'] = self.syntax.name
         if self.parent().file.path != None:
-            env['TM_FILEPATH'] = unicode(self.parent().file.path)
-            env['TM_FILENAME'] = unicode(self.parent().file.filename)
-            env['TM_DIRECTORY'] = unicode(self.parent().file.directory)
+            env['TM_FILEPATH'] = self.parent().file.path
+            env['TM_FILENAME'] = self.parent().file.filename
+            env['TM_DIRECTORY'] = self.parent().file.directory
         if cursor.hasSelection():
-            env['TM_SELECTED_TEXT'] = unicode(cursor.selectedText().replace(u'\u2029', '\n'))
+            env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u'\u2029', '\n')
         #env.update(self._meta.settings['static_variables'])
         env.update(preferences.shellVariables)
         return env
@@ -655,20 +653,24 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def insertSnippet(self, snippet, **kwargs):
         '''Create a new snippet and insert'''
         cursor = self.textCursor()
-        if input == 'selection' and cursor.hasSelection():
-            position = cursor.selectionStart()
-            cursor.removeSelectedText()
-            cursor.setPosition(position)
-            self.setTextCursor(cursor)
-        elif input == 'word':
-            line = unicode(cursor.block().text())
-            match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
-            current_word = line[match.start():match.end()]
-            index = cursor.columnNumber() - match.start()
-            for _ in range(index):
-                cursor.deletePreviousChar()
-            for _ in range(len(current_word) - index):
-                cursor.deleteChar()
+        if 'input' in kwargs:
+            print kwargs['input']
+            if kwargs['input'] == 'selection':
+                position = cursor.selectionStart()
+                cursor.removeSelectedText()
+                cursor.setPosition(position)
+                self.setTextCursor(cursor)
+            elif kwargs['input'] == 'word':
+                line = unicode(cursor.block().text())
+                match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
+                current_word = line[match.start():match.end()]
+                index = cursor.columnNumber() - len(current_word)
+                index = index >= 0 and index or 0
+                index = line.find(current_word, index)
+                cursor.setPosition(cursor.block().position() + index)
+                self.setTextCursor(cursor)
+                for _ in range(len(current_word)):
+                    cursor.deleteChar()
         self.insertBundleItem(snippet, indent = False)
 
     #==========================================================================

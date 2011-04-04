@@ -1,2 +1,2 @@
 #!/bin/bash
-wine $TM_SUPPORT_PATH/bin/CocoaDialog.exe $*
+wine $TM_SUPPORT_PATH/bin/CocoaDialog.exe $* 2> /dev/null

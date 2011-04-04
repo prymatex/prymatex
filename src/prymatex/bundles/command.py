@@ -54,7 +54,7 @@ class PMXCommand(PMXBundleItem):
     
     def getInputText(self, document, character, environment):
         def switch(input):
-            if not input: return "", u""
+            if not input: return "", ""
             if input == 'document':
                 return 'document', document
             if input == 'line':
@@ -67,13 +67,13 @@ class PMXCommand(PMXBundleItem):
                 return 'selection', environment['TM_SELECTED_TEXT']
             if input == 'word' and 'TM_CURRENT_WORD' in environment:
                 return 'word', environment['TM_CURRENT_WORD']
-            return "", u""
+            return "", ""
         input, text = switch(self.input)
         if not text:
             input, text = switch(self.fallbackInput)
         if not text:
             input, text = switch(self.standardInput)
-        return input, text.encode("utf-8")
+        return input, unicode(text).encode("utf-8")
 
     def getOutputFunction(self, code, functions):
         ''' showAsHTML
@@ -105,8 +105,20 @@ class PMXCommand(PMXBundleItem):
         
     def resolve(self, document, character, environment = {}):
         self.input_current, self.input_text = self.getInputText(document, character, environment)
-        if self.input_current == 'world':
-            environment['TM_INPUT_START_LINE_INDEX'] = environment['TM_CURRENT_WORD_INDEX'] 
+        #TODO: Terminar la logica para los inputs
+        if self.input_current == 'word':
+            index = environment['TM_LINE_INDEX'] - len(environment['TM_CURRENT_WORD'])
+            index = index >= 0 and index or 0
+            environment['TM_INPUT_START_COLUMN'] = environment['TM_CURRENT_LINE'].find(environment['TM_CURRENT_WORD'],index)
+            environment['TM_INPUT_START_LINE'] = environment['TM_LINE_NUMBER']
+            environment['TM_INPUT_START_LINE_INDEX'] = environment['TM_CURRENT_LINE'].find(environment['TM_CURRENT_WORD'],index)
+        elif self.input_current == 'selection':
+            index = environment['TM_LINE_INDEX'] - len(environment['TM_CURRENT_WORD'])
+            index = index >= 0 and index or 0
+            environment['TM_INPUT_START_COLUMN'] = environment['TM_CURRENT_LINE'].find(environment['TM_CURRENT_WORD'],index)
+            environment['TM_INPUT_START_LINE'] = environment['TM_LINE_NUMBER']
+            environment['TM_INPUT_START_LINE_INDEX'] = environment['TM_CURRENT_LINE'].find(environment['TM_CURRENT_WORD'],index)
+        
         command = ensureShellScript(self.getSystemCommand())
         self.temp_command_file = makeExecutableTempFile(command)  
         self.command_process = Popen([  self.temp_command_file],
