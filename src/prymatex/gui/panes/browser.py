@@ -6,7 +6,7 @@ from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRepl
 from prymatex.gui.panes import PaneDockBase
 from prymatex.gui.panes.ui_browser import Ui_BrowserPane
 from prymatex.core.base import PMXObject
-from prymatex.core.config import Setting
+from prymatex.core.config import pmxConfigPorperty
 from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
 

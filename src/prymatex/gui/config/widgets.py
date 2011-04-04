@@ -56,7 +56,7 @@ class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
     def on_pushChangeFont_pressed(self):
         font, ok = QFontDialog.getFont(QFont(), self, self.trUtf8("Select editor font"))
         if ok:
-            self.settings.font = font
+            self.settings.setValue('font', font)
             self.syncFont()
     
     def syncFont(self):
@@ -73,7 +73,7 @@ class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
         self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     
     def themesChanged(self, name):
-        settings.editor.theme_name = unicode(name)
+        self.settings.setValue('theme', unicode(name))
 
 from ui_updates import Ui_Updates
 class PMXUpdatesWidget(QWidget, Ui_Updates):

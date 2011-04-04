@@ -113,11 +113,11 @@ class PMXCommand(PMXBundleItem):
             environment['TM_INPUT_START_LINE'] = environment['TM_LINE_NUMBER']
             environment['TM_INPUT_START_LINE_INDEX'] = environment['TM_CURRENT_LINE'].find(environment['TM_CURRENT_WORD'],index)
         elif self.input_current == 'selection':
-            index = environment['TM_LINE_INDEX'] - len(environment['TM_CURRENT_WORD'])
+            index = environment['TM_LINE_INDEX'] - len(environment['TM_SELECTED_TEXT'])
             index = index >= 0 and index or 0
-            environment['TM_INPUT_START_COLUMN'] = environment['TM_CURRENT_LINE'].find(environment['TM_CURRENT_WORD'],index)
+            environment['TM_INPUT_START_COLUMN'] = environment['TM_CURRENT_LINE'].find(environment['TM_SELECTED_TEXT'],index)
             environment['TM_INPUT_START_LINE'] = environment['TM_LINE_NUMBER']
-            environment['TM_INPUT_START_LINE_INDEX'] = environment['TM_CURRENT_LINE'].find(environment['TM_CURRENT_WORD'],index)
+            environment['TM_INPUT_START_LINE_INDEX'] = environment['TM_CURRENT_LINE'].find(environment['TM_SELECTED_TEXT'],index)
         
         command = ensureShellScript(self.getSystemCommand())
         self.temp_command_file = makeExecutableTempFile(command)  

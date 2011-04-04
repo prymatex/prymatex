@@ -1,14 +1,14 @@
 from PyQt4.QtGui import QWidget, QPainter, QPixmap, QFontMetrics
 from PyQt4.Qt import QColor, QSize
-from prymatex.core.config import Setting
+from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.syntax import PMXBlockUserData
 from prymatex import res_rc
 from prymatex.core.base import PMXObject
 
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
 class PMXSidebar(QWidget, PMXObject):
-    foreground = Setting(default = QColor(170, 170, 170))
-    background = Setting(default = QColor(227, 227, 227))
+    foreground = pmxConfigPorperty(default = QColor(170, 170, 170))
+    background = pmxConfigPorperty(default = QColor(227, 227, 227))
     
     def __init__(self, editor):
         super(PMXSidebar, self).__init__(editor)

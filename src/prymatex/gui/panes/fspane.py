@@ -9,12 +9,12 @@ from prymatex.gui.utils import createButton, addActionsToMenu
 from prymatex.gui.panes.ui_fspane import Ui_FSPane
 from prymatex.gui.panes.ui_fssettings import Ui_FSSettingsDialog
 from prymatex.core.base import PMXObject
-from prymatex.core.config import Setting
+from prymatex.core.config import pmxConfigPorperty
 
 logger = logging.getLogger(__name__)
 
 class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
-    filters = Setting(default = ['*~', '*.pyc'])
+    filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
     def __init__(self, parent):
         QWidget.__init__(self, parent)

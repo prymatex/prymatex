@@ -73,7 +73,7 @@ class pmxConfigPorperty(object):
             return self.fget(obj)
         raise Exception("No value for %s" % self.name)
         
-    def toPyType(self, obj)
+    def toPyType(self, obj):
         if self.default != None:
             obj_type = type(self.default)
         elif self.fget != None:
@@ -83,11 +83,13 @@ class pmxConfigPorperty(object):
     def contributeToClass(self, cls, name):
         self.name = name
         self.fget = getattr(cls, name, None)
-        self.fset = getattr(cls, "set" + name.title(), None)
+        if self.fset == None:
+            self.fset = getattr(cls, "set" + name.title(), None)
         cls._meta.settings.addSetting(self)
         setattr(cls, name, self)
     
     def __call__(self, function):
+        self.name = function.__name__
         self.fset = function
         return self
         

@@ -10,7 +10,7 @@ from prymatex.bundles.command import PMXCommand
 from prymatex.bundles.syntax import PMXSyntax
 from prymatex.bundles.theme import PMXTheme
 from prymatex.core.base import PMXObject
-from prymatex.core.config import Setting
+from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.syntax import PMXSyntaxProcessor, PMXBlockUserData
 
@@ -41,7 +41,6 @@ def debug_key(key_event):
 _counter = 0
 
 
-
 class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     The GUI element which holds the editor.
@@ -59,15 +58,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     # Settings, config and init
     #=======================================================================
-    soft_tabs = Setting(default = True)
-    tab_size = Setting(default = 4)
-    font = Setting(default = QFont('Monospace', 10))
+    soft_tabs = pmxConfigPorperty(default = True)
+    tab_size = pmxConfigPorperty(default = 4)
+    font = pmxConfigPorperty(default = QFont('Monospace', 10))
     
     @property
     def tabKeyBehavior(self):
         return self.soft_tabs and u' ' * self.tab_size or u'\t'
     
-    def setTheme(self, name):
+    @pmxConfigPorperty(default = 'Twilight')
+    def theme(self, name):
         theme = PMXTheme.getThemeByName(name)
         self.processor.formatter = theme
         style = theme.getStyle()
@@ -84,8 +84,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.setPalette(palette)
         self.line_highlight = style.getQColor('lineHighlight')
         self.highlightCurrentLine()
-        
-    theme = Setting(default = 'Twilight')
     
     class Meta(object):
         settings = 'editor'

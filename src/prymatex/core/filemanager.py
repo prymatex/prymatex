@@ -6,7 +6,7 @@ from PyQt4.QtCore import QObject, pyqtSignal, QString
 from PyQt4.QtCore import Qt
 from prymatex.lib.magic import magic
 from prymatex.core.base import PMXObject
-from prymatex.core.config import Setting
+from prymatex.core.config import pmxConfigPorperty
 from os.path import *
 from prymatex.core.exceptions import APIUsageError, FileDoesNotExistError
 import codecs
@@ -169,7 +169,7 @@ class PMXFileManager(PMXObject):
     class Meta:
         settings = 'filemanager'
     
-    file_history = Setting(default = [])
+    file_history = pmxConfigPorperty(default = [])
     
     def __init__(self, parent):
         QObject.__init__(self, parent)
