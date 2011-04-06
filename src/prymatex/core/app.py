@@ -10,7 +10,7 @@ from os import getpid, unlink, getcwd
 from os.path import dirname, abspath
 from prymatex.lib import deco
 
-from prymatex.core.config import PMXSettings, PMX_THEMES_PATH
+from prymatex.core.config import PMXSettings
 from prymatex.core.exceptions import APIUsageError
 
 from logging import getLogger
@@ -58,7 +58,7 @@ class PMXApplication(QApplication):
         
         files_to_open = self.parse_app_arguments(args)
         
-        self.settings = PMXSettings('default')
+        self.settings = PMXSettings.getSettingsForProfile('default')
         self.settings.setValue('auto_save', True)
         self.settings.setValue('auto_save_interval', 30)
         # Some init's
@@ -242,23 +242,16 @@ class PMXApplication(QApplication):
     def saveState(self, session_manager):
         print "Save state", session_manager
         
-#    @property
-#    def config(self):
-#        '''
-#        Retorna un objeto que soporta xxx.yyy.zzz
-#        y que puede propagar señales ante edición.
-#        '''
-#        return self.__config
-        
     def load_texmate_themes(self):
         '''
         Load textmate Bundles and Themes
         '''
+        #FIXME: Pasar el path de los themes como parametro desde self.settings
         from prymatex.bundles import load_prymatex_themes
         from prymatex.lib.i18n import ugettext as _
         
         self.splash.showMessage(_("Loading themes..."))
-        themes = load_prymatex_themes(PMX_THEMES_PATH)
+        themes = load_prymatex_themes(self.settings.value('PMX_THEMES_PATH'))
         
         self.splash.showMessage(_("%d themes loaded", themes))
         QApplication.processEvents()
@@ -266,6 +259,7 @@ class PMXApplication(QApplication):
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def load_texmate_bundles(self):
+        #FIXME: Pasar el path de los bundles como parametro desde self.settings
         from prymatex.bundles import load_prymatex_bundles
         from prymatex.lib.i18n import ugettext as _
         bundles = 0
@@ -278,16 +272,7 @@ class PMXApplication(QApplication):
             
         self.splash.showMessage(_("Loading bundles..."))
         bundles += load_prymatex_bundles(update_splash)
-        #Cargar bundles de usuario
-        #for dirname in self.settings.PMX_BUNDLES_PATH:
-        #    self.splash.showMessage(_("Loading bundles..."))
-        #    if isdir(dirname):
-        #        if not isabs(dirname):
-        #            dirname = join(getcwd(), dirname) 
-        #        
-        #    else:
-        #        self.logger.warning("The theme dir does not exist")
-                
+        
         QApplication.processEvents()
         
     def check_single_instance(self):

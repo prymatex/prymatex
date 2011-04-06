@@ -16,12 +16,13 @@ from prymatex.bundles.template import PMXTemplate
 from prymatex.bundles.base import PMXBundle, PMXMenuNode
 from prymatex.bundles.theme import PMXTheme, PMXStyle
 from prymatex.bundles.qtadapter import buildQTextFormat
+#FIXME: esto esta aca para probar cosas sin qt, removerlo
 from prymatex.core.config import PMX_THEMES_PATH, PMX_BUNDLES_PATH
 
 #BundleItemName, BundlePattern, BundleItemClass
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
-def load_prymatex_bundles(after_load_callback = None):
+def load_prymatex_bundles(bundles_path, after_load_callback = None):
     paths = glob(os.path.join(PMX_BUNDLES_PATH, '*.tmbundle'))
     counter = 0
     total = len(paths)
@@ -38,7 +39,7 @@ def load_prymatex_bundles(after_load_callback = None):
 
 
 
-def load_prymatex_themes(after_load_callback = None):
+def load_prymatex_themes(themes_path, after_load_callback = None):
     paths = glob(os.path.join(PMX_THEMES_PATH, '*.tmTheme'))
     counter = 0
     total = len(paths)

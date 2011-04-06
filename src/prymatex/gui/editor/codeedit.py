@@ -228,12 +228,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     
     def mousePressEvent(self, mouse_event):
-        self.inserSpacesUpToPoint(mouse_event.pos())
+        #self.inserSpacesUpToPoint(mouse_event.pos())
         super(PMXCodeEdit, self).mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, event):
-        position = event.pos()
-        QToolTip.showText(self.mapToGlobal(position), "Cacho", self)
+        #position = event.pos()
+        #QToolTip.showText(self.mapToGlobal(position), "Cacho", self)
         super(PMXCodeEdit, self).mouseMoveEvent(event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
