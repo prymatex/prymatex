@@ -263,8 +263,8 @@ class PMXSyntax(PMXBundleItem):
     @classmethod
     def findSyntaxByFirstLine(cls, line):
         line = line.encode('utf-8')
-        for _, syntaxes in cls.SYNTAXES.iteritems():
-            for _, syntax in syntaxes.iteritems():
+        for syntaxes in cls.SYNTAXES.values():
+            for syntax in syntaxes.values():
                 if syntax.firstLineMatch != None and syntax.firstLineMatch.match(line):
                     return syntax
     
@@ -294,16 +294,11 @@ class PMXSyntax(PMXBundleItem):
             return stxs[0]
     
     @classmethod
-    def getSyntaxesByScope(cls, scope):
-        stxs = []
-        scores = PMXScoreManager()
-        for _, syntaxes in cls.SYNTAXES.iteritems():
-            for _, syntax in syntaxes.iteritems():
-                score = scores.score(scope, syntax.scopeName)
-                if score != 0:
-                    stxs.append((score, syntax))
-        stxs.sort(key = lambda t: t[0])
-        return map(lambda (score, stx): stx, stxs)
+    def getSyntaxByScope(cls, scope):
+        for syntaxes in cls.SYNTAXES.values():
+            if scope in syntaxes:
+                return syntaxes[scope]
+        return None
     
     @classmethod
     def getSyntaxes(cls):

@@ -46,6 +46,7 @@ class PMXStyle(object):
     
 class PMXTheme(object):
     THEMES = {}
+    STYLES_CACHE = {}
     scores = PMXScoreManager()
     
     def __init__(self, hash):
@@ -80,6 +81,8 @@ class PMXTheme(object):
                 return theme
 
     def getStyle(self, scope = None):
+        if scope in self.STYLES_CACHE:
+            return self.STYLES_CACHE[scope]
         base = copy(self.default)
         if scope == None:
             return base
@@ -92,4 +95,5 @@ class PMXTheme(object):
         styles.sort(key = lambda t: t[0])
         for score, style in styles:
             base.update(style)
+        self.STYLES_CACHE[scope] = base
         return base

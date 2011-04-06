@@ -33,6 +33,7 @@ class PMXBlockUserData(QTextBlockUserData):
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
+    FORMAT_CACHE = {}
     
     def __init__(self, editor):
         QSyntaxHighlighter.__init__(self, editor.document())
@@ -91,7 +92,10 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         if self.discard_lines == 0:
             scopes = " ".join(self.scopes)
             self.user_data.addScope(begin, end, scopes)
-            self.setFormat(begin, end - begin, self.formatter.getStyle(scopes).QTextFormat)
+            if self.formatter != None:
+                if scopes not in self.FORMAT_CACHE:
+                    self.FORMAT_CACHE[scopes] = self.formatter.getStyle(scopes).QTextFormat
+                self.setFormat(begin, end - begin, self.FORMAT_CACHE[scopes])
         self.line_position = end
     
     def new_line(self, line):

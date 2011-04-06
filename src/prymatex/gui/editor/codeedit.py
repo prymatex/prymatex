@@ -58,13 +58,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     # Settings, config and init
     #=======================================================================
+    default_syntax = pmxConfigPorperty(default = 'text.plain')
     soft_tabs = pmxConfigPorperty(default = True)
     tab_size = pmxConfigPorperty(default = 4)
     font = pmxConfigPorperty(default = QFont('Monospace', 10))
-    
-    @property
-    def tabKeyBehavior(self):
-        return self.soft_tabs and u' ' * self.tab_size or u'\t'
     
     @pmxConfigPorperty(default = 'Twilight')
     def theme(self, name):
@@ -88,6 +85,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     class Meta(object):
         settings = 'editor'
     
+    @property
+    def tabKeyBehavior(self):
+        return self.soft_tabs and u' ' * self.tab_size or u'\t'
+    
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.sidebar = PMXSidebar(self)
@@ -95,17 +96,18 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.bookmarks = []
         self.folded = []
         self.snippet = None
-        # TODO: Load from config
-        #option = QTextOption()
-        #option.setFlags(QTextOption.ShowTabsAndSpaces)
-        #self.document().setDefaultTextOption(option)
-
+        
         # Actions performed when a key is pressed
         self.setupUi()
         self.setupActions()
         self.connectSignals()
         self.declareEvents()
         self.configure()
+        
+        #Set default syntax
+        syntax = PMXSyntax.getSyntaxByScope(self.default_syntax)
+        if syntax != None:
+            self.setSyntax(syntax)
 
     #=======================================================================
     # Connect Signals and Declare Events
