@@ -109,4 +109,19 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network):
             map(lambda w: w.setEnabled(False), self.all_widgets)
         else:
             map(lambda w: w.setEnabled(True), self.all_widgets)
+
+from ui_bundles import Ui_Bundles
+class PMXBundleWidget(PMXConfigBaseWidget, Ui_Bundles):
+    def __init__(self, parent = None):
+        super(PMXConfigBaseWidget, self).__init__(parent)
+        self.setupUi(self)
+        
+    def on_pushAddPath_pressed(self):
+        pth = QFileDialog.getExistingDirectory(self, self.trUtf8("Select bundle dir"))
+    
+    def on_pushRemove_pressed(self):
+        print "Remove"
+    
+    def on_pushEdit_pressed(self):
+        print "Edit"
         

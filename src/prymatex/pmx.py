@@ -23,7 +23,7 @@ def main(args):
     # TODO: Implement quit and restart
     while True:
         try:
-            myapp = app.PMXApplication(args)
+            myapp = app.PMXApplication(args[1:])
             #myapp.logger = logger 
         except exceptions.AlreadyRunningError, e:
             return e.RETURN_VALUE
