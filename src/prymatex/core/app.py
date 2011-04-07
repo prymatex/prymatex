@@ -3,10 +3,10 @@
 from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
 from PyQt4.QtCore import SIGNAL, QEvent
 
-from os.path import join, exists, isdir, isabs
+from os.path import join, exists
 import os
 import sys
-from os import getpid, unlink, getcwd
+from os import getpid, unlink
 from os.path import dirname, abspath
 from prymatex.lib import deco
 
@@ -58,7 +58,7 @@ class PMXApplication(QApplication):
         
         files_to_open = self.parse_app_arguments(args)
         
-        self.settings = PMXSettings.getSettingsForProfile('default')
+        self.settings = PMXSettings.getSettingsForProfile(self.options.profile)
         self.settings.setValue('auto_save', True)
         self.settings.setValue('auto_save_interval', 30)
         # Some init's
@@ -251,9 +251,8 @@ class PMXApplication(QApplication):
         from prymatex.lib.i18n import ugettext as _
         
         self.splash.showMessage(_("Loading themes..."))
-        themes = load_prymatex_themes(self.settings.value('PMX_THEMES_PATH'))
+        load_prymatex_themes(self.settings.value('PMX_THEMES_PATH'))
         
-        self.splash.showMessage(_("%d themes loaded", themes))
         QApplication.processEvents()
     
     # Decorador para imprimir cuanto tarda
@@ -262,17 +261,23 @@ class PMXApplication(QApplication):
         #FIXME: Pasar el path de los bundles como parametro desde self.settings
         from prymatex.bundles import load_prymatex_bundles
         from prymatex.lib.i18n import ugettext as _
-        bundles = 0
         splash = self.splash
         def update_splash(counter, total, name, **kwargs):
             progress = (float(counter) / total) * 100
             splash.showMessage(_("Loading bundle %s\n%4d of %4d (%.d%%)", 
                                  name, counter, total, progress))
             QApplication.processEvents()
-            
-        self.splash.showMessage(_("Loading bundles..."))
-        bundles += load_prymatex_bundles(update_splash)
         
+        self.splash.showMessage(_("Loading bundles..."))
+        #Build primary environment
+        basic_env = {   'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
+                        'TM_SUPPORT_PATH': self.settings.value('PMX_SUPPORT_PATH'),
+                        'TM_BUNDLES_PATH': self.settings.value('PMX_BUNDLES_PATH'),
+                        'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
+                        'TMPDIR': self.settings.value('PMX_TMP_PATH')}
+        
+        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), basic_env, update_splash)
+
         QApplication.processEvents()
         
     def check_single_instance(self):

@@ -22,7 +22,7 @@ def build_prymatex_profile(path):
     
 def get_prymatex_profile_path(name, base):
     path = os.path.abspath(os.path.join(base, name.lower()))
-    if not os.path.exists(path)
+    if not os.path.exists(path):
         build_prymatex_profile(path)
     return path
 
@@ -117,22 +117,21 @@ class pmxConfigPorperty(object):
             self.fset(instance, value)
             
 class PMXSettings(object):
-    PMX_BASE_PATH = get_prymatex_base_path()
+    PMX_APP_PATH = get_prymatex_base_path()
     PMX_USER_PATH = get_prymatex_user_path()
-    PMX_APP_PATH = PMX_BASE_PATH
-    PMX_BUNDLES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Bundles')
-    PMX_THEMES_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Themes')
-    PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
+    PMX_BUNDLES_PATH = os.path.join(PMX_APP_PATH, 'share', 'Bundles')
+    PMX_THEMES_PATH = os.path.join(PMX_APP_PATH, 'share', 'Themes')
+    PMX_SUPPORT_PATH = os.path.join(PMX_APP_PATH, 'share', 'Support')
     #Profile
     PMX_PROFILE_PATH = None
     PMX_TMP_PATH = None
     PMX_LOG_PATH = None
     GROUPS = {}
     def __init__(self, profile_path):
-        self.qsettings = QSettings(os.path.join(qsettings_path, PRYMATEX_SETTING_NAME), QSettings.IniFormat)
+        self.qsettings = QSettings(os.path.join(profile_path, PRYMATEX_SETTING_NAME), QSettings.IniFormat)
     
     @classmethod
-    def getSettingsForProfile(cls, profile = 'default'):
+    def getSettingsForProfile(cls, profile):
         cls.PMX_PROFILE_PATH = get_prymatex_profile_path(profile, cls.PMX_USER_PATH)
         cls.PMX_TMP_PATH = os.path.join(cls.PMX_PROFILE_PATH, 'tmp')
         cls.PMX_LOG_PATH = os.path.join(cls.PMX_PROFILE_PATH, 'log')

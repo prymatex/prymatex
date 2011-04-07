@@ -11,7 +11,6 @@ if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
-from prymatex.core.config import PMX_APP_PATH, PMX_SUPPORT_PATH, PMX_BUNDLES_PATH
 from prymatex.bundles.qtadapter import buildKeyEquivalentString, buildKeySequence
 
 '''
@@ -111,12 +110,11 @@ class PMXBundle(object):
         item.setBundle(self)
 
     def buildEnvironment(self):
-        env = {}
+        env = copy(self.BASE_ENVIRONMENT)
         env.update({
-            'TM_APP_PATH': PMX_APP_PATH,
+            'HOME': env['PMX_USER_PATH'],
             'TM_BUNDLE_PATH': self.path,
-            'TM_BUNDLE_SUPPORT': self.getBundleSupportPath(),
-            'TM_SUPPORT_PATH': PMX_SUPPORT_PATH,
+            'TM_BUNDLE_SUPPORT': self.getBundleSupportPath()
         });
         return env
         
@@ -400,6 +398,6 @@ def test_queryItems():
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
-    for file in glob(os.path.join(PMX_BUNDLES_PATH, '*')):
+    for file in glob(os.path.join('', '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
     test_queryItems()
