@@ -16,15 +16,14 @@ from prymatex.bundles.template import PMXTemplate
 from prymatex.bundles.base import PMXBundle, PMXMenuNode
 from prymatex.bundles.theme import PMXTheme, PMXStyle
 from prymatex.bundles.qtadapter import buildQTextFormat
-from prymatex.core.config import PMX_THEMES_PATH, PMX_BUNDLES_PATH
 
-#BundleItemName, BundlePattern, BundleItemClass
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
-def load_prymatex_bundles(after_load_callback = None):
-    paths = glob(os.path.join(PMX_BUNDLES_PATH, '*.tmbundle'))
+def load_prymatex_bundles(bundles_path, env = {}, after_load_callback = None):
+    paths = glob(os.path.join(bundles_path, '*.tmbundle'))
     counter = 0
     total = len(paths)
+    PMXBundle.BASE_ENVIRONMENT = env
     for path in paths:
         bundle = PMXBundle.loadBundle(path, BUNDLEITEM_CLASSES, 'pryamtex')
         if bundle and callable(after_load_callback):
@@ -36,10 +35,8 @@ def load_prymatex_bundles(after_load_callback = None):
         counter += 1
     return counter
 
-
-
-def load_prymatex_themes(after_load_callback = None):
-    paths = glob(os.path.join(PMX_THEMES_PATH, '*.tmTheme'))
+def load_prymatex_themes(themes_path, after_load_callback = None):
+    paths = glob(os.path.join(themes_path, '*.tmTheme'))
     counter = 0
     total = len(paths)
     for path in paths:

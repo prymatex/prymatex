@@ -228,12 +228,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     
     def mousePressEvent(self, mouse_event):
-        self.inserSpacesUpToPoint(mouse_event.pos())
+        #self.inserSpacesUpToPoint(mouse_event.pos())
         super(PMXCodeEdit, self).mousePressEvent(mouse_event)
 
     def mouseMoveEvent(self, event):
-        position = event.pos()
-        QToolTip.showText(self.mapToGlobal(position), "Cacho", self)
+        #position = event.pos()
+        #QToolTip.showText(self.mapToGlobal(position), "Cacho", self)
         super(PMXCodeEdit, self).mouseMoveEvent(event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
@@ -298,6 +298,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             for handler in [self.keyOtherPressBundleItemEvent, self.keyOtherPressIndentEvent, self.keyOtherPressSmartTypingEvent]:
                 if handler(key_event):
                     return
+        print "notiene"
         super(PMXCodeEdit, self).keyPressEvent(key_event)
 
     def keyPressSnippetEvent(self, key_event):
@@ -475,7 +476,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     def keyOtherPressIndentEvent(self, key_event):
         key = key_event.key()
-        if key > 256:
+        if not (0 <= key <= 256):
             return False
         character = chr(key)
         cursor = self.textCursor()

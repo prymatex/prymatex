@@ -3,15 +3,30 @@
 from PyQt4.Qt import QSettings
 import os
 
+PRYMATEX_HOME_NAME = ".prymatex"
+PRYMATEX_SETTING_NAME = "settings.ini"
+
 def get_prymatex_base_path():
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 def get_prymatex_user_path():
-    path = os.path.join(os.path.expanduser("~"), ".prymatex")
+    path = os.path.abspath(os.path.join(os.path.expanduser("~"), PRYMATEX_HOME_NAME))
     if not os.path.exists(path):
         os.makedirs(path)
-    return os.path.abspath(path)
+    return path
 
+def build_prymatex_profile(path):
+    os.makedirs(path)
+    os.makedirs(os.path.join(path, 'tmp'))
+    os.makedirs(os.path.join(path, 'log'))
+    
+def get_prymatex_profile_path(name, base):
+    path = os.path.abspath(os.path.join(base, name.lower()))
+    if not os.path.exists(path):
+        build_prymatex_profile(path)
+    return path
+
+#Deprecated use qApp.settings
 PMX_BASE_PATH = get_prymatex_base_path()
 PMX_USER_PATH = get_prymatex_user_path()
 PMX_APP_PATH = PMX_BASE_PATH
@@ -102,9 +117,25 @@ class pmxConfigPorperty(object):
             self.fset(instance, value)
             
 class PMXSettings(object):
+    PMX_APP_PATH = get_prymatex_base_path()
+    PMX_USER_PATH = get_prymatex_user_path()
+    PMX_BUNDLES_PATH = os.path.join(PMX_APP_PATH, 'share', 'Bundles')
+    PMX_THEMES_PATH = os.path.join(PMX_APP_PATH, 'share', 'Themes')
+    PMX_SUPPORT_PATH = os.path.join(PMX_APP_PATH, 'share', 'Support')
+    #Profile
+    PMX_PROFILE_PATH = None
+    PMX_TMP_PATH = None
+    PMX_LOG_PATH = None
     GROUPS = {}
-    def __init__(self, profile):
-        self.qsettings = QSettings(os.path.join(PMX_USER_PATH, 'settings.ini'), QSettings.IniFormat)
+    def __init__(self, profile_path):
+        self.qsettings = QSettings(os.path.join(profile_path, PRYMATEX_SETTING_NAME), QSettings.IniFormat)
+    
+    @classmethod
+    def getSettingsForProfile(cls, profile):
+        cls.PMX_PROFILE_PATH = get_prymatex_profile_path(profile, cls.PMX_USER_PATH)
+        cls.PMX_TMP_PATH = os.path.join(cls.PMX_PROFILE_PATH, 'tmp')
+        cls.PMX_LOG_PATH = os.path.join(cls.PMX_PROFILE_PATH, 'log')
+        return cls(cls.PMX_PROFILE_PATH)
     
     def getGroup(self, name):
         if name not in self.GROUPS:
@@ -115,6 +146,9 @@ class PMXSettings(object):
         self.qsettings.setValue(name, value)
     
     def value(self, name):
+        #FIXME keys for class values
+        if name in self.__class__.__dict__:
+            return self.__class__.__dict__[name]
         value = self.qsettings.value(name)
         return value.toPyObject()
 

@@ -140,7 +140,6 @@ class PMXSyntaxProxy(object):
             proxy_value = self.__proxy()
             if proxy_value:
                 return getattr(proxy_value, name)
-        #TODO: else raise exception
     
     def __proxy(self):
         if onig_compile('^#').match(self.proxy):
@@ -152,8 +151,11 @@ class PMXSyntaxProxy(object):
         elif self.proxy == '$base':
             return self.syntax.grammar
         else:
-            return self.syntax.syntaxes[self.proxy].grammar
-        
+            syntaxes = self.syntax.syntaxes
+            if self.proxy in syntaxes:
+                return syntaxes[self.proxy].grammar
+            else:
+                return PMXSyntaxNode({}, self.syntax)
 class PMXSyntax(PMXBundleItem):
     path_patterns = ['Syntaxes/*.tmLanguage', 'Syntaxes/*.plist']
     bundle_collection = 'syntaxes'

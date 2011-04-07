@@ -7,7 +7,7 @@ BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh
 %%s''' % PMX_SUPPORT_PATH
 
-ENV_SCRIPT = '''#!%s/bin/shebang %%s
+ENV_SCRIPT = '''#!%s/bin/shebang.sh %%s
 %%s''' % PMX_SUPPORT_PATH
 
 def has_shebang(text):
