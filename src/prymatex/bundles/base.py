@@ -112,7 +112,6 @@ class PMXBundle(object):
     def buildEnvironment(self):
         env = copy(self.BASE_ENVIRONMENT)
         env.update({
-            'HOME': env['PMX_USER_PATH'],
             'TM_BUNDLE_PATH': self.path,
             'TM_BUNDLE_SUPPORT': self.getBundleSupportPath()
         });

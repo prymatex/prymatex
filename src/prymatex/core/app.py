@@ -274,7 +274,8 @@ class PMXApplication(QApplication):
                         'TM_SUPPORT_PATH': self.settings.value('PMX_SUPPORT_PATH'),
                         'TM_BUNDLES_PATH': self.settings.value('PMX_BUNDLES_PATH'),
                         'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
-                        'TMPDIR': self.settings.value('PMX_TMP_PATH')}
+                        'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
+                        'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
         
         load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), basic_env, update_splash)
 

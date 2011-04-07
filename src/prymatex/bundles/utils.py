@@ -44,8 +44,8 @@ def deleteFile(file):
 
 def ensureEnvironment(environment):
     codingenv = { 'DIALOG': DIALOG }
-    for key, value in os.environ.iteritems():
-        codingenv[key] = value[:]
+    #for key, value in os.environ.iteritems():
+    #    codingenv[key] = value[:]
     for key, value in environment.iteritems():
         codingenv[key] = unicode(value).encode('utf-8')
     return codingenv

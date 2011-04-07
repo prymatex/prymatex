@@ -19,16 +19,32 @@ export PATH
 : ${TM_BASH_INIT:=$HOME/Library/Application Support/TextMate/bash_init.sh}
 if [[ -f "$TM_BASH_INIT" ]]; then
 	. "$TM_BASH_INIT"
+else
+	# First read the system-wide profile
+	[ -f /etc/profile ] && . /etc/profile               &>/dev/null
+
+	# Now find the first local profile, just like a normal login shell
+	if   [ -f ~/.bash_profile ]; then . ~/.bash_profile &>/dev/null
+	elif [ -f ~/.bash_login ];   then . ~/.bash_login   &>/dev/null
+	elif [ -f ~/.profile ];      then . ~/.profile      &>/dev/null
+	fi
 fi
+
+#Now export prymatex
+export HOME=$PMX_USER_PATH #Home is in $HOME/.prymatex
+export TMPDIR=$PMX_TMP_PATH
+export TEMP=$PMX_TMP_PATH
+export TMP=$PMX_TMP_PATH
+export LOGPATH=$PMX_LOG_PATH
 
 export RUBYLIB="${RUBYLIB:+$RUBYLIB:}$TM_SUPPORT_PATH/lib"
 
-textmate_init () {
-	[[ "$1" != / && "$1" != ~ ]] && textmate_init "$(dirname "$1")"
-	[[ -f "$1/.textmate_init" ]] && . "$1/.textmate_init"
-	[[ "$1" == / && -f ~/.textmate_init ]] && . ~/.textmate_init
-}
-textmate_init "${TM_DIRECTORY:-$HOME}"
+#textmate_init () {
+#	[[ "$1" != / && "$1" != ~ ]] && textmate_init "$(dirname "$1")"
+#	[[ -f "$1/.textmate_init" ]] && . "$1/.textmate_init"
+#	[[ "$1" == / && -f ~/.textmate_init ]] && . ~/.textmate_init
+#}
+#textmate_init "${TM_DIRECTORY:-$HOME}"
 
 # an abstract way to change the output option of the running command
 exit_discard ()					{ echo -n "$1"; exit 200; }
