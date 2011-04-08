@@ -268,38 +268,39 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Keyboard Events
     #=======================================================================
     
-    def keyPressEvent(self, key_event):
+    def keyPressEvent(self, event):
         '''
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
         '''
         
-        #Check for snippet
-        if self.snippet != None and self.keyPressSnippetEvent(key_event):
-            return
+        #Check for snippet mode
+        if self.snippet != None:
+            self.keyPressSnippetEvent(event)
+            if event.isAccepted():
+                return
         
-        key = key_event.key()
-        if key == Qt.Key_Tab:
-            for handler in [self.keyTabPressBundleItemEvent, self.keyTabPressIndentEvent]:
-                if handler(key_event):
-                    return
-        elif key == Qt.Key_Backtab:
-            for handler in [self.keyBacktabPressUnindentEvent]:
-                if handler(key_event):
-                    return
-        elif key == Qt.Key_Backspace:
-            for handler in [self.keyBackspacePressSmartTypingEvent]:
-                if handler(key_event):
-                    return
-        elif key == Qt.Key_Return:
-            for handler in [self.keyReturnPressSyntaxEvent, self.keyReturnPressIndentEvent]:
-                if handler(key_event):
+        KEYEVENT_HANDLERS = {
+            Qt.Key_Tab: [self.eventKeyTabBundleItem, self.eventKeyTabIndent],
+            Qt.Key_Backtab: [self.eventKeyBacktabUnindent],
+            Qt.Key_Backspace:  [self.eventKeyBackspaceSmartTyping],
+            Qt.Key_Return: [self.eventKeyReturnSyntax, self.eventKeyReturnIndent]
+        }
+        
+        key = event.key()
+        if key in KEYEVENT_HANDLERS:
+            for handler in KEYEVENT_HANDLERS[key]:
+                handler(event)
+                if event.isAccepted():
                     return
         else:
-            for handler in [self.keyOtherPressBundleItemEvent, self.keyOtherPressIndentEvent, self.keyOtherPressSmartTypingEvent]:
-                if handler(key_event):
+            for handler in [self.eventKeyAnyBundleItem, self.eventKeyAnyIndent, self.eventKeyAnySmartTyping]:
+                handler(event)
+                if event.isAccepted():
                     return
-        print "notiene"
-        super(PMXCodeEdit, self).keyPressEvent(key_event)
+
+        super(PMXCodeEdit, self).keyPressEvent(event)
+        
+        #Cosas luego del evento
 
     def keyPressSnippetEvent(self, key_event):
         key = key_event.key()
@@ -385,7 +386,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Tab Keyboard Events
     #=======================================================================
     
-    def keyTabPressBundleItemEvent(self, key_event):
+    def eventKeyTabBundleItem(self, key_event):
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
@@ -395,60 +396,56 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             snippets = PMXBundle.getTabTriggerItem(word, scope)
             if len(snippets) > 1:
                 self.selectBundleItem(snippets, tabTrigger = True)
-                return True
+                event.accept()
             elif snippets:
                 self.insertBundleItem(snippets[0], tabTrigger = True)
-                return True
-        return False
+                event.accept()
     
-    def keyTabPressIndentEvent(self, key_event):
+    def eventKeyTabIndent(self, key_event):
         cursor = self.textCursor()
         if cursor.hasSelection():
             self.indent(self.tabKeyBehavior)
         else:
             cursor.insertText(self.tabKeyBehavior)
-        return True
+        event.accept()
     
     #=======================================================================
     # Backtab Keyboard Events
     #=======================================================================
     
-    def keyBacktabPressUnindentEvent(self, key_event):
+    def eventKeyBacktabUnindent(self, event):
         self.unindent()
-        return True
+        event.accept()
     
     #=======================================================================
     # Backspace Keyboard Events
     #=======================================================================
-    def keyBackspacePressSmartTypingEvent(self, key_event):
+    def eventKeyBackspaceSmartTyping(self, key_event):
         cursor = self.textCursor()
-        if cursor.hasSelection():
-            return False
-        doc = self.document()
-        scope = self.getCurrentScope()
-        preferences = PMXBundle.getPreferenceSettings(scope)
-        if preferences.smartTypingPairs:
-            character = doc.characterAt(cursor.position() - 1).toAscii()
-            pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
-            if pairs and pairs[0][0] == character and doc.characterAt(cursor.position()).toAscii() == pairs[0][1]:
-                cursor.deleteChar()
-            elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2).toAscii() == pairs[0][0]:
-                cursor.deletePreviousChar()
-        return False
+        if not cursor.hasSelection():
+            doc = self.document()
+            scope = self.getCurrentScope()
+            preferences = PMXBundle.getPreferenceSettings(scope)
+            if preferences.smartTypingPairs:
+                character = doc.characterAt(cursor.position() - 1).toAscii()
+                pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
+                if pairs and pairs[0][0] == character and doc.characterAt(cursor.position()).toAscii() == pairs[0][1]:
+                    cursor.deleteChar()
+                elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2).toAscii() == pairs[0][0]:
+                    cursor.deletePreviousChar()
     
     #=======================================================================
     # Return Keyboard Events
     #=======================================================================
     
-    def keyReturnPressSyntaxEvent(self, key_event):
+    def eventKeyReturnSyntax(self, key_event):
         line = unicode(self.textCursor().block().text())
         if self.document().blockCount() == 1:
             syntax = PMXSyntax.findSyntaxByFirstLine(line)
             if syntax != None:
                 self.setSyntax(syntax)
-        return False
     
-    def keyReturnPressIndentEvent(self, key_event):
+    def eventKeyReturnIndent(self, key_event):
         line = unicode(self.textCursor().block().text())
         scope = self.getCurrentScope()
         settings = PMXBundle.getPreferenceSettings(scope)
@@ -465,16 +462,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             super(PMXCodeEdit, self).keyPressEvent(key_event)
             self.indent(indentation)
-        return True
+        event.accept()
     
     #=======================================================================
     # Other Keyboard Events
     #=======================================================================
     
-    def keyOtherPressBundleItemEvent(self, key_event):
-        return False
+    def eventKeyAnyBundleItem(self, event):
+        pass
     
-    def keyOtherPressIndentEvent(self, key_event):
+    def eventKeyAnyIndent(self, key_event):
         key = key_event.key()
         if not (0 <= key <= 256):
             return False
@@ -496,12 +493,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             print "unident"
         return False
     
-    def keyOtherPressSmartTypingEvent(self, key_event):
+    def eventKeyAnySmartTyping(self, key_event):
         cursor = self.textCursor()
         character = unicode(key_event.text())
         scope = self.getCurrentScope()
         preferences = PMXBundle.getPreferenceSettings(scope)
-        pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
+        pairs = filter(lambda pair: pair[0] == character, preferences.smartTypingPairs)
         if pairs:
             if cursor.hasSelection():
                 position = cursor.selectionStart()
@@ -511,17 +508,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(position + len(text), QTextCursor.KeepAnchor)
             else:
                 position = cursor.position()
-                if pairs[0][0] == character:
-                    super(PMXCodeEdit, self).keyPressEvent(key_event)
-                    cursor.insertText(pairs[0][1])
-                elif pairs[0][1] == character:
-                    cursor.insertText(pairs[0][0])
-                    super(PMXCodeEdit, self).keyPressEvent(key_event)
+                super(PMXCodeEdit, self).keyPressEvent(key_event)
+                cursor.insertText(pairs[0][1])
                 cursor.setPosition(position + 1)
             self.setTextCursor(cursor)
-            return True
-        else:
-            return False
+            event.accept()
 
     #==========================================================================
     # BundleItems
