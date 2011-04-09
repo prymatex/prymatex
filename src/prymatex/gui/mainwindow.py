@@ -73,7 +73,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
         # Una vez centrada la ventana caramos los menues
         self.addBundlesToMenu()
-        self.addBundlesShortcuts()
         
         #self.dialogConfig = PMXConfigDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
@@ -196,20 +195,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             if bundle.mainMenu != None:
                 for _, item in bundle.mainMenu.iteritems():
                     self.addMenuItem(menu, item)  
-    
-    def shortcutBundleItemActivated(self, key):
-        editor = self.currentEditor
-        scope = editor.getCurrentScope()
-        items = PMXBundle.getKeySequenceItem(key, scope)
-        if len(items) > 1:
-            editor.selectBundleItem(items)
-        elif items:
-            editor.insertBundleItem(items[0])
-    
-    def addBundlesShortcuts(self):
-        for keyseq in PMXBundle.KEY_SEQUENCE.keys():
-            receiver = lambda key = keyseq: self.shortcutBundleItemActivated(key)
-            QShortcut(QKeySequence(keyseq), self, receiver)
     
     #====================================================================
     # Command outputs

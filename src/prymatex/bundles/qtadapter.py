@@ -43,7 +43,7 @@ def buildQTextFormat(style):
     return format
 
 QTCHARCODES = {9: Qt.Key_Backspace,
-               10: Qt.Key_Enter,
+               10: Qt.Key_Return,
                127: Qt.Key_Delete,
                63232: Qt.Key_F1,
                63233: Qt.Key_F3,
@@ -55,7 +55,13 @@ QTCHARCODES = {9: Qt.Key_Backspace,
                63272: Qt.Key_F7,
                63302: Qt.Key_F3}
 
-def buildKeySequence(nemonic):
+def keyEquivalentAlternative(code):
+    if code & Qt.SHIFT:
+        key = code & 0xFF
+        if chr(key) not in string.ascii_uppercase:
+            return code - Qt.SHIFT
+
+def buildKeyEquivalent(nemonic):
     values = list(nemonic)
     sequence = []
     if '^' in nemonic:

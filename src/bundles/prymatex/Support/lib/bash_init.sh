@@ -21,19 +21,29 @@ if [[ -f "$TM_BASH_INIT" ]]; then
 	. "$TM_BASH_INIT"
 fi
 
+#Now export
+export HOME=$PMX_USER_PATH #Home is in $HOME/.prymatex
+export TMPDIR=$PMX_TMP_PATH
+export TEMP=$PMX_TMP_PATH
+export TMP=$PMX_TMP_PATH
+export LOGPATH=$PMX_LOG_PATH
+
 export RUBYLIB="${RUBYLIB:+$RUBYLIB:}$TM_SUPPORT_PATH/lib"
 
-textmate_init () {
-	[[ "$1" != / && "$1" != ~ ]] && textmate_init "$(dirname "$1")"
-	[[ -f "$1/.textmate_init" ]] && . "$1/.textmate_init"
-	[[ "$1" == / && -f ~/.textmate_init ]] && . ~/.textmate_init
-}
-textmate_init "${TM_DIRECTORY:-$HOME}"
+#Aliases
+alias 'open'='xdg-open'
+
+#textmate_init () {
+#	[[ "$1" != / && "$1" != ~ ]] && textmate_init "$(dirname "$1")"
+#	[[ -f "$1/.textmate_init" ]] && . "$1/.textmate_init"
+#	[[ "$1" == / && -f ~/.textmate_init ]] && . ~/.textmate_init
+#}
+#textmate_init "${TM_DIRECTORY:-$HOME}"
 
 # an abstract way to change the output option of the running command
 exit_discard ()					{ echo -n "$1"; exit 200; }
 exit_replace_text ()				{ echo -n "$1"; exit 201; }
-exit_replace_document ()		{ echo -n "$1"; exit 202; }
+exit_replace_document ()                            { echo -n "$1"; exit 202; }
 exit_insert_text ()				{ echo -n "$1"; exit 203; }
 exit_insert_snippet ()			{ echo -n "$1"; exit 204; }
 exit_show_html ()					{ echo -n "$1"; exit 205; }
