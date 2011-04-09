@@ -65,11 +65,8 @@ class PMXPreferenceSettings(object):
     def combine(self, other):
         for key in self.KEYS:
             value = getattr(other, key, None)
-            if value != None:
-                if key in [ 'shellVariables' ]:
-                    self.shellVariables.update(value)
-                elif not getattr(self, key):
-                    setattr(self, key, value)
+            if value != None and not getattr(self, key):
+                setattr(self, key, value)
 
     def indent(self, line):
         #IncreasePattern on return indent nextline
@@ -103,6 +100,7 @@ class PMXPreference(PMXBundleItem):
     @staticmethod
     def buildSettings(preferences):
         settings = PMXPreferenceSettings(DEFAULT_SETTINGS)
+        
         for p in preferences:
             settings.combine(p.settings)
         return settings

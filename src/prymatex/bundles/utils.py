@@ -26,9 +26,9 @@ def ensureShellScript(text):
     if not has_shebang(text) or is_bash_shebang(text):
         text = BASH_SCRIPT % text
     elif is_env_shebang(text):
-        tokens = text.splitlines()[0].split()
-        if len(tokens) > 2:
-            text = ENV_SCRIPT % (" ".join(tokens[1:]), text) 
+        lines = text.splitlines()
+        shebang = lines[0].split()
+        text = ENV_SCRIPT % (" ".join(shebang[1:]), "\n".join(lines[1:])) 
     return text
 
 def makeExecutableTempFile(content):
@@ -44,8 +44,8 @@ def deleteFile(file):
 
 def ensureEnvironment(environment):
     codingenv = { 'DIALOG': DIALOG }
-    #for key, value in os.environ.iteritems():
-    #    codingenv[key] = value[:]
+    for key, value in os.environ.iteritems():
+        codingenv[key] = value[:]
     for key, value in environment.iteritems():
         codingenv[key] = unicode(value).encode('utf-8')
     return codingenv

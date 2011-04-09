@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 # plutil.pl 1.6 - implementation of binary/UTF-8 (text) XML conversion of plist files
 # does not (yet) support OS X plutil command line syntax
 

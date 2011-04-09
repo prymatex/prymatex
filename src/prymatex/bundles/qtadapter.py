@@ -43,7 +43,7 @@ def buildQTextFormat(style):
     return format
 
 QTCHARCODES = {9: Qt.Key_Backspace,
-               10: Qt.Key_Enter,
+               10: Qt.Key_Return,
                127: Qt.Key_Delete,
                63232: Qt.Key_F1,
                63233: Qt.Key_F3,
@@ -83,6 +83,8 @@ def buildKeySequence(nemonic):
             else:
                 code = QTCHARCODES[code]
         sequence.append(code)
+    if nemonic == "$\n":
+        print 'es el comando', sequence
     return sum(sequence)
 
 CHARACTER_REPLACES = { ' ': u'Space',
