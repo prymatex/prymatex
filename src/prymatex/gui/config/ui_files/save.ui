@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>Save</class>
  <widget class="QWidget" name="Save">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,94 +20,118 @@
    <iconset resource="../../../res.qrc">
     <normaloff>:/actions/resources/actions/document-save-all.png</normaloff>:/actions/resources/actions/document-save-all.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QCheckBox" name="checkBox_2">
-       <property name="text">
-        <string>Save files automatically every</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="spinBox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="suffix">
-        <string> mins</string>
-       </property>
-       <property name="maximum">
-        <number>120</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Backup prefix</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEdit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>.</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Backup postfix</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEdit_2">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>~</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+  <layout class="QFormLayout" name="formLayout">
+   <item row="5" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Backup prefix</string>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>193</height>
-      </size>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLineEdit" name="lineBackupPrefix">
+     <property name="enabled">
+      <bool>false</bool>
      </property>
-    </spacer>
+     <property name="text">
+      <string>.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Backup postfix</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLineEdit" name="lineBackupPostfix">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>~</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Default encoding</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QComboBox" name="comboEncodings"/>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Line Ending</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1">
+    <widget class="QComboBox" name="comboBox">
+     <item>
+      <property name="text">
+       <string>LF (recommended)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>CR + LF</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="11" column="1">
+    <widget class="QCheckBox" name="checkBox">
+     <property name="text">
+      <string>Use for existing files as well</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QCheckBox" name="checkBox_3">
+     <property name="text">
+      <string>Use for existing files as well</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QCheckBox" name="checkBox_4">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Save when focus is lost</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="checkAutoSave">
+     <property name="text">
+      <string>Automaitcally save</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QSpinBox" name="spinSaveInterval">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="suffix">
+      <string> mins</string>
+     </property>
+     <property name="prefix">
+      <string>every </string>
+     </property>
+     <property name="maximum">
+      <number>120</number>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -113,9 +140,9 @@
  </resources>
  <connections>
   <connection>
-   <sender>checkBox_2</sender>
+   <sender>checkAutoSave</sender>
    <signal>toggled(bool)</signal>
-   <receiver>spinBox</receiver>
+   <receiver>spinSaveInterval</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -123,15 +150,15 @@
      <y>15</y>
     </hint>
     <hint type="destinationlabel">
-     <x>250</x>
-     <y>19</y>
+     <x>197</x>
+     <y>48</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>checkBox_2</sender>
+   <sender>checkAutoSave</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lineEdit</receiver>
+   <receiver>lineBackupPrefix</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -139,15 +166,15 @@
      <y>15</y>
     </hint>
     <hint type="destinationlabel">
-     <x>119</x>
-     <y>38</y>
+     <x>234</x>
+     <y>105</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>checkBox_2</sender>
+   <sender>checkAutoSave</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lineEdit_2</receiver>
+   <receiver>lineBackupPostfix</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -155,8 +182,24 @@
      <y>15</y>
     </hint>
     <hint type="destinationlabel">
-     <x>331</x>
-     <y>51</y>
+     <x>395</x>
+     <y>153</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkAutoSave</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>checkBox_4</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>126</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>144</x>
+     <y>68</y>
     </hint>
    </hints>
   </connection>
