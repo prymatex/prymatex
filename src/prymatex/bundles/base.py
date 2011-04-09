@@ -11,7 +11,7 @@ if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
-from prymatex.bundles.qtadapter import buildKeyEquivalentString, buildKeySequence
+from prymatex.bundles.qtadapter import buildKeyEquivalentString, buildKeyEquivalent, keyEquivalentAlternative
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -73,7 +73,6 @@ class PMXBundle(object):
     BUNDLES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
-    KEY_SEQUENCE = {}
     DRAGS = {}
     PREFERENCES = {}
     TEMPLATES = []
@@ -101,11 +100,8 @@ class PMXBundle(object):
         if item.tabTrigger != None:
             PMXBundle.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
-            keyseq = buildKeySequence(item.keyEquivalent)
-            if keyseq > 255:
-                PMXBundle.KEY_SEQUENCE.setdefault(keyseq, []).append(item)
-            else:
-                PMXBundle.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
+            keyseq = buildKeyEquivalent(item.keyEquivalent)
+            PMXBundle.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
         # I'm four father
         item.setBundle(self)
 
@@ -204,11 +200,12 @@ class PMXBundle(object):
         return with_scope and with_scope or without_scope
             
     @classmethod
-    def getKeyEquivalentItem(cls, character, scope):
+    def getKeyEquivalentItem(cls, code, scope):
         with_scope = []
         without_scope = []
-        if cls.KEY_EQUIVALENTS.has_key(character):
-            for item in cls.KEY_EQUIVALENTS[character]:
+        code = code if code in cls.KEY_EQUIVALENTS else keyEquivalentAlternative(code)
+        if code in cls.KEY_EQUIVALENTS:
+            for item in cls.KEY_EQUIVALENTS[code]:
                 if item.scope == None:
                     without_scope.append(item)
                 else:
@@ -220,23 +217,6 @@ class PMXBundle(object):
         print with_scope, without_scope
         return with_scope and with_scope or without_scope
 
-    @classmethod
-    def getKeySequenceItem(cls, key, scope):
-        with_scope = []
-        without_scope = []
-        if cls.KEY_SEQUENCE.has_key(key):
-            for item in cls.KEY_SEQUENCE[key]:
-                if item.scope == None:
-                    without_scope.append(item)
-                else:
-                    score = cls.scores.score(item.scope, scope)
-                    if score != 0:
-                        with_scope.append((score, item))
-            with_scope.sort(key = lambda t: t[0], reverse = True)
-            with_scope = map(lambda (score, item): item, with_scope)
-        print with_scope, without_scope
-        return with_scope and with_scope or without_scope
-    
 class PMXBundleItem(object):
     path_patterns = []
     bundle_collection = ""
@@ -392,7 +372,7 @@ def test_preferences():
 def test_queryItems():
     from prymatex.bundles.qtadapter import Qt
     print PMXBundle.getTabTriggerItem('class', 'source.python')
-    print PMXBundle.getKeySequenceItem(Qt.CTRL + ord('H'), 'text.html')
+    print PMXBundle.getKeyEquivalentItem(Qt.CTRL + ord('H'), 'text.html')
     
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES

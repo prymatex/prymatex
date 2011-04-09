@@ -55,7 +55,13 @@ QTCHARCODES = {9: Qt.Key_Backspace,
                63272: Qt.Key_F7,
                63302: Qt.Key_F3}
 
-def buildKeySequence(nemonic):
+def keyEquivalentAlternative(code):
+    if code & Qt.SHIFT:
+        key = code & 0xFF
+        if chr(key) not in string.ascii_uppercase:
+            return code - Qt.SHIFT
+
+def buildKeyEquivalent(nemonic):
     values = list(nemonic)
     sequence = []
     if '^' in nemonic:
@@ -83,8 +89,6 @@ def buildKeySequence(nemonic):
             else:
                 code = QTCHARCODES[code]
         sequence.append(code)
-    if nemonic == "$\n":
-        print 'es el comando', sequence
     return sum(sequence)
 
 CHARACTER_REPLACES = { ' ': u'Space',

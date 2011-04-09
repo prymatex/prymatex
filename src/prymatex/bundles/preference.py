@@ -65,6 +65,15 @@ class PMXPreferenceSettings(object):
     def combine(self, other):
         for key in self.KEYS:
             value = getattr(other, key, None)
+            if value != None:
+                if key == 'shellVariables':
+                    self.shellVariables.update(value)
+                elif not getattr(self, key):
+                    setattr(self, key, value)
+    
+    def update(self, other):
+        for key in self.KEYS:
+            value = getattr(other, key, None)
             if value != None and not getattr(self, key):
                 setattr(self, key, value)
 
@@ -100,7 +109,11 @@ class PMXPreference(PMXBundleItem):
     @staticmethod
     def buildSettings(preferences):
         settings = PMXPreferenceSettings(DEFAULT_SETTINGS)
-        
-        for p in preferences:
-            settings.combine(p.settings)
+        if preferences:
+            bundle = preferences[0].bundle
+            for p in preferences:
+                if p.bundle == bundle:
+                    settings.combine(p.settings)
+                else:
+                    settings.update(p.settings)
         return settings
