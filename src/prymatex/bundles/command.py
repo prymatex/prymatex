@@ -22,6 +22,7 @@ class PMXCommand(PMXBundleItem):
     path_patterns = ['Commands/*.tmCommand', 'Commands/*.plist']
     bundle_collection = 'commands'
     exit_codes = {
+                  0:   'discard',
                   200: 'discard',
                   201: 'replaceSelectedText',
                   202: 'replaceDocument',
@@ -75,6 +76,38 @@ class PMXCommand(PMXBundleItem):
             input, text = switch(self.standardInput)
         return input, unicode(text).encode("utf-8")
 
+
+    def formatError(self, output, exit_code):
+        from prymatex.lib.pathutils import make_hyperlinks
+        html = '''
+            <html>
+                <head>
+                    <title>Error</title>
+                    <style>
+                        body {
+                            background: #999;
+                            
+                        }
+                        pre {
+                            border: 1px dashed #222;
+                            background: #ccc;
+                            text: #000;
+                            padding: 2%%;
+                        }
+                    </style>
+                </head>
+                <body>
+                <h3>An error has occurred while executing command "%(name)s"</h3>
+                <pre>%(output)s</pre>
+                <p>Exit code was: %(exit_code)d</p>
+                </body>
+            </html>
+        ''' % {'output': make_hyperlinks(output), 
+               'name': self.name,
+               'exit_code': exit_code}
+        #html.replace()
+        return html
+        
     def getOutputFunction(self, code, functions):
         ''' showAsHTML
             showAsTooltip
@@ -131,9 +164,15 @@ class PMXCommand(PMXBundleItem):
         text = self.command_process.stdout.read()
         self.command_process.stdout.close()
         exit_code = self.command_process.wait()
-        
-        type, function = self.getOutputFunction(exit_code, output_functions)
-        print self.bundle.name, self.name, self.temp_command_file, type, text
+        print "EXIT CODE", exit_code
+        if exit_code not in self.exit_codes:
+            type = 'showAsHTML'
+            function = output_functions[type]
+            text = self.formatError(text, exit_code)
+            
+        else:
+            type, function = self.getOutputFunction(exit_code, output_functions)
+            print self.bundle.name, self.name, self.temp_command_file, type, text
         
         kwargs = {'command': self}
         if self.input_current:
