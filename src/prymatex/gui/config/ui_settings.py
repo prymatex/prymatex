@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/settings.ui'
 #
-# Created: Mon Mar 28 19:14:21 2011
+# Created: Sat Apr  9 13:42:48 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,12 @@ from PyQt4 import QtCore, QtGui
 class Ui_PMXSettingsDialog(object):
     def setupUi(self, PMXSettingsDialog):
         PMXSettingsDialog.setObjectName("PMXSettingsDialog")
-        PMXSettingsDialog.resize(733, 401)
+        PMXSettingsDialog.resize(725, 185)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(PMXSettingsDialog.sizePolicy().hasHeightForWidth())
+        PMXSettingsDialog.setSizePolicy(sizePolicy)
         self.verticalLayout_2 = QtGui.QVBoxLayout(PMXSettingsDialog)
         self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")

@@ -2,60 +2,55 @@
 
 # Form implementation generated from reading ui file 'ui_files/bundles.ui'
 #
-# Created: Wed Apr  6 16:34:39 2011
-#      by: PyQt4 UI code generator 4.8.1
+# Created: Sat Apr  9 13:42:44 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    _fromUtf8 = lambda s: s
-
 class Ui_Bundles(object):
     def setupUi(self, Bundles):
-        Bundles.setObjectName(_fromUtf8("Bundles"))
+        Bundles.setObjectName("Bundles")
         Bundles.resize(400, 359)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/folder-sync.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/actions/resources/actions/folder-sync.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Bundles.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(Bundles)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.verticalLayout.setObjectName("verticalLayout")
         self.label_2 = QtGui.QLabel(Bundles)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.label_2.setObjectName("label_2")
         self.verticalLayout.addWidget(self.label_2)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.label = QtGui.QLabel(Bundles)
-        self.label.setObjectName(_fromUtf8("label"))
+        self.label.setObjectName("label")
         self.horizontalLayout_2.addWidget(self.label)
         self.linePath = QtGui.QLineEdit(Bundles)
-        self.linePath.setObjectName(_fromUtf8("linePath"))
+        self.linePath.setObjectName("linePath")
         self.horizontalLayout_2.addWidget(self.linePath)
         self.pushAddPath = QtGui.QPushButton(Bundles)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/list-add.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/actions/resources/actions/list-add.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushAddPath.setIcon(icon1)
-        self.pushAddPath.setObjectName(_fromUtf8("pushAddPath"))
+        self.pushAddPath.setObjectName("pushAddPath")
         self.horizontalLayout_2.addWidget(self.pushAddPath)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.listWidget = QtGui.QListWidget(Bundles)
-        self.listWidget.setObjectName(_fromUtf8("listWidget"))
+        self.listWidget.setObjectName("listWidget")
         self.verticalLayout.addWidget(self.listWidget)
         self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.pushEdit = QtGui.QPushButton(Bundles)
-        self.pushEdit.setObjectName(_fromUtf8("pushEdit"))
+        self.pushEdit.setObjectName("pushEdit")
         self.horizontalLayout.addWidget(self.pushEdit)
         self.pushRemove = QtGui.QPushButton(Bundles)
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/list-remove.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(":/actions/resources/actions/list-remove.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushRemove.setIcon(icon2)
-        self.pushRemove.setObjectName(_fromUtf8("pushRemove"))
+        self.pushRemove.setObjectName("pushRemove")
         self.horizontalLayout.addWidget(self.pushRemove)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
