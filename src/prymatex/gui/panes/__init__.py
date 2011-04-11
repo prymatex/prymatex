@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from PyQt4.QtCore import SIGNAL
+from PyQt4.QtCore import SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
+from prymatex.core.base import PMXObject
 
-class PaneDockBase(QDockWidget):
+
+class PaneDockBase(QDockWidget, PMXObject):
     '''
     Pane base functions
     '''
@@ -18,13 +20,19 @@ class PaneDockBase(QDockWidget):
           
     def showEvent(self, event):
         QDockWidget.showEvent(self, event)
+        self.setFocus(Qt.MouseFocusReason)
         self.emitWidgetShown(True)
+    
     
     def hideEvent(self, event):
         QDockWidget.hideEvent(self, event)
         self.emitWidgetShown(False)
         if self.action.isChecked():
             self.action.setChecked(False)
+        self.debug("Closing")
+        print "hide"
+        self.mainWindow.tabWidget.currentWidget().setFocus(Qt.MouseFocusReason)
+        
         
     def emitWidgetShown(self, val):
         self.emit(SIGNAL('widgetShown(bool)'), val)
@@ -38,3 +46,6 @@ class PaneDockBase(QDockWidget):
             if not self.isHidden():
                 self.hide()
             self.action.setText(self.text_show)
+    
+    
+        
