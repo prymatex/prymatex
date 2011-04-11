@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>733</width>
-    <height>401</height>
+    <width>725</width>
+    <height>185</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Prymatex Settings</string>
@@ -102,9 +108,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="container" native="true">
-         <zorder>buttonBox</zorder>
-        </widget>
+        <widget class="QWidget" name="container" native="true"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">

@@ -36,6 +36,8 @@ class PMXObjectBase(pyqtWrapperType):
         else:
             setattr(cls, name, value)
 
+from logging import getLogger
+
 class PMXObject(QObject):
     __metaclass__ = PMXObjectBase
 
@@ -59,8 +61,27 @@ class PMXObject(QObject):
         pass
     
     @property
-    def mainwindow(self):
+    def mainWindow(self):
         main = self
         while main.parent() != None:
             main = main.parent()
         return main
+       
+    mainwindow = mainWindow # TODO: Remove
+    
+    @property
+    def logger(self):
+        loggername = type(self).__name__
+        return getLogger(loggername)
+    
+    def debug(self, msg, *args, **kwargs):
+        self.logger.debug(msg)
+    
+    def info(self, msg, *args, **kwargs):
+        self.logger.info(msg)
+    
+    def warn(self, msg, *args, **kwargs):
+        self.logger.warn(msg)
+    
+    def critical(self, msg, *args, **kwargs):
+        self.logger.critical(msg)

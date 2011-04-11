@@ -9,6 +9,7 @@ if __name__ == "__main__":
 from glob import glob
 from prymatex.bundles.macro import PMXMacro
 from prymatex.bundles.syntax import PMXSyntax
+from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.snippet import PMXSnippet
 from prymatex.bundles.preference import PMXPreference
 from prymatex.bundles.command import PMXCommand, PMXDragCommand

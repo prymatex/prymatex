@@ -1,6 +1,7 @@
 import codecs
 
 from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant, SIGNAL
+from PyQt4.QtCore import Qt
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 from prymatex.gui.panes import PaneDockBase
@@ -132,7 +133,9 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
         self.webView.page().setNetworkAccessManager(new_manager)
         self.webView.loadFinished[bool].connect(self.prepareJavaScript)
         self.bundleItem = None
-            
+        title = unicode(self.trUtf8("%s (press Esc to close)")) % self.windowTitle()
+        self.setWindowTitle(title)
+        
     def prepareJavaScript(self, ready):
         if not ready:
             return
@@ -142,3 +145,8 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
     def setHtml(self, string, bundleItem):
         self.bundleItem = bundleItem
         self.webView.setHtml(string)
+    
+    
+    def keyPressEvent(self, key_event):
+        if key_event.key() == Qt.Key_Escape:
+            self.hide()

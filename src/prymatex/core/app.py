@@ -102,13 +102,17 @@ class PMXApplication(QApplication):
                                                 PMXThemeConfigWidget,\
                                                 PMXUpdatesWidget,\
                                                 PMXSaveWidget,\
-                                                PMXNetworkWidget
+                                                PMXNetworkWidget,\
+                                                PMXBundleWidget,\
+                                                PMXEnvVariablesWidgets
                                                 
                                                 
         configdialog.register(PMXGeneralWidget())
         configdialog.register(PMXThemeConfigWidget())
         configdialog.register(PMXUpdatesWidget())
         configdialog.register(PMXSaveWidget())
+        configdialog.register(PMXBundleWidget())
+        configdialog.register(PMXEnvVariablesWidgets())
         configdialog.register(PMXNetworkWidget())
         self.__configdialog = configdialog
     

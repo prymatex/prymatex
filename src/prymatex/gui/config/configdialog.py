@@ -58,7 +58,10 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog, CenterWidget):
         self.proxy_model.setFilterRegExp(QRegExp(txt, Qt.CaseInsensitive))
     
     def exec_(self):
-        center(self)
+        #center(self)
+        self.center()
+        self.resize(QSize(100, 100))
+        self.updateGeometry()
         # No selection?
         if not len(self.treeView.selectedIndexes()):
             # Select first tree element then...
