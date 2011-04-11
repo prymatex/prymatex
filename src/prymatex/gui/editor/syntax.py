@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
-from prymatex.bundles import PMXSyntaxProcessor, PMXSyntax, PMXPreference, PMXBundle
+from prymatex.bundles import PMXSyntaxProcessor, PMXSyntax, PMXPreferenceSettings, PMXBundle
 
 from logging import getLogger
 logger = getLogger(__file__)
@@ -10,11 +10,11 @@ class PMXBlockUserData(QTextBlockUserData):
     FOLDING_NONE = PMXSyntax.FOLDING_NONE
     FOLDING_START = PMXSyntax.FOLDING_START
     FOLDING_STOP = PMXSyntax.FOLDING_STOP
-    INDENT_NONE = PMXPreference.INDENT_NONE
-    INDENT_INCREASE = PMXPreference.INDENT_INCREASE
-    INDENT_DECREASE = PMXPreference.INDENT_DECREASE
-    INDENT_NEXTLINE = PMXPreference.INDENT_NEXTLINE
-    UNINDENT = PMXPreference.UNINDENT
+    INDENT_NONE = PMXPreferenceSettings.INDENT_NONE
+    INDENT_INCREASE = PMXPreferenceSettings.INDENT_INCREASE
+    INDENT_DECREASE = PMXPreferenceSettings.INDENT_DECREASE
+    INDENT_NEXTLINE = PMXPreferenceSettings.INDENT_NEXTLINE
+    UNINDENT = PMXPreferenceSettings.UNINDENT
     
     def __init__(self):
         QTextBlockUserData.__init__(self)
@@ -125,7 +125,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.userData.indentLevel = self.editor.indentationWhitespace(line)
 
     #END
-    def end_parsing(self, scope):
+    def endParsing(self, scope):
         if self.scopes[-1] == scope:
             self.setCurrentBlockState(self.SINGLE_LINE)
         else:

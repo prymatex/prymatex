@@ -69,7 +69,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Settings, config
     #=======================================================================
     @pmxConfigPorperty(default = 'text.plain')
-    def defaultSyntax(self, scope)
+    def defaultSyntax(self, scope):
         syntax = PMXSyntax.getSyntaxByScope(scope)
         if syntax != None:
             self.setSyntax(syntax)

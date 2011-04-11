@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import string
-from PyQt4.Qt import QTextCharFormat, QColor, QFont
+from PyQt4.Qt import QTextCharFormat, QColor, QFont, QKeySequence
 from PyQt4.QtCore import Qt
 
 '''
@@ -55,29 +55,28 @@ QTCHARCODES = {9: Qt.Key_Backspace,
                63272: Qt.Key_F7,
                63302: Qt.Key_F3}
 
-def keyEquivalentAlternative(code):
-    if code & Qt.SHIFT:
-        key = code & 0xFF
-        if chr(key) not in string.ascii_uppercase:
-            return code - Qt.SHIFT
+def buildKeyEquivalentString(nemonic):
+    return buildKeySequence(nemonic).toString()
 
-def buildKeyEquivalent(nemonic):
-    values = list(nemonic)
+def buildKeySequence(nemonic):
+    if isinstance(nemonic, int):
+        return QKeySequence(nemonic)
+    nemonic = list(nemonic)
     sequence = []
-    if '^' in nemonic:
+    if u"^" in nemonic:
         sequence.append(Qt.CTRL)
-        values.remove('^')
-    if '~' in nemonic:
+        nemonic.remove(u"^")
+    if u"~" in nemonic:
         sequence.append(Qt.ALT)
-        values.remove('~')
-    if '$' in nemonic:
+        nemonic.remove(u"~")
+    if u"$" in nemonic:
         sequence.append(Qt.SHIFT)
-        values.remove('$')
-    if '@' in nemonic:
+        nemonic.remove(u"$")
+    if u"@" in nemonic:
         sequence.append(Qt.META)
-        values.remove('@')
-    if len(values) == 1:
-        char = values.pop()
+        nemonic.remove(u"@")
+    if len(nemonic) == 1:
+        char = nemonic.pop()
         code = ord(char)
         if char in string.ascii_uppercase:
             sequence.append(Qt.SHIFT)
@@ -89,48 +88,4 @@ def buildKeyEquivalent(nemonic):
             else:
                 code = QTCHARCODES[code]
         sequence.append(code)
-    return sum(sequence)
-
-CHARACTER_REPLACES = { ' ': u'Space',
-                       '&': u'&&',
-                       9: u'←',
-                       10: u'↩',
-                       127: u'⌫',
-                       63232: u'F1',
-                       63233: u'F1',
-                       63234: u'F1',
-                       63235: u'F1',
-                       63236: u'F1',
-                       63238: u'F3',
-                       63240: u'F5',
-                       63272: u'F7',
-                       63302: u'F1'}
-
-def buildKeyEquivalentString(key):
-    values = list(key)
-    equivalent = []
-    if u"^" in key:
-        equivalent.append(u"Ctrl")
-        values.remove(u"^")
-    if u"~" in key:
-        equivalent.append(u"Alt")
-        values.remove(u"~")
-    if u"$" in key:
-        equivalent.append(u"Shift")
-        values.remove(u"$")
-    if u"@" in key:
-        equivalent.append(u"Meta")
-        values.remove(u"@")
-    if len(values) == 1:
-        char = values.pop()
-        code = ord(char)
-        if char in string.ascii_uppercase:
-            equivalent.append(u"Shift")
-        elif char in string.ascii_lowercase:
-            char = char.upper()
-        elif char in CHARACTER_REPLACES:
-            char = CHARACTER_REPLACES[char]
-        elif code in CHARACTER_REPLACES:
-            char = CHARACTER_REPLACES[code]
-        equivalent.append(char)
-    return u"+".join(equivalent)
+    return QKeySequence(sum(sequence))
