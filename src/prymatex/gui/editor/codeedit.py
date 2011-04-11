@@ -66,9 +66,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     WORD = re.compile(r'\w+', re.UNICODE)
 
     #=======================================================================
-    # Settings, config and init
+    # Settings, config
     #=======================================================================
-    default_syntax = pmxConfigPorperty(default = 'text.plain')
+    @pmxConfigPorperty(default = 'text.plain')
+    def defaultSyntax(self, scope)
+        syntax = PMXSyntax.getSyntaxByScope(scope)
+        if syntax != None:
+            self.setSyntax(syntax)
+    
     soft_tabs = pmxConfigPorperty(default = True)
     tab_size = pmxConfigPorperty(default = 4)
     font = pmxConfigPorperty(default = QFont('Monospace', 10))
@@ -113,11 +118,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.connectSignals()
         self.declareEvents()
         self.configure()
-        
-        #Set default syntax
-        syntax = PMXSyntax.getSyntaxByScope(self.default_syntax)
-        if syntax != None:
-            self.setSyntax(syntax)
 
     #=======================================================================
     # Connect Signals and Declare Events
@@ -185,7 +185,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         del menu
         
     def lineNumberAreaWidth(self):
-        # si tiene folding tengo que sumar mas 10
         return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + self.sidebar.bookmarkArea + self.sidebar.foldArea 
         
     def updateLineNumberAreaWidth(self, newBlockCount):
