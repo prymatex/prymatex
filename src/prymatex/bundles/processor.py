@@ -10,19 +10,19 @@ class PMXSyntaxProcessor(object):
     def __init__(self):
         pass
 
-    def open_tag(self, name, position):
+    def openTag(self, name, position):
         pass
 
-    def close_tag(self, name, position):
+    def closeTag(self, name, position):
         pass
 
-    def new_line(self, line):
+    def newLine(self, line):
         pass
 
-    def start_parsing(self, name):
+    def startParsing(self, name):
         pass
 
-    def end_parsing(self, name):
+    def endParsing(self, name):
         pass
 
 class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
@@ -34,20 +34,20 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
         line = line[:position] + string + line[position:]
         return line
 
-    def open_tag(self, name, position):
+    def openTag(self, name, position):
         print self.pprint( '', '{ %d - %s' % (position, name), position + len(self.line_marks))
 
-    def close_tag(self, name, position):
+    def closeTag(self, name, position):
         print self.pprint( '', '} %d - %s' % (position, name), position + len(self.line_marks))
 
-    def new_line(self, line):
+    def newLine(self, line):
         self.line_number += 1
         self.line_marks = '[%04s] ' % self.line_number
         print '%s%s' % (self.line_marks, line)
 
-    def start_parsing(self, name):
+    def startParsing(self, name):
         print '{%s' % name
 
-    def end_parsing(self, name):
+    def endParsing(self, name):
         print '}%s' % name
         

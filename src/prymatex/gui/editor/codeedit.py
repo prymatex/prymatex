@@ -66,9 +66,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     WORD = re.compile(r'\w+', re.UNICODE)
 
     #=======================================================================
-    # Settings, config and init
+    # Settings, config
     #=======================================================================
-    default_syntax = pmxConfigPorperty(default = 'text.plain')
+    @pmxConfigPorperty(default = 'text.plain')
+    def defaultSyntax(self, scope):
+        syntax = PMXSyntax.getSyntaxByScope(scope)
+        if syntax != None:
+            self.setSyntax(syntax)
+    
     soft_tabs = pmxConfigPorperty(default = True)
     tab_size = pmxConfigPorperty(default = 4)
     font = pmxConfigPorperty(default = QFont('Monospace', 10))
@@ -113,11 +118,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.connectSignals()
         self.declareEvents()
         self.configure()
-        
-        #Set default syntax
-        syntax = PMXSyntax.getSyntaxByScope(self.default_syntax)
-        if syntax != None:
-            self.setSyntax(syntax)
 
     #=======================================================================
     # Connect Signals and Declare Events
@@ -155,6 +155,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             return block.userData().getLastScope()
         return user_data.getScopeAtPosition(cursor.columnNumber())
         
+    def getCurrentWordAndIndex(self):
+        cursor = self.textCursor()
+        line = unicode(cursor.block().text())
+        matchs = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line))
+        if matchs:
+            match = matchs.pop()
+            word = line[match.start():match.end()]
+            index = cursor.columnNumber() - match.start()
+            return word, index
+        return "", 0
+        
     def sendCursorPosChange(self):
         c = self.textCursor()
         line  = c.blockNumber()
@@ -185,7 +196,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         del menu
         
     def lineNumberAreaWidth(self):
-        # si tiene folding tengo que sumar mas 10
         return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + self.sidebar.bookmarkArea + self.sidebar.foldArea 
         
     def updateLineNumberAreaWidth(self, newBlockCount):
@@ -409,12 +419,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     
     def eventKeyTabBundleItem(self, event):
-        cursor = self.textCursor()
-        line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
-        words = self.SPLITWORDS.split(line[:cursor.columnNumber()])
-        word = words and words[-1] or ""
-        if scope or word:
+        word, index = self.getCurrentWordAndIndex()
+        #TODO: Ver si va a tener scope o no
+        # if index is end of word
+        if len(word) == index and (scope or word):
             snippets = PMXBundle.getTabTriggerItem(word, scope)
             if len(snippets) > 1:
                 self.selectBundleItem(snippets, tabTrigger = True)

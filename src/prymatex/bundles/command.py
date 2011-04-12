@@ -22,7 +22,6 @@ class PMXCommand(PMXBundleItem):
     path_patterns = ['Commands/*.tmCommand', 'Commands/*.plist']
     bundle_collection = 'commands'
     exit_codes = {
-                  0:   'discard',
                   200: 'discard',
                   201: 'replaceSelectedText',
                   202: 'replaceDocument',
@@ -116,7 +115,7 @@ class PMXCommand(PMXBundleItem):
             replaceDocument
         '''
         type = ''
-        if self.output != 'showAsHTML' and code != 0 and code in self.exit_codes:
+        if self.output != 'showAsHTML' and code in self.exit_codes:
             type = self.exit_codes[code]
         else:
             type = self.output
@@ -164,15 +163,9 @@ class PMXCommand(PMXBundleItem):
         text = self.command_process.stdout.read()
         self.command_process.stdout.close()
         exit_code = self.command_process.wait()
-        print "EXIT CODE", exit_code
-        if exit_code not in self.exit_codes:
-            type = 'showAsHTML'
-            function = output_functions[type]
-            text = self.formatError(text, exit_code)
-            
-        else:
-            type, function = self.getOutputFunction(exit_code, output_functions)
-            print self.bundle.name, self.name, self.temp_command_file, type, text
+        
+        type, function = self.getOutputFunction(exit_code, output_functions)
+        print self.bundle.name, self.name, self.temp_command_file, type, text
         
         kwargs = {'command': self}
         if self.input_current:

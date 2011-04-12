@@ -82,16 +82,15 @@ class PMXPreferenceSettings(object):
         #DecreasePattern evaluate line to decrease, no requiere del return
         #IncreaseOnlyNextLine on return indent nextline only
         #IgnoringLines evaluate line to unindent, no require el return
-        if self.decreaseIndentPattern != None and self.decreaseIndentPattern.match(line):
+        if self.decreaseIndentPattern != None and self.decreaseIndentPattern.search(line):
             return self.INDENT_DECREASE
-        elif self.increaseIndentPattern != None and self.increaseIndentPattern.match(line):
+        elif self.increaseIndentPattern != None and self.increaseIndentPattern.search(line):
             return self.INDENT_INCREASE
-        elif self.indentNextLinePattern != None and self.indentNextLinePattern.match(line):
+        elif self.indentNextLinePattern != None and self.indentNextLinePattern.search(line):
             return self.INDENT_NEXTLINE
-        elif self.unIndentedLinePattern != None and self.unIndentedLinePattern.match(line):
+        elif self.unIndentedLinePattern != None and self.unIndentedLinePattern.search(line):
             return self.UNINDENT
-        else:
-            return self.INDENT_NONE
+        return self.INDENT_NONE
     
 class PMXPreference(PMXBundleItem):
     path_patterns = ['Preferences/*.tmPreferences', 'Preferences/*.plist']

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
 from prymatex.bundles.score import PMXScoreManager
-from prymatex.bundles.qtadapter import buildKeyEquivalentString, buildKeyEquivalent, keyEquivalentAlternative
+from prymatex.bundles.qtadapter import buildKeySequence
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -100,7 +100,7 @@ class PMXBundle(object):
         if item.tabTrigger != None:
             PMXBundle.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
-            keyseq = buildKeyEquivalent(item.keyEquivalent)
+            keyseq = int(buildKeySequence(item.keyEquivalent))
             PMXBundle.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
         # I'm four father
         item.setBundle(self)
@@ -203,7 +203,7 @@ class PMXBundle(object):
     def getKeyEquivalentItem(cls, code, scope):
         with_scope = []
         without_scope = []
-        code = code if code in cls.KEY_EQUIVALENTS else keyEquivalentAlternative(code)
+        code = int(buildKeySequence(code))
         if code in cls.KEY_EQUIVALENTS:
             for item in cls.KEY_EQUIVALENTS[code]:
                 if item.scope == None:
@@ -255,13 +255,14 @@ class PMXBundleItem(object):
                 print "Error in %s for %s (%s)" % (cls.__name__, path, e)
 
     def buildMenuTextEntry(self, nemonic = ''):
-        text = unicode(self.name).replace('&', '&&')
-        if not nemonic:
-            if self.tabTrigger != None:
-                nemonic = u" \t %s⇥" % (self.tabTrigger.replace('&', '&&'))
-            if self.keyEquivalent != None:
-                nemonic = u" \t %s" % (buildKeyEquivalentString(self.keyEquivalent))
-        return text + u"\t" + nemonic
+        text = unicode(self.name)
+        if nemonic:
+            return text.replace('&', '&&') + u"\t" + nemonic
+        if self.tabTrigger != None:
+            text += u"\t%s⇥" % (self.tabTrigger)
+        if self.keyEquivalent != None:
+            text += u"\t%s" % (buildKeySequence(self.keyEquivalent).toString())
+        return text.replace('&', '&&')
     
     def resolve(self, *args, **kwargs):
         pass

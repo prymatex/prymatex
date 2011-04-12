@@ -67,16 +67,16 @@ class PMXSyntaxNode(object):
         while starts or ends:
             if starts:
                 pos, _, name = starts.pop()
-                processor.open_tag(name, pos)
+                processor.openTag(name, pos)
             elif ends:
                 pos, _, name = ends.pop()
-                processor.close_tag(name, pos)
+                processor.closeTag(name, pos)
             elif abs(ends[-1][1]) < starts[-1][1]:
                 pos, _, name = ends.pop()
-                processor.close_tag(name, pos)
+                processor.closeTag(name, pos)
             else:
                 pos, _, name = starts.pop()
-                processor.open_tag(name, pos)
+                processor.openTag(name, pos)
     
     def match_captures(self, name, match):
         matches = []
@@ -156,10 +156,14 @@ class PMXSyntaxProxy(object):
                 return syntaxes[self.proxy].grammar
             else:
                 return PMXSyntaxNode({}, self.syntax)
+
 class PMXSyntax(PMXBundleItem):
     path_patterns = ['Syntaxes/*.tmLanguage', 'Syntaxes/*.plist']
     bundle_collection = 'syntaxes'
     SYNTAXES = {}
+    FOLDING_NONE = 0
+    FOLDING_START = -1
+    FOLDING_STOP = -2
     def __init__(self, hash, name_space = 'default', path = None):
         super(PMXSyntax, self).__init__(hash, name_space, path)
         for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName',
@@ -196,18 +200,18 @@ class PMXSyntax(PMXBundleItem):
 
     def parse(self, string, processor = None):
         if processor:
-            processor.start_parsing(self.scopeName)
+            processor.startParsing(self.scopeName)
         stack = [[self.grammar, None]]
         string = string.encode('utf-8')
         for line in string.splitlines():
             self.parse_line(stack, line, processor)
         if processor:
-            processor.end_parsing(self.scopeName)
+            processor.endParsing(self.scopeName)
         return stack
 
     def parse_line(self, stack, line, processor):
         if processor:
-            processor.new_line(line)
+            processor.newLine(line)
         top, match = stack[-1]
         position = 0
         grammar = self.grammar
@@ -226,13 +230,13 @@ class PMXSyntax(PMXBundleItem):
                 start_pos = pattern_match.start()
                 end_pos = pattern_match.end()
                 if top.contentName and processor:
-                    processor.close_tag(top.contentName, start_pos)
+                    processor.closeTag(top.contentName, start_pos)
                 if processor:
                     grammar.parse_captures('captures', top, pattern_match, processor)
                 if processor:
                     grammar.parse_captures('endCaptures', top, pattern_match, processor)
                 if top.name and processor:
-                    processor.close_tag( top.name, end_pos)
+                    processor.closeTag( top.name, end_pos)
                 stack.pop()
                 top, match = stack[-1]
             else:
@@ -242,32 +246,39 @@ class PMXSyntax(PMXBundleItem):
                 end_pos = pattern_match.end()
                 if pattern.begin:
                     if pattern.name and processor:
-                        processor.open_tag(pattern.name, start_pos)
+                        processor.openTag(pattern.name, start_pos)
                     if processor:    
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if processor:
                         grammar.parse_captures('beginCaptures', pattern, pattern_match, processor)
                     if pattern.contentName and processor:
-                        processor.open_tag(pattern.contentName, end_pos)
+                        processor.openTag(pattern.contentName, end_pos)
                     top = pattern
                     match = pattern_match
                     stack.append([top, match])
                 elif pattern.match:
                     if pattern.name and processor:
-                        processor.open_tag(pattern.name, start_pos)
+                        processor.openTag(pattern.name, start_pos)
                     if processor:
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if pattern.name and processor:
-                        processor.close_tag(pattern.name, end_pos)
+                        processor.closeTag(pattern.name, end_pos)
             position = end_pos
         return position
-        
+    
+    def folding(self, line):
+        if self.foldingStartMarker != None and self.foldingStartMarker.search(line):
+            return self.FOLDING_START
+        elif self.foldingStopMarker != None and self.foldingStopMarker.search(line):
+            return self.FOLDING_STOP
+        return self.FOLDING_NONE
+    
     @classmethod
     def findSyntaxByFirstLine(cls, line):
         line = line.encode('utf-8')
         for syntaxes in cls.SYNTAXES.values():
             for syntax in syntaxes.values():
-                if syntax.firstLineMatch != None and syntax.firstLineMatch.match(line):
+                if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                     return syntax
     
     @classmethod
