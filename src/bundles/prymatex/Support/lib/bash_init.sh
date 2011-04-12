@@ -32,6 +32,12 @@ export RUBYLIB="${RUBYLIB:+$RUBYLIB:}$TM_SUPPORT_PATH/lib"
 
 #Aliases
 alias 'open'='xdg-open'
+#For xclip
+alias pbcopy='xclip -selection clipboard'
+alias pbpaste='xclip -selection clipboard -o'
+#For xsel
+#alias pbcopy='xsel --clipboard --input'
+#alias pbpaste='xsel --clipboard --output'
 
 #textmate_init () {
 #	[[ "$1" != / && "$1" != ~ ]] && textmate_init "$(dirname "$1")"

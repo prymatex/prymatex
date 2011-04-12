@@ -62,9 +62,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     
     WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
-    SPLITWORDS = re.compile(r'\s', re.UNICODE)
+    TABTRIGGERSPLIT = re.compile(r"\w+|\W+", re.UNICODE)
     WORD = re.compile(r'\w+', re.UNICODE)
-
+    
+    fontMinSize = 6
+    fontMaxSize = 30
     #=======================================================================
     # Settings, config
     #=======================================================================
@@ -165,7 +167,18 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             index = cursor.columnNumber() - match.start()
             return word, index
         return "", 0
-        
+    
+    def getTabTriggerSymbol(self):
+        cursor = self.textCursor()
+        line = unicode(cursor.block().text())
+        matchs = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.TABTRIGGERSPLIT.finditer(line))
+        if matchs:
+            match = matchs.pop()
+            word = line[match.start():match.end()]
+            index = cursor.columnNumber() - match.start()
+            return word, index
+        return "", 0
+    
     def sendCursorPosChange(self):
         c = self.textCursor()
         line  = c.blockNumber()
@@ -246,6 +259,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     # Mouse Events
     #=======================================================================
+    
+    def wheelEvent(self, event):
+        if event.modifiers() == Qt.ControlModifier:
+            if event.delta() == 120:
+                self.zoomIn()
+            elif event.delta() == -120:
+                self.zoomOut()
+            event.ignore()
+        else:
+            super(Editor, self).wheelEvent(event)
     
     def mousePressEvent(self, mouse_event):
         #self.inserSpacesUpToPoint(mouse_event.pos())
@@ -802,6 +825,27 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         cursor.setPosition(cursor.block().position() + column)
         self.setTextCursor(cursor)
+    
+    #===========================================================================
+    # Zoom
+    #===========================================================================
+    
+    def zoomIn(self):
+        font = self.font
+        size = self.font.pointSize()
+        if size < self.fontMaxSize:
+            size += 2
+            font.setPointSize(size)
+        self.font = font
+
+    def zoomOut(self):
+        font = self.font
+        size = font.pointSize()
+        if size > self.fontMinSize:
+            size -= 2
+            font.setPointSize(size)
+        self.font = font
+
     
     #===========================================================================
     # Text Indentation

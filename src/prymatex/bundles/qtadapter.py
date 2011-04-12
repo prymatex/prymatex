@@ -41,7 +41,29 @@ def buildQTextFormat(style):
         elif style['fontStyle'] == 'italic':
             format.setFontItalic(True)
     return format
+    
+def kpts(key_event): # QKeyEvent to sequence converter
+    modseq = ""
+	keyseq = ""
 
+	if (key_event->modifiers() & Qt.ShiftModifier)
+        modseq += "Shift+";
+
+	if (key_event->modifiers() & Qt.ControlModifier)
+        modseq += "Ctrl+";
+
+	if (key_event->modifiers() & Qt.AltModifier)
+		modseq += "Alt+";
+
+	if (key_event->modifiers() & Qt.MetaModifier)
+		modseq += "Meta+";
+
+	keyseq = QKeySequence(key_event->key());
+
+	seq = modseq + keyseq;
+	QKeySequence k = QKeySequence(seq);
+	return k;
+    
 QTCHARCODES = {9: Qt.Key_Backspace,
                10: Qt.Key_Return,
                127: Qt.Key_Delete,
