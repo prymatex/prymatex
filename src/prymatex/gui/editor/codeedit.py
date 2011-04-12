@@ -69,7 +69,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Settings, config
     #=======================================================================
     @pmxConfigPorperty(default = 'text.plain')
-    def defaultSyntax(self, scope)
+    def defaultSyntax(self, scope):
         syntax = PMXSyntax.getSyntaxByScope(scope)
         if syntax != None:
             self.setSyntax(syntax)
@@ -154,6 +154,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 block = block.previous()
             return block.userData().getLastScope()
         return user_data.getScopeAtPosition(cursor.columnNumber())
+        
+    def getCurrentWordAndIndex(self):
+        cursor = self.textCursor()
+        line = unicode(cursor.block().text())
+        matchs = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line))
+        if matchs:
+            match = matchs.pop()
+            word = line[match.start():match.end()]
+            index = cursor.columnNumber() - match.start()
+            return word, index
+        return "", 0
         
     def sendCursorPosChange(self):
         c = self.textCursor()
@@ -408,12 +419,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     
     def eventKeyTabBundleItem(self, event):
-        cursor = self.textCursor()
-        line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
-        words = self.SPLITWORDS.split(line[:cursor.columnNumber()])
-        word = words and words[-1] or ""
-        if scope or word:
+        word, index = self.getCurrentWordAndIndex()
+        #TODO: Ver si va a tener scope o no
+        # if index is end of word
+        if len(word) == index and (scope or word):
             snippets = PMXBundle.getTabTriggerItem(word, scope)
             if len(snippets) > 1:
                 self.selectBundleItem(snippets, tabTrigger = True)

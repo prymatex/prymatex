@@ -11,7 +11,7 @@ from prymatex.bundles.macro import PMXMacro
 from prymatex.bundles.syntax import PMXSyntax
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.snippet import PMXSnippet
-from prymatex.bundles.preference import PMXPreference
+from prymatex.bundles.preference import PMXPreference, PMXPreferenceSettings
 from prymatex.bundles.command import PMXCommand, PMXDragCommand
 from prymatex.bundles.template import PMXTemplate
 from prymatex.bundles.base import PMXBundle, PMXMenuNode

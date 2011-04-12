@@ -724,12 +724,12 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
         self.node = Snippet("root")
         self.taborder = {}
 
-    def open_tag(self, name, start):
+    def openTag(self, name, start):
         token = self.current[self.index:start]
         self.node = self.node.open(name, token)
         self.index = start
         
-    def close_tag(self, name, end):
+    def closeTag(self, name, end):
         token = self.current[self.index:end]
         self.node = self.node.close(name, token)
         if hasattr(self.node, 'index') and callable(getattr(self.node, 'taborder', None)):
@@ -738,7 +738,7 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
                 self.taborder[self.node.index] = self.node.taborder(container)
         self.index = end
 
-    def new_line(self, line):
+    def newLine(self, line):
         if self.current != None:
             if self.index != len(self.current):
                 self.node.append(self.current[self.index:len(self.current)])
@@ -746,10 +746,10 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
         self.current = line
         self.index = 0
         
-    def start_parsing(self, name):
+    def startParsing(self, name):
         self.node.open(name, "")
 
-    def end_parsing(self, name):
+    def endParsing(self, name):
         token = self.current[self.index:len(self.current)]
         self.node.close(name, token)
 
