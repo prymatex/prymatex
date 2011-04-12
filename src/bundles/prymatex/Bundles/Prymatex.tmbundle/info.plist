@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>contactEmailRot13</key>
+	<string>pablopetenello@gmail.com</string>
+	<key>contactName</key>
+	<string>Pablo Petenello</string>
+	<key>description</key>
+	<string>Prymatex Core Bundle</string>
+	<key>mainMenu</key>
+	<dict>
+		<key>items</key>
+		<array>
+			<string>46cec7c4-9194-49e4-a931-2a80ec4a453b</string>
+		</array>
+		<key>submenus</key>
+		<dict/>
+	</dict>
+	<key>name</key>
+	<string>Prymatex</string>
+	<key>ordering</key>
+	<array>
+		<string>46cec7c4-9194-49e4-a931-2a80ec4a453b</string>
+	</array>
+	<key>uuid</key>
+	<string>bffbf71b-5285-4e72-af15-5613323034d1</string>
+</dict>
+</plist>
