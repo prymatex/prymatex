@@ -21,6 +21,7 @@ class PMXBlockUserData(QTextBlockUserData):
         self.scopes = []
         self.folding = self.FOLDING_NONE
         self.nestedLevel = 0
+        self.folded = False
         self.indent = self.INDENT_NONE
         self.indentLevel = 0
     
@@ -104,7 +105,10 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     def startParsing(self, scope):
         self.line_position = 0
         self.scopes = [ scope ]
-        self.userData = PMXBlockUserData()
+        self.userData = self.currentBlock().userData()
+        if self.userData == None:
+            self.setCurrentBlockUserData(PMXBlockUserData())
+        self.userData = self.currentBlock().userData()
 
     #OPEN
     def openTag(self, scope, position):
@@ -118,6 +122,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 
     def foldingMarker(self, line):
         self.userData.folding = self.syntax.folding(line)
+        self.userData.folded = False
 
     def indentMarker(self, line, scope):
         settings = PMXBundle.getPreferenceSettings(scope)
@@ -137,4 +142,4 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.foldingMarker(line)
         self.indentMarker(line, scope)
         
-        self.setCurrentBlockUserData(self.userData)
+        #self.setCurrentBlockUserData(self.userData)

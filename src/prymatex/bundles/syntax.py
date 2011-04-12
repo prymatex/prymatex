@@ -267,11 +267,14 @@ class PMXSyntax(PMXBundleItem):
         return position
     
     def folding(self, line):
-        if self.foldingStartMarker != None and self.foldingStartMarker.search(line):
-            return self.FOLDING_START
-        elif self.foldingStopMarker != None and self.foldingStopMarker.search(line):
-            return self.FOLDING_STOP
-        return self.FOLDING_NONE
+        fold = self.FOLDING_NONE
+        start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker != None else None
+        stop_match = self.foldingStopMarker.search(line) if self.foldingStopMarker != None else None
+        if start_match != None and stop_match == None:
+            fold = self.FOLDING_START
+        elif stop_match != None and start_match == None:
+            fold = self.FOLDING_STOP
+        return fold
     
     @classmethod
     def findSyntaxByFirstLine(cls, line):
