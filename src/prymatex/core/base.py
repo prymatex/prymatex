@@ -9,7 +9,7 @@ from PyQt4.QtGui import qApp
 METHOD_RE = re.compile('(?P<name>[\w\d_]+)(:?\((?P<args>.*)\))?', re.IGNORECASE)
 
 class InvalidEventSignature(Exception):
-	pass
+    pass
 
 settings = qApp.instance().settings
 
@@ -30,7 +30,7 @@ class PMXObjectBase(pyqtWrapperType):
             new_class.add_to_class(name, attr)
         return new_class
 
-    def add_to_class(cls, name, value):
+    def add_to_class(cls, name, value): #@NoSelf
         if hasattr(value, 'contributeToClass'):
             value.contributeToClass(cls, name)
         else:
@@ -69,10 +69,20 @@ class PMXObject(QObject):
        
     mainwindow = mainWindow # TODO: Remove
     
+    
+    # Logging 
+    _logger = None
     @property
     def logger(self):
-        loggername = type(self).__name__
-        return getLogger(loggername)
+        '''
+        Per class logger, logger instances are named after
+        classes, ie: prymatex.gui.mainwindow.PMXMainWindow 
+        '''
+        if self._logger is None:
+            t = type(self)
+            loggername = '.'.join([t.__module__, t.__name__])
+            self.__class__._logger = getLogger(loggername)
+        return self._logger
     
     def debug(self, msg, *args, **kwargs):
         self.logger.debug(msg)
