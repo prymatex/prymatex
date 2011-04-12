@@ -94,6 +94,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.log_dock_widget = LogDockWidget(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.log_dock_widget)
         self.log_dock_widget.action = self.actionShow_Log_Window
+        self.log_dock_widget.hide()
 
     def prevent_menu_lock(self):
         '''
