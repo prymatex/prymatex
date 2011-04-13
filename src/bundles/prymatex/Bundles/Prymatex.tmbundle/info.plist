@@ -13,6 +13,7 @@
 		<key>items</key>
 		<array>
 			<string>46cec7c4-9194-49e4-a931-2a80ec4a453b</string>
+			<string>15fa1c31-af98-44f2-998c-38f41f82029e</string>
 		</array>
 		<key>submenus</key>
 		<dict/>
@@ -21,7 +22,8 @@
 	<string>Prymatex</string>
 	<key>ordering</key>
 	<array>
-		<string>46cec7c4-9194-49e4-a931-2a80ec4a453b</string>
+                <string>46cec7c4-9194-49e4-a931-2a80ec4a453b</string>
+                <string>15fa1c31-af98-44f2-998c-38f41f82029e</string>
 	</array>
 	<key>uuid</key>
 	<string>bffbf71b-5285-4e72-af15-5613323034d1</string>

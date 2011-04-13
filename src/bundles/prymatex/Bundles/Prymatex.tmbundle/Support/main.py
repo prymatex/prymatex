@@ -51,6 +51,7 @@ import os
 
 try:
     TM_APP_PATH = os.environ['TM_APP_PATH']
+    TM_BUNDLES_PATH = os.environ['TM_BUNDLES_PATH']
 except Exception, e:
     TM_APP_PATH = "../../"
 
@@ -58,17 +59,25 @@ except Exception, e:
 
 sys.path.append(os.path.abspath(os.path.join(TM_APP_PATH , '..')))
 
-from prymatex.core import config
 from prymatex.bundles import BUNDLEITEM_CLASSES
 from prymatex.bundles import load_prymatex_bundles
 from prymatex.bundles.base import *
+from glob import glob
 
 if __name__ == "__main__":
+    
+    bundles_to_show = '*.tmbundle'
+    
+    if(len(sys.argv) > 1):
+        bundle_to_show = sys.argv[1]
+        bundles_to_show = '*%s*.tmbundle' % bundle_to_show
+
     print STYLE
     print "<div class='oculto'>"
-    for file in os.listdir(config.PMX_BUNDLES_PATH):
-        f = os.path.join(config.PMX_BUNDLES_PATH, file)
-        PMXBundle.loadBundle(f, BUNDLEITEM_CLASSES)
+    
+    for file in glob(os.path.join(TM_BUNDLES_PATH, bundles_to_show)):
+        PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
+
     print "</div>"
     
     
