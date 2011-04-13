@@ -268,7 +268,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.zoomOut()
             event.ignore()
         else:
-            super(Editor, self).wheelEvent(event)
+            super(PMXCodeEdit, self).wheelEvent(event)
     
     def mousePressEvent(self, mouse_event):
         #self.inserSpacesUpToPoint(mouse_event.pos())
@@ -722,69 +722,77 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Folding
     #==========================================================================
     
-    def codeFoldingEvent(self, line_number):
-        if line_number in self.folded:
-            self._unfold(line_number)
-        else:
-            self._fold(line_number)
+    def codeFoldingFold(self, line_number):
+        self._fold(line_number)
         self.update()
         self.sidebar.update()
     
-    def _fold(self, line_number):
-        startBlock = self.document().findBlockByNumber(line_number - 1)
-        endBlock = self._find_block_fold_closing(startBlock)
-
-        block = startBlock
-        while block.isValid() and block != endBlock:
-            block = block.next()
-            user_data = block.userData()
-            user_data.folding += 1
-            block.setVisible(user_data.folding == PMXBlockUserData.FOLDING_NONE)
-            block = block.next()
+    def codeFoldingUnfold(self, line_number):
+        self._unfold(line_number)
+        self.update()
+        self.sidebar.update()
         
-        self.folded.append(line_number)
+    def _fold(self, line_number):
+        milestone = self.document().findBlockByNumber(line_number - 1)
+        user_data = milestone.userData()
+        if user_data.folding == PMXBlockUserData.FOLDING_START:
+            startBlock = self.document().findBlockByNumber(line_number)
+            endBlock = self._find_block_fold_close(startBlock)
+        else:
+            endBlock = milestone
+            milestone = self._find_block_fold_open(endBlock)
+            startBlock = milestone.next()
+            
+        block = startBlock
+        while True:
+            user_data = block.userData()
+            user_data.nestedLevel += 1
+            block.setVisible(user_data.nestedLevel == PMXBlockUserData.FOLDING_NONE)
+            if block == endBlock:
+                break
+            block = block.next()
+
+        milestone.userData().folded = True
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def _unfold(self, line_number):
-        '''startBlock = self.document().findBlockByNumber(line_number - 1)
-        endPos = self._find_block_fold_closing(startBlock)
-        endBlock = self.document().findBlockByNumber(endPos)
+        milestone = self.document().findBlockByNumber(line_number - 1)
+        startBlock = self.document().findBlockByNumber(line_number)
+        endBlock = self._find_block_fold_close(startBlock)
 
-        block = startBlock.next()
-        while block.isValid() and block != endBlock:
-            block.setVisible(True)
-            block.setLineCount(block.layout().lineCount())
-            endPos = block.position() + block.length()
-            if block.blockNumber() in self.folded:
-                close = self._find_fold_closing(block)
-                block = self.document().findBlockByNumber(close)
-            else:
-                block = block.next()
-        '''
-        self.folded.remove(line_number)
-        #self.document().markContentsDirty(startBlock.position(), endPos)
+        block = startBlock
+        while True:
+            user_data = block.userData()
+            user_data.nestedLevel -= 1
+            block.setVisible(user_data.nestedLevel == PMXBlockUserData.FOLDING_NONE)
+            if block == endBlock:
+                break
+            block = block.next()
+        
+        milestone.userData().folded = False
+        self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
-    def _find_block_fold_closing(self, start):
+    def _find_block_fold_close(self, start):
         end = start
-        if start.userData().folding == PMXBlockUserData.FOLDING_START:
-            #Find Next
-            start_counter = 0
-            while end.userData().folding != PMXBlockUserData.FOLDING_STOP or (end.userData().folding == PMXBlockUserData.FOLDING_STOP and start_counter != 0):
-                end = end.next()
-                if end.userDate().folding == PMXBlockUserData.FOLDING_START:
-                    start_counter += 1
-                elif end.userDate().folding == PMXBlockUserData.FOLDING_STOP:
-                    start_counter -= 1
-        else:
-            #Find Previous
-            end_counter = 0
-            while end.userData().folding != PMXBlockUserData.FOLDING_START or (end.userData().folding == PMXBlockUserData.FOLDING_START and end_counter != 0):
-                end = end.previous()
-                if end.userDate().folding == PMXBlockUserData.FOLDING_STOP:
-                    end_counter += 1
-                elif end.userDate().folding == PMXBlockUserData.FOLDING_START:
-                    end_counter -= 1
+        counter = 0
+        while end.userData().folding != PMXBlockUserData.FOLDING_STOP or counter !=  0:
+            if end.userData().folding == PMXBlockUserData.FOLDING_START:
+                counter += 1
+            elif end.userData().folding == PMXBlockUserData.FOLDING_STOP:
+                counter -= 1
+            end = end.next()
         return end
+    
+    def _find_block_fold_open(self, end):
+        start = end.previous()
+        counter = 0
+        while start.userData().folding != PMXBlockUserData.FOLDING_START or counter !=  0:
+            if start.userData().folding == PMXBlockUserData.FOLDING_STOP:
+                counter += 1
+            elif start.userData().folding == PMXBlockUserData.FOLDING_START:
+                counter -= 1
+            start = start.previous()
+        return start
     #==========================================================================
     # Bookmarks
     #==========================================================================
