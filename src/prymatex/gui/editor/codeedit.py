@@ -183,7 +183,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         c = self.textCursor()
         line  = c.blockNumber()
         col = c.columnNumber()
-        self.editorCursorPositionChangedEvent(line, col)
+        self.editorCursorPositionChangedEvent(line+1, col+1)
         
     def setSyntax(self, syntax):
         self.processor.syntax = syntax
