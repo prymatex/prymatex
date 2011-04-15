@@ -7,7 +7,6 @@ function selectTheme(event) {
 	var theme = event.target.value;
 	var path  = event.target.options[event.target.options.selectedIndex].title;
 
-	alert(TextMate);
 	TextMate.system("defaults write com.macromates.textmate.webpreview SelectedTheme '" + theme + "'", null);
 
 	document.getElementById('tm_webpreview_body').className = theme;

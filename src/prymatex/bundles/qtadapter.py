@@ -58,17 +58,10 @@ QTCHARCODES = {9: Qt.Key_Backspace,
 KEYMAP = get_keymap_table()
 def keyboardLayoutQtKeys(character):
     keys = []
-    for keycode, keysyms in KEYMAP.iteritems():
-        if character in keysyms:
-            index = keysyms.index(character)
-            if index == 1:
-                keys.append(Qt.SHIFT) #Add Shift
-            elif index == 2:
-                keys.append(Qt.Key_AltGr) #Add Altgr
-            elif index == 3:
-                keys.append(Qt.SHIFT); keys.append(Qt.Key_AltGr) #Add Sift + Altgr
-            character = keysyms[0]
-            break
+    
+    for _, keysyms in KEYMAP.iteritems():
+        if character == keysyms[1]:
+            keys.append(Qt.SHIFT) #Add Shift
     code = ord(character.upper())
     if code in QTCHARCODES:
         code = QTCHARCODES[code]

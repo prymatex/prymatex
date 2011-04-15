@@ -4,7 +4,7 @@ import re, logging
 from bisect import bisect
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
-    QTextCursor, QAction, QFont, QPalette, QToolTip
+    QTextCursor, QAction, QFont, QPalette
 from prymatex.bundles import PMXBundle, PMXSnippet
 from prymatex.bundles.command import PMXCommand
 from prymatex.bundles.syntax import PMXSyntax
