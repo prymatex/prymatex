@@ -17,6 +17,7 @@
 import re
 import subprocess
 
+#install xmodmap 
 def cmd_keymap_table():
     return subprocess.Popen(
            ['xmodmap','-pk'], stdout=subprocess.PIPE).communicate()[0]

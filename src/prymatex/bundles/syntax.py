@@ -185,12 +185,12 @@ class PMXSyntax(PMXBundleItem):
         if self.scopeName != None:
             PMXSyntax.SYNTAXES[self.name_space][self.scopeName] = self
 
-	@property
-	def indentSensitive(self):
-		#If stop marker match with "" the grammar is indent sensitive
-		match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
-		return match != None
-		
+    @property
+    def indentSensitive(self):
+        #If stop marker match with "" the grammar is indent sensitive
+        match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
+        return match != None
+
     @property
     def syntaxes(self):
         return PMXSyntax.SYNTAXES[self.name_space]

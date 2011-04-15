@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import string
-try:
-    from PyQt4.Qt import QTextCharFormat, QColor, QFont, QKeySequence
-    from prymatex.bundles.modmap import get_keymap_table
-except:
-    from qtmock import QTextCharFormat, QColor, QFont, QKeySequence, Qt
-    from modmap import get_keymap_table
+from PyQt4.Qt import QTextCharFormat, QColor, QFont, QKeySequence, Qt
+from prymatex.bundles.modmap import get_keymap_table
+
 
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
@@ -68,9 +64,9 @@ def keyboardLayoutQtKeys(character):
             if index == 1:
                 keys.append(Qt.SHIFT) #Add Shift
             elif index == 2:
-                keys.append(Qt.ALTGR) #Add Altgr
+                keys.append(Qt.Key_AltGr) #Add Altgr
             elif index == 3:
-                keys.append(Qt.SHIFT); keys.append(Qt.ALTGR) #Add Sift + Altgr
+                keys.append(Qt.SHIFT); keys.append(Qt.Key_AltGr) #Add Sift + Altgr
             character = keysyms[0]
             break
     code = ord(character.upper())

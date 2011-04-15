@@ -742,7 +742,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             endBlock = milestone
             milestone = self._find_block_fold_open(endBlock)
             startBlock = milestone.next()
-            
+        if endBlock == None or startBlock == None:
+            return;
+        
         block = startBlock
         while True:
             user_data = block.userData()
@@ -759,7 +761,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         milestone = self.document().findBlockByNumber(line_number - 1)
         startBlock = self.document().findBlockByNumber(line_number)
         endBlock = self._find_block_fold_close(startBlock)
-
+        if endBlock == None:
+            return;
+        
         block = startBlock
         while True:
             user_data = block.userData()
@@ -781,6 +785,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             elif end.userData().folding == PMXBlockUserData.FOLDING_STOP:
                 counter -= 1
             end = end.next()
+            if not end.isValid():
+                return None
         return end
     
     def _find_block_fold_open(self, end):
@@ -792,6 +798,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             elif start.userData().folding == PMXBlockUserData.FOLDING_START:
                 counter -= 1
             start = start.previous()
+            if not start.isValid():
+                return None
         return start
     #==========================================================================
     # Bookmarks
