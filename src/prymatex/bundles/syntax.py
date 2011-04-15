@@ -7,6 +7,8 @@
     http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
 '''
 
+#TODO: Importar el adaptador a sre de oniguruma y hacer que compile con re lo que pueda y con onig el resto
+
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, ENCODING_UTF8
 from prymatex.bundles.base import PMXBundleItem
@@ -183,6 +185,12 @@ class PMXSyntax(PMXBundleItem):
         if self.scopeName != None:
             PMXSyntax.SYNTAXES[self.name_space][self.scopeName] = self
 
+	@property
+	def indentSensitive(self):
+		#If stop marker match with "" the grammar is indent sensitive
+		match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
+		return match != None
+		
     @property
     def syntaxes(self):
         return PMXSyntax.SYNTAXES[self.name_space]
@@ -204,12 +212,12 @@ class PMXSyntax(PMXBundleItem):
         stack = [[self.grammar, None]]
         string = string.encode('utf-8')
         for line in string.splitlines():
-            self.parse_line(stack, line, processor)
+            self.parseLine(stack, line, processor)
         if processor:
             processor.endParsing(self.scopeName)
         return stack
 
-    def parse_line(self, stack, line, processor):
+    def parseLine(self, stack, line, processor):
         if processor:
             processor.newLine(line)
         top, match = stack[-1]

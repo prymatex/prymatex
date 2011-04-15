@@ -123,6 +123,8 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 
     def foldingMarker(self, line):
         self.userData.folding = self.syntax.folding(line)
+        if self.syntax.indentSensitive and self.userData.folding == self.syntax.FOLDING_STOP:
+            self.userData.folding = self.syntax.FOLDING_NONE
 
     def indentMarker(self, line, scope):
         settings = PMXBundle.getPreferenceSettings(scope)

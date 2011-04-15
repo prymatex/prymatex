@@ -55,7 +55,7 @@ class PMXCursorPositionLabel(QWidget):
         return unicode(self.__text_format)
         
     def update(self, col, line):
-        self.postionLabel.setText(self.text_format % (col, line))
+        self.postionLabel.setText(self.text_format % (line, col))
 
 class PMXSymbolBox(QComboBox):
     def __init__(self, parent):
