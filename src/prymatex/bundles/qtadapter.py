@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import string
-from PyQt4.Qt import QTextCharFormat, QColor, QFont, QKeySequence
-from PyQt4.QtCore import Qt
+try:
+    from PyQt4.Qt import QTextCharFormat, QColor, QFont, QKeySequence
+    from prymatex.bundles.modmap import get_keymap_table
+except:
+    from qtmock import QTextCharFormat, QColor, QFont, QKeySequence, Qt
+    from modmap import get_keymap_table
 
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
@@ -42,24 +46,6 @@ def buildQTextFormat(style):
             format.setFontItalic(True)
     return format
     
-def kpts(key_event): # QKeyEvent to sequence converter
-    modseq = ""
-    keyseq = ""
-
-    if key_event.modifiers() & Qt.ShiftModifier:
-        modseq += "Shift+"
-    if key_event.modifiers() & Qt.ControlModifier:
-        modseq += "Ctrl+"
-    if key_event.modifiers() & Qt.AltModifier:
-        modseq += "Alt+"
-    if key_event.modifiers() & Qt.MetaModifier:
-        modseq += "Meta+"
-    keyseq = QKeySequence(key_event.key())
-    
-    seq = modseq + keyseq
-    #QKeySequence k = QKeySequence(seq)
-    #return k;
-    
 QTCHARCODES = {9: Qt.Key_Backspace,
                10: Qt.Key_Return,
                127: Qt.Key_Delete,
@@ -73,12 +59,32 @@ QTCHARCODES = {9: Qt.Key_Backspace,
                63272: Qt.Key_F7,
                63302: Qt.Key_F3}
 
+KEYMAP = get_keymap_table()
+def keyboardLayoutQtKeys(character):
+    keys = []
+    for keycode, keysyms in KEYMAP.iteritems():
+        if character in keysyms:
+            index = keysyms.index(character)
+            if index == 1:
+                keys.append(Qt.SHIFT) #Add Shift
+            elif index == 2:
+                keys.append(Qt.ALTGR) #Add Altgr
+            elif index == 3:
+                keys.append(Qt.SHIFT); keys.append(Qt.ALTGR) #Add Sift + Altgr
+            break
+    code = ord(character.upper())
+    if code in QTCHARCODES:
+        code = QTCHARCODES[code]
+    keys.append(code)
+    return keys
+
 def buildKeyEquivalentString(nemonic):
     return buildKeySequence(nemonic).toString()
 
+def buildKeyEquivalentCode(nemonic):
+    return int(buildKeySequence(nemonic))
+
 def buildKeySequence(nemonic):
-    if isinstance(nemonic, int):
-        return QKeySequence(nemonic)
     nemonic = list(nemonic)
     sequence = []
     if u"^" in nemonic:
@@ -94,16 +100,12 @@ def buildKeySequence(nemonic):
         sequence.append(Qt.META)
         nemonic.remove(u"@")
     if len(nemonic) == 1:
-        char = nemonic.pop()
-        code = ord(char)
-        if char in string.ascii_uppercase:
-            sequence.append(Qt.SHIFT)
-        elif char in string.ascii_lowercase:
-            code = ord(char.upper())
-        elif not (0x20 <= code <= 0x7E):
-            if not code in QTCHARCODES:
-                print "need map", code, char
-            else:
-                code = QTCHARCODES[code]
-        sequence.append(code)
+        keys = keyboardLayoutQtKeys(nemonic.pop())
+        sequence.extend(keys)
     return QKeySequence(sum(sequence))
+
+if __name__ == '__main__':
+    tests = ['@r', '^~P', '@&', '@~)']
+    for test in tests:
+        sequence = buildKeySequence(test)
+        print "code %d in Qt and your Keyboar Layout is %s" % (sequence, sequence)
