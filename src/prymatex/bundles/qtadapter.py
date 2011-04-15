@@ -71,6 +71,7 @@ def keyboardLayoutQtKeys(character):
                 keys.append(Qt.ALTGR) #Add Altgr
             elif index == 3:
                 keys.append(Qt.SHIFT); keys.append(Qt.ALTGR) #Add Sift + Altgr
+            character = keysyms[0]
             break
     code = ord(character.upper())
     if code in QTCHARCODES:
