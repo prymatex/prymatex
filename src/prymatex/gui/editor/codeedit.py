@@ -32,7 +32,7 @@ def debug_key(key_event):
     print "nativeModifiers: ", key_event.nativeModifiers()
     print "nativeScanCode: ", key_event.nativeScanCode()
     print "nativeVirtualKey: ", key_event.nativeVirtualKey()
-    print "text: ", key_event.text()
+    print "text: ", unicode(key_event.text()).encode('utf-8')
     print "isAccepted: ", key_event.isAccepted()
     print "modifiers: ", int(key_event.modifiers())
     modifiers = key_event.modifiers()
@@ -315,7 +315,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
         '''
-        #debug_key(event)
+        debug_key(event)
         #Check for snippet mode
         event.ignore()
         if self.snippet != None:
@@ -746,8 +746,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         block = startBlock
         while True:
             user_data = block.userData()
-            user_data.nestedLevel += 1
-            block.setVisible(user_data.nestedLevel == PMXBlockUserData.FOLDING_NONE)
+            user_data.foldingLevel += 1
+            block.setVisible(user_data.foldingLevel == PMXBlockUserData.FOLDING_NONE)
             if block == endBlock:
                 break
             block = block.next()
@@ -763,8 +763,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         block = startBlock
         while True:
             user_data = block.userData()
-            user_data.nestedLevel -= 1
-            block.setVisible(user_data.nestedLevel == PMXBlockUserData.FOLDING_NONE)
+            user_data.foldingLevel -= 1
+            block.setVisible(user_data.foldingLevel == PMXBlockUserData.FOLDING_NONE)
             if block == endBlock:
                 break
             block = block.next()

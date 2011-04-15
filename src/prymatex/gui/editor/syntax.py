@@ -20,7 +20,8 @@ class PMXBlockUserData(QTextBlockUserData):
         QTextBlockUserData.__init__(self)
         self.scopes = []
         self.folding = self.FOLDING_NONE
-        self.nestedLevel = 0
+        self.foldingLevel = 0
+        #self.foldingPeer = None
         self.folded = False
         self.indent = self.INDENT_NONE
         self.indentLevel = 0
@@ -122,7 +123,6 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 
     def foldingMarker(self, line):
         self.userData.folding = self.syntax.folding(line)
-        self.userData.folded = False
 
     def indentMarker(self, line, scope):
         settings = PMXBundle.getPreferenceSettings(scope)
