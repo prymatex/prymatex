@@ -73,7 +73,7 @@ class PMXBundle(object):
     BUNDLES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
-    DRAGS = {}
+    DRAGS = []
     PREFERENCES = {}
     TEMPLATES = []
     SETTINGS_CACHE = {}

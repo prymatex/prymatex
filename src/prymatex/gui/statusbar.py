@@ -86,7 +86,6 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.syntaxMenu = QComboBox(self)
         
         #No syntax
-        self.syntaxMenu.addItem("No syntax")
         for name in PMXSyntax.getSyntaxesNames(sort = True):
             self.syntaxMenu.addItem(name)
             
