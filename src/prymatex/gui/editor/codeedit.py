@@ -76,8 +76,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if syntax != None:
             self.setSyntax(syntax)
     
-    soft_tabs = pmxConfigPorperty(default = True)
-    tab_size = pmxConfigPorperty(default = 4)
+    softTabs = pmxConfigPorperty(default = True)
+    tabSize = pmxConfigPorperty(default = 4)
     font = pmxConfigPorperty(default = QFont('Monospace', 10))
     
     @pmxConfigPorperty(default = 'Twilight')
@@ -104,7 +104,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     @property
     def tabKeyBehavior(self):
-        return self.soft_tabs and u' ' * self.tab_size or u'\t'
+        return self.softTabs and u' ' * self.tabSize or u'\t'
     
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
@@ -238,24 +238,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
     
-    def selectionBlockStart(self):
-        '''
-        Returns the block where the slection starts
-        '''
-        cursor = self.textCursor()
-        if not cursor.hasSelection():
-            return -1
-        return self.document().findBlock( cursor.selectionStart() ).blockNumber()
-        
-    def selectionBlockEnd(self):
-        '''
-        Returns the block number where the selection ends
-        '''
-        cursor = self.textCursor()
-        if not cursor.hasSelection():
-            return -1
-        return self.document().findBlock( cursor.selectionEnd() ).blockNumber()
-    
     #=======================================================================
     # Mouse Events
     #=======================================================================
@@ -331,7 +313,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             Qt.Key_Tab: [self.eventKeyTabBundleItem, self.eventKeyTabIndent],
             Qt.Key_Backtab: [self.eventKeyBacktabUnindent],
             Qt.Key_Backspace:  [self.eventKeyBackspaceSmartTyping],
-            Qt.Key_Return: [self.eventKeyReturnSyntax, self.eventKeyReturnIndent],
+            Qt.Key_Return: [self.eventKeyReturnSyntax], #, self.eventKeyReturnIndent
             ANYKEY: [self.eventKeyAnyIndent, self.eventKeyAnySmartTyping]
         } 
 
@@ -649,8 +631,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 'TM_LINE_INDEX': cursor.columnNumber(), 
                 'TM_LINE_NUMBER': cursor.block().blockNumber() + 1, 
                 'TM_SCOPE': scope,
-                'TM_SOFT_TABS': self.soft_tabs and u'YES' or u'NO',
-                'TM_TAB_SIZE': self.tab_size,
+                'TM_SOFT_TABS': self.softTabs and u'YES' or u'NO',
+                'TM_TAB_SIZE': self.tabSize,
         });
         if current_word != "":
             env['TM_CURRENT_WORD'] = current_word
@@ -905,46 +887,42 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.setTextCursor(cursor)
         cursor.endEditBlock()
 
-    def can_unindent(self):
-        '''
-        Check if un-indetation is possible
-        @returns True if indentation is possible, false otherwise
-        '''
-        block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
-        new_cursor = QTextCursor( self.textCursor() )
-        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
-        new_cursor.movePosition(QTextCursor.StartOfBlock)
-        for i in range(block_count):
-            if not new_cursor.block().text().startsWith(self.tabKeyBehavior):
-                new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, i)
-                return False
-        del new_cursor
-        return True
-    
     def unindent(self):
-        '''
-        Unindents text, fails if can_unindent() returns False
-        '''
-        if not self.can_unindent():
-            return
-        block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
         cursor = self.textCursor()
-        cursor.beginEditBlock()
-        new_cursor = QTextCursor(cursor)
-        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count -1)
-        new_cursor.movePosition(QTextCursor.StartOfBlock)
-
-        for _i in range(block_count):
-            if self.soft_tabs:
-                for _j in range(self.tab_size):
-                    new_cursor.deleteChar()
+        #counter = self.tabSize if self.softTabs else 1
+        if cursor.hasSelection():
+            start, end = cursor.selectionStart(), cursor.selectionEnd()
+            if start > end:
+                end, start = self.document().findBlock(start), self.document().findBlock(end)
             else:
-                new_cursor.deleteChar()
-                    
-            new_cursor.movePosition(QTextCursor.NextBlock)
-            
-            self.setTextCursor(cursor)
-        cursor.endEditBlock()
+                end, start = self.document().findBlock(end), self.document().findBlock(start)
+            cursor.beginEditBlock()
+            new_cursor = QTextCursor(cursor)
+            while True:
+                data = start.userData()
+                counter = self.tabSize if data.indentLevel > self.tabSize else data.indentLevel
+                if counter > 0:
+                    new_cursor.setPosition(start.position())
+                    for _j in range(self.tabSize):
+                        new_cursor.deleteChar()
+                if start == end:
+                    break
+                start = start.next()
+            del new_cursor
+            cursor.endEditBlock()
+        else:
+            block = cursor.block()
+            data = cursor.block().userData()
+            counter = self.tabSize if data.indentLevel > self.tabSize else data.indentLevel
+            if counter > 0:
+                cursor.beginEditBlock()
+                position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabSize else cursor.position() - counter
+                cursor.setPosition(block.position()) 
+                for _ in range(counter):
+                    cursor.deleteChar()
+                cursor.setPosition(position)
+                self.setTextCursor(cursor)
+                cursor.endEditBlock()
 
     MAX_FONT_POINT_SIZE = 32
     MIN_FONT_POINT_SIZE = 6
