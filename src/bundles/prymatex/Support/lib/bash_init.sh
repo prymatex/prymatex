@@ -30,14 +30,11 @@ export LOGPATH=$PMX_LOG_PATH
 
 export RUBYLIB="${RUBYLIB:+$RUBYLIB:}$TM_SUPPORT_PATH/lib"
 
-#Aliases
-alias 'open'='xdg-open'
+#Aliases functions
+open() { xdg-open "$1"; }
 #For xclip
-alias pbcopy='xclip -selection clipboard'
-alias pbpaste='xclip -selection clipboard -o'
-#For xsel
-#alias pbcopy='xsel --clipboard --input'
-#alias pbpaste='xsel --clipboard --output'
+pbcopy () { xclip -selection clipboard "$1"; }
+pbpaste() { xclip -selection clipboard -o "$1"; }
 
 #textmate_init () {
 #	[[ "$1" != / && "$1" != ~ ]] && textmate_init "$(dirname "$1")"
