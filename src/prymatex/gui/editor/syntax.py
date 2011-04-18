@@ -129,7 +129,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     def indentMarker(self, line, scope):
         settings = PMXBundle.getPreferenceSettings(scope)
         self.userData.indent = settings.indent(line)
-        self.userData.indentLevel = self.editor.indentationWhitespace(line)
+        self.userData.indentLevel = len(self.editor.indentationWhitespace(line))
 
     #END
     def endParsing(self, scope):
