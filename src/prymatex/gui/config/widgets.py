@@ -1,7 +1,10 @@
 from PyQt4.QtGui import *
 from PyQt4.Qt import QString, Qt
-
-from PyQt4.QtCore import pyqtSignal, pyqtSignature
+from PyQt4.QtNetwork import *
+from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
+from prymatex.core.base import PMXObject
+from prymatex.gui.panes.browser import PMXBrowserPaneDock
+from prymatex.core.config import pmxConfigPorperty
 
 settings = qApp.instance().settings
 
@@ -18,7 +21,7 @@ class PMXConfigTreeView(QTreeView):
     def currentChanged(self, new, old):
         model = self.model()#.sourceModel()
         new, old = map( lambda indx: model.itemFromIndex(indx), (new, old))
-        print new, old, map(type, [old, new])
+        #print new, old, map(type, [old, new])
         self.widgetChanged.emit(new.widget_index)
 
 #===============================================================================
@@ -28,7 +31,10 @@ CONFIG_WIDGETS = (QLineEdit, QSpinBox, QCheckBox,)
 
 filter_config_widgets = lambda ws: filter(lambda w: isinstance(w, CONFIG_WIDGETS), ws)
 
-class PMXConfigBaseWidget(QWidget):
+class PMXConfigBaseWidget(QWidget, PMXObject):
+    '''
+    Base class for configuration widgets
+    '''
     _widgets = None
     
     @property
@@ -36,6 +42,16 @@ class PMXConfigBaseWidget(QWidget):
         if not self._widgets:
             self._widgets = filter_config_widgets(self.children())
         return self._widgets
+    
+    
+    def enableAllWidgets(self, enabled):
+        map(lambda w: w.setEnabled(enabled), self.all_widgets)
+    
+    def apply(self):
+        QMessageBox.information(self, "Apply %s..." % self.windowTitle(), "Apply settings")
+    
+    def discard(self):
+        QMessageBox.information(self, "Discard %s..." % self.windowTitle(), "Discard settings")
 
 from ui_font_and_theme import Ui_FontThemeConfig
 from prymatex.bundles import PMXTheme
@@ -201,20 +217,144 @@ class PMXSaveWidget(QWidget, Ui_Save):
             self.comboEncodings.addItem(name, None)
         
 from ui_network import Ui_Network
-class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network):
+from PyQt4.QtNetwork import QNetworkProxy
+
+class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
+    '''
+    Setup network connection
+    '''
+    class Meta:
+        settings = 'network'
+        
+    
     def __init__(self, parent = None):
         super(PMXNetworkWidget, self).__init__(parent)
         self.setupUi(self)
-        self.comboProxyType.currentIndexChanged[QString].connect(self.changeProxyType)
-   
-    
-    def changeProxyType(self, proxy_type):
-        proxy_type = unicode(proxy_type).lower()
         
-        if proxy_type.count("no proxy"):
-            map(lambda w: w.setEnabled(False), self.all_widgets)
+        self.radioAutomatically.setToolTip("Not implemented yet")
+        self.radioAutomatically.setEnabled(False)
+        for radio in (
+                      self.radioAutomatically,
+                      self.radioBasedOnVariables,
+                      self.radioDirect,
+                      self.radioManual,
+                      self.radioPAC,
+                      ):
+            radio.toggled.connect(self.changeProxyMode)
+        
+        self.mapping = {
+                        self.radioAutomatically: 'automatic',
+                        self.radioBasedOnVariables: 'enviroment',
+                        self.radioDirect: 'direct',
+                        self.radioManual: 'manual',
+                        self.radioPAC: 'pac',                
+        }
+        
+        self.comboProxyType.addItem(self.trUtf8("HTTP Proxy"), QNetworkProxy.HttpProxy)
+        self.comboProxyType.addItem(self.trUtf8("Socks 5 Proxy"), QNetworkProxy.Socks5Proxy)
+        self.configure()
+        
+    
+    def changeProxyMode(self, checked):
+        if checked:
+            self.proxyType = self.mapping[self.sender()]
+            
+            
+        
+    @pmxConfigPorperty(default = 'direct')
+    def proxyType(self, value):
+        if   value == 'direct':
+            if not self.radioDirect.isChecked():
+                self.radioDirect.setChecked(True)
+            proxy = QNetworkProxy(QNetworkProxy.NoProxy)
+            QNetworkProxy.setApplicationProxy(proxy)
+        elif value == 'pac':
+            if not self.radioPAC.isChecked():
+                self.radioPAC.setChecked(True)
+        elif value == 'manual':
+            if not self.radioManual.isChecked():
+                self.radioManual.setChecked(True)
+        elif value == 'enviroment':
+            if not self.radioBasedOnVariables.isChecked():
+                self.radioBasedOnVariables.setChecked(True)
+        elif value == 'automatic':
+            if not self.radioAutomatically.isChecked():
+                self.radioAutomatically.setChecked(True)
         else:
-            map(lambda w: w.setEnabled(True), self.all_widgets)
+            raise ValueError("%s is not a valid proxyType value" % value)
+        
+    @pmxConfigPorperty(default = '')
+    def proxyManual(self, value):
+        url = QUrl(value)
+        self.lineProxyAddress.setText(url.host())
+        self.spinProxyPort.setValue(int(url.port()))
+        self._proxyManual = url
+    
+    @pmxConfigPorperty(default = 'http_proxy')
+    def proxyEnviromentVariable(self, value):
+        self._proxyEnviromentVariable = value
+    
+        #self.comboProxyType.currentIndexChanged[QString].connect(self.changeProxyType)
+        #self.comboProxyType.addItem(self.trUtf8("No Proxy"), QNetworkProxy.NoProxy)
+        #self.comboProxyType.addItem(self.trUtf8("HTTP Proxy"), QNetworkProxy.HttpProxy)
+        #self.comboProxyType.addItem(self.trUtf8("Socks Proxy"), QNetworkProxy.Socks5Proxy)
+        #self.comboProxyType.addItem(self.trUtf8("Enviroment Proxy"), PMXBrowserPaneDock.ENVIROMENT_PROXY)
+        #self.comboProxyType.addItem(self.trUtf8("Based on Variables"), 0)
+        
+#    def changeProxyType(self, proxy_type):
+#        if self.proxyType == QNetworkProxy.NoProxy:
+#            self.enableAllWidgets(False)
+#        else:
+#            self.enableAllWidgets(True)
+#    
+#    TEST_URL = 'http://www.google.com.ar'
+#    
+#    def on_pushTest_pressed(self):
+#        
+#        self.testNetworkAccessMgr = QNetworkAccessManager()
+#        self.testNetworkAccessMgr.setProxy(self.networkProxy)
+#        self.testReply = self.testNetworkAccessMgr.get(QNetworkRequest(QUrl(self.TEST_URL)))
+#        self.testReply.finished.connect(self.finished)
+#        #self.testReply.error.connect(self.error)
+#        
+#        #QMessageBox.information(self, "Test network settings", "Test network settings")
+#    
+#    def finished(self):
+#        reply = self.sender()
+#        if reply.error() == QNetworkReply.NoError:
+#            
+#            QMessageBox.information(self, "OK", "OK")
+#        else:
+#            QMessageBox.critical(self, "Proxy Error", "Erorr is %s" % reply.errorString())
+#        map(lambda w: w.setEnabled(True), self.all_widgets)
+#        
+#    
+#    
+#    @property
+#    def proxyType(self):
+#        proxy_type = self.comboProxyType.itemData(self.comboProxyType.currentIndex())
+#        proxy_type, _ok = proxy_type.toInt()
+#        return proxy_type
+#    
+#    @property
+#    def networkProxy(self):
+#        return QNetworkProxy(self.proxyType,
+#                              self.lineProxyAddress.text(),
+#                              self.spinProxyPort.value(),
+#                              self.lineProxyUsername.text(),
+#                              self.lineProxyPassword.text()
+#                              )
+#    
+#    
+#    
+#    
+#    def apply(self):
+#        browser_settings = qApp.instance().settings.getGroup('browser')
+#        
+#        browser_settings.setValue('proxy', 'http://localhost:3128')
+#        
+#        self.debug("Seteamos el proxy")
+        
 
 from ui_bundles import Ui_Bundles
 class PMXBundleWidget(PMXConfigBaseWidget, Ui_Bundles):

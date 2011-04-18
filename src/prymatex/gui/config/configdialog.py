@@ -95,10 +95,17 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog, CenterWidget):
         
     def on_pushClose_pressed(self):
         self.reject()
-        
+    
+    @property
+    def currentWidget(self):
+        return self.container.layout().currentWidget()
+    
     def on_pushDiscard_pressed(self):
-        QMessageBox.information(self, "Discard", "Discards changes<br/>TODO")
+        self.currentWidget.discard()
+        
+        #QMessageBox.information(self, "Discard", "Discards changes<br/>TODO")
         
     def on_pushApply_pressed(self):
-        QMessageBox.information(self, "Apply", "Apply changes<br/>TODO")
+        self.currentWidget.apply()
+        #QMessageBox.information(self, "Apply", "Apply changes<br/>TODO")
 

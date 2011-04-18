@@ -21,8 +21,11 @@
     <widget class="PMXCodeEdit" name="codeEdit"/>
    </item>
    <item>
-    <widget class="QWidget" name="gotolineWidget" native="true">
+    <widget class="QWidget" name="goToLineWidget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="margin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QLabel" name="labelGoToLine">
         <property name="text">
@@ -64,7 +67,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushCloseFindreplace_2">
+       <widget class="QPushButton" name="pushCloseGoToLine">
         <property name="text">
          <string/>
         </property>
@@ -294,9 +297,9 @@ p, li { white-space: pre-wrap; }
  </resources>
  <connections>
   <connection>
-   <sender>pushCloseFindreplace_2</sender>
+   <sender>pushCloseGoToLine</sender>
    <signal>pressed()</signal>
-   <receiver>gotolineWidget</receiver>
+   <receiver>goToLineWidget</receiver>
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">

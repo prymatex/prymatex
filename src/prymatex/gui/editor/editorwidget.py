@@ -74,7 +74,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
 
         # Hide some widgets
         self.findreplaceWidget.hide()
-        self.gotolineWidget.hide()
+        self.goToLineWidget.hide()
         
         self.file = pmx_file
         
@@ -82,6 +82,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
         self.codeEdit.setPlainText(self.file.read() or '')
         self.destroyed.connect(self.releaseFile)
+        
+        self.codeEdit.blockCountChanged.connect(self.blockCountChanged)
+        self.spinLineNumbers.setMaximum(self.codeEdit.blockCount())
+        self.spinLineNumbers.valueChanged.connect(self.moveCursorToLine)
         
     def releaseFile(self):
         print "Release file"
@@ -174,42 +178,39 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         # Search
         self.actionFind = QAction("&Find", self)
         self.actionFind.setObjectName("actionFind")
-        
-        #self.actionFind.setShortcut(QKeySequence(self.trUtf8("Ctrl+F")))
+        self.actionFind.triggered.connect(self.find)
         # Replace
         self.actionReplace = QAction(self.trUtf8("Find and &Replce"), self)
         self.actionReplace.setObjectName("actionReplace")
-        #self.actionReplace.setShortcut(QKeySequence(self.trUtf8("Ctrl+R")))
-
-
-
+        self.actionReplace.triggered.connect(self.replace)
+        # Go to line
     
-    def on_actionFind_triggered(self):
-        self.hideReplaceWidgets()
+    def find(self):
+        self.setReplaceWidgetsShown(False)
         self.findreplaceWidget.show()
         self.comboFind.setFocus(Qt.MouseFocusReason)
 
 
-    def on_actionReplace_triggered(self):
-        self.showReplaceWidgets()
+    def replace(self):
+        self.setReplaceWidgetsShown(True)
         self.findreplaceWidget.show()
         self.comboFind.setFocus(Qt.MouseFocusReason)
         
+    def goToLine(self):
+        '''
+        Show Go To Line widget
+        '''
+        self.goToLineWidget.show()
+        self.findreplaceWidget.hide()
+        
 
-
-    #TODO: @diego Too complex? Would it be better to make it more explicit?
-    @property
-    def replaceWidgets(self):
-        return map(lambda name: getattr(self, name), ("labelReplaceWith", "comboReplace",
-                                                      "pushReplaceAndFindPrevious",
-                                                      "pushReplaceAndFindNext",
-                                                      "pushReplaceAll"))
-    def hideReplaceWidgets(self):
-        map(lambda w: w.hide(), self.replaceWidgets)
-
-    def showReplaceWidgets(self):
-        map(lambda w: w.show(), self.replaceWidgets)
-
+        
+    def setReplaceWidgetsShown(self, show):
+        self.labelReplaceWith.setShown(show)
+        self.comboReplace.setShown(show)
+        self.pushReplaceAll.setShown(show)
+        self.pushReplaceAndFindNext.setShown(show)
+        self.pushReplaceAndFindPrevious.setShown(show)
         
     def setupFindReplaceWidget(self):
         self.actionRegex = QAction(self.trUtf8("Use &regular expressions"),self)
@@ -332,7 +333,14 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def modfified(self):
         return self.codeEdit.document().isModified()
     
+    
+    def blockCountChanged(self, new_count):
+        self.spinLineNumbers.setMaximum(new_count)
         
+    def moveCursorToLine(self, line):
+        self.codeEdit.goToLine(line)
+        
+    
     #===========================================================================
     # Callbacks
     #===========================================================================
@@ -340,8 +348,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def afterInsertionCallback(self):
         ''' Callback when the tab is inserted '''
         QTimer.singleShot(0, self.fileTitleUpdate.emit)
-        # Does not work, signal is never emited :(
-        #self.fileTitleUpdate.emit()
     
     def afterRemoveCallback(self):
         self.file.references -= 1

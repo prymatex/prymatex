@@ -49,8 +49,6 @@ def debug_key(key_event):
                                               key, key, key < 255 and chr(key) 
                                               or 'N/A')
     
-_counter = 0
-
 class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     The GUI element which holds the editor.

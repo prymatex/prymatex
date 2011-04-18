@@ -61,14 +61,8 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         #self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
         #self.actionGroupTabs.addMenu(self.menuPanes)
         
-        self.setup_panes()
-        self.setup_logging()
-        
-        #self.setup_menus()
-        #self.setup_actions()
-        
-        #self.setup_toolbars()
-        
+        self.setupPanes()
+        self.setupLogging()
         self.center()
         
         # Una vez centrada la ventana caramos los menues
@@ -79,13 +73,13 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         #self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
         #self.actionShowFSPane.setChecked(True)
-        self.prevent_menu_lock()
+        self.preventMenuLock()
         
         for file in files_to_open:
             print "Opening file", file
             self.openFile(file)
     
-    def setup_logging(self):
+    def setupLogging(self):
         '''
         Logging Sub-Window setup
         TODO: Fix speed issues when a big amount of events is presented
@@ -96,19 +90,20 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.log_dock_widget.action = self.actionShow_Log_Window
         self.log_dock_widget.hide()
 
-    def prevent_menu_lock(self):
+    def preventMenuLock(self):
         '''
         Inspects the MainWindow definition and add the actions itself.
         If menubar is hidden (Ctrl+M), actions will be available.
         Maybe we will need to filter something, right now I don't belive
         it'll be nesseary.
         '''
+        # TODO: Check if there's an action
         action_names = filter(lambda name: name.startswith('action'), dir(self))
         for action in map(lambda name: getattr(self, name), action_names):
             if isinstance(action, QAction):
                 self.addAction(action)
     
-    def setup_panes(self):
+    def setupPanes(self):
         '''
         Basic panels, dock objects. More docks should be available via plugins
         '''
@@ -460,9 +455,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
 
     @pyqtSignature('')
     def on_actionGo_To_Line_triggered(self):
-        #editor = self.tabWidgetEditors.currentWidget()
-        #editor.showGoToLineDialog()
-        self.current_editor.gotolineWidget.show()
+        self.currentEditorWidget.goToLine()
 
     @pyqtSignature('')
     def on_actionGo_To_File_triggered(self):
@@ -475,49 +468,18 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def on_actionShow_Current_Scope_triggered(self):
         scope = self.currentEditor.getCurrentScope()
         self.statusBar().showMessage("%s" % (scope))
-        
-    @pyqtSignature('')
-    def on_actionTo_iNVERT_cASE_triggered(self):
-        def to_title(s):
-            return unicode(s).swapcase()
-        self.current_editor.replaceCursorText(to_title)
-        
-    @pyqtSignature('')
-    def on_actionTo_lowercase_triggered(self):
-        def to_lower(s):
-            return unicode(s).lower()
-        self.current_editor.replaceCursorText(to_lower)
-        
-    @pyqtSignature('')
-    def on_actionTo_TitleCase_triggered(self):
-        def to_title(s):
-            return unicode(s).title()
-        self.current_editor.replaceCursorText(to_title)
-        
-    @pyqtSignature('')
-    def on_actionTranspose_triggered(self):
-        def transpose(s):
-            s = list(unicode(s))
-            l = len(s)
-            for i in range(len(s)/2):
-                s[i], s[l-i-1] = s[l-i-1], s[i],
-            return ''.join(s)
-        
-        self.current_editor.replaceCursorText(transpose)
-        
-    @pyqtSignature('')
-    def on_actionTo_UPPERCASE_triggered(self):
-        def to_upper(s):
-            return unicode(s).upper()
-        self.current_editor.replaceCursorText(to_upper)
+
         
     @pyqtSignature('')
     def on_actionFind_triggered(self):
-        self.current_editor.actionFind.trigger()
+        print "MainWindow::find"
+        self.currentEditorWidget.find()
         
     @pyqtSignature('')
     def on_actionFind_Replace_triggered(self):
-        self.current_editor.actionReplace.trigger()
+        print "MainWindow::replace"
+        self.currentEditorWidget.replace()
+    
     
     #===========================================================
     # Templates

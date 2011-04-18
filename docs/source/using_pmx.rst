@@ -23,6 +23,10 @@ Running (using prymatex).
 	
 	* ponyguruma
 	
+		Ponyguruma is a key component of Prymatex, it allow us to parse and use 
+		Syntax definitions.
+		
+		It's packaged as a simple 
 		Install it from Git with the folowing commands
 		
 		.. code-block:: bash
@@ -32,9 +36,12 @@ Running (using prymatex).
 			cd tmp
 			git clone https://github.com/D3f0/ponyguruma.git
 			cd ponyguruma
-			su -c "python setup.py install" # or sudo python setup.py install on Ubuntu 
+			su -c "python setup.py install" # or sudo python setup.py install on Ubuntu
+	
 	
 	* **Bundles**
+	   
+	   Altough Prymatex includes a set of official bundles.
 	
 Development (improving prymatex or creating new bunldes)
 --------------------------------------------------------

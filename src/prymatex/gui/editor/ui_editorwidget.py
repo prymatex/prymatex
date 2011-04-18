@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/editorwidget.ui'
 #
-# Created: Thu Mar 24 12:55:28 2011
+# Created: Mon Apr 18 15:42:17 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,17 +19,18 @@ class Ui_EditorWidget(object):
         self.codeEdit = PMXCodeEdit(EditorWidget)
         self.codeEdit.setObjectName("codeEdit")
         self.verticalLayout.addWidget(self.codeEdit)
-        self.gotolineWidget = QtGui.QWidget(EditorWidget)
-        self.gotolineWidget.setObjectName("gotolineWidget")
-        self.horizontalLayout = QtGui.QHBoxLayout(self.gotolineWidget)
+        self.goToLineWidget = QtGui.QWidget(EditorWidget)
+        self.goToLineWidget.setObjectName("goToLineWidget")
+        self.horizontalLayout = QtGui.QHBoxLayout(self.goToLineWidget)
+        self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.labelGoToLine = QtGui.QLabel(self.gotolineWidget)
+        self.labelGoToLine = QtGui.QLabel(self.goToLineWidget)
         self.labelGoToLine.setObjectName("labelGoToLine")
         self.horizontalLayout.addWidget(self.labelGoToLine)
-        self.spinLineNumbers = QtGui.QSpinBox(self.gotolineWidget)
+        self.spinLineNumbers = QtGui.QSpinBox(self.goToLineWidget)
         self.spinLineNumbers.setObjectName("spinLineNumbers")
         self.horizontalLayout.addWidget(self.spinLineNumbers)
-        self.pushGoToLine = QtGui.QPushButton(self.gotolineWidget)
+        self.pushGoToLine = QtGui.QPushButton(self.goToLineWidget)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/actions/resources/actions/go-next-view.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushGoToLine.setIcon(icon)
@@ -39,15 +40,15 @@ class Ui_EditorWidget(object):
         self.horizontalLayout.addWidget(self.pushGoToLine)
         spacerItem = QtGui.QSpacerItem(154, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.pushCloseFindreplace_2 = QtGui.QPushButton(self.gotolineWidget)
-        self.pushCloseFindreplace_2.setText("")
+        self.pushCloseGoToLine = QtGui.QPushButton(self.goToLineWidget)
+        self.pushCloseGoToLine.setText("")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/actions/resources/actions/process-stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushCloseFindreplace_2.setIcon(icon1)
-        self.pushCloseFindreplace_2.setFlat(True)
-        self.pushCloseFindreplace_2.setObjectName("pushCloseFindreplace_2")
-        self.horizontalLayout.addWidget(self.pushCloseFindreplace_2)
-        self.verticalLayout.addWidget(self.gotolineWidget)
+        self.pushCloseGoToLine.setIcon(icon1)
+        self.pushCloseGoToLine.setFlat(True)
+        self.pushCloseGoToLine.setObjectName("pushCloseGoToLine")
+        self.horizontalLayout.addWidget(self.pushCloseGoToLine)
+        self.verticalLayout.addWidget(self.goToLineWidget)
         self.findreplaceWidget = QtGui.QWidget(EditorWidget)
         self.findreplaceWidget.setObjectName("findreplaceWidget")
         self.gridLayout = QtGui.QGridLayout(self.findreplaceWidget)
@@ -135,7 +136,7 @@ class Ui_EditorWidget(object):
         self.verticalLayout.addWidget(self.findreplaceWidget)
 
         self.retranslateUi(EditorWidget)
-        QtCore.QObject.connect(self.pushCloseFindreplace_2, QtCore.SIGNAL("pressed()"), self.gotolineWidget.hide)
+        QtCore.QObject.connect(self.pushCloseGoToLine, QtCore.SIGNAL("pressed()"), self.goToLineWidget.hide)
         QtCore.QMetaObject.connectSlotsByName(EditorWidget)
 
     def retranslateUi(self, EditorWidget):
