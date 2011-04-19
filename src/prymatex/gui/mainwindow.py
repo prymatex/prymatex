@@ -300,7 +300,13 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
         for path in files_to_open:
             self.openFile(path, auto_focus = True)
-            
+    
+    
+    @pyqtSignature('')
+    def on_actionShow_Bundle_Editor_triggered(self):
+        #TODO: mejorar esto
+        qApp.instance().show_bundle_editor()
+        
     
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):

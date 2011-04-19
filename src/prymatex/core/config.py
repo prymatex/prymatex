@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+'''
+Application configuration based on Qt's QSettings module.
+
+'''
+
 from PyQt4.Qt import QSettings
 from os.path import join, abspath, expanduser, dirname, exists
 from os import makedirs
