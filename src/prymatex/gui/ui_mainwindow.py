@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Fri Apr  1 17:20:34 2011
+# Created: Tue Apr 19 12:37:03 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -269,7 +269,7 @@ class Ui_MainWindow(object):
         self.actionAbout_Qt = QtGui.QAction(MainWindow)
         self.actionAbout_Qt.setObjectName(_fromUtf8("actionAbout_Qt"))
         self.actionShow_Bundle_Editor = QtGui.QAction(MainWindow)
-        self.actionShow_Bundle_Editor.setCheckable(True)
+        self.actionShow_Bundle_Editor.setCheckable(False)
         self.actionShow_Bundle_Editor.setObjectName(_fromUtf8("actionShow_Bundle_Editor"))
         self.actionSelect_Bundle_Item = QtGui.QAction(MainWindow)
         self.actionSelect_Bundle_Item.setObjectName(_fromUtf8("actionSelect_Bundle_Item"))

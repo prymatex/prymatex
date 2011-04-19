@@ -45,6 +45,10 @@ class PMXApplication(QApplication):
     # File manager
     #===========================================================================
     __file_manager = None
+    #===========================================================================
+    # Bundle Editor
+    #===========================================================================
+    __bundle_editor = None
     
     #@printtime
     @deco.logtime
@@ -115,6 +119,15 @@ class PMXApplication(QApplication):
         configdialog.register(PMXEnvVariablesWidgets())
         configdialog.register(PMXNetworkWidget())
         self.__configdialog = configdialog
+    
+    def show_bundle_editor(self):
+        #TODO: terminar esto
+        if self.__bundle_editor == None:
+            from prymatex.gui.bundle_editor import PMXBundleEditor
+            self.__bundle_editor = PMXBundleEditor()
+        self.__bundle_editor.show()
+        
+        
     
     @property
     def configdialog(self):

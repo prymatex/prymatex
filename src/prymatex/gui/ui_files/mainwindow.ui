@@ -794,7 +794,7 @@
   </action>
   <action name="actionShow_Bundle_Editor">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Show Bundle Editor</string>

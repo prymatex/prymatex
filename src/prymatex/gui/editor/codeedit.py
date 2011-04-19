@@ -2,7 +2,7 @@
 
 import re, logging
 from bisect import bisect
-from PyQt4.QtCore import QRect, Qt, SIGNAL
+from PyQt4.QtCore import QRect, Qt, SIGNAL, QEvent
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette
 from prymatex.bundles import PMXBundle, PMXSnippet
@@ -49,8 +49,6 @@ def debug_key(key_event):
                                               key, key, key < 255 and chr(key) 
                                               or 'N/A')
     
-_counter = 0
-
 class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     The GUI element which holds the editor.
@@ -237,7 +235,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             selection.cursor.clearSelection()
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
-    
+
+    #=======================================================================
+    # Event Filter
+    #=======================================================================
+    def eventFilter(self, object, event):
+        if (event.type() == QEvent.KeyPress):
+            debug_key(event)
+        return super(PMXCodeEdit, self).eventFilter(object, event)
+
     #=======================================================================
     # Mouse Events
     #=======================================================================
@@ -297,7 +303,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
         '''
-        debug_key(event)
         #Check for snippet mode
         event.ignore()
         if self.snippet != None:
