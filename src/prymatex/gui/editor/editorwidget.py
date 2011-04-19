@@ -84,8 +84,17 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.destroyed.connect(self.releaseFile)
         
         self.codeEdit.blockCountChanged.connect(self.blockCountChanged)
-        self.spinLineNumbers.setMaximum(self.codeEdit.blockCount())
+        linecount = self.codeEdit.blockCount()
+        #print linecount
+        self.spinLineNumbers.setMaximum(linecount)
         self.spinLineNumbers.valueChanged.connect(self.moveCursorToLine)
+        
+        # Hide 
+        self.spinLineNumbers.editionFinished.connect(self.goToLineWidget.hide)
+        self.comboFind.editionFinished.connect(self.findreplaceWidget.hide)
+        self.comboReplace.editionFinished.connect(self.findreplaceWidget.hide)
+        # Show
+        self.goToLineWidget.showed.connect(self.syncGoToLinePosition)
         
     def releaseFile(self):
         print "Release file"
@@ -202,8 +211,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         '''
         self.goToLineWidget.show()
         self.findreplaceWidget.hide()
-        
-
+        self.spinLineNumbers.setFocus(Qt.MouseFocusReason)
         
     def setReplaceWidgetsShown(self, show):
         self.labelReplaceWith.setShown(show)
@@ -339,7 +347,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
     def moveCursorToLine(self, line):
         self.codeEdit.goToLine(line)
-        
+        self.codeEdit.ensureCursorVisible()
+    
+    def syncGoToLinePosition(self):
+        lineno = self.codeEdit.textCursor().blockNumber()
+        self.spinLineNumbers.setValue(lineno + 1)
     
     #===========================================================================
     # Callbacks

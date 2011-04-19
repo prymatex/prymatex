@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/editorwidget.ui'
 #
-# Created: Mon Apr 18 15:42:17 2011
+# Created: Tue Apr 19 12:05:35 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,7 @@ class Ui_EditorWidget(object):
         self.codeEdit = PMXCodeEdit(EditorWidget)
         self.codeEdit.setObjectName("codeEdit")
         self.verticalLayout.addWidget(self.codeEdit)
-        self.goToLineWidget = QtGui.QWidget(EditorWidget)
+        self.goToLineWidget = PMXRefocusWidget(EditorWidget)
         self.goToLineWidget.setObjectName("goToLineWidget")
         self.horizontalLayout = QtGui.QHBoxLayout(self.goToLineWidget)
         self.horizontalLayout.setMargin(0)
@@ -27,7 +27,8 @@ class Ui_EditorWidget(object):
         self.labelGoToLine = QtGui.QLabel(self.goToLineWidget)
         self.labelGoToLine.setObjectName("labelGoToLine")
         self.horizontalLayout.addWidget(self.labelGoToLine)
-        self.spinLineNumbers = QtGui.QSpinBox(self.goToLineWidget)
+        self.spinLineNumbers = PMXSpinGoToLine(self.goToLineWidget)
+        self.spinLineNumbers.setMinimum(1)
         self.spinLineNumbers.setObjectName("spinLineNumbers")
         self.horizontalLayout.addWidget(self.spinLineNumbers)
         self.pushGoToLine = QtGui.QPushButton(self.goToLineWidget)
@@ -49,7 +50,7 @@ class Ui_EditorWidget(object):
         self.pushCloseGoToLine.setObjectName("pushCloseGoToLine")
         self.horizontalLayout.addWidget(self.pushCloseGoToLine)
         self.verticalLayout.addWidget(self.goToLineWidget)
-        self.findreplaceWidget = QtGui.QWidget(EditorWidget)
+        self.findreplaceWidget = PMXRefocusWidget(EditorWidget)
         self.findreplaceWidget.setObjectName("findreplaceWidget")
         self.gridLayout = QtGui.QGridLayout(self.findreplaceWidget)
         self.gridLayout.setSizeConstraint(QtGui.QLayout.SetMaximumSize)
@@ -164,7 +165,7 @@ class Ui_EditorWidget(object):
         self.pushReplaceAll.setText(QtGui.QApplication.translate("EditorWidget", "Replace &All", None, QtGui.QApplication.UnicodeUTF8))
 
 from codeedit import PMXCodeEdit
-from searchwidgets import PMXReplaceBox, PMXFindBox
+from internalwidgets import PMXReplaceBox, PMXRefocusWidget, PMXFindBox, PMXSpinGoToLine
 import res_rc
 
 if __name__ == "__main__":
