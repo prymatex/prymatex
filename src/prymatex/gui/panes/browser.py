@@ -78,7 +78,12 @@ class NetworkAccessManager(QNetworkAccessManager, PMXObject):
 js = """
 TextMate.system = function(command, callback) {
     this._system(command);
-    return _systemWrapper;
+    if (callback == null) {
+        _systemWrapper.close();
+        return null;
+    } else {
+        return _systemWrapper;
+    }
 }
 """
 
@@ -90,17 +95,29 @@ class SystemWrapper(QObject):
     
     @pyqtSignature("write(int)")
     def write(self, flags):
-        pass
+        self.process.stdin.write()
     
+    @pyqtSignature("write(int)")
+    def read(self, flags):
+        self.process.stdin.close()
+        text = self.process.stdout.read()
+        self.process.stdout.close()
+        self.process.wait()
+        deleteFile(self.temp_file)
+        return text
+        
     @pyqtSignature("close()")
     def close(self):
-        pass
+        self.process.stdin.close()
+        self.process.stdout.close()
+        self.process.wait()
+        deleteFile(self.temp_file)
 
     def outputString(self):
         self.process.stdin.close()
         text = self.process.stdout.read()
         self.process.stdout.close()
-        exit_code = self.process.wait()
+        self.process.wait()
         deleteFile(self.temp_file)
         return text
     outputString = pyqtProperty("QString", outputString)
