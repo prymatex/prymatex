@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
+import re
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
 from prymatex.bundles import PMXSyntaxProcessor, PMXSyntax, PMXPreferenceSettings, PMXBundle
 
 from logging import getLogger
 logger = getLogger(__file__)
 
+WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
+def whiteSpace(text):
+    match = WHITESPACE.match(text)
+    try:
+        ws = match.group('whitespace')
+        return ws
+    except AttributeError:
+        return ''
 
 class PMXBlockUserData(QTextBlockUserData):
     FOLDING_NONE = PMXSyntax.FOLDING_NONE
@@ -136,7 +145,11 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     def indentMarker(self, line, scope):
         settings = PMXBundle.getPreferenceSettings(scope)
         self.userData.indent = settings.indent(line)
-        self.userData.indentLevel = len(self.editor.indentationWhitespace(line))
+        if self.syntax.indentSensitive and line.strip() == "":
+            prev = self.currentBlock().previous()
+            self.userData.indentLevel = prev.userData().indentLevel if prev.isValid() else 0
+        else: 
+            self.userData.indentLevel = len(whiteSpace(line))
 
     #END
     def endParsing(self, scope):

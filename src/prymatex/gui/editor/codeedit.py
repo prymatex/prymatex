@@ -318,7 +318,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             Qt.Key_Tab: [self.eventKeyTabBundleItem, self.eventKeyTabIndent],
             Qt.Key_Backtab: [self.eventKeyBacktabUnindent],
             Qt.Key_Backspace:  [self.eventKeyBackspaceSmartTyping],
-            Qt.Key_Return: [self.eventKeyReturnSyntax], #, self.eventKeyReturnIndent
+            Qt.Key_Return: [self.eventKeyReturnSyntax, self.eventKeyReturnIndent],
             ANYKEY: [self.eventKeyAnyIndent, self.eventKeyAnySmartTyping]
         } 
 
@@ -487,22 +487,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.setSyntax(syntax)
     
     def eventKeyReturnIndent(self, event):
-        line = unicode(self.textCursor().block().text())
-        scope = self.getCurrentScope()
-        settings = PMXBundle.getPreferenceSettings(scope)
-        acction = settings.indent(line)
-        indentation = self.indentationWhitespace(line)
-        if acction == settings.INDENT_INCREASE:
-            print "increase"
-            super(PMXCodeEdit, self).keyPressEvent(event)
-            self.increaseIndent(indentation)
-        elif acction == settings.INDENT_NEXTLINE:
+        super(PMXCodeEdit, self).keyPressEvent(event)
+        cursor = self.textCursor()
+        block = cursor.block().previous()
+        if block.userData().indent == PMXBlockUserData.INDENT_INCREASE:
+            indent = (block.userData().indentLevel + self.tabSize ) * u' ' if self.softTabs else (block.userData().indentLevel + self.tabSize ) * u'\t'
+            cursor.insertText(indent)
+        elif block.userData().indent == PMXBlockUserData.INDENT_NEXTLINE:
             print "increasenext"
-            super(PMXCodeEdit, self).keyPressEvent(event)
-            self.increaseIndent(indentation)
         else:
-            super(PMXCodeEdit, self).keyPressEvent(event)
-            self.indent(indentation)
+            indent = block.userData().indentLevel * u' ' if self.softTabs else block.userData().indentLevel * u'\t' 
+            cursor.insertText(indent)
         event.accept()
     
     #=======================================================================
@@ -559,6 +554,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def insertBundleItem(self, item, tabTrigger = False, indent = True):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
+        print "Bundle %s Item %s, ( %s )" % (item.bundle.name, item.name, item.hash)
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         indentation = indent and self.indentationWhitespace(line) or ""
@@ -766,14 +762,21 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def _find_block_fold_close(self, start):
         end = start
         counter = 0
-        while end.userData().folding != PMXBlockUserData.FOLDING_STOP or counter !=  0:
-            if end.userData().folding == PMXBlockUserData.FOLDING_START:
-                counter += 1
-            elif end.userData().folding == PMXBlockUserData.FOLDING_STOP:
-                counter -= 1
-            end = end.next()
-            if not end.isValid():
-                return None
+        if self.syntax.indentSensitive:
+            level = start.userData().indentLevel
+            while end.userData().indentLevel <= level:
+                end = end.next()
+                if not end.isValid():
+                    return end.previous()
+        else:
+            while end.userData().folding != PMXBlockUserData.FOLDING_STOP or counter !=  0:
+                if end.userData().folding == PMXBlockUserData.FOLDING_START:
+                    counter += 1
+                elif end.userData().folding == PMXBlockUserData.FOLDING_STOP:
+                    counter -= 1
+                end = end.next()
+                if not end.isValid():
+                    return None
         return end
     
     def _find_block_fold_open(self, end):
@@ -880,17 +883,22 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         Indents text, it take cares of block selections.
         '''
-        block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
         cursor = self.textCursor()
+        start, end = cursor.selectionStart(), cursor.selectionEnd()
+        if start > end:
+            end, start = self.document().findBlock(start), self.document().findBlock(end)
+        else:
+            end, start = self.document().findBlock(end), self.document().findBlock(start)
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)
-        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count - 1)
-        new_cursor.movePosition(QTextCursor.StartOfBlock)
-        for _i in range(block_count):
+        while True:
+            new_cursor.setPosition(start.position())
             new_cursor.insertText(indentation)
-            new_cursor.movePosition(QTextCursor.NextBlock)
-        self.setTextCursor(cursor)
-        cursor.endEditBlock()
+            if start == end:
+                break
+            start = start.next()
+        del new_cursor
+        cursor.endEditBlock()        
 
     def unindent(self):
         cursor = self.textCursor()
