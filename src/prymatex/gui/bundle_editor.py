@@ -2,7 +2,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-from ui_bundle_editor import Ui_BundleEditor
+from ui_bundle_editor import Ui_bundleEditor
 import os, sys, re, plistlib
 from glob import glob
 from copy import copy, deepcopy
@@ -46,40 +46,20 @@ class myQSortFilterProxyModel(QSortFilterProxyModel):
         #print item.tipo
         #return 1
 
-class PMXBundleEditor(QWidget, Ui_BundleEditor, CenterWidget):
+class PMXBundleEditor(Ui_bundleEditor, QWidget):
     '''
         Primatex Bundle Editor
     '''
-    """
-    def __init__(self):
-        super(PMXSettingsDialog, self).__init__()
-        self.setupUi(self)
-        self.model = QStandardItemModel()
-        self.model = QStandardItemModel(self)
-        
-        self.proxy_model = QSortFilterProxyModel(self)
-        self.proxy_model.setSourceModel(self.model)
-        
-        self.treeView.setModel(self.proxy_model)
-        self.treeView.setModel(self.model)
-        self.treeView.widgetChanged.connect(self.changeWidget)
-        #self.model.setHeaderData(0, Qt.Horizontal, self.trUtf8("Option"))
-        self.stackLayout = QStackedLayout()
-        self.container.setLayout(self.stackLayout)
-        
-        self.lineFilter.textChanged.connect(self.filterItems)
-        
-        # Focus first item
-    """
-    
     def __init__(self):
         super(PMXBundleEditor, self).__init__()
         self.setupUi(self)
+        self.stackLayout = QStackedLayout()
         self.configSelectTop()
         self.configTreeView()
         self.connect(self.btn_apply, SIGNAL("clicked()"),self.onApply)
         self.connect(self.select_top, SIGNAL("currentIndexChanged(int)"), self.selectTopChange)
-
+        self.setWindowTitle(QApplication.translate("bundleEditor", "Bundle Editor", None, QApplication.UnicodeUTF8))
+        
 
     def selectTopChange(self, index):
         if index == 0:
@@ -124,13 +104,11 @@ class PMXBundleEditor(QWidget, Ui_BundleEditor, CenterWidget):
         self.treeView.setAnimated(True)
         
         
-        
     def setCentralWidget(self, objeto):
-        print objeto
+        pass
     
     def setStatusBar(self, objeto):
-        print objeto
-        
+        pass
 
     def onApply(self):
         #self.proxyModel.setFilterRegExp(QRegExp("Bundle|(b)|(s)|Syntax"))
@@ -274,7 +252,8 @@ class myModel(QAbstractItemModel):
 
     
     def setupModelData(self, filtro_tipo = None):
-        
+        pass
+        """
         self.rootItem = myTreeItem(None, "Bundles", None)
         self.parents = {0 : self.rootItem}
         
@@ -297,7 +276,8 @@ class myModel(QAbstractItemModel):
                         objeto = objetos[objeto_nombre]
                         item = myTreeItem(objeto, tipo, root_bundle_tipo)
                         root_bundle_tipo.appendChild(item)
-                        
+    """
+    
          
 
 
@@ -306,83 +286,4 @@ class myModel(QAbstractItemModel):
     
     
 
-LOS_BUNDLES = {}
-# //////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////
-class BundleItem(object):
-    def __init__(self, tipo, path, name):
-
-        self.tipo = tipo
-        self.path = path
-        self.name = name
-    
-    def __str__(self):
-        return self.name
-    
-    
-        
-# //////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////
-class Bundle(object):
-    
-    tipos = {'Syntax':{}, 'Snippet':{}, 'Macro':{}, 'Command':{},'Preference':{},'Template':{} }
-    
-    def __init__(self, path, info_plist):
-        
-        f_name, f_ext = os.path.splitext(os.path.split(path)[1])
-        self.name = f_name
-        self.path = path
-        self.info_plist = info_plist
-    
-    def __str__(self):
-        return self.name
-    
-    def populate(self):
-        
-        for tipo, path_relativo in BUNDLE_ELEMENTS:
-            
-            for internal_path in glob(os.path.join(self.path, path_relativo)):
-                   if os.path.isfile(internal_path):
-                       f_name, f_ext = os.path.splitext(os.path.split(internal_path)[1])
-                       self.tipos[tipo][f_name] = BundleItem(tipo, internal_path, f_name)
-
-
-
-# //////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////
-def load_bundles():
-    c=0
-    for path in glob(os.path.join(BUNDLES_DIRECTORY, '*')):
-        file = os.path.split(path)[1]
-        f_name, f_ext = os.path.splitext(file)
-        if f_ext == ".tmbundle" and os.path.exists(os.path.join(path, 'info.plist')):
-           
-            b = Bundle(path, os.path.join(path, 'info.plist'))
-            b.populate()
-            LOS_BUNDLES[f_name] = b
-        if(c == 10):
-            break
-        else:
-            c+=1
-    print LOS_BUNDLES
-            
-            
-
-def main(argv):
-    load_bundles()
-    app = QApplication(argv)
-    bundle_editor = PMXBundleEditor()
-    bundle_editor.show()
-    sys.exit(app.exec_())
-             
-            
-    
-    
-    
-if __name__ == '__main__':
-    sys.exit(main(sys.argv))
-    
     
