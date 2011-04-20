@@ -9,12 +9,15 @@
 
 #TODO: Importar el adaptador a sre de oniguruma y hacer que compile con re lo que pueda y con onig el resto
 
+import re
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, ENCODING_UTF8
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.score import PMXScoreManager
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, encoding = ENCODING_UTF8)
+
+SPLITLINES = re.compile('\n')
 
 class PMXSyntaxNode(object):
     def __init__(self, hash, syntax):
@@ -211,7 +214,7 @@ class PMXSyntax(PMXBundleItem):
             processor.startParsing(self.scopeName)
         stack = [[self.grammar, None]]
         string = string.encode('utf-8')
-        for line in string.splitlines():
+        for line in SPLITLINES.split(string):
             self.parseLine(stack, line, processor)
         if processor:
             processor.endParsing(self.scopeName)

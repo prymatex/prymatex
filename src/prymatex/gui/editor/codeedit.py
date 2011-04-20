@@ -316,19 +316,19 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
         key = event.key()
         
-        if key == Key_Tab:
+        if key == Qt.Key_Tab:
             self.tabPressEvent(event)
-        elif key == Key_Backtab:
-            self.self.backtabPressEvent(event)
-        elif key == Key_Backspace:
+        elif key == Qt.Key_Backtab:
+            self.backtabPressEvent(event)
+        elif key == Qt.Key_Backspace:
             self.backspacePressEvent(event)
-        elif key == Key_Return:
+        elif key == Qt.Key_Return:
             self.returnPressEvent(event)
         else:
             super(PMXCodeEdit, self).keyPressEvent(event)
         
         #Luego de tratar el evento
-        self.keyPressIndent()
+        self.keyPressIndent(event)
     
     def keyPressBundleItem(self, event):
         code = int(event.modifiers()) + event.key()
@@ -456,10 +456,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 snippets = PMXBundle.getTabTriggerItem(word, scope)
                 if len(snippets) > 1:
                     self.selectBundleItem(snippets, tabTrigger = True)
+                    return
                 elif snippets:
                     self.insertBundleItem(snippets[0], tabTrigger = True)
-            else:
-                cursor.insertText(self.tabKeyBehavior)
+                    return
+            cursor.insertText(self.tabKeyBehavior)
     
     #=======================================================================
     # Backtab Keyboard Events
@@ -496,12 +497,18 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.setSyntax(syntax)
         super(PMXCodeEdit, self).keyPressEvent(event)
         cursor = self.textCursor()
-        block = cursor.block().previous()
-        if block.userData().indentMark == PMXBlockUserData.INDENT_INCREASE:
-            indent = (block.userData().indentLevel + self.tabSize ) * u' ' if self.softTabs else (block.userData().indentLevel + self.tabSize ) * u'\t'
+        block = cursor.block()
+        prev = cursor.block().previous()
+        if prev.userData().indentMark == PMXBlockUserData.INDENT_INCREASE:
+            indent = (prev.userData().indentLevel + self.tabSize ) * u' ' if self.softTabs else (prev.userData().indentLevel + self.tabSize ) * u'\t'
             cursor.insertText(indent)
-        elif block.userData().indentMark == PMXBlockUserData.INDENT_NEXTLINE:
+        elif prev.userData().indentMark == PMXBlockUserData.INDENT_NEXTLINE:
             print "increasenext"
+        elif prev.userData().indentMark == PMXBlockUserData.UNINDENT:
+            cursor.setPosition(block.position())
+        elif prev.userData().indentMark == PMXBlockUserData.INDENT_DECREASE:
+            indent = (prev.userData().indentLevel + self.tabSize ) * u' ' if self.softTabs else (prev.userData().indentLevel + self.tabSize ) * u'\t'
+            cursor.insertText(indent)
         else:
             indent = block.userData().indentLevel * u' ' if self.softTabs else block.userData().indentLevel * u'\t' 
             cursor.insertText(indent)
@@ -514,10 +521,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         block = cursor.block()
         prev = block.previous()
-        if block.userData().indentMark == settings.INDENT_DECREASE and prev.isValid() and block.userData().indentLevel == prev.userData().indentLevel:
+        if block.userData().indentMark == PMXBlockUserData.INDENT_DECREASE and prev.isValid() and block.userData().indentLevel == prev.userData().indentLevel:
             self.unindent()
-        elif acction == settings.UNINDENT:
-            print "unident"
     
     #==========================================================================
     # BundleItems
