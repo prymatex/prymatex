@@ -62,9 +62,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
     TABTRIGGERSPLIT = re.compile(r"\w+|\W+", re.UNICODE)
     WORD = re.compile(r'\w+', re.UNICODE)
-    
-    fontMinSize = 6
-    fontMaxSize = 30
+        
     #=======================================================================
     # Settings, config
     #=======================================================================
@@ -104,13 +102,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def tabKeyBehavior(self):
         return self.softTabs and u' ' * self.tabSize or u'\t'
     
+    @property
+    def snippetMode(self):
+        return hasattr(self, 'snippet') and self.snippet != None
+    
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.sidebar = PMXSidebar(self)
         self.processor = PMXSyntaxProcessor(self)
         self.bookmarks = []
         self.folded = []
-        self.snippet = None
         
         # Actions performed when a key is pressed
         self.setupUi()
@@ -303,35 +304,31 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
         '''
-        #Check for snippet mode
-        event.ignore()
-        if self.snippet != None:
-            self.keyPressSnippetEvent(event)
-            if event.isAccepted():
+        #Si lo toma un bundle item o un snippet retorno
+        if self.snippetMode: #Modo Snippet
+            if self.keyPressBundleItem(event):
+                self.snippet = None
                 return
+            elif self.keyPressSnippet(event):
+                return
+        elif self.keyPressBundleItem(event): #Modo Normal
+            return
+        
+        key = event.key()
+        
+        if key == Key_Tab:
+            self.tabPressEvent(event)
+        elif key == Key_Backtab:
+            self.self.backtabPressEvent(event)
+        elif key == Key_Backspace:
+            self.backspacePressEvent(event)
+        elif key == Key_Return:
+            self.returnPressEvent(event)
         else:
-            self.keyPressBundleItem(event)
-            if event.isAccepted():
-                return
+            super(PMXCodeEdit, self).keyPressEvent(event)
         
-        KEYEVENT_HANDLERS = {
-            Qt.Key_Tab: [self.eventKeyTabBundleItem, self.eventKeyTabIndent],
-            Qt.Key_Backtab: [self.eventKeyBacktabUnindent],
-            Qt.Key_Backspace:  [self.eventKeyBackspaceSmartTyping],
-            Qt.Key_Return: [self.eventKeyReturnSyntax], #, self.eventKeyReturnIndent
-            ANYKEY: [self.eventKeyAnyIndent, self.eventKeyAnySmartTyping]
-        } 
-
-        handlers = KEYEVENT_HANDLERS[event.key()] if event.key() in KEYEVENT_HANDLERS else KEYEVENT_HANDLERS[ANYKEY]
-        
-        for handler in handlers:
-            handler(event)
-            if event.isAccepted():
-                return
-                
-        super(PMXCodeEdit, self).keyPressEvent(event)
-        
-        #Cosas luego del evento
+        #Luego de tratar el evento
+        self.keyPressIndent()
     
     def keyPressBundleItem(self, event):
         code = int(event.modifiers()) + event.key()
@@ -342,9 +339,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.selectBundleItem(items)
             else:
                 self.insertBundleItem(items[0])
-            event.accept()
-            
-    def keyPressSnippetEvent(self, event):
+            return True
+        return False
+
+    def keyPressSnippet(self, event):
         key = event.key()
         cursor = self.textCursor()
         
@@ -352,7 +350,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             (index, holder) = self.snippet.setDefaultHolder(cursor.position())
             if holder == None:
                 self.snippet = None
-                return
+                return False
             if key == Qt.Key_Tab:
                 holder = self.snippet.next()
             else:
@@ -364,7 +362,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(index)
                 cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
             self.setTextCursor(cursor)
-            event.accept()
         elif key == Qt.Key_Backspace or key == Qt.Key_Delete:
             starts = self.snippet.starts
             ends = self.snippet.ends
@@ -372,7 +369,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
                 if holder == None:
                     self.snippet = None
-                    return
+                    return False
                 holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
                 position = cursor.selectionStart()
             else:
@@ -382,7 +379,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                     (index, holder) = self.snippet.setDefaultHolder(cursor.position())
                 if holder == None:
                     self.snippet = None
-                    return
+                    return False
                 if key == Qt.Key_Delete:
                     holder.remove(cursor.position() - index, cursor.position() - index + 1)
                     position = cursor.position()
@@ -397,7 +394,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
-            event.accept()
         elif 0x20 <= key <= 0x7E: #Para latin poner otra cosa
             starts = self.snippet.starts
             ends = self.snippet.ends
@@ -405,14 +401,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
                 if holder == None or holder.last:
                     self.snippet = None
-                    return
+                    return False
                 holder.remove(cursor.selectionStart() - index, cursor.selectionEnd() - index)
                 position = cursor.selectionStart()
             else:
                 (index, holder) = self.snippet.setDefaultHolder(cursor.position())
                 if holder == None or holder.last:
                     self.snippet = None
-                    return
+                    return False
                 position = cursor.position()
             holder.insert(unicode(event.text()), position - index)
             position += holder.position() - index + 1
@@ -422,116 +418,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
-            event.accept()
+        return True
     
-    #=======================================================================
-    # Tab Keyboard Events
-    #=======================================================================
-    
-    def eventKeyTabBundleItem(self, event):
-        scope = self.getCurrentScope()
-        word, index = self.getCurrentWordAndIndex()
-        #TODO: Ver si va a tener scope o no
-        # if index is end of word
-        if len(word) == index and (scope or word):
-            snippets = PMXBundle.getTabTriggerItem(word, scope)
-            if len(snippets) > 1:
-                self.selectBundleItem(snippets, tabTrigger = True)
-                event.accept()
-            elif snippets:
-                self.insertBundleItem(snippets[0], tabTrigger = True)
-                event.accept()
-    
-    def eventKeyTabIndent(self, event):
-        cursor = self.textCursor()
-        if cursor.hasSelection():
-            self.indent(self.tabKeyBehavior)
-        else:
-            cursor.insertText(self.tabKeyBehavior)
-        event.accept()
-    
-    #=======================================================================
-    # Backtab Keyboard Events
-    #=======================================================================
-    
-    def eventKeyBacktabUnindent(self, event):
-        self.unindent()
-        event.accept()
-    
-    #=======================================================================
-    # Backspace Keyboard Events
-    #=======================================================================
-    def eventKeyBackspaceSmartTyping(self, key_event):
-        cursor = self.textCursor()
-        if not cursor.hasSelection():
-            doc = self.document()
-            scope = self.getCurrentScope()
-            preferences = PMXBundle.getPreferenceSettings(scope)
-            if preferences.smartTypingPairs:
-                character = doc.characterAt(cursor.position() - 1).toAscii()
-                pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
-                if pairs and pairs[0][0] == character and doc.characterAt(cursor.position()).toAscii() == pairs[0][1]:
-                    cursor.deleteChar()
-                elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2).toAscii() == pairs[0][0]:
-                    cursor.deletePreviousChar()
-    
-    #=======================================================================
-    # Return Keyboard Events
-    #=======================================================================
-    
-    def eventKeyReturnSyntax(self, event):
-        line = unicode(self.textCursor().block().text())
-        if self.document().blockCount() == 1:
-            syntax = PMXSyntax.findSyntaxByFirstLine(line)
-            if syntax != None:
-                self.setSyntax(syntax)
-    
-    def eventKeyReturnIndent(self, event):
-        line = unicode(self.textCursor().block().text())
-        scope = self.getCurrentScope()
-        settings = PMXBundle.getPreferenceSettings(scope)
-        acction = settings.indent(line)
-        indentation = self.indentationWhitespace(line)
-        if acction == settings.INDENT_INCREASE:
-            print "increase"
-            super(PMXCodeEdit, self).keyPressEvent(event)
-            self.increaseIndent(indentation)
-        elif acction == settings.INDENT_NEXTLINE:
-            print "increasenext"
-            super(PMXCodeEdit, self).keyPressEvent(event)
-            self.increaseIndent(indentation)
-        else:
-            super(PMXCodeEdit, self).keyPressEvent(event)
-            self.indent(indentation)
-        event.accept()
-    
-    #=======================================================================
-    # Other Keyboard Events
-    #=======================================================================
-    
-    def eventKeyAnyIndent(self, key_event):
-        key = key_event.key()
-        if not (0 <= key <= 256):
-            return False
-        character = chr(key)
-        cursor = self.textCursor()
-        current_line = unicode(cursor.block().text()) + character
-        scope = self.getCurrentScope()
-        settings = PMXBundle.getPreferenceSettings(scope)
-        acction = settings.indent(current_line)
-        if acction == settings.INDENT_DECREASE:
-            previous_block = cursor.block().previous()
-            if previous_block:
-                current_indentation = self.indentationWhitespace(current_line)
-                previous_indentation = self.indentationWhitespace(previous_block.text())
-                if current_indentation == previous_indentation:
-                    self.unindent()
-                    return True
-        elif acction == settings.UNINDENT:
-            print "unident"
-        return False
-    
-    def eventKeyAnySmartTyping(self, event):
+    def keyPressSmartTyping(self, event):
         cursor = self.textCursor()
         character = unicode(event.text())
         scope = self.getCurrentScope()
@@ -550,8 +439,86 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.insertText(pairs[0][1])
                 cursor.setPosition(position + 1)
             self.setTextCursor(cursor)
-            event.accept()
 
+    #=======================================================================
+    # Tab Keyboard Events
+    #=======================================================================
+    def tabPressEvent(self, event):
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            self.indent(self.tabKeyBehavior)
+        else:
+            scope = self.getCurrentScope()
+            word, index = self.getCurrentWordAndIndex()
+            #TODO: Ver si va a tener scope o no
+            # if index is end of word
+            if len(word) == index and (scope or word):
+                snippets = PMXBundle.getTabTriggerItem(word, scope)
+                if len(snippets) > 1:
+                    self.selectBundleItem(snippets, tabTrigger = True)
+                elif snippets:
+                    self.insertBundleItem(snippets[0], tabTrigger = True)
+            else:
+                cursor.insertText(self.tabKeyBehavior)
+    
+    #=======================================================================
+    # Backtab Keyboard Events
+    #=======================================================================
+    def backtabPressEvent(self, event):
+        self.unindent()
+
+    #=======================================================================
+    # Backspace Keyboard Events
+    #=======================================================================
+    def backspacePressEvent(self, event):
+        cursor = self.textCursor()
+        if not cursor.hasSelection():
+            doc = self.document()
+            scope = self.getCurrentScope()
+            preferences = PMXBundle.getPreferenceSettings(scope)
+            if preferences.smartTypingPairs:
+                character = doc.characterAt(cursor.position() - 1).toAscii()
+                pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
+                if pairs and pairs[0][0] == character and doc.characterAt(cursor.position()).toAscii() == pairs[0][1]:
+                    cursor.deleteChar()
+                elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2).toAscii() == pairs[0][0]:
+                    cursor.deletePreviousChar()
+        super(PMXCodeEdit, self).keyPressEvent(event)
+    
+    #=======================================================================
+    # Return Keyboard Events
+    #=======================================================================
+    def returnPressEvent(self, event):
+        line = unicode(self.textCursor().block().text())
+        if self.document().blockCount() == 1:
+            syntax = PMXSyntax.findSyntaxByFirstLine(line)
+            if syntax != None:
+                self.setSyntax(syntax)
+        super(PMXCodeEdit, self).keyPressEvent(event)
+        cursor = self.textCursor()
+        block = cursor.block().previous()
+        if block.userData().indentMark == PMXBlockUserData.INDENT_INCREASE:
+            indent = (block.userData().indentLevel + self.tabSize ) * u' ' if self.softTabs else (block.userData().indentLevel + self.tabSize ) * u'\t'
+            cursor.insertText(indent)
+        elif block.userData().indentMark == PMXBlockUserData.INDENT_NEXTLINE:
+            print "increasenext"
+        else:
+            indent = block.userData().indentLevel * u' ' if self.softTabs else block.userData().indentLevel * u'\t' 
+            cursor.insertText(indent)
+    
+    #=======================================================================
+    # After Keyboard Events
+    #=======================================================================
+    
+    def keyPressIndent(self, event):
+        cursor = self.textCursor()
+        block = cursor.block()
+        prev = block.previous()
+        if block.userData().indentMark == settings.INDENT_DECREASE and prev.isValid() and block.userData().indentLevel == prev.userData().indentLevel:
+            self.unindent()
+        elif acction == settings.UNINDENT:
+            print "unident"
+    
     #==========================================================================
     # BundleItems
     #==========================================================================
@@ -559,6 +526,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def insertBundleItem(self, item, tabTrigger = False, indent = True):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
+        print "Bundle %s Item %s, ( %s )" % (item.bundle.name, item.name, item.hash)
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         indentation = indent and self.indentationWhitespace(line) or ""
@@ -766,14 +734,21 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def _find_block_fold_close(self, start):
         end = start
         counter = 0
-        while end.userData().folding != PMXBlockUserData.FOLDING_STOP or counter !=  0:
-            if end.userData().folding == PMXBlockUserData.FOLDING_START:
-                counter += 1
-            elif end.userData().folding == PMXBlockUserData.FOLDING_STOP:
-                counter -= 1
-            end = end.next()
-            if not end.isValid():
-                return None
+        if self.syntax.indentSensitive:
+            level = start.userData().indentLevel
+            while end.userData().indentLevel <= level:
+                end = end.next()
+                if not end.isValid():
+                    return end.previous()
+        else:
+            while end.userData().folding != PMXBlockUserData.FOLDING_STOP or counter !=  0:
+                if end.userData().folding == PMXBlockUserData.FOLDING_START:
+                    counter += 1
+                elif end.userData().folding == PMXBlockUserData.FOLDING_STOP:
+                    counter -= 1
+                end = end.next()
+                if not end.isValid():
+                    return None
         return end
     
     def _find_block_fold_open(self, end):
@@ -832,11 +807,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #===========================================================================
     # Zoom
     #===========================================================================
-    
+    FONT_MAX_SIZE = 32
+    FONT_MIN_SIZE = 6
     def zoomIn(self):
         font = self.font
         size = self.font.pointSize()
-        if size < self.fontMaxSize:
+        if size < self.FONT_MAX_SIZE:
             size += 2
             font.setPointSize(size)
         self.font = font
@@ -844,7 +820,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def zoomOut(self):
         font = self.font
         size = font.pointSize()
-        if size > self.fontMinSize:
+        if size > self.FONT_MIN_SIZE:
             size -= 2
             font.setPointSize(size)
         self.font = font
@@ -880,17 +856,22 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         Indents text, it take cares of block selections.
         '''
-        block_count = self.selectionBlockEnd() - self.selectionBlockStart() + 1
         cursor = self.textCursor()
+        start, end = cursor.selectionStart(), cursor.selectionEnd()
+        if start > end:
+            end, start = self.document().findBlock(start), self.document().findBlock(end)
+        else:
+            end, start = self.document().findBlock(end), self.document().findBlock(start)
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)
-        new_cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor, block_count - 1)
-        new_cursor.movePosition(QTextCursor.StartOfBlock)
-        for _i in range(block_count):
+        while True:
+            new_cursor.setPosition(start.position())
             new_cursor.insertText(indentation)
-            new_cursor.movePosition(QTextCursor.NextBlock)
-        self.setTextCursor(cursor)
-        cursor.endEditBlock()
+            if start == end:
+                break
+            start = start.next()
+        del new_cursor
+        cursor.endEditBlock()        
 
     def unindent(self):
         cursor = self.textCursor()
@@ -928,19 +909,3 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(position)
                 self.setTextCursor(cursor)
                 cursor.endEditBlock()
-
-    MAX_FONT_POINT_SIZE = 32
-    MIN_FONT_POINT_SIZE = 6
-    
-    @property
-    def font_size(self):
-        font = self.font()
-        pt_size = font.pointSize()
-        return pt_size
-
-    @font_size.setter
-    def font_size(self, value):
-        font = self.font()
-        font.setPointSize(value)
-        self.setFont(font)
-        

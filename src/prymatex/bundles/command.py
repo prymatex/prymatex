@@ -75,7 +75,6 @@ class PMXCommand(PMXBundleItem):
             input, text = switch(self.standardInput)
         return input, unicode(text).encode("utf-8")
 
-
     def formatError(self, output, exit_code):
         from prymatex.lib.pathutils import make_hyperlinks
         html = '''

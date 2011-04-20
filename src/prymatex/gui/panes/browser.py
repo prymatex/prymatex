@@ -1,15 +1,17 @@
 import codecs
 
 from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant, SIGNAL
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-
+from PyQt4.QtNetwork import QNetworkProxy
+import os
 from prymatex.gui.panes import PaneDockBase
 from prymatex.gui.panes.ui_browser import Ui_BrowserPane
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
+from prymatex.core.config import pmxConfigPorperty
 
 #http://diotavelli.net/PyQtWiki/SampleCode
 '''
@@ -78,7 +80,12 @@ class NetworkAccessManager(QNetworkAccessManager, PMXObject):
 js = """
 TextMate.system = function(command, callback) {
     this._system(command);
-    return _systemWrapper;
+    if (callback == null) {
+        _systemWrapper.close();
+        return null;
+    } else {
+        return _systemWrapper;
+    }
 }
 """
 
@@ -90,17 +97,29 @@ class SystemWrapper(QObject):
     
     @pyqtSignature("write(int)")
     def write(self, flags):
-        pass
+        self.process.stdin.write()
     
+    @pyqtSignature("write(int)")
+    def read(self, flags):
+        self.process.stdin.close()
+        text = self.process.stdout.read()
+        self.process.stdout.close()
+        self.process.wait()
+        deleteFile(self.temp_file)
+        return text
+        
     @pyqtSignature("close()")
     def close(self):
-        pass
+        self.process.stdin.close()
+        self.process.stdout.close()
+        self.process.wait()
+        deleteFile(self.temp_file)
 
     def outputString(self):
         self.process.stdin.close()
         text = self.process.stdout.read()
         self.process.stdout.close()
-        exit_code = self.process.wait()
+        self.process.wait()
         deleteFile(self.temp_file)
         return text
     outputString = pyqtProperty("QString", outputString)
@@ -123,7 +142,10 @@ class TextMate(QObject):
         return True
     isBusy = pyqtProperty("bool", isBusy)
     
-class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
+class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
+    class Meta:
+        settings = 'browser'
+        
     def __init__(self, parent):
         PaneDockBase.__init__(self, parent)
         self.setupUi(self)
@@ -135,6 +157,7 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
         self.bundleItem = None
         title = unicode(self.trUtf8("%s (press Esc to close)")) % self.windowTitle()
         self.setWindowTitle(title)
+        self.configure()
         
     def prepareJavaScript(self, ready):
         if not ready:
@@ -150,3 +173,40 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane):
     def keyPressEvent(self, key_event):
         if key_event.key() == Qt.Key_Escape:
             self.hide()
+    
+    
+    ENVIROMENT_PROXY = '__ENVIROMENT_PROXY__'
+    
+    @property
+    def env_proxy(self):
+        return os.environ.get('http_proxy', '')
+    
+    @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
+    def proxy(self, value):
+        '''
+        System wide proxy
+        '''
+        if value == self.ENVIROMENT_PROXY:
+            value = self.env_proxy
+        
+        proxy_url = QUrl(value)    
+        if not value:
+            network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
+        else:
+            protocol = QNetworkProxy.NoProxy
+            if unicode(proxy_url.scheme()).startswith('http'):
+                protocol = QNetworkProxy.HttpProxy
+            else:
+                protocol = QNetworkProxy.Socks5Proxy
+                
+            network_proxy = QNetworkProxy(
+                                        protocol,
+                                        proxy_url.host(),
+                                        proxy_url.port(),
+                                        proxy_url.userName(),
+                                        proxy_url.password()
+                                        )
+                          
+        QNetworkProxy.setApplicationProxy( network_proxy )
+                                          
+            

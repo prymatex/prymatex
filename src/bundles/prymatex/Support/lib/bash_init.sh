@@ -1,6 +1,20 @@
 unset BASH_ENV # avoid recursively running this script
 export LC_CTYPE="en_US.UTF-8"
 
+: ${TM_BASH_INIT:=$HOME/Library/Application Support/TextMate/bash_init.sh}
+if [ ! -f "$TM_BASH_INIT" ]; then
+
+	# First read the system-wide profile
+	[ -f /etc/profile ] && . /etc/profile               &>/dev/null
+
+	# Now find the first local profile, just like a normal login shell
+	if   [ -f ~/.bash_profile ]; then . ~/.bash_profile &>/dev/null
+	elif [ -f ~/.bash_login ];   then . ~/.bash_login   &>/dev/null
+	elif [ -f ~/.profile ];      then . ~/.profile      &>/dev/null
+	fi
+
+fi
+
 set +u # avoid warning when we use unset variables (if user had ‘set -u’ in his profile)
 
 if [[ -d "$TM_SUPPORT_PATH/bin" ]]; then
@@ -16,7 +30,6 @@ fi
 
 export PATH
 
-: ${TM_BASH_INIT:=$HOME/Library/Application Support/TextMate/bash_init.sh}
 if [[ -f "$TM_BASH_INIT" ]]; then
 	. "$TM_BASH_INIT"
 fi
@@ -33,8 +46,8 @@ export RUBYLIB="${RUBYLIB:+$RUBYLIB:}$TM_SUPPORT_PATH/lib"
 #Aliases functions
 open() { xdg-open "$1"; }
 #For xclip
-pbcopy () { xclip -selection clipboard "$1"; }
-pbpaste() { xclip -selection clipboard -o "$1"; }
+pbcopy () { echo "$1" | xclip; }
+pbpaste() { xclip -o; }
 
 #textmate_init () {
 #	[[ "$1" != / && "$1" != ~ ]] && textmate_init "$(dirname "$1")"

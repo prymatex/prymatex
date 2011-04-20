@@ -58,7 +58,7 @@ class PMXObject(QObject):
         return sender
 
     def connectEventsByName(self):
-        pass
+        raise NotImplementedError("Not implemented error")
     
     @property
     def mainWindow(self):

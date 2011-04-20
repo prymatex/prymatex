@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/bundle_editor.ui'
 #
-# Created: Tue Apr 19 21:38:34 2011
+# Created: Wed Apr 20 12:52:21 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -99,7 +99,7 @@ class Ui_bundleEditor(object):
         QtCore.QMetaObject.connectSlotsByName(bundleEditor)
 
     def retranslateUi(self, bundleEditor):
-        bundleEditor.setWindowTitle(QtGui.QApplication.translate("bundleEditor", "Form", None, QtGui.QApplication.UnicodeUTF8))
+        bundleEditor.setWindowTitle(QtGui.QApplication.translate("bundleEditor", "Bundle Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.select_top.setItemText(0, QtGui.QApplication.translate("bundleEditor", "Select All", None, QtGui.QApplication.UnicodeUTF8))
         self.select_top.setItemText(1, QtGui.QApplication.translate("bundleEditor", "Hide All", None, QtGui.QApplication.UnicodeUTF8))
         self.btn_new_bundle.setText(QtGui.QApplication.translate("bundleEditor", "+", None, QtGui.QApplication.UnicodeUTF8))

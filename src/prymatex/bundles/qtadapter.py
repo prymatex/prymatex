@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from PyQt4.Qt import QTextCharFormat, QColor, QFont, QKeySequence, Qt
+try:
+    from PyQt4.Qt import QTextCharFormat, QColor, QFont, QKeySequence, Qt
+except:
+    from prymatex.bundles.qtmock import Qt, QKeySequence
 from prymatex.bundles.modmap import get_keymap_table
-
-
 '''
     caret, foreground, selection, invisibles, lineHighlight, gutter, background
     * Meta -> (cinta de 4 esquinas) -> arroba (@)
