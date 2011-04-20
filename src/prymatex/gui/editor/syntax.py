@@ -32,7 +32,7 @@ class PMXBlockUserData(QTextBlockUserData):
         self.foldingLevel = 0
         #self.foldingPeer = None
         self.folded = False
-        self.indent = self.INDENT_NONE
+        self.indentMark = self.INDENT_NONE
         self.indentLevel = 0
     
     def __nonzero__(self):
@@ -144,7 +144,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 
     def indentMarker(self, line, scope):
         settings = PMXBundle.getPreferenceSettings(scope)
-        self.userData.indent = settings.indent(line)
+        self.userData.indentMark = settings.indent(line)
         if self.syntax.indentSensitive and line.strip() == "":
             prev = self.currentBlock().previous()
             self.userData.indentLevel = prev.userData().indentLevel if prev.isValid() else 0

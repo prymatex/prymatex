@@ -1,5 +1,8 @@
 import os, stat, tempfile
-from prymatex.core.config import PMX_SUPPORT_PATH
+try:
+    from prymatex.core.config import PMX_SUPPORT_PATH
+except:
+    PMX_SUPPORT_PATH = "/"
 
 DIALOG = PMX_SUPPORT_PATH + '/bin/CocoaDialog.app/Contents/MacOS/CocoaDialog'
 

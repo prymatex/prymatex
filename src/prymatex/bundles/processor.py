@@ -50,4 +50,37 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
 
     def endParsing(self, name):
         print '}%s' % name
-        
+
+class PMXCommandProcessor(object):
+    '''
+        Syntax Processor, clase base para los procesadores de sintaxis
+    '''
+    def __init__(self):
+        pass
+
+    # Inputs
+    def getDocument(self):
+        pass
+    def getCharacter(self):
+        pass
+    def getDocument(self):
+        pass
+    # Outpus function
+    def discard(self):
+        pass
+    def replaceSelectedText(self):
+        pass
+    def replaceDocument(self):
+        pass
+    def insertText(self):
+        pass
+    def afterSelectedText(self):
+        pass
+    def insertAsSnippet(self):
+        pass
+    def showAsHTML(self):
+        pass
+    def showAsTooltip(self):
+        pass
+    def createNewDocument(self):
+        pass

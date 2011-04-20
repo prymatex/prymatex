@@ -271,16 +271,16 @@ class PMXBundleItem(object):
 #----------------------------------------
 def test_snippets():
     #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('Python')
+    bundle = PMXBundle.getBundleByName('HTML')
     errors = 0
     #for bundle in PMXBundle.BUNDLES.values():
     for snippet in bundle.snippets:
         try:
-            #if snippet.name.startswith("Itemize Lines"):
+            if snippet.name.startswith("Special:"):
             #if snippet.name.startswith("belongs_to"):
                 snippet.compile()
                 snippet.resolve(indentation = "",
-                                tabreplacement = "    ",
+                                tabreplacement = "----",
                                 environment = {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "uno\tdos\tcuatro\t"})
                 print "-" * 10, " Bundle ", bundle.name, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 10
                 print snippet.path
@@ -377,6 +377,6 @@ def test_queryItems():
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
-    for file in glob(os.path.join('', '*')):
+    for file in glob(os.path.join('/home/dvanhaaster/workspace/prymatex/src/bundles/prymatex/Bundles', '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_queryItems()
+    test_snippets()
