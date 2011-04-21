@@ -57,6 +57,8 @@ class PMXFindBox(QComboBox):
     def showEvent(self, event):
         super(PMXFindBox, self).showEvent(event)
         self.setStyleSheet(self.STYLE_NORMAL)
+        self.setEditText(self.textEdit.textCursor().selectedText())
+        #self.setCu
     
     @property
     def regexp(self):
@@ -82,8 +84,10 @@ class PMXFindBox(QComboBox):
         '''
         Perofrms text searches
         '''
+        
         if text is None:
             text = self.currentText()
+            
         if text.length() == 0:
             self.setStyleSheet(self.STYLE_NORMAL)
             return
@@ -112,7 +116,6 @@ class PMXFindBox(QComboBox):
         #print "Matches for '%s' are %d" % (text, len(found_cursors))
         
     def findNext(self):
-        print "findNext"
         cursor = self.textEdit.document().find(self.regexp, self.textEdit.textCursor(), self.flags)
         if cursor.isNull():
             cursor = self.textEdit.textCursor()
@@ -123,7 +126,6 @@ class PMXFindBox(QComboBox):
             self.textEdit.setTextCursor(cursor)
     
     def findPrevious(self):
-        print "findPrevious" 
         cursor = self.textEdit.document().find(self.regexp, self.textEdit.textCursor(), self.flags | QTextDocument.FindBackward)
         if cursor.isNull():
             cursor = self.textEdit.textCursor()

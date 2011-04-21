@@ -83,7 +83,7 @@ class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
         try:
             font = self.settings.font
         except Exception, _e:
-            print "Can't get settings font"
+            #print "Can't get settings font"
             font = QFont()
         self.lineFont.setFont(font)
         self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
