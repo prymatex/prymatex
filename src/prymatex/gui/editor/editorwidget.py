@@ -96,6 +96,16 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         # Show
         self.goToLineWidget.showed.connect(self.syncGoToLinePosition)
         
+        self.comboFind.setTextEdit(self.codeEdit)
+        self.comboFind.findMatchCountChanged.connect(self.updateMatchLabel)
+        
+        self.actionCaseSensitive.toggled.connect(self.comboFind.setCaseSensitive)
+        self.actionRegex.triggered.connect(self.comboFind.setRegex)
+        self.actionWholeWord.toggled.connect(self.comboFind.setWholeWord)
+
+        self.pushFindNext.pressed.connect(self.comboFind.findNext)
+        self.pushFindPrevious.pressed.connect(self.comboFind.findPrevious)
+        
     def releaseFile(self):
         print "Release file"
         
@@ -352,6 +362,10 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def syncGoToLinePosition(self):
         lineno = self.codeEdit.textCursor().blockNumber()
         self.spinLineNumbers.setValue(lineno + 1)
+    
+    def updateMatchLabel(self, match_count):
+        label_text = unicode(self.trUtf8("%d matches")) % match_count
+        self.labelMatchCounter.setText(label_text)
     
     #===========================================================================
     # Callbacks

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>715</width>
+    <width>788</width>
     <height>482</height>
    </rect>
   </property>
@@ -129,7 +129,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QPushButton" name="pushReplace">
+       <widget class="QPushButton" name="pushFindNext">
         <property name="font">
          <font>
           <family>Nimbus Mono L</family>
@@ -167,7 +167,7 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="0" column="6">
+      <item row="0" column="7">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -180,7 +180,7 @@ p, li { white-space: pre-wrap; }
         </property>
        </spacer>
       </item>
-      <item row="0" column="7">
+      <item row="0" column="8">
        <widget class="QPushButton" name="pushCloseFindreplace">
         <property name="text">
          <string/>
@@ -271,6 +271,13 @@ p, li { white-space: pre-wrap; }
        <widget class="PMXReplaceBox" name="comboReplace">
         <property name="editable">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QLabel" name="labelMatchCounter">
+        <property name="text">
+         <string>0 matches</string>
         </property>
        </widget>
       </item>

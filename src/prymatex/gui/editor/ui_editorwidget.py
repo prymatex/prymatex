@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/editorwidget.ui'
 #
-# Created: Tue Apr 19 12:05:35 2011
+# Created: Thu Apr 21 17:47:45 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_EditorWidget(object):
     def setupUi(self, EditorWidget):
         EditorWidget.setObjectName("EditorWidget")
-        EditorWidget.resize(715, 482)
+        EditorWidget.resize(788, 482)
         self.verticalLayout = QtGui.QVBoxLayout(EditorWidget)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -71,19 +71,19 @@ class Ui_EditorWidget(object):
         self.pushFindPrevious.setIcon(icon2)
         self.pushFindPrevious.setObjectName("pushFindPrevious")
         self.gridLayout.addWidget(self.pushFindPrevious, 0, 3, 1, 1)
-        self.pushReplace = QtGui.QPushButton(self.findreplaceWidget)
+        self.pushFindNext = QtGui.QPushButton(self.findreplaceWidget)
         font = QtGui.QFont()
         font.setFamily("Nimbus Mono L")
         font.setWeight(75)
         font.setBold(True)
-        self.pushReplace.setFont(font)
-        self.pushReplace.setText("")
+        self.pushFindNext.setFont(font)
+        self.pushFindNext.setText("")
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(":/actions/resources/actions/go-next.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushReplace.setIcon(icon3)
-        self.pushReplace.setAutoDefault(True)
-        self.pushReplace.setObjectName("pushReplace")
-        self.gridLayout.addWidget(self.pushReplace, 0, 4, 1, 1)
+        self.pushFindNext.setIcon(icon3)
+        self.pushFindNext.setAutoDefault(True)
+        self.pushFindNext.setObjectName("pushFindNext")
+        self.gridLayout.addWidget(self.pushFindNext, 0, 4, 1, 1)
         self.pushOptions = QtGui.QPushButton(self.findreplaceWidget)
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(":/actions/resources/actions/configure.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -91,13 +91,13 @@ class Ui_EditorWidget(object):
         self.pushOptions.setObjectName("pushOptions")
         self.gridLayout.addWidget(self.pushOptions, 0, 5, 1, 1)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout.addItem(spacerItem1, 0, 6, 1, 1)
+        self.gridLayout.addItem(spacerItem1, 0, 7, 1, 1)
         self.pushCloseFindreplace = QtGui.QPushButton(self.findreplaceWidget)
         self.pushCloseFindreplace.setText("")
         self.pushCloseFindreplace.setIcon(icon1)
         self.pushCloseFindreplace.setFlat(True)
         self.pushCloseFindreplace.setObjectName("pushCloseFindreplace")
-        self.gridLayout.addWidget(self.pushCloseFindreplace, 0, 7, 1, 1)
+        self.gridLayout.addWidget(self.pushCloseFindreplace, 0, 8, 1, 1)
         self.labelReplaceWith = QtGui.QLabel(self.findreplaceWidget)
         self.labelReplaceWith.setObjectName("labelReplaceWith")
         self.gridLayout.addWidget(self.labelReplaceWith, 1, 0, 1, 1)
@@ -134,6 +134,9 @@ class Ui_EditorWidget(object):
         self.comboReplace.setEditable(True)
         self.comboReplace.setObjectName("comboReplace")
         self.gridLayout.addWidget(self.comboReplace, 1, 2, 1, 1)
+        self.labelMatchCounter = QtGui.QLabel(self.findreplaceWidget)
+        self.labelMatchCounter.setObjectName("labelMatchCounter")
+        self.gridLayout.addWidget(self.labelMatchCounter, 0, 6, 1, 1)
         self.verticalLayout.addWidget(self.findreplaceWidget)
 
         self.retranslateUi(EditorWidget)
@@ -150,7 +153,7 @@ class Ui_EditorWidget(object):
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Find Previous</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushReplace.setToolTip(QtGui.QApplication.translate("EditorWidget", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        self.pushFindNext.setToolTip(QtGui.QApplication.translate("EditorWidget", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
@@ -163,6 +166,7 @@ class Ui_EditorWidget(object):
 "</style></head><body style=\" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Replace &amp; Find Previous</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.pushReplaceAll.setText(QtGui.QApplication.translate("EditorWidget", "Replace &All", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelMatchCounter.setText(QtGui.QApplication.translate("EditorWidget", "0 matches", None, QtGui.QApplication.UnicodeUTF8))
 
 from codeedit import PMXCodeEdit
 from internalwidgets import PMXReplaceBox, PMXRefocusWidget, PMXFindBox, PMXSpinGoToLine
