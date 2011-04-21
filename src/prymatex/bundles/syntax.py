@@ -278,6 +278,7 @@ class PMXSyntax(PMXBundleItem):
         return position
     
     def folding(self, line):
+        line = line.encode('utf-8')
         fold = self.FOLDING_NONE
         start_match = self.foldingStartMarker.search(line) if self.foldingStartMarker != None else None
         stop_match = self.foldingStopMarker.search(line) if self.foldingStopMarker != None else None
