@@ -22,6 +22,9 @@ def get_prymatex_user_path():
     return path
 
 def build_prymatex_profile(path):
+    '''
+    @see: PMXObject.pmxApp.getProfilePath(what, file)
+    '''
     makedirs(path)
     makedirs(join(path, 'tmp'))
     makedirs(join(path, 'log'))

@@ -324,6 +324,21 @@ class PMXApplication(QApplication):
             f = open(self.lock_filename, 'w')
             f.write('%s' % getpid())
             f.close()
+    
+    def getProfilePath(self, what, filename):
+        '''
+        Example
+        
+        self.getProfilePath('tmp', 'log.log')
+        
+        '''
+        from prymatex.core.config import get_prymatex_user_path
+        path = get_prymatex_user_path()
+        final_path =os.path.abspath(os.path.join(path, what))
+        if not os.path.exists(final_path):
+            os.makedirs(final_path, 0700)
+        return os.path.join(final_path, filename)
+        
             
     def startDirectory(self):
         '''
