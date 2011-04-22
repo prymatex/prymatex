@@ -68,13 +68,8 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.setupUi(self)
         
         self.setupFindReplaceWidget()
+        self.setupGoToLineWidget()
         
-        self.codeEdit.addAction(self.actionFind)
-        self.codeEdit.addAction(self.actionReplace)
-
-        # Hide some widgets
-        self.findReplaceWidget.hide()
-        self.goToLineWidget.hide()
         
         self.file = pmx_file
         
@@ -83,35 +78,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.codeEdit.setPlainText(self.file.read() or '')
         self.destroyed.connect(self.releaseFile)
         
-        self.codeEdit.blockCountChanged.connect(self.blockCountChanged)
-        linecount = self.codeEdit.blockCount()
-        #print linecount
-        self.spinLineNumbers.setMaximum(linecount)
-        self.spinLineNumbers.valueChanged.connect(self.moveCursorToLine)
         
-        # Hide 
-        self.spinLineNumbers.editionFinished.connect(self.goToLineWidget.hide)
-        self.comboFind.editionFinished.connect(self.findReplaceWidget.hide)
-        self.comboReplace.editionFinished.connect(self.findReplaceWidget.hide)
         
-        # Show
-        self.goToLineWidget.showed.connect(self.syncGoToLinePosition)
         
-        # Find/Replace Widget logic
-        #self.comboFind.setTextEdit(self.codeEdit)
-        self.findReplaceWidget.setTextEdit(self.codeEdit)
-        self.comboFind.findRequested.connect(self.findReplaceWidget.findFirstTime)
-        self.comboFind.findNextRequested.connect(self.findReplaceWidget.findNext)
-        self.findReplaceWidget.findMatchCountChanged.connect(self.comboFind.findMatchCountChanged)
-        self.findReplaceWidget.searchFlagsChanged.connect(self.comboFind.optionsChanged)
-        #self.comboFind.findMatchCountChanged.connect(self.updateMatchLabel)
         
-        self.actionCaseSensitive.toggled.connect(self.findReplaceWidget.setCaseSensitive)
-        self.actionRegex.triggered.connect(self.findReplaceWidget.setUseRegex)
-        self.actionWholeWord.toggled.connect(self.findReplaceWidget.setWholeWord)
 
-        self.pushFindNext.pressed.connect(self.findReplaceWidget.findNext)
-        self.pushFindPrevious.pressed.connect(self.findReplaceWidget.findPrevious)
         
     def releaseFile(self):
         print "Release file"
@@ -243,6 +214,8 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.pushReplaceAndFindPrevious.setShown(show)
         
     def setupFindReplaceWidget(self):
+        
+        self.findReplaceWidget.hide()
         self.actionRegex = QAction(self.trUtf8("Use &regular expressions"), self)
         self.actionRegex.setCheckable(True)
         
@@ -258,6 +231,35 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.menuOptions.addAction(self.actionCaseSensitive)
 
         self.pushOptions.setMenu(self.menuOptions)
+        
+        self.comboFind.editionFinished.connect(self.findReplaceWidget.hide)
+        self.comboReplace.editionFinished.connect(self.findReplaceWidget.hide)
+        
+        # Find/Replace Widget logic
+        #self.comboFind.setTextEdit(self.codeEdit)
+        self.findReplaceWidget.setTextEdit(self.codeEdit)
+        self.comboFind.findRequested.connect(self.findReplaceWidget.findFirstTime)
+        self.comboFind.findNextRequested.connect(self.findReplaceWidget.findNext)
+        self.findReplaceWidget.findMatchCountChanged.connect(self.comboFind.findMatchCountChanged)
+        self.findReplaceWidget.searchFlagsChanged.connect(self.comboFind.optionsChanged)
+        #self.comboFind.findMatchCountChanged.connect(self.updateMatchLabel)
+        
+        self.actionCaseSensitive.toggled.connect(self.findReplaceWidget.setCaseSensitive)
+        self.actionRegex.triggered.connect(self.findReplaceWidget.setUseRegex)
+        self.actionWholeWord.toggled.connect(self.findReplaceWidget.setWholeWord)
+
+        self.pushFindNext.pressed.connect(self.findReplaceWidget.findNext)
+        self.pushFindPrevious.pressed.connect(self.findReplaceWidget.findPrevious)
+    
+    def setupGoToLineWidget(self):
+        self.goToLineWidget.hide()
+        self.codeEdit.blockCountChanged.connect(self.blockCountChanged)
+        linecount = self.codeEdit.blockCount()
+        self.goToLineWidget.showed.connect(self.syncGoToLinePosition)
+        self.spinLineNumbers.setMaximum(linecount)
+        self.spinLineNumbers.valueChanged.connect(self.moveCursorToLine)
+        self.spinLineNumbers.editionFinished.connect(self.goToLineWidget.hide)
+        
 
     def on_pushCloseFindreplace_pressed(self):
         self.findreplaceWidget.hide()

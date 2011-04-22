@@ -123,6 +123,16 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
             flags |= QTextDocument.FindWholeWords
         return flags
     
+    def replace(self, text):
+        pass
+    
+    def replaceAndFindNext(self):
+        pass
+    
+    def replaceAndFindPrevious(self):
+        pass
+    
+    
         
 class PMXFindBox(QComboBox):
     
@@ -186,13 +196,25 @@ class PMXFindBox(QComboBox):
     
 
 class PMXReplaceBox(QComboBox):
+    '''
+    Editable QComboBox where the user types the replace text
+    '''
     editionFinished = pyqtSignal()
+    replaceTextRequested = pyqtSignal(QString)
+    
     KEY_TRIGGERS = (Qt.Key_Escape, )
+    
     def keyPressEvent(self, event):
         super(PMXReplaceBox, self).keyPressEvent(event)
+        key = event.key()
         if event.key() in self.KEY_TRIGGERS:
             self.editionFinished.emit()
-
+        elif key in (Qt.Key_Return, Qt.Key_Backspace, Qt.Key_Delete):
+            current_text = self.currentText()
+            if current_text.length():
+                self.replaceTextRequested.emit(current_text)
+    
+    
 
 class PMXCommonSearchBox(QComboBox):
     '''
