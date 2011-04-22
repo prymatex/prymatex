@@ -88,7 +88,7 @@
     </widget>
    </item>
    <item>
-    <widget class="PMXRefocusWidget" name="findreplaceWidget" native="true">
+    <widget class="PMXFindReplaceWidget" name="findReplaceWidget" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <property name="sizeConstraint">
        <enum>QLayout::SetMaximumSize</enum>
@@ -295,12 +295,12 @@ p, li { white-space: pre-wrap; }
   <customwidget>
    <class>PMXFindBox</class>
    <extends>QComboBox</extends>
-   <header>internalwidgets</header>
+   <header>findreplace</header>
   </customwidget>
   <customwidget>
    <class>PMXReplaceBox</class>
    <extends>QComboBox</extends>
-   <header>internalwidgets</header>
+   <header>findreplace</header>
   </customwidget>
   <customwidget>
    <class>PMXSpinGoToLine</class>
@@ -311,6 +311,12 @@ p, li { white-space: pre-wrap; }
    <class>PMXRefocusWidget</class>
    <extends>QWidget</extends>
    <header>internalwidgets</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PMXFindReplaceWidget</class>
+   <extends>QWidget</extends>
+   <header>findreplace</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

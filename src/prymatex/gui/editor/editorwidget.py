@@ -73,7 +73,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.codeEdit.addAction(self.actionReplace)
 
         # Hide some widgets
-        self.findreplaceWidget.hide()
+        self.findReplaceWidget.hide()
         self.goToLineWidget.hide()
         
         self.file = pmx_file
@@ -91,20 +91,27 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
         # Hide 
         self.spinLineNumbers.editionFinished.connect(self.goToLineWidget.hide)
-        self.comboFind.editionFinished.connect(self.findreplaceWidget.hide)
-        self.comboReplace.editionFinished.connect(self.findreplaceWidget.hide)
+        self.comboFind.editionFinished.connect(self.findReplaceWidget.hide)
+        self.comboReplace.editionFinished.connect(self.findReplaceWidget.hide)
+        
         # Show
         self.goToLineWidget.showed.connect(self.syncGoToLinePosition)
         
-        self.comboFind.setTextEdit(self.codeEdit)
-        self.comboFind.findMatchCountChanged.connect(self.updateMatchLabel)
+        # Find/Replace Widget logic
+        #self.comboFind.setTextEdit(self.codeEdit)
+        self.findReplaceWidget.setTextEdit(self.codeEdit)
+        self.comboFind.findRequested.connect(self.findReplaceWidget.findFirstTime)
+        self.comboFind.findNextRequested.connect(self.findReplaceWidget.findNext)
+        self.findReplaceWidget.findMatchCountChanged.connect(self.comboFind.findMatchCountChanged)
+        self.findReplaceWidget.searchFlagsChanged.connect(self.comboFind.optionsChanged)
+        #self.comboFind.findMatchCountChanged.connect(self.updateMatchLabel)
         
-        self.actionCaseSensitive.toggled.connect(self.comboFind.setCaseSensitive)
-        self.actionRegex.triggered.connect(self.comboFind.setRegex)
-        self.actionWholeWord.toggled.connect(self.comboFind.setWholeWord)
+        self.actionCaseSensitive.toggled.connect(self.findReplaceWidget.setCaseSensitive)
+        self.actionRegex.triggered.connect(self.findReplaceWidget.setUseRegex)
+        self.actionWholeWord.toggled.connect(self.findReplaceWidget.setWholeWord)
 
-        self.pushFindNext.pressed.connect(self.comboFind.findNext)
-        self.pushFindPrevious.pressed.connect(self.comboFind.findPrevious)
+        self.pushFindNext.pressed.connect(self.findReplaceWidget.findNext)
+        self.pushFindPrevious.pressed.connect(self.findReplaceWidget.findPrevious)
         
     def releaseFile(self):
         print "Release file"
@@ -206,13 +213,18 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     
     def find(self):
         self.setReplaceWidgetsShown(False)
-        self.findreplaceWidget.show()
+        self.findReplaceWidget.show()
+        
+        text = self.codeEdit.textCursor().selectedText()
+        if text.length():
+            self.comboFind.setEditText(text)
+            
         self.comboFind.setFocus(Qt.MouseFocusReason)
 
 
     def replace(self):
         self.setReplaceWidgetsShown(True)
-        self.findreplaceWidget.show()
+        self.findReplaceWidget.show()
         self.comboFind.setFocus(Qt.MouseFocusReason)
         
     def goToLine(self):
@@ -231,7 +243,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.pushReplaceAndFindPrevious.setShown(show)
         
     def setupFindReplaceWidget(self):
-        self.actionRegex = QAction(self.trUtf8("Use &regular expressions"),self)
+        self.actionRegex = QAction(self.trUtf8("Use &regular expressions"), self)
         self.actionRegex.setCheckable(True)
         
         self.actionWholeWord = QAction(self.trUtf8("Find &whole word only"), self)
