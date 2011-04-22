@@ -69,6 +69,18 @@ class PMXObject(QObject):
        
     mainwindow = mainWindow # TODO: Remove
     
+    __app = None
+    @property
+    def pmxApp(self):
+        '''
+        Shortcut property for PyQt4.QtGui.QApplication.instance() whit
+        slight class level cache.
+        '''
+        if not self.__class__.__app:
+            from PyQt4.QtGui import QApplication
+            self.__class__.__app  = QApplication.instance()
+        return self.__class__.__app
+    
     
     # Logging 
     _logger = None
