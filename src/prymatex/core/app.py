@@ -12,7 +12,7 @@ from prymatex.lib import deco
 
 from prymatex.core.config import PMXSettings
 from prymatex.core.exceptions import APIUsageError
-
+from datetime import datetime
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -33,6 +33,7 @@ class PMXApplication(QApplication):
     #===========================================================================
     __settings = None
     __configdialog = None
+    __options = None # Optparse options
     #===========================================================================
     # Logger, deprecated in favour of module level logger
     #===========================================================================
@@ -52,15 +53,15 @@ class PMXApplication(QApplication):
     
     #@printtime
     @deco.logtime
-    def __init__(self, args, logger = None):
+    def __init__(self, open_args, options):
         '''
         Inicialización de la aplicación.
         '''
-        QApplication.__init__(self, args)
+        self.options = options
+        QApplication.__init__(self, [])
         # Logger setup
         self.setup_logging() 
         
-        files_to_open = self.parse_app_arguments(args)
         
         self.settings = PMXSettings.getSettingsForProfile(self.options.profile)
         self.settings.setValue('auto_save', True)
@@ -75,7 +76,7 @@ class PMXApplication(QApplication):
         
         self.setWindowIcon(QIcon(":/resources/icons/Prymatex_Logo.png"))
         
-        self.check_single_instance()
+        self.checkSingleInstance()
         
         # Bundles and Stuff
         self.load_textmate_stuff()
@@ -87,18 +88,23 @@ class PMXApplication(QApplication):
         # Config dialog
         self.setup_configdialog()
         # Creates the GUI
-        self.createWindows(files_to_open)
+        self.createWindows(open_args[1:]) # Skip pmx.py
         
-        # TODO: Fix
-        if not self.options.ipdb_excepthook:
-            sys.excepthook = sys_excepthook
-        else:
-            import ipdb
     
-    def setup_profile(self):
-        pass
+    @property
+    def options(self):
+        return self.__options
     
-    
+    @options.setter
+    def options(self, options):
+        if self.__options:
+            raise ValueError("Options already defined")
+        from optparse import Values
+        if not isinstance(options, Values):
+            raise ValueError("Options should be optparse.Values instances"
+                             ", not %s" % options)
+        self.__options = options
+            
     def setup_configdialog(self):
         from prymatex.gui.config import  PMXSettingsDialog
         configdialog = PMXSettingsDialog()
@@ -132,17 +138,7 @@ class PMXApplication(QApplication):
     @property
     def configdialog(self):
         return self.__configdialog
-    
-    def parse_app_arguments(self, arguments):
-        '''
-        Stores the application parameters in the options property
-        and returns the list of flies to open.
-        @return: List of files to open
-        '''
-        from prymatex.optargs import parser
-        self.__options, files_to_open = parser.parse_args(arguments)
-        return files_to_open
-        
+            
     def load_textmate_stuff(self):
         self.load_texmate_themes()
         self.load_texmate_bundles()
@@ -155,17 +151,6 @@ class PMXApplication(QApplication):
         from prymatex.core.filemanager import PMXFileManager
         self.__file_manager = PMXFileManager(self)
     
-    @property
-    def options(self):
-        ''' Application arguments defined in prymatex.optparse'''
-        return self.__options
-    
-    @options.setter
-    def options(self, options):
-        if not self.__options:
-            self.__options = options
-        else:
-            raise APIUsageError("PMXApplication.options can't be defined twice!")
     
     @property
     def file_manager(self):
@@ -206,22 +191,25 @@ class PMXApplication(QApplication):
         logger.info("Logger set in the application instance")
     
     def setup_logging(self):
+        '''
+        @see PMXObject.debug, PMXObject.info, PMXObject.warn
+        '''
         import logging
         
         logger = logging.getLogger("")
         logger.setLevel(logging.DEBUG)
         # create file handler which logs even debug messages
+        d = datetime.now().strftime('%d-%m-%G-%H-%M-%S')
+        filename = self.getProfilePath('log', 'messages-%s.log' % d)
         try:
-            fh = logging.FileHandler("messages.log")
+            fh = logging.FileHandler(filename)
         except IOError:
-            fh =  logging.FileHandler("/tmp/messages.log")
+            fh =  logging.FileHandler()
         
         fh.setLevel(logging.DEBUG)
         # create console handler with a higher log level
         ch = logging.StreamHandler()
         ch.setLevel(logging.INFO)
-        
-        
         
         # create formatter and add it to the handlers
         formatter = logging.Formatter()#"%(message)s")
@@ -298,13 +286,16 @@ class PMXApplication(QApplication):
 
         QApplication.processEvents()
         
-    def check_single_instance(self):
+    def checkSingleInstance(self):
         '''
-        Intenta trabajar con una sola instancia
+        Checks if there's another instance using current profile
         '''
         from prymatex.lib import os
-        if exists(self.lock_filename):
-            f = open(self.lock_filename)
+        
+        lock_filename = self.getProfilePath('var', 'prymatex.pid')
+        
+        if exists(lock_filename):
+            f = open(lock_filename)
             pid = int(f.read())
             f.close()
             self.logger.info("Checking for another instance: %s", 
@@ -321,7 +312,7 @@ class PMXApplication(QApplication):
                 raise AlreadyRunningError(pid)
             
         else:
-            f = open(self.lock_filename, 'w')
+            f = open(lock_filename, 'w')
             f.write('%s' % getpid())
             f.close()
     
@@ -332,8 +323,8 @@ class PMXApplication(QApplication):
         self.getProfilePath('tmp', 'log.log')
         
         '''
-        from prymatex.core.config import get_prymatex_user_path
-        path = get_prymatex_user_path()
+        from prymatex.core.config import get_prymatex_profile_path, get_prymatex_base_path
+        path = get_prymatex_profile_path(self.options.profile, get_prymatex_base_path())
         final_path =os.path.abspath(os.path.join(path, what))
         if not os.path.exists(final_path):
             os.makedirs(final_path, 0700)

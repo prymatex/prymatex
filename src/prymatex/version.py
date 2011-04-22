@@ -15,21 +15,21 @@ __authoremail__ = ( 'nahuel (dto) defosse (at) gmail',
                     )
 
 
-def show_to_console_version():
     
-    print """
-    +-------+
-    |.....  |   Prymatex %s
-    |...    |   
-    |...... |   Version: %s
-    +-------+.py
-    """ % (__doc__, __version__)
-    
-    
-    print "Website: %s" % __url__
-    print "Author/s:"
-    for author in  __author__:
-        print "\t - %s" % author
-    
-    print "\nFor more information use the -h option"
-    
+__extra_version_string__ = ("""
++-------+
+|.....  |   Prymatex %(doc)s
+|...    |   
+|...... |   Version: %(version)s
++-------+.py
+
+Website: %(website)s
+Author/s:
+%(authors)s
+
+For more information use the -h option
+""" % dict(doc = __doc__, version = __version__,
+           website = __url__, 
+           authors = '\n'.join(['\t%s' % a for a in __author__]),
+           )).strip()
+

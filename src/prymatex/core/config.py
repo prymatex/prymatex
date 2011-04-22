@@ -28,6 +28,8 @@ def build_prymatex_profile(path):
     makedirs(path)
     makedirs(join(path, 'tmp'))
     makedirs(join(path, 'log'))
+    makedirs(join(path, 'var'))
+    
     
 def get_prymatex_profile_path(name, base):
     path = abspath(join(base, name.lower()))

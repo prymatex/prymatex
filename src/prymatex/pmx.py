@@ -19,11 +19,12 @@ def main(args):
     '''
     from prymatex.core import app
     from prymatex.lib import exceptions
-            
+    from prymatex.optargs import parser
     # TODO: Implement quit and restart
     while True:
         try:
-            myapp = app.PMXApplication(args[1:])
+            options, open_args = parser.parse_args(args)
+            myapp = app.PMXApplication(open_args, options = options)
             #myapp.logger = logger 
         except exceptions.AlreadyRunningError, e:
             return e.RETURN_VALUE
@@ -42,8 +43,7 @@ def main(args):
             #from PyQt4.QtGui import QDialog
             #dlg = QDialog()
             dlg.exec_()
-            
-            raise e
+            #raise e
         retval = myapp.exec_()
         if retval == 3:
             del myapp
