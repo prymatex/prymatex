@@ -158,7 +158,7 @@ class PMXFile(QObject):
 
     
     __unicode__ = __repr__ = __str__
-    
+
 class PMXFileManager(PMXObject):
     '''
     A singleton which used for 
@@ -174,7 +174,7 @@ class PMXFileManager(PMXObject):
     def __init__(self, parent):
         QObject.__init__(self, parent)
         
-        self.magic = magic.Magic(MAGIC_FILE, 'delete-me')
+        self.magic = magic.Magic(MAGIC_FILE, self.pmxApp.getProfilePath('tmp', 'magic.cache'))
         self.opened_files = {}
         self.empty_file_counter = 0 
     
