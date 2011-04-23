@@ -60,7 +60,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     
     WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
-    TABTRIGGERSPLIT = re.compile(r"\w+|\W+", re.UNICODE)
     WORD = re.compile(r'\w+', re.UNICODE)
         
     #=======================================================================
@@ -155,28 +154,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 block = block.previous()
             return block.userData().getLastScope()
         return user_data.getScopeAtPosition(cursor.columnNumber())
-        
-    def getCurrentWordAndIndex(self):
-        cursor = self.textCursor()
-        line = unicode(cursor.block().text())
-        matchs = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line))
-        if matchs:
-            match = matchs.pop()
-            word = line[match.start():match.end()]
-            index = cursor.columnNumber() - match.start()
-            return word, index
-        return "", 0
-    
-    def getTabTriggerSymbol(self):
-        cursor = self.textCursor()
-        line = unicode(cursor.block().text())
-        matchs = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.TABTRIGGERSPLIT.finditer(line))
-        if matchs:
-            match = matchs.pop()
-            word = line[match.start():match.end()]
-            index = cursor.columnNumber() - match.start()
-            return word, index
-        return "", 0
     
     def sendCursorPosChange(self):
         c = self.textCursor()
@@ -362,6 +339,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(index)
                 cursor.setPosition(index + len(holder), QTextCursor.KeepAnchor)
             self.setTextCursor(cursor)
+            return True
         elif key == Qt.Key_Backspace or key == Qt.Key_Delete:
             starts = self.snippet.starts
             ends = self.snippet.ends
@@ -394,6 +372,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
+            return True
         elif 0x20 <= key <= 0x7E: #Para latin poner otra cosa
             starts = self.snippet.starts
             ends = self.snippet.ends
@@ -418,7 +397,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.snippet.ends = cursor.position()
             cursor.setPosition(position)
             self.setTextCursor(cursor)
-        return True
+            return True
+        return False
     
     def keyPressSmartTyping(self, event):
         cursor = self.textCursor()
@@ -449,11 +429,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.indent(self.tabKeyBehavior)
         else:
             scope = self.getCurrentScope()
-            word, index = self.getCurrentWordAndIndex()
-            #TODO: Ver si va a tener scope o no
-            # if index is end of word
-            if len(word) == index and (scope or word):
-                snippets = PMXBundle.getTabTriggerItem(word, scope)
+            trigger = PMXBundle.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
+            print trigger
+            if trigger != None:
+                snippets = PMXBundle.getTabTriggerItem(trigger, scope)
                 if len(snippets) > 1:
                     self.selectBundleItem(snippets, tabTrigger = True)
                     return
@@ -500,18 +479,18 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         block = cursor.block()
         prev = cursor.block().previous()
         if prev.userData().indentMark == PMXBlockUserData.INDENT_INCREASE:
-            indent = (prev.userData().indentLevel + self.tabSize ) * u' ' if self.softTabs else (prev.userData().indentLevel + self.tabSize ) * u'\t'
-            cursor.insertText(indent)
+            print "increase"
+            cursor.insertText(prev.userData().indent + self.tabKeyBehavior)
         elif prev.userData().indentMark == PMXBlockUserData.INDENT_NEXTLINE:
             print "increasenext"
         elif prev.userData().indentMark == PMXBlockUserData.UNINDENT:
-            cursor.setPosition(block.position())
+            print "unindent"
         elif prev.userData().indentMark == PMXBlockUserData.INDENT_DECREASE:
-            indent = (prev.userData().indentLevel + self.tabSize ) * u' ' if self.softTabs else (prev.userData().indentLevel + self.tabSize ) * u'\t'
-            cursor.insertText(indent)
+            print "decrease"
+            cursor.insertText(prev.userData().indent[:len(self.tabKeyBehavior)])
         else:
-            indent = block.userData().indentLevel * u' ' if self.softTabs else block.userData().indentLevel * u'\t' 
-            cursor.insertText(indent)
+            print "preserve"
+            cursor.insertText(prev.userData().indent)
     
     #=======================================================================
     # After Keyboard Events
@@ -521,7 +500,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         block = cursor.block()
         prev = block.previous()
-        if block.userData().indentMark == PMXBlockUserData.INDENT_DECREASE and prev.isValid() and block.userData().indentLevel == prev.userData().indentLevel:
+        if block.userData().indentMark == PMXBlockUserData.INDENT_DECREASE and prev.isValid() and block.userData().indent == prev.userData().indent:
             self.unindent()
     
     #==========================================================================
@@ -737,15 +716,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def _find_block_fold_close(self, start):
-        end = start
-        counter = 0
         if self.syntax.indentSensitive:
-            level = start.userData().indentLevel
-            while end.userData().indentLevel <= level:
+            end = start
+            level = end.userData().indent
+            while end.next().isValid() and level <= end.next().userData().indent:
                 end = end.next()
-                if not end.isValid():
-                    return end.previous()
+                if end.userData().folding == PMXBlockUserData.FOLDING_STOP and end.userData().indent == level:
+                    break
         else:
+            end = start
+            counter = 0
             while end.userData().folding != PMXBlockUserData.FOLDING_STOP or counter !=  0:
                 if end.userData().folding == PMXBlockUserData.FOLDING_START:
                     counter += 1
@@ -891,7 +871,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             new_cursor = QTextCursor(cursor)
             while True:
                 data = start.userData()
-                counter = self.tabSize if data.indentLevel > self.tabSize else data.indentLevel
+                counter = self.tabSize if len(data.indent) > self.tabSize else len(data.indent)
                 if counter > 0:
                     new_cursor.setPosition(start.position())
                     for _j in range(self.tabSize):
@@ -904,7 +884,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             block = cursor.block()
             data = cursor.block().userData()
-            counter = self.tabSize if data.indentLevel > self.tabSize else data.indentLevel
+            counter = self.tabSize if len(data.indent) > self.tabSize else len(data.indent)
             if counter > 0:
                 cursor.beginEditBlock()
                 position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabSize else cursor.position() - counter

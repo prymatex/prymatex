@@ -104,10 +104,23 @@ if __name__ == "__main__":
             print "<div class='recuadro'>"
             print "<h4>Snippets:</h4>"
             print "<table>"
-            print "<thead><th>Name</th><th>tabTrigger</th></thead>"
+            print "<thead><th>Name</th><th>tabTrigger</th><th>keyEquivalent</th></thead>"
             for snippet in bundle.snippets:
                 try:
-                    print "<tr><td>%s</td><td>%s</td>" % (snippet.name, snippet.tabTrigger)
+                    print "<tr><td>%s</td><td>%s</td><td>%s</td>" % (snippet.name, snippet.tabTrigger, snippet.keyEquivalent)
+                except:
+                    pass
+            print "</table>"
+            print "</div>"
+        
+        if bundle.snippets:
+            print "<div class='recuadro'>"
+            print "<h4>Commands:</h4>"
+            print "<table>"
+            print "<thead><th>Name</th><th>tabTrigger</th><th>keyEquivalent</th></thead>"
+            for command in bundle.commands:
+                try:
+                    print "<tr><td>%s</td><td>%s</td><td>%s</td>" % (command.name, command.tabTrigger, command.keyEquivalent)
                 except:
                     pass
             print "</table>"
