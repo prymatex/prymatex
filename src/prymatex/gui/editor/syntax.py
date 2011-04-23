@@ -33,7 +33,7 @@ class PMXBlockUserData(QTextBlockUserData):
         #self.foldingPeer = None
         self.folded = False
         self.indentMark = self.INDENT_NONE
-        self.indentLevel = 0
+        self.indent = ""
     
     def __nonzero__(self):
         return bool(self.scopes)
@@ -132,24 +132,17 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 
     def foldingMarker(self, line):
         self.userData.folding = self.syntax.folding(line)
-        if self.syntax.indentSensitive and self.userData.folding == self.syntax.FOLDING_STOP:
-            #if syntax is indent sensitive only one close
-            block = self.currentBlock().previous()
-            while True:
-                if not block.isValid() or block.userData().folding == self.syntax.FOLDING_START or block.userData().folding == self.syntax.FOLDING_STOP:
-                    break
-                block = block.previous()  
-            if not block.isValid() or block.userData().folding == self.syntax.FOLDING_STOP:
-                self.userData.folding = self.syntax.FOLDING_NONE
+        if self.syntax.indentSensitive and self.userData.folding == self.syntax.FOLDING_STOP and line.strip() == "":
+            self.userData.folding = self.syntax.FOLDING_NONE
 
     def indentMarker(self, line, scope):
         settings = PMXBundle.getPreferenceSettings(scope)
         self.userData.indentMark = settings.indent(line)
         if self.syntax.indentSensitive and line.strip() == "":
             prev = self.currentBlock().previous()
-            self.userData.indentLevel = prev.userData().indentLevel if prev.isValid() else 0
+            self.userData.indent = prev.userData().indent if prev.isValid() else ""
         else: 
-            self.userData.indentLevel = len(whiteSpace(line))
+            self.userData.indent = whiteSpace(line)
 
     #END
     def endParsing(self, scope):

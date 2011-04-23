@@ -78,6 +78,7 @@ class PMXBundle(object):
     TEMPLATES = []
     SETTINGS_CACHE = {}
     scores = PMXScoreManager()
+    TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
     
     def __init__(self, hash, name_space, path = None):
         for key in [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]:
@@ -182,6 +183,18 @@ class PMXBundle(object):
             cls.SETTINGS_CACHE[scope] = klass.buildSettings(preferences)
         return cls.SETTINGS_CACHE[scope]
 
+    @classmethod
+    def getTabTriggerSymbol(cls, line, index):
+        line = line[:index]
+        for tabSplit in cls.TABTRIGGERSPLITS:
+            matchs = filter(lambda m: m.start() <= index <= m.end(), tabSplit.finditer(line))
+            if matchs:
+                match = matchs.pop()
+                word = line[match.start():match.end()]
+                if cls.TAB_TRIGGERS.has_key(word):
+                    return word
+        
+    
     @classmethod
     def getTabTriggerItem(cls, keyword, scope):
         with_scope = []
