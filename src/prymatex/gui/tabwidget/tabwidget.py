@@ -33,7 +33,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
     
     
     def __init__(self, parent):
-        print "Insntanciando tab widget con parent", parent
         super(PMXTabWidget, self).__init__(parent)
         
         self.setupActions() # Call it at first so the QMetaObject.connectSlotsByName is called in the setupUi

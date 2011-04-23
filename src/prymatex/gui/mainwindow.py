@@ -55,11 +55,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
         self.NewFromTemplateDialog.newFileCreated.connect(self.newFileFromTemplate)
         
-        #self.tabWidget = PMXTabWidget(self)
-        #self.setCentralWidget( self.tabWidget )
-        
-        #self.tabWidgetEditors.buttonTabList.setMenu(self.menuPanes)
-        #self.actionGroupTabs.addMenu(self.menuPanes)
         
         self.setupPanes()
         self.setupLogging()
@@ -68,11 +63,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         # Una vez centrada la ventana caramos los menues
         self.addBundlesToMenu()
         
-        #self.dialogConfig = PMXConfigDialog(self)
-        self.dialogFilter = PMXFilterDialog(self)
-        #self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
         
-        #self.actionShowFSPane.setChecked(True)
+        self.dialogFilter = PMXFilterDialog(self)
+        
         self.preventMenuLock()
         
         for file in files_to_open:
@@ -281,7 +274,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     
     @pyqtSlot(bool)
     def on_actionShow_Menus_toggled(self, state):
-        print "Toggle", state
         menubar = self.menuBar()
         if state:
             menubar.show()
@@ -337,8 +329,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                 editor = PMXEditorWidget.editorFactory(pmx_file)
             except Exception, e:
                 from prymatex.gui.emergency import PMXTraceBackDialog
-                PMXTraceBackDialog(e).exec_()
-                #del pmx_file
+                print e
+                dlg = PMXTraceBackDialog(e)
+                dlg.exec_()
                 return 
             self.tabWidget.addTab(editor)
         else:

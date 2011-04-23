@@ -3,13 +3,12 @@
 from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
 from PyQt4.QtCore import SIGNAL, QEvent
 
-from os.path import join, exists
 import os
-import sys
 from os import getpid, unlink
-from os.path import dirname, abspath
-from prymatex.lib import deco
+from os.path import join, exists, dirname, abspath, expanduser
+import sys
 
+from prymatex.lib import deco
 from prymatex.core.config import PMXSettings
 from prymatex.core.exceptions import APIUsageError
 from datetime import datetime
@@ -316,6 +315,15 @@ class PMXApplication(QApplication):
             f.write('%s' % getpid())
             f.close()
     
+    __profilePath = None
+    @property
+    def profilePath(self):
+        if not self.__profilePath:
+            self.__profilePath = join(expanduser('~'), '.prymatex')
+        return self.__profilePath
+    
+    
+    @deco.printparams_and_output
     def getProfilePath(self, what, filename):
         '''
         Example
@@ -323,12 +331,12 @@ class PMXApplication(QApplication):
         self.getProfilePath('tmp', 'log.log')
         
         '''
-        from prymatex.core.config import get_prymatex_profile_path, get_prymatex_base_path
-        path = get_prymatex_profile_path(self.options.profile, get_prymatex_base_path())
-        final_path =os.path.abspath(os.path.join(path, what))
-        if not os.path.exists(final_path):
+        #from prymatex.core.config import get_prymatex_profile_path, get_prymatex_base_path
+        path = join(self.profilePath, self.options.profile )
+        final_path = abspath(join(path, what))
+        if not exists(final_path):
             os.makedirs(final_path, 0700)
-        return os.path.join(final_path, filename)
+        return join(final_path, filename)
         
             
     def startDirectory(self):

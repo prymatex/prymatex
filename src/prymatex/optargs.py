@@ -56,12 +56,12 @@ parser.add_option('-p', '--profile', dest='profile',
                   default = 'default',
                   help = "Change profile")
 
-parser.add_option('-P', '--profiling-enabled', dest='profile_enabled',
+parser.add_option('-P', '--profiling', dest='profiling',
                   action="store_true",
                   default = False,
                   help = "Run profiling for prymatex session")
 
-parser.add_option('-e', '--profiling-entries', dest='profile_entries',
+parser.add_option('-e', '--profiling-entries', dest='profiling_entries',
                   action="store",
                   type = int, 
                   default = 0,

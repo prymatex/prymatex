@@ -15,6 +15,17 @@ from ponyguruma.constants import OPTION_CAPTURE_GROUP, ENCODING_UTF8
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.score import PMXScoreManager
 
+# Profiling
+
+try:
+    from prymatex.lib.profilehooks import profile
+    from PyQt4.Qt import qApp
+except Exception, e:
+    PROFILING_CAPABLE = False
+else:
+    PROFILING_CAPABLE = True
+    
+
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, encoding = ENCODING_UTF8)
 
 SPLITLINES = re.compile('\n')
@@ -209,6 +220,7 @@ class PMXSyntax(PMXBundleItem):
             setattr(self, '_grammar', PMXSyntaxNode(hash , self ))
         return self._grammar
 
+        
     def parse(self, string, processor = None):
         if processor:
             processor.startParsing(self.scopeName)
@@ -219,6 +231,9 @@ class PMXSyntax(PMXBundleItem):
         if processor:
             processor.endParsing(self.scopeName)
         return stack
+    
+    if PROFILING_CAPABLE and qApp.instance().options.profiling:
+        parse = profile(parse)
 
     def parseLine(self, stack, line, processor):
         if processor:

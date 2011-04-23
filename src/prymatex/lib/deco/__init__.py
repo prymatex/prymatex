@@ -31,14 +31,25 @@ def simple_decorator(decorator):
     new_decorator.__dict__.update(decorator.__dict__)
     return new_decorator
 
+def format_args(*largs, **kwargs):
+    dict_repr = [ "%s=%s" % (k, repr(v)) for k, v in kwargs.iteritems()]
+    args = ', '.join(map(repr, largs) + dict_repr)
+    return args
 
 @simple_decorator
 def printparams(f):
     def wrapped(*largs, **kwargs):
-        dict_repr = [ "%s=%s" % (k, v) for k, v in kwargs.iteritems()]
-        args = ', '.join(map(str, largs) + dict_repr)
-        print "%s(%s)" % (f.func_name, args)
+        print "%s(%s)" % (f.func_name, format_args(*largs, **kwargs))
         retval = f(*largs, **kwargs)
+        return retval
+    return wrapped
+
+@simple_decorator
+def printparams_and_output(f):
+    def wrapped(*largs, **kwargs):
+        output = "%s(%s)" % (f.func_name, format_args(*largs, **kwargs))
+        retval = f(*largs, **kwargs)
+        print "%s -> %s" % (output, retval)
         return retval
     return wrapped
 
