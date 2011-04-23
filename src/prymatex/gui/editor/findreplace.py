@@ -12,6 +12,7 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
     '''
     findMatchCountChanged = pyqtSignal(int)
     searchFlagsChanged = pyqtSignal()
+    focusFindBox = pyqtSignal()
     
     def findFirstTime(self, text):
         '''
@@ -78,7 +79,8 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
     
     __useRegex = False
     def setUseRegex(self, toggled):
-        self.__regex = toggled
+        self.__useRegex = toggled
+        print "Use regex", toggled
         self.searchFlagsChanged.emit()
     
     useRegex = property(fget = lambda s: s.__useRegex, fset = setUseRegex,
@@ -100,10 +102,22 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
         '''
         return self.__regexp
     
+    def _isSafeRegex(self, text):
+        # TODO: Move this logic to the combo box
+        if text in ('^', '^$', '$'):
+            return False
+        return True
+    
     @regexp.setter
     def regexp(self, text):
         if isinstance(text, (basestring, QString)):
-            self.__regexp = QRegExp(text)
+            if self.useRegex:
+                regex = QRegExp(text)
+                if regex.isValid() and self._isSafeRegex(text):
+                    self.__regexp = regex # Avoids infinite loop   
+            else:
+                self.__regexp = QRegExp(QRegExp.escape(text))
+                
             if self.caseSensitive:
                 caseSensitivity = Qt.CaseSensitive
             else:
@@ -124,7 +138,11 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
         return flags
     
     def replace(self, text):
-        pass
+        print "replace with", self.regexp, text
+        if not self.regexp:
+            self.focusFindBox.emit()
+            return
+        
     
     def replaceAndFindNext(self):
         pass

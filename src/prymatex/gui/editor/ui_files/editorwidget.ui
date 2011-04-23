@@ -159,7 +159,7 @@ p, li { white-space: pre-wrap; }
       <item row="0" column="5">
        <widget class="QPushButton" name="pushOptions">
         <property name="text">
-         <string>&amp;Options</string>
+         <string>Opt&amp;ions</string>
         </property>
         <property name="icon">
          <iconset resource="../../../res.qrc">

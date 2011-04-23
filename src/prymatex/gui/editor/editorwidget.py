@@ -77,11 +77,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
         self.codeEdit.setPlainText(self.file.read() or '')
         self.destroyed.connect(self.releaseFile)
-        
-        
-        
-        
-        
 
         
     def releaseFile(self):
@@ -172,17 +167,12 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         raise NotImplementedError("No implemented")
 
     def setupActions(self):
-        # Search
-        self.actionFind = QAction("&Find", self)
-        self.actionFind.setObjectName("actionFind")
-        self.actionFind.triggered.connect(self.find)
-        # Replace
-        self.actionReplace = QAction(self.trUtf8("Find and &Replce"), self)
-        self.actionReplace.setObjectName("actionReplace")
-        self.actionReplace.triggered.connect(self.replace)
-        # Go to line
+        pass
     
-    def find(self):
+    def showFindWidget(self):
+        '''
+        Find start point
+        '''
         self.setReplaceWidgetsShown(False)
         self.findReplaceWidget.show()
         
@@ -193,10 +183,16 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.comboFind.setFocus(Qt.MouseFocusReason)
 
 
-    def replace(self):
+    def showReplaceWidget(self):
+        '''
+        Replace start point
+        '''
         self.setReplaceWidgetsShown(True)
         self.findReplaceWidget.show()
-        self.comboFind.setFocus(Qt.MouseFocusReason)
+        if self.comboFind.currentText().length() == 0:
+            self.comboFind.setFocus(Qt.MouseFocusReason)
+        else:
+            self.comboReplace.setFocus()
         
     def goToLine(self):
         '''
@@ -242,7 +238,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.comboFind.findNextRequested.connect(self.findReplaceWidget.findNext)
         self.findReplaceWidget.findMatchCountChanged.connect(self.comboFind.findMatchCountChanged)
         self.findReplaceWidget.searchFlagsChanged.connect(self.comboFind.optionsChanged)
-        #self.comboFind.findMatchCountChanged.connect(self.updateMatchLabel)
+        self.findReplaceWidget.findMatchCountChanged.connect(self.updateMatchLabel)
         
         self.actionCaseSensitive.toggled.connect(self.findReplaceWidget.setCaseSensitive)
         self.actionRegex.triggered.connect(self.findReplaceWidget.setUseRegex)
@@ -250,6 +246,12 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
 
         self.pushFindNext.pressed.connect(self.findReplaceWidget.findNext)
         self.pushFindPrevious.pressed.connect(self.findReplaceWidget.findPrevious)
+        
+        
+        # Replace
+        
+        self.comboReplace.replaceTextRequested.connect(self.findReplaceWidget.replace)
+        self.findReplaceWidget.focusFindBox.connect(self.comboFind.setFocus)
     
     def setupGoToLineWidget(self):
         self.goToLineWidget.hide()

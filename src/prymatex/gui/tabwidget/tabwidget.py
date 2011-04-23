@@ -424,6 +424,18 @@ class PMXTabWidget(QTabWidget, PMXObject):
         self.insertTab(index, widget, text)
         self.setCurrentWidget(widget)
 
+    @property
+    def unsavedCounter(self):
+        '''
+        Returns the amount of unsaved documents
+        '''
+        counter = 0
+        for w in self:
+            if getattr(w, 'modified', False):
+                counter += 1
+        return counter
+        # FIXME: Iterations returns none
+        #return sum(map(lambda w: w.modified and 1 or 0, self))
 
 class PMXTabWidgetIterator(object):
     ''' Iterates over the tab widget's widgets '''

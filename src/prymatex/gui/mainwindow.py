@@ -479,14 +479,28 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     @pyqtSignature('')
     def on_actionFind_triggered(self):
         print "MainWindow::find"
-        self.currentEditorWidget.find()
+        self.currentEditorWidget.showFindWidget()
         
     @pyqtSignature('')
     def on_actionFind_Replace_triggered(self):
         print "MainWindow::replace"
-        self.currentEditorWidget.replace()
+        self.currentEditorWidget.showReplaceWidget()
     
     
+    def closeEvent(self, event):
+        unsaved = self.tabWidget.unsavedCounter
+        if unsaved:
+            close_msg = self.trUtf8("There are %s unsaved document in this window.<br>"
+                                    "Close anyway?")
+            response = QMessageBox.question(self, self.trUtf8("Sure to close?"), 
+                             unicode(close_msg) % unsaved, 
+                             buttons=QMessageBox.Ok | QMessageBox.Cancel, 
+                             defaultButton=QMessageBox.Ok)
+            if response == QMessageBox.Cancel:
+                event.ignore()
+        
+        event.accept()
+        self.debug("Closing window")
     #===========================================================
     # Templates
     #===========================================================
