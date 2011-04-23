@@ -39,6 +39,17 @@ ps -xc|grep -sq Camino &amp;&amp; osascript -e 'tell app "Camino"' -e 'activate'
 # Check if Chrome is running, if so refresh 
 ps -xc|grep -sq Chrome &amp;&amp; osascript -e 'tell app "Google Chrome"' -e 'activate' -e 'tell app "System Events" to keystroke "r" using {command down}' -e 'end tell'
 </string>
+	<key>linuxCommand</key>
+	<string>###	Refresh All Active Browsers - OmniWeb, Safari, Firefox &amp; IE
+### v1.0. 2005-03-29
+###
+
+# Check if Firefox is running, if so refresh
+ps -xc|grep -sqi firefox &amp;&amp; echo "1" > /tmp/pmxok &amp;&amp; firefox "file://$TM_FILEPATH" &amp;
+
+# Check if Chrome is running, if so refresh 
+ps -xc|grep -sq Chrome &amp;&amp; echo "1" > /tmp/pmxok &amp;&amp; chromium "file://$TM_FILEPATH" &amp; 
+</string>
 	<key>input</key>
 	<string>none</string>
 	<key>keyEquivalent</key>

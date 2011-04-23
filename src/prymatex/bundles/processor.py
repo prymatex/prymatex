@@ -57,14 +57,23 @@ class PMXCommandProcessor(object):
     '''
     def __init__(self):
         pass
+    
+    def startCommand(self, command):
+        pass
 
+    def endCommand(self, command):
+        pass
+    
+    # beforeRunningCommand
+    def saveActiveFile(self):
+        pass
+    
     # Inputs
     def getDocument(self):
         pass
     def getCharacter(self):
         pass
-    def getDocument(self):
-        pass
+    
     # Outpus function
     def discard(self):
         pass
