@@ -341,7 +341,7 @@ def test_syntaxes():
     from prymatex.bundles.syntax import PMXSyntax
     from prymatex.bundles.processor import PMXDebugSyntaxProcessor
     syntax = PMXSyntax.getSyntaxesByName("Python")
-    syntax[0].parse("class Persona(", PMXDebugSyntaxProcessor())
+    syntax[0].parse("class Persona(object):", PMXDebugSyntaxProcessor())
     print PMXSyntax.getSyntaxesNames()
 
 def print_commands():
@@ -403,4 +403,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('/home/dvanhaaster/workspace/prymatex/src/bundles/prymatex/Bundles', '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_macros()
+    test_syntaxes()
