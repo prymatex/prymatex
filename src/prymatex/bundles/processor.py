@@ -31,7 +31,8 @@ class PMXCommandProcessor(object):
         # Inputs
         for key in [ 'document', 'line', 'character', 'scope', 'selection', 'word', 'environment']:
             if not hasattr(self, key):
-                setattr(self, key, None)
+                print "no tiene", key
+                #setattr(self, key, None)
     
     def startCommand(self, command):
         pass
@@ -41,7 +42,11 @@ class PMXCommandProcessor(object):
     
     # beforeRunningCommand
     def saveActiveFile(self):
-        pass
+        return True
+    def saveModifiedFiles(self):
+        return True
+    def nop(self):
+        return True
     
     # deleteFromEditor
     def deleteWord(self):

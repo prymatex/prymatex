@@ -1,7 +1,7 @@
 from PyQt4.QtGui import QWidget, QPainter, QPixmap, QFontMetrics
 from PyQt4.Qt import QColor, QSize
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.editor.syntax import PMXBlockUserData
+from prymatex.gui.editor.processor import PMXBlockUserData
 from prymatex import res_rc
 from prymatex.core.base import PMXObject
 

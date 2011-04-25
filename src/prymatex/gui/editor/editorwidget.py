@@ -356,8 +356,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                 return False
             self.file.path = path
         self.save()
-            
-
 
     def setSyntax(self):
         syntax = PMXSyntax.findSyntaxByFileType(self.path)

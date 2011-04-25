@@ -55,7 +55,7 @@ class PMXCommand(PMXBundleItem):
     
     def getInputText(self, processor):
         def switch(input):
-            if not input: return None, None
+            if not input or input == "none": return None, None
             return input, getattr(processor, input)
         input, value = switch(self.input)
         if not value:
@@ -107,25 +107,31 @@ class PMXCommand(PMXBundleItem):
             type = self.exit_codes[code]
         else:
             type = self.output
-        if type in functions:
-            return type
-        return 'discard'
+        return type
     
     def execute(self, processor):
+        if hasattr(self, 'beforeRunningCommand') and self.beforeRunningCommand != None:
+            value = getattr(processor, self.beforeRunningCommand)()
+            if not value:
+                return
         processor.startCommand(self)
         input_type, input_value = self.getInputText(processor)
         command = ensureShellScript(self.systemCommand)
         temp_file = makeExecutableTempFile(command)
         process = Popen([  temp_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(processor.environment))
         
-        process.stdin.write(input_value)
+        if input_type != None:
+            process.stdin.write(input_value)
         process.stdin.close()
         output_value = process.stdout.read()
         process.stdout.close()
         output_type = process.wait()
         output_handler = self.getOutputHandler(output_type)
         
-        #handle input_type in editor, remove word, remove character, remove selection
+        if input_type != None:
+            deleteMethod = getattr(processor, 'delete' + input_type.title(), None)
+            if deleteMethod != None:
+                deleteMethod()
         
         text = output_value.decode('utf-8')
         function = getattr(processor, output_handler)
