@@ -382,14 +382,25 @@ def test_preferences():
     for key in settings.KEYS:
         print key, getattr(settings, key)
 
+def test_macros():
+    bundles = PMXBundle.BUNDLES.values()
+    commands = []
+    for bundle in bundles:
+        for macro in bundle.macros:
+            for command in macro.commands:
+                c = command['command']
+                if c not in commands:
+                    commands.append(c)
+    print commands
+    
 def test_queryItems():
     from prymatex.bundles.qtadapter import Qt
     print PMXBundle.getTabTriggerItem('class', 'source.python')
     print PMXBundle.getKeyEquivalentItem(Qt.CTRL + ord('H'), 'text.html')
-    
+
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
     for file in glob(os.path.join('/home/dvanhaaster/workspace/prymatex/src/bundles/prymatex/Bundles', '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_snippets()
+    test_macros()

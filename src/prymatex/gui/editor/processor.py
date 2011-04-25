@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
-from prymatex.bundles import PMXSyntaxProcessor, PMXSyntax, PMXPreferenceSettings, PMXBundle
+from prymatex.bundles import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor, PMXSyntax, PMXPreferenceSettings, PMXBundle
 
 from logging import getLogger
 logger = getLogger(__file__)
@@ -15,6 +15,7 @@ def whiteSpace(text):
     except AttributeError:
         return ''
 
+# Syntax
 class PMXBlockUserData(QTextBlockUserData):
     FOLDING_NONE = PMXSyntax.FOLDING_NONE
     FOLDING_START = PMXSyntax.FOLDING_START
@@ -158,3 +159,128 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.indentMarker(line, scope)
         
         #self.setCurrentBlockUserData(self.userData)
+
+# Command
+class PMXCommandProcessor(PMXCommandProcessor):
+    def __init__(self, editor):
+        PMXCommandProcessor.__init__(self)
+        self.editor = editor
+
+    #Inputs
+    @property
+    def document(self):
+        return unicode(self.editor.toPlainText())
+        
+    @property
+    def line(self):
+        return self.environment['TM_CURRENT_LINE']
+        
+    @property
+    def character(self):
+        char = line and line[cursor.columnNumber() - 1] or ""
+        return unicode(char)
+        
+    @property
+    def scope(self):
+        return self.environment['TM_SCOPE']
+        
+    @property
+    def selection(self):
+        if 'TM_SELECTED_TEXT' in self.environment:
+            index = self.environment['TM_LINE_INDEX'] - len(self.environment['TM_SELECTED_TEXT'])
+            index = index >= 0 and index or 0
+            self.environment['TM_INPUT_START_COLUMN'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
+            self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
+            self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
+            return self.environment['TM_SELECTED_TEXT']
+
+    @property
+    def word(self):
+        if 'TM_CURRENT_WORD' in self.environment:
+            index = self.environment['TM_LINE_INDEX'] - len(self.environment['TM_CURRENT_WORD'])
+            index = index >= 0 and index or 0
+            self.environment['TM_INPUT_START_COLUMN'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_CURRENT_WORD'], index)
+            self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
+            self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_CURRENT_WORD'], index)
+            return self.environment['TM_SELECTED_TEXT']
+
+    @property
+    def environment(self):
+        return self.__env
+    
+    def startCommand(self, command):
+        self.command = command
+        
+        env = command.buildEnvironment()
+        env.update(self.editor.buildEnvironment())
+        #env.update(self.editor.mainwindow._meta.settings['static_variables'])
+        self.__env = env
+
+    # deleteFromEditor
+    def deleteWord(self):
+        pass
+        #line = unicode(cursor.block().text())
+        #match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
+        #current_word = line[match.start():match.end()]
+        #index = cursor.columnNumber() - len(current_word)
+        #index = index >= 0 and index or 0
+        #index = line.find(current_word, index)
+        #cursor.setPosition(cursor.block().position() + index)
+        #self.setTextCursor(cursor)
+        #for _ in range(len(current_word)):
+        #    cursor.deleteChar()
+        
+    def deleteSelection(self):
+        pass
+        #position = cursor.selectionStart()
+        #cursor.removeSelectedText()
+        #cursor.setPosition(position)
+        #self.setTextCursor(cursor)
+
+    def deleteCharacter(self):
+        pass
+        
+    # Outpus function
+    def discard(self):
+        pass
+        
+    def replaceSelectedText(self, text):
+        cursor = self.editor.textCursor()
+        position = cursor.selectionStart()
+        cursor.insertText(text)
+        cursor.setPosition(position, position + len(text))
+        self.setTextCursor(cursor)
+        
+    def replaceDocument(self, text):
+        self.editor.document().setPlainText(text)
+        
+    def insertText(self, text):
+        cursor = self.editor.textCursor()
+        cursor.insertText(text)
+        
+    def afterSelectedText(self, text):
+        cursor = self.editor.textCursor()
+        position = cursor.selectionEnd()
+        cursor.setPosition(position)
+        cursor.insertText(text)
+        
+    def insertAsSnippet(self, text):
+        snippet = PMXSnippet({ 'content': text})
+        snippet.bundle = self.bundle
+        self.editor.insertBundleItem(snippet, indent = False)
+            
+    def showAsHTML(self, text):
+        self.editor.mainwindow.paneBrowser.setHtml(text, self.command)
+        self.editor.mainwindow.paneBrowser.show()
+        
+    def showAsTooltip(self, text):
+        cursor = self.editor.textCursor()
+        point = self.editor.viewport().mapToGlobal(self.editor.cursorRect(cursor).bottomRight())
+        QToolTip.showText(point, text.strip(), self.editor, self.editor.rect())
+        
+    def createNewDocument(self, text):
+        print "Nuevo documento", text
+
+# Macro
+class PMXMacroProcessor(PMXMacroProcessor):
+    pass

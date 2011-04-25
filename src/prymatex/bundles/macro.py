@@ -13,8 +13,5 @@ class PMXMacro(PMXBundleItem):
     bundle_collection = 'macros'
     def __init__(self, hash, name_space = "default", path = None):
         super(PMXMacro, self).__init__(hash, name_space, path)
-        for key in [    'beforeRunningCommand', 'command', 'output', 'input', 'commands', 
-                        'winCommand', 'fileCaptureRegister', 'scopeType', 'useGlobalClipboard',
-                        'lineCaptureRegister', 'capturePattern', 'captureFormatString', 
-                        'columnCaptureRegister', 'autoScrollOutput', 'fallbackInput', 'e_commands']:
+        for key in [    'commands', ]:
             setattr(self, key, hash.get(key, None))
