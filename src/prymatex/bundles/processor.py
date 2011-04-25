@@ -1,7 +1,7 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
-######################### SyntaxProcessor #################################
+######################### SyntaxProcessor #########################
 
 class PMXSyntaxProcessor(object):
     '''
@@ -25,6 +25,129 @@ class PMXSyntaxProcessor(object):
     def endParsing(self, name):
         pass
 
+######################### Command Processor #########################
+class PMXCommandProcessor(object):
+    def __init__(self):
+        # Inputs
+        for key in [ 'document', 'line', 'character', 'scope', 'selection', 'word', 'environment']:
+            if not hasattr(self, key):
+                setattr(self, key, None)
+    
+    def startCommand(self, command):
+        pass
+
+    def endCommand(self, command):
+        pass
+    
+    # beforeRunningCommand
+    def saveActiveFile(self):
+        pass
+    
+    # deleteFromEditor
+    def deleteWord(self):
+        pass
+    def deleteSelection(self):
+        pass
+    def deleteCharacter(self):
+        pass
+
+    # Outpus function
+    def discard(self):
+        pass
+    def replaceSelectedText(self):
+        pass
+    def replaceDocument(self):
+        pass
+    def insertText(self):
+        pass
+    def afterSelectedText(self):
+        pass
+    def insertAsSnippet(self):
+        pass
+    def showAsHTML(self):
+        pass
+    def showAsTooltip(self):
+        pass
+    def createNewDocument(self):
+        pass
+
+######################### Macro Processor #########################
+class PMXMacroProcessor(object):
+    def __init__(self):
+        pass
+
+    # Move
+    def moveRight(self):
+        pass
+   
+    def moveLeft(self):
+        pass
+        
+    def moveUp(self):
+        pass
+        
+    def moveToEndOfLine(self):
+        pass
+        
+    def moveToEndOfParagraph(self):
+        pass
+        
+    def moveToBeginningOfLine(self):
+        pass
+        
+    def moveToEndOfDocumentAndModifySelection(self):
+        pass
+        
+    def moveToBeginningOfDocumentAndModifySelection(self):
+        pass
+        
+    def moveRightAndModifySelection(self):
+        pass
+        
+    def centerSelectionInVisibleArea(self):
+        pass
+    def alignLeft(self):
+        pass
+    # Inserts
+    def insertText(self, argument):
+        pass
+        
+    def insertNewline(self):
+        pass
+    
+    # Deletes
+    def deleteForward(self):
+        pass
+        
+    def deleteBackward(self):
+        pass
+    
+    def deleteWordLeft(self):
+        pass
+        
+    def deleteToBeginningOfLine(self):
+        pass
+    # Selects
+    def selectWord(self):
+        pass
+        
+    def selectAll(self):
+        pass
+        
+    def selectHardLine(self):
+        pass
+    def executeCommandWithOptions(self, argument):
+        pass
+        
+    def insertSnippetWithOptions(self):
+        pass
+        
+    def findWithOptions(self, argument):
+        pass
+        
+    def indent(self):
+        pass
+############# DebugS Preocessors ###############
 class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self):
         self.line_number = 0
@@ -50,46 +173,3 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
 
     def endParsing(self, name):
         print '}%s' % name
-
-class PMXCommandProcessor(object):
-    '''
-        Syntax Processor, clase base para los procesadores de sintaxis
-    '''
-    def __init__(self):
-        pass
-    
-    def startCommand(self, command):
-        pass
-
-    def endCommand(self, command):
-        pass
-    
-    # beforeRunningCommand
-    def saveActiveFile(self):
-        pass
-    
-    # Inputs
-    def getDocument(self):
-        pass
-    def getCharacter(self):
-        pass
-    
-    # Outpus function
-    def discard(self):
-        pass
-    def replaceSelectedText(self):
-        pass
-    def replaceDocument(self):
-        pass
-    def insertText(self):
-        pass
-    def afterSelectedText(self):
-        pass
-    def insertAsSnippet(self):
-        pass
-    def showAsHTML(self):
-        pass
-    def showAsTooltip(self):
-        pass
-    def createNewDocument(self):
-        pass

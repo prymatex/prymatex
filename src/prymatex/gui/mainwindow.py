@@ -185,21 +185,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                 for _, item in bundle.mainMenu.iteritems():
                     self.addMenuItem(menu, item)  
     
-    #====================================================================
-    # Command outputs
-    #====================================================================
-    def showHtml(self, string, **kwargs):
-        self.paneBrowser.setHtml(string, kwargs['command'])
-        self.paneBrowser.show()
-    
-    def showTooltip(self, string, **kwargs):
-        cursor = self.currentEditor.textCursor()
-        point = self.currentEditor.viewport().mapToGlobal(self.currentEditor.cursorRect(cursor).bottomRight())
-        QToolTip.showText(point, string.strip(), self, self.rect())
-    
-    def createNewDocument(self, string, **kwargs):
-        print "Nuevo documento", string
-            
     def on_actionQuit_triggered(self):
         QApplication.quit()
     

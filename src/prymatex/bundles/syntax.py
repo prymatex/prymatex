@@ -158,7 +158,7 @@ class PMXSyntaxProxy(object):
                 return getattr(proxy_value, name)
     
     def __proxy(self):
-        if onig_compile('^#').match(self.proxy):
+        if onig_compile('^#').search(self.proxy):
             grammar = self.syntax.grammar
             if hasattr(grammar, 'repository') and grammar.repository.has_key(self.proxy[1:]):  
                 return grammar.repository[self.proxy[1:]]
@@ -289,6 +289,7 @@ class PMXSyntax(PMXBundleItem):
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if pattern.name and processor:
                         processor.closeTag(pattern.name, end_pos)
+            print end_pos
             position = end_pos
         return position
     

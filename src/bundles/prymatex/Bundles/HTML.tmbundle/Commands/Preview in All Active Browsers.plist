@@ -51,17 +51,23 @@ else
   active.each {|p| `open -a #{e_sh(p)} #{e_sh(url)}` }
 end</string>
 	<key>linuxCommand</key>
-	<string>#!/usr/bin/env ruby -wKU
+	<string>#!/usr/bin/env python
+import webbrowser
+from webbrowser import Error
+import os
 
-require "#{ENV['TM_SUPPORT_PATH']}/lib/escape.rb"
-
-if ENV['TM_PROJECT_SITEURL']
-  url = "#{ENV['TM_PROJECT_SITEURL']}" + ENV['TM_FILEPATH'].sub(/^#{Regexp.escape(ENV['TM_PROJECT_DIRECTORY'])}\//, '') 
-else
-  url = "file://#{ENV['TM_FILEPATH']}"
-end
-
-`xdg-open #{e_sh(url)}`</string>
+browsers = ['mozilla', 'firefox', 'netscape', 'galeon', 'epiphany', 'skipstone', 'kfmclient',
+    'konqueror', 'kfm', 'mosaic', 'opera', 'grail', 'links', 'elinks', 'lynx',
+    'w3m', 'windows-default', 'internet-config', 'macosx']
+    
+url = "file://" + os.environ['TM_FILEPATH']
+for browser in browsers:
+    try:
+        controller = webbrowser.get(browser)
+        if os.system('ps xc|grep -sq ' + browser) == 0:
+            controller.open(url)
+    except Error:
+        pass</string>
 	<key>input</key>
 	<string>none</string>
 	<key>name</key>

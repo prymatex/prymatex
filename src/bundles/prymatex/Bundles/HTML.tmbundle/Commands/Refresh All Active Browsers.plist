@@ -40,16 +40,23 @@ ps -xc|grep -sq Camino &amp;&amp; osascript -e 'tell app "Camino"' -e 'activate'
 ps -xc|grep -sq Chrome &amp;&amp; osascript -e 'tell app "Google Chrome"' -e 'activate' -e 'tell app "System Events" to keystroke "r" using {command down}' -e 'end tell'
 </string>
 	<key>linuxCommand</key>
-	<string>###	Refresh All Active Browsers - OmniWeb, Safari, Firefox &amp; IE
-### v1.0. 2005-03-29
-###
+	<string>#!/usr/bin/env python
+import webbrowser
+from webbrowser import Error
+import os
 
-# Check if Firefox is running, if so refresh
-ps -xc|grep -sqi firefox &amp;&amp; echo "1" > /tmp/pmxok &amp;&amp; firefox "file://$TM_FILEPATH" &amp;
-
-# Check if Chrome is running, if so refresh 
-ps -xc|grep -sq Chrome &amp;&amp; echo "1" > /tmp/pmxok &amp;&amp; chromium "file://$TM_FILEPATH" &amp; 
-</string>
+browsers = ['mozilla', 'firefox', 'netscape', 'galeon', 'epiphany', 'skipstone', 'kfmclient',
+    'konqueror', 'kfm', 'mosaic', 'opera', 'grail', 'links', 'elinks', 'lynx',
+    'w3m', 'windows-default', 'internet-config', 'macosx']
+    
+url = "file://" + os.environ['TM_FILEPATH']
+for browser in browsers:
+    try:
+        controller = webbrowser.get(browser)
+        if os.system('ps xc|grep -sq ' + browser) == 0:
+            controller.open("javascript:alert('hola');", new=0)
+    except Error:
+        pass</string>
 	<key>input</key>
 	<string>none</string>
 	<key>keyEquivalent</key>

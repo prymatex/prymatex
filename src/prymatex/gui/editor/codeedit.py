@@ -12,7 +12,7 @@ from prymatex.bundles.theme import PMXTheme
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
-from prymatex.gui.editor.syntax import PMXSyntaxProcessor, PMXBlockUserData
+from prymatex.gui.editor.processors import PMXSyntaxProcessor, PMXBlockUserData, PMXCommandProcessor, PMXMacroProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     @pmxConfigPorperty(default = 'Twilight')
     def theme(self, name):
         theme = PMXTheme.getThemeByName(name)
-        self.processor.formatter = theme
+        self.syntaxProcessor.formatter = theme
         style = theme.getStyle()
         foreground = style.getQColor('foreground')
         background = style.getQColor('background')
@@ -108,7 +108,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.sidebar = PMXSidebar(self)
-        self.processor = PMXSyntaxProcessor(self)
+        #Processors
+        self.syntaxProcessor = PMXSyntaxProcessor(self)
+        self.commandProcessor = PMXCommandProcessor(self)
+        self.macroProcessor = PMXMacroProcessor(self)
+        
         self.bookmarks = []
         self.folded = []
         
@@ -149,7 +153,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         user_data = block.userData()
         if user_data == None:
             return ""
-        if not bool(user_data) and block.userState() == self.processor.MULTI_LINE:
+        if not bool(user_data) and block.userState() == self.syntaxProcessor.MULTI_LINE:
             while not bool(block.userData()):
                 block = block.previous()
             return block.userData().getLastScope()
@@ -162,12 +166,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.editorCursorPositionChangedEvent(line+1, col+1)
         
     def setSyntax(self, syntax):
-        self.processor.syntax = syntax
+        self.syntaxProcessor.syntax = syntax
         self.editorSetSyntaxEvent(syntax)
     
     @property
     def syntax(self):
-        return self.processor.syntax
+        return self.syntaxProcessor.syntax
         
     @property
     def index(self):
@@ -543,21 +547,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(item.ends)
             self.setTextCursor(cursor)
         elif isinstance(item, PMXCommand):
-            char = line and line[cursor.columnNumber() - 1] or ""
-            item.resolve(unicode(self.toPlainText()), char, environment = self.buildEnvironment(item))
-            functions = {
-                         'replaceSelectedText': self.replaceSelectedText,
-                         'replaceDocument': self.replaceDocument,
-                         'insertText': self.insertText,
-                         'afterSelectedText': self.afterSelectedText,
-                         'insertAsSnippet': self.insertSnippet,
-                         'showAsHTML': self.mainwindow.showHtml,
-                         'showAsTooltip': self.mainwindow.showTooltip,
-                         'createNewDocument': self.mainwindow.createNewDocument
-                         }
-            item.execute(functions)
+            item.execute(self.commandProcessor)
         elif isinstance(item, PMXSyntax):
             self.setSyntax(item)
+        elif isinstance(item, PMXMacro):
+            item.execute(self.macroProcessor)
 
     def selectBundleItem(self, items, tabTrigger = False):
         syntax = any(map(lambda item: isinstance(item, PMXSyntax), items))
@@ -572,7 +566,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
     
-    def buildEnvironment(self, item):
+    # item deprecated
+    def buildEnvironment(self, item = None):
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
@@ -582,7 +577,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             current_word = line[match.start():match.end()]
         except IndexError:
             current_word = ""
-        env = item.buildEnvironment()
+        if item != None:
+            env = item.buildEnvironment()
+        else:
+            env = {}
         env.update({
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.columnNumber(), 
@@ -601,61 +599,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_DIRECTORY'] = self.parent().file.directory
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u'\u2029', '\n')
-        #env.update(self._meta.settings['static_variables'])
         env.update(preferences.shellVariables)
         return env
-
-    #==========================================================================
-    # Commands
-    #==========================================================================
-    
-    def replaceSelectedText(self, string, **kwargs):
-        if 'input' in kwargs and kwargs['input'] == 'document':
-            self.replaceDocument(string, **kwargs)
-        else:
-            cursor = self.textCursor()
-            position = cursor.selectionStart()
-            cursor.insertText(string)
-            cursor.setPosition(position, position + len(string))
-            self.setTextCursor(cursor)
-        
-    def replaceDocument(self, string, **kwargs):
-        self.document().setPlainText(string)
-        
-    def insertText(self, string, **kwargs):
-        cursor = self.textCursor()
-        cursor.insertText(string)
-    
-    def afterSelectedText(self, string, **kwargs):
-        cursor = self.textCursor()
-        position = cursor.selectionEnd()
-        cursor.setPosition(position)
-        cursor.insertText(string)
-    
-    def insertSnippet(self, snippet, **kwargs):
-        '''Create a new snippet and insert'''
-        cursor = self.textCursor()
-        if 'input' in kwargs:
-            if kwargs['input'] == 'selection':
-                position = cursor.selectionStart()
-                cursor.removeSelectedText()
-                cursor.setPosition(position)
-                self.setTextCursor(cursor)
-                self.insertBundleItem(snippet, indent = False)
-            elif kwargs['input'] == 'word':
-                line = unicode(cursor.block().text())
-                match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
-                current_word = line[match.start():match.end()]
-                index = cursor.columnNumber() - len(current_word)
-                index = index >= 0 and index or 0
-                index = line.find(current_word, index)
-                cursor.setPosition(cursor.block().position() + index)
-                self.setTextCursor(cursor)
-                for _ in range(len(current_word)):
-                    cursor.deleteChar()
-                self.insertBundleItem(snippet)
-        else:
-            self.insertBundleItem(snippet, indent = False)
 
     #==========================================================================
     # Folding
