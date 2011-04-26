@@ -339,9 +339,14 @@ def print_snippet_syntax():
     
 def test_syntaxes():
     from prymatex.bundles.syntax import PMXSyntax
-    from prymatex.bundles.processor import PMXDebugSyntaxProcessor
+    from time import time
+    from prymatex.bundles.processor import PMXSyntaxProcessor
     syntax = PMXSyntax.getSyntaxesByName("Python")
-    syntax[0].parse("class Persona(object):", PMXDebugSyntaxProcessor())
+    file = open('../gui/editor/codeedit.py', 'r');
+    start = time()
+    syntax[0].parse(file.read(), PMXSyntaxProcessor())
+    file.close()
+    print "Time:", time() - start
     print PMXSyntax.getSyntaxesNames()
 
 def print_commands():
@@ -397,4 +402,4 @@ if __name__ == '__main__':
     from pprint import pprint
     for file in glob(os.path.join('../../bundles/prymatex/Bundles', '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    print_commands()
+    test_syntaxes()

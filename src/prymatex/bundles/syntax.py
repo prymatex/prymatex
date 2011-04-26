@@ -70,7 +70,8 @@ class PMXSyntaxNode(object):
     
     def parse_captures(self, name, pattern, match, processor):
         captures = pattern.match_captures( name, match )
-        captures = filter(lambda (group, range, name): range[0] and range[0] != range[-1], captures)
+        #Aca tengo que comparar con -1, Ver nota en match_captures
+        captures = filter(lambda (group, range, name): range != -1 and range[0] != range[-1], captures)
         starts = []
         ends = []
         for group, range, name in captures:
@@ -99,8 +100,10 @@ class PMXSyntaxNode(object):
         
         if captures:
             for key, value in captures:
-                if onig_compile('^\d*$').match(key):
+                if re.compile('^\d*$').match(key):
                     if int(key) <= len(match.groups):
+                        #Problemas entre pytgon y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
+                        #esto es importante para el filtro del llamador
                         matches.append([int(key), match.span(int(key)), value['name']])
                 else:
                     if match.groups[ key ]:
@@ -157,7 +160,7 @@ class PMXSyntaxProxy(object):
                 return getattr(proxy_value, name)
     
     def __proxy(self):
-        if onig_compile('^#').search(self.proxy):
+        if re.compile('^#').search(self.proxy):
             grammar = self.syntax.grammar
             if hasattr(grammar, 'repository') and grammar.repository.has_key(self.proxy[1:]):  
                 return grammar.repository[self.proxy[1:]]
