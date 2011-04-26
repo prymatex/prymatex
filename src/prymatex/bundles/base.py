@@ -340,14 +340,13 @@ def print_snippet_syntax():
 def test_syntaxes():
     from prymatex.bundles.syntax import PMXSyntax
     from time import time
-    from prymatex.bundles.processor import PMXSyntaxProcessor
+    from prymatex.bundles.processor import PMXDebugSyntaxProcessor
     syntax = PMXSyntax.getSyntaxesByName("Python")
     file = open('../gui/editor/codeedit.py', 'r');
     start = time()
-    syntax[0].parse(file.read(), PMXSyntaxProcessor())
+    syntax[0].parse(file.read(), PMXDebugSyntaxProcessor())
     file.close()
     print "Time:", time() - start
-    print PMXSyntax.getSyntaxesNames()
 
 def print_commands():
     before = []

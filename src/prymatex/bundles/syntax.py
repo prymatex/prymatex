@@ -10,8 +10,7 @@
 #TODO: Importar el adaptador a sre de oniguruma y hacer que compile con re lo que pueda y con onig el resto
 
 import re
-import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP, ENCODING_UTF8
+from ponyguruma import sre
 from prymatex.bundles.base import PMXBundleItem
 
 # Profiling
@@ -24,8 +23,12 @@ except Exception, e:
 else:
     PROFILING_CAPABLE = True
     
-
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP, encoding = ENCODING_UTF8)
+def compileRegexp(string):
+    #Muejejejeje
+    try:
+        return re.compile(unicode(string))
+    except:
+        return sre.compile(unicode(string))
 
 SPLITLINES = re.compile('\n')
 
@@ -38,7 +41,7 @@ class PMXSyntaxNode(object):
         for key, value in hash.iteritems():
             try:
                 if key in ['match', 'begin']:
-                    setattr(self, key, onig_compile( value ))
+                    setattr(self, key, compileRegexp( value ))
                 elif key in ['content', 'name', 'contentName', 'end']:
                     setattr(self, key, value )
                 elif key in ['captures', 'beginCaptures', 'endCaptures']:
@@ -50,7 +53,7 @@ class PMXSyntaxNode(object):
                     self.create_children(value)
             except TypeError, e:
                 #an encoding can only be given for non-unicode patterns
-                print e
+                print e, value
     
     def parse_repository(self, repository):
         self.repository = {}
@@ -101,13 +104,13 @@ class PMXSyntaxNode(object):
         if captures:
             for key, value in captures:
                 if re.compile('^\d*$').match(key):
-                    if int(key) <= len(match.groups):
+                    if int(key) <= len(match.groups()):
                         #Problemas entre pytgon y ruby, al pones un span del match, en un None oniguruma me retorna (-1, -1),
                         #esto es importante para el filtro del llamador
                         matches.append([int(key), match.span(int(key)), value['name']])
                 else:
-                    if match.groups[ key ]:
-                        matches.append([match.groups[ key ], match.groupdict[ key ], value['name']])
+                    if match.groups()[ key ]:
+                        matches.append([match.groups()[ key ], match.groupdict[ key ], value['name']])
         return matches
       
     def match_first(self, string, position):
@@ -134,9 +137,9 @@ class PMXSyntaxNode(object):
             print "d_match"
             index = mobj.group(0)
             return match.groupdict[index]
-        regstring = onig_compile('\\\\([1-9])').sub(g_match, regstring)
-        regstring = onig_compile('\\\\k<(.*?)>').sub(d_match, regstring)
-        return onig_compile( regstring ).search( string, position )
+        regstring = compileRegexp(u'\\\\([1-9])').sub(g_match, regstring)
+        regstring = compileRegexp(u'\\\\k<(.*?)>').sub(d_match, regstring)
+        return compileRegexp( regstring ).search( string, position )
     
     def match_first_son(self, string, position):
         match = (None, None)
@@ -190,7 +193,7 @@ class PMXSyntax(PMXBundleItem):
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                 #Compiled keys
                 try:
-                    value = onig_compile( value )
+                    value = compileRegexp( value )
                 except TypeError, e:
                     #an encoding can only be given for non-unicode patterns
                     value = None
@@ -227,7 +230,6 @@ class PMXSyntax(PMXBundleItem):
         if processor:
             processor.startParsing(self.scopeName)
         stack = [[self.grammar, None]]
-        string = string.encode('utf-8')
         for line in SPLITLINES.split(string):
             self.parseLine(stack, line, processor)
         if processor:
