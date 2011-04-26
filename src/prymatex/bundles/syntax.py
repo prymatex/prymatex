@@ -26,7 +26,9 @@ else:
 def compileRegexp(string):
     #Muejejejeje
     try:
-        return re.compile(unicode(string))
+        #restring = string.replace('?i:', '(?i)').replace('?x:', '(?x)').replace('?<=', '(?<=)')
+        restring = string
+        return re.compile(unicode(restring))
     except:
         return sre.compile(unicode(string))
 
