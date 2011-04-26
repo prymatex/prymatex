@@ -4,10 +4,10 @@
 '''
     Snippte's module
 '''
-import logging
+import re, logging
 from copy import deepcopy
-import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_DONT_CAPTURE_GROUP, OPTION_MULTILINE
+from ponyguruma import sre
+from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
 from prymatex.bundles.base import PMXBundleItem
 from prymatex.bundles.processor import PMXSyntaxProcessor
 from prymatex.bundles.syntax import PMXSyntax
@@ -528,7 +528,7 @@ class VariableTransformation(Node):
         self.regexp.resolve(indentation, tabreplacement, environment)
 
 class Regexp(NodeList):
-    _repl_re = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)(r"\$(?:(\d+)|g<(.+?)>)")
+    _repl_re = re.compile(r"\$(?:(\d+)|g<(.+?)>)", re.UNICODE)
     
     def __init__(self, scope, parent = None):
         super(Regexp, self).__init__(scope, parent)
@@ -600,7 +600,7 @@ class Regexp(NodeList):
         repl = None
         def expand(m, template):
             def handle(match):
-                numeric, named = match.groups
+                numeric, named = match.groups()
                 if numeric:
                     return m.group(int(numeric)) or ""
                 return m.group(named) or ""
@@ -618,7 +618,7 @@ class Regexp(NodeList):
                 repl = self.prepare_replacement(str(child))
                 result += self.pattern.sub(repl, text)
             elif isinstance(child, Condition):
-                for match in self.pattern.find(text):
+                for match in self.pattern.finditer(text):
                     repl = match[child.index] != None and child.insertion or child.otherwise
                     if repl == None:
                         continue
@@ -644,7 +644,7 @@ class Regexp(NodeList):
         flags = [OPTION_CAPTURE_GROUP]
         if self.option_multiline:
             flags.append(OPTION_MULTILINE)
-        self.pattern = onig.Regexp.factory(flags = reduce(lambda x, y: x | y, flags, 0))(self.pattern)
+        self.pattern = sre.compile(unicode(self.pattern), reduce(lambda x, y: x | y, flags, 0))
         super(Regexp, self).resolve(indentation, tabreplacement, environment)
     
 class Shell(NodeList):    

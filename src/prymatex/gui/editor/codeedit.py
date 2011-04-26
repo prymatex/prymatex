@@ -156,6 +156,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             return block.userData().getLastScope()
         return user_data.getScopeAtPosition(cursor.columnNumber())
     
+    def getCurrentWordAndIndex(self):
+        cursor = self.textCursor()
+        line = unicode(cursor.block().text())
+        matchs = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line))
+        if matchs:
+            match = matchs.pop()
+            word = line[match.start():match.end()]
+            index = cursor.columnNumber() - match.start()
+            return word, index
+        return None, 0
+    
     def sendCursorPosChange(self):
         c = self.textCursor()
         line  = c.blockNumber()
@@ -568,11 +579,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
         preferences = PMXBundle.getPreferenceSettings(scope)
-        try:
-            match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
-            current_word = line[match.start():match.end()]
-        except IndexError:
-            current_word = ""
+        current_word, _ = self.getCurrentWordAndIndex()
         if item != None:
             env = item.buildEnvironment()
         else:
@@ -585,7 +592,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 'TM_SOFT_TABS': self.softTabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': self.tabSize,
         });
-        if current_word != "":
+        if current_word != None:
             env['TM_CURRENT_WORD'] = current_word
         if self.syntax != None:
             env['TM_MODE'] = self.syntax.name

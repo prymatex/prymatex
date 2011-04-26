@@ -15,3 +15,12 @@ class PMXMacro(PMXBundleItem):
         super(PMXMacro, self).__init__(hash, name_space, path)
         for key in [    'commands', ]:
             setattr(self, key, hash.get(key, None))
+
+    def execute(self, processor):
+        for command in self.commands:
+            print command
+            name = command['command'][:-1]
+            method = getattr(processor, name, None)
+            if callable(method):
+                method()
+        

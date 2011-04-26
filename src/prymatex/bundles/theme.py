@@ -80,9 +80,12 @@ class PMXTheme(object):
             if theme.name == name:
                 return theme
 
+    def clearCache(self):
+        PMXTheme.STYLES_CACHE = {}
+        
     def getStyle(self, scope = None):
-        if scope in self.STYLES_CACHE:
-            return self.STYLES_CACHE[scope]
+        if scope in PMXTheme.STYLES_CACHE:
+            return PMXTheme.STYLES_CACHE[scope]
         base = copy(self.default)
         if scope == None:
             return base
@@ -95,5 +98,5 @@ class PMXTheme(object):
         styles.sort(key = lambda t: t[0])
         for score, style in styles:
             base.update(style)
-        self.STYLES_CACHE[scope] = base
+        PMXTheme.STYLES_CACHE[scope] = base
         return base

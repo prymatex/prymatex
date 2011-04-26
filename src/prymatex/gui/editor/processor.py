@@ -69,8 +69,11 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     
     def getFormatter(self):
         return self.__formatter
-    def setFormatter(self, syntax):
-        self.__formatter =  syntax
+    def setFormatter(self, formatter):
+        self.__formatter =  formatter
+        #Deprecate cache
+        self.__formatter.clearCache()
+        PMXSyntaxProcessor.FORMAT_CACHE = {}
         self.rehighlight()
     formatter = property(getFormatter, setFormatter)
 
@@ -102,9 +105,9 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
             scopes = " ".join(self.scopes)
             self.userData.addScope(begin, end, scopes)
             if self.formatter != None:
-                if scopes not in self.FORMAT_CACHE:
-                    self.FORMAT_CACHE[scopes] = self.formatter.getStyle(scopes).QTextFormat
-                self.setFormat(begin, end - begin, self.FORMAT_CACHE[scopes])
+                if scopes not in PMXSyntaxProcessor.FORMAT_CACHE:
+                    PMXSyntaxProcessor.FORMAT_CACHE[scopes] = self.formatter.getStyle(scopes).QTextFormat
+                self.setFormat(begin, end - begin, PMXSyntaxProcessor.FORMAT_CACHE[scopes])
         self.line_position = end
     
     def newLine(self, line):
@@ -229,9 +232,13 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     # deleteFromEditor
     def deleteWord(self):
+        word, index = self.editor.getCurrentWordAndIndex()
+        print word, index
         cursor = self.editor.textCursor()
-        cursor.select(QTextCursor.WordUnderCursor)
-        cursor.removeSelectedText()
+        for _ in xrange(index):
+            cursor.deletePreviousChar()
+        for _ in xrange(len(word) - index):
+            cursor.deleteChar()
         
     def deleteSelection(self):
         cursor = self.editor.textCursor()
@@ -287,3 +294,22 @@ class PMXMacroProcessor(PMXMacroProcessor):
     def __init__(self, editor):
         super(PMXMacroProcessor, self).__init__()
         self.editor = editor
+    
+    # Move
+    def moveRight(self):
+        cursor = self.editor.textCursor()
+        cursor.setPosition(cursor.position() + 1)
+        self.editor.setTextCursor(cursor)
+   
+    def moveLeft(self):
+        cursor = self.editor.textCursor()
+        cursor.setPosition(cursor.position() - 1)
+        self.editor.setTextCursor(cursor)
+        
+    def selectHardLine(self):
+        cursor = self.editor.textCursor()
+        cursor.select(QTextCursor.LineUnderCursor)
+        self.editor.setTextCursor(cursor)
+        
+    def deleteBackward(self):
+        pass
