@@ -8,6 +8,7 @@ Application configuration based on Qt's QSettings module.
 from PyQt4.Qt import QSettings
 from os.path import join, abspath, expanduser, dirname, exists
 from os import makedirs
+from prymatex.lib import deco
 
 PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"
@@ -30,7 +31,7 @@ def build_prymatex_profile(path):
     makedirs(join(path, 'log'))
     makedirs(join(path, 'var'))
     
-    
+@deco.printparams_and_output
 def get_prymatex_profile_path(name, base):
     path = abspath(join(base, name.lower()))
     if not exists(path):

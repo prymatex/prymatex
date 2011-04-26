@@ -137,15 +137,47 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
             flags |= QTextDocument.FindWholeWords
         return flags
     
+    __replacement = None
+    @property
+    def setReplacement(self, text):
+        self.__replacement = text
+    replacement = property(fget = lambda s: s.__replacement, fset = setReplacement)
+    
     def replace(self, text):
         print "replace with", self.regexp, text
         if not self.regexp:
+            # Tehre's no pattern to find, let's focus find box
             self.focusFindBox.emit()
             return
         
+        self.replacement = text
+        # Start from begining?
+        cursor = self.textEdit.textCursor()
+        cursor.movePosition(QTextCursor.Start)
+        self.textEdit.setTextCursor(cursor)
+        
+        cursor = self.textEdit.textCursor()
+        cursor = self.textEdit.document().find(self.regexp, cursor, self.flags)
+        if not cursor.isNull():
+            cursor.beginEditBlock()
+            #cursor.clearSelection()
+            #cursor.movePosition(QTextCursor.NextWord, QTextCursor.KeepAnchor)
+            cursor.insertText(self.replacement)
+            #cur
+            cursor.endEditBlock()
+        
+        return cursor
     
     def replaceAndFindNext(self):
-        pass
+        cursor = self.textEdit.textCursor()
+        cursor = self.textEdit.document().find(self.regexp, cursor, self.flags)
+        if not cursor.isNull():
+            cursor.beginEditBlock()
+            cursor.insertText(self.replacement)
+            cursor.endEditBlock()
+            cursor = self.textEdit.document().find(self.regexp, cursor, self.flags)
+            if not cursor.isNull():
+                self.textEdit.setTextCursor(cursor)
     
     def replaceAndFindPrevious(self):
         pass
