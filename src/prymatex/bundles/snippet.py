@@ -659,7 +659,7 @@ class Shell(NodeList):
     def resolve(self, indentation, tabreplacement, environment):
         command = ensureShellScript(self.render())
         temp_command_file = makeExecutableTempFile(command)
-        process = Popen([temp_command_file], stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(environment))
+        process = Popen([temp_command_file], stdout=PIPE, stderr=STDOUT, env = environment)
         text = process.stdout.read()
         text = text.strip()
         process.stdout.close()
@@ -798,7 +798,7 @@ class PMXSnippet(PMXBundleItem):
         self.addTaborder(processor.taborder)
 
     def resolve(self, indentation = "", tabreplacement = "\t", environment = {}):
-        self.snippet.resolve(indentation, tabreplacement, environment)
+        self.snippet.resolve(indentation, tabreplacement, ensureEnvironment(environment))
         
     def setStarts(self, value):
         self.snippet.starts = value

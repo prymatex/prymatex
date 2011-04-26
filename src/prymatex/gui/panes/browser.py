@@ -13,23 +13,6 @@ from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, de
 from subprocess import Popen, PIPE, STDOUT
 from prymatex.core.config import pmxConfigPorperty
 
-#http://diotavelli.net/PyQtWiki/SampleCode
-'''
-if 'http_proxy' in os.environ:
-    proxy_url = QtCore.QUrl(os.environ['http_proxy'])
-    if unicode(proxy_url.scheme()).starstswith('http'):
-        protocol = QtNetwork.QNetworkProxy.HttpProxy
-    else:
-        protocol = QtNetwork.QNetworkProxy.Socks5Proxy
-    QtNetwork.QNetworkProxy.setApplicationProxy(
-        QtNetwork.QNetworkProxy(
-            protocol,
-            proxy_url.host(),
-            proxy_url.port(),
-            proxy_url.userName(),
-            proxy_url.password()))
-            '''
-
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):
         super(TmFileReply, self).__init__(parent)
@@ -80,12 +63,10 @@ class NetworkAccessManager(QNetworkAccessManager, PMXObject):
 js = """
 TextMate.system = function(command, callback) {
     this._system(command);
-    if (callback == null) {
-        _systemWrapper.close();
-        return null;
-    } else {
-        return _systemWrapper;
+    if (callback != null) {
+        
     }
+    return _systemWrapper;
 }
 """
 

@@ -57,23 +57,23 @@ class PMXCommandProcessor(object):
         pass
 
     # Outpus function
-    def discard(self):
+    def discard(self, text):
         pass
-    def replaceSelectedText(self):
+    def replaceSelectedText(self, text):
         pass
-    def replaceDocument(self):
+    def replaceDocument(self, text):
         pass
-    def insertText(self):
+    def insertText(self, text):
         pass
-    def afterSelectedText(self):
+    def afterSelectedText(self, text):
         pass
-    def insertAsSnippet(self):
+    def insertAsSnippet(self, text):
         pass
-    def showAsHTML(self):
+    def showAsHTML(self, text):
         pass
-    def showAsTooltip(self):
+    def showAsTooltip(self, text):
         pass
-    def createNewDocument(self):
+    def createNewDocument(self, text):
         pass
 
 ######################### Macro Processor #########################

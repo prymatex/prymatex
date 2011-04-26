@@ -242,7 +242,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.deleteChar()
         
     # Outpus function
-    def discard(self):
+    def discard(self, text):
         pass
         
     def replaceSelectedText(self, text):

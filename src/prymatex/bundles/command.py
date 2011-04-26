@@ -123,9 +123,13 @@ class PMXCommand(PMXBundleItem):
         if input_type != None:
             process.stdin.write(input_value)
         process.stdin.close()
-        output_value = process.stdout.read()
+        try:
+            output_value = process.stdout.read()
+        except IOError:
+            pass
         process.stdout.close()
         output_type = process.wait()
+        print output_type
         output_handler = self.getOutputHandler(output_type)
         
         if input_type != None:

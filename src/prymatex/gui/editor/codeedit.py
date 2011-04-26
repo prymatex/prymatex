@@ -285,7 +285,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #Si lo toma un bundle item o un snippet retorno
         if self.snippetMode: #Modo Snippet
             if self.keyPressBundleItem(event):
-                self.snippet = None
                 return
             elif self.keyPressSnippet(event):
                 return

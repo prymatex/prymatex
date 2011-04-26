@@ -372,7 +372,6 @@ def test_bundle_elements():
     pprint(PMXBundle.TEMPLATES)
 
 def test_preferences():
-    from time import time
     settings = PMXBundle.getPreferenceSettings('source.c++')
     for key in settings.KEYS:
         print key, getattr(settings, key)
