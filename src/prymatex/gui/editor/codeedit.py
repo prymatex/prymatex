@@ -5,14 +5,11 @@ from bisect import bisect
 from PyQt4.QtCore import QRect, Qt, SIGNAL, QEvent
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette
-from prymatex.bundles import PMXBundle, PMXSnippet
-from prymatex.bundles.command import PMXCommand
-from prymatex.bundles.syntax import PMXSyntax
-from prymatex.bundles.theme import PMXTheme
+from prymatex.bundles import PMXBundle, PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXTheme
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
-from prymatex.gui.editor.processors import PMXSyntaxProcessor, PMXBlockUserData, PMXCommandProcessor, PMXMacroProcessor
+from prymatex.gui.editor.processor import PMXSyntaxProcessor, PMXBlockUserData, PMXCommandProcessor, PMXMacroProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -288,7 +285,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #Si lo toma un bundle item o un snippet retorno
         if self.snippetMode: #Modo Snippet
             if self.keyPressBundleItem(event):
-                self.snippet = None
                 return
             elif self.keyPressSnippet(event):
                 return

@@ -345,17 +345,12 @@ def test_syntaxes():
     print PMXSyntax.getSyntaxesNames()
 
 def print_commands():
-    from prymatex.bundles.snippet import PMXSnippet
-    for key, values in PMXBundle.KEY_EQUIVALENTS.iteritems():
-        print key, chr(key)
-        if 0 == key:
-            for value in values:
-                print value.bundle.name, value.scope
-                if isinstance(value, PMXSnippet):
-                    print value.content
-                else:
-                    print value
-        
+    before = []
+    for bundle in PMXBundle.BUNDLES.values():
+        for command in bundle.commands:
+            if command.beforeRunningCommand != "nop":
+                before.append(command.beforeRunningCommand)
+    print before
 
 def test_keys():
     from pprint import pprint
@@ -377,7 +372,6 @@ def test_bundle_elements():
     pprint(PMXBundle.TEMPLATES)
 
 def test_preferences():
-    from time import time
     settings = PMXBundle.getPreferenceSettings('source.c++')
     for key in settings.KEYS:
         print key, getattr(settings, key)
@@ -401,6 +395,6 @@ def test_queryItems():
 if __name__ == '__main__':
     from prymatex.bundles import BUNDLEITEM_CLASSES
     from pprint import pprint
-    for file in glob(os.path.join('/home/dvanhaaster/workspace/prymatex/src/bundles/prymatex/Bundles', '*')):
+    for file in glob(os.path.join('../../bundles/prymatex/Bundles', '*')):
         PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_syntaxes()
+    print_commands()

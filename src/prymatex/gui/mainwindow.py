@@ -371,11 +371,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
     @pyqtSignature('')
     def on_actionZoom_In_triggered(self):
-        self.current_editor_widget.zoomIn()
+        self.current_editor_widget.codeEdit.zoomIn()
     
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
-        self.current_editor_widget.zoomOut()
+        self.current_editor_widget.codeEdit.zoomOut()
     
     @pyqtSignature('')
     def on_actionFocus_Editor_triggered(self):

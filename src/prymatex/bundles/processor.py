@@ -31,7 +31,8 @@ class PMXCommandProcessor(object):
         # Inputs
         for key in [ 'document', 'line', 'character', 'scope', 'selection', 'word', 'environment']:
             if not hasattr(self, key):
-                setattr(self, key, None)
+                print "no tiene", key
+                #setattr(self, key, None)
     
     def startCommand(self, command):
         pass
@@ -41,7 +42,11 @@ class PMXCommandProcessor(object):
     
     # beforeRunningCommand
     def saveActiveFile(self):
-        pass
+        return True
+    def saveModifiedFiles(self):
+        return True
+    def nop(self):
+        return True
     
     # deleteFromEditor
     def deleteWord(self):
@@ -52,23 +57,23 @@ class PMXCommandProcessor(object):
         pass
 
     # Outpus function
-    def discard(self):
+    def discard(self, text):
         pass
-    def replaceSelectedText(self):
+    def replaceSelectedText(self, text):
         pass
-    def replaceDocument(self):
+    def replaceDocument(self, text):
         pass
-    def insertText(self):
+    def insertText(self, text):
         pass
-    def afterSelectedText(self):
+    def afterSelectedText(self, text):
         pass
-    def insertAsSnippet(self):
+    def insertAsSnippet(self, text):
         pass
-    def showAsHTML(self):
+    def showAsHTML(self, text):
         pass
-    def showAsTooltip(self):
+    def showAsTooltip(self, text):
         pass
-    def createNewDocument(self):
+    def createNewDocument(self, text):
         pass
 
 ######################### Macro Processor #########################

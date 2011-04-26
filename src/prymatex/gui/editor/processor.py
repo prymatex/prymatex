@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
-from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
-from prymatex.bundles import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor, PMXSyntax, PMXPreferenceSettings, PMXBundle
+from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QToolTip, QTextCursor
+from prymatex.bundles import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor, PMXSnippet, PMXSyntax, PMXPreferenceSettings, PMXBundle
 
 from logging import getLogger
 logger = getLogger(__file__)
@@ -163,7 +163,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 # Command
 class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
-        PMXCommandProcessor.__init__(self)
+        super(PMXCommandProcessor, self).__init__()
         self.editor = editor
 
     #Inputs
@@ -177,8 +177,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     @property
     def character(self):
-        char = line and line[cursor.columnNumber() - 1] or ""
-        return unicode(char)
+        cursor = self.editor.textCursor()
+        return cursor.document().characterAt(cursor.position()).toAscii()
         
     @property
     def scope(self):
@@ -193,7 +193,11 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
             return self.environment['TM_SELECTED_TEXT']
-
+        
+    @property
+    def selectedText(self):
+        return self.selection
+    
     @property
     def word(self):
         if 'TM_CURRENT_WORD' in self.environment:
@@ -202,7 +206,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_COLUMN'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_CURRENT_WORD'], index)
             self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_CURRENT_WORD'], index)
-            return self.environment['TM_SELECTED_TEXT']
+            return self.environment['TM_CURRENT_WORD']
 
     @property
     def environment(self):
@@ -216,32 +220,29 @@ class PMXCommandProcessor(PMXCommandProcessor):
         #env.update(self.editor.mainwindow._meta.settings['static_variables'])
         self.__env = env
 
+    #beforeRunningCommand
+    def saveModifiedFiles(self):
+        return self.editor.mainwindow.on_actionSaveAll_triggered()
+    
+    def saveActiveFile(self):
+        return self.editor.mainwindow.on_actionSave_triggered()
+    
     # deleteFromEditor
     def deleteWord(self):
-        pass
-        #line = unicode(cursor.block().text())
-        #match = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line)).pop()
-        #current_word = line[match.start():match.end()]
-        #index = cursor.columnNumber() - len(current_word)
-        #index = index >= 0 and index or 0
-        #index = line.find(current_word, index)
-        #cursor.setPosition(cursor.block().position() + index)
-        #self.setTextCursor(cursor)
-        #for _ in range(len(current_word)):
-        #    cursor.deleteChar()
+        cursor = self.editor.textCursor()
+        cursor.select(QTextCursor.WordUnderCursor)
+        cursor.removeSelectedText()
         
     def deleteSelection(self):
-        pass
-        #position = cursor.selectionStart()
-        #cursor.removeSelectedText()
-        #cursor.setPosition(position)
-        #self.setTextCursor(cursor)
+        cursor = self.editor.textCursor()
+        cursor.removeSelectedText()
 
     def deleteCharacter(self):
-        pass
+        cursor = self.editor.textCursor()
+        cursor.deleteChar()
         
     # Outpus function
-    def discard(self):
+    def discard(self, text):
         pass
         
     def replaceSelectedText(self, text):
@@ -249,7 +250,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         position = cursor.selectionStart()
         cursor.insertText(text)
         cursor.setPosition(position, position + len(text))
-        self.setTextCursor(cursor)
+        self.editor.setTextCursor(cursor)
         
     def replaceDocument(self, text):
         self.editor.document().setPlainText(text)
@@ -266,7 +267,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def insertAsSnippet(self, text):
         snippet = PMXSnippet({ 'content': text})
-        snippet.bundle = self.bundle
+        snippet.bundle = self.command.bundle
         self.editor.insertBundleItem(snippet, indent = False)
             
     def showAsHTML(self, text):
@@ -283,4 +284,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
 # Macro
 class PMXMacroProcessor(PMXMacroProcessor):
-    pass
+    def __init__(self, editor):
+        super(PMXMacroProcessor, self).__init__()
+        self.editor = editor

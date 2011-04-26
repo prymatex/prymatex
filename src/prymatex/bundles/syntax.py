@@ -13,7 +13,6 @@ import re
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, ENCODING_UTF8
 from prymatex.bundles.base import PMXBundleItem
-from prymatex.bundles.score import PMXScoreManager
 
 # Profiling
 
@@ -289,7 +288,6 @@ class PMXSyntax(PMXBundleItem):
                         grammar.parse_captures('captures', pattern, pattern_match, processor)
                     if pattern.name and processor:
                         processor.closeTag(pattern.name, end_pos)
-            print end_pos
             position = end_pos
         return position
     
