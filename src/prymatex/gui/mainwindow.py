@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import itertools
 import logging
 from PyQt4.QtCore import QUrl
@@ -68,9 +69,30 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
         self.preventMenuLock()
         
+        self.manageFilesToOpen(files_to_open)
+        
+    
+    def manageFilesToOpen(self,files_to_open):
+        '''
+        this will try to open the files that we 
+        pass to prymatex from command line
+        if the file is a directory the file browser
+        will be updated to that path!.  
+        '''
+        #TODO: mejorar esto
         for file in files_to_open:
-            print "Opening file", file
-            self.openFile(file)
+            if os.path.exists(file):
+                if os.path.isfile(file):
+                    self.openFile(file)
+                    continue
+                if os.path.isdir(file):
+                    self.paneFileSystem.show()
+                    fstree = self.paneFileSystem.widget().tree
+                    index = fstree.model().index(file)
+                    fstree.setCurrentIndex(index)
+                    fstree.setRootIndex(index)
+                
+                
     
     def setupLogging(self):
         '''
