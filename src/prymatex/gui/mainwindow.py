@@ -72,25 +72,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.manageFilesToOpen(files_to_open)
         
     
-    def manageFilesToOpen(self,files_to_open):
+    def manageFilesToOpen(self,files):
         '''
-        this will try to open the files that we 
-        pass to prymatex from command line
-        if the file is a directory the file browser
-        will be updated to that path!.  
+            Files to open
         '''
-        #TODO: mejorar esto
-        for file in files_to_open:
-            if os.path.exists(file):
-                if os.path.isfile(file):
-                    self.openFile(file)
-                    continue
-                if os.path.isdir(file):
-                    self.paneFileSystem.show()
-                    fstree = self.paneFileSystem.widget().tree
-                    index = fstree.model().index(file)
-                    fstree.setCurrentIndex(index)
-                    fstree.setRootIndex(index)
+        map(lambda file: self.openFile(file, auto_focus=True), [ file for file in files if os.path.isfile(file) ] )
+       
                 
                 
     
@@ -124,7 +111,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         '''
         self.paneFileSystem = PMXFSPaneDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
-        self.paneFileSystem.hide()
+        
+        if qApp.instance().options.startdir:
+            self.paneFileSystem.show()
+        else:
+            self.paneFileSystem.hide()
+            
         self.paneFileSystem.associateAction(self.actionShow_File_System_Pane,
                                             self.trUtf8("Show Filesystem Panel"),
                                             self.trUtf8("Hide Filesystem Panel"))
