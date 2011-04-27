@@ -106,7 +106,7 @@ if __name__ == "__main__":
             print "<thead><th>Name</th><th>Trigger</th></thead>"
             for snippet in bundle.snippets:
                 try:
-                    print "<tr><td>%s</td><td>%s</td>" % (snippet.name, snippet.trigger)
+                    print "<tr><td>%s</td><td>%s</td></tr>" % (snippet.name, snippet.trigger)
                 except:
                     pass
             print "</table>"
@@ -119,7 +119,7 @@ if __name__ == "__main__":
             print "<thead><th>Name</th><th>Trigger</th></thead>"
             for command in bundle.commands:
                 try:
-                    print "<tr><td>%s</td><td>%s</td>" % (command.name, command.trigger)
+                    print "<tr><td>%s</td><td>%s</td></tr>" % (command.name, command.trigger)
                 except:
                     pass
             print "</table>"
@@ -132,7 +132,7 @@ if __name__ == "__main__":
             print "<thead><th>Name</th><th>Trigger</th></thead>"
             for macro in bundle.macros:
                 try:
-                    print "<tr><td>%s</td><td>%s</td>" % (macro.name, macro.trigger)
+                    print "<tr><td>%s</td><td>%s</td></tr>" % (macro.name, macro.trigger)
                 except:
                     pass
             print "</table>"
