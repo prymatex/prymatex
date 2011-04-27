@@ -96,18 +96,10 @@ class PMXCommand(PMXBundleItem):
         return html
         
     def getOutputHandler(self, code):
-        ''' showAsHTML
-            showAsTooltip
-            insertAsSnippet
-            replaceSelectedText
-            replaceDocument
-        '''
-        type = ''
         if self.output != 'showAsHTML' and code in self.exit_codes:
-            type = self.exit_codes[code]
+            return self.exit_codes[code]
         else:
-            type = self.output
-        return type
+            return self.output
     
     def execute(self, processor):
         if hasattr(self, 'beforeRunningCommand') and self.beforeRunningCommand != None:
@@ -129,10 +121,9 @@ class PMXCommand(PMXBundleItem):
             pass
         process.stdout.close()
         output_type = process.wait()
-        print output_type
         output_handler = self.getOutputHandler(output_type)
         
-        if input_type != None:
+        if input_type != None and output_handler != "discard":
             deleteMethod = getattr(processor, 'delete' + input_type.title(), None)
             if deleteMethod != None:
                 deleteMethod()
