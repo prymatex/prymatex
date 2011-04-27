@@ -441,7 +441,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             scope = self.getCurrentScope()
             trigger = PMXBundle.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
-            print trigger
             if trigger != None:
                 snippets = PMXBundle.getTabTriggerItem(trigger, scope)
                 if len(snippets) > 1:
@@ -521,7 +520,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def insertBundleItem(self, item, tabTrigger = False, indent = True):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
-        print "Bundle %s Item %s, ( %s )" % (item.bundle.name, item.name, item.hash)
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         indentation = indent and self.indentationWhitespace(line) or ""

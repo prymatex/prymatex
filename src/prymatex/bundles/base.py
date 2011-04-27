@@ -171,7 +171,6 @@ class PMXBundle(object):
         with_scope = []
         for p in preferences:
             with_scope.extend(p)
-        print with_scope, without_scope
         return with_scope and with_scope or without_scope
 
     @classmethod
@@ -209,7 +208,6 @@ class PMXBundle(object):
                         with_scope.append((score, item))
             with_scope.sort(key = lambda t: t[0], reverse = True)
             with_scope = map(lambda (score, item): item, with_scope)
-        print with_scope, without_scope
         return with_scope and with_scope or without_scope
             
     @classmethod
@@ -226,7 +224,6 @@ class PMXBundle(object):
                         with_scope.append((score, item))
             with_scope.sort(key = lambda t: t[0], reverse = True)
             with_scope = map(lambda (score, item): item, with_scope)
-        print with_scope, without_scope
         return with_scope and with_scope or without_scope
 
 class PMXBundleItem(object):

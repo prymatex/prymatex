@@ -21,7 +21,7 @@ try:
 except Exception, e:
     PROFILING_CAPABLE = False
 else:
-    PROFILING_CAPABLE = True
+    PROFILING_CAPABLE = qApp.instance() != None
     
 def compileRegexp(string):
     #Muejejejeje

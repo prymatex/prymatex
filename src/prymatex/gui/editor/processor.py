@@ -249,6 +249,36 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.deleteChar()
         
     # Outpus function
+    def commandError(self, text, code):
+        from prymatex.lib.pathutils import make_hyperlinks
+        html = '''
+            <html>
+                <head>
+                    <title>Error</title>
+                    <style>
+                        body {
+                            background: #999;
+                            
+                        }
+                        pre {
+                            border: 1px dashed #222;
+                            background: #ccc;
+                            text: #000;
+                            padding: 2%%;
+                        }
+                    </style>
+                </head>
+                <body>
+                <h3>An error has occurred while executing command "%(name)s"</h3>
+                <pre>%(output)s</pre>
+                <p>Exit code was: %(exit_code)d</p>
+                </body>
+            </html>
+        ''' % {'output': make_hyperlinks(text), 
+               'name': self.command.name,
+               'exit_code': code}
+        self.showAsHTML(html)
+        
     def discard(self, text):
         pass
         

@@ -28,15 +28,10 @@ class PMXSyntaxProcessor(object):
 ######################### Command Processor #########################
 class PMXCommandProcessor(object):
     def __init__(self):
-        # Inputs
-        for key in [ 'document', 'line', 'character', 'scope', 'selection', 'word', 'environment']:
-            if not hasattr(self, key):
-                print "no tiene", key
-                #setattr(self, key, None)
+        pass
     
     def startCommand(self, command):
         pass
-
     def endCommand(self, command):
         pass
     
@@ -56,6 +51,10 @@ class PMXCommandProcessor(object):
     def deleteCharacter(self):
         pass
 
+    # on error
+    def commandError(self, text, code):
+        pass
+    
     # Outpus function
     def discard(self, text):
         pass

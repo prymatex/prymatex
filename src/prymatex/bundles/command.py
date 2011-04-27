@@ -13,7 +13,6 @@ if __name__ == "__main__":
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
-from prymatex.bundles.snippet import PMXSnippet
 from prymatex.bundles.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile, deleteFile
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
@@ -64,40 +63,11 @@ class PMXCommand(PMXBundleItem):
             input, value = switch(self.standardInput)
         return input, unicode(value).encode("utf-8")
 
-    def formatError(self, output, exit_code):
-        from prymatex.lib.pathutils import make_hyperlinks
-        html = '''
-            <html>
-                <head>
-                    <title>Error</title>
-                    <style>
-                        body {
-                            background: #999;
-                            
-                        }
-                        pre {
-                            border: 1px dashed #222;
-                            background: #ccc;
-                            text: #000;
-                            padding: 2%%;
-                        }
-                    </style>
-                </head>
-                <body>
-                <h3>An error has occurred while executing command "%(name)s"</h3>
-                <pre>%(output)s</pre>
-                <p>Exit code was: %(exit_code)d</p>
-                </body>
-            </html>
-        ''' % {'output': make_hyperlinks(output), 
-               'name': self.name,
-               'exit_code': exit_code}
-        #html.replace()
-        return html
-        
     def getOutputHandler(self, code):
         if self.output != 'showAsHTML' and code in self.exit_codes:
             return self.exit_codes[code]
+        elif code != 0:
+            return "commandError"
         else:
             return self.output
     
@@ -128,9 +98,11 @@ class PMXCommand(PMXBundleItem):
             if deleteMethod != None:
                 deleteMethod()
         
-        text = output_value.decode('utf-8')
+        args = [ output_value.decode('utf-8') ]
         function = getattr(processor, output_handler)
-        function(text)
+        if output_handler == "commandError":
+            args.append(output_type)
+        function(*args)
         
         processor.endCommand(self)
         
