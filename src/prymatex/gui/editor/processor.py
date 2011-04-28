@@ -172,7 +172,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     #Inputs
     @property
     def document(self):
-        return unicode(self.editor.toPlainText())
+        return unicode(self.editor.document().toPlainText())
         
     @property
     def line(self):
