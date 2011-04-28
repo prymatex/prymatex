@@ -170,25 +170,20 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor = editor
 
     #Inputs
-    @property
-    def document(self):
+    def document(self, format = None):
         return unicode(self.editor.document().toPlainText())
         
-    @property
-    def line(self):
+    def line(self, format = None):
         return self.environment['TM_CURRENT_LINE']
         
-    @property
-    def character(self):
+    def character(self, format = None):
         cursor = self.editor.textCursor()
         return cursor.document().characterAt(cursor.position()).toAscii()
         
-    @property
-    def scope(self):
+    def scope(self, format = None):
         return self.environment['TM_SCOPE']
-        
-    @property
-    def selection(self):
+    
+    def selection(self, format = None):
         if 'TM_SELECTED_TEXT' in self.environment:
             index = self.environment['TM_LINE_INDEX'] - len(self.environment['TM_SELECTED_TEXT'])
             index = index >= 0 and index or 0
@@ -197,12 +192,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
             return self.environment['TM_SELECTED_TEXT']
         
-    @property
-    def selectedText(self):
+    def selectedText(self, format = None):
         return self.selection
     
-    @property
-    def word(self):
+    def word(self, format = None):
         if 'TM_CURRENT_WORD' in self.environment:
             index = self.environment['TM_LINE_INDEX'] - len(self.environment['TM_CURRENT_WORD'])
             index = index >= 0 and index or 0
@@ -210,11 +203,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_CURRENT_WORD'], index)
             return self.environment['TM_CURRENT_WORD']
-
+    
     @property
-    def environment(self):
+    def environment(self, format = None):
         return self.__env
     
+    #Interface
     def startCommand(self, command):
         self.command = command
         

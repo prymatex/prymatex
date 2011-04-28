@@ -34,8 +34,9 @@ class PMXCommand(PMXBundleItem):
         super(PMXCommand, self).__init__(hash, name_space, path)
         for key in [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
                         'command', 'winCommand', 'linuxCommand',                                #System based Command
+                        'inputFormat',                                                          #Formato requerido en la entrada
                         'capturePattern', 'fileCaptureRegister',
-                        'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
+                        'columnCaptureRegister', 'disableOutputAutoIndent',
                         'lineCaptureRegister', 'dontFollowNewOutput',
                         'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]:
             value = hash.get(key, None)
@@ -53,14 +54,14 @@ class PMXCommand(PMXBundleItem):
             return self.command
     
     def getInputText(self, processor):
-        def switch(input):
+        def getInputTypeAndValue(input):
             if input == "none": return None, None
-            return input, getattr(processor, input)
-        input, value = switch(self.input)
+            return input, getattr(processor, input)(self.inputFormat)
+        input, value = getInputTypeAndValue(self.input)
         if value == None and self.fallbackInput != None:
-            input, value = switch(self.fallbackInput)
+            input, value = getInputTypeAndValue(self.fallbackInput)
         if value == None and self.standardInput != None:
-            input, value = switch(self.standardInput)
+            input, value = getInputTypeAndValue(self.standardInput)
         #return input, value
         return input, value
 
@@ -86,7 +87,7 @@ class PMXCommand(PMXBundleItem):
         if input_type != None:
             print input_type, input_value
             if input_value == None:
-                input_value = processor.document
+                input_value = processor.document(self.inputFormat)
             process.stdin.write(unicode(input_value).encode("utf-8"))
         process.stdin.close()
         try:
