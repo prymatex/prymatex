@@ -54,12 +54,12 @@ class PMXCommand(PMXBundleItem):
     
     def getInputText(self, processor):
         def switch(input):
-            if not input or input == "none": return None, None
+            if input == "none": return None, None
             return input, getattr(processor, input)
         input, value = switch(self.input)
-        if not value:
+        if value == None and self.fallbackInput != None:
             input, value = switch(self.fallbackInput)
-        if not value:
+        if value == None and self.standardInput != None:
             input, value = switch(self.standardInput)
         #return input, value
         return input, unicode(value).encode("utf-8")
@@ -84,7 +84,8 @@ class PMXCommand(PMXBundleItem):
         process = Popen([  temp_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(processor.environment))
         
         if input_type != None:
-            print input_value
+            if input_value == None:
+                input_value = processor.document
             process.stdin.write(input_value)
         process.stdin.close()
         try:
