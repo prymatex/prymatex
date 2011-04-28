@@ -25,13 +25,12 @@
 '''
 import re
 from ponyguruma import sre
-from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
 
 def compileRegexp(string):
     #Muejejejeje
     try:
-        restring = string.replace('?i:', '(?i)').replace('?<=', '(?<=)')
+        restring = string.replace('?i:', '(?i)')
         return re.compile(unicode(restring))
     except:
         return sre.compile(unicode(string))

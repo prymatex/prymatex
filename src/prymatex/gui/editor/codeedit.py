@@ -299,8 +299,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 return
             elif self.keyPressSnippet(event):
                 return
-        elif self.keyPressBundleItem(event): #Modo Normal
-            return
+        else:
+            if self.keyPressBundleItem(event): #Modo Normal
+                return
+            elif self.keyPressSmartTyping(event):
+                return
         
         key = event.key()
         
@@ -328,14 +331,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             else:
                 self.insertBundleItem(items[0])
             return True
-        return False
 
     def keyPressSnippet(self, event):
         key = event.key()
         cursor = self.textCursor()
         
         if key == Qt.Key_Tab or key == Qt.Key_Backtab:
-            (index, holder) = self.snippet.setDefaultHolder(cursor.position())
+            if cursor.hasSelection():
+                (index, holder) = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
+            else:
+                (index, holder) = self.snippet.setDefaultHolder(cursor.position())
             if holder == None:
                 self.snippet = None
                 return False
@@ -409,7 +414,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             cursor.setPosition(position)
             self.setTextCursor(cursor)
             return True
-        return False
     
     def keyPressSmartTyping(self, event):
         cursor = self.textCursor()
@@ -430,6 +434,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.insertText(pairs[0][1])
                 cursor.setPosition(position + 1)
             self.setTextCursor(cursor)
+            return True
 
     #=======================================================================
     # Tab Keyboard Events

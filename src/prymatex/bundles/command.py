@@ -62,7 +62,11 @@ class PMXCommand(PMXBundleItem):
             input, value = getInputTypeAndValue(self.fallbackInput)
         if value == None and self.standardInput != None:
             input, value = getInputTypeAndValue(self.standardInput)
-        #return input, value
+            
+        if input != None and input == 'selection' and value == None:
+            value = processor.document(self.inputFormat)
+        elif value == None:
+            input = None
         return input, value
 
     def getOutputHandler(self, code):
@@ -85,9 +89,6 @@ class PMXCommand(PMXBundleItem):
         process = Popen([  temp_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(processor.environment))
         
         if input_type != None:
-            print input_type, input_value
-            if input_value == None:
-                input_value = processor.document(self.inputFormat)
             process.stdin.write(unicode(input_value).encode("utf-8"))
         process.stdin.close()
         try:

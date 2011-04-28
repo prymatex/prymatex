@@ -24,7 +24,7 @@ else:
 def compileRegexp(string):
     #Muejejejeje
     try:
-        restring = string.replace('?i:', '(?i)').replace('?<=', '(?<=)')
+        restring = string.replace('?i:', '(?i)')
         return re.compile(unicode(restring))
     except:
         return sre.compile(unicode(string))

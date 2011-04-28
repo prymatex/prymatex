@@ -528,7 +528,7 @@ class VariableTransformation(Node):
         self.regexp.resolve(indentation, tabreplacement, environment)
 
 class Regexp(NodeList):
-    _repl_re = re.compile(r"\$(?:(\d+)|g<(.+?)>)", re.UNICODE)
+    _repl_re = sre.compile(u"\$(?:(\d+)|g<(.+?)>)")
     
     def __init__(self, scope, parent = None):
         super(Regexp, self).__init__(scope, parent)
@@ -619,11 +619,10 @@ class Regexp(NodeList):
                 result += self.pattern.sub(repl, text)
             elif isinstance(child, Condition):
                 for match in self.pattern.finditer(text):
-                    repl = match[child.index] != None and child.insertion or child.otherwise
-                    if repl == None:
-                        continue
-                    repl = self.prepare_replacement(repl)
-                    result += self.pattern.sub(repl, str(match))
+                    repl = match.group(child.index) != None and child.insertion or child.otherwise
+                    if repl != None:
+                        repl = self.prepare_replacement(repl)
+                        result += self.pattern.sub(repl, str(match))
                     if not self.option_global:
                         break
         if any(map(lambda r: result.find(r) != -1, ['\u', '\U'])):
