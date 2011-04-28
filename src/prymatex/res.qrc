@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="actions">
+    <file>resources/actions/fork.png</file>
     <file>resources/actions/go-down-search.png</file>
     <file>resources/actions/go-jump-declaration.png</file>
     <file>resources/actions/go-up.png</file>
