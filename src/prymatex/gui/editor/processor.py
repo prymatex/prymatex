@@ -247,6 +247,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def deleteCharacter(self):
         cursor = self.editor.textCursor()
         cursor.deleteChar()
+    
+    def deleteDocument(self):
+        self.editor.document().clear()
         
     # Outpus function
     def commandError(self, text, code):
@@ -284,9 +287,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def replaceSelectedText(self, text):
         cursor = self.editor.textCursor()
-        position = cursor.selectionStart()
-        cursor.insertText(text)
-        cursor.setPosition(position, position + len(text))
+        if cursor.hasSelection():
+            position = cursor.selectionStart()
+            cursor.insertText(text)
+            cursor.setPosition(position, position + len(text))
+        else:
+            cursor.insertText(text)
         self.editor.setTextCursor(cursor)
         
     def replaceDocument(self, text):
@@ -318,6 +324,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def createNewDocument(self, text):
         print "Nuevo documento", text
+        
+    def openAsNewDocument(self, text):
+        editor_widget = self.editor.mainwindow.currentTabWidget.appendEmptyTab()
+        editor_widget.codeEdit.setPlainText(text)
 
 # Macro
 class PMXMacroProcessor(PMXMacroProcessor):
@@ -338,8 +348,13 @@ class PMXMacroProcessor(PMXMacroProcessor):
         
     def selectHardLine(self):
         cursor = self.editor.textCursor()
-        cursor.select(QTextCursor.LineUnderCursor)
+        block = cursor.block()
+        start = block.position()
+        next = block.next()
+        end = next.position() if next.isValid() else start + block.length() - 1
+        cursor.setPosition(start)
+        cursor.setPosition(end, QTextCursor.KeepAnchor)
         self.editor.setTextCursor(cursor)
         
     def deleteBackward(self):
-        pass
+        self.editor.textCursor().deletePreviousChar()

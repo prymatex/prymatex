@@ -61,6 +61,7 @@ class PMXCommand(PMXBundleItem):
             input, value = switch(self.fallbackInput)
         if not value:
             input, value = switch(self.standardInput)
+        #return input, value
         return input, unicode(value).encode("utf-8")
 
     def getOutputHandler(self, code):
@@ -83,6 +84,7 @@ class PMXCommand(PMXBundleItem):
         process = Popen([  temp_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(processor.environment))
         
         if input_type != None:
+            print input_value
             process.stdin.write(input_value)
         process.stdin.close()
         try:
@@ -92,16 +94,20 @@ class PMXCommand(PMXBundleItem):
         process.stdout.close()
         output_type = process.wait()
         output_handler = self.getOutputHandler(output_type)
-        
+
+        # Remove old
         if input_type != None and output_handler != "discard":
             deleteMethod = getattr(processor, 'delete' + input_type.title(), None)
             if deleteMethod != None:
-                deleteMethod()
-        
+                deleteMethod()        
+
         args = [ output_value.decode('utf-8') ]
-        function = getattr(processor, output_handler)
+        function = getattr(processor, output_handler, None)
+        
         if output_handler == "commandError":
             args.append(output_type)
+            
+        # Insert New
         function(*args)
         
         processor.endCommand(self)
