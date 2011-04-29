@@ -48,7 +48,16 @@ class PMXBlockUserData(QTextBlockUserData):
         
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
-
+    
+    def getAllScopes(self):
+        current = ( self.scopes[0], 0 )
+        scopes = []
+        for index, scope in enumerate(self.scopes):
+            if scope != current[0]:
+                scopes.append(( current[0], current[1], index ))
+                current = ( scope, index )
+        return scopes
+    
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
@@ -171,7 +180,20 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     #Inputs
     def document(self, format = None):
-        return unicode(self.editor.document().toPlainText())
+        if format == "xml":
+            result = u""
+            block = self.editor.document().firstBlock()
+            while block.isValid():
+                text = unicode(block.text())
+                for scopes, start, end in block.userData().getAllScopes():
+                    result += "".join(map(lambda scope: "<" + scope + ">", scopes.split()))
+                    result += text[start:end]
+                    result += "".join(map(lambda scope: "</" + scope + ">", scopes.split()))
+                result += "\n"
+                block = block.next()
+            return result
+        else:
+            return unicode(self.editor.document().toPlainText())
         
     def line(self, format = None):
         return self.environment['TM_CURRENT_LINE']
