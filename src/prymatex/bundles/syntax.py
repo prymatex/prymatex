@@ -373,6 +373,10 @@ class PMXSyntax(PMXBundleItem):
         if sort:
             return sorted(stxs)
         return stxs
+    
+    def __str__(self):
+        return u"<PMXSyntax %s>" % self.name
+    
                 
 def parse_file(filename):
     import plistlib

@@ -174,8 +174,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.editorCursorPositionChangedEvent(line+1, col+1)
         
     def setSyntax(self, syntax):
-        self.syntaxProcessor.syntax = syntax
-        self.editorSetSyntaxEvent(syntax)
+        #print self.syntaxProcessor.syntax, syntax
+        if self.syntaxProcessor.syntax != syntax:
+            self.syntaxProcessor.syntax = syntax
+            self.editorSetSyntaxEvent(syntax)
+        
+            
     
     @property
     def syntax(self):

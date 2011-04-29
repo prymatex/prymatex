@@ -124,14 +124,30 @@ class PMXTabWidget(QTabWidget, PMXObject):
         TODO: Resync all menus
         '''
         editor = self.widget(index)
-        #if hasattr(editor, 'codeEdit'):
-            #editor.codeEdit.foucs(QFocusEvent.Mouse)
-        #self.tabWidgetEditorChangedEvent(self.widget(index).codeEdit)
+        self.debug("Widget changed to %s", editor)
+        statusbar = self.mainwindow.statusBar()
+        try:
+            codeEdit = editor.codeEdit
+        except AttributeError:
+            self.warn("Tab doen't seem to be a code edit")
+            return
+        
+        # Update labels
+        syn = codeEdit.syntax
+        if syn:
+            statusbar.updateSyntax(None, syn)
+        codeEdit.sendCursorPosChange()
+        
+        
         
     def mouseDoubleClickEvent(self, mouse_event):
         '''
         Opens a new tab when double-clicking on the tab bar
         '''
+        super(PMXTabWidget, self).mouseDoubleClickEvent(mouse_event)
+        tabbar = self.tabBar()
+        
+        
         if mouse_event.button() == Qt.LeftButton:
             self.appendEmptyTab()
 

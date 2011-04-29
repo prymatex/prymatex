@@ -106,6 +106,14 @@ class PMXStatusBar(QStatusBar, PMXObject):
         #Internal signals
         self.connect(self.syntaxMenu, SIGNAL('currentIndexChanged(QString)'), self.sendStatusBarSyntaxChanged)
         
+        # New style
+#        self.mainwindow.editorCursorPositionChangedEvent.connect( self.updatePosition )
+#        self.mainwindow.editorSetSyntaxEvent.connect( self.updateSyntax )
+#        self.mainwindow.tabWidgetEditorChangedEvent.connect( self.updateEditor )
+#        
+#        #Internal signals
+#        self.syntaxMenu.currentIndexChanged[QString].connect( self.sendStatusBarSyntaxChanged )
+        
     def declareEvents(self):
         self.declareEvent('statusBarSytnaxChangedEvent()')
     
@@ -120,6 +128,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.updateSyntax(source, editor.syntax)
     
     def updateSyntax(self, source, syntax):
+        #print "Statusbar syntax =>", syntax
         if syntax != None:
             index = self.syntaxMenu.findText(syntax.name, Qt.MatchExactly)
             self.syntaxMenu.setCurrentIndex(index)
