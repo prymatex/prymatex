@@ -1,5 +1,6 @@
-import os, shutil, logging
-from os.path import abspath, join, dirname, isdir, isfile, basename
+import os
+import shutil
+from os.path import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.gui.panes import PaneDockBase
@@ -11,7 +12,6 @@ from prymatex.gui.panes.ui_fssettings import Ui_FSSettingsDialog
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 
-logger = logging.getLogger(__name__)
 
 class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
@@ -23,16 +23,17 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         self.setupUi(self)
         start_dir = qApp.instance().startDirectory()
         self.tree.setRootIndex(self.tree.model().index(start_dir))
+        self.comboFavourites.currentIndexChanged[int].connect(self.changeToFavourite)
         self.configure()
         
     class Meta:
-        settings = "filemanager"
+        settings = "fspane"
         
     @pyqtSignature('bool')
     def on_buttonSyncTabFile_toggled(self, sync):
         if sync:
             # Forzamos la sincronizacion
-            editor = self.mainwindow.current_editor_widget
+            editor = self.mainwindow.currentEditorWidget
             self.tree.focusWidgetPath(editor)
 
     @pyqtSignature('')
@@ -48,6 +49,25 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
     
     def on_buttonFilter_pressed(self):
         self.dialogConfigFilters.exec_()
+    
+    def changeToFavourite(self, index):
+        print "-"*40
+        #print index, self.comboFavourites.
+        print "-"*40
+    
+    def addPathToFavourites(self, path):
+        '''
+        Adds an entry to the File Manager 
+        @param path: Adds parameter to path
+        '''
+        if isdir(unicode(path)):
+            root, dirname_part = path.rsplit(os.sep, 1)
+            self.comboFavourites.addItem(dirname_part, {
+                                                    'path': path,
+                                                    'icon': QIcon()})
+        else:
+            self.debug("Not a directory %s" % path)
+        
 
 class PMXFSPaneConfigDialog(Ui_FSSettingsDialog, QDialog):
     def __init__(self, parent):

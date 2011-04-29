@@ -240,7 +240,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="comboFavourites">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -253,7 +253,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushFavourites">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -273,8 +273,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/icons/resources/emblems/emblem-favorite.png</normaloff>:/icons/resources/emblems/emblem-favorite.png</iconset>
+        <iconset resource="../../../res.qrc">
+         <normaloff>:/actions/resources/actions/fork.png</normaloff>:/actions/resources/actions/fork.png</iconset>
        </property>
        <property name="flat">
         <bool>true</bool>

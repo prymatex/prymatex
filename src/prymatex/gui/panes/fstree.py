@@ -15,6 +15,8 @@ class FSTree(QTreeView, PMXObject):
     '''
     File tree panel
     '''
+    class Meta:
+        settings = 'fspane.fstree'
     
     def __init__(self, parent):
         QTreeView.__init__(self, parent)
@@ -24,6 +26,7 @@ class FSTree(QTreeView, PMXObject):
         
                
         self.dirmodelFiles = QDirModel(self)
+        
         self.createMenus()        
 
         self.setModel(self.dirmodelFiles)
@@ -43,10 +46,13 @@ class FSTree(QTreeView, PMXObject):
         '''
         Editor has been hanged in the main window
         '''
+        # Is sync enabled?
         if not self.parent().buttonSyncTabFile.isChecked():
-            print "No sincronizando"
-            return
-        if isinstance(widget, (PMXEditorWidget, )):
+            # The Sync checkbox is not checked so we should not
+            # foucs the current file in the tree
+            self.debug("No sincronizado")
+            
+        elif isinstance(widget, (PMXEditorWidget, )):
             if widget.file.path:
                 path = widget.file.path
                 index = self.model().index(path)
