@@ -4,7 +4,7 @@ __doc__ = """A PyQt4 based TextMate clone"""
 
 __version_info__ = (0, 0, 1)
 __version__ = '.'.join([ str(v) for v in __version_info__])
-__url__ = 'http://github.com/D3f0/prymatex'
+__url__ = 'http://prymatex.org'
 __author__ = ('Nahuel Defossé',
               'Diego Marcos van Haaster',
               'Pablo Petenello'

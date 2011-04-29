@@ -23,11 +23,18 @@
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
-import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP
+import re
+from ponyguruma import sre
 from prymatex.bundles.base import PMXBundleItem
 
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
+def compileRegexp(string):
+    #Muejejejeje
+    try:
+        restring = string.replace('?i:', '(?i)')
+        return re.compile(unicode(restring))
+    except:
+        return sre.compile(unicode(string))
+        
 DEFAULT_SETTINGS = { 'completions': [],
                      'completionCommand': '',
                      'disableDefaultCompletion': 0,
@@ -57,7 +64,7 @@ class PMXPreferenceSettings(object):
             value = hash.get(key, None)
             if value != None:
                 if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
-                    value = onig_compile( value )
+                    value = compileRegexp( value )
                 elif key in [ 'shellVariables' ]:
                     value = dict(map(lambda d: (d['name'], d['value']), value))
             setattr(self, key, value)

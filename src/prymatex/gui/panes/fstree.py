@@ -1,7 +1,7 @@
 # coding: utf-8
 from PyQt4.QtGui import QTreeView, QDirModel, QMenu, QAction, QMessageBox, qApp
 from PyQt4.QtGui import QInputDialog, QApplication
-from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL
+from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir
 import os
 import shutil
 from os.path import join, abspath, isfile, isdir, dirname
@@ -21,20 +21,17 @@ class FSTree(QTreeView, PMXObject):
     def __init__(self, parent):
         QTreeView.__init__(self, parent)
         
-        #fs_pane = self.parent()
-        #self.connect(fs_pane.buttonSyncTabFile, SIGNAL('toggle(bool)'), self.followWidgetFoucs)
         
-               
         self.dirmodelFiles = QDirModel(self)
         
         self.createMenus()        
-
         self.setModel(self.dirmodelFiles)
         for i in range(1,self.dirmodelFiles.columnCount()):
             self.setColumnHidden(i, True)
         self.setAnimated(False)
         self.setIndentation(20)
         self.setSortingEnabled(True)
+        self.dirmodelFiles.setSorting(QDir.Name | QDir.DirsFirst)
         self.mainwindow.tabWidget.currentEditorChanged.connect(self.focusWidgetPath)
         self.setExpandsOnDoubleClick(True)
         QMetaObject.connectSlotsByName(self)

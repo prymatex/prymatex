@@ -48,7 +48,16 @@ class PMXBlockUserData(QTextBlockUserData):
         
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
-
+    
+    def getAllScopes(self):
+        current = ( self.scopes[0], 0 )
+        scopes = []
+        for index, scope in enumerate(self.scopes):
+            if scope != current[0]:
+                scopes.append(( current[0], current[1], index ))
+                current = ( scope, index )
+        return scopes
+    
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
@@ -170,25 +179,33 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor = editor
 
     #Inputs
-    @property
-    def document(self):
-        return unicode(self.editor.toPlainText())
+    def document(self, format = None):
+        if format == "xml":
+            result = u""
+            block = self.editor.document().firstBlock()
+            while block.isValid():
+                text = unicode(block.text())
+                for scopes, start, end in block.userData().getAllScopes():
+                    result += "".join(map(lambda scope: "<" + scope + ">", scopes.split()))
+                    result += text[start:end]
+                    result += "".join(map(lambda scope: "</" + scope + ">", scopes.split()))
+                result += "\n"
+                block = block.next()
+            return result
+        else:
+            return unicode(self.editor.document().toPlainText())
         
-    @property
-    def line(self):
+    def line(self, format = None):
         return self.environment['TM_CURRENT_LINE']
         
-    @property
-    def character(self):
+    def character(self, format = None):
         cursor = self.editor.textCursor()
         return cursor.document().characterAt(cursor.position()).toAscii()
         
-    @property
-    def scope(self):
+    def scope(self, format = None):
         return self.environment['TM_SCOPE']
-        
-    @property
-    def selection(self):
+    
+    def selection(self, format = None):
         if 'TM_SELECTED_TEXT' in self.environment:
             index = self.environment['TM_LINE_INDEX'] - len(self.environment['TM_SELECTED_TEXT'])
             index = index >= 0 and index or 0
@@ -197,12 +214,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
             return self.environment['TM_SELECTED_TEXT']
         
-    @property
-    def selectedText(self):
+    def selectedText(self, format = None):
         return self.selection
     
-    @property
-    def word(self):
+    def word(self, format = None):
         if 'TM_CURRENT_WORD' in self.environment:
             index = self.environment['TM_LINE_INDEX'] - len(self.environment['TM_CURRENT_WORD'])
             index = index >= 0 and index or 0
@@ -210,11 +225,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_CURRENT_WORD'], index)
             return self.environment['TM_CURRENT_WORD']
-
+    
     @property
-    def environment(self):
+    def environment(self, format = None):
         return self.__env
     
+    #Interface
     def startCommand(self, command):
         self.command = command
         
@@ -247,16 +263,52 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def deleteCharacter(self):
         cursor = self.editor.textCursor()
         cursor.deleteChar()
+    
+    def deleteDocument(self):
+        self.editor.document().clear()
         
     # Outpus function
+    def commandError(self, text, code):
+        from prymatex.lib.pathutils import make_hyperlinks
+        html = '''
+            <html>
+                <head>
+                    <title>Error</title>
+                    <style>
+                        body {
+                            background: #999;
+                            
+                        }
+                        pre {
+                            border: 1px dashed #222;
+                            background: #ccc;
+                            text: #000;
+                            padding: 2%%;
+                        }
+                    </style>
+                </head>
+                <body>
+                <h3>An error has occurred while executing command "%(name)s"</h3>
+                <pre>%(output)s</pre>
+                <p>Exit code was: %(exit_code)d</p>
+                </body>
+            </html>
+        ''' % {'output': make_hyperlinks(text), 
+               'name': self.command.name,
+               'exit_code': code}
+        self.showAsHTML(html)
+        
     def discard(self, text):
         pass
         
     def replaceSelectedText(self, text):
         cursor = self.editor.textCursor()
-        position = cursor.selectionStart()
-        cursor.insertText(text)
-        cursor.setPosition(position, position + len(text))
+        if cursor.hasSelection():
+            position = cursor.selectionStart()
+            cursor.insertText(text)
+            cursor.setPosition(position, position + len(text))
+        else:
+            cursor.insertText(text)
         self.editor.setTextCursor(cursor)
         
     def replaceDocument(self, text):
@@ -288,6 +340,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def createNewDocument(self, text):
         print "Nuevo documento", text
+        
+    def openAsNewDocument(self, text):
+        editor_widget = self.editor.mainwindow.currentTabWidget.appendEmptyTab()
+        editor_widget.codeEdit.setPlainText(text)
 
 # Macro
 class PMXMacroProcessor(PMXMacroProcessor):
@@ -308,8 +364,13 @@ class PMXMacroProcessor(PMXMacroProcessor):
         
     def selectHardLine(self):
         cursor = self.editor.textCursor()
-        cursor.select(QTextCursor.LineUnderCursor)
+        block = cursor.block()
+        start = block.position()
+        next = block.next()
+        end = next.position() if next.isValid() else start + block.length() - 1
+        cursor.setPosition(start)
+        cursor.setPosition(end, QTextCursor.KeepAnchor)
         self.editor.setTextCursor(cursor)
         
     def deleteBackward(self):
-        pass
+        self.editor.textCursor().deletePreviousChar()

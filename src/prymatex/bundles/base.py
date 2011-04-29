@@ -171,7 +171,6 @@ class PMXBundle(object):
         with_scope = []
         for p in preferences:
             with_scope.extend(p)
-        print with_scope, without_scope
         return with_scope and with_scope or without_scope
 
     @classmethod
@@ -209,7 +208,6 @@ class PMXBundle(object):
                         with_scope.append((score, item))
             with_scope.sort(key = lambda t: t[0], reverse = True)
             with_scope = map(lambda (score, item): item, with_scope)
-        print with_scope, without_scope
         return with_scope and with_scope or without_scope
             
     @classmethod
@@ -226,7 +224,6 @@ class PMXBundle(object):
                         with_scope.append((score, item))
             with_scope.sort(key = lambda t: t[0], reverse = True)
             with_scope = map(lambda (score, item): item, with_scope)
-        print with_scope, without_scope
         return with_scope and with_scope or without_scope
 
 class PMXBundleItem(object):
@@ -239,7 +236,16 @@ class PMXBundleItem(object):
         self.bundle = None
         for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.get(key, None))
-    
+
+    @property
+    def trigger(self):
+        trigger = []
+        if self.tabTrigger != None:
+            trigger.append(u"%s⇥" % (self.tabTrigger))
+        if self.keyEquivalent != None:
+            trigger.append(u"%s" % (buildKeyEquivalentString(self.keyEquivalent)))
+        return ", ".join(trigger)
+
     def setBundle(self, bundle):
         self.bundle = bundle
         if self.bundle_collection:
@@ -250,6 +256,14 @@ class PMXBundleItem(object):
     def buildEnvironment(self, **kwargs):
         env = self.bundle.buildEnvironment()
         return env
+        
+    def buildMenuTextEntry(self, nemonic = ''):
+        text = unicode(self.name)
+        if nemonic:
+            return text.replace('&', '&&') + u"\t" + nemonic
+        else:
+            text += u"\t%s" % (self.trigger)
+        return text.replace('&', '&&')
     
     @classmethod
     def loadBundleItem(cls, path, name_space = 'prymatex'):
@@ -265,16 +279,6 @@ class PMXBundleItem(object):
                 return cls(data, name_space, path)
             except ExpatError, e:
                 print "Error in %s for %s (%s)" % (cls.__name__, path, e)
-
-    def buildMenuTextEntry(self, nemonic = ''):
-        text = unicode(self.name)
-        if nemonic:
-            return text.replace('&', '&&') + u"\t" + nemonic
-        if self.tabTrigger != None:
-            text += u"\t%s⇥" % (self.tabTrigger)
-        if self.keyEquivalent != None:
-            text += u"\t%s" % (buildKeyEquivalentString(self.keyEquivalent))
-        return text.replace('&', '&&')
     
     def resolve(self, *args, **kwargs):
         pass

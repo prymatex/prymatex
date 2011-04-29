@@ -13,7 +13,6 @@ if __name__ == "__main__":
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
 from prymatex.bundles.base import PMXBundleItem
-from prymatex.bundles.snippet import PMXSnippet
 from prymatex.bundles.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile, deleteFile
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
@@ -35,8 +34,9 @@ class PMXCommand(PMXBundleItem):
         super(PMXCommand, self).__init__(hash, name_space, path)
         for key in [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
                         'command', 'winCommand', 'linuxCommand',                                #System based Command
+                        'inputFormat',                                                          #Formato requerido en la entrada
                         'capturePattern', 'fileCaptureRegister',
-                        'columnCaptureRegister', 'inputFormat', 'disableOutputAutoIndent',
+                        'columnCaptureRegister', 'disableOutputAutoIndent',
                         'lineCaptureRegister', 'dontFollowNewOutput',
                         'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]:
             value = hash.get(key, None)
@@ -54,60 +54,28 @@ class PMXCommand(PMXBundleItem):
             return self.command
     
     def getInputText(self, processor):
-        def switch(input):
-            if not input or input == "none": return None, None
-            return input, getattr(processor, input)
-        input, value = switch(self.input)
-        if not value:
-            input, value = switch(self.fallbackInput)
-        if not value:
-            input, value = switch(self.standardInput)
-        return input, unicode(value).encode("utf-8")
+        def getInputTypeAndValue(input):
+            if input == "none": return None, None
+            return input, getattr(processor, input)(self.inputFormat)
+        input, value = getInputTypeAndValue(self.input)
+        if value == None and self.fallbackInput != None:
+            input, value = getInputTypeAndValue(self.fallbackInput)
+        if value == None and self.standardInput != None:
+            input, value = getInputTypeAndValue(self.standardInput)
+            
+        if input != None and input == 'selection' and value == None:
+            value = processor.document(self.inputFormat)
+        elif value == None:
+            input = None
+        return input, value
 
-    def formatError(self, output, exit_code):
-        from prymatex.lib.pathutils import make_hyperlinks
-        html = '''
-            <html>
-                <head>
-                    <title>Error</title>
-                    <style>
-                        body {
-                            background: #999;
-                            
-                        }
-                        pre {
-                            border: 1px dashed #222;
-                            background: #ccc;
-                            text: #000;
-                            padding: 2%%;
-                        }
-                    </style>
-                </head>
-                <body>
-                <h3>An error has occurred while executing command "%(name)s"</h3>
-                <pre>%(output)s</pre>
-                <p>Exit code was: %(exit_code)d</p>
-                </body>
-            </html>
-        ''' % {'output': make_hyperlinks(output), 
-               'name': self.name,
-               'exit_code': exit_code}
-        #html.replace()
-        return html
-        
     def getOutputHandler(self, code):
-        ''' showAsHTML
-            showAsTooltip
-            insertAsSnippet
-            replaceSelectedText
-            replaceDocument
-        '''
-        type = ''
         if self.output != 'showAsHTML' and code in self.exit_codes:
-            type = self.exit_codes[code]
+            return self.exit_codes[code]
+        elif code != 0:
+            return "commandError"
         else:
-            type = self.output
-        return type
+            return self.output
     
     def execute(self, processor):
         if hasattr(self, 'beforeRunningCommand') and self.beforeRunningCommand != None:
@@ -121,7 +89,7 @@ class PMXCommand(PMXBundleItem):
         process = Popen([  temp_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(processor.environment))
         
         if input_type != None:
-            process.stdin.write(input_value)
+            process.stdin.write(unicode(input_value).encode("utf-8"))
         process.stdin.close()
         try:
             output_value = process.stdout.read()
@@ -129,17 +97,21 @@ class PMXCommand(PMXBundleItem):
             pass
         process.stdout.close()
         output_type = process.wait()
-        print output_type
         output_handler = self.getOutputHandler(output_type)
-        
-        if input_type != None:
+        # Remove old
+        if input_type != None and output_handler in [ "insertText", "insertAsSnippet" ]:
             deleteMethod = getattr(processor, 'delete' + input_type.title(), None)
             if deleteMethod != None:
-                deleteMethod()
+                deleteMethod()        
+
+        args = [ output_value.decode('utf-8') ]
+        function = getattr(processor, output_handler, None)
         
-        text = output_value.decode('utf-8')
-        function = getattr(processor, output_handler)
-        function(text)
+        if output_handler == "commandError":
+            args.append(output_type)
+            
+        # Insert New
+        function(*args)
         
         processor.endCommand(self)
         

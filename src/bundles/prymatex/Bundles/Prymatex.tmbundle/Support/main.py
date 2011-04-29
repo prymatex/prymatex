@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 STYLE = """
 <style type='text/css'>
     *{margin:0px;}
@@ -94,7 +97,6 @@ if __name__ == "__main__":
         
         print "<div class='oculto' id='%s'>" % uuid
         
-        
         try:
             print "<div class='recuadro'>%s</div>" % unicode(bundle.description)
         except UnicodeEncodeError, e:
@@ -104,23 +106,36 @@ if __name__ == "__main__":
             print "<div class='recuadro'>"
             print "<h4>Snippets:</h4>"
             print "<table>"
-            print "<thead><th>Name</th><th>tabTrigger</th><th>keyEquivalent</th></thead>"
+            print "<thead><th>Name</th><th>Trigger</th></thead>"
             for snippet in bundle.snippets:
                 try:
-                    print "<tr><td>%s</td><td>%s</td><td>%s</td>" % (snippet.name, snippet.tabTrigger, snippet.keyEquivalent)
+                    print "<tr><td>%s</td><td>%s</td></tr>" % (snippet.name, snippet.trigger.replace(u"⇥", "&#x21E5;"))
                 except:
                     pass
             print "</table>"
             print "</div>"
         
-        if bundle.snippets:
+        if bundle.commands:
             print "<div class='recuadro'>"
             print "<h4>Commands:</h4>"
             print "<table>"
-            print "<thead><th>Name</th><th>tabTrigger</th><th>keyEquivalent</th></thead>"
+            print "<thead><th>Name</th><th>Trigger</th></thead>"
             for command in bundle.commands:
                 try:
-                    print "<tr><td>%s</td><td>%s</td><td>%s</td>" % (command.name, command.tabTrigger, command.keyEquivalent)
+                    print "<tr><td>%s</td><td>%s</td></tr>" % (command.name, command.trigger.replace(u"⇥", "&#x21E5;"))
+                except:
+                    pass
+            print "</table>"
+            print "</div>"
+        
+        if bundle.macros:
+            print "<div class='recuadro'>"
+            print "<h4>Macros:</h4>"
+            print "<table>"
+            print "<thead><th>Name</th><th>Trigger</th></thead>"
+            for macro in bundle.macros:
+                try:
+                    print "<tr><td>%s</td><td>%s</td></tr>" % (macro.name, macro.trigger.replace(u"⇥", "&#x21E5;"))
                 except:
                     pass
             print "</table>"

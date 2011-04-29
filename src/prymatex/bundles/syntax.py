@@ -7,8 +7,6 @@
     http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
 '''
 
-#TODO: Importar el adaptador a sre de oniguruma y hacer que compile con re lo que pueda y con onig el resto
-
 import re
 from ponyguruma import sre
 from prymatex.bundles.base import PMXBundleItem
@@ -21,13 +19,12 @@ try:
 except Exception, e:
     PROFILING_CAPABLE = False
 else:
-    PROFILING_CAPABLE = True
+    PROFILING_CAPABLE = qApp.instance() != None
     
 def compileRegexp(string):
     #Muejejejeje
     try:
-        #restring = string.replace('?i:', '(?i)').replace('?x:', '(?x)').replace('?<=', '(?<=)')
-        restring = string
+        restring = string.replace('?i:', '(?i)')
         return re.compile(unicode(restring))
     except:
         return sre.compile(unicode(string))
