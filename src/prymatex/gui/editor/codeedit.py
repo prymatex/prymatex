@@ -318,8 +318,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             super(PMXCodeEdit, self).keyPressEvent(event)
         
-        #Luego de tratar el evento
-        self.keyPressIndent(event)
+        #Luego de tratar el evento, solo si se inserto algo de texto
+        if event.text() != "":
+            self.keyPressIndent(event)
     
     def keyPressBundleItem(self, event):
         code = int(event.modifiers()) + event.key()
@@ -515,7 +516,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         block = cursor.block()
         prev = block.previous()
-        if block.userData().indentMark == PMXBlockUserData.INDENT_DECREASE and prev.isValid() and block.userData().indent == prev.userData().indent:
+        if block.userData().indentMark == PMXBlockUserData.INDENT_DECREASE and prev.isValid() and prev.userData().indentMark == PMXBlockUserData.INDENT_NONE and block.userData().indent == prev.userData().indent:
             self.unindent()
     
     #==========================================================================
