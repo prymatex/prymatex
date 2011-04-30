@@ -49,13 +49,15 @@ class PMXBlockUserData(QTextBlockUserData):
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
     
-    def getAllScopes(self):
-        current = ( self.scopes[0], 0 )
+    def getAllScopes(self, start = 0, end = None):
+        current = ( self.scopes[start], start )
         scopes = []
-        for index, scope in enumerate(self.scopes):
-            if scope != current[0]:
+        for index, scope in enumerate(self.scopes, start):
+            if scope != current[0] or (end != None and index == end):
                 scopes.append(( current[0], current[1], index ))
                 current = ( scope, index )
+                if end != None and index == end:
+                    break
         return scopes
     
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
@@ -186,9 +188,11 @@ class PMXCommandProcessor(PMXCommandProcessor):
             while block.isValid():
                 text = unicode(block.text())
                 for scopes, start, end in block.userData().getAllScopes():
-                    result += "".join(map(lambda scope: "<" + scope + ">", scopes.split()))
+                    ss = scopes.split()
+                    result += "".join(map(lambda scope: "<" + scope + ">", ss))
                     result += text[start:end]
-                    result += "".join(map(lambda scope: "</" + scope + ">", scopes.split()))
+                    ss.reverse()
+                    result += "".join(map(lambda scope: "</" + scope + ">", ss))
                 result += "\n"
                 block = block.next()
             return result
@@ -233,6 +237,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     #Interface
     def startCommand(self, command):
         self.command = command
+        self.disableAutoIndent = True
         
         env = command.buildEnvironment()
         env.update(self.editor.buildEnvironment())
@@ -248,6 +253,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     # deleteFromEditor
     def deleteWord(self):
+        self.disableAutoIndent = False
         word, index = self.editor.getCurrentWordAndIndex()
         print word, index
         cursor = self.editor.textCursor()
@@ -327,7 +333,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def insertAsSnippet(self, text):
         snippet = PMXSnippet({ 'content': text})
         snippet.bundle = self.command.bundle
-        self.editor.insertBundleItem(snippet, indent = False)
+        self.editor.insertBundleItem(snippet, disableIndent = self.disableAutoIndent)
             
     def showAsHTML(self, text):
         self.editor.mainwindow.paneBrowser.setHtml(text, self.command)
