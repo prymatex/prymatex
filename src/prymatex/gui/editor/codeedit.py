@@ -173,6 +173,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             return word, index
         return None, 0
     
+    def getSelectionBlockStartEnd(self):
+        cursor = self.textCursor()
+        start, end = cursor.selectionStart(), cursor.selectionEnd()
+        if start > end:
+            return self.document().findBlock(end), self.document().findBlock(start)
+        else:
+            return self.document().findBlock(start), self.document().findBlock(end)
+    
     def sendCursorPosChange(self):
         c = self.textCursor()
         line  = c.blockNumber()
@@ -184,8 +192,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
             self.editorSetSyntaxEvent(syntax)
-        
-            
     
     @property
     def syntax(self):
@@ -303,7 +309,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
-    
     def keyPressEvent(self, event):
         '''
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
@@ -827,11 +832,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         Indents text, it take cares of block selections.
         '''
         cursor = self.textCursor()
-        start, end = cursor.selectionStart(), cursor.selectionEnd()
-        if start > end:
-            end, start = self.document().findBlock(start), self.document().findBlock(end)
-        else:
-            end, start = self.document().findBlock(end), self.document().findBlock(start)
+        start, end = self.getSelectionBlockStartEnd()
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)
         while True:
