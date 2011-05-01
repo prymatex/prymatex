@@ -187,8 +187,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
             block = self.editor.document().firstBlock()
             while block.isValid():
                 text = unicode(block.text())
-                for scopes, start, end in block.userData().getAllScopes():
-                    ss = scopes.split()
+                for scope, start, end in block.userData().getAllScopes():
+                    ss = scope.split()
                     result += "".join(map(lambda scope: "<" + scope + ">", ss))
                     result += text[start:end]
                     ss.reverse()
@@ -216,7 +216,44 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_COLUMN'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
             self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
-            return self.environment['TM_SELECTED_TEXT']
+            if format == "xml":
+                cursor = self.editor.textCursor()
+                start, end = self.editor.getSelectionBlockStartEnd()
+                result = u""
+                if start == end:
+                    text = unicode(start.text())
+                    scopes = start.userData().getAllScopes(start = cursor.selectionStart() - start.position(), end = cursor.selectionEnd() - start.position())
+                    for scope, start, end in scopes:
+                        ss = scope.split()
+                        result += "".join(map(lambda scope: "<" + scope + ">", ss))
+                        result += text[start:end]
+                        ss.reverse()
+                        result += "".join(map(lambda scope: "</" + scope + ">", ss))
+                else:
+                    block = start
+                    while True:
+                        text = unicode(block.text())
+                        if block == start:
+                            print cursor.selectionStart() - block.position()
+                            scopes = block.userData().getAllScopes(start = cursor.selectionStart() - block.position())
+                        elif block == end:
+                            scopes = block.userData().getAllScopes(end = cursor.selectionEnd() - block.position())
+                        else:
+                            scopes = block.userData().getAllScopes()
+                        for scope, start, end in scopes:
+                            ss = scope.split()
+                            result += "".join(map(lambda scope: "<" + scope + ">", ss))
+                            result += text[start:end]
+                            ss.reverse()
+                            result += "".join(map(lambda scope: "</" + scope + ">", ss))
+                        result += "\n"
+                        block = block.next()
+                        if block == end:
+                            break
+                print result
+                return result
+            else:
+                return self.environment['TM_SELECTED_TEXT']
         
     def selectedText(self, format = None):
         return self.selection
