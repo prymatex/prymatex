@@ -60,7 +60,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
         self.connect(self.mainwindow, SIGNAL('statusBarSytnaxChangedEvent'), self.updateEditorSyntax )
         
         #Internal signals
-        self.currentChanged.connect(self.on_current_changed)
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
         self.connect(self, SIGNAL("currentChanged(int)"), self.indexChanged)
         
@@ -119,27 +118,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
             if not self.closeTab(1):
                 return
     
-    def on_current_changed(self, index):
-        '''
-        TODO: Resync all menus
-        '''
-        editor = self.widget(index)
-        self.debug("Widget changed to %s", editor)
-        statusbar = self.mainwindow.statusBar()
-        try:
-            codeEdit = editor.codeEdit
-        except AttributeError:
-            self.warn("Tab doen't seem to be a code edit")
-            return
-        
-        # Update labels
-        syn = codeEdit.syntax
-        if syn:
-            statusbar.updateSyntax(None, syn)
-        codeEdit.sendCursorPosChange()
-        
-        
-        
     def mouseDoubleClickEvent(self, mouse_event):
         '''
         Opens a new tab when double-clicking on the tab bar
