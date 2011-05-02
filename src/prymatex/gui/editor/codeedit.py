@@ -102,6 +102,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def snippetMode(self):
         return hasattr(self, 'snippet') and self.snippet != None
     
+    @property
+    def multiEditMode(self):
+        """retorna si el editor esta en modo multiedit"""
+        return bool(self.cursors)
+    
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         self.sidebar = PMXSidebar(self)
@@ -112,6 +117,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
         self.bookmarks = []
         self.folded = []
+        self.cursors = []
         
         # Actions performed when a key is pressed
         self.setupUi()
@@ -167,6 +173,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             return word, index
         return None, 0
     
+    def getSelectionBlockStartEnd(self):
+        cursor = self.textCursor()
+        start, end = cursor.selectionStart(), cursor.selectionEnd()
+        if start > end:
+            return self.document().findBlock(end), self.document().findBlock(start)
+        else:
+            return self.document().findBlock(start), self.document().findBlock(end)
+    
     def sendCursorPosChange(self):
         c = self.textCursor()
         line  = c.blockNumber()
@@ -178,8 +192,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
             self.editorSetSyntaxEvent(syntax)
-        
-            
     
     @property
     def syntax(self):
@@ -231,17 +243,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.setExtraSelections(extraSelections)
 
     #=======================================================================
-    # Event Filter
-    #=======================================================================
-    def eventFilter(self, object, event):
-        if (event.type() == QEvent.KeyPress):
-            debug_key(event)
-        return super(PMXCodeEdit, self).eventFilter(object, event)
-
-    #=======================================================================
     # Mouse Events
     #=======================================================================
-    
     def wheelEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
             if event.delta() == 120:
@@ -251,10 +254,24 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             event.ignore()
         else:
             super(PMXCodeEdit, self).wheelEvent(event)
-    
-    def mousePressEvent(self, mouse_event):
-        #self.inserSpacesUpToPoint(mouse_event.pos())
-        super(PMXCodeEdit, self).mousePressEvent(mouse_event)
+
+    def mouseDoubleClickEvent(self, event):
+        print "mouseDoubleClickEvent"
+        super(PMXCodeEdit, self).mouseDoubleClickEvent(event)
+        
+    def mouseReleaseEvent(self, event):
+        print "mouseReleaseEvent"
+        super(PMXCodeEdit, self).mouseReleaseEvent(event)
+
+    def mousePressEvent(self, event):
+        print "mousePressEvent"
+        if event.modifiers() == Qt.ControlModifier:
+            position = event.pos()
+            cursor = self.cursorForPosition(position)
+            self.cursors.append(QTextCursor(cursor))
+            print self.cursors
+        else:
+            super(PMXCodeEdit, self).mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         #position = event.pos()
@@ -292,7 +309,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
-    
     def keyPressEvent(self, event):
         '''
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
@@ -303,28 +319,44 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 return
             elif self.keyPressSnippet(event):
                 return
+        elif self.multiEditMode:
+            if self.keyPressBundleItem(event): #Modo MultiEdit
+                self.cursors = []
+                return
         else:
             if self.keyPressBundleItem(event): #Modo Normal
                 return
             elif self.keyPressSmartTyping(event):
                 return
         
-        key = event.key()
+        def handleEvent(event):
+            key = event.key()
         
-        if key == Qt.Key_Tab:
-            self.tabPressEvent(event)
-        elif key == Qt.Key_Backtab:
-            self.backtabPressEvent(event)
-        elif key == Qt.Key_Backspace:
-            self.backspacePressEvent(event)
-        elif key == Qt.Key_Return:
-            self.returnPressEvent(event)
+            if key == Qt.Key_Tab:
+                self.tabPressEvent(event)
+            elif key == Qt.Key_Backtab:
+                self.backtabPressEvent(event)
+            elif key == Qt.Key_Backspace:
+                self.backspacePressEvent(event)
+            elif key == Qt.Key_Return:
+                self.returnPressEvent(event)
+            else:
+                super(PMXCodeEdit, self).keyPressEvent(event)
+            
+            #Luego de tratar el evento, solo si se inserto algo de texto
+            if event.text() != "":
+                self.keyPressIndent(event)
+        
+        if self.multiEditMode:
+            if event.key() != Qt.Key_Escape:
+                cursors = self.cursors + [ self.textCursor() ]
+                for cursor in cursors:
+                    self.setTextCursor(cursor)
+                    handleEvent(event)
+            else:
+                self.cursors = []
         else:
-            super(PMXCodeEdit, self).keyPressEvent(event)
-        
-        #Luego de tratar el evento, solo si se inserto algo de texto
-        if event.text() != "":
-            self.keyPressIndent(event)
+            handleEvent(event)
     
     def keyPressBundleItem(self, event):
         code = int(event.modifiers()) + event.key()
@@ -419,7 +451,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             cursor.setPosition(position)
             self.setTextCursor(cursor)
             return True
-    
+            
     def keyPressSmartTyping(self, event):
         cursor = self.textCursor()
         character = unicode(event.text())
@@ -448,6 +480,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         if cursor.hasSelection():
             self.indent(self.tabKeyBehavior)
+        elif self.multiEditMode:
+            cursor.insertText(self.tabKeyBehavior)
         else:
             scope = self.getCurrentScope()
             trigger = PMXBundle.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
@@ -527,12 +561,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # BundleItems
     #==========================================================================
 
-    def insertBundleItem(self, item, tabTrigger = False, indent = True):
+    def insertBundleItem(self, item, tabTrigger = False, disableIndent = False):
         ''' Inserta un bundle item, por ahora un snippet, debe resolver el item antes de insertarlo
         '''
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
-        indentation = indent and self.indentationWhitespace(line) or ""
+        indentation = self.indentationWhitespace(line) if not disableIndent else ""
         if tabTrigger and item.tabTrigger != None:
             for _ in range(len(item.tabTrigger)):
                 cursor.deletePreviousChar()
@@ -798,11 +832,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         Indents text, it take cares of block selections.
         '''
         cursor = self.textCursor()
-        start, end = cursor.selectionStart(), cursor.selectionEnd()
-        if start > end:
-            end, start = self.document().findBlock(start), self.document().findBlock(end)
-        else:
-            end, start = self.document().findBlock(end), self.document().findBlock(start)
+        start, end = self.getSelectionBlockStartEnd()
         cursor.beginEditBlock()
         new_cursor = QTextCursor(cursor)
         while True:

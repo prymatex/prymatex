@@ -49,13 +49,15 @@ class PMXBlockUserData(QTextBlockUserData):
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
     
-    def getAllScopes(self):
-        current = ( self.scopes[0], 0 )
+    def getAllScopes(self, start = 0, end = None):
+        current = ( self.scopes[start], start )
         scopes = []
-        for index, scope in enumerate(self.scopes):
-            if scope != current[0]:
+        for index, scope in enumerate(self.scopes, start):
+            if scope != current[0] or (end != None and index == end):
                 scopes.append(( current[0], current[1], index ))
                 current = ( scope, index )
+                if end != None and index == end:
+                    break
         return scopes
     
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
@@ -185,10 +187,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
             block = self.editor.document().firstBlock()
             while block.isValid():
                 text = unicode(block.text())
-                for scopes, start, end in block.userData().getAllScopes():
-                    result += "".join(map(lambda scope: "<" + scope + ">", scopes.split()))
+                for scope, start, end in block.userData().getAllScopes():
+                    ss = scope.split()
+                    result += "".join(map(lambda scope: "<" + scope + ">", ss))
                     result += text[start:end]
-                    result += "".join(map(lambda scope: "</" + scope + ">", scopes.split()))
+                    ss.reverse()
+                    result += "".join(map(lambda scope: "</" + scope + ">", ss))
                 result += "\n"
                 block = block.next()
             return result
@@ -212,7 +216,44 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_COLUMN'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
             self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
-            return self.environment['TM_SELECTED_TEXT']
+            if format == "xml":
+                cursor = self.editor.textCursor()
+                start, end = self.editor.getSelectionBlockStartEnd()
+                result = u""
+                if start == end:
+                    text = unicode(start.text())
+                    scopes = start.userData().getAllScopes(start = cursor.selectionStart() - start.position(), end = cursor.selectionEnd() - start.position())
+                    for scope, start, end in scopes:
+                        ss = scope.split()
+                        result += "".join(map(lambda scope: "<" + scope + ">", ss))
+                        result += text[start:end]
+                        ss.reverse()
+                        result += "".join(map(lambda scope: "</" + scope + ">", ss))
+                else:
+                    block = start
+                    while True:
+                        text = unicode(block.text())
+                        if block == start:
+                            print cursor.selectionStart() - block.position()
+                            scopes = block.userData().getAllScopes(start = cursor.selectionStart() - block.position())
+                        elif block == end:
+                            scopes = block.userData().getAllScopes(end = cursor.selectionEnd() - block.position())
+                        else:
+                            scopes = block.userData().getAllScopes()
+                        for scope, start, end in scopes:
+                            ss = scope.split()
+                            result += "".join(map(lambda scope: "<" + scope + ">", ss))
+                            result += text[start:end]
+                            ss.reverse()
+                            result += "".join(map(lambda scope: "</" + scope + ">", ss))
+                        result += "\n"
+                        block = block.next()
+                        if block == end:
+                            break
+                print result
+                return result
+            else:
+                return self.environment['TM_SELECTED_TEXT']
         
     def selectedText(self, format = None):
         return self.selection
@@ -233,6 +274,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     #Interface
     def startCommand(self, command):
         self.command = command
+        self.disableAutoIndent = True
         
         env = command.buildEnvironment()
         env.update(self.editor.buildEnvironment())
@@ -248,6 +290,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     # deleteFromEditor
     def deleteWord(self):
+        self.disableAutoIndent = False
         word, index = self.editor.getCurrentWordAndIndex()
         print word, index
         cursor = self.editor.textCursor()
@@ -327,7 +370,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def insertAsSnippet(self, text):
         snippet = PMXSnippet({ 'content': text})
         snippet.bundle = self.command.bundle
-        self.editor.insertBundleItem(snippet, indent = False)
+        self.editor.insertBundleItem(snippet, disableIndent = self.disableAutoIndent)
             
     def showAsHTML(self, text):
         self.editor.mainwindow.paneBrowser.setHtml(text, self.command)
