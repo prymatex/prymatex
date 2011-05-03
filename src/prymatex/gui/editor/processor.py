@@ -52,7 +52,7 @@ class PMXBlockUserData(QTextBlockUserData):
     def getAllScopes(self, start = 0, end = None):
         current = ( self.scopes[start], start )
         scopes = []
-        for index, scope in enumerate(self.scopes, start):
+        for index, scope in enumerate(self.scopes[start:], start):
             if scope != current[0] or (end != None and index == end):
                 scopes.append(( current[0], current[1], index ))
                 current = ( scope, index )
