@@ -4,8 +4,7 @@
 import os, sys, plistlib, glob
 from optparse import OptionParser
 
-PMX_USER_PATH = os.environ['PMX_USER_PATH'] if 'PMX_USER_PATH' in os.environ else os.path.join(os.environ['HOME'], '.prymatex')
-PREFERENCES_PATH = os.path.join(PMX_USER_PATH, 'Library', 'Preferences')
+PREFERENCES_PATH = os.environ['PMX_PREFERENCES_PATH'] if 'PMX_PREFERENCES_PATH' in os.environ else os.path.join(os.environ['HOME'], 'Library', 'Preferences')
 
 def read(domain = None, key = None):
     '''
