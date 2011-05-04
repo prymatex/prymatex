@@ -1,5 +1,5 @@
 from PyQt4.QtGui import *
-from PyQt4.Qt import QString, Qt
+from PyQt4.Qt import QString, Qt, QVariant
 from PyQt4.QtNetwork import *
 from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
 from prymatex.core.base import PMXObject
@@ -63,10 +63,15 @@ class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
     def __init__(self, parent = None):
         super(PMXThemeConfigWidget, self).__init__(parent)
         self.setupUi(self)
-        for theme in PMXTheme.THEMES.values():
-            self.comboThemes.addItem(theme.name)
-        self.comboThemes.currentIndexChanged[QString].connect(self.themesChanged)
+        
         self.settings = qApp.instance().settings.getGroup('editor')
+        uuid = self.settings.value('theme')
+        #Todo cambiar esto por un metodo, UUIDS es de clase
+        for index, theme in enumerate(PMXTheme.UUIDS.values()):
+            self.comboThemes.addItem(theme.name, QVariant(theme.uuid))
+            if theme.uuid == uuid:
+                self.comboThemes.setCurrentIndex(index)
+        self.comboThemes.currentIndexChanged[int].connect(self.themesChanged)
         self.syncFont()
         
     def on_pushChangeFont_pressed(self):
@@ -88,8 +93,9 @@ class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
         self.lineFont.setFont(font)
         self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     
-    def themesChanged(self, name):
-        self.settings.setValue('theme', unicode(name))
+    def themesChanged(self, index):
+        uuid = self.comboThemes.itemData(index).toPyObject()
+        self.settings.setValue('theme', unicode(uuid))
 
 from ui_updates import Ui_Updates
 class PMXUpdatesWidget(QWidget, Ui_Updates):
