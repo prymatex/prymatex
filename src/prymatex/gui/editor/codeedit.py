@@ -62,7 +62,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     # Settings, config
     #=======================================================================
-    @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6')
+    @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
         syntax = PMXSyntax.getSyntaxByUUID(uuid)
         if syntax != None:
@@ -72,7 +72,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     tabSize = pmxConfigPorperty(default = 4)
     font = pmxConfigPorperty(default = QFont('Monospace', 10))
     
-    @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F')
+    @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
         theme = PMXTheme.getThemeByUUID(uuid)
         self.syntaxProcessor.formatter = theme
