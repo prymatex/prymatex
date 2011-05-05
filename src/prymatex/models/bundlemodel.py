@@ -52,7 +52,7 @@ class PMXBundleItemModel(QStandardItemModel):
         for i, element_name in enumerate(self.ELEMENTS):
             self.setHeaderData(i, Qt.Horizontal, element_name.title())
     
-    def appendBundleRow(self, data, instance):
+    def appendBundleRow(self, instance):
         '''
         Add
         '''
