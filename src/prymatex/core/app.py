@@ -139,6 +139,9 @@ class PMXApplication(QApplication):
         return self.__configdialog
             
     def load_textmate_stuff(self):
+        from prymatex.models.bundlemodel import PMXBundleItemModel, PMXBundleModel
+        self._bundleModel =  PMXBundleModel()
+        self._bundleItemModel =  PMXBundleItemModel()
         self.load_texmate_themes()
         if not self.options.no_bundles:
             self.load_texmate_bundles()

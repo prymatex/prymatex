@@ -11,15 +11,24 @@ from PyQt4.QtGui import *
 from prymatex.bundles.syntax import PMXSyntax
 from prymatex.core.base import PMXObject
 from prymatex.lib.i18n import ugettext as _
+
         
 class PWMStatusLabel(QLabel):
+    '''
+    A label which fires a menu when it's clicked. When an action
+    is 
+    '''
+    valueChanged = pyqtSignal(object)
+    
     def __init__(self, text, parent, default = 0, *options):
+        '''
+        
+        '''
         QLabel.__init__(self, text, parent)
         self.setToolTip(text)
         self.menu = QMenu(self)
-        self.menu.setObjectName("menu")
-        #print "COnexion", self.connect(self.menu, SIGNAL("triggered(QAction* action)"), self.selected)
-        QMetaObject.connectSlotsByName(self)
+        
+        self.menu.triggered[QAction].connect(self.indentModeChangedFromMenu)
         actions = []
         for name, value in options:
             action = self.menu.addAction(name)
@@ -30,14 +39,14 @@ class PWMStatusLabel(QLabel):
         
     def mouseReleaseEvent(self, event):
         if self.menu.actions():
-            #self.menu.exec_()
-            self.menu.popup( event.globalPos() )
+            self.menu.popup( event.globalPos() ) #self.menu.exec_()
     
-    def on_menu_triggered(self, action):
+    def indentModeChangedFromMenu(self, action):
         self.setText(action.text())
+        self.valueChanged.emit(action.value)
 
 class PMXCursorPositionLabel(QWidget):
-    FORMAT = "Line: %d Col: %d"
+    FORMAT = "Line: %5d Col: %5d"
     def __init__(self, parent):
         super(PMXCursorPositionLabel, self).__init__(parent)
         self.__text_format = self.trUtf8(self.FORMAT)
@@ -62,25 +71,32 @@ class PMXSymbolBox(QComboBox):
         super(PMXSymbolBox, self).__init__(parent)        
             
 class PMXStatusBar(QStatusBar, PMXObject):
-    
+    '''
+    Main Window status bar, declares some widgets
+    '''
     def __init__(self, parent ):
         QStatusBar.__init__(self, parent)
         
         self.lineColLabel = PMXCursorPositionLabel(self)
 
-        self.indentModeComboBox = PWMStatusLabel(_("Indent Mode"),
-                                                 self, 0,
-                                                (_('Soft Tabs'), 0),
-                                                (_('Hard Tabs'), 1),
+        self.comboIndentMode = PWMStatusLabel(_("Indent Mode"),
+                                                 self, True,
+                                                (_('Soft Tabs'), True),
+                                                (_('Hard Tabs'), False),
                                                  )
         
-        self.indentWidthComboBox = PWMStatusLabel(_("Intendt width"), self,
+        self.comboIndentMode.valueChanged.connect(self.setIndentMode)
+        
+        self.comboIndentWidth = PWMStatusLabel(_("Intendt width"), self,
                                                   -1,
                                                   ('1', 1),
                                                   ('2', 2),
+                                                  ('3', 3),
                                                   ('4', 4),
                                                   ('8', 8),
                                                   )
+        
+        self.comboIndentWidth.valueChanged.connect(self.setIndentWidth)
         
         
         self.syntaxMenu = QComboBox(self)
@@ -92,11 +108,22 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.addPermanentWidget(self.syntaxMenu)
         self.addPermanentWidget(self.lineColLabel)
         
-        self.addPermanentWidget(self.indentModeComboBox)
-        self.addPermanentWidget(self.indentWidthComboBox)
+        self.addPermanentWidget(self.comboIndentMode)
+        
+        self.addPermanentWidget(self.comboIndentWidth)
         self.declareEvents()
         self.setSignals()
-            
+        
+        self.mainwindow.tabWidget.currentEditorChanged.connect(self.syncToEditor)
+    
+    def setIndentMode(self, value):
+        
+        self.mainwindow.currentEditorWidget.codeEdit.softTabs = value 
+    
+    def setIndentWidth(self, value):
+        self.warn("Tab Width %d" % value)
+        self.mainwindow.currentEditorWidget.codeEdit.tabWidth = value
+        
     def setSignals(self):
         #External events
         self.connect(self.mainwindow, SIGNAL('editorCursorPositionChangedEvent'), self.updatePosition )
@@ -116,6 +143,24 @@ class PMXStatusBar(QStatusBar, PMXObject):
         
     def declareEvents(self):
         self.declareEvent('statusBarSytnaxChangedEvent()')
+    
+    def syncToEditor(self, widget):
+        editor = widget
+        self.debug("Widget changed to %s", editor)
+        
+        try:
+            codeEdit = widget.codeEdit
+        except AttributeError:
+            self.warn("Tab doen't seem to be a code edit")
+            return
+        
+        # Update labels
+        syn = codeEdit.syntax
+        if syn:
+            self.updateSyntax(None, syn)
+        codeEdit.sendCursorPosChange()
+        print codeEdit.softTabs
+        print codeEdit.tabSize
     
     def sendStatusBarSyntaxChanged(self, index):
         uuid = self.syntaxMenu.itemData(index).toPyObject()
