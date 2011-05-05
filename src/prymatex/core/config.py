@@ -8,10 +8,12 @@ Application configuration based on Qt's QSettings module.
 from PyQt4.Qt import QSettings
 from os.path import join, abspath, expanduser, dirname, exists
 from os import makedirs
+import plistlib
 from prymatex.lib import deco
 
 PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"
+TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
 TEXTMATE_PREFERENCE_NAMES = ["Library","Preferences"]
 
 def get_prymatex_base_path():
@@ -23,7 +25,7 @@ def get_prymatex_user_path():
         makedirs(path)
     return path
 
-def get_preferences_user_path():
+def get_textmate_preferences_user_path():
     path = abspath(join(expanduser("~"), *TEXTMATE_PREFERENCE_NAMES))
     if not exists(path):
         makedirs(path)
@@ -48,11 +50,36 @@ def get_prymatex_profile_path(name, base):
 #Deprecated use qApp.settings
 PMX_BASE_PATH = get_prymatex_base_path()
 PMX_USER_PATH = get_prymatex_user_path()
-PMX_PREFERENCES_PATH = get_preferences_user_path()
 PMX_APP_PATH = PMX_BASE_PATH
 PMX_BUNDLES_PATH = join(PMX_BASE_PATH, 'share', 'Bundles')
 PMX_THEMES_PATH = join(PMX_BASE_PATH, 'share', 'Themes')
 PMX_SUPPORT_PATH = join(PMX_BASE_PATH, 'share', 'Support')
+
+TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
+
+class TextMateSettings(object):
+    def __init__(self, file):
+        self.file = file
+        if exists(self.file):
+            self.settings = plistlib.readPlist(self.file)
+        else:
+            self.settings = {}
+            self.sync()
+    
+    def setValue(self, name, value):
+        if name in self.settings and self.settings[name] == value:
+            return
+        self.settings[name] = value
+        self.sync()
+    
+    def value(self, name):
+        try:
+            return self.settings[name]
+        except KeyError:
+            return None
+    
+    def sync(self):
+        plistlib.writePlist(self.settings, self.file)
 
 class SettingsGroup(object):
     def __init__(self, name, qsettings):
@@ -60,13 +87,17 @@ class SettingsGroup(object):
         self.listeners = []
         self.settings = {}
         self.qsettings = qsettings
+        self.tmsettings = tmsettings
             
     def setValue(self, name, value):
-        self.qsettings.beginGroup(self.name)
-        self.qsettings.setValue(name, value)
-        self.qsettings.endGroup()
-        for listener in self.listeners:
-            setattr(listener, name, value)
+        if name in self.settings:
+            self.qsettings.beginGroup(self.name)
+            self.qsettings.setValue(name, value)
+            self.qsettings.endGroup()
+            if self.settings[name].tm_name != None:
+                self.tmsettings.setValue(self.settings[name].tm_name, value)
+            for listener in self.listeners:
+                setattr(listener, name, value)
     
     def value(self, name):
         self.qsettings.beginGroup(self.name)
@@ -76,7 +107,9 @@ class SettingsGroup(object):
         
     def addSetting(self, setting):
         self.settings[setting.name] = setting
-        
+        if setting.tm_name != None and self.tmsettings.value(setting.tm_name) == None:
+            self.tmsettings.setValue(setting.tm_name, setting.getDefault())
+
     def addListener(self, listener):
         self.listeners.append(listener)
     
@@ -97,14 +130,15 @@ class SettingsGroup(object):
                 self.qsettings.endGroup()
                 
 class pmxConfigPorperty(object):
-    def __init__(self, default = None, fset = None):
+    def __init__(self, default = None, fset = None, tm_name = None):
         self.default = default
         self.fset = fset
+        self.tm_name = tm_name
     
-    def getDefault(self, obj):
+    def getDefault(self, obj = None):
         if self.default != None:
             return self.default
-        elif self.fget != None:
+        elif self.fget != None and obj != None:
             return self.fget(obj)
         raise Exception("No value for %s" % self.name)
         
@@ -135,11 +169,11 @@ class pmxConfigPorperty(object):
         self.value = value
         if self.fset != None:
             self.fset(instance, value)
-            
+
 class PMXSettings(object):
     PMX_APP_PATH = get_prymatex_base_path()
     PMX_USER_PATH = get_prymatex_user_path()
-    PMX_PREFERENCES_PATH = get_preferences_user_path()
+    PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
     PMX_BUNDLES_PATH = join(PMX_APP_PATH, 'share', 'Bundles')
     PMX_THEMES_PATH = join(PMX_APP_PATH, 'share', 'Themes')
     PMX_SUPPORT_PATH = join(PMX_APP_PATH, 'share', 'Support')
@@ -150,6 +184,7 @@ class PMXSettings(object):
     GROUPS = {}
     def __init__(self, profile_path):
         self.qsettings = QSettings(join(profile_path, PRYMATEX_SETTING_NAME), QSettings.IniFormat)
+        self.tmsettings = TextMateSettings(join(TM_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
     
     @classmethod
     def getSettingsForProfile(cls, profile):
@@ -160,7 +195,7 @@ class PMXSettings(object):
     
     def getGroup(self, name):
         if name not in self.GROUPS:
-            self.GROUPS[name] = SettingsGroup(name, self.qsettings)
+            self.GROUPS[name] = SettingsGroup(name, self.qsettings, self.tmsettings)
         return self.GROUPS[name]
     
     def setValue(self, name, value):
