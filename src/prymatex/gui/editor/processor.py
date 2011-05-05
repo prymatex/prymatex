@@ -43,8 +43,11 @@ class PMXBlockUserData(QTextBlockUserData):
         return self.scopes[-1]
     
     def addScope(self, begin, end, scope):
-        for pos in xrange(end - begin):
-            self.scopes.insert(begin + pos, scope)
+        # Requiere de testeo por el tema de begin y end, pero este es el camino :) para mas velocidad
+        self.scopes[begin:end] = [scope for _ in xrange(end - begin)]
+        # Lo dejo como un triste recuerdo :P
+        #for pos in xrange(end - begin):
+        #    self.scopes.insert(begin + pos, scope)
         
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
