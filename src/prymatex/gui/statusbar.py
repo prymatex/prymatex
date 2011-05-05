@@ -86,8 +86,8 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.syntaxMenu = QComboBox(self)
         
         #No syntax
-        for name in PMXSyntax.getSyntaxesNames(sort = True):
-            self.syntaxMenu.addItem(name)
+        for syntax in PMXSyntax.getSyntaxes(sort = True):
+            self.syntaxMenu.addItem(syntax.name, QVariant(syntax.uuid))
             
         self.addPermanentWidget(self.syntaxMenu)
         self.addPermanentWidget(self.lineColLabel)
@@ -104,7 +104,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.connect(self.mainwindow, SIGNAL('tabWidgetEditorChangedEvent'), self.updateEditor )
         
         #Internal signals
-        self.connect(self.syntaxMenu, SIGNAL('currentIndexChanged(QString)'), self.sendStatusBarSyntaxChanged)
+        self.syntaxMenu.currentIndexChanged[int].connect(self.sendStatusBarSyntaxChanged)
         
         # New style
 #        self.mainwindow.editorCursorPositionChangedEvent.connect( self.updatePosition )
@@ -117,8 +117,9 @@ class PMXStatusBar(QStatusBar, PMXObject):
     def declareEvents(self):
         self.declareEvent('statusBarSytnaxChangedEvent()')
     
-    def sendStatusBarSyntaxChanged(self, name):
-        syntax = PMXSyntax.getSyntaxByName(str(name))
+    def sendStatusBarSyntaxChanged(self, index):
+        uuid = self.syntaxMenu.itemData(index).toPyObject()
+        syntax = PMXSyntax.getSyntaxByUUID(unicode(uuid))
         self.statusBarSytnaxChangedEvent(syntax)
         
     def updatePosition(self, source, line, col):

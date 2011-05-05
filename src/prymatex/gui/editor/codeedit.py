@@ -2,7 +2,7 @@
 
 import re, logging
 from bisect import bisect
-from PyQt4.QtCore import QRect, Qt, SIGNAL, QEvent
+from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette
 from prymatex.bundles import PMXBundle, PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXTheme
@@ -62,9 +62,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     # Settings, config
     #=======================================================================
-    @pmxConfigPorperty(default = 'text.plain')
-    def defaultSyntax(self, scope):
-        syntax = PMXSyntax.getSyntaxByScope(scope)
+    @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
+    def defaultSyntax(self, uuid):
+        syntax = PMXSyntax.getSyntaxByUUID(uuid)
         if syntax != None:
             self.setSyntax(syntax)
     
@@ -72,9 +72,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     tabSize = pmxConfigPorperty(default = 4)
     font = pmxConfigPorperty(default = QFont('Monospace', 10))
     
-    @pmxConfigPorperty(default = 'Twilight')
-    def theme(self, name):
-        theme = PMXTheme.getThemeByName(name)
+    @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
+    def theme(self, uuid):
+        theme = PMXTheme.getThemeByUUID(uuid)
         self.syntaxProcessor.formatter = theme
         style = theme.getStyle()
         foreground = style.getQColor('foreground')
@@ -242,6 +242,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
 
+    #=======================================================================
+    # QPlainTextEdit Events
+    #=======================================================================
+    def paintEvent(self, event):
+        #self.syntaxProcessor.rehighlight()
+        super(PMXCodeEdit, self).paintEvent(event)
     #=======================================================================
     # Mouse Events
     #=======================================================================
@@ -642,6 +648,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_FILEPATH'] = self.parent().file.path
             env['TM_FILENAME'] = self.parent().file.filename
             env['TM_DIRECTORY'] = self.parent().file.directory
+            print env['TM_FILEPATH']
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u'\u2029', '\n')
         env.update(preferences.shellVariables)

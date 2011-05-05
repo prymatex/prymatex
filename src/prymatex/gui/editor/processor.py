@@ -43,8 +43,11 @@ class PMXBlockUserData(QTextBlockUserData):
         return self.scopes[-1]
     
     def addScope(self, begin, end, scope):
-        for pos in xrange(end - begin):
-            self.scopes.insert(begin + pos, scope)
+        # Requiere de testeo por el tema de begin y end, pero este es el camino :) para mas velocidad
+        self.scopes[begin:end] = [scope for _ in xrange(end - begin)]
+        # Lo dejo como un triste recuerdo :P
+        #for pos in xrange(end - begin):
+        #    self.scopes.insert(begin + pos, scope)
         
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
@@ -99,8 +102,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         return text
     
     def highlightBlock(self, text):
-        if not self.syntax:
-            return
+        #block = self.currentBlock()
         text = unicode(text)
         if self.previousBlockState() == self.MULTI_LINE:
             text = self.collectPreviousText(text)
@@ -109,7 +111,15 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         else:  
             self.discard_lines = 0
         self.syntax.parse(text, self)
-    
+
+    def blockRange(self, block):
+        first = self.editor.firstVisibleBlock()
+        page_bottom = self.editor.viewport().height()
+        viewport_offset = self.editor.contentOffset()
+        first_position = self.editor.blockBoundingGeometry(first).topLeft() + viewport_offset
+        block_position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+        return first_position.y() <= block_position.y() <= page_bottom
+
     def addToken(self, end):
         begin = self.line_position
         if self.discard_lines == 0:
@@ -219,6 +229,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             if format == "xml":
                 cursor = self.editor.textCursor()
                 start, end = self.editor.getSelectionBlockStartEnd()
+                print start, end
                 result = u""
                 if start == end:
                     text = unicode(start.text())
@@ -248,7 +259,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
                             result += "".join(map(lambda scope: "</" + scope + ">", ss))
                         result += "\n"
                         block = block.next()
-                        if block == end:
+                        if block == end or block == None:
+                            print result
                             break
                 print result
                 return result
@@ -283,10 +295,15 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     #beforeRunningCommand
     def saveModifiedFiles(self):
-        return self.editor.mainwindow.on_actionSaveAll_triggered()
+        print "saveModifiedFiles"
+        results = [self.editor.mainwindow.tabWidgetEditors.widget(i).reqquest_save() for i in range(0, self.editor.mainwindow.tabWidgetEditors.count())]
+        return all(results)
     
     def saveActiveFile(self):
-        return self.editor.mainwindow.on_actionSave_triggered()
+        print "saveActiveFile"
+        value = self.editor.mainwindow.current_editor_widget.request_save()
+        print value
+        return value
     
     # deleteFromEditor
     def deleteWord(self):
