@@ -14,6 +14,7 @@ from prymatex.lib import deco
 PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"
 TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
+TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TEXTMATE_PREFERENCE_NAMES = ["Library","Preferences"]
 
 def get_prymatex_base_path():
@@ -29,6 +30,10 @@ def get_textmate_preferences_user_path():
     path = abspath(join(expanduser("~"), *TEXTMATE_PREFERENCE_NAMES))
     if not exists(path):
         makedirs(path)
+    #create extra files
+    webpreview = join(path, TEXTMATE_WEBPREVIEW_NAME)
+    if not exists(webpreview):
+        plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
     return path
     
 def build_prymatex_profile(path):

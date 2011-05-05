@@ -67,6 +67,7 @@ parser.add_option('-e', '--profiling-entries', dest='profiling_entries',
                   default = 0,
                   help = "Define profiling entries, assumes -p")
 
+parser.add_option('-N', '--no-bundles', dest='no_bundles',action="store_true", default=False, help="Do not load bundles")
 
 # TODO: Check if any of these options are valuables for the parser
 '''
