@@ -13,6 +13,8 @@
 	<string>Show current bundle information</string>
 	<key>output</key>
 	<string>showAsHTML</string>
+	<key>keyEquivalent</key>
+	<string>@e</string>
 	<key>uuid</key>
 	<string>15fa1c31-af98-44f2-998c-38f41f82029e</string>
 </dict>

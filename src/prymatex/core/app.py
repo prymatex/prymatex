@@ -140,7 +140,8 @@ class PMXApplication(QApplication):
             
     def load_textmate_stuff(self):
         self.load_texmate_themes()
-        self.load_texmate_bundles()
+        if not self.options.no_bundles:
+            self.load_texmate_bundles()
         
     def setup_splash(self):
         self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))
