@@ -181,6 +181,7 @@ class PMXSyntax(PMXBundleItem):
     path_patterns = ['Syntaxes/*.tmLanguage', 'Syntaxes/*.plist']
     bundle_collection = 'syntaxes'
     SYNTAXES = {}
+    UUIDS = {}
     FOLDING_NONE = 0
     FOLDING_START = -1
     FOLDING_STOP = -2
@@ -199,6 +200,7 @@ class PMXSyntax(PMXBundleItem):
                     print self.name, key, e
             setattr(self, key, value)
 
+        PMXSyntax.UUIDS[self.uuid] = self
         PMXSyntax.SYNTAXES.setdefault(self.name_space, {})
         if self.scopeName != None:
             PMXSyntax.SYNTAXES[self.name_space][self.scopeName] = self
@@ -340,6 +342,11 @@ class PMXSyntax(PMXBundleItem):
             return stxs[0]
     
     @classmethod
+    def getSyntaxByUUID(cls, uuid):
+        if uuid in cls.UUIDS:
+            return cls.UUIDS[uuid]
+    
+    @classmethod
     def getSyntaxByScope(cls, scope):
         for syntaxes in cls.SYNTAXES.values():
             if scope in syntaxes:
@@ -347,11 +354,13 @@ class PMXSyntax(PMXBundleItem):
         return None
     
     @classmethod
-    def getSyntaxes(cls):
+    def getSyntaxes(cls, sort = False):
         stxs = []
         for syntaxes in cls.SYNTAXES.values():
             for syntax in syntaxes.values():
                 stxs.append(syntax)
+        if sort:
+            return sorted(stxs, key = lambda s: s.name)
         return stxs
     
     @classmethod

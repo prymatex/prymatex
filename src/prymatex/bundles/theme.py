@@ -45,7 +45,7 @@ class PMXStyle(object):
         return buildQColor(self[item])
     
 class PMXTheme(object):
-    THEMES = {}
+    UUIDS = {}
     STYLES_CACHE = {}
     scores = PMXScoreManager()
     
@@ -60,8 +60,7 @@ class PMXTheme(object):
             else:
                 setattr(self, key, value)
 
-        if hash:
-            print "Bundle '%s' has more values (%s)" % (self.name, ', '.join(hash.keys()))
+        PMXTheme.UUIDS[self.uuid] = self
 
     @staticmethod
     def loadTheme(path):
@@ -71,14 +70,19 @@ class PMXTheme(object):
         except Exception, e:
             print "Error en bundle %s (%s)" % (path, e)
 
-        PMXTheme.THEMES[theme.uuid] = theme
+        PMXTheme.UUIDS[theme.uuid] = theme
         return theme
         
     @classmethod
     def getThemeByName(cls, name):
-        for theme in cls.THEMES.values():
+        for theme in cls.UUIDS.values():
             if theme.name == name:
                 return theme
+
+    @classmethod
+    def getThemeByUUID(cls, uuid):
+        if uuid in cls.UUIDS:
+            return cls.UUIDS[uuid]
 
     def clearCache(self):
         PMXTheme.STYLES_CACHE = {}

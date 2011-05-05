@@ -52,7 +52,7 @@ class PMXBlockUserData(QTextBlockUserData):
     def getAllScopes(self, start = 0, end = None):
         current = ( self.scopes[start], start )
         scopes = []
-        for index, scope in enumerate(self.scopes, start):
+        for index, scope in enumerate(self.scopes[start:], start):
             if scope != current[0] or (end != None and index == end):
                 scopes.append(( current[0], current[1], index ))
                 current = ( scope, index )
@@ -99,8 +99,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         return text
     
     def highlightBlock(self, text):
-        if not self.syntax:
-            return
+        #block = self.currentBlock()
         text = unicode(text)
         if self.previousBlockState() == self.MULTI_LINE:
             text = self.collectPreviousText(text)
@@ -109,7 +108,15 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         else:  
             self.discard_lines = 0
         self.syntax.parse(text, self)
-    
+
+    def blockRange(self, block):
+        first = self.editor.firstVisibleBlock()
+        page_bottom = self.editor.viewport().height()
+        viewport_offset = self.editor.contentOffset()
+        first_position = self.editor.blockBoundingGeometry(first).topLeft() + viewport_offset
+        block_position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+        return first_position.y() <= block_position.y() <= page_bottom
+
     def addToken(self, end):
         begin = self.line_position
         if self.discard_lines == 0:
