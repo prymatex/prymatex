@@ -309,7 +309,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         #TODO: Check exceptions, for example, disk full.
         promise = self.file.write(buffer_contents)
         logger.debug("Buffer saved to %s" % self.file.path)
-        
     
     def propmpt_file(self, title = None):
         '''
@@ -356,6 +355,8 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                 return False
             self.file.path = path
         self.save()
+        #Esto es necesario para los commandos, de este modo se enteran que el archivo se guardo
+        return True
 
     def setSyntax(self):
         syntax = PMXSyntax.findSyntaxByFileType(self.path)

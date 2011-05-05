@@ -54,7 +54,7 @@ for browser in browsers:
     try:
         controller = webbrowser.get(browser)
         if os.system('ps xc|grep -sq ' + browser) == 0:
-            controller.open("javascript:alert('hola');", new=0)
+            controller.open(url)
     except Error:
         pass</string>
 	<key>input</key>

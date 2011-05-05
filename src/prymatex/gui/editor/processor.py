@@ -226,6 +226,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             if format == "xml":
                 cursor = self.editor.textCursor()
                 start, end = self.editor.getSelectionBlockStartEnd()
+                print start, end
                 result = u""
                 if start == end:
                     text = unicode(start.text())
@@ -255,7 +256,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
                             result += "".join(map(lambda scope: "</" + scope + ">", ss))
                         result += "\n"
                         block = block.next()
-                        if block == end:
+                        if block == end or block == None:
+                            print result
                             break
                 print result
                 return result
@@ -290,10 +292,15 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     #beforeRunningCommand
     def saveModifiedFiles(self):
-        return self.editor.mainwindow.on_actionSaveAll_triggered()
+        print "saveModifiedFiles"
+        results = [self.editor.mainwindow.tabWidgetEditors.widget(i).reqquest_save() for i in range(0, self.editor.mainwindow.tabWidgetEditors.count())]
+        return all(results)
     
     def saveActiveFile(self):
-        return self.editor.mainwindow.on_actionSave_triggered()
+        print "saveActiveFile"
+        value = self.editor.mainwindow.current_editor_widget.request_save()
+        print value
+        return value
     
     # deleteFromEditor
     def deleteWord(self):

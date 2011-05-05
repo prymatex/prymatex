@@ -12,6 +12,7 @@ from prymatex.lib import deco
 
 PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"
+TEXTMATE_PREFERENCE_NAMES = ["Library","Preferences"]
 
 def get_prymatex_base_path():
     return abspath(join(dirname(__file__), '..'))
@@ -22,6 +23,12 @@ def get_prymatex_user_path():
         makedirs(path)
     return path
 
+def get_preferences_user_path():
+    path = abspath(join(expanduser("~"), *TEXTMATE_PREFERENCE_NAMES))
+    if not exists(path):
+        makedirs(path)
+    return path
+    
 def build_prymatex_profile(path):
     '''
     @see: PMXObject.pmxApp.getProfilePath(what, file)
@@ -41,6 +48,7 @@ def get_prymatex_profile_path(name, base):
 #Deprecated use qApp.settings
 PMX_BASE_PATH = get_prymatex_base_path()
 PMX_USER_PATH = get_prymatex_user_path()
+PMX_PREFERENCES_PATH = get_preferences_user_path()
 PMX_APP_PATH = PMX_BASE_PATH
 PMX_BUNDLES_PATH = join(PMX_BASE_PATH, 'share', 'Bundles')
 PMX_THEMES_PATH = join(PMX_BASE_PATH, 'share', 'Themes')
@@ -131,6 +139,7 @@ class pmxConfigPorperty(object):
 class PMXSettings(object):
     PMX_APP_PATH = get_prymatex_base_path()
     PMX_USER_PATH = get_prymatex_user_path()
+    PMX_PREFERENCES_PATH = get_preferences_user_path()
     PMX_BUNDLES_PATH = join(PMX_APP_PATH, 'share', 'Bundles')
     PMX_THEMES_PATH = join(PMX_APP_PATH, 'share', 'Themes')
     PMX_SUPPORT_PATH = join(PMX_APP_PATH, 'share', 'Support')

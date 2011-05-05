@@ -648,6 +648,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_FILEPATH'] = self.parent().file.path
             env['TM_FILENAME'] = self.parent().file.filename
             env['TM_DIRECTORY'] = self.parent().file.directory
+            print env['TM_FILEPATH']
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u'\u2029', '\n')
         env.update(preferences.shellVariables)

@@ -274,10 +274,15 @@ class PMXApplication(QApplication):
         
         self.splash.showMessage(_("Loading bundles..."))
         #Build primary environment
-        basic_env = {   'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
+        basic_env = {   #TextMate Compatible :P
+                        'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
                         'TM_SUPPORT_PATH': self.settings.value('PMX_SUPPORT_PATH'),
                         'TM_BUNDLES_PATH': self.settings.value('PMX_BUNDLES_PATH'),
+                        #Prymatex 
+                        'PMX_THEMES_PATH': self.settings.value('PMX_THEMES_PATH'),
                         'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
+                        'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
+                        'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
                         'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                         'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
         
