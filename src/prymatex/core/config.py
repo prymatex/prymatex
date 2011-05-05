@@ -82,7 +82,7 @@ class TextMateSettings(object):
         plistlib.writePlist(self.settings, self.file)
 
 class SettingsGroup(object):
-    def __init__(self, name, qsettings):
+    def __init__(self, name, qsettings, tmsettings):
         self.name = name
         self.listeners = []
         self.settings = {}
