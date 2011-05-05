@@ -80,13 +80,13 @@ class PMXBundle(object):
     scores = PMXScoreManager()
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
     
-    def __init__(self, hash, name_space, path = None):
+    def __init__(self, hash, namespace, path = None):
         for key in [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]:
             value = hash.pop(key, None)
             if key == 'mainMenu' and value != None:
                 value = PMXMenuNode(self.name, **value)
             setattr(self, key, value)
-        self.name_space = name_space
+        self.namespace = namespace
         self.path = path
         self.syntaxes = []
         self.snippets = []
@@ -123,11 +123,11 @@ class PMXBundle(object):
         return os.path.join(self.path, 'Support')
 
     @classmethod
-    def loadBundle(cls, path, classes, name_space = 'prymatex'):
+    def loadBundle(cls, path, classes, namespace = 'prymatex'):
         info_file = os.path.join(path, 'info.plist')
         try:
             data = plistlib.readPlist(info_file)
-            bundle = cls(data, name_space, path)
+            bundle = cls(data, namespace, path)
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
             return
@@ -141,7 +141,7 @@ class PMXBundle(object):
                 files = glob(os.path.join(path, pattern))
                 for sf in files:
                     try:
-                        item = klass.loadBundleItem(sf, name_space)
+                        item = klass.loadBundleItem(sf, namespace)
                         if item != None:
                             bundle.addBundleItem(item)
                     except Exception, e:
@@ -229,12 +229,12 @@ class PMXBundle(object):
 class PMXBundleItem(object):
     path_patterns = []
     bundle_collection = ""
-    def __init__(self, hash, name_space, path = None):
+    def __init__(self, hash, namespace, path = None):
         self.hash = deepcopy(hash)
-        self.name_space = name_space
+        self.namespace = namespace
         self.path = path
         self.bundle = None
-        for key in [    'uuid', 'bundleUUID', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
+        for key in [    'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
             setattr(self, key, hash.get(key, None))
 
     @property
@@ -266,17 +266,17 @@ class PMXBundleItem(object):
         return text.replace('&', '&&')
     
     @classmethod
-    def loadBundleItem(cls, path, name_space = 'prymatex'):
+    def loadBundleItem(cls, path, namespace = 'prymatex'):
         try:
             data = plistlib.readPlist(path)
-            return cls(data, name_space, path)
+            return cls(data, namespace, path)
         except Exception, e:
             data = open(path).read()
             for match in RE_XML_ILLEGAL.finditer(data):
                 data = data[:match.start()] + "?" + data[match.end():]
             try:
                 data = plistlib.readPlistFromString(data)
-                return cls(data, name_space, path)
+                return cls(data, namespace, path)
             except ExpatError, e:
                 print "Error in %s for %s (%s)" % (cls.__name__, path, e)
     
