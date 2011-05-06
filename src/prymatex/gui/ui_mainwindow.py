@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Tue Apr 19 12:37:03 2011
+# Created: Fri May  6 11:13:59 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -30,7 +30,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 22))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -322,6 +322,12 @@ class Ui_MainWindow(object):
         self.actionCurrent_Scope.setObjectName(_fromUtf8("actionCurrent_Scope"))
         self.actionAll = QtGui.QAction(MainWindow)
         self.actionAll.setObjectName(_fromUtf8("actionAll"))
+        self.actionBundle_List = QtGui.QAction(MainWindow)
+        self.actionBundle_List.setCheckable(True)
+        icon23 = QtGui.QIcon()
+        icon23.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/edit-select-all.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionBundle_List.setIcon(icon23)
+        self.actionBundle_List.setObjectName(_fromUtf8("actionBundle_List"))
         self.menuFile.addAction(self.actionNewTab)
         self.menuFile.addAction(self.actionNew_from_template)
         self.menuFile.addAction(self.actionOpen)
@@ -427,6 +433,7 @@ class Ui_MainWindow(object):
         self.menuEdit.addAction(self.actionPreferences)
         self.menuBundles.addAction(self.actionShow_Bundle_Editor)
         self.menuBundles.addAction(self.actionSelect_Bundle_Item)
+        self.menuBundles.addAction(self.actionBundle_List)
         self.menuBundles.addSeparator()
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
@@ -594,6 +601,8 @@ class Ui_MainWindow(object):
         self.actionEnclosing_Brackets.setText(QtGui.QApplication.translate("MainWindow", "Enclosing &Brackets", None, QtGui.QApplication.UnicodeUTF8))
         self.actionCurrent_Scope.setText(QtGui.QApplication.translate("MainWindow", "Current &Scope", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAll.setText(QtGui.QApplication.translate("MainWindow", "&All", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionBundle_List.setText(QtGui.QApplication.translate("MainWindow", "Bundle List", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionBundle_List.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+B", None, QtGui.QApplication.UnicodeUTF8))
 
 from statusbar import PMXStatusBar
 from tabwidget import PMXTabWidget

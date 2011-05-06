@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -197,6 +197,7 @@
     </property>
     <addaction name="actionShow_Bundle_Editor"/>
     <addaction name="actionSelect_Bundle_Item"/>
+    <addaction name="actionBundle_List"/>
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
@@ -949,6 +950,21 @@
   <action name="actionAll">
    <property name="text">
     <string>&amp;All</string>
+   </property>
+  </action>
+  <action name="actionBundle_List">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../res.qrc">
+     <normaloff>:/actions/resources/actions/edit-select-all.png</normaloff>:/actions/resources/actions/edit-select-all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bundle List</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+B</string>
    </property>
   </action>
  </widget>

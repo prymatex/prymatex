@@ -23,6 +23,7 @@ from prymatex.gui.editor import PMXEditorWidget
 from prymatex.gui.dialogs import NewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXObject
+from prymatex.gui.bundles.tableview import PMXBundleItemTableView
 
 #from prymatex.config.configdialog import PMXConfigDialog
 
@@ -58,6 +59,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
         
         self.setupPanes()
+        
+        self.setupBundleViews()
+        
         self.setupLogging()
         self.center()
         
@@ -202,8 +206,26 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def on_actionQuit_triggered(self):
         QApplication.quit()
     
+    def setupBundleViews(self):
+        '''
+        Creates a TableView for the bundleItemModel and associates it
+        with the QAction in the menu
+        '''
+        self.tableViewBundleItems = PMXBundleItemTableView()
+        self.tableViewBundleItems.setModel(QApplication.instance().bundleItemModel)
+        self.tableViewBundleItems.setWindowTitle("Bundle Items")
+        self.actionBundle_List.toggled[bool].connect(self.tableViewBundleItems.setVisible)
+        self.tableViewBundleItems.showStateChanged.connect(self.actionBundle_List.setChecked)
+        # Center on pmx window
+        geo = self.geometry()
+        #print geo
+        geo.setWidth( geo.width() * .9)
+        geo.setHeight( geo.height() * .9)
+        geo.setX(self.pos().x() * 1.1)
+        geo.setY(self.pos().y() * 1.1)
+        self.tableViewBundleItems.setGeometry(geo)
+        
     counter = 0
-    
     #===========================================================================
     # Shortcuts
     #===========================================================================
@@ -316,17 +338,34 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def openFile(self, path, auto_focus = False):
         '''
         Opens a file or focus its editor
+        @see: File manager to check if a file is opened
+        @return: editor widget or None if it can't make it
         '''
         file_manager = qApp.instance().file_manager
+        pmx_file = None
         try:
+            print "About to open"
             pmx_file = file_manager.openFile(path)
         except FileDoesNotExistError, e:
+            print " FileDoesNotExistError", e
             QMessageBox.critical(self, "File not found", "%s" % e, QMessageBox.Ok)
+            
+        except UnicodeDecodeError, e:
+            print "UnicodeDecodeError", e
+            QMessageBox.critical(self, "Can't decode file", "%s" % e, QMessageBox.Ok)
+        except Exception, e:
+            print "Exception was", e, type(e)
+        
+        if not pmx_file:
             return
+        
+        
+        
         if not pmx_file in self.tabWidget:
             try:
                 editor = PMXEditorWidget.editorFactory(pmx_file)
             except Exception, e:
+                print "Emergency"
                 from prymatex.gui.emergency import PMXTraceBackDialog
                 print e
                 dlg = PMXTraceBackDialog(e)

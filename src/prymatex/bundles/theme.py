@@ -49,7 +49,7 @@ class PMXTheme(object):
     STYLES_CACHE = {}
     scores = PMXScoreManager()
     
-    def __init__(self, hash, namespace, path):
+    def __init__(self, hash, namespace, path = None):
         self.sytles = []
         for key in [    'uuid', 'name', 'comment', 'author', 'settings' ]:
             value = hash.pop(key, None)

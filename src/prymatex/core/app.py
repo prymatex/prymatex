@@ -137,9 +137,19 @@ class PMXApplication(QApplication):
     @property
     def configdialog(self):
         return self.__configdialog
-            
+    
+    _bundleModel = None
+    @property
+    def bundleModel(self):
+        return self._bundleModel
+    
+    _bundleItemModel  = None
+    @property
+    def bundleItemModel(self):
+        return self._bundleItemModel
+    
     def load_textmate_stuff(self):
-        from prymatex.models.bundlemodel import PMXBundleItemModel, PMXBundleModel
+        from prymatex.gui.bundles.bundlemodel import PMXBundleItemModel, PMXBundleModel
         self._bundleModel =  PMXBundleModel()
         self._bundleItemModel =  PMXBundleItemModel()
         self.load_texmate_themes()
@@ -266,15 +276,21 @@ class PMXApplication(QApplication):
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def load_texmate_bundles(self):
-        #FIXME: Pasar el path de los bundles como parametro desde self.settings
         from prymatex.bundles import load_prymatex_bundles
         from prymatex.lib.i18n import ugettext as _
+        
+        disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
+        
         splash = self.splash
-        def update_splash(counter, total, name, **kwargs):
+        
+        def update_splash_popullate_model(counter, total, name, bundle, **kwargs):
             progress = (float(counter) / total) * 100
             splash.showMessage(_("Loading bundle %s\n%4d of %4d (%.d%%)", 
                                  name, counter, total, progress))
+            # Loose coupling 
             QApplication.processEvents()
+            bundleItemModel = QApplication.instance().bundleItemModel
+            bundleItemModel.appendRowFromBundle( bundle )
         
         self.splash.showMessage(_("Loading bundles..."))
         #Build basic environment
@@ -289,7 +305,7 @@ class PMXApplication(QApplication):
                 'PMX_THEMES_PATH': self.settings.value('PMX_THEMES_PATH'),
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')}
                         
-        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), 'pryamtex', env, update_splash)
+        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), 'pryamtex', env, disabled, update_splash_popullate_model)
 
         env = { #User
                 'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
@@ -299,7 +315,7 @@ class PMXApplication(QApplication):
                 'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
         
-        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), 'user', env, update_splash)
+        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), 'user', env, disabled, update_splash_popullate_model)
         
         QApplication.processEvents()
         

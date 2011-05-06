@@ -125,31 +125,18 @@ class PMXBundle(object):
         return os.path.join(self.path, 'Support')
 
     @classmethod
-    def loadBundle(cls, path, classes, namespace):
+    def loadBundle(cls, path, namespace):
         info_file = os.path.join(path, 'info.plist')
         try:
             data = plistlib.readPlist(info_file)
             bundle = cls(data, namespace, path)
-            
+
             no_bundles = qApp.instance().options.no_bundles
             if no_bundles and not re.findall('Text',path):
                 return 
-            #Disabled?
-            #if bundle.uuid in settings.disabled_bundles:
-            #    return
-                
-            for klass in classes:
-                for pattern in klass.path_patterns:
-                    files = glob(os.path.join(path, pattern))
-                    for sf in files:
-                        try:
-                            item = klass.loadBundleItem(sf, namespace)
-                            if item != None:
-                                bundle.addBundleItem(item)
-                        except Exception, e:
-                            print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
-            cls.BUNDLES[bundle.uuid] = bundle
+        
             return bundle
+        
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
 
