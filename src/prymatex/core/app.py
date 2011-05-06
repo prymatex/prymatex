@@ -149,7 +149,7 @@ class PMXApplication(QApplication):
         return self._bundleItemModel
     
     def load_textmate_stuff(self):
-        from prymatex.models.bundlemodel import PMXBundleItemModel, PMXBundleModel
+        from prymatex.gui.bundles.bundlemodel import PMXBundleItemModel, PMXBundleModel
         self._bundleModel =  PMXBundleModel()
         self._bundleItemModel =  PMXBundleItemModel()
         self.load_texmate_themes()
