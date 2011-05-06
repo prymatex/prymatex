@@ -129,26 +129,25 @@ class PMXBundle(object):
         try:
             data = plistlib.readPlist(info_file)
             bundle = cls(data, namespace, path)
+
+            #Disabled?
+            #if bundle.uuid in settings.disabled_bundles:
+            #    return
+                
+            for klass in classes:
+                for pattern in klass.path_patterns:
+                    files = glob(os.path.join(path, pattern))
+                    for sf in files:
+                        try:
+                            item = klass.loadBundleItem(sf, namespace)
+                            if item != None:
+                                bundle.addBundleItem(item)
+                        except Exception, e:
+                            print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
+            cls.BUNDLES[bundle.uuid] = bundle
+            return bundle
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
-            return
-
-        #Disabled?
-        #if bundle.uuid in settings.disabled_bundles:
-        #    return
-            
-        for klass in classes:
-            for pattern in klass.path_patterns:
-                files = glob(os.path.join(path, pattern))
-                for sf in files:
-                    try:
-                        item = klass.loadBundleItem(sf, namespace)
-                        if item != None:
-                            bundle.addBundleItem(item)
-                    except Exception, e:
-                        print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
-        cls.BUNDLES[bundle.uuid] = bundle
-        return bundle
 
     @classmethod
     def getBundleByName(cls, name):

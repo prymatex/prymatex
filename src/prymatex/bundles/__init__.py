@@ -43,6 +43,6 @@ def load_prymatex_themes(themes_path, namespace, after_load_callback = None):
     for path in paths:
         if callable(after_load_callback):
             after_load_callback(counter = counter, total = total, name = os.path.basename(path).split('.')[0])
-        PMXTheme.loadTheme(path, namespace)
+        theme = PMXTheme.loadTheme(path, namespace)
         counter += 1
     return counter
