@@ -267,9 +267,11 @@ class PMXApplication(QApplication):
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def load_texmate_bundles(self):
-        #FIXME: Pasar el path de los bundles como parametro desde self.settings
         from prymatex.bundles import load_prymatex_bundles
         from prymatex.lib.i18n import ugettext as _
+        
+        disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
+        
         splash = self.splash
         def update_splash(counter, total, name, **kwargs):
             progress = (float(counter) / total) * 100
@@ -290,7 +292,7 @@ class PMXApplication(QApplication):
                 'PMX_THEMES_PATH': self.settings.value('PMX_THEMES_PATH'),
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')}
                         
-        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), 'pryamtex', env, update_splash)
+        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), 'pryamtex', env, disabled, update_splash)
 
         env = { #User
                 'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
@@ -300,7 +302,7 @@ class PMXApplication(QApplication):
                 'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
         
-        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), 'user', env, update_splash)
+        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), 'user', env, disabled, update_splash)
         
         QApplication.processEvents()
         
