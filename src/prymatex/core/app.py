@@ -290,7 +290,7 @@ class PMXApplication(QApplication):
                 'PMX_THEMES_PATH': self.settings.value('PMX_THEMES_PATH'),
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')}
                         
-        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), env, 'pryamtex', update_splash)
+        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), 'pryamtex', env, update_splash)
 
         env = { #User
                 'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
@@ -300,7 +300,7 @@ class PMXApplication(QApplication):
                 'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
         
-        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), env, 'user', update_splash)
+        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), 'user', env, update_splash)
         
         QApplication.processEvents()
         

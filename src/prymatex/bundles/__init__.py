@@ -20,7 +20,7 @@ from prymatex.bundles.qtadapter import buildQTextFormat
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
-def load_prymatex_bundles(bundles_path, env = {}, namespace, after_load_callback = None):
+def load_prymatex_bundles(bundles_path, namespace, env = {}, after_load_callback = None):
     paths = glob(os.path.join(bundles_path, '*.tmbundle'))
     counter = 0
     total = len(paths)
