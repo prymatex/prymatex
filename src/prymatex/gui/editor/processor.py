@@ -228,12 +228,11 @@ class PMXCommandProcessor(PMXCommandProcessor):
             self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
             if format == "xml":
                 cursor = self.editor.textCursor()
-                start, end = self.editor.getSelectionBlockStartEnd()
-                print start, end
+                bstart, bend = self.editor.getSelectionBlockStartEnd()
                 result = u""
-                if start == end:
-                    text = unicode(start.text())
-                    scopes = start.userData().getAllScopes(start = cursor.selectionStart() - start.position(), end = cursor.selectionEnd() - start.position())
+                if bstart == bend:
+                    text = unicode(bstart.text())
+                    scopes = bstart.userData().getAllScopes(start = cursor.selectionStart() - bstart.position(), end = cursor.selectionEnd() - bstart.position())
                     for scope, start, end in scopes:
                         ss = scope.split()
                         result += "".join(map(lambda scope: "<" + scope + ">", ss))
@@ -241,13 +240,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
                         ss.reverse()
                         result += "".join(map(lambda scope: "</" + scope + ">", ss))
                 else:
-                    block = start
+                    block = bstart
                     while True:
                         text = unicode(block.text())
-                        if block == start:
-                            print cursor.selectionStart() - block.position()
+                        if block == bstart:
                             scopes = block.userData().getAllScopes(start = cursor.selectionStart() - block.position())
-                        elif block == end:
+                        elif block == bend:
                             scopes = block.userData().getAllScopes(end = cursor.selectionEnd() - block.position())
                         else:
                             scopes = block.userData().getAllScopes()
@@ -259,10 +257,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
                             result += "".join(map(lambda scope: "</" + scope + ">", ss))
                         result += "\n"
                         block = block.next()
-                        if block == end or block == None:
-                            print result
+                        if block == bend:
                             break
-                print result
                 return result
             else:
                 return self.environment['TM_SELECTED_TEXT']
