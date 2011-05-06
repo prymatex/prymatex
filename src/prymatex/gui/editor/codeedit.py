@@ -329,40 +329,30 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             if self.keyPressBundleItem(event): #Modo MultiEdit
                 self.cursors = []
                 return
+            elif self.keyPressMultiEdit(event):
+                return
         else:
             if self.keyPressBundleItem(event): #Modo Normal
                 return
             elif self.keyPressSmartTyping(event):
                 return
         
-        def handleEvent(event):
-            key = event.key()
-        
-            if key == Qt.Key_Tab:
-                self.tabPressEvent(event)
-            elif key == Qt.Key_Backtab:
-                self.backtabPressEvent(event)
-            elif key == Qt.Key_Backspace:
-                self.backspacePressEvent(event)
-            elif key == Qt.Key_Return:
-                self.returnPressEvent(event)
-            else:
-                super(PMXCodeEdit, self).keyPressEvent(event)
-            
-            #Luego de tratar el evento, solo si se inserto algo de texto
-            if event.text() != "":
-                self.keyPressIndent(event)
-        
-        if self.multiEditMode:
-            if event.key() != Qt.Key_Escape:
-                cursors = self.cursors + [ self.textCursor() ]
-                for cursor in cursors:
-                    self.setTextCursor(cursor)
-                    handleEvent(event)
-            else:
-                self.cursors = []
+        key = event.key()
+    
+        if key == Qt.Key_Tab:
+            self.tabPressEvent(event)
+        elif key == Qt.Key_Backtab:
+            self.backtabPressEvent(event)
+        elif key == Qt.Key_Backspace:
+            self.backspacePressEvent(event)
+        elif key == Qt.Key_Return:
+            self.returnPressEvent(event)
         else:
-            handleEvent(event)
+            super(PMXCodeEdit, self).keyPressEvent(event)
+            
+        #Luego de tratar el evento, solo si se inserto algo de texto
+        if event.text() != "":
+            self.keyPressIndent(event)
     
     def keyPressBundleItem(self, event):
         code = int(event.modifiers()) + event.key()
@@ -374,7 +364,23 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             else:
                 self.insertBundleItem(items[0])
             return True
-
+    
+    def keyPressMultiEdit(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.cursors = []
+            return False
+        if event.modifiers() & Qt.ControlModifier:
+            super(PMXCodeEdit, self).keyPressEvent(event)
+        else:
+            cursor = self.textCursor()
+            cursor.beginEditBlock()        
+            cursors = self.cursors + [ cursor ]
+            for cursor in cursors:
+                self.setTextCursor(cursor)
+                super(PMXCodeEdit, self).keyPressEvent(event)
+            cursor.endEditBlock()
+        return True
+    
     def keyPressSnippet(self, event):
         key = event.key()
         cursor = self.textCursor()
@@ -457,7 +463,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             cursor.setPosition(position)
             self.setTextCursor(cursor)
             return True
-            
+    
     def keyPressSmartTyping(self, event):
         cursor = self.textCursor()
         character = unicode(event.text())
