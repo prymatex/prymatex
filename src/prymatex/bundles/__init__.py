@@ -20,13 +20,32 @@ from prymatex.bundles.qtadapter import buildQTextFormat
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
-def load_prymatex_bundles(bundles_path, env = {}, namespace = None, after_load_callback = None):
+def load_prymatex_bundles(bundles_path, namespace, env = {}, disabled = [], after_load_callback = None):
     paths = glob(os.path.join(bundles_path, '*.tmbundle'))
     counter = 0
     total = len(paths)
     PMXBundle.BASE_ENVIRONMENT.update(env)
     for path in paths:
-        bundle = PMXBundle.loadBundle(path, BUNDLEITEM_CLASSES, namespace)
+        bundle = PMXBundle.loadBundle(path, namespace)
+        if bundle == None:
+            continue
+        
+        #Disabled?
+        bundle.disabled = bundle.uuid in disabled
+        if not bundle.disabled:
+            for klass in BUNDLEITEM_CLASSES:
+                for pattern in klass.path_patterns:
+                    files = glob(os.path.join(path, pattern))
+                    for sf in files:
+                        try:
+                            item = klass.loadBundleItem(sf, namespace)
+                            if item == None:
+                                continue
+                            bundle.addBundleItem(item)
+                        except Exception, e:
+                            print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
+        PMXBundle.BUNDLES[bundle.uuid] = bundle
+        
         if bundle and callable(after_load_callback):
             after_load_callback(counter = counter, 
                                 total = total, 
@@ -43,6 +62,6 @@ def load_prymatex_themes(themes_path, namespace, after_load_callback = None):
     for path in paths:
         if callable(after_load_callback):
             after_load_callback(counter = counter, total = total, name = os.path.basename(path).split('.')[0])
-        PMXTheme.loadTheme(path, namespace)
+        theme = PMXTheme.loadTheme(path, namespace)
         counter += 1
     return counter

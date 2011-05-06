@@ -207,12 +207,23 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         QApplication.quit()
     
     def setupBundleViews(self):
-        
+        '''
+        Creates a TableView for the bundleItemModel and associates it
+        with the QAction in the menu
+        '''
         self.tableViewBundleItems = PMXBundleItemTableView()
         self.tableViewBundleItems.setModel(QApplication.instance().bundleItemModel)
         self.tableViewBundleItems.setWindowTitle("Bundle Items")
         self.actionBundle_List.toggled[bool].connect(self.tableViewBundleItems.setVisible)
         self.tableViewBundleItems.showStateChanged.connect(self.actionBundle_List.setChecked)
+        # Center on pmx window
+        geo = self.geometry()
+        #print geo
+        geo.setWidth( geo.width() * .9)
+        geo.setHeight( geo.height() * .9)
+        geo.setX(self.pos().x() * 1.1)
+        geo.setY(self.pos().y() * 1.1)
+        self.tableViewBundleItems.setGeometry(geo)
         
     counter = 0
     #===========================================================================

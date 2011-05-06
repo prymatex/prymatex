@@ -109,7 +109,7 @@ class PMXBundleItemModel(QStandardItemModel):
     
         items = []
         for name, element in zip(self.ELEMENTS, elements) :
-            print name, element
+            #print name, element
             if element is None:
                     # None -> Null String
                 items.append(QStandardItem(''))

@@ -66,13 +66,12 @@ class PMXTheme(object):
     def loadTheme(cls, path, namespace):
         try:
             data = plistlib.readPlist(path)
-            theme = PMXTheme(data, namespace, path = path)
-        except Exception, e:
-            print "Error en bundle %s (%s)" % (path, e)
-        else:
+            theme = PMXTheme(data, namespace, path)
             cls.UUIDS[theme.uuid] = theme
             return theme
-        
+        except Exception, e:
+            print "Error en bundle %s (%s)" % (path, e)
+
     @classmethod
     def getThemeByName(cls, name):
         for theme in cls.UUIDS.values():
