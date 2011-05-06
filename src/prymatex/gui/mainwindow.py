@@ -23,7 +23,8 @@ from prymatex.gui.editor import PMXEditorWidget
 from prymatex.gui.dialogs import NewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXObject
-from prymatex.gui.bundles.tableview import PMXBundleItemTableView
+from prymatex.gui.bundles.tableview import PMXBundleItemTableView,\
+    PMXBundleItemSelector
 
 #from prymatex.config.configdialog import PMXConfigDialog
 
@@ -224,6 +225,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         geo.setX(self.pos().x() * 1.1)
         geo.setY(self.pos().y() * 1.1)
         self.tableViewBundleItems.setGeometry(geo)
+        
+        self.bundleItemSelector = PMXBundleItemSelector(self)
+        self.actionSelect_Bundle_Item.triggered.connect(self.bundleItemSelector.exec_)
         
     counter = 0
     #===========================================================================
