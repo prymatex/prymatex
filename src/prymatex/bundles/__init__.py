@@ -20,13 +20,13 @@ from prymatex.bundles.qtadapter import buildQTextFormat
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
-def load_prymatex_bundles(bundles_path, env = {}, after_load_callback = None):
+def load_prymatex_bundles(bundles_path, env = {}, namespace, after_load_callback = None):
     paths = glob(os.path.join(bundles_path, '*.tmbundle'))
     counter = 0
     total = len(paths)
-    PMXBundle.BASE_ENVIRONMENT = env
+    PMXBundle.BASE_ENVIRONMENT.update(env)
     for path in paths:
-        bundle = PMXBundle.loadBundle(path, BUNDLEITEM_CLASSES, 'pryamtex')
+        bundle = PMXBundle.loadBundle(path, BUNDLEITEM_CLASSES, namespace)
         if bundle and callable(after_load_callback):
             after_load_callback(counter = counter, 
                                 total = total, 
@@ -36,13 +36,13 @@ def load_prymatex_bundles(bundles_path, env = {}, after_load_callback = None):
         counter += 1
     return counter
 
-def load_prymatex_themes(themes_path, after_load_callback = None):
+def load_prymatex_themes(themes_path, namespace, after_load_callback = None):
     paths = glob(os.path.join(themes_path, '*.tmTheme'))
     counter = 0
     total = len(paths)
     for path in paths:
         if callable(after_load_callback):
             after_load_callback(counter = counter, total = total, name = os.path.basename(path).split('.')[0])
-        PMXTheme.loadTheme(path)
+        PMXTheme.loadTheme(path, namespace)
         counter += 1
     return counter

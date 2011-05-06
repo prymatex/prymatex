@@ -49,7 +49,7 @@ class PMXTheme(object):
     STYLES_CACHE = {}
     scores = PMXScoreManager()
     
-    def __init__(self, hash):
+    def __init__(self, hash, namespace, path):
         self.sytles = []
         for key in [    'uuid', 'name', 'comment', 'author', 'settings' ]:
             value = hash.pop(key, None)
@@ -59,18 +59,18 @@ class PMXTheme(object):
                     self.sytles.append(PMXStyle(setting))
             else:
                 setattr(self, key, value)
+        self.namespace = namespace
+        self.path = path
 
-        PMXTheme.UUIDS[self.uuid] = self
-
-    @staticmethod
-    def loadTheme(path):
+    @classmethod
+    def loadTheme(cls, path, namespace):
         try:
             data = plistlib.readPlist(path)
-            theme = PMXTheme(data)
+            theme = PMXTheme(data, namespace)
         except Exception, e:
             print "Error en bundle %s (%s)" % (path, e)
 
-        PMXTheme.UUIDS[theme.uuid] = theme
+        cls.UUIDS[theme.uuid] = theme
         return theme
         
     @classmethod

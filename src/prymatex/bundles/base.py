@@ -77,6 +77,7 @@ class PMXBundle(object):
     PREFERENCES = {}
     TEMPLATES = []
     SETTINGS_CACHE = {}
+    BASE_ENVIRONMENT = {}
     scores = PMXScoreManager()
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
     
@@ -123,7 +124,7 @@ class PMXBundle(object):
         return os.path.join(self.path, 'Support')
 
     @classmethod
-    def loadBundle(cls, path, classes, namespace = 'prymatex'):
+    def loadBundle(cls, path, classes, namespace):
         info_file = os.path.join(path, 'info.plist')
         try:
             data = plistlib.readPlist(info_file)
