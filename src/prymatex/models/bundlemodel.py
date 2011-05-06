@@ -21,7 +21,40 @@ class PMXBundleModel(QStandardItemModel):
                                                  )
         for i, element_name in enumerate(self.ELEMENTS):
             self.setHeaderData(i, Qt.Horizontal, element_name.title())
+
+class PMXBundleItemInstanceItem(QStandardItem):
+    '''
     
+    Create a superclass?
+    '''
+    def __init__(self, pmx_bundle_item):
+        from prymatex.bundles.base import PMXBundleItem
+        assert isinstance(pmx_bundle_item, PMXBundleItem)
+        self.setData(pmx_bundle_item, Qt.EditRole)
+        self.setData(unicode(pmx_bundle_item), Qt.DisplayRole)
+        
+    def setData(self, value, role):
+        '''
+        Display something, but store data
+        http://doc.trolltech.com/latest/qstandarditem.html#setData
+        '''
+        if role == Qt.EditRole:
+            self._item = value
+        elif role == Qt.DisplayRole:
+            super(PMXBundleItemInstanceItem, self).setData(value, role)
+        else:
+            raise TypeError("setData called with unsupported role")
+    
+    def data(self, role = Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            return super(PMXBundleItemInstanceItem, self).data(role)
+        elif role == Qt.EditRole:
+            return self._item
+    
+    @property
+    def item(self):
+        return self._item
+
 
 class PMXBundleItemModel(QStandardItemModel):
     '''
@@ -52,10 +85,13 @@ class PMXBundleItemModel(QStandardItemModel):
         for i, element_name in enumerate(self.ELEMENTS):
             self.setHeaderData(i, Qt.Horizontal, element_name.title())
     
-    def appendBundleRow(self, instance):
+    def appendBundleItemRow(self, instance):
         '''
-        Add
+        Appends a new row based on an instance
+        @param instance A PMXCommand, PMXSnippet, PMXMacro instance
+        @todo: Refactor
         '''
+        from prymatex.bundles.base import PMXBundleItem
         elements = [
                     instance.bundle.uuid,
                     instance.path,
@@ -68,10 +104,50 @@ class PMXBundleItemModel(QStandardItemModel):
                     instance.scope,
                     instance,
                     ]
-        elements = map(QStandardItem, elements)
         
-        self.appendRow(elements)
-              
+    
+    
+        items = []
+        for name, element in zip(self.ELEMENTS, elements) :
+            print name, element
+            if element is None:
+                    # None -> Null String
+                items.append(QStandardItem(''))
+            elif isinstance(element, PMXBundleItem):
+                pass
+            else:
+                items.append(QStandardItem(element))
+        #elements = map(QStandardItem, elements)
+        
+        
+        self.appendRow(items)
+    
+    def appendRowFromBundle(self, pmx_bundle):
+        '''
+        PMXBundle
+        @param pmx_bundle: A prymatex.budnles.PMXBundle instance
+        '''
+        from prymatex.bundles import PMXBundle
+        assert isinstance(pmx_bundle, PMXBundle), "Unexpected %s argument" % type(pmx_bundle)
+        
+        for syntax in pmx_bundle.syntaxes:
+            self.appendBundleItemRow(syntax)
+            
+        for snippet in pmx_bundle.snippets:
+            self.appendBundleItemRow(snippet)
+            
+        for macro in pmx_bundle.macros:
+            self.appendBundleItemRow(macro)
+            
+        for command in pmx_bundle.commands:
+            self.appendBundleItemRow(command)
+            
+        for preference in pmx_bundle.preferences:
+            self.appendBundleItemRow(preference)
+            
+        for template in pmx_bundle.templates:
+            self.appendBundleItemRow(template)
+        
             
 if __name__ == "__main__":
     import sys

@@ -281,12 +281,15 @@ class PMXApplication(QApplication):
         from prymatex.bundles import load_prymatex_bundles
         from prymatex.lib.i18n import ugettext as _
         splash = self.splash
-        def update_splash_popullate_model(counter, total, name, **kwargs):
+        
+        def update_splash_popullate_model(counter, total, name, bundle, **kwargs):
             progress = (float(counter) / total) * 100
             splash.showMessage(_("Loading bundle %s\n%4d of %4d (%.d%%)", 
                                  name, counter, total, progress))
+            # Loose coupling 
             QApplication.processEvents()
-            QApplication.instance().bundleItemModel.appendBundleRow(kwargs['bundle'])
+            bundleItemModel = QApplication.instance().bundleItemModel
+            bundleItemModel.appendRowFromBundle( bundle )
         
         self.splash.showMessage(_("Loading bundles..."))
         #Build basic environment
@@ -301,7 +304,7 @@ class PMXApplication(QApplication):
                 'PMX_THEMES_PATH': self.settings.value('PMX_THEMES_PATH'),
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')}
                         
-        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), env, 'pryamtex', update_splash)
+        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), env, 'pryamtex', update_splash_popullate_model)
 
         env = { #User
                 'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
@@ -311,7 +314,7 @@ class PMXApplication(QApplication):
                 'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
         
-        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), env, 'user', update_splash)
+        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), env, 'user', update_splash_popullate_model)
         
         QApplication.processEvents()
         
