@@ -5,6 +5,7 @@ import os, re, plistlib
 from glob import glob
 from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
+from PyQt4.QtGui import qApp
 
 # for run as main
 if __name__ == "__main__":
@@ -129,7 +130,10 @@ class PMXBundle(object):
         try:
             data = plistlib.readPlist(info_file)
             bundle = cls(data, namespace, path)
-
+            
+            no_bundles = qApp.instance().options.no_bundles
+            if no_bundles and not re.findall('Text',path):
+                return 
             #Disabled?
             #if bundle.uuid in settings.disabled_bundles:
             #    return
