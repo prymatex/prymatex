@@ -269,7 +269,8 @@ class PMXApplication(QApplication):
         from prymatex.lib.i18n import ugettext as _
         
         self.splash.showMessage(_("Loading themes..."))
-        load_prymatex_themes(self.settings.value('PMX_THEMES_PATH'))
+        load_prymatex_themes(self.settings.value('PMX_THEMES_PATH'), 'pryamtex')
+        load_prymatex_themes(self.settings.value('PMX_USER_THEMES_PATH'), 'user')
         
         QApplication.processEvents()
     
@@ -288,21 +289,30 @@ class PMXApplication(QApplication):
             QApplication.instance().bundleItemModel.appendBundleRow(kwargs['bundle'])
         
         self.splash.showMessage(_("Loading bundles..."))
-        #Build primary environment
-        basic_env = {   #TextMate Compatible :P
-                        'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
-                        'TM_SUPPORT_PATH': self.settings.value('PMX_SUPPORT_PATH'),
-                        'TM_BUNDLES_PATH': self.settings.value('PMX_BUNDLES_PATH'),
-                        #Prymatex 
-                        'PMX_THEMES_PATH': self.settings.value('PMX_THEMES_PATH'),
-                        'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
-                        'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
-                        'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
-                        'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
-                        'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
-        
-        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), basic_env, update_splash_popullate_model)
+        #Build basic environment
+        env = { #TextMate Compatible :P
+                'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
+                'TM_SUPPORT_PATH': self.settings.value('PMX_SUPPORT_PATH'),
+                'TM_BUNDLES_PATH': self.settings.value('PMX_BUNDLES_PATH'),
+                #Prymatex 
+                'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
+                'PMX_SUPPORT_PATH': self.settings.value('PMX_SUPPORT_PATH'),
+                'PMX_BUNDLES_PATH': self.settings.value('PMX_BUNDLES_PATH'),
+                'PMX_THEMES_PATH': self.settings.value('PMX_THEMES_PATH'),
+                'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')}
+                        
+        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), env, 'pryamtex', update_splash)
 
+        env = { #User
+                'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
+                'PMX_USER_BUNDLES_PATH': self.settings.value('PMX_USER_BUNDLES_PATH'),
+                'PMX_USER_THEMES_PATH': self.settings.value('PMX_USER_THEMES_PATH'),
+                'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
+                'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
+                'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
+        
+        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), env, 'user', update_splash)
+        
         QApplication.processEvents()
         
     def checkSingleInstance(self):

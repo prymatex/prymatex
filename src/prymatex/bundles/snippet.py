@@ -755,9 +755,9 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
 class PMXSnippet(PMXBundleItem):
     path_patterns = ['Snippets/*.tmSnippet', 'Snippets/*.plist']
     bundle_collection = 'snippets'
-    parser = PMXSyntax(SNIPPET_SYNTAX)
-    def __init__(self, hash, name_space = "default", path = None):
-        super(PMXSnippet, self).__init__(hash, name_space, path)
+    parser = PMXSyntax(SNIPPET_SYNTAX, "internal")
+    def __init__(self, hash, namespace, path = None):
+        super(PMXSnippet, self).__init__(hash, namespace, path)
         for key in [    'content', 'disableAutoIndent', 'inputPattern' ]:
             setattr(self, key, hash.get(key, None))
         self.snippet = None
@@ -765,7 +765,7 @@ class PMXSnippet(PMXBundleItem):
         self.index = -1
         
     def __deepcopy__(self, memo):
-        snippet = PMXSnippet(self.hash, self.name_space)
+        snippet = PMXSnippet(self.hash, self.namespace)
         memo["snippet"] = deepcopy(self.snippet, memo)
         snippet.bundle = self.bundle
         return snippet

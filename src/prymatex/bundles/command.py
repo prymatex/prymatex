@@ -30,8 +30,8 @@ class PMXCommand(PMXBundleItem):
                   206: 'showAsTooltip',
                   207: 'createNewDocument'
                   }
-    def __init__(self, hash, name_space = "default", path = None):
-        super(PMXCommand, self).__init__(hash, name_space, path)
+    def __init__(self, hash, namespace, path = None):
+        super(PMXCommand, self).__init__(hash, namespace, path)
         for key in [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
                         'command', 'winCommand', 'linuxCommand',                                #System based Command
                         'inputFormat',                                                          #Formato requerido en la entrada
@@ -120,8 +120,8 @@ class PMXCommand(PMXBundleItem):
 
 class PMXDragCommand(PMXCommand):
     path_patterns = ['DragCommands/*.tmCommand', 'DragCommands/*.plist']
-    def __init__(self, hash, name_space = "default", path = None):
-        super(PMXDragCommand, self).__init__(hash, name_space, path)
+    def __init__(self, hash, namespace, path = None):
+        super(PMXDragCommand, self).__init__(hash, namespace, path)
         for key in [    'draggedFileExtensions' ]:
             setattr(self, key, hash.get(key, None))
 

@@ -24,13 +24,20 @@ def get_prymatex_user_path():
     path = abspath(join(expanduser("~"), PRYMATEX_HOME_NAME))
     if not exists(path):
         makedirs(path)
+    #Create extra paths
+    bundles = join(path, 'Bundles')
+    if not exists(bundles):
+        makedirs(bundles)
+    themes = join(path, 'Themes')
+    if not exists(themes):
+        makedirs(themes)
     return path
 
 def get_textmate_preferences_user_path():
     path = abspath(join(expanduser("~"), *TEXTMATE_PREFERENCE_NAMES))
     if not exists(path):
         makedirs(path)
-    #create extra files
+    #Create extra files
     webpreview = join(path, TEXTMATE_WEBPREVIEW_NAME)
     if not exists(webpreview):
         plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
@@ -177,11 +184,13 @@ class pmxConfigPorperty(object):
 
 class PMXSettings(object):
     PMX_APP_PATH = get_prymatex_base_path()
-    PMX_USER_PATH = get_prymatex_user_path()
-    PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
     PMX_BUNDLES_PATH = join(PMX_APP_PATH, 'share', 'Bundles')
     PMX_THEMES_PATH = join(PMX_APP_PATH, 'share', 'Themes')
     PMX_SUPPORT_PATH = join(PMX_APP_PATH, 'share', 'Support')
+    PMX_USER_PATH = get_prymatex_user_path()
+    PMX_USER_BUNDLES_PATH = join(PMX_USER_PATH, 'Bundles')
+    PMX_USER_THEMES_PATH = join(PMX_USER_PATH, 'Themes')
+    PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
     #Profile
     PMX_PROFILE_PATH = None
     PMX_TMP_PATH = None

@@ -185,8 +185,8 @@ class PMXSyntax(PMXBundleItem):
     FOLDING_NONE = 0
     FOLDING_START = -1
     FOLDING_STOP = -2
-    def __init__(self, hash, name_space = 'default', path = None):
-        super(PMXSyntax, self).__init__(hash, name_space, path)
+    def __init__(self, hash, namespace, path = None):
+        super(PMXSyntax, self).__init__(hash, namespace, path)
         for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName',
                         'repository', 'foldingStopMarker', 'fileTypes', 'patterns']:
             value = hash.get(key, None)
@@ -201,9 +201,9 @@ class PMXSyntax(PMXBundleItem):
             setattr(self, key, value)
 
         PMXSyntax.UUIDS[self.uuid] = self
-        PMXSyntax.SYNTAXES.setdefault(self.name_space, {})
+        PMXSyntax.SYNTAXES.setdefault(self.namespace, {})
         if self.scopeName != None:
-            PMXSyntax.SYNTAXES[self.name_space][self.scopeName] = self
+            PMXSyntax.SYNTAXES[self.namespace][self.scopeName] = self
 
     @property
     def indentSensitive(self):
@@ -213,7 +213,7 @@ class PMXSyntax(PMXBundleItem):
 
     @property
     def syntaxes(self):
-        return PMXSyntax.SYNTAXES[self.name_space]
+        return PMXSyntax.SYNTAXES[self.namespace]
 
     @property
     def grammar(self):
