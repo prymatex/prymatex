@@ -2,7 +2,27 @@
 
 from PyQt4.Qt import *
 
-class PMXBundleModel(QStandardItemModel):
+
+class PMXCommonModel(QStandardItemModel):
+    ELEMENTS = ()
+    
+    def __init__(self, parent = None):
+        super(PMXCommonModel, self).__init__(0, #Rows
+                                                 len(self.ELEMENTS), # Columns
+                                                 parent
+                                                 )
+        self.fillHeaders()        
+    
+    def fillHeaders(self):
+        if not self.ELEMENTS:
+            raise Exception("ELEMENTS not defined for %s" % type(self))
+        for i, element_name in enumerate(self.ELEMENTS):
+            self.setHeaderData(i, Qt.Horizontal, element_name.title())
+    
+    def loadBundle(self, path):
+        pass
+
+class PMXBundleModel(PMXCommonModel):
     '''
     Store xxx.tmBundle/info.plist data
     '''
@@ -14,13 +34,6 @@ class PMXBundleModel(QStandardItemModel):
                 'contactMailRot13',
                 )
     
-    def __init__(self, parent = None):
-        super(PMXBundleModel, self).__init__(0, #Rows
-                                                 len(self.ELEMENTS), # Columns
-                                                 parent
-                                                 )
-        for i, element_name in enumerate(self.ELEMENTS):
-            self.setHeaderData(i, Qt.Horizontal, element_name.title())
 
 class PMXBundleItemInstanceItem(QStandardItem):
     '''
@@ -56,7 +69,7 @@ class PMXBundleItemInstanceItem(QStandardItem):
         return self._item
 
 
-class PMXBundleItemModel(QStandardItemModel):
+class PMXBundleItemModel(PMXCommonModel):
     '''
     Stores Command, Syntax, Snippets, etc. information
     '''
@@ -77,14 +90,7 @@ class PMXBundleItemModel(QStandardItemModel):
                 )
     ELEMENTS = CUSTOM_ELEMENTS + PLIST_ELEMENTS
     
-    def __init__(self, parent = None):
-        super(PMXBundleItemModel, self).__init__(0, #Rows
-                                                 len(self.ELEMENTS), # Columns
-                                                 parent
-                                                 )
-        for i, element_name in enumerate(self.ELEMENTS):
-            self.setHeaderData(i, Qt.Horizontal, element_name.title())
-    
+   
     def appendBundleItemRow(self, instance):
         '''
         Appends a new row based on an instance

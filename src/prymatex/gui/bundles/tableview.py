@@ -17,13 +17,36 @@ class PMXBundleItemTableView(QTableView):
             self.close()
             return
         super(PMXBundleItemTableView, self).keyPressEvent(event)
+    
+    def setModel(self, model):
+        super(PMXBundleItemTableView, self).setModel(model)
+        model.rowsInserted.connect(self.resizeColumnsAndRows)
+        model.rowsRemoved.connect(self.resizeColumnsAndRows)
+        
+    def resizeColumnsAndRows(self, *largs):
+        self.resizeRowsToContents()
+        self.resizeColumnsToContents()
+        #self.resizeRowsToContents()
+        
+
+
+class PMXFilterBundleItem(QSortFilterProxyModel):
+    
+    #def filterAcceptsRow(self, sourceRow, parent):
+        #print sourceRow
+    #    return True
+    
+    def setFilteringProxy(self, value):
+        print value
+    
 
 class PMXBundleItemSelector(QDialog):
     def __init__(self, parent = None):
         super(PMXBundleItemSelector, self).__init__(parent)
         self.setupUi()
-        self.hideUnusedColumns()
+        #self.hideUnusedColumns()
         self.setModal(True)
+        self.lineFilter.textChanged.connect(self.proxyFilteringModel.setFilteringProxy)
         
     def hideUnusedColumns(self):
         model = self.tableView.model()
@@ -43,7 +66,14 @@ class PMXBundleItemSelector(QDialog):
         layout.addWidget(self.lineFilter)
         self.tableView = QTableView(self)
         
-        self.tableView.setModel(QApplication.instance().bundleItemModel)
+        self.proxyFilteringModel = PMXFilterBundleItem()
+        self.proxyFilteringModel.setSourceModel(QApplication.instance().bundleItemModel)
+        self.tableView.setModel(self.proxyFilteringModel)
+        
+        self.tableView.resizeColumnToContents(1)
+        self.tableView.resizeRowsToContents()
+        self.tableView.verticalHeader().setVisible(False)
+
         layout.addWidget(self.tableView)
         
         self.setLayout(layout)
