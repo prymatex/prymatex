@@ -779,7 +779,7 @@ class PMXSnippet(PMXBundleItem):
         return hash
     
     def __deepcopy__(self, memo):
-        snippet = PMXSnippet(self.hash, self.namespace)
+        snippet = PMXSnippet(self.namespace, self.hash)
         memo["snippet"] = deepcopy(self.snippet, memo)
         snippet.bundle = self.bundle
         return snippet

@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from prymatex.bundles import PMXBundle
 from PyQt4.Qt import *
 
 
@@ -29,12 +30,38 @@ class PMXBundleModel(PMXCommonModel):
     ELEMENTS = (
                 'uuid',
                 'name',
+                'namespace',
                 'description',
                 'contactName',
                 'contactMailRot13',
+                'disabled',
+                'item'
                 )
     
+    def appendBundleRow(self, bundle):
+        elements = [
+                    bundle.uuid,
+                    bundle.name,
+                    bundle.namespace,
+                    bundle.description,
+                    bundle.contactName,
+                    bundle.contactMailRot13,
+                    bundle.disabled,
+                    bundle,
+                    ]
 
+        items = []
+        for element in elements:
+            #print name, element
+            if element is None:
+                items.append(QStandardItem(''))
+            elif isinstance(element, PMXBundle):
+                pass
+            else:
+                items.append(QStandardItem(element))
+
+        self.appendRow(items)
+        
 class PMXBundleItemInstanceItem(QStandardItem):
     '''
     
@@ -89,7 +116,6 @@ class PMXBundleItemModel(PMXCommonModel):
                 'item', # Pointer to the PMXStuff object
                 )
     ELEMENTS = CUSTOM_ELEMENTS + PLIST_ELEMENTS
-    
    
     def appendBundleItemRow(self, instance):
         '''
@@ -110,9 +136,7 @@ class PMXBundleItemModel(PMXCommonModel):
                     instance.scope,
                     instance,
                     ]
-        
-    
-    
+
         items = []
         for name, element in zip(self.ELEMENTS, elements) :
             #print name, element
@@ -124,8 +148,7 @@ class PMXBundleItemModel(PMXCommonModel):
             else:
                 items.append(QStandardItem(element))
         #elements = map(QStandardItem, elements)
-        
-        
+
         self.appendRow(items)
     
     def appendRowFromBundle(self, pmx_bundle):
@@ -154,7 +177,27 @@ class PMXBundleItemModel(PMXCommonModel):
         for template in pmx_bundle.templates:
             self.appendBundleItemRow(template)
         
-            
+class PMXBundleManager(object):
+    def __init__(self, bundles, bundleItems, themes):
+        self.bundles = bundles
+        self.bundleItems = bundleItems
+        self.themes = themes
+        
+    def addBundle(self, bundle):
+        self.bundles.appendBundleRow(bundle)
+        
+    def getBundle(self, uuid):
+        return PMXBundleManager.BUNDLES[uuid]
+    
+    def addBundleItem(self, item):
+        self.bundleItems.appendBundleItemRow(item)
+    
+    def getBundleItem(self, uuid):
+        return PMXBundleManager.BUNDLES[uuid]
+    
+    def addTheme(self, theme):
+        self.themes.appendBundleItemRow(theme)
+
 if __name__ == "__main__":
     import sys
     a = QApplication(sys.argv)
