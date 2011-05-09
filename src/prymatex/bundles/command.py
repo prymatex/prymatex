@@ -136,7 +136,8 @@ class PMXCommand(PMXBundleItem):
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]
-    path_patterns = ['DragCommands/*.tmCommand', 'DragCommands/*.plist']
+    FOLDER = 'DragCommands'
+    FILES = ['*.tmCommand', '*.plist']
     def __init__(self, namespace, hash = None, path = None):
         super(PMXDragCommand, self).__init__(namespace, hash, path)
 

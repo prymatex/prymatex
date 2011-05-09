@@ -221,7 +221,6 @@ class PMXBundle(object):
                 word = line[match.start():match.end()]
                 if cls.TAB_TRIGGERS.has_key(word):
                     return word
-        
     
     @classmethod
     def getTabTriggerItem(cls, keyword, scope):
