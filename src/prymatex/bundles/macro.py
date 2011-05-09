@@ -9,13 +9,28 @@ from pprint import pprint
 from prymatex.bundles.base import PMXBundleItem
 
 class PMXMacro(PMXBundleItem):
+    KEYS = [    'commands' ]
+    FOLDER = 'Macros'
+    FILES = [ '*.tmMacro', '*.plist']
     path_patterns = ['Macros/*.tmMacro', 'Macros/*.plist']
     bundle_collection = 'macros'
-    def __init__(self, hash, name_space = "default", path = None):
-        super(PMXMacro, self).__init__(hash, name_space, path)
-        for key in [    'commands', ]:
-            setattr(self, key, hash.get(key, None))
+    def __init__(self, namespace, hash = None, path = None):
+        super(PMXMacro, self).__init__(namespace, hash, path)
 
+    def load(self, hash):
+        super(PMXMacro, self).load(hash)
+        for key in PMXMacro.KEYS:
+            setattr(self, key, hash.get(key, None))
+    
+    @property
+    def hash(self):
+        hash = super(PMXMacro, self).hash
+        for key in PMXMacro.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                hash[key] = value
+        return hash
+            
     def execute(self, processor):
         for command in self.commands:
             print command

@@ -18,7 +18,15 @@ from prymatex.bundles.utils import ensureShellScript, ensureEnvironment, makeExe
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 
 class PMXCommand(PMXBundleItem):
-    path_patterns = ['Commands/*.tmCommand', 'Commands/*.plist']
+    KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
+                'command', 'winCommand', 'linuxCommand',                                #System based Command
+                'inputFormat',                                                          #Formato requerido en la entrada
+                'capturePattern', 'fileCaptureRegister',
+                'columnCaptureRegister', 'disableOutputAutoIndent',
+                'lineCaptureRegister', 'dontFollowNewOutput',
+                'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
+    FOLDER = 'Commands'
+    FILES = ['*.tmCommand', '*.plist']
     bundle_collection = 'commands'
     exit_codes = {
                   200: 'discard',
@@ -30,20 +38,28 @@ class PMXCommand(PMXBundleItem):
                   206: 'showAsTooltip',
                   207: 'createNewDocument'
                   }
-    def __init__(self, hash, namespace, path = None):
-        super(PMXCommand, self).__init__(hash, namespace, path)
-        for key in [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
-                        'command', 'winCommand', 'linuxCommand',                                #System based Command
-                        'inputFormat',                                                          #Formato requerido en la entrada
-                        'capturePattern', 'fileCaptureRegister',
-                        'columnCaptureRegister', 'disableOutputAutoIndent',
-                        'lineCaptureRegister', 'dontFollowNewOutput',
-                        'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]:
+    def __init__(self, namespace, hash = None, path = None):
+        super(PMXCommand, self).__init__(namespace, hash, path)
+
+    def load(self, hash):
+        super(PMXCommand, self).load(hash)
+        for key in PMXCommand.KEYS:
             value = hash.get(key, None)
             if value != None and key in [    'capturePattern' ]:
                 value = onig_compile( value )
             setattr(self, key, value)
-
+    
+    @property
+    def hash(self):
+        hash = super(PMXCommand, self).hash
+        for key in PMXCommand.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                if key in ['capturePattern']:
+                    value = unicode(value)
+                hash[key] = value
+        return hash
+        
     @property
     def systemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:
@@ -119,12 +135,25 @@ class PMXCommand(PMXBundleItem):
         #deleteFile(self.temp_command_file)
 
 class PMXDragCommand(PMXCommand):
+    KEYS = [    'draggedFileExtensions' ]
     path_patterns = ['DragCommands/*.tmCommand', 'DragCommands/*.plist']
-    def __init__(self, hash, namespace, path = None):
-        super(PMXDragCommand, self).__init__(hash, namespace, path)
-        for key in [    'draggedFileExtensions' ]:
-            setattr(self, key, hash.get(key, None))
+    def __init__(self, namespace, hash = None, path = None):
+        super(PMXDragCommand, self).__init__(namespace, hash, path)
 
+    def load(self, hash):
+        super(PMXDragCommand, self).load(hash)
+        for key in PMXDragCommand.KEYS:
+            setattr(self, key, hash.get(key, None))
+    
+    @property
+    def hash(self):
+        hash = super(PMXDragCommand, self).hash
+        for key in PMXDragCommand.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                hash[key] = value
+        return hash
+            
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXDragCommand, self).buildEnvironment()
         # TM_DROPPED_FILE � relative path of the file dropped (relative to the document directory, which is also set as the current directory).

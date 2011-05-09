@@ -68,9 +68,13 @@ class PMXPreferenceSettings(object):
                 elif key in [ 'shellVariables' ]:
                     value = dict(map(lambda d: (d['name'], d['value']), value))
             setattr(self, key, value)
-            
+    
+    def hash(self):
+        #TODO: Terminar
+        return {}
+    
     def combine(self, other):
-        for key in self.KEYS:
+        for key in PMXPreferenceSettings.KEYS:
             value = getattr(other, key, None)
             if value != None:
                 if key == 'shellVariables':
@@ -79,7 +83,7 @@ class PMXPreferenceSettings(object):
                     setattr(self, key, value)
     
     def update(self, other):
-        for key in self.KEYS:
+        for key in PMXPreferenceSettings.KEYS:
             value = getattr(other, key, None)
             if value != None and not getattr(self, key):
                 setattr(self, key, value)
@@ -101,14 +105,33 @@ class PMXPreferenceSettings(object):
         return self.INDENT_NONE
     
 class PMXPreference(PMXBundleItem):
-    path_patterns = ['Preferences/*.tmPreferences', 'Preferences/*.plist']
+    KEYS = [ 'settings' ]
+    FOLDER = 'Preferences'
+    FILES = ['*.tmPreferences', '*.plist']
     bundle_collection = 'preferences'
-    def __init__(self, hash, name_space = "default", path = None):
-        super(PMXPreference, self).__init__(hash, name_space, path)
+    def __init__(self, namespace, hash = None, path = None):
+        super(PMXPreference, self).__init__(namespace, hash, path)
         for key in [ 'settings' ]:
             if key == 'settings':
                 setattr(self, key, PMXPreferenceSettings(hash.get(key, {})))
 
+    def load(self, hash):
+        super(PMXPreference, self).load(hash)
+        for key in PMXPreference.KEYS:
+            if key == 'settings':
+                setattr(self, key, PMXPreferenceSettings(hash.get(key, {})))
+            else:
+                setattr(self, key, hash.get(key, None))
+    
+    @property
+    def hash(self):
+        hash = super(PMXPreference, self).hash
+        for key in PMXPreference.KEYS:
+            value = self.settings.hash
+            if value != None:
+                hash['settings'] = value
+        return hash
+        
     def setBundle(self, bundle):
         super(PMXPreference, self).setBundle(bundle)
         bundle.PREFERENCES.setdefault(self.scope, []).append(self)
