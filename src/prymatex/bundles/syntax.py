@@ -178,32 +178,44 @@ class PMXSyntaxProxy(object):
                 return PMXSyntaxNode({}, self.syntax)
 
 class PMXSyntax(PMXBundleItem):
-    path_patterns = ['Syntaxes/*.tmLanguage', 'Syntaxes/*.plist']
+    KEYS = [ 'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository', 'foldingStopMarker', 'fileTypes', 'patterns']
+    FOLDER = 'Syntaxes'
+    FILES = ['*.tmLanguage', '*.plist']
     bundle_collection = 'syntaxes'
     SYNTAXES = {}
     UUIDS = {}
     FOLDING_NONE = 0
     FOLDING_START = -1
     FOLDING_STOP = -2
-    def __init__(self, hash, namespace, path = None):
-        super(PMXSyntax, self).__init__(hash, namespace, path)
-        for key in [    'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName',
-                        'repository', 'foldingStopMarker', 'fileTypes', 'patterns']:
+    def __init__(self, namespace, hash = None, path = None):
+        super(PMXSyntax, self).__init__(namespace, hash, path)
+        PMXSyntax.UUIDS[self.uuid] = self
+        PMXSyntax.SYNTAXES.setdefault(self.namespace, {})
+        if hasattr(self, 'scopeName') and self.scopeName != None:
+            PMXSyntax.SYNTAXES[self.namespace][self.scopeName] = self
+
+    def load(self, hash):
+        super(PMXSyntax, self).load(hash)
+        for key in PMXSyntax.KEYS:
             value = hash.get(key, None)
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
-                #Compiled keys
                 try:
                     value = compileRegexp( value )
                 except TypeError, e:
-                    #an encoding can only be given for non-unicode patterns
                     value = None
                     print self.name, key, e
             setattr(self, key, value)
-
-        PMXSyntax.UUIDS[self.uuid] = self
-        PMXSyntax.SYNTAXES.setdefault(self.namespace, {})
-        if self.scopeName != None:
-            PMXSyntax.SYNTAXES[self.namespace][self.scopeName] = self
+    
+    @property
+    def hash(self):
+        hash = super(PMXSyntax, self).hash
+        for key in PMXSyntax.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
+                    value = unicode(value)
+                hash[key] = value
+        return hash
 
     @property
     def indentSensitive(self):

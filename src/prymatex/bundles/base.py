@@ -5,9 +5,9 @@ import os, re, plistlib
 from glob import glob
 from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
-from prymatex.lib.deco.cache import cacheable
-from prymatex.lib.deco.memoize import memoize, memoize_dict
-from prymatex.lib.deco.helpers import printtime
+#from prymatex.lib.deco.cache import cacheable
+#from prymatex.lib.deco.memoize import memoize, memoize_dict
+#from prymatex.lib.deco.helpers import printtime
 
 # for run as main
 if __name__ == "__main__":
@@ -38,10 +38,24 @@ class PMXMenuNode(object):
         self.name = name
         self.items = items
         self.excludedItems = excludedItems
+        self.submenus = submenus
         self.main = dict(map(lambda i: (i, None), filter(lambda x: x != self.MENU_SPACE, self.items)))
-        for uuid, submenu in submenus.iteritems():
+        for uuid, submenu in self.submenus.iteritems():
             self[uuid] = PMXMenuNode(**submenu)
 
+    @property
+    def hash(self):
+        hash = { 'name': self.name, 'items': self.items }
+        if self.excludedItems:
+            hash['excludedItems'] = self.excludedItems
+        if self.submenus:
+            hash['submenus'] = {}
+        for uuid in self.submenus.keys():
+            submenu = self[uuid]
+            if submenu != None:
+                hash['submenus'].update( { uuid: submenu.hash } )
+        return hash
+        
     def __contains__(self, key):
         return key in self.main or any(map(lambda submenu: key in submenu, filter(lambda x: isinstance(x, PMXMenuNode), self.main.values())))
 
@@ -73,6 +87,8 @@ class PMXMenuNode(object):
                 yield (self.MENU_SPACE, self.MENU_SPACE)
 
 class PMXBundle(object):
+    KEYS = [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
+    FILE = 'info.plist'
     BUNDLES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
@@ -84,12 +100,7 @@ class PMXBundle(object):
     scores = PMXScoreManager()
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
     
-    def __init__(self, hash, namespace, path = None):
-        for key in [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]:
-            value = hash.pop(key, None)
-            if key == 'mainMenu' and value != None:
-                value = PMXMenuNode(self.name, **value)
-            setattr(self, key, value)
+    def __init__(self, namespace, hash = None, path = None):
         self.namespace = namespace
         self.path = path
         self.syntaxes = []
@@ -98,7 +109,38 @@ class PMXBundle(object):
         self.commands = []
         self.preferences = []
         self.templates = []
+        if hash != None:
+            self.load(hash)
 
+    def load(self, hash):
+        for key in PMXBundle.KEYS:
+            value = hash.pop(key, None)
+            if key == 'mainMenu' and value != None:
+                value = PMXMenuNode(self.name, **value)
+            setattr(self, key, value)
+    
+    @property
+    def hash(self):
+        #TODO: el menu
+        hash = {}
+        for key in PMXBundle.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                if key in ['mainMenu']:
+                    value = self.mainMenu.hash
+                hash[key] = value
+        return hash
+
+    def save(self, base = None):
+        if base != None:
+            path = os.path.join(base, os.path.basename(self.path))
+            if not os.path.exists(path):
+                os.makedirs(path)
+            file = os.path.join(path, self.FILE)
+        else:
+            file = os.path.join(self.path , self.FILE)
+        plistlib.writePlist(self.hash, file)
+        
     def addBundleItem(self, item):
         if self.mainMenu != None:
             self.mainMenu[item.uuid] = item
@@ -128,10 +170,10 @@ class PMXBundle(object):
 
     @classmethod
     def loadBundle(cls, path, namespace):
-        info_file = os.path.join(path, 'info.plist')
+        info_file = os.path.join(path, cls.FILE)
         try:
             data = plistlib.readPlist(info_file)
-            bundle = cls(data, namespace, path)
+            bundle = cls(namespace, data, path)
             return bundle
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
@@ -214,16 +256,40 @@ class PMXBundle(object):
         return with_scope and with_scope or without_scope
 
 class PMXBundleItem(object):
-    path_patterns = []
+    KEYS = [ 'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
+    FOLDER = ''
+    FILES = []
     bundle_collection = ""
-    def __init__(self, hash, namespace, path = None):
-        self.hash = deepcopy(hash)
+    def __init__(self, namespace, hash = None, path = None):
         self.namespace = namespace
         self.path = path
         self.bundle = None
-        for key in [    'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]:
-            setattr(self, key, hash.get(key, None))
+        if hash != None:
+            self.load(hash)
 
+    def load(self, hash):
+        for key in PMXBundleItem.KEYS:
+            setattr(self, key, hash.get(key, None))
+    
+    @property
+    def hash(self):
+        hash = {}
+        for key in PMXBundleItem.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                hash[key] = value
+        return hash
+
+    def save(self, base = None):
+        if base != None:
+            path = os.path.join(base, os.path.basename(self.bundle.path), self.FOLDER)
+            if not os.path.exists(path):
+                os.makedirs(path)
+            file = os.path.join(path , os.path.basename(self.path))
+        else:
+            file = self.path
+        plistlib.writePlist(self.hash, file)
+        
     @property
     def trigger(self):
         trigger = []
@@ -252,29 +318,30 @@ class PMXBundleItem(object):
             text += u"\t%s" % (self.trigger)
         return text.replace('&', '&&')
     
-    
     # Trying to speed things up a bit, a memoize     
     @classmethod
     #@printtime
-    @memoize_dict
-    def loadBundleItem(cls, path, namespace = 'prymatex'):
+    #@memoize_dict
+    def loadBundleItem(cls, path, namespace):
         try:
             data = plistlib.readPlist(path)
-            return cls(data, namespace, path)
+            item = cls(namespace, data, path)
+            return item
         except Exception, e:
             data = open(path).read()
             for match in RE_XML_ILLEGAL.finditer(data):
                 data = data[:match.start()] + "?" + data[match.end():]
             try:
                 data = plistlib.readPlistFromString(data)
-                return cls(data, namespace, path)
+                item = cls(namespace, data, path)
+                return item
             except ExpatError, e:
                 print "Error in %s for %s (%s)" % (cls.__name__, path, e)
     
     def resolve(self, *args, **kwargs):
         pass
 
-cacheable.init_cache('/home/defo/.functions_cache')
+#cacheable.init_cache('/home/defo/.functions_cache')
 #----------------------------------------
 # Tests
 #----------------------------------------
@@ -338,6 +405,7 @@ def test_syntaxes():
     from time import time
     from prymatex.bundles.processor import PMXSyntaxProcessor
     syntax = PMXSyntax.getSyntaxesByName("Python")
+    print syntax[0].hash
     file = open('../gui/editor/codeedit.py', 'r');
     start = time()
     syntax[0].parse(file.read(), PMXSyntaxProcessor())
@@ -392,9 +460,13 @@ def test_queryItems():
     print PMXBundle.getTabTriggerItem('class', 'source.python')
     print PMXBundle.getKeyEquivalentItem(Qt.CTRL + ord('H'), 'text.html')
 
+def test_saveBundleItems():
+    from prymatex.bundles import PMXBundle
+    for bundle in PMXBundle.BUNDLES.values():
+        bundle.save(base = '/home/dvanhaaster/Bundles')
+    
 if __name__ == '__main__':
-    from prymatex.bundles import BUNDLEITEM_CLASSES
+    from prymatex.bundles import load_prymatex_bundles
     from pprint import pprint
-    for file in glob(os.path.join('../../bundles/prymatex/Bundles', '*')):
-        PMXBundle.loadBundle(file, BUNDLEITEM_CLASSES)
-    test_syntaxes()
+    load_prymatex_bundles('../../bundles/prymatex/Bundles', 'prymatex')
+    test_saveBundleItems()

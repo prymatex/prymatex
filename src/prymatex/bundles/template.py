@@ -17,12 +17,26 @@ if __name__ == "__main__":
 from prymatex.bundles.base import PMXBundleItem
 
 class PMXTemplate(PMXBundleItem):
-    path_patterns = ['Templates/*']
+    KEYS = [    'command', 'extension']
+    FOLDER = 'Templates'
+    FILES = [ '*' ]
     bundle_collection = 'templates'
-    def __init__(self, hash, name_space = "default", path = None):
-        super(PMXTemplate, self).__init__(hash, name_space, path)
-        for key in [    'command', 'extension']:
+    def __init__(self, namespace, hash = None, path = None):
+        super(PMXTemplate, self).__init__(namespace, hash, path)
+    
+    def load(self, hash):
+        super(PMXTemplate, self).load(hash)
+        for key in PMXTemplate.KEYS:
             setattr(self, key, hash.get(key, None))
+    
+    @property
+    def hash(self):
+        hash = super(PMXTemplate, self).hash
+        for key in PMXTemplate.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                hash[key] = value
+        return hash
     
     def setBundle(self, bundle):
         super(PMXTemplate, self).setBundle(bundle)
@@ -52,7 +66,7 @@ class PMXTemplate(PMXBundleItem):
         info_file = os.path.join(path, 'info.plist')
         try:
             data = plistlib.readPlist(info_file)
-            template = cls(data, name_space, path)
+            template = cls(name_space, data, path)
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
             return None
