@@ -4,164 +4,17 @@ Created on 07/05/2011
 
 @author: defo
 '''
-from PyQt4.Qt import *
+
+if __name__ == "__main__":
+    import sys, os
+    path = os.path.dirname(os.path.abspath(__file__))
+    import_path = os.path.abspath(os.path.join(path, '..', ))
+    sys.path.insert(0, import_path)
+    
+from PyQt4.Qt import *    
+import prymatex
 from prymatex.core.exceptions import APIUsageError
-
-class PMXTableField(object):
-    
-    _creation_counter = 0
-    _name = None
-    
-    def __init__(self, 
-                 name = None, 
-                 required = False,
-                 title = None,
-                 default = None,
-                 editable = True,
-                 fget_from_bundle = None, 
-                 item_class = QStandardItem,
-                 delegate_class = QItemDelegate):
-        '''
-        @param name: The field name
-        @param required: Is the field requirerd
-        @param title: Field's title
-        @param fget_from_bundle: How to get data from bundle, maight be dropped soon
-        @param item_ctor: The item class that
-        @param delegate_class: A delegate class, not an instance!
-        '''
-        self.title = title
-        self.name = name
-        self.required = required
-        self.item_class = item_class
-        self.delegate_class = delegate_class
-        self.default = default
-        self.editable = editable
-        # For sorting
-        PMXTableField._creation_counter += 1
-        self._creation_counter = PMXTableField._creation_counter
-        
-    def __str__(self):
-        return "<%s field (%d)>" % (self.name, self._creation_counter)
-    
-    __repr__ = __str__
-    
-
-class PMXTableMeta(object):
-    '''
-    Stores field in order
-    '''
-    fields = []
-    
-    def __init__(self, fields):
-        self.fields = fields
-    
-    @property
-    def field_names(self):
-        return [f.name for f in self.fields]
-    
-    @property
-    def required_field_names(self):
-        return [f.name for f in self.fields if f.required ]
-    
-    def col_number(self, name):
-        for n, field in enumerate(self.fields):
-            if name == field.name:
-                return n
-        raise KeyError("%s not found in %s" % (name, self))
-    
-    @property
-    def editable_cols(self):
-        cols = []
-        for n, field in enumerate(self.fields):
-            if field.editable:
-                cols.append(n)
-        return cols  
-    
-
-class PMXTableMetaclass(pyqtWrapperType):
-    def __new__(cls, name, bases, attrs):
-        
-        fields = []
-        field_names = []
-        for attr_name in attrs:
-            attr = attrs[attr_name]
-            if isinstance(attr, PMXTableField):
-                field = attr
-                field.name = attr_name
-                field.title = field.title or attr_name.title()
-                field_names.append(attr_name)
-                fields.append(field)
-                
-                #print field, attr_name
-        # Remove fields!
-        map(lambda n: attrs.pop(n), field_names)
-            
-        fields.sort(lambda a, b: cmp(a._creation_counter, b._creation_counter))
-        attrs['_meta'] = PMXTableMeta(fields)
-        
-        new_class = super(PMXTableMetaclass, cls).__new__(cls, name, bases, attrs)
-        return new_class
-
-class PMXTableBase(QStandardItemModel):
-    __metaclass__ = PMXTableMetaclass 
-    _configured = False
-    
-    @property
-    def configured(self):
-        return self._configured
-    
-    def __init__(self, parent = None):
-        super(PMXTableBase, self).__init__()
-        self.setup()
-        
-    def setup(self):
-        '''
-        Configure 
-        '''
-        self.setColumnCount(len(self._meta.fields))
-        self.fillHeadersFromFields()
-        self._configured = True
-    
-    def fillHeadersFromFields(self):
-        for n, field in enumerate(self._meta.fields):
-            #QStandardItemModel.setHeaderData(self, n, Qt.Horizontal, field.title)
-            title = field.title
-            self.setHeaderData(n, Qt.Horizontal, title)
-    
-    def setColumnDelegatesFromFields(self, view):
-        if view.model() is not self:
-            raise APIUsageError("Atteped to setup item delegates for wrong model")
-        for n, field in enumerate(self._meta.fields):
-            item_delegate = field.delegate_class()
-            view.setItemDelegateForColumn(n, item_delegate)
-    
-    def addRowFromKwargs(self, **kwargs):
-        required = self._meta.required_field_names
-        if not map(lambda name: name in required, kwargs):
-            raise APIUsageError("Not all required fields provided!")
-        items = []
-        for field in self._meta.fields:
-            data = kwargs.get(field.name, '')
-            if not data and field.default:
-                data = field.default
-            item = field.item_class(data)
-            items.append(item)
-        QStandardItemModel.appendRow(self, items)
-    
-    def sort(self, col, ordering = Qt.AscendingOrder):
-        print col
-        if isinstance(col, (str, unicode)):
-            print "Cambio"
-            col = self._meta.col_number(col)
-        return super(PMXTableBase, self).sort(col, ordering)
-    # http://www.osgeo.org/pipermail/qgis-developer/2009-February/006203.html
-    def flags(self, index):
-        ''' '''
-        baseflags = super(PMXTableBase, self).flags(index)
-        col = index.column()
-        if not col in self._meta.editable_cols:
-            return baseflags & ~Qt.ItemIsEditable
-        return baseflags  
+from prymatex.models import *
     
 class PMXTableModelItemX(QStandardItemModel):
     pass
@@ -170,16 +23,16 @@ class PMXChoiceItemDelegate(QItemDelegate):
     CHOICES = ()
     
     def createEditor(self, parent, option, index):
-        window = QWidget()
-        window.setLayout(QVBoxLayout())
-        window.layout().addWidget(QLabel("Seleccione un tipo"))
-        editor = QComboBox()
-        window.layout().addWidget(editor)
+        #window = QWidget()
+        #window.setLayout(QVBoxLayout())
+        #window.layout().addWidget(QLabel("Seleccione un tipo"))
+        editor = QComboBox(parent)
+        #window.layout().addWidget(editor)
         
         for display_text, data in self.CHOICES:
             editor.addItem(display_text, data)
-            
-        return window
+        print "Editor"
+        return editor
 
     def setEditorData(self, editor, index):
         data = index.data().toPyObject()
@@ -192,6 +45,62 @@ class PMXChoiceItemDelegate(QItemDelegate):
         data = editor.itemData(editor.currentIndex())
         print "Setting data to model %s" % data
         model.setData(index, data)
+
+class PMXDecoupledDialog(QWidget):
+    def __init__(self, title, editor):
+        super(PMXDecoupledDialog, self).__init__()
+        self.setWindowTitle(title)
+        layout = QVBoxLayout()
+        layout.setSpacing(0)
+        layout.addWidget(QLabel("Press <b>Esc</b> to cancel"))
+        self.editor = editor
+        layout.addWidget(self.editor)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        #cancel_btn = QPushButton("Cancel")
+        #cancel_btn.pressed.connect(window.reject)
+        ok_btn = QPushButton("OK")
+        ok_btn.pressed.connect(self.close)#self.accept)
+        button_layout.addWidget(ok_btn)
+        #button_layout.addWidget(cancel_btn)
+        layout.addLayout(button_layout)
+        #self.setModal(True)
+        self.setLayout(layout)
+    
+    #def exec_(self):
+    #    self.normal = True
+    #    super(PMXDecoupledDialog, self).exec_()
+    
+    #normal = False
+    #def setVisible(self, visible):
+    #    if not self.normal:
+    #        return self.exec_()
+    #    else:
+    #        return super(PMXDecoupledDialog, self).setVisible(visible)
+    def showEvent(self, event):
+        retval = super(PMXDecoupledDialog, self).showEvent(event)
+        self.editor.setFocus()
+        return retval
+    
+    
+class PMXDecoupledEditorDelegate(QItemDelegate):
+    ''' Edit a long text '''
+    def createEditor(self, parent, option, index):
+        column_title = index.model()._meta.fields[index.column()].title
+        window = PMXDecoupledDialog(unicode(self.trUtf8("Edit %s")) % column_title,
+                                    editor = QTextEdit())
+        #window.editor.setFocus()
+        #window.exec_()
+        return window
+    
+    def setEditorData(self, window, index):
+        data = index.data().toPyObject()
+        window.editor.setPlainText( data )
+        
+    def setModelData(self, window, model, index):
+        data = window.editor.toPlainText()
+        model.setData(index, data)
+    
 
 class SexoItemDelegate(PMXChoiceItemDelegate):
 
@@ -207,8 +116,10 @@ class PMXTableTest(PMXTableBase):
     nombre = PMXTableField(required = False, editable = False)
     apellido = PMXTableField(required = True, editable = False)
     direccion = PMXTableField(required = True, title = u"Dirección")
-    tipo = PMXTableField(required = True, default = 1, 
+    type_ = PMXTableField(required = True, default = 1, title = "Bundle Type", 
                          delegate_class=SexoItemDelegate)
+    descripcion = PMXTableField(required = False, 
+                                delegate_class=PMXDecoupledEditorDelegate)
     
     def __init__(self, parent = None):
         super(PMXTableTest, self).__init__(parent)
@@ -226,7 +137,7 @@ if __name__ == "__main__":
     model.addRowFromKwargs(nombre = "Diego Marco", apellido = "van Haaster", direccion = "Moreno 46")
     model.sort('apellido')
     win.setWindowTitle(unicode(model.__class__.__name__))
-    win.setGeometry(400,200, 400, 400)
+    win.setGeometry(400,200, 600, 400)
     print model._meta
     win.show()
     sys.exit(app.exec_())

@@ -1,5 +1,15 @@
 # encoding: utf-8
-from tablemodels import *
+from PyQt4.Qt import *
+if __name__ == "__main__":
+    import sys, os
+    path = os.path.dirname(os.path.abspath(__file__))
+    import_path = os.path.abspath(os.path.join(path, '..', ))
+    sys.path.insert(0, import_path)
+    
+    
+from prymatex.core.exceptions import APIUsageError
+from prymatex.models import *
+
 from pprint import pprint
 import pickle
 import os
