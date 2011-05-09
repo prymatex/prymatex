@@ -5,6 +5,9 @@ import os, re, plistlib
 from glob import glob
 from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
+from prymatex.lib.deco.cache import cacheable
+from prymatex.lib.deco.memoize import memoize, memoize_dict
+from prymatex.lib.deco.helpers import printtime
 
 # for run as main
 if __name__ == "__main__":
@@ -249,7 +252,11 @@ class PMXBundleItem(object):
             text += u"\t%s" % (self.trigger)
         return text.replace('&', '&&')
     
+    
+    # Trying to speed things up a bit, a memoize     
     @classmethod
+    #@printtime
+    @memoize_dict
     def loadBundleItem(cls, path, namespace = 'prymatex'):
         try:
             data = plistlib.readPlist(path)
@@ -267,6 +274,7 @@ class PMXBundleItem(object):
     def resolve(self, *args, **kwargs):
         pass
 
+cacheable.init_cache('/home/defo/.functions_cache')
 #----------------------------------------
 # Tests
 #----------------------------------------
