@@ -38,14 +38,24 @@ class PMXMenuNode(object):
         self.name = name
         self.items = items
         self.excludedItems = excludedItems
+        self.submenus = submenus
         self.main = dict(map(lambda i: (i, None), filter(lambda x: x != self.MENU_SPACE, self.items)))
-        for uuid, submenu in submenus.iteritems():
+        for uuid, submenu in self.submenus.iteritems():
             self[uuid] = PMXMenuNode(**submenu)
 
     @property
     def hash(self):
-        return {}
-            
+        hash = { 'name': self.name, 'items': self.items }
+        if self.excludedItems:
+            hash['excludedItems'] = self.excludedItems
+        if self.submenus:
+            hash['submenus'] = {}
+        for uuid in self.submenus.keys():
+            submenu = self[uuid]
+            if submenu != None:
+                hash['submenus'].update( { uuid: submenu.hash } )
+        return hash
+        
     def __contains__(self, key):
         return key in self.main or any(map(lambda submenu: key in submenu, filter(lambda x: isinstance(x, PMXMenuNode), self.main.values())))
 
@@ -454,8 +464,6 @@ def test_saveBundleItems():
     from prymatex.bundles import PMXBundle
     for bundle in PMXBundle.BUNDLES.values():
         bundle.save(base = '/home/dvanhaaster/Bundles')
-        for command in bundle.syntaxes:
-            command.save(base = '/home/dvanhaaster/Bundles')
     
 if __name__ == '__main__':
     from prymatex.bundles import load_prymatex_bundles

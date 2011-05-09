@@ -69,9 +69,18 @@ class PMXPreferenceSettings(object):
                     value = dict(map(lambda d: (d['name'], d['value']), value))
             setattr(self, key, value)
     
+    @property
     def hash(self):
-        #TODO: Terminar
-        return {}
+        hash = {}
+        for key in PMXPreferenceSettings.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
+                    value = unicode( value )
+                elif key in [ 'shellVariables' ]:
+                    value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
+                hash[key] = value
+        return hash
     
     def combine(self, other):
         for key in PMXPreferenceSettings.KEYS:
@@ -111,9 +120,6 @@ class PMXPreference(PMXBundleItem):
     bundle_collection = 'preferences'
     def __init__(self, namespace, hash = None, path = None):
         super(PMXPreference, self).__init__(namespace, hash, path)
-        for key in [ 'settings' ]:
-            if key == 'settings':
-                setattr(self, key, PMXPreferenceSettings(hash.get(key, {})))
 
     def load(self, hash):
         super(PMXPreference, self).load(hash)
