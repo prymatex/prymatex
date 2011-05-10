@@ -1,155 +1,91 @@
 # encoding: utf-8
 
+'''
+Models and proxies for bundle data
+'''
+
 from prymatex.bundles import PMXBundle
 from PyQt4.Qt import *
+from prymatex.models.base import PMXTableBase, PMXTableField
+from prymatex.models.delegates import PMXChoiceItemDelegate
+from prymatex.gui.bundles.items import PMXBundleItemInstanceItem
 
 
-class PMXCommonModel(QStandardItemModel):
-    ELEMENTS = ()
-    
-    def __init__(self, parent = None):
-        super(PMXCommonModel, self).__init__(0, #Rows
-                                                 len(self.ELEMENTS), # Columns
-                                                 parent
-                                                 )
-        self.fillHeaders()        
-    
-    def fillHeaders(self):
-        if not self.ELEMENTS:
-            raise Exception("ELEMENTS not defined for %s" % type(self))
-        for i, element_name in enumerate(self.ELEMENTS):
-            self.setHeaderData(i, Qt.Horizontal, element_name.title())
-    
-    def loadBundle(self, path):
-        pass
-
-class PMXBundleModel(PMXCommonModel):
+class PMXBundleModel(PMXTableBase):
     '''
     Store xxx.tmBundle/info.plist data
     '''
-    ELEMENTS = (
-                'uuid',
-                'name',
-                'namespace',
-                'description',
-                'contactName',
-                'contactMailRot13',
-                'disabled',
-                'item'
-                )
+    
+    uuid = PMXTableField(title = "UUID")
+    name = PMXTableField()
+    namespace = PMXTableField()
+    description = PMXTableField()
+    contactName = PMXTableField( title = "Contact Name")
+    contactMailRot13 = PMXTableField(title = "Conatact E-Mail")
+    disabled = PMXTableField()
+    item = PMXTableField()
+    
     
     def appendBundleRow(self, bundle):
-        elements = [
-                    bundle.uuid,
-                    bundle.name,
-                    bundle.namespace,
-                    bundle.description,
-                    bundle.contactName,
-                    bundle.contactMailRot13,
-                    bundle.disabled,
-                    bundle,
-                    ]
-
-        items = []
-        for element in elements:
-            #print name, element
-            if element is None:
-                items.append(QStandardItem(''))
-            elif isinstance(element, PMXBundle):
-                pass
-            else:
-                items.append(QStandardItem(element))
-
-        self.appendRow(items)
+        self.addRowFromKwargs(
+                    uuid = bundle.uuid,
+                    name = bundle.name,
+                    namespace = bundle.namespace,
+                    description = bundle.description,
+                    contactName = bundle.contactName,
+                    contactMailRot13 = bundle.contactMailRot13,
+                    disabled = bundle.disabled,
+                    item = bundle,
+                    )
         
-class PMXBundleItemInstanceItem(QStandardItem):
-    '''
-    
-    Create a superclass?
-    '''
-    def __init__(self, pmx_bundle_item):
-        from prymatex.bundles.base import PMXBundleItem
-        assert isinstance(pmx_bundle_item, PMXBundleItem)
-        self.setData(pmx_bundle_item, Qt.EditRole)
-        self.setData(unicode(pmx_bundle_item), Qt.DisplayRole)
         
-    def setData(self, value, role):
-        '''
-        Display something, but store data
-        http://doc.trolltech.com/latest/qstandarditem.html#setData
-        '''
-        if role == Qt.EditRole:
-            self._item = value
-        elif role == Qt.DisplayRole:
-            super(PMXBundleItemInstanceItem, self).setData(value, role)
-        else:
-            raise TypeError("setData called with unsupported role")
-    
-    def data(self, role = Qt.DisplayRole):
-        if role == Qt.DisplayRole:
-            return super(PMXBundleItemInstanceItem, self).data(role)
-        elif role == Qt.EditRole:
-            return self._item
-    
-    @property
-    def item(self):
-        return self._item
 
+class PMXBundleTypeDelegate(PMXChoiceItemDelegate):
+    CHOICES = [('Command', 1),
+               ('Snippet', 2),
+               ('Macro', 3),
+               ('Syntax', 5),
+               ]
 
-class PMXBundleItemModel(PMXCommonModel):
+class PMXBundleItemDelegate(QItemDelegate):
+    # Just to try
+    def createEditor(self, *largs):
+        return QTextEdit()
+
+class PMXBundleItemModel(PMXTableBase):
     '''
     Stores Command, Syntax, Snippets, etc. information
     '''
-    CUSTOM_ELEMENTS = (
-                       'bundleUUID', # Reference
-                       'path',
-                       'namespace',
-                       )
-     
-    PLIST_ELEMENTS = (
-                'uuid',
-                'type',
-                'name',
-                'tabTrigger',
-                'keyEquivalent',
-                'scope',
-                'item', # Pointer to the PMXStuff object
-                )
-    ELEMENTS = CUSTOM_ELEMENTS + PLIST_ELEMENTS
+    
+    bundleUUID = PMXTableField(editable = False, title = "Bundle UUID")
+    path = PMXTableField(editable = False, )
+    namespace = PMXTableField(editable = False)
+    
+    uuid = PMXTableField(title = "UUID")
+    type_ = PMXTableField(title = "Item Type", 
+                          delegate_class = PMXBundleTypeDelegate)
+    name = PMXTableField()
+    tabTrigger = PMXTableField(title = "Tab Trigger")
+    keyEquivalent = PMXTableField(title = "Key Equivalent")
+    scope = PMXTableField()
+    item = PMXTableField(item_class = PMXBundleItemInstanceItem, delegate_class=PMXBundleItemDelegate)
    
     def appendBundleItemRow(self, instance):
         '''
         Appends a new row based on an instance
         @param instance A PMXCommand, PMXSnippet, PMXMacro instance
-        @todo: Refactor
         '''
-        from prymatex.bundles.base import PMXBundleItem
-        elements = [
-                    instance.bundle.uuid,
-                    instance.path,
-                    instance.namespace,
-                    instance.uuid,
-                    type(instance).__class__.__name__,
-                    instance.name,
-                    instance.tabTrigger,
-                    instance.keyEquivalent,
-                    instance.scope,
-                    instance,
-                    ]
-
-        items = []
-        for name, element in zip(self.ELEMENTS, elements) :
-            #print name, element
-            if element is None:
-                    # None -> Null String
-                items.append(QStandardItem(''))
-            elif isinstance(element, PMXBundleItem):
-                pass
-            else:
-                items.append(QStandardItem(element))
-        #elements = map(QStandardItem, elements)
-
-        self.appendRow(items)
+        self.addRowFromKwargs(bundleUUID = instance.bundle.uuid,
+                              path = instance.path,
+                              namespace = instance.namespace,
+                              uuid = instance.uuid,
+                              type_ = type(instance).__class__.__name__,
+                              name = instance.name,
+                              tabTrigger = instance.tabTrigger,
+                              keyEquivalent = instance.keyEquivalent,
+                              scope = instance.scope,
+                              #item = item,
+                              )
     
     def appendRowFromBundle(self, pmx_bundle):
         '''
@@ -176,7 +112,21 @@ class PMXBundleItemModel(PMXCommonModel):
             
         for template in pmx_bundle.templates:
             self.appendBundleItemRow(template)
+    
+    def get_by(self, **filter):
+        ''' Returns a list of QStandardItems 
+            I.E. get_by(uuid = 'aaa-bb-cc')
+        ''' 
+        f = QSortFilterProxyModel()
+        f.setSourceModel(self)
+        #f.set
+
+class SortByKeysProxyModel(QSortFilterProxyModel):
+    def __init__(self, **kwargs):
+        pass
+    
         
+
 class PMXBundleManager(object):
     def __init__(self, bundles, bundleItems, themes):
         self.bundles = bundles

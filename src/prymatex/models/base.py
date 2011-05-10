@@ -146,6 +146,8 @@ class PMXTableBase(QStandardItemModel):
             raise APIUsageError("Atteped to setup item delegates for wrong model")
         
         for n, field in enumerate(self._meta.fields):
+            if not field.delegate_class is QItemDelegate:
+                print "Custom delegeta", field.delegate_class, "for field", field
             item_delegate = field.delegate_class()
             view.setItemDelegateForColumn(n, item_delegate)
     
@@ -158,6 +160,8 @@ class PMXTableBase(QStandardItemModel):
             data = kwargs.get(field.name, '')
             if not data and field.default:
                 data = field.default
+            if data is None:
+                data = ''
             item = field.item_class(data)
             items.append(item)
         QStandardItemModel.appendRow(self, items)

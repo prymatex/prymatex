@@ -1,5 +1,6 @@
 from PyQt4.Qt import *
 from prymatex.core.base import PMXObject
+from prymatex.models.base import PMXTableBase
 
 
 class PMXBundleItemTableView(QTableView):
@@ -23,13 +24,18 @@ class PMXBundleItemTableView(QTableView):
         super(PMXBundleItemTableView, self).setModel(model)
         model.rowsInserted.connect(self.resizeColumnsAndRows)
         model.rowsRemoved.connect(self.resizeColumnsAndRows)
+        # Setup
+        if isinstance(model, PMXTableBase):
+            model.setColumnDelegatesFromFields(self)
+
         
     def resizeColumnsAndRows(self, *largs):
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
         #self.resizeRowsToContents()
         
-
+    
+        
 
 class PMXFilterBundleItem(QSortFilterProxyModel):
     '''
