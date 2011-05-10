@@ -138,12 +138,28 @@ class PMXBundeItemSimpleFilterProxyModel(QSortFilterProxyModel):
             self.filters[col_number] = filter_arguments[key]
         
     def filterAcceptsRow(self, row, parent):
+        if not self.filters: 
+            return self.resultsIfEmpty
+            
         for col, value in self.filters:
             if self.data(self.index(row, col)).toPyObject() != value:
                 return False
         return True
     
-
+    _resultsIfEmpty = True
+    @property
+    def resultsIfEmpty(self):
+        return self._resultsIfEmpty
+    
+    @resultsIfEmpty.setter
+    def resultsIfEmpty(self, value):
+        self._resultsIfEmpty = value
+    
+    def __setitem__(self, key, value):
+        self.filters.update(key = value)
+    
+    def __getitem__(self, key):
+        return self.filters.__getitem__(key)
 
 class PMXBundleManager(object):
     def __init__(self, bundles, bundleItems, themes):

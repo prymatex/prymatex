@@ -1,6 +1,6 @@
 
 from PyQt4.Qt import *
-from prymatex.core.exceptions import APIUsageError
+from prymatex.core.exceptions import APIUsageError, InvalidField
 
 class PMXTableField(object):
     
@@ -76,6 +76,23 @@ class PMXTableMeta(object):
             if field.editable:
                 cols.append(n)
         return cols
+    
+    def all_valid_names(self, names):
+        '''
+        @return: True if all name are in the meta's field definition, False otherwise
+        '''
+        valid_names = self.field_names
+        return all(map(lambda fname: fname in valid_names, names))
+        
+    
+    def check_has_names(self, names):
+        '''
+        @raise InvalidField: If not valid field
+        '''
+        valid_names = self.field_names
+        for name in names:
+            if not name in valid_names:
+                raise InvalidField(name, valid_names) 
     
     def __str__(self):
         return "<PMXTableMeta for %s table model>" % self.name
@@ -180,4 +197,14 @@ class PMXTableBase(QStandardItemModel):
         col = index.column()
         if not col in self._meta.editable_cols:
             return baseflags & ~Qt.ItemIsEditable
-        return baseflags  
+        return baseflags
+    
+    def setShownColumnsForView(self, view, column_names):
+        '''
+        Defines which columns have to be shown
+        '''
+        self._meta.check_has_names(column_names)
+        
+        for n, field in enumerate(self._meta.fields):
+            view.setColumnHidden(n, not field.name in column_names)
+

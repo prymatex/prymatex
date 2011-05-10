@@ -1,9 +1,33 @@
 from PyQt4.Qt import *
 from prymatex.core.base import PMXObject
 from prymatex.models.base import PMXTableBase
+from prymatex.core.exceptions import APIUsageError
 
 
-class PMXBundleItemTableView(QTableView):
+class PMXTableViewMixin(QObject):
+    
+    def setShownColumns(self, column_names):
+        '''
+        Defines which columns have to be shown
+        @deprecated: Moved to model
+        '''
+        model = self.model()
+        if isinstance(self.model(), QSortFilterProxyModel):
+            meta = model.sourceModel._meta
+        elif isinstance(self.model(), PMXTableBase):
+            meta = model._meta
+        else:
+            raise APIUsageError("Invalid model")
+        meta.chack_has_names(column_names)
+        
+        for n, field in enumerate(meta.fields):
+            self.setColumnHidden(n, not field.name in column_names)
+    
+
+class PMXBundleItemTableView(QTableView, PMXTableViewMixin):
+    '''
+    Displays a model View
+    '''
     showStateChanged = pyqtSignal(bool)
     
     def closeEvent(self, event):
@@ -19,7 +43,7 @@ class PMXBundleItemTableView(QTableView):
             self.close()
             return
         super(PMXBundleItemTableView, self).keyPressEvent(event)
-    
+
     def setModel(self, model):
         super(PMXBundleItemTableView, self).setModel(model)
         model.rowsInserted.connect(self.resizeColumnsAndRows)
@@ -27,7 +51,6 @@ class PMXBundleItemTableView(QTableView):
         # Setup
         if isinstance(model, PMXTableBase):
             model.setColumnDelegatesFromFields(self)
-
         
     def resizeColumnsAndRows(self, *largs):
         self.resizeRowsToContents()
@@ -35,19 +58,38 @@ class PMXBundleItemTableView(QTableView):
         #self.resizeRowsToContents()
         
     
+class PMXBundleItemsSelectorTableView(QTableView, PMXTableViewMixin):
+    pass    
+
+
         
 
 class PMXFilterBundleItem(QSortFilterProxyModel):
     '''
     Filters from user input
     '''
-    #def filterAcceptsRow(self, sourceRow, parent):
-        #print sourceRow
-    #    return True
     
-    def setFilteringProxy(self, value):
-        print value
+    def __init__(self, model, column_key):
+        super(PMXFilterBundleItem, self).__init__()
+        self.setSourceModel(model)
+        self.setFilterKeyColumn(model._meta.col_number(column_key))
     
+    
+    def filterAcceptsColumn(self, row, parent):
+        if not self.filterString:
+            return False
+        return super(PMXFilterBundleItem, self).filterAcceptsColumn(row, parent)
+    
+    _filterString = None
+    def setFilterString(self, s):
+        self._filterString = s
+        self.setFilterRegExp(QRegExp(s))
+    
+    def filterString(self):
+        return self._filterString
+    
+    filterString = property( fget = filterString, fset = setFilterString)
+        
 
 class PMXBundleItemSelector(QDialog, PMXObject):
     '''
@@ -61,7 +103,7 @@ class PMXBundleItemSelector(QDialog, PMXObject):
         self.setupUi()
         #self.hideUnusedColumns()
         self.setModal(True)
-        self.lineFilter.textChanged.connect(self.proxyFilteringModel.setFilteringProxy)
+        self.lineFilter.textChanged.connect(self.proxyFilteringModel.setFilterString)
     
     def exec_(self):
         # Geo is not known until the mainwindow is shown, so we 
@@ -94,11 +136,15 @@ class PMXBundleItemSelector(QDialog, PMXObject):
         layout.setMargin(0)
         self.lineFilter = QLineEdit(self)
         layout.addWidget(self.lineFilter)
-        self.tableView = QTableView(self)
+        self.tableView = PMXBundleItemsSelectorTableView(self)
         
-        self.proxyFilteringModel = PMXFilterBundleItem()
-        self.proxyFilteringModel.setSourceModel(QApplication.instance().bundleItemModel)
+        bundleItemModel = QApplication.instance().bundleItemModel
+        self.proxyFilteringModel = PMXFilterBundleItem(bundleItemModel, 'name')
         self.tableView.setModel(self.proxyFilteringModel)
+        
+        bundleItemModel.setShownColumnsForView(self.tableView, ['name', ])
+        
+        #self.tableView.setCol
         
         self.tableView.resizeColumnToContents(1)
         self.tableView.resizeRowsToContents()
