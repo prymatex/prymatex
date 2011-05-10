@@ -9,6 +9,7 @@ from PyQt4.Qt import *
 from prymatex.models.base import PMXTableBase, PMXTableField
 from prymatex.models.delegates import PMXChoiceItemDelegate
 from prymatex.gui.bundles.items import PMXBundleItemInstanceItem
+from prymatex.core.exceptions import APIUsageError
 
 
 class PMXBundleModel(PMXTableBase):
@@ -113,19 +114,36 @@ class PMXBundleItemModel(PMXTableBase):
         for template in pmx_bundle.templates:
             self.appendBundleItemRow(template)
     
-    def get_by(self, **filter):
+    def getProxyFilteringModel(self, **filter_kwargs):
         ''' Returns a list of QStandardItems 
             I.E. get_by(uuid = 'aaa-bb-cc')
         ''' 
-        f = QSortFilterProxyModel()
-        f.setSourceModel(self)
-        #f.set
-
-class SortByKeysProxyModel(QSortFilterProxyModel):
-    def __init__(self, **kwargs):
-        pass
-    
+        proxy = PMXBundeItemSimpleFilterProxyModel(self, **filter_kwargs)
+        return proxy 
         
+
+class PMXBundeItemSimpleFilterProxyModel(QSortFilterProxyModel):
+    '''
+    Filters
+    '''
+    def __init__(self, model, **filter_arguments):
+        super(PMXBundeItemSimpleFilterProxyModel, self).__init__(self)
+        self.sourceModel = model
+        self.setSourceModel(self.sourceModel)
+        self.filters = {}
+        for key in filter_arguments:
+            if not key in self.sourceModel._meta.field_names:
+                raise APIUsageError("%s is not a valid field of %s" % (key, self.sourceModel))
+            col_number = self.sourceModel._meta.col_number(key)
+            self.filters[col_number] = filter_arguments[key]
+        
+    def filterAcceptsRow(self, row, parent):
+        for col, value in self.filters:
+            if self.data(self.index(row, col)).toPyObject() != value:
+                return False
+        return True
+    
+
 
 class PMXBundleManager(object):
     def __init__(self, bundles, bundleItems, themes):

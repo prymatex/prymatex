@@ -143,11 +143,11 @@ class PMXTableBase(QStandardItemModel):
     
     def setColumnDelegatesFromFields(self, view):
         if view.model() is not self:
-            raise APIUsageError("Atteped to setup item delegates for wrong model")
+            raise APIUsageError("Atteped to setup item delegate for wrong model")
         
         for n, field in enumerate(self._meta.fields):
             if not field.delegate_class is QItemDelegate:
-                print "Custom delegeta", field.delegate_class, "for field", field
+                print "Setting custom delegete for", field.delegate_class, "for field", field
             item_delegate = field.delegate_class()
             view.setItemDelegateForColumn(n, item_delegate)
     

@@ -79,8 +79,6 @@ if __name__ == "__main__":
     
     QApplication.instance().aboutToQuit.connect(model.pickle)
     
-    
-    
     win.setWindowTitle(unicode(model.__class__.__name__))
     win.setGeometry(400,200, 400, 400)
     print model._meta
