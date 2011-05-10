@@ -18,6 +18,7 @@ from prymatex.bundles.base import PMXBundleItem
 
 class PMXTemplate(PMXBundleItem):
     KEYS = [    'command', 'extension']
+    TYPE = 'template'
     FOLDER = 'Templates'
     FILES = [ '*' ]
     bundle_collection = 'templates'
@@ -37,10 +38,6 @@ class PMXTemplate(PMXBundleItem):
             if value != None:
                 hash[key] = value
         return hash
-    
-    def setBundle(self, bundle):
-        super(PMXTemplate, self).setBundle(bundle)
-        bundle.TEMPLATES.append(self)
     
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()

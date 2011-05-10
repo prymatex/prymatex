@@ -115,6 +115,7 @@ class PMXPreferenceSettings(object):
     
 class PMXPreference(PMXBundleItem):
     KEYS = [ 'settings' ]
+    TYPE = 'preference'
     FOLDER = 'Preferences'
     FILES = ['*.tmPreferences', '*.plist']
     bundle_collection = 'preferences'

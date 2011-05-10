@@ -25,6 +25,7 @@ class PMXCommand(PMXBundleItem):
                 'columnCaptureRegister', 'disableOutputAutoIndent',
                 'lineCaptureRegister', 'dontFollowNewOutput',
                 'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
+    TYPE = 'command'
     FOLDER = 'Commands'
     FILES = ['*.tmCommand', '*.plist']
     bundle_collection = 'commands'
@@ -136,6 +137,7 @@ class PMXCommand(PMXBundleItem):
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]
+    TYPE = 'dragcommand'
     FOLDER = 'DragCommands'
     FILES = ['*.tmCommand', '*.plist']
     def __init__(self, namespace, hash = None, path = None):

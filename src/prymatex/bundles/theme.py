@@ -16,13 +16,20 @@ from prymatex.bundles.qtadapter import buildQTextFormat, buildQColor
 '''
 
 class PMXStyle(object):
-    def __init__(self, hash):
-        for key in [    'scope', 'name', 'settings' ]:
-            setattr(self, key, hash.pop(key, None))
-        
-        if hash:
-            print "Style has more values (%s)" % (', '.join(hash.keys()))
+    KEYS = [    'scope', 'name', 'settings' ]
+    def __init__(self, hash = None):
+        if hash != None:
+            self.load(hash)
 
+    def load(self, hash):
+        for key in PMXStyle.KEYS:
+            setattr(self, key, hash.get(key, None))
+
+    @property
+    def hash(self):
+        hash = {'scope': self.scope, 'name': self.name, 'settings': copy(self.settings)}
+        return hash
+        
     def __getitem__(self, name):
         return self.settings[name]
     
@@ -45,22 +52,48 @@ class PMXStyle(object):
         return buildQColor(self[item])
     
 class PMXTheme(object):
+    KEYS = [    'uuid', 'name', 'comment', 'author', 'settings' ]
     UUIDS = {}
     STYLES_CACHE = {}
     scores = PMXScoreManager()
     
-    def __init__(self, hash, namespace, path = None):
+    def __init__(self, namespace, hash = None, path = None):
+        self.namespace = namespace
+        self.path = path
+        if hash != None:
+            self.load(hash)
+
+    def load(self, hash):
         self.sytles = []
-        for key in [    'uuid', 'name', 'comment', 'author', 'settings' ]:
-            value = hash.pop(key, None)
-            if key == 'settings':
+        for key in PMXTheme.KEYS:
+            value = hash.get(key, None)
+            if value != None and key == 'settings':
                 self.default = PMXStyle(value[0])
                 for setting in value[1:]:
                     self.sytles.append(PMXStyle(setting))
             else:
                 setattr(self, key, value)
-        self.namespace = namespace
-        self.path = path
+    
+    @property
+    def hash(self):
+        hash = {}
+        for key in PMXTheme.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                if key == 'settings':
+                    result = [ self.default.hash ]
+                    for v in value:
+                        result.append(v.hash)
+                    value = result
+                hash[key] = value
+        return hash
+        
+    def save(self, base = None):
+        if base != None:
+            file = os.path.join(base , os.path.basename(self.path))
+        else:
+            file = self.path
+        plistlib.writePlist(self.hash, file)
 
     @classmethod
     def loadTheme(cls, path, namespace):

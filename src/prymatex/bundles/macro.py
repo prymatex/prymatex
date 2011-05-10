@@ -10,6 +10,7 @@ from prymatex.bundles.base import PMXBundleItem
 
 class PMXMacro(PMXBundleItem):
     KEYS = [    'commands' ]
+    TYPE = 'macro'
     FOLDER = 'Macros'
     FILES = [ '*.tmMacro', '*.plist']
     path_patterns = ['Macros/*.tmMacro', 'Macros/*.plist']
