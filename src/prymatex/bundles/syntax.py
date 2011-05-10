@@ -179,6 +179,7 @@ class PMXSyntaxProxy(object):
 
 class PMXSyntax(PMXBundleItem):
     KEYS = [ 'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository', 'foldingStopMarker', 'fileTypes', 'patterns']
+    TYPE = 'syntax'
     FOLDER = 'Syntaxes'
     FILES = ['*.tmLanguage', '*.plist']
     bundle_collection = 'syntaxes'

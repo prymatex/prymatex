@@ -89,26 +89,19 @@ class PMXMenuNode(object):
 class PMXBundle(object):
     KEYS = [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
-    BUNDLES = {}
-    TAB_TRIGGERS = {}
-    KEY_EQUIVALENTS = {}
     DRAGS = []
     PREFERENCES = {}
     TEMPLATES = []
     SETTINGS_CACHE = {}
-    BASE_ENVIRONMENT = {}
     scores = PMXScoreManager()
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
     
     def __init__(self, namespace, hash = None, path = None):
         self.namespace = namespace
         self.path = path
-        self.syntaxes = []
-        self.snippets = []
-        self.macros = []
-        self.commands = []
-        self.preferences = []
-        self.templates = []
+        self.disabled = False
+        self.support = None
+        self.manager = None
         if hash != None:
             self.load(hash)
 
@@ -140,33 +133,23 @@ class PMXBundle(object):
         else:
             file = os.path.join(self.path , self.FILE)
         plistlib.writePlist(self.hash, file)
-        
+ 
     def addBundleItem(self, item):
-        if self.mainMenu != None:
-            self.mainMenu[item.uuid] = item
-        if item.tabTrigger != None:
-            PMXBundle.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
-        if item.keyEquivalent != None:
-            keyseq = buildKeyEquivalentCode(item.keyEquivalent)
-            PMXBundle.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
-        # I'm four father
-        item.setBundle(self)
+        item.bundle = self # I'm four father
+        self.manager.addBundleItem(item) #TODO: si no tiene manager
 
     def buildEnvironment(self):
-        env = copy(self.BASE_ENVIRONMENT)
+        env = copy(self.manager.BASE_ENVIRONMENT)
         env.update({
             'TM_BUNDLE_PATH': self.path,
-            'TM_BUNDLE_SUPPORT': self.getBundleSupportPath()
+            'TM_BUNDLE_SUPPORT': self.support
         });
         return env
-        
+
     def getSyntaxByName(self, name):
         for syntax in self.syntaxes:
             if syntax.name == name:
                 return syntax
-
-    def getBundleSupportPath(self):
-        return os.path.join(self.path, 'Support')
 
     @classmethod
     def loadBundle(cls, path, namespace):
@@ -256,9 +239,9 @@ class PMXBundle(object):
 
 class PMXBundleItem(object):
     KEYS = [ 'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
+    TYPE = ''
     FOLDER = ''
     FILES = []
-    bundle_collection = ""
     def __init__(self, namespace, hash = None, path = None):
         self.namespace = namespace
         self.path = path
@@ -298,13 +281,6 @@ class PMXBundleItem(object):
             trigger.append(u"%s" % (buildKeyEquivalentString(self.keyEquivalent)))
         return ", ".join(trigger)
 
-    def setBundle(self, bundle):
-        self.bundle = bundle
-        if self.bundle_collection:
-            collection = getattr(bundle, self.bundle_collection, None)
-            if collection != None:
-                collection.append(self)
-    
     def buildEnvironment(self, **kwargs):
         env = self.bundle.buildEnvironment()
         return env

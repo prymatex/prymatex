@@ -754,6 +754,7 @@ class PMXSnippetProcessor(PMXSyntaxProcessor):
 
 class PMXSnippet(PMXBundleItem):
     KEYS = [ 'content', 'disableAutoIndent', 'inputPattern' ]
+    TYPE = 'snippet'
     FOLDER = 'Snippets'
     FILES = ['*.tmSnippet', '*.plist']
     bundle_collection = 'snippets'
