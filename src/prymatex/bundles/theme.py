@@ -53,7 +53,6 @@ class PMXStyle(object):
     
 class PMXTheme(object):
     KEYS = [    'uuid', 'name', 'comment', 'author', 'settings' ]
-    UUIDS = {}
     STYLES_CACHE = {}
     scores = PMXScoreManager()
     
@@ -100,21 +99,9 @@ class PMXTheme(object):
         try:
             data = plistlib.readPlist(path)
             theme = PMXTheme(namespace, data, path)
-            cls.UUIDS[theme.uuid] = theme
             return theme
         except Exception, e:
             print "Error en bundle %s (%s)" % (path, e)
-
-    @classmethod
-    def getThemeByName(cls, name):
-        for theme in cls.UUIDS.values():
-            if theme.name == name:
-                return theme
-
-    @classmethod
-    def getThemeByUUID(cls, uuid):
-        if uuid in cls.UUIDS:
-            return cls.UUIDS[uuid]
 
     def clearCache(self):
         PMXTheme.STYLES_CACHE = {}

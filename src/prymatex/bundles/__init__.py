@@ -29,6 +29,7 @@ class PMXBundleManager(object):
     BUNDLES = {}
     BUNDLE_ITEMS = {}
     THEMES = {}
+    SYNTAXES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
     DRAGS = []
@@ -153,6 +154,9 @@ class PMXBundleManager(object):
             self.PREFERENCES.setdefault(item.scope, []).append(item)
         elif item.TYPE == 'template':
             self.TEMPLATES.append(item)
+        elif item.TYPE == 'syntax':
+            self.SYNTAXES[item.scopeName] = item
+            # puede ser dependiente del namespace ? self.SYNTAXES[item.namespace][item.scopeName] = self
 
     def getBundleItem(self, uuid):
         return self.BUNDLE_ITEMS[uuid]
@@ -165,7 +169,10 @@ class PMXBundleManager(object):
         
     def getTheme(self, uuid):
         return self.THEMES[uuid]
-        
+    
+    def getAllThemes(self):
+        return self.THEMES.values()
+    
     def getAllTemplates(self):
         return self.TEMPLATES
     
@@ -240,3 +247,14 @@ class PMXBundleManager(object):
             with_scope.sort(key = lambda t: t[0], reverse = True)
             with_scope = map(lambda (score, item): item, with_scope)
         return with_scope and with_scope or without_scope
+        
+    #---------------------------------------------------------------
+    # SYNTAXES
+    #---------------------------------------------------------------
+    def getSyntaxes(self, sort = False):
+        stxs = []
+        for syntax in self.SYNTAXES.values():
+            stxs.append(syntax)
+        if sort:
+            return sorted(stxs, key = lambda s: s.name)
+        return stxs

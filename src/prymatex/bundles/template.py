@@ -23,8 +23,6 @@ class PMXTemplate(PMXBundleItem):
     FILES = [ '*' ]
     def __init__(self, namespace, hash = None, path = None):
         super(PMXTemplate, self).__init__(namespace, hash, path)
-        if hash != None:
-            self.load(hash)
     
     def load(self, hash):
         super(PMXTemplate, self).load(hash)

@@ -182,18 +182,11 @@ class PMXSyntax(PMXBundleItem):
     TYPE = 'syntax'
     FOLDER = 'Syntaxes'
     FILES = ['*.tmLanguage', '*.plist']
-    bundle_collection = 'syntaxes'
-    SYNTAXES = {}
-    UUIDS = {}
     FOLDING_NONE = 0
     FOLDING_START = -1
     FOLDING_STOP = -2
     def __init__(self, namespace, hash = None, path = None):
         super(PMXSyntax, self).__init__(namespace, hash, path)
-        PMXSyntax.UUIDS[self.uuid] = self
-        PMXSyntax.SYNTAXES.setdefault(self.namespace, {})
-        if hasattr(self, 'scopeName') and self.scopeName != None:
-            PMXSyntax.SYNTAXES[self.namespace][self.scopeName] = self
 
     def load(self, hash):
         super(PMXSyntax, self).load(hash)
@@ -226,7 +219,7 @@ class PMXSyntax(PMXBundleItem):
 
     @property
     def syntaxes(self):
-        return PMXSyntax.SYNTAXES[self.namespace]
+        return self.bundle.manager.SYNTAXES
 
     @property
     def grammar(self):
@@ -355,26 +348,11 @@ class PMXSyntax(PMXBundleItem):
             return stxs[0]
     
     @classmethod
-    def getSyntaxByUUID(cls, uuid):
-        if uuid in cls.UUIDS:
-            return cls.UUIDS[uuid]
-    
-    @classmethod
     def getSyntaxByScope(cls, scope):
         for syntaxes in cls.SYNTAXES.values():
             if scope in syntaxes:
                 return syntaxes[scope]
         return None
-    
-    @classmethod
-    def getSyntaxes(cls, sort = False):
-        stxs = []
-        for syntaxes in cls.SYNTAXES.values():
-            for syntax in syntaxes.values():
-                stxs.append(syntax)
-        if sort:
-            return sorted(stxs, key = lambda s: s.name)
-        return stxs
     
     @classmethod
     def getSyntaxesNames(cls, sort = False):
@@ -398,19 +376,4 @@ class PMXSyntax(PMXBundleItem):
     
     def __str__(self):
         return u"<PMXSyntax %s>" % self.name
-    
-                
-def parse_file(filename):
-    import plistlib
-    from pprint import pprint
-    data = plistlib.readPlist(filename)
-    pprint(data)
-    return PMXSyntax(data)
-
-if __name__ == '__main__':
-    import os
-    from glob import glob
-    files = glob(os.path.join('../share/Bundles/Bundle Development.tmbundle/Syntaxes', '*'))
-    for f in files:
-        syntax = parse_file(f)
-    print PMXSyntax.SYNTAXES
+        

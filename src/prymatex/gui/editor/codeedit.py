@@ -64,7 +64,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
-        syntax = PMXSyntax.getSyntaxByUUID(uuid)
+        syntax = self.pmxApp.bundleManager.getBundleItem(uuid)
         if syntax != None:
             self.setSyntax(syntax)
     
@@ -74,7 +74,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
-        theme = PMXTheme.getThemeByUUID(uuid)
+        theme = self.pmxApp.bundleManager.getTheme(uuid)
         self.syntaxProcessor.formatter = theme
         style = theme.getStyle()
         foreground = style.getQColor('foreground')

@@ -102,7 +102,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.syntaxMenu = QComboBox(self)
         
         #No syntax
-        for syntax in PMXSyntax.getSyntaxes(sort = True):
+        for syntax in self.pmxApp.bundleManager.getSyntaxes(sort = True):
             self.syntaxMenu.addItem(syntax.name, QVariant(syntax.uuid))
             
         self.addPermanentWidget(self.syntaxMenu)
@@ -164,7 +164,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
     
     def sendStatusBarSyntaxChanged(self, index):
         uuid = self.syntaxMenu.itemData(index).toPyObject()
-        syntax = PMXSyntax.getSyntaxByUUID(unicode(uuid))
+        syntax = self.pmxApp.bundleManager.getBundleItem(unicode(uuid))
         self.statusBarSytnaxChangedEvent(syntax)
         
     def updatePosition(self, source, line, col):

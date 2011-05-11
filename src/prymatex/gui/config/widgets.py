@@ -54,9 +54,8 @@ class PMXConfigBaseWidget(QWidget, PMXObject):
         QMessageBox.information(self, "Discard %s..." % self.windowTitle(), "Discard settings")
 
 from ui_font_and_theme import Ui_FontThemeConfig
-from prymatex.bundles import PMXTheme
 
-class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
+class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig, PMXObject):
     '''
     Changes font and theme
     '''
@@ -67,7 +66,7 @@ class PMXThemeConfigWidget(QWidget, Ui_FontThemeConfig):
         self.settings = qApp.instance().settings.getGroup('editor')
         uuid = self.settings.value('theme')
         #Todo cambiar esto por un metodo, UUIDS es de clase
-        for index, theme in enumerate(PMXTheme.UUIDS.values()):
+        for index, theme in enumerate(self.pmxApp.bundleManager.getAllThemes()):
             self.comboThemes.addItem(theme.name, QVariant(theme.uuid))
             if theme.uuid == uuid:
                 self.comboThemes.setCurrentIndex(index)
