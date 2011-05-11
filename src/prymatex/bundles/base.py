@@ -319,7 +319,7 @@ def test_keys():
     pprint(PMXBundle.KEY_EQUIVALENTS)
     
 def test_templates():
-    DIRECTORY = '/home/dvanhaaster/workspace/'
+    DIRECTORY = os.path.join(os.path.expanduser('~'), 'workspace/')
     for template in PMXBundle.TEMPLATES:
         environment = template.buildEnvironment(directory = DIRECTORY)
         template.resolve(environment)
@@ -357,13 +357,13 @@ def test_queryItems():
 def test_saveBundleItems():
     from prymatex.bundles import PMXBundle
     for bundle in PMXBundle.BUNDLES.values():
-        bundle.save(base = '/home/dvanhaaster/Bundles')
+        bundle.save(base = os.path.join(os.path.expanduser('~'), 'Bundles'))
     
 if __name__ == '__main__':
     from prymatex.bundles import PMXBundleManager
     manager = PMXBundleManager(disabled = [], deleted = [])
     manager.addNameSpace(manager.DEFAULT, os.path.abspath('../../bundles/prymatex'))
-    manager.addNameSpace('user', os.path.abspath('/home/dvanhaaster/.prymatex'))
+    manager.addNameSpace('user', os.path.abspath(os.path.join(os.path.expanduser('~', '.prymatex'))))
     manager.loadShit()
     for bundle in manager.BUNDLES.values():
         print bundle.buildEnvironment()
