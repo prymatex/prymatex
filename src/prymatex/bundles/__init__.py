@@ -1,3 +1,4 @@
+import re
 from os.path import join, abspath, basename, exists
 
 # for run as main
@@ -16,7 +17,8 @@ from prymatex.bundles.command import PMXCommand, PMXDragCommand
 from prymatex.bundles.template import PMXTemplate
 from prymatex.bundles.base import PMXBundle, PMXMenuNode
 from prymatex.bundles.theme import PMXTheme, PMXStyle
-from prymatex.bundles.qtadapter import buildQTextFormat
+from prymatex.bundles.qtadapter import buildQTextFormat, buildKeyEquivalentCode
+from prymatex.bundles.score import PMXScoreManager
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
     
@@ -29,11 +31,18 @@ class PMXBundleManager(object):
     THEMES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
+    DRAGS = []
+    PREFERENCES = {}
+    TEMPLATES = []
+    SETTINGS_CACHE = {}
+    TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
+    
     def __init__(self, disabled = [], deleted = []):
         self.namespaces = {}
         self.environment = {}
         self.disabled = disabled
         self.deleted = deleted
+        self.scores = PMXScoreManager()
     
     def addNameSpace(self, name, path):
         self.namespaces[name] = {}
@@ -113,7 +122,8 @@ class PMXBundleManager(object):
                     if item == None:
                         continue
                     if not self.hasBundleItem(item.uuid):
-                        bundle.addBundleItem(item)
+                        item.bundle = bundle
+                        self.addBundleItem(item)
 
     def hasBundle(self, uuid):
         return uuid in self.BUNDLES
@@ -137,9 +147,12 @@ class PMXBundleManager(object):
         if item.tabTrigger != None:
             self.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
-            #keyseq = buildKeyEquivalentCode(item.keyEquivalent)
-            #self.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
-            self.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
+            keyseq = buildKeyEquivalentCode(item.keyEquivalent)
+            self.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
+        if item.TYPE == 'preference':
+            self.PREFERENCES.setdefault(item.scope, []).append(item)
+        elif item.TYPE == 'template':
+            self.TEMPLATES.append(item)
 
     def getBundleItem(self, uuid):
         return self.BUNDLE_ITEMS[uuid]
@@ -152,3 +165,78 @@ class PMXBundleManager(object):
         
     def getTheme(self, uuid):
         return self.THEMES[uuid]
+        
+    def getAllTemplates(self):
+        return self.TEMPLATES
+    
+    #---------------------------------------------------------------
+    # PREFERENCES
+    #---------------------------------------------------------------
+    def getPreferences(self, scope):
+        with_scope = []
+        without_scope = []
+        for key in self.PREFERENCES.keys():
+            if key == None:
+                without_scope.extend(self.PREFERENCES[key])
+            else:
+                score = self.scores.score(key, scope)
+                if score != 0:
+                    with_scope.append((score, self.PREFERENCES[key]))
+        with_scope.sort(key = lambda t: t[0], reverse = True)
+        preferences = map(lambda (score, item): item, with_scope)
+        with_scope = []
+        for p in preferences:
+            with_scope.extend(p)
+        return with_scope and with_scope or without_scope
+
+    def getPreferenceSettings(self, scope):
+        if scope not in self.SETTINGS_CACHE:
+            preferences = self.getPreferences(scope)
+            self.SETTINGS_CACHE[scope] = PMXPreference.buildSettings(preferences)
+        return self.SETTINGS_CACHE[scope]
+    
+    #---------------------------------------------------------------
+    # TABTRIGGERS
+    #---------------------------------------------------------------
+    def getTabTriggerSymbol(self, line, index):
+        line = line[:index]
+        for tabSplit in self.TABTRIGGERSPLITS:
+            matchs = filter(lambda m: m.start() <= index <= m.end(), tabSplit.finditer(line))
+            if matchs:
+                match = matchs.pop()
+                word = line[match.start():match.end()]
+                if self.TAB_TRIGGERS.has_key(word):
+                    return word
+    
+    def getTabTriggerItem(self, keyword, scope):
+        with_scope = []
+        without_scope = []
+        if self.TAB_TRIGGERS.has_key(keyword):
+            for item in self.TAB_TRIGGERS[keyword]:
+                if item.scope == None:
+                    without_scope.append(item)
+                else:
+                    score = self.scores.score(item.scope, scope)
+                    if score != 0:
+                        with_scope.append((score, item))
+            with_scope.sort(key = lambda t: t[0], reverse = True)
+            with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope and with_scope or without_scope
+        
+    #---------------------------------------------------------------
+    # KEYEQUIVALENT
+    #---------------------------------------------------------------
+    def getKeyEquivalentItem(self, code, scope):
+        with_scope = []
+        without_scope = []
+        if code in self.KEY_EQUIVALENTS:
+            for item in self.KEY_EQUIVALENTS[code]:
+                if item.scope == None:
+                    without_scope.append(item)
+                else:
+                    score = self.scores.score(item.scope, scope)
+                    if score != 0:
+                        with_scope.append((score, item))
+            with_scope.sort(key = lambda t: t[0], reverse = True)
+            with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope and with_scope or without_scope

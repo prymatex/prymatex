@@ -21,9 +21,10 @@ class PMXTemplate(PMXBundleItem):
     TYPE = 'template'
     FOLDER = 'Templates'
     FILES = [ '*' ]
-    bundle_collection = 'templates'
     def __init__(self, namespace, hash = None, path = None):
         super(PMXTemplate, self).__init__(namespace, hash, path)
+        if hash != None:
+            self.load(hash)
     
     def load(self, hash):
         super(PMXTemplate, self).load(hash)
@@ -59,12 +60,11 @@ class PMXTemplate(PMXBundleItem):
         os.chdir(origWD) # get back to our original working directory
         
     @classmethod
-    def loadBundleItem(cls, path, name_space = 'prymatex'):
+    def loadBundleItem(cls, path, namespace):
         info_file = os.path.join(path, 'info.plist')
         try:
             data = plistlib.readPlist(info_file)
-            template = cls(name_space, data, path)
+            template = cls(namespace, data, path)
+            return template
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
-            return None
-        return template

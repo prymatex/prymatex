@@ -263,24 +263,10 @@ class PMXApplication(QApplication):
     def saveState(self, session_manager):
         print "Save state", session_manager
         
-    def load_texmate_themes(self):
-        '''
-        Load textmate Bundles and Themes
-        '''
-        #FIXME: Pasar el path de los themes como parametro desde self.settings
-        from prymatex.bundles import load_prymatex_themes
-        from prymatex.lib.i18n import ugettext as _
-        
-        self.splash.showMessage(_("Loading themes..."))
-        load_prymatex_themes(self.settings.value('PMX_THEMES_PATH'), 'pryamtex')
-        load_prymatex_themes(self.settings.value('PMX_USER_THEMES_PATH'), 'user')
-        
-        QApplication.processEvents()
-    
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def load_bundles(self):
-        from prymatex.bundles import load_prymatex_bundles
+        from prymatex.bundles import PMXBundleManager
         from prymatex.lib.i18n import ugettext as _
         
         sharePath = self.settings.value('PMX_SHARE_PATH')
@@ -315,13 +301,13 @@ class PMXApplication(QApplication):
             splash.showMessage(_("Loading bundle %s\n%4d of %4d (%.d%%)", 
                                  name, counter, total, progress))
             # Loose coupling 
-            QApplication.processEvents()
-            bundleItemModel = QApplication.instance().bundleItemModel
-            bundleItemModel.appendRowFromBundle( bundle )
+            #QApplication.processEvents()
+            #bundleItemModel = QApplication.instance().bundleItemModel
+            #bundleItemModel.appendRowFromBundle( bundle )
         
         self.splash.showMessage(_("Loading bundles..."))
                         
-        manager.loadShit(callback = update_splash_popullate_model)
+        manager.loadShit()
         return manager
 
     def checkSingleInstance(self):

@@ -357,7 +357,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def keyPressBundleItem(self, event):
         code = int(event.modifiers()) + event.key()
         scope = self.getCurrentScope()
-        items = PMXBundle.getKeyEquivalentItem(code, scope)
+        items = self.pmxApp.bundleManager.getKeyEquivalentItem(code, scope)
         if items:
             if len(items) > 1:
                 self.selectBundleItem(items)
@@ -468,7 +468,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         character = unicode(event.text())
         scope = self.getCurrentScope()
-        preferences = PMXBundle.getPreferenceSettings(scope)
+        preferences = self.pmxApp.bundleManager.getPreferenceSettings(scope)
         pairs = filter(lambda pair: pair[0] == character, preferences.smartTypingPairs)
         if pairs:
             if cursor.hasSelection():
@@ -496,9 +496,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             cursor.insertText(self.tabKeyBehavior)
         else:
             scope = self.getCurrentScope()
-            trigger = PMXBundle.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
+            trigger = self.pmxApp.bundleManager.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
             if trigger != None:
-                snippets = PMXBundle.getTabTriggerItem(trigger, scope)
+                snippets = self.pmxApp.bundleManager.getTabTriggerItem(trigger, scope)
                 if len(snippets) > 1:
                     self.selectBundleItem(snippets, tabTrigger = True)
                     return
@@ -521,7 +521,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if not cursor.hasSelection():
             doc = self.document()
             scope = self.getCurrentScope()
-            preferences = PMXBundle.getPreferenceSettings(scope)
+            preferences = self.pmxApp.bundleManager.getPreferenceSettings(scope)
             if preferences.smartTypingPairs:
                 character = doc.characterAt(cursor.position() - 1).toAscii()
                 pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
@@ -632,7 +632,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
-        preferences = PMXBundle.getPreferenceSettings(scope)
+        preferences = self.pmxApp.bundleManager.getPreferenceSettings(scope)
         current_word, _ = self.getCurrentWordAndIndex()
         if item != None:
             env = item.buildEnvironment()

@@ -13,7 +13,6 @@ from xml.parsers.expat import ExpatError
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('../..'))
-from prymatex.bundles.score import PMXScoreManager
 from prymatex.bundles.qtadapter import buildKeyEquivalentCode, buildKeyEquivalentString
 
 '''
@@ -91,13 +90,6 @@ class PMXMenuNode(object):
 class PMXBundle(object):
     KEYS = [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
-    DRAGS = []
-    PREFERENCES = {}
-    TEMPLATES = []
-    SETTINGS_CACHE = {}
-    scores = PMXScoreManager()
-    TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
-    
     def __init__(self, namespace, hash = None, path = None):
         self.namespace = namespace
         self.path = path
@@ -135,10 +127,6 @@ class PMXBundle(object):
         else:
             file = os.path.join(self.path , self.FILE)
         plistlib.writePlist(self.hash, file)
- 
-    def addBundleItem(self, item):
-        item.bundle = self # I'm four father
-        self.manager.addBundleItem(item) #TODO: si no tiene manager
 
     def buildEnvironment(self):
         env = copy(self.manager.environment)
@@ -167,76 +155,6 @@ class PMXBundle(object):
         for _, bundle in cls.BUNDLES.iteritems():
             if bundle.name == name:
                 return bundle
-
-    @classmethod
-    def getPreferences(cls, scope):
-        with_scope = []
-        without_scope = []
-        for key in cls.PREFERENCES.keys():
-            if key == None:
-                without_scope.extend(cls.PREFERENCES[key])
-            else:
-                score = cls.scores.score(key, scope)
-                if score != 0:
-                    with_scope.append((score, cls.PREFERENCES[key]))
-        with_scope.sort(key = lambda t: t[0], reverse = True)
-        preferences = map(lambda (score, item): item, with_scope)
-        with_scope = []
-        for p in preferences:
-            with_scope.extend(p)
-        return with_scope and with_scope or without_scope
-
-    @classmethod
-    def getPreferenceSettings(cls, scope):
-        #TODO: retrive the __class__ is ugly
-        klass = cls.PREFERENCES.values()[0][0].__class__
-        if scope not in cls.SETTINGS_CACHE:
-            preferences = cls.getPreferences(scope)
-            cls.SETTINGS_CACHE[scope] = klass.buildSettings(preferences)
-        return cls.SETTINGS_CACHE[scope]
-
-    @classmethod
-    def getTabTriggerSymbol(cls, line, index):
-        line = line[:index]
-        for tabSplit in cls.TABTRIGGERSPLITS:
-            matchs = filter(lambda m: m.start() <= index <= m.end(), tabSplit.finditer(line))
-            if matchs:
-                match = matchs.pop()
-                word = line[match.start():match.end()]
-                if cls.TAB_TRIGGERS.has_key(word):
-                    return word
-    
-    @classmethod
-    def getTabTriggerItem(cls, keyword, scope):
-        with_scope = []
-        without_scope = []
-        if cls.TAB_TRIGGERS.has_key(keyword):
-            for item in cls.TAB_TRIGGERS[keyword]:
-                if item.scope == None:
-                    without_scope.append(item)
-                else:
-                    score = cls.scores.score(item.scope, scope)
-                    if score != 0:
-                        with_scope.append((score, item))
-            with_scope.sort(key = lambda t: t[0], reverse = True)
-            with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope and with_scope or without_scope
-            
-    @classmethod
-    def getKeyEquivalentItem(cls, code, scope):
-        with_scope = []
-        without_scope = []
-        if code in cls.KEY_EQUIVALENTS:
-            for item in cls.KEY_EQUIVALENTS[code]:
-                if item.scope == None:
-                    without_scope.append(item)
-                else:
-                    score = cls.scores.score(item.scope, scope)
-                    if score != 0:
-                        with_scope.append((score, item))
-            with_scope.sort(key = lambda t: t[0], reverse = True)
-            with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope and with_scope or without_scope
 
 class PMXBundleItem(object):
     KEYS = [ 'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]

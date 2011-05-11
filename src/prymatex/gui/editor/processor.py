@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QToolTip, QTextCursor
-from prymatex.bundles import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor, PMXSnippet, PMXSyntax, PMXPreferenceSettings, PMXBundle
+from prymatex.bundles import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor, PMXSnippet, PMXSyntax, PMXPreferenceSettings
 
 from logging import getLogger
 logger = getLogger(__file__)
@@ -161,7 +161,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
             self.userData.folding = self.syntax.FOLDING_NONE
 
     def indentMarker(self, line, scope):
-        settings = PMXBundle.getPreferenceSettings(scope)
+        settings = self.editor.pmxApp.bundleManager.getPreferenceSettings(scope)
         self.userData.indentMark = settings.indent(line)
         if self.syntax.indentSensitive and line.strip() == "":
             prev = self.currentBlock().previous()

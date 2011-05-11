@@ -2,9 +2,9 @@
 from PyQt4.Qt import QDialog, QVBoxLayout, QPushButton, QFileDialog, QVariant
 from PyQt4.QtCore import pyqtSignal, QDir
 from PyQt4.Qt import SIGNAL
-from PyQt4.QtGui import QCompleter, QFileSystemModel, QMessageBox, qApp
+from PyQt4.QtGui import QCompleter, QFileSystemModel, QMessageBox
 from os.path import isdir, abspath
-from prymatex.bundles import PMXBundle
+from prymatex.core.base import PMXObject
 from prymatex.gui.ui_multiclose import Ui_SaveMultipleDialog
 from prymatex.gui.ui_newtemplate import Ui_NewFromTemplateDialog
 
@@ -22,7 +22,7 @@ class MultiCloseDialog(QDialog, Ui_SaveMultipleDialog):
 
 from PyQt4.Qt import QDialog
 
-class NewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog):
+class NewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog, PMXObject):
     newFileCreated = pyqtSignal(str)
     
     def __init__(self, parent):
@@ -33,7 +33,7 @@ class NewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog):
         model.setFilter(QDir.Dirs)
         self.completerFileSystem = QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
-        for template in PMXBundle.TEMPLATES:
+        for template in self.pmxApp.bundleManager.getAllTemplates():
             self.comboTemplates.addItem(template.name, userData = QVariant(template))
         self.buttonCreate.setDefault(True)
     

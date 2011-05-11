@@ -118,7 +118,6 @@ class PMXPreference(PMXBundleItem):
     TYPE = 'preference'
     FOLDER = 'Preferences'
     FILES = ['*.tmPreferences', '*.plist']
-    bundle_collection = 'preferences'
     def __init__(self, namespace, hash = None, path = None):
         super(PMXPreference, self).__init__(namespace, hash, path)
 
@@ -138,11 +137,7 @@ class PMXPreference(PMXBundleItem):
             if value != None:
                 hash['settings'] = value
         return hash
-        
-    def setBundle(self, bundle):
-        super(PMXPreference, self).setBundle(bundle)
-        bundle.PREFERENCES.setdefault(self.scope, []).append(self)
-    
+
     @staticmethod
     def buildSettings(preferences):
         settings = PMXPreferenceSettings(DEFAULT_SETTINGS)
