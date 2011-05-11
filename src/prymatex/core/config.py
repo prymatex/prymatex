@@ -184,12 +184,8 @@ class pmxConfigPorperty(object):
 
 class PMXSettings(object):
     PMX_APP_PATH = get_prymatex_base_path()
-    PMX_BUNDLES_PATH = join(PMX_APP_PATH, 'share', 'Bundles')
-    PMX_THEMES_PATH = join(PMX_APP_PATH, 'share', 'Themes')
-    PMX_SUPPORT_PATH = join(PMX_APP_PATH, 'share', 'Support')
+    PMX_SHARE_PATH = join(PMX_APP_PATH, 'share')
     PMX_USER_PATH = get_prymatex_user_path()
-    PMX_USER_BUNDLES_PATH = join(PMX_USER_PATH, 'Bundles')
-    PMX_USER_THEMES_PATH = join(PMX_USER_PATH, 'Themes')
     PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
     #Profile
     PMX_PROFILE_PATH = None

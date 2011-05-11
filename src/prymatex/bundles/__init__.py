@@ -19,88 +19,117 @@ from prymatex.bundles.theme import PMXTheme, PMXStyle
 from prymatex.bundles.qtadapter import buildQTextFormat
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
-
-def load_bundles(bundles_path, namespace, manager, after_load_callback = None):
-    paths = glob(join(bundles_path, '*.tmbundle'))
-    counter = 0
-    total = len(paths)
-    for path in paths:
-        bundle = PMXBundle.loadBundle(path, namespace)
-        if bundle == None:
-            continue
-        
-        # Me fijo si no esta cargado en el  manager
-        uuid = bundle.uuid
-        if manager.hasBundle(uuid)
-            bundle = manager.getBundle(uuid)
-        else:
-            manager.addBundle(bundle)
-            
-        # Cargo el support path de existir en esta ruta
-        support = join(path, 'Support')
-        if exists(support):
-            bundle.support = support
-
-        #Disabled?
-        if not bundle.disabled:
-            load_bundle_items(bundle, namespace)
-        
-        if bundle and callable(after_load_callback):
-            after_load_callback(counter = counter, 
-                                total = total, 
-                                name = bundle.name,
-                                bundle = bundle)
-
-        counter += 1
-    return counter
-
-def load_bundle_items(bundles, namespace, after_load_callback = None):
-    for klass in BUNDLEITEM_CLASSES:
-        files = reduce(lambda x, y: x + glob(y), [ abspath(join(bundle.path, klass.FOLDER, file)) for file in klass.FILES ], [])
-        for sf in files:
-            try:
-                item = klass.loadBundleItem(sf, namespace)
-                if item == None:
-                    continue
-                bundle.addBundleItem(item)
-            except Exception, e:
-                print "Error in %s for %s (%s)" % (klass.__name__, sf, e)
-    
-def load_themes(themes_path, namespace, after_load_callback = None):
-    paths = glob(join(themes_path, '*.tmTheme'))
-    counter = 0
-    total = len(paths)
-    for path in paths:
-        if callable(after_load_callback):
-            after_load_callback(counter = counter, total = total, name = basename(path).split('.')[0])
-        theme = PMXTheme.loadTheme(path, namespace)
-        counter += 1
-    return counter
     
 class PMXBundleManager(object):
+    ELEMENTS = ['Bundles', 'Support', 'Themes']
+    DEFAULT = 'prymatex'
+    VAR_PREFIX = 'PMX'
     BUNDLES = {}
     BUNDLE_ITEMS = {}
     THEMES = {}
     TAB_TRIGGERS = {}
     KEY_EQUIVALENTS = {}
-    BASE_ENVIRONMENT = {}
-    def __init__(self, disabled = [], env = {}):
-        self.BASE_ENVIRONMENT = env
+    def __init__(self, disabled = [], deleted = []):
+        self.namespaces = {}
+        self.environment = {}
         self.disabled = disabled
+        self.deleted = deleted
+    
+    def addNameSpace(self, name, path):
+        self.namespaces[name] = {}
+        for element in self.ELEMENTS:
+            epath = join(path, element)
+            if not exists(epath):
+                continue
+            if name == self.DEFAULT:
+                var = "_".join([ self.VAR_PREFIX, element.upper(), 'PATH' ])
+            else:
+                var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
+            self.namespaces[name][element] = self.environment[var] = epath
     
     def updateEnvironment(self, env):
-        self.BASE_ENVIRONMENT.update(env)
-        
-    def addBundle(self, bundle):
-        self.BUNDLES[bundle.uuid] = bundle
-        bundle.manager = self
-        
-    def getBundle(self, uuid):
-        return self.BUNDLES[uuid]
+        self.environment.update(env)
+
+    @property
+    def priority(self):
+        ns = self.namespaces.keys()
+        ns.remove(self.DEFAULT)
+        return ns + [ self.DEFAULT ]
     
+    #---------------------------------------------------
+    # LOAD ALL SHIT
+    #---------------------------------------------------
+    def loadShit(self, callback = None):
+        for ns in self.priority:
+            self.loadThemes(ns)
+            self.loadBundles(ns)
+        for bundle in self.getAllBundles():
+            self.populateBundle(bundle)
+
+    #---------------------------------------------------
+    # LOAD THEMES
+    #---------------------------------------------------
+    def loadThemes(self, namespace):
+        if 'Themes' in self.namespaces[namespace]:
+            paths = glob(join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
+            for path in paths:
+                theme = PMXTheme.loadTheme(path, namespace)
+                if theme == None:
+                    continue
+                if not self.hasTheme(theme.uuid):
+                    self.addTheme(theme)
+
+    #---------------------------------------------------
+    # LOAD BUNDLES
+    #---------------------------------------------------
+    def loadBundles(self, namespace):
+        if 'Bundles' in self.namespaces[namespace]:
+            paths = glob(join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
+            for path in paths:
+                bundle = PMXBundle.loadBundle(path, namespace)
+                if bundle == None:
+                    continue
+                bundle.disabled = bundle.uuid in self.disabled
+                if bundle.uuid not in self.deleted and not self.hasBundle(bundle.uuid):
+                    self.addBundle(bundle)
+
+    #---------------------------------------------------
+    # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
+    #---------------------------------------------------
+    def populateBundle(self, bundle):
+        bns = bundle.namespace
+        nss = self.priority
+        index = nss.index(bns)
+        bundle.manager = self
+        for ns in nss[index:]:
+            bpath = join(self.namespaces[ns]['Bundles'], basename(bundle.path))
+            # Search for support
+            if bundle.support == None and exists(join(bpath, 'Support')):
+                bundle.support = join(bpath, 'Support')
+            for klass in BUNDLEITEM_CLASSES:
+                files = reduce(lambda x, y: x + glob(y), [ join(bpath, klass.FOLDER, file) for file in klass.FILES ], [])
+                for sf in files:
+                    item = klass.loadBundleItem(sf, ns)
+                    if item == None:
+                        continue
+                    if not self.hasBundleItem(item.uuid):
+                        bundle.addBundleItem(item)
+
     def hasBundle(self, uuid):
         return uuid in self.BUNDLES
-    
+
+    def addBundle(self, bundle):
+        self.BUNDLES[bundle.uuid] = bundle
+
+    def getBundle(self, uuid):
+        return self.BUNDLES[uuid]
+
+    def getAllBundles(self):
+        return self.BUNDLES.values()
+
+    def hasBundleItem(self, uuid):
+        return uuid in self.BUNDLE_ITEMS
+        
     def addBundleItem(self, item):
         self.BUNDLE_ITEMS[item.uuid] = item
         if item.bundle.mainMenu != None:
@@ -108,11 +137,15 @@ class PMXBundleManager(object):
         if item.tabTrigger != None:
             self.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
-            keyseq = buildKeyEquivalentCode(item.keyEquivalent)
-            self.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
-    
+            #keyseq = buildKeyEquivalentCode(item.keyEquivalent)
+            #self.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
+            self.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
+
     def getBundleItem(self, uuid):
         return self.BUNDLE_ITEMS[uuid]
+    
+    def hasTheme(self, uuid):
+        return uuid in self.THEMES
     
     def addTheme(self, theme):
         self.THEMES[theme.uuid] = theme

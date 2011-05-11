@@ -99,7 +99,7 @@ class PMXTheme(object):
     def loadTheme(cls, path, namespace):
         try:
             data = plistlib.readPlist(path)
-            theme = PMXTheme(data, namespace, path)
+            theme = PMXTheme(namespace, data, path)
             cls.UUIDS[theme.uuid] = theme
             return theme
         except Exception, e:

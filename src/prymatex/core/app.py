@@ -78,7 +78,7 @@ class PMXApplication(QApplication):
         self.checkSingleInstance()
         
         # Bundles and Stuff
-        self.load_textmate_stuff()
+        self.load_stuff()
         
         self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
         self.aboutToQuit.connect(self.settings.sync)
@@ -131,8 +131,6 @@ class PMXApplication(QApplication):
             from prymatex.gui.bundle_editor import PMXBundleEditor
             self.__bundle_editor = PMXBundleEditor()
         self.__bundle_editor.show()
-        
-        
     
     @property
     def configdialog(self):
@@ -148,13 +146,18 @@ class PMXApplication(QApplication):
     def bundleItemModel(self):
         return self._bundleItemModel
     
-    def load_textmate_stuff(self):
+    _bundleManager = None
+    @property
+    def bundleManager(self):
+        return self._bundleManager
+    
+    def load_stuff(self):
         from prymatex.gui.bundles.bundlemodel import PMXBundleItemModel, PMXBundleModel
         self._bundleModel =  PMXBundleModel()
         self._bundleItemModel =  PMXBundleItemModel()
-        self.load_texmate_themes()
+        #self.load_texmate_themes()
         if not self.options.no_bundles:
-            self.load_texmate_bundles()
+            self._bundleManager = self.load_bundles()
         
     def setup_splash(self):
         self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))
@@ -276,11 +279,34 @@ class PMXApplication(QApplication):
     
     # Decorador para imprimir cuanto tarda
     @deco.logtime
-    def load_texmate_bundles(self):
+    def load_bundles(self):
         from prymatex.bundles import load_prymatex_bundles
         from prymatex.lib.i18n import ugettext as _
         
+        sharePath = self.settings.value('PMX_SHARE_PATH')
+        userPath = self.settings.value('PMX_USER_PATH')
+
+        # esto hacerlo una propiedad del manager que corresponda
         disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
+        manager = PMXBundleManager(disabled = [], deleted = [])
+        manager.addNameSpace(manager.DEFAULT, sharePath)
+        manager.updateEnvironment({ #TextMate Compatible :P
+                'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
+                'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
+                'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
+                'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
+                #Prymatex 
+                'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
+                'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')
+        });
+
+        manager.addNameSpace('user', userPath)
+        manager.updateEnvironment({ ##User
+                'PMX_USER_PATH': userPath,
+                'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
+                'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
+                'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')
+        });
         
         splash = self.splash
         
@@ -294,32 +320,10 @@ class PMXApplication(QApplication):
             bundleItemModel.appendRowFromBundle( bundle )
         
         self.splash.showMessage(_("Loading bundles..."))
-        #Build basic environment
-        env = { #TextMate Compatible :P
-                'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
-                'TM_SUPPORT_PATH': self.settings.value('PMX_SUPPORT_PATH'),
-                'TM_BUNDLES_PATH': self.settings.value('PMX_BUNDLES_PATH'),
-                #Prymatex 
-                'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
-                'PMX_SUPPORT_PATH': self.settings.value('PMX_SUPPORT_PATH'),
-                'PMX_BUNDLES_PATH': self.settings.value('PMX_BUNDLES_PATH'),
-                'PMX_THEMES_PATH': self.settings.value('PMX_THEMES_PATH'),
-                'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')}
                         
-        load_prymatex_bundles(self.settings.value('PMX_BUNDLES_PATH'), 'pryamtex', env, disabled, update_splash_popullate_model)
+        manager.loadShit(callback = update_splash_popullate_model)
+        return manager
 
-        env = { #User
-                'PMX_USER_PATH': self.settings.value('PMX_USER_PATH'),
-                'PMX_USER_BUNDLES_PATH': self.settings.value('PMX_USER_BUNDLES_PATH'),
-                'PMX_USER_THEMES_PATH': self.settings.value('PMX_USER_THEMES_PATH'),
-                'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
-                'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
-                'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')}
-        
-        load_prymatex_bundles(self.settings.value('PMX_USER_BUNDLES_PATH'), 'user', env, disabled, update_splash_popullate_model)
-        
-        QApplication.processEvents()
-        
     def checkSingleInstance(self):
         '''
         Checks if there's another instance using current profile

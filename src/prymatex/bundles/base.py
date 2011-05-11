@@ -34,7 +34,7 @@ RE_XML_ILLEGAL = re.compile(RE_XML_ILLEGAL)
 
 class PMXMenuNode(object):
     MENU_SPACE = '-' * 36
-    def __init__(self, name = '', items = [], excludedItems = [], submenus = {}):
+    def __init__(self, name = None, items = [], excludedItems = [], submenus = {}):
         self.name = name
         self.items = items
         self.excludedItems = excludedItems
@@ -45,7 +45,9 @@ class PMXMenuNode(object):
 
     @property
     def hash(self):
-        hash = { 'name': self.name, 'items': self.items }
+        hash = { 'items': self.items }
+        if self.name != None:
+            hash['name'] = self.name
         if self.excludedItems:
             hash['excludedItems'] = self.excludedItems
         if self.submenus:
@@ -107,11 +109,11 @@ class PMXBundle(object):
 
     def load(self, hash):
         for key in PMXBundle.KEYS:
-            value = hash.pop(key, None)
-            if key == 'mainMenu' and value != None:
-                value = PMXMenuNode(self.name, **value)
+            value = hash.get(key, None)
             setattr(self, key, value)
-    
+        if self.mainMenu != None:
+            self.mainMenu = PMXMenuNode(**self.mainMenu)
+
     @property
     def hash(self):
         #TODO: el menu
@@ -139,11 +141,10 @@ class PMXBundle(object):
         self.manager.addBundleItem(item) #TODO: si no tiene manager
 
     def buildEnvironment(self):
-        env = copy(self.manager.BASE_ENVIRONMENT)
-        env.update({
-            'TM_BUNDLE_PATH': self.path,
-            'TM_BUNDLE_SUPPORT': self.support
-        });
+        env = copy(self.manager.environment)
+        env['TM_BUNDLE_PATH'] = self.path
+        if self.support != None:
+            env['TM_BUNDLE_SUPPORT'] = self.support
         return env
 
     def getSyntaxByName(self, name):
@@ -441,7 +442,10 @@ def test_saveBundleItems():
         bundle.save(base = '/home/dvanhaaster/Bundles')
     
 if __name__ == '__main__':
-    from prymatex.bundles import load_prymatex_bundles
-    from pprint import pprint
-    load_prymatex_bundles('../../bundles/prymatex/Bundles', 'prymatex')
-    test_saveBundleItems()
+    from prymatex.bundles import PMXBundleManager
+    manager = PMXBundleManager(disabled = [], deleted = [])
+    manager.addNameSpace(manager.DEFAULT, os.path.abspath('../../bundles/prymatex'))
+    manager.addNameSpace('user', os.path.abspath('/home/dvanhaaster/.prymatex'))
+    manager.loadShit()
+    for bundle in manager.BUNDLES.values():
+        print bundle.buildEnvironment()
