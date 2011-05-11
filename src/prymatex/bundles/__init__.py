@@ -258,3 +258,15 @@ class PMXBundleManager(object):
         if sort:
             return sorted(stxs, key = lambda s: s.name)
         return stxs
+        
+    def findSyntaxByFirstLine(self, line):
+        for syntax in self.SYNTAXES.values():
+            if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
+                return syntax
+    
+    def findSyntaxByFileType(self, path):
+        for syntax in self.SYNTAXES.values():
+            if type(syntax.fileTypes) == list:
+                for t in syntax.fileTypes:
+                    if path.endswith(t):
+                        return syntax

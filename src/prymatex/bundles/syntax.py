@@ -313,23 +313,6 @@ class PMXSyntax(PMXBundleItem):
         elif stop_match != None and start_match == None:
             fold = self.FOLDING_STOP
         return fold
-    
-    @classmethod
-    def findSyntaxByFirstLine(cls, line):
-        line = line.encode('utf-8')
-        for syntaxes in cls.SYNTAXES.values():
-            for syntax in syntaxes.values():
-                if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
-                    return syntax
-    
-    @classmethod
-    def findSyntaxByFileType(cls, path):
-        for _, syntaxes in cls.SYNTAXES.iteritems():
-            for _, syntax in syntaxes.iteritems():
-                if type(syntax.fileTypes) == list:
-                    for t in syntax.fileTypes:
-                        if path.endswith(t):
-                            return syntax
                 
     @classmethod
     def getSyntaxesByName(cls, name):

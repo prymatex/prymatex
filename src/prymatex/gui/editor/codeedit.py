@@ -537,7 +537,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def returnPressEvent(self, event):
         line = unicode(self.textCursor().block().text())
         if self.document().blockCount() == 1:
-            syntax = PMXSyntax.findSyntaxByFirstLine(line)
+            syntax = self.pmxApp.bundleManager.findSyntaxByFirstLine(line)
             if syntax != None:
                 self.setSyntax(syntax)
         super(PMXCodeEdit, self).keyPressEvent(event)
