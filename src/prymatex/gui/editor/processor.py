@@ -287,7 +287,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         env = command.buildEnvironment()
         print env
         env.update(self.editor.buildEnvironment())
-        #env.update(self.editor.mainwindow._meta.settings['static_variables'])
         self.__env = env
 
     #beforeRunningCommand

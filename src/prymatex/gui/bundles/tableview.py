@@ -21,8 +21,7 @@ class PMXTableViewMixin(QObject):
         meta.chack_has_names(column_names)
         
         for n, field in enumerate(meta.fields):
-            self.setColumnHidden(n, not field.name in column_names)
-    
+            self.setColumnHidden(n, not field.name in column_names)    
 
 class PMXBundleItemTableView(QTableView, PMXTableViewMixin):
     '''
@@ -59,10 +58,8 @@ class PMXBundleItemTableView(QTableView, PMXTableViewMixin):
         
     
 class PMXBundleItemsSelectorTableView(QTableView, PMXTableViewMixin):
-    pass    
+    pass
 
-
-        
 
 class PMXFilterBundleItem(QSortFilterProxyModel):
     '''

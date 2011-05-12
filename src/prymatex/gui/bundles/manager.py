@@ -27,15 +27,14 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
         super(PMXTableSupportManager, self).__init__(self.disabledBundles, 
                                                      self.deletedBundles)
         
-        print self.shellVariables
         for var in self.shellVariables:
-            if var[QString('enabled')]:
-                self.environment[var[QString('variable')]] = var[QString('value')]
+            if var['enabled']:
+                self.environment[var['variable']] = var['value']
         
         self.model = PMXBundleItemModel()
         
         #self.shellVariables.append({'a':1})
-        group = self._meta.settings.setValue('shellVariables', [{'variable': 'TM_FOO', 'value': 'foo',  'enabled': True}, ])
+        #group = self._meta.settings.setValue('shellVariables', [{'variable': 'TM_FOO', 'value': 'foo',  'enabled': True}, ])
         
     
 
