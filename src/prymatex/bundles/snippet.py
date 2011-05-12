@@ -757,7 +757,6 @@ class PMXSnippet(PMXBundleItem):
     TYPE = 'snippet'
     FOLDER = 'Snippets'
     FILES = ['*.tmSnippet', '*.plist']
-    bundle_collection = 'snippets'
     parser = PMXSyntax("internal", hash = SNIPPET_SYNTAX)
     def __init__(self, namespace, hash = None, path = None):
         super(PMXSnippet, self).__init__(namespace, hash, path)

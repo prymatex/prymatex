@@ -285,6 +285,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.disableAutoIndent = True
         
         env = command.buildEnvironment()
+        print env
         env.update(self.editor.buildEnvironment())
         #env.update(self.editor.mainwindow._meta.settings['static_variables'])
         self.__env = env
@@ -381,7 +382,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(text)
         
     def insertAsSnippet(self, text):
-        snippet = PMXSnippet({ 'content': text})
+        snippet = PMXSnippet("internal", hash = { 'content': text})
         snippet.bundle = self.command.bundle
         self.editor.insertBundleItem(snippet, disableIndent = self.disableAutoIndent)
             

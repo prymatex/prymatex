@@ -12,8 +12,8 @@ from xml.parsers.expat import ExpatError
 # for run as main
 if __name__ == "__main__":
     import sys
-    sys.path.append(os.path.abspath('../..'))
-from prymatex.bundles.qtadapter import buildKeyEquivalentCode, buildKeyEquivalentString
+    sys.path.append(os.path.abspath('..'))
+from prymatex.bundles.qtadapter import buildKeyEquivalentString
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -56,7 +56,7 @@ class PMXMenuNode(object):
             if submenu != None:
                 hash['submenus'].update( { uuid: submenu.hash } )
         return hash
-        
+            
     def __contains__(self, key):
         return key in self.main or any(map(lambda submenu: key in submenu, filter(lambda x: isinstance(x, PMXMenuNode), self.main.values())))
 
@@ -149,12 +149,6 @@ class PMXBundle(object):
             return bundle
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
-
-    @classmethod
-    def getBundleByName(cls, name):
-        for _, bundle in cls.BUNDLES.iteritems():
-            if bundle.name == name:
-                return bundle
 
 class PMXBundleItem(object):
     KEYS = [ 'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
@@ -268,31 +262,6 @@ def test_snippets():
                 traceback.print_exc()
                 sys.exit(0)
     print errors
-
-def test_commands():
-    bundle = PMXBundle.getBundleByName('Python')
-    #bundle = PMXBundle.getBundleByName('SQL')
-    errors = 0
-    #for bundle in PMXBundle.BUNDLES.values():
-    for command in bundle.commands:
-        try:
-            #if command.name.startswith("Validate Syntax"):
-                env = command.buildEnvironment()
-                env["TM_CURRENT_WORD"] = "echo"
-                env["PHP_MANUAL_LOCATION"] = "http://www.php.net/download-docs.php"
-            #if snippet.name.startswith("Convert Tabs To Table"):
-                print command.name, command.path
-                command.resolve(u"print 'ú'", u"d", env)
-                command.execute({})
-        except Exception, e:
-            print command.path, e
-            errors += 1
-    print errors
-    
-def print_snippet_syntax():
-    bundle = PMXBundle.getBundleByName('Bundle Development')
-    syntax = bundle.getSyntaxByName("Snippet")
-    pprint(syntax.hash)
     
 def test_syntaxes():
     from prymatex.bundles.syntax import PMXSyntax
@@ -362,8 +331,8 @@ def test_saveBundleItems():
 if __name__ == '__main__':
     from prymatex.bundles import PMXBundleManager
     manager = PMXBundleManager(disabled = [], deleted = [])
-    manager.addNameSpace(manager.DEFAULT, os.path.abspath('../../bundles/prymatex'))
-    manager.addNameSpace('user', os.path.abspath(os.path.join(os.path.expanduser('~', '.prymatex'))))
+    manager.addNameSpace(manager.DEFAULT, os.path.abspath('../bundles/prymatex'))
+    manager.addNameSpace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     manager.loadShit()
     for bundle in manager.BUNDLES.values():
         print bundle.buildEnvironment()
