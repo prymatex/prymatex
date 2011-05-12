@@ -10,7 +10,7 @@ from PyQt4.QtCore import SIGNAL, QEvent
 
 from prymatex.lib import deco
 from prymatex.core.config import PMXSettings
-from prymatex.support import PMXSupportManager
+#from prymatex.support import PMXSupportManager
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -143,12 +143,13 @@ class PMXApplication(QApplication):
     _bundleItemModel  = None
     @property
     def bundleItemModel(self):
-        return self._bundleItemModel
+        #return self._bundleItemModel
+        return self.manager.model
     
     _bundleManager = None
     @property
     def bundleManager(self):
-        return self._bundleManager
+        return self.manager
     
     def load_stuff(self):
         from prymatex.gui.bundles.bundlemodel import PMXBundleItemModel, PMXBundleModel
@@ -156,7 +157,7 @@ class PMXApplication(QApplication):
         self._bundleItemModel =  PMXBundleItemModel()
         
         if not self.options.no_bundles:
-            self._bundleManager = self.load_support()
+            self.manager = self.load_support()
         
     def setup_splash(self):
         self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))
@@ -265,12 +266,16 @@ class PMXApplication(QApplication):
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def load_support(self):
+        # Lazy load
+        from prymatex.gui.bundles.manager import PMXTableSupportManager
+
         sharePath = self.settings.value('PMX_SHARE_PATH')
         userPath = self.settings.value('PMX_USER_PATH')
 
         # esto hacerlo una propiedad del manager que corresponda
         disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
-        manager = PMXSupportManager(disabledBundles = [], deletedBundles = [])
+        #manager = PMXSupportManager(disabledBundles = [], deletedBundles = [])
+        manager = PMXTableSupportManager()
         manager.addNameSpace(manager.DEFAULT, sharePath)
         manager.updateEnvironment({ #TextMate Compatible :P
                 'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),

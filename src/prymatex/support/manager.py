@@ -123,18 +123,33 @@ class PMXSupportManager(object):
                         self.addBundleItem(item)
 
     def hasBundle(self, uuid):
+        '''
+        @return: True if bundle exists
+        '''
         return uuid in self.BUNDLES
 
     def addBundle(self, bundle):
+        '''
+        @param bundle: PMXBundle instance
+        '''
         self.BUNDLES[bundle.uuid] = bundle
 
     def getBundle(self, uuid):
+        '''
+        @return: PMXBundle by UUID
+        '''
         return self.BUNDLES[uuid]
 
     def getAllBundles(self):
+        '''
+        @return: list of PMXBundle instances
+        '''
         return self.BUNDLES.values()
 
     def hasBundleItem(self, uuid):
+        '''
+        @return: True if PMXBundleItem exists
+        '''
         return uuid in self.BUNDLE_ITEMS
         
     def addBundleItem(self, item):

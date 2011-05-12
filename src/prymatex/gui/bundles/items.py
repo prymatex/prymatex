@@ -6,7 +6,7 @@ class PMXBundleItemInstanceItem(QStandardItem):
     '''
     def __init__(self, pmx_bundle_item):
         super(PMXBundleItemInstanceItem, self).__init__()
-        from prymatex.bundles.base import PMXBundleItem
+        from prymatex.support.bundle import PMXBundleItem
         if isinstance(pmx_bundle_item, PMXBundleItem):
             self.setData(pmx_bundle_item, Qt.EditRole)
             self.setData(unicode(pmx_bundle_item), Qt.DisplayRole)

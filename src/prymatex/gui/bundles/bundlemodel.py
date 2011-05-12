@@ -80,7 +80,7 @@ class PMXBundleItemModel(PMXTableBase):
                               path = instance.path,
                               namespace = instance.namespace,
                               uuid = instance.uuid,
-                              type_ = type(instance).__class__.__name__,
+                              type_ = instance.TYPE,
                               name = instance.name,
                               tabTrigger = instance.tabTrigger,
                               keyEquivalent = instance.keyEquivalent,
@@ -88,11 +88,12 @@ class PMXBundleItemModel(PMXTableBase):
                               #item = item,
                               )
     
-    def appendRowFromBundle(self, pmx_bundle):
+    def _appendRowFromBundle(self, pmx_bundle):
         '''
         PMXBundle
         @param pmx_bundle: A prymatex.budnles.PMXBundle instance
         '''
+        print "deperecated"
         assert isinstance(pmx_bundle, PMXBundle), "Unexpected %s argument" % type(pmx_bundle)
         
         for syntax in pmx_bundle.syntaxes:
@@ -159,28 +160,7 @@ class PMXBundeItemSimpleFilterProxyModel(QSortFilterProxyModel):
     
     def __getitem__(self, key):
         return self.filters.__getitem__(key)
-
-class PMXBundleManager(object):
-    def __init__(self, bundles, bundleItems, themes):
-        self.bundles = bundles
-        self.bundleItems = bundleItems
-        self.themes = themes
-        
-    def addBundle(self, bundle):
-        self.bundles.appendBundleRow(bundle)
-        
-    def getBundle(self, uuid):
-        return PMXBundleManager.BUNDLES[uuid]
     
-    def addBundleItem(self, item):
-        self.bundleItems.appendBundleItemRow(item)
-    
-    def getBundleItem(self, uuid):
-        return PMXBundleManager.BUNDLES[uuid]
-    
-    def addTheme(self, theme):
-        self.themes.appendBundleItemRow(theme)
-
 if __name__ == "__main__":
     import sys
     a = QApplication(sys.argv)
