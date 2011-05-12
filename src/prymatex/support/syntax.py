@@ -9,7 +9,7 @@
 
 import re
 from ponyguruma import sre
-from prymatex.bundles.base import PMXBundleItem
+from prymatex.support.bundle import PMXBundleItem
 
 # Profiling
 

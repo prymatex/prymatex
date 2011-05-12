@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os, stat, tempfile
 try:
     from prymatex.core.config import PMX_SUPPORT_PATH

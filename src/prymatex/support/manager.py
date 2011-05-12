@@ -1,28 +1,24 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import re
 from os.path import join, abspath, basename, exists
 
-# for run as main
-# https://github.com/textmate
-if __name__ == "__main__":
-    import sys
-    sys.path.append(os.path.abspath('../..'))
-
 from glob import glob
-from prymatex.bundles.macro import PMXMacro
-from prymatex.bundles.syntax import PMXSyntax
-from prymatex.bundles.processor import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor
-from prymatex.bundles.snippet import PMXSnippet
-from prymatex.bundles.preference import PMXPreference, PMXPreferenceSettings
-from prymatex.bundles.command import PMXCommand, PMXDragCommand
-from prymatex.bundles.template import PMXTemplate
-from prymatex.bundles.base import PMXBundle, PMXMenuNode
-from prymatex.bundles.theme import PMXTheme, PMXStyle
-from prymatex.bundles.qtadapter import buildQTextFormat, buildKeyEquivalentCode
-from prymatex.bundles.score import PMXScoreManager
+from prymatex.support.bundle import PMXBundle, PMXMenuNode
+from prymatex.support.macro import PMXMacro
+from prymatex.support.syntax import PMXSyntax
+from prymatex.support.snippet import PMXSnippet
+from prymatex.support.preference import PMXPreference
+from prymatex.support.command import PMXCommand, PMXDragCommand
+from prymatex.support.template import PMXTemplate
+from prymatex.support.theme import PMXTheme
+from prymatex.support.qtadapter import buildQTextFormat, buildKeyEquivalentCode
+from prymatex.support.score import PMXScoreManager
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
     
-class PMXBundleManager(object):
+class PMXSupportManager(object):
     ELEMENTS = ['Bundles', 'Support', 'Themes']
     DEFAULT = 'prymatex'
     VAR_PREFIX = 'PMX'
@@ -38,11 +34,11 @@ class PMXBundleManager(object):
     SETTINGS_CACHE = {}
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
     
-    def __init__(self, disabled = [], deleted = []):
+    def __init__(self, disabledBundles = [], deletedBundles = []):
         self.namespaces = {}
         self.environment = {}
-        self.disabled = disabled
-        self.deleted = deleted
+        self.disabledBundles = disabledBundles
+        self.deletedBundles = deletedBundles
         self.scores = PMXScoreManager()
     
     def addNameSpace(self, name, path):
@@ -67,9 +63,9 @@ class PMXBundleManager(object):
         return ns + [ self.DEFAULT ]
     
     #---------------------------------------------------
-    # LOAD ALL SHIT
+    # LOAD ALL SUPPORT
     #---------------------------------------------------
-    def loadShit(self, callback = None):
+    def loadSupport(self, callback = None):
         for ns in self.priority:
             self.loadThemes(ns)
             self.loadBundles(ns)
@@ -99,8 +95,8 @@ class PMXBundleManager(object):
                 bundle = PMXBundle.loadBundle(path, namespace)
                 if bundle == None:
                     continue
-                bundle.disabled = bundle.uuid in self.disabled
-                if bundle.uuid not in self.deleted and not self.hasBundle(bundle.uuid):
+                bundle.disabled = bundle.uuid in self.disabledBundles
+                if bundle.uuid not in self.deletedBundles and not self.hasBundle(bundle.uuid):
                     self.addBundle(bundle)
 
     #---------------------------------------------------

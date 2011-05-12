@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 # encoding: utf-8
-from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
-from PyQt4.QtCore import SIGNAL, QEvent
-
-import os
+import os, sys
 from os import getpid, unlink
 from os.path import join, exists, dirname, abspath, expanduser
-import sys
+from datetime import datetime
+
+from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
+from PyQt4.QtCore import SIGNAL, QEvent
 
 from prymatex.lib import deco
 from prymatex.core.config import PMXSettings
 from prymatex.core.exceptions import APIUsageError
-from datetime import datetime
+from prymatex.support import PMXSupportManager
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -23,7 +23,7 @@ class PMXApplication(QApplication):
     The application instance.
     There can't be two apps running simultaneously, since configuration issues
     may occur.
-    The application loads the TM Bundles and Themes.
+    The application loads the PMX Support.
     '''
     
     #===========================================================================
@@ -155,9 +155,9 @@ class PMXApplication(QApplication):
         from prymatex.gui.bundles.bundlemodel import PMXBundleItemModel, PMXBundleModel
         self._bundleModel =  PMXBundleModel()
         self._bundleItemModel =  PMXBundleItemModel()
-        #self.load_texmate_themes()
+        
         if not self.options.no_bundles:
-            self._bundleManager = self.load_bundles()
+            self._bundleManager = self.load_support()
         
     def setup_splash(self):
         self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))
@@ -265,16 +265,13 @@ class PMXApplication(QApplication):
         
     # Decorador para imprimir cuanto tarda
     @deco.logtime
-    def load_bundles(self):
-        from prymatex.bundles import PMXBundleManager
-        from prymatex.lib.i18n import ugettext as _
-        
+    def load_support(self):
         sharePath = self.settings.value('PMX_SHARE_PATH')
         userPath = self.settings.value('PMX_USER_PATH')
 
         # esto hacerlo una propiedad del manager que corresponda
         disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
-        manager = PMXBundleManager(disabled = [], deleted = [])
+        manager = PMXSupportManager(disabledBundles = [], deletedBundles = [])
         manager.addNameSpace(manager.DEFAULT, sharePath)
         manager.updateEnvironment({ #TextMate Compatible :P
                 'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
@@ -307,7 +304,7 @@ class PMXApplication(QApplication):
         
         self.splash.showMessage(_("Loading bundles..."))
                         
-        manager.loadShit()
+        manager.loadSupport()
         return manager
 
     def checkSingleInstance(self):

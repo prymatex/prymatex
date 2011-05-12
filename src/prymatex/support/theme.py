@@ -4,12 +4,8 @@
 import plistlib
 from copy import copy
 from xml.parsers.expat import ExpatError
-# for run as main
-if __name__ == "__main__":
-    import sys, os
-    sys.path.append(os.path.abspath('../..'))
-from prymatex.bundles.score import PMXScoreManager
-from prymatex.bundles.qtadapter import buildQTextFormat, buildQColor
+from prymatex.support.score import PMXScoreManager
+from prymatex.support.qtadapter import buildQTextFormat, buildQColor
 
 '''
     caret = Cursor, foreground, selection, invisibles, lineHighlight, gutter, background

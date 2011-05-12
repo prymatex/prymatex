@@ -12,8 +12,8 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath('../..'))
 import ponyguruma as onig
 from ponyguruma.constants import OPTION_CAPTURE_GROUP
-from prymatex.bundles.base import PMXBundleItem
-from prymatex.bundles.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile, deleteFile
+from prymatex.support.bundle import PMXBundleItem
+from prymatex.support.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile, deleteFile
 
 onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
 

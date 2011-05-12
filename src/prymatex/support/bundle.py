@@ -5,15 +5,12 @@ import os, re, plistlib
 from glob import glob
 from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
-#from prymatex.lib.deco.cache import cacheable
-#from prymatex.lib.deco.memoize import memoize, memoize_dict
-#from prymatex.lib.deco.helpers import printtime
 
 # for run as main
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.abspath('..'))
-from prymatex.bundles.qtadapter import buildKeyEquivalentString
+from prymatex.support.qtadapter import buildKeyEquivalentString
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -208,8 +205,6 @@ class PMXBundleItem(object):
     
     # Trying to speed things up a bit, a memoize     
     @classmethod
-    #@printtime
-    #@memoize_dict
     def loadBundleItem(cls, path, namespace):
         try:
             data = plistlib.readPlist(path)
@@ -229,7 +224,6 @@ class PMXBundleItem(object):
     def resolve(self, *args, **kwargs):
         pass
 
-#cacheable.init_cache('/home/defo/.functions_cache')
 #----------------------------------------
 # Tests
 #----------------------------------------

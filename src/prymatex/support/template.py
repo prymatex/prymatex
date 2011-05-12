@@ -8,13 +8,8 @@
 
 import os, plistlib
 from subprocess import Popen
-from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile,\
-    ensureEnvironment, deleteFile
-# for run as main
-if __name__ == "__main__":
-    import sys
-    sys.path.append(os.path.abspath('../..'))
-from prymatex.bundles.base import PMXBundleItem
+from prymatex.support.bundle import PMXBundleItem
+from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, ensureEnvironment, deleteFile
 
 class PMXTemplate(PMXBundleItem):
     KEYS = [    'command', 'extension']

@@ -5,8 +5,7 @@
     Macro's module
         content, name, scope, keyEquivalent, tabTrigger
 '''
-from pprint import pprint
-from prymatex.bundles.base import PMXBundleItem
+from prymatex..support.bundle import PMXBundleItem
 
 class PMXMacro(PMXBundleItem):
     KEYS = [    'commands' ]
@@ -39,4 +38,3 @@ class PMXMacro(PMXBundleItem):
             method = getattr(processor, name, None)
             if callable(method):
                 method()
-        

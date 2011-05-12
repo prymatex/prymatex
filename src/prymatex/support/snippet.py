@@ -8,10 +8,10 @@ import re, logging
 from copy import deepcopy
 from ponyguruma import sre
 from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
-from prymatex.bundles.base import PMXBundleItem
-from prymatex.bundles.processor import PMXSyntaxProcessor
-from prymatex.bundles.syntax import PMXSyntax
-from prymatex.bundles.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
+from prymatex.support.bundle import PMXBundleItem
+from prymatex.support.processor import PMXSyntaxProcessor
+from prymatex.support.syntax import PMXSyntax
+from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
 
 logger = logging.getLogger(__name__)
