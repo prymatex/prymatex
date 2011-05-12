@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QToolTip, QTextCursor
-from prymatex.bundles import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor, PMXSnippet, PMXSyntax, PMXPreferenceSettings
+from prymatex.support import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor, PMXSnippet, PMXSyntax, PMXPreferenceSettings
 
 from logging import getLogger
 logger = getLogger(__file__)

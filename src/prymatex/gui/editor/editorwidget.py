@@ -8,7 +8,7 @@ from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget,
     QAction, QMenu, QKeySequence, qApp, QFocusEvent
 
 from logging import getLogger
-from prymatex.bundles import PMXSyntax
+from prymatex.support import PMXSyntax
 from ui_editorwidget import Ui_EditorWidget
 import logging
 import os

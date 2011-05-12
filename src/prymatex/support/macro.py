@@ -5,7 +5,7 @@
     Macro's module
         content, name, scope, keyEquivalent, tabTrigger
 '''
-from prymatex..support.bundle import PMXBundleItem
+from prymatex.support.bundle import PMXBundleItem
 
 class PMXMacro(PMXBundleItem):
     KEYS = [    'commands' ]

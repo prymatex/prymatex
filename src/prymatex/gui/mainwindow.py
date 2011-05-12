@@ -5,7 +5,7 @@ import logging
 from PyQt4.QtCore import QUrl
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from prymatex.bundles import PMXMenuNode
+from prymatex.support import PMXMenuNode
 from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
 from prymatex.gui.mixins.common import CenterWidget

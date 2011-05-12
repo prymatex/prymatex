@@ -8,7 +8,6 @@ Some of the widgets defined here are:
 '''
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from prymatex.bundles.syntax import PMXSyntax
 from prymatex.core.base import PMXObject
 from prymatex.lib.i18n import ugettext as _
 

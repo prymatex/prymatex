@@ -10,7 +10,6 @@ from PyQt4.QtCore import SIGNAL, QEvent
 
 from prymatex.lib import deco
 from prymatex.core.config import PMXSettings
-from prymatex.core.exceptions import APIUsageError
 from prymatex.support import PMXSupportManager
 from logging import getLogger
 logger = getLogger(__name__)
@@ -295,14 +294,14 @@ class PMXApplication(QApplication):
         
         def update_splash_popullate_model(counter, total, name, bundle, **kwargs):
             progress = (float(counter) / total) * 100
-            splash.showMessage(_("Loading bundle %s\n%4d of %4d (%.d%%)", 
-                                 name, counter, total, progress))
+            splash.showMessage("Loading bundle %s\n%4d of %4d (%.d%%)", 
+                                 name, counter, total, progress)
             # Loose coupling 
             #QApplication.processEvents()
             #bundleItemModel = QApplication.instance().bundleItemModel
             #bundleItemModel.appendRowFromBundle( bundle )
         
-        self.splash.showMessage(_("Loading bundles..."))
+        self.splash.showMessage("Loading bundles...")
                         
         manager.loadSupport()
         return manager

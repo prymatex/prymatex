@@ -4,7 +4,7 @@
 Models and proxies for bundle data
 '''
 
-from prymatex.bundles import PMXBundle
+from prymatex.support.bundle import PMXBundle
 from PyQt4.Qt import *
 from prymatex.models.base import PMXTableBase, PMXTableField
 from prymatex.models.delegates import PMXChoiceItemDelegate
@@ -93,7 +93,6 @@ class PMXBundleItemModel(PMXTableBase):
         PMXBundle
         @param pmx_bundle: A prymatex.budnles.PMXBundle instance
         '''
-        from prymatex.bundles import PMXBundle
         assert isinstance(pmx_bundle, PMXBundle), "Unexpected %s argument" % type(pmx_bundle)
         
         for syntax in pmx_bundle.syntaxes:

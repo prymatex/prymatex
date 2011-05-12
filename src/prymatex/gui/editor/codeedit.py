@@ -5,7 +5,7 @@ from bisect import bisect
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette
-from prymatex.bundles import PMXBundle, PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXTheme
+from prymatex.support import PMXBundle, PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXTheme
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar

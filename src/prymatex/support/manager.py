@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import re
-from os.path import join, abspath, basename, exists
+from os.path import join, basename, exists
 
 from glob import glob
-from prymatex.support.bundle import PMXBundle, PMXMenuNode
+from prymatex.support.bundle import PMXBundle
 from prymatex.support.macro import PMXMacro
 from prymatex.support.syntax import PMXSyntax
 from prymatex.support.snippet import PMXSnippet
@@ -13,7 +13,7 @@ from prymatex.support.preference import PMXPreference
 from prymatex.support.command import PMXCommand, PMXDragCommand
 from prymatex.support.template import PMXTemplate
 from prymatex.support.theme import PMXTheme
-from prymatex.support.qtadapter import buildQTextFormat, buildKeyEquivalentCode
+from prymatex.support.qtadapter import buildKeyEquivalentCode
 from prymatex.support.score import PMXScoreManager
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
