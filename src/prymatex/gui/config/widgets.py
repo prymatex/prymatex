@@ -5,6 +5,8 @@ from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
 from prymatex.core.base import PMXObject
 from prymatex.gui.panes.browser import PMXBrowserPaneDock
 from prymatex.core.config import pmxConfigPorperty
+from prymatex.gui.config.model import PMXEnvironmentVariablesModel
+from prymatex.gui.bundles.tableview import PMXTableViewMixin
 
 settings = qApp.instance().settings
 
@@ -378,7 +380,9 @@ class PMXBundleWidget(PMXConfigBaseWidget, Ui_Bundles):
 
 
 
-    
+class PMXEnvironmentVariablesTableView(QTableView, PMXTableViewMixin):
+    pass
+
 from ui_envvars import Ui_EnvVariables
 class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables):
     '''
@@ -387,15 +391,12 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables):
     def __init__(self, parent = None):
         super(PMXEnvVariablesWidgets, self).__init__(parent)
         self.setupUi(self)
-        self.tableVariables.setColumnCount(2)
-        self.tableVariables.setHorizontalHeaderItem(0, 
-                                                    QTableWidgetItem(self.trUtf8("Name")))
-        self.tableVariables.setHorizontalHeaderItem(1, 
-                                                    QTableWidgetItem(self.trUtf8("Value")))
+        self.tableModel = PMXEnvironmentVariablesModel()
+        self.tableVariables = PMXEnvironmentVariablesTableView(self)
+        self.tableVariables.setModel(self.tableModel)
+        
         self.tableVariables.setUpdatesEnabled(True)
-        self.tableVariables.cellChanged.connect(self.updateCellWidths)
-        #self.tableVariables.model().setHeaderData(0, Qt.Horizontal, self.trUtf8("Name"))
-        #self.tableVariables.model().setHeaderData(1, Qt.Horizontal, self.trUtf8("Value"))
+        #self.tableVariables.cellChanged.connect(self.updateCellWidths)
         
     def updateCellWidths(self, _row, _column):
         self.tableVariables.resizeColumnsToContent(0)

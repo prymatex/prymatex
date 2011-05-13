@@ -37,6 +37,14 @@ def ensureShellScript(text):
         text = ENV_SCRIPT % (" ".join(shebang[1:]), "\n".join(lines[1:])) 
     return text
 
+def ensureEnvironment(environment):
+    codingenv = { 'DIALOG': DIALOG }
+    for key, value in os.environ.iteritems():
+        codingenv[key] = value[:]
+    for key, value in environment.iteritems():
+        codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
+    return codingenv
+    
 def makeExecutableTempFile(content):
     descriptor, name = tempfile.mkstemp(prefix='pmx')
     file = os.fdopen(descriptor, 'w+')
@@ -48,10 +56,13 @@ def makeExecutableTempFile(content):
 def deleteFile(file):
     return os.unlink(file)
 
-def ensureEnvironment(environment):
-    codingenv = { 'DIALOG': DIALOG }
-    for key, value in os.environ.iteritems():
-        codingenv[key] = value[:]
-    for key, value in environment.iteritems():
-        codingenv[key] = unicode(value).encode('utf-8')
-    return codingenv
+def sh(cmd):
+    """ Execute `cmd` and capture stdout, and return it as a string. """
+    result = ""
+    pipe = None
+    try:
+        pipe   = popen(cmd)
+        result = pipe.read()
+    finally:
+        if pipe: pipe.close()
+    return result

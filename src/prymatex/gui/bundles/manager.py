@@ -17,28 +17,24 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
     class Meta:
         setting = 'Manager'
     
-    #@pmxConfigPorperty(default = [])
-    shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables') 
+    shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
     deletedBundles = pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
     disabledBundles = pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDisabledBundles')
     
     def __init__(self):
+        super(PMXTableSupportManager, self).__init__()
         self.configure()
-        super(PMXTableSupportManager, self).__init__(self.disabledBundles, 
-                                                     self.deletedBundles)
-        
-        print self.shellVariables
-        for var in self.shellVariables:
-            if var[QString('enabled')]:
-                self.environment[var[QString('variable')]] = var[QString('value')]
         
         self.model = PMXBundleItemModel()
-        
-        #self.shellVariables.append({'a':1})
-        group = self._meta.settings.setValue('shellVariables', [{'variable': 'TM_FOO', 'value': 'foo',  'enabled': True}, ])
-        
-    
 
+    def buildEnvironment(self):
+        env = {}
+        for var in self.shellVariables:
+            if var['enabled']:
+                env[var['variable']] = var['value']
+        env.update(self.environment)
+        return env
+        
     def hasBundle(self, uuid):
         return PMXSupportManager.hasBundle(self, uuid)
 
@@ -48,12 +44,9 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
         @todo: Update Bundle Tree hierachy
         '''
         return PMXSupportManager.addBundle(self, bundle)
-        
-
 
     def getBundle(self, uuid):
         return PMXSupportManager.getBundle(self, uuid)
-
 
     def getAllBundles(self):
         return PMXSupportManager.getAllBundles(self)

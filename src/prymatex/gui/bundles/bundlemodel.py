@@ -32,7 +32,6 @@ class PMXBundleModel(PMXTableBase):
     disabled = PMXTableField()
     item = PMXTableField()
     
-    
     def appendBundleRow(self, bundle):
         self.addRowFromKwargs(
                     uuid = bundle.uuid,
@@ -93,32 +92,6 @@ class PMXBundleItemModel(PMXTableBase):
                               scope = instance.scope,
                               #item = item,
                               )
-    
-    def _appendRowFromBundle(self, pmx_bundle):
-        '''
-        PMXBundle
-        @param pmx_bundle: A prymatex.budnles.PMXBundle instance
-        '''
-        print "deperecated"
-        assert isinstance(pmx_bundle, PMXBundle), "Unexpected %s argument" % type(pmx_bundle)
-        
-        for syntax in pmx_bundle.syntaxes:
-            self.appendBundleItemRow(syntax)
-            
-        for snippet in pmx_bundle.snippets:
-            self.appendBundleItemRow(snippet)
-            
-        for macro in pmx_bundle.macros:
-            self.appendBundleItemRow(macro)
-            
-        for command in pmx_bundle.commands:
-            self.appendBundleItemRow(command)
-            
-        for preference in pmx_bundle.preferences:
-            self.appendBundleItemRow(preference)
-            
-        for template in pmx_bundle.templates:
-            self.appendBundleItemRow(template)
     
     def getProxyFilteringModel(self, **filter_kwargs):
         ''' Returns a list of QStandardItems 

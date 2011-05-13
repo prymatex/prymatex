@@ -20,7 +20,6 @@ BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreferenc
     
 class PMXSupportManager(object):
     ELEMENTS = ['Bundles', 'Support', 'Themes']
-    DEFAULT = 'prymatex'
     VAR_PREFIX = 'PMX'
     BUNDLES = {}
     BUNDLE_ITEMS = {}
@@ -36,18 +35,22 @@ class PMXSupportManager(object):
     
     def __init__(self, disabledBundles = [], deletedBundles = []):
         self.namespaces = {}
+        # Te first is the name space base, and the last is de default for new bundles and items */
+        self.nsorder = []
         self.environment = {}
         self.disabledBundles = disabledBundles
         self.deletedBundles = deletedBundles
         self.scores = PMXScoreManager()
     
-    def addNameSpace(self, name, path):
+    def addNamespace(self, name, path):
         self.namespaces[name] = {}
+        self.nsorder.append(name)
         for element in self.ELEMENTS:
             epath = join(path, element)
             if not exists(epath):
                 continue
-            if name == self.DEFAULT:
+            #Si es el primero es el protegido
+            if len(self.nsorder) == 1:
                 var = "_".join([ self.VAR_PREFIX, element.upper(), 'PATH' ])
             else:
                 var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
@@ -56,17 +59,14 @@ class PMXSupportManager(object):
     def updateEnvironment(self, env):
         self.environment.update(env)
 
-    @property
-    def priority(self):
-        ns = self.namespaces.keys()
-        ns.remove(self.DEFAULT)
-        return ns + [ self.DEFAULT ]
-    
+    def buildEnvironment(self):
+        return self.environment
+
     #---------------------------------------------------
     # LOAD ALL SUPPORT
     #---------------------------------------------------
     def loadSupport(self, callback = None):
-        for ns in self.priority:
+        for ns in self.nsorder[::-1]:
             self.loadThemes(ns)
             self.loadBundles(ns)
         for bundle in self.getAllBundles():
@@ -104,7 +104,7 @@ class PMXSupportManager(object):
     #---------------------------------------------------
     def populateBundle(self, bundle):
         bns = bundle.namespace
-        nss = self.priority
+        nss = self.nsorder[::-1]
         index = nss.index(bns)
         bundle.manager = self
         for ns in nss[index:]:

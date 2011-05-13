@@ -126,7 +126,7 @@ class PMXBundle(object):
         plistlib.writePlist(self.hash, file)
 
     def buildEnvironment(self):
-        env = copy(self.manager.environment)
+        env = copy(self.manager.buildEnvironment())
         env['TM_BUNDLE_PATH'] = self.path
         if self.support != None:
             env['TM_BUNDLE_SUPPORT'] = self.support

@@ -5,7 +5,7 @@ Application configuration based on Qt's QSettings module.
 
 '''
 
-from PyQt4.Qt import QSettings
+from PyQt4.Qt import QSettings, QString, QVariant
 from os.path import join, abspath, expanduser, dirname, exists
 from os import makedirs
 import plistlib
@@ -61,10 +61,7 @@ def get_prymatex_profile_path(name, base):
 
 #Deprecated use qApp.settings
 PMX_BASE_PATH = get_prymatex_base_path()
-PMX_USER_PATH = get_prymatex_user_path()
-PMX_APP_PATH = PMX_BASE_PATH
-PMX_BUNDLES_PATH = join(PMX_BASE_PATH, 'share', 'Bundles')
-PMX_THEMES_PATH = join(PMX_BASE_PATH, 'share', 'Themes')
+#Cuidado esta la necesita el paquete support en el modulo utils, ver como quitarla igualmente
 PMX_SUPPORT_PATH = join(PMX_BASE_PATH, 'share', 'Support')
 
 TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
@@ -111,11 +108,25 @@ class SettingsGroup(object):
             for listener in self.listeners:
                 setattr(listener, name, value)
     
+    @staticmethod
+    def toPyObject(obj):
+        if isinstance(obj, list):
+            return [SettingsGroup.toPyObject(o) for o in obj ]
+        elif isinstance(obj, dict):
+            return dict([(SettingsGroup.toPyObject(o[0]), SettingsGroup.toPyObject(o[1])) for o in obj.iteritems() ])
+        #PyQtObjects
+        elif isinstance(obj, QString):
+            return unicode(obj)
+        elif isinstance(obj, QVariant):
+            return SettingsGroup.toPyObject(obj.toPyObject())
+        else:
+            return obj
+    
     def value(self, name):
         self.qsettings.beginGroup(self.name)
         value = self.qsettings.value(name)
         self.qsettings.endGroup()
-        return value.toPyObject()
+        return SettingsGroup.toPyObject(value)
         
     def addSetting(self, setting):
         self.settings[setting.name] = setting
@@ -153,7 +164,7 @@ class pmxConfigPorperty(object):
         elif self.fget != None and obj != None:
             return self.fget(obj)
         raise Exception("No value for %s" % self.name)
-        
+    
     def toPyType(self, obj):
         if self.default != None:
             obj_type = type(self.default)

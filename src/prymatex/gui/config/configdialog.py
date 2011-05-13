@@ -18,9 +18,6 @@ class PMXSettingsItem(QStandardItem):
 class PMXNetworkConfigWidget(QWidget):
     def __init__(self):
         super(PMXNetworkConfigWidget, self).__init__()
-        
-
-
 
 class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog, CenterWidget):
     '''
