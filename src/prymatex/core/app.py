@@ -276,7 +276,7 @@ class PMXApplication(QApplication):
         disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
         #manager = PMXSupportManager(disabledBundles = [], deletedBundles = [])
         manager = PMXTableSupportManager()
-        manager.addNameSpace(manager.DEFAULT, sharePath)
+        manager.addNamespace('prymatex', sharePath)
         manager.updateEnvironment({ #TextMate Compatible :P
                 'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
                 'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
@@ -287,7 +287,7 @@ class PMXApplication(QApplication):
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')
         });
 
-        manager.addNameSpace('user', userPath)
+        manager.addNamespace('user', userPath)
         manager.updateEnvironment({ ##User
                 'PMX_USER_PATH': userPath,
                 'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
