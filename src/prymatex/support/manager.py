@@ -122,6 +122,9 @@ class PMXSupportManager(object):
                         item.bundle = bundle
                         self.addBundleItem(item)
 
+    def buildEnvironment(self):
+        return self.environment
+                        
     def hasBundle(self, uuid):
         '''
         @return: True if bundle exists
