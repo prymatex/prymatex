@@ -11,7 +11,13 @@ from prymatex.models.delegates import PMXChoiceItemDelegate
 from prymatex.gui.bundles.items import PMXBundleItemInstanceItem
 from prymatex.core.exceptions import APIUsageError
 
-
+class PMXEnviromentVairableModel(PMXTableBase):
+    variable = PMXTableField()
+    value = PMXTableField()
+    enabled = PMXTableField(default  = True,
+                            #delegate_class=
+                            )
+    
 class PMXBundleModel(PMXTableBase):
     '''
     Store xxx.tmBundle/info.plist data
