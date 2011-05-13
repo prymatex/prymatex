@@ -61,10 +61,7 @@ def get_prymatex_profile_path(name, base):
 
 #Deprecated use qApp.settings
 PMX_BASE_PATH = get_prymatex_base_path()
-PMX_USER_PATH = get_prymatex_user_path()
-PMX_APP_PATH = PMX_BASE_PATH
-PMX_BUNDLES_PATH = join(PMX_BASE_PATH, 'share', 'Bundles')
-PMX_THEMES_PATH = join(PMX_BASE_PATH, 'share', 'Themes')
+#Cuidado esta la necesita el paquete support en el modulo utils, ver como quitarla igualmente
 PMX_SUPPORT_PATH = join(PMX_BASE_PATH, 'share', 'Support')
 
 TM_PREFERENCES_PATH = get_textmate_preferences_user_path()

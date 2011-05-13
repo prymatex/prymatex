@@ -49,7 +49,8 @@ class PMXSupportManager(object):
             epath = join(path, element)
             if not exists(epath):
                 continue
-            if name == self.DEFAULT:
+            #Si es el primero es el protegido
+            if len(self.nsorder) == 1:
                 var = "_".join([ self.VAR_PREFIX, element.upper(), 'PATH' ])
             else:
                 var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
