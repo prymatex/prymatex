@@ -5,9 +5,7 @@ from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
 from prymatex.core.base import PMXObject
 from prymatex.gui.panes.browser import PMXBrowserPaneDock
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.config.model import PMXEnvironmentVariablesModel
 from prymatex.gui.bundles.tableview import PMXTableViewMixin
-
 settings = qApp.instance().settings
 
 class PMXConfigTreeView(QTreeView):
@@ -377,35 +375,3 @@ class PMXBundleWidget(PMXConfigBaseWidget, Ui_Bundles):
     
     def on_pushEdit_pressed(self):
         print "Edit"
-
-
-
-class PMXEnvironmentVariablesTableView(QTableView, PMXTableViewMixin):
-    pass
-
-from ui_envvars import Ui_EnvVariables
-class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables):
-    '''
-    Variables
-    '''
-    def __init__(self, parent = None):
-        super(PMXEnvVariablesWidgets, self).__init__(parent)
-        self.setupUi(self)
-        self.tableModel = PMXEnvironmentVariablesModel()
-        self.tableVariables = PMXEnvironmentVariablesTableView(self)
-        self.tableVariables.setModel(self.tableModel)
-        
-        self.tableVariables.setUpdatesEnabled(True)
-        #self.tableVariables.cellChanged.connect(self.updateCellWidths)
-        
-    def updateCellWidths(self, _row, _column):
-        self.tableVariables.resizeColumnsToContent(0)
-        
-    def on_pushAdd_pressed(self):
-        r = self.tableVariables.insertRow(0)
-        print r
-        
-    def on_pushRemove_pressed(self):
-        pass
-
-
