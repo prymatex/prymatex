@@ -111,8 +111,8 @@ class PMXApplication(QApplication):
                                                 PMXUpdatesWidget,\
                                                 PMXSaveWidget,\
                                                 PMXNetworkWidget,\
-                                                PMXBundleWidget,\
-                                                PMXEnvVariablesWidgets
+                                                PMXBundleWidget
+        from prymatex.gui.config.envvars import PMXEnvVariablesWidgets
                                                 
                                                 
         configdialog.register(PMXGeneralWidget())
