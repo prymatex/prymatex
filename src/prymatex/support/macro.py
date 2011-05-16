@@ -11,9 +11,8 @@ class PMXMacro(PMXBundleItem):
     KEYS = [    'commands' ]
     TYPE = 'macro'
     FOLDER = 'Macros'
-    FILES = [ '*.tmMacro', '*.plist']
-    path_patterns = ['Macros/*.tmMacro', 'Macros/*.plist']
-    bundle_collection = 'macros'
+    EXTENSION = 'tmMacro'
+    PATTERNS = [ '*.tmMacro', '*.plist']
     def __init__(self, namespace, hash = None, path = None):
         super(PMXMacro, self).__init__(namespace, hash, path)
 

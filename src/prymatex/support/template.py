@@ -15,7 +15,8 @@ class PMXTemplate(PMXBundleItem):
     KEYS = [    'command', 'extension']
     TYPE = 'template'
     FOLDER = 'Templates'
-    FILES = [ '*' ]
+    PATTERNS = [ '*' ]
+
     def __init__(self, namespace, hash = None, path = None):
         super(PMXTemplate, self).__init__(namespace, hash, path)
     

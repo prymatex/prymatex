@@ -5,7 +5,7 @@ import re
 from os.path import join, basename, exists
 
 from glob import glob
-from prymatex.support.bundle import PMXBundle
+from prymatex.support.bundle import PMXBundle, PMXBundleItem
 from prymatex.support.macro import PMXMacro
 from prymatex.support.syntax import PMXSyntax
 from prymatex.support.snippet import PMXSnippet
@@ -15,8 +15,22 @@ from prymatex.support.template import PMXTemplate
 from prymatex.support.theme import PMXTheme
 from prymatex.support.qtadapter import buildKeyEquivalentCode
 from prymatex.support.score import PMXScoreManager
+from prymatex.support.utils import sh
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
+
+def compare(object, attrs, tests):
+    if not attrs:
+        return True
+    attr = getattr(object, attrs[0], None)
+    if attr == None or attrs[0] not in tests:
+        return True and compare(object, attrs[1:], tests)
+    elif isinstance(attr, (str, unicode)):
+        return attr.find(tests[attrs[0]]) != -1 and compare(object, attrs[1:], tests)
+    elif isinstance(attr, (int)):
+        return attr == tests[attrs[0]] and compare(object, attrs[1:], tests)
+    else:
+        return attr == tests[attrs[0]] and compare(object, attrs[1:], tests)
     
 class PMXSupportManager(object):
     ELEMENTS = ['Bundles', 'Support', 'Themes']
@@ -31,7 +45,7 @@ class PMXSupportManager(object):
     PREFERENCES = {}
     TEMPLATES = []
     SETTINGS_CACHE = {}
-    TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE)) 
+    TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE))
     
     def __init__(self, disabledBundles = [], deletedBundles = []):
         self.namespaces = {}
@@ -55,7 +69,11 @@ class PMXSupportManager(object):
             else:
                 var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
             self.namespaces[name][element] = self.environment[var] = epath
-    
+
+    def uuidgen(self):
+        # TODO: ver que el uuid generado no este entre los elementos existentes
+        return sh("uuidgen").strip()
+
     def updateEnvironment(self, env):
         self.environment.update(env)
 
@@ -113,7 +131,7 @@ class PMXSupportManager(object):
             if bundle.support == None and exists(join(bpath, 'Support')):
                 bundle.support = join(bpath, 'Support')
             for klass in BUNDLEITEM_CLASSES:
-                files = reduce(lambda x, y: x + glob(y), [ join(bpath, klass.FOLDER, file) for file in klass.FILES ], [])
+                files = reduce(lambda x, y: x + glob(y), [ join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
                 for sf in files:
                     item = klass.loadBundleItem(sf, ns)
                     if item == None:
@@ -122,6 +140,9 @@ class PMXSupportManager(object):
                         item.bundle = bundle
                         self.addBundleItem(item)
 
+    #---------------------------------------------------
+    # BUNDLE INTERFACE
+    #---------------------------------------------------
     def hasBundle(self, uuid):
         '''
         @return: True if bundle exists
@@ -134,6 +155,12 @@ class PMXSupportManager(object):
         '''
         self.BUNDLES[bundle.uuid] = bundle
 
+    def removeBundle(self, bundle):
+        '''
+        @param bundle: PMXBundle instance
+        '''
+        self.BUNDLES.pop(bundle.uuid)
+        
     def getBundle(self, uuid):
         '''
         @return: PMXBundle by UUID
@@ -145,13 +172,84 @@ class PMXSupportManager(object):
         @return: list of PMXBundle instances
         '''
         return self.BUNDLES.values()
-
+    
+    def addDeletedBundle(self, uuid):
+        self.deletedBundles.append(uuid)
+    
+    def findBundles(self, **attrs):
+        '''
+            Retorna todos los bundles que cumplan con attrs
+        '''
+        bundles = []
+        keys = PMXBundle.KEYS
+        keys.extend([key for key in attrs.keys() if key not in keys])
+        for bundle in self.getAllBundles():
+            if compare(bundle, keys, attrs):
+                bundles.append(bundle)
+        return bundles
+        
+    #---------------------------------------------------
+    # BUNDLE CRUD
+    #---------------------------------------------------
+    def createBundle(self, name, namespace = None):
+        '''
+            Crea un bundle nuevo lo agrega en los bundles y lo retorna,
+            Precondiciones:
+                Tenes por lo menos un nombre en el espacio de nombres
+                El nombre tipo Title.
+                El nombre no este entre los nombres ya cargados.
+            Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
+        '''
+        namespace = self.nsorder[-1] if namespace == None else namespace
+        hash = {    'uuid': self.uuidgen(),
+                    'name': name }
+        path = join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % name)
+        bundle = PMXBundle(namespace, hash, path)
+        self.addBundle(bundle)
+        return bundle
+    
+    def readBundle(self, **attrs):
+        '''
+            Retorna un bundle por sus atributos
+        '''
+        bundles = self.findBundles(**attrs)
+        if len(bundles) > 1:
+            raise Exception("More than one bundle")
+        return bundles[0]
+        
+    def updateBundle(self, **attrs):
+        '''
+            Retorna un bundle por sus atributos
+        '''
+        bundles = self.findBundles(**attrs)
+        if len(bundles) > 1:
+            raise Exception("More than one bundle")
+        return bundles[0]
+        
+    def deleteBundle(self, bundle):
+        '''
+            Elimina un bundle,
+            si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
+        '''
+        self.removeBundle(bundle)
+        items = self.findBundleItems(bundle = bundle)
+        #Primero los items
+        for item in items:
+            self.deleteBundleItem(item)
+        if bundle.namespace == self.nsorder[0]:
+            self.addDeletedBundle(uuid)
+        else:
+            bundle.delete()
+        
+    #---------------------------------------------------
+    # BUNDLEITEM INTERFACE
+    #---------------------------------------------------
     def hasBundleItem(self, uuid):
         '''
         @return: True if PMXBundleItem exists
         '''
         return uuid in self.BUNDLE_ITEMS
-        
+
     def addBundleItem(self, item):
         self.BUNDLE_ITEMS[item.uuid] = item
         if item.bundle.mainMenu != None:
@@ -169,9 +267,77 @@ class PMXSupportManager(object):
             self.SYNTAXES[item.scopeName] = item
             # puede ser dependiente del namespace ? self.SYNTAXES[item.namespace][item.scopeName] = self
 
+    def removeBundleItem(self, item):
+        self.BUNDLE_ITEMS.pop(item.uuid)
+    
     def getBundleItem(self, uuid):
         return self.BUNDLE_ITEMS[uuid]
+        
+    def getAllBundleItems(self):
+        return self.BUNDLE_ITEMS.values()
+        
+    def findBundleItems(self, **attrs):
+        '''
+            Retorna todos los items que complan las condiciones en attrs
+        '''
+        items = []
+        keys = PMXBundleItem.KEYS
+        keys.extend([key for key in attrs.keys() if key not in keys])
+        for item in self.getAllBundleItems():
+            if compare(item, keys, attrs):
+                items.append(item)
+        return items
+
+    #---------------------------------------------------
+    # BUNDLEITEM CRUD
+    #---------------------------------------------------
+    def createBundleItem(self, name, tipo, bundle, namespace = None):
+        '''
+            Crea un bundle item nuevo lo agrega en los bundle items y lo retorna,
+            Precondiciones:
+                Tenes por lo menos un nombre en el espacio de nombres
+                El tipo tiene que ser uno de los conocidos
+            Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
+        '''
+        namespace = self.nsorder[-1] if namespace == None else namespace
+        hash = {    'uuid': self.uuidgen(),
+                    'name': name }
+        klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
+        if len(klass) != 1:
+            raise Exception("No class type for %s" % tipo)
+        klass = klass.pop()
+        path = join(bundle.path, klass.FOLDER, "%s.%s" % (name, klass.EXTENSION))
+
+        item = klass(namespace, hash, path)
+        item.bundle = bundle
+        self.addBundleItem(item)
+        return item
     
+    def readBundleItem(self, **attrs):
+        '''
+            Retorna un bundle item por sus atributos
+        '''
+        items = self.findBundleItems(**attrs)
+        if len(items) > 1:
+            raise Exception("More than one bundle item")
+        return items[0]
+        
+    def updateBundleItem(self, **attrs):
+        pass
+        
+    def deleteBundleItem(self, item):
+        '''
+            Elimina un bundle por su uuid,
+            si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
+        '''
+        self.removeBundleItem(item)
+        #Si el espacio de nombres es distinto al protegido lo elimino
+        if item.namespace != self.nsorder[0]:
+            item.delete()
+        
+    #---------------------------------------------------
+    # THEME INTERFACE
+    #---------------------------------------------------
     def hasTheme(self, uuid):
         return uuid in self.THEMES
     
@@ -184,6 +350,9 @@ class PMXSupportManager(object):
     def getAllThemes(self):
         return self.THEMES.values()
     
+    #---------------------------------------------------
+    # TEMPLATES INTERFACE
+    #---------------------------------------------------
     def getAllTemplates(self):
         return self.TEMPLATES
     

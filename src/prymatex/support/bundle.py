@@ -6,12 +6,6 @@ from glob import glob
 from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
 
-# for run as main
-if __name__ == "__main__":
-    import sys
-    sys.path.append(os.path.abspath('..'))
-from prymatex.support.qtadapter import buildKeyEquivalentString
-
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
     http://manual.macromates.com/en/bundles
@@ -115,16 +109,21 @@ class PMXBundle(object):
                 hash[key] = value
         return hash
 
-    def save(self, base = None):
-        if base != None:
-            path = os.path.join(base, os.path.basename(self.path))
-            if not os.path.exists(path):
-                os.makedirs(path)
-            file = os.path.join(path, self.FILE)
-        else:
-            file = os.path.join(self.path , self.FILE)
+    def save(self):
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
+        file = os.path.join(self.path , self.FILE)
         plistlib.writePlist(self.hash, file)
 
+    def delete(self):
+        #No se puede borrar si tiene items, sub archivos o subdirectorios
+        os.unlink(os.path.join(self.path, self.FILE))
+        try:
+            #El ultimo apaga la luz, elimina el directorio base
+            os.rmdir(self.path)
+        except os.OSError:
+            pass
+        
     def buildEnvironment(self):
         env = copy(self.manager.buildEnvironment())
         env['TM_BUNDLE_PATH'] = self.path
@@ -151,7 +150,8 @@ class PMXBundleItem(object):
     KEYS = [ 'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
     TYPE = ''
     FOLDER = ''
-    FILES = []
+    EXTENSION = ''
+    PATTERNS = []
     def __init__(self, namespace, hash = None, path = None):
         self.namespace = namespace
         self.path = path
@@ -172,16 +172,21 @@ class PMXBundleItem(object):
                 hash[key] = value
         return hash
 
-    def save(self, base = None):
-        if base != None:
-            path = os.path.join(base, os.path.basename(self.bundle.path), self.FOLDER)
-            if not os.path.exists(path):
-                os.makedirs(path)
-            file = os.path.join(path , os.path.basename(self.path))
-        else:
-            file = self.path
-        plistlib.writePlist(self.hash, file)
-        
+    def save(self):
+        dir = os.path.dirname(self.path)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        plistlib.writePlist(self.hash, self.path)
+    
+    def delete(self):
+        os.unlink(self.path)
+        dir = os.path.dirname(self.path)
+        try:
+            #El ultimo apaga la luz, elimina el directorio base
+            os.rmdir(dir)
+        except os.OSError:
+            pass
+
     @property
     def trigger(self):
         trigger = []
@@ -223,110 +228,4 @@ class PMXBundleItem(object):
     
     def resolve(self, *args, **kwargs):
         pass
-
-#----------------------------------------
-# Tests
-#----------------------------------------
-def test_snippets():
-    #bundle = PMXBundle.getBundleByName('LaTeX')
-    bundle = PMXBundle.getBundleByName('HTML')
-    errors = 0
-    #for bundle in PMXBundle.BUNDLES.values():
-    for snippet in bundle.snippets:
-        try:
-            if snippet.name.startswith("Special:"):
-            #if snippet.name.startswith("belongs_to"):
-                snippet.compile()
-                snippet.resolve(indentation = "",
-                                tabreplacement = "----",
-                                environment = {"TM_CURRENT_LINE": "  ", "TM_SCOPE": "text.tex.latex string.other.math.block.environment.latex", "TM_SELECTED_TEXT": "uno\tdos\tcuatro\t"})
-                print "-" * 10, " Bundle ", bundle.name, " Test ", snippet.name, " (", snippet.tabTrigger, ") ", "-" * 10
-                print snippet.path
-                print "Origin: ", len(snippet), snippet.next()
-                print snippet, snippet.ends
-                clon = snippet.clone()
-                clon.write(0, "Un Capitulo Nuevo")
-                print "Clone: ", len(clon), clon.next()
-                print clon, clon.ends
-        except Exception, e:
-            print bundle.name, snippet.name, e
-            errors += 1
-            if "'ascii' codec can't encode" not in str(e):
-                import sys, traceback
-                traceback.print_exc()
-                sys.exit(0)
-    print errors
-    
-def test_syntaxes():
-    from prymatex.bundles.syntax import PMXSyntax
-    from time import time
-    from prymatex.bundles.processor import PMXSyntaxProcessor
-    syntax = PMXSyntax.getSyntaxesByName("Python")
-    print syntax[0].hash
-    file = open('../gui/editor/codeedit.py', 'r');
-    start = time()
-    syntax[0].parse(file.read(), PMXSyntaxProcessor())
-    file.close()
-    print "Time:", time() - start
-
-def print_commands():
-    before = []
-    for bundle in PMXBundle.BUNDLES.values():
-        for command in bundle.commands:
-            if command.beforeRunningCommand != "nop":
-                before.append(command.beforeRunningCommand)
-    print before
-
-def test_keys():
-    from pprint import pprint
-    pprint(PMXBundle.KEY_EQUIVALENTS)
-    
-def test_templates():
-    DIRECTORY = os.path.join(os.path.expanduser('~'), 'workspace/')
-    for template in PMXBundle.TEMPLATES:
-        environment = template.buildEnvironment(directory = DIRECTORY)
-        template.resolve(environment)
-
-def test_bundle_elements():
-    from pprint import pprint
-    pprint(PMXBundle.BUNDLES)
-    pprint(PMXBundle.TAB_TRIGGERS)
-    pprint(PMXBundle.KEY_EQUIVALENTS)
-    pprint(PMXBundle.KEY_SEQUENCE)
-    pprint(PMXBundle.PREFERENCES)
-    pprint(PMXBundle.TEMPLATES)
-
-def test_preferences():
-    settings = PMXBundle.getPreferenceSettings('source.c++')
-    for key in settings.KEYS:
-        print key, getattr(settings, key)
-
-def test_macros():
-    bundles = PMXBundle.BUNDLES.values()
-    commands = []
-    for bundle in bundles:
-        for macro in bundle.macros:
-            for command in macro.commands:
-                c = command['command']
-                if c not in commands:
-                    commands.append(c)
-    print commands
-    
-def test_queryItems():
-    from prymatex.bundles.qtadapter import Qt
-    print PMXBundle.getTabTriggerItem('class', 'source.python')
-    print PMXBundle.getKeyEquivalentItem(Qt.CTRL + ord('H'), 'text.html')
-
-def test_saveBundleItems():
-    from prymatex.bundles import PMXBundle
-    for bundle in PMXBundle.BUNDLES.values():
-        bundle.save(base = os.path.join(os.path.expanduser('~'), 'Bundles'))
-    
-if __name__ == '__main__':
-    from prymatex.bundles import PMXBundleManager
-    manager = PMXBundleManager(disabled = [], deleted = [])
-    manager.addNameSpace(manager.DEFAULT, os.path.abspath('../bundles/prymatex'))
-    manager.addNameSpace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
-    manager.loadShit()
-    for bundle in manager.BUNDLES.values():
-        print bundle.buildEnvironment()
+        
