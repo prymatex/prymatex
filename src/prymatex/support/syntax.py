@@ -181,7 +181,8 @@ class PMXSyntax(PMXBundleItem):
     KEYS = [ 'comment', 'firstLineMatch', 'foldingStartMarker', 'scopeName', 'repository', 'foldingStopMarker', 'fileTypes', 'patterns']
     TYPE = 'syntax'
     FOLDER = 'Syntaxes'
-    FILES = ['*.tmLanguage', '*.plist']
+    EXTENSION = 'tmLanguage'
+    PATTERNS = ['*.tmLanguage', '*.plist']
     FOLDING_NONE = 0
     FOLDING_START = -1
     FOLDING_STOP = -2

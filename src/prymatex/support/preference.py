@@ -117,7 +117,9 @@ class PMXPreference(PMXBundleItem):
     KEYS = [ 'settings' ]
     TYPE = 'preference'
     FOLDER = 'Preferences'
-    FILES = ['*.tmPreferences', '*.plist']
+    EXTENSION = 'tmPreferences'
+    PATTERNS = ['*.tmPreferences', '*.plist']
+
     def __init__(self, namespace, hash = None, path = None):
         super(PMXPreference, self).__init__(namespace, hash, path)
 

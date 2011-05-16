@@ -27,7 +27,8 @@ class PMXCommand(PMXBundleItem):
                 'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
     TYPE = 'command'
     FOLDER = 'Commands'
-    FILES = ['*.tmCommand', '*.plist']
+    EXTENSION = 'tmCommand'
+    PATTERNS = ['*.tmCommand', '*.plist']
     exit_codes = {
                   200: 'discard',
                   201: 'replaceSelectedText',

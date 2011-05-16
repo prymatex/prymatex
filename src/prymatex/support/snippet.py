@@ -756,7 +756,9 @@ class PMXSnippet(PMXBundleItem):
     KEYS = [ 'content', 'disableAutoIndent', 'inputPattern' ]
     TYPE = 'snippet'
     FOLDER = 'Snippets'
-    FILES = ['*.tmSnippet', '*.plist']
+    EXTENSION = 'tmSnippet'
+    PATTERNS = ['*.tmSnippet', '*.plist']
+
     parser = PMXSyntax("internal", hash = SNIPPET_SYNTAX)
     def __init__(self, namespace, hash = None, path = None):
         super(PMXSnippet, self).__init__(namespace, hash, path)

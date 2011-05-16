@@ -57,11 +57,11 @@ def deleteFile(file):
     return os.unlink(file)
 
 def sh(cmd):
-    """ Execute `cmd` and capture stdout, and return it as a string. """
+    """ Execute cmd and capture stdout, and return it as a string. """
     result = ""
     pipe = None
     try:
-        pipe   = popen(cmd)
+        pipe   = os.popen(cmd)
         result = pipe.read()
     finally:
         if pipe: pipe.close()
