@@ -15,7 +15,7 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
     bundleLoaded = pyqtSignal()
     bundleItemLoaded = pyqtSignal()
     class Meta:
-        setting = 'Manager'
+        settings = 'Manager'
     
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
     deletedBundles = pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
