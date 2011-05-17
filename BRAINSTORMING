@@ -1,7 +1,5 @@
 # Configuration
 
-
-
 * Inspired in config module (available at PyPi)
 * Events when config changes
 * Configuration hierachy
@@ -17,8 +15,6 @@
 
 * Lots of them!
 * Detonator (signal handling cross-OS)
-
-
 
 # Signals
 
@@ -39,3 +35,9 @@
 ### Spell check
 
 * Spellcheck comments
+
+#Install software
+
+* xmodmap for keyboard shortcuts
+* docutils for restructuredtext bundle
+* tidy for html bundle

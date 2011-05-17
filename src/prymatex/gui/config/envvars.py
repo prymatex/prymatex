@@ -19,6 +19,17 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
             self.values[1].append(var['value'])
             self.values[2].append(var['enabled'])
     
+    def setSettingValue(self):
+        variables = []
+        for index in range(len(self.values[0])):
+            if self.values[0][index] != "":
+                var = {}
+                var['variable'] = self.values[0][index]
+                var['value'] = self.values[1][index]
+                var['enabled'] = self.values[2][index]
+                variables.append(var)
+        self.settingGroup.setValue(variables)
+    
     def rowCount(self, parent):
         return len(self.values[0])
     
@@ -50,10 +61,12 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
                 except ValueError:
                     pass
             self.values[index.column()][index.row()] = new_value
+            self.setSettingValue()
             self.dataChanged.emit(index, index)
             return True;
         elif role == QtCore.Qt.CheckStateRole:
             self.values[2][index.row()] = value.toBool()
+            self.setSettingValue()
             self.dataChanged.emit(index, index)
             return True
         return False
@@ -67,10 +80,12 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
                     return "Value"
 
     def insertRows(self, position, rows, parent = QtCore.QModelIndex()):
+        if "" in self.values[0]:
+            return False
         self.beginInsertRows(parent, position, position + rows - 1)
         for _ in range(rows):
-            self.values[0].insert(position, "VARIABLE")
-            self.values[1].insert(position, "value")
+            self.values[0].insert(position, "")
+            self.values[1].insert(position, "")
             self.values[2].insert(position, True)
         self.endInsertRows()
         return True
@@ -81,6 +96,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
             self.values[0].pop(position)
             self.values[1].pop(position)
             self.values[2].pop(position)
+            self.setSettingValue()
         self.endRemoveRows()
         return True
 
@@ -102,4 +118,5 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
         self.model.insertRows(0, 1)
         
     def on_pushRemove_pressed(self):
-        self.model.removeRows(0, 1)
+        index = self.tableView.currentIndex()
+        self.model.removeRows(index.row() , 1)
