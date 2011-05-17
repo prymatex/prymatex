@@ -19,7 +19,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
             self.values[1].append(var['value'])
             self.values[2].append(var['enabled'])
     
-        def rowCount(self, parent):
+    def rowCount(self, parent):
         return len(self.values[0])
     
     def columnCount(self, parent):
