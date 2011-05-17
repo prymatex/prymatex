@@ -347,8 +347,57 @@ class PMXSupportManager(object):
     def getTheme(self, uuid):
         return self.THEMES[uuid]
     
+    def removeTheme(self, theme):
+        self.THEMES.pop(theme.uuid)
+    
     def getAllThemes(self):
         return self.THEMES.values()
+    
+    def findThemes(self, **attrs):
+        '''
+            Retorna todos los themes que complan las condiciones en attrs
+        '''
+        items = []
+        keys = PMXTheme.KEYS
+        keys.extend([key for key in attrs.keys() if key not in keys])
+        for item in self.getAllThemes():
+            if compare(item, keys, attrs):
+                items.append(item)
+        return items
+    #---------------------------------------------------
+    # THEME CRUD
+    #---------------------------------------------------
+    def createTheme(self, name, namespace = None):
+        '''
+            
+        '''
+        namespace = self.nsorder[-1] if namespace == None else namespace
+        hash = {    'uuid': self.uuidgen(),
+                    'name': name }
+        theme = PMXTheme(namespace, hash, path)
+        self.addTheme(theme)
+        return theme
+    
+    def readTheme(self, **attrs):
+        '''
+            Retorna un bundle item por sus atributos
+        '''
+        items = self.findThemes(**attrs)
+        if len(items) > 1:
+            raise Exception("More than one theme")
+        return items[0]
+        
+    def updateTheme(self, **attrs):
+        pass
+        
+    def deleteTheme(self, theme):
+        '''
+            Elimina un theme por su uuid
+        '''
+        self.removeTheme(theme)
+        #Si el espacio de nombres es distinto al protegido lo elimino
+        if theme.namespace != self.nsorder[0]:
+            theme.delete()
     
     #---------------------------------------------------
     # TEMPLATES INTERFACE
