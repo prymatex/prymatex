@@ -38,8 +38,8 @@ def compileRegexp(string):
 DEFAULT_SETTINGS = { 'completions': [],
                      'completionCommand': '',
                      'disableDefaultCompletion': 0,
-                     'showInSymbolList': 0,
-                     'symbolTransformation': '',
+                     'showInSymbolList': None,
+                     'symbolTransformation': None,
                      'highlightPairs': [],
                      'smartTypingPairs': [],
                      'decreaseIndentPattern': None,
@@ -59,6 +59,7 @@ class PMXPreferenceSettings(object):
     INDENT_DECREASE = 2
     INDENT_NEXTLINE = 3
     UNINDENT = 4
+    TRANSFORMATIONPATTERN = re.compile('s/(.*)/(.*)/([mg]?);?')
     def __init__(self, hash):
         for key in self.KEYS:
             value = hash.get(key, None)
@@ -67,6 +68,8 @@ class PMXPreferenceSettings(object):
                     value = compileRegexp( value )
                 elif key in [ 'shellVariables' ]:
                     value = dict(map(lambda d: (d['name'], d['value']), value))
+                elif key in [ 'symbolTransformation' ]:
+                    value = [ self.TRANSFORMATIONPATTERN.findall(value) ]
             setattr(self, key, value)
     
     @property
@@ -88,13 +91,15 @@ class PMXPreferenceSettings(object):
             if value != None:
                 if key == 'shellVariables':
                     self.shellVariables.update(value)
+                if key == 'showInSymbolList' and self.showInSymbolList == None:
+                    self.showInSymbolList = other.showInSymbolList
                 elif not getattr(self, key):
                     setattr(self, key, value)
     
     def update(self, other):
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(other, key, None)
-            if value != None and not getattr(self, key):
+            if value != None and getattr(self, key) == None:
                 setattr(self, key, value)
 
     def indent(self, line):

@@ -112,14 +112,6 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
             self.discard_lines = 0
         self.syntax.parse(text, self)
 
-    def blockRange(self, block):
-        first = self.editor.firstVisibleBlock()
-        page_bottom = self.editor.viewport().height()
-        viewport_offset = self.editor.contentOffset()
-        first_position = self.editor.blockBoundingGeometry(first).topLeft() + viewport_offset
-        block_position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-        return first_position.y() <= block_position.y() <= page_bottom
-
     def addToken(self, end):
         begin = self.line_position
         if self.discard_lines == 0:
@@ -157,8 +149,9 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 
     def foldingMarker(self, line):
         self.userData.folding = self.syntax.folding(line)
-        if self.syntax.indentSensitive and self.userData.folding == self.syntax.FOLDING_STOP and line.strip() == "":
-            self.userData.folding = self.syntax.FOLDING_NONE
+        #TODO: Si es un folding stop buscar hacia arriba el de apertura
+        #if self.syntax.indentSensitive and self.userData.folding == self.syntax.FOLDING_STOP and line.strip() == "":
+        #    self.userData.folding = self.syntax.FOLDING_NONE
 
     def indentMarker(self, line, scope):
         settings = self.editor.pmxApp.bundleManager.getPreferenceSettings(scope)

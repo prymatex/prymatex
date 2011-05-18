@@ -5,6 +5,7 @@ import os, re, plistlib
 from glob import glob
 from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
+from prymatex.support.qtadapter import buildKeyEquivalentString
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
