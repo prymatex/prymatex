@@ -212,11 +212,11 @@ class PMXSyntax(PMXBundleItem):
                 hash[key] = value
         return hash
 
+    #Deprecated es una chanchada
     @property
     def indentSensitive(self):
         #If stop marker match with "" the grammar is indent sensitive
-        match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
-        return match != None
+        return False
 
     @property
     def syntaxes(self):
