@@ -28,7 +28,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
                 var['value'] = self.values[1][index]
                 var['enabled'] = self.values[2][index]
                 variables.append(var)
-        self.settingGroup.setValue(variables)
+        self.settingGroup.setValue('shellVariables', variables)
     
     def rowCount(self, parent):
         return len(self.values[0])

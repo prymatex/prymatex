@@ -487,6 +487,11 @@ class PMXSupportManager(object):
         if sort:
             return sorted(stxs, key = lambda s: s.name)
         return stxs
+    
+    def getSyntaxByScopeName(self, scope):
+        if scope in self.SYNTAXES:
+            return self.SYNTAXES[scope]
+        return None
         
     def findSyntaxByFirstLine(self, line):
         for syntax in self.SYNTAXES.values():

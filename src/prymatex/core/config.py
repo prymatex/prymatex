@@ -125,10 +125,10 @@ class SettingsGroup(object):
     def value(self, name):
         self.qsettings.beginGroup(self.name)
         value = self.qsettings.value(name)
-        if value == None:
+        self.qsettings.endGroup()
+        if value == None and name in self.settings:
             #TODO: ver si tengo que pasarle un objeto
             return self.settings[name].getDefault()
-        self.qsettings.endGroup()
         return SettingsGroup.toPyObject(value)
         
     def addSetting(self, setting):
