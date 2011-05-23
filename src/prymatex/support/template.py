@@ -6,13 +6,14 @@
     http://manual.macromates.com/en/templates
 '''
 
-import os, plistlib
+import os, shutil, plistlib
 from subprocess import Popen
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, ensureEnvironment, deleteFile
 
 class PMXTemplate(PMXBundleItem):
     KEYS = [    'command', 'extension']
+    FILE = 'info.plist'
     TYPE = 'template'
     FOLDER = 'Templates'
     PATTERNS = [ '*' ]
@@ -25,6 +26,13 @@ class PMXTemplate(PMXBundleItem):
         for key in PMXTemplate.KEYS:
             setattr(self, key, hash.get(key, None))
     
+    def update(self, hash):
+        for key in hash.keys():
+            if key == "path":
+                #Si quieren cambiar el path muevo mis archivos dependientes
+                shutil.copytree(self.path, hash[key])
+            setattr(self, key, hash[key])
+    
     @property
     def hash(self):
         hash = super(PMXTemplate, self).hash
@@ -34,6 +42,12 @@ class PMXTemplate(PMXBundleItem):
                 hash[key] = value
         return hash
     
+    def save(self):
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
+        file = os.path.join(self.path , self.FILE)
+        plistlib.writePlist(self.hash, file)
+        
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()
         env['TM_NEW_FILE'] = os.path.join(directory, name + '.' + self.extension)
@@ -55,7 +69,7 @@ class PMXTemplate(PMXBundleItem):
         
     @classmethod
     def loadBundleItem(cls, path, namespace):
-        info_file = os.path.join(path, 'info.plist')
+        info_file = os.path.join(path, cls.FILE)
         try:
             data = plistlib.readPlist(info_file)
             template = cls(namespace, data, path)

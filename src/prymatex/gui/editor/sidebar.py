@@ -27,7 +27,7 @@ class PMXSidebar(QWidget, PMXObject):
         self.configure()
 
     class Meta(object):
-        settings = 'editor.sidebar'
+        settings = 'Editor.Sidebar'
         
     def sizeHint(self):
         return QSize(self.editor.lineNumberAreaWidth(), 0)

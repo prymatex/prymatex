@@ -92,7 +92,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.highlightCurrentLine()
     
     class Meta(object):
-        settings = 'editor'
+        settings = 'Editor'
     
     @property
     def tabKeyBehavior(self):

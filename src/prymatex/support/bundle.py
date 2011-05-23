@@ -98,6 +98,16 @@ class PMXBundle(object):
         if self.mainMenu != None:
             self.mainMenu = PMXMenuNode(**self.mainMenu)
 
+    def update(self, hash):
+        for key in hash.keys():
+            setattr(self, key, hash[key])
+    
+    def isChanged(self, hash):
+        for key in hash.keys():
+            if getattr(self, key) != hash[key]:
+                return True
+        return False
+
     @property
     def hash(self):
         #TODO: el menu
@@ -163,6 +173,16 @@ class PMXBundleItem(object):
     def load(self, hash):
         for key in PMXBundleItem.KEYS:
             setattr(self, key, hash.get(key, None))
+    
+    def update(self, hash):
+        for key in hash.keys():
+            setattr(self, key, hash[key])
+    
+    def isChanged(self, hash):
+        for key in hash.keys():
+            if getattr(self, key) != hash[key]:
+                return True
+        return False
     
     @property
     def hash(self):
