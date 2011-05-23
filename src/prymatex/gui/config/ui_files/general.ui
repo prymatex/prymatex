@@ -38,39 +38,48 @@
       <string>Window Title</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1" colspan="2">
-       <widget class="QComboBox" name="comboBox">
-        <item>
-         <property name="text">
-          <string>Application Name</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Current File - Application Name</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Current Project - Current File</string>
-         </property>
-        </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Title template</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="3">
+       <widget class="QComboBox" name="comboTabVisibility"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelTabVisibility">
+        <property name="text">
+         <string>Tab visibilty</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="pushInsertAppName">
+        <property name="text">
+         <string>Application Name</string>
+        </property>
        </widget>
       </item>
       <item row="2" column="2">
-       <widget class="QCheckBox" name="checkBox_3">
+       <widget class="QPushButton" name="pushInsertProject">
         <property name="text">
-         <string>Use file name instead of path</string>
-        </property>
-        <property name="setting" stdset="0">
-         <string>editor.pepe</string>
+         <string>Project Name</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
+      <item row="2" column="3">
+       <widget class="QPushButton" name="pushInsertFile">
         <property name="text">
-         <string>Format</string>
+         <string>File Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="3">
+       <widget class="QComboBox" name="comboApplicationTitle">
+        <property name="editable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

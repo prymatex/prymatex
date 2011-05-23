@@ -14,6 +14,7 @@ from prymatex.core.base import PMXObject
 import logging
 from prymatex.core.exceptions import APIUsageError
 from prymatex.core.filemanager import PMXFile
+from prymatex.core.config import pmxConfigPorperty
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +30,37 @@ class PMXTabWidget(QTabWidget, PMXObject):
     callbacks
     '''
     
+    class Meta:
+        settings = 'tabwidget'
+        
+    # Settings
+    TABBAR_NEVER_SHOWN = 0x00
+    TABBAR_ALWAYS_SHOWN = 0x01
+    TABBAR_WHEN_MULTIPLE = 0x02
+    
+    _showTabBar = TABBAR_ALWAYS_SHOWN
+    def setShowTabBar(self, value):
+        values = [
+                  self.TABBAR_NEVER_SHOWN,
+                  self.TABBAR_ALWAYS_SHOWN,
+                  self.TABBAR_WHEN_MULTIPLE,
+                  ]
+        if not value in values:
+            raise APIUsageError("setShowTabBar expected a valid constant")
+        self._showTabBar = value
+        self.showTabBarCheck() # Update
+        
+    showTabBar = pmxConfigPorperty(default = True, fset=setShowTabBar)
+     
+    # Signals
     currentEditorChanged = pyqtSignal(QWidget)
+    
     
     
     def __init__(self, parent):
         super(PMXTabWidget, self).__init__(parent)
+        
+        self.configure()
         
         self.setupActions() # Call it at first so the QMetaObject.connectSlotsByName is called in the setupUi
         self.setupUi()
@@ -347,6 +374,24 @@ class PMXTabWidget(QTabWidget, PMXObject):
         editor = self.widget(index)
         if editor:
             self.currentEditorChanged.emit(editor)
+        self.showTabBarCheck()
+    
+    def showTabBarCheck(self):
+        ''' Updates PMXTabBar behavior '''
+        tabBar = self.tabBar()
+        if self.showTabBar == self.TABBAR_ALWAYS_SHOWN:
+            if tabBar.isHidden():
+                tabBar.show()
+        elif self.showTabBar == self.TABBAR_NEVER_SHOWN:
+            if not tabBar.isHidden():
+                tabBar.hide()
+        elif self.showTabBar == self.TABBAR_WHEN_MULTIPLE:
+            print "Count"
+            count = self.count()
+            if count > 1:
+                self.tabBar().show()
+            elif count == 1:
+                self.tabBar().hide()
         
     
     def tabInserted(self, index):

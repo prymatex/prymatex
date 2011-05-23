@@ -6,6 +6,7 @@ from prymatex.core.base import PMXObject
 from prymatex.gui.panes.browser import PMXBrowserPaneDock
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.bundles.tableview import PMXTableViewMixin
+from prymatex.gui.mainwindow import PMXMainWindow
 settings = qApp.instance().settings
 
 class PMXConfigTreeView(QTreeView):
@@ -60,10 +61,55 @@ class PMXUpdatesWidget(QWidget, Ui_Updates):
         self.setupUi(self)
         
 from ui_general import Ui_General
-class PMXGeneralWidget(QWidget, Ui_General):
+class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
     def __init__(self, parent = None):
         super(PMXGeneralWidget, self).__init__(parent)
         self.setupUi(self)
+        from prymatex.gui.tabwidget import PMXTabWidget
+        self.comboTabVisibility.addItem("Always shown", PMXTabWidget.TABBAR_ALWAYS_SHOWN)
+        self.comboTabVisibility.addItem("Show when more than one", PMXTabWidget.TABBAR_WHEN_MULTIPLE)
+        self.comboTabVisibility.addItem("Never show", PMXTabWidget.TABBAR_NEVER_SHOWN)
+        
+        self.tabwidgetSettingsGroup = qApp.instance().settings.getGroup('tabwidget')
+        
+        self.comboTabVisibility.currentIndexChanged.connect(self.tabVisibilityChanged)
+        
+        
+        #self.mainwindowSettingsGroup = qApp.instance().settings.getGroup('mainwindow')
+        #title = self.mainwindowSettingsGroup.value('windowTitleTemplate') or '%APPTITLE'
+        title = self.settingsValue('mainwindow.windowTitleTemplate', default = '$APPTITLE')
+        self.comboApplicationTitle.editTextChanged.connect(self.updateMainWindowTitle)
+        
+        self.comboApplicationTitle.addItem(title, title) 
+        
+        
+        
+    def tabVisibilityChanged(self, index):
+        value = self.comboTabVisibility.itemData(index)
+        print self.tabwidgetSettingsGroup.setValue('showTabBar', value)
+    
+    def appendToCombo(self, text):
+        
+        current_index = self.comboApplicationTitle.currentIndex()
+        #print "Current index", current_index
+        current_text = self.comboApplicationTitle.currentText()
+        text = unicode(current_text or '') + unicode(text or '')
+        self.comboApplicationTitle.setItemText(current_index, text)
+        #print "Settings text", text
+    
+    def on_pushInsertAppName_pressed(self):
+        self.appendToCombo(" $APPNAME")
+        
+    def on_pushInsertFile_pressed(self):
+        self.appendToCombo(" $FILENAME")
+        
+    def on_pushInsertProject_pressed(self):
+        self.appendToCombo(" $PROJECT")
+    
+    def updateMainWindowTitle(self, text):
+        self.mainwindow.windowTitleTemplate = unicode(text)
+        print self.mainwindow.windowTitleTemplate
+        
         
 CODECS = '''
 ascii    646, us-ascii    English
