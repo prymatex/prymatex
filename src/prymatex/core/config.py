@@ -156,6 +156,9 @@ class SettingsGroup(object):
                 self.qsettings.endGroup()
                 
 class pmxConfigPorperty(object):
+    '''
+    Configuration descriptor
+    '''
     def __init__(self, default = None, fset = None, tm_name = None):
         self.default = default
         self.fset = fset
