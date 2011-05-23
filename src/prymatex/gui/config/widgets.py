@@ -70,23 +70,22 @@ class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
         self.comboTabVisibility.addItem("Show when more than one", PMXTabWidget.TABBAR_WHEN_MULTIPLE)
         self.comboTabVisibility.addItem("Never show", PMXTabWidget.TABBAR_NEVER_SHOWN)
         
-        self.tabwidgetSettingsGroup = qApp.instance().settings.getGroup('tabwidget')
+        self.tabwidgetSettingsGroup = self.pmxApp.settings.getGroup('TabWidget')
+        self.mainwindowSettingsGroup = self.pmxApp.settings.getGroup('MainWindow')
         
         self.comboTabVisibility.currentIndexChanged.connect(self.tabVisibilityChanged)
         
         
         #self.mainwindowSettingsGroup = qApp.instance().settings.getGroup('mainwindow')
         #title = self.mainwindowSettingsGroup.value('windowTitleTemplate') or '%APPTITLE'
-        title = self.settingsValue('mainwindow.windowTitleTemplate', default = '$APPTITLE')
+        title = self.mainwindowSettingsGroup.value('windowTitleTemplate')
         self.comboApplicationTitle.editTextChanged.connect(self.updateMainWindowTitle)
         
         self.comboApplicationTitle.addItem(title, title) 
         
-        
-        
     def tabVisibilityChanged(self, index):
         value = self.comboTabVisibility.itemData(index)
-        print self.tabwidgetSettingsGroup.setValue('showTabBar', value)
+        self.tabwidgetSettingsGroup.setValue('showTabBar', value)
     
     def appendToCombo(self, text):
         
@@ -107,9 +106,7 @@ class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
         self.appendToCombo(" $PROJECT")
     
     def updateMainWindowTitle(self, text):
-        self.mainwindow.windowTitleTemplate = unicode(text)
-        print self.mainwindow.windowTitleTemplate
-        
+        self.mainwindowSettingsGroup.setValue('windowTitleTemplate', unicode(text))
         
 CODECS = '''
 ascii    646, us-ascii    English

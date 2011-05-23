@@ -31,7 +31,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
     '''
     
     class Meta:
-        settings = 'tabwidget'
+        settings = 'TabWidget'
         
     # Settings
     TABBAR_NEVER_SHOWN = 0x00

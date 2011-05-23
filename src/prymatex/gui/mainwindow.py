@@ -39,16 +39,14 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     '''
 
     class Meta:
-        settings = 'mainwindow'
+        settings = 'MainWindow'
     
     # Settings
     
-    def setWindowTitleTemplate(self, value):
+    @pmxConfigPorperty(default = "$APPNAME")
+    def windowTitleTemplate(self, value):
         self._windowTitleTemplate = value
         self.updateWindowTitle()
-    
-    windowTitleTemplate = pmxConfigPorperty(default = "$APPNAME", fset=setWindowTitleTemplate)
-    
     
     # Constructor
     
@@ -92,8 +90,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.preventMenuLock()
         
         self.manageFilesToOpen(files_to_open)
-        
-        
+        self.configure()
     
     def manageFilesToOpen(self,files):
         '''

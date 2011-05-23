@@ -317,9 +317,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             super(PMXCodeEdit, self).mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        #position = event.pos()
-        #QToolTip.showText(self.mapToGlobal(position), "Cacho", self)
-        super(PMXCodeEdit, self).mouseMoveEvent(event)
+        print "mouseMoveEvent"
+        if event.modifiers() == Qt.ControlModifier:
+            new_cursor = self.cursorForPosition(event.pos())
+            index = 0
+            self.cursors.insert(index, new_cursor)
+            #self.repaint()
+        else:
+            super(PMXCodeEdit, self).mouseMoveEvent(event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
         '''
@@ -928,3 +933,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(position)
                 self.setTextCursor(cursor)
                 cursor.endEditBlock()
+
+class PMXCursors(object):
+    def __init__(self):
+        pass
