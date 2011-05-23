@@ -106,15 +106,14 @@
     <file>resources/icons/Prymatex_Logo.png</file>
   </qresource>
   <qresource prefix="bundles">
-    <file>resources/icons/command.png</file>
-    <file>resources/icons/drag.png</file>
-    <file>resources/icons/language.png</file>
-    <file>resources/icons/menu.png</file>
-    <file>resources/icons/snippet.png</file>
-    <file>resources/icons/perference.png</file>
-    <file>resources/icons/bundle.png</file>
-    <file>resources/icons/template.png</file>
-    <file>resources/icons/language.png</file>
+    <file>resources/bundles/commands.png</file>
+    <file>resources/bundles/drag-commands.png</file>
+    <file>resources/bundles/languages.png</file>
+    <file>resources/bundles/macros.png</file>
+    <file>resources/bundles/preferences.png</file>
+    <file>resources/bundles/snippets.png</file>
+    <file>resources/bundles/template-files.png</file>
+    <file>resources/bundles/templates.png</file>
   </qresource>
   <qresource prefix="sidebar">
     <file>resources/sidebar/bookmark-flag.png</file>

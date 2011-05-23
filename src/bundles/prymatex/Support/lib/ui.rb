@@ -97,6 +97,7 @@ module TextMate
         command << ' --transparent' if options[:transparent]
         format = options[:format] ? options[:format].to_s : 'text'
         command << ' --' << format << ' ' << e_sh(content)
+        puts command
         %x{ #{command} }
       end
       
@@ -129,7 +130,7 @@ module TextMate
         pid = fork do
           STDOUT.reopen(open('/dev/null'))
           STDERR.reopen(open('/dev/null'))
-
+        
           unless options.has_key? :initial_filter
             require ENV['TM_SUPPORT_PATH'] + '/lib/current_word'
             characters = "a-zA-Z0-9" # Hard-coded into D2
@@ -150,7 +151,7 @@ module TextMate
             io << plist.to_plist; io.close_write
             OSX::PropertyList.load io rescue nil
           end
-
+    
           # Use a default block if none was provided
           block ||= lambda do |choice|
             choice ? choice['insert'] : nil
@@ -454,6 +455,7 @@ ENV['WEB_PREVIEW_RUBY']='NO-RUN'
 class TestCompletes < Test::Unit::TestCase
   def test_basic_completion
     #Should complete the snippet, if there is one, without requiring a block
+    puts @choices
     TextMate::UI.complete(@choices)
     # 
   end
@@ -546,9 +548,11 @@ class TestCompletes < Test::Unit::TestCase
       {'image' => 'Macro',   'display' => 'foo', 'insert' => '(${1:one}, "${2:one}", ${3:three}${4:, ${5:five}, ${6:six}})',   'tool_tip_format' => "html", 'tool_tip' => "(one, two)\n This method does something or other maybe.\n Insert longer description of it here."},
       {'image' => 'Command', 'display' => 'bar', 'insert' => '(${1:one}, ${2:one}, "${3:three}"${4:, "${5:five}", ${6:six}})',                              'tool_tip' => "(one, two[, three])\n This method does something or other maybe.\n Insert longer description of it here."},
     ]
+    test_with_tooltips
   end
   def make_front!
-    `open "txmt://open?url=file://$TM_FILEPATH"` #For testing purposes, make this document the topmost so that the complete popup works
+      puts "Iniciando" 
+    #`xdg-open "txmt://open?url=file://$TM_FILEPATH"` #For testing purposes, make this document the topmost so that the complete popup works
   end
 end
 

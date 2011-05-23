@@ -22,6 +22,8 @@ class PMXSidebar(QWidget, PMXObject):
         self.foldingBottomIcon.load(":/sidebar/resources/sidebar/folding-bottom.png")
         self.foldingCollapsedIcon = QPixmap()
         self.foldingCollapsedIcon.load(":/sidebar/resources/sidebar/folding-collapsed.png")
+        self.foldingEllipsisIcon = QPixmap()
+        self.foldingEllipsisIcon.load(":/sidebar/resources/sidebar/folding-ellipsis.png")
         self.bookmarkFlagIcon = QPixmap()
         self.bookmarkFlagIcon.load(":/sidebar/resources/sidebar/bookmark-flag.png")
         self.configure()

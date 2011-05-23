@@ -2,10 +2,11 @@
 
 import re, logging
 from bisect import bisect
+from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
-    QTextCursor, QAction, QFont, QPalette
-from prymatex.support import PMXBundle, PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXTheme
+    QTextCursor, QAction, QFont, QPalette, QPainter, QFontMetrics, QColor
+from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
@@ -74,19 +75,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
+        print "set themes"
         theme = self.pmxApp.bundleManager.getTheme(uuid)
         self.syntaxProcessor.formatter = theme
         style = theme.getStyle()
-        foreground = style.getQColor('foreground')
-        background = style.getQColor('background')
-        selection = style.getQColor('selection')
-        invisibles = style.getQColor('invisibles')
+        self.foreground = style.getQColor('foreground')
+        self.background = style.getQColor('background')
+        self.selection = style.getQColor('selection')
+        self.invisibles = style.getQColor('invisibles')
         palette = self.palette()
-        palette.setColor(QPalette.Active, QPalette.Text, foreground)
-        palette.setColor(QPalette.Active, QPalette.Base, background)
-        palette.setColor(QPalette.Inactive, QPalette.Base, background)
-        palette.setColor(QPalette.Active, QPalette.Highlight, selection)
-        palette.setColor(QPalette.Active, QPalette.AlternateBase, invisibles)
+        palette.setColor(QPalette.Active, QPalette.Text, self.foreground)
+        palette.setColor(QPalette.Active, QPalette.Base, self.background)
+        palette.setColor(QPalette.Inactive, QPalette.Base, self.background)
+        palette.setColor(QPalette.Active, QPalette.Highlight, self.selection)
+        palette.setColor(QPalette.Active, QPalette.AlternateBase, self.invisibles)
         self.setPalette(palette)
         self.line_highlight = style.getQColor('lineHighlight')
         self.highlightCurrentLine()
@@ -246,8 +248,39 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # QPlainTextEdit Events
     #=======================================================================
     def paintEvent(self, event):
-        #self.syntaxProcessor.rehighlight()
+        #QPlainTextEdit.paintEvent(self, event)
         super(PMXCodeEdit, self).paintEvent(event)
+        page_bottom = self.viewport().height()
+        font_metrics = QFontMetrics(self.document().defaultFont())
+
+        painter = QPainter(self.viewport())
+        
+        block = self.firstVisibleBlock()
+        viewport_offset = self.contentOffset()
+        line_count = block.blockNumber()
+        while block.isValid():
+            line_count += 1
+            # The top left position of the block in the document
+            position = self.blockBoundingGeometry(block).topLeft() + viewport_offset
+            # Check if the position of the block is out side of the visible area
+            if position.y() > page_bottom:
+                break
+
+            user_data = block.userData()
+            if user_data.folding == PMXBlockUserData.FOLDING_START and user_data.folded:
+                painter.drawPixmap(font_metrics.width(block.text()) + 10,
+                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.sidebar.foldingEllipsisIcon.height(),
+                    self.sidebar.foldingEllipsisIcon)
+            
+            block = block.next()
+        if self.multiEditMode:
+            for cursor in self.cursors:
+                rec = self.cursorRect(cursor)
+                cursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
+                painter.setPen(QtGui.QPen(self.foreground))
+                painter.drawLine(cursor)
+        painter.end()
+
     #=======================================================================
     # Mouse Events
     #=======================================================================
@@ -272,10 +305,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def mousePressEvent(self, event):
         print "mousePressEvent"
         if event.modifiers() == Qt.ControlModifier:
-            position = event.pos()
-            cursor = self.cursorForPosition(position)
-            self.cursors.append(QTextCursor(cursor))
-            print self.cursors
+            new_cursor = self.cursorForPosition(event.pos())
+            index = 0
+            for index, cursor in enumerate(self.cursors):
+                print cursor.position(), new_cursor.position()
+                if cursor.position() > new_cursor.position():
+                    break;
+            self.cursors.insert(index, new_cursor)
+            print index
+            #self.repaint()
         else:
             super(PMXCodeEdit, self).mousePressEvent(event)
 
@@ -751,10 +789,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             if not start.isValid():
                 return None
         return start
+    
     #==========================================================================
     # Bookmarks
-    #==========================================================================
-    
+    #==========================================================================    
     def toggleBookmark(self, line_number):
         if line_number in self.bookmarks:
             self.bookmarks.remove(line_number)
@@ -813,11 +851,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             font.setPointSize(size)
         self.font = font
 
-    
     #===========================================================================
     # Text Indentation
     #===========================================================================
-    
     @classmethod
     def indentationWhitespace(cls, text):
         '''
