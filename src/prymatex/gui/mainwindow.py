@@ -25,6 +25,8 @@ from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXObject
 from prymatex.gui.bundles.tableview import PMXBundleItemTableView,\
     PMXBundleItemSelector
+from prymatex.core.config import pmxConfigPorperty
+
 
 #from prymatex.config.configdialog import PMXConfigDialog
 
@@ -36,6 +38,20 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     grants access to the focused editor.
     '''
 
+    class Meta:
+        settings = 'mainwindow'
+    
+    # Settings
+    
+    def setWindowTitleTemplate(self, value):
+        self._windowTitleTemplate = value
+        self.updateWindowTitle()
+    
+    windowTitleTemplate = pmxConfigPorperty(default = "$APPNAME", fset=setWindowTitleTemplate)
+    
+    
+    # Constructor
+    
     def __init__(self, files_to_open):
         '''
         The main window
@@ -46,8 +62,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         super(PMXMainWindow, self).__init__()
         # Initialize graphical elements
         self.setupUi(self)
-        
-        self.setWindowTitle(self.trUtf8(u"Prymatex Text Editor"))
+        # Window Title update
+        self.tabWidget.currentEditorChanged.connect(self.updateWindowTitle)
+        #self.setWindowTitle(self.trUtf8(u"Prymatex Text Editor"))
 
         #Conectar tabs con status y status con tabs
         #self.statusbar.syntaxMenu.syntaxChange.connect(self.tabWidgetEditors.on_syntax_change)
@@ -75,6 +92,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.preventMenuLock()
         
         self.manageFilesToOpen(files_to_open)
+        
         
     
     def manageFilesToOpen(self,files):
@@ -522,6 +540,17 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.currentEditorWidget.showReplaceWidget()
     
     
+    def updateWindowTitle(self):
+        ''' Updates window title '''
+        from string import Template
+        print self.windowTitleTemplate, type(self.windowTitleTemplate)
+        template = Template(self.windowTitleTemplate)
+        s = template.safe_substitute(APPNAME="Prymatex",
+                                FILE='No file',
+                                PROJECT='No project',)
+        self.setWindowTitle(s)
+        
+    
     def closeEvent(self, event):
         unsaved = self.tabWidget.unsavedCounter
         if unsaved:
@@ -568,6 +597,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def on_actionRemove_All_Bookmarks_triggered(self):
         editor = self.currentEditor
         editor.removeBookmarks()
+    
+    
+    
 
 class PMXTabActionGroup(QActionGroup):
     '''
@@ -600,4 +632,4 @@ class PMXTabActionGroup(QActionGroup):
             self.menus.append(menu)
             for action in self.actions():
                 menu.addAction(action)
-            
+           
