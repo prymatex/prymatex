@@ -143,38 +143,44 @@ class PMXSupportManager(object):
     #---------------------------------------------------
     # BUNDLE INTERFACE
     #---------------------------------------------------
-    def hasBundle(self, uuid):
-        '''
-        @return: True if bundle exists
-        '''
-        return uuid in self.BUNDLES
-
     def addBundle(self, bundle):
         '''
         @param bundle: PMXBundle instance
         '''
         self.BUNDLES[bundle.uuid] = bundle
 
-    def removeBundle(self, bundle):
-        '''
-        @param bundle: PMXBundle instance
-        '''
-        self.BUNDLES.pop(bundle.uuid)
-        
     def getBundle(self, uuid):
         '''
         @return: PMXBundle by UUID
         '''
         return self.BUNDLES[uuid]
 
+    def modifyBundle(self, bundle):
+        pass
+
+    def removeBundle(self, bundle):
+        '''
+        @param bundle: PMXBundle instance
+        '''
+        self.BUNDLES.pop(bundle.uuid)
+
+    def addDeletedBundle(self, uuid):
+        '''
+            Perform logical delete
+        '''
+        self.deletedBundles.append(uuid)
+        
+    def hasBundle(self, uuid):
+        '''
+        @return: True if bundle exists
+        '''
+        return uuid in self.BUNDLES
+
     def getAllBundles(self):
         '''
         @return: list of PMXBundle instances
         '''
         return self.BUNDLES.values()
-    
-    def addDeletedBundle(self, uuid):
-        self.deletedBundles.append(uuid)
     
     def findBundles(self, **attrs):
         '''
@@ -217,14 +223,21 @@ class PMXSupportManager(object):
             raise Exception("More than one bundle")
         return bundles[0]
         
-    def updateBundle(self, **attrs):
+    def updateBundle(self, bundle, **attrs):
         '''
-            Retorna un bundle por sus atributos
+            Actualiza un bundle
         '''
-        bundles = self.findBundles(**attrs)
-        if len(bundles) > 1:
-            raise Exception("More than one bundle")
-        return bundles[0]
+        if bundle.namespace == self.nsorder[0]:
+            #Cambiar de namespace y de path al por defecto para proteger el base
+            newns = self.nsorder[-1]
+            attrs["namespace"] = newns
+            #TODO: escape de los caracteres del file system en el nombre pasado
+            name = "%s.tmbundle" % attrs["name"] if "name" in attrs else basename(bundle.path)
+            attrs["path"] = join(self.namespaces[newns]['Bundles'], name)
+        bundle.update(attrs)
+        bundle.save()
+        self.modifyBundle(bundle)
+        return bundle
         
     def deleteBundle(self, bundle):
         '''
@@ -244,12 +257,6 @@ class PMXSupportManager(object):
     #---------------------------------------------------
     # BUNDLEITEM INTERFACE
     #---------------------------------------------------
-    def hasBundleItem(self, uuid):
-        '''
-        @return: True if PMXBundleItem exists
-        '''
-        return uuid in self.BUNDLE_ITEMS
-
     def addBundleItem(self, item):
         self.BUNDLE_ITEMS[item.uuid] = item
         if item.bundle.mainMenu != None:
@@ -267,12 +274,21 @@ class PMXSupportManager(object):
             self.SYNTAXES[item.scopeName] = item
             # puede ser dependiente del namespace ? self.SYNTAXES[item.namespace][item.scopeName] = self
 
+    def getBundleItem(self, uuid):
+        return self.BUNDLE_ITEMS[uuid]
+
+    def modifyBundleItem(self, item):
+        pass
+
     def removeBundleItem(self, item):
         self.BUNDLE_ITEMS.pop(item.uuid)
     
-    def getBundleItem(self, uuid):
-        return self.BUNDLE_ITEMS[uuid]
-        
+    def hasBundleItem(self, uuid):
+        '''
+        @return: True if PMXBundleItem exists
+        '''
+        return uuid in self.BUNDLE_ITEMS
+
     def getAllBundleItems(self):
         return self.BUNDLE_ITEMS.values()
         
@@ -321,10 +337,25 @@ class PMXSupportManager(object):
         if len(items) > 1:
             raise Exception("More than one bundle item")
         return items[0]
-        
-    def updateBundleItem(self, **attrs):
-        pass
-        
+    
+    def updateBundleItem(self, item, **attrs):
+        '''
+            Actualiza un bundle item
+        '''
+        if item.bundle.namespace == self.nsorder[0]:
+            self.updateBundle(item.bundle)
+        if item.namespace == self.nsorder[0]:
+            #Cambiar de namespace y de path al por defecto para proteger el base
+            newns = self.nsorder[-1]
+            attrs["namespace"] = newns
+            #TODO: escape de los caracteres del file system en el nombre pasado
+            name = ("%s.%s" % attrs["name"], item.__class__.EXTENSION) if "name" in attrs else basename(item.path)
+            attrs["path"] = join(item.bundle.path, item.__class__.FOLDER, name)
+        item.update(attrs)
+        item.save()
+        self.modifyBundleItem(item)
+        return item
+    
     def deleteBundleItem(self, item):
         '''
             Elimina un bundle por su uuid,
@@ -338,18 +369,21 @@ class PMXSupportManager(object):
     #---------------------------------------------------
     # THEME INTERFACE
     #---------------------------------------------------
-    def hasTheme(self, uuid):
-        return uuid in self.THEMES
-    
     def addTheme(self, theme):
         self.THEMES[theme.uuid] = theme
         
     def getTheme(self, uuid):
         return self.THEMES[uuid]
-    
+
+    def modifyTheme(self, theme):
+        pass
+        
     def removeTheme(self, theme):
         self.THEMES.pop(theme.uuid)
-    
+
+    def hasTheme(self, uuid):
+        return uuid in self.THEMES
+
     def getAllThemes(self):
         return self.THEMES.values()
     
@@ -387,8 +421,21 @@ class PMXSupportManager(object):
             raise Exception("More than one theme")
         return items[0]
         
-    def updateTheme(self, **attrs):
-        pass
+    def updateTheme(self, theme, **attrs):
+        '''
+            Actualiza un themes
+        '''
+        if not theme.isChanged(attrs): return theme;
+        if theme.namespace == self.nsorder[0]:
+            #Cambiar de namespace y de path al por defecto para proteger el base
+            newns = self.nsorder[-1]
+            attrs["namespace"] = newns
+            name = "%s.tmTheme" % attrs["name"] if "name" in attrs else basename(theme.path)
+            attrs["path"] = join(self.namespaces[newns]['Themes'], name)
+        theme.update(attrs)
+        theme.save()
+        self.modifyTheme(theme)
+        return theme
         
     def deleteTheme(self, theme):
         '''

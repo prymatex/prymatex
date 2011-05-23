@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import plistlib
+import os, plistlib
 from copy import copy
 from xml.parsers.expat import ExpatError
 from prymatex.support.score import PMXScoreManager
@@ -68,7 +68,17 @@ class PMXTheme(object):
                     self.sytles.append(PMXStyle(setting))
             else:
                 setattr(self, key, value)
+
+    def update(self, hash):
+        for key in hash.keys():
+            setattr(self, key, hash[key])
     
+    def isChanged(self, hash):
+        for key in hash.keys():
+            if getattr(self, key) != hash[key]:
+                return True
+        return False
+        
     @property
     def hash(self):
         hash = {}
@@ -83,12 +93,11 @@ class PMXTheme(object):
                 hash[key] = value
         return hash
         
-    def save(self, base = None):
-        if base != None:
-            file = os.path.join(base , os.path.basename(self.path))
-        else:
-            file = self.path
-        plistlib.writePlist(self.hash, file)
+    def save(self):
+        dir = os.path.dirname(self.path)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        plistlib.writePlist(self.hash, self.path)
 
     @classmethod
     def loadTheme(cls, path, namespace):

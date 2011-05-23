@@ -25,11 +25,17 @@ def test_creationAndDeleteBundle(manager):
     item = manager.createBundleItem('MiSnippet', 'snippet', bundle)
     item.save()
     manager.deleteBundle(bundle)
-    
+
+def test_bundleItemsCRUD(manager):
+    items = manager.findBundleItems(name = "thon")
+    for item in items:
+        item = manager.updateBundleItem(item, tabTrigger = "cacho")
+        print item.tabTrigger
+        
 if __name__ == "__main__":
     from prymatex.support.manager import PMXSupportManager
     manager = PMXSupportManager()
     manager.addNamespace('prymatex', os.path.abspath('../bundles/prymatex'))
     manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     manager.loadSupport()
-    test_syntax(manager)
+    test_bundleItemsCRUD(manager)
