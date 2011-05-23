@@ -307,12 +307,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if event.modifiers() == Qt.ControlModifier:
             new_cursor = self.cursorForPosition(event.pos())
             index = 0
-            for index, cursor in enumerate(self.cursors):
+            for index, cursor in enumerate(self.cursors, 1):
                 print cursor.position(), new_cursor.position()
                 if cursor.position() > new_cursor.position():
                     break;
             self.cursors.insert(index, new_cursor)
-            print index
             #self.repaint()
         else:
             super(PMXCodeEdit, self).mousePressEvent(event)
