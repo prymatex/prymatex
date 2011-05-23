@@ -114,7 +114,8 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 
     def addToken(self, end):
         begin = self.line_position
-        if self.discard_lines == 0:
+        if self.discard_lines == 0 and begin != end:
+            # Solo si no estoy descartando lineas y tengo realmente algo que agregar
             scopes = " ".join(self.scopes)
             self.userData.addScope(begin, end, scopes)
             if self.formatter != None:
