@@ -6,6 +6,7 @@ import re
 from prymatex.core.event import PMXEventSender
 from prymatex.core.config import SettingsGroup
 from PyQt4.QtGui import qApp
+from prymatex.core.exceptions import APIUsageError
 METHOD_RE = re.compile('(?P<name>[\w\d_]+)(:?\((?P<args>.*)\))?', re.IGNORECASE)
 
 class InvalidEventSignature(Exception):
@@ -59,6 +60,27 @@ class PMXObject(QObject):
 
     def connectEventsByName(self):
         raise NotImplementedError("Not implemented error")
+    
+    
+    def settingsValue(self, path, **kwargs):
+        ''' A simple shortcut, accepts default as named argument 
+        @param path: path.name
+        @param default: Optional value
+        '''
+        if kwargs and len(kwargs) > 1 or 'default' not in kwargs:
+            raise APIUsageError("default is the only optional argument")
+        try:
+            group_name, value_name = path.split('.')
+        except ValueError:
+            return kwargs['default']
+            raise
+        
+        group = self.pmxApp.settings.getGroup(group_name)
+        return group.value(value_name)
+    
+    def setSettingsValue(self, path, value):
+        raise NotImplementedError()
+        
     
     @property
     def mainWindow(self):
