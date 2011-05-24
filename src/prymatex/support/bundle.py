@@ -237,15 +237,17 @@ class PMXBundleItem(object):
             item = cls(namespace, data, path)
             return item
         except Exception, e:
-            data = open(path).read()
-            for match in RE_XML_ILLEGAL.finditer(data):
-                data = data[:match.start()] + "?" + data[match.end():]
             try:
+                data = open(path).read()
+                for match in RE_XML_ILLEGAL.finditer(data):
+                    data = data[:match.start()] + "?" + data[match.end():]
                 data = plistlib.readPlistFromString(data)
                 item = cls(namespace, data, path)
                 return item
             except ExpatError, e:
                 print "Error in %s for %s (%s)" % (cls.__name__, path, e)
+            except IOError, e:
+                pass
     
     def resolve(self, *args, **kwargs):
         pass

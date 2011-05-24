@@ -19,12 +19,17 @@ import subprocess
 
 #install xmodmap 
 def cmd_keymap_table():
-    return subprocess.Popen(
-           ['xmodmap','-pk'], stdout=subprocess.PIPE).communicate()[0]
-
+    try:
+        return subprocess.Popen(
+               ['xmodmap','-pk'], stdout=subprocess.PIPE).communicate()[0]
+    except:
+        return ""
 def cmd_modifier_map():
-    return subprocess.Popen(
-            ['xmodmap','-pm'], stdout=subprocess.PIPE).communicate()[0]
+    try:
+        return subprocess.Popen(
+                ['xmodmap','-pm'], stdout=subprocess.PIPE).communicate()[0]
+    except:
+        return ""
 
 def get_keymap_table():
     keymap = {}
