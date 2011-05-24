@@ -62,7 +62,7 @@ class PMXObject(QObject):
                 PMXObjectInstance.settingsValue("settingsAttribute", default = "foo");
         '''
         value = self.pmxApp.settings.value(name)
-        value = value if value != None else default:
+        value = value if value != None else default
         return value
     
     def setSettingsValue(self, name, value):

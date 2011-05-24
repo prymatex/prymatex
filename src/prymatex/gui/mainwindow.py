@@ -48,6 +48,12 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self._windowTitleTemplate = value
         self.updateWindowTitle()
     
+    @pmxConfigPorperty(default = True)
+    def showMenuBar(self, value):
+        print "Set menu bar"
+        self._showMenuBar = value
+        self.menuBar().setShown(value)
+    
     # Constructor
     
     def __init__(self, files_to_open):

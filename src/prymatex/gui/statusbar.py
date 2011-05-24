@@ -113,29 +113,29 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.declareEvents()
         self.setSignals()
         
-        self.mainwindow.tabWidget.currentEditorChanged.connect(self.syncToEditor)
+        self.mainWindow.tabWidget.currentEditorChanged.connect(self.syncToEditor)
     
     def setIndentMode(self, value):
         
-        self.mainwindow.currentEditorWidget.codeEdit.softTabs = value 
+        self.mainWindow.currentEditorWidget.codeEdit.softTabs = value 
     
     def setIndentWidth(self, value):
         self.warn("Tab Width %d" % value)
-        self.mainwindow.currentEditorWidget.codeEdit.tabWidth = value
+        self.mainWindow.currentEditorWidget.codeEdit.tabWidth = value
         
     def setSignals(self):
         #External events
-        self.connect(self.mainwindow, SIGNAL('editorCursorPositionChangedEvent'), self.updatePosition )
-        self.connect(self.mainwindow, SIGNAL('editorSetSyntaxEvent'), self.updateSyntax )
-        self.connect(self.mainwindow, SIGNAL('tabWidgetEditorChangedEvent'), self.updateEditor )
+        self.connect(self.mainWindow, SIGNAL('editorCursorPositionChangedEvent'), self.updatePosition )
+        self.connect(self.mainWindow, SIGNAL('editorSetSyntaxEvent'), self.updateSyntax )
+        self.connect(self.mainWindow, SIGNAL('tabWidgetEditorChangedEvent'), self.updateEditor )
         
         #Internal signals
         self.syntaxMenu.currentIndexChanged[int].connect(self.sendStatusBarSyntaxChanged)
         
         # New style
-#        self.mainwindow.editorCursorPositionChangedEvent.connect( self.updatePosition )
-#        self.mainwindow.editorSetSyntaxEvent.connect( self.updateSyntax )
-#        self.mainwindow.tabWidgetEditorChangedEvent.connect( self.updateEditor )
+#        self.mainWindow.editorCursorPositionChangedEvent.connect( self.updatePosition )
+#        self.mainWindow.editorSetSyntaxEvent.connect( self.updateSyntax )
+#        self.mainWindow.tabWidgetEditorChangedEvent.connect( self.updateEditor )
 #        
 #        #Internal signals
 #        self.syntaxMenu.currentIndexChanged[QString].connect( self.sendStatusBarSyntaxChanged )

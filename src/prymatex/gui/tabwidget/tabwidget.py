@@ -84,7 +84,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
     
     def setSignals(self):
         #External events
-        self.connect(self.mainwindow, SIGNAL('statusBarSytnaxChangedEvent'), self.updateEditorSyntax )
+        self.connect(self.mainWindow, SIGNAL('statusBarSytnaxChangedEvent'), self.updateEditorSyntax )
         
         #Internal signals
         self.connect(self, SIGNAL("tabCloseRequested(int)"), self.closeTab)
