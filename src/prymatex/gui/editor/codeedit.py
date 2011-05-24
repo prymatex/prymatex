@@ -656,7 +656,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             receiver = lambda item = item: self.insertBundleItem(item, tabTrigger = tabTrigger)
             self.connect(action, SIGNAL('triggered()'), receiver)
         if syntax:
-            point = self.mainwindow.cursor().pos()
+            point = self.mainWindow.cursor().pos()
         else:
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
