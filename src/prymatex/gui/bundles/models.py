@@ -1,9 +1,58 @@
-import os, sys
-sys.path.append(os.path.abspath('..'))
-
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from prymatex import res_rc
+
+class PMBBundleTreeItem(object):  
+    def __init__(self, uuid, name, tipo, parent=None):
+        self.name = name
+        self.uuid = uuid
+        self.tipo = tipo
+        self.parentItem = parent
+        self.childItems = []
+        self.setIcon(self.tipo)
+
+    def setIcon(self, tipo):
+        self.icon = QtGui.QPixmap()
+        if tipo == "template":
+            self.icon.load(":/bundles/resources/bundles/templates.png")
+        elif tipo == "command":
+            self.icon.load(":/bundles/resources/bundles/commands.png")
+        elif tipo == "bundle":
+            self.icon.fill(QtCore.Qt.gray)
+        elif tipo == "syntax":
+            self.icon.load(":/bundles/resources/bundles/languages.png")
+        elif tipo == "preference":
+            self.icon.load(":/bundles/resources/bundles/preferences.png")
+        elif tipo == "dragcommand":
+            self.icon.load(":/bundles/resources/bundles/drag-commands.png")
+        elif tipo == "snippet":
+            self.icon.load(":/bundles/resources/bundles/snippets.png")
+        elif tipo == "macro":
+            self.icon.load(":/bundles/resources/bundles/macros.png")
+        else:
+            self.icon.load(":/bundles/resources/bundles/template-files.png")
+
+    def appendChild(self, item):
+        self.childItems.append(item)
+
+    def child(self, row):
+        return self.childItems[row]
+
+    def childCount(self):
+        return len(self.childItems)
+
+    def columnCount(self):
+        return 1
+
+    def parent(self):  
+        return self.parentItem  
+
+    def row(self):  
+        if self.parentItem:  
+            return self.parentItem.childItems.index(self)  
+        return 0
+    
+    def setData(self, name):  
+        self.name = name
 
 class PMBBundleTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, manager, parent = None):  
@@ -104,74 +153,3 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
         for item in items:
             biti = PMBBundleTreeItem(item.uuid, item.name, item.TYPE, parent)
             parent.appendChild(biti)
-    
-class PMBBundleTreeItem(object):  
-    def __init__(self, uuid, name, tipo, parent=None):
-        self.name = name
-        self.uuid = uuid
-        self.tipo = tipo
-        self.parentItem = parent
-        self.childItems = []
-        self.setIcon(self.tipo)
-
-    def setIcon(self, tipo):
-        self.icon = QtGui.QPixmap(12,12)
-        if tipo == "template":
-            self.icon.fill(QtCore.Qt.green)
-        elif tipo == "command":
-            self.icon.fill(QtCore.Qt.red)
-        elif tipo == "bundle":
-            self.icon.fill(QtCore.Qt.gray)
-        elif tipo == "syntax":
-            self.icon.fill(QtCore.Qt.yellow)
-        elif tipo == "preference":
-            self.icon.fill(QtCore.Qt.lightGray)
-        elif tipo == "dragcommand":
-            self.icon.fill(QtCore.Qt.magenta)
-        elif tipo == "snippet":
-            self.icon.fill(QtCore.Qt.cyan)
-        else:
-            self.icon.fill(QtCore.Qt.blue)
-        
-    def appendChild(self, item):
-        self.childItems.append(item)
-
-    def child(self, row):
-        return self.childItems[row]
-
-    def childCount(self):
-        return len(self.childItems)
-
-    def columnCount(self):
-        return 1
-
-    def parent(self):  
-        return self.parentItem  
-
-    def row(self):  
-        if self.parentItem:  
-            return self.parentItem.childItems.index(self)  
-        return 0
-    
-    def setData(self, name):  
-        self.name = name
-
-class ColumnView(QTreeView):
-    def __init__(self, manager):
-        super(ColumnView,  self).__init__()
-
-        self.model = PMBBundleTreeModel(manager)
-        self.setModel(self.model)
-
-        self.setSortingEnabled(True)
-        self.resize(700,  700)
-        self.show()
-
-if __name__ == "__main__":
-    from prymatex.support.manager import PMXSupportManager
-    manager = PMXSupportManager()
-    manager.addNamespace('prymatex', os.path.abspath('../bundles/prymatex'))
-    manager.loadSupport()
-    app = QApplication([])
-    m = ColumnView(manager)
-    app.exec_()
