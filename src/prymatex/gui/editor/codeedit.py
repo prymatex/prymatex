@@ -75,22 +75,30 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
-        print "set themes"
         theme = self.pmxApp.bundleManager.getTheme(uuid)
         self.syntaxProcessor.formatter = theme
         style = theme.getStyle()
-        self.foreground = style.getQColor('foreground')
-        self.background = style.getQColor('background')
-        self.selection = style.getQColor('selection')
-        self.invisibles = style.getQColor('invisibles')
+        self.colours = {
+            'foreground': style.getQColor('foreground'),
+            'background': style.getQColor('background'),
+            'selection': style.getQColor('selection'),
+            'invisibles': style.getQColor('invisibles'),
+            'lineHighlight': style.getQColor('lineHighlight'),
+            'caret': style.getQColor('caret'),
+            'gutter': style.getQColor('gutter')
+        }
+        #Editor colours
         palette = self.palette()
-        palette.setColor(QPalette.Active, QPalette.Text, self.foreground)
-        palette.setColor(QPalette.Active, QPalette.Base, self.background)
-        palette.setColor(QPalette.Inactive, QPalette.Base, self.background)
-        palette.setColor(QPalette.Active, QPalette.Highlight, self.selection)
-        palette.setColor(QPalette.Active, QPalette.AlternateBase, self.invisibles)
+        palette.setColor(QPalette.Active, QPalette.Text, self.colours['foreground'])
+        palette.setColor(QPalette.Active, QPalette.Base, self.colours['background'])
+        palette.setColor(QPalette.Inactive, QPalette.Base, self.colours['background'])
+        palette.setColor(QPalette.Active, QPalette.Highlight, self.colours['selection'])
+        palette.setColor(QPalette.Active, QPalette.AlternateBase, self.colours['invisibles'])
         self.setPalette(palette)
-        self.line_highlight = style.getQColor('lineHighlight')
+        #Sidebar colours
+        self.sidebar.foreground = self.colours['foreground']
+        self.sidebar.background = self.colours['gutter']
+        
         self.highlightCurrentLine()
     
     class Meta(object):
@@ -102,26 +110,31 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     @property
     def snippetMode(self):
+        """Retorna si el editor esta en modo snippet"""
         return hasattr(self, 'snippet') and self.snippet != None
     
     @property
     def multiEditMode(self):
-        """retorna si el editor esta en modo multiedit"""
-        return bool(self.cursors)
+        """Retorna si el editor esta en modo multiedit"""
+        return self.cursors.hasCursors
     
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
+        
+        #Sidebar
         self.sidebar = PMXSidebar(self)
+        
         #Processors
         self.syntaxProcessor = PMXSyntaxProcessor(self)
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
         
+        #Cursors
+        self.cursors = PMXCursors(self)
+        
         self.bookmarks = []
         self.folded = []
-        self.cursors = []
         
-        # Actions performed when a key is pressed
         self.setupUi()
         self.setupActions()
         self.connectSignals()
@@ -146,6 +159,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.declareEvent('editorSetSyntaxEvent()')
 
     def setupActions(self):
+        # Actions performed when a key is pressed
         self.actionIndent = QAction(self.trUtf8("Increase indentation"), self )
         self.connect(self.actionIndent, SIGNAL("triggered()"), self.indent)
         self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
@@ -237,7 +251,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         extraSelections = []
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
-            selection.format.setBackground(self.line_highlight);
+            selection.format.setBackground(self.colours['lineHighlight']);
             selection.format.setProperty(QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
@@ -361,23 +375,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
         '''
-        #Si lo toma un bundle item o un snippet retorno
-        if self.snippetMode: #Modo Snippet
-            if self.keyPressBundleItem(event):
-                return
-            elif self.keyPressSnippet(event):
-                return
-        elif self.multiEditMode:
-            if self.keyPressBundleItem(event): #Modo MultiEdit
-                self.cursors = []
-                return
-            elif self.keyPressMultiEdit(event):
-                return
-        else:
-            if self.keyPressBundleItem(event): #Modo Normal
-                return
-            elif self.keyPressSmartTyping(event):
-                return
+        #Si lo toma un bundle item retorno
+        if self.keyPressBundleItem(event):
+            if self.multiEditMode:
+                self.cursors.removeAll()
+            return
+        elif self.snippetMode and self.keyPressSnippet(event): #Modo Snippet
+            return
+        elif self.multiEditMode and self.cursors.keyPressEvent(event): #Modo MultiEdit
+            return
+        elif self.keyPressSmartTyping(event): #Modo Normal
+            return
         
         key = event.key()
     
@@ -406,22 +414,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             else:
                 self.insertBundleItem(items[0])
             return True
-    
-    def keyPressMultiEdit(self, event):
-        if event.key() == Qt.Key_Escape:
-            self.cursors = []
-            return False
-        if event.modifiers() & Qt.ControlModifier:
-            super(PMXCodeEdit, self).keyPressEvent(event)
-        else:
-            cursor = self.textCursor()
-            cursor.beginEditBlock()        
-            cursors = self.cursors + [ cursor ]
-            for cursor in cursors:
-                self.setTextCursor(cursor)
-                super(PMXCodeEdit, self).keyPressEvent(event)
-            cursor.endEditBlock()
-        return True
     
     def keyPressSnippet(self, event):
         key = event.key()
@@ -935,5 +927,40 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.endEditBlock()
 
 class PMXCursors(object):
-    def __init__(self):
+    def __init__(self, editor):
+        self.editor = editor
+        self.cursors = {}
+    
+    @property
+    def hasCursors(self):
+        return bool(self.cursors)
+    
+    def addCursor(self, cursor):
+        self.cursors[cursor.position()] = cursor
+    
+    def removeAll(self):
+        self.cursors = {}
+    
+    #Handle the editor key event
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.removeAll()
+            return False
+        if event.modifiers() & Qt.ControlModifier:
+            super(PMXCodeEdit, self.editor).keyPressEvent(event)
+        else:
+            cursor = self.editor.textCursor()
+            cursor.beginEditBlock()        
+            cursors = self.cursors.values() + [ cursor ]
+            for cursor in cursors:
+                self.editor.setTextCursor(cursor)
+                super(PMXCodeEdit, self.editor).keyPressEvent(event)
+            cursor.endEditBlock()
+        return True
+    
+    def __iter__(self):
+        return iter(self.cursors.values())
+    
+    def __del__(self):
         pass
+    

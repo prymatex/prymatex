@@ -3,19 +3,18 @@ from PyQt4.Qt import QColor, QSize
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.processor import PMXBlockUserData
 from prymatex import res_rc
-from prymatex.core.base import PMXObject
 
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
-class PMXSidebar(QWidget, PMXObject):
-    foreground = pmxConfigPorperty(default = QColor(170, 170, 170))
-    background = pmxConfigPorperty(default = QColor(227, 227, 227))
-    
+class PMXSidebar(QWidget):
     def __init__(self, editor):
         super(PMXSidebar, self).__init__(editor)
         self.editor = editor
         self.highest_line = 0
         self.bookmarkArea = 12
         self.foldArea = 12
+        self.foreground = None #pmxConfigPorperty(default = QColor(170, 170, 170))
+        self.background = None #pmxConfigPorperty(default = QColor(227, 227, 227))
+        #Load Icons
         self.foldingTopIcon = QPixmap()
         self.foldingTopIcon.load(":/sidebar/resources/sidebar/folding-top.png")
         self.foldingBottomIcon = QPixmap()
@@ -26,11 +25,7 @@ class PMXSidebar(QWidget, PMXObject):
         self.foldingEllipsisIcon.load(":/sidebar/resources/sidebar/folding-ellipsis.png")
         self.bookmarkFlagIcon = QPixmap()
         self.bookmarkFlagIcon.load(":/sidebar/resources/sidebar/bookmark-flag.png")
-        self.configure()
 
-    class Meta(object):
-        settings = 'Editor.Sidebar'
-        
     def sizeHint(self):
         return QSize(self.editor.lineNumberAreaWidth(), 0)
 

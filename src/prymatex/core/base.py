@@ -42,10 +42,42 @@ from logging import getLogger
 class PMXObject(QObject):
     __metaclass__ = PMXObjectBase
 
+    #============================================================
+    # Settings
+    #============================================================
     def configure(self):
         self._meta.settings.addListener(self)
         self._meta.settings.configure(self)
     
+    def __del__(self):
+        self._meta.settings.removeListener(self)
+    
+    def settingsValue(self, name, default = None):
+        ''' A shortcut, for access to root settings
+            Usage: 
+                Accesss to Bar group
+                PMXObjectInstance.settingsValue("Bar/settingsAttribute");
+                PMXObjectInstance.settingsValue("Bar/settingsAttribute", default = "foo");
+                Accesss to Global group
+                PMXObjectInstance.settingsValue("settingsAttribute", default = "foo");
+        '''
+        value = self.pmxApp.settings.value(name)
+        value = value if value != None else default:
+        return value
+    
+    def setSettingsValue(self, name, value):
+        ''' A shortcut, for access to root settings
+            Usage: 
+                Set settingsAttribute in Bar group
+                PMXObjectInstance.setSettingsValue("Bar/settingsAttribute", 10);
+                Set settingsAttribute in Global group
+                PMXObjectInstance.setSettingsValue("settingsAttribute", 10);
+        '''
+        value = self.pmxApp.settings.setValue(name, value)
+    
+    #============================================================
+    # Events
+    #============================================================
     def declareEvent(self, signature):
         global EVENT_CLASSES
         match = METHOD_RE.match(signature)
@@ -60,37 +92,19 @@ class PMXObject(QObject):
 
     def connectEventsByName(self):
         raise NotImplementedError("Not implemented error")
-    
-    
-    def settingsValue(self, path, **kwargs):
-        ''' A simple shortcut, accepts default as named argument 
-        @param path: path.name
-        @param default: Optional value
-        '''
-        if kwargs and len(kwargs) > 1 or 'default' not in kwargs:
-            raise APIUsageError("default is the only optional argument")
-        try:
-            group_name, value_name = path.split('.')
-        except ValueError:
-            return kwargs['default']
-            raise
-        
-        group = self.pmxApp.settings.getGroup(group_name)
-        return group.value(value_name)
-    
-    def setSettingsValue(self, path, value):
-        raise NotImplementedError()
-        
-    
+
+    #============================================================
+    # Shortcut
+    #============================================================
+    __mainwindow = None
     @property
     def mainWindow(self):
-        main = self
-        while main.parent() != None:
-            main = main.parent()
-        return main
-       
-    mainwindow = mainWindow # TODO: Remove
-    
+        if self.__class__.__mainwindow == None:
+            self.__class__.__mainwindow = self
+            while self.__class__.__mainwindow.parent() != None:
+                self.__class__.__mainwindow = self.__class__.__mainwindow.parent()
+        return self.__class__.__mainwindow
+        
     __app = None
     @property
     def pmxApp(self):
@@ -98,25 +112,26 @@ class PMXObject(QObject):
         Shortcut property for PyQt4.QtGui.QApplication.instance() whit
         slight class level cache.
         '''
-        if not self.__class__.__app:
+        if self.__class__.__app == None:
             from PyQt4.QtGui import QApplication
             self.__class__.__app  = QApplication.instance()
         return self.__class__.__app
-    
-    
-    # Logging 
-    _logger = None
+
+    #============================================================
+    # Logger
+    #============================================================
+    __logger = None
     @property
     def logger(self):
         '''
         Per class logger, logger instances are named after
         classes, ie: prymatex.gui.mainwindow.PMXMainWindow 
         '''
-        if self._logger is None:
+        if self.__logger is None:
             t = type(self)
             loggername = '.'.join([t.__module__, t.__name__])
-            self.__class__._logger = getLogger(loggername)
-        return self._logger
+            self.__class__.__logger = getLogger(loggername)
+        return self.__logger
     
     def debug(self, msg, *args, **kwargs):
         self.logger.debug(msg)

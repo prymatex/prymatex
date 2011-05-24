@@ -139,6 +139,9 @@ class SettingsGroup(object):
     def addListener(self, listener):
         self.listeners.append(listener)
     
+    def removeListener(self, listener):
+        self.listeners.remove(listener)
+    
     def configure(self, obj):
         for key, setting in self.settings.iteritems():
             value = self.value(key)
