@@ -4,7 +4,7 @@ This module is inspired in QtCretor FileManager instance
 
 from PyQt4.QtCore import QObject, pyqtSignal, QString 
 from PyQt4.QtCore import Qt
-from prymatex.lib.magic import magic
+from prymatex.utils.magic import magic
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from os.path import *

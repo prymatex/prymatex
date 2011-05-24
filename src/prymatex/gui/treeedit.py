@@ -4,7 +4,7 @@
 Configuration may use this
 '''
 try:
-    from prymatex.lib.i18n import ugettext as _
+    from prymatex.utils.i18n import ugettext as _
 except:
     _ = lambda s: s
     

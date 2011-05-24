@@ -8,7 +8,7 @@ from datetime import datetime
 from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
 from PyQt4.QtCore import SIGNAL, QEvent
 
-from prymatex.lib import deco
+from prymatex.utils import deco
 from prymatex.core.config import PMXSettings
 #from prymatex.support import PMXSupportManager
 from logging import getLogger
@@ -309,7 +309,7 @@ class PMXApplication(QApplication):
         '''
         Checks if there's another instance using current profile
         '''
-        from prymatex.lib import os
+        from prymatex.utils import os
         
         lock_filename = self.getProfilePath('var', 'prymatex.pid')
         
@@ -321,13 +321,13 @@ class PMXApplication(QApplication):
                         pid in os.pid_proc_dict()
                         )
             if pid in os.pid_proc_dict():
-                from prymatex.lib.i18n import ugettext as _
+                from prymatex.utils.i18n import ugettext as _
                 self.logger.warning("Another app running")
                 QMessageBox.critical(None, _('Application Already Running'),
                                      _('''%s seems to be runnig. Please
                                      close the other instance.''', self.applicationName()),
                                      QMessageBox.Ok)
-                from prymatex.lib.exceptions import AlreadyRunningError
+                from prymatex.utils.exceptions import AlreadyRunningError
                 raise AlreadyRunningError(pid)
             
         else:
@@ -366,7 +366,7 @@ class PMXApplication(QApplication):
         if self.options.startdir and exists(self.options.startdir):
             return abspath(self.options.startdir)
         else:
-            #from prymatex.lib.os import get_homedir
+            #from prymatex.utils.os import get_homedir
             #return get_homedir()
             return os.getcwd()
 

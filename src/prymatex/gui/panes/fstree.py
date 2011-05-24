@@ -56,7 +56,7 @@ class FSTree(QTreeView, PMXObject):
                 self.setCurrentIndex(index) 
     
     def createMenus(self):
-        from prymatex.lib.i18n import ugettext as _
+        from prymatex.utils.i18n import ugettext as _
         # File Menu
         self.menuFile = QMenu(self)
         self.menuFile.setObjectName('menuFile')
@@ -201,7 +201,7 @@ class FSTree(QTreeView, PMXObject):
     
     @pyqtSignature('')
     def on_actionDirNew_triggered(self):
-        from prymatex.lib.i18n import ugettext as _
+        from prymatex.utils.i18n import ugettext as _
         
         pth = self.current_selected_path
         base = isdir(pth) and pth or dirname(pth)

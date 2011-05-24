@@ -20,7 +20,7 @@ from prymatex.core.filemanager import PMXFile
 from prymatex.core.exceptions import APIUsageError
 
 
-#from prymatex.lib.deco import logresult
+#from prymatex.utils.deco import logresult
 logger = logging.getLogger(__name__)
 
 # Path correction for standalone test

@@ -1,5 +1,5 @@
 
-from prymatex.lib.exceptions import UnsupportedPlatformError
+from prymatex.utils.exceptions import UnsupportedPlatformError
 
 import sys
 if sys.platform.count('linux') or sys.platform.count('darwin'):

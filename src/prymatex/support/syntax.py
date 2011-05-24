@@ -17,7 +17,7 @@ from prymatex.support.bundle import PMXBundleItem
 # Profiling
 
 try:
-    from prymatex.lib.profilehooks import profile
+    from prymatex.utils.profilehooks import profile
     from PyQt4.Qt import qApp
 except Exception, e:
     PROFILING_CAPABLE = False

@@ -3,7 +3,7 @@
 # Created: 10/02/2010 by defo
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from prymatex.lib.i18n import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.panes import PaneDockBase
 
 class OutputPanel(QWidget):

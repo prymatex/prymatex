@@ -319,7 +319,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     # Outpus function
     def commandError(self, text, code):
-        from prymatex.lib.pathutils import make_hyperlinks
+        from prymatex.utils.pathutils import make_hyperlinks
         html = '''
             <html>
                 <head>

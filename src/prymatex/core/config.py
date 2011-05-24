@@ -9,7 +9,7 @@ from PyQt4.Qt import QSettings, QString, QVariant
 from os.path import join, abspath, expanduser, dirname, exists
 from os import makedirs
 import plistlib
-from prymatex.lib import deco
+from prymatex.utils import deco
 
 PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"

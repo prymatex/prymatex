@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.lib.deco import printparams, printtime
+from prymatex.utils.deco import printparams, printtime
 
 import shelve
 import sys
