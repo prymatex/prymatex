@@ -234,7 +234,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         with the QAction in the menu
         '''
         self.tableViewBundleItems = PMXBundleItemTableView()
-        self.tableViewBundleItems.setModel(QApplication.instance().bundleItemModel)
+        self.tableViewBundleItems.setModel(self.pmxApp.supportManager.model)
         self.tableViewBundleItems.setWindowTitle("Bundle Items")
         self.actionBundle_List.toggled[bool].connect(self.tableViewBundleItems.setVisible)
         self.tableViewBundleItems.showStateChanged.connect(self.actionBundle_List.setChecked)
@@ -343,7 +343,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     @pyqtSignature('')
     def on_actionShow_Bundle_Editor_triggered(self):
         #TODO: mejorar esto
-        qApp.instance().show_bundle_editor()
+        self.pmxApp.bundleEditor.show()
         
     
     def openUrl(self, url):
