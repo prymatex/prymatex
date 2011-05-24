@@ -32,7 +32,7 @@ class FSTree(QTreeView, PMXObject):
         self.setIndentation(20)
         self.setSortingEnabled(True)
         self.dirmodelFiles.setSorting(QDir.Name | QDir.DirsFirst)
-        self.mainwindow.tabWidget.currentEditorChanged.connect(self.focusWidgetPath)
+        self.mainWindow.tabWidget.currentEditorChanged.connect(self.focusWidgetPath)
         self.setExpandsOnDoubleClick(True)
         QMetaObject.connectSlotsByName(self)
     
@@ -143,15 +143,12 @@ class FSTree(QTreeView, PMXObject):
         path = unicode(self.model().filePath(index))
         print path
         if os.path.isfile(path):
-            self.mainwindow.openFile(path)
+            self.mainWindow.openFile(path)
             
         if os.path.isdir(path):
             if self.model().hasChildren(index):
                 print "Cerpeta"
 
-    @property
-    def mainwindow(self):
-        return self.parent().parent().parent()
         
     def goUp(self):
         current_top = unicode(self.model().filePath(self.rootIndex()))

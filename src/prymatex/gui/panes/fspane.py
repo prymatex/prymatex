@@ -33,7 +33,7 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
     def on_buttonSyncTabFile_toggled(self, sync):
         if sync:
             # Forzamos la sincronizacion
-            editor = self.mainwindow.currentEditorWidget
+            editor = self.mainWindow.currentEditorWidget
             self.tree.focusWidgetPath(editor)
 
     @pyqtSignature('')

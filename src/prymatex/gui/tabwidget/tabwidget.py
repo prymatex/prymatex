@@ -60,13 +60,14 @@ class PMXTabWidget(QTabWidget, PMXObject):
     def __init__(self, parent):
         super(PMXTabWidget, self).__init__(parent)
         
-        self.configure()
         
         self.setupActions() # Call it at first so the QMetaObject.connectSlotsByName is called in the setupUi
         self.setupUi()
 
         if not self.count():
             self.appendEmptyTab()
+        
+        self.configure()
         
         self.buttonTabList = QPushButton(self)
         self.buttonTabList.setObjectName("buttonTabList")

@@ -105,7 +105,7 @@ class PMXBundleItemSelector(QDialog, PMXObject):
     def exec_(self):
         # Geo is not known until the mainwindow is shown, so we 
         # must accept it
-        geo = self.mainwindow.geometry()
+        geo = self.mainWindow.geometry()
         w  = geo.width() * .8
         h = geo.height() * .4
         geo.setX(geo.x() + (geo.width() - w)/2)

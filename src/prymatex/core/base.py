@@ -52,6 +52,9 @@ class PMXObject(QObject):
     def __del__(self):
         self._meta.settings.removeListener(self)
     
+    # Shortcuts
+    # TODO: Documentation
+    
     def settingsValue(self, name, default = None):
         ''' A shortcut, for access to root settings
             Usage: 
@@ -74,6 +77,10 @@ class PMXObject(QObject):
                 PMXObjectInstance.setSettingsValue("settingsAttribute", 10);
         '''
         value = self.pmxApp.settings.setValue(name, value)
+    
+    def getSettingsGroup(self, name):
+        ''' Shortcut '''
+        return self.pmxApp.settings.getGroup(name)
     
     #============================================================
     # Events

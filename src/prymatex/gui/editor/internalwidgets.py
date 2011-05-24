@@ -15,7 +15,7 @@ class PMXRefocusWidget(QWidget, PMXObject):
        
     def hideEvent(self, event):
         super(PMXRefocusWidget, self).hideEvent(event)
-        self.mainwindow.currentEditorWidget.setFocus(Qt.MouseFocusReason)
+        self.mainWindow.currentEditorWidget.setFocus(Qt.MouseFocusReason)
         
     def showEvent(self, event):
         super(PMXRefocusWidget, self).showEvent(event)

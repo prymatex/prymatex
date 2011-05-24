@@ -28,6 +28,6 @@ class PMXBaseGUIMixin(object):
     mainwindow = property(_getMainWindow)
     
     def getCurrentEditor(self): 
-        return self.mainwindow.tabWidgetEditors.currentWidget()
+        return self.mainWindow.tabWidgetEditors.currentWidget()
        
     currentEditor = property(getCurrentEditor)

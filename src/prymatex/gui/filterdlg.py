@@ -59,7 +59,7 @@ class PMXFilterDialog(QDialog, Ui_FilterThroughCommand, PMXBaseGUIMixin):
             cursor.endEditBlock()
         elif self.radioOutputCreateNewDocument.isChecked():
             
-            editor = self.mainwindow.tabWidgetEditors.appendEmptyTab()
+            editor = self.mainWindow.tabWidgetEditors.appendEmptyTab()
             editor.setPlainText(output)
             
         elif self.radioOutputInsertSnippet.isChecked():
@@ -73,8 +73,8 @@ class PMXFilterDialog(QDialog, Ui_FilterThroughCommand, PMXBaseGUIMixin):
             pass
         elif self.radioOutputShowToolTip.isChecked():
             point = self.currentEditor.cursorRect().bottomRight()
-            point = self.mainwindow.mapToGlobal(point)
+            point = self.mainWindow.mapToGlobal(point)
             logger.info("Mostrar como tooltip %s %s", point, output)
             
-            QToolTip.showText(point, output, self.mainwindow)
+            QToolTip.showText(point, output, self.mainWindow)
             

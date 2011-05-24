@@ -286,12 +286,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
     #beforeRunningCommand
     def saveModifiedFiles(self):
         print "saveModifiedFiles"
-        results = [self.editor.mainwindow.tabWidgetEditors.widget(i).reqquest_save() for i in range(0, self.editor.mainwindow.tabWidgetEditors.count())]
+        results = [self.editor.mainWindow.tabWidgetEditors.widget(i).reqquest_save() for i in range(0, self.editor.mainWindow.tabWidgetEditors.count())]
         return all(results)
     
     def saveActiveFile(self):
         print "saveActiveFile"
-        value = self.editor.mainwindow.current_editor_widget.request_save()
+        value = self.editor.mainWindow.current_editor_widget.request_save()
         print value
         return value
     
@@ -380,8 +380,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.insertBundleItem(snippet, disableIndent = self.disableAutoIndent)
             
     def showAsHTML(self, text):
-        self.editor.mainwindow.paneBrowser.setHtml(text, self.command)
-        self.editor.mainwindow.paneBrowser.show()
+        self.editor.mainWindow.paneBrowser.setHtml(text, self.command)
+        self.editor.mainWindow.paneBrowser.show()
         
     def showAsTooltip(self, text):
         cursor = self.editor.textCursor()
@@ -392,7 +392,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         print "Nuevo documento", text
         
     def openAsNewDocument(self, text):
-        editor_widget = self.editor.mainwindow.currentTabWidget.appendEmptyTab()
+        editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
         editor_widget.codeEdit.setPlainText(text)
 
 # Macro

@@ -348,7 +348,7 @@ class PMXApplication(QApplication):
         return self.__profilePath
     
     
-    @deco.printparams_and_output
+    #@deco.printparams_and_output
     def getProfilePath(self, what, filename):
         '''
         Example

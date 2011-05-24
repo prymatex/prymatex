@@ -70,8 +70,8 @@ class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
         self.comboTabVisibility.addItem("Show when more than one", PMXTabWidget.TABBAR_WHEN_MULTIPLE)
         self.comboTabVisibility.addItem("Never show", PMXTabWidget.TABBAR_NEVER_SHOWN)
         
-        self.tabwidgetSettingsGroup = self.pmxApp.settings.getGroup('TabWidget')
-        self.mainwindowSettingsGroup = self.pmxApp.settings.getGroup('MainWindow')
+        self.tabwidgetSettingsGroup = self.getSettingsGroup('TabWidget')
+        self.mainwindowSettingsGroup = self.getSettingsGroup('MainWindow')
         
         self.comboTabVisibility.currentIndexChanged.connect(self.tabVisibilityChanged)
         

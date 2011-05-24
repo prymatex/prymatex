@@ -369,7 +369,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         file_manager = qApp.instance().file_manager
         pmx_file = None
         try:
-            print "About to open"
+            print "About to open", path
             pmx_file = file_manager.openFile(path)
         except FileDoesNotExistError, e:
             print " FileDoesNotExistError", e
@@ -512,7 +512,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             editor = self.tabWidgetEditors.appendEmptyTab()
             editor.appendPlainText(text)
         else:
-            self.mainwindow.statusbar.showMessage(self.trUtf8("Nothing to paste."))
+            self.mainWindow.statusbar.showMessage(self.trUtf8("Nothing to paste."))
           
 
     @pyqtSignature('')
@@ -635,4 +635,3 @@ class PMXTabActionGroup(QActionGroup):
             self.menus.append(menu)
             for action in self.actions():
                 menu.addAction(action)
-           

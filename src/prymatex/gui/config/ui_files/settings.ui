@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>725</width>
-    <height>185</height>
+    <height>225</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -129,23 +129,18 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushApply">
-           <property name="text">
-            <string>&amp;Apply</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushDiscard">
-           <property name="text">
-            <string>&amp;Discard</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="pushClose">
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+padding: 8%;
+}</string>
+           </property>
            <property name="text">
             <string>&amp;Close</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../res.qrc">
+             <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
            </property>
           </widget>
          </item>
