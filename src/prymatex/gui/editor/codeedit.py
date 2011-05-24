@@ -926,7 +926,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
 class PMXCursors(object):
     def __init__(self, editor):
         self.editor = editor
-        self.cursors = {}
+        self.cursors = []
     
     @property
     def hasCursors(self):
@@ -940,24 +940,27 @@ class PMXCursors(object):
         ecursor = self.editor.cursorForPosition(end)
         if scursor.position() == ecursor.position():
             self.addCursor(scursor)
+            self.editor.document().markContentsDirty(scursor.position(), scursor.position())
         elif scursor.block() == ecursor.block():
-            print scursor.block().blockNumber(), ecursor.block().blockNumber()
             #Estan en el mismo block
             if scursor.position() > ecursor.position():
                 ecursor.setPosition(scursor.position(), QTextCursor.KeepAnchor)
                 self.addCursor(ecursor)
+                self.editor.document().markContentsDirty(ecursor.position(), scursor.position())
             else:
                 scursor.setPosition(ecursor.position(), QTextCursor.KeepAnchor)
                 self.addCursor(scursor)
+                self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
         else:
             #Estan en distintos block
             if scursor.position() > ecursor.position():
                 startx, starty = ecursor.columnNumber(), ecursor.block().blockNumber()
                 endx, endy = scursor.columnNumber(), scursor.block().blockNumber()
+                self.editor.document().markContentsDirty(ecursor.position(), scursor.position())
             else:
                 startx, starty = scursor.columnNumber(), scursor.block().blockNumber()
                 endx, endy = ecursor.columnNumber(), ecursor.block().blockNumber()
-            print startx, starty, endx, endy
+                self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
             for i in xrange(starty, endy + 1):
                 start = self.editor.document().findBlockByNumber(i).position()
                 cursor = QTextCursor(scursor)
@@ -966,40 +969,45 @@ class PMXCursors(object):
                 self.addCursor(cursor)
         
     def addCursor(self, cursor):
-        self.cursors[cursor.position()] = cursor
+        self.editor.setTextCursor(cursor)
+        self.cursors.append(cursor)
     
     def removeAll(self):
-        self.cursors = {}
+        self.cursors = []
     
-    #Handle the editor key event
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
+            scursor = min(self.cursors, key = lambda cursor: cursor.position())
+            ecursor = max(self.cursors, key = lambda cursor: cursor.position())
+            self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
+            self.editor.setTextCursor(ecursor)
             self.removeAll()
             return False
-        if event.modifiers() & Qt.ControlModifier:
+        elif event.modifiers() & Qt.ControlModifier:
             super(PMXCodeEdit, self.editor).keyPressEvent(event)
+        elif event.key() == QtCore.Qt.Key_Right or event.key() == QtCore.Qt.Key_Left:
+            #Mouse Move
+            value = 1 if event.key() == QtCore.Qt.Key_Right else -1
+            if event.modifiers() & Qt.ShiftModifier:
+                for cursor in self.cursors:
+                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + value)
+                    cursor.setPosition(cursor.position() + value, QTextCursor.KeepAnchor)
+            else:
+                for cursor in self.cursors:
+                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + value)
+                    cursor.setPosition(cursor.position() + value)
+            self.editor.setTextCursor(cursor)
         else:
             cursor = self.editor.textCursor()
-            cursor.beginEditBlock()        
-            cursors = self.cursors.values()
-            for cursor in cursors:
+            cursor.beginEditBlock()
+            for cursor in self.cursors:
                 self.editor.setTextCursor(cursor)
                 super(PMXCodeEdit, self.editor).keyPressEvent(event)
-            self.editor.setTextCursor(cursor)
             cursor.endEditBlock()
         return True
     
     def __iter__(self):
-        return iter(self.cursors.values())
+        return iter(self.cursors)
     
     def __del__(self):
         pass
-    """
-    new_cursor = self.cursorForPosition(event.pos())
-            index = 0
-            for index, cursor in enumerate(self.cursors, 1):
-                print cursor.position(), new_cursor.position()
-                if cursor.position() > new_cursor.position():
-                    break;
-            self.cursors.insert(index, new_cursor)
-    """
