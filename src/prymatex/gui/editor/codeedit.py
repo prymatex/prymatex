@@ -291,7 +291,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             for cursor in self.cursors:
                 rec = self.cursorRect(cursor)
                 cursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
-                painter.setPen(QtGui.QPen(self.foreground))
+                painter.setPen(QtGui.QPen(self.colours['caret']))
                 painter.drawLine(cursor)
         painter.end()
 
