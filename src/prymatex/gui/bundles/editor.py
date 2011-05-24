@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -9,7 +10,7 @@ from copy import copy, deepcopy
 from xml.parsers.expat import ExpatError
 
 from prymatex.core.base import PMXObject
-from prymatex.gui.bundles.model import PMBBundleTreeModel
+from prymatex.gui.bundles.models import PMBBundleTreeModel
 
 class PMXBundleEditor(Ui_bundleEditor, QWidget, PMXObject):
     '''
@@ -46,13 +47,14 @@ class PMXBundleEditor(Ui_bundleEditor, QWidget, PMXObject):
         self.select_top.removeItem(0)
         self.select_top.removeItem(0)
         
-        self.select_top.addItem(_fromUtf8("Show all"))
-        self.select_top.addItem(_fromUtf8("  Syntaxs"))
-        self.select_top.addItem(_fromUtf8("  Snippets"))
-        self.select_top.addItem(_fromUtf8("  Macros"))
-        self.select_top.addItem(_fromUtf8("  Command"))
-        self.select_top.addItem(_fromUtf8("  Preference"))
-        self.select_top.addItem(_fromUtf8("  Template"))
+        self.select_top.addItem("Show all", QtCore.QVariant("all"))
+        self.select_top.addItem("Syntaxs", QtCore.QVariant("syntax"))
+        self.select_top.addItem("Snippets", QtCore.QVariant("snippet"))
+        self.select_top.addItem("Macros", QtCore.QVariant("macro"))
+        self.select_top.addItem("Commands", QtCore.QVariant("command"))
+        self.select_top.addItem("DragCommands", QtCore.QVariant("dragcommand"))
+        self.select_top.addItem("Preferences", QtCore.QVariant("preference"))
+        self.select_top.addItem("Templates", QtCore.QVariant("template"))
     
     def configTreeView(self):
                 

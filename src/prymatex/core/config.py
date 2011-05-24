@@ -145,7 +145,7 @@ class SettingsGroup(object):
     def configure(self, obj):
         for key, setting in self.settings.iteritems():
             value = self.value(key)
-            if not value:
+            if value is None:
                 value = setting.getDefault(obj)
             else:
                 value = setting.toPyType(value)
@@ -195,7 +195,8 @@ class pmxConfigPorperty(object):
         return self
         
     def __get__(self, instance, instance_type = None):
-        return hasattr(self, 'value') and self.value or self.default
+        value = self.value if hasattr(self, 'value') else self.default
+        return value
         
     def __set__(self, instance, value):
         self.value = value

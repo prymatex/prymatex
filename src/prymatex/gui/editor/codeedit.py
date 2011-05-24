@@ -288,11 +288,19 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             
             block = block.next()
         if self.multiEditMode:
+            extraSelections = []
             for cursor in self.cursors:
+                if cursor.hasSelection():
+                    selection = QTextEdit.ExtraSelection()
+                    selection.format.setBackground(self.colours['selection'])
+                    selection.format.setProperty(QTextFormat.FullWidthSelection, True)
+                    selection.cursor = cursor
+                    extraSelections.append(selection)
                 rec = self.cursorRect(cursor)
                 cursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
                 painter.setPen(QtGui.QPen(self.colours['caret']))
                 painter.drawLine(cursor)
+            self.setExtraSelections(extraSelections)
         painter.end()
 
     #=======================================================================
@@ -314,31 +322,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
     def mouseReleaseEvent(self, event):
         print "mouseReleaseEvent"
-        super(PMXCodeEdit, self).mouseReleaseEvent(event)
+        if event.modifiers() == Qt.ControlModifier:
+            self.cursors.endCursor(event.pos())
+        else:
+            super(PMXCodeEdit, self).mouseReleaseEvent(event)
 
     def mousePressEvent(self, event):
         print "mousePressEvent"
         if event.modifiers() == Qt.ControlModifier:
-            new_cursor = self.cursorForPosition(event.pos())
-            index = 0
-            for index, cursor in enumerate(self.cursors, 1):
-                print cursor.position(), new_cursor.position()
-                if cursor.position() > new_cursor.position():
-                    break;
-            self.cursors.insert(index, new_cursor)
-            #self.repaint()
+            self.cursors.beginCursor(event.pos())
         else:
             super(PMXCodeEdit, self).mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        print "mouseMoveEvent"
-        if event.modifiers() == Qt.ControlModifier:
-            new_cursor = self.cursorForPosition(event.pos())
-            index = 0
-            self.cursors.insert(index, new_cursor)
-            #self.repaint()
-        else:
-            super(PMXCodeEdit, self).mouseMoveEvent(event)
+        super(PMXCodeEdit, self).mouseMoveEvent(event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
         '''
@@ -935,6 +932,39 @@ class PMXCursors(object):
     def hasCursors(self):
         return bool(self.cursors)
     
+    def beginCursor(self, start):
+        self.start = start
+        
+    def endCursor(self, end):
+        scursor = self.editor.cursorForPosition(self.start)
+        ecursor = self.editor.cursorForPosition(end)
+        if scursor.position() == ecursor.position():
+            self.addCursor(scursor)
+        elif scursor.block() == ecursor.block():
+            print scursor.block().blockNumber(), ecursor.block().blockNumber()
+            #Estan en el mismo block
+            if scursor.position() > ecursor.position():
+                ecursor.setPosition(scursor.position(), QTextCursor.KeepAnchor)
+                self.addCursor(ecursor)
+            else:
+                scursor.setPosition(ecursor.position(), QTextCursor.KeepAnchor)
+                self.addCursor(scursor)
+        else:
+            #Estan en distintos block
+            if scursor.position() > ecursor.position():
+                startx, starty = ecursor.columnNumber(), ecursor.block().blockNumber()
+                endx, endy = scursor.columnNumber(), scursor.block().blockNumber()
+            else:
+                startx, starty = scursor.columnNumber(), scursor.block().blockNumber()
+                endx, endy = ecursor.columnNumber(), ecursor.block().blockNumber()
+            print startx, starty, endx, endy
+            for i in xrange(starty, endy + 1):
+                start = self.editor.document().findBlockByNumber(i).position()
+                cursor = QTextCursor(scursor)
+                cursor.setPosition(start + startx)
+                cursor.setPosition(start + endx, QTextCursor.KeepAnchor)
+                self.addCursor(cursor)
+        
     def addCursor(self, cursor):
         self.cursors[cursor.position()] = cursor
     
@@ -951,10 +981,11 @@ class PMXCursors(object):
         else:
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()        
-            cursors = self.cursors.values() + [ cursor ]
+            cursors = self.cursors.values()
             for cursor in cursors:
                 self.editor.setTextCursor(cursor)
                 super(PMXCodeEdit, self.editor).keyPressEvent(event)
+            self.editor.setTextCursor(cursor)
             cursor.endEditBlock()
         return True
     
@@ -963,4 +994,12 @@ class PMXCursors(object):
     
     def __del__(self):
         pass
-    
+    """
+    new_cursor = self.cursorForPosition(event.pos())
+            index = 0
+            for index, cursor in enumerate(self.cursors, 1):
+                print cursor.position(), new_cursor.position()
+                if cursor.position() > new_cursor.position():
+                    break;
+            self.cursors.insert(index, new_cursor)
+    """

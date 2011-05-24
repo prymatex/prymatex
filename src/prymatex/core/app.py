@@ -71,7 +71,6 @@ class PMXApplication(QApplication):
         
         self.setup_splash()
         
-        
         self.setWindowIcon(QIcon(":/resources/icons/Prymatex_Logo.png"))
         
         self.checkSingleInstance()
@@ -85,9 +84,10 @@ class PMXApplication(QApplication):
         self.setup_file_manager()
         # Config dialog
         self.setup_configdialog()
+        # Setupo bundle editor
+        self.setup_bundle_editor()
         # Creates the GUI
         self.createWindows(open_args[1:]) # Skip pmx.py
-        
     
     @property
     def options(self):
@@ -123,12 +123,13 @@ class PMXApplication(QApplication):
         configdialog.register(PMXNetworkWidget())
         self.__configdialog = configdialog
     
-    def show_bundle_editor(self):
-        #TODO: terminar esto
-        if self.__bundle_editor == None:
-            from prymatex.gui.bundle_editor import PMXBundleEditor
-            self.__bundle_editor = PMXBundleEditor()
-        self.__bundle_editor.show()
+    def setup_bundle_editor(self):
+        from prymatex.gui.bundles.editor import PMXBundleEditor
+        self.__bundle_editor = PMXBundleEditor()
+    
+    @property
+    def bundleEditor(self):
+        return self.__bundle_editor
     
     @property
     def configdialog(self):

@@ -38,7 +38,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
     TABBAR_ALWAYS_SHOWN = 0x01
     TABBAR_WHEN_MULTIPLE = 0x02
     
-    _showTabBar = TABBAR_ALWAYS_SHOWN
     def setShowTabBar(self, value):
         values = [
                   self.TABBAR_NEVER_SHOWN,
@@ -47,10 +46,10 @@ class PMXTabWidget(QTabWidget, PMXObject):
                   ]
         if not value in values:
             raise APIUsageError("setShowTabBar expected a valid constant")
-        self._showTabBar = value
+        print "set show tab bar", value
         self.showTabBarCheck() # Update
         
-    showTabBar = pmxConfigPorperty(default = True, fset=setShowTabBar)
+    showTabBar = pmxConfigPorperty(default = TABBAR_ALWAYS_SHOWN, fset=setShowTabBar)
      
     # Signals
     currentEditorChanged = pyqtSignal(QWidget)
@@ -60,14 +59,11 @@ class PMXTabWidget(QTabWidget, PMXObject):
     def __init__(self, parent):
         super(PMXTabWidget, self).__init__(parent)
         
-        
         self.setupActions() # Call it at first so the QMetaObject.connectSlotsByName is called in the setupUi
         self.setupUi()
 
         if not self.count():
             self.appendEmptyTab()
-        
-        self.configure()
         
         self.buttonTabList = QPushButton(self)
         self.buttonTabList.setObjectName("buttonTabList")
@@ -82,6 +78,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
         self.chooseFileDlg = QDialog()
         self.setSignals()
+        self.configure()
     
     def setSignals(self):
         #External events
