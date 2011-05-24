@@ -4,18 +4,28 @@
 '''
     Command's module    
 '''
-import os
+import os, re
 from subprocess import Popen, PIPE, STDOUT
-# for run as main
-if __name__ == "__main__":
-    import sys
-    sys.path.append(os.path.abspath('../..'))
-import ponyguruma as onig
-from ponyguruma.constants import OPTION_CAPTURE_GROUP
+try:
+    from ponyguruma import sre
+    from ponyguruma.constants import OPTION_CAPTURE_GROUP
+except Exception, e:
+    sre = re
+    OPTION_CAPTURE_GROUP = re.MULTILINE
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile, deleteFile
 
-onig_compile = onig.Regexp.factory(flags = OPTION_CAPTURE_GROUP)
+def compileRegexp(string):
+    #Muejejejeje
+    try:
+        restring = string.replace('?i:', '(?i)')
+        return re.compile(unicode(restring))
+    except:
+        try:
+            return sre.compile(unicode(string))
+        except:
+            #Mala leche
+            pass
 
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
@@ -47,7 +57,7 @@ class PMXCommand(PMXBundleItem):
         for key in PMXCommand.KEYS:
             value = hash.get(key, None)
             if value != None and key in [    'capturePattern' ]:
-                value = onig_compile( value )
+                value = compileRegexp( value )
             setattr(self, key, value)
     
     @property

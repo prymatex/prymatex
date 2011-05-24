@@ -24,7 +24,10 @@
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
 import re
-from ponyguruma import sre
+try:
+    from ponyguruma import sre
+except Exception, e:
+    sre = re
 from prymatex.support.bundle import PMXBundleItem
 
 def compileRegexp(string):
@@ -33,7 +36,11 @@ def compileRegexp(string):
         restring = string.replace('?i:', '(?i)')
         return re.compile(unicode(restring))
     except:
-        return sre.compile(unicode(string))
+        try:
+            return sre.compile(unicode(string))
+        except:
+            #Mala leche
+            pass
         
 DEFAULT_SETTINGS = { 'completions': [],
                      'completionCommand': '',

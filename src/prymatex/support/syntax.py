@@ -8,7 +8,10 @@
 '''
 
 import re
-from ponyguruma import sre
+try:
+    from ponyguruma import sre
+except Exception, e:
+    sre = re
 from prymatex.support.bundle import PMXBundleItem
 
 # Profiling
@@ -27,7 +30,11 @@ def compileRegexp(string):
         restring = string.replace('?i:', '(?i)')
         return re.compile(unicode(restring))
     except:
-        return sre.compile(unicode(string))
+        try:
+            return sre.compile(unicode(string))
+        except:
+            #Mala leche
+            pass
 
 SPLITLINES = re.compile('\n')
 

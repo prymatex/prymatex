@@ -134,29 +134,24 @@ class PMXApplication(QApplication):
     def configdialog(self):
         return self.__configdialog
     
-    _bundleModel = None
-    @property
-    def bundleModel(self):
-        return self._bundleModel
-    
     _bundleItemModel  = None
     @property
     def bundleItemModel(self):
-        #return self._bundleItemModel
         return self.manager.model
     
-    _bundleManager = None
+    #Deprecated
     @property
     def bundleManager(self):
-        return self.manager
-    
-    def load_stuff(self):
-        from prymatex.gui.bundles.bundlemodel import PMXBundleItemModel, PMXBundleModel
-        self._bundleModel =  PMXBundleModel()
-        self._bundleItemModel =  PMXBundleItemModel()
+        return self.__supportManager
+
+    __supportManager = None
+    @property
+    def supportManager(self):
+        return self.__supportManager
         
+    def load_stuff(self):
         if not self.options.no_bundles:
-            self.manager = self.load_support()
+            self.__supportManager = self.load_support()
         
     def setup_splash(self):
         self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))

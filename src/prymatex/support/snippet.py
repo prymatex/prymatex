@@ -6,8 +6,13 @@
 '''
 import re, logging
 from copy import deepcopy
-from ponyguruma import sre
-from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
+try:
+    from ponyguruma import sre
+    from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
+except Exception, e:
+    sre = re
+    OPTION_CAPTURE_GROUP = re.MULTILINE
+    OPTION_MULTILINE = re.MULTILINE
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
