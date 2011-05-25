@@ -997,7 +997,7 @@ class PMXCursors(object):
                     self.editor.document().markContentsDirty(cursor.position(), cursor.position() + value)
                     cursor.setPosition(cursor.position() + value)
             self.editor.setTextCursor(cursor)
-        else:
+        elif event.text() != "":
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
             for cursor in self.cursors:
