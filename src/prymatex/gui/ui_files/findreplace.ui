@@ -22,6 +22,9 @@
    </property>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <property name="spacing">
+      <number>2</number>
+     </property>
      <item row="1" column="4">
       <widget class="QPushButton" name="pushReplaceAlll">
        <property name="text">
