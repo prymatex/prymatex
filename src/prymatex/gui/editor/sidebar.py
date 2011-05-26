@@ -69,7 +69,7 @@ class PMXSidebar(QWidget):
                 # TODO: Deprecar el if None de user data, simpre vamos a tene user data
                 user_data = block.userData()
                 if user_data != None:
-                    if user_data.folding == PMXBlockUserData.FOLDING_START:
+                    if user_data.foldingMark == PMXBlockUserData.FOLDING_START:
                         if user_data.folded:
                             painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
                                 round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
@@ -78,7 +78,7 @@ class PMXSidebar(QWidget):
                             painter.drawPixmap(self.width() - self.foldingTopIcon.width() - 1,
                                 round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingTopIcon.height(),
                                 self.foldingTopIcon)
-                    elif user_data.folding == PMXBlockUserData.FOLDING_STOP:
+                    elif user_data.foldingMark == PMXBlockUserData.FOLDING_STOP:
                         painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
                             round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
                             self.foldingBottomIcon)

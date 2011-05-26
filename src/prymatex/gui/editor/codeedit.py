@@ -59,7 +59,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
     WORD = re.compile(r'\w+', re.UNICODE)
-        
+    PREFERENCE_CACHE = {}
+    
     #=======================================================================
     # Settings, config
     #=======================================================================
@@ -165,6 +166,14 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
         self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
         self.actionFind = QAction(self.trUtf8("Find"), self)
+
+    #=======================================================================
+    # Obteniendo datos del editor
+    #=======================================================================
+    def getPreference(self, scope):
+        if scope not in PMXCodeEdit.PREFERENCE_CACHE:
+            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.editor.pmxApp.bundleManager.getPreferenceSettings(scope)
+        return PMXCodeEdit.PREFERENCE_CACHE[scope]
 
     def getCurrentScope(self):
         cursor = self.textCursor()
@@ -499,7 +508,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         character = unicode(event.text())
         scope = self.getCurrentScope()
-        preferences = self.pmxApp.bundleManager.getPreferenceSettings(scope)
+        preferences = self.getPreference(scope)
         pairs = filter(lambda pair: pair[0] == character, preferences.smartTypingPairs)
         if pairs:
             if cursor.hasSelection():
@@ -552,7 +561,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if not cursor.hasSelection():
             doc = self.document()
             scope = self.getCurrentScope()
-            preferences = self.pmxApp.bundleManager.getPreferenceSettings(scope)
+            preferences = self.getPreference(scope)
             if preferences.smartTypingPairs:
                 character = doc.characterAt(cursor.position() - 1).toAscii()
                 pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
@@ -663,7 +672,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
-        preferences = self.pmxApp.bundleManager.getPreferenceSettings(scope)
+        preferences = self.getPreference(scope)
         current_word, _ = self.getCurrentWordAndIndex()
         if item != None:
             env = item.buildEnvironment()
@@ -708,7 +717,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def _fold(self, line_number):
         milestone = self.document().findBlockByNumber(line_number - 1)
         user_data = milestone.userData()
-        if user_data.folding == PMXBlockUserData.FOLDING_START:
+        if user_data.foldingMark == PMXBlockUserData.FOLDING_START:
             startBlock = self.document().findBlockByNumber(line_number)
             endBlock = self._find_block_fold_close(startBlock)
         else:
@@ -721,8 +730,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         block = startBlock
         while True:
             user_data = block.userData()
-            user_data.foldingLevel += 1
-            block.setVisible(user_data.foldingLevel == PMXBlockUserData.FOLDING_NONE)
+            user_data.foldedLevel += 1
+            block.setVisible(user_data.folded)
             if block == endBlock:
                 break
             block = block.next()
@@ -740,8 +749,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         block = startBlock
         while True:
             user_data = block.userData()
-            user_data.foldingLevel -= 1
-            block.setVisible(user_data.foldingLevel == PMXBlockUserData.FOLDING_NONE)
+            user_data.foldedLevel -= 1
+            block.setVisible(not user_data.folded)
             if block == endBlock:
                 break
             block = block.next()
@@ -755,15 +764,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             level = end.userData().indent
             while end.next().isValid() and level <= end.next().userData().indent:
                 end = end.next()
-                if end.userData().folding == PMXBlockUserData.FOLDING_STOP and end.userData().indent == level:
+                if end.userData().foldingMark == PMXBlockUserData.FOLDING_STOP and end.userData().indent == level:
                     break
         else:
             end = start
             counter = 0
-            while end.userData().folding != PMXBlockUserData.FOLDING_STOP or counter !=  0:
-                if end.userData().folding == PMXBlockUserData.FOLDING_START:
+            while end.userData().foldingMark != PMXBlockUserData.FOLDING_STOP or counter !=  0:
+                if end.userData().foldingMark == PMXBlockUserData.FOLDING_START:
                     counter += 1
-                elif end.userData().folding == PMXBlockUserData.FOLDING_STOP:
+                elif end.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
                     counter -= 1
                 end = end.next()
                 if not end.isValid():
@@ -773,10 +782,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def _find_block_fold_open(self, end):
         start = end.previous()
         counter = 0
-        while start.userData().folding != PMXBlockUserData.FOLDING_START or counter !=  0:
-            if start.userData().folding == PMXBlockUserData.FOLDING_STOP:
+        while start.userData().foldingMark != PMXBlockUserData.FOLDING_START or counter !=  0:
+            if start.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
                 counter += 1
-            elif start.userData().folding == PMXBlockUserData.FOLDING_START:
+            elif start.userData().foldingMark == PMXBlockUserData.FOLDING_START:
                 counter -= 1
             start = start.previous()
             if not start.isValid():
