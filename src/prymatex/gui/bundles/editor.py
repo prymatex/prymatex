@@ -1,46 +1,38 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-
-from ui_bundle_editor import Ui_bundleEditor
-import os, sys, re, plistlib
-from glob import glob
-from copy import copy, deepcopy
-from xml.parsers.expat import ExpatError
 
 from prymatex.core.base import PMXObject
+from prymatex.gui.bundles.ui_editor import Ui_bundleEditor
 from prymatex.gui.bundles.models import PMBBundleTreeModel
 
-class PMXBundleEditor(Ui_bundleEditor, QWidget, PMXObject):
+class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     '''
-        Primatex Bundle Editor
+        Prymatex Bundle Editor
     '''
     def __init__(self):
         super(PMXBundleEditor, self).__init__()
         self.setupUi(self)
-        self.stackLayout = QStackedLayout()
+        self.stackLayout = QtGui.QStackedLayout()
         self.configSelectTop()
         self.configTreeView()
-        self.connect(self.btn_apply, SIGNAL("clicked()"), self.onApply)
-        self.connect(self.select_top, SIGNAL("currentIndexChanged(int)"), self.selectTopChange)
-        self.setWindowTitle(QApplication.translate("bundleEditor", "Bundle Editor", None, QApplication.UnicodeUTF8))
+        self.connect(self.select_top, QtCore.SIGNAL("currentIndexChanged(int)"), self.selectTopChange)
+        self.setWindowTitle(QtGui.QApplication.translate("bundleEditor", "Bundle Editor", None, QtGui.QApplication.UnicodeUTF8))
 
     def selectTopChange(self, index):
         if index == 0:
             self.proxyModel.setFilterRegExp("")
         elif index == 1:
-            self.proxyModel.setFilterRegExp(QRegExp("Bundle|(b)|(Sy)|Syntax"))
+            self.proxyModel.setFilterRegExp(QtCore.Qt.QRegExp("Bundle|(b)|(Sy)|Syntax"))
         elif index == 2:
-            self.proxyModel.setFilterRegExp(QRegExp("Bundle|(b)|(Sn)|Snippets"))
+            self.proxyModel.setFilterRegExp(QtCore.Qt.QRegExp("Bundle|(b)|(Sn)|Snippets"))
         elif index == 3:
-            self.proxyModel.setFilterRegExp(QRegExp("Bundle|(b)|(M)|Macros"))
+            self.proxyModel.setFilterRegExp(QtCore.Qt.QRegExp("Bundle|(b)|(M)|Macros"))
         elif index == 4:
-            self.proxyModel.setFilterRegExp(QRegExp("Bundle|(b)|(C)|Command"))
+            self.proxyModel.setFilterRegExp(QtCore.Qt.QRegExp("Bundle|(b)|(C)|Command"))
         elif index == 5:
-            self.proxyModel.setFilterRegExp(QRegExp("Bundle|(b)|(P)|Preference"))
+            self.proxyModel.setFilterRegExp(QtCore.Qt.QRegExp("Bundle|(b)|(P)|Preference"))
         elif index == 6:
-            self.proxyModel.setFilterRegExp(QRegExp("Bundle|(b)|(T)|Template"))
+            self.proxyModel.setFilterRegExp(QtCore.Qt.QRegExp("Bundle|(b)|(T)|Template"))
         #self.proxyModel.setFilterKeyColumn(0)
         
     def configSelectTop(self):

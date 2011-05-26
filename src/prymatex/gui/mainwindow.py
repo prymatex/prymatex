@@ -19,7 +19,7 @@ from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
 from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.lib.i18n import ugettext as _
-from prymatex.gui.editor import PMXEditorWidget
+from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.gui.dialogs import NewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXObject

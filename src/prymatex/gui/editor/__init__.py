@@ -1,11 +1,6 @@
-from prymatex.gui.editor.codeedit import PMXCodeEdit
-from prymatex.gui.editor.editorwidget import PMXEditorWidget
-from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import QRect
 
-
-
-def center(widget, respect_to = QApplication.desktop().availableGeometry()):
+def center(widget, respect_to):
     my_geo = widget.geometry()
     my_width, my_height = widget.width(), widget.height()
     width, height = respect_to.width(), respect_to.height()

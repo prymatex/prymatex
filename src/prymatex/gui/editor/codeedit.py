@@ -11,6 +11,7 @@ from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processor import PMXSyntaxProcessor, PMXBlockUserData, PMXCommandProcessor, PMXMacroProcessor
+from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper
 
 logger = logging.getLogger(__name__)
 
@@ -130,11 +131,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
         
-        #Cursors
-        self.cursors = PMXCursors(self)
+        #Helpers
+        self.cursors = PMXCursorsHelper(self)
+        self.folding = PMXFoldingHelper(self)
         
         self.bookmarks = []
-        self.folded = []
         
         self.setupUi()
         self.setupActions()
@@ -172,7 +173,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     def getPreference(self, scope):
         if scope not in PMXCodeEdit.PREFERENCE_CACHE:
-            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.editor.pmxApp.bundleManager.getPreferenceSettings(scope)
+            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.pmxApp.bundleManager.getPreferenceSettings(scope)
         return PMXCodeEdit.PREFERENCE_CACHE[scope]
 
     def getCurrentScope(self):
@@ -290,7 +291,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 break
 
             user_data = block.userData()
-            if user_data.folding == PMXBlockUserData.FOLDING_START and user_data.folded:
+            if user_data.foldingMark == PMXBlockUserData.FOLDING_START and user_data.folded:
                 painter.drawPixmap(font_metrics.width(block.text()) + 10,
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.sidebar.foldingEllipsisIcon.height(),
                     self.sidebar.foldingEllipsisIcon)
@@ -685,6 +686,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 'TM_SCOPE': scope,
                 'TM_SOFT_TABS': self.softTabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': self.tabSize,
+                'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
         });
         if current_word != None:
             env['TM_CURRENT_WORD'] = current_word
@@ -694,7 +696,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_FILEPATH'] = self.parent().file.path
             env['TM_FILENAME'] = self.parent().file.filename
             env['TM_DIRECTORY'] = self.parent().file.directory
-            print env['TM_FILEPATH']
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u'\u2029', '\n')
         env.update(preferences.shellVariables)
@@ -736,7 +737,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 break
             block = block.next()
 
-        milestone.userData().folded = True
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def _unfold(self, line_number):
@@ -754,8 +754,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             if block == endBlock:
                 break
             block = block.next()
-        
-        milestone.userData().folded = False
+
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def _find_block_fold_close(self, start):
@@ -931,92 +930,4 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(position)
                 self.setTextCursor(cursor)
                 cursor.endEditBlock()
-
-class PMXCursors(object):
-    def __init__(self, editor):
-        self.editor = editor
-        self.cursors = []
-    
-    @property
-    def hasCursors(self):
-        return bool(self.cursors)
-    
-    def beginCursor(self, start):
-        self.start = start
-        
-    def endCursor(self, end):
-        scursor = self.editor.cursorForPosition(self.start)
-        ecursor = self.editor.cursorForPosition(end)
-        if scursor.position() == ecursor.position():
-            self.addCursor(scursor)
-            self.editor.document().markContentsDirty(scursor.position(), scursor.position())
-        elif scursor.block() == ecursor.block():
-            #Estan en el mismo block
-            if scursor.position() > ecursor.position():
-                ecursor.setPosition(scursor.position(), QTextCursor.KeepAnchor)
-                self.addCursor(ecursor)
-                self.editor.document().markContentsDirty(ecursor.position(), scursor.position())
-            else:
-                scursor.setPosition(ecursor.position(), QTextCursor.KeepAnchor)
-                self.addCursor(scursor)
-                self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
-        else:
-            #Estan en distintos block
-            if scursor.position() > ecursor.position():
-                startx, starty = ecursor.columnNumber(), ecursor.block().blockNumber()
-                endx, endy = scursor.columnNumber(), scursor.block().blockNumber()
-                self.editor.document().markContentsDirty(ecursor.position(), scursor.position())
-            else:
-                startx, starty = scursor.columnNumber(), scursor.block().blockNumber()
-                endx, endy = ecursor.columnNumber(), ecursor.block().blockNumber()
-                self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
-            for i in xrange(starty, endy + 1):
-                start = self.editor.document().findBlockByNumber(i).position()
-                cursor = QTextCursor(scursor)
-                cursor.setPosition(start + startx)
-                cursor.setPosition(start + endx, QTextCursor.KeepAnchor)
-                self.addCursor(cursor)
-        
-    def addCursor(self, cursor):
-        self.editor.setTextCursor(cursor)
-        self.cursors.append(cursor)
-    
-    def removeAll(self):
-        self.cursors = []
-    
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
-            scursor = min(self.cursors, key = lambda cursor: cursor.position())
-            ecursor = max(self.cursors, key = lambda cursor: cursor.position())
-            self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
-            self.editor.setTextCursor(ecursor)
-            self.removeAll()
-            return False
-        elif event.modifiers() & Qt.ControlModifier:
-            super(PMXCodeEdit, self.editor).keyPressEvent(event)
-        elif event.key() == QtCore.Qt.Key_Right or event.key() == QtCore.Qt.Key_Left:
-            #Mouse Move
-            value = 1 if event.key() == QtCore.Qt.Key_Right else -1
-            if event.modifiers() & Qt.ShiftModifier:
-                for cursor in self.cursors:
-                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + value)
-                    cursor.setPosition(cursor.position() + value, QTextCursor.KeepAnchor)
-            else:
-                for cursor in self.cursors:
-                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + value)
-                    cursor.setPosition(cursor.position() + value)
-            self.editor.setTextCursor(cursor)
-        elif event.text() != "":
-            cursor = self.editor.textCursor()
-            cursor.beginEditBlock()
-            for cursor in self.cursors:
-                self.editor.setTextCursor(cursor)
-                super(PMXCodeEdit, self.editor).keyPressEvent(event)
-            cursor.endEditBlock()
-        return True
-    
-    def __iter__(self):
-        return iter(self.cursors)
-    
-    def __del__(self):
-        pass
+                

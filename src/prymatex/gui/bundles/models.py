@@ -1,3 +1,4 @@
+import os
 from PyQt4 import QtCore, QtGui
 from prymatex import res_rc
 
@@ -154,6 +155,7 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
             biti = PMBBundleTreeItem(item.uuid, item.name, item.TYPE, parent)
             if item.TYPE == "template":
                 for file in item.files:
+                    #TODO: sacar la referencia al modulo os, poner la obtencion del nombre a nivel de support
                     tifi = PMBBundleTreeItem(file, os.path.basename(file), "template-file", biti)
                     biti.appendChild(tifi)
             parent.appendChild(biti)
