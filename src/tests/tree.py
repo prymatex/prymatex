@@ -103,6 +103,10 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
     def setupModelData(self, items, parent):
         for item in items:
             biti = PMBBundleTreeItem(item.uuid, item.name, item.TYPE, parent)
+            if item.TYPE == "template":
+                for file in item.files:
+                    tifi = PMBBundleTreeItem(file, os.path.basename(file), "template-file", biti)
+                    biti.appendChild(tifi)
             parent.appendChild(biti)
     
 class PMBBundleTreeItem(object):  
@@ -162,11 +166,23 @@ class ColumnView(QTreeView):
 
         self.model = PMBBundleTreeModel(manager)
         self.setModel(self.model)
-
+        
         self.setSortingEnabled(True)
         self.resize(700,  700)
         self.show()
 
+    def selectionChanged(self, newindex, oldindex):
+        print "olds"
+        indexes = oldindex.indexes()
+        if indexes:
+            for index in indexes:
+                print index.internalPointer().name
+        print "news"
+        indexes = newindex.indexes()
+        if indexes:
+            for index in indexes:
+                print index.internalPointer().name
+        
 if __name__ == "__main__":
     from prymatex.support.manager import PMXSupportManager
     manager = PMXSupportManager()

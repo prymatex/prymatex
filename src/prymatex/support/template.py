@@ -7,6 +7,7 @@
 '''
 
 import os, shutil, plistlib
+from glob import glob
 from subprocess import Popen
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, ensureEnvironment, deleteFile
@@ -20,6 +21,7 @@ class PMXTemplate(PMXBundleItem):
 
     def __init__(self, namespace, hash = None, path = None):
         super(PMXTemplate, self).__init__(namespace, hash, path)
+        self.files = []
     
     def load(self, hash):
         super(PMXTemplate, self).load(hash)
@@ -28,9 +30,6 @@ class PMXTemplate(PMXBundleItem):
     
     def update(self, hash):
         for key in hash.keys():
-            if key == "path":
-                #Si quieren cambiar el path muevo mis archivos dependientes
-                shutil.copytree(self.path, hash[key])
             setattr(self, key, hash[key])
     
     @property
@@ -47,7 +46,25 @@ class PMXTemplate(PMXBundleItem):
             os.makedirs(self.path)
         file = os.path.join(self.path , self.FILE)
         plistlib.writePlist(self.hash, file)
+        #Hora los archivos del template
+        files = []
+        for file in self.files:
+            name = os.path.basename(file)
+            dir = os.path.dirname(file)
+            if dir != self.path:
+                newfile = os.path.join(dir , name)
+                shutil.copy(file, newfile)
+                files.append(newfile)
+            else:
+                files.append(file)
+        self.files = files
+
+    def addFile(self, file):
+        self.files.append(file)
         
+    def getFileNames(self):
+        return map(lambda file: os.path.basename(file), self.files)
+    
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()
         env['TM_NEW_FILE'] = os.path.join(directory, name + '.' + self.extension)
@@ -69,10 +86,14 @@ class PMXTemplate(PMXBundleItem):
         
     @classmethod
     def loadBundleItem(cls, path, namespace):
-        info_file = os.path.join(path, cls.FILE)
+        info = os.path.join(path, cls.FILE)
+        files = glob(os.path.join(path, '*'))
+        files.remove(info)
         try:
-            data = plistlib.readPlist(info_file)
+            data = plistlib.readPlist(info)
             template = cls(namespace, data, path)
+            for file in files:
+                template.addFile(file)
             return template
         except Exception, e:
-            print "Error in bundle %s (%s)" % (info_file, e)
+            print "Error in bundle %s (%s)" % (info, e)
