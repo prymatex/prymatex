@@ -7,6 +7,7 @@ class PMXCursorsHelper(object):
     def __init__(self, editor):
         self.editor = editor
         self.cursors = []
+	self.scursor = self.dp = self.sp = None
     
     @property
     def hasCursors(self):
@@ -18,7 +19,7 @@ class PMXCursorsHelper(object):
     
     def getDragCursorRect(self):
         """Retorna un rectangulo que representa la zona del drag cursor"""
-        return QRect(self.sp, self.dp)
+        return QtCore.QRect(self.sp, self.dp)
     
     def startPoint(self, start):
         self.sp = start
@@ -26,8 +27,8 @@ class PMXCursorsHelper(object):
 
     def dragPoint(self, pos):
         self.dp = pos
-        dcursor = self.cursorForPosition(self.dp)
-        self.document().markContentsDirty(self.scursor.position(), dcursor.position())
+        dcursor = self.editor.cursorForPosition(self.dp)
+        self.editor.document().markContentsDirty(self.scursor.position(), dcursor.position())
 
     def endPoint(self, end):
         scursor = self.scursor

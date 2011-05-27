@@ -113,12 +113,12 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         if self.discard_lines == 0 and begin != end:
             scopes = " ".join(self.scopes)
             self.userData.addScope(begin, end, scopes)
-            format = self.getFormat(scopes)
-            if format is not None:
-                self.setFormat(begin, end - begin, format)
-            preferences = self.editor.getPreference(scopes)
-            if preferences is not None:
-                pass
+            #format = self.getFormat(scopes)
+            #if format is not None:
+            #    self.setFormat(begin, end - begin, format)
+            #preferences = self.editor.getPreference(scopes)
+            #if preferences is not None:
+            #    pass
         self.line_position = end
     
     def getFormat(self, scope):

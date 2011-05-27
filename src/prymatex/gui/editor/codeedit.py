@@ -118,7 +118,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     @property
     def multiEditMode(self):
         """Retorna si el editor esta en modo multiedit"""
-        return self.cursors.hasCursors
+        return self.cursors.hasCursors or self.cursors.isDragCursor
     
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
@@ -312,12 +312,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 painter.drawLine(cursor)
             self.setExtraSelections(extraSelections)
             if self.cursors.isDragCursor:
+                print "is drag"
                 pen = QtGui.QPen(self.colours['caret'])
                 pen.setWidth(2)
                 painter.setPen(pen)
                 color = QColor(self.colours['selection'])
                 color.setAlpha(128)
-                painter.setBrush(QBrush(color))
+                painter.setBrush(QtGui.QBrush(color))
                 painter.setOpacity(0.2)
                 painter.drawRect(self.cursors.getDragCursorRect())
         painter.end()
