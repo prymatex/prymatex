@@ -11,12 +11,26 @@ class PMXCursorsHelper(object):
     @property
     def hasCursors(self):
         return bool(self.cursors)
+
+    @property
+    def isDragCursor(self):
+        return self.dp != None
     
-    def beginCursor(self, start):
-        self.start = start
-        
-    def endCursor(self, end):
-        scursor = self.editor.cursorForPosition(self.start)
+    def getDragCursorRect(self):
+        """Retorna un rectangulo que representa la zona del drag cursor"""
+        return QRect(self.sp, self.dp)
+    
+    def startPoint(self, start):
+        self.sp = start
+        self.scursor = self.editor.cursorForPosition(self.sp)
+
+    def dragPoint(self, pos):
+        self.dp = pos
+        dcursor = self.cursorForPosition(self.dp)
+        self.document().markContentsDirty(self.scursor.position(), dcursor.position())
+
+    def endPoint(self, end):
+        scursor = self.scursor
         ecursor = self.editor.cursorForPosition(end)
         if scursor.position() == ecursor.position():
             self.addCursor(scursor)
@@ -44,9 +58,18 @@ class PMXCursorsHelper(object):
             for i in xrange(starty, endy + 1):
                 start = self.editor.document().findBlockByNumber(i).position()
                 cursor = QtGui.QTextCursor(scursor)
-                cursor.setPosition(start + startx)
-                cursor.setPosition(start + endx, QtGui.QTextCursor.KeepAnchor)
+                #Para que lado fue la apertura del recuadro
+                if startx == endx:
+                    cursor.setPosition(start + startx)
+                elif startx > endx:
+                    cursor.setPosition(start + startx)
+                    cursor.setPosition(start + endx, QtGui.QTextCursor.KeepAnchor)
+                else:
+                    cursor.setPosition(start + endx)
+                    cursor.setPosition(start + startx, QtGui.QTextCursor.KeepAnchor)
                 self.addCursor(cursor)
+        #Clean last acction
+        self.scursor = self.dp = self.sp = None
         
     def addCursor(self, cursor):
         self.editor.setTextCursor(cursor)

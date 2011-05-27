@@ -31,12 +31,9 @@ class PMXBlockUserData(QTextBlockUserData):
         self.scopes = []
         self.foldingMark = self.FOLDING_NONE
         self.foldedLevel = 0
+        self.folded = False
         self.indentMark = self.INDENT_NONE
         self.indent = ""
-    
-    @property
-    def folded(self):
-        return self.foldedLevel != 0
 
     def __nonzero__(self):
         return bool(self.scopes)
@@ -181,10 +178,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         if self.userData.foldingMark == PMXBlockUserData.FOLDING_START:
             self.editor.folding.setStart(self.block_number)
         elif self.userData.foldingMark == PMXBlockUserData.FOLDING_STOP:
-            if self.editor.folding.getNestedLevel(self.block_number) > 0:
-                self.editor.folding.setStop(self.block_number)
-            else:
-                self.userData.foldingMark = PMXBlockUserData.FOLDING_NONE
+            self.editor.folding.setStop(self.block_number)
         elif self.userData.foldingMark == PMXBlockUserData.FOLDING_NONE:
             self.editor.folding.setNone(self.block_number)
 

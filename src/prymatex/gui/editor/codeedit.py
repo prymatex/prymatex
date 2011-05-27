@@ -311,6 +311,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 painter.setPen(QtGui.QPen(self.colours['caret']))
                 painter.drawLine(cursor)
             self.setExtraSelections(extraSelections)
+            if self.cursors.isDragCursor:
+                pen = QtGui.QPen(self.colours['caret'])
+                pen.setWidth(2)
+                painter.setPen(pen)
+                color = QColor(self.colours['selection'])
+                color.setAlpha(128)
+                painter.setBrush(QBrush(color))
+                painter.setOpacity(0.2)
+                painter.drawRect(self.cursors.getDragCursorRect())
         painter.end()
 
     #=======================================================================
@@ -329,23 +338,24 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def mouseDoubleClickEvent(self, event):
         print "mouseDoubleClickEvent"
         super(PMXCodeEdit, self).mouseDoubleClickEvent(event)
-        
-    def mouseReleaseEvent(self, event):
-        print "mouseReleaseEvent"
-        if event.modifiers() == Qt.ControlModifier:
-            self.cursors.endCursor(event.pos())
-        else:
-            super(PMXCodeEdit, self).mouseReleaseEvent(event)
 
     def mousePressEvent(self, event):
-        print "mousePressEvent"
         if event.modifiers() == Qt.ControlModifier:
-            self.cursors.beginCursor(event.pos())
+            self.cursors.startPoint(event.pos())
         else:
             super(PMXCodeEdit, self).mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        super(PMXCodeEdit, self).mouseMoveEvent(event)
+        if event.modifiers() == Qt.ControlModifier:
+            self.cursors.dragPoint(event.pos())
+        else:
+            super(PMXCodeEdit, self).mouseReleaseEvent(event)
+ 
+    def mouseReleaseEvent(self, event):
+        if event.modifiers() == Qt.ControlModifier:
+            self.cursors.endPoint(event.pos())
+        else:
+            super(PMXCodeEdit, self).mouseReleaseEvent(event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
         '''
@@ -736,7 +746,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             if block == endBlock:
                 break
             block = block.next()
-
+        
+        milestone.userData().folded = True
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def _unfold(self, line_number):
@@ -755,6 +766,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 break
             block = block.next()
 
+        milestone.userData().folded = False
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     def _find_block_fold_close(self, start):
