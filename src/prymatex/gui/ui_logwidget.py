@@ -2,44 +2,51 @@
 
 # Form implementation generated from reading ui file 'ui_files/logwidget.ui'
 #
-# Created: Thu Mar 31 09:44:47 2011
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Thu May 26 15:15:29 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
 
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
+
 class Ui_LogWidget(object):
     def setupUi(self, LogWidget):
-        LogWidget.setObjectName("LogWidget")
-        LogWidget.resize(666, 131)
+        LogWidget.setObjectName(_fromUtf8("LogWidget"))
+        LogWidget.resize(666, 133)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/actions/resources/actions/document-preview.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/document-preview.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         LogWidget.setWindowIcon(icon)
         LogWidget.setFloating(True)
         LogWidget.setAllowedAreas(QtCore.Qt.BottomDockWidgetArea|QtCore.Qt.RightDockWidgetArea|QtCore.Qt.TopDockWidgetArea)
         self.dockWidgetContents = QtGui.QWidget()
-        self.dockWidgetContents.setObjectName("dockWidgetContents")
+        self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.Clear = QtGui.QPushButton(self.dockWidgetContents)
-        self.Clear.setText("")
+        self.Clear.setText(_fromUtf8(""))
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/actions/resources/actions/edit-delete.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/edit-delete.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Clear.setIcon(icon1)
-        self.Clear.setObjectName("Clear")
+        self.Clear.setObjectName(_fromUtf8("Clear"))
         self.horizontalLayout.addWidget(self.Clear)
         self.pushDebugLevel = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushDebugLevel.setText("")
+        self.pushDebugLevel.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/actions/resources/actions/view-filter.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/view-filter.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushDebugLevel.setIcon(icon2)
-        self.pushDebugLevel.setObjectName("pushDebugLevel")
+        self.pushDebugLevel.setObjectName(_fromUtf8("pushDebugLevel"))
         self.horizontalLayout.addWidget(self.pushDebugLevel)
         self.lineEdit = QtGui.QLineEdit(self.dockWidgetContents)
-        self.lineEdit.setObjectName("lineEdit")
+        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
         self.horizontalLayout.addWidget(self.lineEdit)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
@@ -47,12 +54,12 @@ class Ui_LogWidget(object):
         self.textLog = QtGui.QTextEdit(self.dockWidgetContents)
         self.textLog.setEnabled(False)
         self.textLog.setReadOnly(True)
-        self.textLog.setObjectName("textLog")
+        self.textLog.setObjectName(_fromUtf8("textLog"))
         self.verticalLayout.addWidget(self.textLog)
         LogWidget.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(LogWidget)
-        QtCore.QObject.connect(self.Clear, QtCore.SIGNAL("clicked()"), self.textLog.clear)
+        QtCore.QObject.connect(self.Clear, QtCore.SIGNAL(_fromUtf8("clicked()")), self.textLog.clear)
         QtCore.QMetaObject.connectSlotsByName(LogWidget)
 
     def retranslateUi(self, LogWidget):

@@ -29,13 +29,15 @@ class PMXBlockUserData(QTextBlockUserData):
     def __init__(self):
         QTextBlockUserData.__init__(self)
         self.scopes = []
-        self.folding = self.FOLDING_NONE
-        self.foldingLevel = 0
-        #self.foldingPeer = None
-        self.folded = False
+        self.foldingMark = self.FOLDING_NONE
+        self.foldedLevel = 0
         self.indentMark = self.INDENT_NONE
         self.indent = ""
     
+    @property
+    def folded(self):
+        return self.foldedLevel != 0
+
     def __nonzero__(self):
         return bool(self.scopes)
     
@@ -43,11 +45,7 @@ class PMXBlockUserData(QTextBlockUserData):
         return self.scopes[-1]
     
     def addScope(self, begin, end, scope):
-        # Requiere de testeo por el tema de begin y end, pero este es el camino :) para mas velocidad
         self.scopes[begin:end] = [scope for _ in xrange(end - begin)]
-        # Lo dejo como un triste recuerdo :P
-        #for pos in xrange(end - begin):
-        #    self.scopes.insert(begin + pos, scope)
         
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
@@ -85,7 +83,7 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         return self.__formatter
     def setFormatter(self, formatter):
         self.__formatter =  formatter
-        #Deprecate cache
+        #Deprecate format cache
         self.__formatter.clearCache()
         PMXSyntaxProcessor.FORMAT_CACHE = {}
         self.rehighlight()
@@ -114,16 +112,28 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
 
     def addToken(self, end):
         begin = self.line_position
+        # Solo si no estoy descartando lineas y tengo realmente algo que agregar
         if self.discard_lines == 0 and begin != end:
-            # Solo si no estoy descartando lineas y tengo realmente algo que agregar
             scopes = " ".join(self.scopes)
             self.userData.addScope(begin, end, scopes)
-            if self.formatter != None:
-                if scopes not in PMXSyntaxProcessor.FORMAT_CACHE:
-                    PMXSyntaxProcessor.FORMAT_CACHE[scopes] = self.formatter.getStyle(scopes).QTextFormat
-                self.setFormat(begin, end - begin, PMXSyntaxProcessor.FORMAT_CACHE[scopes])
+            format = self.getFormat(scopes)
+            if format is not None:
+                self.setFormat(begin, end - begin, format)
+            preferences = self.editor.getPreference(scopes)
+            if preferences is not None:
+                pass
         self.line_position = end
     
+    def getFormat(self, scope):
+        if self.formatter == None: return None
+        if scope not in PMXSyntaxProcessor.FORMAT_CACHE:
+            PMXSyntaxProcessor.FORMAT_CACHE[scope] = self.formatter.getStyle(scope).QTextFormat
+        return PMXSyntaxProcessor.FORMAT_CACHE[scope]
+    
+    #===============================================================================
+    # PMXSyntaxProcessor interface
+    #===============================================================================
+    #NEW LINE
     def newLine(self, line):
         self.line_position = 0
         if self.discard_lines:
@@ -132,10 +142,12 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     #START
     def startParsing(self, scope):
         self.line_position = 0
+        self.block_number = self.currentBlock().blockNumber()
         self.scopes = [ scope ]
         self.userData = self.currentBlock().userData()
         if self.userData == None:
             self.setCurrentBlockUserData(PMXBlockUserData())
+            self.editor.folding.insert(self.block_number)
         self.userData = self.currentBlock().userData()
 
     #OPEN
@@ -147,21 +159,6 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     def closeTag(self, scope, position):
         self.addToken(position)
         self.scopes.pop()
-
-    def foldingMarker(self, line):
-        self.userData.folding = self.syntax.folding(line)
-        #TODO: Si es un folding stop buscar hacia arriba el de apertura
-        #if self.syntax.indentSensitive and self.userData.folding == self.syntax.FOLDING_STOP and line.strip() == "":
-        #    self.userData.folding = self.syntax.FOLDING_NONE
-
-    def indentMarker(self, line, scope):
-        settings = self.editor.pmxApp.bundleManager.getPreferenceSettings(scope)
-        self.userData.indentMark = settings.indent(line)
-        if self.syntax.indentSensitive and line.strip() == "":
-            prev = self.currentBlock().previous()
-            self.userData.indent = prev.userData().indent if prev.isValid() else ""
-        else: 
-            self.userData.indent = whiteSpace(line)
 
     #END
     def endParsing(self, scope):
@@ -176,7 +173,29 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.foldingMarker(line)
         self.indentMarker(line, scope)
         
-        #self.setCurrentBlockUserData(self.userData)
+    #===============================================================================
+    # Extra data for user data
+    #===============================================================================
+    def foldingMarker(self, line):
+        self.userData.foldingMark = self.syntax.folding(line)
+        if self.userData.foldingMark == PMXBlockUserData.FOLDING_START:
+            self.editor.folding.setStart(self.block_number)
+        elif self.userData.foldingMark == PMXBlockUserData.FOLDING_STOP:
+            if self.editor.folding.getNestedLevel(self.block_number) > 0:
+                self.editor.folding.setStop(self.block_number)
+            else:
+                self.userData.foldingMark = PMXBlockUserData.FOLDING_NONE
+        elif self.userData.foldingMark == PMXBlockUserData.FOLDING_NONE:
+            self.editor.folding.setNone(self.block_number)
+
+    def indentMarker(self, line, scope):
+        settings = self.editor.getPreference(scope)
+        self.userData.indentMark = settings.indent(line)
+        if self.syntax.indentSensitive and line.strip() == "":
+            prev = self.currentBlock().previous()
+            self.userData.indent = prev.userData().indent if prev.isValid() else ""
+        else: 
+            self.userData.indent = whiteSpace(line)
 
 # Command
 class PMXCommandProcessor(PMXCommandProcessor):

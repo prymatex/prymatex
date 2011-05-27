@@ -1,3 +1,4 @@
+import os
 from PyQt4 import QtCore, QtGui
 from prymatex import res_rc
 
@@ -16,8 +17,6 @@ class PMBBundleTreeItem(object):
             self.icon.load(":/bundles/resources/bundles/templates.png")
         elif tipo == "command":
             self.icon.load(":/bundles/resources/bundles/commands.png")
-        elif tipo == "bundle":
-            self.icon.fill(QtCore.Qt.gray)
         elif tipo == "syntax":
             self.icon.load(":/bundles/resources/bundles/languages.png")
         elif tipo == "preference":
@@ -28,8 +27,10 @@ class PMBBundleTreeItem(object):
             self.icon.load(":/bundles/resources/bundles/snippets.png")
         elif tipo == "macro":
             self.icon.load(":/bundles/resources/bundles/macros.png")
-        else:
+        elif tipo == "template-file":
             self.icon.load(":/bundles/resources/bundles/template-files.png")
+        else:
+            self.icon = None
 
     def appendChild(self, item):
         self.childItems.append(item)
@@ -152,4 +153,9 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
     def setupModelData(self, items, parent):
         for item in items:
             biti = PMBBundleTreeItem(item.uuid, item.name, item.TYPE, parent)
+            if item.TYPE == "template":
+                for file in item.files:
+                    #TODO: sacar la referencia al modulo os, poner la obtencion del nombre a nivel de support
+                    tifi = PMBBundleTreeItem(file, os.path.basename(file), "template-file", biti)
+                    biti.appendChild(tifi)
             parent.appendChild(biti)

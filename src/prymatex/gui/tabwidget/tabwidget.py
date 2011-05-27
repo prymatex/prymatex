@@ -8,7 +8,7 @@ from PyQt4.QtCore import QString, SIGNAL, Qt
 import itertools
 
 from prymatex.gui.utils import *
-from prymatex.gui.editor import PMXEditorWidget
+from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from choosetab import ChooseTabDialog
 from prymatex.core.base import PMXObject
 import logging
