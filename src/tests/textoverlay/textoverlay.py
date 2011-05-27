@@ -78,46 +78,33 @@ class OverlayedQTextEdit(QPlainTextEdit):
     
     def mousePressEvent(self, event):
         super(OverlayedQTextEdit, self).mousePressEvent(event)
-        pos = event.pos()
-        #print "Mouse press", pos 
-        self.rectStart = pos
+        if event.modifiers() == Qt.ControlModifier:
+            self.rectStart = event.pos()
+            self.cursorStart = self.cursorForPosition(event.pos())
         
     def mouseMoveEvent(self, event):
-        super(OverlayedQTextEdit, self).mouseMoveEvent(event)
-        pos = event.pos()
-        #print "Mouse move", pos
-        #print "Mouse drag"
-        self.rectEnd = pos
-        self.repaint()
-        self.update()
-        
+        if event.modifiers() == Qt.ControlModifier:
+            self.rectEnd = event.pos()
+            self.cursorEnd = self.cursorForPosition(event.pos())
+            self.document().markContentsDirty(self.cursorStart.position(), self.cursorEnd.position())
+        else:
+            super(OverlayedQTextEdit, self).mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
-        # Esto no fuciona si es una ABC :(
         super(OverlayedQTextEdit, self).mouseReleaseEvent(event)
-        #print "Mouse release", event.pos()
-        self.rectStart = self.rectEnd = None
-        #self.repaint(self.viewport().geometry())
-        #self.re
-        self.update()
+        if self.cursorStart != None and self.cursorEnd != None:
+            self.document().markContentsDirty(self.cursorStart.position(), self.cursorEnd.position())
+            self.rectStart = self.rectEnd = None
+            self.cursorStart = self.cursorEnd = None
+
     
     def paintEvent(self, event):
-        print 
         retval = super(OverlayedQTextEdit, self).paintEvent(event)
         
         #print self.rectStart, self.rectEnd
         
         if self.rectStart and self.rectEnd:
-            #print "printing"
-            if isinstance(self, QAbstractScrollArea):
-                painter = QPainter(self.viewport())
-                painter.translate(-self.horizontalScrollBar().value(), 
-                              -self.verticalScrollBar().value())
-            
-            else:
-                painter = QPainter(self)
-            
-            
+            painter = QPainter(self.viewport())
             
             pen = QPen("red")
             pen.setWidth(2)
@@ -129,12 +116,7 @@ class OverlayedQTextEdit(QPlainTextEdit):
             painter.setOpacity(0.2)
             painter.drawRect(QRect(self.rectStart, self.rectEnd))
             
-            #painter.end()
-            
         return retval
-
-
-
 
 class TestWidget(QWidget):
     def __init__(self):
