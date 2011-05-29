@@ -1,9 +1,22 @@
+'''
+A simple django-models like API for Qt's TableModel.
+It allows to handle things by name insted of index.
+Some caching is peformed for some operations.
 
-from PyQt4.Qt import *
+For sample usage check prymatex test folder in the source
+tree inside the tablemodels
+
+'''
+from PyQt4.QtGui import QStandardItem, QItemDelegate, QStandardItemModel
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtWrapperType
 from prymatex.core.exceptions import APIUsageError, InvalidField
 
 class PMXTableField(object):
-    
+    '''
+    Table fields define table strcuture. Their definition is stored
+    in a PMXTableBase instance inside a _meta attibute.
+
+    '''
     _creation_counter = 0
     _name = None
     
@@ -17,6 +30,7 @@ class PMXTableField(object):
                  item_class = QStandardItem,
                  delegate_class = QItemDelegate):
         '''
+        Field costructor, all fields are optional but name.
         @param name: The field name
         @param required: Is the field requirerd
         @param title: Field's title
@@ -130,6 +144,9 @@ class PMXTableMetaclass(pyqtWrapperType):
         return new_class
 
 class PMXTableBase(QStandardItemModel):
+    '''
+    The model
+    '''
     __metaclass__ = PMXTableMetaclass 
     _configured = False
     
