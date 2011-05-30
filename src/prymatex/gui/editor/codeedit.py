@@ -134,6 +134,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #Helpers
         self.cursors = PMXCursorsHelper(self)
         self.folding = PMXFoldingHelper(self)
+        #self.folding.start()
         
         self.bookmarks = []
         

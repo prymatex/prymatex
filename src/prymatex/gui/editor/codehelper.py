@@ -149,39 +149,36 @@ class PMXCursorsHelper(object):
     def __iter__(self):
         return iter(self.cursors)
 
-class PMXFoldingHelper(object):
+class PMXFoldingHelper(QtCore.QThread):
     def __init__(self, editor):
+        super(PMXFoldingHelper, self).__init__(editor)
         self.editor = editor
-        self.start = []
-        self.stop = []
+        self.open = []
+        self.close = []
     
-    def fill(self, index):
-        if len(self.start) <= index:
-            self.start[len(self.start):index] = [0 for _ in xrange(index - len(self.start))]
-            self.start.append(0)
-        if len(self.stop) <= index:
-            self.stop[len(self.stop):index] = [0 for _ in xrange(index - len(self.stop))]
-            self.stop.append(0)
+    def run(self):
+        while True:
+            QtCore.QThread.sleep(2)
+            print "valores"
+            print self.open
+            print self.close
             
-    def setStart(self, index):
-        self.fill(index)
-        self.start[index] = 1
+    def setOpen(self, index):
+        self.open[index] = 1
         
-    def setStop(self, index):
-        self.fill(index)
-        self.stop[index] = -1
+    def setClose(self, index):
+        self.close[index] = -1
     
     def setNone(self, index):
-        self.fill(index)
-        self.start[index] = self.stop[index] = 0
+        self.open[index] = self.close[index] = 0
     
     def insert(self, index):
-        self.start.insert(index, 0)
-        self.stop.insert(index, 0)
+        self.open.insert(index, 0)
+        self.close.insert(index, 0)
     
     def getNestedLevel(self, index):
-        start = self.start[:index]
-        stop = self.stop[:index]
+        start = self.open[:index]
+        stop = self.close[:index]
         print index
         print start
         print stop

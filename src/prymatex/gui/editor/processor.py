@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+from copy import copy
 from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QToolTip, QTextCursor
 from prymatex.support import PMXSyntaxProcessor, PMXCommandProcessor, PMXMacroProcessor, PMXSnippet, PMXSyntax, PMXPreferenceSettings
 
@@ -34,6 +35,7 @@ class PMXBlockUserData(QTextBlockUserData):
         self.folded = False
         self.indentMark = self.INDENT_NONE
         self.indent = ""
+        self.cache = None
 
     def __nonzero__(self):
         return bool(self.scopes)
@@ -57,6 +59,12 @@ class PMXBlockUserData(QTextBlockUserData):
                 if end != None and index == end:
                     break
         return scopes
+    
+    def getStackAndScopes(self):
+        return copy(self.cache[0]), copy(self.cache[1])
+    
+    def setStackAndScopes(self, stack, scopes):
+        self.cache = (stack, scopes)
     
 class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
@@ -86,36 +94,47 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
         self.rehighlight()
     formatter = property(getFormatter, setFormatter)
 
-    def collectPreviousText(self, current):
-        text = [ current ]
-        block = self.currentBlock().previous()
-        
-        while block.userState() == self.MULTI_LINE:
-            text.append(unicode(block.text()))
-            block = block.previous()
-        text.reverse()
-        return text
-    
     def highlightBlock(self, text):
-        #block = self.currentBlock()
+        #Start Parsing
+        self.block_number = self.currentBlock().blockNumber()
+        self.userData = self.currentBlock().userData()
+        if self.userData == None:
+            self.editor.folding.insert(self.block_number)
+            self.userData = PMXBlockUserData()
+            self.setCurrentBlockUserData(self.userData)
+        
         text = unicode(text)
         if self.previousBlockState() == self.MULTI_LINE:
-            text = self.collectPreviousText(text)
-            self.discard_lines = len(text)
-            text = "\n".join( text )
-        else:  
-            self.discard_lines = 0
-        self.syntax.parse(text, self)
+            #Recupero una copia del stack y los scopes del user data
+            stack, self.scopes = self.currentBlock().previous().userData().getStackAndScopes()
+        else:
+            #Creo un stack y scopes nuevos 
+            stack = [[self.syntax.grammar, None]]
+            self.scopes = [ self.syntax.scopeName ]
+        # A parserar mi amor, vamos a parsear mi amor
+        self.syntax.parseLine(stack, text, self)
+        
+        #End Parsing
+        self.addToken(self.currentBlock().length())
+        if self.scopes[-1] == self.syntax.scopeName:
+            self.setCurrentBlockState(self.SINGLE_LINE)
+        else:
+            self.setCurrentBlockState(self.MULTI_LINE)
+            self.userData.setStackAndScopes(stack, self.scopes)
+            
+        line = unicode(self.currentBlock().text())
+        self.foldingMarker(line)
+        self.indentMarker(line, self.scopes[-1])
 
     def addToken(self, end):
         begin = self.line_position
         # Solo si no estoy descartando lineas y tengo realmente algo que agregar
-        if self.discard_lines == 0 and begin != end:
+        if begin != end:
             scopes = " ".join(self.scopes)
             self.userData.addScope(begin, end, scopes)
-            #format = self.getFormat(scopes)
-            #if format is not None:
-            #    self.setFormat(begin, end - begin, format)
+            format = self.getFormat(scopes)
+            if format is not None:
+                self.setFormat(begin, end - begin, format)
             #preferences = self.editor.getPreference(scopes)
             #if preferences is not None:
             #    pass
@@ -133,19 +152,6 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     #NEW LINE
     def newLine(self, line):
         self.line_position = 0
-        if self.discard_lines:
-            self.discard_lines -= 1
-
-    #START
-    def startParsing(self, scope):
-        self.line_position = 0
-        self.block_number = self.currentBlock().blockNumber()
-        self.scopes = [ scope ]
-        self.userData = self.currentBlock().userData()
-        if self.userData == None:
-            self.setCurrentBlockUserData(PMXBlockUserData())
-            self.editor.folding.insert(self.block_number)
-        self.userData = self.currentBlock().userData()
 
     #OPEN
     def openTag(self, scope, position):
@@ -156,19 +162,6 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     def closeTag(self, scope, position):
         self.addToken(position)
         self.scopes.pop()
-
-    #END
-    def endParsing(self, scope):
-        if self.scopes[-1] == scope:
-            self.setCurrentBlockState(self.SINGLE_LINE)
-        else:
-            self.setCurrentBlockState(self.MULTI_LINE)
-        self.addToken(self.currentBlock().length())
-        self.scopes.pop()
-        
-        line = unicode(self.currentBlock().text())
-        self.foldingMarker(line)
-        self.indentMarker(line, scope)
         
     #===============================================================================
     # Extra data for user data
@@ -176,9 +169,9 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     def foldingMarker(self, line):
         self.userData.foldingMark = self.syntax.folding(line)
         if self.userData.foldingMark == PMXBlockUserData.FOLDING_START:
-            self.editor.folding.setStart(self.block_number)
+            self.editor.folding.setOpen(self.block_number)
         elif self.userData.foldingMark == PMXBlockUserData.FOLDING_STOP:
-            self.editor.folding.setStop(self.block_number)
+            self.editor.folding.setClose(self.block_number)
         elif self.userData.foldingMark == PMXBlockUserData.FOLDING_NONE:
             self.editor.folding.setNone(self.block_number)
 
