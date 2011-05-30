@@ -226,21 +226,21 @@ if __name__ == "__main__":
     combo = QComboBox()
     
     layout2.addWidget(combo)
-    layout2.addWidget(QPushButton("Save to file"))
+    #layout2.addWidget(QPushButton("Save to file"))
     # Create model
     model = setupModel()
     table.setModel(model)
     
     combo.setModel(model)
     #combo.setModelColumn(model._meta.colNumber('nombre_apelido'))
-    combo.setModelColumn(0)#model._meta.colNumber('nombre_apelido'))
+    combo.setModelColumn(model._meta.colNumber('nombre_apelido'))
     # Enable edit features
     model.setColumnDelegatesFromFields(table)
     model.setShownColumnsForView(table,)
     
     
     
-    model.sort('apellido')
+    model.sort('nombre_apelido')
     test_win.setWindowTitle(unicode(model.__class__.__name__))
     test_win.setGeometry(400,200, 600, 560)
     print model._meta
