@@ -31,11 +31,18 @@ def test_bundleItemsCRUD(manager):
     for item in items:
         item = manager.updateBundleItem(item, tabTrigger = "cacho")
         print item.tabTrigger
-        
+
+def test_bundleItemsTemplates(manager):
+    items = manager.findBundleItems(TYPE = "template")
+    for item in items:
+        for name in item.getFileNames():
+            data = item.getFileContent(name)
+            print name, data
+
 if __name__ == "__main__":
     from prymatex.support.manager import PMXSupportManager
     manager = PMXSupportManager()
     manager.addNamespace('prymatex', os.path.abspath('../bundles/prymatex'))
     manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     manager.loadSupport()
-    test_bundleItemsCRUD(manager)
+    test_bundleItemsTemplates(manager)
