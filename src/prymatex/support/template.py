@@ -6,7 +6,7 @@
     http://manual.macromates.com/en/templates
 '''
 
-import os, shutil, plistlib
+import os, shutil, plistlib, codecs
 from glob import glob
 from subprocess import Popen
 from prymatex.support.bundle import PMXBundleItem
@@ -61,10 +61,24 @@ class PMXTemplate(PMXBundleItem):
 
     def addFile(self, file):
         self.files.append(file)
-        
+    
     def getFileNames(self):
         return map(lambda file: os.path.basename(file), self.files)
     
+    def getFileContent(self, name):
+        file = os.path.join(self.path, name)
+        f = codecs.open(file, 'r', 'utf-8')
+        content = f.read()
+        f.close()
+        return content
+    
+    def setFileContent(self, name, content):
+        file = os.path.join(self.path, name)
+        if os.path.exists(file):
+            f = codecs.open(file, 'w', 'utf-8')
+            f.write(content)
+            f.close()
+
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()
         env['TM_NEW_FILE'] = os.path.join(directory, name + '.' + self.extension)

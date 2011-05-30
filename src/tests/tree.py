@@ -104,8 +104,8 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
         for item in items:
             biti = PMBBundleTreeItem(item.uuid, item.name, item.TYPE, parent)
             if item.TYPE == "template":
-                for file in item.files:
-                    tifi = PMBBundleTreeItem(file, os.path.basename(file), "template-file", biti)
+                for fname in item.getFileNames():
+                    tifi = PMBBundleTreeItem(item.uuid, fname, "template-file", biti)
                     biti.appendChild(tifi)
             parent.appendChild(biti)
     
@@ -163,7 +163,7 @@ class PMBBundleTreeItem(object):
 class ColumnView(QTreeView):
     def __init__(self, manager):
         super(ColumnView,  self).__init__()
-
+        self.manager = manager
         self.model = PMBBundleTreeModel(manager)
         self.setModel(self.model)
         
@@ -172,16 +172,20 @@ class ColumnView(QTreeView):
         self.show()
 
     def selectionChanged(self, newindex, oldindex):
-        print "olds"
         indexes = oldindex.indexes()
         if indexes:
+            olditem = None
             for index in indexes:
-                print index.internalPointer().name
-        print "news"
+                olditem = index.internalPointer()
+            if olditem != None:
+                # Ver si cambio algo de los valores
+                bitem = self.manager.getBundleItem(uuid = olditem.uuid)
+                hash = bitem.hash
+                print bitem.isChanged(hash)
         indexes = newindex.indexes()
         if indexes:
             for index in indexes:
-                print index.internalPointer().name
+                newitem = index.internalPointer()
         
 if __name__ == "__main__":
     from prymatex.support.manager import PMXSupportManager

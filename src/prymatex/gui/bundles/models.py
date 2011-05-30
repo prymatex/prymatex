@@ -154,8 +154,7 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
         for item in items:
             biti = PMBBundleTreeItem(item.uuid, item.name, item.TYPE, parent)
             if item.TYPE == "template":
-                for file in item.files:
-                    #TODO: sacar la referencia al modulo os, poner la obtencion del nombre a nivel de support
-                    tifi = PMBBundleTreeItem(file, os.path.basename(file), "template-file", biti)
+                for fname in item.getFileNames():
+                    tifi = PMBBundleTreeItem(item.uuid, fname, "template-file", biti)
                     biti.appendChild(tifi)
             parent.appendChild(biti)
