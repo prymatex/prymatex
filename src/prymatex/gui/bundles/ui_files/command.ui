@@ -45,6 +45,16 @@
          <string>Nothing</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Current File</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>All Files in Project</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -65,7 +75,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Command:</string>
+      <string>Command(s):</string>
      </property>
     </widget>
    </item>
@@ -85,32 +95,17 @@
       <widget class="QComboBox" name="comboBox_2">
        <item>
         <property name="text">
-         <string>Document</string>
+         <string>None</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Line</string>
+         <string>Selected Text</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Word</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Character</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Scope</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Nothing</string>
+         <string>Entire Document</string>
         </property>
        </item>
       </widget>

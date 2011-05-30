@@ -7,7 +7,7 @@ class PMXCursorsHelper(object):
     def __init__(self, editor):
         self.editor = editor
         self.cursors = []
-	self.scursor = self.dp = self.sp = None
+        self.scursor = self.dp = self.sp = None
     
     @property
     def hasCursors(self):
@@ -33,121 +33,75 @@ class PMXCursorsHelper(object):
     def getPoints(self, start, end):
         metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
         hight = metrics.lineSpacing()
+        width = metrics.width("x")
         sx, ex = (start.x(), end.x()) if start.x() <= end.x() else (end.x(), start.x())
         sy, ey = (start.y(), end.y()) if start.y() <= end.y() else (end.y(), start.y())
-        puntos = [ [ (sx, sy), (ex, sy) ] ]
+        puntos = [ ( (sx, sy), (ex, sy) ) ]
         p = sy + hight
-        while p < ey:
-            puntos.append( [ (sx, p), (ex, p) ] )
+        e = ey - hight
+        while p <= e:
+            puntos.append( ( (sx, p), (ex, p) ) )
             p += hight
-        print puntos
-        return puntos
+        puntos.append( ( (sx, ey), (ex, ey) ) )
+        return hight, width, puntos
         
-    def endPoint(self, end):
-        scursor = self.scursor
-        ecursor = self.editor.cursorForPosition(end)
-        self.getPoints(self.sp, end)
+    def endPoint(self, endPoint):
+        _, width, points = self.getPoints(self.sp, endPoint)
         
-        if self.sp == end:
-            cursor = self.editor.cursorForPosition(end)
-            self.addCursor(cursor)
-            self.editor.document().markContentsDirty(cursor.position(), cursor.position())
-        elif self.sp.x() > end.x():         #de derecha a izquierda
-            if self.sp.y() > end.y():       #de abajo hacia arriba
-                startBlock, endBlock = self.editor.cursorForPosition(end).block(), self.editor.cursorForPosition(self.sp).block()
-            else:                           #de arriba hacia abajo
-                startBlock, endBlock = self.editor.cursorForPosition(self.sp).block(), self.editor.cursorForPosition(end).block()
-            block = startBlock
-            while True:
-                rect = self.editor.blockBoundingGeometry(block)
-                if rect.right() > self.sp.x():
-                    cursor = self.editor.cursorForPosition(QtCore.QPoint(self.sp.x(), rect.bottom()))
-                elif rect.left() > end.x():
-                    cursor = self.editor.cursorForPosition(QtCore.QPoint(rect.right(), rect.bottom()))
-                else:
-                    continue
-                if rect.left() < end.x():
-                    ecursor = self.editor.cursorForPosition(QtCore.QPoint(end.x(), rect.bottom()))
-                else:
-                    ecursor = self.editor.cursorForPosition(QtCore.QPoint(rect.left(), rect.bottom()))
-                cursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
+        for tupla in points:
+            if tupla[0] == tupla[1]:
+                cursor = self.editor.cursorForPosition(QtCore.QPoint(*tupla[0]))
                 self.addCursor(cursor)
-                if block == endBlock:
-                    break
-                block = block.next()
-            self.editor.document().markContentsDirty(startBlock.position(), endBlock.position() + endBlock.length())
-        else:                               #de izquierda a derecha
-            if self.sp.y() > end.y():       #de abajo hacia arriba
-                startBlock, endBlock = self.editor.cursorForPosition(end).block(), self.editor.cursorForPosition(self.sp).block()
-            else:                           #de arriba hacia abajo
-                startBlock, endBlock = self.editor.cursorForPosition(self.sp).block(), self.editor.cursorForPosition(end).block()
-            block = startBlock
-            while True:
-                rect = self.editor.blockBoundingGeometry(block)
-                if rect.right() > self.sp.x():
-                    cursor = self.editor.cursorForPosition(QtCore.QPoint(self.sp.x(), rect.bottom()))
-                else:
-                    cursor = self.editor.cursorForPosition(QtCore.QPoint(rect.right(), rect.bottom()))
-                if rect.left() < end.x():
-                    ecursor = self.editor.cursorForPosition(QtCore.QPoint(end.x(), rect.bottom()))
-                else:
-                    ecursor = self.editor.cursorForPosition(QtCore.QPoint(rect.left(), rect.bottom()))
-                cursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
-                self.addCursor(cursor)
-                if block == endBlock:
-                    break
-                block = block.next()
-            self.editor.document().markContentsDirty(startBlock.position(), endBlock.position() + endBlock.length())
-        '''
-        elif scursor.block() == ecursor.block():
-            #Estan en el mismo block
-            if scursor.position() > ecursor.position():
-                ecursor.setPosition(scursor.position(), QtGui.QTextCursor.KeepAnchor)
-                self.addCursor(ecursor)
-                self.editor.document().markContentsDirty(ecursor.position(), scursor.position())
-            else:
-                scursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
-                self.addCursor(scursor)
-                self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
-        else:
-            #Estan en distintos block
-            if scursor.position() > ecursor.position():
-                startBlock = ecursor.block().blockNumber()
-                endBlock = scursor.block().blockNumber()
-                self.editor.document().markContentsDirty(ecursor.position(), scursor.position())
-            else:
-                startBlock = scursor.block().blockNumber()
-                endBlock = ecursor.block().blockNumber()
-                self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
-            for i in xrange(startBlock, endBlock + 1):
-                rect = self.editor.blockBoundingGeometry(self.editor.document().findBlockByNumber(i))
-                print rect
-                #Para que lado fue la apertura del recuadro
-                if self.sp.x() == end.x():
-                    cursor = self.editor.cursorForPosition(QtCore.QPoint(end.x(), rect.bottom()))
-                elif self.sp.x() > end.x():
-                    
-                else:
-                    if rect.right() > self.sp.x():
-                        cursor = self.editor.cursorForPosition(QtCore.QPoint(self.sp.x(), rect.bottom()))
-                    else:
-                        cursor = self.editor.cursorForPosition(QtCore.QPoint(rect.right(), rect.bottom()))
-                    if rect.left() < end.x():
-                        ecursor = self.editor.cursorForPosition(QtCore.QPoint(end.x(), rect.bottom()))
-                    else:
-                        ecursor = self.editor.cursorForPosition(QtCore.QPoint(rect.left(), rect.bottom()))
-                    cursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
-                self.addCursor(cursor)
-                '''
+                self.editor.document().markContentsDirty(cursor.position(), cursor.position())
+                continue
+            #Sentido en el que queda el cursor
+            if self.sp.x() < endPoint.x():  #izquierda a derecha
+                start, end = tupla
+                cursor = self.editor.cursorForPosition(QtCore.QPoint(*start))
+                rect = self.editor.cursorRect(cursor)
+                if rect.right() - width / 2 <= start[0] <= rect.right() + width / 2 and rect.top() <= start[1] <= rect.bottom():
+                    ecursor = self.editor.cursorForPosition(QtCore.QPoint(*end))
+                    rect = self.editor.cursorRect(ecursor)
+                    if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
+                        cursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
+                        self.addCursor(cursor)
+                    self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
+            else: # Derecha a izquierda
+                start, end = tupla
+                cursor = self.editor.cursorForPosition(QtCore.QPoint(*start))
+                rect = self.editor.cursorRect(cursor)
+                if rect.right() - width / 2 <= start[0] <= rect.right() + width / 2 and rect.top() <= start[1] <= rect.bottom():
+                    ecursor = self.editor.cursorForPosition(QtCore.QPoint(*end))
+                    rect = self.editor.cursorRect(ecursor)
+                    if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
+                        ecursor.setPosition(cursor.position(), QtGui.QTextCursor.KeepAnchor)
+                        self.addCursor(ecursor)
+                    self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
+        
         #Clean last acction
         self.scursor = self.dp = self.sp = None
         
     def addCursor(self, cursor):
+        '''
+            Solo se pueden incorporar cursores nuevos.
+        '''
+        new_begin, new_end = (cursor.selectionStart(), cursor.selectionEnd()) if cursor.hasSelection() else (cursor.position(), cursor.position())
+        for c in self.cursors:
+            c_begin, c_end = (c.selectionStart(), c.selectionEnd()) if c.hasSelection() else (c.position(), c.position())
+            if c_begin <= new_begin <= new_end <= c_end:
+                #Esta contenido
+                return
         self.editor.setTextCursor(cursor)
         self.cursors.append(cursor)
     
     def removeAll(self):
         self.cursors = []
+    
+    def canMoveRight(self):
+        return all(map(lambda c: not c.atBlockStart(), self.cursors))
+    
+    def canMoveLeft(self):
+        return all(map(lambda c: not c.atBlockEnd(), self.cursors))
     
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
@@ -156,20 +110,29 @@ class PMXCursorsHelper(object):
             self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
             self.editor.setTextCursor(ecursor)
             self.removeAll()
+            self.editor.highlightCurrentLine()
             return False
         elif event.modifiers() & QtCore.Qt.ControlModifier:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-        elif event.key() == QtCore.Qt.Key_Right or event.key() == QtCore.Qt.Key_Left:
-            #Mouse Move
-            value = 1 if event.key() == QtCore.Qt.Key_Right else -1
+        elif event.key() == QtCore.Qt.Key_Right and self.canMoveRight():
             if event.modifiers() & QtCore.Qt.ShiftModifier:
                 for cursor in self.cursors:
-                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + value)
-                    cursor.setPosition(cursor.position() + value, QtGui.QTextCursor.KeepAnchor)
+                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + 1)
+                    cursor.setPosition(cursor.position() + 1, QtGui.QTextCursor.KeepAnchor)
             else:
                 for cursor in self.cursors:
-                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + value)
-                    cursor.setPosition(cursor.position() + value)
+                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + 1)
+                    cursor.setPosition(cursor.position() + 1)
+            self.editor.setTextCursor(cursor) 
+        elif event.key() == QtCore.Qt.Key_Left and self.canMoveLeft():
+            if event.modifiers() & QtCore.Qt.ShiftModifier:
+                for cursor in self.cursors:
+                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() - 1)
+                    cursor.setPosition(cursor.position() - 1, QtGui.QTextCursor.KeepAnchor)
+            else:
+                for cursor in self.cursors:
+                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() - 1)
+                    cursor.setPosition(cursor.position() - 1)
             self.editor.setTextCursor(cursor)
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:
             #Desactivados por ahora

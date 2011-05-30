@@ -118,7 +118,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     @property
     def multiEditMode(self):
         """Retorna si el editor esta en modo multiedit"""
-        return self.cursors.hasCursors or self.cursors.isDragCursor
+        return self.cursors.hasCursors
     
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
@@ -259,9 +259,16 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
     def highlightCurrentLine(self):
         extraSelections = []
+        if self.multiEditMode:
+            for cursor in self.cursors:
+                if cursor.hasSelection():
+                    selection = QTextEdit.ExtraSelection()
+                    selection.format.setBackground(self.colours['selection'])
+                    selection.cursor = cursor
+                    extraSelections.append(selection)
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
-            selection.format.setBackground(self.colours['lineHighlight']);
+            selection.format.setBackground(self.colours['lineHighlight'])
             selection.format.setProperty(QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
@@ -298,29 +305,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             
             block = block.next()
         if self.multiEditMode:
-            extraSelections = []
             for cursor in self.cursors:
-                if cursor.hasSelection():
-                    selection = QTextEdit.ExtraSelection()
-                    selection.format.setBackground(self.colours['selection'])
-                    selection.format.setProperty(QTextFormat.FullWidthSelection, True)
-                    selection.cursor = cursor
-                    extraSelections.append(selection)
                 rec = self.cursorRect(cursor)
                 cursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
                 painter.setPen(QtGui.QPen(self.colours['caret']))
                 painter.drawLine(cursor)
-            self.setExtraSelections(extraSelections)
-            if self.cursors.isDragCursor:
-                print "is drag"
-                pen = QtGui.QPen(self.colours['caret'])
-                pen.setWidth(2)
-                painter.setPen(pen)
-                color = QColor(self.colours['selection'])
-                color.setAlpha(128)
-                painter.setBrush(QtGui.QBrush(color))
-                painter.setOpacity(0.2)
-                painter.drawRect(self.cursors.getDragCursorRect())
+        if self.cursors.isDragCursor:
+            pen = QtGui.QPen(self.colours['caret'])
+            pen.setWidth(2)
+            painter.setPen(pen)
+            color = QColor(self.colours['selection'])
+            color.setAlpha(128)
+            painter.setBrush(QtGui.QBrush(color))
+            painter.setOpacity(0.2)
+            painter.drawRect(self.cursors.getDragCursorRect())
         painter.end()
 
     #=======================================================================

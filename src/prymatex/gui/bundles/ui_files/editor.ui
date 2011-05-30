@@ -140,7 +140,12 @@
            </property>
            <item>
             <property name="text">
-             <string>key Equivalent</string>
+             <string>Key Equivalent</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Tab Trigger</string>
             </property>
            </item>
           </widget>

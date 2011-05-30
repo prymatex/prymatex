@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/command.ui'
 #
-# Created: Thu May 26 15:16:27 2011
+# Created: Mon May 30 14:59:37 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,6 +32,8 @@ class Ui_Form(object):
         self.comboBox = QtGui.QComboBox(Form)
         self.comboBox.setObjectName(_fromUtf8("comboBox"))
         self.comboBox.addItem(_fromUtf8(""))
+        self.comboBox.addItem(_fromUtf8(""))
+        self.comboBox.addItem(_fromUtf8(""))
         self.horizontalLayout_2.addWidget(self.comboBox)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
@@ -49,9 +51,6 @@ class Ui_Form(object):
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.comboBox_2 = QtGui.QComboBox(Form)
         self.comboBox_2.setObjectName(_fromUtf8("comboBox_2"))
-        self.comboBox_2.addItem(_fromUtf8(""))
-        self.comboBox_2.addItem(_fromUtf8(""))
-        self.comboBox_2.addItem(_fromUtf8(""))
         self.comboBox_2.addItem(_fromUtf8(""))
         self.comboBox_2.addItem(_fromUtf8(""))
         self.comboBox_2.addItem(_fromUtf8(""))
@@ -98,14 +97,13 @@ class Ui_Form(object):
         Form.setWindowTitle(QtGui.QApplication.translate("Form", "Form", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Form", "Save:", None, QtGui.QApplication.UnicodeUTF8))
         self.comboBox.setItemText(0, QtGui.QApplication.translate("Form", "Nothing", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("Form", "Command:", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(1, QtGui.QApplication.translate("Form", "Current File", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox.setItemText(2, QtGui.QApplication.translate("Form", "All Files in Project", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("Form", "Command(s):", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Form", "Input:", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_2.setItemText(0, QtGui.QApplication.translate("Form", "Document", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_2.setItemText(1, QtGui.QApplication.translate("Form", "Line", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_2.setItemText(2, QtGui.QApplication.translate("Form", "Word", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_2.setItemText(3, QtGui.QApplication.translate("Form", "Character", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_2.setItemText(4, QtGui.QApplication.translate("Form", "Scope", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_2.setItemText(5, QtGui.QApplication.translate("Form", "Nothing", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox_2.setItemText(0, QtGui.QApplication.translate("Form", "None", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox_2.setItemText(1, QtGui.QApplication.translate("Form", "Selected Text", None, QtGui.QApplication.UnicodeUTF8))
+        self.comboBox_2.setItemText(2, QtGui.QApplication.translate("Form", "Entire Document", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Form", "or", None, QtGui.QApplication.UnicodeUTF8))
         self.comboBox_3.setItemText(0, QtGui.QApplication.translate("Form", "Document", None, QtGui.QApplication.UnicodeUTF8))
         self.comboBox_3.setItemText(1, QtGui.QApplication.translate("Form", "Line", None, QtGui.QApplication.UnicodeUTF8))
