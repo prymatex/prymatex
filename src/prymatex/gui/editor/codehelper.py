@@ -30,9 +30,24 @@ class PMXCursorsHelper(object):
         dcursor = self.editor.cursorForPosition(self.dp)
         self.editor.document().markContentsDirty(scursor.position(), dcursor.position())
 
+    def getPoints(self, start, end):
+        metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
+        hight = metrics.lineSpacing()
+        sx, ex = (start.x(), end.x()) if start.x() <= end.x() else (end.x(), start.x())
+        sy, ey = (start.y(), end.y()) if start.y() <= end.y() else (end.y(), start.y())
+        puntos = [ [ (sx, sy), (ex, sy) ] ]
+        p = sy + hight
+        while p < ey:
+            puntos.append( [ (sx, p), (ex, p) ] )
+            p += hight
+        print puntos
+        return puntos
+        
     def endPoint(self, end):
         scursor = self.scursor
         ecursor = self.editor.cursorForPosition(end)
+        self.getPoints(self.sp, end)
+        
         if self.sp == end:
             cursor = self.editor.cursorForPosition(end)
             self.addCursor(cursor)
@@ -44,7 +59,6 @@ class PMXCursorsHelper(object):
                 startBlock, endBlock = self.editor.cursorForPosition(self.sp).block(), self.editor.cursorForPosition(end).block()
             block = startBlock
             while True:
-                print block.blockNumber()
                 rect = self.editor.blockBoundingGeometry(block)
                 if rect.right() > self.sp.x():
                     cursor = self.editor.cursorForPosition(QtCore.QPoint(self.sp.x(), rect.bottom()))
@@ -69,7 +83,6 @@ class PMXCursorsHelper(object):
                 startBlock, endBlock = self.editor.cursorForPosition(self.sp).block(), self.editor.cursorForPosition(end).block()
             block = startBlock
             while True:
-                print block.blockNumber()
                 rect = self.editor.blockBoundingGeometry(block)
                 if rect.right() > self.sp.x():
                     cursor = self.editor.cursorForPosition(QtCore.QPoint(self.sp.x(), rect.bottom()))
