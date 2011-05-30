@@ -69,7 +69,7 @@ class PMXFilterBundleItem(QSortFilterProxyModel):
     def __init__(self, model, column_key):
         super(PMXFilterBundleItem, self).__init__()
         self.setSourceModel(model)
-        self.setFilterKeyColumn(model._meta.col_number(column_key))
+        self.setFilterKeyColumn(model._meta.colNumber(column_key))
     
     
     def filterAcceptsColumn(self, row, parent):

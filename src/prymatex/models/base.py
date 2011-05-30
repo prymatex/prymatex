@@ -8,7 +8,7 @@ tree inside the tablemodels
 
 '''
 from PyQt4.QtGui import QStandardItem, QItemDelegate, QStandardItemModel
-from PyQt4.QtCore import Qt, pyqtSignal, pyqtWrapperType
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtWrapperType, QVariant, QString, QModelIndex
 from prymatex.core.exceptions import APIUsageError, InvalidField
 
 class PMXTableField(object):
@@ -24,6 +24,7 @@ class PMXTableField(object):
                  name = None, 
                  required = False,
                  title = None,
+                 hidden = False,
                  default = None,
                  editable = True,
                  fget_from_bundle = None, 
@@ -45,6 +46,7 @@ class PMXTableField(object):
         self.delegate_class = delegate_class
         self.default = default
         self.editable = editable
+        self.hidden = hidden
         # For sorting
         PMXTableField._creation_counter += 1
         self._creation_counter = PMXTableField._creation_counter
@@ -66,24 +68,31 @@ class PMXTableMeta(object):
         self.name = name
     
     @property
-    def field_names(self):
+    def fieldNames(self):
         ''' Return a list of field names '''
         return [f.name for f in self.fields]
     
     @property
-    def required_field_names(self):
+    def requiredFieldNames(self):
         ''' Returns a list of required fields '''
         return [f.name for f in self.fields if f.required ]
     
-    def col_number(self, name):
+    def fieldName(self, col_number):
+        ''' Returns integer index for col '''
+        return self.fieldNames.index(col_number)
+    
+    def colNumber(self, name):
         ''' Returns integer index for a column name '''
         for n, field in enumerate(self.fields):
             if name == field.name:
                 return n
         raise KeyError("%s not found in %s" % (name, self))
     
+    def colsNumber(self, names):
+        return map(self.colNumber, names)
+    
     @property
-    def editable_cols(self):
+    def editableCols(self):
         ''' Returns editable columns '''
         cols = []
         for n, field in enumerate(self.fields):
@@ -91,19 +100,28 @@ class PMXTableMeta(object):
                 cols.append(n)
         return cols
     
-    def all_valid_names(self, names):
+    def allValidNames(self, names):
         '''
         @return: True if all name are in the meta's field definition, False otherwise
         '''
-        valid_names = self.field_names
+        valid_names = self.fieldNames
         return all(map(lambda fname: fname in valid_names, names))
-        
     
-    def check_has_names(self, names):
+    
+    @property
+    def visibleColumnsNames(self):
+        return [ f.name for f in self.fields if not f.hidden ]
+    
+    @property
+    def hiddenColumnsNames(self):
+        return [ f.name for f in self.fields if f.hidden ]
+    
+    
+    def checkHasNames(self, names):
         '''
         @raise InvalidField: If not valid field
         '''
-        valid_names = self.field_names
+        valid_names = self.fieldNames
         for name in names:
             if not name in valid_names:
                 raise InvalidField(name, valid_names) 
@@ -112,6 +130,8 @@ class PMXTableMeta(object):
         return "<PMXTableMeta for %s table model>" % self.name
     
     __repr__ = __str__
+    
+    
     
 
 class PMXTableMetaclass(pyqtWrapperType):
@@ -168,6 +188,7 @@ class PMXTableBase(QStandardItemModel):
         self.fillHeadersFromFields()
         self._configured = True
         self.tableConfigured.emit()
+        
     
     def fillHeadersFromFields(self):
         for n, field in enumerate(self._meta.fields):
@@ -186,7 +207,7 @@ class PMXTableBase(QStandardItemModel):
             view.setItemDelegateForColumn(n, item_delegate)
     
     def addRowFromKwargs(self, **kwargs):
-        required = self._meta.required_field_names
+        required = self._meta.requiredFieldNames
         if not map(lambda name: name in required, kwargs):
             raise APIUsageError("Not all required fields provided!")
         items = []
@@ -201,27 +222,64 @@ class PMXTableBase(QStandardItemModel):
         QStandardItemModel.appendRow(self, items)
     
     def sort(self, col, ordering = Qt.AscendingOrder):
-        print col
+        assert self._configured, APIUsageError("configure() not called")
         if isinstance(col, (str, unicode)):
-            print "Cambio"
-            col = self._meta.col_number(col)
+            #print "Cambio"
+            col = self._meta.colNumber(col)
         return super(PMXTableBase, self).sort(col, ordering)
     
     # http://www.osgeo.org/pipermail/qgis-developer/2009-February/006203.html
     def flags(self, index):
-        ''' '''
+        ''' 
+        Read only fields are handled here
+        '''
         baseflags = super(PMXTableBase, self).flags(index)
         col = index.column()
-        if not col in self._meta.editable_cols:
+        if not col in self._meta.editableCols:
             return baseflags & ~Qt.ItemIsEditable
         return baseflags
     
-    def setShownColumnsForView(self, view, column_names):
+    def setShownColumnsForView(self, view, column_names = []):
         '''
         Defines which columns have to be shown
         '''
-        self._meta.check_has_names(column_names)
+        if not column_names:
+            column_names = self._meta.visibleColumnsNames
+            print "Hidding"
+            print column_names
+        else:
+            self._meta.checkHasNames(column_names)
         
         for n, field in enumerate(self._meta.fields):
             view.setColumnHidden(n, not field.name in column_names)
+    
+    
+    def index(self, row, column, parent = QModelIndex()):
+        ''' Accepts names as well as ints'''
+        if isinstance(column, (basestring, QString)):
+            column = self._meta.colNumber(column)
+        return super(PMXTableBase, self).index(row, column, parent)
+        
+    
 
+    #===========================================================================
+    # Persistance
+    #===========================================================================
+    
+    #===========================================================================
+    # Python API
+    #===========================================================================
+    
+    def __setitem__(self, key, value):
+        ''' Enable simple access '''
+        if isinstance(key, tuple) and len(key) == 2:
+            row, col = key
+            index = self.index(row, col)
+            self.setData(index, QVariant(value))
+        else:
+            raise APIUsageError("Only tuples can be used")
+        print "Set"
+        
+        
+        
+        

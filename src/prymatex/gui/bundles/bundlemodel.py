@@ -111,10 +111,10 @@ class PMXBundeItemSimpleFilterProxyModel(QSortFilterProxyModel):
         self.setSourceModel(self.sourceModel)
         self.filters = {}
         for key in filter_arguments:
-            if not key in self.sourceModel._meta.field_names:
+            if not key in self.sourceModel._meta.fieldNames:
                 raise APIUsageError("%s is not a valid field of %s" % (key, self.sourceModel))
-            col_number = self.sourceModel._meta.col_number(key)
-            self.filters[col_number] = filter_arguments[key]
+            colNumber = self.sourceModel._meta.colNumber(key)
+            self.filters[colNumber] = filter_arguments[key]
         
     def filterAcceptsRow(self, row, parent):
         if not self.filters: 

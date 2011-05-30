@@ -11,10 +11,21 @@ if __name__ == "__main__":
     import_path = os.path.abspath(os.path.join(path, '..', ))
     sys.path.insert(0, import_path)
     
-from PyQt4.Qt import *    
+from PyQt4.Qt import *
 import prymatex
 from prymatex.core.exceptions import APIUsageError
 from prymatex.models import *
+
+
+def colorize(some_code):
+    ''' python -> html '''
+    try:
+        from pygments import highlight
+        from pygments.lexers import PythonLexer
+        from pygments.formatters import HtmlFormatter
+        return highlight(some_code, PythonLexer(), HtmlFormatter(noclasses = True))
+    except ImportError:
+        return some_code
     
 class PMXTableModelItemX(QStandardItemModel):
     pass
@@ -113,6 +124,63 @@ class SexoItemDelegate(PMXChoiceItemDelegate):
 
 class PMXTableTest(PMXTableBase):
     # Order matters
+    nombre = PMXTableField(required = False)
+    apellido = PMXTableField(required = True)
+    direccion = PMXTableField(required = True, title = u"Dirección")
+    type_ = PMXTableField(required = True, default = 1, title = "Bundle Type", 
+                         delegate_class=SexoItemDelegate)
+    descripcion = PMXTableField(required = False, 
+                                delegate_class=PMXDecoupledEditorDelegate)
+    
+    nombre_apelido = PMXTableField(editable = False)
+
+    
+    def __init__(self, parent = None):
+        super(PMXTableTest, self).__init__(parent)
+        self.setup()
+        # Eventos
+        self.itemChanged.connect(self._updateItem)
+        self.rowsInserted.connect(self.appendToApeNombre)
+
+    def fillNombreApellido(self, row):
+        ''' Rellenar una columna a partir de otras dos '''
+        values = self.index(row, 'nombre' ).data(), self.index(row, 'apellido' ).data()
+        values = map(lambda x: unicode(x.toPyObject()), values)
+        data = " ".join(values)
+        self.setData(self.index(row, 'nombre_apelido'), data)
+    
+    
+    def _updateItem(self, item):
+        '''
+        Si se edita un item, se acutaliza
+        '''
+        index = item.index()
+        row = item.index().row()
+        interesting_indexes = self._meta.colsNumber(["nombre", "apellido"])
+        #  Se modifico alguna columna interesante? 
+        if index.column() in interesting_indexes:
+            self.fillNombreApellido(row)
+        
+    def appendToApeNombre(self, index, start, end):
+        ''' Cuando se agrega una columna '''
+        for row in range(start, end+1):
+            self.fillNombreApellido(row)
+        
+        
+    
+
+def setupModel():
+    model = PMXTableTest()
+    model.addRowFromKwargs(nombre = "Pepe", apellido = u"Grillo", direccion = u"Caja de 222 fósforos Patito")
+    model.addRowFromKwargs(nombre = "Pinocho", apellido = u"Pérez", direccion = "Lata de concentrado de ballena")
+    model.addRowFromKwargs(nombre = "Froddo", apellido = "Baggins", direccion = "The fellowship of the ring")
+    return model
+
+def exampleCodeLabel():
+    html = colorize('''
+
+class PMXTableTest(PMXTableBase):
+    # Order matters
     nombre = PMXTableField(required = False, editable = False)
     apellido = PMXTableField(required = True, editable = False)
     direccion = PMXTableField(required = True, title = u"Dirección")
@@ -124,20 +192,57 @@ class PMXTableTest(PMXTableBase):
     def __init__(self, parent = None):
         super(PMXTableTest, self).__init__(parent)
         self.setup()
-        
+
+model = PMXTableTest()
+model.addRowFromKwargs(nombre = "Pepe", apellido = u"Grillo", direccion = u"Caja de 222 fósforos Patito")
+model.addRowFromKwargs(nombre = "Pinocho", apellido = u"Pérez", direccion = "Lata de concentrado de ballena")
+model.addRowFromKwargs(nombre = "Froddo", apellido = "Baggins", direccion = "The fellowship of the ring")
+model.sort('apellido')
+    ''')
+    lbl = QLabel(html)
+    lbl.setStyleSheet('QLabel {border: 1px solid #000; }')
+    return lbl
+      
 if __name__ == "__main__":
+    ''' Create the widget '''
     import sys
+    
+        
     app = QApplication(sys.argv)
-    win = QTableView()
-    model = PMXTableTest()
-    win.setModel(model)
-    model.setColumnDelegatesFromFields(win)
-    model.addRowFromKwargs(nombre = "Nahuel", apellido = u"Defossé", direccion = "Moreno 46")
-    model.addRowFromKwargs(nombre = "Pablo Enrrique", apellido = "Petenello", direccion = "Moreno 46")
-    model.addRowFromKwargs(nombre = "Diego Marco", apellido = "van Haaster", direccion = "Moreno 46")
+    test_win = QWidget()
+    layout = QVBoxLayout()
+    layout.setSpacing(0)
+    layout.setContentsMargins(0, 0, 0, 0)
+    test_win.setLayout(layout)
+    lbl = QLabel('''<h3>PMXTableBase</h3>''')
+    lbl.setMargin(3)
+    layout.addWidget(lbl)
+    layout.addWidget(exampleCodeLabel())
+    table = QTableView()
+    layout.addWidget(table)
+    layout2 = QHBoxLayout()
+    layout.addLayout(layout2)
+    layout2.addStretch()
+    combo = QComboBox()
+    
+    layout2.addWidget(combo)
+    layout2.addWidget(QPushButton("Save to file"))
+    # Create model
+    model = setupModel()
+    table.setModel(model)
+    
+    combo.setModel(model)
+    #combo.setModelColumn(model._meta.colNumber('nombre_apelido'))
+    combo.setModelColumn(0)#model._meta.colNumber('nombre_apelido'))
+    # Enable edit features
+    model.setColumnDelegatesFromFields(table)
+    model.setShownColumnsForView(table,)
+    
+    
+    
     model.sort('apellido')
-    win.setWindowTitle(unicode(model.__class__.__name__))
-    win.setGeometry(400,200, 600, 400)
+    test_win.setWindowTitle(unicode(model.__class__.__name__))
+    test_win.setGeometry(400,200, 600, 560)
     print model._meta
-    win.show()
+    test_win.show()
     sys.exit(app.exec_())
