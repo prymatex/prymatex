@@ -250,7 +250,7 @@ class PMXSupportManager(object):
         for item in items:
             self.deleteBundleItem(item)
         if bundle.namespace == self.nsorder[0]:
-            self.addDeletedBundle(uuid)
+            self.addDeletedBundle(bundle.uuid)
         else:
             bundle.delete()
         

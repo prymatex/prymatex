@@ -29,18 +29,7 @@
       <enum>QLayout::SetMaximumSize</enum>
      </property>
      <item>
-      <widget class="QComboBox" name="select_top">
-       <item>
-        <property name="text">
-         <string>Select All</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Hide All</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="comboBoxItemFilter"/>
      </item>
      <item>
       <widget class="QTreeView" name="treeView"/>

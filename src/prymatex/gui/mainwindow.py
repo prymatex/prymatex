@@ -234,7 +234,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         with the QAction in the menu
         '''
         self.tableViewBundleItems = PMXBundleItemTableView()
-        self.tableViewBundleItems.setModel(self.pmxApp.supportManager.model)
+        self.tableViewBundleItems.setModel(self.pmxApp.supportManager.bundleItemModel)
         self.tableViewBundleItems.setWindowTitle("Bundle Items")
         self.actionBundle_List.toggled[bool].connect(self.tableViewBundleItems.setVisible)
         self.tableViewBundleItems.showStateChanged.connect(self.actionBundle_List.setChecked)

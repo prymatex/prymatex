@@ -105,9 +105,12 @@ class PMXCursorsHelper(object):
     
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
+            #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
             scursor = min(self.cursors, key = lambda cursor: cursor.position())
             ecursor = max(self.cursors, key = lambda cursor: cursor.position())
             self.editor.document().markContentsDirty(scursor.position(), ecursor.position())
+            if ecursor.hasSelection():
+                ecursor.clearSelection()
             self.editor.setTextCursor(ecursor)
             self.removeAll()
             self.editor.highlightCurrentLine()

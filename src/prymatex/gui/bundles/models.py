@@ -1,7 +1,13 @@
-import os
 from PyQt4 import QtCore, QtGui
-from prymatex import res_rc
+from PyQt4.QtCore import Qt
+from prymatex.core.exceptions import APIUsageError
+from prymatex.models.base import PMXTableBase, PMXTableField
+from prymatex.models.delegates import PMXChoiceItemDelegate
+#from PyQt4.Qt import *
 
+#====================================================
+# Bundle Tree Model
+#====================================================
 class PMXBundleTreeItem(object):  
     def __init__(self, data, parent=None):
         self.data = data
@@ -71,18 +77,36 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         super(PMXBundleTreeModel, self).__init__(parent)  
         self.manager = manager
         self.rootItem = PMXBundleTreeItem(RootItem())
+        
+    def populateFromManager(self):
         for bundle in self.manager.getAllBundles():
             bti = PMXBundleTreeItem(bundle, self.rootItem)
             self.rootItem.appendChild(bti)
             bundle_items = self.manager.findBundleItems(bundle = bundle)
             self.setupModelData(bundle_items, bti)
-      
+    
+    def addBundle(self, bundle):
+        bti = PMXBundleTreeItem(bundle, self.rootItem)
+        self.rootItem.appendChild(bti)
+        
+    def addBundleItem(self, bundleItem):
+        bnode = filter(lambda bnode: bnode.data == bundleItem.bundle, self.rootItem.childItems)
+        if len(bnode) != 1:
+            raise Exception("No bundle node for bundle item: %s", bundleItem.name)
+        bnode = bnode[0]
+        bti = PMXBundleTreeItem(bundleItem, bnode)
+        if bundleItem.TYPE == "template":
+            for file in bundleItem.getTemplateFiles():
+                tifi = PMXBundleTreeItem(file, bti)
+                bti.appendChild(tifi)
+        bnode.appendChild(bti)
+    
     def setData(self, index, value, role):  
         if not index.isValid():  
             return False
         elif role == QtCore.Qt.EditRole:  
             item = index.internalPointer()  
-            item.name = unicode(value.toString())
+            item.data.name = unicode(value.toString())
             return True
         return False  
      
@@ -195,3 +219,172 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
             return rightData.name > leftData.name
         else:
             return self.bundleItemTypeOrder.index(rightData.tipo) > self.bundleItemTypeOrder.index(leftData.tipo)
+
+#====================================================
+# Bundle Item Table Model
+#====================================================
+class PMXBundleItemInstanceItem(QtGui.QStandardItem):
+    '''
+    Create a superclass?
+    '''
+    def __init__(self, pmx_bundle_item):
+        super(PMXBundleItemInstanceItem, self).__init__()
+        from prymatex.support.bundle import PMXBundleItem
+        if isinstance(pmx_bundle_item, PMXBundleItem):
+            self.setData(pmx_bundle_item, QtCore.Qt.EditRole)
+            self.setData(unicode(pmx_bundle_item), QtCore.Qt.DisplayRole)
+        
+    def setData(self, value, role):
+        '''
+        Display something, but store data
+        http://doc.trolltech.com/latest/qstandarditem.html#setData
+        '''
+        if role == Qt.EditRole:
+            self._item = value
+        elif role == Qt.DisplayRole:
+            super(PMXBundleItemInstanceItem, self).setData(value, role)
+        else:
+            raise TypeError("setData called with unsupported role")
+    
+    def data(self, role = Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            return super(PMXBundleItemInstanceItem, self).data(role)
+        elif role == Qt.EditRole:
+            return self._item
+    
+    @property
+    def item(self):
+        return self._item
+    
+class PMXBundleModel(PMXTableBase):
+    '''
+    Store xxx.tmBundle/info.plist data
+    '''
+    
+    uuid = PMXTableField(title = "UUID")
+    name = PMXTableField()
+    namespace = PMXTableField()
+    description = PMXTableField()
+    contactName = PMXTableField( title = "Contact Name")
+    contactMailRot13 = PMXTableField(title = "Conatact E-Mail")
+    disabled = PMXTableField()
+    item = PMXTableField()
+    
+    def appendBundleRow(self, bundle):
+        self.addRowFromKwargs(
+                    uuid = bundle.uuid,
+                    name = bundle.name,
+                    namespace = bundle.namespace,
+                    description = bundle.description,
+                    contactName = bundle.contactName,
+                    contactMailRot13 = bundle.contactMailRot13,
+                    disabled = bundle.disabled,
+                    item = bundle,
+                    )
+        
+        
+
+class PMXBundleTypeDelegate(PMXChoiceItemDelegate):
+    CHOICES = [('Command', 1),
+               ('Snippet', 2),
+               ('Macro', 3),
+               ('Syntax', 5),
+               ]
+
+class PMXBundleItemDelegate(QtGui.QItemDelegate):
+    # Just to try
+    def createEditor(self, *largs):
+        return QtGui.QTextEdit()
+
+class PMXBundleItemModel(PMXTableBase):
+    '''
+    Stores Command, Syntax, Snippets, etc. information
+    '''
+    
+    bundleUUID = PMXTableField(editable = False, title = "Bundle UUID")
+    path = PMXTableField(editable = False, )
+    namespace = PMXTableField(editable = False)
+    
+    uuid = PMXTableField(title = "UUID")
+    type_ = PMXTableField(title = "Item Type", 
+                          delegate_class = PMXBundleTypeDelegate)
+    name = PMXTableField()
+    tabTrigger = PMXTableField(title = "Tab Trigger")
+    keyEquivalent = PMXTableField(title = "Key Equivalent")
+    scope = PMXTableField()
+    item = PMXTableField(item_class = PMXBundleItemInstanceItem, delegate_class=PMXBundleItemDelegate)
+   
+    def appendBundleItemRow(self, instance):
+        '''
+        Appends a new row based on an instance
+        @param instance A PMXCommand, PMXSnippet, PMXMacro instance
+        '''
+        self.addRowFromKwargs(bundleUUID = instance.bundle.uuid,
+                              path = instance.path,
+                              namespace = instance.namespace,
+                              uuid = instance.uuid,
+                              type_ = instance.TYPE,
+                              name = instance.name,
+                              tabTrigger = instance.tabTrigger,
+                              keyEquivalent = instance.keyEquivalent,
+                              scope = instance.scope,
+                              #item = item,
+                              )
+    
+    def getProxyFilteringModel(self, **filter_kwargs):
+        ''' Returns a list of QStandardItems 
+            I.E. get_by(uuid = 'aaa-bb-cc')
+        ''' 
+        proxy = PMXBundeItemSimpleFilterProxyModel(self, **filter_kwargs)
+        return proxy 
+        
+
+class PMXBundeItemSimpleFilterProxyModel(QtGui.QSortFilterProxyModel):
+    '''
+    Filters
+    '''
+    def __init__(self, model, **filter_arguments):
+        super(PMXBundeItemSimpleFilterProxyModel, self).__init__(self)
+        self.sourceModel = model
+        self.setSourceModel(self.sourceModel)
+        self.filters = {}
+        for key in filter_arguments:
+            if not key in self.sourceModel._meta.fieldNames:
+                raise APIUsageError("%s is not a valid field of %s" % (key, self.sourceModel))
+            colNumber = self.sourceModel._meta.colNumber(key)
+            self.filters[colNumber] = filter_arguments[key]
+        
+    def filterAcceptsRow(self, row, parent):
+        if not self.filters: 
+            return self.resultsIfEmpty
+            
+        for col, value in self.filters:
+            if self.data(self.index(row, col)).toPyObject() != value:
+                return False
+        return True
+    
+    _resultsIfEmpty = True
+    @property
+    def resultsIfEmpty(self):
+        return self._resultsIfEmpty
+    
+    @resultsIfEmpty.setter
+    def resultsIfEmpty(self, value):
+        self._resultsIfEmpty = value
+    
+    def __setitem__(self, key, value):
+        self.filters.update(key = value)
+    
+    def __getitem__(self, key):
+        return self.filters.__getitem__(key)
+    
+if __name__ == "__main__":
+    import sys
+    a = QtGui.QApplication(sys.argv)
+    w = QtGui.QTableView()
+    model = PMXBundleItemModel()
+    w.setModel(model)
+    w.setGeometry(400, 100, 600, 480)
+    w.resizeColumnsToContents()
+    w.show()
+    sys.exit(a.exec_())

@@ -127,7 +127,6 @@ class PMXBundleItemSelector(QDialog, PMXObject):
             
         
     def setupUi(self):
-        
         layout = QVBoxLayout()
         layout.setSpacing(0)
         layout.setMargin(0)
@@ -135,7 +134,7 @@ class PMXBundleItemSelector(QDialog, PMXObject):
         layout.addWidget(self.lineFilter)
         self.tableView = PMXBundleItemsSelectorTableView(self)
         
-        bundleItemModel = self.pmxApp.supportManager.model
+        bundleItemModel = self.pmxApp.supportManager.bundleItemModel
         self.proxyFilteringModel = PMXFilterBundleItem(bundleItemModel, 'name')
         self.tableView.setModel(self.proxyFilteringModel)
         

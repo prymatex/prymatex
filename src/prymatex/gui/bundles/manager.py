@@ -33,44 +33,30 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
                 env[var['variable']] = var['value']
         env.update(self.environment)
         return env
-        
-    def hasBundle(self, uuid):
-        return PMXSupportManager.hasBundle(self, uuid)
 
+    #---------------------------------------------------
+    # BUNDLE OVERRIDE INTERFACE 
+    #---------------------------------------------------
     def addBundle(self, bundle):
-        '''
-        @todo: Update Bundle Tree hierachy
-        '''
+        self.bundleModel.addBundle(bundle)
         return PMXSupportManager.addBundle(self, bundle)
 
-    def getBundle(self, uuid):
-        return PMXSupportManager.getBundle(self, uuid)
-
-    def getAllBundles(self):
-        return PMXSupportManager.getAllBundles(self)
-
-
-    def hasBundleItem(self, uuid):
-        
-        return PMXSupportManager.hasBundleItem(self, uuid)
-
+    #---------------------------------------------------
+    # BUNDLEITEM OVERRIDE INTERFACE 
+    #---------------------------------------------------
     def addBundleItem(self, item):
+        self.bundleModel.addBundleItem(item)
         self.bundleItemModel.appendBundleItemRow(item)
         return PMXSupportManager.addBundleItem(self, item)
 
-
-    def getBundleItem(self, uuid):
-        
-        return PMXSupportManager.getBundleItem(self, uuid)
-
-
+    #---------------------------------------------------
+    # THEME OVERRIDE INTERFACE
+    #---------------------------------------------------
     def hasTheme(self, uuid):
         return PMXSupportManager.hasTheme(self, uuid)
 
-
     def addTheme(self, theme):
         return PMXSupportManager.addTheme(self, theme)
-
 
     def getTheme(self, uuid):
         return PMXSupportManager.getTheme(self, uuid)
