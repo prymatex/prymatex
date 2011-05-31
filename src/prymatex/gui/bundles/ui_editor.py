@@ -28,8 +28,6 @@ class Ui_bundleEditor(object):
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.select_top = QtGui.QComboBox(bundleEditor)
         self.select_top.setObjectName(_fromUtf8("select_top"))
-        self.select_top.addItem(_fromUtf8(""))
-        self.select_top.addItem(_fromUtf8(""))
         self.verticalLayout.addWidget(self.select_top)
         self.treeView = QtGui.QTreeView(bundleEditor)
         self.treeView.setObjectName(_fromUtf8("treeView"))
@@ -57,7 +55,7 @@ class Ui_bundleEditor(object):
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout_3.addWidget(self.label)
         self.widget = QtGui.QWidget(bundleEditor)
-        self.widget.setStyleSheet(_fromUtf8("image: url(:/icons/resources/icons/Prymatex_Logo.png);"))
+        #self.widget.setStyleSheet(_fromUtf8("image: url(:/icons/resources/icons/Prymatex_Logo.png);"))
         self.widget.setObjectName(_fromUtf8("widget"))
         self.verticalLayout_3.addWidget(self.widget)
         self.formLayout_2 = QtGui.QFormLayout()
@@ -96,8 +94,6 @@ class Ui_bundleEditor(object):
 
     def retranslateUi(self, bundleEditor):
         bundleEditor.setWindowTitle(QtGui.QApplication.translate("bundleEditor", "Bundle Editor", None, QtGui.QApplication.UnicodeUTF8))
-        self.select_top.setItemText(0, QtGui.QApplication.translate("bundleEditor", "Select All", None, QtGui.QApplication.UnicodeUTF8))
-        self.select_top.setItemText(1, QtGui.QApplication.translate("bundleEditor", "Hide All", None, QtGui.QApplication.UnicodeUTF8))
         self.btn_new_bundle.setText(QtGui.QApplication.translate("bundleEditor", "+", None, QtGui.QApplication.UnicodeUTF8))
         self.btn_del_bundle.setText(QtGui.QApplication.translate("bundleEditor", "-", None, QtGui.QApplication.UnicodeUTF8))
         self.btn_filter.setText(QtGui.QApplication.translate("bundleEditor", "Filter List", None, QtGui.QApplication.UnicodeUTF8))
@@ -105,15 +101,3 @@ class Ui_bundleEditor(object):
         self.label_2.setText(QtGui.QApplication.translate("bundleEditor", "Activation:", None, QtGui.QApplication.UnicodeUTF8))
         self.comboBox_3.setItemText(0, QtGui.QApplication.translate("bundleEditor", "key Equivalent", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("bundleEditor", "Scope Selector:", None, QtGui.QApplication.UnicodeUTF8))
-
-import res_rc
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    bundleEditor = QtGui.QWidget()
-    ui = Ui_bundleEditor()
-    ui.setupUi(bundleEditor)
-    bundleEditor.show()
-    sys.exit(app.exec_())
-

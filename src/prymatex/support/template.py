@@ -12,6 +12,27 @@ from subprocess import Popen
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, ensureEnvironment, deleteFile
 
+class PMXTemplateFile(object):
+    TYPE = 'template-file'
+    def __init__(self, name, template):
+        self.name = name
+        self.template = template
+        
+    def getFileContent(self):
+        file = os.path.join(self.template.path, self.name)
+        f = codecs.open(file, 'r', 'utf-8')
+        content = f.read()
+        f.close()
+        return content
+    
+    def setFileContent(self, content):
+        file = os.path.join(self.template.path, self.name)
+        if os.path.exists(file):
+            f = codecs.open(file, 'w', 'utf-8')
+            f.write(content)
+            f.close()
+    content = property(getFileContent, setFileContent)
+
 class PMXTemplate(PMXBundleItem):
     KEYS = [    'command', 'extension']
     FILE = 'info.plist'
@@ -60,24 +81,11 @@ class PMXTemplate(PMXBundleItem):
         self.files = files
 
     def addFile(self, file):
-        self.files.append(file)
+        name = os.path.basename(file)
+        self.files.append(PMXTemplateFile(name, self))
     
-    def getFileNames(self):
-        return map(lambda file: os.path.basename(file), self.files)
-    
-    def getFileContent(self, name):
-        file = os.path.join(self.path, name)
-        f = codecs.open(file, 'r', 'utf-8')
-        content = f.read()
-        f.close()
-        return content
-    
-    def setFileContent(self, name, content):
-        file = os.path.join(self.path, name)
-        if os.path.exists(file):
-            f = codecs.open(file, 'w', 'utf-8')
-            f.write(content)
-            f.close()
+    def getTemplateFiles(self):
+        return self.files
 
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()

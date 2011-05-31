@@ -7,7 +7,7 @@ Created on 07/05/2011
 
 if __name__ == "__main__":
     import sys, os
-    path = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.dirname(os.path.abspath('.'))
     import_path = os.path.abspath(os.path.join(path, '..', ))
     sys.path.insert(0, import_path)
     

@@ -2,15 +2,21 @@ import os
 from PyQt4 import QtCore, QtGui
 from prymatex import res_rc
 
-class PMBBundleTreeItem(object):  
-    def __init__(self, uuid, name, tipo, parent=None):
-        self.name = name
-        self.uuid = uuid
-        self.tipo = tipo
+class PMXBundleTreeItem(object):  
+    def __init__(self, data, parent=None):
+        self.data = data
         self.parentItem = parent
         self.childItems = []
         self.setIcon(self.tipo)
-
+        
+    @property
+    def name(self):
+        return self.data.name
+        
+    @property
+    def tipo(self):
+        return self.data.TYPE
+    
     def setIcon(self, tipo):
         self.icon = QtGui.QPixmap()
         if tipo == "template":
@@ -32,8 +38,8 @@ class PMBBundleTreeItem(object):
         else:
             self.icon = None
 
-    def appendChild(self, item):
-        self.childItems.append(item)
+    def appendChild(self, child):
+        self.childItems.append(child)
 
     def child(self, row):
         return self.childItems[row]
@@ -52,17 +58,21 @@ class PMBBundleTreeItem(object):
             return self.parentItem.childItems.index(self)  
         return 0
     
-    def setData(self, name):  
-        self.name = name
+    def setData(self, data):  
+        self.data = data
 
-class PMBBundleTreeModel(QtCore.QAbstractItemModel):  
-    def __init__(self, manager, parent = None):  
-        super(PMBBundleTreeModel, self).__init__(parent)  
-        self.parents = []
+class RootItem(object):
+    def __init__(self):
+        self.name = "root"
+        self.TYPE = "root"
+
+class PMXBundleTreeModel(QtCore.QAbstractItemModel):  
+    def __init__(self, manager, parent = None):
+        super(PMXBundleTreeModel, self).__init__(parent)  
         self.manager = manager
-        self.rootItem = PMBBundleTreeItem("", u"Bundles", "root")
+        self.rootItem = PMXBundleTreeItem(RootItem())
         for bundle in self.manager.getAllBundles():
-            bti = PMBBundleTreeItem(bundle.uuid, bundle.name, "bundle", self.rootItem)
+            bti = PMXBundleTreeItem(bundle, self.rootItem)
             self.rootItem.appendChild(bti)
             bundle_items = self.manager.findBundleItems(bundle = bundle)
             self.setupModelData(bundle_items, bti)
@@ -152,9 +162,36 @@ class PMBBundleTreeModel(QtCore.QAbstractItemModel):
 
     def setupModelData(self, items, parent):
         for item in items:
-            biti = PMBBundleTreeItem(item.uuid, item.name, item.TYPE, parent)
+            biti = PMXBundleTreeItem(item, parent)
             if item.TYPE == "template":
-                for fname in item.getFileNames():
-                    tifi = PMBBundleTreeItem(item.uuid, fname, "template-file", biti)
+                for file in item.getTemplateFiles():
+                    tifi = PMXBundleTreeItem(file, biti)
                     biti.appendChild(tifi)
             parent.appendChild(biti)
+
+class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
+    def __init__(self, parent = None):
+        super(PMXBundleTreeProxyModel, self).__init__(parent)
+        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "template-file", "syntax"]
+        
+    def filterAcceptsRow(self, sourceRow, sourceParent):
+        regexp = self.filterRegExp()
+        if regexp.isEmpty():
+            return True
+        index = self.sourceModel().index(sourceRow, 0, sourceParent)
+        item = index.internalPointer()
+        if item.tipo == "bundle":
+            return True
+        else:
+            return QtCore.QString(item.tipo).contains(regexp)
+        
+    def filterAcceptsColumn(self, sourceColumn, sourceParent):
+        return True
+        
+    def lessThan(self, left, right):
+        leftData = left.internalPointer()
+        rightData = right.internalPointer()
+        if leftData.tipo == rightData.tipo:
+            return rightData.name > leftData.name
+        else:
+            return self.bundleItemTypeOrder.index(rightData.tipo) > self.bundleItemTypeOrder.index(leftData.tipo)

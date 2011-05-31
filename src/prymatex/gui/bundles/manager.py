@@ -5,8 +5,7 @@ from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.bundles.bundlemodel import PMXBundleItemModel
-
-
+from prymatex.gui.bundles.models import PMXBundleTreeModel
 
 class PMXTableSupportManager(PMXSupportManager, PMXObject):
     '''
@@ -24,8 +23,8 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
     def __init__(self):
         super(PMXTableSupportManager, self).__init__()
         self.configure()
-        
-        self.model = PMXBundleItemModel()
+        self.bundleItemModel = PMXBundleItemModel()
+        self.bundleModel = PMXBundleTreeModel(self)
 
     def buildEnvironment(self):
         env = {}
@@ -37,7 +36,6 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
         
     def hasBundle(self, uuid):
         return PMXSupportManager.hasBundle(self, uuid)
-
 
     def addBundle(self, bundle):
         '''
@@ -56,9 +54,8 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
         
         return PMXSupportManager.hasBundleItem(self, uuid)
 
-
     def addBundleItem(self, item):
-        self.model.appendBundleItemRow(item)
+        self.bundleItemModel.appendBundleItemRow(item)
         return PMXSupportManager.addBundleItem(self, item)
 
 

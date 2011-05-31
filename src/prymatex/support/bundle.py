@@ -81,6 +81,7 @@ class PMXMenuNode(object):
 class PMXBundle(object):
     KEYS = [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
+    TYPE = 'bundle'
     def __init__(self, namespace, hash = None, path = None):
         self.namespace = namespace
         self.path = path
