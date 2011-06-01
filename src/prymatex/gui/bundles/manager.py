@@ -4,8 +4,7 @@ from PyQt4.Qt import *
 from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.bundles.bundlemodel import PMXBundleItemModel
-from prymatex.gui.bundles.models import PMXBundleTreeModel
+from prymatex.gui.bundles.models import PMXBundleTreeModel, PMXBundleItemModel
 
 class PMXTableSupportManager(PMXSupportManager, PMXObject):
     '''

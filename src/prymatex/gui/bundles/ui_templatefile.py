@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/templatefile.ui'
 #
-# Created: Mon May 30 14:59:38 2011
+# Created: Tue May 31 18:51:25 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,31 +14,31 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_Form(object):
-    def setupUi(self, Form):
-        Form.setObjectName(_fromUtf8("Form"))
-        Form.resize(274, 210)
-        self.verticalLayout = QtGui.QVBoxLayout(Form)
+class Ui_TemplateFile(object):
+    def setupUi(self, TemplateFile):
+        TemplateFile.setObjectName(_fromUtf8("TemplateFile"))
+        TemplateFile.resize(274, 210)
+        self.verticalLayout = QtGui.QVBoxLayout(TemplateFile)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.plainTextEdit = QtGui.QPlainTextEdit(Form)
+        self.plainTextEdit = QtGui.QPlainTextEdit(TemplateFile)
         self.plainTextEdit.setObjectName(_fromUtf8("plainTextEdit"))
         self.verticalLayout.addWidget(self.plainTextEdit)
 
-        self.retranslateUi(Form)
-        QtCore.QMetaObject.connectSlotsByName(Form)
+        self.retranslateUi(TemplateFile)
+        QtCore.QMetaObject.connectSlotsByName(TemplateFile)
 
-    def retranslateUi(self, Form):
-        Form.setWindowTitle(QtGui.QApplication.translate("Form", "Form", None, QtGui.QApplication.UnicodeUTF8))
+    def retranslateUi(self, TemplateFile):
+        TemplateFile.setWindowTitle(QtGui.QApplication.translate("TemplateFile", "Form", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":
     import sys
     app = QtGui.QApplication(sys.argv)
-    Form = QtGui.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(Form)
-    Form.show()
+    TemplateFile = QtGui.QWidget()
+    ui = Ui_TemplateFile()
+    ui.setupUi(TemplateFile)
+    TemplateFile.show()
     sys.exit(app.exec_())
 

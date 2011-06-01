@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 from prymatex.gui.bundles.ui_editor import Ui_bundleEditor
 from prymatex.gui.bundles.models import PMXBundleTreeProxyModel, PMXBundleTreeModel
+from prymatex.gui.bundles.widgets import PMXSnippetWidget, PMXCommandWidget
 
 class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     '''
@@ -12,8 +13,8 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     def __init__(self, manager = None):
         super(PMXBundleEditor, self).__init__()
         self.setupUi(self)
-        self.stackLayout = QtGui.QStackedLayout()
         self.configSelectTop()
+        self.loadEditorWidgets()
         self.configTreeView(manager)
         self.comboBoxItemFilter.currentIndexChanged[int].connect(self.selectTopChange)
         self.setWindowTitle(QtGui.QApplication.translate("bundleEditor", "Bundle Editor", None, QtGui.QApplication.UnicodeUTF8))
@@ -47,8 +48,25 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.treeView.setAnimated(True)
         self.treeView.pressed.connect(self.itemSelected)
         
+    def loadEditorWidgets(self):
+        self.currentWidget = self.widget
+        self.editors = { u'bundle': PMXSnippetWidget(),
+                         u'command': PMXCommandWidget(),
+                         u'dragcommand': PMXSnippetWidget(),
+                         u'macro': PMXSnippetWidget(),
+                         u'snippet': PMXSnippetWidget(),
+                         u'preference': PMXSnippetWidget(),
+                         u'template': PMXSnippetWidget(),
+                         u'template-file': PMXSnippetWidget(),
+                         u'syntax': PMXSnippetWidget() }
+    
     def itemSelected(self, index):
-        print index, "hola"
+        index = self.treeModel.data(index)
+        item = index.internalPointer()
+        print item
+        self.verticalLayout_3.removeWidget(self.currentWidget)
+        self.currentWidget = self.editors[unicode(item.tipo)]
+        self.verticalLayout_3.insertWidget(1, self.currentWidget)
         
     def setCentralWidget(self, objeto):
         pass
