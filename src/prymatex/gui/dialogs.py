@@ -16,6 +16,9 @@ if __name__ == '__main__':
     sys.path.append( path )
     
 class MultiCloseDialog(QDialog, Ui_SaveMultipleDialog):
+    '''
+    @todo: Implement PMXTabWidget model
+    '''
     def __init__(self, parent):
         super(MultiCloseDialog, self).__init__(parent)
         self.setupUi(self)
