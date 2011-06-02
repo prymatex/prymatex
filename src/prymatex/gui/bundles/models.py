@@ -1,5 +1,5 @@
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QString
 from prymatex.core.exceptions import APIUsageError
 from prymatex.models.base import PMXTableBase, PMXTableField
 from prymatex.models.delegates import PMXChoiceItemDelegate
@@ -335,31 +335,48 @@ class PMXBundleItemModel(PMXTableBase):
         ''' Returns a list of QStandardItems 
             I.E. get_by(uuid = 'aaa-bb-cc')
         ''' 
-        proxy = PMXBundeItemSimpleFilterProxyModel(self, **filter_kwargs)
+        proxy = PMXTableFilterProxyModel(self, **filter_kwargs)
         return proxy 
         
 
-class PMXBundeItemSimpleFilterProxyModel(QtGui.QSortFilterProxyModel):
+class PMXTableFilterProxyModel(QtGui.QSortFilterProxyModel):
     '''
-    Filters
+    Filter created through getProxyFilteringModel(setup)
+    
+    @param sourceModel: A PMXTableBase instance
+    @param resultsIfEmpty: Show tables
+    @param filterArguments: Filter colName = colValue  
+    
     '''
-    def __init__(self, model, **filter_arguments):
-        super(PMXBundeItemSimpleFilterProxyModel, self).__init__(self)
-        self.sourceModel = model
+    def __init__(self, sourceModel, resultsIfEmpty = False, **filterArguments):
+        '''
+        Simple
+        '''
+        super(PMXTableFilterProxyModel, self).__init__()
+        self.sourceModel = sourceModel
         self.setSourceModel(self.sourceModel)
         self.filters = {}
-        for key in filter_arguments:
+        
+        for key in filterArguments:
             if not key in self.sourceModel._meta.fieldNames:
                 raise APIUsageError("%s is not a valid field of %s" % (key, self.sourceModel))
             colNumber = self.sourceModel._meta.colNumber(key)
-            self.filters[colNumber] = filter_arguments[key]
+            self.filters[colNumber] = filterArguments[key]
+        self.resultsIfEmpty = resultsIfEmpty
         
     def filterAcceptsRow(self, row, parent):
+        '''
+        Stores values 
+        '''
+        
         if not self.filters: 
             return self.resultsIfEmpty
-            
-        for col, value in self.filters:
-            if self.data(self.index(row, col)).toPyObject() != value:
+        # For each key = value
+        for colNumber, colValue in self.filters.iteritems():
+            #print "Buscando ", row, " con ", self.filters
+            data = self.sourceModel.index(row, colNumber).data().toPyObject()
+            #print "filter", data
+            if data != colValue:
                 return False
         return True
     
@@ -370,13 +387,30 @@ class PMXBundeItemSimpleFilterProxyModel(QtGui.QSortFilterProxyModel):
     
     @resultsIfEmpty.setter
     def resultsIfEmpty(self, value):
+        ''' Populate model when no filter criteria has been 
+        defined yet'''
         self._resultsIfEmpty = value
     
     def __setitem__(self, key, value):
         self.filters.update(key = value)
     
     def __getitem__(self, key):
-        return self.filters.__getitem__(key)
+        if len(key) == 2:
+            row, column = key
+            if not isinstance(row, int):
+                raise APIUsageError("Indexes must be integers")
+            if isinstance(column, (basestring, QString)):
+                column = self.sourceModel._meta.colNumber(column)
+            elif not isinstance(column, int):
+                raise APIUsageError("Indexes must be integers")
+            #print "Indexing proxy model with", row, ", ", column
+            return self.index(row, column).data().toPyObject()
+        raise APIUsageError("Can't use %s as index for model try (row, column), where columns"
+                            "can be names")
+    
+    def getSrcModelField(self, index, fieldName):
+        pass
+    
     
 if __name__ == "__main__":
     import sys

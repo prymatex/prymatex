@@ -36,7 +36,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     def configTreeView(self, manager = None):
         if manager is None:
             print "sin manager tomo de la tabla ya armada"
-            self.treeModel = self.pmxApp.supportManager.bundleModel
+            self.treeModel = self.pmxApp.supportManager.bundleTreeModel
         else:
             self.treeModel = PMXBundleTreeModel(manager)
             self.treeModel.populateFromManager()

@@ -298,7 +298,7 @@ class PMXApplication(QApplication):
                                  name, counter, total, progress)
             # Loose coupling 
             #QApplication.processEvents()
-            #bundleItemModel = QApplication.instance().bundleItemModel
+            #bundleItemModel = QApplication.instance().bundleTableModel
             #bundleItemModel.appendRowFromBundle( bundle )
         
         self.splash.showMessage("Loading bundles...")

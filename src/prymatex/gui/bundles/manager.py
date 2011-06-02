@@ -22,8 +22,8 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
     def __init__(self):
         super(PMXTableSupportManager, self).__init__()
         self.configure()
-        self.bundleItemModel = PMXBundleItemModel()
-        self.bundleModel = PMXBundleTreeModel(self)
+        self.bundleTableModel = PMXBundleItemModel()
+        self.bundleTreeModel = PMXBundleTreeModel(self)
 
     def buildEnvironment(self):
         env = {}
@@ -37,15 +37,15 @@ class PMXTableSupportManager(PMXSupportManager, PMXObject):
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
     def addBundle(self, bundle):
-        self.bundleModel.addBundle(bundle)
+        self.bundleTreeModel.addBundle(bundle)
         return PMXSupportManager.addBundle(self, bundle)
 
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
     #---------------------------------------------------
     def addBundleItem(self, item):
-        self.bundleModel.addBundleItem(item)
-        self.bundleItemModel.appendBundleItemRow(item)
+        self.bundleTreeModel.addBundleItem(item)
+        self.bundleTableModel.appendBundleItemRow(item)
         return PMXSupportManager.addBundleItem(self, item)
 
     #---------------------------------------------------
