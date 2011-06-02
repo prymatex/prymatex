@@ -798,7 +798,7 @@ class PMXSnippet(PMXBundleItem):
         return unicode(self.snippet)
     
     def __len__(self):
-        return len(self.snippet)
+        return self.snippet is not None and len(self.snippet) or 0
 
     def clone(self):
         memo = {"parent": None, "snippet": None, "taborder": {}}
