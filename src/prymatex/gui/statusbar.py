@@ -45,6 +45,7 @@ class PWMStatusLabel(QLabel):
         self.valueChanged.emit(action.value)
 
 class PMXCursorPositionLabel(QWidget):
+    
     FORMAT = "Line: %5d Col: %5d"
     def __init__(self, parent):
         super(PMXCursorPositionLabel, self).__init__(parent)
@@ -66,10 +67,12 @@ class PMXCursorPositionLabel(QWidget):
         self.postionLabel.setText(self.text_format % (line, col))
 
 class PMXSymbolBox(QComboBox):
+    # TODO: Implement SymbolBox
     def __init__(self, parent):
         super(PMXSymbolBox, self).__init__(parent)        
             
 class PMXStatusBar(QStatusBar, PMXObject):
+    # TODO: Implement indentation checks
     '''
     Main Window status bar, declares some widgets
     '''
@@ -101,8 +104,27 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.syntaxMenu = QComboBox(self)
         
         #No syntax
-        for syntax in self.pmxApp.bundleManager.getSyntaxes(sort = True):
-            self.syntaxMenu.addItem(syntax.name, QVariant(syntax.uuid))
+        print "Syntax..."
+        bundleTableModel = self.pmxApp.supportManager.bundleTableModel
+        syntaxModel = bundleTableModel.getProxyFilteringModel(type_ = 'syntax')
+        self.syntaxMenu.setModelColumn(bundleTableModel._meta.colNumber('name'))
+        
+        self.syntaxMenu.setModel(syntaxModel)
+        print syntaxModel.rowCount()
+        print bundleTableModel._meta.colNumber('name')
+        #self.tbl = QTableView()
+        #self.tbl.setModel(syntaxModel)
+        #self.tbl.show()
+        
+        self._combo = QComboBox()
+        self._combo.setModel(syntaxModel)
+        self._combo.setModelColumn(bundleTableModel._meta.colNumber('name'))
+        self._combo.show()
+        self._combo.currentIndexChanged[int].connect(self.mostrar)
+        
+        #syntaxModel = self.pmxApp.supportManager.bundleTableModel
+        #for syntax in self.pmxApp.bundleManager.getSyntaxes(sort = True):
+        #    self.syntaxMenu.addItem(syntax.name, QVariant(syntax.uuid))
             
         self.addPermanentWidget(self.syntaxMenu)
         self.addPermanentWidget(self.lineColLabel)
@@ -114,6 +136,9 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.setSignals()
         
         self.mainWindow.tabWidget.currentEditorChanged.connect(self.syncToEditor)
+    
+    def mostrar(self, index):
+        print self._combo.model()[index, 'path']
     
     def setIndentMode(self, value):
         
@@ -130,7 +155,8 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.connect(self.mainWindow, SIGNAL('tabWidgetEditorChangedEvent'), self.updateEditor )
         
         #Internal signals
-        self.syntaxMenu.currentIndexChanged[int].connect(self.sendStatusBarSyntaxChanged)
+        # FIXME: Connect syntax
+        #self.syntaxMenu.currentIndexChanged[int].connect(self.sendStatusBarSyntaxChanged)
         
         # New style
 #        self.mainWindow.editorCursorPositionChangedEvent.connect( self.updatePosition )
@@ -179,3 +205,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
             self.syntaxMenu.setCurrentIndex(index)
         else:
             self.syntaxMenu.setCurrentIndex(0)
+
+
+def mostrar(*largs):
+    print largs

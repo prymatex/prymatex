@@ -46,7 +46,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
                   ]
         if not value in values:
             raise APIUsageError("setShowTabBar expected a valid constant")
-        print "set show tab bar", value
         self.showTabBarCheck() # Update
         
     showTabBar = pmxConfigPorperty(default = TABBAR_ALWAYS_SHOWN, fset=setShowTabBar)
@@ -275,7 +274,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
             editor = self[0]
             
             if editor.file.path is None and not editor.modified:
-                print "Editor unico", editor.file.path, editor.modified
                 self.removeTab(1)
                     
         if type(autoFocus) is not bool:
@@ -384,7 +382,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
             if not tabBar.isHidden():
                 tabBar.hide()
         elif self.showTabBar == self.TABBAR_WHEN_MULTIPLE:
-            print "Count"
             count = self.count()
             if count > 1:
                 self.tabBar().show()

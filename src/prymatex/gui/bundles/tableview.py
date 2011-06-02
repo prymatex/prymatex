@@ -134,11 +134,11 @@ class PMXBundleItemSelector(QDialog, PMXObject):
         layout.addWidget(self.lineFilter)
         self.tableView = PMXBundleItemsSelectorTableView(self)
         
-        bundleItemModel = self.pmxApp.supportManager.bundleItemModel
-        self.proxyFilteringModel = PMXFilterBundleItem(bundleItemModel, 'name')
+        bundleTableModel = self.pmxApp.supportManager.bundleTableModel
+        self.proxyFilteringModel = PMXFilterBundleItem(bundleTableModel, 'name')
         self.tableView.setModel(self.proxyFilteringModel)
         
-        bundleItemModel.setShownColumnsForView(self.tableView, ['name', ])
+        bundleTableModel.setShownColumnsForView(self.tableView, ['name', ])
         
         #self.tableView.setCol
         

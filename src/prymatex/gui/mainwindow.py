@@ -198,6 +198,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             parent_menu.addAction(action)
             
     def addBundlesToMenu(self):
+        # TOODO: Use bundleTableModel for menu generation
         name_order = lambda b1, b2: cmp(b1.name, b2.name)
         
         used = []
@@ -230,11 +231,11 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     
     def setupBundleViews(self):
         '''
-        Creates a TableView for the bundleItemModel and associates it
+        Creates a TableView for the bundleTableModel and associates it
         with the QAction in the menu
         '''
         self.tableViewBundleItems = PMXBundleItemTableView()
-        self.tableViewBundleItems.setModel(self.pmxApp.supportManager.bundleItemModel)
+        self.tableViewBundleItems.setModel(self.pmxApp.supportManager.bundleTableModel)
         self.tableViewBundleItems.setWindowTitle("Bundle Items")
         self.actionBundle_List.toggled[bool].connect(self.tableViewBundleItems.setVisible)
         self.tableViewBundleItems.showStateChanged.connect(self.actionBundle_List.setChecked)
