@@ -106,25 +106,10 @@ class PMXStatusBar(QStatusBar, PMXObject):
         #No syntax
         print "Syntax..."
         bundleTableModel = self.pmxApp.supportManager.bundleTableModel
-        syntaxModel = bundleTableModel.getProxyFilteringModel(type_ = 'syntax')
+        syntaxModel = bundleTableModel.getProxyFilteringModel(type_ = 'syntax', order_by = 'name')
         self.syntaxMenu.setModelColumn(bundleTableModel._meta.colNumber('name'))
         
         self.syntaxMenu.setModel(syntaxModel)
-        print syntaxModel.rowCount()
-        print bundleTableModel._meta.colNumber('name')
-        #self.tbl = QTableView()
-        #self.tbl.setModel(syntaxModel)
-        #self.tbl.show()
-        
-        self._combo = QComboBox()
-        self._combo.setModel(syntaxModel)
-        self._combo.setModelColumn(bundleTableModel._meta.colNumber('name'))
-        self._combo.show()
-        self._combo.currentIndexChanged[int].connect(self.mostrar)
-        
-        #syntaxModel = self.pmxApp.supportManager.bundleTableModel
-        #for syntax in self.pmxApp.bundleManager.getSyntaxes(sort = True):
-        #    self.syntaxMenu.addItem(syntax.name, QVariant(syntax.uuid))
             
         self.addPermanentWidget(self.syntaxMenu)
         self.addPermanentWidget(self.lineColLabel)
@@ -138,6 +123,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.mainWindow.tabWidget.currentEditorChanged.connect(self.syncToEditor)
     
     def mostrar(self, index):
+        print self._combo.model()[index, 'item']
         print self._combo.model()[index, 'path']
     
     def setIndentMode(self, value):
@@ -156,7 +142,7 @@ class PMXStatusBar(QStatusBar, PMXObject):
         
         #Internal signals
         # FIXME: Connect syntax
-        #self.syntaxMenu.currentIndexChanged[int].connect(self.sendStatusBarSyntaxChanged)
+        self.syntaxMenu.currentIndexChanged[int].connect(self.sendStatusBarSyntaxChanged)
         
         # New style
 #        self.mainWindow.editorCursorPositionChangedEvent.connect( self.updatePosition )
@@ -188,8 +174,9 @@ class PMXStatusBar(QStatusBar, PMXObject):
         print codeEdit.tabSize
     
     def sendStatusBarSyntaxChanged(self, index):
-        uuid = self.syntaxMenu.itemData(index).toPyObject()
-        syntax = self.pmxApp.bundleManager.getBundleItem(unicode(uuid))
+        syntax = self.sender().model()[index, 'item']
+        #uuid = self.syntaxMenu.itemData(index).toPyObject()
+        #syntax = self.pmxApp.bundleManager.getBundleItem(unicode(uuid))
         self.statusBarSytnaxChangedEvent(syntax)
         
     def updatePosition(self, source, line, col):
@@ -199,10 +186,16 @@ class PMXStatusBar(QStatusBar, PMXObject):
         self.updateSyntax(source, editor.syntax)
     
     def updateSyntax(self, source, syntax):
-        #print "Statusbar syntax =>", syntax
+        print "Statusbar syntax =>", syntax
         if syntax != None:
-            index = self.syntaxMenu.findText(syntax.name, Qt.MatchExactly)
-            self.syntaxMenu.setCurrentIndex(index)
+            #index = self.syntaxMenu.findText(syntax.name, Qt.MatchExactly)
+            
+            model =  self.syntaxMenu.model() # Proxy
+            items = model.findItems(syntax.name, Qt.MatchExactly, 'name')
+            print items
+            #self.syntaxMenu.setCurrentIndex(index)
+            
+            
         else:
             self.syntaxMenu.setCurrentIndex(0)
 
