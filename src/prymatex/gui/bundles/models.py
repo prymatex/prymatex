@@ -138,7 +138,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             item = index.internalPointer()
             return item.icon
 
-    def flags(self, index):  
+    def flags(self, index):
         if not index.isValid():  
             return QtCore.Qt.NoItemFlags  
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable  
@@ -146,7 +146,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
     def headerData(self, section, orientation, role):  
         return None
 
-    def index(self, row, column, parent):  
+    def index(self, row, column, parent):
         if row < 0 or column < 0 or row >= self.rowCount(parent) or column >= self.columnCount(parent):  
             return QtCore.QModelIndex()  
 
@@ -161,7 +161,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         else:
             return QtCore.QModelIndex()
 
-    def parent(self, index):  
+    def parent(self, index):
         if not index.isValid():  
             return QtCore.QModelIndex()  
 
@@ -173,7 +173,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
 
         return self.createIndex(parentItem.row(), 0, parentItem)  
 
-    def rowCount(self, parent):  
+    def rowCount(self, parent):
         if parent.column() > 0:  
             return 0  
 
@@ -320,16 +320,16 @@ class PMXBundleItemModel(PMXTableBase):
         @param instance A PMXCommand, PMXSnippet, PMXMacro instance
         '''
         self.addRowFromKwargs(bundleUUID = instance.bundle.uuid,
-                              path = instance.path,
-                              namespace = instance.namespace,
-                              uuid = instance.uuid,
-                              type_ = instance.TYPE,
-                              name = instance.name,
-                              tabTrigger = instance.tabTrigger,
-                              keyEquivalent = instance.keyEquivalent,
-                              scope = instance.scope,
-                              #item = item,
-                              )
+                          path = instance.path,
+                          namespace = instance.namespace,
+                          uuid = instance.uuid,
+                          type_ = instance.TYPE,
+                          name = instance.name,
+                          tabTrigger = instance.tabTrigger,
+                          keyEquivalent = instance.keyEquivalent,
+                          scope = instance.scope,
+                          item = instance,
+        )
     
     def getProxyFilteringModel(self, **filter_kwargs):
         ''' Returns a list of QStandardItems 
@@ -348,7 +348,7 @@ class PMXTableFilterProxyModel(QtGui.QSortFilterProxyModel):
     @param filterArguments: Filter colName = colValue  
     
     '''
-    def __init__(self, sourceModel, resultsIfEmpty = False, **filterArguments):
+    def __init__(self, sourceModel, resultsIfEmpty = False, order_by = None, **filterArguments):
         '''
         Simple
         '''
@@ -363,6 +363,13 @@ class PMXTableFilterProxyModel(QtGui.QSortFilterProxyModel):
             colNumber = self.sourceModel._meta.colNumber(key)
             self.filters[colNumber] = filterArguments[key]
         self.resultsIfEmpty = resultsIfEmpty
+        
+        if order_by:
+            colNumber = self.sourceModel._meta.colNumber(order_by)
+            self.order_by = self.setFilterKeyColumn(colNumber)
+            
+        
+        
         
     def filterAcceptsRow(self, row, parent):
         '''
@@ -391,14 +398,16 @@ class PMXTableFilterProxyModel(QtGui.QSortFilterProxyModel):
         defined yet'''
         self._resultsIfEmpty = value
     
-    def __setitem__(self, key, value):
-        self.filters.update(key = value)
-    
-    def __getitem__(self, key):
+    def __getitem__(self, key): 
+        '''
+        A simple shortcut for row, column access
+        @todo Implement data
+        '''
+        
         if len(key) == 2:
             row, column = key
             if not isinstance(row, int):
-                raise APIUsageError("Indexes must be integers")
+                raise APIUsageError("Row indexes must be integers")
             if isinstance(column, (basestring, QString)):
                 column = self.sourceModel._meta.colNumber(column)
             elif not isinstance(column, int):
@@ -408,8 +417,17 @@ class PMXTableFilterProxyModel(QtGui.QSortFilterProxyModel):
         raise APIUsageError("Can't use %s as index for model try (row, column), where columns"
                             "can be names")
     
-    def getSrcModelField(self, index, fieldName):
-        pass
+    def findItems(self, query, flags, column):
+        '''
+        Find items based on
+        ''' 
+        if isinstance(column, (QString, basestring)):
+            column = self.sourceModel._meta.colNumber(column)
+        items = self.sourceModel.findItems(query, flags, column)
+        print "Query: (%s)" % map(unicode, (query, flags, column))
+        print items
+        for item in items:
+            print item
     
     
 if __name__ == "__main__":
