@@ -4,17 +4,26 @@ import sys
 
 class PMXCrashDialog(QDialog, Ui_CrashDialog):
     '''
-        Emergency Dialog
+    Show a nice traceback dialog
     '''
-    
+    #TODO: Impement send to in the crash dialog button
     def __init__(self, traceback_text, show_through_stderr = True):
         super(PMXCrashDialog, self).__init__()
         self.setupUi(self)
         text = unicode(traceback_text)
-        self.textEdit.setText(text)
+        self.textEdit.setText(self.format(traceback_text))
         if show_through_stderr:
             sys.stderr.write(text)
             sys.stderr.flush()
+            
+    def format(self, some_code):
+        try:
+            from pygments import highlight
+            from pygments.lexers import PythonLexer
+            from pygments.formatters import HtmlFormatter
+            return highlight(some_code, PythonLexer(), HtmlFormatter(noclasses = True))
+        except ImportError:
+            return some_code
     
     def on_pushCopyTraceback_pressed(self):
         clipboard = qApp.instance().clipboard()
