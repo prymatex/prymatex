@@ -37,7 +37,11 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLineEdit" name="lineEditExtension"/>
+     </item>
+    </layout>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label_2">
@@ -47,7 +51,7 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QPlainTextEdit" name="plainTextEdit"/>
+    <widget class="QPlainTextEdit" name="command"/>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="label_4">
@@ -59,13 +63,7 @@
    <item row="2" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QComboBox" name="comboBox_4">
-       <item>
-        <property name="text">
-         <string>Insert as Text</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="comboBoxOutput"/>
      </item>
      <item>
       <spacer name="horizontalSpacer_3">

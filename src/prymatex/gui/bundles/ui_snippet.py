@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/snippet.ui'
 #
-# Created: Tue May 31 18:51:25 2011
+# Created: Thu Jun  2 21:18:18 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -22,9 +22,9 @@ class Ui_Snippet(object):
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.plainTextEdit = QtGui.QPlainTextEdit(Snippet)
-        self.plainTextEdit.setObjectName(_fromUtf8("plainTextEdit"))
-        self.verticalLayout.addWidget(self.plainTextEdit)
+        self.content = QtGui.QPlainTextEdit(Snippet)
+        self.content.setObjectName(_fromUtf8("content"))
+        self.verticalLayout.addWidget(self.content)
 
         self.retranslateUi(Snippet)
         QtCore.QMetaObject.connectSlotsByName(Snippet)
