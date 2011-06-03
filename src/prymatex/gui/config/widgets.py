@@ -3,11 +3,7 @@ from PyQt4.Qt import QString, Qt, QVariant
 from PyQt4.QtNetwork import *
 from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
 from prymatex.core.base import PMXObject
-from prymatex.gui.panes.browser import PMXBrowserPaneDock
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.bundles.tableview import PMXTableViewMixin
-from prymatex.gui.mainwindow import PMXMainWindow
-settings = qApp.instance().settings
 
 class PMXConfigTreeView(QTreeView):
     _model = None

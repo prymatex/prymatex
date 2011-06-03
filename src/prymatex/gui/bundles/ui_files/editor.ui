@@ -83,18 +83,14 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="labelTitle">
        <property name="text">
         <string>No item selected</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QWidget" name="widget" native="true">
-       <property name="styleSheet">
-        <string notr="true">image: url(:/icons/resources/icons/Prymatex_Logo.png);</string>
-       </property>
-      </widget>
+      <widget class="QWidget" name="container" native="true"/>
      </item>
      <item>
       <layout class="QFormLayout" name="formLayout_2">
@@ -123,24 +119,14 @@
           <number>2</number>
          </property>
          <item>
-          <widget class="QComboBox" name="comboBox_3">
+          <widget class="QComboBox" name="comboBoxActivation">
            <property name="enabled">
             <bool>false</bool>
            </property>
-           <item>
-            <property name="text">
-             <string>Key Equivalent</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Tab Trigger</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="line_activation">
+          <widget class="QLineEdit" name="lineEditActivation">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -156,7 +142,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="line_scope">
+        <widget class="QLineEdit" name="lineEditScope">
          <property name="enabled">
           <bool>false</bool>
          </property>

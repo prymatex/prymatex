@@ -39,23 +39,7 @@
    <item row="0" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QComboBox" name="comboBox">
-       <item>
-        <property name="text">
-         <string>Nothing</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Current File</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>All Files in Project</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="comboBoxBeforeRunning"/>
      </item>
      <item>
       <spacer name="horizontalSpacer_2">
@@ -80,7 +64,7 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QPlainTextEdit" name="plainTextEdit"/>
+    <widget class="QPlainTextEdit" name="command"/>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="label_3">
@@ -92,64 +76,17 @@
    <item row="2" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QComboBox" name="comboBox_2">
-       <item>
-        <property name="text">
-         <string>None</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Selected Text</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Entire Document</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="comboBoxInput"/>
      </item>
      <item>
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="labelInputOption">
        <property name="text">
         <string>or</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_3">
-       <item>
-        <property name="text">
-         <string>Document</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Line</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Word</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Character</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Scope</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Nothing</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="comboBoxFallbackInput"/>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -176,48 +113,7 @@
    <item row="3" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QComboBox" name="comboBox_4">
-       <item>
-        <property name="text">
-         <string>Discard</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Replace Selected Text</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Replace Document</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Insert as Text</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Insert as Snippet</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Show as HTML</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Show as Tool Tip</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Create New Document</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="comboBoxOutput"/>
      </item>
      <item>
       <spacer name="horizontalSpacer_3">

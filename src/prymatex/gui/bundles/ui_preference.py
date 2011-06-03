@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/preference.ui'
 #
-# Created: Tue May 31 18:51:25 2011
+# Created: Thu Jun  2 21:39:26 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -22,9 +22,9 @@ class Ui_Preference(object):
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.plainTextEdit = QtGui.QPlainTextEdit(Preference)
-        self.plainTextEdit.setObjectName(_fromUtf8("plainTextEdit"))
-        self.verticalLayout.addWidget(self.plainTextEdit)
+        self.settings = QtGui.QPlainTextEdit(Preference)
+        self.settings.setObjectName(_fromUtf8("settings"))
+        self.verticalLayout.addWidget(self.settings)
 
         self.retranslateUi(Preference)
         QtCore.QMetaObject.connectSlotsByName(Preference)

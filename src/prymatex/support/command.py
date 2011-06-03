@@ -31,10 +31,11 @@ class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
                 'command', 'winCommand', 'linuxCommand',                                #System based Command
                 'inputFormat',                                                          #Formato requerido en la entrada
+                'beforeRunningCommand',                                                 #Antes de correr el command
                 'capturePattern', 'fileCaptureRegister',
                 'columnCaptureRegister', 'disableOutputAutoIndent',
                 'lineCaptureRegister', 'dontFollowNewOutput',
-                'beforeRunningCommand', 'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
+                'autoScrollOutput', 'captureFormatString', 'beforeRunningScript' ]
     TYPE = 'command'
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'

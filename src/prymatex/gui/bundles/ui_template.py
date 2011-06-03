@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/template.ui'
 #
-# Created: Tue May 31 18:51:25 2011
+# Created: Thu Jun  2 22:28:21 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -29,22 +29,24 @@ class Ui_Template(object):
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        self.lineEditExtension = QtGui.QLineEdit(Template)
+        self.lineEditExtension.setObjectName(_fromUtf8("lineEditExtension"))
+        self.horizontalLayout_2.addWidget(self.lineEditExtension)
         self.formLayout_2.setLayout(0, QtGui.QFormLayout.FieldRole, self.horizontalLayout_2)
         self.label_2 = QtGui.QLabel(Template)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_2)
-        self.plainTextEdit = QtGui.QPlainTextEdit(Template)
-        self.plainTextEdit.setObjectName(_fromUtf8("plainTextEdit"))
-        self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.plainTextEdit)
+        self.command = QtGui.QPlainTextEdit(Template)
+        self.command.setObjectName(_fromUtf8("command"))
+        self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.command)
         self.label_4 = QtGui.QLabel(Template)
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_4)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.comboBox_4 = QtGui.QComboBox(Template)
-        self.comboBox_4.setObjectName(_fromUtf8("comboBox_4"))
-        self.comboBox_4.addItem(_fromUtf8(""))
-        self.horizontalLayout_3.addWidget(self.comboBox_4)
+        self.comboBoxOutput = QtGui.QComboBox(Template)
+        self.comboBoxOutput.setObjectName(_fromUtf8("comboBoxOutput"))
+        self.horizontalLayout_3.addWidget(self.comboBoxOutput)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
         self.formLayout_2.setLayout(2, QtGui.QFormLayout.FieldRole, self.horizontalLayout_3)
@@ -57,7 +59,6 @@ class Ui_Template(object):
         self.label.setText(QtGui.QApplication.translate("Template", "Extension:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Template", "Command(s):", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Template", "Output:", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboBox_4.setItemText(0, QtGui.QApplication.translate("Template", "Insert as Text", None, QtGui.QApplication.UnicodeUTF8))
 
 
 if __name__ == "__main__":

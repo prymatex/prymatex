@@ -53,16 +53,12 @@ class PMXBundleTreeItem(object):
     def childCount(self):
         return len(self.childItems)
 
-    def columnCount(self):
-        return 1
-
     def parent(self):  
         return self.parentItem  
 
     def row(self):  
-        if self.parentItem:  
-            return self.parentItem.childItems.index(self)  
-        return 0
+        if self.parentItem is not None:  
+            return self.parentItem.childItems.index(self)
     
     def setData(self, data):  
         self.data = data
@@ -108,7 +104,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             item = index.internalPointer()  
             item.data.name = unicode(value.toString())
             return True
-        return False  
+        return False
      
     def removeRows(self, position=0, count=1,  parent=QtCore.QModelIndex()):
         node = self.nodeFromIndex(parent)
@@ -119,14 +115,22 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
     def nodeFromIndex(self, index):  
         if index.isValid():  
             return index.internalPointer()  
-        else:  
+        else:
             return self.rootItem  
 
-    def columnCount(self, parent):  
-        if parent.isValid():  
-            return parent.internalPointer().columnCount()  
+    def rowCount(self, parent):  
+        if parent.column() > 0:  
+            return 0  
+
+        if not parent.isValid():  
+            parentItem = self.rootItem  
         else:  
-            return self.rootItem.columnCount()  
+            parentItem = parent.internalPointer()  
+
+        return parentItem.childCount()
+    
+    def columnCount(self, parent):  
+        return 1  
 
     def data(self, index, role):  
         if not index.isValid():  
@@ -146,10 +150,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
     def headerData(self, section, orientation, role):  
         return None
 
-    def index(self, row, column, parent):  
-        if row < 0 or column < 0 or row >= self.rowCount(parent) or column >= self.columnCount(parent):  
-            return QtCore.QModelIndex()  
-
+    def index(self, row, column, parent):
         if not parent.isValid():  
             parentItem = self.rootItem  
         else:  
@@ -171,18 +172,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         if parentItem == self.rootItem:  
             return QtCore.QModelIndex()  
 
-        return self.createIndex(parentItem.row(), 0, parentItem)  
-
-    def rowCount(self, parent):  
-        if parent.column() > 0:  
-            return 0  
-
-        if not parent.isValid():  
-            parentItem = self.rootItem  
-        else:  
-            parentItem = parent.internalPointer()  
-
-        return parentItem.childCount()  
+        return self.createIndex(parentItem.row(), 0, parentItem)
 
     def setupModelData(self, items, parent):
         for item in items:
