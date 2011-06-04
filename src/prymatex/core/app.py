@@ -185,11 +185,6 @@ class PMXApplication(QApplication):
         first_window.show()
         self.windows.append(first_window)   # Could it be possible to hold it in
                                             # its childrens?
-        
-    
-    
-    
-    
     @property
     def logger(self):
         return self.__logger
@@ -262,7 +257,7 @@ class PMXApplication(QApplication):
     @deco.logtime
     def load_support(self):
         # Lazy load
-        from prymatex.gui.bundles.manager import PMXTableSupportManager
+        from prymatex.gui.bundles.manager import PMXSupportModelManager
 
         sharePath = self.settings.value('PMX_SHARE_PATH')
         userPath = self.settings.value('PMX_USER_PATH')
@@ -270,7 +265,7 @@ class PMXApplication(QApplication):
         # esto hacerlo una propiedad del manager que corresponda
         disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
         #manager = PMXSupportManager(disabledBundles = [], deletedBundles = [])
-        manager = PMXTableSupportManager()
+        manager = PMXSupportModelManager()
         manager.addNamespace('prymatex', sharePath)
         manager.updateEnvironment({ #TextMate Compatible :P
                 'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),

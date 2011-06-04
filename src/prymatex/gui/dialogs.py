@@ -36,8 +36,10 @@ class NewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog, PMXObject):
         model.setFilter(QDir.Dirs)
         self.completerFileSystem = QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
-        for template in self.pmxApp.bundleManager.getAllTemplates():
-            self.comboTemplates.addItem(template.name, userData = QVariant(template))
+        
+        self.templateProxyModel = self.pmxApp.supportManager.templateProxyModel
+        self.comboTemplates.setModel(self.templateProxyModel)
+        self.comboTemplates.setModelColumn(0)
         self.buttonCreate.setDefault(True)
     
     def on_buttonChoose_pressed(self):
@@ -80,32 +82,3 @@ class NewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog, PMXObject):
     def on_buttonClose_pressed(self):
         self.close()
     
-    def exec_(self):
-        self.lineFileName.setText('')
-        start_directory = qApp.instance().startDirectory()
-        start_directory = abspath(start_directory)
-        self.lineLocation.setText(start_directory)
-        self.check_valid_location()
-        super(NewFromTemplateDialog, self).exec_()
-        
-def test():
-    def multiclose_dialog(p):
-        d = MultiCloseDialog(p)
-        d.exec_()
-    from functools import partial
-    from PyQt4.Qt import QApplication, QWidget
-    app = QApplication(sys.argv)
-    widget = QWidget()
-    widget.setWindowTitle("Window Title")
-    layout = QVBoxLayout()
-    pushButton = QPushButton("Multi Save Dialog")
-    widget.connect(pushButton, SIGNAL("pressed()"), partial(multiclose_dialog, widget))
-    layout.addWidget(pushButton)
-    widget.setLayout(layout)
-    widget.show()
-    
-    return app.exec_()
-
-if __name__ == '__main__':
-    import sys
-    sys.exit(test())

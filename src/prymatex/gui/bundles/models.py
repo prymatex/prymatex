@@ -8,7 +8,7 @@ from prymatex.models.delegates import PMXChoiceItemDelegate
 #====================================================
 # Bundle Tree Model
 #====================================================
-class PMXBundleTreeItem(object):  
+class PMXBundleTreeNode(object):  
     def __init__(self, data, parent=None):
         self.data = data
         self.parentItem = parent
@@ -72,17 +72,17 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
     def __init__(self, manager, parent = None):
         super(PMXBundleTreeModel, self).__init__(parent)  
         self.manager = manager
-        self.rootItem = PMXBundleTreeItem(RootItem())
+        self.rootItem = PMXBundleTreeNode(RootItem())
         
     def populateFromManager(self):
         for bundle in self.manager.getAllBundles():
-            bti = PMXBundleTreeItem(bundle, self.rootItem)
+            bti = PMXBundleTreeNode(bundle, self.rootItem)
             self.rootItem.appendChild(bti)
             bundle_items = self.manager.findBundleItems(bundle = bundle)
             self.setupModelData(bundle_items, bti)
     
     def addBundle(self, bundle):
-        bti = PMXBundleTreeItem(bundle, self.rootItem)
+        bti = PMXBundleTreeNode(bundle, self.rootItem)
         self.rootItem.appendChild(bti)
         
     def addBundleItem(self, bundleItem):
@@ -90,10 +90,10 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         if len(bnode) != 1:
             raise Exception("No bundle node for bundle item: %s", bundleItem.name)
         bnode = bnode[0]
-        bti = PMXBundleTreeItem(bundleItem, bnode)
+        bti = PMXBundleTreeNode(bundleItem, bnode)
         if bundleItem.TYPE == "template":
             for file in bundleItem.getTemplateFiles():
-                tifi = PMXBundleTreeItem(file, bti)
+                tifi = PMXBundleTreeNode(file, bti)
                 bti.appendChild(tifi)
         bnode.appendChild(bti)
     
@@ -176,39 +176,12 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
 
     def setupModelData(self, items, parent):
         for item in items:
-            biti = PMXBundleTreeItem(item, parent)
+            biti = PMXBundleTreeNode(item, parent)
             if item.TYPE == "template":
                 for file in item.getTemplateFiles():
-                    tifi = PMXBundleTreeItem(file, biti)
+                    tifi = PMXBundleTreeNode(file, biti)
                     biti.appendChild(tifi)
             parent.appendChild(biti)
-
-class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
-    def __init__(self, parent = None):
-        super(PMXBundleTreeProxyModel, self).__init__(parent)
-        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "template-file", "syntax"]
-        
-    def filterAcceptsRow(self, sourceRow, sourceParent):
-        regexp = self.filterRegExp()
-        if regexp.isEmpty():
-            return True
-        index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        item = index.internalPointer()
-        if item.tipo == "bundle":
-            return True
-        else:
-            return QtCore.QString(item.tipo).contains(regexp)
-        
-    def filterAcceptsColumn(self, sourceColumn, sourceParent):
-        return True
-        
-    def lessThan(self, left, right):
-        leftData = left.internalPointer()
-        rightData = right.internalPointer()
-        if leftData.tipo == rightData.tipo:
-            return rightData.name > leftData.name
-        else:
-            return self.bundleItemTypeOrder.index(rightData.tipo) > self.bundleItemTypeOrder.index(leftData.tipo)
 
 #====================================================
 # Bundle Item Table Model

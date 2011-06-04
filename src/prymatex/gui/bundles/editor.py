@@ -3,7 +3,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.core.base import PMXObject
 from prymatex.gui.bundles.ui_editor import Ui_bundleEditor
-from prymatex.gui.bundles.models import PMXBundleTreeProxyModel, PMXBundleTreeModel
+from prymatex.gui.bundles.models import PMXBundleTreeModel
 from prymatex.gui.bundles.widgets import PMXSnippetWidget, PMXCommandWidget, PMXDragCommandWidget
 from prymatex.gui.bundles.widgets import PMXBundleWidget,PMXTemplateFileWidget, PMXTemplateWidget
 from prymatex.gui.bundles.widgets import PMXPreferenceWidget, PMXLanguageWidget, PMXEditorBaseWidget
@@ -12,12 +12,12 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     '''
         Prymatex Bundle Editor
     '''
-    def __init__(self, manager = None):
-        super(PMXBundleEditor, self).__init__()
+    def __init__(self, parent = None):
+        super(PMXBundleEditor, self).__init__(parent)
         self.setupUi(self)
         self.configEditorWidgets()
         self.configSelectTop()
-        self.configTreeView(manager)
+        self.configTreeView()
         self.configActivation()
 
     def selectTopChange(self, index):
@@ -36,14 +36,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.comboBoxItemFilter.currentIndexChanged[int].connect(self.selectTopChange)
         
     def configTreeView(self, manager = None):
-        if manager is None:
-            self.treeModel = self.pmxApp.supportManager.bundleTreeModel
-        else:
-            self.treeModel = PMXBundleTreeModel(manager)
-            self.treeModel.populateFromManager()
-        self.proxyTreeModel = PMXBundleTreeProxyModel()
-        self.proxyTreeModel.setSourceModel(self.treeModel)
-        self.proxyTreeModel.sort(0)
+        self.proxyTreeModel = self.pmxApp.supportManager.bundleProxyTreeModel
         self.treeView.setModel(self.proxyTreeModel)
         self.treeView.setHeaderHidden(True)
         self.treeView.setAnimated(True)
@@ -53,15 +46,15 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.stackLayout = QtGui.QStackedLayout()
         self.container.setLayout(self.stackLayout)
         self.indexes = {}
-        self.editors = [ PMXSnippetWidget(),
-                         PMXCommandWidget(),
-                         PMXDragCommandWidget(),
-                         PMXBundleWidget(),
-                         PMXTemplateFileWidget(),
-                         PMXTemplateWidget(),
-                         PMXPreferenceWidget(),
-                         PMXLanguageWidget(),
-                         PMXEditorBaseWidget() ]
+        self.editors = [ PMXSnippetWidget(self),
+                         PMXCommandWidget(self),
+                         PMXDragCommandWidget(self),
+                         PMXBundleWidget(self),
+                         PMXTemplateFileWidget(self),
+                         PMXTemplateWidget(self),
+                         PMXPreferenceWidget(self),
+                         PMXLanguageWidget(self),
+                         PMXEditorBaseWidget(self) ]
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackLayout.addWidget(editor)
         self.noneWidgetIndex = len(self.editors)
