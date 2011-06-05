@@ -44,7 +44,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         
     def configEditorWidgets(self):
         self.stackLayout = QtGui.QStackedLayout()
-        self.container.setLayout(self.stackLayout)
+        self.editorsLayout.insertLayout(1, self.stackLayout)
         self.indexes = {}
         self.editors = [ PMXSnippetWidget(self),
                          PMXCommandWidget(self),
@@ -90,8 +90,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
             editor = self.editors[index]
             editor.edit(treeItem.data)
             #TODO: ver si tengo que cuardar el current editor
-            print self.container.layout().currentWidget()
-            self.container.layout().setCurrentIndex(index)
+            self.stackLayout.setCurrentIndex(index)
             self.currentEditorWidgetChanged(index)
             #title = self.container.layout().currentWidget().windowTitle()
             #self.labelTitle.setText( title )

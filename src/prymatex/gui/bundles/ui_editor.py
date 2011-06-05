@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/editor.ui'
 #
-# Created: Sat Jun  4 17:44:14 2011
+# Created: Sat Jun  4 19:16:19 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -64,7 +64,7 @@ class Ui_bundleEditor(object):
         self.basicFormLayout.setObjectName(_fromUtf8("basicFormLayout"))
         self.labelActivation = QtGui.QLabel(self.verticalLayoutWidget_2)
         self.labelActivation.setObjectName(_fromUtf8("labelActivation"))
-        self.basicFormLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.labelActivation)
+        self.basicFormLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.labelActivation)
         self.activationLayout = QtGui.QHBoxLayout()
         self.activationLayout.setSpacing(2)
         self.activationLayout.setObjectName(_fromUtf8("activationLayout"))
@@ -76,17 +76,14 @@ class Ui_bundleEditor(object):
         self.lineEditActivation.setEnabled(False)
         self.lineEditActivation.setObjectName(_fromUtf8("lineEditActivation"))
         self.activationLayout.addWidget(self.lineEditActivation)
-        self.basicFormLayout.setLayout(1, QtGui.QFormLayout.FieldRole, self.activationLayout)
+        self.basicFormLayout.setLayout(0, QtGui.QFormLayout.FieldRole, self.activationLayout)
         self.labelScopeSelector = QtGui.QLabel(self.verticalLayoutWidget_2)
         self.labelScopeSelector.setObjectName(_fromUtf8("labelScopeSelector"))
-        self.basicFormLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.labelScopeSelector)
+        self.basicFormLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.labelScopeSelector)
         self.lineEditScope = QtGui.QLineEdit(self.verticalLayoutWidget_2)
         self.lineEditScope.setEnabled(False)
         self.lineEditScope.setObjectName(_fromUtf8("lineEditScope"))
-        self.basicFormLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.lineEditScope)
-        self.container = QtGui.QWidget(self.verticalLayoutWidget_2)
-        self.container.setObjectName(_fromUtf8("container"))
-        self.basicFormLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.container)
+        self.basicFormLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.lineEditScope)
         self.editorsLayout.addLayout(self.basicFormLayout)
         self.verticalLayout.addWidget(self.splitter)
 
