@@ -1,8 +1,8 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, QString
 from prymatex.core.exceptions import APIUsageError
-from prymatex.models.base import PMXTableBase, PMXTableField
-from prymatex.models.delegates import PMXChoiceItemDelegate
+from prymatex.mvc.models import PMXTableBase, PMXTableField
+from prymatex.mvc.delegates import PMXChoiceItemDelegate
 #from PyQt4.Qt import *
 
 #====================================================

@@ -287,17 +287,7 @@ class PMXApplication(QApplication):
         
         splash = self.splash
         
-        def update_splash_popullate_model(counter, total, name, bundle, **kwargs):
-            progress = (float(counter) / total) * 100
-            splash.showMessage("Loading bundle %s\n%4d of %4d (%.d%%)", 
-                                 name, counter, total, progress)
-            # Loose coupling 
-            #QApplication.processEvents()
-            #bundleItemModel = QApplication.instance().bundleTableModel
-            #bundleItemModel.appendRowFromBundle( bundle )
-        
         self.splash.showMessage("Loading bundles...")
-                        
         manager.loadSupport()
         return manager
 
