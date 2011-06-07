@@ -181,6 +181,7 @@ class PMXApplication(QApplication):
         from prymatex.gui.mainwindow import PMXMainWindow
         self.windows = []
         first_window = PMXMainWindow( files_to_open )
+        first_window.tabWidget.appendEmptyTab()
         self.splash.finish(first_window)
         first_window.show()
         self.windows.append(first_window)   # Could it be possible to hold it in
@@ -355,30 +356,3 @@ class PMXApplication(QApplication):
             #from prymatex.utils.os import get_homedir
             #return get_homedir()
             return os.getcwd()
-
-    def notify(self, receiver, event):
-        '''
-    	Notify with propagation for customEvent
-    	'''
-        if event.type() > QEvent.User:
-            w = receiver
-            while(w):
-                # DEBUG
-                #print ('Type of w is %s', type(w))
-                if is_sip_wrapped(w):
-                    res = w.customEvent(event)
-                    if res and event.isAccepted():
-                        return res
-                    elif w.receivers(event.signal) != 0:    
-                        w.emit(event.signal, event.source, *event.largs)
-                w = w.parent()
-        return super(PMXApplication, self).notify(receiver, event)
-
-def is_sip_wrapped(instance):
-    try:
-        instance.sender()
-    except RuntimeError:
-        return False
-    return True
-    
-import res_rc #@UnresolvedImport @UnusedImport

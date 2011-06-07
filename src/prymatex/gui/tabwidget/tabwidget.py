@@ -3,6 +3,7 @@
 #-*- encoding: utf-8 -*-
 # Created: 02/02/2010 by defo
 
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
 from PyQt4.QtCore import QString, SIGNAL, Qt
 import itertools
@@ -51,9 +52,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
     showTabBar = pmxConfigPorperty(default = TABBAR_ALWAYS_SHOWN, fset=setShowTabBar)
      
     # Signals
-    currentEditorChanged = pyqtSignal(QWidget)
-    
-    
+    currentEditorChanged = QtCore.pyqtSignal(QWidget)
     
     def __init__(self, parent):
         super(PMXTabWidget, self).__init__(parent)
@@ -61,9 +60,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
         self.setupActions() # Call it at first so the QMetaObject.connectSlotsByName is called in the setupUi
         self.setupUi()
 
-        if not self.count():
-            self.appendEmptyTab()
-        
         self.buttonTabList = QPushButton(self)
         self.buttonTabList.setObjectName("buttonTabList")
         self.buttonTabList.setToolTip(self.trUtf8("Tab list"))
@@ -76,10 +72,10 @@ class PMXTabWidget(QTabWidget, PMXObject):
         ''')
         self.setCornerWidget(self.buttonTabList, Qt.TopRightCorner)
         self.chooseFileDlg = QDialog()
-        self.setSignals()
+        self.connectSignals()
         self.configure()
     
-    def setSignals(self):
+    def connectSignals(self):
         #External events
         self.connect(self.mainWindow, SIGNAL('statusBarSytnaxChangedEvent'), self.updateEditorSyntax )
         
@@ -260,7 +256,7 @@ class PMXTabWidget(QTabWidget, PMXObject):
         #traceback.print_stack()
         file_manager = qApp.instance().file_manager
         empty_file = file_manager.getEmptyFile()
-        editor = PMXEditorWidget.editorFactory(empty_file)
+        editor = PMXEditorWidget.editorFactory(empty_file, parent = self)
         # Title should be filled after tab insertion
         self.addTab(editor)
         return editor
@@ -364,9 +360,6 @@ class PMXTabWidget(QTabWidget, PMXObject):
         #    widget.actionMenuTab.setChecked(True)
             
     def indexChanged(self, index):
-        #if index >= 0:
-        #    widget = self.widget(index)
-        #    widget.actionMenuTab.setChecked(True)
         editor = self.widget(index)
         if editor:
             self.currentEditorChanged.emit(editor)

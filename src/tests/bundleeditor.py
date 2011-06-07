@@ -22,9 +22,8 @@ if __name__ == "__main__":
     app.supportManager = PMXSupportModelManager()
     app.supportManager.addNamespace('prymatex', os.path.abspath('../bundles/prymatex'))
     app.supportManager.loadSupport()
-    flat = PMXFlatBaseProxyModel(app.supportManager.bundleTreeModel)
     combo = QtGui.QComboBox()
-    combo.setModel(flat)
+    combo.setModel(app.supportManager.templateProxyModel)
     combo.currentIndexChanged[int].connect(selectChanged)
     combo.show()
     from prymatex.gui.bundles.editor import PMXBundleEditor

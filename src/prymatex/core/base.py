@@ -1,27 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from PyQt4.QtCore import QObject, pyqtWrapperType
-import re
-from prymatex.core.event import PMXEventSender
-from prymatex.core.config import SettingsGroup
-from PyQt4.QtGui import qApp
-from prymatex.core.exceptions import APIUsageError
-METHOD_RE = re.compile('(?P<name>[\w\d_]+)(:?\((?P<args>.*)\))?', re.IGNORECASE)
-
-class InvalidEventSignature(Exception):
-    pass
-
-settings = qApp.instance().settings
-
-EVENT_CLASSES = {}
+from PyQt4 import QtCore, QtGui
 
 class PMXOptions(object):
     def __init__(self, options):
-        self.settings = settings.getGroup(getattr(options, 'settings', ''))
-        self.events = getattr(options, 'events', None)
+        self.settings = QtGui.QApplication.instance().settings.getGroup(getattr(options, 'settings', ''))
 
-class PMXObjectBase(pyqtWrapperType):
+class PMXObjectBase(QtCore.pyqtWrapperType):
     def __new__(cls, name, bases, attrs):
         module = attrs.pop('__module__')
         new_class = super(PMXObjectBase, cls).__new__(cls, name, bases, { '__module__': module })
@@ -39,8 +25,14 @@ class PMXObjectBase(pyqtWrapperType):
 
 from logging import getLogger
 
-class PMXObject(QObject):
+class PMXObject(QtCore.QObject):
     __metaclass__ = PMXObjectBase
+    __app = QtGui.QApplication.instance()
+    __mainwindow = None
+    __logger = None
+    
+    def __del__(self):
+        self._meta.settings.removeListener(self)
 
     #============================================================
     # Settings
@@ -49,12 +41,7 @@ class PMXObject(QObject):
         self._meta.settings.addListener(self)
         self._meta.settings.configure(self)
     
-    def __del__(self):
-        self._meta.settings.removeListener(self)
-    
     # Shortcuts
-    # TODO: Documentation
-    
     def settingsValue(self, name, default = None):
         ''' A shortcut, for access to root settings
             Usage: 
@@ -83,27 +70,8 @@ class PMXObject(QObject):
         return self.pmxApp.settings.getGroup(name)
     
     #============================================================
-    # Events
-    #============================================================
-    def declareEvent(self, signature):
-        global EVENT_CLASSES
-        match = METHOD_RE.match(signature)
-        if not match:
-                raise InvalidEventSignature(signature)
-        name, args = match.group('name'), match.group('args')
-        event_class = EVENT_CLASSES.setdefault(name, PMXEventSender.eventFactory(name))
-        
-        sender = PMXEventSender(event_class = event_class, source = self)
-        setattr(self, name, sender)
-        return sender
-
-    def connectEventsByName(self):
-        raise NotImplementedError("Not implemented error")
-
-    #============================================================
     # Shortcut
     #============================================================
-    __mainwindow = None
     @property
     def mainWindow(self):
         if self.__class__.__mainwindow == None:
@@ -111,23 +79,17 @@ class PMXObject(QObject):
             while self.__class__.__mainwindow.parent() != None:
                 self.__class__.__mainwindow = self.__class__.__mainwindow.parent()
         return self.__class__.__mainwindow
-        
-    __app = None
+    
     @property
     def pmxApp(self):
         '''
-        Shortcut property for PyQt4.QtGui.QApplication.instance() whit
-        slight class level cache.
+        Shortcut property for PyQt4.QtGui.QApplication.instance().
         '''
-        if self.__class__.__app == None:
-            from PyQt4.QtGui import QApplication
-            self.__class__.__app  = QApplication.instance()
-        return self.__class__.__app
+        return self.__app
 
     #============================================================
     # Logger
     #============================================================
-    __logger = None
     @property
     def logger(self):
         '''

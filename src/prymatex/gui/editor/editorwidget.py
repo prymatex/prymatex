@@ -58,11 +58,11 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     fileStatusOutOfSync = pyqtSignal(object)
     fileStatusDeleted = pyqtSignal(object)
     
-    def __init__(self, pmx_file):
+    def __init__(self, pmx_file, parent = None):
         '''
         PMXEditorWidget instances gain Qt's parent attribute on PMXTabWidget.addTab() 
         '''
-        super(PMXEditorWidget, self).__init__(None)
+        super(PMXEditorWidget, self).__init__(parent)
         
         self.setupActions()
         self.setupUi(self)
@@ -78,7 +78,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.codeEdit.setPlainText(self.file.read() or '')
         self.destroyed.connect(self.releaseFile)
 
-        
     def releaseFile(self):
         print "Release file"
         
@@ -146,7 +145,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     #===========================================================================
     
     @classmethod
-    def editorFactory(cls, pmx_file):
+    def editorFactory(cls, pmx_file, parent = None):
         '''
         Factory for the editors.
         PMXEditorWidget.registerEditor( editor )
@@ -156,7 +155,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         from prymatex.core.filemanager import PMXFile
         if not isinstance(pmx_file, PMXFile):
             raise APIUsageError("%s is not a valid file" % pmx_file) 
-        editor = PMXEditorWidget(pmx_file)
+        editor = PMXEditorWidget(pmx_file, parent = parent)
         return editor
 
     @classmethod

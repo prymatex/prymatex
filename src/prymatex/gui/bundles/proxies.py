@@ -1,4 +1,5 @@
 from PyQt4 import QtCore, QtGui
+from prymatex.mvc.proxies import PMXFlatBaseProxyModel
 
 class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
@@ -27,16 +28,16 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         else:
             return self.bundleItemTypeOrder.index(rightData.tipo) > self.bundleItemTypeOrder.index(leftData.tipo)
 
-class PMXTemplateProxyModel(QtGui.QSortFilterProxyModel):
+class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
+    def __init__(self, tipo, parent = None):
+        super(PMXBundleTypeFilterProxyModel, self).__init__(parent)
+        self.tipo = tipo
+        
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         item = index.internalPointer()
-        return item.tipo == "template"
+        return item.tipo == self.tipo
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True
-        
-    def lessThan(self, left, right):
-        leftData = left.internalPointer()
-        rightData = right.internalPointer()
-        return rightData.name > leftData.name
+

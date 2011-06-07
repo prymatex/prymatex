@@ -2,6 +2,7 @@
 import os
 import itertools
 import logging
+from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QUrl
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -20,7 +21,7 @@ from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
-from prymatex.gui.dialogs import NewFromTemplateDialog
+from prymatex.gui.dialogs import PMXNewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXObject
 from prymatex.gui.bundles.tableview import PMXBundleItemTableView,\
@@ -32,17 +33,17 @@ from prymatex.core.config import pmxConfigPorperty
 
 logger = logging.getLogger(__name__)
 
-class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
+class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     '''
     Prymatex main window, it holds a currentEditor property which
     grants access to the focused editor.
     '''
-
+    newFileCreated = pyqtSignal(str)
+    
     class Meta:
         settings = 'MainWindow'
     
     # Settings
-    
     @pmxConfigPorperty(default = "$APPNAME")
     def windowTitleTemplate(self, value):
         self._windowTitleTemplate = value
@@ -50,12 +51,10 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     
     @pmxConfigPorperty(default = True)
     def showMenuBar(self, value):
-        print "Set menu bar"
         self._showMenuBar = value
         self.menuBar().setShown(value)
     
     # Constructor
-    
     def __init__(self, files_to_open):
         '''
         The main window
@@ -66,32 +65,24 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         super(PMXMainWindow, self).__init__()
         # Initialize graphical elements
         self.setupUi(self)
-        # Window Title update
-        self.tabWidget.currentEditorChanged.connect(self.updateWindowTitle)
-        #self.setWindowTitle(self.trUtf8(u"Prymatex Text Editor"))
-
-        #Conectar tabs con status y status con tabs
-        #self.statusbar.syntaxMenu.syntaxChange.connect(self.tabWidgetEditors.on_syntax_change)
-        #self.tabWidgetEditors.currentEditorChange.connect(self.statusbar.syntaxMenu.on_current_editor_changed)
         
+        # Create dialogs
+        self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
+        self.dialogFilter = PMXFilterDialog(self)
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
-        self.NewFromTemplateDialog = NewFromTemplateDialog(self)
         
-        self.NewFromTemplateDialog.newFileCreated.connect(self.newFileFromTemplate)
-        
+        # Connect Signals
+        self.tabWidget.currentEditorChanged.connect(self.updateWindowTitle)
+        self.statusbar.syntaxChanged.connect(self.updateEditorSyntax)
+        self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         
         self.setupPanes()
-        
         self.setupBundleViews()
         
         self.setupLogging()
         self.center()
         
-        # Una vez centrada la ventana caramos los menues
         self.addBundlesToMenu()
-        
-        
-        self.dialogFilter = PMXFilterDialog(self)
         
         self.preventMenuLock()
         
@@ -103,10 +94,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             Files to open
         '''
         map(lambda file: self.openFile(file, auto_focus=True), [ file for file in files if os.path.isfile(file) ] )
-       
-                
-                
-    
+        
     def setupLogging(self):
         '''
         Logging Sub-Window setup
@@ -180,6 +168,9 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     #====================================================================
     # Bundle Items
     #====================================================================
+    def updateEditorSyntax(self, syntax):
+        self.currentEditor.setSyntax(syntax)
+        
     def menuBundleItemActionTriggered(self, item):
         self.currentEditor.insertBundleItem(item)
         
@@ -288,8 +279,6 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
         self.tabWidget.focusNextTab()
-        
-
         
     @pyqtSignature('')
     def on_actionPrevious_Tab_triggered(self):
@@ -577,7 +566,7 @@ class PMXMainWindow(QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     
     @pyqtSignature('')
     def on_actionNew_from_template_triggered(self):
-        self.NewFromTemplateDialog.exec_()
+        self.dialogNewFromTemplate.exec_()
     
     #============================================================
     # Bookmarks

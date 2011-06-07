@@ -141,7 +141,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.setupUi()
         self.setupActions()
         self.connectSignals()
-        self.declareEvents()
         self.configure()
 
     #=======================================================================
@@ -154,12 +153,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def connectSignals(self):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
-        self.cursorPositionChanged.connect(self.sendCursorPosChange)
+        self.cursorPositionChanged.connect(self.updateStatusBar)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
-        
-    def declareEvents(self):
-        self.declareEvent('editorCursorPositionChangedEvent()')
-        self.declareEvent('editorSetSyntaxEvent()')
 
     def setupActions(self):
         # Actions performed when a key is pressed
@@ -208,17 +203,19 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             return self.document().findBlock(start), self.document().findBlock(end)
     
-    def sendCursorPosChange(self):
-        c = self.textCursor()
-        line  = c.blockNumber()
-        col = c.columnNumber()
-        self.editorCursorPositionChangedEvent(line+1, col+1)
+    def updateStatusBar(self):
+        status = {}
+        cursor = self.textCursor()
+        status['line']  = cursor.blockNumber() + 1
+        status['column'] = cursor.columnNumber() + 1
+        status['scope'] = self.getCurrentScope()
+        self.mainWindow.statusbar.updateStatus(status)
         
     def setSyntax(self, syntax):
         #print self.syntaxProcessor.syntax, syntax
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
-            self.editorSetSyntaxEvent(syntax)
+            self.mainWindow.statusbar.updateSyntax(syntax)
     
     @property
     def syntax(self):

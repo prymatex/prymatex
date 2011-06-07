@@ -1,11 +1,11 @@
 '''
 '''
-from PyQt4.Qt import *
+from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.bundles.models import PMXBundleTreeModel, PMXBundleItemModel
-from prymatex.gui.bundles.proxies import PMXBundleTreeProxyModel, PMXTemplateProxyModel
+from prymatex.gui.bundles.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel
 
 class PMXSupportModelManager(PMXSupportManager, PMXObject):
     #Settings
@@ -26,8 +26,11 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         self.bundleProxyTreeModel = PMXBundleTreeProxyModel()
         self.bundleProxyTreeModel.setSourceModel(self.bundleTreeModel)
         
-        self.templateProxyModel = PMXTemplateProxyModel()
+        self.templateProxyModel = PMXBundleTypeFilterProxyModel("template")
         self.templateProxyModel.setSourceModel(self.bundleTreeModel)
+        
+        self.syntaxProxyModel = PMXBundleTypeFilterProxyModel("syntax")
+        self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)
         
     def buildEnvironment(self):
         env = {}
@@ -37,6 +40,10 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         env.update(self.environment)
         return env
 
+    def loadSupport(self, callback = None):
+        super(PMXSupportModelManager, self).loadSupport(callback = None)
+        self.templateProxyModel.reMapModel()
+        self.syntaxProxyModel.reMapModel()
     #---------------------------------------------------
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
@@ -63,7 +70,6 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
 
     def getTheme(self, uuid):
         return PMXSupportManager.getTheme(self, uuid)
-
 
     def getAllThemes(self):
         return PMXSupportManager.getAllThemes(self)

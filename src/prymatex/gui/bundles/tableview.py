@@ -1,6 +1,6 @@
 from PyQt4.Qt import *
 from prymatex.core.base import PMXObject
-from prymatex.models.base import PMXTableBase
+from prymatex.mvc.models import PMXTableBase
 from prymatex.core.exceptions import APIUsageError
 
 

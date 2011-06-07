@@ -1,15 +1,13 @@
 from PyQt4 import QtCore, QtGui
 
-class PMXFlatBaseProxyModel(QtGui.QAbstractProxyModel):
+class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
     '''
         Proxy for create flat models from tree models
     '''
-    def __init__(self, model = None, parent = None):
+    def __init__(self, parent = None):
         super(PMXFlatBaseProxyModel, self).__init__(parent)
-        self.mModelIndexMap = {}
+        self.__indexMap = []
         self.__sourceModel = None
-        if model is not None:
-            self.setSourceModel(model)
 
     def sourceModel(self):
         return self.__sourceModel
@@ -19,22 +17,22 @@ class PMXFlatBaseProxyModel(QtGui.QAbstractProxyModel):
             return
         if self.__sourceModel is not None:
             self.__sourceModel.disconnect(self)
-        self.mModelIndexMap = {}
         self.__sourceModel = model
-        self.remap()
-
-    def mapToSource(self, proxyIndex):
-        return self.mModelIndexMap[proxyIndex.row()]
-        
-    def mapFromSource(self, sourceIndex):
-        return self.mModelIndexMap.values().index(sourceIndex)
-        
-    def sort(self, column, order = QtCore.Qt.AscendingOrder):
-        pass
-        
-    def lessThan(self, left, right):
+        self.__sourceModel.dataChanged.connect(self.reMapModel)
+        self.__sourceModel.layoutChanged.connect(self.reMapModel)
+    
+    def filterAcceptsRow(self, sourceRow, sourceParent):
         return True
         
+    def filterAcceptsColumn(self, sourceColumn, sourceParent):
+        return True
+    
+    def mapToSource(self, proxyIndex):
+        return self.__indexMap[proxyIndex.row()]
+        
+    def mapFromSource(self, sourceIndex):
+        return self.__indexMap.index(sourceIndex)
+            
     def columnCount(self, parent):
         return 1
 
@@ -67,38 +65,29 @@ class PMXFlatBaseProxyModel(QtGui.QAbstractProxyModel):
         return QtCore.QModelIndex()
 
     def rowCount(self, parent):
-        return len(self.mModelIndexMap)
+        return len(self.__indexMap)
 
     def modelIndex(self, proxyIndex):
         if proxyIndex.isValid():
             row = proxyIndex.row()
-            if row in self.mModelIndexMap:
-                return self.mModelIndexMap[row]
+            if row < len(self.__indexMap):
+                return self.__indexMap[row]
         return QtCore.QModelIndex()
-        
-    def slotDataChanged(self, row, index):
-        self.remap()
 
-    def slotLayoutChanged(self):
-        self.remap();
-
-    def remap(self):
+    def reMapModel(self):
         if self.__sourceModel is not None:
-            position = 0;
-            self.mapModel(position, QtCore.QModelIndex())
-
-            self.__sourceModel.dataChanged.connect(self.slotDataChanged)
-            self.__sourceModel.layoutChanged.connect(self.slotLayoutChanged)
+            self.__indexMap = []
+            self.mapModel(QtCore.QModelIndex())
 
         #self.emit("modelChanged()")
-        #self.layoutChanged.emit()
+        self.layoutChanged.emit()
 
-    def mapModel(self, pos, parent):
+    def mapModel(self, parent):
         childCount = self.__sourceModel.rowCount(parent)
         for i in xrange(childCount):
             #First, map this one
             index = self.__sourceModel.index(i, 0, parent)
-            self.mModelIndexMap[pos] = index;
-            pos += 1
+            if self.filterAcceptsRow(i, parent):
+                self.__indexMap.append(index)
             #Map it's children
-            self.mapModel(pos, index);
+            self.mapModel(index)

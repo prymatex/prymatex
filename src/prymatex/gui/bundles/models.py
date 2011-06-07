@@ -8,6 +8,7 @@ from prymatex.mvc.delegates import PMXChoiceItemDelegate
 #====================================================
 # Bundle Tree Model
 #====================================================
+#TODO: que esto sea un proxy al item interno
 class PMXBundleTreeNode(object):  
     def __init__(self, data, parent=None):
         self.data = data
@@ -74,7 +75,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         self.manager = manager
         self.rootItem = PMXBundleTreeNode(RootItem())
         
-    def populateFromManager(self):
+    def _populateFromManager(self):
         for bundle in self.manager.getAllBundles():
             bti = PMXBundleTreeNode(bundle, self.rootItem)
             self.rootItem.appendChild(bti)
@@ -106,7 +107,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             return True
         return False
      
-    def removeRows(self, position=0, count=1,  parent=QtCore.QModelIndex()):
+    def removeRows(self, position = 0, count = 1,  parent=QtCore.QModelIndex()):
         node = self.nodeFromIndex(parent)
         self.beginRemoveRows(parent, position, position + count - 1)  
         node.childItems.pop(position)  

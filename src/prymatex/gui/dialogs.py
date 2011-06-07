@@ -25,11 +25,11 @@ class MultiCloseDialog(QDialog, Ui_SaveMultipleDialog):
 
 from PyQt4.Qt import QDialog
 
-class NewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog, PMXObject):
+class PMXNewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog, PMXObject):
     newFileCreated = pyqtSignal(str)
     
     def __init__(self, parent):
-        super(NewFromTemplateDialog, self).__init__(parent)
+        super(PMXNewFromTemplateDialog, self).__init__(parent)
         self.setupUi(self)
         model = QFileSystemModel(self)
         model.setRootPath("")

@@ -26,7 +26,6 @@ class PMXFile(QObject):
     fileSaveError = pyqtSignal(QString)
     fileLostReference = pyqtSignal()
     
-    
     _path = None
     _references = 0
     
