@@ -13,7 +13,6 @@ from prymatex.support.preference import PMXPreference
 from prymatex.support.command import PMXCommand, PMXDragCommand
 from prymatex.support.template import PMXTemplate
 from prymatex.support.theme import PMXTheme
-from prymatex.support.qtadapter import buildKeyEquivalentCode
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import sh
 
@@ -264,8 +263,7 @@ class PMXSupportManager(object):
         if item.tabTrigger != None:
             self.TAB_TRIGGERS.setdefault(item.tabTrigger, []).append(item)
         if item.keyEquivalent != None:
-            keyseq = buildKeyEquivalentCode(item.keyEquivalent)
-            self.KEY_EQUIVALENTS.setdefault(keyseq, []).append(item)
+            self.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
         if item.TYPE == 'preference':
             self.PREFERENCES.setdefault(item.scope, []).append(item)
         elif item.TYPE == 'template':

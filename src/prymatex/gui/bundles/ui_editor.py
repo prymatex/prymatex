@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/editor.ui'
 #
-# Created: Sat Jun  4 19:16:19 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed Jun 08 10:16:08 2011
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -69,19 +69,19 @@ class Ui_bundleEditor(object):
         self.activationLayout.setSpacing(2)
         self.activationLayout.setObjectName(_fromUtf8("activationLayout"))
         self.comboBoxActivation = QtGui.QComboBox(self.verticalLayoutWidget_2)
-        self.comboBoxActivation.setEnabled(False)
         self.comboBoxActivation.setObjectName(_fromUtf8("comboBoxActivation"))
         self.activationLayout.addWidget(self.comboBoxActivation)
-        self.lineEditActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
-        self.lineEditActivation.setEnabled(False)
-        self.lineEditActivation.setObjectName(_fromUtf8("lineEditActivation"))
-        self.activationLayout.addWidget(self.lineEditActivation)
+        self.lineTabTriggerActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
+        self.lineTabTriggerActivation.setObjectName(_fromUtf8("lineTabTriggerActivation"))
+        self.activationLayout.addWidget(self.lineTabTriggerActivation)
+        self.lineKeyEquivalentActivation = QtGui.QLineEdit(self.verticalLayoutWidget_2)
+        self.lineKeyEquivalentActivation.setObjectName(_fromUtf8("lineKeyEquivalentActivation"))
+        self.activationLayout.addWidget(self.lineKeyEquivalentActivation)
         self.basicFormLayout.setLayout(0, QtGui.QFormLayout.FieldRole, self.activationLayout)
         self.labelScopeSelector = QtGui.QLabel(self.verticalLayoutWidget_2)
         self.labelScopeSelector.setObjectName(_fromUtf8("labelScopeSelector"))
         self.basicFormLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.labelScopeSelector)
         self.lineEditScope = QtGui.QLineEdit(self.verticalLayoutWidget_2)
-        self.lineEditScope.setEnabled(False)
         self.lineEditScope.setObjectName(_fromUtf8("lineEditScope"))
         self.basicFormLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.lineEditScope)
         self.editorsLayout.addLayout(self.basicFormLayout)
@@ -98,13 +98,3 @@ class Ui_bundleEditor(object):
         self.labelTitle.setText(QtGui.QApplication.translate("bundleEditor", "No item selected", None, QtGui.QApplication.UnicodeUTF8))
         self.labelActivation.setText(QtGui.QApplication.translate("bundleEditor", "Activation:", None, QtGui.QApplication.UnicodeUTF8))
         self.labelScopeSelector.setText(QtGui.QApplication.translate("bundleEditor", "Scope Selector:", None, QtGui.QApplication.UnicodeUTF8))
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    bundleEditor = QtGui.QWidget()
-    ui = Ui_bundleEditor()
-    ui.setupUi(bundleEditor)
-    bundleEditor.show()
-    sys.exit(app.exec_())
-

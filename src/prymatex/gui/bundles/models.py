@@ -1,6 +1,7 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, QString
 from prymatex.core.exceptions import APIUsageError
+from prymatex.gui.bundles.qtadapter import buildKeySequence
 from prymatex.mvc.models import PMXTableBase, PMXTableField
 from prymatex.mvc.delegates import PMXChoiceItemDelegate
 #from PyQt4.Qt import *
@@ -10,7 +11,7 @@ from prymatex.mvc.delegates import PMXChoiceItemDelegate
 #====================================================
 class PMXBundleTreeNode(object):
     ''' 
-        Bundle and bundle item proxy
+        Bundle and bundle item decorator
     '''
     ICONS = {
              "template": QtGui.QPixmap(":/bundles/resources/bundles/templates.png"),
@@ -22,6 +23,7 @@ class PMXBundleTreeNode(object):
              "macro": QtGui.QPixmap(":/bundles/resources/bundles/macros.png"),
              "templatefile": QtGui.QPixmap(":/bundles/resources/bundles/template-files.png") 
     }
+    
     def __init__(self, item, parent = None):
         self.item = item
         self.parent = parent
@@ -30,11 +32,43 @@ class PMXBundleTreeNode(object):
     def __getattr__(self, name):
         return getattr(self.item, name)
     
+    #==================================================
+    # Item decoration
+    #==================================================
+    @property
+    def keyEquivalent(self):
+        if self.item.keyEquivalent is not None:
+            return buildKeySequence(self.item.keyEquivalent)
+    
+    @keyEquivalent.setter
+    def keyEquivalent(self, key):
+        return self.item.keyEquivalent
+    
     @property
     def icon(self):
         icon = self.ICONS[self.TYPE] if self.TYPE in self.ICONS else None
         return icon
-
+    
+    @property
+    def trigger(self):
+        trigger = []
+        if self.tabTrigger != None:
+            trigger.append(u"%s?" % (self.tabTrigger))
+        if self.keyEquivalent != None:
+            trigger.append(u"%s" % (self.keyEquivalent))
+        return ", ".join(trigger)
+    
+    def buildMenuTextEntry(self, nemonic = ''):
+        text = unicode(self.name)
+        if nemonic:
+            return text.replace('&', '&&') + u"\t" + nemonic
+        else:
+            text += u"\t%s" % (self.trigger)
+        return text.replace('&', '&&')
+    
+    #==================================================
+    # Tree Node interface
+    #==================================================
     def appendChild(self, child):
         self.children.append(child)
 
@@ -66,14 +100,15 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             bundle_items = self.manager.findBundleItems(bundle = bundle)
             self.setupModelData(bundle_items, bti)
     
-    def addBundle(self, bundle):
+    def populateToBundleNode(self, bundle):
         bti = PMXBundleTreeNode(bundle, self.root)
         self.root.appendChild(bti)
+        return bti
         
-    def addBundleItem(self, bundleItem):
-        bnode = filter(lambda bnode: bnode.item == bundleItem.bundle, self.root.children)
+    def populateToBundleItemNode(self, bundleItem):
+        bnode = filter(lambda bnode: bnode == bundleItem.bundle, self.root.children)
         if len(bnode) != 1:
-            raise Exception("No bundle node for bundle item: %s", bundleItem.name)
+            raise Exception("No bundle node for bundle item: %s, %s" % (bundleItem.TYPE, bundleItem.name))
         bnode = bnode[0]
         bti = PMXBundleTreeNode(bundleItem, bnode)
         if bundleItem.TYPE == "template":
@@ -81,6 +116,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
                 tifi = PMXBundleTreeNode(file, bti)
                 bti.appendChild(tifi)
         bnode.appendChild(bti)
+        return bti
     
     def setData(self, index, value, role):  
         if not index.isValid():  

@@ -20,7 +20,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.configTreeView()
         self.configActivation()
 
-    def selectTopChange(self, index):
+    def on_comboBoxItemFilter_changed(self, index):
         value = self.comboBoxItemFilter.itemData(index).toString()
         self.proxyTreeModel.setFilterRegExp(value)
         
@@ -33,7 +33,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.comboBoxItemFilter.addItem("DragCommands", QtCore.QVariant("dragcommand"))
         self.comboBoxItemFilter.addItem("Preferences", QtCore.QVariant("preference"))
         self.comboBoxItemFilter.addItem("Templates", QtCore.QVariant("template*"))
-        self.comboBoxItemFilter.currentIndexChanged[int].connect(self.selectTopChange)
+        self.comboBoxItemFilter.currentIndexChanged[int].connect(self.on_comboBoxItemFilter_changed)
         
     def configTreeView(self, manager = None):
         self.proxyTreeModel = self.pmxApp.supportManager.bundleProxyTreeModel
@@ -61,27 +61,56 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         #self.stackLayout.currentChanged.connect(self.currentEditorWidgetChanged)
         self.stackLayout.setCurrentIndex(self.noneWidgetIndex)
     
+    #===========================================================
+    # Activation
+    #===========================================================
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress and obj == self.lineKeyEquivalentActivation:
+            keyseq = QtGui.QKeySequence(int(event.modifiers()) + event.key())
+            self.lineKeyEquivalentActivation.setText(keyseq.toString())
+            return True
+        elif event.type() == QtCore.QEvent.KeyRelease and obj == self.lineKeyEquivalentActivation:
+            keyseq = QtGui.QKeySequence(int(event.modifiers()) + event.key())
+            print "listo"
+            return True
+        return super(PMXBundleEditor, self).eventFilter(obj, event)
+
+        
+    def on_comboBoxActivation_changed(self, index):
+        self.lineKeyEquivalentActivation.setVisible(index == 0)
+        self.lineTabTriggerActivation.setVisible(index == 1)
+        
     def configActivation(self):
-        self.comboBoxActivation.addItem("Key Equivalent", QtCore.QVariant("keyEquivalent"))
-        self.comboBoxActivation.addItem("Tab Trigger", QtCore.QVariant("tabTrigger"))
+        self.comboBoxActivation.addItem("Key Equivalent")
+        self.comboBoxActivation.addItem("Tab Trigger")
+        self.comboBoxActivation.currentIndexChanged[int].connect(self.on_comboBoxActivation_changed)
+        self.lineKeyEquivalentActivation.installEventFilter(self)
     
     def currentEditorWidgetChanged(self, index):
         widget = self.stackLayout.currentWidget()
-        self.labelTitle.setText(widget.title())
+        self.labelTitle.setText(widget.title)
         scope = widget.scope
         tabTrigger = widget.tabTrigger
         keyEquivalent = widget.keyEquivalent
-        self.lineEditScope.setEnabled(scope != None)
-        self.lineEditActivation.setEnabled(tabTrigger != None or keyEquivalent != None)
-        self.comboBoxActivation.setEnabled(tabTrigger != None or keyEquivalent != None)
-        if scope != None:
+        self.lineEditScope.setEnabled(scope is not None)
+        self.lineKeyEquivalentActivation.setEnabled(keyEquivalent is not None)
+        self.lineTabTriggerActivation.setEnabled(tabTrigger is not None)
+        self.comboBoxActivation.setEnabled(tabTrigger is not None or keyEquivalent is not None)
+        if scope is not None:
             self.lineEditScope.setText(scope)
-        if keyEquivalent != None:
-            self.lineEditActivation.setText(keyEquivalent)
+        else:
+            self.lineEditScope.clear()
+        if not keyEquivalent and not tabTrigger:
+            self.lineKeyEquivalentActivation.clear()
+            self.lineTabTriggerActivation.clear()
             self.comboBoxActivation.setCurrentIndex(0)
-        if tabTrigger != None:
-            self.lineEditActivation.setText(tabTrigger)
-            self.comboBoxActivation.setCurrentIndex(1)
+        else:
+            if keyEquivalent is not None:
+                self.lineKeyEquivalentActivation.setText(keyEquivalent)
+            if tabTrigger is not None:
+                self.lineTabTriggerActivation.setText(tabTrigger)
+            index = 0 if keyEquivalent else 1
+            self.comboBoxActivation.setCurrentIndex(index)
         
     def treeViewItemActivated(self, index):
         treeItem = self.proxyTreeModel.mapToSource(index).internalPointer()
@@ -89,9 +118,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
             index = self.indexes[treeItem.TYPE]
             editor = self.editors[index]
             editor.edit(treeItem)
-            #TODO: ver si tengo que cuardar el current editor
+            
+            #TODO: ver si tengo que guardar el current editor
             self.stackLayout.setCurrentIndex(index)
             self.currentEditorWidgetChanged(index)
-            #title = self.container.layout().currentWidget().windowTitle()
-            #self.labelTitle.setText( title )
-            

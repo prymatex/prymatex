@@ -48,16 +48,16 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
     def addBundle(self, bundle):
-        self.bundleTreeModel.addBundle(bundle)
+        bundle = self.bundleTreeModel.populateToBundleNode(bundle)
         return PMXSupportManager.addBundle(self, bundle)
 
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
     #---------------------------------------------------
-    def addBundleItem(self, item):
-        self.bundleTreeModel.addBundleItem(item)
-        self.bundleTableModel.appendBundleItemRow(item)
-        return PMXSupportManager.addBundleItem(self, item)
+    def addBundleItem(self, bundleItem):
+        bundleItem= self.bundleTreeModel.populateToBundleItemNode(bundleItem)
+        #self.bundleTableModel.appendBundleItemRow(item)
+        return PMXSupportManager.addBundleItem(self, bundleItem)
 
     #---------------------------------------------------
     # THEME OVERRIDE INTERFACE

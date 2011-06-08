@@ -208,28 +208,10 @@ class PMXBundleItem(object):
         except os.OSError:
             pass
 
-    @property
-    def trigger(self):
-        trigger = []
-        if self.tabTrigger != None:
-            trigger.append(u"%s⇥" % (self.tabTrigger))
-        if self.keyEquivalent != None:
-            trigger.append(u"%s" % (buildKeyEquivalentString(self.keyEquivalent)))
-        return ", ".join(trigger)
-
     def buildEnvironment(self, **kwargs):
         env = self.bundle.buildEnvironment()
         return env
         
-    def buildMenuTextEntry(self, nemonic = ''):
-        text = unicode(self.name)
-        if nemonic:
-            return text.replace('&', '&&') + u"\t" + nemonic
-        else:
-            text += u"\t%s" % (self.trigger)
-        return text.replace('&', '&&')
-    
-    # Trying to speed things up a bit, a memoize     
     @classmethod
     def loadBundleItem(cls, path, namespace):
         try:
