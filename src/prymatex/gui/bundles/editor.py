@@ -85,10 +85,10 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         
     def treeViewItemActivated(self, index):
         treeItem = self.proxyTreeModel.mapToSource(index).internalPointer()
-        if treeItem.tipo in self.indexes: 
-            index = self.indexes[treeItem.tipo]
+        if treeItem.TYPE in self.indexes: 
+            index = self.indexes[treeItem.TYPE]
             editor = self.editors[index]
-            editor.edit(treeItem.data)
+            editor.edit(treeItem)
             #TODO: ver si tengo que cuardar el current editor
             self.stackLayout.setCurrentIndex(index)
             self.currentEditorWidgetChanged(index)

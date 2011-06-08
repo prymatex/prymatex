@@ -12,10 +12,10 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
             return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         item = index.internalPointer()
-        if item.tipo == "bundle":
+        if item.TYPE == "bundle":
             return True
         else:
-            return QtCore.QString(item.tipo).contains(regexp)
+            return QtCore.QString(item.TYPE).contains(regexp)
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True
@@ -36,8 +36,18 @@ class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         item = index.internalPointer()
-        return item.tipo == self.tipo
+        return item.TYPE == self.tipo
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True
 
+    def compareIndex(self, xindex, yindex):
+        xnode = xindex.internalPointer()
+        ynode = yindex.internalPointer()
+        # Ya son del mismo tipo porque este proxy es por tipo
+        return cmp(xnode.name, ynode.name)
+    
+    def findItem(self, syntax):
+        for num, index in enumerate(self.indexMap()):
+            if index.internalPointer().item == syntax:
+                return num

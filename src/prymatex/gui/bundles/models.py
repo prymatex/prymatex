@@ -8,63 +8,47 @@ from prymatex.mvc.delegates import PMXChoiceItemDelegate
 #====================================================
 # Bundle Tree Model
 #====================================================
-#TODO: que esto sea un proxy al item interno
-class PMXBundleTreeNode(object):  
-    def __init__(self, data, parent=None):
-        self.data = data
-        self.parentItem = parent
-        self.childItems = []
-        self.setIcon(self.tipo)
-        
-    @property
-    def name(self):
-        return self.data.name
-        
-    @property
-    def tipo(self):
-        return self.data.TYPE
+class PMXBundleTreeNode(object):
+    ''' 
+        Bundle and bundle item proxy
+    '''
+    ICONS = {
+             "template": QtGui.QPixmap(":/bundles/resources/bundles/templates.png"),
+             "command": QtGui.QPixmap(":/bundles/resources/bundles/commands.png"),
+             "syntax": QtGui.QPixmap(":/bundles/resources/bundles/languages.png"),
+             "preference": QtGui.QPixmap(":/bundles/resources/bundles/preferences.png"),
+             "dragcommand": QtGui.QPixmap(":/bundles/resources/bundles/drag-commands.png"),
+             "snippet": QtGui.QPixmap(":/bundles/resources/bundles/snippets.png"),
+             "macro": QtGui.QPixmap(":/bundles/resources/bundles/macros.png"),
+             "templatefile": QtGui.QPixmap(":/bundles/resources/bundles/template-files.png") 
+    }
+    def __init__(self, item, parent = None):
+        self.item = item
+        self.parent = parent
+        self.children = []
     
-    def setIcon(self, tipo):
-        self.icon = QtGui.QPixmap()
-        if tipo == "template":
-            self.icon.load(":/bundles/resources/bundles/templates.png")
-        elif tipo == "command":
-            self.icon.load(":/bundles/resources/bundles/commands.png")
-        elif tipo == "syntax":
-            self.icon.load(":/bundles/resources/bundles/languages.png")
-        elif tipo == "preference":
-            self.icon.load(":/bundles/resources/bundles/preferences.png")
-        elif tipo == "dragcommand":
-            self.icon.load(":/bundles/resources/bundles/drag-commands.png")
-        elif tipo == "snippet":
-            self.icon.load(":/bundles/resources/bundles/snippets.png")
-        elif tipo == "macro":
-            self.icon.load(":/bundles/resources/bundles/macros.png")
-        elif tipo == "template-file":
-            self.icon.load(":/bundles/resources/bundles/template-files.png")
-        else:
-            self.icon = None
+    def __getattr__(self, name):
+        return getattr(self.item, name)
+    
+    @property
+    def icon(self):
+        icon = self.ICONS[self.TYPE] if self.TYPE in self.ICONS else None
+        return icon
 
     def appendChild(self, child):
-        self.childItems.append(child)
+        self.children.append(child)
 
     def child(self, row):
-        return self.childItems[row]
+        return self.children[row]
 
     def childCount(self):
-        return len(self.childItems)
-
-    def parent(self):  
-        return self.parentItem  
+        return len(self.children)
 
     def row(self):  
-        if self.parentItem is not None:  
-            return self.parentItem.childItems.index(self)
-    
-    def setData(self, data):  
-        self.data = data
+        if self.parent is not None:  
+            return self.parent.children.index(self)
 
-class RootItem(object):
+class RootNode(object):
     def __init__(self):
         self.name = "root"
         self.TYPE = "root"
@@ -73,21 +57,21 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
     def __init__(self, manager, parent = None):
         super(PMXBundleTreeModel, self).__init__(parent)  
         self.manager = manager
-        self.rootItem = PMXBundleTreeNode(RootItem())
+        self.root = PMXBundleTreeNode(RootNode())
         
     def _populateFromManager(self):
         for bundle in self.manager.getAllBundles():
-            bti = PMXBundleTreeNode(bundle, self.rootItem)
-            self.rootItem.appendChild(bti)
+            bti = PMXBundleTreeNode(bundle, self.root)
+            self.root.appendChild(bti)
             bundle_items = self.manager.findBundleItems(bundle = bundle)
             self.setupModelData(bundle_items, bti)
     
     def addBundle(self, bundle):
-        bti = PMXBundleTreeNode(bundle, self.rootItem)
-        self.rootItem.appendChild(bti)
+        bti = PMXBundleTreeNode(bundle, self.root)
+        self.root.appendChild(bti)
         
     def addBundleItem(self, bundleItem):
-        bnode = filter(lambda bnode: bnode.data == bundleItem.bundle, self.rootItem.childItems)
+        bnode = filter(lambda bnode: bnode.item == bundleItem.bundle, self.root.children)
         if len(bnode) != 1:
             raise Exception("No bundle node for bundle item: %s", bundleItem.name)
         bnode = bnode[0]
@@ -103,32 +87,32 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             return False
         elif role == QtCore.Qt.EditRole:  
             item = index.internalPointer()  
-            item.data.name = unicode(value.toString())
+            item.name = unicode(value.toString())
             return True
         return False
      
     def removeRows(self, position = 0, count = 1,  parent=QtCore.QModelIndex()):
         node = self.nodeFromIndex(parent)
         self.beginRemoveRows(parent, position, position + count - 1)  
-        node.childItems.pop(position)  
+        node.children.pop(position)  
         self.endRemoveRows()  
 
     def nodeFromIndex(self, index):  
         if index.isValid():  
             return index.internalPointer()  
         else:
-            return self.rootItem  
+            return self.root  
 
-    def rowCount(self, parent):  
+    def rowCount(self, parent):
         if parent.column() > 0:  
             return 0  
 
         if not parent.isValid():  
-            parentItem = self.rootItem  
+            parent = self.root  
         else:  
-            parentItem = parent.internalPointer()  
+            parent = parent.internalPointer()  
 
-        return parentItem.childCount()
+        return parent.childCount()
     
     def columnCount(self, parent):  
         return 1  
@@ -153,13 +137,13 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
 
     def index(self, row, column, parent):
         if not parent.isValid():  
-            parentItem = self.rootItem  
+            parent = self.root  
         else:  
-            parentItem = parent.internalPointer()
+            parent = parent.internalPointer()
 
-        childItem = parentItem.child(row)
-        if childItem:  
-            return self.createIndex(row, column, childItem)
+        child = parent.child(row)
+        if child:
+            return self.createIndex(row, column, child)
         else:
             return QtCore.QModelIndex()
 
@@ -167,13 +151,13 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():  
             return QtCore.QModelIndex()  
 
-        childItem = index.internalPointer()  
-        parentItem = childItem.parent()  
+        child = index.internalPointer()  
+        parent = child.parent
 
-        if parentItem == self.rootItem:  
+        if parent == self.root:  
             return QtCore.QModelIndex()  
 
-        return self.createIndex(parentItem.row(), 0, parentItem)
+        return self.createIndex(parent.row(), 0, parent)
 
     def setupModelData(self, items, parent):
         for item in items:

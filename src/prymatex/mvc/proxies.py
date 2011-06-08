@@ -1,5 +1,20 @@
 from PyQt4 import QtCore, QtGui
 
+def bisect(elements, element, function):
+    if not elements:
+        return 0
+    else:
+        index = len(elements) / 2
+        comp = function(elements[index], element)
+        if comp > 0:
+            index = index - 1 if index > 0 else 0
+            return index + bisect(elements[:index], element, function)
+        elif comp < 0:
+            index = index + 1 if index < len(elements) else len(elements)
+            return index + bisect(elements[index:], element, function)
+        else:
+            return index
+
 class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
     '''
         Proxy for create flat models from tree models
@@ -9,6 +24,9 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         self.__indexMap = []
         self.__sourceModel = None
 
+    def indexMap(self):
+        return self.__indexMap
+    
     def sourceModel(self):
         return self.__sourceModel
         
@@ -26,6 +44,9 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True
+    
+    def compareIndex(self, xindex, yindex):
+        return 0
     
     def mapToSource(self, proxyIndex):
         return self.__indexMap[proxyIndex.row()]
@@ -73,7 +94,7 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
             if row < len(self.__indexMap):
                 return self.__indexMap[row]
         return QtCore.QModelIndex()
-
+    
     def reMapModel(self):
         if self.__sourceModel is not None:
             self.__indexMap = []
@@ -88,6 +109,7 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
             #First, map this one
             index = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
-                self.__indexMap.append(index)
+                position = bisect(self.__indexMap, index, lambda xindex, yindex: self.compareIndex(xindex, yindex))
+                self.__indexMap.insert(position, index)
             #Map it's children
             self.mapModel(index)

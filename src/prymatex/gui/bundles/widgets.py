@@ -140,7 +140,7 @@ class PMXTemplateWidget(PMXEditorBaseWidget, Ui_Template):
         self.lineEditExtension.setText(hash['extension'])
 
 class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
-    TYPE = 'template-file'
+    TYPE = 'templatefile'
     def __init__(self, parent = None):
         super(PMXTemplateFileWidget, self).__init__(parent)
         self.setupUi(self) 

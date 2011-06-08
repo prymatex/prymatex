@@ -169,7 +169,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     # Bundle Items
     #====================================================================
     def updateEditorSyntax(self, syntax):
-        self.currentEditor.setSyntax(syntax)
+        editor = self.currentEditor
+        if editor is not None:
+            editor.setSyntax(syntax)
         
     def menuBundleItemActionTriggered(self, item):
         self.currentEditor.insertBundleItem(item)
@@ -255,14 +257,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
 
     # TODO: Fix, just grep and replace
     @property
-    def current_editor(self):
-        return self.current_editor_widget.codeEdit
-    currentEditor = current_editor # Alias
+    def currentEditor(self):
+        widget = self.currentEditorWidget
+        if widget != None:
+            return widget.codeEdit
 
     @property
-    def current_editor_widget(self):
+    def currentEditorWidget(self):
         return self.currentTabWidget.currentWidget()
-    currentEditorWidget = current_editor_widget
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):

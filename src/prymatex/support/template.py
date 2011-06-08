@@ -13,7 +13,7 @@ from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, ensureEnvironment, deleteFile
 
 class PMXTemplateFile(object):
-    TYPE = 'template-file'
+    TYPE = 'templatefile'
     def __init__(self, name, template):
         self.name = name
         self.template = template
