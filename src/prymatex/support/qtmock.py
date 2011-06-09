@@ -1,4 +1,5 @@
-#Qt Mock
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 class Qt(object):
     #Keys

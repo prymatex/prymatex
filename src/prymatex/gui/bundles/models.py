@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, QString
 from prymatex.core.exceptions import APIUsageError
-from prymatex.gui.bundles.qtadapter import buildKeySequence
+from prymatex.gui.bundles.qtadapter import buildKeySequence, buildKeyEquivalent
 from prymatex.mvc.models import PMXTableBase, PMXTableField
 from prymatex.mvc.delegates import PMXChoiceItemDelegate
 #from PyQt4.Qt import *
@@ -42,16 +45,7 @@ class PMXBundleTreeNode(object):
     
     @keyEquivalent.setter
     def keyEquivalent(self, key):
-        pass
-    
-    @property
-    def keySequence(self):
-        if self.item.keyEquivalent is not None:
-            return buildKeySequence(self.item.keyEquivalent)
-    
-    @keySequence.setter
-    def keySequence(self, key):
-        pass
+        self.item.keyEquivalent = buildKeyEquivalent(key)
     
     @property
     def icon(self):

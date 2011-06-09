@@ -1,4 +1,5 @@
-# -*- encoding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import re, logging
 from bisect import bisect
@@ -113,7 +114,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     @property
     def snippetMode(self):
         """Retorna si el editor esta en modo snippet"""
-        return hasattr(self, 'snippet') and self.snippet != None
+        return self.snippetProcessor.hasSnippet
     
     @property
     def multiEditMode(self):
@@ -130,6 +131,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.syntaxProcessor = PMXSyntaxProcessor(self)
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
+        self.snippetProcessor = PMXSnippetProcessor(self)
         
         #Helpers
         self.cursors = PMXCursorsHelper(self)

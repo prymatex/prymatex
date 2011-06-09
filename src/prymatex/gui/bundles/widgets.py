@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.bundles.ui_snippet import Ui_Snippet

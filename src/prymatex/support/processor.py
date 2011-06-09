@@ -75,6 +75,15 @@ class PMXCommandProcessor(object):
     def createNewDocument(self, text):
         pass
 
+class PMXSnippetProcessor(object):
+    def __init__(self):
+        pass
+    
+    def startSnippet(self, snippet):
+        pass
+    def endSnippet(self):
+        pass
+
 ######################### Macro Processor #########################
 class PMXMacroProcessor(object):
     def __init__(self):
