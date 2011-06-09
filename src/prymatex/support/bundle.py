@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import os, re, plistlib
-from copy import copy, deepcopy
+from copy import copy
 from xml.parsers.expat import ExpatError
-from prymatex.support.qtadapter import buildKeyEquivalentString
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/

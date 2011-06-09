@@ -57,7 +57,7 @@ class PMXEditorBaseWidget(QtGui.QWidget):
     def tabTrigger(self, value):
         current = self.tabTrigger
         if value is not None and current is not None:
-            if value != self.tabTrigger:
+            if value != current:
                 self.changes['tabTrigger'] = value
             else:
                 self.changes.pop('tabTrigger', None)
@@ -70,13 +70,13 @@ class PMXEditorBaseWidget(QtGui.QWidget):
     def keyEquivalent(self):
         if self.current is None or getattr(self.current, 'keyEquivalent') is None:
             return None
-        return self.current.keyEquivalent.toString()
+        return self.current.keyEquivalent
     
     @keyEquivalent.setter
     def keyEquivalent(self, value):
         current = self.keyEquivalent
         if value is not None and current is not None:
-            if value.toString() == current.toString():
+            if value != current:
                 self.changes['keyEquivalent'] = value
             else:
                 self.changes.pop('keyEquivalent', None)

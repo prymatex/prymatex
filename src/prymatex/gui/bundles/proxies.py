@@ -49,5 +49,5 @@ class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
     
     def findItem(self, syntax):
         for num, index in enumerate(self.indexMap()):
-            if index.internalPointer().item == syntax:
+            if index.internalPointer() == syntax:
                 return num

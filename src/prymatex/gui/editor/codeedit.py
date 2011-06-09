@@ -419,9 +419,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.keyPressIndent(event)
     
     def keyPressBundleItem(self, event):
-        code = int(event.modifiers()) + event.key()
+        keyseq = int(event.modifiers()) + event.key()
         scope = self.getCurrentScope()
-        items = self.pmxApp.bundleManager.getKeyEquivalentItem(code, scope)
+        items = self.pmxApp.bundleManager.getKeyEquivalentItem(keyseq, scope)
         if items:
             if len(items) > 1:
                 self.selectBundleItem(items)
@@ -630,7 +630,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if tabTrigger and item.tabTrigger != None:
             for _ in range(len(item.tabTrigger)):
                 cursor.deletePreviousChar()
-        if isinstance(item, PMXSnippet):
+        if item.TYPE == PMXSnippet.TYPE:
             #Snippet Item needs compile and clone
             if not item.ready:
                 item.compile()
@@ -655,11 +655,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             else:
                 cursor.setPosition(item.ends)
             self.setTextCursor(cursor)
-        elif isinstance(item, PMXCommand):
+        elif item.TYPE == PMXCommand.TYPE:
             item.execute(self.commandProcessor)
-        elif isinstance(item, PMXSyntax):
+        elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
-        elif isinstance(item, PMXMacro):
+        elif item.TYPE == PMXMacro.TYPE:
             item.execute(self.macroProcessor)
 
     def selectBundleItem(self, items, tabTrigger = False):

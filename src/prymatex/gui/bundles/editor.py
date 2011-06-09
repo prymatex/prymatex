@@ -57,8 +57,8 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
                          PMXEditorBaseWidget(self) ]
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackLayout.addWidget(editor)
-        self.noneWidgetIndex = len(self.editors)
-        #self.stackLayout.currentChanged.connect(self.currentEditorWidgetChanged)
+        self.noneWidgetIndex = len(self.editors) - 1
+        self.stackLayout.currentChanged.connect(self.on_currentEditorWidget_changed)
         self.stackLayout.setCurrentIndex(self.noneWidgetIndex)
     
     #===========================================================
@@ -86,7 +86,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.comboBoxActivation.currentIndexChanged[int].connect(self.on_comboBoxActivation_changed)
         self.lineKeyEquivalentActivation.installEventFilter(self)
     
-    def currentEditorWidgetChanged(self, index):
+    def on_currentEditorWidget_changed(self, index):
         widget = self.stackLayout.currentWidget()
         self.labelTitle.setText(widget.title)
         scope = widget.scope
@@ -104,9 +104,10 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
             self.lineKeyEquivalentActivation.clear()
             self.lineTabTriggerActivation.clear()
             self.comboBoxActivation.setCurrentIndex(0)
+            self.lineTabTriggerActivation.setVisible(False)
         else:
             if keyEquivalent is not None:
-                self.lineKeyEquivalentActivation.setText(keyEquivalent)
+                self.lineKeyEquivalentActivation.setText(QtGui.QKeySequence(keyEquivalent).toString())
             if tabTrigger is not None:
                 self.lineTabTriggerActivation.setText(tabTrigger)
             index = 0 if keyEquivalent else 1
@@ -121,4 +122,3 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
             
             #TODO: ver si tengo que guardar el current editor
             self.stackLayout.setCurrentIndex(index)
-            self.currentEditorWidgetChanged(index)

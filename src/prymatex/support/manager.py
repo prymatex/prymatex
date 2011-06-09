@@ -114,6 +114,7 @@ class PMXSupportManager(object):
                     continue
                 bundle.disabled = bundle.uuid in self.disabledBundles
                 if bundle.uuid not in self.deletedBundles and not self.hasBundle(bundle.uuid):
+                    bundle.manager = self
                     self.addBundle(bundle)
 
     #---------------------------------------------------
@@ -123,7 +124,6 @@ class PMXSupportManager(object):
         bns = bundle.namespace
         nss = self.nsorder[::-1]
         index = nss.index(bns)
-        bundle.manager = self
         for ns in nss[index:]:
             bpath = join(self.namespaces[ns]['Bundles'], basename(bundle.path))
             # Search for support

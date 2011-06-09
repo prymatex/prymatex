@@ -5,7 +5,8 @@ import os, plistlib
 from copy import copy
 from xml.parsers.expat import ExpatError
 from prymatex.support.score import PMXScoreManager
-from prymatex.support.qtadapter import buildQTextFormat, buildQColor
+#Deprecated use decorator like bundle items
+from prymatex.gui.bundles.qtadapter import buildQTextFormat, buildQColor
 
 '''
     caret = Cursor, foreground, selection, invisibles, lineHighlight, gutter, background

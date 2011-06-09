@@ -38,11 +38,20 @@ class PMXBundleTreeNode(object):
     @property
     def keyEquivalent(self):
         if self.item.keyEquivalent is not None:
-            return buildKeySequence(self.item.keyEquivalent)
+            return int(buildKeySequence(self.item.keyEquivalent))
     
     @keyEquivalent.setter
     def keyEquivalent(self, key):
-        return self.item.keyEquivalent
+        pass
+    
+    @property
+    def keySequence(self):
+        if self.item.keyEquivalent is not None:
+            return buildKeySequence(self.item.keyEquivalent)
+    
+    @keySequence.setter
+    def keySequence(self, key):
+        pass
     
     @property
     def icon(self):
