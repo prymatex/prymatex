@@ -215,7 +215,7 @@ class PMXSyntax(PMXBundleItem):
             value = getattr(self, key)
             if value != None:
                 if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
-                    value = unicode(value)
+                    value = value.pattern
                 hash[key] = value
         return hash
 

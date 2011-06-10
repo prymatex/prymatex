@@ -86,7 +86,7 @@ class PMXPreferenceSettings(object):
             value = getattr(self, key)
             if value != None:
                 if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
-                    value = unicode( value )
+                    value = value.pattern
                 elif key in [ 'shellVariables' ]:
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
                 hash[key] = value

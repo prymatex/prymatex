@@ -6,7 +6,7 @@ from copy import copy
 from xml.parsers.expat import ExpatError
 from prymatex.support.score import PMXScoreManager
 #Deprecated use decorator like bundle items
-from prymatex.gui.bundles.qtadapter import buildQTextFormat, buildQColor
+from prymatex.gui.support.qtadapter import buildQTextFormat, buildQColor
 
 '''
     caret = Cursor, foreground, selection, invisibles, lineHighlight, gutter, background
@@ -74,12 +74,6 @@ class PMXTheme(object):
         for key in hash.keys():
             setattr(self, key, hash[key])
     
-    def isChanged(self, hash):
-        for key in hash.keys():
-            if getattr(self, key) != hash[key]:
-                return True
-        return False
-        
     @property
     def hash(self):
         hash = {}

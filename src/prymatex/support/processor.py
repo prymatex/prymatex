@@ -1,167 +1,99 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
+def nop(self, *args):
+    pass
+
 ######################### SyntaxProcessor #########################
 
-class PMXSyntaxProcessor(object):
-    '''
-        Syntax Processor, clase base para los procesadores de sintaxis
-    '''
-    def __init__(self):
-        pass
-
-    def openTag(self, name, position):
-        pass
-
-    def closeTag(self, name, position):
-        pass
-
-    def newLine(self, line):
-        pass
-
-    def startParsing(self, name):
-        pass
-
-    def endParsing(self, name):
-        pass
+PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
+    "__init__": nop,
+    "startParsing": nop,
+    "endParsing": nop,
+    "openTag": nop,
+    "closeTag": nop,
+    "newLine": nop
+})
 
 ######################### Command Processor #########################
-class PMXCommandProcessor(object):
-    def __init__(self):
-        pass
-    
-    def startCommand(self, command):
-        pass
-    def endCommand(self, command):
-        pass
-    
+PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
+    "__init__": nop,
+    "startCommand": nop,
+    "endCommand": nop,
     # beforeRunningCommand
-    def saveActiveFile(self):
-        return True
-    def saveModifiedFiles(self):
-        return True
-    def nop(self):
-        return True
-    
+    "saveActiveFile": nop,
+    "saveModifiedFiles": nop,
+    "nop": nop,
     # deleteFromEditor
-    def deleteWord(self):
-        pass
-    def deleteSelection(self):
-        pass
-    def deleteCharacter(self):
-        pass
-
-    # on error
-    def commandError(self, text, code):
-        pass
-    
+    "deleteWord": nop,
+    "deleteSelection": nop,
+    "deleteCharacter": nop,
     # Outpus function
-    def discard(self, text):
-        pass
-    def replaceSelectedText(self, text):
-        pass
-    def replaceDocument(self, text):
-        pass
-    def insertText(self, text):
-        pass
-    def afterSelectedText(self, text):
-        pass
-    def insertAsSnippet(self, text):
-        pass
-    def showAsHTML(self, text):
-        pass
-    def showAsTooltip(self, text):
-        pass
-    def createNewDocument(self, text):
-        pass
+    "discard": nop,
+    "replaceSelectedText": nop,
+    "replaceDocument": nop,
+    "insertText": nop,
+    "afterSelectedText": nop,
+    "insertAsSnippet": nop,
+    "showAsHTML": nop,
+    "showAsTooltip": nop,
+    "createNewDocument": nop
+})
 
-class PMXSnippetProcessor(object):
-    def __init__(self):
-        pass
-    
-    def startSnippet(self, snippet):
-        pass
-    def endSnippet(self):
-        pass
+######################### Snipper Processor #########################
+PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
+    "__init__": nop,
+    "startSnippet": nop,
+    "endSnippet": nop,
+    # transformations
+    "startTransformation": nop,
+    "endTransformation": nop,
+    # cursor or carret
+    "cursorPosition": nop,
+    "setCursorPosition": nop,
+    # select
+    "selectSlice": nop,
+    "selectHolder": nop,
+    # insert
+    "insertText": nop
+})
 
 ######################### Macro Processor #########################
-class PMXMacroProcessor(object):
-    def __init__(self):
-        pass
-
+PMXMacroProcessor = type("PMXMacroProcessor", (object, ), {
+    "__init__": nop,
+    "startMacro": nop,
+    "endMacro": nop,
     # Move
-    def moveRight(self):
-        pass
-   
-    def moveLeft(self):
-        pass
-        
-    def moveUp(self):
-        pass
-        
-    def moveToEndOfLine(self):
-        pass
-        
-    def moveToEndOfParagraph(self):
-        pass
-        
-    def moveToBeginningOfLine(self):
-        pass
-        
-    def moveToEndOfDocumentAndModifySelection(self):
-        pass
-        
-    def moveToBeginningOfDocumentAndModifySelection(self):
-        pass
-        
-    def moveRightAndModifySelection(self):
-        pass
-        
-    def centerSelectionInVisibleArea(self):
-        pass
-    def alignLeft(self):
-        pass
+    "moveRight": nop,
+    "moveLeft": nop,
+    "moveUp": nop,
+    "moveToEndOfLine": nop,
+    "moveToEndOfParagraph": nop,
+    "moveToBeginningOfLine": nop,
+    "moveToEndOfDocumentAndModifySelection": nop,
+    "moveToBeginningOfDocumentAndModifySelection": nop,
+    "moveRightAndModifySelection": nop,
+    "centerSelectionInVisibleArea": nop,
+    "alignLeft": nop,
     # Inserts
-    def insertText(self, argument):
-        pass
-        
-    def insertNewline(self):
-        pass
-    
+    "insertText": nop,
+    "insertNewline": nop,
     # Deletes
-    def deleteForward(self):
-        pass
-        
-    def deleteBackward(self):
-        pass
-    
-    def deleteWordLeft(self):
-        pass
-        
-    def deleteToBeginningOfLine(self):
-        pass
+    "deleteForward": nop,
+    "deleteBackward": nop,
+    "deleteWordLeft": nop,
+    "deleteToBeginningOfLine": nop,
     # Selects
-    def selectWord(self):
-        pass
-        
-    def selectAll(self):
-        pass
-        
-    def selectHardLine(self):
-        pass
-    def executeCommandWithOptions(self, argument):
-        pass
-        
-    def insertSnippetWithOptions(self):
-        pass
-        
-    def findWithOptions(self, argument):
-        pass
-        
-    def indent(self):
-        pass
+    "selectWord": nop,
+    "selectAll": nop,
+    "selectHardLine": nop,
+    "executeCommandWithOptions": nop,
+    "insertSnippetWithOptions": nop,
+    "findWithOptions": nop,
+    "indent": nop
+})
     
-############# DebugS Preocessors ###############
+############# Debugs Preocessors ###############
 class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self):
         self.line_number = 0
@@ -230,5 +162,5 @@ class PMXDebugSnippetProcessor(PMXSnippetProcessor):
         if self.transformation:
             self.capture += text
         else:
-            print text
+            print text,
             self.position += len(text)

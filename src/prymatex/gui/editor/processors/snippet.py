@@ -47,6 +47,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.__env = env
 
     def startTransformation(self, transformation):
+        #TODO: que pasa si tiene transformaciones anidadas, creo que es mejor una lista
         self.transformation = True
         self.capture = ""
         

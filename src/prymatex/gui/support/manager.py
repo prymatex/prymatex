@@ -5,8 +5,8 @@ from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.bundles.models import PMXBundleTreeModel, PMXBundleItemModel
-from prymatex.gui.bundles.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel
+from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleItemModel
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel
 
 class PMXSupportModelManager(PMXSupportManager, PMXObject):
     #Settings
@@ -32,6 +32,9 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         
         self.syntaxProxyModel = PMXBundleTypeFilterProxyModel("syntax")
         self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)
+        
+        self.preferenceProxyModel = PMXBundleTypeFilterProxyModel("preference")
+        self.preferenceProxyModel.setSourceModel(self.bundleTreeModel)
         
     def buildEnvironment(self):
         env = {}

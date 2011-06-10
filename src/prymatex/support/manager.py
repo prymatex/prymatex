@@ -423,7 +423,6 @@ class PMXSupportManager(object):
         '''
             Actualiza un themes
         '''
-        if not theme.isChanged(attrs): return theme;
         if theme.namespace == self.nsorder[0]:
             #Cambiar de namespace y de path al por defecto para proteger el base
             newns = self.nsorder[-1]

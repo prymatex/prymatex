@@ -13,7 +13,6 @@ def test_snippet(manager):
     snippet = manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD')
     start = time()
     snippet.execute(PMXDebugSnippetProcessor())
-    file.close()
     print "Time:", time() - start
 
 def test_syntax(manager):
@@ -24,7 +23,7 @@ def test_syntax(manager):
     print syntax.scopeName
     file = open('../prymatex/gui/editor/codeedit.py', 'r');
     start = time()
-    syntax.parse(file.read(), PMXSyntaxProcessor())
+    syntax.parse(file.read(), PMXDebugSyntaxProcessor())
     file.close()
     print "Time:", time() - start
 

@@ -14,11 +14,11 @@ if __name__ == "__main__":
     app.settings = PMXSettings.getSettingsForProfile("default")
     options, open_args = parser.parse_args([])
     app.options = options
-    from prymatex.gui.bundles.manager import PMXSupportModelManager
+    from prymatex.gui.support.manager import PMXSupportModelManager
     app.supportManager = PMXSupportModelManager()
     app.supportManager.addNamespace('prymatex', os.path.abspath('../bundles/prymatex'))
     app.supportManager.loadSupport()
-    from prymatex.gui.bundles.editor import PMXBundleEditor
+    from prymatex.gui.support.bundleeditor import PMXBundleEditor
     m = PMXBundleEditor()
     m.show()
     app.exec_()

@@ -4,7 +4,7 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, QString
 from prymatex.core.exceptions import APIUsageError
-from prymatex.gui.bundles.qtadapter import buildKeySequence, buildKeyEquivalent
+from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent
 from prymatex.mvc.models import PMXTableBase, PMXTableField
 from prymatex.mvc.delegates import PMXChoiceItemDelegate
 #from PyQt4.Qt import *
