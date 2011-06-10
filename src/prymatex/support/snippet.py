@@ -102,12 +102,6 @@ class Node(object):
         self.parent = parent
         self.scope = scope
 
-    def __len__(self):
-        return len(str(self))
-
-    def resolve(self, indentation, tabreplacement, environment):
-        pass
-
     def open(self, scope, text):
         logger.debug("%s open %s %s" % (self.__class__.__name__, scope, text))
         return self
@@ -118,23 +112,29 @@ class Node(object):
         else:
             logger.debug("%s close %s %s" % (self.__class__.__name__, scope, text))
         return self
-
+    
+    def reset(self):
+        attrs = ['start', 'end', 'content']
+        for attr in attrs:
+            if hasattr(self, attr):
+                delattr(self, attr)
+                
+    def render(self, processor):
+        pass
+    
 class TextNode(Node):
     def __init__(self, text, parent = None):
         super(TextNode, self).__init__("string", parent)
         self.text = text.replace('\\n', '\n').replace('\\t', '\t')
 
-    def __str__(self):
-        return self.text
-
-    def render(self):
+    def __len__(self):
+        return len(self.text)
+    
+    def __unicode__(self):
         return self.text
     
-    def __deepcopy__(self, memo):
-        return TextNode(self.text, memo["parent"])
-        
-    def resolve(self, indentation, tabreplacement, environment):
-        self.text = self.text.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
+    def render(self, processor):
+        processor.insertText(self.text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement))
 
 class NodeList(list):
     def __init__(self, scope, parent = None):
@@ -142,92 +142,11 @@ class NodeList(list):
         self.parent = parent
         self.scope = scope
 
-    def __str__(self):
-        string = ""
-        for child in self:
-            string += str(child)
-        return string
-    
-    def __len__(self):
-        return len(str(self))
-    
-    def __contains__(self, element):
-        for child in self:
-            if child == element:
-                return True
-            elif isinstance(child, NodeList) and element in child:
-                return True
-        return False
-    
-    def render(self):
-        string = ""
-        for child in self:
-            string += child.render()
-        return string
-    
-    def append(self, element):
-        if isinstance(element, (str, unicode)):
-            element = TextNode(element, self)
-        super(NodeList, self).append(element)
-    
-    def clear(self):
-        while self:
-            self.pop()
-    
-    def resolve(self, indentation, tabreplacement, environment):
-        for child in self:
-            child.resolve(indentation, tabreplacement, environment)
-
-    def open(self, scope, text):
-        if scope == 'constant.character.escape.snippet':
-            self.append(text)
-        else:
-            logger.debug("%s open %s %s" % (self.__class__.__name__, scope, text))
-        return self
-
-    def close(self, scope, text):
-        if scope == self.scope:
-            return self.parent
-        elif scope == 'keyword.escape.snippet':
-            self.append(text)
-        else:
-            self.append(text)
-            logger.debug("%s close %s %s" % (self.__class__.__name__, scope, text))
-        return self
-    
-#Snippet root
-class Snippet(NodeList):
-    def __init__(self, scope, parent = None):
-        super(Snippet, self).__init__(scope, parent)
-        self.__starts = None
-        self.__ends = None
-    
-    def __deepcopy__(self, memo):
-        node = Snippet(self.scope, memo["parent"])
-        memo["parent"] = node
-        for child in self:
-            node.append(deepcopy(child, memo))
-        return node
-    
-    def setStarts(self, value):
-        self.__starts = value
-        
-    def getStarts(self):
-        return (self.__starts != None) and self.__starts or 0
-    
-    starts = property(getStarts, setStarts)
-    
-    def setEnds(self, value):
-        self.__ends = value
-        
-    def getEnds(self):
-        return (self.__ends != None) and self.__ends or len(self)
-    
-    ends = property(getEnds, setEnds)
-        
     def open(self, scope, text):
         node = self
-        if scope == 'structure.tabstop.snippet':
+        if scope == 'constant.character.escape.snippet':
+            self.append(text)
+        elif scope == 'structure.tabstop.snippet':
             self.append(text)
             node = StructureTabstop(scope, self)
             self.append(node)
@@ -256,23 +175,61 @@ class Snippet(NodeList):
             node = Shell(scope, self)
             self.append(node)
         else:
-            return super(Snippet, self).open(scope, text)
+            logger.debug("%s open %s %s" % (self.__class__.__name__, scope, text))
         return node
+
+    def close(self, scope, text):
+        if scope == self.scope:
+            return self.parent
+        elif scope == 'keyword.escape.snippet':
+            self.append(text)
+        else:
+            self.append(text)
+            logger.debug("%s close %s %s" % (self.__class__.__name__, scope, text))
+        return self
+    
+    def reset(self):
+        for child in self:
+            child.reset()
+        attrs = ['start', 'end', 'content']
+        for attr in attrs:
+            if hasattr(self, attr):
+                delattr(self, attr)
+    
+    def __len__(self):
+        if hasattr(self, 'start') and hasattr(self, 'end'):
+            return self.end - self.start
+        return 0
         
-    def position(self, element):
-        pos = self.starts
-        def index(holder, element):
-            val = 0
-            for child in holder:
-                if child == element:
-                    break
-                elif isinstance(child, Snippet) and element in child:
-                    val += index(child, element)
-                    break
-                else:
-                    val += len(child)
-            return val
-        return pos + index(self, element)
+    def __unicode__(self):
+        return u"".join([unicode(node) for node in self])
+    
+    def render(self, processor):
+        for child in self:
+            child.render(processor)
+    
+    def __contains__(self, element):
+        for child in self:
+            if child == element:
+                return True
+            elif isinstance(child, NodeList) and element in child:
+                return True
+        return False
+    
+    def append(self, element):
+        if isinstance(element, (str, unicode)):
+            element = TextNode(element, self)
+        super(NodeList, self).append(element)
+    
+#Snippet root
+class Snippet(NodeList):
+    def __init__(self, scope, parent = None):
+        super(Snippet, self).__init__(scope, parent)
+        
+    def render(self, processor):
+        self.start = processor.cursorPosition()
+        super(Snippet, self).render(processor)
+        self.end = processor.cursorPosition()
 
 #Snippet structures
 class StructureTabstop(Node):
@@ -280,22 +237,7 @@ class StructureTabstop(Node):
         super(StructureTabstop, self).__init__(scope, parent)
         self.placeholder = None
         self.index = None
-        self.content = ""
 
-    def __str__(self):
-        if self.placeholder != None:
-            return str(self.placeholder)
-        else:
-            return self.content
-
-    def __deepcopy__(self, memo):
-        node = StructureTabstop(self.scope, memo["parent"])
-        node.index = self.index
-        container = memo["taborder"].setdefault(node.index, [])
-        if (node != container and node not in container):
-            memo["taborder"][node.index] = node.taborder(container)
-        return node
-        
     def close(self, scope, text):
         node = self
         if scope == 'keyword.tabstop.snippet':
@@ -304,11 +246,14 @@ class StructureTabstop(Node):
             return super(StructureTabstop, self).close(scope, text)
         return node
 
-    def position(self):
-        root = self.parent
-        while (root.parent != None):
-            root = root.parent
-        return root.position(self)
+    def render(self, processor):
+        self.start = processor.cursorPosition()
+        if self.placeholder != None:
+            self.placeholder.render(processor, mirror = True)
+        else:
+            if hasattr(self, 'content'):
+                processor.insertText(self.content)
+        self.end = processor.cursorPosition()
     
     def taborder(self, container):
         if type(container) == list:
@@ -317,42 +262,15 @@ class StructureTabstop(Node):
             self.placeholder = container
         return container
         
-    def insert(self, character, position):
-        text = str(self)
-        text = text[:position] + character + text[position:]
-        self.content = text
+    def setContent(self, content):
+        self.content = content
     
-    def remove(self, start, end = None):
-        end = end != None and end or start
-        text = str(self)
-        text = text[:start] + text[end:]
-        self.content = text
-    
-    def clear(self):
-        self.content = ""
-    
-class StructurePlaceholder(Snippet):
+class StructurePlaceholder(NodeList):
     def __init__(self, scope, parent = None):
         super(StructurePlaceholder, self).__init__(scope, parent)
         self.index = None
         self.placeholder = None
         
-    def __deepcopy__(self, memo):
-        node = StructurePlaceholder(self.scope, memo["parent"])
-        memo["parent"] = node
-        for child in self:
-            node.append(deepcopy(child, memo))
-        node.index = self.index
-        container = memo["taborder"].setdefault(node.index, [])
-        if (node != container and node not in container):
-            memo["taborder"][node.index] = node.taborder(container)
-        return node
-
-    def __str__(self):
-        if self.placeholder != None:
-            return str(self.placeholder)
-        return super(StructurePlaceholder, self).__str__()
-    
     def close(self, scope, text):
         node = self
         if scope == 'keyword.placeholder.snippet':
@@ -360,7 +278,19 @@ class StructurePlaceholder(Snippet):
         else:
             return super(StructurePlaceholder, self).close(scope, text)
         return node
-
+        
+    def render(self, processor, mirror = False):
+        if not mirror:
+            self.start = processor.cursorPosition()
+        if hasattr(self, 'content'):
+            processor.insertText(self.content)
+        elif self.placeholder != None:
+            self.placeholder.render(processor)
+        else:
+            super(StructurePlaceholder, self).render(processor)
+        if not mirror:
+            self.end = processor.cursorPosition()
+    
     def taborder(self, container):
         if type(container) == list and container:
             for element in container:
@@ -370,24 +300,8 @@ class StructurePlaceholder(Snippet):
             return container
         return self
 
-    def position(self):
-        root = self.parent
-        while (root.parent != None):
-            root = root.parent
-        return root.position(self)
-    
-    def insert(self, character, position):
-        text = str(self)
-        text = text[:position] + character + text[position:]
-        self.clear()
-        self.append(text)
-    
-    def remove(self, start, end = None):
-        end = end != None and end or start
-        text = str(self)
-        text = text[:start] + text[end:]
-        self.clear()
-        self.append(text)
+    def setContent(self, content):
+        self.content = content
         
 class StructureTransformation(Node):
     def __init__(self, scope, parent = None):
@@ -396,22 +310,6 @@ class StructureTransformation(Node):
         self.index = None
         self.regexp = None
     
-    def __str__(self):
-        text = ""
-        if self.placeholder != None:
-            text = str(self.placeholder)
-        return "".join(self.regexp.transform(text))
-
-    def __deepcopy__(self, memo):
-        node = StructureTransformation(self.scope, memo["parent"])
-        memo["parent"] = node
-        node.index = self.index
-        node.regexp = deepcopy(self.regexp, memo)
-        container = memo["taborder"].setdefault(node.index, [])
-        if (node != container and node not in container):
-            memo["taborder"][node.index] = node.taborder(container)
-        return node
-        
     def open(self, scope, text):
         node = self
         if scope == 'string.regexp':
@@ -428,30 +326,24 @@ class StructureTransformation(Node):
             return super(StructureTransformation, self).close(scope, text)
         return node
     
+    def render(self, processor):
+        processor.startTransformation(self.regexp)
+        if self.placeholder != None:
+            self.placeholder.render(processor, mirror = True)
+        processor.endTransformation(self.regexp)
+    
     def taborder(self, container):
         if type(container) == list:
             container.append(self)
         else:
             self.placeholder = container
         return container
-        
-    def resolve(self, indentation, tabreplacement, environment):
-        self.regexp.resolve(indentation, tabreplacement, environment)    
 
 #Snippet variables
 class VariableTabstop(Node):
     def __init__(self, scope, parent = None):
         super(VariableTabstop, self).__init__(scope, parent)
         self.name = None
-        self.value = ""
-
-    def __deepcopy__(self, memo):
-        node = VariableTabstop(self.scope, memo["parent"])
-        node.name = self.name
-        return node
-
-    def __str__(self):
-        return self.value
 
     def close(self, scope, text):
         node = self
@@ -461,26 +353,14 @@ class VariableTabstop(Node):
             return super(VariableTabstop, self).close(scope, text)
         return node
     
-    def resolve(self, indentation, tabreplacement, environment):
-        if self.name in environment:
-            self.value = environment[self.name]
+    def render(self, processor):
+        if self.name in processor.environment:
+            processor.insertText(processor.environment[self.name])
 
-class VariablePlaceholder(Snippet):
+class VariablePlaceholder(NodeList):
     def __init__(self, scope, parent = None):
         super(VariablePlaceholder, self).__init__(scope, parent)
         self.name = None
-        self.value = ""
-
-    def __deepcopy__(self, memo):
-        node = VariablePlaceholder(self.scope, memo["parent"])
-        memo["parent"] = node
-        for child in self:
-            node.append(deepcopy(child, memo))
-        node.name = self.name
-        return node
-
-    def __str__(self):
-        return self.value or super(VariablePlaceholder, self).__str__()
 
     def close(self, scope, text):
         node = self
@@ -490,27 +370,20 @@ class VariablePlaceholder(Snippet):
             return super(VariablePlaceholder, self).close(scope, text)
         return node
     
-    def resolve(self, indentation, tabreplacement, environment):
-        if self.name in environment:
-            self.value = environment[self.name]
-
+    def render(self, processor):
+        self.start = processor.cursorPosition()
+        if self.name in processor.environment:
+            processor.insertText(processor.environment[self.name])
+        else:
+            super(StructurePlaceholder, self).render(processor)
+        self.end = processor.cursorPosition()
+    
 class VariableTransformation(Node):
     def __init__(self, scope, parent = None):
         super(VariableTransformation, self).__init__(scope, parent)
         self.name = None
-        self.value = ""
         self.regexp = None
 
-    def __str__(self):
-        return "".join(self.regexp.transform(self.value))
-
-    def __deepcopy__(self, memo):
-        node = VariableTransformation(self.scope, memo["parent"])
-        memo["parent"] = node
-        node.name = self.name
-        node.regexp = deepcopy(self.regexp, memo)
-        return node
-        
     def open(self, scope, text):
         node = self
         if scope == 'string.regexp':
@@ -527,10 +400,10 @@ class VariableTransformation(Node):
             return super(VariableTransformation, self).close(scope, text)
         return node
     
-    def resolve(self, indentation, tabreplacement, environment):
-        if self.name in environment:
-            self.value = environment[self.name]
-        self.regexp.resolve(indentation, tabreplacement, environment)
+    def render(self, processor):
+        if self.name in processor.environment:
+            text = self.regexp.transform(processor.environment[self.name], processor)
+            processor.insertText(text)
 
 class Regexp(NodeList):
     _repl_re = sre.compile(u"\$(?:(\d+)|g<(.+?)>)")
@@ -539,15 +412,6 @@ class Regexp(NodeList):
         super(Regexp, self).__init__(scope, parent)
         self.pattern = ""
         self.options = None
-
-    def __deepcopy__(self, memo):
-        node = Regexp(self.scope, memo["parent"])
-        memo["parent"] = node
-        for child in self:
-            node.append(deepcopy(child, memo))
-        node.pattern = self.pattern
-        node.options = self.options
-        return node
 
     def open(self, scope, text):
         node = self
@@ -616,11 +480,15 @@ class Regexp(NodeList):
             repl = lambda m, r = text: r
         return repl
 
-    def transform(self, text):
+    def transform(self, text, processor):
+        flags = [OPTION_CAPTURE_GROUP]
+        if self.option_multiline:
+            flags.append(OPTION_MULTILINE)
+        self.pattern = sre.compile(unicode(self.pattern), reduce(lambda x, y: x | y, flags, 0))
         result = ""
         for child in self:
             if isinstance(child, TextNode):
-                repl = self.prepare_replacement(str(child))
+                repl = self.prepare_replacement(unicode(child))
                 result += self.pattern.sub(repl, text)
             elif isinstance(child, Condition):
                 for match in self.pattern.finditer(text):
@@ -634,7 +502,7 @@ class Regexp(NodeList):
             result = Regexp.uppercase(result)
         if any(map(lambda r: result.find(r) != -1, ['\L'])):
             result = Regexp.lowercase(result)
-        return result
+        return result.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
     
     @property
     def option_global(self):
@@ -643,13 +511,6 @@ class Regexp(NodeList):
     @property
     def option_multiline(self):
         return self.options != None and 'm' in self.options or False
-        
-    def resolve(self, indentation, tabreplacement, environment):
-        flags = [OPTION_CAPTURE_GROUP]
-        if self.option_multiline:
-            flags.append(OPTION_MULTILINE)
-        self.pattern = sre.compile(unicode(self.pattern), reduce(lambda x, y: x | y, flags, 0))
-        super(Regexp, self).resolve(indentation, tabreplacement, environment)
     
 class Shell(NodeList):    
     def close(self, scope, text):
@@ -660,17 +521,21 @@ class Shell(NodeList):
             return super(Shell, self).close(scope, text)
         return node
     
-    def resolve(self, indentation, tabreplacement, environment):
-        command = ensureShellScript(self.render())
+    def execute(self, processor):
+        command = ensureShellScript(unicode(self))
         temp_command_file = makeExecutableTempFile(command)
-        process = Popen([temp_command_file], stdout=PIPE, stderr=STDOUT, env = environment)
+        process = Popen([temp_command_file], stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(processor.environment))
         text = process.stdout.read()
         text = text.strip()
         process.stdout.close()
-        exit_code = process.wait()
+        _ = process.wait()
         deleteFile(temp_command_file)
-        self.clear()
-        self.append(text.replace('\n', '\n' + indentation).replace('\t', tabreplacement))
+        self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
+        
+    def render(self, processor):
+        if not hasattr(self, 'content'):
+            self.execute(processor)
+        processor.insertText(self.content)
 
 class Condition(Node):
     def __init__(self, scope, parent = None):
@@ -680,13 +545,6 @@ class Condition(Node):
         self.otherwise = None
         self.current = ""
         
-    def __deepcopy__(self, memo):
-        node = Condition(self.scope, memo["parent"])
-        node.index = self.index
-        node.insertion = self.insertion
-        node.otherwise = self.otherwise
-        return node
-    
     def open(self, scope, text):
         node = self
         if scope == 'otherwise.condition':
@@ -718,11 +576,8 @@ class Condition(Node):
     
     def append(self, element):
         self.current += element.replace('\\n', '\n').replace('\\t', '\t')
-        
-    def resolve(self, indentation, tabreplacement, environment):
-        self.insertion = self.insertion.replace('\n', '\n' + indentation).replace('\t', tabreplacement)
 
-class PMXSnippetProcessor(PMXSyntaxProcessor):
+class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self):
         self.current = None
         self.node = Snippet("root")
@@ -785,57 +640,48 @@ class PMXSnippet(PMXBundleItem):
                 hash[key] = value
         return hash
     
-    def __deepcopy__(self, memo):
-        snippet = PMXSnippet(self.namespace, self.hash)
-        memo["snippet"] = deepcopy(self.snippet, memo)
-        snippet.bundle = self.bundle
-        return snippet
-    
-    def __str__(self):
-        return str(self.snippet)
-    
-    def __unicode__(self):
-        return unicode(self.snippet)
-    
-    def __len__(self):
-        return self.snippet is not None and len(self.snippet) or 0
-
-    def clone(self):
-        memo = {"parent": None, "snippet": None, "taborder": {}}
-        new = deepcopy(self, memo)
-        new.snippet = memo["snippet"]
-        new.addTaborder(memo["taborder"])
-        return new
-    
     @property
     def ready(self):
         return self.snippet != None
     
     def compile(self):
-        processor = PMXSnippetProcessor()
+        processor = PMXSnippetSyntaxProcessor()
         self.parser.parse(self.content, processor)
         self.snippet = processor.node
         self.addTaborder(processor.taborder)
 
-    def resolve(self, indentation = "", tabreplacement = "\t", environment = {}):
-        self.snippet.resolve(indentation, tabreplacement, ensureEnvironment(environment))
+    def execute(self, processor):
+        if not self.ready:
+            self.compile()
+        else:
+            self.reset()
+        processor.startSnippet(self)
+        self.render(processor)
+        holder = self.next()
+        if holder != None:
+            processor.selectHolder(holder)
+        else:
+            processor.endSnippet()
+    
+    @property
+    def start(self):
+        if hasattr(self, 'snippet') and hasattr(self.snippet, 'start'):
+            return self.snippet.start
+        return 0
+    
+    @property    
+    def end(self):
+        if hasattr(self, 'snippet') and hasattr(self.snippet, 'end'):
+            return self.snippet.end
+        return 0
+    
+    def reset(self):
+        self.index = -1
+        self.snippet.reset()
+    
+    def render(self, processor):
+        self.snippet.render(processor)
         
-    def setStarts(self, value):
-        self.snippet.starts = value
-        
-    def getStarts(self):
-        return self.snippet.starts
-    
-    starts = property(getStarts, setStarts)
-    
-    def setEnds(self, value):
-        self.snippet.ends = value
-        
-    def getEnds(self):
-        return self.snippet.ends
-    
-    ends = property(getEnds, setEnds) 
-    
     def addTaborder(self, taborder):
         self.taborder = []
         last = taborder.pop(0, None)
@@ -861,25 +707,25 @@ class PMXSnippet(PMXBundleItem):
     def getHolder(self, start, end = None):
         ''' Return the placeholder for position, where starts > position > ends'''
         end = end != None and end or start
-        found = (0, None)
+        found = None
         for holder in self.taborder:
             # if holder == None then is the end of taborders
             if holder == None: break
-            index = holder.position()
-            if index <= start <= index + len(holder) and index <= end <= index + len(holder) and (found[1] == None or len(holder) < len(found[1])):
-                found = (index, holder)
-        if found[1] != None:
-            setattr(found[1], 'last', found[1] == self.taborder[-1])
+            index = holder.start
+            if holder.start <= start <= holder.end and holder.start <= end <= holder.end and (found == None or len(holder) < len(found)):
+                found = holder
+        if found != None:
+            setattr(found, 'last', found == self.taborder[-1])
         return found
     
     def setCurrentHolder(self, holder):
         self.index = self.taborder.index(holder)
     
     def setDefaultHolder(self, start, end = None):
-        (index, holder) = self.getHolder(start, end)
+        holder = self.getHolder(start, end)
         if holder != None:
             self.setCurrentHolder(holder)
-        return (index, holder)
+        return holder
     
     def current(self):
         if self.index == -1:

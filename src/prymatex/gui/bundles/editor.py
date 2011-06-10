@@ -60,8 +60,8 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackLayout.addWidget(editor)
         self.noneWidgetIndex = len(self.editors) - 1
-        self.stackLayout.currentChanged.connect(self.on_currentEditorWidget_changed)
         self.stackLayout.setCurrentIndex(self.noneWidgetIndex)
+        self.beginEdit()
     
     #===========================================================
     # Activation
@@ -88,7 +88,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.comboBoxActivation.currentIndexChanged[int].connect(self.on_comboBoxActivation_changed)
         self.lineKeyEquivalentActivation.installEventFilter(self)
     
-    def on_currentEditorWidget_changed(self, index):
+    def beginEdit(self):
         widget = self.stackLayout.currentWidget()
         self.labelTitle.setText(widget.title)
         scope = widget.scope
@@ -124,3 +124,4 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
             
             #TODO: ver si tengo que guardar el current editor
             self.stackLayout.setCurrentIndex(index)
+            self.beginEdit()

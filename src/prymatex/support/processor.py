@@ -160,6 +160,7 @@ class PMXMacroProcessor(object):
         
     def indent(self):
         pass
+    
 ############# DebugS Preocessors ###############
 class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
     def __init__(self):
@@ -186,3 +187,48 @@ class PMXDebugSyntaxProcessor(PMXSyntaxProcessor):
 
     def endParsing(self, name):
         print '}%s' % name
+
+class PMXDebugSnippetProcessor(PMXSnippetProcessor):
+    def __init__(self):
+        self.snippet = None
+        self.transformation = None
+        self.tabreplacement = "\t"
+        self.indentation = ""
+
+    @property
+    def hasSnippet(self):
+        return self.snippet is not None
+    
+    @property
+    def environment(self, format = None):
+        return self.__env
+    
+    def startSnippet(self, snippet):
+        self.snippet = snippet
+        self.position = 0
+        env = snippet.buildEnvironment()
+        self.__env = env
+    
+    def endSnippet(self):
+        self.snippet = None
+    
+    def startTransformation(self, transformation):
+        self.transformation = True
+        self.capture = ""
+        
+    def endTransformation(self, transformation):
+        self.transformation = False
+        self.insertText(transformation.transform(self.capture, self))
+        
+    def cursorPosition(self):
+        return self.position
+            
+    def selectHolder(self, holder):
+        pass
+
+    def insertText(self, text):
+        if self.transformation:
+            self.capture += text
+        else:
+            print text
+            self.position += len(text)

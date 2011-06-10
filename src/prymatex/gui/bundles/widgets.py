@@ -11,7 +11,6 @@ from prymatex.gui.bundles.ui_language import Ui_Language
 from prymatex.gui.bundles.ui_menu import Ui_Menu
 from prymatex.gui.bundles.ui_templatefile import Ui_TemplateFile
 from prymatex.gui.bundles.ui_preference import Ui_Preference
-from prymatex.gui.bundles.qtadapter import buildKeyEquivalentString
 from pprint import pformat
 
 class PMXEditorBaseWidget(QtGui.QWidget):
@@ -24,7 +23,6 @@ class PMXEditorBaseWidget(QtGui.QWidget):
         super(PMXEditorBaseWidget, self).__init__(parent)
         #The bundle item
         self.current = None
-        self.changes = {}
     
     @property
     def title(self):
@@ -88,6 +86,7 @@ class PMXEditorBaseWidget(QtGui.QWidget):
             self.changes.pop('keyEquivalent', None)
     
     def edit(self, bundleItem):
+        self.changes = {}
         self.current = bundleItem
 
 #============================================================

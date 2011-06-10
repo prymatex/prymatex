@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from PyQt4 import QtCore, QtGui
 from prymatex.support.processor import PMXCommandProcessor
+from prymatex.support.snippet import PMXSnippet
 
 class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
@@ -103,7 +104,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.disableAutoIndent = True
         
         env = command.buildEnvironment()
-        print env
         env.update(self.editor.buildEnvironment())
         self.__env = env
 
@@ -210,7 +210,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def showAsTooltip(self, text):
         cursor = self.editor.textCursor()
         point = self.editor.viewport().mapToGlobal(self.editor.cursorRect(cursor).bottomRight())
-        QToolTip.showText(point, text.strip(), self.editor, self.editor.rect())
+        QtGui.QToolTip.showText(point, text.strip(), self.editor, self.editor.rect())
         
     def createNewDocument(self, text):
         print "Nuevo documento", text

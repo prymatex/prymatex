@@ -7,6 +7,15 @@ def test_findPreferences(manager):
     for key in settings.KEYS:
         print key, getattr(settings, key, None)
 
+def test_snippet(manager):
+    from prymatex.support.processor import PMXDebugSnippetProcessor
+    from time import time
+    snippet = manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD')
+    start = time()
+    snippet.execute(PMXDebugSnippetProcessor())
+    file.close()
+    print "Time:", time() - start
+
 def test_syntax(manager):
     from prymatex.support.syntax import PMXSyntax
     from time import time
@@ -45,4 +54,4 @@ if __name__ == "__main__":
     manager.addNamespace('prymatex', os.path.abspath('../bundles/prymatex'))
     manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     manager.loadSupport()
-    test_bundleItemsTemplates(manager)
+    test_snippet(manager)
