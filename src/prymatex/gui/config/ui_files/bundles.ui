@@ -49,10 +49,6 @@ directory.</string>
        <property name="text">
         <string>Add path</string>
        </property>
-       <property name="icon">
-        <iconset resource="../../../res.qrc">
-         <normaloff>:/actions/resources/actions/list-add.png</normaloff>:/actions/resources/actions/list-add.png</iconset>
-       </property>
       </widget>
      </item>
     </layout>
@@ -86,10 +82,6 @@ directory.</string>
       <widget class="QPushButton" name="pushRemove">
        <property name="text">
         <string>Remove</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../res.qrc">
-         <normaloff>:/actions/resources/actions/list-remove.png</normaloff>:/actions/resources/actions/list-remove.png</iconset>
        </property>
       </widget>
      </item>

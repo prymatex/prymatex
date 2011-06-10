@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/editor.ui'
 #
-# Created: Wed Jun 08 10:16:08 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jun 10 16:02:54 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -98,3 +98,15 @@ class Ui_bundleEditor(object):
         self.labelTitle.setText(QtGui.QApplication.translate("bundleEditor", "No item selected", None, QtGui.QApplication.UnicodeUTF8))
         self.labelActivation.setText(QtGui.QApplication.translate("bundleEditor", "Activation:", None, QtGui.QApplication.UnicodeUTF8))
         self.labelScopeSelector.setText(QtGui.QApplication.translate("bundleEditor", "Scope Selector:", None, QtGui.QApplication.UnicodeUTF8))
+
+import res_rc
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    bundleEditor = QtGui.QWidget()
+    ui = Ui_bundleEditor()
+    ui.setupUi(bundleEditor)
+    bundleEditor.show()
+    sys.exit(app.exec_())
+

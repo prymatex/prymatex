@@ -46,22 +46,14 @@
      <item>
       <widget class="QPushButton" name="pushAdd">
        <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../res.qrc">
-         <normaloff>:/actions/resources/actions/list-add.png</normaloff>:/actions/resources/actions/list-add.png</iconset>
+        <string>+</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushRemove">
        <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../res.qrc">
-         <normaloff>:/actions/resources/actions/list-remove.png</normaloff>:/actions/resources/actions/list-remove.png</iconset>
+        <string>-</string>
        </property>
       </widget>
      </item>

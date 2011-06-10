@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/envvars.ui'
 #
-# Created: Sun May 15 00:37:58 2011
+# Created: Fri Jun 10 17:01:31 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,17 +34,9 @@ class Ui_EnvVariables(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.pushAdd = QtGui.QPushButton(EnvVariables)
-        self.pushAdd.setText(_fromUtf8(""))
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/list-add.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushAdd.setIcon(icon1)
         self.pushAdd.setObjectName(_fromUtf8("pushAdd"))
         self.horizontalLayout.addWidget(self.pushAdd)
         self.pushRemove = QtGui.QPushButton(EnvVariables)
-        self.pushRemove.setText(_fromUtf8(""))
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/list-remove.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushRemove.setIcon(icon2)
         self.pushRemove.setObjectName(_fromUtf8("pushRemove"))
         self.horizontalLayout.addWidget(self.pushRemove)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -55,6 +47,8 @@ class Ui_EnvVariables(object):
     def retranslateUi(self, EnvVariables):
         EnvVariables.setWindowTitle(QtGui.QApplication.translate("EnvVariables", "Enviroment Variables", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("EnvVariables", "Enviroment Variables", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushAdd.setText(QtGui.QApplication.translate("EnvVariables", "+", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushRemove.setText(QtGui.QApplication.translate("EnvVariables", "-", None, QtGui.QApplication.UnicodeUTF8))
 
 import res_rc
 

@@ -124,7 +124,7 @@ class PMXApplication(QApplication):
         self.__configdialog = configdialog
     
     def setup_bundle_editor(self):
-        from prymatex.gui.bundles.editor import PMXBundleEditor
+        from prymatex.gui.support.bundleeditor import PMXBundleEditor
         self.__bundle_editor = PMXBundleEditor()
     
     @property
@@ -258,7 +258,7 @@ class PMXApplication(QApplication):
     @deco.logtime
     def load_support(self):
         # Lazy load
-        from prymatex.gui.bundles.manager import PMXSupportModelManager
+        from prymatex.gui.support.manager import PMXSupportModelManager
 
         sharePath = self.settings.value('PMX_SHARE_PATH')
         userPath = self.settings.value('PMX_USER_PATH')

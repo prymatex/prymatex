@@ -17,15 +17,66 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     def __init__(self, parent = None):
         super(PMXBundleEditor, self).__init__(parent)
         self.setupUi(self)
-        self.configTreeView()
         self.configSelectTop()
+        self.configTreeView()
+        self.configToolbar()
         self.configEditorWidgets()
         self.configActivation()
 
     def on_comboBoxItemFilter_changed(self, index):
         value = self.comboBoxItemFilter.itemData(index).toString()
         self.proxyTreeModel.setFilterRegExp(value)
+    
+    #==========================================================
+    # Toolbar
+    #==========================================================
+    def on_actionCommand_triggered(self):
+        print "Command"
+    def on_actionDragCommand_triggered(self):
+        print "DragCommand"
+    def on_actionLanguage_triggered(self):
+        print "Language"
+    def on_actionSnippet_triggered(self):
+        print "Snippet"
+    def on_actionTemplate_triggered(self):
+        print "Template"
+    def on_actionTemplateFile_triggered(self):
+        print "TemplateFile"
+    def on_actionPreferences_triggered(self):
+        print "Preferences"
+    def on_actionBundle_triggered(self):
+        print "Bundle"
         
+    def configToolbar(self):
+        self.toolbarMenu = QtGui.QMenu("Menu", self)
+        action = QtGui.QAction("New Command", self)
+        action.triggered.connect(self.on_actionCommand_triggered)
+        self.toolbarMenu.addAction(action)
+        action = QtGui.QAction("New Drag Command", self)
+        action.triggered.connect(self.on_actionDragCommand_triggered)
+        self.toolbarMenu.addAction(action)
+        action = QtGui.QAction("New Language", self)
+        action.triggered.connect(self.on_actionLanguage_triggered)
+        self.toolbarMenu.addAction(action)
+        action = QtGui.QAction("New Snippet", self)
+        action.triggered.connect(self.on_actionSnippet_triggered)
+        self.toolbarMenu.addAction(action)
+        action = QtGui.QAction("New Template", self)
+        action.triggered.connect(self.on_actionTemplate_triggered)
+        self.toolbarMenu.addAction(action)
+        self.templateFileAction = QtGui.QAction("New Template File", self)
+        self.templateFileAction.triggered.connect(self.on_actionTemplateFile_triggered)
+        self.templateFileAction.setDisabled(True)
+        self.toolbarMenu.addAction(self.templateFileAction)
+        action = QtGui.QAction("New Preferences", self)
+        action.triggered.connect(self.on_actionPreferences_triggered)
+        self.toolbarMenu.addAction(action)
+        self.toolbarMenu.addSeparator()
+        action = QtGui.QAction("New Bundle", self)
+        action.triggered.connect(self.on_actionBundle_triggered)
+        self.toolbarMenu.addAction(action)
+        self.pushButtonAdd.setMenu(self.toolbarMenu)
+            
     def configSelectTop(self):
         self.comboBoxItemFilter.addItem("Show all", QtCore.QVariant(""))
         self.comboBoxItemFilter.addItem("Syntaxs", QtCore.QVariant("syntax"))
@@ -45,8 +96,10 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.treeView.activated.connect(self.treeViewItemActivated)
         
     def configEditorWidgets(self):
-        self.stackLayout = QtGui.QStackedLayout()
-        self.editorsLayout.insertLayout(1, self.stackLayout)
+        self.stackedWidget = QtGui.QStackedWidget()
+        self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.stackedWidget.setFrameShadow(QtGui.QFrame.Sunken)
+        self.editorsLayout.insertWidget(1, self.stackedWidget)
         self.indexes = {}
         self.editors = [ PMXSnippetWidget(self),
                          PMXCommandWidget(self),
@@ -58,7 +111,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
                          PMXLanguageWidget(self),
                          PMXEditorBaseWidget(self) ]
         for editor in self.editors:
-            self.indexes[editor.TYPE] = self.stackLayout.addWidget(editor)
+            self.indexes[editor.TYPE] = self.stackedWidget.addWidget(editor)
         self.beginEdit(self.editors[-1], None)
     
     #===========================================================
@@ -71,7 +124,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
             return True
         elif event.type() == QtCore.QEvent.KeyRelease and obj == self.lineKeyEquivalentActivation:
             keyseq = int(event.modifiers()) + event.key()
-            self.stackLayout.currentWidget().setKeyEquivalent(keyseq)
+            self.stackedWidget.currentWidget().setKeyEquivalent(keyseq)
             return True
         return super(PMXBundleEditor, self).eventFilter(obj, event)
         
@@ -80,10 +133,10 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.lineTabTriggerActivation.setVisible(index == 1)
     
     def on_lineEditScope_edited(self, text):
-        self.stackLayout.currentWidget().setScope(unicode(text))
+        self.stackedWidget.currentWidget().setScope(unicode(text))
     
     def on_lineTabTriggerActivation_edited(self, text):
-        self.stackLayout.currentWidget().setTabTrigger(unicode(text))
+        self.stackedWidget.currentWidget().setTabTrigger(unicode(text))
     
     def configActivation(self):
         self.comboBoxActivation.addItem("Key Equivalent")
@@ -96,7 +149,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     
     def beginEdit(self, editor, item):
         editor.edit(item)
-        self.stackLayout.setCurrentWidget(editor)
+        self.stackedWidget.setCurrentWidget(editor)
         self.labelTitle.setText(editor.title)
         scope = editor.getScope()
         tabTrigger = editor.getTabTrigger()
@@ -124,11 +177,15 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         
     def treeViewItemActivated(self, index):
         treeItem = self.proxyTreeModel.mapToSource(index).internalPointer()
+        
         #TODO: ver si tengo que guardar el current editor
-        current = self.stackLayout.currentWidget()
+        current = self.stackedWidget.currentWidget()
         if current.isChanged:
             print current.changes
-        if treeItem.TYPE in self.indexes: 
+            
+        self.templateFileAction.setEnabled(treeItem.TYPE == "template" or treeItem.TYPE == "templatefile")
+        
+        if treeItem.TYPE in self.indexes:
             index = self.indexes[treeItem.TYPE]
             editor = self.editors[index]
             self.beginEdit(editor, treeItem)

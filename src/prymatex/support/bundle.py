@@ -171,6 +171,12 @@ class PMXBundleItem(object):
         for key in hash.keys():
             setattr(self, key, hash[key])
     
+    def isChanged(self, hash):
+        for key in hash.keys():
+            if getattr(self, key) != hash[key]:
+                return True
+        return False
+    
     @property
     def hash(self):
         hash = {}

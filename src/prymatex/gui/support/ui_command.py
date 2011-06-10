@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/command.ui'
 #
-# Created: Wed Jun 08 10:15:57 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jun 10 15:26:11 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_Command(object):
     def setupUi(self, Command):
         Command.setObjectName(_fromUtf8("Command"))
-        Command.resize(361, 264)
+        Command.resize(361, 331)
         self.formLayout_2 = QtGui.QFormLayout(Command)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout_2.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
@@ -39,6 +39,11 @@ class Ui_Command(object):
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_2)
         self.command = QtGui.QPlainTextEdit(Command)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(1)
+        sizePolicy.setHeightForWidth(self.command.sizePolicy().hasHeightForWidth())
+        self.command.setSizePolicy(sizePolicy)
         self.command.setObjectName(_fromUtf8("command"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.command)
         self.label_3 = QtGui.QLabel(Command)

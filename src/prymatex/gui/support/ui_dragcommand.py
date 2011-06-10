@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/dragcommand.ui'
 #
-# Created: Thu Jun  2 22:57:56 2011
+# Created: Fri Jun 10 15:26:11 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -37,6 +37,11 @@ class Ui_DragCommand(object):
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_2)
         self.command = QtGui.QPlainTextEdit(DragCommand)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(1)
+        sizePolicy.setHeightForWidth(self.command.sizePolicy().hasHeightForWidth())
+        self.command.setSizePolicy(sizePolicy)
         self.command.setObjectName(_fromUtf8("command"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.command)
         self.label_4 = QtGui.QLabel(DragCommand)

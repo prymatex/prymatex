@@ -26,7 +26,7 @@ from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.gui.dialogs import PMXNewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXObject
-from prymatex.gui.bundles.tableview import PMXBundleItemTableView,\
+from prymatex.gui.support.tableview import PMXBundleItemTableView,\
     PMXBundleItemSelector
 from prymatex.core.config import pmxConfigPorperty
 
