@@ -109,16 +109,12 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         return bti
         
     def populateToBundleItemNode(self, bundleItem):
-        bnode = filter(lambda bnode: bnode == bundleItem.bundle, self.root.children)
-        if len(bnode) != 1:
-            raise Exception("No bundle node for bundle item: %s, %s" % (bundleItem.TYPE, bundleItem.name))
-        bnode = bnode[0]
-        bti = PMXBundleTreeNode(bundleItem, bnode)
+        bti = PMXBundleTreeNode(bundleItem, bundleItem.bundle)
         if bundleItem.TYPE == "template":
             for file in bundleItem.getTemplateFiles():
                 tifi = PMXBundleTreeNode(file, bti)
                 bti.appendChild(tifi)
-        bnode.appendChild(bti)
+        bundleItem.bundle.appendChild(bti)
         return bti
     
     def setData(self, index, value, role):  

@@ -178,7 +178,3 @@ class PMXDragCommand(PMXCommand):
         #This is a bitwise OR in the form: SHIFT|CONTROL|OPTION|COMMAND (in case all modifiers were down).
         env['TM_MODIFIER_FLAGS'] = directory
         return env
-        
-    def setBundle(self, bundle):
-        super(PMXDragCommand, self).setBundle(bundle)
-        bundle.DRAGS.append(self)

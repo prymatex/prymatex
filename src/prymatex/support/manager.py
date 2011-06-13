@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from os.path import join, basename, exists
+from os.path import join, basename, exists, normpath
 
 from glob import glob
 from prymatex.support.bundle import PMXBundle, PMXBundleItem
@@ -30,21 +30,15 @@ def compare(object, attrs, tests):
         return attr == tests[attrs[0]] and compare(object, attrs[1:], tests)
     else:
         return attr == tests[attrs[0]] and compare(object, attrs[1:], tests)
-    
-class PMXSupportManager(object):
+
+class PMXSupportBaseManager(object):
     ELEMENTS = ['Bundles', 'Support', 'Themes']
     VAR_PREFIX = 'PMX'
-    BUNDLES = {}
-    BUNDLE_ITEMS = {}
-    THEMES = {}
-    SYNTAXES = {}
-    TAB_TRIGGERS = {}
-    KEY_EQUIVALENTS = {}
-    DRAGS = []
-    PREFERENCES = {}
-    TEMPLATES = []
-    SETTINGS_CACHE = {}
+    PROTECTEDNS = 0
+    DEFAULTNS = -1
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE))
+    #FIXME: Dudo de la cache en este lugar
+    SETTINGS_CACHE = {}
     
     def __init__(self, disabledBundles = [], deletedBundles = []):
         self.namespaces = {}
@@ -72,6 +66,10 @@ class PMXSupportManager(object):
     def uuidgen(self):
         # TODO: ver que el uuid generado no este entre los elementos existentes
         return sh("uuidgen").strip()
+        
+    def convertToValidPath(self, name):
+        # TODO: ver que el uuid generado no este entre los elementos existentes
+        return normpath(name)
 
     def updateEnvironment(self, env):
         self.environment.update(env)
@@ -83,29 +81,33 @@ class PMXSupportManager(object):
     # LOAD ALL SUPPORT
     #---------------------------------------------------
     def loadSupport(self, callback = None):
+        cache = {}
         for ns in self.nsorder[::-1]:
-            self.loadThemes(ns)
-            self.loadBundles(ns)
+            self.loadThemes(ns, cache)
+            self.loadBundles(ns, cache)
         for bundle in self.getAllBundles():
-            self.populateBundle(bundle)
+            self.populateBundle(bundle, cache)
 
     #---------------------------------------------------
     # LOAD THEMES
     #---------------------------------------------------
-    def loadThemes(self, namespace):
+    def loadThemes(self, namespace, cache = {}):
         if 'Themes' in self.namespaces[namespace]:
             paths = glob(join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
                 theme = PMXTheme.loadTheme(path, namespace)
                 if theme == None:
                     continue
-                if not self.hasTheme(theme.uuid):
+                if theme.uuid not in cache:
                     self.addTheme(theme)
+                    cache[theme.uuid] = theme
+                else:
+                    cache[theme.uuid].addNamespace(namespace)
 
     #---------------------------------------------------
     # LOAD BUNDLES
     #---------------------------------------------------
-    def loadBundles(self, namespace):
+    def loadBundles(self, namespace, cache = {}):
         if 'Bundles' in self.namespaces[namespace]:
             paths = glob(join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for path in paths:
@@ -113,18 +115,19 @@ class PMXSupportManager(object):
                 if bundle == None:
                     continue
                 bundle.disabled = bundle.uuid in self.disabledBundles
-                if bundle.uuid not in self.deletedBundles and not self.hasBundle(bundle.uuid):
-                    bundle.manager = self
+                if bundle.uuid not in self.deletedBundles and bundle.uuid not in cache:
+                    bundle.setManager(self)
                     self.addBundle(bundle)
+                    cache[bundle.uuid] = bundle
+                elif bundle.uuid in cache:
+                    cache[bundle.uuid].addNamespace(namespace)
 
     #---------------------------------------------------
     # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     #---------------------------------------------------
-    def populateBundle(self, bundle):
-        bns = bundle.namespace
-        nss = self.nsorder[::-1]
-        index = nss.index(bns)
-        for ns in nss[index:]:
+    def populateBundle(self, bundle, cache = {}):
+        nss = bundle.namespaces[::-1]
+        for ns in nss:
             bpath = join(self.namespaces[ns]['Bundles'], basename(bundle.path))
             # Search for support
             if bundle.support == None and exists(join(bpath, 'Support')):
@@ -135,10 +138,467 @@ class PMXSupportManager(object):
                     item = klass.loadBundleItem(sf, ns)
                     if item == None:
                         continue
-                    if not self.hasBundleItem(item.uuid):
-                        item.bundle = bundle
+                    if bundle.uuid not in self.deletedBundles and item.uuid not in cache:
+                        item.setBundle(bundle)
                         self.addBundleItem(item)
+                        cache[item.uuid] = item
+                    elif item.uuid in cache:
+                        cache[item.uuid].addNamespace(namespace)
 
+    #---------------------------------------------------
+    # BUNDLE INTERFACE
+    #---------------------------------------------------
+    def addBundle(self, bundle):
+        pass
+    def getBundle(self, uuid):
+        pass
+
+    def modifyBundle(self, bundle):
+        '''
+            Llamado luego de modificar un bundle
+        '''
+        pass
+
+    def removeBundle(self, bundle):
+        '''
+            Llamado antes de eliminar un bundle
+        '''
+        pass
+
+    def setDeletedBundle(self, uuid):
+        '''
+            Marcar un bundle como eliminado
+        '''
+        pass
+        
+    def hasBundle(self, uuid):
+        pass
+
+    def getAllBundles(self):
+        pass
+    
+    #---------------------------------------------------
+    # BUNDLE CRUD
+    #---------------------------------------------------
+    def findBundles(self, **attrs):
+        '''
+            Retorna todos los bundles que cumplan con attrs
+        '''
+        bundles = []
+        keys = PMXBundle.KEYS
+        keys.extend([key for key in attrs.keys() if key not in keys])
+        for bundle in self.getAllBundles():
+            if compare(bundle, keys, attrs):
+                bundles.append(bundle)
+        return bundles
+    
+    def createBundle(self, name, namespace = None):
+        '''
+            Crea un bundle nuevo lo agrega en los bundles y lo retorna,
+            Precondiciones:
+                Tenes por lo menos dos espacios de nombre el base o proteguido y uno donde generar los nuevos bundles
+                El nombre tipo Title.
+                El nombre no este entre los nombres ya cargados.
+            Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
+        '''
+        namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
+        hash = {    'uuid': self.uuidgen(),
+                    'name': name }
+        path = join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
+        bundle = PMXBundle(namespace, hash, path)
+        self.addBundle(bundle)
+        return bundle
+    
+    def readBundle(self, **attrs):
+        '''
+            Retorna un bundle por sus atributos
+        '''
+        bundles = self.findBundles(**attrs)
+        if len(bundles) > 1:
+            raise Exception("More than one bundle")
+        return bundles[0]
+        
+    def updateBundle(self, bundle, **attrs):
+        '''
+            Actualiza un bundle
+        '''
+        if bundle.namespace == self.nsorder[self.PROTECTEDNS]:
+            #Cambiar de namespace y de path al por defecto para proteger el base
+            newns = self.nsorder[self.DEFAULTNS]
+            attrs["namespace"] = newns
+            name = "%s.tmbundle" % self.convertToValidPath(attrs["name"]) if "name" in attrs else basename(bundle.path)
+            attrs["path"] = join(self.namespaces[newns]['Bundles'], name)
+            bundle.update(attrs)
+            bundle.save()
+            bundle.addNamespace(newns)
+        else:
+            bundle.update(attrs)
+            bundle.save()
+        self.modifyBundle(bundle)
+        return bundle
+        
+    def deleteBundle(self, bundle):
+        '''
+            Elimina un bundle,
+            si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
+        '''
+        self.removeBundle(bundle)
+        items = self.findBundleItems(bundle = bundle)
+        #Primero los items
+        for item in items:
+            self.deleteBundleItem(item)
+        if bundle.namespace == self.nsorder[0]:
+            self.setDeletedBundle(bundle.uuid)
+        else:
+            bundle.delete()
+        
+    #---------------------------------------------------
+    # BUNDLEITEM INTERFACE
+    #---------------------------------------------------
+    def addBundleItem(self, item):
+        pass
+        
+    def getBundleItem(self, uuid):
+        pass
+
+    def modifyBundleItem(self, item):
+        pass
+
+    def removeBundleItem(self, item):
+        pass
+    
+    def setDeletedBundleItem(self, uuid):
+        '''
+            Marcar un bundle item como eliminado
+        '''
+        pass
+        
+    def hasBundleItem(self, uuid):
+        '''
+        @return: True if PMXBundleItem exists
+        '''
+        pass
+
+    def getAllBundleItems(self):
+        pass
+        
+    #---------------------------------------------------
+    # BUNDLEITEM CRUD
+    #---------------------------------------------------
+    def findBundleItems(self, **attrs):
+        '''
+            Retorna todos los items que complan las condiciones en attrs
+        '''
+        items = []
+        keys = PMXBundleItem.KEYS
+        keys.extend([key for key in attrs.keys() if key not in keys])
+        for item in self.getAllBundleItems():
+            if compare(item, keys, attrs):
+                items.append(item)
+        return items
+
+    def createBundleItem(self, name, tipo, bundle, namespace = None):
+        '''
+            Crea un bundle item nuevo lo agrega en los bundle items y lo retorna,
+            Precondiciones:
+                Tenes por lo menos un nombre en el espacio de nombres
+                El tipo tiene que ser uno de los conocidos
+            Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
+        '''
+        namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
+        hash = {    'uuid': self.uuidgen(),
+                    'name': name }
+        klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
+        if len(klass) != 1:
+            raise Exception("No class type for %s" % tipo)
+        klass = klass.pop()
+        path = join(bundle.path, klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
+
+        item = klass(namespace, hash, path)
+        item.setBundle(bundle)
+        self.addBundleItem(item)
+        return item
+    
+    def readBundleItem(self, **attrs):
+        '''
+            Retorna un bundle item por sus atributos
+        '''
+        items = self.findBundleItems(**attrs)
+        if len(items) > 1:
+            raise Exception("More than one bundle item")
+        return items[0]
+    
+    def updateBundleItem(self, item, **attrs):
+        '''
+            Actualiza un bundle item
+        '''
+        if item.bundle.namespace == self.nsorder[0]:
+            self.updateBundle(item.bundle)
+        if item.namespace == self.nsorder[self.PROTECTEDNS]:
+            #Cambiar de namespace y de path al por defecto para proteger el base
+            newns = self.nsorder[self.DEFAULTNS]
+            attrs["namespace"] = newns
+            name = ("%s.%s" % self.convertToValidPath(attrs["name"]), item.__class__.EXTENSION) if "name" in attrs else basename(item.path)
+            attrs["path"] = join(item.bundle.path, item.__class__.FOLDER, name)
+            item.update(attrs)
+            item.save()
+            item.addNamespace(newns)
+        else:
+            item.update(attrs)
+            item.save()
+        self.modifyBundleItem(item)
+        return item
+    
+    def deleteBundleItem(self, item):
+        '''
+            Elimina un bundle por su uuid,
+            si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
+        '''
+        self.removeBundleItem(item)
+        #Si el espacio de nombres es distinto al protegido lo elimino
+        if item.namespace == self.nsorder[self.PROTECTEDNS]:
+            self.setDeletedBundleItem(item.uuid)
+        else:
+            item.delete()
+
+    #---------------------------------------------------
+    # THEME INTERFACE
+    #---------------------------------------------------
+    def addTheme(self, theme):
+        pass
+        
+    def getTheme(self, uuid):
+        pass
+
+    def modifyTheme(self, theme):
+        pass
+        
+    def removeTheme(self, theme):
+        pass
+        
+    def setDeletedTheme(self, uuid):
+        pass
+        
+    def hasTheme(self, uuid):
+        pass
+
+    def getAllThemes(self):
+        pass
+    
+    #---------------------------------------------------
+    # THEME CRUD
+    #---------------------------------------------------
+    def findThemes(self, **attrs):
+        '''
+            Retorna todos los themes que complan las condiciones en attrs
+        '''
+        items = []
+        keys = PMXTheme.KEYS
+        keys.extend([key for key in attrs.keys() if key not in keys])
+        for item in self.getAllThemes():
+            if compare(item, keys, attrs):
+                items.append(item)
+        return items
+
+    def createTheme(self, name, namespace = None):
+        '''
+            
+        '''
+        namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
+        hash = {    'uuid': self.uuidgen(),
+                    'name': name }
+        path = join(self.namespaces[namespace]['Themes'], "%s.tmTheme" % self.convertToValidPath(name))
+        theme = PMXTheme(namespace, hash, path)
+        self.addTheme(theme)
+        return theme
+    
+    def readTheme(self, **attrs):
+        '''
+            Retorna un bundle item por sus atributos
+        '''
+        items = self.findThemes(**attrs)
+        if len(items) > 1:
+            raise Exception("More than one theme")
+        return items[0]
+        
+    def updateTheme(self, theme, **attrs):
+        '''
+            Actualiza un themes
+        '''
+        if theme.namespace == self.nsorder[0]:
+            #Cambiar de namespace y de path al por defecto para proteger el base
+            newns = self.nsorder[-1]
+            attrs["namespace"] = newns
+            name = "%s.tmTheme" % self.convertToValidPath(attrs["name"]) if "name" in attrs else basename(theme.path)
+            attrs["path"] = join(self.namespaces[newns]['Themes'], name)
+            theme.update(attrs)
+            theme.save()
+            theme.addNamespace(newns)
+        else:
+            theme.update(attrs)
+            theme.save()
+        self.modifyTheme(theme)
+        return theme
+        
+    def deleteTheme(self, theme):
+        '''
+            Elimina un theme por su uuid
+        '''
+        self.removeTheme(theme)
+        #Si el espacio de nombres es distinto al protegido lo elimino
+        if theme.namespace == self.nsorder[self.PROTECTEDNS]:
+            self.setDeletedTheme(theme.uuid)
+        else:
+            theme.delete()
+    
+    #---------------------------------------------------
+    # PREFERENCES INTERFACE
+    #---------------------------------------------------
+    def getAllPreferences(self):
+        '''
+            Return a list of preferences bundle items
+        '''
+        pass
+        
+    #---------------------------------------------------------------
+    # PREFERENCES
+    #---------------------------------------------------------------
+    def getPreferences(self, scope):
+        with_scope = []
+        without_scope = []
+        for preference in self.getAllPreferences():
+            if preference.scope == None:
+                without_scope.append(preference)
+            else:
+                score = self.scores.score(preference.scope, scope)
+                if score != 0:
+                    with_scope.append((score, preference))
+        with_scope.sort(key = lambda t: t[0], reverse = True)
+        preferences = map(lambda (score, item): item, with_scope)
+        with_scope = []
+        for p in preferences:
+            with_scope.append(p)
+        return with_scope and with_scope or without_scope
+
+    def getPreferenceSettings(self, scope):
+        if scope not in self.SETTINGS_CACHE:
+            preferences = self.getPreferences(scope)
+            self.SETTINGS_CACHE[scope] = PMXPreference.buildSettings(preferences)
+        return self.SETTINGS_CACHE[scope]
+    
+    #---------------------------------------------------
+    # TABTRIGGERS INTERFACE
+    #---------------------------------------------------
+    def getAllTabTriggersMnemonics(self):
+        '''
+            Return a list of tab triggers
+            ['class', 'def', ...]
+        '''
+        pass
+    
+    def getAllBundleItemsByTabTrigger(self, tabTrigger):
+        '''
+            Return a list of tab triggers bundle items
+        '''
+        pass
+    
+    #---------------------------------------------------------------
+    # TABTRIGGERS
+    #---------------------------------------------------------------
+    def getTabTriggerSymbol(self, line, index):
+        line = line[:index]
+        tiggers = self.getAllTabTriggersMnemonics()
+        for tabSplit in self.TABTRIGGERSPLITS:
+            matchs = filter(lambda m: m.start() <= index <= m.end(), tabSplit.finditer(line))
+            if matchs:
+                match = matchs.pop()
+                word = line[match.start():match.end()]
+                if word in tiggers:
+                    return word
+    
+    def getTabTriggerItem(self, keyword, scope):
+        with_scope = []
+        without_scope = []
+        for item in self.getAllBundleItemsByTabTrigger(keyword):
+            if item.scope == None:
+                without_scope.append(item)
+            else:
+                score = self.scores.score(item.scope, scope)
+                if score != 0:
+                    with_scope.append((score, item))
+        with_scope.sort(key = lambda t: t[0], reverse = True)
+        with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope and with_scope or without_scope
+    
+    #---------------------------------------------------
+    # KEYEQUIVALENT INTERFACE
+    #---------------------------------------------------
+    def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+        '''
+            Return a list of key equivalent bundle items
+        '''
+        pass
+        
+    #---------------------------------------------------------------
+    # KEYEQUIVALENT
+    #---------------------------------------------------------------
+    def getKeyEquivalentItem(self, code, scope):
+        with_scope = []
+        without_scope = []
+        for item in self.getAllBundleItemsByKeyEquivalent(code):
+            if item.scope == None:
+                without_scope.append(item)
+            else:
+                score = self.scores.score(item.scope, scope)
+                if score != 0:
+                    with_scope.append((score, item))
+        with_scope.sort(key = lambda t: t[0], reverse = True)
+        with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope and with_scope or without_scope
+        
+    #---------------------------------------------------------------
+    # SYNTAXES
+    #---------------------------------------------------------------
+    def getSyntaxes(self, sort = False):
+        stxs = []
+        for syntax in self.SYNTAXES.values():
+            stxs.append(syntax)
+        if sort:
+            return sorted(stxs, key = lambda s: s.name)
+        return stxs
+    
+    def getSyntaxByScopeName(self, scope):
+        if scope in self.SYNTAXES:
+            return self.SYNTAXES[scope]
+        return None
+        
+    def findSyntaxByFirstLine(self, line):
+        for syntax in self.SYNTAXES.values():
+            if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
+                return syntax
+    
+    def findSyntaxByFileType(self, path):
+        for syntax in self.SYNTAXES.values():
+            if type(syntax.fileTypes) == list:
+                for t in syntax.fileTypes:
+                    if path.endswith(t):
+                        return syntax
+
+        
+class PMXSupportManager(PMXSupportBaseManager):
+    BUNDLES = {}
+    BUNDLE_ITEMS = {}
+    THEMES = {}
+    SYNTAXES = {}
+    TAB_TRIGGERS = {}
+    KEY_EQUIVALENTS = {}
+    DRAGS = []
+    PREFERENCES = []
+    TEMPLATES = []
+    
+    def __init__(self, disabledBundles = [], deletedBundles = []):
+        super(PMXSupportManager, self).__init__(disabledBundles, deletedBundles)
+    
     #---------------------------------------------------
     # BUNDLE INTERFACE
     #---------------------------------------------------
@@ -181,78 +641,6 @@ class PMXSupportManager(object):
         '''
         return self.BUNDLES.values()
     
-    def findBundles(self, **attrs):
-        '''
-            Retorna todos los bundles que cumplan con attrs
-        '''
-        bundles = []
-        keys = PMXBundle.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
-        for bundle in self.getAllBundles():
-            if compare(bundle, keys, attrs):
-                bundles.append(bundle)
-        return bundles
-        
-    #---------------------------------------------------
-    # BUNDLE CRUD
-    #---------------------------------------------------
-    def createBundle(self, name, namespace = None):
-        '''
-            Crea un bundle nuevo lo agrega en los bundles y lo retorna,
-            Precondiciones:
-                Tenes por lo menos un nombre en el espacio de nombres
-                El nombre tipo Title.
-                El nombre no este entre los nombres ya cargados.
-            Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
-        '''
-        namespace = self.nsorder[-1] if namespace == None else namespace
-        hash = {    'uuid': self.uuidgen(),
-                    'name': name }
-        path = join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % name)
-        bundle = PMXBundle(namespace, hash, path)
-        self.addBundle(bundle)
-        return bundle
-    
-    def readBundle(self, **attrs):
-        '''
-            Retorna un bundle por sus atributos
-        '''
-        bundles = self.findBundles(**attrs)
-        if len(bundles) > 1:
-            raise Exception("More than one bundle")
-        return bundles[0]
-        
-    def updateBundle(self, bundle, **attrs):
-        '''
-            Actualiza un bundle
-        '''
-        if bundle.namespace == self.nsorder[0]:
-            #Cambiar de namespace y de path al por defecto para proteger el base
-            newns = self.nsorder[-1]
-            attrs["namespace"] = newns
-            #TODO: escape de los caracteres del file system en el nombre pasado
-            name = "%s.tmbundle" % attrs["name"] if "name" in attrs else basename(bundle.path)
-            attrs["path"] = join(self.namespaces[newns]['Bundles'], name)
-        bundle.update(attrs)
-        bundle.save()
-        self.modifyBundle(bundle)
-        return bundle
-        
-    def deleteBundle(self, bundle):
-        '''
-            Elimina un bundle,
-            si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
-        '''
-        self.removeBundle(bundle)
-        items = self.findBundleItems(bundle = bundle)
-        #Primero los items
-        for item in items:
-            self.deleteBundleItem(item)
-        if bundle.namespace == self.nsorder[0]:
-            self.addDeletedBundle(bundle.uuid)
-        else:
-            bundle.delete()
-        
     #---------------------------------------------------
     # BUNDLEITEM INTERFACE
     #---------------------------------------------------
@@ -265,12 +653,11 @@ class PMXSupportManager(object):
         if item.keyEquivalent != None:
             self.KEY_EQUIVALENTS.setdefault(item.keyEquivalent, []).append(item)
         if item.TYPE == 'preference':
-            self.PREFERENCES.setdefault(item.scope, []).append(item)
+            self.PREFERENCES.append(item)
         elif item.TYPE == 'template':
             self.TEMPLATES.append(item)
         elif item.TYPE == 'syntax':
             self.SYNTAXES[item.scopeName] = item
-            # puede ser dependiente del namespace ? self.SYNTAXES[item.namespace][item.scopeName] = self
 
     def getBundleItem(self, uuid):
         return self.BUNDLE_ITEMS[uuid]
@@ -289,80 +676,6 @@ class PMXSupportManager(object):
 
     def getAllBundleItems(self):
         return self.BUNDLE_ITEMS.values()
-        
-    def findBundleItems(self, **attrs):
-        '''
-            Retorna todos los items que complan las condiciones en attrs
-        '''
-        items = []
-        keys = PMXBundleItem.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
-        for item in self.getAllBundleItems():
-            if compare(item, keys, attrs):
-                items.append(item)
-        return items
-
-    #---------------------------------------------------
-    # BUNDLEITEM CRUD
-    #---------------------------------------------------
-    def createBundleItem(self, name, tipo, bundle, namespace = None):
-        '''
-            Crea un bundle item nuevo lo agrega en los bundle items y lo retorna,
-            Precondiciones:
-                Tenes por lo menos un nombre en el espacio de nombres
-                El tipo tiene que ser uno de los conocidos
-            Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
-        '''
-        namespace = self.nsorder[-1] if namespace == None else namespace
-        hash = {    'uuid': self.uuidgen(),
-                    'name': name }
-        klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
-        if len(klass) != 1:
-            raise Exception("No class type for %s" % tipo)
-        klass = klass.pop()
-        path = join(bundle.path, klass.FOLDER, "%s.%s" % (name, klass.EXTENSION))
-
-        item = klass(namespace, hash, path)
-        item.bundle = bundle
-        self.addBundleItem(item)
-        return item
-    
-    def readBundleItem(self, **attrs):
-        '''
-            Retorna un bundle item por sus atributos
-        '''
-        items = self.findBundleItems(**attrs)
-        if len(items) > 1:
-            raise Exception("More than one bundle item")
-        return items[0]
-    
-    def updateBundleItem(self, item, **attrs):
-        '''
-            Actualiza un bundle item
-        '''
-        if item.bundle.namespace == self.nsorder[0]:
-            self.updateBundle(item.bundle)
-        if item.namespace == self.nsorder[0]:
-            #Cambiar de namespace y de path al por defecto para proteger el base
-            newns = self.nsorder[-1]
-            attrs["namespace"] = newns
-            #TODO: escape de los caracteres del file system en el nombre pasado
-            name = ("%s.%s" % attrs["name"], item.__class__.EXTENSION) if "name" in attrs else basename(item.path)
-            attrs["path"] = join(item.bundle.path, item.__class__.FOLDER, name)
-        item.update(attrs)
-        item.save()
-        self.modifyBundleItem(item)
-        return item
-    
-    def deleteBundleItem(self, item):
-        '''
-            Elimina un bundle por su uuid,
-            si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
-        '''
-        self.removeBundleItem(item)
-        #Si el espacio de nombres es distinto al protegido lo elimino
-        if item.namespace != self.nsorder[0]:
-            item.delete()
         
     #---------------------------------------------------
     # THEME INTERFACE
@@ -385,142 +698,40 @@ class PMXSupportManager(object):
     def getAllThemes(self):
         return self.THEMES.values()
     
-    def findThemes(self, **attrs):
-        '''
-            Retorna todos los themes que complan las condiciones en attrs
-        '''
-        items = []
-        keys = PMXTheme.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
-        for item in self.getAllThemes():
-            if compare(item, keys, attrs):
-                items.append(item)
-        return items
     #---------------------------------------------------
-    # THEME CRUD
+    # PREFERENCES INTERFACE
     #---------------------------------------------------
-    def createTheme(self, name, namespace = None):
+    def getAllPreferences(self):
         '''
-            
+            Return all preferences
         '''
-        namespace = self.nsorder[-1] if namespace == None else namespace
-        hash = {    'uuid': self.uuidgen(),
-                    'name': name }
-        theme = PMXTheme(namespace, hash, path)
-        self.addTheme(theme)
-        return theme
-    
-    def readTheme(self, **attrs):
-        '''
-            Retorna un bundle item por sus atributos
-        '''
-        items = self.findThemes(**attrs)
-        if len(items) > 1:
-            raise Exception("More than one theme")
-        return items[0]
-        
-    def updateTheme(self, theme, **attrs):
-        '''
-            Actualiza un themes
-        '''
-        if theme.namespace == self.nsorder[0]:
-            #Cambiar de namespace y de path al por defecto para proteger el base
-            newns = self.nsorder[-1]
-            attrs["namespace"] = newns
-            name = "%s.tmTheme" % attrs["name"] if "name" in attrs else basename(theme.path)
-            attrs["path"] = join(self.namespaces[newns]['Themes'], name)
-        theme.update(attrs)
-        theme.save()
-        self.modifyTheme(theme)
-        return theme
-        
-    def deleteTheme(self, theme):
-        '''
-            Elimina un theme por su uuid
-        '''
-        self.removeTheme(theme)
-        #Si el espacio de nombres es distinto al protegido lo elimino
-        if theme.namespace != self.nsorder[0]:
-            theme.delete()
+        return self.PREFERENCES
     
     #---------------------------------------------------
-    # TEMPLATES INTERFACE
+    # TABTRIGGERS INTERFACE
     #---------------------------------------------------
-    def getAllTemplates(self):
-        return self.TEMPLATES
+    def getAllTabTriggersMnemonics(self):
+        '''
+            Return a list of tab triggers
+            ['class', 'def', ...]
+        '''
+        return self.TAB_TRIGGERS.keys()
     
-    #---------------------------------------------------------------
-    # PREFERENCES
-    #---------------------------------------------------------------
-    def getPreferences(self, scope):
-        with_scope = []
-        without_scope = []
-        for key in self.PREFERENCES.keys():
-            if key == None:
-                without_scope.extend(self.PREFERENCES[key])
-            else:
-                score = self.scores.score(key, scope)
-                if score != 0:
-                    with_scope.append((score, self.PREFERENCES[key]))
-        with_scope.sort(key = lambda t: t[0], reverse = True)
-        preferences = map(lambda (score, item): item, with_scope)
-        with_scope = []
-        for p in preferences:
-            with_scope.extend(p)
-        return with_scope and with_scope or without_scope
-
-    def getPreferenceSettings(self, scope):
-        if scope not in self.SETTINGS_CACHE:
-            preferences = self.getPreferences(scope)
-            self.SETTINGS_CACHE[scope] = PMXPreference.buildSettings(preferences)
-        return self.SETTINGS_CACHE[scope]
+    def getAllBundleItemsByTabTrigger(self, tabTrigger):
+        '''
+            Return a list of tab triggers bundle items
+        '''
+        return self.TAB_TRIGGERS[tabTrigger]
     
-    #---------------------------------------------------------------
-    # TABTRIGGERS
-    #---------------------------------------------------------------
-    def getTabTriggerSymbol(self, line, index):
-        line = line[:index]
-        for tabSplit in self.TABTRIGGERSPLITS:
-            matchs = filter(lambda m: m.start() <= index <= m.end(), tabSplit.finditer(line))
-            if matchs:
-                match = matchs.pop()
-                word = line[match.start():match.end()]
-                if self.TAB_TRIGGERS.has_key(word):
-                    return word
+    #---------------------------------------------------
+    # KEYEQUIVALENT INTERFACE
+    #---------------------------------------------------
+    def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+        '''
+            Return a list of key equivalent bundle items
+        '''
+        return self.KEY_EQUIVALENTS[keyEquivalent]
     
-    def getTabTriggerItem(self, keyword, scope):
-        with_scope = []
-        without_scope = []
-        if self.TAB_TRIGGERS.has_key(keyword):
-            for item in self.TAB_TRIGGERS[keyword]:
-                if item.scope == None:
-                    without_scope.append(item)
-                else:
-                    score = self.scores.score(item.scope, scope)
-                    if score != 0:
-                        with_scope.append((score, item))
-            with_scope.sort(key = lambda t: t[0], reverse = True)
-            with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope and with_scope or without_scope
-        
-    #---------------------------------------------------------------
-    # KEYEQUIVALENT
-    #---------------------------------------------------------------
-    def getKeyEquivalentItem(self, code, scope):
-        with_scope = []
-        without_scope = []
-        if code in self.KEY_EQUIVALENTS:
-            for item in self.KEY_EQUIVALENTS[code]:
-                if item.scope == None:
-                    without_scope.append(item)
-                else:
-                    score = self.scores.score(item.scope, scope)
-                    if score != 0:
-                        with_scope.append((score, item))
-            with_scope.sort(key = lambda t: t[0], reverse = True)
-            with_scope = map(lambda (score, item): item, with_scope)
-        return with_scope and with_scope or without_scope
-        
     #---------------------------------------------------------------
     # SYNTAXES
     #---------------------------------------------------------------

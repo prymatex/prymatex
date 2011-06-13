@@ -5,6 +5,7 @@ import os, plistlib
 from copy import copy
 from xml.parsers.expat import ExpatError
 from prymatex.support.score import PMXScoreManager
+from prymatex.support.bundle import PMXManagedItem
 #Deprecated use decorator like bundle items
 from prymatex.gui.support.qtadapter import buildQTextFormat, buildQColor
 
@@ -48,13 +49,13 @@ class PMXStyle(object):
     def getQColor(self, item):
         return buildQColor(self[item])
     
-class PMXTheme(object):
+class PMXTheme(PMXManagedItem):
     KEYS = [    'uuid', 'name', 'comment', 'author', 'settings' ]
     STYLES_CACHE = {}
     scores = PMXScoreManager()
     
     def __init__(self, namespace, hash = None, path = None):
-        self.namespace = namespace
+        super(PMXTheme, self).__init__(namespace)
         self.path = path
         if hash != None:
             self.load(hash)

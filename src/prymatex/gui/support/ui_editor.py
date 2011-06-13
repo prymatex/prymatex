@@ -101,15 +101,3 @@ class Ui_bundleEditor(object):
         self.labelTitle.setText(QtGui.QApplication.translate("bundleEditor", "No item selected", None, QtGui.QApplication.UnicodeUTF8))
         self.labelActivation.setText(QtGui.QApplication.translate("bundleEditor", "Activation:", None, QtGui.QApplication.UnicodeUTF8))
         self.labelScopeSelector.setText(QtGui.QApplication.translate("bundleEditor", "Scope Selector:", None, QtGui.QApplication.UnicodeUTF8))
-
-import res_rc
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    bundleEditor = QtGui.QWidget()
-    ui = Ui_bundleEditor()
-    ui.setupUi(bundleEditor)
-    bundleEditor.show()
-    sys.exit(app.exec_())
-

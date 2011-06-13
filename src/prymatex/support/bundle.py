@@ -21,6 +21,7 @@ RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
 
 RE_XML_ILLEGAL = re.compile(RE_XML_ILLEGAL)
 
+#Deprecar menu
 class PMXMenuNode(object):
     MENU_SPACE = '-' * 36
     def __init__(self, name = None, items = [], excludedItems = [], submenus = {}):
@@ -77,16 +78,27 @@ class PMXMenuNode(object):
             else:
                 yield (self.MENU_SPACE, self.MENU_SPACE)
 
-class PMXBundle(object):
+class PMXManagedItem(object):
+    def __init__(self, namespace):
+        #Base or default namespace
+        self.namespaces = [ namespace ]
+        self.manager = None
+        
+    def addNamespace(self, namespace):
+        self.namespaces.append(namespace)
+    
+    def setManager(self, manager):
+        self.manager = manager
+        
+class PMXBundle(PMXManagedItem):
     KEYS = [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
     def __init__(self, namespace, hash = None, path = None):
-        self.namespace = namespace
+        super(PMXBundle, self).__init__(namespace)
         self.path = path
         self.disabled = False
         self.support = None
-        self.manager = None
         if hash != None:
             self.load(hash)
 
@@ -135,11 +147,6 @@ class PMXBundle(object):
             env['TM_BUNDLE_SUPPORT'] = self.support
         return env
 
-    def getSyntaxByName(self, name):
-        for syntax in self.syntaxes:
-            if syntax.name == name:
-                return syntax
-
     @classmethod
     def loadBundle(cls, path, namespace):
         info_file = os.path.join(path, cls.FILE)
@@ -150,19 +157,22 @@ class PMXBundle(object):
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
 
-class PMXBundleItem(object):
+class PMXBundleItem(PMXManagedItem):
     KEYS = [ 'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
     TYPE = ''
     FOLDER = ''
     EXTENSION = ''
     PATTERNS = []
     def __init__(self, namespace, hash = None, path = None):
-        self.namespace = namespace
+        super(PMXBundleItem, self).__init__(namespace)
         self.path = path
         self.bundle = None
         if hash != None:
             self.load(hash)
 
+    def setBundle(self, bundle):
+        self.bundle = bundle
+        
     def load(self, hash):
         for key in PMXBundleItem.KEYS:
             setattr(self, key, hash.get(key, None))
