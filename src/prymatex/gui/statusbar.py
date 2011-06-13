@@ -141,7 +141,7 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
     def syntaxMenuIndexChanged(self, index):
         model = self.syntaxMenu.model()
         node = model.mapToSource(model.createIndex(index, 0))
-        syntax = node.internalPointer().item
+        syntax = node.internalPointer()
         self.syntaxChanged.emit(syntax)
         
     def updateStatus(self, status):
