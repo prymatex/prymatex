@@ -2,11 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt, QString
-from prymatex.core.exceptions import APIUsageError
 from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent
-from prymatex.mvc.models import PMXTableBase, PMXTableField
-from prymatex.mvc.delegates import PMXChoiceItemDelegate
 #from PyQt4.Qt import *
 
 #====================================================
@@ -41,7 +37,7 @@ class PMXBundleTreeNode(object):
     @property
     def keyEquivalent(self):
         if self.item.keyEquivalent is not None:
-            return int(buildKeySequence(self.item.keyEquivalent))
+            return buildKeySequence(self.item.keyEquivalent)
     
     @keyEquivalent.setter
     def keyEquivalent(self, key):
@@ -56,9 +52,9 @@ class PMXBundleTreeNode(object):
     def trigger(self):
         trigger = []
         if self.tabTrigger != None:
-            trigger.append(u"%s?" % (self.tabTrigger))
+            trigger.append(u"%s⇥" % (self.tabTrigger))
         if self.keyEquivalent != None:
-            trigger.append(u"%s" % buildKeySequence(self.keyEquivalent).toString())
+            trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
         return ", ".join(trigger)
     
     def buildMenuTextEntry(self, nemonic = ''):
