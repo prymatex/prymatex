@@ -58,7 +58,7 @@ class PMXBundleTreeNode(object):
         if self.tabTrigger != None:
             trigger.append(u"%s?" % (self.tabTrigger))
         if self.keyEquivalent != None:
-            trigger.append(u"%s" % (self.keyEquivalent))
+            trigger.append(u"%s" % buildKeySequence(self.keyEquivalent).toString())
         return ", ".join(trigger)
     
     def buildMenuTextEntry(self, nemonic = ''):
