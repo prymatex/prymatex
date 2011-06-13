@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleItemModel
+from prymatex.gui.support.models import PMXBundleTreeModel
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel
 
 class PMXSupportModelManager(PMXSupportManager, PMXObject):
@@ -20,7 +20,6 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     def __init__(self):
         super(PMXSupportModelManager, self).__init__()
         self.configure()
-        self.bundleTableModel = PMXBundleItemModel()
         self.bundleTreeModel = PMXBundleTreeModel(self)
         
         #Proxy
