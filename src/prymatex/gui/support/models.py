@@ -208,6 +208,57 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             parent.appendChild(biti)
 
 #====================================================
+# Themes Styles
+#====================================================
+class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
+    def __init__(self, parent = None):
+        super(PMXThemeStylesTableModel, self).__init__(parent)
+        self.styles = []
+        self.headers = ['Element', 'Foreground', 'Background', 'Font Style']
+        
+    def rowCount(self, parent):
+        return len(self.styles)
+    
+    def columnCount(self, parent):
+        return 4
+    
+    def data(self, index, role):
+        if not index.isValid: return QtCore.QVariant()
+        return QtCore.QVariant()
+
+    def setData(self, index, value, role):
+        '''
+            Retornar verdadero si se puedo hacer el camio, falso en caso contratio
+        '''
+        if not index.isValid: return False
+
+        if role == QtCore.Qt.EditRole:
+            self.dataChanged.emit(index, index)
+            return True;
+        elif role == QtCore.Qt.CheckStateRole:
+            self.dataChanged.emit(index, index)
+            return True
+        return False
+        
+    def headerData(self, section, orientation, role):
+        if role == QtCore.Qt.DisplayRole:
+            if orientation == QtCore.Qt.Horizontal:
+                return self.headers[section]
+
+    def insertRows(self, position, rows, parent = QtCore.QModelIndex()):
+        self.beginInsertRows(parent, position, position + rows - 1)
+        self.endInsertRows()
+        return True
+
+    def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
+        self.beginRemoveRows(parent, position, position + rows - 1);
+        self.endRemoveRows()
+        return True
+
+    def flags(self, index):
+        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled
+
+#====================================================
 # Bundle Item Table Model
 #====================================================
 class PMXBundleItemInstanceItem(QtGui.QStandardItem):

@@ -5,7 +5,6 @@
     Snippte's module
 '''
 import re, logging
-from copy import deepcopy
 try:
     from ponyguruma import sre
     from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE

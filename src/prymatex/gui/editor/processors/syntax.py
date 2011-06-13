@@ -3,8 +3,8 @@
 
 import re
 from copy import copy
-from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData, QToolTip, QTextCursor
-from prymatex.support import PMXSyntaxProcessor, PMXSnippet, PMXSyntax, PMXPreferenceSettings
+from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
+from prymatex.support import PMXSyntaxProcessor, PMXSyntax, PMXPreferenceSettings
 
 from logging import getLogger
 logger = getLogger(__file__)

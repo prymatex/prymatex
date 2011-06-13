@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Bundle Editor</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../../res.qrc">
+    <normaloff>:/icons/resources/icons/Prymatex_Logo.png</normaloff>:/icons/resources/icons/Prymatex_Logo.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QSplitter" name="splitter">

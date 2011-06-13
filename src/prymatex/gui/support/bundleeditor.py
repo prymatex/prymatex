@@ -5,7 +5,6 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.core.base import PMXObject
 from prymatex.gui.support.ui_editor import Ui_bundleEditor
-from prymatex.gui.support.models import PMXBundleTreeModel
 from prymatex.gui.support.widgets import PMXSnippetWidget, PMXCommandWidget, PMXDragCommandWidget
 from prymatex.gui.support.widgets import PMXBundleWidget,PMXTemplateFileWidget, PMXTemplateWidget
 from prymatex.gui.support.widgets import PMXPreferenceWidget, PMXLanguageWidget, PMXEditorBaseWidget
@@ -76,16 +75,16 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         action.triggered.connect(self.on_actionBundle_triggered)
         self.toolbarMenu.addAction(action)
         self.pushButtonAdd.setMenu(self.toolbarMenu)
-            
+        
     def configSelectTop(self):
         self.comboBoxItemFilter.addItem("Show all", QtCore.QVariant(""))
-        self.comboBoxItemFilter.addItem("Syntaxs", QtCore.QVariant("syntax"))
-        self.comboBoxItemFilter.addItem("Snippets", QtCore.QVariant("snippet"))
-        self.comboBoxItemFilter.addItem("Macros", QtCore.QVariant("macro"))
-        self.comboBoxItemFilter.addItem("Commands", QtCore.QVariant("command"))
-        self.comboBoxItemFilter.addItem("DragCommands", QtCore.QVariant("dragcommand"))
-        self.comboBoxItemFilter.addItem("Preferences", QtCore.QVariant("preference"))
-        self.comboBoxItemFilter.addItem("Templates", QtCore.QVariant("template*"))
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/languages.png"), "Syntaxs", QtCore.QVariant("syntax"))
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/snippets.png"), "Snippets", QtCore.QVariant("snippet"))
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/macros.png"), "Macros", QtCore.QVariant("macro"))
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/commands.png"), "Commands", QtCore.QVariant("command"))
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/drag-commands.png"), "DragCommands", QtCore.QVariant("dragcommand"))
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/preferences.png"), "Preferences", QtCore.QVariant("preference"))
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/templates.png"), "Templates", QtCore.QVariant("template*"))
         self.comboBoxItemFilter.currentIndexChanged[int].connect(self.on_comboBoxItemFilter_changed)
         
     def configTreeView(self, manager = None):
