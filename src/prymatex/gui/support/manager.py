@@ -18,8 +18,8 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         settings = 'Manager'
     
     def __init__(self):
-        super(PMXSupportModelManager, self).__init__()
         self.configure()
+        super(PMXSupportModelManager, self).__init__(self.disabledBundles, self.deletedBundles)
         self.bundleTreeModel = PMXBundleTreeModel(self)
         
         #Proxy

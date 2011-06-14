@@ -4,23 +4,30 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.core.base import PMXObject
+from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.support.ui_editor import Ui_bundleEditor
 from prymatex.gui.support.widgets import PMXSnippetWidget, PMXCommandWidget, PMXDragCommandWidget
 from prymatex.gui.support.widgets import PMXBundleWidget,PMXTemplateFileWidget, PMXTemplateWidget
 from prymatex.gui.support.widgets import PMXPreferenceWidget, PMXLanguageWidget, PMXEditorBaseWidget
 
 class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
-    '''
-        Prymatex Bundle Editor
-    '''
+    #http://manual.macromates.com/en/expert_preferences.html
+    #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
+    defaultBundleForNewBundleItems = pmxConfigPorperty(default = u'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = u'OakDefaultBundleForNewBundleItems')
+    
+    class Meta:
+        settings = 'BundleEditor'
+        
     def __init__(self, parent = None):
         super(PMXBundleEditor, self).__init__(parent)
         self.setupUi(self)
+        self.manager = self.pmxApp.supportManager
         self.configSelectTop()
         self.configTreeView()
         self.configToolbar()
         self.configEditorWidgets()
         self.configActivation()
+        self.configure()
 
     def on_comboBoxItemFilter_changed(self, index):
         value = self.comboBoxItemFilter.itemData(index).toString()
@@ -60,6 +67,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     def on_actionBundle_triggered(self):
         print "Bundle"
         bundle = self.manager.createBundle("MyBundle")
+        print bundle.name, bundle.uuid
         
     def configToolbar(self):
         self.toolbarMenu = QtGui.QMenu("Menu", self)
