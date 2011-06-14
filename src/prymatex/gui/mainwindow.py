@@ -212,7 +212,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                     return new_name
             return name        
         
-        for bundle in sorted(self.pmxApp.bundleManager.getAllBundles(), name_order):
+        for bundle in sorted(self.pmxApp.supportManager.getAllBundles(), name_order):
             
             menu = QMenu(get_name_with_accel(bundle.name), self)
             

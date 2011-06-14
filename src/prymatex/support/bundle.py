@@ -139,7 +139,10 @@ class PMXBundle(PMXManagedItem):
             os.rmdir(self.path)
         except os.OSError:
             pass
-        
+            
+    def relocate(self):
+        pass
+    
     def buildEnvironment(self):
         env = copy(self.manager.buildEnvironment())
         env['TM_BUNDLE_PATH'] = self.path
@@ -210,7 +213,10 @@ class PMXBundleItem(PMXManagedItem):
             os.rmdir(dir)
         except os.OSError:
             pass
-
+    
+    def relocate(self):
+        pass
+    
     def buildEnvironment(self, **kwargs):
         env = self.bundle.buildEnvironment()
         return env

@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.support.models import PMXBundleTreeModel
+from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel
 
 class PMXSupportModelManager(PMXSupportManager, PMXObject):
@@ -18,8 +18,8 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         settings = 'Manager'
     
     def __init__(self):
-        super(PMXSupportModelManager, self).__init__()
         self.configure()
+        super(PMXSupportModelManager, self).__init__(self.disabledBundles, self.deletedBundles)
         self.bundleTreeModel = PMXBundleTreeModel(self)
         
         #Proxy
@@ -43,24 +43,28 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         env.update(self.environment)
         return env
 
-    def loadSupport(self, callback = None):
-        super(PMXSupportModelManager, self).loadSupport(callback = None)
-        self.templateProxyModel.reMapModel()
-        self.syntaxProxyModel.reMapModel()
     #---------------------------------------------------
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
     def addBundle(self, bundle):
-        bundle = self.bundleTreeModel.populateToBundleNode(bundle)
-        return PMXSupportManager.addBundle(self, bundle)
+        bundleNode = PMXBundleTreeNode(bundle)
+        self.bundleTreeModel.appendBundle(bundleNode)
+        return bundleNode
 
+    def getAllBundles(self):
+        return self.bundleTreeModel.getAllBundles()
+    
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
     #---------------------------------------------------
     def addBundleItem(self, bundleItem):
-        bundleItem= self.bundleTreeModel.populateToBundleItemNode(bundleItem)
-        #self.bundleTableModel.appendBundleItemRow(item)
-        return PMXSupportManager.addBundleItem(self, bundleItem)
+        bundleItemNode = PMXBundleTreeNode(bundleItem)
+        if bundleItem.TYPE == "template":
+            for file in bundleItem.getTemplateFiles():
+                bundleTemplateFileNode = PMXBundleTreeNode(file)
+                bundleItemNode.appendChild(bundleTemplateFileNode)
+        bundleItem.bundle.appendChild(bundleItemNode)
+        return bundleItemNode
 
     #---------------------------------------------------
     # THEME OVERRIDE INTERFACE
@@ -77,10 +81,8 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     def getAllThemes(self):
         return PMXSupportManager.getAllThemes(self)
 
-
     def getAllTemplates(self):
         return PMXSupportManager.getAllTemplates(self)
-
 
     def getPreferences(self, scope):
         return PMXSupportManager.getPreferences(self, scope)

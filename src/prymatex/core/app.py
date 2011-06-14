@@ -140,11 +140,6 @@ class PMXApplication(QApplication):
     def bundleItemModel(self):
         return self.manager.model
     
-    #Deprecated
-    @property
-    def bundleManager(self):
-        return self.__supportManager
-
     __supportManager = None
     @property
     def supportManager(self):
