@@ -30,21 +30,36 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     # Toolbar
     #==========================================================
     def on_actionCommand_triggered(self):
+        bundle = self.manager if not "default bundle" else "bundle in node selected"
+        self.manager.createBundleItem("MyCommand", "command", bundle)
         print "Command"
     def on_actionDragCommand_triggered(self):
+        bundle = self.manager if not "default bundle" else "bundle in node selected"
+        self.manager.createBundleItem("MyDragCommand", "dragcommand", bundle)
         print "DragCommand"
     def on_actionLanguage_triggered(self):
+        bundle = self.manager if not "default bundle" else "bundle in node selected"
+        self.manager.createBundleItem("MyLanguage", "syntax", bundle)
         print "Language"
     def on_actionSnippet_triggered(self):
+        bundle = self.manager if not "default bundle" else "bundle in node selected"
+        self.manager.createBundleItem("MySnippet", "snippet", bundle)
         print "Snippet"
     def on_actionTemplate_triggered(self):
+        bundle = self.manager if not "default bundle" else "bundle in node selected"
+        self.manager.createBundleItem("MyTemplate", "template", bundle)
         print "Template"
     def on_actionTemplateFile_triggered(self):
+        bundle = self.manager if not "default bundle" else "bundle in node selected"
+        self.manager.createBundleItem("MyTemplateFile", "templatefile", bundle)
         print "TemplateFile"
     def on_actionPreferences_triggered(self):
+        bundle = self.manager if not "default bundle" else "bundle in node selected"
+        self.manager.createBundleItem("MyPreference", "preference", bundle)
         print "Preferences"
     def on_actionBundle_triggered(self):
         print "Bundle"
+        bundle = self.manager.createBundle("MyBundle")
         
     def configToolbar(self):
         self.toolbarMenu = QtGui.QMenu("Menu", self)

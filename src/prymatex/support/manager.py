@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from os.path import join, basename, exists, normpath
+from os.path import join, basename, dirname, exists, normpath
 
 from glob import glob
 from prymatex.support.bundle import PMXBundle, PMXBundleItem
@@ -149,7 +149,8 @@ class PMXSupportBaseManager(object):
     # BUNDLE INTERFACE
     #---------------------------------------------------
     def addBundle(self, bundle):
-        pass
+        return bundle
+        
     def getBundle(self, uuid):
         pass
 
@@ -206,8 +207,7 @@ class PMXSupportBaseManager(object):
                     'name': name }
         path = join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
         bundle = PMXBundle(namespace, hash, path)
-        self.addBundle(bundle)
-        return bundle
+        return self.addBundle(bundle)
     
     def readBundle(self, **attrs):
         '''
@@ -225,13 +225,16 @@ class PMXSupportBaseManager(object):
         if bundle.namespace == self.nsorder[self.PROTECTEDNS]:
             #Cambiar de namespace y de path al por defecto para proteger el base
             newns = self.nsorder[self.DEFAULTNS]
-            attrs["namespace"] = newns
             name = "%s.tmbundle" % self.convertToValidPath(attrs["name"]) if "name" in attrs else basename(bundle.path)
-            attrs["path"] = join(self.namespaces[newns]['Bundles'], name)
+            attrs["path"] = join(self.namespaces[newns]['Bundles'], basename(bundle.path))
             bundle.update(attrs)
             bundle.save()
             bundle.addNamespace(newns)
         else:
+            if "name" in attrs:
+                name = "%s.tmbundle" % self.convertToValidPath(attrs["name"])
+                attrs["path"] = join(dirname(bundle.path), name)
+                bundle.relocate(attrs["path"])
             bundle.update(attrs)
             bundle.save()
         self.modifyBundle(bundle)
@@ -255,16 +258,16 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # BUNDLEITEM INTERFACE
     #---------------------------------------------------
-    def addBundleItem(self, item):
-        pass
+    def addBundleItem(self, bundleItem):
+        return bundleItem
         
     def getBundleItem(self, uuid):
         pass
 
-    def modifyBundleItem(self, item):
+    def modifyBundleItem(self, bundleItem):
         pass
 
-    def removeBundleItem(self, item):
+    def removeBundleItem(self, bundleItem):
         pass
     
     def setDeletedBundleItem(self, uuid):
@@ -316,8 +319,7 @@ class PMXSupportBaseManager(object):
 
         item = klass(namespace, hash, path)
         item.setBundle(bundle)
-        self.addBundleItem(item)
-        return item
+        return self.addBundleItem(item)
     
     def readBundleItem(self, **attrs):
         '''
@@ -332,18 +334,21 @@ class PMXSupportBaseManager(object):
         '''
             Actualiza un bundle item
         '''
-        if item.bundle.namespace == self.nsorder[0]:
+        if item.bundle.namespace == self.nsorder[self.PROTECTEDNS]:
             self.updateBundle(item.bundle)
         if item.namespace == self.nsorder[self.PROTECTEDNS]:
             #Cambiar de namespace y de path al por defecto para proteger el base
             newns = self.nsorder[self.DEFAULTNS]
-            attrs["namespace"] = newns
             name = ("%s.%s" % self.convertToValidPath(attrs["name"]), item.__class__.EXTENSION) if "name" in attrs else basename(item.path)
             attrs["path"] = join(item.bundle.path, item.__class__.FOLDER, name)
             item.update(attrs)
             item.save()
             item.addNamespace(newns)
         else:
+            if "name" in attrs:
+                name = ("%s.%s" % self.convertToValidPath(attrs["name"]), item.__class__.EXTENSION)
+                attrs["path"] = join(item.bundle.path, item.__class__.FOLDER, name)
+                bundle.relocate(attrs["path"])
             item.update(attrs)
             item.save()
         self.modifyBundleItem(item)
