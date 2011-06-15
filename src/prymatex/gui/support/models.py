@@ -98,8 +98,14 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():  
             return False
         elif role == QtCore.Qt.EditRole:  
-            item = index.internalPointer()  
-            item.name = unicode(value.toString())
+            item = index.internalPointer()
+            name = unicode(value.toString())
+            if item.TYPE == "bundle":
+                self.manager.updateBundle(item, name = name)
+            elif item.TYPE == "templatefile":
+                pass
+            else:
+                self.manager.updateBundleItem(item, name = name)
             self.dataChanged.emit(index, index)
             return True
         return False

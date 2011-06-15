@@ -222,11 +222,12 @@ class PMXSupportBaseManager(object):
         '''
             Actualiza un bundle
         '''
-        if bundle.namespace == self.nsorder[self.PROTECTEDNS]:
+        if bundle.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
             #Cambiar de namespace y de path al por defecto para proteger el base
             newns = self.nsorder[self.DEFAULTNS]
             name = "%s.tmbundle" % self.convertToValidPath(attrs["name"]) if "name" in attrs else basename(bundle.path)
             attrs["path"] = join(self.namespaces[newns]['Bundles'], basename(bundle.path))
+            print newns, attrs
             bundle.update(attrs)
             bundle.save()
             bundle.addNamespace(newns)
@@ -334,20 +335,21 @@ class PMXSupportBaseManager(object):
         '''
             Actualiza un bundle item
         '''
-        if item.bundle.namespace == self.nsorder[self.PROTECTEDNS]:
+        if item.bundle.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
             self.updateBundle(item.bundle)
-        if item.namespace == self.nsorder[self.PROTECTEDNS]:
+        if item.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
             #Cambiar de namespace y de path al por defecto para proteger el base
             newns = self.nsorder[self.DEFAULTNS]
-            name = ("%s.%s" % self.convertToValidPath(attrs["name"]), item.__class__.EXTENSION) if "name" in attrs else basename(item.path)
-            attrs["path"] = join(item.bundle.path, item.__class__.FOLDER, name)
+            name = "%s.%s" % (self.convertToValidPath(attrs["name"]), item.EXTENSION) if "name" in attrs else basename(item.path)
+            attrs["path"] = join(item.bundle.path, item.FOLDER, name)
+            print attrs
             item.update(attrs)
             item.save()
             item.addNamespace(newns)
         else:
             if "name" in attrs:
-                name = ("%s.%s" % self.convertToValidPath(attrs["name"]), item.__class__.EXTENSION)
-                attrs["path"] = join(item.bundle.path, item.__class__.FOLDER, name)
+                name = "%s.%s" % (self.convertToValidPath(attrs["name"]), item.EXTENSION)
+                attrs["path"] = join(item.bundle.path, item.FOLDER, name)
                 item.relocate(attrs["path"])
             item.update(attrs)
             item.save()
@@ -430,7 +432,7 @@ class PMXSupportBaseManager(object):
         '''
             Actualiza un themes
         '''
-        if theme.namespace == self.nsorder[0]:
+        if theme.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
             #Cambiar de namespace y de path al por defecto para proteger el base
             newns = self.nsorder[-1]
             attrs["namespace"] = newns
