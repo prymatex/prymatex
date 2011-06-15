@@ -5,7 +5,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
         super(PMXBundleTreeProxyModel, self).__init__(parent)
         self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "template-file", "syntax"]
-        
+    
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()
         if regexp.isEmpty():
