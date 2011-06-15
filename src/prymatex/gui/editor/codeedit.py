@@ -750,20 +750,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #===========================================================================
     # Text Indentation
     #===========================================================================
-    @classmethod
-    def indentationWhitespace(cls, text):
-        '''
-        Gets text whitespace
-        @param text: Text, QTextCursor o QTextBlock instance
-        @return: The text whitespace
-        '''
-        match = cls.WHITESPACE.match(text)
-        try:
-            ws = match.group('whitespace')
-            return ws
-        except AttributeError:
-            return ''
-    
     def increaseIndent(self, indentation):
         self.indent(indentation + (self.tabKeyBehavior))
     

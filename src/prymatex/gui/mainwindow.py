@@ -79,7 +79,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         
         self.setupPanes()
-        self.setupBundleViews()
+        #self.setupBundleViews()
         
         self.setupLogging()
         self.center()

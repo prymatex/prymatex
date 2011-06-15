@@ -143,7 +143,7 @@ class PMXSupportBaseManager(object):
                         self.addBundleItem(item)
                         cache[item.uuid] = item
                     elif item.uuid in cache:
-                        cache[item.uuid].addNamespace(namespace)
+                        cache[item.uuid].addNamespace(ns)
 
     #---------------------------------------------------
     # BUNDLE INTERFACE
@@ -721,6 +721,8 @@ class PMXSupportManager(PMXSupportBaseManager):
         '''
             Return a list of tab triggers bundle items
         '''
+        if tabTrigger not in self.TAB_TRIGGERS:
+            return []
         return self.TAB_TRIGGERS[tabTrigger]
     
     #---------------------------------------------------
@@ -730,6 +732,8 @@ class PMXSupportManager(PMXSupportBaseManager):
         '''
             Return a list of key equivalent bundle items
         '''
+        if keyEquivalent not in self.KEY_EQUIVALENTS:
+            return [] 
         return self.KEY_EQUIVALENTS[keyEquivalent]
     
     #---------------------------------------------------------------

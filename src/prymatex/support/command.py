@@ -108,7 +108,8 @@ class PMXCommand(PMXBundleItem):
     def execute(self, processor):
         if hasattr(self, 'beforeRunningCommand') and self.beforeRunningCommand != None:
             value = getattr(processor, self.beforeRunningCommand)()
-            if not value:
+            #Solo si es falso, intenta ejecutar para todos los otros valores
+            if value == False:
                 return
         processor.startCommand(self)
         input_type, input_value = self.getInputText(processor)
