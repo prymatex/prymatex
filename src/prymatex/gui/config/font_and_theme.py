@@ -14,7 +14,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.settings = self.pmxApp.settings.getGroup('Editor')
         uuid = self.settings.value('theme')
         #Todo cambiar esto por un metodo, UUIDS es de clase
-        for index, theme in enumerate(self.pmxApp.bundleManager.getAllThemes()):
+        for index, theme in enumerate(self.pmxApp.supportManager.getAllThemes()):
             self.comboThemes.addItem(theme.name, QtCore.QVariant(theme.uuid))
             if theme.uuid == uuid:
                 self.comboThemes.setCurrentIndex(index)

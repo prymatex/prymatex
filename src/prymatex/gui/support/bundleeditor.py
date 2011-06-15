@@ -36,38 +36,52 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     #==========================================================
     # Toolbar
     #==========================================================
+    def getBundleForIndex(self, index):
+        bundle = None
+        if not index.isValid():
+            bundle = self.proxyTreeModel.sourceModel().getBundle(self.defaultBundleForNewBundleItems)
+        else:
+            bundle = self.proxyTreeModel.mapToSource(index).internalPointer()
+            while bundle.TYPE != 'bundle':
+                bundle = bundle.parent
+        return bundle
+    
+    def createBundleItem(self, itemName, itemType):
+        index = self.treeView.currentIndex()
+        bundle = self.getBundleForIndex(index)
+        bundleItem = self.manager.createBundleItem(itemName, itemType, bundle)
+        index = self.proxyTreeModel.index(bundleItem.row(), 0, self.proxyTreeModel.index(bundleItem.bundle.row(), 0 , QtCore.QModelIndex()))
+        self.treeView.setCurrentIndex(index)
+        self.treeView.edit(index)
+        self.on_treeView_Activated(index)
+        
     def on_actionCommand_triggered(self):
-        bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem("MyCommand", "command", bundle)
-        print "Command"
+        self.createBundleItem("untitled", "command")
+        
     def on_actionDragCommand_triggered(self):
-        bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem("MyDragCommand", "dragcommand", bundle)
-        print "DragCommand"
+        self.createBundleItem("untitled", "dragcommand")
+        
     def on_actionLanguage_triggered(self):
-        bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem("MyLanguage", "syntax", bundle)
-        print "Language"
+        self.createBundleItem("untitled", "syntax")
+        
     def on_actionSnippet_triggered(self):
-        bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem("MySnippet", "snippet", bundle)
-        print "Snippet"
+        self.createBundleItem("untitled", "snippet")
+        
     def on_actionTemplate_triggered(self):
-        bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem("MyTemplate", "template", bundle)
-        print "Template"
+        self.createBundleItem("untitled", "template")
+        
     def on_actionTemplateFile_triggered(self):
         bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem("MyTemplateFile", "templatefile", bundle)
+        self.manager.createBundleItem("untitled", "templatefile", bundle)
         print "TemplateFile"
+        
     def on_actionPreferences_triggered(self):
-        bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem("MyPreference", "preference", bundle)
-        print "Preferences"
+        self.createBundleItem("untitled", "preference")
+
     def on_actionBundle_triggered(self):
-        print "Bundle"
-        bundle = self.manager.createBundle("MyBundle")
-        print bundle.name, bundle.uuid
+        bundle = self.manager.createBundle("untitled")
+        index = self.proxyTreeModel.index(bundle.row(), 0, QtCore.QModelIndex())
+        self.treeView.setCurrentIndex(index)
         
     def configToolbar(self):
         self.toolbarMenu = QtGui.QMenu("Menu", self)
@@ -101,7 +115,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         
     def configSelectTop(self):
         self.comboBoxItemFilter.addItem("Show all", QtCore.QVariant(""))
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/languages.png"), "Syntaxs", QtCore.QVariant("syntax"))
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/languages.png"), "Languages", QtCore.QVariant("syntax"))
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/snippets.png"), "Snippets", QtCore.QVariant("snippet"))
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/macros.png"), "Macros", QtCore.QVariant("macro"))
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/bundles/resources/bundles/commands.png"), "Commands", QtCore.QVariant("command"))
@@ -115,7 +129,8 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.treeView.setModel(self.proxyTreeModel)
         self.treeView.setHeaderHidden(True)
         self.treeView.setAnimated(True)
-        self.treeView.activated.connect(self.treeViewItemActivated)
+        self.treeView.activated.connect(self.on_treeView_Activated)
+        self.treeView.pressed.connect(self.on_treeView_Activated)
         
     def configEditorWidgets(self):
         self.stackedWidget = QtGui.QStackedWidget()
@@ -196,8 +211,8 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
                 self.lineTabTriggerActivation.setText(tabTrigger)
             index = 0 if keyEquivalent else 1
             self.comboBoxActivation.setCurrentIndex(index)
-        
-    def treeViewItemActivated(self, index):
+    
+    def on_treeView_Activated(self, index):
         treeItem = self.proxyTreeModel.mapToSource(index).internalPointer()
         
         #TODO: ver si tengo que guardar el current editor

@@ -150,7 +150,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
 
     def index(self, row, column, parent):
         if not parent.isValid():
-            parent = self.root  
+            parent = self.root
         else:
             parent = parent.internalPointer()
         
@@ -176,10 +176,23 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
     # Functions
     #========================================================================
     def appendBundle(self, bundle):
+        self.beginInsertRows(QtCore.QModelIndex(), self.root.childCount(), self.root.childCount())
         self.root.appendChild(bundle)
+        self.endInsertRows()
+    
+    def appendBundleItem(self, bundleItem):
+        bnode = bundleItem.bundle
+        self.beginInsertRows(self.index(bnode.row(), 0, QtCore.QModelIndex()), bnode.childCount(), bnode.childCount())
+        bundleItem.bundle.appendChild(bundleItem)
+        self.endInsertRows()
     
     def getAllBundles(self):
         return self.root.children
+    
+    def getBundle(self, uuid):
+        for child in self.root.children:
+            if child.uuid == uuid:
+                return child
         
 #====================================================
 # Themes Styles

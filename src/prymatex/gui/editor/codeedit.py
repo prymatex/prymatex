@@ -68,7 +68,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
-        syntax = self.pmxApp.bundleManager.getBundleItem(uuid)
+        syntax = self.pmxApp.supportManager.getBundleItem(uuid)
         if syntax != None:
             self.setSyntax(syntax)
     
@@ -78,7 +78,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
-        theme = self.pmxApp.bundleManager.getTheme(uuid)
+        theme = self.pmxApp.supportManager.getTheme(uuid)
         self.syntaxProcessor.formatter = theme
         style = theme.getStyle()
         self.colours = {
@@ -171,7 +171,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     def getPreference(self, scope):
         if scope not in PMXCodeEdit.PREFERENCE_CACHE:
-            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.pmxApp.bundleManager.getPreferenceSettings(scope)
+            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.pmxApp.supportManager.getPreferenceSettings(scope)
         return PMXCodeEdit.PREFERENCE_CACHE[scope]
 
     def getCurrentScope(self):
@@ -423,7 +423,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def keyPressBundleItem(self, event):
         keyseq = int(event.modifiers()) + event.key()
         scope = self.getCurrentScope()
-        items = self.pmxApp.bundleManager.getKeyEquivalentItem(keyseq, scope)
+        items = self.pmxApp.supportManager.getKeyEquivalentItem(keyseq, scope)
         if items:
             if len(items) > 1:
                 self.selectBundleItem(items)
@@ -461,9 +461,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.indent(self.tabKeyBehavior)
         else:
             scope = self.getCurrentScope()
-            trigger = self.pmxApp.bundleManager.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
+            trigger = self.pmxApp.supportManager.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
             if trigger != None:
-                snippets = self.pmxApp.bundleManager.getTabTriggerItem(trigger, scope)
+                snippets = self.pmxApp.supportManager.getTabTriggerItem(trigger, scope)
                 if len(snippets) > 1:
                     self.selectBundleItem(snippets, tabTrigger = True)
                     return
@@ -502,7 +502,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def returnPressEvent(self, event):
         line = unicode(self.textCursor().block().text())
         if self.document().blockCount() == 1:
-            syntax = self.pmxApp.bundleManager.findSyntaxByFirstLine(line)
+            syntax = self.pmxApp.supportManager.findSyntaxByFirstLine(line)
             if syntax != None:
                 self.setSyntax(syntax)
         super(PMXCodeEdit, self).keyPressEvent(event)

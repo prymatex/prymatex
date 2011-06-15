@@ -49,8 +49,12 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     def addBundle(self, bundle):
         bundleNode = PMXBundleTreeNode(bundle)
         self.bundleTreeModel.appendBundle(bundleNode)
+        #super(PMXSupportModelManager, self).addBundle(bundleNode) ya no hace falta ahora uso el modelo
         return bundleNode
 
+    def getBundle(self, uuid):
+        return self.bundleTreeModel.getBundle(uuid)
+    
     def getAllBundles(self):
         return self.bundleTreeModel.getAllBundles()
     
@@ -63,7 +67,8 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
             for file in bundleItem.getTemplateFiles():
                 bundleTemplateFileNode = PMXBundleTreeNode(file)
                 bundleItemNode.appendChild(bundleTemplateFileNode)
-        bundleItem.bundle.appendChild(bundleItemNode)
+        self.bundleTreeModel.appendBundleItem(bundleItemNode)
+        super(PMXSupportModelManager, self).addBundleItem(bundleItemNode)
         return bundleItemNode
 
     #---------------------------------------------------

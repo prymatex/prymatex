@@ -348,7 +348,7 @@ class PMXSupportBaseManager(object):
             if "name" in attrs:
                 name = ("%s.%s" % self.convertToValidPath(attrs["name"]), item.__class__.EXTENSION)
                 attrs["path"] = join(item.bundle.path, item.__class__.FOLDER, name)
-                bundle.relocate(attrs["path"])
+                item.relocate(attrs["path"])
             item.update(attrs)
             item.save()
         self.modifyBundleItem(item)
