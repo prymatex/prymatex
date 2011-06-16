@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, re, plistlib
+import os, re, plistlib, shutil
 from copy import copy
 from xml.parsers.expat import ExpatError
 
@@ -140,8 +140,9 @@ class PMXBundle(PMXManagedItem):
         except os.OSError:
             pass
             
-    def relocate(self):
-        pass
+    def relocate(self, path):
+        if os.path.exists(self.path):
+            shutil.move(self.path, path)
     
     def buildEnvironment(self):
         env = copy(self.manager.buildEnvironment())
@@ -214,8 +215,9 @@ class PMXBundleItem(PMXManagedItem):
         except os.OSError:
             pass
     
-    def relocate(self):
-        pass
+    def relocate(self, path):
+        if os.path.exists(self.path):
+            shutil.move(self.path, path)
     
     def buildEnvironment(self, **kwargs):
         env = self.bundle.buildEnvironment()

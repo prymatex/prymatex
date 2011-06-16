@@ -44,7 +44,7 @@ def ensureEnvironment(environment):
     for key, value in environment.iteritems():
         codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
     return codingenv
-    
+
 def makeExecutableTempFile(content):
     descriptor, name = tempfile.mkstemp(prefix='pmx')
     file = os.fdopen(descriptor, 'w+')
@@ -66,3 +66,16 @@ def sh(cmd):
     finally:
         if pipe: pipe.close()
     return result
+
+def ensurePath(path, name, suffix = 0):
+    '''
+        Return a safe path, ensure not exists
+    '''
+    if suffix == 0 and not os.path.exists(path % name):
+        return path % name
+    else:
+        newPath = path % (name + "_" + unicode(suffix))
+        if not os.path.exists(newPath):
+            return newPath
+        else:
+            return ensurePath(path, name, suffix + 1)

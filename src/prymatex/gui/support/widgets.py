@@ -24,7 +24,12 @@ class PMXEditorBaseWidget(QtGui.QWidget):
         #The bundle item
         self.bundleItem = None
         self.changes = {}
+        self.new = False
     
+    @property
+    def isNew(self):
+        return self.new
+        
     @property
     def isChanged(self):
         return bool(self.changes)
@@ -84,15 +89,31 @@ class PMXEditorBaseWidget(QtGui.QWidget):
         else:
             self.changes.pop('keyEquivalent', None)
     
-    def edit(self, bundleItem):
+    def edit(self, bundleItem, new = False):
         self.changes = {}
         self.bundleItem = bundleItem
+        self.new = new
 
 #============================================================
 # Snippet Editor Widget
 #============================================================
 class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
     TYPE = 'snippet'
+    DEFAULTS = {'content': """Syntax Summary:
+
+  Variables        $TM_FILENAME, $TM_SELECTED_TEXT
+  Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}
+  Substitutions    ${TM_FILENAME/.*/\U$0/}
+
+  Tab Stops        $1, $2, $3, … $0 (optional)
+  Placeholders     ${1:default value}
+  Mirrors          <${2:tag}>…</$2>
+  Transformations  <${3:tag}>…</${3/(\w*).*/\U$1/}>
+
+  Shell Code       `date`, `pwd`
+
+  Escape Codes     \$ \` \\"""}
+
     def __init__(self, parent = None):
         super(PMXSnippetWidget, self).__init__(parent)
         self.setupUi(self)
@@ -102,7 +123,16 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
         if self.bundleItem != None:
             return 'Edit Snippet: "%s"' % self.bundleItem.name
         return super(PMXSnippetWidget, self).title()
-
+    
+    def getContent(self):
+        if self.isNew:
+            self.changes['content'] = self.DEFAULTS['content']
+            return self.changes['content']
+        elif self.bundleItem.content != None:
+            return self.bundleItem.content
+        else:
+            return ""
+    
     def getScope(self):
         scope = super(PMXSnippetWidget, self).getScope()
         return scope is not None and scope or ""
@@ -115,13 +145,22 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
         keyEquivalent = super(PMXSnippetWidget, self).getKeyEquivalent()
         return keyEquivalent is not None and keyEquivalent or ""
     
-    def edit(self, bundleItem):
-        super(PMXSnippetWidget, self).edit(bundleItem)
-        hash = bundleItem.hash
-        self.content.setPlainText(hash['content'])
+    def edit(self, bundleItem, new = False):
+        super(PMXSnippetWidget, self).edit(bundleItem, new)
+        self.content.setPlainText(self.getContent())
 
 class PMXCommandWidget(PMXEditorBaseWidget, Ui_Command):
     TYPE = 'command'
+    DEFAULTS = {'beforeRunningCommand': 'nop',
+                'command': '''# just to remind you of some useful environment variables
+# see Help / Environment Variables for the full list
+echo File: "$TM_FILEPATH"
+echo Word: "$TM_CURRENT_WORD"
+echo Selection: "$TM_SELECTED_TEXT"''',
+                'input': 'selection',
+                'fallbackInput': 'document',
+                'output': 'replaceSelectedText'}
+
     def __init__(self, parent = None):
         super(PMXCommandWidget, self).__init__(parent)
         self.setupUi(self)
@@ -223,6 +262,13 @@ class PMXCommandWidget(PMXEditorBaseWidget, Ui_Command):
     
 class PMXTemplateWidget(PMXEditorBaseWidget, Ui_Template):
     TYPE = 'template'
+    DEFAULTS = {'extension': 'txt',
+                'command': '''if [[ ! -f "$TM_NEW_FILE" ]]; then
+  TM_YEAR=`date +%Y` \
+  TM_DATE=`date +%Y-%m-%d` \
+  perl -pe 's/\$\{([^}]*)\}/$ENV{$1}/g' \
+     < template_in.txt > "$TM_NEW_FILE"
+fi"'''}
     def __init__(self, parent = None):
         super(PMXTemplateWidget, self).__init__(parent)
         self.setupUi(self)
@@ -249,6 +295,12 @@ class PMXTemplateWidget(PMXEditorBaseWidget, Ui_Template):
 
 class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
     TYPE = 'templatefile'
+    DEFAULTS = {'content': '''//
+//  ${TM_NEW_FILE_BASENAME}
+//
+//  Created by ${TM_FULLNAME} on ${TM_DATE}.
+//  Copyright (c) ${TM_YEAR} ${TM_ORGANIZATION_NAME}. All rights reserved.
+//'''}
     def __init__(self, parent = None):
         super(PMXTemplateFileWidget, self).__init__(parent)
         self.setupUi(self)
@@ -265,6 +317,8 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
     
 class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
     TYPE = 'dragcommand'
+    DEFAULTS = {'draggedFileExtensions': ['png', 'jpg'],
+                'command': '''echo "$TM_DROPPED_FILE"'''}
     def __init__(self, parent = None):
         super(PMXDragCommandWidget, self).__init__(parent)
         self.setupUi(self)
@@ -295,6 +349,25 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
 
 class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
     TYPE = 'syntax'
+    DEFAULTS = {'content': '''{       scopeName = 'source.untitled';
+       fileTypes = ( );
+       foldingStartMarker = '/\*\*|\{\s*$';
+       foldingStopMarker = '\*\*/|^\s*\}';
+       patterns = (
+               {       name = 'keyword.control.untitled';
+                       match = '\b(if|while|for|return)\b';
+               },
+               {       name = 'string.quoted.double.untitled';
+                       begin = '"';
+                       end = '"';
+                       patterns = (
+                               {       name = 'constant.character.escape.untitled';
+                                       match = '\\.';
+                               },
+                       );
+               },
+       );
+}'''}
     def __init__(self, parent = None):
         super(PMXLanguageWidget, self).__init__(parent)
         self.setupUi(self)
