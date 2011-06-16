@@ -117,7 +117,12 @@ class Node(object):
         for attr in attrs:
             if hasattr(self, attr):
                 delattr(self, attr)
-                
+    
+    def __len__(self):
+        if hasattr(self, 'start') and hasattr(self, 'end'):
+            return self.end - self.start
+        return 0
+    
     def render(self, processor):
         pass
     

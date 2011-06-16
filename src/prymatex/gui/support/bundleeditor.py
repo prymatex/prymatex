@@ -67,10 +67,13 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
         bundleItem = self.manager.createBundleItem(itemName, itemType, bundle)
-        index = self.proxyTreeModel.index(bundleItem.row(), 0, self.proxyTreeModel.index(bundleItem.bundle.row(), 0 , QtCore.QModelIndex()))
-        self.treeView.setCurrentIndex(index)
-        self.treeView.edit(index)
-        self.on_treeView_Activated(index)
+        editor = self.getEditorForTreeItem(bundleItem)
+        if editor != None:
+            index = self.proxyTreeModel.index(bundleItem.row(), 0, self.proxyTreeModel.index(bundleItem.bundle.row(), 0 , QtCore.QModelIndex()))
+            self.treeView.setCurrentIndex(index)
+            self.treeView.edit(index)
+            editor.edit(bundleItem)
+            self.setCurrentEditor(editor)
         
     def on_actionCommand_triggered(self):
         self.createBundleItem("untitled", "command")
@@ -170,6 +173,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         
     def configTreeView(self, manager = None):
         self.proxyTreeModel = self.pmxApp.supportManager.bundleProxyTreeModel
+        #self.proxyTreeModel.sort(0)
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
         self.treeView.setModel(self.proxyTreeModel)
         self.treeView.setHeaderHidden(True)

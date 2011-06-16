@@ -106,7 +106,7 @@ class PMXPreferenceSettings(object):
     def update(self, other):
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(other, key, None)
-            if value != None and getattr(self, key) == None:
+            if value is not None and not getattr(self, key):
                 setattr(self, key, value)
 
     def indent(self, line):

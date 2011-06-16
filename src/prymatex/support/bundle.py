@@ -102,6 +102,9 @@ class PMXBundle(PMXManagedItem):
         if hash != None:
             self.load(hash)
 
+    def setSupport(self, support):
+        self.support = support
+        
     def load(self, hash):
         for key in PMXBundle.KEYS:
             value = hash.get(key, None)
@@ -176,7 +179,11 @@ class PMXBundleItem(PMXManagedItem):
 
     def setBundle(self, bundle):
         self.bundle = bundle
-        
+    
+    @property
+    def disabled(self):
+        return self.bundle.disabled  
+    
     def load(self, hash):
         for key in PMXBundleItem.KEYS:
             setattr(self, key, hash.get(key, None))

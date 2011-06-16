@@ -4,7 +4,7 @@ from prymatex.mvc.proxies import PMXFlatBaseProxyModel
 class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
         super(PMXBundleTreeProxyModel, self).__init__(parent)
-        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "template-file", "syntax"]
+        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax"]
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()
@@ -23,10 +23,10 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def lessThan(self, left, right):
         leftData = left.internalPointer()
         rightData = right.internalPointer()
-        if leftData.tipo == rightData.tipo:
+        if leftData.TYPE == rightData.TYPE:
             return rightData.name > leftData.name
         else:
-            return self.bundleItemTypeOrder.index(rightData.tipo) > self.bundleItemTypeOrder.index(leftData.tipo)
+            return self.bundleItemTypeOrder.index(rightData.TYPE) > self.bundleItemTypeOrder.index(leftData.TYPE)
 
 class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
     def __init__(self, tipo, parent = None):

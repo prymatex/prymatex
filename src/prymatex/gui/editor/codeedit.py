@@ -425,10 +425,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         scope = self.getCurrentScope()
         items = self.pmxApp.supportManager.getKeyEquivalentItem(keyseq, scope)
         if items:
-            if len(items) > 1:
-                self.selectBundleItem(items)
-            else:
+            if len(items) == 1:
                 self.insertBundleItem(items[0])
+            elif len(items) == 2 and items[0].TYPE != items[1].TYPE:
+                #Son distintos desempato, el primero es el que mejor se ajusta
+                self.insertBundleItem(items[0])
+            else:
+                self.selectBundleItem(items)
             return True
     
     def keyPressSmartTyping(self, event):
@@ -544,16 +547,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(tabTrigger, disableIndent)
+            print "Corriendo Snippet", item.name
             item.execute(self.snippetProcessor)
         elif item.TYPE == PMXCommand.TYPE:
+            print "Corriendo Command", item.name
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
+            print "Corriendo Macro", item.name
             item.execute(self.macroProcessor)
 
     def selectBundleItem(self, items, tabTrigger = False):
-        syntax = any(map(lambda item: isinstance(item, PMXSyntax), items))
+        #Tengo mas de uno que hago?
+        syntax = any(map(lambda item: item.TYPE == 'syntax', items))
         menu = QMenu()
         for index, item in enumerate(items):
             action = menu.addAction(item.buildMenuTextEntry("&" + str(index + 1)))
