@@ -202,7 +202,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             self.comboBoxFallbackInput.setVisible(True)
             fallbackInput = self.bundleItem.fallbackInput
             if fallbackInput is None:
-                fallbackInput = self.changes['fallbackInput'] = self.DEFAULTS['fallbackInput']
+                fallbackInput = self.DEFAULTS['fallbackInput']
             index = self.comboBoxFallbackInput.findData(QtCore.QVariant(fallbackInput))
             if index != -1:
                 self.comboBoxFallbackInput.setCurrentIndex(index)
@@ -213,7 +213,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         
     def on_comboBoxFallbackInput_changed(self, index):
         value = self.comboBoxFallbackInput.itemData(index).toString()
-        if value != self.bundleItem.fallbackInput:
+        if value != self.bundleItem.fallbackInput and value != self.DEFAULTS['fallbackInput']:
             self.changes['fallbackInput'] = unicode(value)
         else:
             self.changes.pop('fallbackInput', None)

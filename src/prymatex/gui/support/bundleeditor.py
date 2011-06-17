@@ -66,14 +66,11 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     def createBundleItem(self, itemName, itemType):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
-        bundleItem = self.manager.createBundleItem(itemName, itemType, bundle)
-        editor = self.getEditorForTreeItem(bundleItem)
-        if editor != None:
-            index = self.proxyTreeModel.index(bundleItem.row(), 0, self.proxyTreeModel.index(bundleItem.bundle.row(), 0 , QtCore.QModelIndex()))
-            self.treeView.setCurrentIndex(index)
-            self.treeView.edit(index)
-            editor.edit(bundleItem)
-            self.setCurrentEditor(editor)
+        treeItem = self.manager.createBundleItem(itemName, itemType, bundle)
+        index = self.proxyTreeModel.index(treeItem.row(), 0, self.proxyTreeModel.index(treeItem.bundle.row(), 0 , QtCore.QModelIndex()))
+        self.treeView.setCurrentIndex(index)
+        self.treeView.edit(index)
+        editor.editTreeItem(treeItem)
         
     def on_actionCommand_triggered(self):
         self.createBundleItem("untitled", "command")
@@ -166,10 +163,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     def on_treeView_Activated(self, index):
         treeItem = self.proxyTreeModel.mapToSource(index).internalPointer()
         self.templateFileAction.setEnabled(treeItem.TYPE == "template" or treeItem.TYPE == "templatefile")
-        editor = self.getEditorForTreeItem(treeItem)
-        if editor != None:
-            editor.edit(treeItem)
-            self.setCurrentEditor(editor)
+        self.editTreeItem(treeItem)
         
     def configTreeView(self, manager = None):
         self.proxyTreeModel = self.pmxApp.supportManager.bundleProxyTreeModel
@@ -214,12 +208,18 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.lineTabTriggerActivation.textEdited.connect(self.on_lineTabTriggerActivation_edited)
         self.lineEditScope.textEdited.connect(self.on_lineEditScope_edited)
     
-    def setCurrentEditor(self, editor):
+    def editTreeItem(self, treeItem):
         #TODO: ver si tengo que guardar el current editor
         current = self.stackedWidget.currentWidget()
         if current.isChanged:
             print current.changes
-
+            
+        editor = self.getEditorForTreeItem(treeItem)
+        if editor != None:
+            editor.edit(treeItem)
+            self.setCurrentEditor(editor)
+            
+    def setCurrentEditor(self, editor):
         self.stackedWidget.setCurrentWidget(editor)
         self.labelTitle.setText(editor.title)
         scope = editor.getScope()

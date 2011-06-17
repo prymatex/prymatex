@@ -85,7 +85,11 @@ class PMXManagedItem(object):
         self.manager = None
         
     def addNamespace(self, namespace):
-        self.namespaces.append(namespace)
+        index = self.manager.nsorder.index(namespace)
+        if index < len(self.namespaces):
+            self.namespaces.insert(index, namespace)
+        else:
+            self.namespaces.append(namespace)
     
     def setManager(self, manager):
         self.manager = manager

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re
+import re, string, unicodedata
 from os.path import join, basename, dirname, exists, normpath
 
 from glob import glob
@@ -37,6 +37,7 @@ class PMXSupportBaseManager(object):
     PROTECTEDNS = 0
     DEFAULTNS = -1
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE))
+    VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     #FIXME: Dudo de la cache en este lugar
     SETTINGS_CACHE = {}
     
@@ -69,7 +70,11 @@ class PMXSupportBaseManager(object):
         
     def convertToValidPath(self, name):
         # TODO: ver que el uuid generado no este entre los elementos existentes
-        return normpath(name)
+        validPath = []
+        for char in unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore'):
+            char = char if char in self.VALID_PATH_CARACTERS else '-'
+            validPath.append(char)
+        return ''.join(validPath)
 
     def updateEnvironment(self, env):
         self.environment.update(env)
@@ -99,6 +104,7 @@ class PMXSupportBaseManager(object):
                 if theme == None:
                     continue
                 if theme.uuid not in cache:
+                    theme.setManager(self)
                     self.addTheme(theme)
                     cache[theme.uuid] = theme
                 else:
@@ -139,6 +145,7 @@ class PMXSupportBaseManager(object):
                     if item == None:
                         continue
                     if bundle.uuid not in self.deletedBundles and item.uuid not in cache:
+                        item.setManager(self)
                         item.setBundle(bundle)
                         self.addBundleItem(item)
                         cache[item.uuid] = item
