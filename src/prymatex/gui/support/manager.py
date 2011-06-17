@@ -22,18 +22,29 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         super(PMXSupportModelManager, self).__init__(self.disabledBundles, self.deletedBundles)
         self.bundleTreeModel = PMXBundleTreeModel(self)
         
-        #Proxy
+        #TREE PROXY
         self.bundleProxyTreeModel = PMXBundleTreeProxyModel()
         self.bundleProxyTreeModel.setSourceModel(self.bundleTreeModel)
         
+        #TEMPLATES
         self.templateProxyModel = PMXBundleTypeFilterProxyModel("template")
         self.templateProxyModel.setSourceModel(self.bundleTreeModel)
         
+        #SYNTAX
         self.syntaxProxyModel = PMXBundleTypeFilterProxyModel("syntax")
         self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)
         
+        #INTERACTIVEITEMS
+        self.itemsProxyModel = PMXBundleTypeFilterProxyModel(["command", "snippet", "macro"])
+        self.itemsProxyModel.setSourceModel(self.bundleTreeModel)
+        
+        #PREFERENCES
         self.preferenceProxyModel = PMXBundleTypeFilterProxyModel("preference")
         self.preferenceProxyModel.setSourceModel(self.bundleTreeModel)
+        
+        #DRAGCOMMANDS
+        self.dragProxyModel = PMXBundleTypeFilterProxyModel("dragcommand")
+        self.dragProxyModel.setSourceModel(self.bundleTreeModel)
         
     def buildEnvironment(self):
         env = {}

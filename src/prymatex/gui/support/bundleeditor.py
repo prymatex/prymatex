@@ -70,30 +70,30 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         index = self.proxyTreeModel.index(treeItem.row(), 0, self.proxyTreeModel.index(treeItem.bundle.row(), 0 , QtCore.QModelIndex()))
         self.treeView.setCurrentIndex(index)
         self.treeView.edit(index)
-        editor.editTreeItem(treeItem)
+        self.editTreeItem(treeItem)
         
     def on_actionCommand_triggered(self):
-        self.createBundleItem("untitled", "command")
+        self.createBundleItem(u"untitled", "command")
         
     def on_actionDragCommand_triggered(self):
-        self.createBundleItem("untitled", "dragcommand")
+        self.createBundleItem(u"untitled", "dragcommand")
         
     def on_actionLanguage_triggered(self):
-        self.createBundleItem("untitled", "syntax")
+        self.createBundleItem(u"untitled", "syntax")
         
     def on_actionSnippet_triggered(self):
-        self.createBundleItem("untitled", "snippet")
+        self.createBundleItem(u"untitled", "snippet")
         
     def on_actionTemplate_triggered(self):
-        self.createBundleItem("untitled", "template")
+        self.createBundleItem(u"untitled", "template")
         
     def on_actionTemplateFile_triggered(self):
         bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem("untitled", "templatefile", bundle)
+        self.manager.createBundleItem(u"untitled", "templatefile", bundle)
         print "TemplateFile"
         
     def on_actionPreferences_triggered(self):
-        self.createBundleItem("untitled", "preference")
+        self.createBundleItem(u"untitled", "preference")
 
     def on_actionBundle_triggered(self):
         bundle = self.manager.createBundle("untitled")

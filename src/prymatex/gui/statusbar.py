@@ -149,6 +149,6 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
     
     def updateSyntax(self, syntax):
         model =  self.syntaxMenu.model() # Proxy
-        index = model.findItem(syntax)
+        index = model.findItemIndex(syntax)
         self.syntaxMenu.setCurrentIndex(index)
         

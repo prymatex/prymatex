@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, string, unicodedata
+import re, uuid, string, unicodedata
 from os.path import join, basename, dirname, exists, normpath
 
 from glob import glob
@@ -14,7 +14,7 @@ from prymatex.support.command import PMXCommand, PMXDragCommand
 from prymatex.support.template import PMXTemplate
 from prymatex.support.theme import PMXTheme
 from prymatex.support.score import PMXScoreManager
-from prymatex.support.utils import sh, ensurePath
+from prymatex.support.utils import ensurePath
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
@@ -65,13 +65,12 @@ class PMXSupportBaseManager(object):
             self.namespaces[name][element] = self.environment[var] = epath
 
     def uuidgen(self):
-        # TODO: ver que el uuid generado no este entre los elementos existentes
-        return sh("uuidgen").strip()
+        return unicode(uuid.uuid1())
         
     def convertToValidPath(self, name):
         # TODO: ver que el uuid generado no este entre los elementos existentes
         validPath = []
-        for char in unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore'):
+        for char in unicodedata.normalize('NFKD', unicode(name)).encode('ASCII', 'ignore'):
             char = char if char in self.VALID_PATH_CARACTERS else '-'
             validPath.append(char)
         return ''.join(validPath)

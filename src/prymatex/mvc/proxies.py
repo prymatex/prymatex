@@ -108,6 +108,7 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         for i in xrange(start, end + 1):
             index = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
+                print "agregando %s:%s" % (index.internalPointer().TYPE, index.internalPointer().name)
                 position = bisect(self.__indexMap, index, lambda xindex, yindex: self.compareIndex(xindex, yindex))
                 self.__indexMap.insert(position, index)
     

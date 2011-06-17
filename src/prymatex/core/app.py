@@ -201,7 +201,7 @@ class PMXApplication(QApplication):
         logger = logging.getLogger("")
         logger.setLevel(logging.DEBUG)
         # create file handler which logs even debug messages
-        d = datetime.now().strftime('%d-%m-%G-%H-%M-%S')
+        d = datetime.now().strftime('%d-%m-%Y-%H-%M-%S')
         filename = self.getProfilePath('log', 'messages-%s.log' % d)
         try:
             fh = logging.FileHandler(filename)
