@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from PyQt4 import QtGui
 from prymatex.support import PMXMacroProcessor
 
 class PMXMacroProcessor(PMXMacroProcessor):
@@ -26,7 +26,7 @@ class PMXMacroProcessor(PMXMacroProcessor):
         next = block.next()
         end = next.position() if next.isValid() else start + block.length() - 1
         cursor.setPosition(start)
-        cursor.setPosition(end, QTextCursor.KeepAnchor)
+        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         self.editor.setTextCursor(cursor)
         
     def deleteBackward(self):

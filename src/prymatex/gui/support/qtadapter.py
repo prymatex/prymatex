@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, sys
+import os, sys, string
 sys.path.append(os.path.abspath('../../..'))
 
 try:
@@ -49,16 +49,13 @@ def buildQTextFormat(style):
     
 QTCHARCODES = {9: Qt.Key_Backspace,
                10: Qt.Key_Return,
+               #32: Qt.Key_Space,
                127: Qt.Key_Delete,
                63232: Qt.Key_F1,
-               63233: Qt.Key_F3,
                63234: Qt.Key_F2,
-               63235: Qt.Key_F3,
-               63236: Qt.Key_F3,
-               63238: Qt.Key_F3,
+               63233: Qt.Key_F3,
                63240: Qt.Key_F5,
-               63272: Qt.Key_F7,
-               63302: Qt.Key_F3}
+               63272: Qt.Key_F7}
 
 KEYMAP = get_keymap_table()
 def keyboardLayoutQtKeys(character):
@@ -73,6 +70,13 @@ def keyboardLayoutQtKeys(character):
     keys.append(code)
     return keys
 
+def keyboardLayoutKeys(key):
+    shift = False
+    for _, keysyms in KEYMAP.iteritems():
+        if key == keysyms[1]:
+            return (True, key)
+    return (shift, key)
+
 def buildKeyEquivalent(sequence):
     nemonic = []
     if sequence & Qt.CTRL:
@@ -83,11 +87,39 @@ def buildKeyEquivalent(sequence):
         nemonic.append(u"$")
     if sequence & Qt.META:
         nemonic.append(u"@")
-    key = sequence & 0xFF
-    if key:
-        #TODO: Manejar el shift
-        nemonic.append(chr(key))
-    return "".join(nemonic)
+    key = unichr(sequence & 0xFFFF)
+    if key in string.uppercase and u"$" in nemonic:
+        nemonic.remove(u"$")
+        nemonic.append(key)
+        return u"".join(nemonic)
+    elif key in string.uppercase and u"$" not in nemonic:
+        nemonic.append(key.lower())
+        return u"".join(nemonic)
+    elif u"$" not in nemonic:
+        for orig, qtcode in QTCHARCODES.iteritems():
+            if sequence & qtcode == qtcode:
+                key = unichr(orig)
+        nemonic.append(key)
+        return u"".join(nemonic)
+    else:
+        #Seguro que apreto shift
+        shift, code = keyboardLayoutKeys(key)
+        if shift:
+            nemonic.remove(u"$")
+            nemonic.append(key)
+            return u"".join(nemonic)
+        else:
+            for orig, qtcode in QTCHARCODES.iteritems():
+                if sequence & qtcode == qtcode:
+                    key = unichr(orig)
+            nemonic.append(key)
+            return u"".join(nemonic)
+    return None
+    if shift and u"$" in nemonic:
+        nemonic.append(key)
+        nemonic.remove(u"$")
+    nemonic.append(code)
+    return u"".join(nemonic)
     
 def buildKeySequence(nemonic):
     nemonic = list(nemonic)
@@ -106,6 +138,8 @@ def buildKeySequence(nemonic):
         nemonic.remove(u"@")
     if len(nemonic) == 1:
         keys = keyboardLayoutQtKeys(nemonic.pop())
+        if Qt.SHIFT in keys and Qt.SHIFT in sequence:
+            keys.remove(Qt.SHIFT)
         sequence.extend(keys)
     return sum(sequence)
 
