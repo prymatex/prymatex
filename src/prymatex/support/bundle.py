@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, re, plistlib
+import os, re, plistlib, shutil
 from copy import copy
 from xml.parsers.expat import ExpatError
 
@@ -85,7 +85,11 @@ class PMXManagedItem(object):
         self.manager = None
         
     def addNamespace(self, namespace):
-        self.namespaces.append(namespace)
+        index = self.manager.nsorder.index(namespace)
+        if index < len(self.namespaces):
+            self.namespaces.insert(index, namespace)
+        else:
+            self.namespaces.append(namespace)
     
     def setManager(self, manager):
         self.manager = manager
@@ -102,6 +106,9 @@ class PMXBundle(PMXManagedItem):
         if hash != None:
             self.load(hash)
 
+    def setSupport(self, support):
+        self.support = support
+        
     def load(self, hash):
         for key in PMXBundle.KEYS:
             value = hash.get(key, None)
@@ -139,7 +146,11 @@ class PMXBundle(PMXManagedItem):
             os.rmdir(self.path)
         except os.OSError:
             pass
-        
+            
+    def relocate(self, path):
+        if os.path.exists(self.path):
+            shutil.move(self.path, path)
+    
     def buildEnvironment(self):
         env = copy(self.manager.buildEnvironment())
         env['TM_BUNDLE_PATH'] = self.path
@@ -172,7 +183,11 @@ class PMXBundleItem(PMXManagedItem):
 
     def setBundle(self, bundle):
         self.bundle = bundle
-        
+    
+    @property
+    def disabled(self):
+        return self.bundle.disabled  
+    
     def load(self, hash):
         for key in PMXBundleItem.KEYS:
             setattr(self, key, hash.get(key, None))
@@ -210,7 +225,11 @@ class PMXBundleItem(PMXManagedItem):
             os.rmdir(dir)
         except os.OSError:
             pass
-
+    
+    def relocate(self, path):
+        if os.path.exists(self.path):
+            shutil.move(self.path, path)
+    
     def buildEnvironment(self, **kwargs):
         env = self.bundle.buildEnvironment()
         return env

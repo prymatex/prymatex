@@ -212,7 +212,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                     return new_name
             return name        
         
-        for bundle in sorted(self.pmxApp.bundleManager.getAllBundles(), name_order):
+        for bundle in sorted(self.pmxApp.supportManager.getAllBundles(), name_order):
             
             menu = QMenu(get_name_with_accel(bundle.name), self)
             
@@ -415,11 +415,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
        
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        self.current_editor_widget.request_save()
+        self.currentEditorWidget.request_save()
     
     @pyqtSignature('')
     def on_actionSave_As_triggered(self):
-        self.current_editor_widget.request_save(save_as = True)
+        self.currentEditorWidget.request_save(save_as = True)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
@@ -443,11 +443,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
     @pyqtSignature('')
     def on_actionZoom_In_triggered(self):
-        self.current_editor_widget.codeEdit.zoomIn()
+        self.currentEditorWidget.codeEdit.zoomIn()
     
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
-        self.current_editor_widget.codeEdit.zoomOut()
+        self.currentEditorWidget.codeEdit.zoomOut()
     
     @pyqtSignature('')
     def on_actionFocus_Editor_triggered(self):

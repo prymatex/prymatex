@@ -70,9 +70,11 @@ class PMXBundleTreeNode(object):
     #==================================================
     def appendChild(self, child):
         self.children.append(child)
+        child.parent = self
 
     def child(self, row):
-        return self.children[row]
+        if len(self.children) > row:
+            return self.children[row]
 
     def childCount(self):
         return len(self.children)
@@ -88,37 +90,23 @@ class RootNode(object):
 
 class PMXBundleTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, manager, parent = None):
-        super(PMXBundleTreeModel, self).__init__(parent)  
+        super(PMXBundleTreeModel, self).__init__(parent)
         self.manager = manager
         self.root = PMXBundleTreeNode(RootNode())
-        
-    def _populateFromManager(self):
-        for bundle in self.manager.getAllBundles():
-            bti = PMXBundleTreeNode(bundle, self.root)
-            self.root.appendChild(bti)
-            bundle_items = self.manager.findBundleItems(bundle = bundle)
-            self.setupModelData(bundle_items, bti)
-    
-    def populateToBundleNode(self, bundle):
-        bti = PMXBundleTreeNode(bundle, self.root)
-        self.root.appendChild(bti)
-        return bti
-        
-    def populateToBundleItemNode(self, bundleItem):
-        bti = PMXBundleTreeNode(bundleItem, bundleItem.bundle)
-        if bundleItem.TYPE == "template":
-            for file in bundleItem.getTemplateFiles():
-                tifi = PMXBundleTreeNode(file, bti)
-                bti.appendChild(tifi)
-        bundleItem.bundle.appendChild(bti)
-        return bti
     
     def setData(self, index, value, role):  
         if not index.isValid():  
             return False
         elif role == QtCore.Qt.EditRole:  
-            item = index.internalPointer()  
-            item.name = unicode(value.toString())
+            item = index.internalPointer()
+            name = unicode(value.toString())
+            if item.TYPE == "bundle":
+                self.manager.updateBundle(item, name = name)
+            elif item.TYPE == "templatefile":
+                pass
+            else:
+                self.manager.updateBundleItem(item, name = name)
+            self.dataChanged.emit(index, index)
             return True
         return False
      
@@ -167,11 +155,11 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         return None
 
     def index(self, row, column, parent):
-        if not parent.isValid():  
-            parent = self.root  
-        else:  
+        if not parent.isValid():
+            parent = self.root
+        else:
             parent = parent.internalPointer()
-
+        
         child = parent.child(row)
         if child:
             return self.createIndex(row, column, child)
@@ -186,19 +174,32 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         parent = child.parent
 
         if parent == self.root:  
-            return QtCore.QModelIndex()  
+            return QtCore.QModelIndex()
 
         return self.createIndex(parent.row(), 0, parent)
-
-    def setupModelData(self, items, parent):
-        for item in items:
-            biti = PMXBundleTreeNode(item, parent)
-            if item.TYPE == "template":
-                for file in item.getTemplateFiles():
-                    tifi = PMXBundleTreeNode(file, biti)
-                    biti.appendChild(tifi)
-            parent.appendChild(biti)
-
+    
+    #========================================================================
+    # Functions
+    #========================================================================
+    def appendBundle(self, bundle):
+        self.beginInsertRows(QtCore.QModelIndex(), self.root.childCount(), self.root.childCount())
+        self.root.appendChild(bundle)
+        self.endInsertRows()
+    
+    def appendBundleItem(self, bundleItem):
+        bnode = bundleItem.bundle
+        self.beginInsertRows(self.index(bnode.row(), 0, QtCore.QModelIndex()), bnode.childCount(), bnode.childCount())
+        bundleItem.bundle.appendChild(bundleItem)
+        self.endInsertRows()
+    
+    def getAllBundles(self):
+        return self.root.children
+    
+    def getBundle(self, uuid):
+        for child in self.root.children:
+            if child.uuid == uuid:
+                return child
+        
 #====================================================
 # Themes Styles
 #====================================================

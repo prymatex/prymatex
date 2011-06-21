@@ -70,14 +70,7 @@ class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
         self.mainwindowSettingsGroup = self.getSettingsGroup('MainWindow')
         
         self.comboTabVisibility.currentIndexChanged.connect(self.tabVisibilityChanged)
-        
-        
-        #self.mainwindowSettingsGroup = qApp.instance().settings.getGroup('mainwindow')
-        #title = self.mainwindowSettingsGroup.value('windowTitleTemplate') or '%APPTITLE'
-        title = self.mainwindowSettingsGroup.value('windowTitleTemplate')
         self.comboApplicationTitle.editTextChanged.connect(self.updateMainWindowTitle)
-        
-        self.comboApplicationTitle.addItem(title, title) 
         
     def tabVisibilityChanged(self, index):
         value = self.comboTabVisibility.itemData(index)

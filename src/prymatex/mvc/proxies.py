@@ -36,8 +36,10 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         if self.__sourceModel is not None:
             self.__sourceModel.disconnect(self)
         self.__sourceModel = model
-        self.__sourceModel.dataChanged.connect(self.reMapModel)
-        self.__sourceModel.layoutChanged.connect(self.reMapModel)
+        self.__sourceModel.dataChanged.connect(self.on_sourceModel_dataChanged)
+        self.__sourceModel.rowsInserted.connect(self.on_sourceModel_rowsInserted)
+        self.__sourceModel.rowsRemoved.connect(self.on_sourceModel_rowsRemoved)
+        self.__sourceModel.layoutChanged.connect(self.on_sourceModel_layoutChanged)
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
         return True
@@ -95,21 +97,24 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
                 return self.__indexMap[row]
         return QtCore.QModelIndex()
     
-    def reMapModel(self):
-        if self.__sourceModel is not None:
-            self.__indexMap = []
-            self.mapModel(QtCore.QModelIndex())
-
-        #self.emit("modelChanged()")
-        self.layoutChanged.emit()
-
-    def mapModel(self, parent):
-        childCount = self.__sourceModel.rowCount(parent)
-        for i in xrange(childCount):
-            #First, map this one
+    #=========================================
+    # source model handler
+    #=========================================
+    
+    def on_sourceModel_dataChanged(self, topLeft, bottomRight):
+        print "cambiaron los datos", topLeft, bottomRight
+    
+    def on_sourceModel_rowsInserted(self, parent, start, end):
+        for i in xrange(start, end + 1):
             index = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
+                print "agregando %s:%s" % (index.internalPointer().TYPE, index.internalPointer().name)
                 position = bisect(self.__indexMap, index, lambda xindex, yindex: self.compareIndex(xindex, yindex))
                 self.__indexMap.insert(position, index)
-            #Map it's children
-            self.mapModel(index)
+    
+    def on_sourceModel_rowsRemoved(self, parent, start, end):
+        print "se quitaron items"
+        
+    def on_sourceModel_layoutChanged(self):
+        print "cambio el layout"
+    

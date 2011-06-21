@@ -113,7 +113,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return all(results)
     
     def saveActiveFile(self):
-        value = self.editor.mainWindow.current_editor_widget.request_save()
+        value = self.editor.mainWindow.currentEditorWidget.request_save()
         return value
     
     # deleteFromEditor

@@ -26,6 +26,10 @@ class PMXEditorBaseWidget(QtGui.QWidget):
         self.changes = {}
     
     @property
+    def isNew(self):
+        return self.new
+        
+    @property
     def isChanged(self):
         return bool(self.changes)
     
@@ -93,6 +97,21 @@ class PMXEditorBaseWidget(QtGui.QWidget):
 #============================================================
 class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
     TYPE = 'snippet'
+    DEFAULTS = {'content': '''Syntax Summary:
+
+  Variables        $TM_FILENAME, $TM_SELECTED_TEXT
+  Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}
+  Substitutions    ${TM_FILENAME/.*/\U$0/}
+
+  Tab Stops        $1, $2, $3, � $0 (optional)
+  Placeholders     ${1:default value}
+  Mirrors          <${2:tag}>�</$2>
+  Transformations  <${3:tag}>�</${3/(\w*).*/\U$1/}>
+
+  Shell Code       `date`, `pwd`
+
+  Escape Codes     \$ \` \\'''}
+
     def __init__(self, parent = None):
         super(PMXSnippetWidget, self).__init__(parent)
         self.setupUi(self)
@@ -102,7 +121,7 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
         if self.bundleItem != None:
             return 'Edit Snippet: "%s"' % self.bundleItem.name
         return super(PMXSnippetWidget, self).title()
-
+    
     def getScope(self):
         scope = super(PMXSnippetWidget, self).getScope()
         return scope is not None and scope or ""
@@ -117,11 +136,23 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
     
     def edit(self, bundleItem):
         super(PMXSnippetWidget, self).edit(bundleItem)
-        hash = bundleItem.hash
-        self.content.setPlainText(hash['content'])
+        content = bundleItem.content
+        if content is None:
+            content = self.changes['content'] = self.DEFAULTS['content']
+        self.content.setPlainText(content)
 
 class PMXCommandWidget(PMXEditorBaseWidget, Ui_Command):
     TYPE = 'command'
+    DEFAULTS = {'beforeRunningCommand': 'nop',
+                'command': '''# just to remind you of some useful environment variables
+# see Help / Environment Variables for the full list
+echo File: "$TM_FILEPATH"
+echo Word: "$TM_CURRENT_WORD"
+echo Selection: "$TM_SELECTED_TEXT"''',
+                'input': 'selection',
+                'fallbackInput': 'document',
+                'output': 'replaceSelectedText'}
+
     def __init__(self, parent = None):
         super(PMXCommandWidget, self).__init__(parent)
         self.setupUi(self)
@@ -166,19 +197,23 @@ class PMXCommandWidget(PMXEditorBaseWidget, Ui_Command):
             self.changes['input'] = unicode(value)
         else:
             self.changes.pop('input', None)
-        if value == 'selection' and self.bundleItem.fallbackInput != None:
+        if value == 'selection':
             self.labelInputOption.setVisible(True)
             self.comboBoxFallbackInput.setVisible(True)
-            index = self.comboBoxFallbackInput.findData(QtCore.QVariant(self.bundleItem.fallbackInput))
+            fallbackInput = self.bundleItem.fallbackInput
+            if fallbackInput is None:
+                fallbackInput = self.DEFAULTS['fallbackInput']
+            index = self.comboBoxFallbackInput.findData(QtCore.QVariant(fallbackInput))
             if index != -1:
                 self.comboBoxFallbackInput.setCurrentIndex(index)
         else:
+            self.changes.pop('fallbackInput', None)
             self.labelInputOption.setVisible(False)
             self.comboBoxFallbackInput.setVisible(False)
         
     def on_comboBoxFallbackInput_changed(self, index):
         value = self.comboBoxFallbackInput.itemData(index).toString()
-        if value != self.bundleItem.fallbackInput:
+        if value != self.bundleItem.fallbackInput and value != self.DEFAULTS['fallbackInput']:
             self.changes['fallbackInput'] = unicode(value)
         else:
             self.changes.pop('fallbackInput', None)
@@ -210,19 +245,42 @@ class PMXCommandWidget(PMXEditorBaseWidget, Ui_Command):
     
     def edit(self, bundleItem):
         super(PMXCommandWidget, self).edit(bundleItem)
-        self.command.setPlainText(bundleItem.command)
-        index = self.comboBoxBeforeRunning.findData(QtCore.QVariant(bundleItem.beforeRunningCommand))
+        #Command
+        command = bundleItem.command
+        if command is None:
+            command = self.changes['command'] = self.DEFAULTS['command']
+        self.command.setPlainText(command)
+        #BeforeRunningCommand
+        beforeRunningCommand = bundleItem.beforeRunningCommand
+        if beforeRunningCommand is None:
+            beforeRunningCommand = self.changes['beforeRunningCommand'] = self.DEFAULTS['beforeRunningCommand']
+        index = self.comboBoxBeforeRunning.findData(QtCore.QVariant(beforeRunningCommand))
         if index != -1:
             self.comboBoxBeforeRunning.setCurrentIndex(index)
-        index = self.comboBoxInput.findData(QtCore.QVariant(bundleItem.input))
+        #Input
+        input = bundleItem.input
+        if input is None:
+            input = self.changes['input'] = self.DEFAULTS['input']
+        index = self.comboBoxInput.findData(QtCore.QVariant(input))
         if index != -1:
             self.comboBoxInput.setCurrentIndex(index)
-        index = self.comboBoxOutput.findData(QtCore.QVariant(bundleItem.output))
+        #Output
+        output = bundleItem.output
+        if output is None:
+            output = self.changes['output'] = self.DEFAULTS['output']
+        index = self.comboBoxOutput.findData(QtCore.QVariant(output))
         if index != -1:
             self.comboBoxOutput.setCurrentIndex(index)
     
 class PMXTemplateWidget(PMXEditorBaseWidget, Ui_Template):
     TYPE = 'template'
+    DEFAULTS = {'extension': 'txt',
+                'command': '''if [[ ! -f "$TM_NEW_FILE" ]]; then
+  TM_YEAR=`date +%Y` \
+  TM_DATE=`date +%Y-%m-%d` \
+  perl -pe 's/\$\{([^}]*)\}/$ENV{$1}/g' \
+     < template_in.txt > "$TM_NEW_FILE"
+fi"'''}
     def __init__(self, parent = None):
         super(PMXTemplateWidget, self).__init__(parent)
         self.setupUi(self)
@@ -244,11 +302,23 @@ class PMXTemplateWidget(PMXEditorBaseWidget, Ui_Template):
 
     def edit(self, bundleItem):
         super(PMXTemplateWidget, self).edit(bundleItem)
-        self.command.setPlainText(bundleItem.command)
-        self.lineEditExtension.setText(bundleItem.extension)
+        command = bundleItem.command
+        if command is None:
+            command = self.changes['command'] = self.DEFAULTS['command']
+        self.command.setPlainText(command)
+        extension = bundleItem.extension
+        if extension is None:
+            extension = self.changes['extension'] = self.DEFAULTS['extension']
+        self.lineEditExtension.setText(extension)
 
 class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
     TYPE = 'templatefile'
+    DEFAULTS = {'content': '''//
+//  ${TM_NEW_FILE_BASENAME}
+//
+//  Created by ${TM_FULLNAME} on ${TM_DATE}.
+//  Copyright (c) ${TM_YEAR} ${TM_ORGANIZATION_NAME}. All rights reserved.
+//'''}
     def __init__(self, parent = None):
         super(PMXTemplateFileWidget, self).__init__(parent)
         self.setupUi(self)
@@ -261,10 +331,15 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
 
     def edit(self, bundleItem):
         super(PMXTemplateFileWidget, self).edit(bundleItem)
-        self.content.setPlainText(bundleItem.content)
+        content = bundleItem.content
+        if content is None:
+            content = self.changes['content'] = self.DEFAULTS['content']
+        self.content.setPlainText(content)
     
 class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
     TYPE = 'dragcommand'
+    DEFAULTS = {'draggedFileExtensions': ['png', 'jpg'],
+                'command': '''echo "$TM_DROPPED_FILE"'''}
     def __init__(self, parent = None):
         super(PMXDragCommandWidget, self).__init__(parent)
         self.setupUi(self)
@@ -290,11 +365,33 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
         
     def edit(self, bundleItem):
         super(PMXDragCommandWidget, self).edit(bundleItem)
-        self.command.setPlainText(bundleItem.command)
-        self.lineEditExtensions.setText(", ".join(bundleItem.draggedFileExtensions))
+        command = bundleItem.command
+        if command is None:
+            command = self.changes['command'] = self.DEFAULTS['command']
+        self.command.setPlainText(command)
+        draggedFileExtensions = bundleItem.draggedFileExtensions
+        if draggedFileExtensions is None:
+            draggedFileExtensions = self.changes['draggedFileExtensions'] = self.DEFAULTS['draggedFileExtensions']
+        self.lineEditExtensions.setText(", ".join(draggedFileExtensions))
 
 class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
     TYPE = 'syntax'
+    DEFAULTS = {'content': {       'scopeName': 'source.untitled',
+       'fileTypes': [],
+       'foldingStartMarker': u'/\*\*|\{\s*$',
+       'foldingStopMarker': u'\*\*/|^\s*\}',
+       'patterns': [
+               {       'name': 'keyword.control.untitled',
+                       'match': u'\b(if|while|for|return)\b' },
+               {       'name': 'string.quoted.double.untitled',
+                       'begin': '"',
+                       'end': '"',
+                       'patterns': [
+                               {     'name': 'constant.character.escape.untitled',
+                                     'match': '\\.' } ]
+               }
+       ]}
+    }
     def __init__(self, parent = None):
         super(PMXLanguageWidget, self).__init__(parent)
         self.setupUi(self)
@@ -305,14 +402,18 @@ class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
             return 'Edit Language: "%s"' % self.bundleItem.name
         return super(PMXLanguageWidget, self).title()
     
-    def getScope(self):
-        scope = super(PMXLanguageWidget, self).getScope()
-        return scope is not None and scope or ""
+    def getKeyEquivalent(self):
+        keyEquivalent = super(PMXLanguageWidget, self).getKeyEquivalent()
+        return keyEquivalent is not None and keyEquivalent or ""
     
     def edit(self, bundleItem):
         super(PMXLanguageWidget, self).edit(bundleItem)
-        hash = bundleItem.hash
-        self.content.setPlainText(pformat(hash))
+        content = bundleItem.hash
+        content.pop('name')
+        content.pop('uuid')
+        if len(content) == 0:
+            content = self.changes['content'] = self.DEFAULTS['content']
+        self.content.setPlainText(pformat(content))
     
 class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     TYPE = 'preference'
@@ -332,8 +433,8 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     
     def edit(self, bundleItem):
         super(PMXPreferenceWidget, self).edit(bundleItem)
-        hash = bundleItem.hash
-        self.settings.setPlainText(pformat(hash['settings']))
+        content = bundleItem.hash
+        self.settings.setPlainText(pformat(content['settings']))
 
 class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     TYPE = 'bundle'

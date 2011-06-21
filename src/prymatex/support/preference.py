@@ -76,7 +76,7 @@ class PMXPreferenceSettings(object):
                 elif key in [ 'shellVariables' ]:
                     value = dict(map(lambda d: (d['name'], d['value']), value))
                 elif key in [ 'symbolTransformation' ]:
-                    value = [ self.TRANSFORMATIONPATTERN.findall(value) ]
+                    value = self.TRANSFORMATIONPATTERN.findall(value)
             setattr(self, key, value)
     
     @property
@@ -89,6 +89,11 @@ class PMXPreferenceSettings(object):
                     value = value.pattern
                 elif key in [ 'shellVariables' ]:
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
+                elif key in [ 'symbolTransformation' ]:
+                    symbols = []
+                    for v in value:
+                        symbols.append('s/' + v[0] + '/' + v[1] + '/' + v[2])
+                    value = ";".join(symbols) + ";"
                 hash[key] = value
         return hash
     
@@ -106,7 +111,7 @@ class PMXPreferenceSettings(object):
     def update(self, other):
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(other, key, None)
-            if value != None and getattr(self, key) == None:
+            if value is not None and not getattr(self, key):
                 setattr(self, key, value)
 
     def indent(self, line):

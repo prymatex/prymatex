@@ -68,7 +68,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
-        syntax = self.pmxApp.bundleManager.getBundleItem(uuid)
+        syntax = self.pmxApp.supportManager.getBundleItem(uuid)
         if syntax != None:
             self.setSyntax(syntax)
     
@@ -78,7 +78,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
-        theme = self.pmxApp.bundleManager.getTheme(uuid)
+        theme = self.pmxApp.supportManager.getTheme(uuid)
         self.syntaxProcessor.formatter = theme
         style = theme.getStyle()
         self.colours = {
@@ -171,7 +171,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     def getPreference(self, scope):
         if scope not in PMXCodeEdit.PREFERENCE_CACHE:
-            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.pmxApp.bundleManager.getPreferenceSettings(scope)
+            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.pmxApp.supportManager.getPreferenceSettings(scope)
         return PMXCodeEdit.PREFERENCE_CACHE[scope]
 
     def getCurrentScope(self):
@@ -423,12 +423,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def keyPressBundleItem(self, event):
         keyseq = int(event.modifiers()) + event.key()
         scope = self.getCurrentScope()
-        items = self.pmxApp.bundleManager.getKeyEquivalentItem(keyseq, scope)
+        items = self.pmxApp.supportManager.getKeyEquivalentItem(keyseq, scope)
         if items:
-            if len(items) > 1:
-                self.selectBundleItem(items)
-            else:
+            if len(items) == 1:
                 self.insertBundleItem(items[0])
+            elif len(items) == 2 and items[0].TYPE != items[1].TYPE:
+                #Son distintos desempato, el primero es el que mejor se ajusta
+                self.insertBundleItem(items[0])
+            else:
+                self.selectBundleItem(items)
             return True
     
     def keyPressSmartTyping(self, event):
@@ -461,9 +464,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.indent(self.tabKeyBehavior)
         else:
             scope = self.getCurrentScope()
-            trigger = self.pmxApp.bundleManager.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
+            trigger = self.pmxApp.supportManager.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
             if trigger != None:
-                snippets = self.pmxApp.bundleManager.getTabTriggerItem(trigger, scope)
+                snippets = self.pmxApp.supportManager.getTabTriggerItem(trigger, scope)
                 if len(snippets) > 1:
                     self.selectBundleItem(snippets, tabTrigger = True)
                     return
@@ -502,7 +505,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def returnPressEvent(self, event):
         line = unicode(self.textCursor().block().text())
         if self.document().blockCount() == 1:
-            syntax = self.pmxApp.bundleManager.findSyntaxByFirstLine(line)
+            syntax = self.pmxApp.supportManager.findSyntaxByFirstLine(line)
             if syntax != None:
                 self.setSyntax(syntax)
         super(PMXCodeEdit, self).keyPressEvent(event)
@@ -544,16 +547,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(tabTrigger, disableIndent)
+            print "Corriendo Snippet", item.name
             item.execute(self.snippetProcessor)
         elif item.TYPE == PMXCommand.TYPE:
+            print "Corriendo Command", item.name
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
+            print "Corriendo Macro", item.name
             item.execute(self.macroProcessor)
 
     def selectBundleItem(self, items, tabTrigger = False):
-        syntax = any(map(lambda item: isinstance(item, PMXSyntax), items))
+        #Tengo mas de uno que hago?
+        syntax = any(map(lambda item: item.TYPE == 'syntax', items))
         menu = QMenu()
         for index, item in enumerate(items):
             action = menu.addAction(item.buildMenuTextEntry("&" + str(index + 1)))
