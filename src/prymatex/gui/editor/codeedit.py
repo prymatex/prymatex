@@ -819,3 +819,31 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.setTextCursor(cursor)
                 cursor.endEditBlock()
                 
+    def dragEnterEvent(self, dragEnterEvent):
+        if dragEnterEvent.mimeData().hasFormat('text/plain'):
+            dragEnterEvent.accept()
+        else:
+            dragEnterEvent.ignore()
+    
+    
+    def dropEvent(self, dropEvent):
+        '''
+        When a file is dropped
+        '''
+        dropedText = dropEvent.mimeData().text()
+        filesToOpen = []
+        
+        while True:
+            if dropedText and not dropedText.count('\n'):
+                text = dropedText
+            else:
+                text, dropedText = dropedText.split('\n', 1)
+            
+            
+             
+        # Check if there were files droped
+
+# TODO: Move to a more convinient location
+from os.path import isfile, isdir
+isFile = lambda s: s.startswith('file://') and isfile(s[7:])
+isDir = lambda s: s.startswith('file://') and isdir(s[7:])
