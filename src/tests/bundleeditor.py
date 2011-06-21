@@ -16,7 +16,7 @@ if __name__ == "__main__":
     app.options = options
     from prymatex.gui.support.manager import PMXSupportModelManager
     app.supportManager = PMXSupportModelManager()
-    app.supportManager.addNamespace('prymatex', os.path.abspath('../bundles/prymatex'))
+    app.supportManager.addNamespace('prymatex', os.path.abspath('../prymatex/share'))
     app.supportManager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     app.supportManager.loadSupport()
     from prymatex.gui.support.bundleeditor import PMXBundleEditor
