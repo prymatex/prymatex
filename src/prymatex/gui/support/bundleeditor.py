@@ -180,12 +180,10 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     #===========================================================
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj == self.lineKeyEquivalentActivation:
-            keyseq = QtGui.QKeySequence(int(event.modifiers()) + event.key())
-            self.lineKeyEquivalentActivation.setText(keyseq.toString())
-            return True
-        elif event.type() == QtCore.QEvent.KeyRelease and obj == self.lineKeyEquivalentActivation:
             keyseq = int(event.modifiers()) + event.key()
+            print "press", keyseq
             self.stackedWidget.currentWidget().setKeyEquivalent(keyseq)
+            self.lineKeyEquivalentActivation.setText(QtGui.QKeySequence(keyseq).toString())
             return True
         return super(PMXBundleEditor, self).eventFilter(obj, event)
         
@@ -212,7 +210,11 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         #TODO: ver si tengo que guardar el current editor
         current = self.stackedWidget.currentWidget()
         if current.isChanged:
-            print current.changes
+            if current.TYPE != "":
+                if current.TYPE == "bundle":
+                    self.manager.updateBundle(current.bundleItem, **current.changes)
+                else:
+                    self.manager.updateBundleItem(current.bundleItem, **current.changes)
             
         editor = self.getEditorForTreeItem(treeItem)
         if editor != None:

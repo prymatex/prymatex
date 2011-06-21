@@ -114,12 +114,6 @@ def buildKeyEquivalent(sequence):
                     key = unichr(orig)
             nemonic.append(key)
             return u"".join(nemonic)
-    return None
-    if shift and u"$" in nemonic:
-        nemonic.append(key)
-        nemonic.remove(u"$")
-    nemonic.append(code)
-    return u"".join(nemonic)
     
 def buildKeySequence(nemonic):
     nemonic = list(nemonic)

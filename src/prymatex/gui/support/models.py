@@ -61,6 +61,11 @@ class PMXBundleTreeNode(object):
             text += u"\t%s" % (self.trigger)
         return text.replace('&', '&&')
     
+    def update(self, hash):
+        if 'keyEquivalent' in hash:
+            hash['keyEquivalent'] = buildKeyEquivalent(hash['keyEquivalent'])
+        self.item.update(hash)
+    
     #==================================================
     # Tree Node interface
     #==================================================
