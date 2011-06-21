@@ -379,7 +379,7 @@ class VariablePlaceholder(NodeList):
         if self.name in processor.environment:
             processor.insertText(processor.environment[self.name])
         else:
-            super(StructurePlaceholder, self).render(processor)
+            super(VariablePlaceholder, self).render(processor)
         self.end = processor.cursorPosition()
     
 class VariableTransformation(Node):
