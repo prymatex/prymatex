@@ -193,8 +193,8 @@ class PMXSyntax(PMXBundleItem):
     FOLDING_NONE = 0
     FOLDING_START = -1
     FOLDING_STOP = -2
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXSyntax, self).__init__(namespace, hash, path)
+    def __init__(self, uuid, namespace, hash, path = None):
+        super(PMXSyntax, self).__init__(uuid, namespace, hash, path)
 
     def load(self, hash):
         super(PMXSyntax, self).load(hash)

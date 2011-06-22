@@ -7,6 +7,7 @@
 '''
 
 import os, shutil, plistlib, codecs
+import uuid as uuidmodule
 from glob import glob
 from subprocess import Popen
 from prymatex.support.bundle import PMXBundleItem
@@ -41,8 +42,8 @@ class PMXTemplate(PMXBundleItem):
     FOLDER = 'Templates'
     PATTERNS = [ '*' ]
 
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXTemplate, self).__init__(namespace, hash, path)
+    def __init__(self, uuid, namespace, hash, path = None):
+        super(PMXTemplate, self).__init__(uuid, namespace, hash, path)
         self.files = []
     
     def load(self, hash):
@@ -107,7 +108,8 @@ class PMXTemplate(PMXBundleItem):
         paths.remove(info)
         try:
             data = plistlib.readPlist(info)
-            template = cls(namespace, data, path)
+            uuid = uuidmodule.UUID(data.pop('uuid'))
+            template = cls(uuid, namespace, data, path)
             template.setBundle(bundle)
             template = manager.addBundleItem(template)
             manager.addManagedObject(template)

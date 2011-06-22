@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, re, plistlib, shutil, uuid
+import os, re, plistlib, shutil
+import uuid as uuidmodule
 from copy import copy
-from xml.parsers.expat import ExpatError
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -24,7 +24,7 @@ RE_XML_ILLEGAL = re.compile(RE_XML_ILLEGAL)
 def readPlist(file):
     try:
         data = plistlib.readPlist(file)
-    except Exception, e:
+    except:
         data = open(file).read()
         for match in RE_XML_ILLEGAL.finditer(data):
             data = data[:match.start()] + "?" + data[match.end():]
@@ -89,22 +89,15 @@ class PMXMenuNode(object):
                 yield (self.MENU_SPACE, self.MENU_SPACE)
 
 class PMXManagedObject(object):
-    def __init__(self, namespace):
-        #Base or default namespace
+    def __init__(self, uuid, namespace):
+        self.uuid = uuid
         self.namespaces = [ namespace ]
         self.manager = None
-        self.__uuid = None
-        
+    
     @property
-    def uuid(self):
-        return self.__uuid
-        
-    @uuid.setter
-    def uuid(self, value):
-        if not isinstance(value, uuid.UUID):
-            value = uuid.UUID(value)
-        self.__uuid = value
-        
+    def hash(self):
+        return { 'uuid': unicode(self.uuid).upper() }
+    
     def addNamespace(self, namespace):
         index = self.manager.nsorder.index(namespace)
         if index < len(self.namespaces):
@@ -116,16 +109,15 @@ class PMXManagedObject(object):
         self.manager = manager
         
 class PMXBundle(PMXManagedObject):
-    KEYS = [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
+    KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXBundle, self).__init__(namespace)
+    def __init__(self, uuid, namespace, hash, path = None):
+        super(PMXBundle, self).__init__(uuid, namespace)
         self.path = path
         self.disabled = False
         self.support = None
-        if hash != None:
-            self.load(hash)
+        self.load(hash)
 
     def setSupport(self, support):
         self.support = support
@@ -143,8 +135,7 @@ class PMXBundle(PMXManagedObject):
     
     @property
     def hash(self):
-        #TODO: el menu
-        hash = {}
+        hash = super(PMXBundle, self).hash
         for key in PMXBundle.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -184,9 +175,10 @@ class PMXBundle(PMXManagedObject):
         info_file = os.path.join(path, cls.FILE)
         try:
             data = readPlist(info_file)
-            bundle = manager.getManagedObject(data['uuid'])
-            if bundle is None and not manager.isDeleted(data['uuid']):
-                bundle = cls(namespace, data, path)
+            uuid = uuidmodule.UUID(data.pop('uuid'))
+            bundle = manager.getManagedObject(uuid)
+            if bundle is None and not manager.isDeleted(uuid):
+                bundle = cls(uuid, namespace, data, path)
                 bundle.disabled = manager.isDisabled(bundle.uuid)
                 #Add and promote, capture bundle
                 bundle = manager.addBundle(bundle)
@@ -197,17 +189,16 @@ class PMXBundle(PMXManagedObject):
             print "Error in bundle %s (%s)" % (info_file, e)
 
 class PMXBundleItem(PMXManagedObject):
-    KEYS = [ 'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
+    KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
     TYPE = ''
     FOLDER = ''
     EXTENSION = ''
     PATTERNS = []
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXBundleItem, self).__init__(namespace)
+    def __init__(self, uuid, namespace, hash, path = None):
+        super(PMXBundleItem, self).__init__(uuid, namespace)
         self.path = path
         self.bundle = None
-        if hash != None:
-            self.load(hash)
+        self.load(hash)
 
     def setBundle(self, bundle):
         self.bundle = bundle
@@ -232,7 +223,7 @@ class PMXBundleItem(PMXManagedObject):
     
     @property
     def hash(self):
-        hash = {}
+        hash = super(PMXBundleItem, self).hash
         for key in PMXBundleItem.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -266,9 +257,10 @@ class PMXBundleItem(PMXManagedObject):
     def loadBundleItem(cls, path, namespace, bundle, manager):
         try:
             data = readPlist(path)
-            item = manager.getManagedObject(data['uuid'])
-            if item is None and not manager.isDeleted(data['uuid']):
-                item = cls(namespace, data, path)
+            uuid = uuidmodule.UUID(data.pop('uuid'))
+            item = manager.getManagedObject(uuid)
+            if item is None and not manager.isDeleted(uuid):
+                item = cls(uuid, namespace, data, path)
                 #danger!!! add and populate
                 item.setBundle(bundle)
                 item = manager.addBundleItem(item)
@@ -278,6 +270,6 @@ class PMXBundleItem(PMXManagedObject):
         except Exception, e:
             print "Error in bundle item %s (%s)" % (path, e)
     
-    def resolve(self, *args, **kwargs):
+    def execute(self, processor):
         pass
         

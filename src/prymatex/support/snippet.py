@@ -4,7 +4,8 @@
 '''
     Snippte's module
 '''
-import re, logging, uuid
+import re, logging
+import uuid as uuidmodule
 try:
     from ponyguruma import sre
     from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
@@ -20,7 +21,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 logger = logging.getLogger(__name__)
 
-SNIPPET_SYNTAX = { 'uuid': uuid.uuid1(),
+SNIPPET_SYNTAX = { 
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
                'match': '\\\\(\\\\|\\$|`)',
                'name': 'constant.character.escape.snippet'},
@@ -622,10 +623,10 @@ class PMXSnippet(PMXBundleItem):
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
     PATTERNS = ['*.tmSnippet', '*.plist']
-
-    parser = PMXSyntax("internal", hash = SNIPPET_SYNTAX)
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXSnippet, self).__init__(namespace, hash, path)
+    parser = PMXSyntax(uuidmodule.uuid1(), "internal", hash = SNIPPET_SYNTAX)
+    
+    def __init__(self, uuid, namespace, hash, path = None):
+        super(PMXSnippet, self).__init__(uuid, namespace, hash, path)
         self.snippet = None
         self.taborder = None
         self.index = -1
@@ -715,7 +716,6 @@ class PMXSnippet(PMXBundleItem):
         for holder in self.taborder:
             # if holder == None then is the end of taborders
             if holder == None: break
-            index = holder.start
             if holder.start <= start <= holder.end and holder.start <= end <= holder.end and (found == None or len(holder) < len(found)):
                 found = holder
         if found != None:

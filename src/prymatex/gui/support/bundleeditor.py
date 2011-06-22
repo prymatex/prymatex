@@ -88,8 +88,12 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.createBundleItem(u"untitled", "template")
         
     def on_actionTemplateFile_triggered(self):
-        bundle = self.manager if not "default bundle" else "bundle in node selected"
-        self.manager.createBundleItem(u"untitled", "templatefile", bundle)
+        index = self.treeView.currentIndex()
+        if index.isValid():
+            template = self.proxyTreeModel.mapToSource(index).internalPointer()
+            if template.TYPE == 'templatefile':
+                template = template.parent
+        self.manager.createTemplateFile(u"untitled", template)
         print "TemplateFile"
         
     def on_actionPreferences_triggered(self):

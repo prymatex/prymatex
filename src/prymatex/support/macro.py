@@ -13,8 +13,8 @@ class PMXMacro(PMXBundleItem):
     FOLDER = 'Macros'
     EXTENSION = 'tmMacro'
     PATTERNS = [ '*.tmMacro', '*.plist']
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXMacro, self).__init__(namespace, hash, path)
+    def __init__(self, uuid, namespace, hash, path = None):
+        super(PMXMacro, self).__init__(uuid, namespace, hash, path)
 
     def load(self, hash):
         super(PMXMacro, self).load(hash)

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, uuid, string, unicodedata
-from os.path import join, basename, dirname, exists, normpath
+import re, string, unicodedata
+import uuid as uuidmodule
+from os.path import join, basename, dirname, exists
 
 from glob import glob
 from prymatex.support.bundle import PMXBundle, PMXBundleItem
@@ -11,7 +12,7 @@ from prymatex.support.syntax import PMXSyntax
 from prymatex.support.snippet import PMXSnippet
 from prymatex.support.preference import PMXPreference
 from prymatex.support.command import PMXCommand, PMXDragCommand
-from prymatex.support.template import PMXTemplate
+from prymatex.support.template import PMXTemplate, PMXTemplateFile
 from prymatex.support.theme import PMXTheme
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
@@ -66,7 +67,7 @@ class PMXSupportBaseManager(object):
             self.namespaces[name][element] = self.environment[var] = epath
 
     def uuidgen(self):
-        return uuid.uuid1()
+        return uuidmodule.uuid1()
         
     def convertToValidPath(self, name):
         # TODO: ver que el uuid generado no este entre los elementos existentes
@@ -99,7 +100,7 @@ class PMXSupportBaseManager(object):
         if 'Themes' in self.namespaces[namespace]:
             paths = glob(join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
-                theme = PMXTheme.loadTheme(path, namespace, self)
+                PMXTheme.loadTheme(path, namespace, self)
 
     #---------------------------------------------------
     # LOAD BUNDLES
@@ -123,7 +124,6 @@ class PMXSupportBaseManager(object):
             for klass in BUNDLEITEM_CLASSES:
                 files = reduce(lambda x, y: x + glob(y), [ join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
                 for path in files:
-                    #TODO: Se puede delegar la carga completa del bundle item pasando tambien la cache
                     klass.loadBundleItem(path, namespace, bundle, self)
 
     #---------------------------------------------------
@@ -148,10 +148,10 @@ class PMXSupportBaseManager(object):
         obj.setManager(self)
         self.managedObjects[obj.uuid] = obj
         
-    def getManagedObject(self, uid):
-        if not isinstance(uid, uuid.UUID):
-            uid = uuid.UUID(uid)
-        return self.managedObjects.get(uid, None)
+    def getManagedObject(self, uuid):
+        if not isinstance(uuid, uuidmodule.UUID):
+            uuid = uuidmodule.UUID(uuid)
+        return self.managedObjects.get(uuid, None)
     
     #---------------------------------------------------
     # BUNDLE INTERFACE
@@ -159,9 +159,6 @@ class PMXSupportBaseManager(object):
     def addBundle(self, bundle):
         return bundle
         
-    def getBundle(self, uuid):
-        pass
-
     def modifyBundle(self, bundle):
         '''
             Llamado luego de modificar un bundle
@@ -172,9 +169,6 @@ class PMXSupportBaseManager(object):
         '''
             Llamado antes de eliminar un bundle
         '''
-        pass
-
-    def hasBundle(self, uuid):
         pass
 
     def getAllBundles(self):
@@ -207,10 +201,8 @@ class PMXSupportBaseManager(object):
         if len(self.nsorder) < 2:
             return None
         namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
-        hash = {    'uuid': self.uuidgen(),
-                    'name': name }
         path = join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
-        bundle = PMXBundle(namespace, hash, path)
+        bundle = PMXBundle(self.uuidgen(), namespace, { 'name': name }, path)
         return self.addBundle(bundle)
     
     def readBundle(self, **attrs):
@@ -268,21 +260,12 @@ class PMXSupportBaseManager(object):
     def addBundleItem(self, bundleItem):
         return bundleItem
         
-    def getBundleItem(self, uuid):
-        pass
-
     def modifyBundleItem(self, bundleItem):
         pass
 
     def removeBundleItem(self, bundleItem):
         pass
     
-    def hasBundleItem(self, uuid):
-        '''
-        @return: True if PMXBundleItem exists
-        '''
-        pass
-
     def getAllBundleItems(self):
         pass
         
@@ -312,15 +295,13 @@ class PMXSupportBaseManager(object):
         if len(self.nsorder) < 2:
             return None
         namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
-        hash = {    'uuid': self.uuidgen(),
-                    'name': name }
         klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
         if len(klass) != 1:
             raise Exception("No class type for %s" % tipo)
         klass = klass.pop()
         path = join(bundle.path, klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
 
-        item = klass(namespace, hash, path)
+        item = klass(self.uuidgen(), namespace, { 'name': name }, path)
         item.setBundle(bundle)
         return self.addBundleItem(item)
     
@@ -376,26 +357,33 @@ class PMXSupportBaseManager(object):
     # TEMPLATEFILE INTERFACE
     #---------------------------------------------------
     def addTemplateFile(self, file):
-        pass
-            
+        return file
+    
+    #---------------------------------------------------
+    # TEMPLATEFILE CRUD
+    #---------------------------------------------------
+    def createTemplateFile(self, name, template):
+        if len(self.nsorder) < 2:
+            return None
+        if template.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
+            self.updateBundleItem(template)
+        path = join(template.path, "%s.%s" % (self.convertToValidPath(name), template.extension))
+        file = PMXTemplateFile(path, template)
+        file = self.addTemplateFile(file)
+        return file
+    
     #---------------------------------------------------
     # THEME INTERFACE
     #---------------------------------------------------
     def addTheme(self, theme):
         return theme
         
-    def getTheme(self, uuid):
-        pass
-
     def modifyTheme(self, theme):
         pass
         
     def removeTheme(self, theme):
         pass
         
-    def hasTheme(self, uuid):
-        pass
-
     def getAllThemes(self):
         pass
     
@@ -415,14 +403,9 @@ class PMXSupportBaseManager(object):
         return items
 
     def createTheme(self, name, namespace = None):
-        '''
-            
-        '''
         namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
-        hash = {    'uuid': self.uuidgen(),
-                    'name': name }
         path = join(self.namespaces[namespace]['Themes'], "%s.tmTheme" % self.convertToValidPath(name))
-        theme = PMXTheme(namespace, hash, path)
+        theme = PMXTheme(self.uuidgen(), namespace, { 'name': name }, path)
         self.addTheme(theme)
         return theme
     
@@ -623,10 +606,7 @@ class PMXSupportManager(PMXSupportBaseManager):
         self.BUNDLES[bundle.uuid] = bundle
 
     def getBundle(self, uuid):
-        '''
-        @return: PMXBundle by UUID
-        '''
-        return self.BUNDLES[uuid]
+        return self.getManagedObject(uuid)
 
     def modifyBundle(self, bundle):
         pass
@@ -642,12 +622,6 @@ class PMXSupportManager(PMXSupportBaseManager):
             Perform logical delete
         '''
         self.deletedBundles.append(uuid)
-        
-    def hasBundle(self, uuid):
-        '''
-        @return: True if bundle exists
-        '''
-        return uuid in self.BUNDLES
 
     def getAllBundles(self):
         '''
@@ -674,7 +648,7 @@ class PMXSupportManager(PMXSupportBaseManager):
             self.SYNTAXES[item.scopeName] = item
 
     def getBundleItem(self, uuid):
-        return self.BUNDLE_ITEMS[uuid]
+        return self.getManagedObject(uuid)
 
     def modifyBundleItem(self, item):
         pass
@@ -682,12 +656,6 @@ class PMXSupportManager(PMXSupportBaseManager):
     def removeBundleItem(self, item):
         self.BUNDLE_ITEMS.pop(item.uuid)
     
-    def hasBundleItem(self, uuid):
-        '''
-        @return: True if PMXBundleItem exists
-        '''
-        return uuid in self.BUNDLE_ITEMS
-
     def getAllBundleItems(self):
         return self.BUNDLE_ITEMS.values()
         
@@ -696,9 +664,10 @@ class PMXSupportManager(PMXSupportBaseManager):
     #---------------------------------------------------
     def addTheme(self, theme):
         self.THEMES[theme.uuid] = theme
+        return theme
         
     def getTheme(self, uuid):
-        return self.THEMES[uuid]
+        return self.getManagedObject(uuid)
 
     def modifyTheme(self, theme):
         pass

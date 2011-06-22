@@ -13,7 +13,7 @@ except Exception, e:
     sre = re
     OPTION_CAPTURE_GROUP = re.MULTILINE
 from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile, deleteFile
+from prymatex.support.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile
 
 def compileRegexp(string):
     #Muejejejeje
@@ -50,8 +50,8 @@ class PMXCommand(PMXBundleItem):
                   206: 'showAsTooltip',
                   207: 'createNewDocument'
                   }
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXCommand, self).__init__(namespace, hash, path)
+    def __init__(self, uuid, namespace, hash, path = None):
+        super(PMXCommand, self).__init__(uuid, namespace, hash, path)
 
     def load(self, hash):
         super(PMXCommand, self).load(hash)
@@ -152,8 +152,8 @@ class PMXDragCommand(PMXCommand):
     TYPE = 'dragcommand'
     FOLDER = 'DragCommands'
     FILES = ['*.tmCommand', '*.plist']
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXDragCommand, self).__init__(namespace, hash, path)
+    def __init__(self, uuid, namespace, hash = None, path = None):
+        super(PMXDragCommand, self).__init__(uuid, namespace, hash, path)
 
     def load(self, hash):
         super(PMXDragCommand, self).load(hash)

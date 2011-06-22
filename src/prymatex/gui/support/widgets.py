@@ -103,10 +103,10 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
   Fallback Values  ${TM_SELECTED_TEXT:$TM_CURRENT_WORD}
   Substitutions    ${TM_FILENAME/.*/\U$0/}
 
-  Tab Stops        $1, $2, $3, � $0 (optional)
+  Tab Stops        $1, $2, $3, ... $0 (optional)
   Placeholders     ${1:default value}
-  Mirrors          <${2:tag}>�</$2>
-  Transformations  <${3:tag}>�</${3/(\w*).*/\U$1/}>
+  Mirrors          <${2:tag}>...</$2>
+  Transformations  <${3:tag}>...</${3/(\w*).*/\U$1/}>
 
   Shell Code       `date`, `pwd`
 
@@ -329,6 +329,15 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
             return 'Edit Template File: "%s"' % self.bundleItem.name
         return super(PMXTemplateFileWidget, self).title()
 
+    def getScope(self):
+        return None
+    
+    def getTabTrigger(self):
+        return None
+    
+    def getKeyEquivalent(self):
+        return None
+    
     def edit(self, bundleItem):
         super(PMXTemplateFileWidget, self).edit(bundleItem)
         content = bundleItem.content

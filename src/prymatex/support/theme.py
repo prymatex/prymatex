@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os, plistlib
+import uuid as uuidmodule
 from copy import copy
 from xml.parsers.expat import ExpatError
 from prymatex.support.score import PMXScoreManager
@@ -50,15 +51,14 @@ class PMXStyle(object):
         return buildQColor(self[item])
     
 class PMXTheme(PMXManagedObject):
-    KEYS = [    'uuid', 'name', 'comment', 'author', 'settings' ]
+    KEYS = [    'name', 'comment', 'author', 'settings' ]
     STYLES_CACHE = {}
     scores = PMXScoreManager()
     
-    def __init__(self, namespace, hash = None, path = None):
-        super(PMXTheme, self).__init__(namespace)
+    def __init__(self, uuid, namespace, hash, path = None):
+        super(PMXTheme, self).__init__(uuid, namespace)
         self.path = path
-        if hash != None:
-            self.load(hash)
+        self.load(hash)
 
     def load(self, hash):
         self.sytles = []
@@ -77,7 +77,7 @@ class PMXTheme(PMXManagedObject):
     
     @property
     def hash(self):
-        hash = {}
+        hash = super(PMXTheme, self).hash
         for key in PMXTheme.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -99,9 +99,10 @@ class PMXTheme(PMXManagedObject):
     def loadTheme(cls, path, namespace, manager):
         try:
             data = plistlib.readPlist(path)
-            theme = manager.getManagedObject(data['uuid'])
-            if theme is None and not manager.isDeleted(data['uuid']):
-                theme = PMXTheme(namespace, data, path)
+            uuid = uuidmodule.UUID(data.pop('uuid'))
+            theme = manager.getManagedObject(uuid)
+            if theme is None and not manager.isDeleted(uuid):
+                theme = PMXTheme(uuid, namespace, data, path)
                 theme = manager.addTheme(theme)
                 manager.addManagedObject(theme)
             elif theme is not None:
