@@ -377,7 +377,10 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     def addTheme(self, theme):
         return theme
-        
+    
+    def addThemeStyle(self, style):
+        return style
+    
     def modifyTheme(self, theme):
         pass
         

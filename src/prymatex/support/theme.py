@@ -14,14 +14,14 @@ from prymatex.gui.support.qtadapter import buildQTextFormat, buildQColor
     caret = Cursor, foreground, selection, invisibles, lineHighlight, gutter, background
 '''
 
-class PMXStyle(object):
+class PMXThemeStyle(object):
     KEYS = [    'scope', 'name', 'settings' ]
-    def __init__(self, hash = None):
-        if hash != None:
-            self.load(hash)
+    def __init__(self, hash, theme):
+        self.theme = theme
+        self.load(hash)
 
     def load(self, hash):
-        for key in PMXStyle.KEYS:
+        for key in PMXThemeStyle.KEYS:
             setattr(self, key, hash.get(key, None))
 
     @property
@@ -37,7 +37,7 @@ class PMXStyle(object):
     
     def __copy__(self):
         values = {'scope': self.scope, 'name': self.name, 'settings': copy(self.settings)}
-        obj = PMXStyle(values)
+        obj = PMXThemeStyle(values, self.theme)
         return obj
         
     def update(self, other):
@@ -51,26 +51,26 @@ class PMXStyle(object):
         return buildQColor(self[item])
     
 class PMXTheme(PMXManagedObject):
-    KEYS = [    'name', 'comment', 'author', 'settings' ]
+    KEYS = [    'name', 'comment', 'author']
     STYLES_CACHE = {}
     scores = PMXScoreManager()
     
     def __init__(self, uuid, namespace, hash, path = None):
         super(PMXTheme, self).__init__(uuid, namespace)
         self.path = path
+        self.styles = []
+        self.default = None
         self.load(hash)
 
     def load(self, hash):
-        self.sytles = []
         for key in PMXTheme.KEYS:
             value = hash.get(key, None)
-            if value != None and key == 'settings':
-                self.default = PMXStyle(value[0])
-                for setting in value[1:]:
-                    self.sytles.append(PMXStyle(setting))
-            else:
+            if value != None:
                 setattr(self, key, value)
 
+    def setDefault(self, default):
+        self.default = default
+        
     def update(self, hash):
         for key in hash.keys():
             setattr(self, key, hash[key])
@@ -104,6 +104,14 @@ class PMXTheme(PMXManagedObject):
             if theme is None and not manager.isDeleted(uuid):
                 theme = PMXTheme(uuid, namespace, data, path)
                 theme = manager.addTheme(theme)
+                settings = data.pop('settings', [])
+                if settings:
+                    style = PMXThemeStyle(settings[0], theme)
+                    theme.setDefault(style)
+                for setting in settings[1:]:
+                    style = PMXThemeStyle(setting, theme)
+                    style = manager.addThemeStyle(style)
+                    theme.styles.append(style)
                 manager.addManagedObject(theme)
             elif theme is not None:
                 theme.addNamespace(namespace)
@@ -120,7 +128,7 @@ class PMXTheme(PMXManagedObject):
         if scope == None:
             return base
         styles = []
-        for style in self.sytles:
+        for style in self.styles:
             if style.scope != None:
                 score = self.scores.score(style.scope, scope)
                 if score != 0:

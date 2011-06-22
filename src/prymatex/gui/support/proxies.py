@@ -48,3 +48,20 @@ class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
         for num, index in enumerate(self.indexMap()):
             if index.internalPointer() == item:
                 return num
+            
+class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
+    def filterAcceptsRow(self, sourceRow, sourceParent):
+        regexp = self.filterRegExp()
+        if regexp.isEmpty():
+            return True
+        index = self.sourceModel().index(sourceRow, 0, sourceParent)
+        item = index.internalPointer()
+        return True
+        
+    def filterAcceptsColumn(self, sourceColumn, sourceParent):
+        return True
+        
+    def lessThan(self, left, right):
+        leftData = left.internalPointer()
+        rightData = right.internalPointer()
+        return rightData.name > leftData.name

@@ -5,8 +5,9 @@ from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode
-from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel
+from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel
+from prymatex.mvc.proxies import bisect
 
 class PMXSupportModelManager(PMXSupportManager, PMXObject):
     #Settings
@@ -21,6 +22,12 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         self.configure()
         super(PMXSupportModelManager, self).__init__(self.disabledBundles, self.deletedBundles)
         self.bundleTreeModel = PMXBundleTreeModel(self)
+        self.themeStylesTableModel = PMXThemeStylesTableModel(self)
+        self.themeListModel = []
+        
+        #STYLE PROXY
+        self.themeStyleProxyModel = PMXThemeStyleTableProxyModel()
+        self.themeStyleProxyModel.setSourceModel(self.themeStylesTableModel)
         
         #TREE PROXY
         self.bundleProxyTreeModel = PMXBundleTreeProxyModel()
@@ -44,7 +51,7 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         
         #DRAGCOMMANDS
         self.dragProxyModel = PMXBundleTypeFilterProxyModel("dragcommand")
-        self.dragProxyModel.setSourceModel(self.bundleTreeModel)
+        self.dragProxyModel.setSourceModel(self.bundleTreeModel) 
         
     def buildEnvironment(self):
         env = {}
@@ -88,21 +95,14 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     #---------------------------------------------------
     # THEME OVERRIDE INTERFACE
     #---------------------------------------------------
-    def hasTheme(self, uuid):
-        return PMXSupportManager.hasTheme(self, uuid)
-
     def addTheme(self, theme):
-        return PMXSupportManager.addTheme(self, theme)
-
-    def getTheme(self, uuid):
-        return PMXSupportManager.getTheme(self, uuid)
-
+        index = bisect(self.themeListModel, theme, lambda t1, t2: cmp(t1.name, t2.name))
+        self.themeListModel.insert(index, theme)
+        return theme
+    
+    def addThemeStyle(self, style):
+        self.themeStylesTableModel.appendStyle(style)
+        return style
+    
     def getAllThemes(self):
-        return PMXSupportManager.getAllThemes(self)
-
-    def getAllTemplates(self):
-        return PMXSupportManager.getAllTemplates(self)
-
-    def getPreferences(self, scope):
-        return PMXSupportManager.getPreferences(self, scope)
-
+        return self.themeListModel
