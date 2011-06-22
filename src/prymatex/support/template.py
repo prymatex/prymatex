@@ -14,8 +14,9 @@ from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, en
 
 class PMXTemplateFile(object):
     TYPE = 'templatefile'
-    def __init__(self, name, template):
-        self.name = name
+    def __init__(self, path, template):
+        self.path = path
+        self.name = os.path.basename(path)
         self.template = template
         
     def getFileContent(self):
@@ -80,13 +81,6 @@ class PMXTemplate(PMXBundleItem):
                 files.append(file)
         self.files = files
 
-    def addFile(self, file):
-        name = os.path.basename(file)
-        self.files.append(PMXTemplateFile(name, self))
-    
-    def getTemplateFiles(self):
-        return self.files
-
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()
         env['TM_NEW_FILE'] = os.path.join(directory, name + '.' + self.extension)
@@ -107,15 +101,19 @@ class PMXTemplate(PMXBundleItem):
         os.chdir(origWD) # get back to our original working directory
         
     @classmethod
-    def loadBundleItem(cls, path, namespace):
+    def loadBundleItem(cls, path, namespace, bundle, manager):
         info = os.path.join(path, cls.FILE)
-        files = glob(os.path.join(path, '*'))
-        files.remove(info)
+        paths = glob(os.path.join(path, '*'))
+        paths.remove(info)
         try:
             data = plistlib.readPlist(info)
             template = cls(namespace, data, path)
-            for file in files:
-                template.addFile(file)
+            template.setBundle(bundle)
+            template = manager.addBundleItem(template)
+            manager.addManagedObject(template)
+            for path in paths:
+                file = PMXTemplateFile(path, template)
+                manager.addTemplateFile(file)
             return template
         except Exception, e:
             print "Error in bundle %s (%s)" % (info, e)

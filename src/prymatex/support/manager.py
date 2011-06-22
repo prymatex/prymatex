@@ -46,6 +46,7 @@ class PMXSupportBaseManager(object):
         # Te first is the name space base, and the last is de default for new bundles and items */
         self.nsorder = []
         self.environment = {}
+        self.managedObjects = {}
         self.disabledBundles = disabledBundles
         self.deletedBundles = deletedBundles
         self.scores = PMXScoreManager()
@@ -65,7 +66,7 @@ class PMXSupportBaseManager(object):
             self.namespaces[name][element] = self.environment[var] = epath
 
     def uuidgen(self):
-        return unicode(uuid.uuid1())
+        return uuid.uuid1()
         
     def convertToValidPath(self, name):
         # TODO: ver que el uuid generado no este entre los elementos existentes
@@ -85,72 +86,73 @@ class PMXSupportBaseManager(object):
     # LOAD ALL SUPPORT
     #---------------------------------------------------
     def loadSupport(self, callback = None):
-        cache = {}
         for ns in self.nsorder[::-1]:
-            self.loadThemes(ns, cache)
-            self.loadBundles(ns, cache)
+            self.loadThemes(ns)
+            self.loadBundles(ns)
         for bundle in self.getAllBundles():
-            self.populateBundle(bundle, cache)
+            self.populateBundle(bundle)
 
     #---------------------------------------------------
     # LOAD THEMES
     #---------------------------------------------------
-    def loadThemes(self, namespace, cache = {}):
+    def loadThemes(self, namespace):
         if 'Themes' in self.namespaces[namespace]:
             paths = glob(join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
-                theme = PMXTheme.loadTheme(path, namespace)
-                if theme == None:
-                    continue
-                if theme.uuid not in cache:
-                    theme.setManager(self)
-                    self.addTheme(theme)
-                    cache[theme.uuid] = theme
-                else:
-                    cache[theme.uuid].addNamespace(namespace)
+                theme = PMXTheme.loadTheme(path, namespace, self)
 
     #---------------------------------------------------
     # LOAD BUNDLES
     #---------------------------------------------------
-    def loadBundles(self, namespace, cache = {}):
+    def loadBundles(self, namespace):
         if 'Bundles' in self.namespaces[namespace]:
             paths = glob(join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for path in paths:
-                bundle = PMXBundle.loadBundle(path, namespace)
-                if bundle == None:
-                    continue
-                bundle.disabled = bundle.uuid in self.disabledBundles
-                if bundle.uuid not in self.deletedBundles and bundle.uuid not in cache:
-                    bundle.setManager(self)
-                    self.addBundle(bundle)
-                    cache[bundle.uuid] = bundle
-                elif bundle.uuid in cache:
-                    cache[bundle.uuid].addNamespace(namespace)
+                PMXBundle.loadBundle(path, namespace, self)
 
     #---------------------------------------------------
     # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     #---------------------------------------------------
-    def populateBundle(self, bundle, cache = {}):
+    def populateBundle(self, bundle):
         nss = bundle.namespaces[::-1]
-        for ns in nss:
-            bpath = join(self.namespaces[ns]['Bundles'], basename(bundle.path))
+        for namespace in nss:
+            bpath = join(self.namespaces[namespace]['Bundles'], basename(bundle.path))
             # Search for support
             if bundle.support == None and exists(join(bpath, 'Support')):
                 bundle.setSupport(join(bpath, 'Support'))
             for klass in BUNDLEITEM_CLASSES:
                 files = reduce(lambda x, y: x + glob(y), [ join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
-                for sf in files:
-                    item = klass.loadBundleItem(sf, ns)
-                    if item == None:
-                        continue
-                    if bundle.uuid not in self.deletedBundles and item.uuid not in cache:
-                        item.setManager(self)
-                        item.setBundle(bundle)
-                        self.addBundleItem(item)
-                        cache[item.uuid] = item
-                    elif item.uuid in cache:
-                        cache[item.uuid].addNamespace(ns)
+                for path in files:
+                    #TODO: Se puede delegar la carga completa del bundle item pasando tambien la cache
+                    klass.loadBundleItem(path, namespace, bundle, self)
 
+    #---------------------------------------------------
+    # MANAGED OBJECTS INTERFACE
+    #---------------------------------------------------
+    def setDeleted(self, uuid):
+        '''
+            Marcar un managed object como eliminado
+        '''
+        self.deletedBundles.append(uuid)
+        
+    def isDeleted(self, uuid):
+        '''
+            Marcar un managed object como eliminado
+        '''
+        return uuid in self.deletedBundles
+
+    def isDisabled(self, uuid):
+        return uuid in self.disabledBundles
+        
+    def addManagedObject(self, obj):
+        obj.setManager(self)
+        self.managedObjects[obj.uuid] = obj
+        
+    def getManagedObject(self, uid):
+        if not isinstance(uid, uuid.UUID):
+            uid = uuid.UUID(uid)
+        return self.managedObjects.get(uid, None)
+    
     #---------------------------------------------------
     # BUNDLE INTERFACE
     #---------------------------------------------------
@@ -172,12 +174,6 @@ class PMXSupportBaseManager(object):
         '''
         pass
 
-    def setDeletedBundle(self, uuid):
-        '''
-            Marcar un bundle como eliminado
-        '''
-        pass
-        
     def hasBundle(self, uuid):
         pass
 
@@ -281,12 +277,6 @@ class PMXSupportBaseManager(object):
     def removeBundleItem(self, bundleItem):
         pass
     
-    def setDeletedBundleItem(self, uuid):
-        '''
-            Marcar un bundle item como eliminado
-        '''
-        pass
-        
     def hasBundleItem(self, uuid):
         '''
         @return: True if PMXBundleItem exists
@@ -383,10 +373,16 @@ class PMXSupportBaseManager(object):
             item.delete()
 
     #---------------------------------------------------
+    # TEMPLATEFILE INTERFACE
+    #---------------------------------------------------
+    def addTemplateFile(self, file):
+        pass
+            
+    #---------------------------------------------------
     # THEME INTERFACE
     #---------------------------------------------------
     def addTheme(self, theme):
-        pass
+        return theme
         
     def getTheme(self, uuid):
         pass
@@ -395,9 +391,6 @@ class PMXSupportBaseManager(object):
         pass
         
     def removeTheme(self, theme):
-        pass
-        
-    def setDeletedTheme(self, uuid):
         pass
         
     def hasTheme(self, uuid):

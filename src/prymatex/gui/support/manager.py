@@ -60,7 +60,6 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     def addBundle(self, bundle):
         bundleNode = PMXBundleTreeNode(bundle)
         self.bundleTreeModel.appendBundle(bundleNode)
-        #super(PMXSupportModelManager, self).addBundle(bundleNode) ya no hace falta ahora uso el modelo
         return bundleNode
 
     def getBundle(self, uuid):
@@ -74,14 +73,18 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     #---------------------------------------------------
     def addBundleItem(self, bundleItem):
         bundleItemNode = PMXBundleTreeNode(bundleItem)
-        if bundleItem.TYPE == "template":
-            for file in bundleItem.getTemplateFiles():
-                bundleTemplateFileNode = PMXBundleTreeNode(file)
-                bundleItemNode.appendChild(bundleTemplateFileNode)
         self.bundleTreeModel.appendBundleItem(bundleItemNode)
         super(PMXSupportModelManager, self).addBundleItem(bundleItemNode)
         return bundleItemNode
-
+    
+    #---------------------------------------------------
+    # TEMPLATEFILE OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def addTemplateFile(self, file):
+        bundleTemplateFileNode = PMXBundleTreeNode(file)
+        file.template.appendChild(bundleTemplateFileNode)
+        return bundleTemplateFileNode
+    
     #---------------------------------------------------
     # THEME OVERRIDE INTERFACE
     #---------------------------------------------------

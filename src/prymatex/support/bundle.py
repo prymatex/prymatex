@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, re, plistlib, shutil
+import os, re, plistlib, shutil, uuid
 from copy import copy
 from xml.parsers.expat import ExpatError
 
@@ -20,6 +20,16 @@ RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
                    unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
 
 RE_XML_ILLEGAL = re.compile(RE_XML_ILLEGAL)
+
+def readPlist(file):
+    try:
+        data = plistlib.readPlist(file)
+    except Exception, e:
+        data = open(file).read()
+        for match in RE_XML_ILLEGAL.finditer(data):
+            data = data[:match.start()] + "?" + data[match.end():]
+        data = plistlib.readPlistFromString(data)
+    return data
 
 #Deprecar menu
 class PMXMenuNode(object):
@@ -78,11 +88,22 @@ class PMXMenuNode(object):
             else:
                 yield (self.MENU_SPACE, self.MENU_SPACE)
 
-class PMXManagedItem(object):
+class PMXManagedObject(object):
     def __init__(self, namespace):
         #Base or default namespace
         self.namespaces = [ namespace ]
         self.manager = None
+        self.__uuid = None
+        
+    @property
+    def uuid(self):
+        return self.__uuid
+        
+    @uuid.setter
+    def uuid(self, value):
+        if not isinstance(value, uuid.UUID):
+            value = uuid.UUID(value)
+        self.__uuid = value
         
     def addNamespace(self, namespace):
         index = self.manager.nsorder.index(namespace)
@@ -94,7 +115,7 @@ class PMXManagedItem(object):
     def setManager(self, manager):
         self.manager = manager
         
-class PMXBundle(PMXManagedItem):
+class PMXBundle(PMXManagedObject):
     KEYS = [    'uuid', 'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
@@ -159,16 +180,23 @@ class PMXBundle(PMXManagedItem):
         return env
 
     @classmethod
-    def loadBundle(cls, path, namespace):
+    def loadBundle(cls, path, namespace, manager):
         info_file = os.path.join(path, cls.FILE)
         try:
-            data = plistlib.readPlist(info_file)
-            bundle = cls(namespace, data, path)
-            return bundle
+            data = readPlist(info_file)
+            bundle = manager.getManagedObject(data['uuid'])
+            if bundle is None and not manager.isDeleted(data['uuid']):
+                bundle = cls(namespace, data, path)
+                bundle.disabled = manager.isDisabled(bundle.uuid)
+                #Add and promote, capture bundle
+                bundle = manager.addBundle(bundle)
+                manager.addManagedObject(bundle)
+            elif bundle is not None:
+                bundle.addNamespace(namespace)
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
 
-class PMXBundleItem(PMXManagedItem):
+class PMXBundleItem(PMXManagedObject):
     KEYS = [ 'uuid', 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
     TYPE = ''
     FOLDER = ''
@@ -235,23 +263,20 @@ class PMXBundleItem(PMXManagedItem):
         return env
         
     @classmethod
-    def loadBundleItem(cls, path, namespace):
+    def loadBundleItem(cls, path, namespace, bundle, manager):
         try:
-            data = plistlib.readPlist(path)
-            item = cls(namespace, data, path)
-            return item
-        except Exception, e:
-            try:
-                data = open(path).read()
-                for match in RE_XML_ILLEGAL.finditer(data):
-                    data = data[:match.start()] + "?" + data[match.end():]
-                data = plistlib.readPlistFromString(data)
+            data = readPlist(path)
+            item = manager.getManagedObject(data['uuid'])
+            if item is None and not manager.isDeleted(data['uuid']):
                 item = cls(namespace, data, path)
-                return item
-            except ExpatError, e:
-                print "Error in %s for %s (%s)" % (cls.__name__, path, e)
-            except IOError, e:
-                pass
+                #danger!!! add and populate
+                item.setBundle(bundle)
+                item = manager.addBundleItem(item)
+                manager.addManagedObject(item)
+            elif item is not None:
+                item.addNamespace(namespace)
+        except Exception, e:
+            print "Error in bundle item %s (%s)" % (path, e)
     
     def resolve(self, *args, **kwargs):
         pass

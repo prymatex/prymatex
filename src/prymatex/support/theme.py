@@ -5,7 +5,7 @@ import os, plistlib
 from copy import copy
 from xml.parsers.expat import ExpatError
 from prymatex.support.score import PMXScoreManager
-from prymatex.support.bundle import PMXManagedItem
+from prymatex.support.bundle import PMXManagedObject
 #Deprecated use decorator like bundle items
 from prymatex.gui.support.qtadapter import buildQTextFormat, buildQColor
 
@@ -49,7 +49,7 @@ class PMXStyle(object):
     def getQColor(self, item):
         return buildQColor(self[item])
     
-class PMXTheme(PMXManagedItem):
+class PMXTheme(PMXManagedObject):
     KEYS = [    'uuid', 'name', 'comment', 'author', 'settings' ]
     STYLES_CACHE = {}
     scores = PMXScoreManager()
@@ -96,11 +96,16 @@ class PMXTheme(PMXManagedItem):
         plistlib.writePlist(self.hash, self.path)
 
     @classmethod
-    def loadTheme(cls, path, namespace):
+    def loadTheme(cls, path, namespace, manager):
         try:
             data = plistlib.readPlist(path)
-            theme = PMXTheme(namespace, data, path)
-            return theme
+            theme = manager.getManagedObject(data['uuid'])
+            if theme is None and not manager.isDeleted(data['uuid']):
+                theme = PMXTheme(namespace, data, path)
+                theme = manager.addTheme(theme)
+                manager.addManagedObject(theme)
+            elif theme is not None:
+                theme.addNamespace(namespace)
         except Exception, e:
             print "Error en bundle %s (%s)" % (path, e)
 

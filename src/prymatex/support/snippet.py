@@ -4,7 +4,7 @@
 '''
     Snippte's module
 '''
-import re, logging
+import re, logging, uuid
 try:
     from ponyguruma import sre
     from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
@@ -20,7 +20,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 logger = logging.getLogger(__name__)
 
-SNIPPET_SYNTAX = {
+SNIPPET_SYNTAX = { 'uuid': uuid.uuid1(),
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
                'match': '\\\\(\\\\|\\$|`)',
                'name': 'constant.character.escape.snippet'},
