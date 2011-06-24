@@ -204,6 +204,36 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
 #====================================================
 # Themes Styles
 #====================================================
+
+class PMXThemeStyleRow(object):
+    ''' 
+        Bundle and bundle item decorator
+    '''
+    def __init__(self, style):
+        self.style = style
+    
+    def __getattr__(self, name):
+        return getattr(self.style, name)
+    
+    @property
+    def QTextFormat(self):
+        format = QtGui.QTextCharFormat()
+        if 'foreground' in style:
+            format.setForeground(buildQColor(style['foreground']))
+        if 'background' in style:
+            format.setBackground(buildQColor(style['background']))
+        if 'fontStyle' in style:
+            if style['fontStyle'] == 'bold':
+                format.setFontWeight(QFont.Bold)
+            elif style['fontStyle'] == 'underline':
+                format.setFontUnderline(True)
+            elif style['fontStyle'] == 'italic':
+                format.setFontItalic(True)
+        return format
+    
+    def getQColor(self, item):
+        return buildQColor(self[item])
+
 class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
     def __init__(self, manager, parent = None):
         super(PMXThemeStylesTableModel, self).__init__(parent)

@@ -5,7 +5,7 @@ import os, sys, string
 sys.path.append(os.path.abspath('../../..'))
 
 try:
-    from PyQt4.Qt import QTextCharFormat, QColor, QFont, QKeySequence, Qt
+    from PyQt4.Qt import QColor, QFont, QKeySequence, Qt
 except:
     from prymatex.support.qtmock import Qt, QKeySequence
 from prymatex.support.modmap import get_keymap_table

@@ -11,44 +11,42 @@ from prymatex.support.bundle import PMXManagedObject
 from prymatex.gui.support.qtadapter import buildQTextFormat, buildQColor
 
 '''
-    caret = Cursor, foreground, selection, invisibles, lineHighlight, gutter, background
+    foreground, background, selection, invisibles, lineHighlight, caret, gutter
 '''
 
 class PMXThemeStyle(object):
-    KEYS = [    'scope', 'name', 'settings' ]
+    KEYS = [ 'scope', 'name', 'settings' ]
+    SETTING_ATTRIBUTES = [ 'fontStyle', 'foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter' ]
     def __init__(self, hash, theme):
         self.theme = theme
         self.load(hash)
 
     def load(self, hash):
         for key in PMXThemeStyle.KEYS:
-            setattr(self, key, hash.get(key, None))
+            value = hash.get(key, None)
+            if value != None and key == 'settings':
+                for attr in PMXThemeStyle.SETTING_ATTRIBUTES:
+                    if attr in value:
+                        setattr(self, key, value[attr])
+            elif value != None:
+                setattr(self, key, value)
 
     @property
     def hash(self):
-        hash = {'scope': self.scope, 'name': self.name, 'settings': copy(self.settings)}
+        hash = {'scope': self.scope, 'name': self.name}
+        for attr in PMXThemeStyle.SETTING_ATTRIBUTES:
+            if hasattr(self, attr):
+                hash[attr] = getattr(self, attr))
         return hash
         
-    def __getitem__(self, name):
-        return self.settings[name]
-    
-    def __contains__(self, name):
-        return name in self.settings
-    
     def __copy__(self):
-        values = {'scope': self.scope, 'name': self.name, 'settings': copy(self.settings)}
-        obj = PMXThemeStyle(values, self.theme)
+        obj = PMXThemeStyle(self.hash, self.theme)
         return obj
-        
+
     def update(self, other):
-        self.settings.update(other.settings)
-    
-    @property
-    def QTextFormat(self):
-        return buildQTextFormat(self)
-    
-    def getQColor(self, item):
-        return buildQColor(self[item])
+        for attr in PMXThemeStyle.SETTING_ATTRIBUTES:
+            if hasattr(other, attr):
+                setattr(self, attr, getattr(other, attr))
     
 class PMXTheme(PMXManagedObject):
     KEYS = [    'name', 'comment', 'author']

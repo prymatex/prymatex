@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel
+from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel
 from prymatex.mvc.proxies import bisect
 
@@ -101,8 +101,9 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         return theme
     
     def addThemeStyle(self, style):
-        self.themeStylesTableModel.appendStyle(style)
-        return style
+        themeStyleRow = PMXThemeStyleRow(style)
+        self.themeStylesTableModel.appendStyle(themeStyleRow)
+        return themeStyleRow
     
     def getAllThemes(self):
         return self.themeListModel
