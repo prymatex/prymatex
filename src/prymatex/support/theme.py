@@ -36,7 +36,7 @@ class PMXThemeStyle(object):
         hash = {'scope': self.scope, 'name': self.name}
         for attr in PMXThemeStyle.SETTING_ATTRIBUTES:
             if hasattr(self, attr):
-                hash[attr] = getattr(self, attr))
+                hash[attr] = getattr(self, attr)
         return hash
         
     def __copy__(self):
