@@ -3,12 +3,9 @@
 
 import os, plistlib
 import uuid as uuidmodule
-from copy import copy
 from xml.parsers.expat import ExpatError
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.bundle import PMXManagedObject
-#Deprecated use decorator like bundle items
-from prymatex.gui.support.qtadapter import buildQTextFormat, buildQColor
 
 '''
     foreground, background, selection, invisibles, lineHighlight, caret, gutter
@@ -16,48 +13,28 @@ from prymatex.gui.support.qtadapter import buildQTextFormat, buildQColor
 
 class PMXThemeStyle(object):
     KEYS = [ 'scope', 'name', 'settings' ]
-    SETTING_ATTRIBUTES = [ 'fontStyle', 'foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter' ]
     def __init__(self, hash, theme):
         self.theme = theme
         self.load(hash)
 
     def load(self, hash):
         for key in PMXThemeStyle.KEYS:
-            value = hash.get(key, None)
-            if value != None and key == 'settings':
-                for attr in PMXThemeStyle.SETTING_ATTRIBUTES:
-                    if attr in value:
-                        setattr(self, key, value[attr])
-            elif value != None:
-                setattr(self, key, value)
+            setattr(self, key, hash.get(key, None))
 
     @property
     def hash(self):
-        hash = {'scope': self.scope, 'name': self.name}
-        for attr in PMXThemeStyle.SETTING_ATTRIBUTES:
-            if hasattr(self, attr):
-                hash[attr] = getattr(self, attr)
+        hash = {'scope': self.scope, 'name': self.name, 'settings': self.settings}
         return hash
-        
-    def __copy__(self):
-        obj = PMXThemeStyle(self.hash, self.theme)
-        return obj
-
-    def update(self, other):
-        for attr in PMXThemeStyle.SETTING_ATTRIBUTES:
-            if hasattr(other, attr):
-                setattr(self, attr, getattr(other, attr))
     
 class PMXTheme(PMXManagedObject):
     KEYS = [    'name', 'comment', 'author']
-    STYLES_CACHE = {}
     scores = PMXScoreManager()
     
     def __init__(self, uuid, namespace, hash, path = None):
         super(PMXTheme, self).__init__(uuid, namespace)
         self.path = path
         self.styles = []
-        self.default = None
+        self.settings = None
         self.load(hash)
 
     def load(self, hash):
@@ -66,8 +43,8 @@ class PMXTheme(PMXManagedObject):
             if value != None:
                 setattr(self, key, value)
 
-    def setDefault(self, default):
-        self.default = default
+    def setSettings(self, settings):
+        self.settings = settings
         
     def update(self, hash):
         for key in hash.keys():
@@ -104,8 +81,7 @@ class PMXTheme(PMXManagedObject):
                 theme = manager.addTheme(theme)
                 settings = data.pop('settings', [])
                 if settings:
-                    style = PMXThemeStyle(settings[0], theme)
-                    theme.setDefault(style)
+                    theme.setSettings(settings[0].settings)
                 for setting in settings[1:]:
                     style = PMXThemeStyle(setting, theme)
                     style = manager.addThemeStyle(style)
@@ -115,24 +91,3 @@ class PMXTheme(PMXManagedObject):
                 theme.addNamespace(namespace)
         except Exception, e:
             print "Error en bundle %s (%s)" % (path, e)
-
-    def clearCache(self):
-        PMXTheme.STYLES_CACHE = {}
-        
-    def getStyle(self, scope = None):
-        if scope in PMXTheme.STYLES_CACHE:
-            return PMXTheme.STYLES_CACHE[scope]
-        base = copy(self.default)
-        if scope == None:
-            return base
-        styles = []
-        for style in self.styles:
-            if style.scope != None:
-                score = self.scores.score(style.scope, scope)
-                if score != 0:
-                    styles.append((score, style))
-        styles.sort(key = lambda t: t[0])
-        for score, style in styles:
-            base.update(style)
-        PMXTheme.STYLES_CACHE[scope] = base
-        return base

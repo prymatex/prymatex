@@ -3,7 +3,7 @@
 
 import re
 from copy import copy
-from PyQt4.Qt import QSyntaxHighlighter, QTextBlockUserData
+from PyQt4 import QtCore, QtGui
 from prymatex.support import PMXSyntaxProcessor, PMXSyntax, PMXPreferenceSettings
 
 from logging import getLogger
@@ -19,7 +19,7 @@ def whiteSpace(text):
         return ''
 
 # Syntax
-class PMXBlockUserData(QTextBlockUserData):
+class PMXBlockUserData(QtGui.QTextBlockUserData):
     FOLDING_NONE = PMXSyntax.FOLDING_NONE
     FOLDING_START = PMXSyntax.FOLDING_START
     FOLDING_STOP = PMXSyntax.FOLDING_STOP
@@ -30,7 +30,7 @@ class PMXBlockUserData(QTextBlockUserData):
     UNINDENT = PMXPreferenceSettings.UNINDENT
     
     def __init__(self):
-        QTextBlockUserData.__init__(self)
+        QtGui.QTextBlockUserData.__init__(self)
         self.scopes = []
         self.foldingMark = self.FOLDING_NONE
         self.foldedLevel = 0
@@ -68,13 +68,13 @@ class PMXBlockUserData(QTextBlockUserData):
     def setStackAndScopes(self, stack, scopes):
         self.cache = (stack, scopes)
     
-class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
+class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
     SINGLE_LINE = 0
     MULTI_LINE = 1
     FORMAT_CACHE = {}
     
     def __init__(self, editor):
-        QSyntaxHighlighter.__init__(self, editor.document())
+        QtGui.QSyntaxHighlighter.__init__(self, editor.document())
         self.editor = editor
         self.__syntax = None
         self.__formatter = None
@@ -145,7 +145,20 @@ class PMXSyntaxProcessor(QSyntaxHighlighter, PMXSyntaxProcessor):
     def getFormat(self, scope):
         if self.formatter == None: return None
         if scope not in PMXSyntaxProcessor.FORMAT_CACHE:
-            PMXSyntaxProcessor.FORMAT_CACHE[scope] = self.formatter.getStyle(scope).QTextFormat
+            format = QtGui.QTextCharFormat()
+            settings = self.formatter.getStyle(scope)
+            if 'foreground' in settings:
+                format.setForeground(settings['foreground'])
+            if 'background' in settings:
+                format.setBackground(settings['background'])
+            if 'fontStyle' in settings:
+                if 'bold' in settings['fontStyle']:
+                    format.setFontWeight(QtGui.QFont.Bold)
+                if 'underline' in settings['fontStyle']:
+                    format.setFontUnderline(True)
+                if 'italic' in settings['fontStyle']:
+                    format.setFontItalic(True)
+            PMXSyntaxProcessor.FORMAT_CACHE[scope] = format 
         return PMXSyntaxProcessor.FORMAT_CACHE[scope]
     
     #===============================================================================

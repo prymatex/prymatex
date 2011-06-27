@@ -80,16 +80,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def theme(self, uuid):
         theme = self.pmxApp.supportManager.getTheme(uuid)
         self.syntaxProcessor.formatter = theme
-        style = theme.getStyle()
-        self.colours = {
-            'foreground': style.getQColor('foreground'),
-            'background': style.getQColor('background'),
-            'selection': style.getQColor('selection'),
-            'invisibles': style.getQColor('invisibles'),
-            'lineHighlight': style.getQColor('lineHighlight'),
-            'caret': style.getQColor('caret'),
-            'gutter': style.getQColor('gutter')
-        }
+        self.colours = theme.settings
         #Editor colours
         palette = self.palette()
         palette.setColor(QPalette.Active, QPalette.Text, self.colours['foreground'])

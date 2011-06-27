@@ -96,14 +96,15 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     # THEME OVERRIDE INTERFACE
     #---------------------------------------------------
     def addTheme(self, theme):
-        index = bisect(self.themeListModel, theme, lambda t1, t2: cmp(t1.name, t2.name))
-        self.themeListModel.insert(index, theme)
-        return theme
+        themeRow = PMXThemeStyleRow(theme, self.scores)
+        index = bisect(self.themeListModel, themeRow, lambda t1, t2: cmp(t1.name, t2.name))
+        self.themeListModel.insert(index, themeRow)
+        return themeRow
     
     def addThemeStyle(self, style):
-        themeStyleRow = PMXThemeStyleRow(style)
-        self.themeStylesTableModel.appendStyle(themeStyleRow)
-        return themeStyleRow
+        themeStyle = PMXThemeStyleRow(style)
+        self.themeStylesTableModel.appendStyle(themeStyle)
+        return themeStyle
     
     def getAllThemes(self):
         return self.themeListModel

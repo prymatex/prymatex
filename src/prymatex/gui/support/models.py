@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent
+from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent, buildQColor
 #from PyQt4.Qt import *
 
 #====================================================
@@ -207,32 +207,55 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
 
 class PMXThemeStyleRow(object):
     ''' 
-        Bundle and bundle item decorator
+        Theme and Style decorator
     '''
-    def __init__(self, style):
-        self.style = style
+    STYLES_CACHE = {}
+    def __init__(self, item, scores = None):
+        self.item = item
+        self.scores = scores
     
     def __getattr__(self, name):
-        return getattr(self.style, name)
+        return getattr(self.item, name)
     
     @property
-    def QTextFormat(self):
-        format = QtGui.QTextCharFormat()
-        if 'foreground' in style:
-            format.setForeground(buildQColor(style['foreground']))
-        if 'background' in style:
-            format.setBackground(buildQColor(style['background']))
-        if 'fontStyle' in style:
-            if style['fontStyle'] == 'bold':
-                format.setFontWeight(QFont.Bold)
-            elif style['fontStyle'] == 'underline':
-                format.setFontUnderline(True)
-            elif style['fontStyle'] == 'italic':
-                format.setFontItalic(True)
-        return format
+    def settings(self):
+        settings = {}
+        settings.update(self.item.settings)
+        for color_key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
+            if color_key in settings:
+                color = buildQColor(settings[color_key])
+                settings[color_key] = color
+        if 'fontStyle' in settings:
+            settings['fontStyle'] = settings['fontStyle'].split()
+        return settings
     
-    def getQColor(self, item):
-        return buildQColor(self[item])
+    def setForeground(self, value):
+        self.item.settings['foreground'] = value
+        
+    def setBackground(self, value):
+        self.item.settings['background'] = value
+    
+    def clearCache(self):
+        PMXThemeStyleRow.STYLES_CACHE = {}
+        
+    def getStyle(self, scope = None):
+        if scope in PMXThemeStyleRow.STYLES_CACHE:
+            return PMXThemeStyleRow.STYLES_CACHE[scope]
+        base = {}
+        base.update(self.settings)
+        if scope == None:
+            return base
+        styles = []
+        for style in self.styles:
+            if style.scope != None:
+                score = self.scores.score(style.scope, scope)
+                if score != 0:
+                    styles.append((score, style))
+        styles.sort(key = lambda t: t[0])
+        for score, style in styles:
+            base.update(style.settings)
+        PMXThemeStyleRow.STYLES_CACHE[scope] = base
+        return base
 
 class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
     def __init__(self, manager, parent = None):
@@ -248,14 +271,36 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
         return 4
     
     def data(self, index, role):
-        if not index.isValid: 
+        if not index.isValid(): 
             return QtCore.QVariant()
-        row = index.row()
-        column = index.column()
-        style = self.styles[row]
-        if column == 0:
-            return QtCore.QVariant(style.name)
-        return QtCore.QVariant()
+        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+            row = index.row()
+            column = index.column()
+            if column == 0:
+                style = self.styles[row]
+                return QtCore.QVariant(style.scope)
+            elif column == 1:
+                settings = self.styles[row].settings
+                return QtCore.QVariant(settings['foreground'])
+            elif column == 2:
+                settings = self.styles[row].settings
+                return QtCore.QVariant(settings['background'])
+            elif column == 3:
+                settings = self.styles[row].settings
+                return QtCore.QVariant(", ".join(settings['fontStyle']))
+        elif role == QtCore.Qt.DecorationRole:
+            row = index.row()
+            column = index.column()
+            if column == 1:
+                settings = self.styles[row].settings
+                pixmap = QtGui.QPixmap(26, 26)
+                pixmap.fill(settings['foreground'])
+                return pixmap
+            elif column == 2:
+                settings = self.styles[row].settings
+                pixmap = QtGui.QPixmap(26, 26)
+                pixmap.fill(settings['background'])
+                return pixmap
 
     def setData(self, index, value, role):
         '''
@@ -264,20 +309,31 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
         if not index.isValid: return False
 
         if role == QtCore.Qt.EditRole:
+            row = index.row()
+            column = index.column()
+            if column == 0:
+                style = self.styles[row]
+                style.setScope(unicode(value))
+            elif column == 1:
+                self.styles[row].setForeground(unicode(value))
+            elif column == 2:
+                self.styles[row].setBackground(unicode(value))
             self.dataChanged.emit(index, index)
             return True
         elif role == QtCore.Qt.CheckStateRole:
             self.dataChanged.emit(index, index)
             return True
         return False
+    
+    def flags(self, index):
+        if not index.isValid():  
+            return QtCore.Qt.NoItemFlags  
+        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
         
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 return self.headers[section]
-
-    def flags(self, index):
-        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled
     
     #========================================================================
     # Functions
