@@ -23,10 +23,8 @@ from prymatex.support.modmap import get_keymap_table
 def buildQColor(color):
     if isinstance(color, (str, unicode)):
         if color[0] == "#":
-            alpha = color[7:]
-            qcolor = QColor(color[:7])
-            if alpha:
-                qcolor.setAlpha(int(alpha, 16))
+            qcolor = QColor()
+            qcolor.setRgba(int(color[7:] + color[1:7], 16))
             return qcolor
     
 QTCHARCODES = {9: Qt.Key_Backspace,

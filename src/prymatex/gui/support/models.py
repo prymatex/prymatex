@@ -229,11 +229,16 @@ class PMXThemeStyleRow(object):
             settings['fontStyle'] = settings['fontStyle'].split()
         return settings
     
-    def setForeground(self, value):
-        self.item.settings['foreground'] = value
-        
-    def setBackground(self, value):
-        self.item.settings['background'] = value
+    def update(self, hash):
+        if 'settings' in hash:
+            settings = hash['settings']
+            for key in settings.keys():
+                if key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
+                    hash['settings'][key] = hex(settings[key].rgba()).upper()[2:-1]
+                    hash['settings'][key] = '#' + hash['settings'][key][:2] + hash['settings'][key][2:]
+            if 'fontStyle' in settings:
+                hash['settings']['fontStyle'] = " ".join(settings['fontStyle'])
+        self.item.update(hash)
     
     def clearCache(self):
         PMXThemeStyleRow.STYLES_CACHE = {}

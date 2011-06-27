@@ -23,12 +23,14 @@ class PMXThemeStyle(object):
 
     @property
     def hash(self):
-        hash = {'scope': self.scope, 'name': self.name, 'settings': self.settings}
-        return hash
+        return {'scope': self.scope, 'name': self.name, 'settings': self.settings}
+        
+    def update(self, hash):
+        for key in hash.keys():
+            setattr(self, key, hash[key])
     
 class PMXTheme(PMXManagedObject):
     KEYS = [    'name', 'comment', 'author']
-    scores = PMXScoreManager()
     
     def __init__(self, uuid, namespace, hash, path = None):
         super(PMXTheme, self).__init__(uuid, namespace)
@@ -39,9 +41,7 @@ class PMXTheme(PMXManagedObject):
 
     def load(self, hash):
         for key in PMXTheme.KEYS:
-            value = hash.get(key, None)
-            if value != None:
-                setattr(self, key, value)
+            setattr(self, key, hash.get(key, None))
 
     def setSettings(self, settings):
         self.settings = settings
@@ -56,12 +56,10 @@ class PMXTheme(PMXManagedObject):
         for key in PMXTheme.KEYS:
             value = getattr(self, key)
             if value != None:
-                if key == 'settings':
-                    result = [ self.default.hash ]
-                    for v in value:
-                        result.append(v.hash)
-                    value = result
                 hash[key] = value
+        hash['settings'] = [ { 'settings': self.settings } ]
+        for style in self.styles:
+            hash['settings'].append(style.hash)
         return hash
         
     def save(self):

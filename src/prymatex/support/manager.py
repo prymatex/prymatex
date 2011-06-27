@@ -649,6 +649,7 @@ class PMXSupportManager(PMXSupportBaseManager):
             self.TEMPLATES.append(item)
         elif item.TYPE == 'syntax':
             self.SYNTAXES[item.scopeName] = item
+        return item
 
     def getBundleItem(self, uuid):
         return self.getManagedObject(uuid)
