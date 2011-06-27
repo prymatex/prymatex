@@ -235,7 +235,7 @@ class PMXThemeStyleRow(object):
             for key in settings.keys():
                 if key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
                     hash['settings'][key] = hex(settings[key].rgba()).upper()[2:-1]
-                    hash['settings'][key] = '#' + hash['settings'][key][:2] + hash['settings'][key][2:]
+                    hash['settings'][key] = '#' + hash['settings'][key][2:] + hash['settings'][key][:2]
             if 'fontStyle' in settings:
                 hash['settings']['fontStyle'] = " ".join(settings['fontStyle'])
         self.item.update(hash)
@@ -281,27 +281,27 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
+            style = self.styles[row]
+            settings = self.styles[row].settings
             if column == 0:
-                style = self.styles[row]
                 return QtCore.QVariant(style.scope)
-            elif column == 1:
-                settings = self.styles[row].settings
+            elif column == 1 and 'foreground' in settings:
                 return QtCore.QVariant(settings['foreground'])
-            elif column == 2:
-                settings = self.styles[row].settings
+            elif column == 2 and 'background' in settings:
                 return QtCore.QVariant(settings['background'])
-            elif column == 3:
-                settings = self.styles[row].settings
+            elif column == 3 and 'fontStyle' in settings:
                 return QtCore.QVariant(", ".join(settings['fontStyle']))
         elif role == QtCore.Qt.DecorationRole:
             row = index.row()
             column = index.column()
-            if column == 1:
+            style = self.styles[row]
+            settings = self.styles[row].settings
+            if column == 1 and 'foreground' in settings:
                 settings = self.styles[row].settings
                 pixmap = QtGui.QPixmap(26, 26)
                 pixmap.fill(settings['foreground'])
                 return pixmap
-            elif column == 2:
+            elif column == 2 and 'background' in settings:
                 settings = self.styles[row].settings
                 pixmap = QtGui.QPixmap(26, 26)
                 pixmap.fill(settings['background'])
@@ -339,6 +339,13 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 return self.headers[section]
+    
+    def index(self, row, column, parent = QtCore.QModelIndex()):
+        style = self.styles[row]
+        if style:
+            return self.createIndex(row, column, style)
+        else:
+            return QtCore.QModelIndex()
     
     #========================================================================
     # Functions

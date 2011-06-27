@@ -55,8 +55,8 @@ class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
         if regexp.isEmpty():
             return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        item = index.internalPointer()
-        return True
+        node = index.internalPointer()
+        return QtCore.QString(unicode(node.item.theme.uuid)).contains(regexp)
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True

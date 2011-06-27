@@ -22,9 +22,11 @@ from prymatex.support.modmap import get_keymap_table
 #caret, foreground, selection, invisibles, lineHighlight, gutter, background
 def buildQColor(color):
     if isinstance(color, (str, unicode)):
-        if color[0] == "#":
+        if color[0] == '#':
+            rgba = color[7:] or 'FF'
+            rgba += color[1:7]
             qcolor = QColor()
-            qcolor.setRgba(int(color[7:] + color[1:7], 16))
+            qcolor.setRgba(int(rgba, 16))
             return qcolor
     
 QTCHARCODES = {9: Qt.Key_Backspace,

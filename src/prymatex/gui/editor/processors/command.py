@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
+import uuid as uuidmodule
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
 
@@ -196,7 +197,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(text)
         
     def insertAsSnippet(self, text):
-        snippet = PMXSnippet("internal", hash = { 'content': text})
+        snippet = PMXSnippet(uuidmodule.uuid1(), "internal", hash = { 'content': text})
         snippet.bundle = self.command.bundle
         self.editor.insertBundleItem(snippet, disableIndent = self.disableAutoIndent)
             

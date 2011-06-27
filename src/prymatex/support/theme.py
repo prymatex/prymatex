@@ -27,16 +27,19 @@ class PMXThemeStyle(object):
         
     def update(self, hash):
         for key in hash.keys():
-            setattr(self, key, hash[key])
+            if key == 'settings':
+                self.settings.update(hash[key])
+                self.settings = dict(filter(lambda tupla: tupla[1] != None, self.settings.iteritems()))
+            else:
+                setattr(self, key, hash[key])
     
 class PMXTheme(PMXManagedObject):
-    KEYS = [    'name', 'comment', 'author']
+    KEYS = [    'name', 'comment', 'author', 'settings']
     
     def __init__(self, uuid, namespace, hash, path = None):
         super(PMXTheme, self).__init__(uuid, namespace)
         self.path = path
         self.styles = []
-        self.settings = None
         self.load(hash)
 
     def load(self, hash):
@@ -48,7 +51,11 @@ class PMXTheme(PMXManagedObject):
         
     def update(self, hash):
         for key in hash.keys():
-            setattr(self, key, hash[key])
+            if key == 'settings':
+                self.settings.update(hash[key])
+                self.settings = dict(filter(lambda tupla: tupla[1] != None, self.settings.iteritems()))
+            else:
+                setattr(self, key, hash[key])
     
     @property
     def hash(self):
