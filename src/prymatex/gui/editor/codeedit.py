@@ -91,7 +91,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.setPalette(palette)
         #Sidebar colours
         self.sidebar.foreground = self.colours['foreground']
-        self.sidebar.background = self.colours['gutter']
+        self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
         self.highlightCurrentLine()
     

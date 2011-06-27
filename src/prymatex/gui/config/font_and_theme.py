@@ -10,19 +10,16 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     def __init__(self, parent = None):
         super(PMXThemeConfigWidget, self).__init__(parent)
         self.setupUi(self)
+        #Settings
+        self.settings = self.pmxApp.settings.getGroup('Editor')
+
+        #Manager and Modelo
         self.manager = self.pmxApp.supportManager
-        
-        #Modelo
         self.tableView.setModel(self.manager.themeStyleProxyModel)
         
-        self.settings = self.pmxApp.settings.getGroup('Editor')
-        uuid = self.settings.value('theme')
-        
         #Combo Theme
-        for index, theme in enumerate(self.pmxApp.supportManager.getAllThemes()):
+        for theme in self.pmxApp.supportManager.getAllThemes():
             self.comboThemes.addItem(theme.name, QtCore.QVariant(theme.uuid))
-            if theme.uuid == uuid:
-                self.comboThemes.setCurrentIndex(index)
         self.comboThemes.currentIndexChanged[int].connect(self.themesChanged)
         
         self.colorDialog = QtGui.QColorDialog(self)
