@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_files/envvars.ui'
+# Form implementation generated from reading ui file 'ui_files/environment.ui'
 #
-# Created: Fri Jun 10 17:01:31 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed Jun 29 17:20:25 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -27,6 +27,8 @@ class Ui_EnvVariables(object):
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
         self.tableView = QtGui.QTableView(EnvVariables)
+        self.tableView.setShowGrid(False)
+        self.tableView.setSortingEnabled(True)
         self.tableView.setObjectName(_fromUtf8("tableView"))
         self.verticalLayout.addWidget(self.tableView)
         self.horizontalLayout = QtGui.QHBoxLayout()

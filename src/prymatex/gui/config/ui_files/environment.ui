@@ -26,7 +26,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableView" name="tableView"/>
+    <widget class="QTableView" name="tableView">
+     <property name="showGrid">
+      <bool>false</bool>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

@@ -3,8 +3,8 @@ Created on 15/05/2011
 
 @author: diego
 '''
-from PyQt4 import QtCore
-from prymatex.gui.config.ui_envvars import Ui_EnvVariables
+from PyQt4 import QtCore, QtGui
+from prymatex.gui.config.ui_environment import Ui_EnvVariables
 from prymatex.gui.config.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
 
@@ -113,6 +113,7 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
         self.configure()
         self.model = PMXEnvVariablesTableModel(self.pmxApp.settings.getGroup('Manager'))
         self.tableView.setModel(self.model)
+        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         
     def on_pushAdd_pressed(self):
         self.model.insertRows(0, 1)

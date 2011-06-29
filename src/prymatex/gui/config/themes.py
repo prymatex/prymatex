@@ -67,22 +67,40 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     #==========================================================
     # TableView
     #==========================================================
+    def on_tableView_Activated(self, index):
+        style = self.manager.themeStyleProxyModel.mapToSource(index).internalPointer()
+        self.comboBoxScope.setEditText(style.scope) 
+    
+    def on_comboBoxScope_changed(self, string):
+        print string
+    
     def configTableView(self):
         self.tableView.setModel(self.manager.themeStyleProxyModel)
+        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.tableView.activated.connect(self.on_tableView_Activated)
+        self.tableView.pressed.connect(self.on_tableView_Activated)
+        #Conectar
+        for _, scope in self.DEFAULTS['styles']:
+            self.comboBoxScope.addItem(scope)
+        self.comboBoxScope.currentIndexChanged[str].connect(self.on_comboBoxScope_changed)
+        self.comboBoxScope.editTextChanged.connect(self.on_comboBoxScope_changed)
     
     #==========================================================
     # Push Button
     #==========================================================
     def configPushButton(self):
-        self.colorDialog = QtGui.QColorDialog(self)
-        self.colorDialog.setOption(QtGui.QColorDialog.ShowAlphaChannel, True)
-        
+        #Colors
         self.pushButtonForeground.pressed.connect(lambda element = 'foreground': self.on_pushButtonColor_pressed(element))
         self.pushButtonBackground.pressed.connect(lambda element = 'background': self.on_pushButtonColor_pressed(element))
         self.pushButtonSelection.pressed.connect(lambda element = 'selection': self.on_pushButtonColor_pressed(element))
         self.pushButtonInvisibles.pressed.connect(lambda element = 'invisibles': self.on_pushButtonColor_pressed(element))
         self.pushButtonLineHighlight.pressed.connect(lambda element = 'lineHighlight': self.on_pushButtonColor_pressed(element))
         self.pushButtonCaret.pressed.connect(lambda element = 'caret': self.on_pushButtonColor_pressed(element))
+        #Font
+        self.pushButtonChangeFont.pressed.connect(self.on_pushButtonChangeFont_pressed)
+        font = self.settings.value('font')
+        self.lineFont.setFont(font)
+        self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     
     def on_pushButtonChangeFont_pressed(self):
         font = self.settings.value('font')
