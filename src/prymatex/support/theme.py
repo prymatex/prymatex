@@ -54,6 +54,7 @@ class PMXTheme(PMXManagedObject):
             if key == 'settings':
                 self.settings.update(hash[key])
                 self.settings = dict(filter(lambda tupla: tupla[1] != None, self.settings.iteritems()))
+                print self.settings
             else:
                 setattr(self, key, hash[key])
     

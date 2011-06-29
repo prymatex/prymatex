@@ -35,7 +35,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushChangeFont">
+      <widget class="QPushButton" name="pushButtonChangeFont">
        <property name="text">
         <string>&amp;Change Font</string>
        </property>
@@ -65,7 +65,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboThemes"/>
+         <widget class="QComboBox" name="comboBoxThemes"/>
         </item>
        </layout>
       </item>
@@ -79,7 +79,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QPushButton" name="pushForeground">
+         <widget class="QPushButton" name="pushButtonForeground">
           <property name="maximumSize">
            <size>
             <width>50</width>
@@ -99,7 +99,7 @@
          </widget>
         </item>
         <item row="0" column="3">
-         <widget class="QPushButton" name="pushInvisibles">
+         <widget class="QPushButton" name="pushButtonInvisibles">
           <property name="maximumSize">
            <size>
             <width>50</width>
@@ -119,7 +119,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QPushButton" name="pushBackground">
+         <widget class="QPushButton" name="pushButtonBackground">
           <property name="maximumSize">
            <size>
             <width>50</width>
@@ -139,7 +139,7 @@
          </widget>
         </item>
         <item row="1" column="3">
-         <widget class="QPushButton" name="pushLineHighlight">
+         <widget class="QPushButton" name="pushButtonLineHighlight">
           <property name="maximumSize">
            <size>
             <width>50</width>
@@ -159,7 +159,7 @@
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QPushButton" name="pushSelection">
+         <widget class="QPushButton" name="pushButtonSelection">
           <property name="maximumSize">
            <size>
             <width>50</width>
@@ -179,7 +179,7 @@
          </widget>
         </item>
         <item row="2" column="3">
-         <widget class="QPushButton" name="pushCaret">
+         <widget class="QPushButton" name="pushButtonCaret">
           <property name="maximumSize">
            <size>
             <width>50</width>
@@ -206,14 +206,14 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QPushButton" name="pushButton_8">
+         <widget class="QPushButton" name="pushButtonAdd">
           <property name="text">
            <string>+</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_9">
+         <widget class="QPushButton" name="pushButtonRemove">
           <property name="text">
            <string>-</string>
           </property>
@@ -240,7 +240,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_2">
+         <widget class="QComboBox" name="comboBoxScope">
           <property name="editable">
            <bool>true</bool>
           </property>

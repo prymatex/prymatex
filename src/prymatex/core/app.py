@@ -112,7 +112,7 @@ class PMXApplication(QApplication):
                                                 PMXNetworkWidget,\
                                                 PMXBundleWidget
         from prymatex.gui.config.envvars import PMXEnvVariablesWidgets
-        from prymatex.gui.config.font_and_theme import PMXThemeConfigWidget
+        from prymatex.gui.config.themes import PMXThemeConfigWidget
                                                 
         configdialog.register(PMXGeneralWidget())
         configdialog.register(PMXThemeConfigWidget())
