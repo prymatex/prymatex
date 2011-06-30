@@ -3,7 +3,7 @@
 
 # pyuic es el compilador de UI (Qt XML) a Python 
 PYUIC=pyuic4
-PYUIC_FLAGS=-x
+PYUIC_FLAGS=-x --from-imports
 UI_BASE=ui_files
 UI_FILES=$(notdir $(shell ls ${UI_BASE}/*.ui))
 PY_FILES=$(patsubst %.ui,ui_%.py,${UI_FILES})

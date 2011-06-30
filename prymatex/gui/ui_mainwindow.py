@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_files/mainwindow.ui'
 #
-# Created: Fri May  6 11:13:59 2011
+# Created: Thu Jun 30 17:57:35 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -606,7 +606,7 @@ class Ui_MainWindow(object):
 
 from statusbar import PMXStatusBar
 from tabwidget import PMXTabWidget
-import res_rc
+from . import res_rc
 
 if __name__ == "__main__":
     import sys

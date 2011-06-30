@@ -65,7 +65,7 @@ class Ui_TracebackDialog(object):
         self.pushCopy.setText(QtGui.QApplication.translate("TracebackDialog", "&Copy", None, QtGui.QApplication.UnicodeUTF8))
         self.pushClose.setText(QtGui.QApplication.translate("TracebackDialog", "&Close", None, QtGui.QApplication.UnicodeUTF8))
 
-import res_rc
+import prymatex.res_rc
 
 if __name__ == "__main__":
     import sys

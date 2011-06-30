@@ -1,5 +1,5 @@
 from PyQt4.Qt import *
-from ui_crash import Ui_CrashDialog
+from prymatex.gui.emergency.ui_crash import Ui_CrashDialog
 import sys
 
 class PMXCrashDialog(QDialog, Ui_CrashDialog):

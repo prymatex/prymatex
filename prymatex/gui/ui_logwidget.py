@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/logwidget.ui'
 #
-# Created: Thu May 26 15:15:29 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Thu Jun 30 17:57:34 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -66,7 +66,7 @@ class Ui_LogWidget(object):
         LogWidget.setWindowTitle(QtGui.QApplication.translate("LogWidget", "Log", None, QtGui.QApplication.UnicodeUTF8))
         self.lineEdit.setToolTip(QtGui.QApplication.translate("LogWidget", "Filter debugging output", None, QtGui.QApplication.UnicodeUTF8))
 
-import res_rc
+from . import res_rc
 
 if __name__ == "__main__":
     import sys

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_files/findreplace.ui'
 #
-# Created: Thu May 26 15:15:28 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Thu Jun 30 17:57:34 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -123,7 +123,7 @@ class Ui_Form(object):
         self.pushFindPrevious.setText(QtGui.QApplication.translate("Form", "<", None, QtGui.QApplication.UnicodeUTF8))
         self.labelFind.setText(QtGui.QApplication.translate("Form", "FInd:", None, QtGui.QApplication.UnicodeUTF8))
 
-import res_rc
+from . import res_rc
 
 if __name__ == "__main__":
     import sys
