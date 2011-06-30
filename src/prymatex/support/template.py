@@ -19,22 +19,27 @@ class PMXTemplateFile(object):
         self.path = path
         self.name = os.path.basename(path)
         self.template = template
-        
+
     def getFileContent(self):
-        file = os.path.join(self.template.path, self.name)
-        f = codecs.open(file, 'r', 'utf-8')
+        f = codecs.open(self.path, 'r', 'utf-8')
         content = f.read()
         f.close()
         return content
     
     def setFileContent(self, content):
-        file = os.path.join(self.template.path, self.name)
-        if os.path.exists(file):
-            f = codecs.open(file, 'w', 'utf-8')
+        if os.path.exists(self.path):
+            f = codecs.open(self.path, 'w', 'utf-8')
             f.write(content)
             f.close()
     content = property(getFileContent, setFileContent)
 
+    def save(self, path):
+        newpath = os.path.join(path, self.name)
+        f = codecs.open(newpath, 'w', 'utf-8')
+        f.write(self.content)
+        f.close()
+        self.path = newpath
+    
 class PMXTemplate(PMXBundleItem):
     KEYS = [    'command', 'extension']
     FILE = 'info.plist'
@@ -70,17 +75,9 @@ class PMXTemplate(PMXBundleItem):
         file = os.path.join(self.path , self.FILE)
         plistlib.writePlist(self.hash, file)
         #Hora los archivos del template
-        files = []
         for file in self.files:
-            name = os.path.basename(file)
-            dir = os.path.dirname(file)
-            if dir != self.path:
-                newfile = os.path.join(dir , name)
-                shutil.copy(file, newfile)
-                files.append(newfile)
-            else:
-                files.append(file)
-        self.files = files
+            if file.path != self.path:
+                file.save(self.path)
 
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()
@@ -112,10 +109,11 @@ class PMXTemplate(PMXBundleItem):
             template = cls(uuid, namespace, data, path)
             template.setBundle(bundle)
             template = manager.addBundleItem(template)
-            manager.addManagedObject(template)
             for path in paths:
                 file = PMXTemplateFile(path, template)
-                manager.addTemplateFile(file)
+                file = manager.addTemplateFile(file)
+                template.files.append(file)
+            manager.addManagedObject(template)
             return template
         except Exception, e:
             print "Error in bundle %s (%s)" % (info, e)

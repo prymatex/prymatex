@@ -13,7 +13,7 @@ from prymatex.support.snippet import PMXSnippet
 from prymatex.support.preference import PMXPreference
 from prymatex.support.command import PMXCommand, PMXDragCommand
 from prymatex.support.template import PMXTemplate, PMXTemplateFile
-from prymatex.support.theme import PMXTheme
+from prymatex.support.theme import PMXTheme, PMXThemeStyle
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
 
@@ -52,6 +52,9 @@ class PMXSupportBaseManager(object):
         self.deletedBundles = deletedBundles
         self.scores = PMXScoreManager()
     
+    #---------------------------------------------------
+    # Namespaces
+    #---------------------------------------------------
     def addNamespace(self, name, path):
         self.namespaces[name] = {}
         self.nsorder.append(name)
@@ -66,9 +69,26 @@ class PMXSupportBaseManager(object):
                 var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
             self.namespaces[name][element] = self.environment[var] = epath
 
+    @property
+    def protectedNamespace(self):
+        return self.nsorder[self.PROTECTEDNS]
+        
+    @property
+    def defaultNamespace(self):
+        return self.nsorder[self.DEFAULTNS]
+
+    def updateEnvironment(self, env):
+        self.environment.update(env)
+
+    def buildEnvironment(self):
+        return self.environment
+        
+    #---------------------------------------------------
+    # Tools
+    #---------------------------------------------------
     def uuidgen(self):
         return uuidmodule.uuid1()
-        
+
     def convertToValidPath(self, name):
         # TODO: ver que el uuid generado no este entre los elementos existentes
         validPath = []
@@ -76,12 +96,6 @@ class PMXSupportBaseManager(object):
             char = char if char in self.VALID_PATH_CARACTERS else '-'
             validPath.append(char)
         return ''.join(validPath)
-
-    def updateEnvironment(self, env):
-        self.environment.update(env)
-
-    def buildEnvironment(self):
-        return self.environment
 
     #---------------------------------------------------
     # LOAD ALL SUPPORT
@@ -200,7 +214,7 @@ class PMXSupportBaseManager(object):
         '''
         if len(self.nsorder) < 2:
             return None
-        namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
+        if namespace is None: namespace = self.defaultNamespace
         path = join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
         bundle = PMXBundle(self.uuidgen(), namespace, { 'name': name }, path)
         return self.addBundle(bundle)
@@ -223,19 +237,17 @@ class PMXSupportBaseManager(object):
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == bundle.name:
             #Updates que no son updates
             return bundle
-        if bundle.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
-            #Cambiar de namespace y de path al por defecto para proteger el base
-            newns = self.nsorder[self.DEFAULTNS]
-            attrs["path"] = join(self.namespaces[newns]['Bundles'], basename(bundle.path))
-            bundle.update(attrs)
-            bundle.save()
-            bundle.addNamespace(newns)
+        if bundle.isProtected:
+            if not bundle.isSafe:
+                namespace = self.defaultNamespace
+                attrs["path"] = join(self.namespaces[namespace]['Bundles'], basename(bundle.path))
+                bundle.addNamespace(namespace)
         else:
-            if "name" in attrs and self.nsorder[self.PROTECTEDNS] not in bundle.namespaces:
+            if "name" in attrs:
                 attrs["path"] = ensurePath(join(dirname(bundle.path), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
                 bundle.relocate(attrs["path"])
-            bundle.update(attrs)
-            bundle.save()
+        bundle.update(attrs)
+        bundle.save()
         self.modifyBundle(bundle)
         return bundle
         
@@ -249,8 +261,10 @@ class PMXSupportBaseManager(object):
         #Primero los items
         for item in items:
             self.deleteBundleItem(item)
-        if bundle.namespace == self.nsorder[0]:
-            self.setDeletedBundle(bundle.uuid)
+        if bundle.isProtected:
+            if bundle.isSafe:
+                pass #Eliminar la parte safe
+            self.setDeleted(bundle.uuid)
         else:
             bundle.delete()
         
@@ -294,7 +308,7 @@ class PMXSupportBaseManager(object):
         '''
         if len(self.nsorder) < 2:
             return None
-        namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
+        if namespace is None: namespace = self.defaultNamespace
         klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
         if len(klass) != 1:
             raise Exception("No class type for %s" % tipo)
@@ -323,21 +337,20 @@ class PMXSupportBaseManager(object):
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
             #Updates que no son updates
             return item
-        if item.bundle.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
+        if item.bundle.isProtected and not item.bundle.isSafe:
             self.updateBundle(item.bundle)
-        if item.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
-            #Cambiar de namespace y de path al por defecto para proteger el base
-            newns = self.nsorder[self.DEFAULTNS]
-            attrs["path"] = join(item.bundle.path, item.FOLDER, basename(item.path))
-            item.update(attrs)
-            item.save()
-            item.addNamespace(newns)
+        if item.isProtected:
+            if not item.isSafe:
+                namespace = self.defaultNamespace
+                attrs["path"] = join(item.bundle.path, item.FOLDER, basename(item.path))
+                item.addNamespace(namespace)
         else:
-            if "name" in attrs and self.nsorder[self.PROTECTEDNS] not in item.namespaces:
-                attrs["path"] = ensurePath(join(item.bundle.path, item.FOLDER, "%%s.%s" % item.EXTENSION), self.convertToValidPath(attrs["name"]))
+            if "name" in attrs:
+                namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
+                attrs["path"] = ensurePath(join(item.bundle.path, item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
                 item.relocate(attrs["path"])
-            item.update(attrs)
-            item.save()
+        item.update(attrs)
+        item.save()
         self.modifyBundleItem(item)
         return item
     
@@ -348,8 +361,10 @@ class PMXSupportBaseManager(object):
         '''
         self.removeBundleItem(item)
         #Si el espacio de nombres es distinto al protegido lo elimino
-        if item.namespace == self.nsorder[self.PROTECTEDNS]:
-            self.setDeletedBundleItem(item.uuid)
+        if item.isProtected:
+            if item.isSafe:
+                pass #Borrar la parte safe del bundle item
+            self.setDeleted(item.uuid)
         else:
             item.delete()
 
@@ -362,24 +377,27 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # TEMPLATEFILE CRUD
     #---------------------------------------------------
-    def createTemplateFile(self, name, template):
-        if len(self.nsorder) < 2:
-            return None
-        if template.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
+    def createTemplateFile(self, name, content, template):
+        if template.isProtected and not template.isSafe:
             self.updateBundleItem(template)
         path = join(template.path, "%s.%s" % (self.convertToValidPath(name), template.extension))
         file = PMXTemplateFile(path, template)
         file = self.addTemplateFile(file)
+        template.files.append(file)
         return file
+
+    def deleteTemplateFile(self, style):
+        theme = style.theme
+        if theme.isProtected and not theme.isSafe:
+            self.updateTheme(theme)
+        theme.styles.remove(style)
+        theme.save()
     
     #---------------------------------------------------
     # THEME INTERFACE
     #---------------------------------------------------
     def addTheme(self, theme):
         return theme
-    
-    def addThemeStyle(self, style):
-        return style
     
     def modifyTheme(self, theme):
         pass
@@ -406,12 +424,13 @@ class PMXSupportBaseManager(object):
         return items
 
     def createTheme(self, name, namespace = None):
-        namespace = self.nsorder[self.DEFAULTNS] if namespace == None else namespace
+        if len(self.nsorder) < 2:
+            return None
+        if namespace is None: namespace = self.defaultNamespace
         path = join(self.namespaces[namespace]['Themes'], "%s.tmTheme" % self.convertToValidPath(name))
         theme = PMXTheme(self.uuidgen(), namespace, { 'name': name }, path)
-        self.addTheme(theme)
-        return theme
-    
+        return self.addTheme(theme)
+
     def readTheme(self, **attrs):
         '''
             Retorna un bundle item por sus atributos
@@ -425,18 +444,17 @@ class PMXSupportBaseManager(object):
         '''
             Actualiza un themes
         '''
-        if theme.namespaces[-1] == self.nsorder[self.PROTECTEDNS]:
-            #Cambiar de namespace y de path al por defecto para proteger el base
-            newns = self.nsorder[-1]
-            attrs["namespace"] = newns
-            name = "%s.tmTheme" % self.convertToValidPath(attrs["name"]) if "name" in attrs else basename(theme.path)
-            attrs["path"] = join(self.namespaces[newns]['Themes'], name)
-            theme.update(attrs)
-            theme.save()
-            theme.addNamespace(newns)
+        if theme.isProtected:
+            if not theme.isSafe:
+                namespace = self.defaultNamespace
+                attrs["path"] = join(self.namespaces[namespace]['Themes'], basename(theme.path))
+                theme.addNamespace(namespace)
         else:
-            theme.update(attrs)
-            theme.save()
+            if "name" in attrs:
+                attrs["path"] = ensurePath(join(dirname(theme.path), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
+                theme.relocate(attrs["path"])
+        theme.update(attrs)
+        theme.save()
         self.modifyTheme(theme)
         return theme
         
@@ -446,11 +464,38 @@ class PMXSupportBaseManager(object):
         '''
         self.removeTheme(theme)
         #Si el espacio de nombres es distinto al protegido lo elimino
-        if theme.namespace == self.nsorder[self.PROTECTEDNS]:
-            self.setDeletedTheme(theme.uuid)
+        if theme.isProtected:
+            if theme.isSafe:
+                pass #TODO: Borrar archivos en safe zones
+            self.setDeleted(theme.uuid)
         else:
             theme.delete()
     
+    #---------------------------------------------------
+    # THEMESTYLE INTERFACE
+    #---------------------------------------------------
+    def addThemeStyle(self, style):
+        return style
+    
+    #---------------------------------------------------
+    # THEMESTYLE CRUD
+    #---------------------------------------------------
+    def createThemeStyle(self, name, scope, theme):
+        if theme.isProtected and not theme.isSafe:
+            self.updateTheme(theme)
+        style = PMXThemeStyle({'name': name, 'scope': scope, 'settings': {}}, theme)
+        style = self.addThemeStyle(style)
+        theme.styles.append(style)
+        theme.save()
+        return style
+
+    def deleteThemeStyle(self, style):
+        theme = style.theme
+        if theme.isProtected and not theme.isSafe:
+            self.updateTheme(theme)
+        theme.styles.remove(style)
+        theme.save()
+        
     #---------------------------------------------------
     # PREFERENCES INTERFACE
     #---------------------------------------------------
@@ -607,6 +652,7 @@ class PMXSupportManager(PMXSupportBaseManager):
         @param bundle: PMXBundle instance
         '''
         self.BUNDLES[bundle.uuid] = bundle
+        return bundle
 
     def getBundle(self, uuid):
         return self.getManagedObject(uuid)

@@ -23,7 +23,14 @@ class PMXThemeStyle(object):
 
     @property
     def hash(self):
-        return {'scope': self.scope, 'name': self.name, 'settings': self.settings}
+        hash = {'name': self.name}
+        if self.scope is not None:
+            hash['scope'] = self.scope
+        hash['settings'] = {}
+        for name, setting in self.settings.iteritems():
+            if setting != None:
+                hash['settings'][name] = setting
+        return hash
         
     def update(self, hash):
         for key in hash.keys():
@@ -37,8 +44,7 @@ class PMXTheme(PMXManagedObject):
     KEYS = [    'name', 'comment', 'author', 'settings']
     
     def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXTheme, self).__init__(uuid, namespace)
-        self.path = path
+        super(PMXTheme, self).__init__(uuid, namespace, path)
         self.styles = []
         self.load(hash)
 

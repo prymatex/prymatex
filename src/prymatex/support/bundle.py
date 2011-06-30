@@ -89,32 +89,45 @@ class PMXMenuNode(object):
                 yield (self.MENU_SPACE, self.MENU_SPACE)
 
 class PMXManagedObject(object):
-    def __init__(self, uuid, namespace):
+    def __init__(self, uuid, namespace, path):
         self.uuid = uuid
         self.namespaces = [ namespace ]
+        self.path = path
         self.manager = None
     
+    @property
+    def isProtected(self):
+        return self.manager.protectedNamespace in self.namespaces
+        
+    @property
+    def isSafe(self):
+        return len(self.namespaces) > 1
+        
     @property
     def hash(self):
         return { 'uuid': unicode(self.uuid).upper() }
     
     def addNamespace(self, namespace):
-        index = self.manager.nsorder.index(namespace)
-        if index < len(self.namespaces):
-            self.namespaces.insert(index, namespace)
-        else:
-            self.namespaces.append(namespace)
+        if namespace not in self.namespaces:
+            index = self.manager.nsorder.index(namespace)
+            if index < len(self.namespaces):
+                self.namespaces.insert(index, namespace)
+            else:
+                self.namespaces.append(namespace)
     
     def setManager(self, manager):
         self.manager = manager
         
+    def relocate(self, path):
+        if os.path.exists(self.path):
+            shutil.move(self.path, path)
+    
 class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
     def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXBundle, self).__init__(uuid, namespace)
-        self.path = path
+        super(PMXBundle, self).__init__(uuid, namespace, path)
         self.disabled = False
         self.support = None
         self.load(hash)
@@ -159,10 +172,6 @@ class PMXBundle(PMXManagedObject):
         except os.OSError:
             pass
             
-    def relocate(self, path):
-        if os.path.exists(self.path):
-            shutil.move(self.path, path)
-    
     def buildEnvironment(self):
         env = copy(self.manager.buildEnvironment())
         env['TM_BUNDLE_PATH'] = self.path
@@ -195,8 +204,7 @@ class PMXBundleItem(PMXManagedObject):
     EXTENSION = ''
     PATTERNS = []
     def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXBundleItem, self).__init__(uuid, namespace)
-        self.path = path
+        super(PMXBundleItem, self).__init__(uuid, namespace, path)
         self.bundle = None
         self.load(hash)
 
@@ -244,10 +252,6 @@ class PMXBundleItem(PMXManagedObject):
             os.rmdir(dir)
         except os.OSError:
             pass
-    
-    def relocate(self, path):
-        if os.path.exists(self.path):
-            shutil.move(self.path, path)
     
     def buildEnvironment(self, **kwargs):
         env = self.bundle.buildEnvironment()

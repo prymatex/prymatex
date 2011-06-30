@@ -97,11 +97,11 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.pushButtonLineHighlight.pressed.connect(lambda element = 'lineHighlight': self.on_pushButtonColor_pressed(element))
         self.pushButtonCaret.pressed.connect(lambda element = 'caret': self.on_pushButtonColor_pressed(element))
         #Font
-        self.pushButtonChangeFont.pressed.connect(self.on_pushButtonChangeFont_pressed)
         font = self.settings.value('font')
         self.lineFont.setFont(font)
         self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     
+    @pyqtSignature('')
     def on_pushButtonChangeFont_pressed(self):
         font = self.settings.value('font')
         font, ok = QtGui.QFontDialog.getFont(font, self, self.trUtf8("Select editor font"))
