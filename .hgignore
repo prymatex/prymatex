@@ -1,23 +1,9 @@
-syntax: glob
-.*
-*~
-*.pyc
-*.so*
-*/test
-*.o
-*/themes/*
-*/macromates/*
-*.orig
-*sshot*png
-*src/tests/bundles
-# Deben ser incluidos explicitamente los SVG
-*.svg
-res/*.png
-# Definicones XML de conversion de H a Python
-src/prymatex/*.xml
-*/LOCK
-*.cache
-tests/*/basic_usage
-src/prymatex/test.*
+syntax:glob
+.project
+.pydevproject
+.settings
 *.log
-src/prymatex\-macromatex/*
+*.egg-info
+*.pot
+*.py[co]
+docs/_build/

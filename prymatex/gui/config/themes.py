@@ -72,7 +72,12 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.comboBoxScope.setEditText(style.scope) 
     
     def on_comboBoxScope_changed(self, string):
-        print string
+        string = unicode(string)
+        index = self.tableView.currentIndex()
+        if index.isValid():
+            style = self.manager.themeStyleProxyModel.mapToSource(index).internalPointer()
+            if string != style.scope:
+                self.manager.updateThemeStyle(style, scope = string)
     
     def configTableView(self):
         self.tableView.setModel(self.manager.themeStyleProxyModel)
@@ -101,7 +106,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.lineFont.setFont(font)
         self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     
-    @pyqtSignature('')
+    @QtCore.pyqtSignature('')
     def on_pushButtonChangeFont_pressed(self):
         font = self.settings.value('font')
         font, ok = QtGui.QFontDialog.getFont(font, self, self.trUtf8("Select editor font"))
@@ -110,13 +115,26 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
             self.lineFont.setFont(font)
             self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     
+    @QtCore.pyqtSignature('')
+    def on_pushButtonAdd_pressed(self):
+        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex()).toPyObject()
+        theme = self.manager.getTheme(unicode(uuid))
+        style = self.manager.createThemeStyle('untitled', unicode(self.comboBoxScope.currentText()), theme)
+    
+    @QtCore.pyqtSignature('')
+    def on_pushButtonRemove_pressed(self):
+        index = self.tableView.currentIndex()
+        if index.isValid():
+            style = self.manager.themeStyleProxyModel.mapToSource(index).internalPointer()
+            self.manager.deleteThemeStyle(style)
+    
     def on_pushButtonColor_pressed(self, element):
         uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex()).toPyObject()
         theme = self.manager.getTheme(unicode(uuid))
         settings = theme.settings
         color = QtGui.QColorDialog.getColor(settings[element], self)
         if color:
-            theme.update({'settings': { element: color }})
+            self.manager.updateTheme(theme, settings = { element: color })
             self.setThemeSettings(theme)
     
     def getRGB(self, color):

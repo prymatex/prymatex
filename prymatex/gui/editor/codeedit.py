@@ -58,7 +58,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     It holds the highlighter and the folding
     
     '''
-    
     WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
     WORD = re.compile(r'\w+', re.UNICODE)
     PREFERENCE_CACHE = {}
@@ -553,8 +552,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #Tengo mas de uno que hago?
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
         menu = QMenu()
-        for index, item in enumerate(items):
-            action = menu.addAction(item.buildMenuTextEntry("&" + str(index + 1)))
+        for index, item in enumerate(items, 1):
+            action = menu.addAction(item.buildMenuTextEntry("&" + str(index)))
             receiver = lambda item = item: self.insertBundleItem(item, tabTrigger = tabTrigger)
             self.connect(action, SIGNAL('triggered()'), receiver)
         if syntax:

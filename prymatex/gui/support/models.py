@@ -318,12 +318,13 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
+            style = self.styles[row]
             if column == 0:
-                self.styles[row].update({'name': unicode(value.toString()) })
+                self.manager.updateThemeStyle(style, name = unicode(value.toString()))
             elif column == 1:
-                self.styles[row].update({'settings': {'foreground' : unicode(value.toString()) }})
+                self.manager.updateThemeStyle(style, settings = {'foreground' : unicode(value.toString()) })
             elif column == 2:
-                self.styles[row].update({'settings': {'background' : unicode(value.toString()) }})
+                self.manager.updateThemeStyle(style, settings = {'background' : unicode(value.toString()) })
             self.dataChanged.emit(index, index)
             return True
         return False

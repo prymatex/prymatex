@@ -489,6 +489,15 @@ class PMXSupportBaseManager(object):
         theme.save()
         return style
 
+    def updateThemeStyle(self, style, **attrs):
+        theme = style.theme
+        if theme.isProtected and not theme.isSafe:
+            self.updateTheme(theme)
+        style.update(attrs)
+        theme.save()
+        self.modifyTheme(theme)
+        return style
+
     def deleteThemeStyle(self, style):
         theme = style.theme
         if theme.isProtected and not theme.isSafe:
