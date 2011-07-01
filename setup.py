@@ -22,7 +22,85 @@ Needed packages to run (using Debian/Ubuntu package names):
 import os
 
 from distutils.command.install import install
+from distutils.command.build import build
 from distutils.core import setup
+
+class QtBuild(build):
+    """Build PyQt (.ui) files and resources."""
+ 
+    description = "build PyQt GUIs (.ui)."
+ 
+    def compile_ui(self, ui_file, py_file=None):
+        """Compile the .ui files to python modules."""
+        # Search for pyuic4 in python bin dir, then in the $Path.
+        if py_file is None:
+            # go from the ui_file in the data folder to the
+            # python file in the qt moodule
+            py_file = os.path.split(ui_file)[1]
+            py_file = os.path.splitext(py_file)[0] + '_ui.py'
+            py_file = os.path.join('package', 'qt', py_file)
+        # we indeed want to catch Exception, is ugle but w need it
+        # pylint: disable=W0703
+        try:
+            # import the uic compiler from pyqt and generate the 
+            # .py files something similar could be done with pyside
+            # but that is left as an exercise for the reader.
+            from PyQt4 import uic
+            fp = open(py_file, 'w')
+            uic.compileUi(ui_file, fp)
+            fp.close()
+            log.info('Compiled %s into %s', ui_file, py_file)
+        except Exception, e:
+            self.warn('Unable to compile user interface %s: %s',
+                           py_file, e)
+            if not os.path.exists(py_file) or\
+                                            not file(py_file).read():
+                raise SystemExit(1)
+            return
+        # pylint: enable=W0703
+ 
+    def run(self):
+        """Execute the command."""
+        self._wrapuic()
+        basepath = os.path.join('prymatex',  'gui')
+        for dirpath, _, filenames in os.walk(basepath):
+            for filename in filenames:
+                if filename.endswith('.ui'):
+                    self.compile_ui(os.path.join(dirpath, filename))
+ 
+    # pylint: disable=E1002
+    _wrappeduic = False
+    @classmethod
+    def _wrapuic(cls):
+        """Wrap uic to use gettext's _() in place of tr()"""
+        if cls._wrappeduic:
+            return
+ 
+        from PyQt4.uic.Compiler import compiler, qtproxies, indenter
+ 
+        # pylint: disable=C0103
+        class _UICompiler(compiler.UICompiler):
+            """Speciallized compiler for qt .ui files."""
+            def createToplevelWidget(self, classname, widgetname):
+                o = indenter.getIndenter()
+                o.level = 0
+                o.write('from module.with.gettext.setup import _')
+                return super(_UICompiler, self).createToplevelWidget(
+                                   classname, widgetname)
+        compiler.UICompiler = _UICompiler
+ 
+        class _i18n_string(qtproxies.i18n_string):
+            """Provide a translated text."""
+ 
+            def __str__(self):
+                return "_('%s')" % self.string.encode(
+                                                'string-escape')
+ 
+        qtproxies.i18n_string = _i18n_string
+ 
+        cls._wrappeduic = True
+        # pylint: enable=C0103
+    # pylint: enable=E1002
 
 class CustomInstall(install):
     """Custom installation class on package files.
@@ -83,5 +161,6 @@ setup(
 
     cmdclass = {
         'install': CustomInstall,
+        'build_ui': QtBuild 
     }
 )
