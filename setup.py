@@ -62,17 +62,20 @@ class CustomInstall(install):
         self._custom_data_dir = data_dir
 
 # Dynamically calculate the version based on prymatex.VERSION.
-version = __import__('prymatex.version', fromlist=['prymatex'])
+vmodule = __import__('prymatex.version', fromlist=['prymatex'])
+version = vmodule.get_version()
+if u'GIT' in version:
+    version = ' '.join(version.split(' ')[:-1])
 
 setup(
     name = 'prymatex',
-    version = version.get_version(),
+    version = version,
     license = 'GPL-3',
-    author = version.AUTHOR,
-    author_email = version.AUTHOR_EMAIL,
-    description = version.DESCRIPTION,
-    long_description = version.LONG_DESCRIPTION,
-    url = version.URL,
+    author = vmodule.AUTHOR,
+    author_email = vmodule.AUTHOR_EMAIL,
+    description = vmodule.DESCRIPTION,
+    long_description = vmodule.LONG_DESCRIPTION,
+    url = vmodule.URL,
 
     packages = ["prymatex"],
     package_data = {"prymatex": ["resources/*", "share/*"]},
