@@ -37,8 +37,8 @@ class QtBuild(build):
             # go from the ui_file in the data folder to the
             # python file in the qt moodule
             py_file = os.path.split(ui_file)[1]
-            py_file = os.path.splitext(py_file)[0] + '_ui.py'
-            py_file = os.path.join('package', 'qt', py_file)
+            py_file = os.path.splitext(py_file)[0] + '.py'
+            py_file = os.path.join('prymatex', 'ui', py_file)
         # we indeed want to catch Exception, is ugle but w need it
         # pylint: disable=W0703
         try:
@@ -51,10 +51,8 @@ class QtBuild(build):
             fp.close()
             log.info('Compiled %s into %s', ui_file, py_file)
         except Exception, e:
-            self.warn('Unable to compile user interface %s: %s',
-                           py_file, e)
-            if not os.path.exists(py_file) or\
-                                            not file(py_file).read():
+            self.warn('Unable to compile user interface %s: %s', py_file, e)
+            if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
             return
         # pylint: enable=W0703
@@ -62,7 +60,7 @@ class QtBuild(build):
     def run(self):
         """Execute the command."""
         self._wrapuic()
-        basepath = os.path.join('prymatex',  'gui')
+        basepath = os.path.join('prymatex',  'resources', 'ui')
         for dirpath, _, filenames in os.walk(basepath):
             for filename in filenames:
                 if filename.endswith('.ui'):
@@ -85,17 +83,13 @@ class QtBuild(build):
                 o = indenter.getIndenter()
                 o.level = 0
                 o.write('from module.with.gettext.setup import _')
-                return super(_UICompiler, self).createToplevelWidget(
-                                   classname, widgetname)
+                return super(_UICompiler, self).createToplevelWidget(classname, widgetname)
         compiler.UICompiler = _UICompiler
  
         class _i18n_string(qtproxies.i18n_string):
             """Provide a translated text."""
- 
             def __str__(self):
-                return "_('%s')" % self.string.encode(
-                                                'string-escape')
- 
+                return "_('%s')" % self.string.encode('string-escape')
         qtproxies.i18n_string = _i18n_string
  
         cls._wrappeduic = True
