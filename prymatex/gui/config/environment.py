@@ -1,12 +1,10 @@
-'''
-Created on 15/05/2011
-
-@author: diego
-'''
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
-from prymatex.gui.config.ui_environment import Ui_EnvVariables
+
 from prymatex.gui.config.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
+from prymatex.ui.configenvironment import Ui_EnvVariables
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
     def __init__(self, settingGroup, parent = None):

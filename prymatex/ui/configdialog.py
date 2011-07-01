@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\configdialog.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/configdialog.ui'
 #
-# Created: Fri Jul 01 12:35:45 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -36,22 +36,9 @@ class Ui_PMXSettingsDialog(object):
         self.verticalLayout.setSpacing(-1)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.labelFilter = QtGui.QLabel(self.layoutWidget)
-        self.labelFilter.setObjectName(_fromUtf8("labelFilter"))
-        self.horizontalLayout.addWidget(self.labelFilter)
         self.lineFilter = QtGui.QLineEdit(self.layoutWidget)
         self.lineFilter.setObjectName(_fromUtf8("lineFilter"))
-        self.horizontalLayout.addWidget(self.lineFilter)
-        self.pushClearFilter = QtGui.QPushButton(self.layoutWidget)
-        self.pushClearFilter.setText(_fromUtf8(""))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/edit-delete.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushClearFilter.setIcon(icon)
-        self.pushClearFilter.setObjectName(_fromUtf8("pushClearFilter"))
-        self.horizontalLayout.addWidget(self.pushClearFilter)
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout.addWidget(self.lineFilter)
         self.treeView = PMXConfigTreeView(self.layoutWidget)
         self.treeView.setMinimumSize(QtCore.QSize(250, 0))
         self.treeView.setLineWidth(0)
@@ -80,21 +67,6 @@ class Ui_PMXSettingsDialog(object):
         self.container = QtGui.QWidget(self.mainContainer)
         self.container.setObjectName(_fromUtf8("container"))
         self.verticalLayout_3.addWidget(self.container)
-        self.horizontalLayout_2 = QtGui.QHBoxLayout()
-        self.horizontalLayout_2.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
-        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem)
-        self.pushClose = QtGui.QPushButton(self.mainContainer)
-        self.pushClose.setStyleSheet(_fromUtf8("QPushButton {\n"
-"padding: 8%;\n"
-"}"))
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/process-stop.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushClose.setIcon(icon1)
-        self.pushClose.setObjectName(_fromUtf8("pushClose"))
-        self.horizontalLayout_2.addWidget(self.pushClose)
-        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addWidget(self.splitter)
 
         self.retranslateUi(PMXSettingsDialog)
@@ -102,9 +74,7 @@ class Ui_PMXSettingsDialog(object):
 
     def retranslateUi(self, PMXSettingsDialog):
         PMXSettingsDialog.setWindowTitle(_('Prymatex Settings'))
-        self.labelFilter.setText(_('Filter'))
         self.labelTitle.setText(_('TextLabel'))
-        self.pushClose.setText(_('&Close'))
 
 from prymatex.gui.config.widgets import PMXConfigTreeView
-from prymatex import res_rc
+from prymatex import resources_rc

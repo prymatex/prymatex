@@ -101,7 +101,7 @@ class PMXApplication(QtGui.QApplication):
         self.__options = options
             
     def setup_configdialog(self):
-        from prymatex.gui.config import  PMXSettingsDialog
+        from prymatex.gui.config.configdialog import  PMXSettingsDialog
         configdialog = PMXSettingsDialog()
         from prymatex.gui.config.widgets import PMXGeneralWidget,\
                                                 PMXUpdatesWidget,\
@@ -224,10 +224,10 @@ class PMXApplication(QtGui.QApplication):
     
     def init_application_params(self):
         from prymatex import version
-        self.setApplicationName(version.__doc__)
-        self.setApplicationVersion(version.__version__) # hg stuff?
+        self.setApplicationName(version.DESCRIPTION)
+        self.setApplicationVersion(version.get_version()) # hg stuff?
         self.setOrganizationDomain("org")
-        self.projectUrl = version.__url__    
+        self.projectUrl = version.URL    
     
     @property
     def lock_filename(self):

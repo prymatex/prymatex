@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\findreplace.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/findreplace.ui'
 #
-# Created: Fri Jul 01 12:35:45 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:34 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -54,7 +54,7 @@ class Ui_Form(object):
         self.pushClose = QtGui.QPushButton(Form)
         self.pushClose.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/process-stop.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushClose.setIcon(icon)
         self.pushClose.setFlat(True)
         self.pushClose.setObjectName(_fromUtf8("pushClose"))
@@ -112,4 +112,4 @@ class Ui_Form(object):
         self.pushFindPrevious.setText(_('<'))
         self.labelFind.setText(_('FInd:'))
 
-from prymatex import res_rc
+from prymatex import resources_rc

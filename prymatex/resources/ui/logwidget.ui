@@ -39,8 +39,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>:/actions/resources/actions/edit-delete.png</normaloff>:/actions/resources/actions/edit-delete.png</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/view-refresh.png</normaloff>:/icons/actions/view-refresh.png</iconset>
         </property>
        </widget>
       </item>
@@ -50,8 +50,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>:/actions/resources/actions/view-filter.png</normaloff>:/actions/resources/actions/view-filter.png</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/view-filter.png</normaloff>:/icons/actions/view-filter.png</iconset>
         </property>
        </widget>
       </item>
@@ -91,7 +91,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="../../res.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>

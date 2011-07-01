@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\emergencycrash.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/emergencycrash.ui'
 #
-# Created: Fri Jul 01 12:35:45 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -52,21 +52,18 @@ class Ui_CrashDialog(object):
         self.horizontalLayout_2.addItem(spacerItem)
         self.pushSendTraceback = QtGui.QPushButton(CrashDialog)
         self.pushSendTraceback.setEnabled(False)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/go-top.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushSendTraceback.setIcon(icon)
         self.pushSendTraceback.setObjectName(_fromUtf8("pushSendTraceback"))
         self.horizontalLayout_2.addWidget(self.pushSendTraceback)
         self.pushCopyTraceback = QtGui.QPushButton(CrashDialog)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushCopyTraceback.setIcon(icon1)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushCopyTraceback.setIcon(icon)
         self.pushCopyTraceback.setObjectName(_fromUtf8("pushCopyTraceback"))
         self.horizontalLayout_2.addWidget(self.pushCopyTraceback)
         self.pushClose = QtGui.QPushButton(CrashDialog)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/system-shutdown.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushClose.setIcon(icon2)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/application-exit.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushClose.setIcon(icon1)
         self.pushClose.setObjectName(_fromUtf8("pushClose"))
         self.horizontalLayout_2.addWidget(self.pushClose)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
@@ -84,5 +81,4 @@ class Ui_CrashDialog(object):
         self.pushCopyTraceback.setText(_('Copy'))
         self.pushClose.setText(_('Close'))
 
-from prymatex import resources_rc
 from prymatex import resources_rc

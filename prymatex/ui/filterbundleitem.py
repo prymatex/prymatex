@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\filterbundleitem.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/filterbundleitem.ui'
 #
-# Created: Fri Jul 01 12:35:45 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -135,4 +135,3 @@ class Ui_FilterThroughCommand(object):
         self.radioOutputShowAsHTML.setText(_('Show As &Html'))
         self.radioOutputCreateNewDocument.setText(_('Create &New Document'))
 
-from prymatex import res_rc

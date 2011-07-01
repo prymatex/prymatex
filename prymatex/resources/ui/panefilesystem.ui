@@ -49,7 +49,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/go-up.png</normaloff>:/actions/resources/actions/go-up.png</iconset>
        </property>
        <property name="iconSize">
@@ -75,7 +75,7 @@
         <string>Go previous place</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/go-previous.png</normaloff>:/actions/resources/actions/go-previous.png</iconset>
        </property>
        <property name="iconSize">
@@ -104,7 +104,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/go-next.png</normaloff>:/actions/resources/actions/go-next.png</iconset>
        </property>
        <property name="flat">
@@ -124,7 +124,7 @@
         <string>Filter settings</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/view-filter.png</normaloff>:/actions/resources/actions/view-filter.png</iconset>
        </property>
        <property name="iconSize">
@@ -150,7 +150,7 @@
         <string>Sync folder with current editor file path</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/system-switch-user.png</normaloff>:/actions/resources/actions/system-switch-user.png</iconset>
        </property>
        <property name="iconSize">
@@ -179,7 +179,7 @@
         <string>Collapse Folder</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/debug-step-into.png</normaloff>:/actions/resources/actions/debug-step-into.png</iconset>
        </property>
        <property name="iconSize">
@@ -208,7 +208,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/help-hint.png</normaloff>:/actions/resources/actions/help-hint.png</iconset>
        </property>
        <property name="checkable">
@@ -273,7 +273,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/fork.png</normaloff>:/actions/resources/actions/fork.png</iconset>
        </property>
        <property name="flat">
@@ -296,7 +296,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../res.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

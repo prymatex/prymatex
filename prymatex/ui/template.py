@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_files/template.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/template.ui'
 #
-# Created: Fri Jun 10 15:26:12 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
+from prymatex.utils.translation import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -60,18 +61,8 @@ class Ui_Template(object):
         QtCore.QMetaObject.connectSlotsByName(Template)
 
     def retranslateUi(self, Template):
-        Template.setWindowTitle(QtGui.QApplication.translate("Template", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Template", "Extension:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("Template", "Command(s):", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("Template", "Output:", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    Template = QtGui.QWidget()
-    ui = Ui_Template()
-    ui.setupUi(Template)
-    Template.show()
-    sys.exit(app.exec_())
+        Template.setWindowTitle(_('Form'))
+        self.label.setText(_('Extension:'))
+        self.label_2.setText(_('Command(s):'))
+        self.label_4.setText(_('Output:'))
 

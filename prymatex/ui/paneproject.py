@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\paneproject.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/paneproject.ui'
 #
-# Created: Fri Jul 01 12:35:46 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -59,4 +59,4 @@ class Ui_ProjectPane(object):
         self.buttonAdd.setToolTip(_('Add files/folders'))
         self.buttonRemove.setToolTip(_('Remove File/Folders'))
 
-from prymatex import res_rc
+from prymatex import resources_rc

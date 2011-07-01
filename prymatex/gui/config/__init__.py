@@ -1,1 +1,0 @@
-from configdialog import PMXSettingsDialog

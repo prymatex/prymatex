@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>454</width>
     <height>300</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>General</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../res.qrc">
+   <iconset>
     <normaloff>:/icons/resources/icons/Prymatex_Logo.png</normaloff>:/icons/resources/icons/Prymatex_Logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -101,8 +101,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

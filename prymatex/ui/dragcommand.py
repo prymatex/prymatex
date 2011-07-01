@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_files/dragcommand.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/dragcommand.ui'
 #
-# Created: Fri Jun 10 15:26:11 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Jul  1 17:02:34 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
+from prymatex.utils.translation import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -60,18 +61,8 @@ class Ui_DragCommand(object):
         QtCore.QMetaObject.connectSlotsByName(DragCommand)
 
     def retranslateUi(self, DragCommand):
-        DragCommand.setWindowTitle(QtGui.QApplication.translate("DragCommand", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("DragCommand", "File Types:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("DragCommand", "Command(s):", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("DragCommand", "Output:", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    DragCommand = QtGui.QWidget()
-    ui = Ui_DragCommand()
-    ui.setupUi(DragCommand)
-    DragCommand.show()
-    sys.exit(app.exec_())
+        DragCommand.setWindowTitle(_('Form'))
+        self.label.setText(_('File Types:'))
+        self.label_2.setText(_('Command(s):'))
+        self.label_4.setText(_('Output:'))
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\newtemplate.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/newtemplate.ui'
 #
-# Created: Fri Jul 01 12:35:46 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:34 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -57,13 +57,13 @@ class Ui_NewFromTemplateDialog(object):
         self.horizontalLayout.addItem(spacerItem)
         self.buttonCancel = QtGui.QPushButton(NewFromTemplateDialog)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/process-stop.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCancel.setIcon(icon)
         self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
         self.horizontalLayout.addWidget(self.buttonCancel)
         self.buttonCreate = QtGui.QPushButton(NewFromTemplateDialog)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCreate.setIcon(icon1)
         self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
         self.horizontalLayout.addWidget(self.buttonCreate)
@@ -87,4 +87,4 @@ class Ui_NewFromTemplateDialog(object):
         self.buttonCancel.setText(_('C&ancel'))
         self.buttonCreate.setText(_('&Create'))
 
-from prymatex import res_rc
+from prymatex import resources_rc

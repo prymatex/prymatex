@@ -14,7 +14,7 @@
    <string>Bundle Paths</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../res.qrc">
+   <iconset>
     <normaloff>:/actions/resources/actions/folder-sync.png</normaloff>:/actions/resources/actions/folder-sync.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -89,8 +89,6 @@ directory.</string>
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

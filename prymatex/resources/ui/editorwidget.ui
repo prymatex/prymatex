@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>788</width>
+    <width>825</width>
     <height>482</height>
    </rect>
   </property>
@@ -46,8 +46,8 @@
          <string>Go</string>
         </property>
         <property name="icon">
-         <iconset resource="../../../res.qrc">
-          <normaloff>:/actions/resources/actions/go-next-view.png</normaloff>:/actions/resources/actions/go-next-view.png</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/go-jump.png</normaloff>:/icons/actions/go-jump.png</iconset>
         </property>
         <property name="autoDefault">
          <bool>true</bool>
@@ -76,7 +76,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../res.qrc">
+         <iconset>
           <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
         </property>
         <property name="flat">
@@ -103,67 +103,14 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
-       <widget class="QPushButton" name="pushFindPrevious">
-        <property name="font">
-         <font>
-          <family>Nimbus Mono L</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Mono L'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../res.qrc">
-          <normaloff>:/actions/resources/actions/go-previous.png</normaloff>:/actions/resources/actions/go-previous.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QPushButton" name="pushFindNext">
-        <property name="font">
-         <font>
-          <family>Nimbus Mono L</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Mono L'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Next&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../res.qrc">
-          <normaloff>:/actions/resources/actions/go-next.png</normaloff>:/actions/resources/actions/go-next.png</iconset>
-        </property>
-        <property name="autoDefault">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="5">
        <widget class="QPushButton" name="pushOptions">
         <property name="text">
          <string>Opt&amp;ions</string>
         </property>
         <property name="icon">
-         <iconset resource="../../../res.qrc">
-          <normaloff>:/actions/resources/actions/configure.png</normaloff>:/actions/resources/actions/configure.png</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
         </property>
        </widget>
       </item>
@@ -186,7 +133,7 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../res.qrc">
+         <iconset>
           <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
         </property>
         <property name="flat">
@@ -203,13 +150,6 @@ p, li { white-space: pre-wrap; }
       </item>
       <item row="1" column="3">
        <widget class="QPushButton" name="pushReplaceAndFindPrevious">
-        <property name="font">
-         <font>
-          <family>Nimbus Mono L</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
         <property name="toolTip">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -218,29 +158,14 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Replace &amp;amp; Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../res.qrc">
-          <normaloff>:/actions/resources/actions/go-previous.png</normaloff>:/actions/resources/actions/go-previous.png</iconset>
+         <string>Reemplazar</string>
         </property>
        </widget>
       </item>
       <item row="1" column="4">
        <widget class="QPushButton" name="pushReplaceAndFindNext">
-        <property name="font">
-         <font>
-          <family>Nimbus Mono L</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
         <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../res.qrc">
-          <normaloff>:/actions/resources/actions/go-next.png</normaloff>:/actions/resources/actions/go-next.png</iconset>
+         <string>Replace &amp;All</string>
         </property>
        </widget>
       </item>
@@ -278,6 +203,35 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="labelMatchCounter">
         <property name="text">
          <string>0 matches</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="pushFindPrevious">
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Mono L'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Next</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/go-down.png</normaloff>:/icons/actions/go-down.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QPushButton" name="pushFindNext">
+        <property name="text">
+         <string>Previous</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/go-up.png</normaloff>:/icons/actions/go-up.png</iconset>
         </property>
        </widget>
       </item>
@@ -321,7 +275,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../res.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>

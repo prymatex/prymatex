@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\confignetwork.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/confignetwork.ui'
 #
-# Created: Fri Jul 01 12:35:45 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:34 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -154,4 +154,3 @@ class Ui_Network(object):
         self.checkBox.setText(_('User auth?'))
         self.pushTestSettings.setText(_('Test settings'))
 
-from prymatex import res_rc

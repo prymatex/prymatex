@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_files/menu.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/bundle.ui'
 #
-# Created: Tue May 31 18:51:24 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
+from prymatex.utils.translation import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -31,15 +32,5 @@ class Ui_Menu(object):
         QtCore.QMetaObject.connectSlotsByName(Menu)
 
     def retranslateUi(self, Menu):
-        Menu.setWindowTitle(QtGui.QApplication.translate("Menu", "Form", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    Menu = QtGui.QWidget()
-    ui = Ui_Menu()
-    ui.setupUi(Menu)
-    Menu.show()
-    sys.exit(app.exec_())
+        Menu.setWindowTitle(_('Form'))
 

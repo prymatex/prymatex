@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\configgeneral.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/configgeneral.ui'
 #
-# Created: Fri Jul 01 12:35:45 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:34 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_General(object):
     def setupUi(self, General):
         General.setObjectName(_fromUtf8("General"))
-        General.resize(400, 300)
+        General.resize(454, 300)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/resources/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         General.setWindowIcon(icon)
@@ -74,4 +74,3 @@ class Ui_General(object):
         self.pushInsertProject.setText(_('Project Name'))
         self.pushInsertFile.setText(_('File Name'))
 
-from prymatex import res_rc

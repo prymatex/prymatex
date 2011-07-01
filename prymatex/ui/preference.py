@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_files/preference.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/preference.ui'
 #
-# Created: Thu Jun  2 21:39:26 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
+from prymatex.utils.translation import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -30,15 +31,5 @@ class Ui_Preference(object):
         QtCore.QMetaObject.connectSlotsByName(Preference)
 
     def retranslateUi(self, Preference):
-        Preference.setWindowTitle(QtGui.QApplication.translate("Preference", "Form", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    Preference = QtGui.QWidget()
-    ui = Ui_Preference()
-    ui.setupUi(Preference)
-    Preference.show()
-    sys.exit(app.exec_())
+        Preference.setWindowTitle(_('Form'))
 

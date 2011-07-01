@@ -1,5 +1,35 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/go-jump.png</file>
+    <file>actions/go-bottom.png</file>
+    <file>actions/go-down.png</file>
+    <file>actions/go-first-view.png</file>
+    <file>actions/go-first.png</file>
+    <file>actions/go-last-view.png</file>
+    <file>actions/go-last.png</file>
+    <file>actions/go-next.png</file>
+    <file>actions/go-previous-view.png</file>
+    <file>actions/go-top.png</file>
+    <file>actions/go-up.png</file>
+    <file>actions/go-previous.png</file>
+    <file>actions/go-next-view.png</file>
+    <file>actions/configure.png</file>
+    <file>actions/document-close.png</file>
+    <file>actions/document-edit.png</file>
+    <file>actions/document-new.png</file>
+    <file>actions/application-exit.png</file>
+    <file>actions/edit-copy.png</file>
+    <file>actions/edit-cut.png</file>
+    <file>actions/edit-find.png</file>
+    <file>actions/edit-paste.png</file>
+    <file>actions/view-refresh.png</file>
+    <file>actions/edit-delete.png</file>
+    <file>actions/dialog-close.png</file>
+    <file>actions/view-filter.png</file>
+    <file>actions/dialog-cancel.png</file>
+    <file>actions/document-save-all.png</file>
+    <file>actions/document-save-as.png</file>
+    <file>actions/document-save.png</file>
     <file>bundles/commands.png</file>
     <file>icons/Prymatex_Logo.png</file>
     <file>bundles/drag-commands.png</file>

@@ -90,10 +90,6 @@ Full detail about the exception has been pasted below.</string>
        <property name="text">
         <string>Send</string>
        </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>:/actions/resources/actions/go-top.png</normaloff>:/actions/resources/actions/go-top.png</iconset>
-       </property>
       </widget>
      </item>
      <item>
@@ -102,8 +98,8 @@ Full detail about the exception has been pasted below.</string>
         <string>Copy</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/actions/resources/actions/edit-copy.png</normaloff>:/actions/resources/actions/edit-copy.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
        </property>
       </widget>
      </item>
@@ -113,8 +109,8 @@ Full detail about the exception has been pasted below.</string>
         <string>Close</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/actions/resources/actions/system-shutdown.png</normaloff>:/actions/resources/actions/system-shutdown.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/actions/application-exit.png</normaloff>:/icons/actions/application-exit.png</iconset>
        </property>
       </widget>
      </item>
@@ -123,7 +119,6 @@ Full detail about the exception has been pasted below.</string>
   </layout>
  </widget>
  <resources>
-  <include location="../resources.qrc"/>
   <include location="../resources.qrc"/>
  </resources>
  <connections>

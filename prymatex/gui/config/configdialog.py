@@ -1,7 +1,9 @@
-from ui_settings import Ui_PMXSettingsDialog
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from PyQt4.Qt import *
 from prymatex.gui.editor import center
 from prymatex.gui.mixins.common import CenterWidget
+from prymatex.ui.configdialog import Ui_PMXSettingsDialog
 
 class PMXSettingsItem(QStandardItem):
     def __init__(self, name, widget_index, parent = None):

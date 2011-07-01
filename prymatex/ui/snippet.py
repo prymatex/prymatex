@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_files/snippet.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/snippet.ui'
 #
-# Created: Thu Jun  2 21:18:18 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
+from prymatex.utils.translation import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -30,15 +31,5 @@ class Ui_Snippet(object):
         QtCore.QMetaObject.connectSlotsByName(Snippet)
 
     def retranslateUi(self, Snippet):
-        Snippet.setWindowTitle(QtGui.QApplication.translate("Snippet", "Form", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    Snippet = QtGui.QWidget()
-    ui = Ui_Snippet()
-    ui.setupUi(Snippet)
-    Snippet.show()
-    sys.exit(app.exec_())
+        Snippet.setWindowTitle(_('Form'))
 

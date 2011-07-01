@@ -14,7 +14,7 @@
    <string>Network Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../res.qrc">
+   <iconset>
     <normaloff>:/actions/resources/actions/document-open-remote.png</normaloff>:/actions/resources/actions/document-open-remote.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -237,9 +237,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../res.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>radioBasedOnVariables</sender>

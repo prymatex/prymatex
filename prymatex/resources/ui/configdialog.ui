@@ -34,29 +34,7 @@
         <number>-1</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QLabel" name="labelFilter">
-           <property name="text">
-            <string>Filter</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineFilter"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushClearFilter">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../res.qrc">
-             <normaloff>:/actions/resources/actions/edit-delete.png</normaloff>:/actions/resources/actions/edit-delete.png</iconset>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QLineEdit" name="lineFilter"/>
        </item>
        <item>
         <widget class="PMXConfigTreeView" name="treeView">
@@ -110,42 +88,6 @@
        <item>
         <widget class="QWidget" name="container" native="true"/>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushClose">
-           <property name="styleSheet">
-            <string notr="true">QPushButton {
-padding: 8%;
-}</string>
-           </property>
-           <property name="text">
-            <string>&amp;Close</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../res.qrc">
-             <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -160,7 +102,7 @@ padding: 8%;
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../res.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

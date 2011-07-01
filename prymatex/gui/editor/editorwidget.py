@@ -9,7 +9,6 @@ from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget,
 
 from logging import getLogger
 from prymatex.support import PMXSyntax
-from ui_editorwidget import Ui_EditorWidget
 import logging
 import os
 from os.path import join
@@ -18,7 +17,7 @@ import sys
 import traceback
 from prymatex.core.filemanager import PMXFile
 from prymatex.core.exceptions import APIUsageError
-
+from prymatex.ui.editorwidget import Ui_EditorWidget
 
 #from prymatex.utils.deco import logresult
 logger = logging.getLogger(__name__)

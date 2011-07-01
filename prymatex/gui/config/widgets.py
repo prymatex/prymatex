@@ -1,9 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from PyQt4.QtGui import *
 from PyQt4.Qt import QString, Qt, QVariant
-from PyQt4.QtNetwork import *
+from PyQt4.QtNetwork import QNetworkProxy
 from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
+
+from prymatex.ui.configupdates import Ui_Updates
+from prymatex.ui.configsave import Ui_Save
+from prymatex.ui.confignetwork import Ui_Network
+from prymatex.ui.configgeneral import Ui_General
+from prymatex.ui.configbundles import Ui_Bundles
 
 class PMXConfigTreeView(QTreeView):
     _model = None
@@ -50,13 +58,11 @@ class PMXConfigBaseWidget(QWidget, PMXObject):
     def discard(self):
         QMessageBox.information(self, "Discard %s..." % self.windowTitle(), "Discard settings")
 
-from ui_updates import Ui_Updates
 class PMXUpdatesWidget(QWidget, Ui_Updates):
     def __init__(self, parent = None):
         super(PMXUpdatesWidget, self).__init__(parent)
         self.setupUi(self)
-        
-from ui_general import Ui_General
+
 class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
     def __init__(self, parent = None):
         super(PMXGeneralWidget, self).__init__(parent)
@@ -200,8 +206,7 @@ for codline in CODECS:
                                      alias.strip(), 
                                      lang.strip().title(), ) 
     )
-
-from ui_save import Ui_Save 
+ 
 class PMXSaveWidget(QWidget, Ui_Save):
     def __init__(self, parent = None):
         super(PMXSaveWidget, self).__init__(parent)
@@ -209,9 +214,6 @@ class PMXSaveWidget(QWidget, Ui_Save):
         for code, alias, lang in CODECS_CODEC_ALIAS_LANG:
             name = "%s%s %s" % (code, alias and " (%s)" % alias or '', lang)
             self.comboEncodings.addItem(name, None)
-        
-from ui_network import Ui_Network
-from PyQt4.QtNetwork import QNetworkProxy
 
 class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
     '''
@@ -349,8 +351,6 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
 #        
 #        self.debug("Seteamos el proxy")
         
-
-from ui_bundles import Ui_Bundles
 class PMXBundleWidget(PMXConfigBaseWidget, Ui_Bundles):
     def __init__(self, parent = None):
         super(PMXConfigBaseWidget, self).__init__(parent)

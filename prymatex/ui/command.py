@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_files/command.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/command.ui'
 #
-# Created: Fri Jun 10 15:26:11 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
+from prymatex.utils.translation import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -79,20 +80,10 @@ class Ui_Command(object):
         QtCore.QMetaObject.connectSlotsByName(Command)
 
     def retranslateUi(self, Command):
-        Command.setWindowTitle(QtGui.QApplication.translate("Command", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Command", "Save:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("Command", "Command(s):", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("Command", "Input:", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelInputOption.setText(QtGui.QApplication.translate("Command", "or", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("Command", "Output:", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    Command = QtGui.QWidget()
-    ui = Ui_Command()
-    ui.setupUi(Command)
-    Command.show()
-    sys.exit(app.exec_())
+        Command.setWindowTitle(_('Form'))
+        self.label.setText(_('Save:'))
+        self.label_2.setText(_('Command(s):'))
+        self.label_3.setText(_('Input:'))
+        self.labelInputOption.setText(_('or'))
+        self.label_4.setText(_('Output:'))
 

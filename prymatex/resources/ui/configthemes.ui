@@ -14,7 +14,7 @@
    <string>Font and Theme</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../res.qrc">
+   <iconset>
     <normaloff>:/actions/resources/actions/format-font-size-more.png</normaloff>:/actions/resources/actions/format-font-size-more.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -260,8 +260,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

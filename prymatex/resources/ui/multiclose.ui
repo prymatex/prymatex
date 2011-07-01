@@ -47,24 +47,20 @@ Do you want to save them?</string>
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="pushDontSave">
+       <property name="text">
+        <string>Do &amp;not save</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushSaveSelected">
        <property name="text">
         <string>Save &amp;Selected</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/actions/resources/actions/document-save-all.png</normaloff>:/actions/resources/actions/document-save-all.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushDontSave">
-       <property name="text">
-        <string>Do &amp;not save</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>:/actions/resources/actions/edit-delete.png</normaloff>:/actions/resources/actions/edit-delete.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/actions/document-save-all.png</normaloff>:/icons/actions/document-save-all.png</iconset>
        </property>
       </widget>
      </item>
@@ -74,8 +70,8 @@ Do you want to save them?</string>
         <string>&amp;Cancel</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/actions/dialog-cancel.png</normaloff>:/icons/actions/dialog-cancel.png</iconset>
        </property>
       </widget>
      </item>
@@ -84,7 +80,7 @@ Do you want to save them?</string>
   </layout>
  </widget>
  <resources>
-  <include location="../../res.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>

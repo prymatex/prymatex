@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\logwidget.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/logwidget.ui'
 #
-# Created: Fri Jul 01 12:35:45 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -35,14 +35,14 @@ class Ui_LogWidget(object):
         self.Clear = QtGui.QPushButton(self.dockWidgetContents)
         self.Clear.setText(_fromUtf8(""))
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/edit-delete.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Clear.setIcon(icon1)
         self.Clear.setObjectName(_fromUtf8("Clear"))
         self.horizontalLayout.addWidget(self.Clear)
         self.pushDebugLevel = QtGui.QPushButton(self.dockWidgetContents)
         self.pushDebugLevel.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/view-filter.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-filter.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushDebugLevel.setIcon(icon2)
         self.pushDebugLevel.setObjectName(_fromUtf8("pushDebugLevel"))
         self.horizontalLayout.addWidget(self.pushDebugLevel)
@@ -67,4 +67,4 @@ class Ui_LogWidget(object):
         LogWidget.setWindowTitle(_('Log'))
         self.lineEdit.setToolTip(_('Filter debugging output'))
 
-from prymatex import res_rc
+from prymatex import resources_rc

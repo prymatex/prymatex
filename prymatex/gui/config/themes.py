@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
-from prymatex.gui.config.ui_themes import Ui_FontThemeConfig
+
 from prymatex.gui.config.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
+from prymatex.ui.configthemes import Ui_FontThemeConfig
 
 class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     '''

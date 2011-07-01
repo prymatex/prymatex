@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui_files/language.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/language.ui'
 #
-# Created: Thu Jun  2 22:34:25 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Jul  1 17:02:34 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
+from prymatex.utils.translation import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -30,15 +31,5 @@ class Ui_Language(object):
         QtCore.QMetaObject.connectSlotsByName(Language)
 
     def retranslateUi(self, Language):
-        Language.setWindowTitle(QtGui.QApplication.translate("Language", "Form", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    Language = QtGui.QWidget()
-    ui = Ui_Language()
-    ui.setupUi(Language)
-    Language.show()
-    sys.exit(app.exec_())
+        Language.setWindowTitle(_('Form'))
 

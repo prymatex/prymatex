@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex\resources\ui\emergencytrace.ui'
+# Form implementation generated from reading ui file 'prymatex/resources/ui/emergencytrace.ui'
 #
-# Created: Fri Jul 01 12:35:45 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Fri Jul  1 17:02:35 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -43,13 +43,13 @@ class Ui_TracebackDialog(object):
         self.horizontalLayout.addWidget(self.pushButton)
         self.pushCopy = QtGui.QPushButton(TracebackDialog)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushCopy.setIcon(icon)
         self.pushCopy.setObjectName(_fromUtf8("pushCopy"))
         self.horizontalLayout.addWidget(self.pushCopy)
         self.pushClose = QtGui.QPushButton(TracebackDialog)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/process-stop.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushClose.setIcon(icon1)
         self.pushClose.setObjectName(_fromUtf8("pushClose"))
         self.horizontalLayout.addWidget(self.pushClose)

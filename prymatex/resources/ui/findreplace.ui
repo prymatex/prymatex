@@ -83,8 +83,8 @@ p, li { white-space: pre-wrap; }
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
        </property>
        <property name="flat">
         <bool>true</bool>
@@ -181,7 +181,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="../../res.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>

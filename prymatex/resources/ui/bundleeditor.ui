@@ -14,7 +14,7 @@
    <string>Bundle Editor</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../res.qrc">
+   <iconset>
     <normaloff>:/icons/resources/icons/Prymatex_Logo.png</normaloff>:/icons/resources/icons/Prymatex_Logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -138,8 +138,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

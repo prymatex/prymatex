@@ -89,8 +89,8 @@
         <string>C&amp;ancel</string>
        </property>
        <property name="icon">
-        <iconset resource="../../res.qrc">
-         <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/actions/dialog-cancel.png</normaloff>:/icons/actions/dialog-cancel.png</iconset>
        </property>
       </widget>
      </item>
@@ -100,8 +100,8 @@
         <string>&amp;Create</string>
        </property>
        <property name="icon">
-        <iconset resource="../../res.qrc">
-         <normaloff>:/actions/resources/actions/document-new.png</normaloff>:/actions/resources/actions/document-new.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
        </property>
       </widget>
      </item>
@@ -118,7 +118,7 @@
   <tabstop>buttonCancel</tabstop>
  </tabstops>
  <resources>
-  <include location="../../res.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>
