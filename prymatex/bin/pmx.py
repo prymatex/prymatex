@@ -26,7 +26,7 @@ def main(args):
     while True:
         try:
             options, open_args = parser.parse_args(args)
-            myapp = app.PMXApplication(open_args, options = options) 
+            myapp = app.PMXApplication(open_args, options = options)
         except exceptions.AlreadyRunningError, e:
             return e.RETURN_VALUE
         except Exception, e:

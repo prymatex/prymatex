@@ -1,5 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from PyQt4.Qt import *
-from prymatex.gui.emergency.ui_crash import Ui_CrashDialog
+from prymatex.ui.emergencycrash import Ui_CrashDialog
 import sys
 
 class PMXCrashDialog(QDialog, Ui_CrashDialog):

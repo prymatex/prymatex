@@ -74,7 +74,7 @@
         <string>&amp;Copy</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/edit-copy.png</normaloff>:/actions/resources/actions/edit-copy.png</iconset>
        </property>
       </widget>
@@ -85,7 +85,7 @@
         <string>&amp;Close</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/process-stop.png</normaloff>:/actions/resources/actions/process-stop.png</iconset>
        </property>
       </widget>
@@ -95,7 +95,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../../res.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>

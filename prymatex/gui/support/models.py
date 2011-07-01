@@ -13,14 +13,14 @@ class PMXBundleTreeNode(object):
         Bundle and bundle item decorator
     '''
     ICONS = {
-             "template": QtGui.QPixmap(":/bundles/resources/bundles/templates.png"),
-             "command": QtGui.QPixmap(":/bundles/resources/bundles/commands.png"),
-             "syntax": QtGui.QPixmap(":/bundles/resources/bundles/languages.png"),
-             "preference": QtGui.QPixmap(":/bundles/resources/bundles/preferences.png"),
-             "dragcommand": QtGui.QPixmap(":/bundles/resources/bundles/drag-commands.png"),
-             "snippet": QtGui.QPixmap(":/bundles/resources/bundles/snippets.png"),
-             "macro": QtGui.QPixmap(":/bundles/resources/bundles/macros.png"),
-             "templatefile": QtGui.QPixmap(":/bundles/resources/bundles/template-files.png") 
+             "template": QtGui.QPixmap(":/icons/bundles/templates.png"),
+             "command": QtGui.QPixmap(":/icons/bundles/commands.png"),
+             "syntax": QtGui.QPixmap(":/icons/bundles/languages.png"),
+             "preference": QtGui.QPixmap(":/icons/bundles/preferences.png"),
+             "dragcommand": QtGui.QPixmap(":/icons/bundles/drag-commands.png"),
+             "snippet": QtGui.QPixmap(":/icons/bundles/snippets.png"),
+             "macro": QtGui.QPixmap(":/icons/bundles/macros.png"),
+             "templatefile": QtGui.QPixmap(":/icons/bundles/template-files.png") 
     }
     
     def __init__(self, item, parent = None):

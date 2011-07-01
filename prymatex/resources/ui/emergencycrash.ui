@@ -48,7 +48,7 @@ Full detail about the exception has been pasted below.</string>
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../../../res.qrc">:/icons/resources/icons/Prymatex_Logo.png</pixmap>
+        <pixmap>:/icons/resources/icons/Prymatex_Logo.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>false</bool>
@@ -91,7 +91,7 @@ Full detail about the exception has been pasted below.</string>
         <string>Send</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/go-top.png</normaloff>:/actions/resources/actions/go-top.png</iconset>
        </property>
       </widget>
@@ -102,7 +102,7 @@ Full detail about the exception has been pasted below.</string>
         <string>Copy</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/edit-copy.png</normaloff>:/actions/resources/actions/edit-copy.png</iconset>
        </property>
       </widget>
@@ -113,7 +113,7 @@ Full detail about the exception has been pasted below.</string>
         <string>Close</string>
        </property>
        <property name="icon">
-        <iconset resource="../../../res.qrc">
+        <iconset>
          <normaloff>:/actions/resources/actions/system-shutdown.png</normaloff>:/actions/resources/actions/system-shutdown.png</iconset>
        </property>
       </widget>
@@ -123,7 +123,8 @@ Full detail about the exception has been pasted below.</string>
   </layout>
  </widget>
  <resources>
-  <include location="../../../res.qrc"/>
+  <include location="../resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections>
   <connection>

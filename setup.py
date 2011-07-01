@@ -34,8 +34,6 @@ class QtBuild(build):
         """Compile the .ui files to python modules."""
         # Search for pyuic4 in python bin dir, then in the $Path.
         if py_file is None:
-            # go from the ui_file in the data folder to the
-            # python file in the qt moodule
             py_file = os.path.split(ui_file)[1]
             py_file = os.path.splitext(py_file)[0] + '.py'
             py_file = os.path.join('prymatex', 'ui', py_file)
@@ -49,14 +47,26 @@ class QtBuild(build):
             fp = open(py_file, 'w')
             uic.compileUi(ui_file, fp)
             fp.close()
-            log.info('Compiled %s into %s', ui_file, py_file)
         except Exception, e:
             self.warn('Unable to compile user interface %s: %s', py_file, e)
             if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
             return
         # pylint: enable=W0703
- 
+    def compile_rc(self, rc_file, py_file = None):
+        if py_file is None:
+            py_file = os.path.basename(rc_file)
+            py_file = os.path.splitext(py_file)[0] + '_rc.py'
+            py_file = os.path.join('prymatex', py_file)
+        try:
+            command = 'pyrcc4 %s -o %s'
+            os.system(command % (rc_file, py_file))
+        except Exception, e:
+            self.warn('Unable to compile resources %s: %s', py_file, e)
+            if not os.path.exists(py_file) or not file(py_file).read():
+                raise SystemExit(1)
+            return
+
     def run(self):
         """Execute the command."""
         self._wrapuic()
@@ -65,6 +75,7 @@ class QtBuild(build):
             for filename in filenames:
                 if filename.endswith('.ui'):
                     self.compile_ui(os.path.join(dirpath, filename))
+        self.compile_rc(os.path.join('prymatex',  'resources', 'resources.qrc'))
  
     # pylint: disable=E1002
     _wrappeduic = False
@@ -80,10 +91,27 @@ class QtBuild(build):
         class _UICompiler(compiler.UICompiler):
             """Speciallized compiler for qt .ui files."""
             def createToplevelWidget(self, classname, widgetname):
-                o = indenter.getIndenter()
-                o.level = 0
-                o.write('from module.with.gettext.setup import _')
+                output = indenter.getIndenter()
+                output.level = 0
+                output.write('from prymatex.utils.translation import ugettext as _')
                 return super(_UICompiler, self).createToplevelWidget(classname, widgetname)
+                
+            def compileUi(self, input_stream, output_stream, from_imports):
+                indenter.createCodeIndenter(output_stream)
+                w = self.parse(input_stream)
+
+                output = indenter.getIndenter()
+                output.write("")
+
+                self.factory._cpolicy._writeOutImports()
+                
+                for res in self._resources:
+                    output.write("from prymatex import %s" % res)
+                    #write_import(res, from_imports)
+
+                return {"widgetname": str(w),
+                        "uiclass" : w.uiclass,
+                        "baseclass" : w.baseclass}
         compiler.UICompiler = _UICompiler
  
         class _i18n_string(qtproxies.i18n_string):

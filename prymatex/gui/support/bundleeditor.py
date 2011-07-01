@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.gui.support.ui_editor import Ui_bundleEditor
+from prymatex.ui.bundleeditor import Ui_bundleEditor
 from prymatex.gui.support.widgets import PMXSnippetWidget, PMXCommandWidget, PMXDragCommandWidget
 from prymatex.gui.support.widgets import PMXBundleWidget,PMXTemplateFileWidget, PMXTemplateWidget
 from prymatex.gui.support.widgets import PMXPreferenceWidget, PMXLanguageWidget, PMXEditorBaseWidget

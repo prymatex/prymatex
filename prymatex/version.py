@@ -1,5 +1,5 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# encoding: utf-8
 
 VERSION = (0, 9, 6, 'alpha', 0)
 
@@ -34,7 +34,7 @@ def get_version():
         version = "%s %s" % (version, git_rev)
     return version
 
-URL = 'http://prymatex.org'
+URL = 'http://www.prymatex.org'
 AUTHOR = ('Diego Marcos van Haaster',
           'Nahuel Defosse',
           'Pablo Petenello' )

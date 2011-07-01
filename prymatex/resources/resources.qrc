@@ -1,0 +1,23 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>bundles/commands.png</file>
+    <file>icons/Prymatex_Logo.png</file>
+    <file>bundles/drag-commands.png</file>
+    <file>bundles/languages.png</file>
+    <file>bundles/macros.png</file>
+    <file>bundles/preferences.png</file>
+    <file>bundles/snippets.png</file>
+    <file>bundles/template-files.png</file>
+    <file>bundles/templates.png</file>
+  </qresource>
+  <qresource prefix="editor">
+    <file>sidebar/bookmark-flag.png</file>
+    <file>sidebar/folding-bottom.png</file>
+    <file>sidebar/folding-collapsed.png</file>
+    <file>sidebar/folding-ellipsis.png</file>
+    <file>sidebar/folding-top.png</file>
+  </qresource>
+  <qresource prefix="images">
+    <file>prymatex/Prymatex_Splash.svg</file>
+  </qresource>
+</RCC>

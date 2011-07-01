@@ -1,19 +1,11 @@
-'''
-Created on 21/11/2010
-
-@author: defo
-
-A widget for logging
-'''
-
-# TODO: Check if twiggy or simple logger has to be used
-
-from ui_logwidget import Ui_LogWidget
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import logging
 from PyQt4.QtGui import QWidget, QDockWidget, QActionGroup, QAction, QMenu
 from PyQt4.QtCore import QVariant, SIGNAL
-from prymatex.gui.mixins.common import ShownByQAction
 from PyQt4.QtCore import Qt
-import logging
+from prymatex.ui.logwidget import Ui_LogWidget
+from prymatex.gui.mixins.common import ShownByQAction
 logger = logging.getLogger(__file__)
 
 DEBUG_LEVELS = ("INFO",

@@ -1,9 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from ui_trace import Ui_TracebackDialog
-from PyQt4.QtGui import QDialog, qApp
 import traceback
+from PyQt4 import QtGui
+from prymatex.ui.emergencytrace import Ui_TracebackDialog
 
-class PMXTraceBackDialog(QDialog, Ui_TracebackDialog):
+class PMXTraceBackDialog(QtGui.QDialog, Ui_TracebackDialog):
     '''
     Crash dialog, shown when a fatal exception occurs
     '''
@@ -18,12 +20,11 @@ class PMXTraceBackDialog(QDialog, Ui_TracebackDialog):
         self.setWindowTitle("%s" % type(exception).__name__)
         self.textStackTrace.setPlainText(traceback.format_exc())
         
-        
     def on_pushCopy_pressed(self):
         '''
         Copies text to the clipboard
         '''
         text = self.textStackTrace.toPlainText()
-        qApp.instance().clipboard().setText(text)
+        QtGui.qApp.instance().clipboard().setText(text)
         
         

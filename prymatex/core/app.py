@@ -1,23 +1,22 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# encoding: utf-8
 import os, sys
 from os import getpid, unlink
 from os.path import join, exists, dirname, abspath, expanduser
 from datetime import datetime
+from PyQt4 import QtGui, QtCore
 
-from PyQt4.QtGui import QApplication, QMessageBox, QSplashScreen, QPixmap, QIcon
-from PyQt4.QtCore import SIGNAL, QEvent
-
+from prymatex import resources_rc
 from prymatex.utils import deco
 from prymatex.core.config import PMXSettings
-#from prymatex.support import PMXSupportManager
+
 from logging import getLogger
 logger = getLogger(__name__)
 
 # ipdb handling
 
 sys_excepthook = sys.excepthook
-class PMXApplication(QApplication):
+class PMXApplication(QtGui.QApplication):
     '''
     The application instance.
     There can't be two apps running simultaneously, since configuration issues
@@ -56,7 +55,7 @@ class PMXApplication(QApplication):
         Inicialización de la aplicación.
         '''
         self.options = options
-        QApplication.__init__(self, [])
+        QtGui.QApplication.__init__(self, [])
         # Logger setup
         self.setup_logging() 
         
@@ -71,14 +70,12 @@ class PMXApplication(QApplication):
         
         self.setup_splash()
         
-        self.setWindowIcon(QIcon(":/resources/icons/Prymatex_Logo.png"))
-        
         self.checkSingleInstance()
         
         # Bundles and Stuff
         self.load_stuff()
         
-        self.connect(self, SIGNAL('aboutToQuit()'), self.cleanup)
+        self.connect(self, QtCore.SIGNAL('aboutToQuit()'), self.cleanup)
         self.aboutToQuit.connect(self.settings.sync)
         
         self.setup_file_manager()
@@ -150,7 +147,7 @@ class PMXApplication(QApplication):
             self.__supportManager = self.load_support()
         
     def setup_splash(self):
-        self.splash = QSplashScreen(QPixmap(":/images/resources/prymatex/Prymatex_Splash.svg"))
+        self.splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
         self.splash.show()
     
     def setup_file_manager(self):
@@ -305,10 +302,10 @@ class PMXApplication(QApplication):
             if pid in os.pid_proc_dict():
                 from prymatex.utils.i18n import ugettext as _
                 self.logger.warning("Another app running")
-                QMessageBox.critical(None, _('Application Already Running'),
+                QtGui.QMessageBox.critical(None, _('Application Already Running'),
                                      _('''%s seems to be runnig. Please
                                      close the other instance.''', self.applicationName()),
-                                     QMessageBox.Ok)
+                                     QtGui.QMessageBox.Ok)
                 from prymatex.utils.exceptions import AlreadyRunningError
                 raise AlreadyRunningError(pid)
             
