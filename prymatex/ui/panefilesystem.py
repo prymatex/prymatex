@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex/resources/ui/panefilesystem.ui'
+# Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Fri Jul  1 17:02:35 2011
+# Created: Fri Jul  1 21:03:41 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -144,5 +144,5 @@ class Ui_FSPane(object):
         self.comboFavourites.setToolTip(_('Folders'))
         self.pushFavourites.setToolTip(_('Favourite places'))
 
-from fstree import FSTree
+from prymatex.gui.panes.fstree import FSTree
 from prymatex import resources_rc

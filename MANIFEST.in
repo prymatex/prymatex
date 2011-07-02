@@ -1,0 +1,10 @@
+include README.rst
+include AUTHORS
+include INSTALL
+include LICENSE
+include MANIFEST.in
+recursive-include docs *
+recursive-include scripts *
+recursive-include prymatex/share/ *
+prune bundles *
+prune tests *

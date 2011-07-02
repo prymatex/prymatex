@@ -292,7 +292,7 @@
   <customwidget>
    <class>FSTree</class>
    <extends>QTreeView</extends>
-   <header>fstree</header>
+   <header>prymatex.gui.panes.fstree</header>
   </customwidget>
  </customwidgets>
  <resources>

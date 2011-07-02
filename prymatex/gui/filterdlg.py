@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from PyQt4.QtGui import QDialog, QMessageBox, QToolTip
 from PyQt4.QtCore import SIGNAL, QProcess
-from ui_filterthroughcommand import Ui_FilterThroughCommand
+from prymatex.ui.filterbundleitem import Ui_FilterThroughCommand
 from prymatex.gui import PMXBaseGUIMixin
-from prymatex.utils.i18n import ugettext as _
 import logging
 
 logger = logging.getLogger(__name__)

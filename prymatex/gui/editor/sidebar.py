@@ -1,7 +1,7 @@
 from PyQt4.QtGui import QWidget, QPainter, QPixmap, QFontMetrics
 from PyQt4.Qt import QColor, QSize
 from prymatex.gui.editor.processors import PMXBlockUserData
-from prymatex import res_rc
+from prymatex import resources_rc
 
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
 class PMXSidebar(QWidget):
@@ -15,15 +15,15 @@ class PMXSidebar(QWidget):
         self.background = None #pmxConfigPorperty(default = QColor(227, 227, 227))
         #Load Icons
         self.foldingTopIcon = QPixmap()
-        self.foldingTopIcon.load(":/sidebar/resources/sidebar/folding-top.png")
+        self.foldingTopIcon.load(":/editor/sidebar/folding-top.png")
         self.foldingBottomIcon = QPixmap()
-        self.foldingBottomIcon.load(":/sidebar/resources/sidebar/folding-bottom.png")
+        self.foldingBottomIcon.load(":/editor/sidebar/folding-bottom.png")
         self.foldingCollapsedIcon = QPixmap()
-        self.foldingCollapsedIcon.load(":/sidebar/resources/sidebar/folding-collapsed.png")
+        self.foldingCollapsedIcon.load(":/editor/sidebar/folding-collapsed.png")
         self.foldingEllipsisIcon = QPixmap()
-        self.foldingEllipsisIcon.load(":/sidebar/resources/sidebar/folding-ellipsis.png")
+        self.foldingEllipsisIcon.load(":/editor/sidebar/folding-ellipsis.png")
         self.bookmarkFlagIcon = QPixmap()
-        self.bookmarkFlagIcon.load(":/sidebar/resources/sidebar/bookmark-flag.png")
+        self.bookmarkFlagIcon.load(":/editor/sidebar/bookmark-flag.png")
 
     def sizeHint(self):
         return QSize(self.editor.lineNumberAreaWidth(), 0)

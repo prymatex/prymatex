@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#-*- encoding: utf-8 -*-
-# Created: 02/02/2010 by defo
 
+import logging
+import itertools
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
 from PyQt4.QtCore import QString, SIGNAL, Qt
-import itertools
 
 from prymatex.gui.utils import *
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from choosetab import ChooseTabDialog
 from prymatex.core.base import PMXObject
-import logging
 from prymatex.core.exceptions import APIUsageError
 from prymatex.core.filemanager import PMXFile
 from prymatex.core.config import pmxConfigPorperty

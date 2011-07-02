@@ -23,6 +23,7 @@ import os
 
 from distutils.command.install import install
 from distutils.command.build import build
+from distutils.command.install_data import install_data
 from distutils.core import setup
 
 class QtBuild(build):
@@ -40,9 +41,6 @@ class QtBuild(build):
         # we indeed want to catch Exception, is ugle but w need it
         # pylint: disable=W0703
         try:
-            # import the uic compiler from pyqt and generate the 
-            # .py files something similar could be done with pyside
-            # but that is left as an exercise for the reader.
             from PyQt4 import uic
             fp = open(py_file, 'w')
             uic.compileUi(ui_file, fp)
@@ -70,12 +68,12 @@ class QtBuild(build):
     def run(self):
         """Execute the command."""
         self._wrapuic()
-        basepath = os.path.join('prymatex',  'resources', 'ui')
+        basepath = os.path.join('resources', 'ui')
         for dirpath, _, filenames in os.walk(basepath):
             for filename in filenames:
                 if filename.endswith('.ui'):
                     self.compile_ui(os.path.join(dirpath, filename))
-        self.compile_rc(os.path.join('prymatex',  'resources', 'resources.qrc'))
+        self.compile_rc(os.path.join('resources', 'resources.qrc'))
  
     # pylint: disable=E1002
     _wrappeduic = False
@@ -161,6 +159,36 @@ class CustomInstall(install):
         # save this custom data dir to later change the scripts
         self._custom_data_dir = data_dir
 
+def fullsplit(path, result=None):
+    """
+    Split a pathname into components (the opposite of os.path.join) in a platform-neutral way.
+    """
+    if result is None:
+        result = []
+    head, tail = os.path.split(path)
+    if head == '':
+        return [tail] + result
+    if head == path:
+        return result
+    return fullsplit(head, [tail] + result)
+
+# Compile the list of packages available, because distutils doesn't have
+# an easy way to do this.
+packages, data_files = [], []
+root_dir = os.path.dirname(__file__)
+if root_dir != '':
+    os.chdir(root_dir)
+prymatex_dir = 'prymatex'
+
+for dirpath, dirnames, filenames in os.walk(prymatex_dir):
+    # Ignore dirnames that start with '.'
+    for i, dirname in enumerate(dirnames):
+        if dirname.startswith('.'): del dirnames[i]
+    if '__init__.py' in filenames:
+        packages.append('.'.join(fullsplit(dirpath)))
+    elif filenames:
+        data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
+
 # Dynamically calculate the version based on prymatex.VERSION.
 vmodule = __import__('prymatex.version', fromlist=['prymatex'])
 version = vmodule.get_version()
@@ -177,9 +205,9 @@ setup(
     long_description = vmodule.LONG_DESCRIPTION,
     url = vmodule.URL,
 
-    packages = ["prymatex"],
-    package_data = {"prymatex": ["resources/*", "share/*"]},
-    scripts = ["prymatex/bin/pmx"],
+    packages = packages,
+    package_data = {'prymatex': ['share/*']},
+    scripts = ["prymatex/bin/pmx.py"],
 
     cmdclass = {
         'install': CustomInstall,

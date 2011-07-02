@@ -5,8 +5,8 @@ from PyQt4.Qt import SIGNAL
 from PyQt4.QtGui import QCompleter, QFileSystemModel, QMessageBox
 from os.path import isdir, abspath
 from prymatex.core.base import PMXObject
-from prymatex.gui.ui_multiclose import Ui_SaveMultipleDialog
-from prymatex.gui.ui_newtemplate import Ui_NewFromTemplateDialog
+from prymatex.ui.multiclose import Ui_SaveMultipleDialog
+from prymatex.ui.newtemplate import Ui_NewFromTemplateDialog
 
 if __name__ == '__main__':
     import sys

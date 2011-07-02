@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'prymatex/resources/ui/mainwindow.ui'
+# Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Fri Jul  1 17:02:35 2011
+# Created: Fri Jul  1 21:03:41 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 18))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -605,6 +605,6 @@ class Ui_MainWindow(object):
         self.actionBundle_List.setText(_('Bundle List'))
         self.actionBundle_List.setShortcut(_('Ctrl+Shift+B'))
 
-from statusbar import PMXStatusBar
-from tabwidget import PMXTabWidget
+from prymatex.gui.statusbar import PMXStatusBar
+from prymatex.gui.tabwidget import PMXTabWidget
 from prymatex import resources_rc

@@ -13,7 +13,6 @@ else:
 
 if project_basedir not in sys.path:
     sys.path.insert(0, project_basedir)
-    print sys.path
 
 def main(args):
     '''

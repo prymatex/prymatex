@@ -19,9 +19,7 @@ from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
 from prymatex.gui.panes.browser import PMXBrowserPaneDock
 from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
-from prymatex.gui.ui_mainwindow import Ui_MainWindow
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
-from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.gui.dialogs import PMXNewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
@@ -29,7 +27,7 @@ from prymatex.core.base import PMXObject
 from prymatex.gui.support.tableview import PMXBundleItemTableView,\
     PMXBundleItemSelector
 from prymatex.core.config import pmxConfigPorperty
-
+from prymatex.ui.mainwindow import Ui_MainWindow
 
 #from prymatex.config.configdialog import PMXConfigDialog
 
