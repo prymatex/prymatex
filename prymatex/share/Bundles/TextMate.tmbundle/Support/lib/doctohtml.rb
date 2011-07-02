@@ -18,8 +18,7 @@ def find_theme(uuid)
 	theme_dirs = [
 		File.expand_path('~/Library/Application Support/TextMate/Themes'),
 		'/Library/Application Support/TextMate/Themes',
-		TextMate.app_path + '/Contents/SharedSupport/Themes',
-		TextMate.app_path + '/share/Themes'
+		TextMate.app_path + '/Contents/SharedSupport/Themes'
 	]
 
 	theme_dirs.each do |theme_dir|

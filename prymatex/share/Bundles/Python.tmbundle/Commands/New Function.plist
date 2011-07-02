@@ -48,7 +48,7 @@ selfAndMore = {
 sPass = '\t${4/.+/"""/}${4:docstring for %s}${4/.+/"""\n/}${4/.+/\t/}${0:pass}'
 
 def defLine(func, args):
-    return ''.join(["def __", func, "__(", args, "):\n", sPass % func])
+    return ''.join(["def __", func, "__(", args, "):\n", sPass])
 
 def make_snippet(name):
     if name in selfList:

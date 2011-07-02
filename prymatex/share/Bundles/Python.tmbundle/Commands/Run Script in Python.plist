@@ -30,27 +30,6 @@ osascript &lt;&lt;- APPLESCRIPT
 APPLESCRIPT
 
 </string>
-	<key>linuxCommand</key>
-	<string>#!/bin/bash
-[[ -z "$TM_FILEPATH" ]] &amp;&amp; TM_TMPFILE=$(mktemp)
-: "${TM_FILEPATH:=$TM_TMPFILE}"; cat &gt;"$TM_FILEPATH"
-
-TPY=${TM_PYTHON:-python}
-
-esc () {
-STR="$1" ruby &lt;&lt;"RUBY"
-   str = ENV['STR']
-   str = str.gsub(/'/, "'\\\\''")
-   str = str.gsub(/[\\"]/, '\\\\\\0')
-   print "#{str}"
-RUBY
-}
-konsole &amp;
-sleep 1
-service=org.kde.konsole-$(ps a | grep konsole | grep Sl | awk '{print $1}')
-qdbus $service /Sessions/1 sendText "clear; cd $(esc "${TM_DIRECTORY}"); $(esc "${TPY}") $(esc "${TM_FILEPATH}"); rm -f $(esc "${TM_TMPFILE}")"
-qdbus $service /Sessions/1 sendText $'\n'
-</string>
 	<key>input</key>
 	<string>document</string>
 	<key>keyEquivalent</key>

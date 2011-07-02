@@ -174,7 +174,7 @@ def fullsplit(path, result=None):
 
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
-packages, data_files = [], []
+packages, package_data = [], []
 root_dir = os.path.dirname(__file__)
 if root_dir != '':
     os.chdir(root_dir)
@@ -187,7 +187,7 @@ for dirpath, dirnames, filenames in os.walk(prymatex_dir):
     if '__init__.py' in filenames:
         packages.append('.'.join(fullsplit(dirpath)))
     elif filenames:
-        data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
+        package_data.extend([os.path.join(dirpath, f) for f in filenames])
 
 # Dynamically calculate the version based on prymatex.VERSION.
 vmodule = __import__('prymatex.version', fromlist=['prymatex'])
@@ -206,7 +206,7 @@ setup(
     url = vmodule.URL,
 
     packages = packages,
-    package_data = {'prymatex': ['share/*']},
+    package_data = {'prymatex': package_data},
     scripts = ["prymatex/bin/pmx.py"],
 
     cmdclass = {

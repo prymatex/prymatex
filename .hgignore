@@ -8,3 +8,4 @@ syntax:glob
 *.pot
 *.py[co]
 docs/_build/
+build/

@@ -7,3 +7,4 @@
 *.pot
 *.py[co]
 docs/_build/
+build/

@@ -6,8 +6,6 @@
 	<string>nop</string>
 	<key>command</key>
 	<string>tr &lt;&lt;&lt; "$TM_SCOPE" ' ' '\n'|pbcopy</string>
-	<key>linuxCommand</key>
-	<string>tr &lt;&lt;&lt; "$TM_SCOPE" ' ' '\n'|xclip</string>
 	<key>input</key>
 	<string>none</string>
 	<key>keyEquivalent</key>
