@@ -3,14 +3,14 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.support.ui_snippet import Ui_Snippet
-from prymatex.gui.support.ui_command import Ui_Command
-from prymatex.gui.support.ui_template import Ui_Template
-from prymatex.gui.support.ui_dragcommand import Ui_DragCommand
-from prymatex.gui.support.ui_language import Ui_Language
-from prymatex.gui.support.ui_menu import Ui_Menu
-from prymatex.gui.support.ui_templatefile import Ui_TemplateFile
-from prymatex.gui.support.ui_preference import Ui_Preference
+from prymatex.ui.editorsnippet import Ui_Snippet
+from prymatex.ui.editorcommand import Ui_Command
+from prymatex.ui.editortemplate import Ui_Template
+from prymatex.ui.editordragcommand import Ui_DragCommand
+from prymatex.ui.editorlanguage import Ui_Language
+from prymatex.ui.editorbundle import Ui_Menu
+from prymatex.ui.editortemplatefile import Ui_TemplateFile
+from prymatex.ui.editorpreference import Ui_Preference
 from pprint import pformat
 
 class PMXEditorBaseWidget(QtGui.QWidget):
