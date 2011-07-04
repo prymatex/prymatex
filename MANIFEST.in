@@ -5,4 +5,4 @@ include LICENSE
 include MANIFEST.in
 recursive-include docs *
 recursive-include prymatex/share *
-prune resources/
+prune resources
