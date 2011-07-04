@@ -1,22 +1,17 @@
-# encoding: utf-8
-from PyQt4.Qt import QItemDelegate, QComboBox
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-class PMXChoiceItemDelegate(QItemDelegate):
-    ''' Mimic django choice field '''
+from PyQt4 import QtGui
+
+class PMXColorDelegate(QtGui.QItemDelegate):
     CHOICES = ()
     
     def createEditor(self, parent, option, index):
-        editor = QComboBox(parent)
-        print "Creando editor"
-        for display_text, data in self.CHOICES:
-            editor.addItem(display_text, data)
-        return editor
+        button = QtGui.QPushButton(parent)
+        return button
 
     def setEditorData(self, editor, index):
-        data = index.data().toPyObject()
-        editor.setCurrentIndex(editor.findData(data))
+        pass
 
     def setModelData(self, editor, model, index):
-        #return PyQt4.Qt.QItemDelegate.setModelData(self, *args, **kwargs)
-        data = editor.itemData(editor.currentIndex())
-        model.setData(index, data)
+        pass
