@@ -31,15 +31,13 @@ class QtBuild(build):
  
     description = "build PyQt GUIs (.ui)."
  
-    def compile_ui(self, ui_file, py_file=None):
+    def compile_ui(self, ui_file, py_file = None):
         """Compile the .ui files to python modules."""
         # Search for pyuic4 in python bin dir, then in the $Path.
         if py_file is None:
             py_file = os.path.split(ui_file)[1]
             py_file = os.path.splitext(py_file)[0] + '.py'
             py_file = os.path.join('prymatex', 'ui', py_file)
-        # we indeed want to catch Exception, is ugle but w need it
-        # pylint: disable=W0703
         try:
             from PyQt4 import uic
             fp = open(py_file, 'w')
@@ -50,7 +48,6 @@ class QtBuild(build):
             if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
             return
-        # pylint: enable=W0703
     def compile_rc(self, rc_file, py_file = None):
         if py_file is None:
             py_file = os.path.basename(rc_file)
@@ -74,9 +71,8 @@ class QtBuild(build):
                 if filename.endswith('.ui'):
                     self.compile_ui(os.path.join(dirpath, filename))
         self.compile_rc(os.path.join('resources', 'resources.qrc'))
- 
-    # pylint: disable=E1002
     _wrappeduic = False
+    
     @classmethod
     def _wrapuic(cls):
         """Wrap uic to use gettext's _() in place of tr()"""
@@ -85,7 +81,6 @@ class QtBuild(build):
  
         from PyQt4.uic.Compiler import compiler, qtproxies, indenter
  
-        # pylint: disable=C0103
         class _UICompiler(compiler.UICompiler):
             """Speciallized compiler for qt .ui files."""
             def createToplevelWidget(self, classname, widgetname):
@@ -119,13 +114,10 @@ class QtBuild(build):
         qtproxies.i18n_string = _i18n_string
  
         cls._wrappeduic = True
-        # pylint: enable=C0103
-    # pylint: enable=E1002
 
 class CustomInstall(install):
     """Custom installation class on package files.
-
-    It copies all the files into the "PREFIX/PROJECTNAME" dir.
+    It copies all the files into the "PREFIX/share/PROJECTNAME" dir.
     """
     def run(self):
         """Run parent install, and then save the install dir in the script."""
@@ -142,12 +134,9 @@ class CustomInstall(install):
     def finalize_options(self):
         """Alter the installation path."""
         install.finalize_options(self)
+        data_dir = os.path.join(self.prefix, "share", self.distribution.get_name())
 
-        # the data path is under 'prefix'
-        data_dir = os.path.join(self.prefix, self.distribution.get_name())
-
-        # if we have 'root', put the building path also under it (used normally
-        # by pbuilder)
+        # if we have 'root', put the building path also under it (used normally by pbuilder)
         if self.root is None:
             build_dir = data_dir
         else:
