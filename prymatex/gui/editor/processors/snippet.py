@@ -112,10 +112,18 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 if holder == None:
                     self.endSnippet()
                     return False
-                holder.setContent("")
-                self.selectSlice(self.snippet.start, self.snippet.end)
+                #Posicion relativa al holder
+                position = cursor.selectionStart() - holder.start
+                leng = cursor.selectionEnd() - cursor.selectionStart()
+                QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+                #Capture Text
+                cursor.setPosition(holder.start)
+                cursor.setPosition(holder.end - leng, QtGui.QTextCursor.KeepAnchor)
+                holder.setContent(unicode(cursor.selectedText()))
+                #Prepare replace
+                self.selectSlice(self.snippet.start, self.snippet.end - leng)
                 self.snippet.render(self)
-                self.setCursorPosition(holder.start)
+                self.setCursorPosition(holder.start + position)
             else:
                 if key == Qt.Key_Delete:
                     holder = self.snippet.setDefaultHolder(cursor.position() + 1)
@@ -138,7 +146,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 else:
                     self.setCursorPosition(holder.start)
             return True
-        elif event.text(): #Para latin poner otra cosa
+        elif event.text():
             if cursor.hasSelection():
                 holder = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
                 if holder == None or holder.last:

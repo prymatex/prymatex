@@ -21,10 +21,11 @@ class PMXTemplateFile(object):
         self.template = template
 
     def getFileContent(self):
-        f = codecs.open(self.path, 'r', 'utf-8')
-        content = f.read()
-        f.close()
-        return content
+        if os.path.exists(self.path):
+            f = codecs.open(self.path, 'r', 'utf-8')
+            content = f.read()
+            f.close()
+            return content
     
     def setFileContent(self, content):
         if os.path.exists(self.path):

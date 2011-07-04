@@ -185,7 +185,6 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj == self.lineKeyEquivalentActivation:
             keyseq = int(event.modifiers()) + event.key()
-            print "press", keyseq
             self.stackedWidget.currentWidget().setKeyEquivalent(keyseq)
             self.lineKeyEquivalentActivation.setText(QtGui.QKeySequence(keyseq).toString())
             return True
@@ -217,6 +216,8 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
             if current.TYPE != "":
                 if current.TYPE == "bundle":
                     self.manager.updateBundle(current.bundleItem, **current.changes)
+                elif current.TYPE == "templatefile":
+                    self.manager.updateBundleItem(current.bundleItem.template)
                 else:
                     self.manager.updateBundleItem(current.bundleItem, **current.changes)
             

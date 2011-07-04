@@ -217,7 +217,9 @@ class PMXSupportBaseManager(object):
         if namespace is None: namespace = self.defaultNamespace
         path = join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
         bundle = PMXBundle(self.uuidgen(), namespace, { 'name': name }, path)
-        return self.addBundle(bundle)
+        bundle = self.addBundle(bundle)
+        self.addManagedObject(bundle)
+        return bundle
     
     def readBundle(self, **attrs):
         '''
@@ -317,7 +319,9 @@ class PMXSupportBaseManager(object):
 
         item = klass(self.uuidgen(), namespace, { 'name': name }, path)
         item.setBundle(bundle)
-        return self.addBundleItem(item)
+        item = self.addBundleItem(item)
+        self.addManagedObject(item)
+        return item
     
     def readBundleItem(self, **attrs):
         '''
@@ -377,21 +381,19 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # TEMPLATEFILE CRUD
     #---------------------------------------------------
-    def createTemplateFile(self, name, content, template):
+    def createTemplateFile(self, name, template):
         if template.isProtected and not template.isSafe:
             self.updateBundleItem(template)
         path = join(template.path, "%s.%s" % (self.convertToValidPath(name), template.extension))
         file = PMXTemplateFile(path, template)
+        #No es la mejor forma pero es la forma de guardar el archivo
         file = self.addTemplateFile(file)
         template.files.append(file)
+        #template.save()
         return file
 
     def deleteTemplateFile(self, style):
-        theme = style.theme
-        if theme.isProtected and not theme.isSafe:
-            self.updateTheme(theme)
-        theme.styles.remove(style)
-        theme.save()
+        pass
     
     #---------------------------------------------------
     # THEME INTERFACE
@@ -429,7 +431,9 @@ class PMXSupportBaseManager(object):
         if namespace is None: namespace = self.defaultNamespace
         path = join(self.namespaces[namespace]['Themes'], "%s.tmTheme" % self.convertToValidPath(name))
         theme = PMXTheme(self.uuidgen(), namespace, { 'name': name }, path)
-        return self.addTheme(theme)
+        theme = self.addTheme(theme)
+        self.addManagedObject(theme)
+        return theme
 
     def readTheme(self, **attrs):
         '''
