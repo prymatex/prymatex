@@ -2,19 +2,18 @@
 #-*- encoding: utf-8 -*-
 # Created: 10/02/2010 by defo
 
-from PyQt4.QtGui import *
-from prymatex.utils.i18n import ugettext as _
+from PyQt4 import QtGui
+from prymatex.utils.translation import ugettext as _
 from prymatex.gui.panes import PaneDockBase
-from prymatex.gui.panes.ui_symbols import Ui_SymbolList
+from prymatex.ui.panesymbols import Ui_SymbolList
 
-
-class SymbolListWidget(QWidget, Ui_SymbolList):
+class SymbolListWidget(QtGui.QWidget, Ui_SymbolList):
     def __init__(self, parent):
-        QWidget.__init__(self, parent)
+        QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
     
 class PMXSymboldListDock(PaneDockBase):
     def __init__(self, parent):
-        QDockWidget.__init__(self, parent)
+        QtGui.QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Symbol List"))
         self.setWidget(SymbolListWidget(self))

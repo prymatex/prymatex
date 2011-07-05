@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
 import os
 import shutil
 from os.path import *
@@ -5,7 +7,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from prymatex.gui.panes import PaneDockBase
 from prymatex.gui import PMXBaseGUIMixin
-from prymatex.utils.i18n import ugettext as _
+from prymatex.utils.translation import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
 from prymatex.ui.panefilesystem import Ui_FSPane
 from prymatex.ui.filesystemsettings import Ui_FSSettingsDialog

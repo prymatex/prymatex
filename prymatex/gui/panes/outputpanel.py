@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-# Created: 10/02/2010 by defo
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from prymatex.utils.i18n import ugettext as _
+from prymatex.utils.translation import ugettext as _
 from prymatex.gui.panes import PaneDockBase
 
 class OutputPanel(QWidget):

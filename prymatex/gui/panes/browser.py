@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
 import codecs
 
 from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant, SIGNAL

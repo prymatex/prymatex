@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
 from PyQt4.QtGui import *
-from prymatex.utils.i18n import ugettext as _
+from prymatex.utils.translation import ugettext as _
 from prymatex.gui.panes import PaneDockBase
 
 class PMXBundleWidget(QWidget):

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-# Created: 03/02/2010 by defo
 '''
 Algunas definciones en Python para simplificar la creación de botones y 
 acciones.

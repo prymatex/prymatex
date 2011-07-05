@@ -1,4 +1,5 @@
-# coding: utf-8
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
 from PyQt4.QtGui import QTreeView, QDirModel, QMenu, QAction, QMessageBox, qApp
 from PyQt4.QtGui import QInputDialog, QApplication
 from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir
