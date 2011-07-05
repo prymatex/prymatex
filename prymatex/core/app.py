@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os, sys
+import prymatex, os, sys
 from os import getpid, unlink
 from os.path import join, exists, dirname, abspath, expanduser
 from datetime import datetime
@@ -223,11 +223,10 @@ class PMXApplication(QtGui.QApplication):
         self.logger = logger
     
     def init_application_params(self):
-        from prymatex import version
-        self.setApplicationName(version.DESCRIPTION)
-        self.setApplicationVersion(version.get_version()) # hg stuff?
+        self.setApplicationName(prymatex.__doc__)
+        self.setApplicationVersion(prymatex.get_version()) # hg stuff?
         self.setOrganizationDomain("org")
-        self.projectUrl = version.URL    
+        self.projectUrl = prymatex.__url__    
     
     @property
     def lock_filename(self):

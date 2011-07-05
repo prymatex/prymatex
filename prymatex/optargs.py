@@ -4,15 +4,15 @@
 '''
 Command line parameters
 '''
+import prymatex
 from optparse import OptionParser
-from prymatex import version
 
 #usage, option_list, option_class, version, conflict_handler, description, formatter, add_help_option, prog, epilog)
 parser = OptionParser(usage="%prog [options] [files]",
-                      description = version.DESCRIPTION,
-                      version = version.get_version(),
+                      description = prymatex.__doc__,
+                      version = prymatex.get_version(),
                       epilog = "Check project page at %s" % (
-                        version.URL,
+                        prymatex.__url__,
                       ))
 
 # Directory where the application should start

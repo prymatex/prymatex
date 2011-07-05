@@ -195,21 +195,16 @@ for dirpath, dirnames, filenames in os.walk(prymatex_dir):
         basename = os.path.join(*fullsplit(dirpath)[1:])
         package_data['.'.join(parts)].extend([os.path.join(basename, p) for p in patterns])
 
-# Dynamically calculate the version based on prymatex.VERSION.
-vmodule = __import__('prymatex.version', fromlist=['prymatex'])
-version = vmodule.get_version()
-if u'GIT' in version:
-    version = ' '.join(version.split(' ')[:-1])
+import prymatex
 
 setup(
     name = 'prymatex',
-    version = version,
-    license = 'GPL-3',
-    author = vmodule.AUTHOR,
-    author_email = vmodule.AUTHOR_EMAIL,
-    description = vmodule.DESCRIPTION,
-    long_description = vmodule.LONG_DESCRIPTION,
-    url = vmodule.URL,
+    version = prymatex.__version__,
+    license = prymatex.__license__,
+    author = prymatex.__author__,
+    author_email = prymatex.__mail__,
+    description = prymatex.__doc__,
+    url = prymatex.__url__,
 
     packages = packages,
     package_data = package_data,
