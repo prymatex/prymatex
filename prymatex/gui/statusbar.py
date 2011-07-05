@@ -8,9 +8,8 @@ Some of the widgets defined here are:
 '''
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
-from prymatex.utils.i18n import ugettext as _
+from prymatex.utils.translation import ugettext as _
 
-        
 class PWMStatusLabel(QtGui.QLabel):
     '''
     A label which fires a menu when it's clicked. When an action is 
