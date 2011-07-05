@@ -1,0 +1,1 @@
+ugettext = lambda s: s
