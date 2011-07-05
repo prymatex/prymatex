@@ -198,8 +198,8 @@ for dirpath, dirnames, filenames in os.walk(prymatex_dir):
 import prymatex
 
 setup(
-    name = 'prymatex',
-    version = prymatex.__version__,
+    name = 'Prymatex',
+    version = str(prymatex.__version__.replace(' ', '-')),
     license = prymatex.__license__,
     author = prymatex.__author__,
     author_email = prymatex.__mail__,
