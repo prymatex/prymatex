@@ -152,6 +152,40 @@ class PMXCursorsHelper(object):
     def __iter__(self):
         return iter(self.cursors)
 
+class PMXCompleterHelper(QtGui.QCompleter):
+    def __init__(self, editor):
+        super(PMXCompleterHelper, self).__init__()
+        self.editor = editor
+        self.setWidget(self.editor)
+        self.popupView = QtGui.QListWidget()
+        self.popupView.setAlternatingRowColors(True)
+        self.popupView.setWordWrap(False)
+        self.setPopup(self.popupView)
+        self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
+        self.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.activated[str].connect(self.insertCompletion)
+
+    def insertCompletion(self, insert):
+        extra = insert.length() - self.completionPrefix().length()
+        self.editor.textCursor().insertText(insert.right(extra))
+
+    def complete(self, cr):
+        try:
+            model = self.obtainModelItems()
+            self.setModel(model)
+            self.popup().setCurrentIndex(model.index(0, 0))
+            cr.setWidth(self.popup().sizeHintForColumn(0) \
+                + self.popup().verticalScrollBar().sizeHint().width() + 10)
+            self.popupView.updateGeometries()
+            super(PMXCompleterHelper, self).complete(cr)
+        except:
+            return
+
+    def obtainModelItems(self):
+        for name in ['uno', 'dos', 'tres']:
+            self.popupView.addItem(QtGui.QListWidgetItem(name))
+        return self.popupView.model()
+
 class PMXFoldingHelper(QtCore.QThread):
     def __init__(self, editor):
         super(PMXFoldingHelper, self).__init__(editor)
