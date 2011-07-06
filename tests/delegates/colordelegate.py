@@ -21,11 +21,12 @@ def HTML2QColor(htmlColor):
     
 class QWebColorDelegate(QItemDelegate):
     def createEditor(self, parent, options, index):
-        #print("createEditor")
+        print("createEditor")
         editor = QColorDialog(parent)
         return editor
     
     def setModelData(self, colorDialog, model, index):
+        
         color = colorDialog.currentColor()
         #print color.lightness()
         HTMLColor = QColor2HTML(color)
@@ -53,10 +54,15 @@ def main(argv):
     win.setLayout(layout)
     tableView = QTableView()
     layout.addWidget(tableView)
-    model = QStandardItemModel(1, 1)
+    model = QStandardItemModel(1, 4)
     model.setHeaderData(0, Qt.Horizontal, "Foreground")
     tableView.setModel(model)
-    tableView.setItemDelegateForColumn(0, QWebColorDelegate())
+    for i in range(model.columnCount()):
+        print "Setting delegate for column: %d" % i
+        delegate = QWebColorDelegate()
+        delegate.setParent(tableView)
+        tableView.setItemDelegateForColumn(i, delegate)
+        
     win.show()
     return app.exec_()
 
