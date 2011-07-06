@@ -88,8 +88,8 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tableView.activated.connect(self.on_tableView_Activated)
         self.tableView.pressed.connect(self.on_tableView_Activated)
-        self.tableView.setItemDelegateForColumn(1, PMXColorDelegate())
-        self.tableView.setItemDelegateForColumn(2, PMXColorDelegate())
+        self.tableView.setItemDelegateForColumn(1, PMXColorDelegate(self))
+        self.tableView.setItemDelegateForColumn(2, PMXColorDelegate(self))
         #Conectar
         for _, scope in self.DEFAULTS['styles']:
             self.comboBoxScope.addItem(scope)
