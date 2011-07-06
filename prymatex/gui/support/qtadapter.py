@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, sys, string
-sys.path.append(os.path.abspath('../../..'))
+import string
 
 try:
     from PyQt4 import QtGui
@@ -21,31 +20,37 @@ from prymatex.support.modmap import get_keymap_table
 '''
 
 #caret, foreground, selection, invisibles, lineHighbuildQColorlight, gutter, background
-def RGBA2QColor(rgbColor):
+def RGBA2QColor(rgba):
     '''
-    @param rgbColor: A html formated color string i.e.: #RRGGBB or #RRGGBBAA
-    @return: If rgbColor is a valid color, a QColor isntance
+    @param rgba: A html formated color string i.e.: #RRGGBB or #RRGGBBAA
+    @return: If rgba is a valid color, a QColor isntance
     ''' 
-    rgbColor = unicode(rgbColor).strip('#')
-    if len(rgbColor) in [ 6, 8 ]:
-        red, green, blue, alpha = rgbColor[0:2], rgbColor[2:4], rgbColor[4:6], rgbColor[6:8]
+    rgba = unicode(rgba).strip('#')
+    if len(rgba) in [ 6, 8 ]:
+        red, green, blue, alpha = rgba[0:2], rgba[2:4], rgba[4:6], rgba[6:8]
     else:
-        raise ValueError("Invalid Color")
+        raise ValueError("Invalid RGBA value %s", rgba)
     return QtGui.QColor(int(red, 16), int(green, 16), int(blue, 16), int(alpha or 'FF', 16))
 
-def QColor2RGB(color):
+def QColor2RGBA(color):
+    '''
+    @param color: A QColor, int, str, unicode instance
+    @return: If color is a valid, a html formated color string i.e.: #RRGGBB or #RRGGBBAA
+    ''' 
     if isinstance(color, QtGui.QColor):
-        pass
-    elif isinstance(color, (str, unicode)):
-        pass
-    elif isinstance(color, int):
-        pass
+        color = color.rgba()
+    if isinstance(color, (int, long)):
+        color = hex(long(color))[2:-1]
+    if isinstance(color, (str, unicode)) and len(color) in [ 6, 8 ]:
+        color = color.upper()
+        if len(color) == 8:
+            color = color[2:] + color[0:2] if color[0:2] != 'FF' else color[2:]
+        return "#%s" % color
     else:
-        raise ValueError("Invalid Color")
-    
+        raise ValueError("Invalid color value %s" % color)
+  
 QTCHARCODES = {9: Qt.Key_Backspace,
                10: Qt.Key_Return,
-               #32: Qt.Key_Space,
                127: Qt.Key_Delete,
                63232: Qt.Key_F1,
                63234: Qt.Key_F2,
