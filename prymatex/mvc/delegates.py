@@ -56,13 +56,12 @@ class PMXWidgetDelegate(QtGui.QStyledItemDelegate):
         self.widget.render(painter)
         painter.restore()
         
-class PMXFontStyleDelegate(PMXWidgetDelegate):
-    def __init__(self, parent):
-        widget = self.createWidget()
-        super(PMXFontStyleDelegate, self).__init__(parent, widget)
+class PMXFontStyleWidget(QtGui.QWidget):
+    def __init__(self, parent = None):
+        super(PMXFontStyleWidget, self).__init__(parent)
+        self.setupUi()
         
-    def createWidget(self):
-        widget = QtGui.QWidget()
+    def setupUi(self):
         layout = QtGui.QHBoxLayout()
         layout.setSpacing(0)
         layout.setMargin(0)
@@ -84,7 +83,17 @@ class PMXFontStyleDelegate(PMXWidgetDelegate):
         layout.addWidget(self.buttonBold)
         layout.addWidget(self.buttonItalic)
         layout.addWidget(self.buttonUnderline)
-        widget.setLayout(layout)
+        self.setLayout(layout)
+        
+class PMXFontStyleDelegate(PMXWidgetDelegate):
+    
+    def __init__(self, parent):
+        # Store the widget and update it acordigly
+        self.widgetToPaint = self.createWidget()
+        super(PMXFontStyleDelegate, self).__init__(parent, self.widgetToPaint)
+        
+    def createWidget(self):
+        widget = PMXFontStyleWidget()
         return widget
     
     def createEditor(self, parent, option, index):
@@ -92,5 +101,28 @@ class PMXFontStyleDelegate(PMXWidgetDelegate):
         widget.setParent(parent)
         return widget
         
+    def setModelData(self, widget, model, index):
+        flags = set()
+        self.widgetToPaint.buttonBold.setChecked(widget.buttonBold.isChecked())
+        if widget.buttonBold.isChecked():
+            flags.add('bold')
         
+        self.widgetToPaint.buttonItalic.setChecked(widget.buttonItalic.isChecked())    
+        if widget.buttonItalic.isChecked():
+            flags.add('italic')
+            
+        self.widgetToPaint.buttonUnderline.setChecked(widget.buttonUnderline.isChecked())
+        if widget.buttonUnderline.isChecked():
+            flags.add('underline')
+            
+        modelString = ','.join(flags)
+        #print "setModelData", modelString
+        model.setData(index, modelString)
+    
+    def setEditorData(self, widget, index):
+        flags = index.data().toString().split(',')
+        widget.buttonBold.setChecked('bold' in flags)
+        widget.buttonItalic.setChecked('italic' in flags)
+        widget.buttonUnderline.setChecked('underline' in flags)
+            
         
