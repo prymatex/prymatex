@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent, buildQColor
+from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent, RGBA2QColor
 #from PyQt4.Qt import *
 
 #====================================================
@@ -20,8 +20,7 @@ class PMXBundleTreeNode(object):
              "dragcommand": QtGui.QPixmap(":/icons/bundles/drag-commands.png"),
              "snippet": QtGui.QPixmap(":/icons/bundles/snippets.png"),
              "macro": QtGui.QPixmap(":/icons/bundles/macros.png"),
-             "templatefile": QtGui.QPixmap(":/icons/bundles/template-files.png") 
-    }
+             "templatefile": QtGui.QPixmap(":/icons/bundles/template-files.png") }
     
     def __init__(self, item, parent = None):
         self.item = item
@@ -220,16 +219,16 @@ class PMXThemeStyleRow(object):
     @property
     def settings(self):
         settings = {}
-        settings.update(self.item.settings)
         for color_key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
-            if color_key in settings:
-                color = buildQColor(settings[color_key])
+            if color_key in self.item.settings and self.item.settings[color_key]:
+                color = RGBA2QColor(self.item.settings[color_key])
                 settings[color_key] = color
-        if 'fontStyle' in settings:
-            settings['fontStyle'] = settings['fontStyle'].split()
+        if 'fontStyle' in self.item.settings:
+            settings['fontStyle'] = self.item.settings['fontStyle'].split()
         return settings
     
     def update(self, hash):
+        #TODO, que soporte colores en strings, enteros y qcolors
         if 'settings' in hash:
             settings = {}
             for key in hash['settings'].keys():
@@ -290,9 +289,9 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
             if column == 0:
                 return QtCore.QVariant(style.name)
             elif column == 1 and 'foreground' in settings:
-                return QtCore.QVariant(settings['foreground'])
+                return settings['foreground']
             elif column == 2 and 'background' in settings:
-                return QtCore.QVariant(settings['background'])
+                return settings['background']
             elif column == 3 and 'fontStyle' in settings:
                 return QtCore.QVariant(", ".join(settings['fontStyle']))
         elif role == QtCore.Qt.DecorationRole:

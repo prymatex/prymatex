@@ -9,6 +9,7 @@ from PyQt4 import QtGui, QtCore
 from prymatex import resources_rc
 from prymatex.utils import deco
 from prymatex.core.config import PMXSettings
+from prymatex.utils.i18n import ugettext as _
 
 from logging import getLogger
 logger = getLogger(__name__)
@@ -299,11 +300,10 @@ class PMXApplication(QtGui.QApplication):
                         pid in os.pid_proc_dict()
                         )
             if pid in os.pid_proc_dict():
-                from prymatex.utils.i18n import ugettext as _
                 self.logger.warning("Another app running")
                 QtGui.QMessageBox.critical(None, _('Application Already Running'),
                                      _('''%s seems to be runnig. Please
-                                     close the other instance.''', self.applicationName()),
+                                     close the other instance.''' % self.applicationName()),
                                      QtGui.QMessageBox.Ok)
                 from prymatex.utils.exceptions import AlreadyRunningError
                 raise AlreadyRunningError(pid)

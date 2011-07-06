@@ -5,7 +5,8 @@ import os, sys, string
 sys.path.append(os.path.abspath('../../..'))
 
 try:
-    from PyQt4.Qt import QColor, QFont, QKeySequence, Qt
+    from PyQt4 import QtGui
+    from PyQt4.Qt import QKeySequence, Qt
 except:
     from prymatex.support.qtmock import Qt, QKeySequence
 from prymatex.support.modmap import get_keymap_table
@@ -19,15 +20,28 @@ from prymatex.support.modmap import get_keymap_table
     * Alt -> ~
 '''
 
-#caret, foreground, selection, invisibles, lineHighlight, gutter, background
-def buildQColor(color):
-    if isinstance(color, (str, unicode)):
-        if color[0] == '#':
-            rgba = color[7:] or 'FF'
-            rgba += color[1:7]
-            qcolor = QColor()
-            qcolor.setRgba(int(rgba, 16))
-            return qcolor
+#caret, foreground, selection, invisibles, lineHighbuildQColorlight, gutter, background
+def RGBA2QColor(rgbColor):
+    '''
+    @param rgbColor: A html formated color string i.e.: #RRGGBB or #RRGGBBAA
+    @return: If rgbColor is a valid color, a QColor isntance
+    ''' 
+    rgbColor = unicode(rgbColor).strip('#')
+    if len(rgbColor) in [ 6, 8 ]:
+        red, green, blue, alpha = rgbColor[0:2], rgbColor[2:4], rgbColor[4:6], rgbColor[6:8]
+    else:
+        raise ValueError("Invalid Color")
+    return QtGui.QColor(int(red, 16), int(green, 16), int(blue, 16), int(alpha or 'FF', 16))
+
+def QColor2RGB(color):
+    if isinstance(color, QtGui.QColor):
+        pass
+    elif isinstance(color, (str, unicode)):
+        pass
+    elif isinstance(color, int):
+        pass
+    else:
+        raise ValueError("Invalid Color")
     
 QTCHARCODES = {9: Qt.Key_Backspace,
                10: Qt.Key_Return,

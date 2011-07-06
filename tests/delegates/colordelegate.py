@@ -6,7 +6,7 @@ QColor2HTML = lambda color: ("#%2x%2x%2x" % (color.red(), color.green(), color.b
 
 def HTML2QColor(htmlColor):
     '''
-    @param htmlColor: A html formated color string i.e.: #DDA039
+    @param htmlColor: A html formated color string i.e.: #RRGGBB or #RRGGBBAA
     @return: If htmlColor is a valid color, a QColor isntance
     ''' 
     htmlColor = unicode(htmlColor).strip('#')

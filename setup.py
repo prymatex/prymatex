@@ -86,7 +86,7 @@ class QtBuild(build):
             def createToplevelWidget(self, classname, widgetname):
                 output = indenter.getIndenter()
                 output.level = 0
-                output.write('from prymatex.utils.translation import ugettext as _')
+                output.write('from prymatex.utils.i18n import ugettext as _')
                 return super(_UICompiler, self).createToplevelWidget(classname, widgetname)
                 
             def compileUi(self, input_stream, output_stream, from_imports):

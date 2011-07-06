@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.config.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
+from prymatex.mvc.delegates import PMXColorDelegate
 from prymatex.ui.configthemes import Ui_FontThemeConfig
 
 class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
@@ -87,6 +88,8 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tableView.activated.connect(self.on_tableView_Activated)
         self.tableView.pressed.connect(self.on_tableView_Activated)
+        self.tableView.setItemDelegateForColumn(1, PMXColorDelegate())
+        self.tableView.setItemDelegateForColumn(2, PMXColorDelegate())
         #Conectar
         for _, scope in self.DEFAULTS['styles']:
             self.comboBoxScope.addItem(scope)
@@ -135,8 +138,8 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex()).toPyObject()
         theme = self.manager.getTheme(unicode(uuid))
         settings = theme.settings
-        color = QtGui.QColorDialog.getColor(settings[element], self)
-        if color:
+        color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
+        if ok:
             self.manager.updateTheme(theme, settings = { element: color })
             self.setThemeSettings(theme)
     

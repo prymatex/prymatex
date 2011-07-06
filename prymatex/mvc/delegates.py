@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 class PMXColorDelegate(QtGui.QItemDelegate):
-    CHOICES = ()
+    def createEditor(self, parent, options, index):
+        editor = QtGui.QColorDialog(parent)
+        editor.setOptions(QtGui.QColorDialog.ShowAlphaChannel)
+        return editor
     
-    def createEditor(self, parent, option, index):
-        button = QtGui.QPushButton(parent)
-        return button
-
-    def setEditorData(self, editor, index):
-        pass
-
-    def setModelData(self, editor, model, index):
-        pass
+    def setModelData(self, colorDialog, model, index):
+        color = colorDialog.currentColor()
+        model.setData(index, color)
+    
+    def setEditorData(self, colorDialog, index):
+        variant = index.data()
+        if variant.canConvert(QtCore.QVariant.Color):
+            colorDialog.setCurrentColor(QtGui.QColor(variant))
