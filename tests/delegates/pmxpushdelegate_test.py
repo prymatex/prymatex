@@ -2,8 +2,8 @@
 from PyQt4.Qt import *
 
 from PyQt4.Qt import *
-import sys
-
+import os, sys
+sys.path.append(os.path.abspath('../..'))
 
 def main(argv = sys.argv):
     
