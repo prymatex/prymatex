@@ -37,25 +37,6 @@ class PMXColorDelegate(QtGui.QItemDelegate):
         if variant.canConvert(QtCore.QVariant.Color):
             colorDialog.setCurrentColor(QtGui.QColor(variant))
 
-class PMXWidgetDelegate(QtGui.QStyledItemDelegate):
-    # Taken from http://www.qtcentre.org/threads/26916-inserting-custom-Widget-to-listview?p=155774#post155774
-    def __init__(self, parent, widget = QtGui.QLabel("Change ME!")):
-        super(PMXWidgetDelegate, self).__init__(parent)
-        self.widget = widget
-        
-    def paint(self, painter, option, index):
-        
-        self.widget.resize(option.rect.size())
-        #
-        #       Here update the witem with some method with the real item data
-        #       Update labels, icons, and so on
-        #       */
-                
-        painter.save()
-        painter.translate(option.rect.topLeft())
-        self.widget.render(painter)
-        painter.restore()
-        
 class PMXFontStyleWidget(QtGui.QWidget):
     def __init__(self, parent = None):
         super(PMXFontStyleWidget, self).__init__(parent)
@@ -85,12 +66,12 @@ class PMXFontStyleWidget(QtGui.QWidget):
         layout.addWidget(self.buttonUnderline)
         self.setLayout(layout)
         
-class PMXFontStyleDelegate(PMXWidgetDelegate):
+class PMXFontStyleDelegate(QtGui.QStyledItemDelegate):
     
     def __init__(self, parent):
         # Store the widget and update it acordigly
-        self.widgetToPaint = self.createWidget()
-        super(PMXFontStyleDelegate, self).__init__(parent, self.widgetToPaint)
+        super(PMXFontStyleDelegate, self).__init__(parent)
+        self.widgetDict = {}
         
     def createWidget(self):
         widget = PMXFontStyleWidget()
@@ -101,18 +82,19 @@ class PMXFontStyleDelegate(PMXWidgetDelegate):
         widget.setParent(parent)
         return widget
         
-    def setModelData(self, widget, model, index):
+    def setModelData(self, editedWidget, model, index):
         flags = set()
-        self.widgetToPaint.buttonBold.setChecked(widget.buttonBold.isChecked())
-        if widget.buttonBold.isChecked():
+        widgetToPaint = self.getWidgetForIndex(index)
+        widgetToPaint.buttonBold.setChecked(editedWidget.buttonBold.isChecked())
+        if editedWidget.buttonBold.isChecked():
             flags.add('bold')
         
-        self.widgetToPaint.buttonItalic.setChecked(widget.buttonItalic.isChecked())    
-        if widget.buttonItalic.isChecked():
+        widgetToPaint.buttonItalic.setChecked(editedWidget.buttonItalic.isChecked())    
+        if editedWidget.buttonItalic.isChecked():
             flags.add('italic')
             
-        self.widgetToPaint.buttonUnderline.setChecked(widget.buttonUnderline.isChecked())
-        if widget.buttonUnderline.isChecked():
+        widgetToPaint.buttonUnderline.setChecked(editedWidget.buttonUnderline.isChecked())
+        if editedWidget.buttonUnderline.isChecked():
             flags.add('underline')
             
         modelString = ','.join(flags)
@@ -124,5 +106,26 @@ class PMXFontStyleDelegate(PMXWidgetDelegate):
         widget.buttonBold.setChecked('bold' in flags)
         widget.buttonItalic.setChecked('italic' in flags)
         widget.buttonUnderline.setChecked('underline' in flags)
-            
+    
+    def getWidgetForIndex(self, index):
+        indexTuple = index.column(), index.row()
         
+        if not indexTuple in self.widgetDict:
+            widget = self.createWidget()
+            self.setEditorData(widget, index)
+            self.widgetDict[indexTuple] = widget
+            
+        return self.widgetDict[indexTuple]
+    
+    def paint(self, painter, option, index):
+        widget = self.getWidgetForIndex(index)
+        widget.resize(option.rect.size())
+        #
+        #       Here update the witem with some method with the real item data
+        #       Update labels, icons, and so on
+        #       */
+                
+        painter.save()
+        painter.translate(option.rect.topLeft())
+        widget.render(painter)
+        painter.restore()
