@@ -4,7 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.config.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
-from prymatex.mvc.delegates import PMXColorDelegate
+from prymatex.mvc.delegates import PMXColorDelegate, PMXFontStyleDelegate
 from prymatex.ui.configthemes import Ui_FontThemeConfig
 
 class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
@@ -90,6 +90,9 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.tableView.pressed.connect(self.on_tableView_Activated)
         self.tableView.setItemDelegateForColumn(1, PMXColorDelegate(self))
         self.tableView.setItemDelegateForColumn(2, PMXColorDelegate(self))
+        self.tableView.setItemDelegateForColumn(3, PMXFontStyleDelegate(self))
+        self.tableView.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
+        self.tableView.resizeColumnToContents(3)
         #Conectar
         for _, scope in self.DEFAULTS['styles']:
             self.comboBoxScope.addItem(scope)
