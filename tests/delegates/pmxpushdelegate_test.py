@@ -18,6 +18,8 @@ def main(argv = sys.argv):
     model.setHeaderData(0, Qt.Horizontal, "Foreground")
     tableView.setModel(model)
     
+    tableView.setEditTriggers(QAbstractItemView.AllEditTriggers)
+    
     from prymatex.mvc.delegates import PMXFontStyleDelegate
 
     for i in range(model.columnCount()):
