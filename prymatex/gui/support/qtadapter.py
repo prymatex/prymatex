@@ -41,10 +41,12 @@ def QColor2RGBA(color):
         color = color.rgba()
     if isinstance(color, (int, long)):
         color = hex(long(color))[2:-1]
-    if isinstance(color, (str, unicode)) and len(color) in [ 6, 8 ]:
+    if isinstance(color, (str, unicode)) and len(color) in [ 6, 7, 8 ]:
         color = color.upper()
         if len(color) == 8:
             color = color[2:] + color[0:2] if color[0:2] != 'FF' else color[2:]
+        elif len(color) == 7:
+            color = color[1:] + '0' + color[0]
         return "#%s" % color
     else:
         raise ValueError("Invalid color value %s" % color)

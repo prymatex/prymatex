@@ -223,8 +223,7 @@ class PMXThemeStyleRow(object):
             if color_key in self.item.settings and self.item.settings[color_key]:
                 color = RGBA2QColor(self.item.settings[color_key])
                 settings[color_key] = color
-        if 'fontStyle' in self.item.settings:
-            settings['fontStyle'] = self.item.settings['fontStyle'].split()
+        settings['fontStyle'] = self.item.settings['fontStyle'].split() if 'fontStyle' in self.item.settings else []
         return settings
     
     def update(self, hash):
@@ -265,7 +264,7 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
         super(PMXThemeStylesTableModel, self).__init__(parent)
         self.manager = manager
         self.styles = []
-        self.headers = ['Element', 'Foreground', 'Background', 'Font Style']
+        self.headers = ['Element', 'Fg', 'Bg', 'Font Style']
         
     def rowCount(self, parent):
         return len(self.styles)
@@ -275,17 +274,8 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
     
     def data(self, index, role):
         if not index.isValid(): 
-            return QtCore.QVariant()
-        if role == QtCore.Qt.DisplayRole:
-            row = index.row()
-            column = index.column()
-            style = self.styles[row]
-            settings = self.styles[row].settings
-            if column == 0:
-                return style.name
-            elif column == 3 and 'fontStyle' in settings:
-                return ", ".join(settings['fontStyle'])
-        elif role == QtCore.Qt.EditRole:
+            return QtCore.QVariant() 
+        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
             style = self.styles[row]
@@ -296,19 +286,40 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
                 return settings['foreground']
             elif column == 2 and 'background' in settings:
                 return settings['background']
-        elif role == QtCore.Qt.DecorationRole:
+            elif column == 3 and 'fontStyle' in settings:
+                return settings['fontStyle']
+        elif role == QtCore.Qt.FontRole:
             row = index.row()
             column = index.column()
             style = self.styles[row]
             settings = self.styles[row].settings
-            if column == 1 and 'foreground' in settings:
-                pixmap = QtGui.QPixmap(16, 16)
-                pixmap.fill(settings['foreground'])
-                return pixmap
+            if column == 0:
+                font = QtGui.QFont()
+                if 'bold' in settings['fontStyle']:
+                    font.setBold(True)
+                if 'underline' in settings['fontStyle']:
+                    font.setUnderline(True)
+                if 'italic' in settings['fontStyle']:
+                    font.setItalic(True)
+                return font
+        elif role == QtCore.Qt.ForegroundRole:
+            row = index.row()
+            column = index.column()
+            style = self.styles[row]
+            settings = self.styles[row].settings
+            if column == 0 and 'foreground' in settings:
+                return settings['foreground']
+        elif role == QtCore.Qt.BackgroundColorRole:
+            row = index.row()
+            column = index.column()
+            style = self.styles[row]
+            settings = self.styles[row].settings
+            if column == 0 and 'background' in settings:
+                return settings['background']
+            elif column == 1 and 'foreground' in settings:
+                return settings['foreground']
             elif column == 2 and 'background' in settings:
-                pixmap = QtGui.QPixmap(16, 16)
-                pixmap.fill(settings['background'])
-                return pixmap
+                return settings['background']
 
     def setData(self, index, value, role):
         '''
@@ -326,6 +337,9 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
                 self.manager.updateThemeStyle(style, settings = {'foreground' : QtGui.QColor(value) })
             elif column == 2 and value.canConvert(QtCore.QVariant.Color):
                 self.manager.updateThemeStyle(style, settings = {'background' : QtGui.QColor(value) })
+            elif column == 3:
+                fontStyle = value.toPyObject()
+                self.manager.updateThemeStyle(style, settings = {'fontStyle' : fontStyle })
             self.dataChanged.emit(index, index)
             return True
         return False

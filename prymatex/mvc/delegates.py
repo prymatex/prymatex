@@ -21,7 +21,7 @@ class AcceptableColorDialog(QtGui.QColorDialog):
         self.isAccepted = True
         super(AcceptableColorDialog, self).accept(*largs)
     
-class PMXColorDelegate(QtGui.QItemDelegate):
+class PMXColorDelegate(QtGui.QStyledItemDelegate):
     def createEditor(self, parent, options, index):
         editor = AcceptableColorDialog(parent)
         editor.setOptions(QtGui.QColorDialog.ShowAlphaChannel)
@@ -36,7 +36,23 @@ class PMXColorDelegate(QtGui.QItemDelegate):
         variant = index.data()
         if variant.canConvert(QtCore.QVariant.Color):
             colorDialog.setCurrentColor(QtGui.QColor(variant))
-
+            
+    def paint(self, painter, option, index):
+        data = index.data().toPyObject()
+        if isinstance(data, QtGui.QColor):
+            painter.save()
+            #Con un pixmap lindo
+            #pixmap = QtGui.QPixmap(16, 16)
+            #pixmap.fill(data)
+            #painter.translate(option.rect.topLeft())
+            #painter.drawPixmap(0, 0, pixmap)
+            #Pintando todo
+            brush = QtGui.QBrush(data)
+            painter.fillRect(option.rect, brush)
+            painter.restore()
+            return
+        super(PMXColorDelegate, self).paint(painter, option, index)
+    
 class PMXFontStyleWidget(QtGui.QWidget):
     def __init__(self, parent = None):
         super(PMXFontStyleWidget, self).__init__(parent)
@@ -97,12 +113,10 @@ class PMXFontStyleDelegate(QtGui.QStyledItemDelegate):
         if editedWidget.buttonUnderline.isChecked():
             flags.add('underline')
             
-        modelString = ','.join(flags)
-        #print "setModelData", modelString
-        model.setData(index, modelString)
+        model.setData(index, flags)
     
     def setEditorData(self, widget, index):
-        flags = index.data().toString().split(',')
+        flags = index.data().toPyObject()
         widget.buttonBold.setChecked('bold' in flags)
         widget.buttonItalic.setChecked('italic' in flags)
         widget.buttonUnderline.setChecked('underline' in flags)

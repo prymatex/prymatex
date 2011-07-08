@@ -6,6 +6,7 @@ from prymatex.gui.config.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
 from prymatex.mvc.delegates import PMXColorDelegate, PMXFontStyleDelegate
 from prymatex.ui.configthemes import Ui_FontThemeConfig
+from prymatex.gui.support.qtadapter import QColor2RGBA
 
 class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     '''
@@ -85,7 +86,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     
     def configTableView(self):
         self.tableView.setModel(self.manager.themeStyleProxyModel)
-        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
         self.tableView.activated.connect(self.on_tableView_Activated)
         self.tableView.pressed.connect(self.on_tableView_Activated)
         self.tableView.setItemDelegateForColumn(1, PMXColorDelegate(self))
@@ -93,6 +94,9 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.tableView.setItemDelegateForColumn(3, PMXFontStyleDelegate(self))
         self.tableView.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
         self.tableView.resizeColumnToContents(3)
+        self.tableView.setColumnWidth(0, 437)
+        self.tableView.setColumnWidth(1, 25)
+        self.tableView.setColumnWidth(2, 25)
         #Conectar
         for _, scope in self.DEFAULTS['styles']:
             self.comboBoxScope.addItem(scope)
@@ -146,21 +150,14 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
             self.manager.updateTheme(theme, settings = { element: color })
             self.setThemeSettings(theme)
     
-    def getRGB(self, color):
-        rgba = hex(color.rgba())[2:-1]
-        values = []
-        for index in range(0, len(rgba), 2):
-            values.append(str(int(rgba[index:index + 2], 16)))
-        return values[1:]
-    
     def setThemeSettings(self, theme):
         settings = theme.settings
-        self.pushButtonForeground.setStyleSheet("background-color: rgb(" + ", ".join(self.getRGB(settings['foreground'])) + ");")
-        self.pushButtonBackground.setStyleSheet("background-color: rgb(" + ", ".join(self.getRGB(settings['background'])) + ");")
-        self.pushButtonSelection.setStyleSheet("background-color: rgb(" + ", ".join(self.getRGB(settings['selection'])) + ");")
-        self.pushButtonInvisibles.setStyleSheet("background-color: rgb(" + ", ".join(self.getRGB(settings['invisibles'])) + ");")
-        self.pushButtonLineHighlight.setStyleSheet("background-color: rgb(" + ", ".join(self.getRGB(settings['lineHighlight'])) + ");")
-        self.pushButtonCaret.setStyleSheet("background-color: rgb(" + ", ".join(self.getRGB(settings['caret'])) + ");")
+        self.pushButtonForeground.setStyleSheet("background-color: " + QColor2RGBA(settings['foreground'])[:7])
+        self.pushButtonBackground.setStyleSheet("background-color: " + QColor2RGBA(settings['background'])[:7])
+        self.pushButtonSelection.setStyleSheet("background-color: " + QColor2RGBA(settings['selection'])[:7])
+        self.pushButtonInvisibles.setStyleSheet("background-color: " + QColor2RGBA(settings['invisibles'])[:7])
+        self.pushButtonLineHighlight.setStyleSheet("background-color: " + QColor2RGBA(settings['lineHighlight'])[:7])
+        self.pushButtonCaret.setStyleSheet("background-color: " + QColor2RGBA(settings['caret'])[:7])
         self.manager.themeStyleProxyModel.setFilterRegExp(unicode(theme.uuid))
         self.settings.setValue('theme', unicode(theme.uuid))
         

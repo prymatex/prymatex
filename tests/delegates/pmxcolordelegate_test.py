@@ -1,5 +1,6 @@
 from PyQt4.Qt import *
-import sys
+import os, sys
+sys.path.append(os.path.abspath('../..'))
 
 from prymatex.mvc.delegates import PMXColorDelegate
 
