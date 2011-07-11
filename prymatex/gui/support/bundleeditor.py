@@ -103,7 +103,19 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         bundle = self.manager.createBundle("untitled")
         index = self.proxyTreeModel.index(bundle.row(), 0, QtCore.QModelIndex())
         self.treeView.setCurrentIndex(index)
-        
+    
+    @QtCore.pyqtSignature('')
+    def on_pushButtonRemove_pressed(self):
+        index = self.treeView.currentIndex()
+        if index.isValid():
+            item = self.proxyTreeModel.mapToSource(index).internalPointer()
+            if item.TYPE == 'bundle':
+                self.manager.deleteBundle(item)
+            elif item.TYPE == 'templatefile':
+                self.manager.deleteBundle(u"untitled", template)
+            else:
+                self.manager.deleteBundleItem(item)
+
     def configToolbar(self):
         self.toolbarMenu = QtGui.QMenu("Menu", self)
         action = QtGui.QAction("New Command", self)
@@ -217,7 +229,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
                 if current.TYPE == "bundle":
                     self.manager.updateBundle(current.bundleItem, **current.changes)
                 elif current.TYPE == "templatefile":
-                    self.manager.updateBundleItem(current.bundleItem.template)
+                    self.manager.updateTemplateFile(current.bundleItem, **current.changes)
                 else:
                     self.manager.updateBundleItem(current.bundleItem, **current.changes)
             
@@ -225,7 +237,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         if editor != None:
             editor.edit(treeItem)
             self.setCurrentEditor(editor)
-            
+
     def setCurrentEditor(self, editor):
         self.stackedWidget.setCurrentWidget(editor)
         self.labelTitle.setText(editor.title)

@@ -286,29 +286,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def on_actionPrevious_Tab_triggered(self):
         self.tabWidget.focusPrevTab()
         
-    @pyqtSignature('')
-    def on_actionAboutApp_triggered(self):
-        QMessageBox.about(self, self.trUtf8("About"), self.trUtf8("""
-        <h3>Prymatex Text Editor</h3>
-        <p>(c) 2010 Xurix</p>
-        <p><h4>Authors:</h4>
-        <ul>
-            <li>D3f0</li>
-            <li>diegomvh</li>
-            <li>locurask</li>
-        </ul>
-        <a href="http://d3f0.github.com/prymatex">Homepage</a>
-        <p>Version %s</p>
-        </p>
-        """, qApp.instance().applicationVersion()))
-        
     @pyqtSlot(bool)
     def on_actionFullscreen_toggled(self, check):
         if not check and self.isFullScreen():
             self.showNormal()
         elif check:
             self.showFullScreen()
-    
     
     @pyqtSlot(bool)
     def on_actionShow_Menus_toggled(self, state):
@@ -318,7 +301,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         else:
             menubar.hide()
         
-            
     @pyqtSignature('')
     def on_actionOpen_triggered(self):
         '''
@@ -331,13 +313,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         for path in files_to_open:
             self.openFile(path, auto_focus = True)
     
-    
     @pyqtSignature('')
     def on_actionShow_Bundle_Editor_triggered(self):
         #TODO: mejorar esto
         self.pmxApp.bundleEditor.show()
-        
-    
+
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
             url = QUrl(url)

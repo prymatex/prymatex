@@ -222,7 +222,6 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
     class Meta:
         settings = 'network'
         
-    
     def __init__(self, parent = None):
         super(PMXNetworkWidget, self).__init__(parent)
         self.setupUi(self)
@@ -254,9 +253,7 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
     def changeProxyMode(self, checked):
         if checked:
             self.proxyType = self.mapping[self.sender()]
-            
-            
-        
+
     @pmxConfigPorperty(default = 'direct')
     def proxyType(self, value):
         if   value == 'direct':

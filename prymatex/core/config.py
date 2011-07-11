@@ -4,7 +4,7 @@
 Application configuration based on Qt's QSettings module.
 
 '''
-
+from PyQt4 import QtCore
 from PyQt4.Qt import QSettings, QString, QVariant
 from os.path import join, abspath, expanduser, dirname, exists
 from os import makedirs
@@ -115,6 +115,8 @@ class SettingsGroup(object):
         elif isinstance(obj, dict):
             return dict([(SettingsGroup.toPyObject(o[0]), SettingsGroup.toPyObject(o[1])) for o in obj.iteritems() ])
         #PyQtObjects
+        elif isinstance(obj, QtCore.QStringList):
+            return [SettingsGroup.toPyObject(o) for o in obj ]
         elif isinstance(obj, QString):
             return unicode(obj)
         elif isinstance(obj, QVariant):

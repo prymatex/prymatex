@@ -42,14 +42,12 @@ class PMXSupportBaseManager(object):
     #FIXME: Dudo de la cache en este lugar
     SETTINGS_CACHE = {}
     
-    def __init__(self, disabledBundles = [], deletedBundles = []):
+    def __init__(self):
         self.namespaces = {}
         # Te first is the name space base, and the last is de default for new bundles and items */
         self.nsorder = []
         self.environment = {}
         self.managedObjects = {}
-        self.disabledBundles = disabledBundles
-        self.deletedBundles = deletedBundles
         self.scores = PMXScoreManager()
     
     #---------------------------------------------------
@@ -147,16 +145,19 @@ class PMXSupportBaseManager(object):
         '''
             Marcar un managed object como eliminado
         '''
-        self.deletedBundles.append(uuid)
+        #self.deletedBundles.append(uuid)
+        pass
         
     def isDeleted(self, uuid):
         '''
             Marcar un managed object como eliminado
         '''
-        return uuid in self.deletedBundles
+        #return uuid in self.deletedBundles
+        return False
 
     def isDisabled(self, uuid):
-        return uuid in self.disabledBundles
+        #return uuid in self.disabledBundles
+        return False
         
     def addManagedObject(self, obj):
         obj.setManager(self)
@@ -181,7 +182,7 @@ class PMXSupportBaseManager(object):
 
     def removeBundle(self, bundle):
         '''
-            Llamado antes de eliminar un bundle
+            Llamado luego de eliminar un bundle
         '''
         pass
 
@@ -258,8 +259,8 @@ class PMXSupportBaseManager(object):
             Elimina un bundle,
             si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
         '''
-        self.removeBundle(bundle)
         items = self.findBundleItems(bundle = bundle)
+        print items
         #Primero los items
         for item in items:
             self.deleteBundleItem(item)
@@ -269,6 +270,7 @@ class PMXSupportBaseManager(object):
             self.setDeleted(bundle.uuid)
         else:
             bundle.delete()
+        self.removeBundle(bundle)
         
     #---------------------------------------------------
     # BUNDLEITEM INTERFACE
@@ -363,7 +365,6 @@ class PMXSupportBaseManager(object):
             Elimina un bundle por su uuid,
             si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
         '''
-        self.removeBundleItem(item)
         #Si el espacio de nombres es distinto al protegido lo elimino
         if item.isProtected:
             if item.isSafe:
@@ -371,12 +372,16 @@ class PMXSupportBaseManager(object):
             self.setDeleted(item.uuid)
         else:
             item.delete()
-
+        self.removeBundleItem(item)
+        
     #---------------------------------------------------
     # TEMPLATEFILE INTERFACE
     #---------------------------------------------------
     def addTemplateFile(self, file):
         return file
+    
+    def removeTemplateFile(self, file):
+        pass
     
     #---------------------------------------------------
     # TEMPLATEFILE CRUD
@@ -392,8 +397,18 @@ class PMXSupportBaseManager(object):
         #template.save()
         return file
 
-    def deleteTemplateFile(self, style):
-        pass
+    def updateTemplateFile(self, templateFile, **attrs):
+        template = templateFile.template
+        if template.isProtected and not template.isSafe:
+            self.updateBundleItem(template)
+        templateFile.update(attrs)
+        return templateFile
+
+    def deleteTemplateFile(self, templateFile):
+        template = templateFile.template
+        if template.isProtected and not template.isSafe:
+            self.deleteBundleItem(template)
+        self.removeTemplateFile(templateFile)
     
     #---------------------------------------------------
     # THEME INTERFACE
@@ -481,6 +496,9 @@ class PMXSupportBaseManager(object):
     def addThemeStyle(self, style):
         return style
     
+    def removeThemeStyle(self, style):
+        pass
+    
     #---------------------------------------------------
     # THEMESTYLE CRUD
     #---------------------------------------------------
@@ -508,6 +526,7 @@ class PMXSupportBaseManager(object):
             self.updateTheme(theme)
         theme.styles.remove(style)
         theme.save()
+        self.removeThemeStyle(style)
         
     #---------------------------------------------------
     # PREFERENCES INTERFACE
@@ -654,8 +673,8 @@ class PMXSupportManager(PMXSupportBaseManager):
     PREFERENCES = []
     TEMPLATES = []
     
-    def __init__(self, disabledBundles = [], deletedBundles = []):
-        super(PMXSupportManager, self).__init__(disabledBundles, deletedBundles)
+    def __init__(self):
+        super(PMXSupportManager, self).__init__()
     
     #---------------------------------------------------
     # BUNDLE INTERFACE

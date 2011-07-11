@@ -13,6 +13,8 @@ from prymatex.ui.editortemplatefile import Ui_TemplateFile
 from prymatex.ui.editorpreference import Ui_Preference
 from pprint import pformat
 
+TABWIDTH = 20
+
 class PMXEditorBaseWidget(QtGui.QWidget):
     '''
         Base class for editors  
@@ -115,7 +117,12 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
     def __init__(self, parent = None):
         super(PMXSnippetWidget, self).__init__(parent)
         self.setupUi(self)
+        self.content.setTabStopWidth(TABWIDTH)
 
+    @QtCore.pyqtSignature('')
+    def on_content_textChanged(self):
+        self.changes['content'] = unicode(self.content.toPlainText())
+        
     @property
     def title(self):
         if self.bundleItem != None:
@@ -183,7 +190,13 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         self.comboBoxOutput.addItem("Show as Tool Tip", QtCore.QVariant("showAsTooltip"))
         self.comboBoxOutput.addItem("Create New Document", QtCore.QVariant("createNewDocument"))
         self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
+        
+        self.command.setTabStopWidth(TABWIDTH)
 
+    @QtCore.pyqtSignature('')
+    def on_command_textChanged(self):
+        self.changes['command'] = unicode(self.command.toPlainText())
+        
     def on_comboBoxBeforeRunning_changed(self, index):
         value = self.comboBoxBeforeRunning.itemData(index).toString()
         if value != self.bundleItem.beforeRunningCommand:
@@ -285,10 +298,16 @@ fi"'''}
         super(PMXTemplateWidget, self).__init__(parent)
         self.setupUi(self)
         self.comboBoxOutput.addItem("Insert as Text", QtCore.QVariant("insertText"))
-        self.lineEditExtension.textEdited.connect(self.on_lineEditExtension_edited)
+        self.command.setTabStopWidth(TABWIDTH)
+
+    @QtCore.pyqtSignature('')
+    def on_command_textChanged(self):
+        self.changes['command'] = unicode(self.command.toPlainText())
     
-    def on_lineEditExtension_edited(self, text):
+    @QtCore.pyqtSignature('QString')
+    def on_lineEditExtension_textEdited(self, text):
         value = unicode(text)
+        print value
         if value != self.bundleItem.extension:
             self.changes['extension'] = value
         else:
@@ -322,7 +341,12 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
     def __init__(self, parent = None):
         super(PMXTemplateFileWidget, self).__init__(parent)
         self.setupUi(self)
+        self.content.setTabStopWidth(TABWIDTH)
 
+    @QtCore.pyqtSignature('')
+    def on_content_textChanged(self):
+        self.changes['content'] = unicode(self.content.toPlainText())
+        
     @property
     def title(self):
         if self.bundleItem != None:
@@ -353,9 +377,14 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
         super(PMXDragCommandWidget, self).__init__(parent)
         self.setupUi(self)
         self.comboBoxOutput.addItem("Insert as Snippet", QtCore.QVariant("insertAsSnippet"))
-        self.lineEditExtensions.textEdited.connect(self.on_lineEditExtensions_edited)
+        self.command.setTabStopWidth(TABWIDTH)
     
-    def on_lineEditExtensions_edited(self, text):
+    @QtCore.pyqtSignature('')
+    def on_command_textChanged(self):
+        self.changes['command'] = unicode(self.command.toPlainText())
+    
+    @QtCore.pyqtSignature('QString')
+    def on_lineEditExtensions_textEdited(self, text):
         value = map(lambda item: item.strip(), unicode(text).split(","))
         if value != self.bundleItem.draggedFileExtensions:
             self.changes['draggedFileExtensions'] = value
@@ -404,6 +433,13 @@ class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
     def __init__(self, parent = None):
         super(PMXLanguageWidget, self).__init__(parent)
         self.setupUi(self)
+        self.content.setTabStopWidth(TABWIDTH)
+    
+    @QtCore.pyqtSignature('')
+    def on_content_textChanged(self):
+        #Convertir a dict
+        #self.changes['content'] = unicode(self.command.toPlainText())
+        pass
     
     @property
     def title(self):
@@ -429,6 +465,13 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     def __init__(self, parent = None):
         super(PMXPreferenceWidget, self).__init__(parent)
         self.setupUi(self)
+        self.settings.setTabStopWidth(TABWIDTH)
+    
+    @QtCore.pyqtSignature('')
+    def on_settings_textChanged(self):
+        #Convertir a dict
+        #self.changes['content'] = unicode(self.command.toPlainText())
+        pass
     
     @property
     def title(self):

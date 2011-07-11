@@ -72,6 +72,9 @@ class PMXBundleTreeNode(object):
         self.children.append(child)
         child.parent = self
 
+    def removeChild(self, child):
+        self.children.remove(child)
+        
     def child(self, row):
         if len(self.children) > row:
             return self.children[row]
@@ -186,11 +189,23 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         self.root.appendChild(bundle)
         self.endInsertRows()
     
+    def removeBundle(self, bundle):
+        self.beginRemoveRows(QtCore.QModelIndex(), bundle.row(), bundle.row())
+        self.root.removeChild(bundle)
+        self.endRemoveRows()
+    
     def appendBundleItem(self, bundleItem):
         bnode = bundleItem.bundle
         self.beginInsertRows(self.index(bnode.row(), 0, QtCore.QModelIndex()), bnode.childCount(), bnode.childCount())
         bundleItem.bundle.appendChild(bundleItem)
         self.endInsertRows()
+    
+    def removeBundleItem(self, bundleItem):
+        pindex = self.index(bundleItem.bundle.row(), 0, QtCore.QModelIndex())
+        index = self.index(bundleItem.row(), 0, pindex)
+        self.beginRemoveRows(pindex, index.row(), index.row())
+        bundleItem.bundle.removeChild(bundleItem)
+        self.endRemoveRows()
     
     def getAllBundles(self):
         return self.root.children
@@ -368,4 +383,10 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.styles), len(self.styles))
         self.styles.append(style)
         self.endInsertRows()
+
+    def removeStyle(self, style):
+        index = self.styles.index(style)
+        self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+        self.styles.remove(style)
+        self.endRemoveRows()
         

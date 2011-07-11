@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
+import uuid as uuidmodule
 from prymatex.support.manager import PMXSupportManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
@@ -12,15 +13,20 @@ from prymatex.mvc.proxies import bisect
 class PMXSupportModelManager(PMXSupportManager, PMXObject):
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
-    deletedBundles = pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
-    disabledBundles = pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDisabledBundles')
     
+    @pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
+    def deleted(self, deleted):
+        self.deletedObjects = map(lambda uuid: uuidmodule.UUID(uuid), deleted)
+        
+    @pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
+    def disabled(self, disabled):
+        self.disabledObjects = map(lambda uuid: uuidmodule.UUID(uuid), disabled)
+        
     class Meta:
         settings = 'Manager'
     
     def __init__(self):
-        self.configure()
-        super(PMXSupportModelManager, self).__init__(self.disabledBundles, self.deletedBundles)
+        super(PMXSupportModelManager, self).__init__()
         self.bundleTreeModel = PMXBundleTreeModel(self)
         self.themeStylesTableModel = PMXThemeStylesTableModel(self)
         self.themeListModel = []
@@ -51,7 +57,8 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         
         #DRAGCOMMANDS
         self.dragProxyModel = PMXBundleTypeFilterProxyModel("dragcommand")
-        self.dragProxyModel.setSourceModel(self.bundleTreeModel) 
+        self.dragProxyModel.setSourceModel(self.bundleTreeModel)
+        self.configure()
         
     def buildEnvironment(self):
         env = {}
@@ -62,13 +69,36 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         return env
 
     #---------------------------------------------------
+    # MANAGED OBJECTS OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def setDeleted(self, uuid):
+        '''
+            Marcar un managed object como eliminado
+        '''
+        self.deletedObjects.append(uuid)
+        deleted = map(lambda uuid: unicode(uuid).upper(), self.deletedObjects)
+        self._meta.settings.setValue('deleted', deleted)
+
+    def isDeleted(self, uuid):
+        '''
+            Marcar un managed object como eliminado
+        '''
+        return uuid in self.deletedObjects
+
+    def isDisabled(self, uuid):
+        return uuid in self.disabledObjects
+
+    #---------------------------------------------------
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
     def addBundle(self, bundle):
         bundleNode = PMXBundleTreeNode(bundle)
         self.bundleTreeModel.appendBundle(bundleNode)
         return bundleNode
-
+    
+    def removeBundle(self, bundle):
+        self.bundleTreeModel.removeBundle(bundle)
+    
     def getBundle(self, uuid):
         return self.bundleTreeModel.getBundle(uuid)
     
@@ -83,6 +113,9 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         self.bundleTreeModel.appendBundleItem(bundleItemNode)
         super(PMXSupportModelManager, self).addBundleItem(bundleItemNode)
         return bundleItemNode
+    
+    def removeBundleItem(self, bundleItem):
+        self.bundleTreeModel.removeBundleItem(bundleItem)
     
     #---------------------------------------------------
     # TEMPLATEFILE OVERRIDE INTERFACE
@@ -101,10 +134,13 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         self.themeListModel.insert(index, themeRow)
         return themeRow
     
+    def getAllThemes(self):
+        return self.themeListModel
+    
     def addThemeStyle(self, style):
         themeStyle = PMXThemeStyleRow(style)
         self.themeStylesTableModel.appendStyle(themeStyle)
         return themeStyle
     
-    def getAllThemes(self):
-        return self.themeListModel
+    def removeThemeStyle(self, style):
+        self.themeStylesTableModel.removeStyle(style)

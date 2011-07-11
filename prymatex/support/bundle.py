@@ -250,7 +250,7 @@ class PMXBundleItem(PMXManagedObject):
         try:
             #El ultimo apaga la luz, elimina el directorio base
             os.rmdir(dir)
-        except os.OSError:
+        except:
             pass
     
     def buildEnvironment(self, **kwargs):

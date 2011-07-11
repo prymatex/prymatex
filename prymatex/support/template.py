@@ -107,14 +107,18 @@ class PMXTemplate(PMXBundleItem):
         try:
             data = plistlib.readPlist(info)
             uuid = uuidmodule.UUID(data.pop('uuid'))
-            template = cls(uuid, namespace, data, path)
-            template.setBundle(bundle)
-            template = manager.addBundleItem(template)
-            for path in paths:
-                file = PMXTemplateFile(path, template)
-                file = manager.addTemplateFile(file)
-                template.files.append(file)
-            manager.addManagedObject(template)
+            template = manager.getManagedObject(uuid)
+            if template is None and not manager.isDeleted(uuid):
+                template = cls(uuid, namespace, data, path)
+                template.setBundle(bundle)
+                template = manager.addBundleItem(template)
+                for path in paths:
+                    file = PMXTemplateFile(path, template)
+                    file = manager.addTemplateFile(file)
+                    template.files.append(file)
+                manager.addManagedObject(template)
+            elif template is not None:
+                template.addNamespace(namespace)
             return template
         except Exception, e:
             print "Error in bundle %s (%s)" % (info, e)
