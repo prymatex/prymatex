@@ -144,7 +144,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             return None
         elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             item = index.internalPointer()
-            return QtCore.QVariant(item.name)
+            return item.name
         elif role == QtCore.Qt.DecorationRole:
             item = index.internalPointer()
             return item.icon

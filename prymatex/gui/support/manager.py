@@ -46,6 +46,12 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         #SYNTAX
         self.syntaxProxyModel = PMXBundleTypeFilterProxyModel("syntax")
         self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)
+        def syntaxDisplayFormater(index):
+            if not index.isValid():
+                return None
+            item = index.internalPointer()
+            return item.buildMenuTextEntry()
+        self.syntaxProxyModel.setFormater(syntaxDisplayFormater, QtCore.Qt.DisplayRole)
         
         #INTERACTIVEITEMS
         self.itemsProxyModel = PMXBundleTypeFilterProxyModel(["command", "snippet", "macro"])

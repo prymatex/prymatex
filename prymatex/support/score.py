@@ -10,14 +10,14 @@ class PMXScoreManager(object):
     NESTING_DEPTH  = 40
     START_VALUE    = 2 ** ( POINT_DEPTH * NESTING_DEPTH )
     BASE           = 2 ** POINT_DEPTH
-      
+    SPLITER        = re.compile("\B-")
     def __init__(self):
         self.scores = {}
     
     def score(self, search_scope, reference_scope):
         maxi = 0
         for scope in search_scope.split( ',' ):
-            arrays =  re.compile("\B-").split(scope)
+            arrays =  self.SPLITER.split(scope)
             #remove space
             arrays = map(lambda scope: scope.strip(), arrays)
             if len(arrays) == 1:
@@ -35,9 +35,9 @@ class PMXScoreManager(object):
         return maxi
     
     def score_term(self, search_scope, reference_scope):
-        if not (self.scores.has_key(reference_scope) and self.scores[reference_scope].has_key(search_scope)):
+        if reference_scope not in self.scores or search_scope not in self.scores[reference_scope]:
             self.scores.setdefault(reference_scope, {})
-            self.scores[reference_scope][search_scope] = self.score_array( search_scope.split(' '), reference_scope.split( ' ' ) )
+            self.scores[reference_scope][search_scope] = self.score_array( search_scope.split(' '), reference_scope.split(' ') )
         return self.scores[reference_scope][search_scope]
       
     def score_array(self, search_array, reference_array):
@@ -56,25 +56,8 @@ class PMXScoreManager(object):
                     reg = re.compile( "^%s" % re.escape( pending[-1] ) )
             multiplier = multiplier / self.BASE
             reference_array.pop()
-            current = reference_array and reference_array[-1] or None
+            current = reference_array[-1] if reference_array else None
         if len(pending) > 0:
             result = 0
         return result
-
-if __name__ == "__main__":
-    sp = PMXScoreManager()
-    reference_scope = 'text.html.basic source.php.embedded.html string.quoted.double.php'
-      
-    print 0, "!=", sp.score( 'source.php string', reference_scope )
-    print 0, "!=", sp.score( 'text.html source.php', reference_scope )
-    print 0, "==", sp.score( 'string source.php', reference_scope )
-    print 0, "==", sp.score( 'source.php text.html', reference_scope )
-      
-    print 0, "==", sp.score( 'text.html source.php - string', reference_scope )
-    print 0, "!=", sp.score( 'text.html source.php - ruby', reference_scope )
-      
-    print sp.score( '', reference_scope ), " > ", sp.score( 'source.php', reference_scope )
-    print sp.score( 'string', reference_scope ), " > ", sp.score( 'source.php', reference_scope ) 
-    print sp.score( 'text source string', reference_scope ), " > ", sp.score( 'source string', reference_scope )
-      
-    print 0, "==", sp.score( 'text.html source.php - string', reference_scope )
+        
