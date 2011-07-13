@@ -164,12 +164,16 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
         for item in self.itemsProxyModel.getAllItems():
             if item.tabTrigger != None:
                 yield item.tabTrigger
-    
+        else:
+            raise StopIteration()
+            
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         for item in self.itemsProxyModel.getAllItems():
             if item.tabTrigger == tabTrigger:
                 yield item
-                
+        else:
+            raise StopIteration()
+            
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
@@ -180,3 +184,5 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
         for syntax in self.syntaxProxyModel.getAllItems():
             if syntax.keyEquivalent == keyEquivalent:
                 yield syntax
+        else:
+            raise StopIteration()
