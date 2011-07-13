@@ -3,14 +3,14 @@
 
 from PyQt4 import QtCore, QtGui
 import uuid as uuidmodule
-from prymatex.support.manager import PMXSupportManager
+from prymatex.support.manager import PMXSupportBaseManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel
 from prymatex.mvc.proxies import bisect
 
-class PMXSupportModelManager(PMXSupportManager, PMXObject):
+class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
     
@@ -150,3 +150,33 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     
     def removeThemeStyle(self, style):
         self.themeStylesTableModel.removeStyle(style)
+
+    #---------------------------------------------------
+    # PREFERENCES OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllPreferences(self):
+        return self.preferenceProxyModel.getAllItems()
+    
+    #---------------------------------------------------
+    # TABTRIGGERS OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllTabTriggersMnemonics(self):
+        for item in self.itemsProxyModel.getAllItems():
+            if item.tabTrigger != None:
+                yield item.tabTrigger
+    
+    def getAllBundleItemsByTabTrigger(self, tabTrigger):
+        for item in self.itemsProxyModel.getAllItems():
+            if item.tabTrigger == tabTrigger:
+                yield item
+                
+    #---------------------------------------------------
+    # KEYEQUIVALENT OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+        for item in self.itemsProxyModel.getAllItems():
+            if item.keyEquivalent == keyEquivalent:
+                yield item
+        for syntax in self.syntaxProxyModel.getAllItems():
+            if syntax.keyEquivalent == keyEquivalent:
+                yield syntax

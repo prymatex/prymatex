@@ -41,13 +41,16 @@ class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
     def compareIndex(self, xindex, yindex):
         xnode = xindex.internalPointer()
         ynode = yindex.internalPointer()
-        # Ya son del mismo tipo porque este proxy es por tipo
         return cmp(xnode.name, ynode.name)
     
     def findItemIndex(self, item):
         for num, index in enumerate(self.indexMap()):
             if index.internalPointer() == item:
                 return num
+    
+    def getAllItems(self):
+        for index in self.indexMap():
+            yield index.internalPointer()
             
 class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):

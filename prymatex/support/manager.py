@@ -230,7 +230,10 @@ class PMXSupportBaseManager(object):
         if len(bundles) > 1:
             raise Exception("More than one bundle")
         return bundles[0]
-        
+    
+    def getBundle(self, uuid):
+        return self.getManagedObject(uuid)
+    
     def updateBundle(self, bundle, **attrs):
         '''
             Actualiza un bundle
@@ -333,6 +336,9 @@ class PMXSupportBaseManager(object):
         if len(items) > 1:
             raise Exception("More than one bundle item")
         return items[0]
+    
+    def getBundleItem(self, uuid):
+        return self.getManagedObject(uuid)
     
     def updateBundleItem(self, item, **attrs):
         '''
@@ -458,7 +464,10 @@ class PMXSupportBaseManager(object):
         if len(items) > 1:
             raise Exception("More than one theme")
         return items[0]
-        
+    
+    def getTheme(self, uuid):
+        return self.getManagedObject(uuid)
+    
     def updateTheme(self, theme, **attrs):
         '''
             Actualiza un themes
@@ -661,8 +670,7 @@ class PMXSupportBaseManager(object):
                     if path.endswith(t):
                         return syntax
 
-        
-class PMXSupportManager(PMXSupportBaseManager):
+class PMXSupportPythonManager(PMXSupportBaseManager):
     BUNDLES = {}
     BUNDLE_ITEMS = {}
     THEMES = {}
@@ -674,7 +682,7 @@ class PMXSupportManager(PMXSupportBaseManager):
     TEMPLATES = []
     
     def __init__(self):
-        super(PMXSupportManager, self).__init__()
+        super(PMXSupportPythonManager, self).__init__()
     
     #---------------------------------------------------
     # BUNDLE INTERFACE
@@ -686,9 +694,6 @@ class PMXSupportManager(PMXSupportBaseManager):
         self.BUNDLES[bundle.uuid] = bundle
         return bundle
 
-    def getBundle(self, uuid):
-        return self.getManagedObject(uuid)
-
     def modifyBundle(self, bundle):
         pass
 
@@ -697,12 +702,6 @@ class PMXSupportManager(PMXSupportBaseManager):
         @param bundle: PMXBundle instance
         '''
         self.BUNDLES.pop(bundle.uuid)
-
-    def addDeletedBundle(self, uuid):
-        '''
-            Perform logical delete
-        '''
-        self.deletedBundles.append(uuid)
 
     def getAllBundles(self):
         '''
@@ -729,9 +728,6 @@ class PMXSupportManager(PMXSupportBaseManager):
             self.SYNTAXES[item.scopeName] = item
         return item
 
-    def getBundleItem(self, uuid):
-        return self.getManagedObject(uuid)
-
     def modifyBundleItem(self, item):
         pass
 
@@ -748,17 +744,11 @@ class PMXSupportManager(PMXSupportBaseManager):
         self.THEMES[theme.uuid] = theme
         return theme
         
-    def getTheme(self, uuid):
-        return self.getManagedObject(uuid)
-
     def modifyTheme(self, theme):
         pass
         
     def removeTheme(self, theme):
         self.THEMES.pop(theme.uuid)
-
-    def hasTheme(self, uuid):
-        return uuid in self.THEMES
 
     def getAllThemes(self):
         return self.THEMES.values()
