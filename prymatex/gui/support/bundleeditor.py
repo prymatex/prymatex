@@ -10,7 +10,7 @@ from prymatex.gui.support.widgets import PMXSnippetWidget, PMXCommandWidget, PMX
 from prymatex.gui.support.widgets import PMXBundleWidget,PMXTemplateFileWidget, PMXTemplateWidget
 from prymatex.gui.support.widgets import PMXPreferenceWidget, PMXLanguageWidget, PMXEditorBaseWidget
 
-class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
+class PMXBundleEditor(Ui_bundleEditor, QtGui.QDialog, PMXObject):
     #http://manual.macromates.com/en/expert_preferences.html
     #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
     defaultBundleForNewBundleItems = pmxConfigPorperty(default = u'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = u'OakDefaultBundleForNewBundleItems')
@@ -22,6 +22,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         super(PMXBundleEditor, self).__init__(parent)
         self.setupUi(self)
         self.manager = self.pmxApp.supportManager
+        self.finished.connect(self.on_bundleEditor_finished)
         #Cargar los widgets editores
         self.configEditorWidgets()
         #Configurar filter, tree, toolbar y activaciones
@@ -31,6 +32,9 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.configActivation()
         self.configure()
 
+    def on_bundleEditor_finished(self, code):
+        self.saveChanges()
+        
     def configEditorWidgets(self):
         self.stackedWidget = QtGui.QStackedWidget()
         self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)
@@ -56,7 +60,8 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
     def getBundleForIndex(self, index):
         bundle = None
         if not index.isValid():
-            bundle = self.proxyTreeModel.sourceModel().getBundle(self.defaultBundleForNewBundleItems)
+            print self.defaultBundleForNewBundleItems
+            bundle = self.manager.getBundle(self.defaultBundleForNewBundleItems)
         else:
             bundle = self.proxyTreeModel.mapToSource(index).internalPointer()
             while bundle.TYPE != 'bundle':
@@ -221,7 +226,7 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
         self.lineTabTriggerActivation.textEdited.connect(self.on_lineTabTriggerActivation_edited)
         self.lineEditScope.textEdited.connect(self.on_lineEditScope_edited)
     
-    def editTreeItem(self, treeItem):
+    def saveChanges(self):
         #TODO: ver si tengo que guardar el current editor
         current = self.stackedWidget.currentWidget()
         if current.isChanged:
@@ -232,7 +237,9 @@ class PMXBundleEditor(Ui_bundleEditor, QtGui.QWidget, PMXObject):
                     self.manager.updateTemplateFile(current.bundleItem, **current.changes)
                 else:
                     self.manager.updateBundleItem(current.bundleItem, **current.changes)
-            
+
+    def editTreeItem(self, treeItem):
+        self.saveChanges()
         editor = self.getEditorForTreeItem(treeItem)
         if editor != None:
             editor.edit(treeItem)

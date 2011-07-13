@@ -7,7 +7,7 @@ from prymatex.support.manager import PMXSupportBaseManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
-from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel
 from prymatex.mvc.proxies import bisect
 
 class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
@@ -34,10 +34,14 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
         #STYLE PROXY
         self.themeStyleProxyModel = PMXThemeStyleTableProxyModel()
         self.themeStyleProxyModel.setSourceModel(self.themeStylesTableModel)
-        
+
         #TREE PROXY
         self.bundleProxyTreeModel = PMXBundleTreeProxyModel()
         self.bundleProxyTreeModel.setSourceModel(self.bundleTreeModel)
+
+        #BUNDLES
+        self.bundleProxyModel = PMXBundleProxyModel()
+        self.bundleProxyModel.setSourceModel(self.bundleTreeModel)
         
         #TEMPLATES
         self.templateProxyModel = PMXBundleTypeFilterProxyModel("template")
@@ -105,11 +109,8 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     def removeBundle(self, bundle):
         self.bundleTreeModel.removeBundle(bundle)
     
-    def getBundle(self, uuid):
-        return self.bundleTreeModel.getBundle(uuid)
-    
     def getAllBundles(self):
-        return self.bundleTreeModel.getAllBundles()
+        return self.bundleProxyModel.getAllItems()
     
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 

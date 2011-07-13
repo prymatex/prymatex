@@ -20,7 +20,7 @@ class Ui_bundleEditor(object):
         bundleEditor.setObjectName(_fromUtf8("bundleEditor"))
         bundleEditor.resize(594, 507)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/resources/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         bundleEditor.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(bundleEditor)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))

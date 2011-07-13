@@ -628,8 +628,6 @@ class PMXSnippet(PMXBundleItem):
     def __init__(self, uuid, namespace, hash, path = None):
         super(PMXSnippet, self).__init__(uuid, namespace, hash, path)
         self.snippet = None
-        self.taborder = None
-        self.index = -1
     
     def load(self, hash):
         super(PMXSnippet, self).load(hash)
@@ -645,6 +643,11 @@ class PMXSnippet(PMXBundleItem):
                 hash[key] = value
         return hash
     
+    #override save for deprecate compiled snippet
+    def save(self):
+        super(PMXSnippet, self).save()
+        self.snippet = None
+    
     @property
     def ready(self):
         return self.snippet != None
@@ -658,8 +661,7 @@ class PMXSnippet(PMXBundleItem):
     def execute(self, processor):
         if not self.ready:
             self.compile()
-        else:
-            self.reset()
+        self.reset()
         processor.startSnippet(self)
         self.render(processor)
         holder = self.next()

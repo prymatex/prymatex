@@ -119,13 +119,13 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         for i in xrange(start, end + 1):
             index = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
-                #print "agregando %s:%s" % (index.internalPointer().TYPE, index.internalPointer().name)
                 position = bisect(self.__indexMap, index, lambda xindex, yindex: self.compareIndex(xindex, yindex))
                 self.__indexMap.insert(position, index)
     
     def on_sourceModel_rowsRemoved(self, parent, start, end):
-        print "se quitaron items"
-        
+        #Remove indexes
+        self.__indexMap = filter(lambda index: index.parent() != parent or index.row() not in range(start, end + 1), self.__indexMap)
+
     def on_sourceModel_layoutChanged(self):
         print "cambio el layout"
     

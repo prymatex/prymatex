@@ -315,6 +315,8 @@ class PMXSupportBaseManager(object):
         '''
         if len(self.nsorder) < 2:
             return None
+        if bundle.isProtected and not bundle.isSafe:
+            self.updateBundle(bundle)
         if namespace is None: namespace = self.defaultNamespace
         klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
         if len(klass) != 1:
