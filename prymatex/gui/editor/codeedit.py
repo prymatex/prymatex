@@ -12,7 +12,7 @@ from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processors import PMXSyntaxProcessor, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper
+from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +111,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         """Retorna si el editor esta en modo multiedit"""
         return self.cursors.hasCursors
     
+    @property
+    def completerMode(self):
+        """Retorna si el editor esta mostrando el completer"""
+        return self.completer.popup().isVisible()
+    
     def __init__(self, parent = None):
         super(PMXCodeEdit, self).__init__(parent)
         
@@ -126,6 +131,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #Helpers
         self.cursors = PMXCursorsHelper(self)
         self.folding = PMXFoldingHelper(self)
+        self.completer = PMXCompleterHelper(self)
         #self.folding.start()
         
         self.bookmarks = []
@@ -176,16 +182,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             return block.userData().getLastScope()
         return user_data.getScopeAtPosition(cursor.columnNumber())
     
-    def getCurrentWordAndIndex(self):
+    def getCurrentWord(self):
         cursor = self.textCursor()
-        line = unicode(cursor.block().text())
-        matchs = filter(lambda m: m.start() <= cursor.columnNumber() <= m.end(), self.WORD.finditer(line))
-        if matchs:
-            match = matchs.pop()
-            word = line[match.start():match.end()]
-            index = cursor.columnNumber() - match.start()
-            return word, index
-        return None, 0
+        cursor.select(QtGui.QTextCursor.WordUnderCursor)
+        return cursor.selectedText()
     
     def getSelectionBlockStartEnd(self):
         cursor = self.textCursor()
@@ -385,6 +385,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         '''
         This method is called whenever a key is pressed. The key code is stored in key_event.key()
         '''
+
+        if self.completerMode:
+            if event.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Tab, Qt.Key_Escape, Qt.Key_Backtab):
+                event.ignore()
+                self.completer.popup().hide()
+                return
+            elif event.key == Qt.Key_Space:
+                self.completer.popup().hide()
+        
         #Si lo toma un bundle item retorno
         if self.keyPressBundleItem(event):
             if self.multiEditMode:
@@ -409,10 +418,23 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.returnPressEvent(event)
         else:
             super(PMXCodeEdit, self).keyPressEvent(event)
-            
+
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
             self.keyPressIndent(event)
+        
+        completionPrefix = self.getCurrentWord()
+        if event.key() == Qt.Key_Space and event.modifiers() == Qt.ControlModifier:
+            self.completer.setCompletionPrefix('')
+            cr = self.cursorRect()
+            self.completer.complete(cr)
+        if self.completer is not None and self.completer.popup().isVisible():
+            if completionPrefix != self.completer.completionPrefix():
+                self.completer.setCompletionPrefix(completionPrefix)
+                self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+                self.completer.setCurrentRow(0)
+                cr = self.cursorRect()
+                self.completer.complete(cr)
     
     def keyPressBundleItem(self, event):
         keyseq = int(event.modifiers()) + event.key()
@@ -572,7 +594,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
         preferences = self.getPreference(scope)
-        current_word, _ = self.getCurrentWordAndIndex()
+        current_word = self.getCurrentWord()
         env = {
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.columnNumber(), 

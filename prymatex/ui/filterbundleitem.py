@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file 'resources/ui/filterbundleitem.ui'
 #
-# Created: Mon Jul  4 22:08:50 2011
+# Created: Thu Jul 14 20:29:23 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:

@@ -139,8 +139,8 @@ class PMXBundle(PMXManagedObject):
         for key in PMXBundle.KEYS:
             value = hash.get(key, None)
             setattr(self, key, value)
-        if self.mainMenu != None:
-            self.mainMenu = PMXMenuNode(**self.mainMenu)
+        #if self.mainMenu != None:
+        #    self.mainMenu = PMXMenuNode(**self.mainMenu)
 
     def update(self, hash):
         for key in hash.keys():
@@ -152,8 +152,8 @@ class PMXBundle(PMXManagedObject):
         for key in PMXBundle.KEYS:
             value = getattr(self, key)
             if value != None:
-                if key in ['mainMenu']:
-                    value = self.mainMenu.hash
+                #if key in ['mainMenu']:
+                #    value = self.mainMenu.hash
                 hash[key] = value
         return hash
 

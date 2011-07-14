@@ -215,9 +215,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             menu = QMenu(get_name_with_accel(bundle.name), self)
             
             self.menuBundles.addMenu(menu)
-            if bundle.mainMenu != None:
-                for _, item in bundle.mainMenu.iteritems():
-                    self.addMenuItem(menu, item)  
+            #if bundle.mainMenu != None:
+            #    for _, item in bundle.mainMenu.iteritems():
+            #        self.addMenuItem(menu, item)  
     
     def on_actionQuit_triggered(self):
         QApplication.quit()

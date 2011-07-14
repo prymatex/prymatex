@@ -120,13 +120,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
     # deleteFromEditor
     def deleteWord(self):
         self.disableAutoIndent = False
-        word, index = self.editor.getCurrentWordAndIndex()
-        print word, index
         cursor = self.editor.textCursor()
-        for _ in xrange(index):
-            cursor.deletePreviousChar()
-        for _ in xrange(len(word) - index):
-            cursor.deleteChar()
+        cursor.select(QtGui.QTextCursor.WordUnderCursor)
+        cursor.removeSelectedText()
         
     def deleteSelection(self):
         cursor = self.editor.textCursor()
