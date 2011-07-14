@@ -325,24 +325,28 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             super(PMXCodeEdit, self).wheelEvent(event)
 
     def mouseDoubleClickEvent(self, event):
-        print "mouseDoubleClickEvent"
-        super(PMXCodeEdit, self).mouseDoubleClickEvent(event)
+        if event.modifiers() == Qt.ControlModifier:
+            print "mouseDoubleClickEvent"
+            self.cursors.mouseDoubleClickPoint(event.pos())
+        else:
+            super(PMXCodeEdit, self).mouseDoubleClickEvent(event)
 
     def mousePressEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
-            self.cursors.startPoint(event.pos())
+            self.cursors.mousePressPoint(event.pos())
         else:
             super(PMXCodeEdit, self).mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
-            self.cursors.dragPoint(event.pos())
+            self.cursors.mouseMovePoint(event.pos())
         else:
             super(PMXCodeEdit, self).mouseReleaseEvent(event)
  
     def mouseReleaseEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
-            self.cursors.endPoint(event.pos())
+            print "mouseReleaseEvent"
+            self.cursors.mouseReleasePoint(event.pos())
         else:
             super(PMXCodeEdit, self).mouseReleaseEvent(event)
 

@@ -643,13 +643,19 @@ class PMXSupportBaseManager(object):
         with_scope.sort(key = lambda t: t[0], reverse = True)
         with_scope = map(lambda (score, item): item, with_scope)
         return with_scope and with_scope or without_scope
-        
+    
+    #---------------------------------------------------
+    # SYNTAXES INTERFACE
+    #---------------------------------------------------
+    def getAllSyntaxes(self):
+        pass
+    
     #---------------------------------------------------------------
     # SYNTAXES
     #---------------------------------------------------------------
     def getSyntaxes(self, sort = False):
         stxs = []
-        for syntax in self.SYNTAXES.values():
+        for syntax in self.getAllSyntaxes():
             stxs.append(syntax)
         if sort:
             return sorted(stxs, key = lambda s: s.name)
@@ -661,12 +667,12 @@ class PMXSupportBaseManager(object):
         return None
         
     def findSyntaxByFirstLine(self, line):
-        for syntax in self.SYNTAXES.values():
+        for syntax in self.getAllSyntaxes():
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                 return syntax
     
     def findSyntaxByFileType(self, path):
-        for syntax in self.SYNTAXES.values():
+        for syntax in self.getAllSyntaxes():
             if type(syntax.fileTypes) == list:
                 for t in syntax.fileTypes:
                     if path.endswith(t):

@@ -187,3 +187,9 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
                 yield syntax
         else:
             raise StopIteration()
+    
+    #---------------------------------------------------
+    # SYNTAXES OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllSyntaxes(self):
+        return self.syntaxProxyModel.getAllItems()

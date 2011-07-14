@@ -7,7 +7,7 @@ class PMXCursorsHelper(object):
     def __init__(self, editor):
         self.editor = editor
         self.cursors = []
-        self.scursor = self.dp = self.sp = None
+        self.scursor = self.dragPoint = self.startPoint = None
     
     @property
     def hasCursors(self):
@@ -15,38 +15,26 @@ class PMXCursorsHelper(object):
 
     @property
     def isDragCursor(self):
-        return self.dp != None
+        return self.dragPoint != None
     
     def getDragCursorRect(self):
         """Retorna un rectangulo que representa la zona del drag cursor"""
-        return QtCore.QRect(self.sp, self.dp)
+        return QtCore.QRect(self.startPoint, self.dragPoint)
     
-    def startPoint(self, start):
-        self.sp = start
+    def mousePressPoint(self, point):
+        self.startPoint = point
 
-    def dragPoint(self, pos):
-        self.dp = pos
-        scursor = self.editor.cursorForPosition(self.sp)
-        dcursor = self.editor.cursorForPosition(self.dp)
+    def mouseDoubleClickPoint(self, point):
+        self.startPoint = point
+        
+    def mouseMovePoint(self, point):
+        self.dragPoint = point
+        scursor = self.editor.cursorForPosition(self.startPoint)
+        dcursor = self.editor.cursorForPosition(self.dragPoint)
         self.editor.document().markContentsDirty(scursor.position(), dcursor.position())
 
-    def getPoints(self, start, end):
-        metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
-        hight = metrics.lineSpacing()
-        width = metrics.width("x")
-        sx, ex = (start.x(), end.x()) if start.x() <= end.x() else (end.x(), start.x())
-        sy, ey = (start.y(), end.y()) if start.y() <= end.y() else (end.y(), start.y())
-        puntos = [ ( (sx, sy), (ex, sy) ) ]
-        p = sy + hight
-        e = ey - hight
-        while p <= e:
-            puntos.append( ( (sx, p), (ex, p) ) )
-            p += hight
-        puntos.append( ( (sx, ey), (ex, ey) ) )
-        return hight, width, puntos
-        
-    def endPoint(self, endPoint):
-        _, width, points = self.getPoints(self.sp, endPoint)
+    def mouseReleasePoint(self, endPoint):
+        _, width, points = self.getPoints(self.startPoint, endPoint)
         
         for tupla in points:
             if tupla[0] == tupla[1]:
@@ -55,7 +43,7 @@ class PMXCursorsHelper(object):
                 self.editor.document().markContentsDirty(cursor.position(), cursor.position())
                 continue
             #Sentido en el que queda el cursor
-            if self.sp.x() < endPoint.x():  #izquierda a derecha
+            if self.startPoint.x() < endPoint.x():  #izquierda a derecha
                 start, end = tupla
                 cursor = self.editor.cursorForPosition(QtCore.QPoint(*start))
                 rect = self.editor.cursorRect(cursor)
@@ -79,7 +67,22 @@ class PMXCursorsHelper(object):
                     self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
         
         #Clean last acction
-        self.scursor = self.dp = self.sp = None
+        self.scursor = self.dragPoint = self.startPoint = None
+
+    def getPoints(self, start, end):
+        metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
+        hight = metrics.lineSpacing()
+        width = metrics.width("x")
+        sx, ex = (start.x(), end.x()) if start.x() <= end.x() else (end.x(), start.x())
+        sy, ey = (start.y(), end.y()) if start.y() <= end.y() else (end.y(), start.y())
+        puntos = [ ( (sx, sy), (ex, sy) ) ]
+        p = sy + hight
+        e = ey - hight
+        while p <= e:
+            puntos.append( ( (sx, p), (ex, p) ) )
+            p += hight
+        puntos.append( ( (sx, ey), (ex, ey) ) )
+        return hight, width, puntos
         
     def addCursor(self, cursor):
         '''
