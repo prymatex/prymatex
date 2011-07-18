@@ -227,7 +227,7 @@ class PMXSyntax(PMXBundleItem):
 
     @property
     def syntaxes(self):
-        return self.bundle.manager.SYNTAXES
+        return self.bundle.manager.getAllSyntaxes()
 
     @property
     def grammar(self):
