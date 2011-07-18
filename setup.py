@@ -67,7 +67,7 @@ class QtBuild(build):
             if self.verbose:
                 print("Compiling %s -> %s" % (ui_file, py_file))
             self._ui2py(ui_file, py_file)
-        elif self.verbose:
+        elif self.verbose > 1:
             print("%s has not been modified" % ui_file) 
     
     def _rc2py(self, rc_file, py_file):
@@ -90,7 +90,7 @@ class QtBuild(build):
             if self.verbose:
                 print("Building resource %s -> %s" % (rc_file,py_file))
             self._rc2py(rc_file, py_file)
-        elif self.verbose:
+        elif self.verbose > 1:
             print("%s has not been modified" % rc_file )
 
     def run(self):
