@@ -26,18 +26,23 @@ from distutils.command.build import build
 from distutils.command.install_data import install_data
 from distutils.core import setup
 
+def has_been_updated(source, dest):
+    ''' Chcecks weather a file needs to be updated'''
+    source_mtime = os.path.getmtime(source)
+    try:
+        dest_mtime = os.path.getmtime(dest)
+    except os.error:
+        return True
+    if source_mtime > dest_mtime:
+        return True
+    return False
+
 class QtBuild(build):
     """Build PyQt (.ui) files and resources."""
  
     description = "build PyQt GUIs (.ui)."
- 
-    def compile_ui(self, ui_file, py_file = None):
-        """Compile the .ui files to python modules."""
-        # Search for pyuic4 in python bin dir, then in the $Path.
-        if py_file is None:
-            py_file = os.path.split(ui_file)[1]
-            py_file = os.path.splitext(py_file)[0] + '.py'
-            py_file = os.path.join('prymatex', 'ui', py_file)
+    
+    def _ui2py(self, ui_file, py_file):
         try:
             from PyQt4 import uic
             fp = open(py_file, 'w')
@@ -48,11 +53,24 @@ class QtBuild(build):
             if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
             return
-    def compile_rc(self, rc_file, py_file = None):
+        
+    def compile_ui(self, ui_file, py_file = None):
+        """Compile the .ui files to python modules."""
+        # Search for pyuic4 in python bin dir, then in the $Path.
         if py_file is None:
-            py_file = os.path.basename(rc_file)
-            py_file = os.path.splitext(py_file)[0] + '_rc.py'
-            py_file = os.path.join('prymatex', py_file)
+            py_file = os.path.split(ui_file)[1]
+            py_file = os.path.splitext(py_file)[0] + '.py'
+            py_file = os.path.join('prymatex', 'ui', py_file)
+            
+        
+        if has_been_updated(ui_file, py_file) or self.force:
+            if self.verbose:
+                print("Compiling %s -> %s" % (ui_file, py_file))
+            self._ui2py(ui_file, py_file)
+        elif self.verbose:
+            print("%s has not been modified" % ui_file) 
+    
+    def _rc2py(self, rc_file, py_file):
         try:
             command = 'pyrcc4 %s -o %s'
             os.system(command % (rc_file, py_file))
@@ -60,10 +78,24 @@ class QtBuild(build):
             self.warn('Unable to compile resources %s: %s', py_file, e)
             if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
-            return
+            return    
+        
+    def compile_rc(self, rc_file, py_file = None):
+        if py_file is None:
+            py_file = os.path.basename(rc_file)
+            py_file = os.path.splitext(py_file)[0] + '_rc.py'
+            py_file = os.path.join('prymatex', py_file)
+            
+        if has_been_updated(rc_file, py_file) or self.force:
+            if self.verbose:
+                print("Building resource %s -> %s" % (rc_file,py_file))
+            self._rc2py(rc_file, py_file)
+        elif self.verbose:
+            print("%s has not been modified" % rc_file )
 
     def run(self):
         """Execute the command."""
+        #import ipdb; ipdb.set_trace()
         self._wrapuic()
         basepath = os.path.join('resources', 'ui')
         for dirpath, _, filenames in os.walk(basepath):
