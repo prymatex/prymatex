@@ -69,7 +69,7 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog, CenterWidget):
         super(PMXSettingsDialog, self).exec_()
     
     def changeWidget(self, index):
-        print "Cambiando al widget"
+        #print "Cambiando al widget"
         self.container.layout().setCurrentIndex(index)
         title = self.container.layout().currentWidget().windowTitle()
         self.labelTitle.setText( title )

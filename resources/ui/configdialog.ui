@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Prymatex Settings</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <property name="margin">
     <number>0</number>

@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/fork.png</file>
+    <file>actions/help-hint.png</file>
+    <file>actions/debug-step-into.png</file>
+    <file>actions/system-switch-user.png</file>
     <file>actions/go-jump.png</file>
     <file>actions/go-bottom.png</file>
     <file>actions/go-down.png</file>
