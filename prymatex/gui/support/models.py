@@ -21,6 +21,8 @@ class PMXBundleTreeNode(object):
              "snippet": QtGui.QPixmap(":/icons/bundles/snippets.png"),
              "macro": QtGui.QPixmap(":/icons/bundles/macros.png"),
              "templatefile": QtGui.QPixmap(":/icons/bundles/template-files.png") }
+    USED = []
+    BANNED_ACCEL = ' \t'
     
     def __init__(self, item, parent = None):
         self.item = item
@@ -51,6 +53,23 @@ class PMXBundleTreeNode(object):
         if self.keyEquivalent != None:
             trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
         return ", ".join(trigger)
+    
+    def action(self, parent):
+        return QtGui.QAction(QtGui.QIcon(self.icon), self.buildMenuTextEntry(), parent)
+    
+    def menu(self, parent):
+        return QtGui.QMenu(self.buildBundleAccelerator(), parent)
+    
+    def buildBundleAccelerator(self):
+        name = unicode(self.name)
+        for index, char in enumerate(name):
+            if char in self.BANNED_ACCEL:
+                continue
+            char = char.lower()
+            if not char in self.USED:
+                self.USED.append(char)
+                return name[0:index] + '&' + name[index:]
+        return name
     
     def buildMenuTextEntry(self, nemonic = ''):
         text = unicode(self.name)

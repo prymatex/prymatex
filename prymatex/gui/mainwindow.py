@@ -174,52 +174,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         if editor is not None:
             editor.setSyntax(syntax)
         
-    def menuBundleItemActionTriggered(self, item):
+    def on_bundleItem_triggered(self, item):
         self.currentEditor.insertBundleItem(item)
         
-    def addMenuItem(self, parent_menu, item):
-        if isinstance(item, PMXMenuNode):
-            menu = QMenu(item.name, parent_menu)
-            parent_menu.addMenu(menu)
-            for _, i in item.iteritems():
-                self.addMenuItem(menu, i)
-        elif item == PMXMenuNode.MENU_SPACE:
-            parent_menu.addSeparator()
-        elif item != None and item.name:
-            action = QAction(item.buildMenuTextEntry(), self)
-            receiver = lambda item = item: self.menuBundleItemActionTriggered(item)
-            self.connect(action, SIGNAL('triggered()'), receiver)
-            parent_menu.addAction(action)
-            
     def addBundlesToMenu(self):
-        # TOODO: Use bundleTableModel for menu generation
         name_order = lambda b1, b2: cmp(b1.name, b2.name)
-        
-        used = []
-        BANNED_ACCEL = ' \t'
-        def get_name_with_accel(name):
-            
-            for index, char in enumerate(name):
-                if char in BANNED_ACCEL:
-                    continue
-                char = char.lower()
-                # Not so nice
-                #return name[0:index] + '&' + name[index:]
-                if not char in used:
-                    used.append(char)
-                    new_name = name[0:index] + '&' + name[index:]
-                    return new_name
-            return name        
-        
+        #TODO: Esto ya tendria que estar ordenado
         for bundle in sorted(self.pmxApp.supportManager.getAllBundles(), name_order):
-            
-            menu = QMenu(get_name_with_accel(bundle.name), self)
-            
-            self.menuBundles.addMenu(menu)
-            #if bundle.mainMenu != None:
-            #    for _, item in bundle.mainMenu.iteritems():
-            #        self.addMenuItem(menu, item)  
-    
+            menu = self.pmxApp.supportManager.buildBundleMenu(bundle, self)
+            if menu is not None:
+                self.menuBundles.addMenu(menu)
+        #Connect
+        self.pmxApp.supportManager.bundleItemTriggered.connect(self.on_bundleItem_triggered)
+        
     def on_actionQuit_triggered(self):
         QApplication.quit()
     

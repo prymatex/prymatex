@@ -11,6 +11,9 @@ from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeF
 from prymatex.mvc.proxies import bisect
 
 class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
+    #Signals
+    bundleItemTriggered = QtCore.pyqtSignal(object)
+    
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
     
@@ -26,7 +29,8 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
         settings = 'Manager'
     
     def __init__(self):
-        super(PMXSupportModelManager, self).__init__()
+        PMXObject.__init__(self)
+        PMXSupportBaseManager.__init__(self)
         self.bundleTreeModel = PMXBundleTreeModel(self)
         self.themeStylesTableModel = PMXThemeStylesTableModel(self)
         self.themeListModel = []
@@ -69,7 +73,31 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
         self.dragProxyModel = PMXBundleTypeFilterProxyModel("dragcommand")
         self.dragProxyModel.setSourceModel(self.bundleTreeModel)
         self.configure()
-        
+
+    def buildMenu(self, items, menu, submenus, parent = None):
+        for uuid in items:
+            if uuid.startswith('-'):
+                menu.addSeparator()
+                continue
+            item = self.getBundleItem(uuid)
+            if item != None:
+                action = item.action(parent)
+                receiver = lambda item = item: self.bundleItemTriggered.emit(item)
+                self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+                menu.addAction(action)
+            elif uuid in submenus:
+                submenu = QtGui.QMenu(submenus[uuid]['name'], parent)
+                menu.addMenu(submenu)
+                self.buildMenu(submenus[uuid]['items'], submenu, submenus, parent)
+                
+    def buildBundleMenu(self, bundle, parent):
+        if bundle.mainMenu != None:
+            menu = bundle.menu(parent)
+            submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+            self.buildMenu(items, menu, submenus, parent)
+            return menu
+    
     def buildEnvironment(self):
         env = {}
         for var in self.shellVariables:

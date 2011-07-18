@@ -490,6 +490,11 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
 
 class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     TYPE = 'bundle'
+    BUNDLEITEM = 0
+    SEPARATOR = 1
+    SUBMENU = 2
+    NEWGROUP = 3
+    NEWSEPARATOR = 4
     def __init__(self, parent = None):
         super(PMXBundleWidget, self).__init__(parent)
         self.setupUi(self)
@@ -501,6 +506,11 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         if self.bundleItem != None:
             return 'Edit Menu: "%s"' % self.bundleItem.name
         return super(PMXBundleWidget, self).title()
+        
+    @property
+    def isChanged(self):
+        
+        return False
         
     def getScope(self):
         return None
@@ -514,15 +524,18 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def buildMenu(self, items, parent, submenus = {}):
         for uuid in items:
             if uuid.startswith('-'):
-                separator = QtGui.QTreeWidgetItem(parent, 0)
+                separator = QtGui.QTreeWidgetItem(parent, self.SEPARATOR)
+                separator.setData(0, QtCore.Qt.EditRole, "")
                 separator.setText(0, '--------------------------------')
                 continue
             item = self.manager.getBundleItem(uuid)
             if item != None:
-                node = QtGui.QTreeWidgetItem(parent, 1)
+                node = QtGui.QTreeWidgetItem(parent, self.BUNDLEITEM)
+                node.setData(0, QtCore.Qt.EditRole, uuid)
                 node.setText(0, item.name)
             elif uuid in submenus:
-                submenu = QtGui.QTreeWidgetItem(parent, 0)
+                submenu = QtGui.QTreeWidgetItem(parent, self.SUBMENU)
+                submenu.setData(0, QtCore.Qt.EditRole, uuid)
                 submenu.setText(0, submenus[uuid]['name'])
                 self.buildMenu(submenus[uuid]['items'], submenu, submenus)
     
@@ -530,9 +543,9 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         super(PMXBundleWidget, self).edit(bundleItem)
         self.treeExcludedWidget.clear()
         self.treeMenuWidget.clear()
-        newGroup = QtGui.QTreeWidgetItem(self.treeExcludedWidget, 0)
+        newGroup = QtGui.QTreeWidgetItem(self.treeExcludedWidget, self.NEWGROUP)
         newGroup.setText(0, 'New Group')
-        separator = QtGui.QTreeWidgetItem(self.treeExcludedWidget, 0)
+        separator = QtGui.QTreeWidgetItem(self.treeExcludedWidget, self.NEWSEPARATOR)
         separator.setText(0, '--------------------------------')
         if bundleItem.mainMenu == None:
             return
@@ -542,6 +555,6 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
             for uuid in bundleItem.mainMenu['excludedItems']:
                 item = self.manager.getBundleItem(uuid)
                 if item != None:
-                    node = QtGui.QTreeWidgetItem(self.treeExcludedWidget, 1)
+                    node = QtGui.QTreeWidgetItem(self.treeExcludedWidget, self.BUNDLEITEM)
                     node.setText(0, item.name)
-        
+    
