@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file 'resources/ui/bundleeditor.ui'
 #
-# Created: Mon Jul  4 22:08:50 2011
+# Created: Sun Jul 17 21:59:52 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -20,7 +20,7 @@ class Ui_bundleEditor(object):
         bundleEditor.setObjectName(_fromUtf8("bundleEditor"))
         bundleEditor.resize(594, 507)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/resources/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         bundleEditor.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(bundleEditor)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -103,3 +103,4 @@ class Ui_bundleEditor(object):
         self.labelActivation.setText(_('Activation:'))
         self.labelScopeSelector.setText(_('Scope Selector:'))
 
+from prymatex import resources_rc

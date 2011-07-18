@@ -41,14 +41,36 @@ class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
     def compareIndex(self, xindex, yindex):
         xnode = xindex.internalPointer()
         ynode = yindex.internalPointer()
-        # Ya son del mismo tipo porque este proxy es por tipo
         return cmp(xnode.name, ynode.name)
     
     def findItemIndex(self, item):
         for num, index in enumerate(self.indexMap()):
             if index.internalPointer() == item:
                 return num
-            
+    
+    def getAllItems(self):
+        for index in self.indexMap():
+            yield index.internalPointer()
+
+class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
+    def __init__(self, parent = None):
+        super(PMXBundleProxyModel, self).__init__('bundle', parent)
+    
+    def data(self, index, role):
+        if self.__sourceModel is None:
+            return QtCore.QVariant()
+        
+        mIndex = self.modelIndex(index)
+        row = mIndex.row()
+        parent = mIndex.parent()
+        
+        if role == QtCore.Qt.CheckStateRole:
+            index = self.__sourceModel.index(row, 0, parent)
+            bundle = index.internalPointer()
+            return QtCore.Qt.Checked if bundle.disabled else QtCore.Qt.Unchecked
+        else:
+            return self.__sourceModel.data(self.__sourceModel.index(row, 0, parent), role)
+
 class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()

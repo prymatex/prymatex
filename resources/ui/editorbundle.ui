@@ -15,10 +15,43 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <widget class="QTreeView" name="treeView"/>
+    <widget class="QTreeWidget" name="treeMenuWidget">
+     <property name="dragEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="dragDropOverwriteMode">
+      <bool>false</bool>
+     </property>
+     <property name="dragDropMode">
+      <enum>QAbstractItemView::DragDrop</enum>
+     </property>
+     <property name="defaultDropAction">
+      <enum>Qt::MoveAction</enum>
+     </property>
+     <column>
+      <property name="text">
+       <string>Menu Structure</string>
+      </property>
+     </column>
+    </widget>
    </item>
    <item>
-    <widget class="QListView" name="listView"/>
+    <widget class="QTreeWidget" name="treeExcludedWidget">
+     <property name="dragEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="dragDropMode">
+      <enum>QAbstractItemView::DragDrop</enum>
+     </property>
+     <property name="defaultDropAction">
+      <enum>Qt::MoveAction</enum>
+     </property>
+     <column>
+      <property name="text">
+       <string>Excluded Items</string>
+      </property>
+     </column>
+    </widget>
    </item>
   </layout>
  </widget>

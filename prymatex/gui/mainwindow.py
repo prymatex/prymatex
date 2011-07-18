@@ -215,9 +215,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             menu = QMenu(get_name_with_accel(bundle.name), self)
             
             self.menuBundles.addMenu(menu)
-            if bundle.mainMenu != None:
-                for _, item in bundle.mainMenu.iteritems():
-                    self.addMenuItem(menu, item)  
+            #if bundle.mainMenu != None:
+            #    for _, item in bundle.mainMenu.iteritems():
+            #        self.addMenuItem(menu, item)  
     
     def on_actionQuit_triggered(self):
         QApplication.quit()
@@ -316,7 +316,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     @pyqtSignature('')
     def on_actionShow_Bundle_Editor_triggered(self):
         #TODO: mejorar esto
-        self.pmxApp.bundleEditor.show()
+        self.pmxApp.bundleEditor.exec_()
 
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
@@ -452,7 +452,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             if not self.tabWidgetEditors.closeTab(i):
                 return
             
-
     @pyqtSignature('')
     def on_actionMove_Tab_Left_triggered(self):
         self.tabWidget.moveTabLeft()
@@ -464,7 +463,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     #===========================================================================
     # Dumb code :/
     #===========================================================================
-    
     @pyqtSignature('')
     def on_actionPreferences_triggered(self):
         qApp.instance().configdialog.exec_()
@@ -524,8 +522,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                                 FILE='No file',
                                 PROJECT='No project',)
         self.setWindowTitle(s)
-        
-    
+
     def closeEvent(self, event):
         unsaved = self.tabWidget.unsavedCounter
         if unsaved:
@@ -572,9 +569,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def on_actionRemove_All_Bookmarks_triggered(self):
         editor = self.currentEditor
         editor.removeBookmarks()
-    
-    
-    
 
 class PMXTabActionGroup(QActionGroup):
     '''

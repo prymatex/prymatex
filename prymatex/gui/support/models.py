@@ -111,6 +111,12 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
                 self.manager.updateBundleItem(item, name = name)
             self.dataChanged.emit(index, index)
             return True
+        elif role == QtCore.Qt.CheckStateRole:
+            item = index.internalPointer()
+            if item.TYPE == "bundle":
+                item.disabled = value.toBool()
+            self.dataChanged.emit(index, index)
+            return True
         return False
      
     def removeRows(self, position = 0, count = 1,  parent=QtCore.QModelIndex()):
@@ -144,7 +150,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             return None
         elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             item = index.internalPointer()
-            return QtCore.QVariant(item.name)
+            return item.name
         elif role == QtCore.Qt.DecorationRole:
             item = index.internalPointer()
             return item.icon
@@ -207,14 +213,6 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         bundleItem.bundle.removeChild(bundleItem)
         self.endRemoveRows()
     
-    def getAllBundles(self):
-        return self.root.children
-    
-    def getBundle(self, uuid):
-        for child in self.root.children:
-            if child.uuid == uuid:
-                return child
-        
 #====================================================
 # Themes Styles
 #====================================================

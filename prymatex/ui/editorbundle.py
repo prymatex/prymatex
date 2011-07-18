@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorbundle.ui'
 #
-# Created: Mon Jul  4 22:08:49 2011
+# Created: Sun Jul 17 21:59:52 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -21,16 +21,25 @@ class Ui_Menu(object):
         Menu.resize(458, 349)
         self.horizontalLayout_2 = QtGui.QHBoxLayout(Menu)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        self.treeView = QtGui.QTreeView(Menu)
-        self.treeView.setObjectName(_fromUtf8("treeView"))
-        self.horizontalLayout_2.addWidget(self.treeView)
-        self.listView = QtGui.QListView(Menu)
-        self.listView.setObjectName(_fromUtf8("listView"))
-        self.horizontalLayout_2.addWidget(self.listView)
+        self.treeMenuWidget = QtGui.QTreeWidget(Menu)
+        self.treeMenuWidget.setDragEnabled(True)
+        self.treeMenuWidget.setDragDropOverwriteMode(False)
+        self.treeMenuWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
+        self.treeMenuWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
+        self.treeMenuWidget.setObjectName(_fromUtf8("treeMenuWidget"))
+        self.horizontalLayout_2.addWidget(self.treeMenuWidget)
+        self.treeExcludedWidget = QtGui.QTreeWidget(Menu)
+        self.treeExcludedWidget.setDragEnabled(True)
+        self.treeExcludedWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
+        self.treeExcludedWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
+        self.treeExcludedWidget.setObjectName(_fromUtf8("treeExcludedWidget"))
+        self.horizontalLayout_2.addWidget(self.treeExcludedWidget)
 
         self.retranslateUi(Menu)
         QtCore.QMetaObject.connectSlotsByName(Menu)
 
     def retranslateUi(self, Menu):
         Menu.setWindowTitle(_('Form'))
+        self.treeMenuWidget.headerItem().setText(0, _('Menu Structure'))
+        self.treeExcludedWidget.headerItem().setText(0, _('Excluded Items'))
 

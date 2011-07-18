@@ -46,7 +46,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         '''
             Retornar verdadero si se puedo hacer el camio, falso en caso contratio
         '''
-        if not index.isValid: return False
+        if not index.isValid(): return False
 
         if role == QtCore.Qt.EditRole:
             new_value = unicode(value.toPyObject());

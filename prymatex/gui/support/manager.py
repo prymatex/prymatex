@@ -3,14 +3,14 @@
 
 from PyQt4 import QtCore, QtGui
 import uuid as uuidmodule
-from prymatex.support.manager import PMXSupportManager
+from prymatex.support.manager import PMXSupportBaseManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
-from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel
 from prymatex.mvc.proxies import bisect
 
-class PMXSupportModelManager(PMXSupportManager, PMXObject):
+class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
     
@@ -34,10 +34,14 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         #STYLE PROXY
         self.themeStyleProxyModel = PMXThemeStyleTableProxyModel()
         self.themeStyleProxyModel.setSourceModel(self.themeStylesTableModel)
-        
+
         #TREE PROXY
         self.bundleProxyTreeModel = PMXBundleTreeProxyModel()
         self.bundleProxyTreeModel.setSourceModel(self.bundleTreeModel)
+
+        #BUNDLES
+        self.bundleProxyModel = PMXBundleProxyModel()
+        self.bundleProxyModel.setSourceModel(self.bundleTreeModel)
         
         #TEMPLATES
         self.templateProxyModel = PMXBundleTypeFilterProxyModel("template")
@@ -46,6 +50,12 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
         #SYNTAX
         self.syntaxProxyModel = PMXBundleTypeFilterProxyModel("syntax")
         self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)
+        def syntaxDisplayFormater(index):
+            if not index.isValid():
+                return None
+            item = index.internalPointer()
+            return item.buildMenuTextEntry()
+        self.syntaxProxyModel.setFormater(syntaxDisplayFormater, QtCore.Qt.DisplayRole)
         
         #INTERACTIVEITEMS
         self.itemsProxyModel = PMXBundleTypeFilterProxyModel(["command", "snippet", "macro"])
@@ -99,11 +109,8 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     def removeBundle(self, bundle):
         self.bundleTreeModel.removeBundle(bundle)
     
-    def getBundle(self, uuid):
-        return self.bundleTreeModel.getBundle(uuid)
-    
     def getAllBundles(self):
-        return self.bundleTreeModel.getAllBundles()
+        return self.bundleProxyModel.getAllItems()
     
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
@@ -144,3 +151,45 @@ class PMXSupportModelManager(PMXSupportManager, PMXObject):
     
     def removeThemeStyle(self, style):
         self.themeStylesTableModel.removeStyle(style)
+
+    #---------------------------------------------------
+    # PREFERENCES OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllPreferences(self):
+        return self.preferenceProxyModel.getAllItems()
+    
+    #---------------------------------------------------
+    # TABTRIGGERS OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllTabTriggersMnemonics(self):
+        for item in self.itemsProxyModel.getAllItems():
+            if item.tabTrigger != None:
+                yield item.tabTrigger
+        else:
+            raise StopIteration()
+            
+    def getAllBundleItemsByTabTrigger(self, tabTrigger):
+        for item in self.itemsProxyModel.getAllItems():
+            if item.tabTrigger == tabTrigger:
+                yield item
+        else:
+            raise StopIteration()
+            
+    #---------------------------------------------------
+    # KEYEQUIVALENT OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+        for item in self.itemsProxyModel.getAllItems():
+            if item.keyEquivalent == keyEquivalent:
+                yield item
+        for syntax in self.syntaxProxyModel.getAllItems():
+            if syntax.keyEquivalent == keyEquivalent:
+                yield syntax
+        else:
+            raise StopIteration()
+    
+    #---------------------------------------------------
+    # SYNTAXES OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllSyntaxes(self):
+        return self.syntaxProxyModel.getAllItems()

@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configbundles.ui'
 #
-# Created: Mon Jul  4 22:08:49 2011
+# Created: Sun Jul 17 21:59:52 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:

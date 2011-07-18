@@ -26,6 +26,7 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         super(PMXFlatBaseProxyModel, self).__init__(parent)
         self.__indexMap = []
         self.__sourceModel = None
+        self.__formaters = {}
 
     def indexMap(self):
         return self.__indexMap
@@ -44,6 +45,10 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         self.__sourceModel.rowsRemoved.connect(self.on_sourceModel_rowsRemoved)
         self.__sourceModel.layoutChanged.connect(self.on_sourceModel_layoutChanged)
     
+    def setFormater(self, formater, role):
+        self.__formaters[role] = formater
+        self.layoutChanged.emit()
+    
     def filterAcceptsRow(self, sourceRow, sourceParent):
         return True
         
@@ -55,7 +60,7 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
     
     def mapToSource(self, proxyIndex):
         return self.__indexMap[proxyIndex.row()]
-        
+
     def mapFromSource(self, sourceIndex):
         return self.__indexMap.index(sourceIndex)
             
@@ -69,8 +74,11 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         mIndex = self.modelIndex(index)
         row = mIndex.row()
         parent = mIndex.parent()
-
-        return self.__sourceModel.data(self.__sourceModel.index(row, 0, parent), role)
+        
+        if role in self.__formaters:
+            return self.__formaters[role](self.__sourceModel.index(row, 0, parent))
+        else:
+            return self.__sourceModel.data(self.__sourceModel.index(row, 0, parent), role)
 
     def flags(self, index):
         if self.__sourceModel is None or not index.isValid():  
@@ -111,13 +119,13 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         for i in xrange(start, end + 1):
             index = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
-                #print "agregando %s:%s" % (index.internalPointer().TYPE, index.internalPointer().name)
                 position = bisect(self.__indexMap, index, lambda xindex, yindex: self.compareIndex(xindex, yindex))
                 self.__indexMap.insert(position, index)
     
     def on_sourceModel_rowsRemoved(self, parent, start, end):
-        print "se quitaron items"
-        
+        #Remove indexes
+        self.__indexMap = filter(lambda index: index.parent() != parent or index.row() not in range(start, end + 1), self.__indexMap)
+
     def on_sourceModel_layoutChanged(self):
         print "cambio el layout"
     

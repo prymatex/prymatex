@@ -493,6 +493,8 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def __init__(self, parent = None):
         super(PMXBundleWidget, self).__init__(parent)
         self.setupUi(self)
+        assert parent != None and hasattr(parent, 'manager'), "Set parent and manager"
+        self.manager = parent.manager
     
     @property
     def title(self):
@@ -508,3 +510,38 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     
     def getKeyEquivalent(self):
         return None
+    
+    def buildMenu(self, items, parent, submenus = {}):
+        for uuid in items:
+            if uuid.startswith('-'):
+                separator = QtGui.QTreeWidgetItem(parent, 0)
+                separator.setText(0, '--------------------------------')
+                continue
+            item = self.manager.getBundleItem(uuid)
+            if item != None:
+                node = QtGui.QTreeWidgetItem(parent, 1)
+                node.setText(0, item.name)
+            elif uuid in submenus:
+                submenu = QtGui.QTreeWidgetItem(parent, 0)
+                submenu.setText(0, submenus[uuid]['name'])
+                self.buildMenu(submenus[uuid]['items'], submenu, submenus)
+    
+    def edit(self, bundleItem):
+        super(PMXBundleWidget, self).edit(bundleItem)
+        self.treeExcludedWidget.clear()
+        self.treeMenuWidget.clear()
+        newGroup = QtGui.QTreeWidgetItem(self.treeExcludedWidget, 0)
+        newGroup.setText(0, 'New Group')
+        separator = QtGui.QTreeWidgetItem(self.treeExcludedWidget, 0)
+        separator.setText(0, '--------------------------------')
+        if bundleItem.mainMenu == None:
+            return
+        if 'items' in bundleItem.mainMenu:
+            self.buildMenu(bundleItem.mainMenu['items'], self.treeMenuWidget, bundleItem.mainMenu['submenus'])
+        if 'excludedItems' in bundleItem.mainMenu:
+            for uuid in bundleItem.mainMenu['excludedItems']:
+                item = self.manager.getBundleItem(uuid)
+                if item != None:
+                    node = QtGui.QTreeWidgetItem(self.treeExcludedWidget, 1)
+                    node.setText(0, item.name)
+        

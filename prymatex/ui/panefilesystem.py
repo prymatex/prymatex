@@ -2,12 +2,12 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Mon Jul  4 22:08:49 2011
+# Created: Sun Jul 17 21:59:52 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -35,7 +35,7 @@ class Ui_FSPane(object):
         self.buttonUp.setMaximumSize(QtCore.QSize(24, 24))
         self.buttonUp.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/go-up.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-up.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonUp.setIcon(icon)
         self.buttonUp.setIconSize(QtCore.QSize(16, 16))
         self.buttonUp.setFlat(True)
@@ -44,7 +44,7 @@ class Ui_FSPane(object):
         self.buttonBackRoot = QtGui.QPushButton(FSPane)
         self.buttonBackRoot.setMaximumSize(QtCore.QSize(24, 24))
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/go-previous.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-previous.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonBackRoot.setIcon(icon1)
         self.buttonBackRoot.setIconSize(QtCore.QSize(16, 16))
         self.buttonBackRoot.setFlat(True)
@@ -54,7 +54,7 @@ class Ui_FSPane(object):
         self.pushButton_2.setMaximumSize(QtCore.QSize(24, 24))
         self.pushButton_2.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/go-next.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-next.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_2.setIcon(icon2)
         self.pushButton_2.setFlat(True)
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
@@ -62,7 +62,7 @@ class Ui_FSPane(object):
         self.buttonFilter = QtGui.QPushButton(FSPane)
         self.buttonFilter.setMaximumSize(QtCore.QSize(24, 24))
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/view-filter.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-filter.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonFilter.setIcon(icon3)
         self.buttonFilter.setIconSize(QtCore.QSize(16, 16))
         self.buttonFilter.setFlat(True)
@@ -71,7 +71,7 @@ class Ui_FSPane(object):
         self.buttonSyncTabFile = QtGui.QPushButton(FSPane)
         self.buttonSyncTabFile.setMaximumSize(QtCore.QSize(24, 24))
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonSyncTabFile.setIcon(icon4)
         self.buttonSyncTabFile.setIconSize(QtCore.QSize(16, 16))
         self.buttonSyncTabFile.setCheckable(True)
@@ -81,7 +81,7 @@ class Ui_FSPane(object):
         self.buttonCollapseAll = QtGui.QPushButton(FSPane)
         self.buttonCollapseAll.setMaximumSize(QtCore.QSize(24, 24))
         icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/debug-step-into.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/debug-step-into.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCollapseAll.setIcon(icon5)
         self.buttonCollapseAll.setIconSize(QtCore.QSize(16, 16))
         self.buttonCollapseAll.setFlat(True)
@@ -91,7 +91,7 @@ class Ui_FSPane(object):
         self.pushShowHidden.setMaximumSize(QtCore.QSize(24, 24))
         self.pushShowHidden.setText(_fromUtf8(""))
         icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/help-hint.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/help-hint.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushShowHidden.setIcon(icon6)
         self.pushShowHidden.setCheckable(True)
         self.pushShowHidden.setFlat(True)
@@ -119,7 +119,7 @@ class Ui_FSPane(object):
         self.pushFavourites.setMaximumSize(QtCore.QSize(24, 24))
         self.pushFavourites.setText(_fromUtf8(""))
         icon7 = QtGui.QIcon()
-        icon7.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/fork.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon7.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/fork.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushFavourites.setIcon(icon7)
         self.pushFavourites.setFlat(True)
         self.pushFavourites.setObjectName(_fromUtf8("pushFavourites"))

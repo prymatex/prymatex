@@ -48,7 +48,6 @@ class PMXConfigBaseWidget(QWidget, PMXObject):
             self._widgets = filter_config_widgets(self.children())
         return self._widgets
     
-    
     def enableAllWidgets(self, enabled):
         map(lambda w: w.setEnabled(enabled), self.all_widgets)
     

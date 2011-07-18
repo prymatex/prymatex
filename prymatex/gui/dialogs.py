@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+from PyQt4 import QtCore, QtGui
 from PyQt4.Qt import QDialog, QVBoxLayout, QPushButton, QFileDialog, QVariant
 from PyQt4.QtCore import pyqtSignal, QDir
 from PyQt4.Qt import SIGNAL
@@ -15,7 +18,7 @@ if __name__ == '__main__':
     print path
     sys.path.append( path )
     
-class MultiCloseDialog(QDialog, Ui_SaveMultipleDialog):
+class MultiCloseDialog(QtGui.QDialog, Ui_SaveMultipleDialog):
     '''
     @todo: Implement PMXTabWidget model
     '''
