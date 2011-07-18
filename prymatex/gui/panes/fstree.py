@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-from PyQt4.QtGui import QTreeView, QDirModel, QMenu, QAction, QMessageBox, qApp
-from PyQt4.QtGui import QInputDialog, QApplication
+from PyQt4.QtGui import QTreeView, QFileSystemModel, QMenu, QAction, QMessageBox, qApp
+from PyQt4.QtGui import QInputDialog, QApplication, QPixmap, QIcon
 from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir
 import os
 import shutil
@@ -23,8 +23,8 @@ class FSTree(QTreeView, PMXObject):
         QTreeView.__init__(self, parent)
         
         
-        self.dirmodelFiles = QDirModel(self)
-        
+        self.dirmodelFiles = QFileSystemModel(self)
+        self.dirmodelFiles.setRootPath('.')
         self.createMenus()        
         self.setModel(self.dirmodelFiles)
         for i in range(1,self.dirmodelFiles.columnCount()):
@@ -32,7 +32,7 @@ class FSTree(QTreeView, PMXObject):
         self.setAnimated(False)
         self.setIndentation(20)
         self.setSortingEnabled(True)
-        self.dirmodelFiles.setSorting(QDir.Name | QDir.DirsFirst)
+        self.dirmodelFiles.sort(0)
         self.mainWindow.tabWidget.currentEditorChanged.connect(self.focusWidgetPath)
         self.setExpandsOnDoubleClick(True)
         QMetaObject.connectSlotsByName(self)
@@ -77,6 +77,7 @@ class FSTree(QTreeView, PMXObject):
         self.menuFile.addAction(self.actionCopyPathToClipBoard)
         
         self.actionRename = QAction(_("&Rename"), self)
+        self.actionRename.setIcon(QIcon(":/icons/actions/edit-rename.png"))
         self.actionRename.setObjectName("actionRename")
         self.menuFile.addAction(self.actionRename)
         
@@ -86,14 +87,17 @@ class FSTree(QTreeView, PMXObject):
         
         self.actionFileOpen = QAction(_("&Open"), self)
         self.actionFileOpen.setObjectName("actionFileOpen")
+        self.actionFileOpen.setIcon(QIcon(":/icons/actions/document-open.png"))
         self.menuFile.addAction(self.actionFileOpen)
         
         self.actionRefresh = QAction(_("&Refresh"), self)
+        self.actionRefresh.setIcon(QIcon(":/icons/actions/view-refresh.png"))
         self.actionRefresh.setObjectName("actionRefresh")
         self.menuFile.addAction(self.actionRefresh)
         
         self.actionProperties = QAction(_("&Properties"), self)
         self.actionProperties.setObjectName("actionProperties")
+        self.actionProperties.setIcon(QIcon(":/icons/actions/document-properties.png"))
         #self.actionProperties.setShortcut("")
         self.menuFile.addAction(self.actionProperties)
         
@@ -101,6 +105,7 @@ class FSTree(QTreeView, PMXObject):
         # Directory Menus
         self.menuNewFileSystemElement = QMenu(_("&New.."), self)
         self.menuNewFileSystemElement.setObjectName('menuNewFileSystemElement')
+        self.menuNewFileSystemElement.setIcon(QIcon(":/icons/actions/document-new.png"))
         self.actionFileNew = self.menuNewFileSystemElement.addAction('File')
         self.actionFileNew.setObjectName("actionFileNew")
         

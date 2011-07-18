@@ -26,6 +26,7 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         start_dir = qApp.instance().startDirectory()
         self.tree.setRootIndex(self.tree.model().index(start_dir))
         self.comboFavourites.currentIndexChanged[int].connect(self.changeToFavourite)
+        self.tree.model().rootPathChanged.connect(self.treeRootPathChanged)
         self.configure()
         
     class Meta:
@@ -69,6 +70,9 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
                                                     'icon': QIcon()})
         else:
             self.debug("Not a directory %s" % path)
+    
+    def treeRootPathChanged(self, newPath):
+        pass
         
 
 class PMXFSPaneConfigDialog(Ui_FSSettingsDialog, QDialog):
