@@ -281,5 +281,28 @@ class PMXTableBase(QStandardItemModel):
         print "Set"
         
         
+class PMXModelIterator(object):
+    ''' Python iteration of Qt models '''
+    
+    def __init__(self, model, typeSubstitution = {(QString, unicode): str}):
+        print model
+        self.model = model
+        self.currentRow = 0
+        self.typeSubstitution = typeSubstitution
         
-        
+    def next(self):
+        if self.currentRow >= self.model.rowCount():
+            raise StopIteration()
+        data = []
+        for c in range(self.model.columnCount()):
+            data.append( self.model.data(self.model.index(self.currentRow, c)))
+        self.currentRow += 1
+        return map(self.typeConversion, data)
+
+    def typeConversion(self, data):
+        if isinstance(data, QVariant):
+            data = data.toPyObject()
+        for types, substitution in self.typeSubstitution:
+            if isinstance(data, types):
+                return substitution(data)
+        return data

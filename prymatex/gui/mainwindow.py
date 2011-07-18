@@ -29,6 +29,7 @@ from prymatex.gui.support.tableview import PMXBundleItemTableView,\
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
 
+
 #from prymatex.config.configdialog import PMXConfigDialog
 
 logger = logging.getLogger(__name__)
@@ -516,11 +517,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def updateWindowTitle(self):
         ''' Updates window title '''
         from string import Template
-        print self.windowTitleTemplate, type(self.windowTitleTemplate)
+        #print self.windowTitleTemplate, type(self.windowTitleTemplate)
+        from prymatex.gui.config.environment import enviromentVariablesModel
         template = Template(self.windowTitleTemplate)
+        
+        extra_attrs = dict(enviromentVariablesModel)
+        #print extra_attrs
         s = template.safe_substitute(APPNAME="Prymatex",
                                 FILE='No file',
-                                PROJECT='No project',)
+                                PROJECT='No project',
+                                **extra_attrs)
         self.setWindowTitle(s)
 
     def closeEvent(self, event):

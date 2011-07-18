@@ -1,10 +1,13 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/download-later.png</file>
+    <file>actions/format-font-size-more.png</file>
     <file>actions/fork.png</file>
     <file>actions/help-hint.png</file>
     <file>actions/debug-step-into.png</file>
     <file>actions/system-switch-user.png</file>
     <file>actions/go-jump.png</file>
+    <file>actions/document-open-remote.png</file>
     <file>actions/go-bottom.png</file>
     <file>actions/go-down.png</file>
     <file>actions/go-first-view.png</file>
@@ -13,6 +16,7 @@
     <file>actions/go-last.png</file>
     <file>actions/go-next.png</file>
     <file>actions/go-previous-view.png</file>
+    <file>actions/shapes.png</file>
     <file>actions/go-top.png</file>
     <file>actions/go-up.png</file>
     <file>actions/go-previous.png</file>
@@ -44,6 +48,7 @@
     <file>bundles/template-files.png</file>
     <file>bundles/templates.png</file>
   </qresource>
+  <qresource prefix="newPrefix"/>
   <qresource prefix="editor">
     <file>sidebar/bookmark-flag.png</file>
     <file>sidebar/folding-bottom.png</file>

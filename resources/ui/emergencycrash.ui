@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Prymatex Crash</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/icons/Prymatex_Logo.png</normaloff>:/icons/icons/Prymatex_Logo.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">

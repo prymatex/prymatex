@@ -17,8 +17,8 @@
    <string>Save</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/actions/resources/actions/document-save-all.png</normaloff>:/actions/resources/actions/document-save-all.png</iconset>
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/actions/document-save-all.png</normaloff>:/icons/actions/document-save-all.png</iconset>
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="5" column="0">
@@ -135,7 +135,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>checkAutoSave</sender>

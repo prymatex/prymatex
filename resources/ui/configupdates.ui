@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Updates</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/actions/download-later.png</normaloff>:/icons/actions/download-later.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QCheckBox" name="checkBox">
@@ -111,7 +115,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>checkBox</sender>

@@ -14,8 +14,8 @@
    <string>Enviroment Variables</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/actions/resources/actions/configure.png</normaloff>:/actions/resources/actions/configure.png</iconset>
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -68,6 +68,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

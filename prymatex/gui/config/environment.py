@@ -5,6 +5,10 @@ from PyQt4 import QtCore, QtGui
 from prymatex.gui.config.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
 from prymatex.ui.configenvironment import Ui_EnvVariables
+from logging import getLogger
+
+logger = getLogger(__name__)
+
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
     def __init__(self, settingGroup, parent = None):
@@ -16,7 +20,13 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
             self.values[0].append(var['variable'])
             self.values[1].append(var['value'])
             self.values[2].append(var['enabled'])
-    
+        
+        # FIXME: Thre should be a nicer way to get this ref
+        global enviromentVariablesModel
+        if enviromentVariablesModel is not None:
+            logger.warn("Should not create more than one %s" % self)
+        enviromentVariablesModel = self
+            
     def setSettingValue(self):
         variables = []
         for index in range(len(self.values[0])):
@@ -28,13 +38,13 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
                 variables.append(var)
         self.settingGroup.setValue('shellVariables', variables)
     
-    def rowCount(self, parent):
+    def rowCount(self, parent = None):
         return len(self.values[0])
     
-    def columnCount(self, parent):
+    def columnCount(self, parent = None):
         return 2
     
-    def data(self, index, role):
+    def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid: return QtCore.QVariant()
         
         if role == QtCore.Qt.CheckStateRole and index.column() == 0:
@@ -100,6 +110,14 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
 
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
+    
+    def __iter__(self):
+        from prymatex.mvc.models import PMXModelIterator
+        return PMXModelIterator(self)
+    
+    def asPyDict(self):
+        print "Dictionarization!!!"
+        return dict(iter(self))
 
 class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
     '''
@@ -119,3 +137,5 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
     def on_pushRemove_pressed(self):
         index = self.tableView.currentIndex()
         self.model.removeRows(index.row() , 1)
+
+enviromentVariablesModel = None

@@ -14,8 +14,8 @@
    <string>General</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/resources/icons/Prymatex_Logo.png</normaloff>:/icons/resources/icons/Prymatex_Logo.png</iconset>
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/icons/Prymatex_Logo.png</normaloff>:/icons/icons/Prymatex_Logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -101,6 +101,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
