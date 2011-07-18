@@ -240,7 +240,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QComboBox" name="comboFavourites">
+      <widget class="PMXBookmarksPathComboBox" name="comboFavourites">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -274,7 +274,7 @@
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
-         <normaloff>:/icons/actions/fork.png</normaloff>:/icons/actions/fork.png</iconset>
+         <normaloff>:/icons/emblems/emblem-favorite.png</normaloff>:/icons/emblems/emblem-favorite.png</iconset>
        </property>
        <property name="flat">
         <bool>true</bool>
@@ -293,6 +293,11 @@
    <class>FSTree</class>
    <extends>QTreeView</extends>
    <header>prymatex.gui.panes.fstree</header>
+  </customwidget>
+  <customwidget>
+   <class>PMXBookmarksPathComboBox</class>
+   <extends>QComboBox</extends>
+   <header>prymatex.gui.panes.fswidgets</header>
   </customwidget>
  </customwidgets>
  <resources>

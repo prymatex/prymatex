@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Sun Jul 17 23:25:30 2011
+# Created: Mon Jul 18 15:31:06 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -102,7 +102,7 @@ class Ui_FSPane(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.comboFavourites = QtGui.QComboBox(FSPane)
+        self.comboFavourites = PMXBookmarksPathComboBox(FSPane)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -119,7 +119,7 @@ class Ui_FSPane(object):
         self.pushFavourites.setMaximumSize(QtCore.QSize(24, 24))
         self.pushFavourites.setText(_fromUtf8(""))
         icon7 = QtGui.QIcon()
-        icon7.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/fork.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon7.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/emblems/emblem-favorite.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushFavourites.setIcon(icon7)
         self.pushFavourites.setFlat(True)
         self.pushFavourites.setObjectName(_fromUtf8("pushFavourites"))
@@ -145,4 +145,5 @@ class Ui_FSPane(object):
         self.pushFavourites.setToolTip(_('Favourite places'))
 
 from prymatex.gui.panes.fstree import FSTree
+from prymatex.gui.panes.fswidgets import PMXBookmarksPathComboBox
 from prymatex import resources_rc
