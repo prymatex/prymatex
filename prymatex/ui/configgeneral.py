@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configgeneral.ui'
 #
-# Created: Sun Jul 17 21:59:52 2011
+# Created: Sun Jul 17 23:56:02 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,7 +20,7 @@ class Ui_General(object):
         General.setObjectName(_fromUtf8("General"))
         General.resize(454, 300)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/resources/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         General.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(General)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -74,3 +74,4 @@ class Ui_General(object):
         self.pushInsertProject.setText(_('Project Name'))
         self.pushInsertFile.setText(_('File Name'))
 
+from prymatex import resources_rc

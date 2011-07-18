@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/confignetwork.ui'
 #
-# Created: Sun Jul 17 21:59:52 2011
+# Created: Sun Jul 17 23:39:50 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,7 +20,7 @@ class Ui_Network(object):
         Network.setObjectName(_fromUtf8("Network"))
         Network.resize(460, 403)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/document-open-remote.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open-remote.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Network.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(Network)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -154,3 +154,4 @@ class Ui_Network(object):
         self.checkBox.setText(_('User auth?'))
         self.pushTestSettings.setText(_('Test settings'))
 
+from prymatex import resources_rc

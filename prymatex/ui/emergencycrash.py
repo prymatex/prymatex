@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/emergencycrash.ui'
 #
-# Created: Sun Jul 17 21:59:52 2011
+# Created: Mon Jul 18 00:13:51 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,6 +19,9 @@ class Ui_CrashDialog(object):
     def setupUi(self, CrashDialog):
         CrashDialog.setObjectName(_fromUtf8("CrashDialog"))
         CrashDialog.resize(579, 411)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        CrashDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(CrashDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label = QtGui.QLabel(CrashDialog)
@@ -55,15 +58,15 @@ class Ui_CrashDialog(object):
         self.pushSendTraceback.setObjectName(_fromUtf8("pushSendTraceback"))
         self.horizontalLayout_2.addWidget(self.pushSendTraceback)
         self.pushCopyTraceback = QtGui.QPushButton(CrashDialog)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushCopyTraceback.setIcon(icon)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushCopyTraceback.setIcon(icon1)
         self.pushCopyTraceback.setObjectName(_fromUtf8("pushCopyTraceback"))
         self.horizontalLayout_2.addWidget(self.pushCopyTraceback)
         self.pushClose = QtGui.QPushButton(CrashDialog)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/application-exit.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushClose.setIcon(icon1)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/application-exit.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushClose.setIcon(icon2)
         self.pushClose.setObjectName(_fromUtf8("pushClose"))
         self.horizontalLayout_2.addWidget(self.pushClose)
         self.verticalLayout.addLayout(self.horizontalLayout_2)

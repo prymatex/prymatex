@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configupdates.ui'
 #
-# Created: Sun Jul 17 21:59:52 2011
+# Created: Sun Jul 17 23:49:13 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,6 +19,9 @@ class Ui_Updates(object):
     def setupUi(self, Updates):
         Updates.setObjectName(_fromUtf8("Updates"))
         Updates.resize(400, 300)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/download-later.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Updates.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(Updates)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.checkBox = QtGui.QCheckBox(Updates)
@@ -79,3 +82,4 @@ class Ui_Updates(object):
         self.label_3.setText(_('TextLabel'))
         self.pushButton.setText(_('Check Now!'))
 
+from prymatex import resources_rc

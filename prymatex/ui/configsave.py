@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configsave.ui'
 #
-# Created: Sun Jul 17 21:59:52 2011
+# Created: Sun Jul 17 23:46:50 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -21,7 +21,7 @@ class Ui_Save(object):
         Save.setEnabled(True)
         Save.resize(400, 300)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/document-save-all.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-save-all.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Save.setWindowIcon(icon)
         self.formLayout = QtGui.QFormLayout(Save)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
@@ -95,3 +95,4 @@ class Ui_Save(object):
         self.spinSaveInterval.setPrefix(_('every '))
         self.checkBox_4.setText(_('Save when focus is lost'))
 
+from prymatex import resources_rc

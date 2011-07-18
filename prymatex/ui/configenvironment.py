@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configenvironment.ui'
 #
-# Created: Sun Jul 17 21:59:52 2011
+# Created: Sun Jul 17 23:46:50 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,7 +20,7 @@ class Ui_EnvVariables(object):
         EnvVariables.setObjectName(_fromUtf8("EnvVariables"))
         EnvVariables.resize(400, 449)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         EnvVariables.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(EnvVariables)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -53,3 +53,4 @@ class Ui_EnvVariables(object):
         self.pushAdd.setText(_('+'))
         self.pushRemove.setText(_('-'))
 
+from prymatex import resources_rc

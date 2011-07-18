@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configbundles.ui'
 #
-# Created: Sun Jul 17 21:59:52 2011
+# Created: Sun Jul 17 23:54:49 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,7 +20,7 @@ class Ui_Bundles(object):
         Bundles.setObjectName(_fromUtf8("Bundles"))
         Bundles.resize(400, 359)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/folder-sync.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/shapes.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Bundles.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(Bundles)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -66,3 +66,4 @@ class Ui_Bundles(object):
         self.pushEdit.setText(_('Edit'))
         self.pushRemove.setText(_('Remove'))
 
+from prymatex import resources_rc
