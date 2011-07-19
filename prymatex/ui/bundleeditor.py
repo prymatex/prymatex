@@ -15,7 +15,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_bundleEditor(object):
+class Ui_BundleEditor(object):
     def setupUi(self, bundleEditor):
         bundleEditor.setObjectName(_fromUtf8("bundleEditor"))
         bundleEditor.resize(594, 507)
