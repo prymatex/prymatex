@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/bundleeditor.ui'
 #
-# Created: Sun Jul 17 23:25:30 2011
+# Created: Tue Jul 19 15:22:14 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -16,15 +16,15 @@ except AttributeError:
     _fromUtf8 = lambda s: s
 
 class Ui_BundleEditor(object):
-    def setupUi(self, bundleEditor):
-        bundleEditor.setObjectName(_fromUtf8("bundleEditor"))
-        bundleEditor.resize(594, 507)
+    def setupUi(self, BundleEditor):
+        BundleEditor.setObjectName(_fromUtf8("BundleEditor"))
+        BundleEditor.resize(594, 507)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        bundleEditor.setWindowIcon(icon)
-        self.verticalLayout = QtGui.QVBoxLayout(bundleEditor)
+        BundleEditor.setWindowIcon(icon)
+        self.verticalLayout = QtGui.QVBoxLayout(BundleEditor)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.splitter = QtGui.QSplitter(bundleEditor)
+        self.splitter = QtGui.QSplitter(BundleEditor)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(_fromUtf8("splitter"))
         self.verticalLayoutWidget = QtGui.QWidget(self.splitter)
@@ -91,11 +91,11 @@ class Ui_BundleEditor(object):
         self.editorsLayout.addLayout(self.basicFormLayout)
         self.verticalLayout.addWidget(self.splitter)
 
-        self.retranslateUi(bundleEditor)
-        QtCore.QMetaObject.connectSlotsByName(bundleEditor)
+        self.retranslateUi(BundleEditor)
+        QtCore.QMetaObject.connectSlotsByName(BundleEditor)
 
-    def retranslateUi(self, bundleEditor):
-        bundleEditor.setWindowTitle(_('Bundle Editor'))
+    def retranslateUi(self, BundleEditor):
+        BundleEditor.setWindowTitle(_('Bundle Editor'))
         self.pushButtonAdd.setText(_('+'))
         self.pushButtonRemove.setText(_('-'))
         self.pushButtonFilter.setText(_('Filter List'))
