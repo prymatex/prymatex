@@ -100,10 +100,10 @@ class PMXCursorsHelper(object):
         self.cursors = []
     
     def canMoveRight(self):
-        return all(map(lambda c: not c.atBlockEnd(), self.cursors))
+        return all(map(lambda c: not c.atEnd(), self.cursors))
     
     def canMoveLeft(self):
-        return all(map(lambda c: not c.atBlockStart(), self.cursors))
+        return all(map(lambda c: not c.atStart(), self.cursors))
     
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
@@ -144,7 +144,7 @@ class PMXCursorsHelper(object):
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
             pass
-        elif event.modifiers() & QtCore.Qt.ControlModifier:
+        elif event.text():
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
             for cursor in self.cursors:
@@ -178,8 +178,7 @@ class PMXCompleterHelper(QtGui.QCompleter):
             model = self.obtainModelItems()
             self.setModel(model)
             self.popup().setCurrentIndex(model.index(0, 0))
-            cr.setWidth(self.popup().sizeHintForColumn(0) \
-                + self.popup().verticalScrollBar().sizeHint().width() + 10)
+            cr.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 10)
             self.popupView.updateGeometries()
             super(PMXCompleterHelper, self).complete(cr)
         except:

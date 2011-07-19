@@ -847,6 +847,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         When a file is dropped
         '''
         dropedText = dropEvent.mimeData().text()
+        print dropedText
         filesToOpen = []
         
         while True:
