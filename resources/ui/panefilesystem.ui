@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="buttonsLayout">
      <property name="spacing">
       <number>-1</number>
      </property>
@@ -90,7 +90,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="pushFowardRoot">
        <property name="maximumSize">
         <size>
          <width>24</width>
@@ -238,9 +238,9 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="bookmarksLayout">
      <item>
-      <widget class="PMXBookmarksPathComboBox" name="comboFavourites">
+      <widget class="PMXBookmarksPathComboBox" name="comboBookmarks">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -253,7 +253,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushFavourites">
+      <widget class="QPushButton" name="pushBookmarks">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>

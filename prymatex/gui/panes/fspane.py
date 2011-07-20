@@ -25,8 +25,9 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         self.setupUi(self)
         start_dir = qApp.instance().startDirectory()
         self.tree.setRootIndex(self.tree.model().index(start_dir))
-        self.comboFavourites.currentIndexChanged[int].connect(self.changeToFavourite)
-        self.tree.model().rootPathChanged.connect(self.treeRootPathChanged)
+        
+        self.tree.model().rootPathChanged.connect(self.comboBookmarks.pathChanged)
+        self.comboBookmarks.currentIndexChanged[int].connect(self.changeToFavourite)
         self.configure()
         
     class Meta:
@@ -71,9 +72,6 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         else:
             self.debug("Not a directory %s" % path)
     
-    def treeRootPathChanged(self, newPath):
-        pass
-        
 
 class PMXFSPaneConfigDialog(Ui_FSSettingsDialog, QDialog):
     def __init__(self, parent):
