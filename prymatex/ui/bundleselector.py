@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/bundleselector.ui'
+# Form implementation generated from reading ui file 'resources\ui\bundleselector.ui'
 #
-# Created: Tue Jul 19 15:22:13 2011
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Wed Jul 20 10:00:23 2011
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 

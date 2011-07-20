@@ -176,6 +176,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         user_data = block.userData()
         if user_data == None:
             return ""
+        #FIXME: Esta condicion con el bucle no se puede o no se deberia dar nunca
         if not bool(user_data) and block.userState() == self.syntaxProcessor.MULTI_LINE:
             while not bool(block.userData()):
                 block = block.previous()

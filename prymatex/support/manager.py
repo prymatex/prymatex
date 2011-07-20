@@ -645,6 +645,35 @@ class PMXSupportBaseManager(object):
         return with_scope and with_scope or without_scope
     
     #---------------------------------------------------
+    # ACTION ITEMS INTERFACE
+    #---------------------------------------------------
+    def getAllActionItems(self):
+        '''
+            Return action items
+        '''
+        pass
+    
+    #---------------------------------------------------------------
+    # ACTION ITEMS FOR SCOPE
+    #---------------------------------------------------------------
+    def getActionItems(self, scope):
+        '''
+            Return a list of actions items for scope and without scope
+        '''
+        with_scope = []
+        without_scope = []
+        for item in self.getAllActionItems():
+            if item.scope == None:
+                without_scope.append(item)
+            else:
+                score = self.scores.score(item.scope, scope)
+                if score != 0:
+                    with_scope.append((score, item))
+        with_scope.sort(key = lambda t: t[0], reverse = True)
+        with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope + without_scope
+    
+    #---------------------------------------------------
     # SYNTAXES INTERFACE
     #---------------------------------------------------
     def getAllSyntaxes(self):

@@ -183,9 +183,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                 self.menuBundles.addMenu(menu)
         #Connect
         self.pmxApp.supportManager.bundleItemTriggered.connect(self.on_bundleItem_triggered)
-        
+    
+    @pyqtSignature('')
     def on_actionSelect_Bundle_Item_triggered(self):
-        self.bundleItemSelector.exec_()
+        editor = self.currentEditor
+        scope = editor.getCurrentScope()
+        items = self.pmxApp.supportManager.getActionItems(scope)
+        item = self.bundleItemSelector.select(items)
+        if item is not None:
+            self.currentEditor.insertBundleItem(item)
 
     counter = 0
     #===========================================================================

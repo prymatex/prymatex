@@ -62,8 +62,8 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
         self.syntaxProxyModel.setFormater(syntaxDisplayFormater, QtCore.Qt.DisplayRole)
         
         #INTERACTIVEITEMS
-        self.itemsProxyModel = PMXBundleTypeFilterProxyModel(["command", "snippet", "macro"])
-        self.itemsProxyModel.setSourceModel(self.bundleTreeModel)
+        self.actionItemsProxyModel = PMXBundleTypeFilterProxyModel(["command", "snippet", "macro"])
+        self.actionItemsProxyModel.setSourceModel(self.bundleTreeModel)
         
         #PREFERENCES
         self.preferenceProxyModel = PMXBundleTypeFilterProxyModel("preference")
@@ -190,14 +190,14 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllTabTriggersMnemonics(self):
-        for item in self.itemsProxyModel.getAllItems():
+        for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
                 yield item.tabTrigger
         else:
             raise StopIteration()
             
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
-        for item in self.itemsProxyModel.getAllItems():
+        for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger == tabTrigger:
                 yield item
         else:
@@ -207,7 +207,7 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
-        for item in self.itemsProxyModel.getAllItems():
+        for item in self.actionItemsProxyModel.getAllItems():
             if item.keyEquivalent == keyEquivalent:
                 yield item
         for syntax in self.syntaxProxyModel.getAllItems():
@@ -215,6 +215,12 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
                 yield syntax
         else:
             raise StopIteration()
+    
+    #---------------------------------------------------
+    # ACTION ITEMS OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllActionItems(self):
+        return self.actionItemsProxyModel.getAllItems()
     
     #---------------------------------------------------
     # SYNTAXES OVERRIDE INTERFACE

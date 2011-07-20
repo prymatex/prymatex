@@ -1,32 +1,7 @@
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
 from prymatex.ui.bundleselector import Ui_BundleSelector
 
-class PMXFilterBundleItem(QtGui.QSortFilterProxyModel):
-    def filterAcceptsRow(self, sourceRow, sourceParent):
-        regexp = self.filterRegExp()
-        if regexp.isEmpty():
-            return True
-        index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        index = self.sourceModel().modelIndex(index)
-        item = index.internalPointer()
-        return QtCore.QString(item.name).contains(regexp)
-
-    def filterAcceptsColumn(self, sourceColumn, sourceParent):
-        return True
-
-    def data(self, index, role):
-        if self.sourceModel() is None:
-            return QtCore.QVariant()
-        
-        if role == QtCore.Qt.DisplayRole:
-            index = self.sourceModel().modelIndex(index)
-            item = index.internalPointer()
-            return item.buildMenuTextEntry()
-        else:
-            return self.sourceModel().data(index, role)
-            
-class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog, PMXObject):
+class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog):
     '''
     This dialog allow the user to search through commands, snippets and macros in the current scope easily.
     An instance is hold in the main window and triggered with an action.
@@ -34,9 +9,40 @@ class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog, PMXObject):
     def __init__(self, parent = None):
         super(PMXBundleItemSelector, self).__init__(parent)
         self.setupUi(self)
-        self.proxyFilteringModel = PMXFilterBundleItem()
-        self.proxyFilteringModel.setSourceModel(self.pmxApp.supportManager.itemsProxyModel)
-        self.listBundleItems.setModel(self.proxyFilteringModel)
+        self.setWindowFlags(QtCore.Qt.Dialog)
+        self.model = QtGui.QStandardItemModel(self)
+        self.proxy = QtGui.QSortFilterProxyModel(self)
+        self.proxy.setSourceModel(self.model)
+        self.listBundleItems.setModel(self.proxy)
+        
+    def select(self, items):
+        self.item = None
+        self.items = items
+        self.model.clear()
+        self.lineFilter.clear()
+        self.lineFilter.setFocus()
+        for item in items:
+            self.model.appendRow(QtGui.QStandardItem(QtGui.QIcon(item.icon), item.name))
+        self.exec_()
+        return self.item
     
     def on_lineFilter_textChanged(self, text):
-        self.proxyFilteringModel.setFilterRegExp(QtCore.QRegExp(text))
+        regexp = QtCore.QRegExp("*%s*" % text, QtCore.Qt.CaseInsensitive, QtCore.QRegExp.Wildcard)
+        self.proxy.setFilterRegExp(regexp)
+    
+    def on_listBundleItems_activated(self, index):
+        sIndex = self.proxy.mapToSource(index)
+        self.item = self.items[sIndex.row()]
+        self.accept()
+        
+    def on_listBundleItems_doubleClicked(self, index):
+        sIndex = self.proxy.mapToSource(index)
+        self.item = self.items[sIndex.row()]
+        self.accept()
+        
+    def on_lineFilter_returnPressed(self):
+        index = self.proxy.index(0, 0)
+        if index.isValid():
+            sIndex = self.proxy.mapToSource(index)
+            self.item = self.items[sIndex.row()]
+            self.accept()
