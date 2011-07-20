@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Sun Jul 17 23:25:30 2011
+# Created: Tue Jul 19 15:22:13 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 18))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -436,7 +436,6 @@ class Ui_MainWindow(object):
         self.menuEdit.addAction(self.actionPreferences)
         self.menuBundles.addAction(self.actionShow_Bundle_Editor)
         self.menuBundles.addAction(self.actionSelect_Bundle_Item)
-        self.menuBundles.addAction(self.actionBundle_List)
         self.menuBundles.addSeparator()
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())

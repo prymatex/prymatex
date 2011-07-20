@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configbundles.ui'
 #
-# Created: Sun Jul 17 23:54:49 2011
+# Created: Tue Jul 19 15:22:13 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!

@@ -57,6 +57,9 @@ QTCHARCODES = {9: Qt.Key_Backspace,
                63232: Qt.Key_F1,
                63234: Qt.Key_F2,
                63233: Qt.Key_F3,
+               63235: Qt.Key_F11, #No se que es
+               63236: Qt.Key_F11, #No se que es
+               63238: Qt.Key_F11, #No se que es
                63240: Qt.Key_F5,
                63272: Qt.Key_F7}
 

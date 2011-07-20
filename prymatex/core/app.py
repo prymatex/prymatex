@@ -81,9 +81,9 @@ class PMXApplication(QtGui.QApplication):
         
         self.setup_file_manager()
         # Config dialog
-        self.setup_configdialog()
+        self.setupConfigDialog()
         # Setupo bundle editor
-        self.setup_bundle_editor()
+        self.setupBundleEditor()
         # Creates the GUI
         self.createWindows(open_args[1:]) # Skip pmx.py
     
@@ -101,7 +101,7 @@ class PMXApplication(QtGui.QApplication):
                              ", not %s" % options)
         self.__options = options
             
-    def setup_configdialog(self):
+    def setupConfigDialog(self):
         from prymatex.gui.config.configdialog import  PMXSettingsDialog
         configdialog = PMXSettingsDialog()
         from prymatex.gui.config.widgets import PMXGeneralWidget,\
@@ -121,13 +121,13 @@ class PMXApplication(QtGui.QApplication):
         configdialog.register(PMXNetworkWidget())
         self.__configdialog = configdialog
     
-    def setup_bundle_editor(self):
+    def setupBundleEditor(self):
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
-        self.__bundle_editor = PMXBundleEditor()
+        self.__bundleEditor = PMXBundleEditor()
     
     @property
     def bundleEditor(self):
-        return self.__bundle_editor
+        return self.__bundleEditor
     
     @property
     def configdialog(self):

@@ -24,8 +24,7 @@ from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.gui.dialogs import PMXNewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXObject
-from prymatex.gui.support.tableview import PMXBundleItemTableView,\
-    PMXBundleItemSelector
+from prymatex.gui.support.bundleselector import PMXBundleItemSelector
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
 
@@ -71,6 +70,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
+        self.bundleItemSelector = PMXBundleItemSelector(self)
         
         # Connect Signals
         self.tabWidget.currentEditorChanged.connect(self.updateWindowTitle)
@@ -78,13 +78,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         
         self.setupPanes()
-        #self.setupBundleViews()
-        
         self.setupLogging()
         self.center()
         
         self.addBundlesToMenu()
-        
         self.preventMenuLock()
         
         self.manageFilesToOpen(files_to_open)
@@ -186,32 +183,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                 self.menuBundles.addMenu(menu)
         #Connect
         self.pmxApp.supportManager.bundleItemTriggered.connect(self.on_bundleItem_triggered)
-        
-    def on_actionQuit_triggered(self):
-        QApplication.quit()
     
-    def setupBundleViews(self):
-        '''
-        Creates a TableView for the bundleTableModel and associates it
-        with the QAction in the menu
-        '''
-        self.tableViewBundleItems = PMXBundleItemTableView()
-        self.tableViewBundleItems.setModel(self.pmxApp.supportManager.bundleTableModel)
-        self.tableViewBundleItems.setWindowTitle("Bundle Items")
-        self.actionBundle_List.toggled[bool].connect(self.tableViewBundleItems.setVisible)
-        self.tableViewBundleItems.showStateChanged.connect(self.actionBundle_List.setChecked)
-        # Center on pmx window
-        geo = self.geometry()
-        #print geo
-        geo.setWidth( geo.width() * .9)
-        geo.setHeight( geo.height() * .9)
-        geo.setX(self.pos().x() * 1.1)
-        geo.setY(self.pos().y() * 1.1)
-        self.tableViewBundleItems.setGeometry(geo)
-        
-        self.bundleItemSelector = PMXBundleItemSelector(self)
-        self.actionSelect_Bundle_Item.triggered.connect(self.bundleItemSelector.exec_)
-        
+    @pyqtSignature('')
+    def on_actionSelect_Bundle_Item_triggered(self):
+        editor = self.currentEditor
+        scope = editor.getCurrentScope()
+        items = self.pmxApp.supportManager.getActionItems(scope)
+        item = self.bundleItemSelector.select(items)
+        if item is not None:
+            self.currentEditor.insertBundleItem(item)
+
     counter = 0
     #===========================================================================
     # Shortcuts
@@ -245,6 +226,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         if self.tabWidget.count():
             self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
 
+    def on_actionQuit_triggered(self):
+        QApplication.quit()
     
     @pyqtSignature('')    
     def on_actionNext_Tab_triggered(self):
@@ -324,8 +307,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         if not pmx_file:
             return
         
-        
-        
         if not pmx_file in self.tabWidget:
             try:
                 editor = PMXEditorWidget.editorFactory(pmx_file)
@@ -357,8 +338,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def on_actionProjectHomePage_triggered(self):
         import webbrowser
         webbrowser.open(qApp.instance().projectUrl)
-    
-       
+
     @pyqtSignature('')
     def on_actionSave_triggered(self):
         self.currentEditorWidget.request_save()
@@ -451,7 +431,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
             editor.appendPlainText(text)
         else:
             self.mainWindow.statusbar.showMessage(self.trUtf8("Nothing to paste."))
-          
 
     @pyqtSignature('')
     def on_actionGo_To_Line_triggered(self):
@@ -469,7 +448,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         scope = self.currentEditor.getCurrentScope()
         self.statusBar().showMessage("%s" % (scope))
 
-        
     @pyqtSignature('')
     def on_actionFind_triggered(self):
         print "MainWindow::find"
@@ -479,7 +457,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def on_actionFind_Replace_triggered(self):
         print "MainWindow::replace"
         self.currentEditorWidget.showReplaceWidget()
-    
     
     def updateWindowTitle(self):
         ''' Updates window title '''
