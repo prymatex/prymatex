@@ -26,7 +26,6 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         super(PMXFlatBaseProxyModel, self).__init__(parent)
         self.__indexMap = []
         self.__sourceModel = None
-        self.__formaters = {}
 
     def indexMap(self):
         return self.__indexMap
@@ -44,10 +43,6 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         self.__sourceModel.rowsInserted.connect(self.on_sourceModel_rowsInserted)
         self.__sourceModel.rowsRemoved.connect(self.on_sourceModel_rowsRemoved)
         self.__sourceModel.layoutChanged.connect(self.on_sourceModel_layoutChanged)
-    
-    def setFormater(self, formater, role):
-        self.__formaters[role] = formater
-        self.layoutChanged.emit()
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
         return True
@@ -75,10 +70,7 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         row = mIndex.row()
         parent = mIndex.parent()
         
-        if role in self.__formaters:
-            return self.__formaters[role](self.__sourceModel.index(row, 0, parent))
-        else:
-            return self.__sourceModel.data(self.__sourceModel.index(row, 0, parent), role)
+        return self.__sourceModel.data(self.__sourceModel.index(row, 0, parent), role)
 
     def flags(self, index):
         if self.__sourceModel is None or not index.isValid():  

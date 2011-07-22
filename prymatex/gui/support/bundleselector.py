@@ -13,7 +13,7 @@ class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog):
         self.model = QtGui.QStandardItemModel(self)
         self.proxy = QtGui.QSortFilterProxyModel(self)
         self.proxy.setSourceModel(self.model)
-        self.listBundleItems.setModel(self.proxy)
+        self.tableBundleItems.setModel(self.proxy)
         
     def select(self, items):
         self.item = None
@@ -22,7 +22,9 @@ class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog):
         self.lineFilter.clear()
         self.lineFilter.setFocus()
         for item in items:
-            self.model.appendRow(QtGui.QStandardItem(QtGui.QIcon(item.icon), item.name))
+            self.model.appendRow([ QtGui.QStandardItem(QtGui.QIcon(item.icon), item.name), QtGui.QStandardItem(item.trigger) ])
+        self.tableBundleItems.resizeColumnsToContents()
+        self.tableBundleItems.resizeRowsToContents()
         self.exec_()
         return self.item
     
@@ -30,12 +32,12 @@ class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog):
         regexp = QtCore.QRegExp("*%s*" % text, QtCore.Qt.CaseInsensitive, QtCore.QRegExp.Wildcard)
         self.proxy.setFilterRegExp(regexp)
     
-    def on_listBundleItems_activated(self, index):
+    def on_tableBundleItems_activated(self, index):
         sIndex = self.proxy.mapToSource(index)
         self.item = self.items[sIndex.row()]
         self.accept()
         
-    def on_listBundleItems_doubleClicked(self, index):
+    def on_tableBundleItems_doubleClicked(self, index):
         sIndex = self.proxy.mapToSource(index)
         self.item = self.items[sIndex.row()]
         self.accept()

@@ -91,8 +91,9 @@ class PMXCommand(PMXBundleItem):
         if value == None and self.standardInput != None:
             input, value = getInputTypeAndValue(self.standardInput)
             
-        if input != None and input == 'selection' and value == None:
+        if input == 'selection' and value == None:
             value = processor.document(self.inputFormat)
+            input = "document"
         elif value == None:
             input = None
         return input, value
@@ -128,7 +129,8 @@ class PMXCommand(PMXBundleItem):
         output_type = process.wait()
         output_handler = self.getOutputHandler(output_type)
         # Remove old
-        if input_type != None and output_handler in [ "insertText", "insertAsSnippet" ]:
+        if input_type != None and output_handler in [ "insertText", "insertAsSnippet", "replaceSelectedText" ]:
+            print 'delete' + input_type.title()
             deleteMethod = getattr(processor, 'delete' + input_type.title(), None)
             if deleteMethod != None:
                 deleteMethod()        

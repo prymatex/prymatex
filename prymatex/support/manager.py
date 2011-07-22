@@ -84,8 +84,14 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # Tools
     #---------------------------------------------------
-    def uuidgen(self):
-        return uuidmodule.uuid1()
+    def uuidgen(self, uuid = None):
+        if uuid is None:
+            return uuidmodule.uuid1()
+        try:
+            return uuidmodule.UUID(uuid)
+        except ValueError:
+            #generate
+            return uuidmodule.uuid3(uuidmodule.NAMESPACE_DNS, uuid)
 
     def convertToValidPath(self, name):
         # TODO: ver que el uuid generado no este entre los elementos existentes

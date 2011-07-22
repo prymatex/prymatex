@@ -71,6 +71,31 @@ class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
         else:
             return self.__sourceModel.data(self.__sourceModel.index(row, 0, parent), role)
 
+class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
+    def __init__(self, parent = None):
+        super(PMXSyntaxProxyModel, self).__init__('syntax', parent)
+    
+    def data(self, index, role):
+        if self.sourceModel() is None:
+            return None
+        
+        if not index.isValid():
+            return None
+        
+        mIndex = self.modelIndex(index)
+        row = mIndex.row()
+        parent = mIndex.parent()
+        
+        if role == QtCore.Qt.DisplayRole and index.column() == 1:
+            index = self.sourceModel().index(row, 0, parent)
+            syntax = index.internalPointer()
+            return syntax.trigger
+        elif index.column() == 0:
+            return self.sourceModel().data(self.sourceModel().index(row, 0, parent), role)
+
+    def columnCount(self, parent):
+        return 2
+    
 class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()

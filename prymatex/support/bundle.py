@@ -184,7 +184,7 @@ class PMXBundle(PMXManagedObject):
         info_file = os.path.join(path, cls.FILE)
         try:
             data = readPlist(info_file)
-            uuid = uuidmodule.UUID(data.pop('uuid'))
+            uuid = manager.uuidgen(data.pop('uuid', None))
             bundle = manager.getManagedObject(uuid)
             if bundle is None and not manager.isDeleted(uuid):
                 bundle = cls(uuid, namespace, data, path)
@@ -261,7 +261,7 @@ class PMXBundleItem(PMXManagedObject):
     def loadBundleItem(cls, path, namespace, bundle, manager):
         try:
             data = readPlist(path)
-            uuid = uuidmodule.UUID(data.pop('uuid'))
+            uuid = manager.uuidgen(data.pop('uuid', None))
             item = manager.getManagedObject(uuid)
             if item is None and not manager.isDeleted(uuid):
                 item = cls(uuid, namespace, data, path)
@@ -272,6 +272,7 @@ class PMXBundleItem(PMXManagedObject):
             elif item is not None:
                 item.addNamespace(namespace)
         except Exception, e:
+            
             print "Error in bundle item %s (%s)" % (path, e)
     
     def execute(self, processor):

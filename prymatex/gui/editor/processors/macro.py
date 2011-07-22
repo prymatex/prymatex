@@ -31,3 +31,6 @@ class PMXMacroProcessor(PMXMacroProcessor):
         
     def deleteBackward(self):
         self.editor.textCursor().deletePreviousChar()
+        
+    def executeCommandWithOptions(self, options):
+        print options

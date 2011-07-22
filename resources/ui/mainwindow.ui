@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -211,7 +211,7 @@
   <widget class="PMXStatusBar" name="statusbar"/>
   <action name="actionNewTab">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
    </property>
    <property name="text">
@@ -235,7 +235,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-save.png</normaloff>:/icons/actions/document-save.png</iconset>
    </property>
    <property name="text">
@@ -247,7 +247,7 @@
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-save-as.png</normaloff>:/icons/actions/document-save-as.png</iconset>
    </property>
    <property name="text">
@@ -259,7 +259,7 @@
   </action>
   <action name="actionSave_All">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-save-all.png</normaloff>:/icons/actions/document-save-all.png</iconset>
    </property>
    <property name="text">
@@ -271,7 +271,7 @@
   </action>
   <action name="actionReload">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/view-refresh.png</normaloff>:/icons/actions/view-refresh.png</iconset>
    </property>
    <property name="text">
@@ -280,7 +280,7 @@
   </action>
   <action name="actionClose">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
    </property>
    <property name="text">
@@ -292,7 +292,7 @@
   </action>
   <action name="actionClose_Others">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-close.png</normaloff>:/icons/actions/document-close.png</iconset>
    </property>
    <property name="text">
@@ -312,7 +312,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/application-exit.png</normaloff>:/icons/actions/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -348,7 +348,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
@@ -360,7 +360,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
@@ -372,7 +372,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
@@ -396,7 +396,7 @@
   </action>
   <action name="actionFind">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/edit-find.png</normaloff>:/icons/actions/edit-find.png</iconset>
    </property>
    <property name="text">
@@ -420,7 +420,7 @@
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
    </property>
    <property name="text">
@@ -805,7 +805,7 @@
     <string>Select Bundle Item</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+T</string>
+    <string>Meta+Ctrl+T</string>
    </property>
   </action>
   <action name="actionSelect_None">
@@ -835,7 +835,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
    </property>
    <property name="text">

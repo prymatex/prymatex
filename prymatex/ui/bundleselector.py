@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources\ui\bundleselector.ui'
+# Form implementation generated from reading ui file 'resources/ui/bundleselector.ui'
 #
-# Created: Wed Jul 20 10:00:23 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Thu Jul 21 19:09:15 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,9 +26,14 @@ class Ui_BundleSelector(object):
         self.lineFilter = QtGui.QLineEdit(BundleSelector)
         self.lineFilter.setObjectName(_fromUtf8("lineFilter"))
         self.verticalLayout.addWidget(self.lineFilter)
-        self.listBundleItems = QtGui.QListView(BundleSelector)
-        self.listBundleItems.setObjectName(_fromUtf8("listBundleItems"))
-        self.verticalLayout.addWidget(self.listBundleItems)
+        self.tableBundleItems = QtGui.QTableView(BundleSelector)
+        self.tableBundleItems.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.tableBundleItems.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableBundleItems.setShowGrid(False)
+        self.tableBundleItems.setObjectName(_fromUtf8("tableBundleItems"))
+        self.tableBundleItems.horizontalHeader().setVisible(False)
+        self.tableBundleItems.verticalHeader().setVisible(False)
+        self.verticalLayout.addWidget(self.tableBundleItems)
 
         self.retranslateUi(BundleSelector)
         QtCore.QMetaObject.connectSlotsByName(BundleSelector)

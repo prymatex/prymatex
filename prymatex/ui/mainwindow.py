@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Tue Jul 19 15:22:13 2011
+# Created: Thu Jul 21 18:31:24 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 18))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -577,7 +577,7 @@ class Ui_MainWindow(object):
         self.actionAbout_Qt.setText(_('About &Qt'))
         self.actionShow_Bundle_Editor.setText(_('Show Bundle Editor'))
         self.actionSelect_Bundle_Item.setText(_('Select Bundle Item'))
-        self.actionSelect_Bundle_Item.setShortcut(_('Ctrl+Alt+T'))
+        self.actionSelect_Bundle_Item.setShortcut(_('Meta+Ctrl+T'))
         self.actionSelect_None.setText(_('Select None'))
         self.actionShow_Log_Window.setText(_('Show Log Window'))
         self.actionShow_Log_Window.setStatusTip(_('Displays Log Messages'))

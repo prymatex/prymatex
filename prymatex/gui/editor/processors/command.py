@@ -128,11 +128,19 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor = self.editor.textCursor()
         cursor.removeSelectedText()
 
+    def deleteLine(self):
+        cursor = self.editor.textCursor()
+        block = cursor.block()
+        cursor.setPosition(block.position())
+        cursor.setPosition(block.position() + block.length() - 1, QtGui.QTextCursor.KeepAnchor)
+        cursor.removeSelectedText()
+        
     def deleteCharacter(self):
         cursor = self.editor.textCursor()
         cursor.deleteChar()
     
     def deleteDocument(self):
+        print "borrar documento"
         self.editor.document().clear()
         
     # Outpus function

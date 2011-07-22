@@ -7,7 +7,7 @@ from prymatex.support.manager import PMXSupportBaseManager
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
-from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
 from prymatex.mvc.proxies import bisect
 
 class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
@@ -36,41 +36,35 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
         self.themeListModel = []
         
         #STYLE PROXY
-        self.themeStyleProxyModel = PMXThemeStyleTableProxyModel()
+        self.themeStyleProxyModel = PMXThemeStyleTableProxyModel(self)
         self.themeStyleProxyModel.setSourceModel(self.themeStylesTableModel)
 
         #TREE PROXY
-        self.bundleProxyTreeModel = PMXBundleTreeProxyModel()
+        self.bundleProxyTreeModel = PMXBundleTreeProxyModel(self)
         self.bundleProxyTreeModel.setSourceModel(self.bundleTreeModel)
 
         #BUNDLES
-        self.bundleProxyModel = PMXBundleProxyModel()
+        self.bundleProxyModel = PMXBundleProxyModel(self)
         self.bundleProxyModel.setSourceModel(self.bundleTreeModel)
         
         #TEMPLATES
-        self.templateProxyModel = PMXBundleTypeFilterProxyModel("template")
+        self.templateProxyModel = PMXBundleTypeFilterProxyModel("template", self)
         self.templateProxyModel.setSourceModel(self.bundleTreeModel)
         
         #SYNTAX
-        self.syntaxProxyModel = PMXBundleTypeFilterProxyModel("syntax")
+        self.syntaxProxyModel = PMXSyntaxProxyModel(self)
         self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)
-        def syntaxDisplayFormater(index):
-            if not index.isValid():
-                return None
-            item = index.internalPointer()
-            return item.buildMenuTextEntry()
-        self.syntaxProxyModel.setFormater(syntaxDisplayFormater, QtCore.Qt.DisplayRole)
         
         #INTERACTIVEITEMS
-        self.actionItemsProxyModel = PMXBundleTypeFilterProxyModel(["command", "snippet", "macro"])
+        self.actionItemsProxyModel = PMXBundleTypeFilterProxyModel(["command", "snippet", "macro"], self)
         self.actionItemsProxyModel.setSourceModel(self.bundleTreeModel)
         
         #PREFERENCES
-        self.preferenceProxyModel = PMXBundleTypeFilterProxyModel("preference")
+        self.preferenceProxyModel = PMXBundleTypeFilterProxyModel("preference", self)
         self.preferenceProxyModel.setSourceModel(self.bundleTreeModel)
         
         #DRAGCOMMANDS
-        self.dragProxyModel = PMXBundleTypeFilterProxyModel("dragcommand")
+        self.dragProxyModel = PMXBundleTypeFilterProxyModel("dragcommand", self)
         self.dragProxyModel.setSourceModel(self.bundleTreeModel)
         self.configure()
 

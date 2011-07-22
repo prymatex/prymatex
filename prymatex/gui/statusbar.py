@@ -96,8 +96,7 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
         self.comboIndentWidth.valueChanged.connect(self.setIndentWidth)
         
         
-        self.syntaxMenu = QtGui.QComboBox(self)
-        self.syntaxMenu.setModel(self.pmxApp.supportManager.syntaxProxyModel)
+        self.configSyntaxMenu()
             
         self.addPermanentWidget(self.syntaxMenu)
         self.addPermanentWidget(self.lineColLabel)    
@@ -107,6 +106,24 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
         self.connectSignals()
         
         self.mainWindow.tabWidget.currentEditorChanged.connect(self.syncToEditor)
+    
+    def configSyntaxMenu(self):
+        self.syntaxMenu = QtGui.QComboBox(self)
+        tableView = QtGui.QTableView(self)
+        tableView.setModel(self.pmxApp.supportManager.syntaxProxyModel)
+        tableView.resizeColumnsToContents()
+        tableView.resizeRowsToContents()
+        tableView.verticalHeader().setVisible(False)
+        tableView.horizontalHeader().setVisible(False)
+        tableView.setShowGrid(False)
+        tableView.setMinimumWidth(tableView.horizontalHeader().length() + 25)
+        tableView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        tableView.setAutoScroll(False)
+        self.syntaxMenu.setModel(self.pmxApp.supportManager.syntaxProxyModel);
+        self.syntaxMenu.setModelColumn(0);
+        self.syntaxMenu.setView(tableView);
     
     def mostrar(self, index):
         print self._combo.model()[index, 'item']
