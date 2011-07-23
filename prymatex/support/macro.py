@@ -31,9 +31,9 @@ class PMXMacro(PMXBundleItem):
         return hash
             
     def execute(self, processor):
+        processor.startMacro(self)
         for command in self.commands:
-            print command
             name = command['command'][:-1]
-            method = getattr(processor, name, None)
-            if callable(method):
-                method()
+            args = [command['argument']] if 'argument' in command else []
+            getattr(processor, name, None)(*args)
+        processor.endMacro(self)

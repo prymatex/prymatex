@@ -90,6 +90,7 @@ PMXMacroProcessor = type("PMXMacroProcessor", (object, ), {
     "executeCommandWithOptions": nop,
     "insertSnippetWithOptions": nop,
     "findWithOptions": nop,
+    "findNext": nop,
     "indent": nop
 })
     

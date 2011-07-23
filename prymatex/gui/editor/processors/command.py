@@ -201,7 +201,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(text)
         
     def insertAsSnippet(self, text):
-        snippet = PMXSnippet(uuidmodule.uuid1(), "internal", hash = { 'content': text})
+        snippet = PMXSnippet(self.command.manager.uuidgen(), "internal", hash = { 'content': text})
         snippet.bundle = self.command.bundle
         self.editor.insertBundleItem(snippet, disableIndent = self.disableAutoIndent)
             
