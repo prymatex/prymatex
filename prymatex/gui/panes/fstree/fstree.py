@@ -19,7 +19,7 @@ class FSTree(QTreeView, PMXObject):
     class Meta:
         settings = 'fspane.fstree'
     
-    def __init__(self, parent):
+    def __init__(self, parent = None):
         QTreeView.__init__(self, parent)
         
         
@@ -33,7 +33,8 @@ class FSTree(QTreeView, PMXObject):
         self.setIndentation(20)
         self.setSortingEnabled(True)
         self.dirmodelFiles.sort(0)
-        self.mainWindow.tabWidget.currentEditorChanged.connect(self.focusWidgetPath)
+        print self.mainWindow
+        #self.mainWindow.tabWidget.currentEditorChanged.connect(self.focusWidgetPath)
         self.setExpandsOnDoubleClick(True)
         QMetaObject.connectSlotsByName(self)
     

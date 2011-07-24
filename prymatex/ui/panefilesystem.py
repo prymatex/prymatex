@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Sat Jul 23 13:30:00 2011
+# Created: Sun Jul 24 20:02:46 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -24,7 +24,6 @@ class Ui_FSPane(object):
 "\n"
 "}"))
         self.verticalLayout = QtGui.QVBoxLayout(FSPane)
-        self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.buttonsLayout = QtGui.QHBoxLayout()
@@ -100,8 +99,6 @@ class Ui_FSPane(object):
         spacerItem = QtGui.QSpacerItem(10, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.buttonsLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.buttonsLayout)
-        self.bookmarksLayout = QtGui.QHBoxLayout()
-        self.bookmarksLayout.setObjectName(_fromUtf8("bookmarksLayout"))
         self.comboBookmarks = QtGui.QComboBox(FSPane)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -109,13 +106,38 @@ class Ui_FSPane(object):
         sizePolicy.setHeightForWidth(self.comboBookmarks.sizePolicy().hasHeightForWidth())
         self.comboBookmarks.setSizePolicy(sizePolicy)
         self.comboBookmarks.setObjectName(_fromUtf8("comboBookmarks"))
-        self.bookmarksLayout.addWidget(self.comboBookmarks)
-        self.verticalLayout.addLayout(self.bookmarksLayout)
-        self.tree = FSTree(FSPane)
+        icon7 = QtGui.QIcon()
+        icon7.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/emblems/emblem-favorite.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.comboBookmarks.addItem(icon7, _fromUtf8(""))
+        icon8 = QtGui.QIcon()
+        icon8.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.comboBookmarks.addItem(icon8, _fromUtf8(""))
+        self.verticalLayout.addWidget(self.comboBookmarks)
+        self.stackedWidget = QtGui.QStackedWidget(FSPane)
+        self.stackedWidget.setLineWidth(0)
+        self.stackedWidget.setObjectName(_fromUtf8("stackedWidget"))
+        self.pageFSTree = QtGui.QWidget()
+        self.pageFSTree.setObjectName(_fromUtf8("pageFSTree"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.pageFSTree)
+        self.verticalLayout_2.setMargin(0)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.tree = FSTree(self.pageFSTree)
         self.tree.setObjectName(_fromUtf8("tree"))
-        self.verticalLayout.addWidget(self.tree)
+        self.verticalLayout_2.addWidget(self.tree)
+        self.stackedWidget.addWidget(self.pageFSTree)
+        self.pageBookmarks = QtGui.QWidget()
+        self.pageBookmarks.setObjectName(_fromUtf8("pageBookmarks"))
+        self.verticalLayout_3 = QtGui.QVBoxLayout(self.pageBookmarks)
+        self.verticalLayout_3.setMargin(0)
+        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        self.listWidget = PMXBookmarksListView(self.pageBookmarks)
+        self.listWidget.setObjectName(_fromUtf8("listWidget"))
+        self.verticalLayout_3.addWidget(self.listWidget)
+        self.stackedWidget.addWidget(self.pageBookmarks)
+        self.verticalLayout.addWidget(self.stackedWidget)
 
         self.retranslateUi(FSPane)
+        self.stackedWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(FSPane)
 
     def retranslateUi(self, FSPane):
@@ -128,6 +150,9 @@ class Ui_FSPane(object):
         self.buttonCollapseAll.setToolTip(_('Collapse Folder'))
         self.pushShowHidden.setToolTip(_('Show Hidden Files'))
         self.comboBookmarks.setToolTip(_('Folders'))
+        self.comboBookmarks.setItemText(0, _('Bookmarks'))
+        self.comboBookmarks.setItemText(1, _('File System'))
 
-from prymatex.gui.panes.fstree import FSTree
+from prymatex.gui.panes.fstree.bookmarks import PMXBookmarksListView
+from prymatex.gui.panes.fstree.fstree import FSTree
 from prymatex import resources_rc

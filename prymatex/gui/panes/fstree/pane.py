@@ -25,9 +25,7 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         self.setupUi(self)
         start_dir = qApp.instance().startDirectory()
         self.tree.setRootIndex(self.tree.model().index(start_dir))
-        self.comboBookmarks.addItem(_("Bookmarks"), 1)
-        #self.comboBookmarks.addItem(_("File System"), 2)
-        #self.tree.model().rootPathChanged.connect(self.comboBookmarks.pathChanged)
+        self.setupBookmarksCombo()
         self.tree.model().rootPathChanged.connect(self.treeRootPathChanged)
         
         self.configure()
@@ -39,8 +37,20 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         self.comboBookmarks.addItem(path)
         #self.tree.model().rootPathChanged.connect(self.treeRootPathChanged)
     
+    def setupBookmarksCombo(self):
+        self.comboBookmarks.insertSeparator(self.comboBookmarks.model().rowCount())
+        for depth, path in enumerate(["/"] + os.getcwd().split(os.sep)[1:]):
+            self.comboBookmarks.addItem((" "* depth) + path)
+        #self.comboBookmarks.addItem("Cosas")
+    
     @pyqtSignature('int')
     def on_comboBookmarks_currentIndexChanged(self, index):
+        if index == 0:
+            self.stackedWidget.setCurrentIndex(1)
+        elif index == 1:
+            self.stackedWidget.setCurrentIndex(0)
+        
+        
         data = self.comboBookmarks.itemData(index)
         print data.toPyObject()
     
