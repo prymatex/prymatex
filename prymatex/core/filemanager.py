@@ -35,7 +35,7 @@ class PMXFile(QObject):
         assert isinstance(parent, PMXFileManager), ("PMXFile should have a PMXFileManager"
                                                     "instance as parent. PMXFileManager is "
                                                     "a singleton property on "
-                                                    "PMXApplication.file_manager")
+                                                    "PMXApplication.fileManager")
         super(PMXFile, self).__init__(parent)
         self.path = path
         self.fileLostReference.connect(parent.fileUnused)
@@ -224,4 +224,7 @@ class PMXFileManager(PMXObject):
     
     def recentFiles(self):
         return []
-    
+
+
+class FileNotSupported(Exception):
+    pass

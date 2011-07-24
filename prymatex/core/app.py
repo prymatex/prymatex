@@ -43,7 +43,7 @@ class PMXApplication(QtGui.QApplication):
     #===========================================================================
     # File manager
     #===========================================================================
-    __file_manager = None
+    __fileManager = None
     #===========================================================================
     # Bundle Editor
     #===========================================================================
@@ -153,19 +153,19 @@ class PMXApplication(QtGui.QApplication):
     
     def setup_file_manager(self):
         from prymatex.core.filemanager import PMXFileManager
-        self.__file_manager = PMXFileManager(self)
+        self.__fileManager = PMXFileManager(self)
     
     
     @property
-    def file_manager(self):
-        return self.__file_manager
+    def fileManager(self):
+        return self.__fileManager
     
-    @file_manager.setter
-    def file_manager(self, value):
-        assert self.__file_manager is None
+    @fileManager.setter
+    def fileManager(self, value):
+        assert self.__fileManager is None
         from prymatex.core.filemanager import PMXFileManager
         assert isinstance(value, PMXFileManager)
-        self.__file_manager = value
+        self.__fileManager = value
         
     def createWindows(self, files_to_open):
         '''

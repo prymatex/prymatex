@@ -252,8 +252,8 @@ class PMXTabWidget(QTabWidget, PMXObject):
         #print "** appendEmptyTab called!"
         #import traceback
         #traceback.print_stack()
-        file_manager = qApp.instance().file_manager
-        empty_file = file_manager.getEmptyFile()
+        fileManager = qApp.instance().fileManager
+        empty_file = fileManager.getEmptyFile()
         editor = PMXEditorWidget.editorFactory(empty_file, parent = self)
         # Title should be filled after tab insertion
         self.addTab(editor)
