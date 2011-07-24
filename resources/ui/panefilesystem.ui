@@ -240,7 +240,7 @@
    <item>
     <layout class="QHBoxLayout" name="bookmarksLayout">
      <item>
-      <widget class="PMXBookmarksPathComboBox" name="comboBookmarks">
+      <widget class="QComboBox" name="comboBookmarks">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -249,35 +249,6 @@
        </property>
        <property name="toolTip">
         <string>Folders</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushBookmarks">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Favourite places</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources.qrc">
-         <normaloff>:/icons/emblems/emblem-favorite.png</normaloff>:/icons/emblems/emblem-favorite.png</iconset>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -293,11 +264,6 @@
    <class>FSTree</class>
    <extends>QTreeView</extends>
    <header>prymatex.gui.panes.fstree</header>
-  </customwidget>
-  <customwidget>
-   <class>PMXBookmarksPathComboBox</class>
-   <extends>QComboBox</extends>
-   <header>prymatex.gui.panes.fswidgets</header>
   </customwidget>
  </customwidgets>
  <resources>

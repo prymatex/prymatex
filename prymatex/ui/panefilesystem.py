@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Wed Jul 20 11:01:58 2011
+# Created: Sat Jul 23 13:30:00 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -102,7 +102,7 @@ class Ui_FSPane(object):
         self.verticalLayout.addLayout(self.buttonsLayout)
         self.bookmarksLayout = QtGui.QHBoxLayout()
         self.bookmarksLayout.setObjectName(_fromUtf8("bookmarksLayout"))
-        self.comboBookmarks = PMXBookmarksPathComboBox(FSPane)
+        self.comboBookmarks = QtGui.QComboBox(FSPane)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -110,20 +110,6 @@ class Ui_FSPane(object):
         self.comboBookmarks.setSizePolicy(sizePolicy)
         self.comboBookmarks.setObjectName(_fromUtf8("comboBookmarks"))
         self.bookmarksLayout.addWidget(self.comboBookmarks)
-        self.pushBookmarks = QtGui.QPushButton(FSPane)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushBookmarks.sizePolicy().hasHeightForWidth())
-        self.pushBookmarks.setSizePolicy(sizePolicy)
-        self.pushBookmarks.setMaximumSize(QtCore.QSize(24, 24))
-        self.pushBookmarks.setText(_fromUtf8(""))
-        icon7 = QtGui.QIcon()
-        icon7.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/emblems/emblem-favorite.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushBookmarks.setIcon(icon7)
-        self.pushBookmarks.setFlat(True)
-        self.pushBookmarks.setObjectName(_fromUtf8("pushBookmarks"))
-        self.bookmarksLayout.addWidget(self.pushBookmarks)
         self.verticalLayout.addLayout(self.bookmarksLayout)
         self.tree = FSTree(FSPane)
         self.tree.setObjectName(_fromUtf8("tree"))
@@ -142,8 +128,6 @@ class Ui_FSPane(object):
         self.buttonCollapseAll.setToolTip(_('Collapse Folder'))
         self.pushShowHidden.setToolTip(_('Show Hidden Files'))
         self.comboBookmarks.setToolTip(_('Folders'))
-        self.pushBookmarks.setToolTip(_('Favourite places'))
 
 from prymatex.gui.panes.fstree import FSTree
-from prymatex.gui.panes.fswidgets import PMXBookmarksPathComboBox
 from prymatex import resources_rc
