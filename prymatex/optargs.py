@@ -19,10 +19,6 @@ parser = OptionParser(usage="%prog [options] [files]",
 parser.add_option('-d', '--startdir', dest='startdir', default = '',
                   help = 'Start directory')
 
-# Configuration file to use
-parser.add_option('-c', '--config', dest='config_file',
-                  help='Config file'
-                  )
 
 # Reverts custom options
 parser.add_option('-R', '--reset-config', dest='reste_config', 
