@@ -39,7 +39,8 @@ class FSTree(QTreeView, PMXObject):
     
     def followWidgetFoucs(self, follow):
         print "Follow", follow
-        
+    
+    
     def focusWidgetPath(self, widget):
         '''
         Editor has been hanged in the main window
@@ -153,7 +154,7 @@ class FSTree(QTreeView, PMXObject):
             
         if os.path.isdir(path):
             if self.model().hasChildren(index):
-                print "Cerpeta"
+                self.model().setRootPath(path)
 
         
     def goUp(self):

@@ -5,6 +5,7 @@ import shutil
 from os.path import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+
 from prymatex.gui.panes import PaneDockBase
 from prymatex.gui import PMXBaseGUIMixin
 from prymatex.utils.translation import ugettext as _
@@ -13,7 +14,6 @@ from prymatex.ui.panefilesystem import Ui_FSPane
 from prymatex.ui.filesystemsettings import Ui_FSSettingsDialog
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-
 
 class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
@@ -25,14 +25,25 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         self.setupUi(self)
         start_dir = qApp.instance().startDirectory()
         self.tree.setRootIndex(self.tree.model().index(start_dir))
+        self.comboBookmarks.addItem(_("Bookmarks"), 1)
+        #self.comboBookmarks.addItem(_("File System"), 2)
+        #self.tree.model().rootPathChanged.connect(self.comboBookmarks.pathChanged)
+        self.tree.model().rootPathChanged.connect(self.treeRootPathChanged)
         
-        self.tree.model().rootPathChanged.connect(self.comboBookmarks.pathChanged)
-        self.comboBookmarks.currentIndexChanged[int].connect(self.changeToFavourite)
         self.configure()
         
     class Meta:
         settings = "fspane"
-        
+    
+    def treeRootPathChanged(self, path):
+        self.comboBookmarks.addItem(path)
+        #self.tree.model().rootPathChanged.connect(self.treeRootPathChanged)
+    
+    @pyqtSignature('int')
+    def on_comboBookmarks_currentIndexChanged(self, index):
+        data = self.comboBookmarks.itemData(index)
+        print data.toPyObject()
+    
     @pyqtSignature('bool')
     def on_buttonSyncTabFile_toggled(self, sync):
         if sync:
