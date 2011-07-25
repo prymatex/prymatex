@@ -30,7 +30,7 @@ class PaneDockBase(QDockWidget, PMXObject):
         if self.action.isChecked():
             self.action.setChecked(False)
         self.debug("Closing")
-        print "hide"
+        #print "hide"
         self.mainWindow.tabWidget.currentWidget().setFocus(Qt.MouseFocusReason)
         
         

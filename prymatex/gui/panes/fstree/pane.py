@@ -26,21 +26,43 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         start_dir = qApp.instance().startDirectory()
         self.tree.setRootIndex(self.tree.model().index(start_dir))
         self.setupBookmarksCombo()
-        self.tree.model().rootPathChanged.connect(self.treeRootPathChanged)
+        self.tree.rootChanged.connect(self.treeRootPathChanged)
         
+        self.bookmarksView.pathChangeRequested.connect(self.openBookmark)
         self.configure()
         
     class Meta:
         settings = "fspane"
     
     def treeRootPathChanged(self, path):
-        self.comboBookmarks.addItem(path)
-        #self.tree.model().rootPathChanged.connect(self.treeRootPathChanged)
+        #self.comboBookmarks.addItem(path)
+        newPathParts = unicode(path).split(os.sep)
+        rows = self.comboBookmarks.model().rowCount()
+        self.comboBookmarks.setEnabled(False)
+        self.comboBookmarks.model().removeRows(2, rows -2)
+        self.comboBookmarks.insertSeparator(2)
+        for i in range(len(newPathParts)):
+            
+            name = newPathParts[i]
+            if not name:
+                continue
+            path = os.sep.join(newPathParts[:i+1])
+            model = self.tree.model()
+            icon = model.fileIcon(model.index(path))
+            self.comboBookmarks.addItem(icon, name, path)
+        self.comboBookmarks.setCurrentIndex(self.comboBookmarks.model().rowCount()-1)
+        self.comboBookmarks.setEnabled(True)
+        
+        
+        
+    
+    def openBookmark(self, path):
+        self.tree.setRootIndex(self.tree.model().index(path))
+        self.comboBookmarks.setCurrentIndex(1)
+    
     
     def setupBookmarksCombo(self):
         self.comboBookmarks.insertSeparator(self.comboBookmarks.model().rowCount())
-        for depth, path in enumerate(["/"] + os.getcwd().split(os.sep)[1:]):
-            self.comboBookmarks.addItem((" "* depth) + path)
         #self.comboBookmarks.addItem("Cosas")
     
     @pyqtSignature('int')
@@ -50,9 +72,12 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         elif index == 1:
             self.stackedWidget.setCurrentIndex(0)
         
-        
-        data = self.comboBookmarks.itemData(index)
-        print data.toPyObject()
+        else:
+            path = self.comboBookmarks.itemData(index).toPyObject()
+            if self.tree.model().index(path) != self.tree.rootIndex():
+                print "Should Change"
+            #if os.path.exists(path):
+            #    self.tree.setRootIndex(self.tree.model().index(path))
     
     @pyqtSignature('bool')
     def on_buttonSyncTabFile_toggled(self, sync):

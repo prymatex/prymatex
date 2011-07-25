@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Sun Jul 24 20:02:46 2011
+# Created: Sun Jul 24 22:50:23 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -130,9 +130,9 @@ class Ui_FSPane(object):
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.pageBookmarks)
         self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.listWidget = PMXBookmarksListView(self.pageBookmarks)
-        self.listWidget.setObjectName(_fromUtf8("listWidget"))
-        self.verticalLayout_3.addWidget(self.listWidget)
+        self.bookmarksView = PMXBookmarksListView(self.pageBookmarks)
+        self.bookmarksView.setObjectName(_fromUtf8("bookmarksView"))
+        self.verticalLayout_3.addWidget(self.bookmarksView)
         self.stackedWidget.addWidget(self.pageBookmarks)
         self.verticalLayout.addWidget(self.stackedWidget)
 

@@ -1,6 +1,8 @@
 import subprocess
 import os
-from prymatex.utils.deco import memoize
+
+from PyQt4.Qt import QIcon, QThread, QPixmap
+
 
 class PMXKDE4ResourceManager(object):
     
@@ -19,42 +21,58 @@ class PMXKDE4ResourceManager(object):
         return self._iconPaths
 
     _iconCache = {}
-    def getIcon(self, iconName, preferedInPath=None):
+    def getIcon(self, iconName):
         if self.cache:
-            cacheKey = (iconName, preferedInPath)
+            cacheKey = (iconName, )
             if not self._iconCache.has_key(cacheKey):
-                self._iconCache[cacheKey] = self._findIconPath(iconName, preferedInPath)
-            else:
-                print "Hit!"
+                self._iconCache[cacheKey] = self._loadIcon(iconName, )
             return self._iconCache[cacheKey]
         else:
-            return self._findIconPath(iconName, preferedInPath)
-    
-    @memoize
-    def _findIconPath(self, iconName, preferedInPath=None):
-        '''
-        Gets icon path from KDE resource system
-        '''
-        if isinstance(preferedInPath, basestring):
-            preferedInPath = (preferedInPath, )
-        matches = []
-        for basePath in self.iconPaths:
-            for root, dir, files in os.walk(basePath, followlinks = True):
-                for filename in files:
-                    name, ext = os.path.splitext(filename)
-                    if name == iconName:
-                        fullpath = os.path.join(root, filename)
-                        if preferedInPath:
-                            for part in preferedInPath:
-                                if part in root:
-                                    return fullpath
-                                else:
-                                    matches.append(fullpath)
-                        else:
-                            return fullpath
-        if matches:
-            return matches[0]
-    
+            return QIcon.fromTheme(iconName, fallback=QIcon(QPixmap(iconName)))
+        
+    def _loadIcon(self, name):
+        if os.path.exists(name):
+            return QIcon(QPixmap(name))
+        else:
+            return QIcon.fromTheme(name, fallback = QIcon())
+        
+
+def findFileName(searchPaths, fileName, preferedInPath=None, exts=None):
+    '''
+    Generic function for resouce crawling under a path
+    @param searchPaths: Paths where resource should be searched in
+    @param fileName: The name, i.e. "folder"
+    @param preferedInPath: A string or list of parts expected in the path (i.e. 32x32)
+    @param exts: Extensions
+    '''
+    if isinstance(preferedInPath, basestring):
+        preferedInPath = (preferedInPath, )
+    if isinstance(exts, basestring):
+        exts = (exts, )
+    exts = map(lambda s: s.lower(), exts)
+        
+    matches = []
+    for basePath in searchPaths:
+        for root, dir, files in os.walk(basePath, followlinks = True):
+            for filename in files:
+                name, ext = os.path.splitext(filename)
+                if name == fileName:
+                    if exts and not ext.lower() in exts:
+                        continue
+                    fullpath = os.path.join(root, filename)
+                    if preferedInPath:
+                        for part in preferedInPath:
+                            if part in root:
+                                return fullpath
+                            else:
+                                matches.append(fullpath)
+                    else:
+                        return fullpath
+    if matches:
+        return matches[0]
+
 if __name__ == "__main__":
     resouceManager = PMXKDE4ResourceManager()
-    print resouceManager.getIcon('folder',)
+    icon =  resouceManager.getIcon('folder',)
+    print icon.isNull()
+    

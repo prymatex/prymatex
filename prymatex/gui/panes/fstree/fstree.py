@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 from PyQt4.QtGui import QTreeView, QFileSystemModel, QMenu, QAction, QMessageBox, qApp
 from PyQt4.QtGui import QInputDialog, QApplication, QPixmap, QIcon
-from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir
+from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir, pyqtSignal, QString
 import os
 import shutil
 from os.path import join, abspath, isfile, isdir, dirname
@@ -16,6 +16,8 @@ class FSTree(QTreeView, PMXObject):
     '''
     File tree panel
     '''
+    rootChanged = pyqtSignal(object)
+    
     class Meta:
         settings = 'fspane.fstree'
     
@@ -155,7 +157,7 @@ class FSTree(QTreeView, PMXObject):
             
         if os.path.isdir(path):
             if self.model().hasChildren(index):
-                self.model().setRootPath(path)
+                self.setRootIndex(index)
 
         
     def goUp(self):
@@ -250,3 +252,8 @@ class FSTree(QTreeView, PMXObject):
                 shutil.rmtree(curpath)
             self.actionRefresh.trigger()
 
+    def setRootIndex(self, index):
+        path = self.model().filePath(index)
+        super(FSTree, self).setRootIndex(index)
+        self.rootChanged.emit(path)
+        

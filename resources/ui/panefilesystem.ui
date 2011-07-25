@@ -289,7 +289,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="PMXBookmarksListView" name="listWidget"/>
+        <widget class="PMXBookmarksListView" name="bookmarksView"/>
        </item>
       </layout>
      </widget>
