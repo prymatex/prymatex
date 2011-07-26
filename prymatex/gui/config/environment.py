@@ -16,6 +16,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         self.settingGroup = settingGroup
         self.variables = user + map(lambda (variable, value): {'variable': variable, 'value': value, 'system': True, 'enabled': True}, system.iteritems())
         
+        
     def setSettingValue(self):
         variables = filter(lambda item: 'system' not in item, self.variables)
         self.settingGroup.setValue('shellVariables', variables)
@@ -106,6 +107,10 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
         self.model = PMXEnvVariablesTableModel(self.pmxApp.settings.getGroup('Manager'), self.pmxApp.supportManager.shellVariables, self.pmxApp.supportManager.environment, self)
         self.tableView.setModel(self.model)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        
+        self.model.rowsInserted.connect(self.tableView.resizeRowsToContents)
+        self.model.rowsRemoved.connect(self.tableView.resizeRowsToContents)
+        self.tableView.resizeRowsToContents()
         
     def on_pushAdd_pressed(self):
         self.model.insertRows(0, 1)
