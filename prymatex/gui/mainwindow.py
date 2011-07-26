@@ -13,7 +13,7 @@ from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
 from prymatex.gui.mixins.common import CenterWidget
 from prymatex.gui.panes.bundles import PMXBundleEditorDock
-from prymatex.gui.panes.fspane import PMXFSPaneDock
+from prymatex.gui.panes.fstree import PMXFSPaneDock
 from prymatex.gui.panes.outputpanel import PMXOutputDock
 from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
@@ -27,6 +27,7 @@ from prymatex.core.base import PMXObject
 from prymatex.gui.support.bundleselector import PMXBundleItemSelector
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
+from prymatex.core.filemanager import FileNotSupported
 
 
 #from prymatex.config.configdialog import PMXConfigDialog
@@ -289,14 +290,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         @see: File manager to check if a file is opened
         @return: editor widget or None if it can't make it
         '''
-        file_manager = qApp.instance().file_manager
+        fileManager = qApp.instance().fileManager
         pmx_file = None
         try:
             print "About to open", path
-            pmx_file = file_manager.openFile(path)
+            pmx_file = fileManager.openFile(path)
         except FileDoesNotExistError, e:
             print " FileDoesNotExistError", e
             QMessageBox.critical(self, "File not found", "%s" % e, QMessageBox.Ok)
+        except FileNotSupported, e:
+            QMessageBox.critical(self, "%s doesn't know how to handle this kind of file", "%s" % e, QMessageBox.Ok)
             
         except UnicodeDecodeError, e:
             print "UnicodeDecodeError", e
@@ -462,11 +465,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         ''' Updates window title '''
         from string import Template
         #print self.windowTitleTemplate, type(self.windowTitleTemplate)
-        from prymatex.gui.config.environment import enviromentVariablesModel
         template = Template(self.windowTitleTemplate)
         
-        extra_attrs = dict(enviromentVariablesModel)
-        #print extra_attrs
+        extra_attrs = self.pmxApp.supportManager.buildEnvironment()
         s = template.safe_substitute(APPNAME="Prymatex",
                                 FILE='No file',
                                 PROJECT='No project',

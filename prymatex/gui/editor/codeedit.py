@@ -224,7 +224,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
         menu.addAction(self.actionIndent)
         menu.addAction(self.actionUnindent)
-        self.actionUnindent.setEnabled(self.can_unindent())
+        self.actionUnindent.setEnabled(self.canUnindent())
+        
 
         menu.exec_(event.globalPos());
         del menu
@@ -836,6 +837,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.setTextCursor(cursor)
                 cursor.endEditBlock()
                 
+    # FIXME: Return something sensible :P
+    def canUnindent(self):
+        return True
+    
     def dragEnterEvent(self, dragEnterEvent):
         if dragEnterEvent.mimeData().hasFormat('text/plain'):
             dragEnterEvent.accept()
