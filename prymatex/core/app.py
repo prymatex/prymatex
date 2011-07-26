@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import prymatex, os, sys
+import os, sys
 from os import getpid, unlink
 from os.path import join, exists, dirname, abspath, expanduser
 from datetime import datetime
 from PyQt4 import QtGui, QtCore
 
+import prymatex
 from prymatex import resources_rc
 from prymatex.utils import deco
 from prymatex.core.config import PMXSettings
@@ -154,7 +155,7 @@ class PMXApplication(QtGui.QApplication):
     def setup_file_manager(self):
         from prymatex.core.filemanager import PMXFileManager
         self.__fileManager = PMXFileManager(self)
-    
+
     
     @property
     def fileManager(self):
@@ -267,7 +268,8 @@ class PMXApplication(QtGui.QApplication):
                 'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
                 #Prymatex 
                 'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
-                'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH')
+                'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
+                'PMX_VERSION': prymatex.get_version()
         });
 
         manager.addNamespace('user', userPath)

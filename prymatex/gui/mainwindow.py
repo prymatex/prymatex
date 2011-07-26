@@ -465,11 +465,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         ''' Updates window title '''
         from string import Template
         #print self.windowTitleTemplate, type(self.windowTitleTemplate)
-        from prymatex.gui.config.environment import enviromentVariablesModel
         template = Template(self.windowTitleTemplate)
         
-        extra_attrs = dict(enviromentVariablesModel)
-        #print extra_attrs
+        extra_attrs = self.pmxApp.supportManager.buildEnvironment()
         s = template.safe_substitute(APPNAME="Prymatex",
                                 FILE='No file',
                                 PROJECT='No project',

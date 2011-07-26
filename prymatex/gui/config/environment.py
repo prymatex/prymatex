@@ -11,46 +11,32 @@ logger = getLogger(__name__)
 
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, settingGroup, user, system, parent = None):
         super(PMXEnvVariablesTableModel, self).__init__(parent)
-        self.values = [[], [], []]
         self.settingGroup = settingGroup
-        shellVariables = self.settingGroup.value('shellVariables')
-        for var in shellVariables:
-            self.values[0].append(var['variable'])
-            self.values[1].append(var['value'])
-            self.values[2].append(var['enabled'])
+        self.variables = user + map(lambda (variable, value): {'variable': variable, 'value': value, 'system': True, 'enabled': True}, system.iteritems())
         
-        # FIXME: Thre should be a nicer way to get this ref
-        global enviromentVariablesModel
-        if enviromentVariablesModel is not None:
-            logger.warn("Should not create more than one %s" % self)
-        enviromentVariablesModel = self
-            
     def setSettingValue(self):
-        variables = []
-        for index in range(len(self.values[0])):
-            if self.values[0][index] != "":
-                var = {}
-                var['variable'] = self.values[0][index]
-                var['value'] = self.values[1][index]
-                var['enabled'] = self.values[2][index]
-                variables.append(var)
+        variables = filter(lambda item: 'system' not in item, self.variables)
         self.settingGroup.setValue('shellVariables', variables)
     
     def rowCount(self, parent = None):
-        return len(self.values[0])
+        return len(self.variables)
     
     def columnCount(self, parent = None):
         return 2
     
     def data(self, index, role = QtCore.Qt.DisplayRole):
-        if not index.isValid: return QtCore.QVariant()
+        if not index.isValid(): return QtCore.QVariant()
         
         if role == QtCore.Qt.CheckStateRole and index.column() == 0:
-            return QtCore.Qt.Unchecked if not self.values[2][index.row()] else QtCore.Qt.Checked 
+            if 'system' not in self.variables[index.row()]:
+                return QtCore.Qt.Unchecked if not self.variables[index.row()]['enabled'] else QtCore.Qt.Checked
         elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return QtCore.QVariant(self.values[index.column()][index.row()])
+            if index.column() == 0:
+                return self.variables[index.row()]['variable']
+            else:
+                return self.variables[index.row()]['value']
 
     def setData(self, index, value, role):
         '''
@@ -60,20 +46,17 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
 
         if role == QtCore.Qt.EditRole:
             new_value = unicode(value.toPyObject());
-            if index.column() == 0:
-                #Ver si no esta repetido el valor de la variable
-                try:
-                    old_index = self.values[index.column()].index(new_value)
-                    if not old_index == index.row():
-                        return False
-                except ValueError:
-                    pass
-            self.values[index.column()][index.row()] = new_value
+            if index.column() == 0 and any(map(lambda value: value['variable'] == new_value, self.variables)):
+                return False
+            elif index.column() == 0:
+                self.variables[index.row()]['variable'] = new_value
+            else:
+                self.variables[index.row()]['value'] = new_value
             self.setSettingValue()
             self.dataChanged.emit(index, index)
             return True;
         elif role == QtCore.Qt.CheckStateRole:
-            self.values[2][index.row()] = value.toBool()
+            self.variables[index.row()]['enabled'] = value.toBool()
             self.setSettingValue()
             self.dataChanged.emit(index, index)
             return True
@@ -88,36 +71,29 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
                     return "Value"
 
     def insertRows(self, position, rows, parent = QtCore.QModelIndex()):
-        if "" in self.values[0]:
+        if any(map(lambda value: value['variable'] == "", self.variables)):
             return False
         self.beginInsertRows(parent, position, position + rows - 1)
         for _ in range(rows):
-            self.values[0].insert(position, "")
-            self.values[1].insert(position, "")
-            self.values[2].insert(position, True)
+            self.variables.insert(position, {'variable': "", 'value': "", 'enabled': True})
         self.endInsertRows()
         return True
 
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
+        if any(map(lambda value: 'system' in value, self.variables)):
+            return False
         self.beginRemoveRows(parent, position, position + rows - 1);
         for _ in range(rows):
-            self.values[0].pop(position)
-            self.values[1].pop(position)
-            self.values[2].pop(position)
-            self.setSettingValue()
+            self.variables.pop(position)
+        self.setSettingValue()
         self.endRemoveRows()
         return True
 
     def flags(self, index):
-        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
-    
-    def __iter__(self):
-        from prymatex.mvc.models import PMXModelIterator
-        return PMXModelIterator(self)
-    
-    def asPyDict(self):
-        print "Dictionarization!!!"
-        return dict(iter(self))
+        if 'system' in self.variables[index.row()]:
+            return QtCore.Qt.ItemIsEnabled
+        else:
+            return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
 
 class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
     '''
@@ -127,7 +103,7 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
         super(PMXEnvVariablesWidgets, self).__init__(parent)
         self.setupUi(self)
         self.configure()
-        self.model = PMXEnvVariablesTableModel(self.pmxApp.settings.getGroup('Manager'))
+        self.model = PMXEnvVariablesTableModel(self.pmxApp.settings.getGroup('Manager'), self.pmxApp.supportManager.shellVariables, self.pmxApp.supportManager.environment, self)
         self.tableView.setModel(self.model)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         
@@ -137,5 +113,3 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
     def on_pushRemove_pressed(self):
         index = self.tableView.currentIndex()
         self.model.removeRows(index.row() , 1)
-
-enviromentVariablesModel = None
