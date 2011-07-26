@@ -7,27 +7,45 @@ import os
 import thread
 from prymatex.utils.resources import PMXKDE4ResourceManager
 from urllib import unquote, unquote_plus
+from prymatex.core.base import PMXObject
 
 class PMXBookmarksBaseModel(QStandardItemModel):
-    pass
-
-
-class PMXBookmarksKDE4Model(PMXBookmarksBaseModel):
-    # In kde we should parse 
-    # $USER/.kde/share/apps/kfileplaces
     def __init__(self, parent = None):
-        super(PMXBookmarksKDE4Model, self).__init__(0, 2, parent)
-        bookmarks_path = expanduser('~/.kde/share/apps/kfileplaces/bookmarks.xml')
-        if not exists(bookmarks_path):
-            from prymatex.core.exceptions import FileDoesNotExistError
-            raise FileDoesNotExistError("Can't read KDE 4 bookmarks :(")
-        self.resourceManager = PMXKDE4ResourceManager()
-
-        self.loadBookmarks(bookmarks_path)
-        #thread.start_new(self.loadBookmarks, (bookmarks_path, ))
+        super(PMXBookmarksBaseModel, self).__init__(0, 2, parent)
+        self.loadBookmarks()
         
+    def loadBookmarks(self):
+        '''
+        This method should populate the model
+        '''
+        raise NotImplementedError()
+    
+    def addItem(self, text, path, icon = QIcon() ):
+        item = QStandardItem(text)
+        item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsDragEnabled)
+        item.setIcon(icon)
+        item.setToolTip(path)
+        self.appendRow([item, QStandardItem(path)])
+
+class PMXBookmarksEmptyModel(PMXBookmarksBaseModel):
+    def loadBookmarks(self):
+        pass
+
+class PMXBookmarkModelFactory(PMXObject):
+    
+    __model = None
+    @property
+    def bookmarksModel(self):
+        if not self.__model:
+            try:
+                self.__model = PMXBookmarksKDE4Model(self)
+            except:
+                self.__model = PMXBookmarksEmptyModel(self)
+        return self.__model
         
     
+class PMXBookmarksKDE4Model(PMXBookmarksBaseModel):
+    #thread.start_new(self.loadBookmarks, (bookmarks_path, ))
     
     def findIconInMetadata(self, bookmark):
         icon = ''
@@ -37,9 +55,18 @@ class PMXBookmarksKDE4Model(PMXBookmarksBaseModel):
                 break
          
         return self.resourceManager.getIcon(icon)
-            
+    
+    def getKDEBookmarksPath(self):
+        ''' @return: kde bookmark XML file '''
+        path = expanduser('~/.kde/share/apps/kfileplaces/bookmarks.xml')
+        if not exists(path):
+            from prymatex.core.exceptions import FileDoesNotExistError
+            raise FileDoesNotExistError("Can't read KDE 4 bookmarks :(")
+        return path
                 
-    def loadBookmarks(self, path):
+    def loadBookmarks(self):
+        path = self.getKDEBookmarksPath()
+        self.resourceManager = PMXKDE4ResourceManager()
         from lxml import etree
         bookmarks_tree = etree.parse(path)
         for bookmark in bookmarks_tree.findall('bookmark'):
@@ -51,13 +78,8 @@ class PMXBookmarksKDE4Model(PMXBookmarksBaseModel):
             icon = self.findIconInMetadata(bookmark)
             
             title = bookmark.find('title').text
-            item = QStandardItem(title) 
-            item.setToolTip(path)
-            item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            if icon:
-                item.setIcon(icon)
-            self.appendRow([item, QStandardItem(path)])
-
+            self.addItem(title, path, icon)
+    
 
 class PMXBookmarksListView(QListView):
     '''
@@ -67,7 +89,8 @@ class PMXBookmarksListView(QListView):
     
     def __init__(self, parent = None):
         super(PMXBookmarksListView, self).__init__(parent)
-        self.setModel(PMXBookmarksKDE4Model(self))
+        self.modelFactory = PMXBookmarkModelFactory(self)
+        self.setModel(self.modelFactory.bookmarksModel)
         self.doubleClicked.connect(self.itemDoubleClicked)
     
     def itemDoubleClicked(self, index):
