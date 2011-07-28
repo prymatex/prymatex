@@ -87,6 +87,9 @@ class PMXApplication(QtGui.QApplication):
         self.setupBundleEditor()
         # Creates the GUI
         self.createWindows(open_args[1:]) # Skip pmx.py
+        
+        
+        self.createRPCThread()
     
     @property
     def options(self):
@@ -349,3 +352,8 @@ class PMXApplication(QtGui.QApplication):
             #from prymatex.utils.os import get_homedir
             #return get_homedir()
             return os.getcwd()
+
+    def createRPCThread(self):
+        from prymatex.core.rpcserver import PMXXMLRPCServerThread
+        self.RPCServerThread = PMXXMLRPCServerThread(self)
+        self.RPCServerThread.start()
