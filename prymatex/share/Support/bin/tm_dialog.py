@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 from xmlrpclib import ServerProxy
-import sys
+import sys, tempfile
 from optparse import OptionParser
 # sum(map(lambda c: ord(c), 'Prymatex is an open source textmate replacement'))
 
 PORT = 4612
-
-
 
 def show_tooltip(args):
     '''
@@ -31,14 +29,26 @@ def show_tooltip(args):
 def print_help():
     print "?"
 
+def send_to_temp_file(data):
+    desc, name = tempfile.mkstemp(suffix="dialog")
+    file = open(name, "w")
+    file.write(data)
+    file.close()
+    
 def main(argv = sys.argv[1:]):
     command = argv[0]
     if command == 'tooltip':
-        return show_tooltip(argv[1:])
+        send_to_temp_file(" ".join(argv[1:]))
+        #return show_tooltip(argv[1:])
+    elif command == '-u':
+        data = sys.stdin.readlines()
+        send_to_temp_file(" ".join(data))
+    elif command == '-ep':
+        send_to_temp_file(" ".join(argv[1:]))
+    elif command == '-cmp':
+        send_to_temp_file(" ".join(argv[1:]))
     else:
         print_help()
-    
-    
 
 if __name__ == '__main__':
     main()
