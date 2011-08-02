@@ -180,10 +180,7 @@ def show_tooltip(args):
     options, content = parser.parse_args(args)
     #import ipdb; ipdb.set_trace()
     
-    server = ServerProxy('http://localhost:%d' % PORT)
-    retval = server.show_tooltip(options.transparent, 
-                        options.format,
-                        content)
+    
     return retval
 
 def print_help():
@@ -194,21 +191,17 @@ def send_to_temp_file(data):
     file = open(name, "w")
     file.write(data)
     file.close()
-    
-def main(argv = sys.argv[1:]):
-    command = argv[0]
-    if command == 'tooltip':
-        send_to_temp_file(" ".join(argv[1:]))
-        #return show_tooltip(argv[1:])
-    elif command == '-u':
-        data = sys.stdin.readlines()
-        send_to_temp_file(" ".join(data))
-    elif command == '-ep':
-        send_to_temp_file(" ".join(argv[1:]))
-    elif command == '-cmp':
-        send_to_temp_file(" ".join(argv[1:]))
-    else:
-        print_help()
 
+def main(args):
+    command = args[0]
+    if command in ['nib', 'tooltip', 'menu', 'popup', 'images', 'alert']:
+        server = ServerProxy('http://localhost:%d' % PORT)
+        getattr(server, command)(args[1:])
+    elif command = 'defaults':
+        #TODO: Ejecutar el commando defaults con los argumentos
+        pass
+	else:
+        print_help()
+        
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
