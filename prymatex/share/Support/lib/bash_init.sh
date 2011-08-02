@@ -35,7 +35,7 @@ if [[ -f "$TM_BASH_INIT" ]]; then
 fi
 
 #Now export
-#export HOME=$PMX_USER_PATH #Home is in $HOME/.prymatex
+export DIALOG="$PMX_SUPPORT_PATH/bin/tm_dialog.py"
 export TMPDIR=$PMX_TMP_PATH
 export TEMP=$PMX_TMP_PATH
 export TMP=$PMX_TMP_PATH

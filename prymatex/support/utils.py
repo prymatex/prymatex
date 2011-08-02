@@ -7,8 +7,6 @@ try:
 except:
     PMX_SUPPORT_PATH = "/"
 
-DIALOG = PMX_SUPPORT_PATH + '/bin/CocoaDialog.app/Contents/MacOS/CocoaDialog'
-
 BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh
 %%s''' % PMX_SUPPORT_PATH
@@ -38,7 +36,7 @@ def ensureShellScript(text):
     return text
 
 def ensureEnvironment(environment):
-    codingenv = { 'DIALOG': DIALOG }
+    codingenv = {}
     for key, value in os.environ.iteritems():
         codingenv[key] = value[:]
     for key, value in environment.iteritems():
