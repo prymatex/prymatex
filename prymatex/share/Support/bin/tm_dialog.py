@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+
 from xmlrpclib import ServerProxy
 import sys, tempfile
 from optparse import OptionParser
@@ -7,18 +9,6 @@ from optparse import OptionParser
 PORT = 4612
 
 '''
-parser.add_option('-c', '--center', action = 'store_true', default = False,
-                      help = 'Center the window on screen.')
-parser.add_option('-d', '--defaults', action = 'store_true', default = False,
-                      help = 'Register initial values for user defaults.')
-parser.add_option('-m', '--modal', action = 'store_true', default = False,
-                      help = 'Show window as modal.')
-parser.add_option('-q', '--quiet', action = 'store_true', default = False,
-                      help = 'Do not write result to stdout.')
-parser.add_option('-p', '--parameters', action = 'store_true', default = False,
-                      help = 'Provide parameters as a plist.')
-parser.add_option('-u', '--menu', action = 'store_true', default = False,
-                      help = 'Treat parameters as a menu structure.')
 
 *******************************************************************************
 - help 
@@ -40,16 +30,16 @@ Use `"$DIALOG" help command` for detailed help
 Displays custom dialogs from NIBs.
 
 nib usage:
-"$DIALOG" nib --load «nib file» [«options»]
-"$DIALOG" nib --update «token» [«options»]
-"$DIALOG" nib --wait «token»
-"$DIALOG" nib --dispose «token»
+"$DIALOG" nib --load ï¿½nib fileï¿½ [ï¿½optionsï¿½]
+"$DIALOG" nib --update ï¿½tokenï¿½ [ï¿½optionsï¿½]
+"$DIALOG" nib --wait ï¿½tokenï¿½
+"$DIALOG" nib --dispose ï¿½tokenï¿½
 "$DIALOG" nib --list
 
 Options:
 	--center
-	--model «plist»
-	--prototypes «plist»
+	--model ï¿½plistï¿½
+	--prototypes ï¿½plistï¿½
 
 *******************************************************************************
 - tooltip 
@@ -113,7 +103,7 @@ Usage (menu): tm_dialog [-p] -u
 Dialog Options:
  -c, --center                 Center the window on screen.
  -d, --defaults <plist>       Register initial values for user defaults.
- -n, --new-items <plist>      A key/value list of classes (the key) which should dynamically be created at run-time for use as the NSArrayController’s object class. The value (a dictionary) is how instances of this class should be initialized (the actual instance will be an NSMutableDictionary with these values).
+ -n, --new-items <plist>      A key/value list of classes (the key) which should dynamically be created at run-time for use as the NSArrayControllerï¿½s object class. The value (a dictionary) is how instances of this class should be initialized (the actual instance will be an NSMutableDictionary with these values).
  -m, --modal                  Show window as modal (other windows will be inaccessible).
  -p, --parameters <plist>     Provide parameters as a plist.
  -q, --quiet                  Do not write result to stdout.
@@ -166,42 +156,52 @@ sorcerer% $tm_dialog -t 7 --parameters '{progressValue = 100;}'
 sorcerer% $tm_dialog -x 7
 '''
 
-def show_tooltip(args):
-    '''
-    tm_dialog tooltip --transparent --text|--html CONTENT
-    '''
+def new_dialgo_parser(args):
     parser = OptionParser()
-    parser.add_option('--transparent', action = 'store_true', default = False,
-                      help = 'Transparent tooltip')
-    parser.add_option('--text', action = 'store_true', default = False,
-                      help = 'Text', dest = 'format')
-    parser.add_option('--html', action = 'store_true', default = False,
-                      help = 'HTML', dest = 'format')
-    options, content = parser.parse_args(args)
-    #import ipdb; ipdb.set_trace()
+    #Dialog Options
+    parser.add_option('-c', '--center', action = 'store_true', default = False,
+                          help = 'Center the window on screen.')
+    parser.add_option('-d', '--defaults', action = 'store', dest="plist",
+                          help = 'Register initial values for user defaults.')
+    parser.add_option('-n', '--new-items', action = 'store', dest="plist",
+                          help = 'A key/value list of classes (the key) which should dynamically be created at run-time for use as the NSArrayControllers object class. The value (a dictionary) is how instances of this class should be initialized (the actual instance will be an NSMutableDictionary with these values).')
+    parser.add_option('-m', '--modal', action = 'store_true', default = False,
+                          help = 'Show window as modal.')
+    parser.add_option('-p', '--parameters', action = 'store', dest="plist",
+                          help = 'Provide parameters as a plist.')
+    parser.add_option('-q', '--quiet', action = 'store_true', default = False,
+                          help = 'Do not write result to stdout.')
+    #Alert Options            
+    parser.add_option('-e', '--alert', action = 'store_true', default = False,
+                          help = "Show alert. Parameters: 'title', 'message', 'buttons', 'alertStyle' -- can be 'warning,' 'informational', 'critical'.  Returns the button index.")
+    #Menu Options
+    parser.add_option('-u', '--menu', action = 'store_true', default = False,
+                          help = 'Treat parameters as a menu structure.')
     
-    
-    return retval
-
-def print_help():
-    print "?"
-
-def send_to_temp_file(data):
-    desc, name = tempfile.mkstemp(suffix="dialog")
-    file = open(name, "w")
-    file.write(data)
-    file.close()
+    #Async Window Options
+    parser.add_option('-a', '--async-window', action = 'store_true', default = False,
+                          help = 'Displays the window and returns a reference token for it in the output property list.')
+    parser.add_option('-l', '--list-windows', action = 'store_true', default = False,
+                          help = 'List async window tokens.')
+    parser.add_option('-t', '--update-window', action = 'store', dest="token",
+                          help = 'Update an async window with new parameter values. Use the --parameters argument (or stdin) to specify the updated parameters.')
+    parser.add_option('-x', '--close-window', action = 'store', dest="token",
+                          help = 'Close and release an async window.')
+    parser.add_option('-w', '--wait-for-input', action = 'store', dest="token",
+                          help = 'Wait for user input from the given async window.')
+    return parser.parse_args(args)
 
 def main(args):
-    command = args[0]
-    if command in ['nib', 'tooltip', 'menu', 'popup', 'images', 'alert']:
+    if len(args) > 1 and args[0] in ['nib', 'tooltip', 'menu', 'popup', 'images', 'alert']:
         server = ServerProxy('http://localhost:%d' % PORT)
-        getattr(server, command)(args[1:])
-    elif command = 'defaults':
+        getattr(server, args[0])(" ".join(args[1:]))
+    elif len(args) > 1 and args[0] == 'defaults':
         #TODO: Ejecutar el commando defaults con los argumentos
         pass
-	else:
-        print_help()
+    else:
+        # new version tm_dialog r9151 (Apr 12 2008)
+        options, args = new_dialgo_parser(args)
+        print options, args
         
 if __name__ == '__main__':
     main(sys.argv[1:])

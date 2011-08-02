@@ -1,4 +1,5 @@
-# coding: utf-8
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
 
 # TODO: Constants!
 
@@ -10,8 +11,31 @@ PORT = 4612
 
 class PMXCommandDispatcher(PMXObject):
     
-    def show_tooltip(self, transparent, format, content):
-        print "Tooltip: ", content
+    def nib(self, args):
+        print "nib: ", args
+        return True
+    
+    def tooltip(self, args):
+        '''
+        tm_dialog tooltip --transparent --text|--html CONTENT
+        '''
+        print "Tooltip: ", args
+        return True
+    
+    def menu(self, args):
+        print "menu: ", args
+        return True
+    
+    def popup(self, args):
+        print "popup: ", args
+        return True
+    
+    def images(self, args):
+        print "images: ", args
+        return True
+    
+    def alert(self, args):
+        print "alert: ", args
         return True
 
 class PMXXMLRPCServerThread(QThread):
