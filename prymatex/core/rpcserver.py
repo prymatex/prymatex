@@ -37,6 +37,10 @@ class PMXCommandDispatcher(PMXObject):
     def alert(self, args):
         print "alert: ", args
         return True
+    
+    def debug(self, options, args):
+        print "debug: ", options, args
+        return True
 
 class PMXXMLRPCServerThread(QThread):
     def __init__(self, parent):

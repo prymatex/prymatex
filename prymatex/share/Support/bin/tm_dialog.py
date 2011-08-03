@@ -201,7 +201,8 @@ def main(args):
     else:
         # new version tm_dialog r9151 (Apr 12 2008)
         options, args = new_dialgo_parser(args)
-        print options, args
+        server = ServerProxy('http://localhost:%d' % PORT)
+        server.debug(str(options), str(args))
         
 if __name__ == '__main__':
     main(sys.argv[1:])
