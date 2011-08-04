@@ -43,12 +43,6 @@ export LOGPATH=$PMX_LOG_PATH
 
 export RUBYLIB="${RUBYLIB:+$RUBYLIB:}$TM_SUPPORT_PATH/lib"
 
-#Aliases functions
-open() { xdg-open "$1"; }
-#For xclip
-pbcopy () { echo "$1" | xclip; }
-pbpaste() { xclip -o; }
-
 #textmate_init () {
 #	[[ "$1" != / && "$1" != ~ ]] && textmate_init "$(dirname "$1")"
 #	[[ -f "$1/.textmate_init" ]] && . "$1/.textmate_init"
