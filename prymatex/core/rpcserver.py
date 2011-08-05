@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 # TODO: Constants!
-
+import plistlib
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 from PyQt4.Qt import QThread
 from prymatex.core.base import PMXObject
@@ -11,36 +11,37 @@ PORT = 4612
 
 class PMXCommandDispatcher(PMXObject):
     
-    def nib(self, args):
-        print "nib: ", args
+    def nib(self, options, args):
+        print "nib: ", options, args
         return True
     
-    def tooltip(self, args):
-        '''
-        tm_dialog tooltip --transparent --text|--html CONTENT
-        '''
-        print "Tooltip: ", args
+    def tooltip(self, options, args):
+        print "Tooltip: ", options, args
         return True
     
-    def menu(self, args):
-        print "menu: ", args
+    def menu(self, options, args):
+        print "menu: ", options, args
         return True
     
-    def popup(self, args):
-        print "popup: ", args
+    def popup(self, options, args):
+        print "popup: ", options, args
         return True
     
-    def images(self, args):
-        print "images: ", args
+    def defaults(self, options, args):
+        print "defaults: ", options, args
         return True
     
-    def alert(self, args):
-        print "alert: ", args
+    def images(self, options, args):
+        print "images: ", options, args
+        return True
+    
+    def alert(self, options, args):
+        print "alert: ", options, args
         return True
     
     def debug(self, options, args):
         print "debug: ", options, args
-        return True
+        return plistlib.writePlistToString({"selectedIndex": 1})
 
 class PMXXMLRPCServerThread(QThread):
     def __init__(self, parent):

@@ -244,7 +244,7 @@ Note:
                           help = 'A key/value list of classes (the key) which should dynamically be created at run-time for use as the NSArrayControllers object class. The value (a dictionary) is how instances of this class should be initialized (the actual instance will be an NSMutableDictionary with these values).')
     group.add_option('-m', '--modal', action = 'store_true', default = False,
                           help = 'Show window as modal.')
-    group.add_option('-p', '--parameters', action = 'store', dest="plist",
+    group.add_option('-p', '--parameters', action = 'store',
                           help = 'Provide parameters as a plist.')
     group.add_option('-q', '--quiet', action = 'store_true', default = False,
                           help = 'Do not write result to stdout.')
@@ -275,52 +275,55 @@ Note:
     group.add_option('-w', '--wait-for-input', action = 'store', dest="token",
                           help = 'Wait for user input from the given async window.')
     parser.add_option_group(group)
-    parser.print_help()
-    print note
     return parser.parse_args(args)
 
 class CommandHandler(object):
+    def __init__(self):
+        self.server = ServerProxy('http://localhost:%d' % PORT)
+        
     def nib(self, args):
         options, args = nib_parse_args(args)
-        print options, args
+        self.server.nib(str(options), str(args))
         
     def tooltip(self, args):
         options, args = tooltip_parse_args(args)
-        print options, args
+        self.server.tooltip(str(options), str(args))
         
     def menu(self, args):
         options, args = menu_parse_args(args)
-        print options, args
+        self.server.menu(str(options), str(args))
         
     def popup(self, args):
         options, args = popup_parse_args(args)
-        print options, args
+        self.server.popup(str(options), str(args))
         
     def defaults(self, args):
         options, args = defaults_parse_args(args)
-        print options, args
+        self.server.defaults(str(options), str(args))
         
     def images(self, args):
         options, args = images_parse_args(args)
-        print options, args
+        self.server.images(str(options), str(args))
         
     def alert(self, args):
         options, args = alert_parse_args(args)
-        print options, args
+        self.server.alert(str(options), str(args))
+        
+    def debug(self, args):
+        options, args = new_dialgo_parse_args(args)
+        if options.parameters == None:
+            options.parameters = sys.stdin.readlines()
+        result = self.server.debug(str(options), str(args))
+        sys.stdout.write(result)
     
 def main(args):
+    handler = CommandHandler()
     if len(args) >= 1 and args[0] in ['nib', 'tooltip', 'menu', 'popup', 'defaults', 'images', 'alert']:
-        handler = CommandHandler()
         method = getattr(handler, args[0], None)
         if method is not None:
             method(args[1:])
-        #server = ServerProxy('http://localhost:%d' % PORT)
-        #getattr(server, args[0])(" ".join(args[1:]))
     else:
-        # new version tm_dialog r9151 (Apr 12 2008)
-        options, args = new_dialgo_parse_args(args)
-        #server = ServerProxy('http://localhost:%d' % PORT)
-        #server.debug(str(options), str(args))
+        handler.debug(args)
         
 if __name__ == '__main__':
     main(sys.argv[1:])
