@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, sys
-from os import unlink
 from os.path import join, exists, dirname, abspath, expanduser
 from datetime import datetime
 from PyQt4 import QtGui, QtCore
@@ -230,16 +229,8 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationDomain("org")
         self.projectUrl = prymatex.__url__    
     
-    @property
-    def lock_filename(self):
-        base_path = dirname(abspath(__file__))
-        return join(base_path,  'LOCK')
-    
     def cleanup(self):
-        try:
-            unlink(self.lock_filename)
-        except:
-            pass
+        pass
     
     def commitData(self):
         print "Commit data"
@@ -292,7 +283,7 @@ class PMXApplication(QtGui.QApplication):
         '''
         Checks if there's another instance using current profile
         '''
-        from prymatex.utils import _os
+        from prymatex.utils._os import pid_proc_dict
         
         lock_filename = self.getProfilePath('var', 'prymatex.pid')
         
@@ -300,8 +291,8 @@ class PMXApplication(QtGui.QApplication):
             f = open(lock_filename)
             pid = int(f.read())
             f.close()
-            self.logger.info("Checking for another instance: %s", pid in _os.pid_proc_dict())
-            if pid in _os.pid_proc_dict():
+            self.logger.info("Checking for another instance: %s", pid in pid_proc_dict())
+            if pid in pid_proc_dict():
                 self.logger.warning("Another app running")
                 QtGui.QMessageBox.critical(None, _('Application Already Running'),
                                      _('''%s seems to be runnig. Please
