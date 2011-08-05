@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Sun Jul 24 22:50:23 2011
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Thu Aug  4 22:02:52 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
