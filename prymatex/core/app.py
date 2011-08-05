@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, sys
-from os import getpid, unlink
+from os import unlink
 from os.path import join, exists, dirname, abspath, expanduser
 from datetime import datetime
 from PyQt4 import QtGui, QtCore
@@ -61,15 +61,12 @@ class PMXApplication(QtGui.QApplication):
         # Logger setup
         self.setup_logging() 
         
-        
         self.settings = PMXSettings.getSettingsForProfile(self.options.profile)
         self.settings.setValue('auto_save', True)
         self.settings.setValue('auto_save_interval', 30)
+        
         # Some init's
         self.init_application_params()
-        
-        #self.res_mngr.loadStyleSheet()
-        
         self.setup_splash()
         
         self.checkSingleInstance()
@@ -269,10 +266,12 @@ class PMXApplication(QtGui.QApplication):
                 'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
                 'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
                 'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
+                'TM_PID': os.getpid(),
                 #Prymatex 
                 'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
-                'PMX_VERSION': prymatex.get_version()
+                'PMX_VERSION': prymatex.get_version(),
+                'PMX_PID': os.getpid()
         });
 
         manager.addNamespace('user', userPath)
@@ -293,7 +292,7 @@ class PMXApplication(QtGui.QApplication):
         '''
         Checks if there's another instance using current profile
         '''
-        from prymatex.utils import os
+        from prymatex.utils import _os
         
         lock_filename = self.getProfilePath('var', 'prymatex.pid')
         
@@ -301,10 +300,8 @@ class PMXApplication(QtGui.QApplication):
             f = open(lock_filename)
             pid = int(f.read())
             f.close()
-            self.logger.info("Checking for another instance: %s", 
-                        pid in os.pid_proc_dict()
-                        )
-            if pid in os.pid_proc_dict():
+            self.logger.info("Checking for another instance: %s", pid in _os.pid_proc_dict())
+            if pid in _os.pid_proc_dict():
                 self.logger.warning("Another app running")
                 QtGui.QMessageBox.critical(None, _('Application Already Running'),
                                      _('''%s seems to be runnig. Please
@@ -315,7 +312,7 @@ class PMXApplication(QtGui.QApplication):
             
         else:
             f = open(lock_filename, 'w')
-            f.write('%s' % getpid())
+            f.write('%s' % os.getpid())
             f.close()
     
     __profilePath = None

@@ -600,7 +600,8 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         env = {
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.columnNumber(), 
-                'TM_LINE_NUMBER': cursor.block().blockNumber() + 1, 
+                'TM_LINE_NUMBER': cursor.block().blockNumber() + 1,
+                'TM_COLUMN_NUMBER': cursor.columnNumber() + 1, 
                 'TM_SCOPE': scope,
                 'TM_SOFT_TABS': self.softTabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': self.tabSize,
@@ -616,6 +617,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_DIRECTORY'] = self.parent().file.directory
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u'\u2029', '\n')
+            start, end = self.getSelectionBlockStartEnd()
+            env['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
+            env['TM_INPUT_START_LINE'] = start.blockNumber() + 1
+            env['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
+            
         env.update(preferences.shellVariables)
         return env
 

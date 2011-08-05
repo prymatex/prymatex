@@ -41,11 +41,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     def selection(self, format = None):
         if 'TM_SELECTED_TEXT' in self.environment:
-            index = self.environment['TM_LINE_INDEX'] - len(self.environment['TM_SELECTED_TEXT'])
-            index = index >= 0 and index or 0
-            self.environment['TM_INPUT_START_COLUMN'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
-            self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
-            self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_SELECTED_TEXT'], index)
             if format == "xml":
                 cursor = self.editor.textCursor()
                 bstart, bend = self.editor.getSelectionBlockStartEnd()
@@ -88,11 +83,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     def word(self, format = None):
         if 'TM_CURRENT_WORD' in self.environment:
-            index = self.environment['TM_LINE_INDEX'] - len(self.environment['TM_CURRENT_WORD'])
-            index = index >= 0 and index or 0
-            self.environment['TM_INPUT_START_COLUMN'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_CURRENT_WORD'], index)
-            self.environment['TM_INPUT_START_LINE'] = self.environment['TM_LINE_NUMBER']
-            self.environment['TM_INPUT_START_LINE_INDEX'] = self.environment['TM_CURRENT_LINE'].find(self.environment['TM_CURRENT_WORD'], index)
             return self.environment['TM_CURRENT_WORD']
     
     @property
