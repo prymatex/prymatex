@@ -90,7 +90,7 @@ def tooltip_parse_args(args):
     parser.add_option('--transparent', action = 'store_true', default = False)
     options, args = parser.parse_args(args)
     if options.text and options.html:
-        parser.error("options --text and -html are mutually exclusive")
+        parser.error("options --text and --html are mutually exclusive")
     return options, args
 
 # ##############################################################################
@@ -104,7 +104,7 @@ def menu_parse_args(args):
         "$DIALOG" menu --items '({title = foo;}, {separator = 1;}, {header=1; title = bar;}, {title = baz;})'
     '''
     parser = OptionParser()
-    parser.add_option('--items', action = 'store', dest="plist")
+    parser.add_option('--items', action = 'store', dest="parameters")
     
     options, args = parser.parse_args(args)
     return options, args
@@ -275,7 +275,23 @@ Note:
     group.add_option('-w', '--wait-for-input', action = 'store', dest="token",
                           help = 'Wait for user input from the given async window.')
     parser.add_option_group(group)
-    return parser.parse_args(args)
+    
+    options, args = parser.parse_args(args)
+    if options.alert and options.menu:
+        parser.error("options --alert and --menu are mutually exclusive")
+
+    return options, args
+    
+
+PARSERS = {
+           'nib': nib_parse_args,
+           'tooltip': tooltip_parse_args,
+           'menu': menu_parse_args,
+           'popup': popup_parse_args,
+           'defaults': defaults_parse_args,
+           'images': images_parse_args,
+           'alert': alert_parse_args
+           }
 
 class CommandHandler(object):
     def __init__(self):
@@ -318,12 +334,12 @@ class CommandHandler(object):
     
 def main(args):
     handler = CommandHandler()
-    if len(args) >= 1 and args[0] in ['nib', 'tooltip', 'menu', 'popup', 'defaults', 'images', 'alert']:
-        method = getattr(handler, args[0], None)
-        if method is not None:
-            method(args[1:])
+    if len(args) >= 1 and args[0] in PARSERS:
+        options, args = PARSERS[args[0]](args[1:])
     else:
-        handler.debug(args)
+        options, args = new_dialgo_parse_args(args)
+    print options, args
+    #self.server.debug(str(options), str(args))
         
 if __name__ == '__main__':
     main(sys.argv[1:])
