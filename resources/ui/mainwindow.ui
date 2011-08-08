@@ -53,34 +53,37 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <widget class="QMenu" name="menuGutter">
+     <property name="title">
+      <string>Gutter</string>
+     </property>
+     <addaction name="actionShow_Folding"/>
+     <addaction name="actionShow_Bookmarks_Fold"/>
+     <addaction name="actionShow_Line_Numbers"/>
+    </widget>
+    <widget class="QMenu" name="menuFont">
+     <property name="title">
+      <string>Font</string>
+     </property>
+     <addaction name="actionZoom_In"/>
+     <addaction name="actionZoom_Out"/>
+    </widget>
+    <widget class="QMenu" name="menuType_Here">
+     <property name="title">
+      <string>Type Here</string>
+     </property>
+    </widget>
+    <addaction name="menuFont"/>
+    <addaction name="menuGutter"/>
+    <addaction name="separator"/>
     <addaction name="actionFullscreen"/>
     <addaction name="actionShow_Menus"/>
-    <addaction name="separator"/>
-    <addaction name="actionZoom_In"/>
-    <addaction name="actionZoom_Out"/>
-    <addaction name="separator"/>
-    <addaction name="actionSplit_Vertically"/>
-    <addaction name="actionSplit_Horizontally"/>
-    <addaction name="separator"/>
-    <addaction name="actionFocus_Editor"/>
-    <addaction name="actionShow_Line_Numbers"/>
-    <addaction name="actionShow_Folding"/>
-    <addaction name="actionShow_Bookmarks_Fold"/>
-    <addaction name="separator"/>
-    <addaction name="actionShow_File_System_Pane"/>
-    <addaction name="actionShow_Project_Dock"/>
-    <addaction name="actionShow_Symbol_List"/>
-    <addaction name="actionShow_Output"/>
-    <addaction name="actionShow_Browser_Dock"/>
-    <addaction name="separator"/>
-    <addaction name="actionShow_Current_Scope"/>
-    <addaction name="separator"/>
-    <addaction name="actionShow_Log_Window"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Whitespace"/>
     <addaction name="actionShow_Indentation"/>
     <addaction name="actionEOL"/>
     <addaction name="actionWord_Warp"/>
+    <addaction name="menuType_Here"/>
    </widget>
    <widget class="QMenu" name="menuText">
     <property name="title">
@@ -110,18 +113,15 @@
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
-     <string>T&amp;ools</string>
+     <string>&amp;Panels</string>
     </property>
-    <widget class="QMenu" name="menuRun">
-     <property name="title">
-      <string>Run</string>
-     </property>
-     <addaction name="actionThis_file"/>
-     <addaction name="actionWith_options"/>
-    </widget>
-    <addaction name="menuRun"/>
+    <addaction name="actionShow_File_System_Pane"/>
+    <addaction name="actionShow_Project_Dock"/>
+    <addaction name="actionShow_Browser_Dock"/>
+    <addaction name="actionShow_Symbol_List"/>
     <addaction name="actionTerminal"/>
-    <addaction name="actionFile_browser"/>
+    <addaction name="actionShow_Output"/>
+    <addaction name="actionShow_Log_Window"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -202,8 +202,8 @@
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
-   <addaction name="menuText"/>
    <addaction name="menuTools"/>
+   <addaction name="menuText"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
    <addaction name="menuHelp"/>
@@ -479,17 +479,9 @@
     <string>Ctrl+-</string>
    </property>
   </action>
-  <action name="actionFocus_Editor">
-   <property name="text">
-    <string>Focus Editor</string>
-   </property>
-   <property name="shortcut">
-    <string>F12</string>
-   </property>
-  </action>
   <action name="actionShow_Line_Numbers">
    <property name="text">
-    <string>Show Line Numbers</string>
+    <string>Line Numbers</string>
    </property>
    <property name="shortcut">
     <string>F10</string>
@@ -497,7 +489,7 @@
   </action>
   <action name="actionShow_Folding">
    <property name="text">
-    <string>Show Code Folding</string>
+    <string>Foldings</string>
    </property>
    <property name="shortcut">
     <string>Shift+F10</string>
@@ -505,7 +497,7 @@
   </action>
   <action name="actionShow_Bookmarks_Fold">
    <property name="text">
-    <string>Show Bookmarks Fold</string>
+    <string>Bookmarks</string>
    </property>
    <property name="shortcut">
     <string>Alt+F10</string>
@@ -516,7 +508,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show File System Navigator</string>
+    <string>File System</string>
    </property>
    <property name="shortcut">
     <string>F8</string>
@@ -527,7 +519,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Project</string>
+    <string>Project</string>
    </property>
    <property name="shortcut">
     <string>F7</string>
@@ -538,7 +530,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Symbol List</string>
+    <string>Symbols</string>
    </property>
    <property name="shortcut">
     <string>F6</string>
@@ -549,7 +541,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Output</string>
+    <string>Output</string>
    </property>
    <property name="shortcut">
     <string>Shift+F6</string>
@@ -640,6 +632,9 @@
    </property>
   </action>
   <action name="actionTerminal">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Terminal</string>
    </property>
@@ -818,7 +813,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Log Window</string>
+    <string>Log</string>
    </property>
    <property name="statusTip">
     <string>Displays Log Messages</string>
@@ -913,7 +908,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Browser</string>
+    <string>Web Browser</string>
    </property>
   </action>
   <action name="actionRead_documentation">
@@ -964,6 +959,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+B</string>
+   </property>
+  </action>
+  <action name="actionPanes">
+   <property name="text">
+    <string>Panes</string>
    </property>
   </action>
  </widget>

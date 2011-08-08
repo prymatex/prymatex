@@ -377,15 +377,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     @pyqtSignature('')
     def on_actionZoom_Out_triggered(self):
         self.currentEditorWidget.codeEdit.zoomOut()
-    
-    @pyqtSignature('')
-    def on_actionFocus_Editor_triggered(self):
-        # Siempre debería haber una ventana de edición
-        try:
-            self.tabWidgetEditors.currentWidget().setFocus(Qt.TabFocusReason)
-        except Exception:
-            pass
-    
+
     @pyqtSignature('')
     def on_actionFilter_Through_Command_triggered(self):
         self.dialogFilter.exec_()
@@ -446,11 +438,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         '''
         self.tabWidget.chooseFileDlg.exec_()
     
-    @pyqtSignature('')
-    def on_actionShow_Current_Scope_triggered(self):
-        scope = self.currentEditor.getCurrentScope()
-        self.statusBar().showMessage("%s" % (scope))
-
     @pyqtSignature('')
     def on_actionFind_triggered(self):
         print "MainWindow::find"
