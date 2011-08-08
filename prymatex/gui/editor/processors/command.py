@@ -10,24 +10,40 @@ class PMXCommandProcessor(PMXCommandProcessor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
 
+    def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
+        result = []
+        block = firstBlock
+        for line in text.splitlines():
+            if block == firstBlock and block == lastBlock:
+                scopes = block.userData().getAllScopes(start = startIndex, end = endIndex)
+            elif block == firstBlock:
+                scopes = block.userData().getAllScopes(start = startIndex)
+            elif block == lastBlock:
+                scopes = block.userData().getAllScopes(end = endIndex)
+            else:
+                scopes = block.userData().getAllScopes()
+            for scope, start, end in scopes:
+                ss = scope.split()
+                token = "".join(map(lambda scope: "<" + scope + ">", ss))
+                token += line[start:end]
+                ss.reverse()
+                token += "".join(map(lambda scope: "</" + scope + ">", ss))
+                result.append(token)
+            if block == lastBlock:
+                break
+            block = block.next()
+        return "\n".join(result)
+
     #Inputs
     def document(self, format = None):
+        #TODO: ver si pone los \n
+        text = unicode(self.editor.document().toPlainText())
         if format == "xml":
-            result = u""
-            block = self.editor.document().firstBlock()
-            while block.isValid():
-                text = unicode(block.text())
-                for scope, start, end in block.userData().getAllScopes():
-                    ss = scope.split()
-                    result += "".join(map(lambda scope: "<" + scope + ">", ss))
-                    result += text[start:end]
-                    ss.reverse()
-                    result += "".join(map(lambda scope: "</" + scope + ">", ss))
-                result += "\n"
-                block = block.next()
-            return result
+            firstBlock = self.editor.document().firstBlock()
+            lastBlock = self.editor.document().lastBlock()
+            return self.formatAsXml(text, firstBlock, lastBlock, firstBlock.position(), lastBlock.position() + lastBlock.length())
         else:
-            return unicode(self.editor.document().toPlainText())
+            return text
         
     def line(self, format = None):
         return self.environment['TM_CURRENT_LINE']
@@ -41,42 +57,13 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     def selection(self, format = None):
         if 'TM_SELECTED_TEXT' in self.environment:
+            text = unicode(self.environment['TM_SELECTED_TEXT'])
             if format == "xml":
                 cursor = self.editor.textCursor()
-                bstart, bend = self.editor.getSelectionBlockStartEnd()
-                result = u""
-                if bstart == bend:
-                    text = unicode(bstart.text())
-                    scopes = bstart.userData().getAllScopes(start = cursor.selectionStart() - bstart.position(), end = cursor.selectionEnd() - bstart.position())
-                    for scope, start, end in scopes:
-                        ss = scope.split()
-                        result += "".join(map(lambda scope: "<" + scope + ">", ss))
-                        result += text[start:end]
-                        ss.reverse()
-                        result += "".join(map(lambda scope: "</" + scope + ">", ss))
-                else:
-                    block = bstart
-                    while True:
-                        text = unicode(block.text())
-                        if block == bstart:
-                            scopes = block.userData().getAllScopes(start = cursor.selectionStart() - block.position())
-                        elif block == bend:
-                            scopes = block.userData().getAllScopes(end = cursor.selectionEnd() - block.position())
-                        else:
-                            scopes = block.userData().getAllScopes()
-                        for scope, start, end in scopes:
-                            ss = scope.split()
-                            result += "".join(map(lambda scope: "<" + scope + ">", ss))
-                            result += text[start:end]
-                            ss.reverse()
-                            result += "".join(map(lambda scope: "</" + scope + ">", ss))
-                        result += "\n"
-                        block = block.next()
-                        if block == bend:
-                            break
-                return result
+                firstBlock, lastBlock = self.editor.getSelectionBlockStartEnd()
+                return self.formatAsXml(text, firstBlock, lastBlock, cursor.selectionStart() - firstBlock.position(), cursor.selectionEnd() - lastBlock.position())
             else:
-                return self.environment['TM_SELECTED_TEXT']
+                return text
         
     def selectedText(self, format = None):
         return self.selection

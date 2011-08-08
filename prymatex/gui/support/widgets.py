@@ -12,8 +12,18 @@ from prymatex.ui.editorbundle import Ui_Menu
 from prymatex.ui.editortemplatefile import Ui_TemplateFile
 from prymatex.ui.editorpreference import Ui_Preference
 from pprint import pformat
+import ast
 
 TABWIDTH = 20
+
+'''
+s = "Name1='Value=2';Name2=Value2;Name3=Value3"
+
+dict(csv.reader([item], delimiter='=', quotechar="'").next() 
+    for item in csv.reader([s], delimiter=';', quotechar="'").next())
+
+{'Name2': 'Value2', 'Name3': 'Value3', 'Name1': 'Value1=2'}
+'''
 
 class PMXEditorBaseWidget(QtGui.QWidget):
     '''
@@ -438,8 +448,10 @@ class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
     @QtCore.pyqtSignature('')
     def on_content_textChanged(self):
         #Convertir a dict
-        #self.changes['content'] = unicode(self.command.toPlainText())
-        pass
+        try
+            self.changes['content'] = ast.literal_eval(self.command.toPlainText())
+        except:
+            pass
     
     @property
     def title(self):
@@ -470,8 +482,10 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     @QtCore.pyqtSignature('')
     def on_settings_textChanged(self):
         #Convertir a dict
-        #self.changes['content'] = unicode(self.command.toPlainText())
-        pass
+        try
+            self.changes['content'] = ast.literal_eval(self.command.toPlainText())
+        except:
+            pass
     
     @property
     def title(self):
