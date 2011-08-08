@@ -448,7 +448,7 @@ class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
     @QtCore.pyqtSignature('')
     def on_content_textChanged(self):
         #Convertir a dict
-        try
+        try:
             self.changes['content'] = ast.literal_eval(self.command.toPlainText())
         except:
             pass
@@ -482,7 +482,7 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     @QtCore.pyqtSignature('')
     def on_settings_textChanged(self):
         #Convertir a dict
-        try
+        try:
             self.changes['content'] = ast.literal_eval(self.command.toPlainText())
         except:
             pass
