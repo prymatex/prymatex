@@ -161,6 +161,7 @@ class PMXCompleterHelper(QtGui.QCompleter):
         super(PMXCompleterHelper, self).__init__()
         self.editor = editor
         self.setWidget(self.editor)
+        #TODO: Mi propio modelo para autocompletado
         self.popupView = QtGui.QListWidget()
         self.popupView.setAlternatingRowColors(True)
         self.popupView.setWordWrap(False)
@@ -173,20 +174,28 @@ class PMXCompleterHelper(QtGui.QCompleter):
         extra = insert.length() - self.completionPrefix().length()
         self.editor.textCursor().insertText(insert.right(extra))
 
-    def complete(self, cr):
+    def complete(self, rect, suggestions):
         try:
-            model = self.obtainModelItems()
+            self.popupView.clear()
+            model = self.buildModelItems(suggestions)
             self.setModel(model)
             self.popup().setCurrentIndex(model.index(0, 0))
-            cr.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 10)
+            rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 10)
             self.popupView.updateGeometries()
-            super(PMXCompleterHelper, self).complete(cr)
+            super(PMXCompleterHelper, self).complete(rect)
         except:
             return
 
-    def obtainModelItems(self):
-        for name in ['uno', 'dos', 'tres']:
-            self.popupView.addItem(QtGui.QListWidgetItem(name))
+    def buildModelItems(self, suggestions):
+        for suggestion in suggestions:
+            item = QtGui.QListWidgetItem(suggestion['display'])
+            if 'insert' in suggestion:
+                print "no, por ahora"
+            if 'image' in suggestion:
+                item.setIcon(QtGui.QIcon(suggestion['image']))
+            if 'match' in suggestion:
+                print "no, por ahora"
+            self.popupView.addItem(item)
         return self.popupView.model()
 
 class PMXFoldingHelper(QtCore.QThread):

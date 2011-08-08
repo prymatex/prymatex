@@ -118,9 +118,19 @@ def popup_parse_args(args):
 
     popup usage:
         "$DIALOG" popup --suggestions '( { display = law; }, { display = laws; insert = "(${1:hello}, ${2:again})"; } )'
+        --returnChoice
+        --alreadyTyped
+        --staticPrefix
+        --additionalWordCharacters
+        --caseInsensitive
     '''
     parser = OptionParser()
-    parser.add_option('--suggestions', action = 'store', dest="plist")
+    parser.add_option('--suggestions', action = 'store', dest="parameters")
+    parser.add_option('--returnChoice', action = 'store_true')
+    parser.add_option('--alreadyTyped', action = 'store')
+    parser.add_option('--staticPrefix', action = 'store')
+    parser.add_option('--additionalWordCharacters', action = 'store')
+    parser.add_option('--caseInsensitive', action = 'store_true')
     
     options, args = parser.parse_args(args)
     return options, args
