@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
+from prymatex.support import PMXSyntax
 
 class PMXCursorsHelper(object):
     def __init__(self, editor):
@@ -198,32 +199,39 @@ class PMXCompleterHelper(QtGui.QCompleter):
             self.popupView.addItem(item)
         return self.popupView.model()
 
-class PMXFoldingHelper(QtCore.QThread):
+class PMXFoldingHelper():
+    FOLDING_NONE = PMXSyntax.FOLDING_NONE
+    FOLDING_START = PMXSyntax.FOLDING_START
+    FOLDING_STOP = PMXSyntax.FOLDING_STOP
     def __init__(self, editor):
         super(PMXFoldingHelper, self).__init__(editor)
         self.editor = editor
         self.open = []
         self.close = []
+        self.indent = []
+        self.__folding = []
     
-    def run(self):
-        while True:
-            QtCore.QThread.sleep(2)
-            print "valores"
-            print self.open
-            print self.close
-            
-    def setOpen(self, index):
-        self.open[index] = 1
+    @property
+    def folding(self):
+        return self.__folding
+    
+    def setBlockFoldingMark(self, index, mark):
+        if mark == self.FOLDING_START:
+            self.open[index] = 1
+        elif mark == self.FOLDING_STOP:
+            self.close[index] = -1
+        elif mark == self.FOLDING_NONE:
+            self.open[index] = self.close[index] = 0
+        #TODO: Mas inteligente, si no tenia valor y no agrego valor no hace falta regenerar por ejemplo
+        self.__folding = []
         
-    def setClose(self, index):
-        self.close[index] = -1
-    
-    def setNone(self, index):
-        self.open[index] = self.close[index] = 0
-    
+    def setBlockIndent(self, index, indent):
+        self.indent[index] = indent
+        
     def insert(self, index):
         self.open.insert(index, 0)
         self.close.insert(index, 0)
+        self.indent.insert(index, 0)
     
     def getNestedLevel(self, index):
         start = self.open[:index]
