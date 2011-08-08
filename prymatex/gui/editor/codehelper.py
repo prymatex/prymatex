@@ -199,41 +199,31 @@ class PMXCompleterHelper(QtGui.QCompleter):
             self.popupView.addItem(item)
         return self.popupView.model()
 
-class PMXFoldingHelper():
+class PMXFoldingHelper(object):
     FOLDING_NONE = PMXSyntax.FOLDING_NONE
     FOLDING_START = PMXSyntax.FOLDING_START
     FOLDING_STOP = PMXSyntax.FOLDING_STOP
     def __init__(self, editor):
-        super(PMXFoldingHelper, self).__init__(editor)
         self.editor = editor
-        self.open = []
-        self.close = []
-        self.indent = []
         self.__folding = []
     
-    @property
-    def folding(self):
-        return self.__folding
-    
-    def setBlockFoldingMark(self, index, mark):
-        if mark == self.FOLDING_START:
-            self.open[index] = 1
-        elif mark == self.FOLDING_STOP:
-            self.close[index] = -1
-        elif mark == self.FOLDING_NONE:
-            self.open[index] = self.close[index] = 0
-        #TODO: Mas inteligente, si no tenia valor y no agrego valor no hace falta regenerar por ejemplo
-        self.__folding = []
-        
-    def setBlockIndent(self, index, indent):
-        self.indent[index] = indent
-        
-    def insert(self, index):
-        self.open.insert(index, 0)
-        self.close.insert(index, 0)
-        self.indent.insert(index, 0)
+    def __buildFoldingMarks(self, lastBlock):
+        folding = []
+        block = self.editor.document.firstBlock()
+        nest = 0
+        while block != lastBlock:
+            userData = block.userData()
+        return folding
+
+    def getFoldingMark(self, block):
+        #if self.__folding == None:
+        #    self.__folding = self.__buildFoldingMarks(lastBlock)
+        userData = block.userData()
+        return userData.foldingMark
+        #return self.__folding[index]
     
     def getNestedLevel(self, index):
+        return 0
         start = self.open[:index]
         stop = self.close[:index]
         print index

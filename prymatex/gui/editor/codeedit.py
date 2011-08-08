@@ -132,8 +132,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.cursors = PMXCursorsHelper(self)
         self.folding = PMXFoldingHelper(self)
         self.completer = PMXCompleterHelper(self)
-        #self.folding.start()
-        
         self.bookmarks = []
         
         self.setupUi()
@@ -290,7 +288,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 break
 
             user_data = block.userData()
-            if user_data.foldingMark == PMXBlockUserData.FOLDING_START and user_data.folded:
+            if self.folding.getFoldingMark(block) == self.folding.FOLDING_START and user_data.folded:
                 painter.drawPixmap(font_metrics.width(block.text()) + 10,
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.sidebar.foldingEllipsisIcon.height(),
                     self.sidebar.foldingEllipsisIcon)
