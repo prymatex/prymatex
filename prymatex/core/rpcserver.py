@@ -42,7 +42,7 @@ class PMXCommandDispatcher(PMXObject):
     
     def debug(self, options, args):
         print "debug: ", options, args
-        return plistlib.writePlistToString({"selectedIndex": 1})
+        return True
 
 class PMXXMLRPCServerThread(QtCore.QThread, PMXObject):
     def __init__(self, parent):

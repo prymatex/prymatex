@@ -339,8 +339,7 @@ class CommandHandler(object):
         self.server.alert(str(options), str(args))
         
     def debug(self, options, args):
-        result = self.server.debug(str(options), str(args))
-        sys.stdout.write(result)
+        self.server.debug(str(options), str(args))
     
 def main(args):
     if len(args) >= 1 and args[0] in PARSERS:
@@ -350,6 +349,8 @@ def main(args):
     handler = CommandHandler()
     if options.menu:
         handler.menu(options)
+    else:
+        handler.debug(options, args)
         
 if __name__ == '__main__':
     main(sys.argv[1:])
