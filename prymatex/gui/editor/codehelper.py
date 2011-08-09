@@ -175,12 +175,13 @@ class PMXCompleterHelper(QtGui.QCompleter):
         extra = insert.length() - self.completionPrefix().length()
         self.editor.textCursor().insertText(insert.right(extra))
 
-    def complete(self, rect, suggestions):
+    def complete(self, rect, suggestions = None):
         try:
-            self.popupView.clear()
-            model = self.buildModelItems(suggestions)
-            self.setModel(model)
-            self.popup().setCurrentIndex(model.index(0, 0))
+            if suggestions is not None:
+                self.popupView.clear()
+                model = self.buildModelItems(suggestions)
+                self.setModel(model)
+                self.popup().setCurrentIndex(model.index(0, 0))
             rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 10)
             self.popupView.updateGeometries()
             super(PMXCompleterHelper, self).complete(rect)
@@ -189,13 +190,18 @@ class PMXCompleterHelper(QtGui.QCompleter):
 
     def buildModelItems(self, suggestions):
         for suggestion in suggestions:
-            item = QtGui.QListWidgetItem(suggestion['display'])
-            if 'insert' in suggestion:
-                print "no, por ahora"
-            if 'image' in suggestion:
-                item.setIcon(QtGui.QIcon(suggestion['image']))
-            if 'match' in suggestion:
-                print "no, por ahora"
+            if 'display' in suggestion:
+                item = QtGui.QListWidgetItem(suggestion['display'])
+                if 'insert' in suggestion:
+                    print "no, por ahora"
+                if 'image' in suggestion:
+                    item.setIcon(QtGui.QIcon(suggestion['image']))
+                if 'match' in suggestion:
+                    print "no, por ahora"
+            elif 'title' in suggestion:
+                item = QtGui.QListWidgetItem(suggestion['title'])
+            else:
+                continue
             self.popupView.addItem(item)
         return self.popupView.model()
 

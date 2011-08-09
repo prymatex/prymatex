@@ -205,7 +205,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         #return self.centralWidget()
         return self.tabWidget
 
-    # TODO: Fix, just grep and replace
     @property
     def currentEditor(self):
         widget = self.currentEditorWidget

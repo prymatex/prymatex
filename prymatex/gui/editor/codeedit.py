@@ -207,6 +207,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
             self.folding.indentSensitive = syntax.indentSensitive
+            print self.folding.indentSensitive
             self.mainWindow.statusbar.updateSyntax(syntax)
     
     @property
@@ -420,19 +421,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
             self.keyPressIndent(event)
-        
-        completionPrefix = self.getCurrentWord()
-        if event.key() == Qt.Key_Space and event.modifiers() == Qt.ControlModifier:
-            self.completer.setCompletionPrefix('')
-            cr = self.cursorRect()
-            self.completer.complete(cr)
-        if self.completer is not None and self.completer.popup().isVisible():
-            if completionPrefix != self.completer.completionPrefix():
+            if self.completerMode:
+                completionPrefix = self.getCurrentWord()
                 self.completer.setCompletionPrefix(completionPrefix)
-                self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
-                self.completer.setCurrentRow(0)
-                cr = self.cursorRect()
-                self.completer.complete(cr)
+                #self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+                #self.completer.setCurrentRow(0)
+                self.completer.complete(self.cursorRect())
     
     def keyPressBundleItem(self, event):
         keyseq = int(event.modifiers()) + event.key()
@@ -554,7 +548,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #==========================================================================
     # BundleItems
     #==========================================================================
-
     def insertBundleItem(self, item, tabTrigger = False, disableIndent = False):
         ''' 
             Inserta un bundle item
@@ -586,8 +579,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
     
-    # item deprecated
-    def buildEnvironment(self, item = None):
+    def buildEnvironment(self):
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
@@ -622,9 +614,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         return env
 
     #==========================================================================
-    # Folding
+    # Completer
     #==========================================================================
     
+    def showCompleter(self, suggestions):
+        completionPrefix = self.getCurrentWord()
+        self.completer.setCompletionPrefix(completionPrefix)
+        #self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+        #self.completer.setCurrentRow(0)
+        cr = self.cursorRect()
+        self.completer.complete(cr, suggestions)
+    
+    #==========================================================================
+    # Folding
+    #==========================================================================
     def codeFoldingFold(self, line_number):
         self._fold(line_number)
         self.update()
