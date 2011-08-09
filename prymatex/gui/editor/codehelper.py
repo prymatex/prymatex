@@ -205,6 +205,7 @@ class PMXFoldingHelper(object):
     FOLDING_STOP = PMXSyntax.FOLDING_STOP              #Cuidado esto tiene que ser -1
     def __init__(self, editor):
         self.editor = editor
+        self.indentSensitive = False
         self.folding = []
     
     def updateFoldingMarks(self, lastBlock):
@@ -214,6 +215,7 @@ class PMXFoldingHelper(object):
         while True:
             userData = block.userData()
             mark = userData.foldingMark
+            #indent = userData.indent
             if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
                 self.folding.append(mark)
                 nest += mark

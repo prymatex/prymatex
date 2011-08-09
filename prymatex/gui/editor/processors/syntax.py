@@ -76,22 +76,26 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
         self.__syntax = None
         self.__formatter = None
 
-    def getSyntax(self):
+    @property
+    def syntax(self):
         return self.__syntax
-    def setSyntax(self, syntax):
+    
+    @syntax.setter
+    def syntax(self, syntax):
         self.__syntax =  syntax
         self.rehighlight()
-    syntax = property(getSyntax, setSyntax)
-    
-    def getFormatter(self):
+
+    @property
+    def formatter(self):
         return self.__formatter
-    def setFormatter(self, formatter):
+
+    @formatter.setter
+    def formatter(self, formatter):
         self.__formatter =  formatter
         #Deprecate format cache
         self.__formatter.clearCache()
         PMXSyntaxProcessor.FORMAT_CACHE = {}
         self.rehighlight()
-    formatter = property(getFormatter, setFormatter)
 
     def highlightBlock(self, text):
         #Start Parsing
@@ -184,8 +188,4 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
     def indentMarker(self, line, scope):
         settings = self.editor.getPreference(scope)
         self.userData.indentMark = settings.indent(line)
-        if self.syntax.indentSensitive and line.strip() == "":
-            prev = self.currentBlock().previous()
-            self.userData.indent = prev.userData().indent if prev.isValid() else ""
-        else: 
-            self.userData.indent = whiteSpace(line)
+        self.userData.indent = whiteSpace(line)

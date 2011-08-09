@@ -202,10 +202,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         status['scope'] = self.getCurrentScope()
         self.mainWindow.statusbar.updateStatus(status)
         
+    #TODO: un setter para la syntax
     def setSyntax(self, syntax):
-        #print self.syntaxProcessor.syntax, syntax
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
+            self.folding.indentSensitive = syntax.indentSensitive
             self.mainWindow.statusbar.updateSyntax(syntax)
     
     @property
@@ -219,12 +220,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
 
     def contextMenuEvent(self, event):
         menu = self.createStandardContextMenu()
-        
         menu.addAction(self.actionIndent)
         menu.addAction(self.actionUnindent)
         self.actionUnindent.setEnabled(self.canUnindent())
-        
-
         menu.exec_(event.globalPos());
         del menu
         
