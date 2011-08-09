@@ -132,8 +132,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.cursors = PMXCursorsHelper(self)
         self.folding = PMXFoldingHelper(self)
         self.completer = PMXCompleterHelper(self)
-        #self.folding.start()
-        
         self.bookmarks = []
         
         self.setupUi()
@@ -204,10 +202,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         status['scope'] = self.getCurrentScope()
         self.mainWindow.statusbar.updateStatus(status)
         
+    #TODO: un setter para la syntax
     def setSyntax(self, syntax):
-        #print self.syntaxProcessor.syntax, syntax
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
+            self.folding.indentSensitive = syntax.indentSensitive
+            print self.folding.indentSensitive
             self.mainWindow.statusbar.updateSyntax(syntax)
     
     @property
@@ -221,12 +221,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
 
     def contextMenuEvent(self, event):
         menu = self.createStandardContextMenu()
-        
         menu.addAction(self.actionIndent)
         menu.addAction(self.actionUnindent)
         self.actionUnindent.setEnabled(self.canUnindent())
-        
-
         menu.exec_(event.globalPos());
         del menu
         
@@ -290,7 +287,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 break
 
             user_data = block.userData()
-            if user_data.foldingMark == PMXBlockUserData.FOLDING_START and user_data.folded:
+            if self.folding.getFoldingMark(block) == self.folding.FOLDING_START and user_data.folded:
                 painter.drawPixmap(font_metrics.width(block.text()) + 10,
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.sidebar.foldingEllipsisIcon.height(),
                     self.sidebar.foldingEllipsisIcon)
@@ -424,19 +421,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
             self.keyPressIndent(event)
-        
-        completionPrefix = self.getCurrentWord()
-        if event.key() == Qt.Key_Space and event.modifiers() == Qt.ControlModifier:
-            self.completer.setCompletionPrefix('')
-            cr = self.cursorRect()
-            self.completer.complete(cr)
-        if self.completer is not None and self.completer.popup().isVisible():
-            if completionPrefix != self.completer.completionPrefix():
+            if self.completerMode:
+                completionPrefix = self.getCurrentWord()
                 self.completer.setCompletionPrefix(completionPrefix)
-                self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
-                self.completer.setCurrentRow(0)
-                cr = self.cursorRect()
-                self.completer.complete(cr)
+                #self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+                #self.completer.setCurrentRow(0)
+                self.completer.complete(self.cursorRect())
     
     def keyPressBundleItem(self, event):
         keyseq = int(event.modifiers()) + event.key()
@@ -558,7 +548,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #==========================================================================
     # BundleItems
     #==========================================================================
-
     def insertBundleItem(self, item, tabTrigger = False, disableIndent = False):
         ''' 
             Inserta un bundle item
@@ -590,8 +579,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
     
-    # item deprecated
-    def buildEnvironment(self, item = None):
+    def buildEnvironment(self):
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
@@ -626,9 +614,20 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         return env
 
     #==========================================================================
-    # Folding
+    # Completer
     #==========================================================================
     
+    def showCompleter(self, suggestions):
+        completionPrefix = self.getCurrentWord()
+        self.completer.setCompletionPrefix(completionPrefix)
+        #self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+        #self.completer.setCurrentRow(0)
+        cr = self.cursorRect()
+        self.completer.complete(cr, suggestions)
+    
+    #==========================================================================
+    # Folding
+    #==========================================================================
     def codeFoldingFold(self, line_number):
         self._fold(line_number)
         self.update()
@@ -641,13 +640,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
     def _fold(self, line_number):
         milestone = self.document().findBlockByNumber(line_number - 1)
-        user_data = milestone.userData()
-        if user_data.foldingMark == PMXBlockUserData.FOLDING_START:
-            startBlock = self.document().findBlockByNumber(line_number)
-            endBlock = self._find_block_fold_close(startBlock)
+        if self.folding.getFoldingMark(milestone) == self.folding.FOLDING_START:
+            startBlock = milestone.next()
+            endBlock = self.folding.findBlockFoldClose(milestone)
         else:
             endBlock = milestone
-            milestone = self._find_block_fold_open(endBlock)
+            milestone = self.folding.findBlockFoldOpen(endBlock)
             startBlock = milestone.next()
         if endBlock == None or startBlock == None:
             return;
@@ -666,10 +664,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
 
     def _unfold(self, line_number):
         milestone = self.document().findBlockByNumber(line_number - 1)
-        startBlock = self.document().findBlockByNumber(line_number)
-        endBlock = self._find_block_fold_close(startBlock)
+        startBlock = milestone.next()
+        endBlock = self.folding.findBlockFoldClose(milestone)
         if endBlock == None:
-            return;
+            return
         
         block = startBlock
         while True:
@@ -683,40 +681,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         milestone.userData().folded = False
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
-    def _find_block_fold_close(self, start):
-        if self.syntax.indentSensitive:
-            end = start
-            level = end.userData().indent
-            while end.next().isValid() and level <= end.next().userData().indent:
-                end = end.next()
-                if end.userData().foldingMark == PMXBlockUserData.FOLDING_STOP and end.userData().indent == level:
-                    break
-        else:
-            end = start
-            counter = 0
-            while end.userData().foldingMark != PMXBlockUserData.FOLDING_STOP or counter !=  0:
-                if end.userData().foldingMark == PMXBlockUserData.FOLDING_START:
-                    counter += 1
-                elif end.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
-                    counter -= 1
-                end = end.next()
-                if not end.isValid():
-                    return None
-        return end
-    
-    def _find_block_fold_open(self, end):
-        start = end.previous()
-        counter = 0
-        while start.userData().foldingMark != PMXBlockUserData.FOLDING_START or counter !=  0:
-            if start.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
-                counter += 1
-            elif start.userData().foldingMark == PMXBlockUserData.FOLDING_START:
-                counter -= 1
-            start = start.previous()
-            if not start.isValid():
-                return None
-        return start
-    
     #==========================================================================
     # Bookmarks
     #==========================================================================    

@@ -84,7 +84,6 @@ class PMXApplication(QtGui.QApplication):
         # Creates the GUI
         self.createWindows(open_args[1:]) # Skip pmx.py
         
-        
         self.createRPCThread()
     
     @property
@@ -154,7 +153,6 @@ class PMXApplication(QtGui.QApplication):
     def setup_file_manager(self):
         from prymatex.core.filemanager import PMXFileManager
         self.__fileManager = PMXFileManager(self)
-
     
     @property
     def fileManager(self):

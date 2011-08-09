@@ -315,9 +315,12 @@ class CommandHandler(object):
         options, args = tooltip_parse_args(args)
         self.server.tooltip(str(options), str(args))
         
-    def menu(self, args):
-        options, args = menu_parse_args(args)
-        self.server.menu(str(options), str(args))
+    def menu(self, options):
+        if options.parameters == None:
+            options.parameters = sys.stdin.readlines()
+        result = self.server.menu("".join(options.parameters))
+        if not options.quiet:
+            sys.stdout.write(result)
         
     def popup(self, args):
         options, args = popup_parse_args(args)
@@ -335,21 +338,19 @@ class CommandHandler(object):
         options, args = alert_parse_args(args)
         self.server.alert(str(options), str(args))
         
-    def debug(self, args):
-        options, args = new_dialgo_parse_args(args)
-        if options.parameters == None:
-            options.parameters = sys.stdin.readlines()
-        result = self.server.debug(str(options), str(args))
-        sys.stdout.write(result)
+    def debug(self, options, args):
+        self.server.debug(str(options), str(args))
     
 def main(args):
-    handler = CommandHandler()
     if len(args) >= 1 and args[0] in PARSERS:
         options, args = PARSERS[args[0]](args[1:])
     else:
         options, args = new_dialgo_parse_args(args)
-    print options, args
-    #self.server.debug(str(options), str(args))
+    handler = CommandHandler()
+    if options.menu:
+        handler.menu(options)
+    else:
+        handler.debug(options, args)
         
 if __name__ == '__main__':
     main(sys.argv[1:])

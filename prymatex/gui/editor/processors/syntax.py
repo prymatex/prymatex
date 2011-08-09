@@ -29,7 +29,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
         self.scopes = []
-        #self.foldingMark = self.FOLDING_NONE
+        self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
         self.folded = False
         self.indentMark = self.INDENT_NONE
@@ -76,29 +76,32 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
         self.__syntax = None
         self.__formatter = None
 
-    def getSyntax(self):
+    @property
+    def syntax(self):
         return self.__syntax
-    def setSyntax(self, syntax):
+    
+    @syntax.setter
+    def syntax(self, syntax):
         self.__syntax =  syntax
         self.rehighlight()
-    syntax = property(getSyntax, setSyntax)
-    
-    def getFormatter(self):
+
+    @property
+    def formatter(self):
         return self.__formatter
-    def setFormatter(self, formatter):
+
+    @formatter.setter
+    def formatter(self, formatter):
         self.__formatter =  formatter
         #Deprecate format cache
         self.__formatter.clearCache()
         PMXSyntaxProcessor.FORMAT_CACHE = {}
         self.rehighlight()
-    formatter = property(getFormatter, setFormatter)
 
     def highlightBlock(self, text):
         #Start Parsing
         self.block_number = self.currentBlock().blockNumber()
         self.userData = self.currentBlock().userData()
         if self.userData == None:
-            self.editor.folding.insert(self.block_number)
             self.userData = PMXBlockUserData()
             self.setCurrentBlockUserData(self.userData)
         
@@ -179,14 +182,10 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
     # Extra data for user data
     #===============================================================================
     def foldingMarker(self, line):
-        self.editor.folding.setBlockFoldingMark(self.block_number, self.syntax.folding(line))
+        self.userData.foldingMark = self.syntax.folding(line)
+        self.editor.folding.deprecateFolding(self.block_number)
 
     def indentMarker(self, line, scope):
         settings = self.editor.getPreference(scope)
         self.userData.indentMark = settings.indent(line)
-        if self.syntax.indentSensitive and line.strip() == "":
-            prev = self.currentBlock().previous()
-            self.userData.indent = prev.userData().indent if prev.isValid() else ""
-        else: 
-            self.userData.indent = whiteSpace(line)
-        self.editor.folding.setBlockIndent(self.block_number, len(self.userData.indent))
+        self.userData.indent = whiteSpace(line)

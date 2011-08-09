@@ -175,12 +175,13 @@ class PMXCompleterHelper(QtGui.QCompleter):
         extra = insert.length() - self.completionPrefix().length()
         self.editor.textCursor().insertText(insert.right(extra))
 
-    def complete(self, rect, suggestions):
+    def complete(self, rect, suggestions = None):
         try:
-            self.popupView.clear()
-            model = self.buildModelItems(suggestions)
-            self.setModel(model)
-            self.popup().setCurrentIndex(model.index(0, 0))
+            if suggestions is not None:
+                self.popupView.clear()
+                model = self.buildModelItems(suggestions)
+                self.setModel(model)
+                self.popup().setCurrentIndex(model.index(0, 0))
             rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 10)
             self.popupView.updateGeometries()
             super(PMXCompleterHelper, self).complete(rect)
@@ -189,54 +190,79 @@ class PMXCompleterHelper(QtGui.QCompleter):
 
     def buildModelItems(self, suggestions):
         for suggestion in suggestions:
-            item = QtGui.QListWidgetItem(suggestion['display'])
-            if 'insert' in suggestion:
-                print "no, por ahora"
-            if 'image' in suggestion:
-                item.setIcon(QtGui.QIcon(suggestion['image']))
-            if 'match' in suggestion:
-                print "no, por ahora"
+            if 'display' in suggestion:
+                item = QtGui.QListWidgetItem(suggestion['display'])
+                if 'insert' in suggestion:
+                    print "no, por ahora"
+                if 'image' in suggestion:
+                    item.setIcon(QtGui.QIcon(suggestion['image']))
+                if 'match' in suggestion:
+                    print "no, por ahora"
+            elif 'title' in suggestion:
+                item = QtGui.QListWidgetItem(suggestion['title'])
+            else:
+                continue
             self.popupView.addItem(item)
         return self.popupView.model()
 
-class PMXFoldingHelper():
-    FOLDING_NONE = PMXSyntax.FOLDING_NONE
-    FOLDING_START = PMXSyntax.FOLDING_START
-    FOLDING_STOP = PMXSyntax.FOLDING_STOP
+class PMXFoldingHelper(object):
+    FOLDING_NONE = PMXSyntax.FOLDING_NONE              #Cuidado esto tiene que ser 0
+    FOLDING_START = PMXSyntax.FOLDING_START            #Cuidado esto tiene que ser +1
+    FOLDING_STOP = PMXSyntax.FOLDING_STOP              #Cuidado esto tiene que ser -1
     def __init__(self, editor):
-        super(PMXFoldingHelper, self).__init__(editor)
         self.editor = editor
-        self.open = []
-        self.close = []
-        self.indent = []
-        self.__folding = []
+        self.indentSensitive = False
+        self.folding = []
     
-    @property
-    def folding(self):
-        return self.__folding
+    def updateFoldingMarks(self, lastBlock):
+        index = len(self.folding)
+        block = self.editor.document().findBlockByNumber(index)
+        nest = reduce(lambda x, y: x + y, self.folding, 0)
+        while True:
+            userData = block.userData()
+            mark = userData.foldingMark
+            #indent = userData.indent
+            if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
+                self.folding.append(mark)
+                nest += mark
+            elif mark == self.FOLDING_STOP:
+                self.folding.append(self.FOLDING_NONE)
+            if not block.isValid() or (block >= lastBlock and nest <= 0):
+                break
+            block = block.next()
+
+    def deprecateFolding(self, index):
+        self.folding = self.folding[:index]
     
-    def setBlockFoldingMark(self, index, mark):
-        if mark == self.FOLDING_START:
-            self.open[index] = 1
-        elif mark == self.FOLDING_STOP:
-            self.close[index] = -1
-        elif mark == self.FOLDING_NONE:
-            self.open[index] = self.close[index] = 0
-        #TODO: Mas inteligente, si no tenia valor y no agrego valor no hace falta regenerar por ejemplo
-        self.__folding = []
-        
-    def setBlockIndent(self, index, indent):
-        self.indent[index] = indent
-        
-    def insert(self, index):
-        self.open.insert(index, 0)
-        self.close.insert(index, 0)
-        self.indent.insert(index, 0)
+    def getFoldingMark(self, block):
+        if block.blockNumber() >= len(self.folding):
+            self.updateFoldingMarks(block)
+        return self.folding[block.blockNumber()]
+    
+    def findBlockFoldClose(self, block):
+        nest = 0
+        while True:
+            index = block.blockNumber()
+            nest += self.folding[index]
+            if nest == 0:
+                break
+            if not block.isValid():
+                return None
+            block = block.next()
+        return block
+    
+    def findBlockFoldOpen(self, end):
+        start = end.previous()
+        counter = 0
+        while start.userData().foldingMark != PMXBlockUserData.FOLDING_START or counter !=  0:
+            if start.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
+                counter += 1
+            elif start.userData().foldingMark == PMXBlockUserData.FOLDING_START:
+                counter -= 1
+            start = start.previous()
+            if not start.isValid():
+                return None
+        return start
     
     def getNestedLevel(self, index):
-        start = self.open[:index]
-        stop = self.close[:index]
-        print index
-        print start
-        print stop
-        return reduce(lambda x, y: x + y, start, 0) + reduce(lambda x, y: x + y, stop, 0)
+        return reduce(lambda x, y: x + y, self.folding[:index], 0)

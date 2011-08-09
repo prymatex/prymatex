@@ -191,8 +191,8 @@ class PMXSyntax(PMXBundleItem):
     EXTENSION = 'tmLanguage'
     PATTERNS = ['*.tmLanguage', '*.plist']
     FOLDING_NONE = 0
-    FOLDING_START = -1
-    FOLDING_STOP = -2
+    FOLDING_START = 1
+    FOLDING_STOP = -1
     def __init__(self, uuid, namespace, hash, path = None):
         super(PMXSyntax, self).__init__(uuid, namespace, hash, path)
 
@@ -219,11 +219,11 @@ class PMXSyntax(PMXBundleItem):
                 hash[key] = value
         return hash
 
-    #Deprecated es una chanchada
     @property
     def indentSensitive(self):
         #If stop marker match with "" the grammar is indent sensitive
-        return False
+        match = self.foldingStopMarker.search("") if self.foldingStopMarker != None else None
+        return match != None
 
     @property
     def syntaxes(self):
@@ -239,7 +239,6 @@ class PMXSyntax(PMXBundleItem):
                 hash['patterns'] = self.patterns
             setattr(self, '_grammar', PMXSyntaxNode(hash , self ))
         return self._grammar
-
         
     def parse(self, string, processor = None):
         if processor:
@@ -251,9 +250,6 @@ class PMXSyntax(PMXBundleItem):
             processor.endParsing(self.scopeName)
         return stack
     
-    if PROFILING_CAPABLE and qApp.instance().options.profiling:
-        parse = profile(parse)
-
     def parseLine(self, stack, line, processor):
         if processor:
             processor.newLine(line)

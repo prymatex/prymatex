@@ -4,7 +4,7 @@
 # TODO: Constants!
 import plistlib
 from SimpleXMLRPCServer import SimpleXMLRPCServer
-from PyQt4.Qt import QThread
+from PyQt4 import QtCore
 from prymatex.core.base import PMXObject
 
 PORT = 4612
@@ -19,9 +19,10 @@ class PMXCommandDispatcher(PMXObject):
         print "Tooltip: ", options, args
         return True
     
-    def menu(self, options, args):
-        print "menu: ", options, args
-        return True
+    def menu(self, plist):
+        data = plistlib.readPlistFromString(plist)
+        print data
+        return plistlib.writePlistToString({})
     
     def popup(self, options, args):
         print "popup: ", options, args
@@ -41,15 +42,14 @@ class PMXCommandDispatcher(PMXObject):
     
     def debug(self, options, args):
         print "debug: ", options, args
-        return plistlib.writePlistToString({"selectedIndex": 1})
+        return True
 
-class PMXXMLRPCServerThread(QThread, PMXObject):
+class PMXXMLRPCServerThread(QtCore.QThread, PMXObject):
     def __init__(self, parent):
         super(PMXXMLRPCServerThread, self).__init__(parent)
         self.server = self.getServer(PORT, PORT + 10)
         self.dispatcher = PMXCommandDispatcher()
         self.server.register_instance(self.dispatcher)
-    
     
     def getServer(self, start_port, end_port):
         '''

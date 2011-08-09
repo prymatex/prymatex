@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QWidget, QPainter, QPixmap, QFontMetrics
 from PyQt4.Qt import QColor, QSize
 from prymatex.gui.editor.processors import PMXBlockUserData
@@ -11,8 +15,8 @@ class PMXSidebar(QWidget):
         self.highest_line = 0
         self.bookmarkArea = 12
         self.foldArea = 12
-        self.foreground = None #pmxConfigPorperty(default = QColor(170, 170, 170))
-        self.background = None #pmxConfigPorperty(default = QColor(227, 227, 227))
+        self.foreground = None 
+        self.background = None 
         #Load Icons
         self.foldingTopIcon = QPixmap()
         self.foldingTopIcon.load(":/editor/sidebar/folding-top.png")
@@ -26,7 +30,7 @@ class PMXSidebar(QWidget):
         self.bookmarkFlagIcon.load(":/editor/sidebar/bookmark-flag.png")
 
     def sizeHint(self):
-        return QSize(self.editor.lineNumberAreaWidth(), 0)
+        return QtGui.QSize(self.editor.lineNumberAreaWidth(), 0)
 
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
@@ -65,22 +69,21 @@ class PMXSidebar(QWidget):
                         round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.bookmarkFlagIcon.height(),
                         self.bookmarkFlagIcon)
     
-                # TODO: Deprecar el if None de user data, simpre vamos a tene user data
                 user_data = block.userData()
-                if user_data != None:
-                    if user_data.foldingMark == PMXBlockUserData.FOLDING_START:
-                        if user_data.folded:
-                            painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
-                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
-                                self.foldingCollapsedIcon)
-                        else:
-                            painter.drawPixmap(self.width() - self.foldingTopIcon.width() - 1,
-                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingTopIcon.height(),
-                                self.foldingTopIcon)
-                    elif user_data.foldingMark == PMXBlockUserData.FOLDING_STOP:
+                mark = self.editor.folding.getFoldingMark(block)
+                if mark == self.editor.folding.FOLDING_START:
+                    if user_data.folded:
                         painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
                             round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
-                            self.foldingBottomIcon)
+                            self.foldingCollapsedIcon)
+                    else:
+                        painter.drawPixmap(self.width() - self.foldingTopIcon.width() - 1,
+                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingTopIcon.height(),
+                            self.foldingTopIcon)
+                elif mark == self.editor.folding.FOLDING_STOP:
+                    painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
+                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
+                        self.foldingBottomIcon)
             
             block = block.next()
 

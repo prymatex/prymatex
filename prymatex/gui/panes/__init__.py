@@ -23,7 +23,6 @@ class PaneDockBase(QDockWidget, PMXObject):
         self.setFocus(Qt.MouseFocusReason)
         self.emitWidgetShown(True)
     
-    
     def hideEvent(self, event):
         QDockWidget.hideEvent(self, event)
         self.emitWidgetShown(False)
