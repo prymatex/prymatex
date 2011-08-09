@@ -191,8 +191,8 @@ class PMXSyntax(PMXBundleItem):
     EXTENSION = 'tmLanguage'
     PATTERNS = ['*.tmLanguage', '*.plist']
     FOLDING_NONE = 0
-    FOLDING_START = -1
-    FOLDING_STOP = -2
+    FOLDING_START = 1
+    FOLDING_STOP = -1
     def __init__(self, uuid, namespace, hash, path = None):
         super(PMXSyntax, self).__init__(uuid, namespace, hash, path)
 

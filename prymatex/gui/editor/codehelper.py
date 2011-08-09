@@ -200,33 +200,61 @@ class PMXCompleterHelper(QtGui.QCompleter):
         return self.popupView.model()
 
 class PMXFoldingHelper(object):
-    FOLDING_NONE = PMXSyntax.FOLDING_NONE
-    FOLDING_START = PMXSyntax.FOLDING_START
-    FOLDING_STOP = PMXSyntax.FOLDING_STOP
+    FOLDING_NONE = PMXSyntax.FOLDING_NONE              #Cuidado esto tiene que ser 0
+    FOLDING_START = PMXSyntax.FOLDING_START            #Cuidado esto tiene que ser +1
+    FOLDING_STOP = PMXSyntax.FOLDING_STOP              #Cuidado esto tiene que ser -1
     def __init__(self, editor):
         self.editor = editor
-        self.__folding = []
+        self.folding = []
     
-    def __buildFoldingMarks(self, lastBlock):
-        folding = []
-        block = self.editor.document.firstBlock()
-        nest = 0
-        while block != lastBlock:
+    def updateFoldingMarks(self, lastBlock):
+        index = len(self.folding)
+        block = self.editor.document().findBlockByNumber(index)
+        nest = reduce(lambda x, y: x + y, self.folding, 0)
+        while True:
             userData = block.userData()
-        return folding
+            mark = userData.foldingMark
+            if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
+                self.folding.append(mark)
+                nest += mark
+            elif mark == self.FOLDING_STOP:
+                self.folding.append(self.FOLDING_NONE)
+            if not block.isValid() or (block >= lastBlock and nest <= 0):
+                break
+            block = block.next()
 
+    def deprecateFolding(self, index):
+        self.folding = self.folding[:index]
+    
     def getFoldingMark(self, block):
-        #if self.__folding == None:
-        #    self.__folding = self.__buildFoldingMarks(lastBlock)
-        userData = block.userData()
-        return userData.foldingMark
-        #return self.__folding[index]
+        if block.blockNumber() >= len(self.folding):
+            self.updateFoldingMarks(block)
+        return self.folding[block.blockNumber()]
+    
+    def findBlockFoldClose(self, block):
+        nest = 0
+        while True:
+            index = block.blockNumber()
+            nest += self.folding[index]
+            if nest == 0:
+                break
+            if not block.isValid():
+                return None
+            block = block.next()
+        return block
+    
+    def findBlockFoldOpen(self, end):
+        start = end.previous()
+        counter = 0
+        while start.userData().foldingMark != PMXBlockUserData.FOLDING_START or counter !=  0:
+            if start.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
+                counter += 1
+            elif start.userData().foldingMark == PMXBlockUserData.FOLDING_START:
+                counter -= 1
+            start = start.previous()
+            if not start.isValid():
+                return None
+        return start
     
     def getNestedLevel(self, index):
-        return 0
-        start = self.open[:index]
-        stop = self.close[:index]
-        print index
-        print start
-        print stop
-        return reduce(lambda x, y: x + y, start, 0) + reduce(lambda x, y: x + y, stop, 0)
+        return reduce(lambda x, y: x + y, self.folding[:index], 0)

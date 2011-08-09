@@ -639,13 +639,12 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         
     def _fold(self, line_number):
         milestone = self.document().findBlockByNumber(line_number - 1)
-        user_data = milestone.userData()
-        if user_data.foldingMark == PMXBlockUserData.FOLDING_START:
-            startBlock = self.document().findBlockByNumber(line_number)
-            endBlock = self._find_block_fold_close(startBlock)
+        if self.folding.getFoldingMark(milestone) == self.folding.FOLDING_START:
+            startBlock = milestone.next()
+            endBlock = self.folding.findBlockFoldClose(milestone)
         else:
             endBlock = milestone
-            milestone = self._find_block_fold_open(endBlock)
+            milestone = self.folding.findBlockFoldOpen(endBlock)
             startBlock = milestone.next()
         if endBlock == None or startBlock == None:
             return;
@@ -664,10 +663,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
 
     def _unfold(self, line_number):
         milestone = self.document().findBlockByNumber(line_number - 1)
-        startBlock = self.document().findBlockByNumber(line_number)
-        endBlock = self._find_block_fold_close(startBlock)
+        startBlock = milestone.next()
+        endBlock = self.folding.findBlockFoldClose(milestone)
         if endBlock == None:
-            return;
+            return
         
         block = startBlock
         while True:
@@ -681,40 +680,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         milestone.userData().folded = False
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
-    def _find_block_fold_close(self, start):
-        if self.syntax.indentSensitive:
-            end = start
-            level = end.userData().indent
-            while end.next().isValid() and level <= end.next().userData().indent:
-                end = end.next()
-                if end.userData().foldingMark == PMXBlockUserData.FOLDING_STOP and end.userData().indent == level:
-                    break
-        else:
-            end = start
-            counter = 0
-            while end.userData().foldingMark != PMXBlockUserData.FOLDING_STOP or counter !=  0:
-                if end.userData().foldingMark == PMXBlockUserData.FOLDING_START:
-                    counter += 1
-                elif end.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
-                    counter -= 1
-                end = end.next()
-                if not end.isValid():
-                    return None
-        return end
-    
-    def _find_block_fold_open(self, end):
-        start = end.previous()
-        counter = 0
-        while start.userData().foldingMark != PMXBlockUserData.FOLDING_START or counter !=  0:
-            if start.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
-                counter += 1
-            elif start.userData().foldingMark == PMXBlockUserData.FOLDING_START:
-                counter -= 1
-            start = start.previous()
-            if not start.isValid():
-                return None
-        return start
-    
     #==========================================================================
     # Bookmarks
     #==========================================================================    

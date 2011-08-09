@@ -20,9 +20,6 @@ def whiteSpace(text):
 
 # Syntax
 class PMXBlockUserData(QtGui.QTextBlockUserData):
-    FOLDING_NONE = PMXSyntax.FOLDING_NONE
-    FOLDING_START = PMXSyntax.FOLDING_START
-    FOLDING_STOP = PMXSyntax.FOLDING_STOP
     INDENT_NONE = PMXPreferenceSettings.INDENT_NONE
     INDENT_INCREASE = PMXPreferenceSettings.INDENT_INCREASE
     INDENT_DECREASE = PMXPreferenceSettings.INDENT_DECREASE
@@ -32,7 +29,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
         self.scopes = []
-        self.foldingMark = self.FOLDING_NONE
+        self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
         self.folded = False
         self.indentMark = self.INDENT_NONE
@@ -182,6 +179,7 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
     #===============================================================================
     def foldingMarker(self, line):
         self.userData.foldingMark = self.syntax.folding(line)
+        self.editor.folding.deprecateFolding(self.block_number)
 
     def indentMarker(self, line, scope):
         settings = self.editor.getPreference(scope)
