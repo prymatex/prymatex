@@ -647,9 +647,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             endBlock = milestone
             milestone = self.folding.findBlockFoldOpen(endBlock)
             startBlock = milestone.next()
-        if endBlock == None or startBlock == None:
-            return;
-        
+        print startBlock.blockNumber(), milestone.blockNumber(), endBlock.blockNumber()
         block = startBlock
         while True:
             user_data = block.userData()

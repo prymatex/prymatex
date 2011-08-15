@@ -218,16 +218,15 @@ class PMXFoldingHelper(object):
         index = len(self.folding)
         block = self.editor.document().findBlockByNumber(index)
         nest = reduce(lambda x, y: x + y, self.folding, 0)
-        while True:
+        while block.isValid():
             userData = block.userData()
             mark = userData.foldingMark
-            #indent = userData.indent
             if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
                 self.folding.append(mark)
                 nest += mark
             elif mark == self.FOLDING_STOP:
                 self.folding.append(self.FOLDING_NONE)
-            if not block.isValid() or (block >= lastBlock and nest <= 0):
+            if block >= lastBlock and nest <= 0:
                 break
             block = block.next()
 
@@ -241,15 +240,19 @@ class PMXFoldingHelper(object):
     
     def findBlockFoldClose(self, block):
         nest = 0
-        while True:
+        indent = block.userData().indent
+        while block.isValid():
             index = block.blockNumber()
             nest += self.folding[index]
             if nest == 0:
                 break
-            if not block.isValid():
-                return None
+            if self.indentSensitive and block.userData().indent <= indent:
+                if block.text().trimmed() != "":
+                    block = block.previous()
+                    break
             block = block.next()
-        return block
+        #return the founded block or the last valid block
+        return block if block.isValid() else block.previous()
     
     def findBlockFoldOpen(self, end):
         start = end.previous()
