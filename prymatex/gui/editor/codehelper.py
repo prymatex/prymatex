@@ -214,6 +214,16 @@ class PMXFoldingHelper(object):
         self.indentSensitive = False
         self.folding = []
     
+    def findPreviousNotBlankBlock(self, block):
+        """
+            Return previous block if text in block is not ""
+        """
+        while block.isValid():
+            block = block.previous()
+            if block.text().trimmed() != "":
+                break
+        return block
+    
     def updateIndentFoldingMarks(self, lastBlock):
         index = len(self.folding)
         block = self.editor.document().findBlockByNumber(index)
@@ -221,7 +231,18 @@ class PMXFoldingHelper(object):
         while block.isValid():
             userData = block.userData()
             mark = userData.foldingMark
-            self.folding.append(self.FOLDING_NONE)
+            if mark == self.FOLDING_START or (mark == self.FOLDING_STOP and nest > 0 and block.text().trimmed() != ""):
+                self.folding.append(mark)
+                nest += mark
+            else:
+                self.folding.append(self.FOLDING_NONE)
+            #Le pongo un "corcho" al anterior
+            previousBlock = self.findPreviousNotBlankBlock(block)
+            if previousBlock.isValid() and previousBlock.userData().foldingMark == self.FOLDING_NONE and previousBlock.userData().indent > userData.indent:
+                #Validar que tabKeyBehavior no sea cero
+                factor = len(previousBlock.userData().indent) / len(self.editor.tabKeyBehavior)
+                factor -= len(userData.indent) / len(self.editor.tabKeyBehavior)
+                self.folding[previousBlock.blockNumber()] = -1 * factor
             if block >= lastBlock:
                 break
             block = block.next()
@@ -246,12 +267,19 @@ class PMXFoldingHelper(object):
         self.folding = self.folding[:index]
     
     def getFoldingMark(self, block):
-        if block.blockNumber() >= len(self.folding):
-            if self.indentSensitive:
+        if self.indentSensitive:
+            if block.blockNumber() >= len(self.folding):
                 self.updateIndentFoldingMarks(block)
+            if self.folding[block.blockNumber()] < 0:
+                return self.FOLDING_STOP
+            elif self.folding[block.blockNumber()] > 0:
+                return self.FOLDING_START
             else:
+                return self.FOLDING_NONE
+        else:
+            if block.blockNumber() >= len(self.folding):
                 self.updateFoldingMarks(block)
-        return self.folding[block.blockNumber()]
+            return self.folding[block.blockNumber()]
     
     def findBlockFoldClose(self, block):
         nest = 0
@@ -259,7 +287,7 @@ class PMXFoldingHelper(object):
         while block.isValid():
             index = block.blockNumber()
             nest += self.folding[index]
-            if nest == 0:
+            if nest <= 0:
                 break
             block = block.next()
         #return the founded block or the last valid block
