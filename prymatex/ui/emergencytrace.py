@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/emergencytrace.ui'
 #
-# Created: Sun Jul 17 23:25:30 2011
+# Created: Tue Aug 16 10:01:40 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,13 +25,7 @@ class Ui_TracebackDialog(object):
         self.labelTitle = QtGui.QLabel(TracebackDialog)
         self.labelTitle.setObjectName(_fromUtf8("labelTitle"))
         self.verticalLayout.addWidget(self.labelTitle)
-        self.textStackTrace = QtGui.QPlainTextEdit(TracebackDialog)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.textStackTrace.sizePolicy().hasHeightForWidth())
-        self.textStackTrace.setSizePolicy(sizePolicy)
-        self.textStackTrace.setReadOnly(True)
+        self.textStackTrace = QtGui.QTextEdit(TracebackDialog)
         self.textStackTrace.setObjectName(_fromUtf8("textStackTrace"))
         self.verticalLayout.addWidget(self.textStackTrace)
         self.horizontalLayout = QtGui.QHBoxLayout()

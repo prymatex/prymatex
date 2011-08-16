@@ -34,17 +34,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPlainTextEdit" name="textStackTrace">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
+    <widget class="QTextEdit" name="textStackTrace"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

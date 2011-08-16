@@ -12,6 +12,7 @@ from prymatex.core.config import PMXSettings
 from prymatex.utils.i18n import ugettext as _
 
 from logging import getLogger
+from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
 logger = getLogger(__name__)
 
 # ipdb handling
@@ -84,7 +85,12 @@ class PMXApplication(QtGui.QApplication):
         # Creates the GUI
         self.createWindows(open_args[1:]) # Skip pmx.py
         
+        # Print exceptions in a window
+        self.replaceSysExceptHook()
+        
         self.createRPCThread()
+        
+        
     
     @property
     def options(self):
@@ -343,3 +349,15 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.core.rpcserver import PMXXMLRPCServerThread
         self.RPCServerThread = PMXXMLRPCServerThread(self)
         self.RPCServerThread.start()
+    
+    def displayApplicationException(self, exctype, value, traceback):
+        ''' Display a nice dialog showing the python traceback'''
+        # run original trace
+        sys.__excepthook__(exctype, value, traceback)
+        print "displayApplicationException", exctype, value, traceback, type(traceback)
+        dialog = PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback)
+        dialog.exec_()
+        
+    
+    def replaceSysExceptHook(self):
+        sys.excepthook = self.displayApplicationException

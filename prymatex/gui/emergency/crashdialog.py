@@ -4,36 +4,21 @@
 from PyQt4.Qt import *
 from prymatex.ui.emergencycrash import Ui_CrashDialog
 import sys
+from beautify import beautifyTraceback
 
 class PMXCrashDialog(QDialog, Ui_CrashDialog):
     '''
     Show a nice traceback dialog
     '''
     #TODO: Impement send to in the crash dialog button
-    def __init__(self, traceback_text, show_through_stderr = True):
+    def __init__(self, tracebackText, show_through_stderr = True):
         super(PMXCrashDialog, self).__init__()
         self.setupUi(self)
         self.pushSendTraceback.setEnabled(True) #Testing
-        self.fillTracebackTextEdit(traceback_text)
+        self.textEdit.setText(beautifyTraceback(tracebackText))
         if show_through_stderr:
-            sys.stderr.write(traceback_text)
+            sys.stderr.write(tracebackText)
             sys.stderr.flush()
-        
-    def fillTracebackTextEdit(self, content):
-        text = content#.decode('utf-8')
-        self.textEdit.setText(self.format(text))
-            
-    def format(self, some_code):
-        ''' If pygment's available it will highlight the
-        traceback with HTML, allowing Qt's integrated text
-        browser to display it nicely :) '''
-        try:
-            from pygments import highlight
-            from pygments.lexers import PythonLexer
-            from pygments.formatters import HtmlFormatter
-            return highlight(some_code, PythonLexer(), HtmlFormatter(noclasses = True))
-        except ImportError:
-            return some_code
     
     def on_pushCopyTraceback_pressed(self):
         clipboard = qApp.instance().clipboard()
