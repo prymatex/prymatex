@@ -287,7 +287,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 break
 
             user_data = block.userData()
-            if self.folding.getFoldingMark(block) == self.folding.FOLDING_START and user_data.folded:
+            if block.isVisible() and self.folding.getFoldingMark(block) == self.folding.FOLDING_START and user_data.folded:
                 painter.drawPixmap(font_metrics.width(block.text()) + 10,
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.sidebar.foldingEllipsisIcon.height(),
                     self.sidebar.foldingEllipsisIcon)
@@ -652,7 +652,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         while True:
             user_data = block.userData()
             user_data.foldedLevel += 1
-            block.setVisible(user_data.folded)
+            block.setVisible(user_data.foldedLevel == 0)
             if block == endBlock:
                 break
             block = block.next()
@@ -671,7 +671,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         while True:
             user_data = block.userData()
             user_data.foldedLevel -= 1
-            block.setVisible(not user_data.folded)
+            block.setVisible(user_data.foldedLevel == 0)
             if block == endBlock:
                 break
             block = block.next()

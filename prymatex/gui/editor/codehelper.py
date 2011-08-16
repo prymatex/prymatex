@@ -224,25 +224,45 @@ class PMXFoldingHelper(object):
                 break
         return block
     
+    def closePreviousBlock(self, block):
+        #Le pongo un "corcho" al anterior
+        factor = 1
+        userData = block.userData()
+        startBlock = previousBlock = self.findPreviousNotBlankBlock(block)
+        while startBlock.isValid():
+            #Busco uno que abre al mismo nivel
+            if startBlock.userData().foldingMark == self.FOLDING_START and startBlock.userData().indent == userData.indent:
+                self.folding[previousBlock.blockNumber()] = -1 * factor
+                break
+            elif startBlock.userData().indent <= userData.indent:
+                break
+            #Update factor
+            factor = factor + 1 if self.folding[previousBlock.blockNumber()] > 0 else factor - 1 if self.folding[previousBlock.blockNumber()] < 0 else factor
+            startBlock = self.findPreviousNotBlankBlock(startBlock)
+        print factor
+        return factor
+    
     def updateIndentFoldingMarks(self, lastBlock):
         index = len(self.folding)
         block = self.editor.document().findBlockByNumber(index)
         nest = reduce(lambda x, y: x + y, self.folding, 0)
+        #Find Start
+        last = self.findPreviousNotBlankBlock(block)
+        lastIndent = last.userData().indent if last.isValid() else ""
         while block.isValid():
             userData = block.userData()
             mark = userData.foldingMark
             if mark == self.FOLDING_START or (mark == self.FOLDING_STOP and nest > 0 and block.text().trimmed() != ""):
+                if mark == self.FOLDING_START and nest > 0:
+                    nest -= self.closePreviousBlock(block)
                 self.folding.append(mark)
                 nest += mark
+            elif lastIndent > userData.indent and block.text().trimmed() != "" and nest > 0:
+                nest -= self.closePreviousBlock(block)
+                lastIndent = userData.indent
+                self.folding.append(self.FOLDING_NONE)
             else:
                 self.folding.append(self.FOLDING_NONE)
-            #Le pongo un "corcho" al anterior
-            previousBlock = self.findPreviousNotBlankBlock(block)
-            if previousBlock.isValid() and previousBlock.userData().foldingMark == self.FOLDING_NONE and previousBlock.userData().indent > userData.indent:
-                #Validar que tabKeyBehavior no sea cero
-                factor = len(previousBlock.userData().indent) / len(self.editor.tabKeyBehavior)
-                factor -= len(userData.indent) / len(self.editor.tabKeyBehavior)
-                self.folding[previousBlock.blockNumber()] = -1 * factor
             if block >= lastBlock:
                 break
             block = block.next()
@@ -283,7 +303,10 @@ class PMXFoldingHelper(object):
     
     def findBlockFoldClose(self, block):
         nest = 0
-        indent = block.userData().indent
+        #DEBUG
+        index = block.blockNumber()
+        print self.folding[index]
+        
         while block.isValid():
             index = block.blockNumber()
             nest += self.folding[index]
@@ -293,18 +316,20 @@ class PMXFoldingHelper(object):
         #return the founded block or the last valid block
         return block if block.isValid() else block.previous()
     
-    def findBlockFoldOpen(self, end):
-        start = end.previous()
-        counter = 0
-        while start.userData().foldingMark != PMXBlockUserData.FOLDING_START or counter !=  0:
-            if start.userData().foldingMark == PMXBlockUserData.FOLDING_STOP:
-                counter += 1
-            elif start.userData().foldingMark == PMXBlockUserData.FOLDING_START:
-                counter -= 1
-            start = start.previous()
-            if not start.isValid():
-                return None
-        return start
+    def findBlockFoldOpen(self, block):
+        nest = 0
+        #DEBUG
+        index = block.blockNumber()
+        print self.folding[index]
+        
+        while block.isValid():
+            index = block.blockNumber()
+            nest += self.folding[index]
+            if nest >= 0:
+                break
+            block = block.previous()
+        #return the founded block or the first valid block
+        return block if block.isValid() else block.next()
     
     def getNestedLevel(self, index):
         return reduce(lambda x, y: x + y, self.folding[:index], 0)
