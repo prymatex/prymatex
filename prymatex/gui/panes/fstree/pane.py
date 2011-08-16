@@ -73,7 +73,7 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
             self.stackedWidget.setCurrentIndex(0)
         
         else:
-            path = self.comboBookmarks.itemData(index).toPyObject()
+            path = self.comboBookmarks.itemData(index)
             if self.tree.model().index(path) != self.tree.rootIndex():
                 print "Should Change"
             #if os.path.exists(path):

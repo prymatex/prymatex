@@ -28,7 +28,8 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         return 2
     
     def data(self, index, role = QtCore.Qt.DisplayRole):
-        if not index.isValid(): return QtCore.QVariant()
+        if not index.isValid(): 
+            return None
         
         if role == QtCore.Qt.CheckStateRole and index.column() == 0:
             if 'system' not in self.variables[index.row()]:
@@ -46,7 +47,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         if not index.isValid(): return False
 
         if role == QtCore.Qt.EditRole:
-            new_value = unicode(value.toPyObject());
+            new_value = value
             if index.column() == 0 and any(map(lambda value: value['variable'] == new_value, self.variables)):
                 return False
             elif index.column() == 0:

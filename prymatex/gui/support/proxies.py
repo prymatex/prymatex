@@ -15,7 +15,8 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         if item.TYPE == "bundle":
             return True
         else:
-            return QtCore.QString(item.TYPE).contains(regexp)
+            #return QtCore.QString(item.TYPE).contains(regexp)
+            return True
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True
@@ -103,6 +104,7 @@ class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
             return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = index.internalPointer()
+        return True
         return QtCore.QString(unicode(node.item.theme.uuid)).contains(regexp)
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):

@@ -11,10 +11,8 @@ from PyQt4.QtGui import *
 from prymatex.support import PMXMenuNode
 from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
-from prymatex.gui.mixins.common import CenterWidget
-from prymatex.gui.panes.bundles import PMXBundleEditorDock
+#from prymatex.gui.mixins.common import CenterWidget
 from prymatex.gui.panes.fstree import PMXFSPaneDock
-from prymatex.gui.panes.outputpanel import PMXOutputDock
 from prymatex.gui.panes.project import PMXProjectDock
 from prymatex.gui.panes.symbols import PMXSymboldListDock
 from prymatex.gui.panes.browser import PMXBrowserPaneDock
@@ -23,7 +21,7 @@ from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.gui.dialogs import PMXNewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
-from prymatex.core.base import PMXObject
+from prymatex.core.base import PMXWidget
 from prymatex.gui.support.bundleselector import PMXBundleItemSelector
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
@@ -34,7 +32,7 @@ from prymatex.core.filemanager import FileNotSupported
 
 logger = logging.getLogger(__name__)
 
-class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
+class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     '''
     Prymatex main window, it holds a currentEditor property which
     grants access to the focused editor.
@@ -87,7 +85,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
         self.manageFilesToOpen(files_to_open)
         self.configure()
-    
+        
     def manageFilesToOpen(self,files):
         '''
             Files to open
@@ -134,13 +132,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                                             self.trUtf8("Show Filesystem Panel"),
                                             self.trUtf8("Hide Filesystem Panel"))
         
-        self.paneOutput = PMXOutputDock(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
-        self.paneOutput.hide()
-        self.paneOutput.associateAction(self.actionShow_Output,
-                                        self.trUtf8("Show Output"),
-                                        self.trUtf8("Hide Output"))
-        
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
         self.paneProject.hide()
@@ -151,11 +142,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.paneSymbolList = PMXSymboldListDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
         self.paneSymbolList.hide()
-        
-        
-        self.paneBundleEditor = PMXBundleEditorDock(self)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneBundleEditor)
-        self.paneBundleEditor.hide()
         
         self.paneBrowser = PMXBrowserPaneDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneBrowser)

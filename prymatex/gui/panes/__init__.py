@@ -32,7 +32,6 @@ class PaneDockBase(QDockWidget, PMXObject):
         #print "hide"
         self.mainWindow.tabWidget.currentWidget().setFocus(Qt.MouseFocusReason)
         
-        
     def emitWidgetShown(self, val):
         self.emit(SIGNAL('widgetShown(bool)'), val)
 

@@ -159,14 +159,14 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
         self.proxyTreeModel.setFilterRegExp(value)
     
     def configSelectTop(self):
-        self.comboBoxItemFilter.addItem("Show all", QtCore.QVariant(""))
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/languages.png"), "Languages", QtCore.QVariant("syntax"))
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/snippets.png"), "Snippets", QtCore.QVariant("snippet"))
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/macros.png"), "Macros", QtCore.QVariant("macro"))
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/commands.png"), "Commands", QtCore.QVariant("command"))
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/drag-commands.png"), "DragCommands", QtCore.QVariant("dragcommand"))
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/preferences.png"), "Preferences", QtCore.QVariant("preference"))
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", QtCore.QVariant("template*"))
+        self.comboBoxItemFilter.addItem("Show all", "")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/languages.png"), "Languages", "syntax")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/snippets.png"), "Snippets", "snippet")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/macros.png"), "Macros", "macro")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/commands.png"), "Commands", "command")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/drag-commands.png"), "DragCommands", "dragcommand")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/preferences.png"), "Preferences", "preference")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template*")
         self.comboBoxItemFilter.currentIndexChanged[int].connect(self.on_comboBoxItemFilter_changed)
     
     #==========================================================

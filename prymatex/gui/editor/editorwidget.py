@@ -3,7 +3,7 @@
 Code Editor Widget.
 '''
 
-from PyQt4.QtCore import SIGNAL, Qt, QString, pyqtSignal, QTimer
+from PyQt4.QtCore import SIGNAL, Qt, pyqtSignal, QTimer
 from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, \
     QAction, QMenu, QKeySequence, qApp, QFocusEvent
 
@@ -311,7 +311,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     def propmpt_file(self, title = None):
         '''
         Prompts the user for a file name
-        @return: filepath {unicode,str,QString} or None if the action is cancelled
+        @return: filepath {unicode,str} or None if the action is cancelled
         '''
         if not title:
             title = self.trUtf8("Save file...")

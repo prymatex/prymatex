@@ -1,7 +1,8 @@
 # -*- encoding: utf-8 -*-
+from PyQt4 import QtCore
 from PyQt4.Qt import QStandardItemModel, QModelIndex
 from PyQt4.Qt import QStandardItem, QIcon, QPixmap
-from PyQt4.Qt import Qt, QListView, QTableView, pyqtSignal, QString
+from PyQt4.Qt import Qt, QListView, QTableView, pyqtSignal
 from os.path import expanduser, exists
 import os
 import thread
@@ -85,7 +86,7 @@ class PMXBookmarksListView(QListView):
     '''
     Bookmarks view
     '''
-    pathChangeRequested = pyqtSignal(QString)
+    pathChangeRequested = QtCore.pyqtSignal(str)
     
     def __init__(self, parent = None):
         super(PMXBookmarksListView, self).__init__(parent)
@@ -94,11 +95,10 @@ class PMXBookmarksListView(QListView):
         self.doubleClicked.connect(self.itemDoubleClicked)
     
     def itemDoubleClicked(self, index):
-        path = self.model().index(index.row(), 1).data().toPyObject()
+        path = self.model().index(index.row(), 1).data()
         self.pathChangeRequested.emit(path)
         
         
-    
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication
     import sys

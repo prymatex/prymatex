@@ -220,7 +220,7 @@ class PMXFoldingHelper(object):
         """
         while block.isValid():
             block = block.previous()
-            if block.text().trimmed() != "":
+            if block.text().strip() != "":
                 break
         return block
     
@@ -252,12 +252,12 @@ class PMXFoldingHelper(object):
         while block.isValid():
             userData = block.userData()
             mark = userData.foldingMark
-            if mark == self.FOLDING_START or (mark == self.FOLDING_STOP and nest > 0 and block.text().trimmed() != ""):
+            if mark == self.FOLDING_START or (mark == self.FOLDING_STOP and nest > 0 and block.text().strip() != ""):
                 if mark == self.FOLDING_START and nest > 0:
                     nest -= self.closePreviousBlock(block)
                 self.folding.append(mark)
                 nest += mark
-            elif lastIndent > userData.indent and block.text().trimmed() != "" and nest > 0:
+            elif lastIndent > userData.indent and block.text().strip() != "" and nest > 0:
                 nest -= self.closePreviousBlock(block)
                 lastIndent = userData.indent
                 self.folding.append(self.FOLDING_NONE)

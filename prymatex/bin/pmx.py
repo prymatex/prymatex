@@ -34,7 +34,7 @@ def main(args):
             # Something went very bad
             # tell the user something about the emergency
             from prymatex.gui.emergency import PMXCrashDialog
-            dlg = PMXCrashDialog(traceback_text=traceback)
+            dlg = PMXCrashDialog(traceback)
             dlg.exec_()
         retval = myapp.exec_()
         if retval == 3:

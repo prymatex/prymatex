@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from PyQt4.QtGui import *
-from PyQt4.Qt import QString, Qt, QVariant
+from PyQt4.Qt import Qt, QVariant
 from PyQt4.QtNetwork import QNetworkProxy
 from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
 from prymatex.core.base import PMXObject
@@ -285,67 +285,6 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
     @pmxConfigPorperty(default = 'http_proxy')
     def proxyEnviromentVariable(self, value):
         self._proxyEnviromentVariable = value
-    
-        #self.comboProxyType.currentIndexChanged[QString].connect(self.changeProxyType)
-        #self.comboProxyType.addItem(self.trUtf8("No Proxy"), QNetworkProxy.NoProxy)
-        #self.comboProxyType.addItem(self.trUtf8("HTTP Proxy"), QNetworkProxy.HttpProxy)
-        #self.comboProxyType.addItem(self.trUtf8("Socks Proxy"), QNetworkProxy.Socks5Proxy)
-        #self.comboProxyType.addItem(self.trUtf8("Enviroment Proxy"), PMXBrowserPaneDock.ENVIROMENT_PROXY)
-        #self.comboProxyType.addItem(self.trUtf8("Based on Variables"), 0)
-        
-#    def changeProxyType(self, proxy_type):
-#        if self.proxyType == QNetworkProxy.NoProxy:
-#            self.enableAllWidgets(False)
-#        else:
-#            self.enableAllWidgets(True)
-#    
-#    TEST_URL = 'http://www.google.com.ar'
-#    
-#    def on_pushTest_pressed(self):
-#        
-#        self.testNetworkAccessMgr = QNetworkAccessManager()
-#        self.testNetworkAccessMgr.setProxy(self.networkProxy)
-#        self.testReply = self.testNetworkAccessMgr.get(QNetworkRequest(QUrl(self.TEST_URL)))
-#        self.testReply.finished.connect(self.finished)
-#        #self.testReply.error.connect(self.error)
-#        
-#        #QMessageBox.information(self, "Test network settings", "Test network settings")
-#    
-#    def finished(self):
-#        reply = self.sender()
-#        if reply.error() == QNetworkReply.NoError:
-#            
-#            QMessageBox.information(self, "OK", "OK")
-#        else:
-#            QMessageBox.critical(self, "Proxy Error", "Erorr is %s" % reply.errorString())
-#        map(lambda w: w.setEnabled(True), self.all_widgets)
-#        
-#    
-#    
-#    @property
-#    def proxyType(self):
-#        proxy_type = self.comboProxyType.itemData(self.comboProxyType.currentIndex())
-#        proxy_type, _ok = proxy_type.toInt()
-#        return proxy_type
-#    
-#    @property
-#    def networkProxy(self):
-#        return QNetworkProxy(self.proxyType,
-#                              self.lineProxyAddress.text(),
-#                              self.spinProxyPort.value(),
-#                              self.lineProxyUsername.text(),
-#                              self.lineProxyPassword.text()
-#                              )
-#    
-#    
-#    
-#    
-#    def apply(self):
-#        browser_settings = qApp.instance().settings.getGroup('browser')
-#        
-#        browser_settings.setValue('proxy', 'http://localhost:3128')
-#        
-#        self.debug("Seteamos el proxy")
         
 class PMXBundleWidget(PMXConfigBaseWidget, Ui_Bundles):
     def __init__(self, parent = None):

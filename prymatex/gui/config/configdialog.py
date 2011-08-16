@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from PyQt4.Qt import *
-from prymatex.gui.editor import center
-from prymatex.gui.mixins.common import CenterWidget
+from PyQt4 import QtCore, QtGui
+from prymatex.core.base import PMXWidget
 from prymatex.ui.configdialog import Ui_PMXSettingsDialog
 
-class PMXSettingsItem(QStandardItem):
+class PMXSettingsItem(QtGui.QStandardItem):
     def __init__(self, name, widget_index, parent = None):
-        if isinstance(parent, QStandardItem):
+        if isinstance(parent, QtGui.QStandardItem):
             super(PMXSettingsItem, self).__init__(parent)
         else:
             super(PMXSettingsItem, self).__init__()
@@ -17,11 +16,12 @@ class PMXSettingsItem(QStandardItem):
         self.widget_index = widget_index
         
 
-class PMXNetworkConfigWidget(QWidget):
+class PMXNetworkConfigWidget(QtGui.QWidget):
     def __init__(self):
         super(PMXNetworkConfigWidget, self).__init__()
 
-class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog, CenterWidget):
+
+class PMXSettingsDialog(QtGui.QDialog, Ui_PMXSettingsDialog, PMXWidget):
     '''
     Settings dialog, it's hold by the application under
     configdialog property
@@ -29,24 +29,21 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog, CenterWidget):
     def __init__(self):
         super(PMXSettingsDialog, self).__init__()
         self.setupUi(self)
-        self.model = QStandardItemModel()
-        self.model = QStandardItemModel(self)
+        self.model = QtGui.QStandardItemModel(self)
         
-        self.proxy_model = QSortFilterProxyModel(self)
+        self.proxy_model = QtGui.QSortFilterProxyModel(self)
         self.proxy_model.setSourceModel(self.model)
         
         self.treeView.setModel(self.proxy_model)
         self.treeView.setModel(self.model)
         self.treeView.widgetChanged.connect(self.changeWidget)
         #self.model.setHeaderData(0, Qt.Horizontal, self.trUtf8("Option"))
-        self.stackLayout = QStackedLayout()
+        self.stackLayout = QtGui.QStackedLayout()
         self.container.setLayout(self.stackLayout)
         
         self.lineFilter.textChanged.connect(self.filterItems)
         
         # Focus first item
-    
-    
     
     def focusFirst(self):
         index = self.model.index(0, 0)
@@ -54,12 +51,11 @@ class PMXSettingsDialog(QDialog, Ui_PMXSettingsDialog, CenterWidget):
         self.treeView.setCurrentIndex(index)
     
     def filterItems(self, txt):
-        self.proxy_model.setFilterRegExp(QRegExp(txt, Qt.CaseInsensitive))
+        self.proxy_model.setFilterRegExp(QtCore.QRegExp(txt, Qt.CaseInsensitive))
     
     def exec_(self):
-        #center(self)
         self.center()
-        self.resize(QSize(100, 100))
+        self.resize(QtCore.QSize(100, 100))
         self.updateGeometry()
         # No selection?
         if not len(self.treeView.selectedIndexes()):

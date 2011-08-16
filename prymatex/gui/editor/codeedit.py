@@ -499,11 +499,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             scope = self.getCurrentScope()
             preferences = self.getPreference(scope)
             if preferences.smartTypingPairs:
-                character = doc.characterAt(cursor.position() - 1).toAscii()
+                character = doc.characterAt(cursor.position() - 1)
                 pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
-                if pairs and pairs[0][0] == character and doc.characterAt(cursor.position()).toAscii() == pairs[0][1]:
+                if pairs and pairs[0][0] == character and doc.characterAt(cursor.position()) == pairs[0][1]:
                     cursor.deleteChar()
-                elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2).toAscii() == pairs[0][0]:
+                elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2) == pairs[0][0]:
                     cursor.deletePreviousChar()
         super(PMXCodeEdit, self).keyPressEvent(event)
     
@@ -604,7 +604,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_FILENAME'] = self.parent().file.filename
             env['TM_DIRECTORY'] = self.parent().file.directory
         if cursor.hasSelection():
-            env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u'\u2029', '\n')
+            env['TM_SELECTED_TEXT'] = cursor.selectedText()
             start, end = self.getSelectionBlockStartEnd()
             env['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             env['TM_INPUT_START_LINE'] = start.blockNumber() + 1

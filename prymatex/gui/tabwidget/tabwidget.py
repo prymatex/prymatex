@@ -5,11 +5,10 @@ import logging
 import itertools
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QTabWidget, QTextEdit, QMessageBox, QAction, QIcon
-from PyQt4.QtCore import QString, SIGNAL, Qt
+from PyQt4.QtCore import SIGNAL, Qt
 
 from prymatex.gui.utils import *
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
-from choosetab import ChooseTabDialog
 from prymatex.core.base import PMXObject
 from prymatex.core.exceptions import APIUsageError
 from prymatex.core.filemanager import PMXFile

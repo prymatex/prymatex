@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+import os
 import codecs
 
+from PyQt4 import QtCore
 from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant, SIGNAL
 from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
-import os
 from prymatex.gui.panes import PaneDockBase
 from prymatex.ui.panebrowser import Ui_BrowserPane
 from prymatex.core.base import PMXObject
@@ -105,7 +106,7 @@ class SystemWrapper(QObject):
         self.process.wait()
         deleteFile(self.temp_file)
         return text
-    outputString = pyqtProperty("QString", outputString)
+    outputString = QtCore.pyqtProperty(str, outputString)
     
 class TextMate(QObject):
     def __init__(self, mainFrame, bundleItem = None):
@@ -113,7 +114,7 @@ class TextMate(QObject):
         self.mainFrame = mainFrame
         self.bundleItem = bundleItem
         
-    @pyqtSignature("_system(QString)")
+    @QtCore.pyqtSlot(str)
     def _system(self, command):
         environment = self.bundleItem != None and self.bundleItem.buildEnvironment() or {}
         command = ensureShellScript(unicode(command))
@@ -152,11 +153,9 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
         self.bundleItem = bundleItem
         self.webView.setHtml(string)
     
-    
     def keyPressEvent(self, key_event):
         if key_event.key() == Qt.Key_Escape:
             self.hide()
-    
     
     ENVIROMENT_PROXY = '__ENVIROMENT_PROXY__'
     
@@ -192,4 +191,3 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
                           
         QNetworkProxy.setApplicationProxy( network_proxy )
                                           
-            

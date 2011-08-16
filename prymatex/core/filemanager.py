@@ -2,8 +2,7 @@
 This module is inspired in QtCretor FileManager instance
 '''
 
-from PyQt4.QtCore import QObject, pyqtSignal, QString
-from PyQt4.QtCore import Qt
+from PyQt4 import QtCore 
 from prymatex.utils.magic import magic
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
@@ -18,14 +17,14 @@ logger = getLogger(__file__)
 MAGIC_FILE = join(dirname(abspath(magic.__file__)), 'magic.linux')
 
 
-class PMXFile(QObject):
+class PMXFile(QtCore.QObject):
     #==========================================================================
     # Signals
     #==========================================================================
-    fileSaved = pyqtSignal(QString)
-    fileRenamed = pyqtSignal(QString)
-    fileSaveError = pyqtSignal(QString)
-    fileLostReference = pyqtSignal()
+    fileSaved = QtCore.pyqtSignal(str)
+    fileRenamed = QtCore.pyqtSignal(str)
+    fileSaveError = QtCore.pyqtSignal(str)
+    fileLostReference = QtCore.pyqtSignal()
 
     _path = None
     _references = 0
@@ -162,7 +161,7 @@ class PMXFileManager(PMXObject):
     A singleton which used for
     '''
 
-    filedOpened = pyqtSignal(PMXFile) # A new file has been opened
+    filedOpened = QtCore.pyqtSignal(PMXFile) # A new file has been opened
 
     class Meta:
         settings = 'filemanager'
@@ -170,7 +169,7 @@ class PMXFileManager(PMXObject):
     file_history = pmxConfigPorperty(default=[])
 
     def __init__(self, parent):
-        QObject.__init__(self, parent)
+        super(PMXFileManager, self).__init__(parent)
 
         self.magic = magic.Magic(MAGIC_FILE, self.pmxApp.getProfilePath('tmp', 'magic.cache'))
         self.opened_files = {}
