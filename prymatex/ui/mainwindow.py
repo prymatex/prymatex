@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Mon Aug  8 20:14:41 2011
+# Created: Tue Aug 16 20:53:21 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 20))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -189,9 +189,6 @@ class Ui_MainWindow(object):
         self.actionShow_Symbol_List = QtGui.QAction(MainWindow)
         self.actionShow_Symbol_List.setCheckable(True)
         self.actionShow_Symbol_List.setObjectName(_fromUtf8("actionShow_Symbol_List"))
-        self.actionShow_Output = QtGui.QAction(MainWindow)
-        self.actionShow_Output.setCheckable(True)
-        self.actionShow_Output.setObjectName(_fromUtf8("actionShow_Output"))
         self.actionShow_Current_Scope = QtGui.QAction(MainWindow)
         self.actionShow_Current_Scope.setObjectName(_fromUtf8("actionShow_Current_Scope"))
         self.actionShilft_Left = QtGui.QAction(MainWindow)
@@ -225,9 +222,9 @@ class Ui_MainWindow(object):
         self.actionFilter_Through_Command.setObjectName(_fromUtf8("actionFilter_Through_Command"))
         self.actionRun_selection = QtGui.QAction(MainWindow)
         self.actionRun_selection.setObjectName(_fromUtf8("actionRun_selection"))
-        self.actionTerminal = QtGui.QAction(MainWindow)
-        self.actionTerminal.setCheckable(True)
-        self.actionTerminal.setObjectName(_fromUtf8("actionTerminal"))
+        self.actionShow_Terminal_Dock = QtGui.QAction(MainWindow)
+        self.actionShow_Terminal_Dock.setCheckable(True)
+        self.actionShow_Terminal_Dock.setObjectName(_fromUtf8("actionShow_Terminal_Dock"))
         self.actionFile_browser = QtGui.QAction(MainWindow)
         self.actionFile_browser.setObjectName(_fromUtf8("actionFile_browser"))
         self.actionThis_file = QtGui.QAction(MainWindow)
@@ -383,8 +380,7 @@ class Ui_MainWindow(object):
         self.menuTools.addAction(self.actionShow_Project_Dock)
         self.menuTools.addAction(self.actionShow_Browser_Dock)
         self.menuTools.addAction(self.actionShow_Symbol_List)
-        self.menuTools.addAction(self.actionTerminal)
-        self.menuTools.addAction(self.actionShow_Output)
+        self.menuTools.addAction(self.actionShow_Terminal_Dock)
         self.menuTools.addAction(self.actionShow_Log_Window)
         self.menuNavigation.addAction(self.actionToggle_Bookmark)
         self.menuNavigation.addAction(self.actionNext_Bookmark)
@@ -517,8 +513,6 @@ class Ui_MainWindow(object):
         self.actionShow_Project_Dock.setShortcut(_('F7'))
         self.actionShow_Symbol_List.setText(_('Symbols'))
         self.actionShow_Symbol_List.setShortcut(_('F6'))
-        self.actionShow_Output.setText(_('Output'))
-        self.actionShow_Output.setShortcut(_('Shift+F6'))
         self.actionShow_Current_Scope.setText(_('Show Current Scope'))
         self.actionShow_Current_Scope.setShortcut(_('Alt+Shift+S'))
         self.actionShilft_Left.setText(_('Shift Left'))
@@ -535,7 +529,7 @@ class Ui_MainWindow(object):
         self.actionFilter_Through_Command.setShortcut(_('Ctrl+Shift+F'))
         self.actionRun_selection.setText(_('Run selection'))
         self.actionRun_selection.setShortcut(_('Alt+Shift+R'))
-        self.actionTerminal.setText(_('Terminal'))
+        self.actionShow_Terminal_Dock.setText(_('Terminal'))
         self.actionFile_browser.setText(_('File browser'))
         self.actionThis_file.setText(_('This file'))
         self.actionWith_options.setText(_('with options...'))

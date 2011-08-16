@@ -14,7 +14,6 @@ class ProjectWidget(QWidget, Ui_ProjectPane):
 
 class PMXProjectDock(PaneDockBase):
     def __init__(self, parent):
-        QDockWidget.__init__(self, parent)
-        self.setWindowTitle(_("Project"))
+        PaneDockBase.__init__(self, parent)
         self.setWidget(ProjectWidget(self))
         

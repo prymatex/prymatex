@@ -11,11 +11,6 @@ from PyQt4.QtGui import *
 from prymatex.support import PMXMenuNode
 from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
-#from prymatex.gui.mixins.common import CenterWidget
-from prymatex.gui.panes.fstree import PMXFSPaneDock
-from prymatex.gui.panes.project import PMXProjectDock
-from prymatex.gui.panes.symbols import PMXSymboldListDock
-from prymatex.gui.panes.browser import PMXBrowserPaneDock
 from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
@@ -120,6 +115,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         '''
         Basic panels, dock objects. More docks should be available via plugins
         '''
+        from prymatex.gui.panes.fstree import PMXFSPaneDock
+        from prymatex.gui.panes.project import PMXProjectDock
+        from prymatex.gui.panes.symbols import PMXSymboldListDock
+        from prymatex.gui.panes.browser import PMXBrowserPaneDock
+        from prymatex.gui.panes.console import PMXConsoleDock
+        
         self.paneFileSystem = PMXFSPaneDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
         
@@ -149,6 +150,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.paneBrowser.associateAction(self.actionShow_Browser_Dock,
                                          self.trUtf8("Show Browser"),
                                          self.trUtf8("Hide Browser"))
+        
+        self.paneConsole = PMXConsoleDock(self)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneConsole)
+        self.paneConsole.hide()
+        self.paneConsole.associateAction(self.actionShow_Terminal_Dock,
+                                         self.trUtf8("Show Terminal"),
+                                         self.trUtf8("Hide Terminal"))
         
     #====================================================================
     # Bundle Items
