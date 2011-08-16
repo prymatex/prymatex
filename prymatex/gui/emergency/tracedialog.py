@@ -4,21 +4,20 @@
 import traceback
 from PyQt4 import QtGui
 from prymatex.ui.emergencytrace import Ui_TracebackDialog
+from traceback import format_exception
+from beautify import beautifyTraceback
 
 class PMXTraceBackDialog(QtGui.QDialog, Ui_TracebackDialog):
     '''
     Crash dialog, shown when a fatal exception occurs
     '''
-    def __init__(self, exception, explanation = None):
+    def __init__(self, parent = None):
         '''
         @param exception: An exceptino instance
-        @param explanation: Some explanation about what has happened
         '''
-        assert isinstance(exception, Exception)
-        if not explanation:
-            explanation = self.trUtf8("An exception has occured")
-        self.setWindowTitle("%s" % type(exception).__name__)
-        self.textStackTrace.setPlainText(traceback.format_exc())
+        super(PMXTraceBackDialog, self).__init__(parent)
+        self.setupUi(self)
+        
         
     def on_pushCopy_pressed(self):
         '''
@@ -26,5 +25,24 @@ class PMXTraceBackDialog(QtGui.QDialog, Ui_TracebackDialog):
         '''
         text = self.textStackTrace.toPlainText()
         QtGui.qApp.instance().clipboard().setText(text)
-        
-        
+    
+    @classmethod
+    def fromLastException(cls, exception, parent = None):
+        '''
+        Factory for exception
+        '''
+        assert isinstance(exception, Exception)
+        inst = cls()
+        inst.setWindowTitle("%s" % type(exception).__name__)
+        inst.textStackTrace.setPlainText(traceback.format_exc())
+        return inst
+    
+    @classmethod
+    def fromSysExceptHook(cls, exctype, value, traceback, parent = None):
+        ''' Creates a dialgo from sysexcepthook arguments,
+        better suited for sys.excepthook handling '''
+        inst = cls()
+        inst.setWindowTitle("Unhandled Exception")
+        tracebackText = ''.join(format_exception(type, value, traceback))
+        inst.textStackTrace.setHtml(beautifyTraceback(tracebackText))
+        return inst

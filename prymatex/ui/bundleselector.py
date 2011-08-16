@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/bundleselector.ui'
 #
-# Created: Thu Aug  4 22:05:24 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Aug  5 12:56:14 2011
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
