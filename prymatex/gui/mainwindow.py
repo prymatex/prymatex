@@ -12,6 +12,7 @@ from prymatex.support import PMXMenuNode
 from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
 from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
+from prymatex.gui.splittabwidget import SplitTabWidget
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.gui.dialogs import PMXNewFromTemplateDialog
@@ -58,7 +59,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         '''
         super(PMXMainWindow, self).__init__()
         # Initialize graphical elements
+        self.tabWidget = SplitTabWidget(self)
         self.setupUi(self)
+        self.setCentralWidget(self.tabWidget)
         
         # Create dialogs
         self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
@@ -67,7 +70,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.bundleItemSelector = PMXBundleItemSelector(self)
         
         # Connect Signals
-        self.tabWidget.currentEditorChanged.connect(self.updateWindowTitle)
+        self.tabWidget.tabWindowChanged.connect(self.updateWindowTitle)
         self.statusbar.syntaxChanged.connect(self.updateEditorSyntax)
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         
@@ -80,7 +83,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         
         self.manageFilesToOpen(files_to_open)
         self.configure()
-        
+        self.addEmptyEditor()
+    
+    def addEmptyEditor(self):
+        fileManager = self.pmxApp.fileManager
+        empty_file = fileManager.getEmptyFile()
+        editor = PMXEditorWidget.editorFactory(empty_file, parent = self)
+        self.tabWidget.addTab(editor, empty_file.filename)
+        return editor
+    
     def manageFilesToOpen(self,files):
         '''
             Files to open
@@ -211,7 +222,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        self.tabWidget.appendEmptyTab()
+        self.addEmptyEditor()
 
     @pyqtSignature('')
     def on_actionClose_triggered(self):
@@ -415,7 +426,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     def on_actionPaste_As_New_triggered(self):
         text = qApp.instance().clipboard().text()
         if text:
-            editor = self.tabWidgetEditors.appendEmptyTab()
+            editor = self.addEmptyEditor()
             editor.appendPlainText(text)
         else:
             self.mainWindow.statusbar.showMessage(self.trUtf8("Nothing to paste."))

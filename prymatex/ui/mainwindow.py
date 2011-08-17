@@ -22,14 +22,6 @@ class Ui_MainWindow(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
-        self.foo = QtGui.QWidget(MainWindow)
-        self.foo.setObjectName(_fromUtf8("foo"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.foo)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.tabWidget = PMXTabWidget(self.foo)
-        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
-        self.verticalLayout.addWidget(self.tabWidget)
-        MainWindow.setCentralWidget(self.foo)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 20))
         self.menubar.setObjectName(_fromUtf8("menubar"))
@@ -597,5 +589,4 @@ class Ui_MainWindow(object):
         self.actionPanes.setText(_('Panes'))
 
 from prymatex.gui.statusbar import PMXStatusBar
-from prymatex.gui.tabwidget import PMXTabWidget
 from prymatex import resources_rc

@@ -168,7 +168,6 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.mainwindow import PMXMainWindow
         self.windows = []
         first_window = PMXMainWindow( files_to_open )
-        first_window.tabWidget.appendEmptyTab()
         self.splash.finish(first_window)
         first_window.show()
         self.windows.append(first_window)   # Could it be possible to hold it in
