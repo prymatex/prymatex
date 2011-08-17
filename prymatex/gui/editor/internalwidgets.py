@@ -3,7 +3,7 @@ Some custom widgets used in the editor widget class
 '''
 
 from PyQt4.QtGui import QComboBox, QSpinBox, QWidget, QTextCursor, QTextDocument
-from PyQt4.QtCore import Qt, pyqtSignal, QRegExp, QString
+from PyQt4.QtCore import Qt, pyqtSignal, QRegExp
 from prymatex.core.base import PMXObject
 
 

@@ -5,7 +5,7 @@ Application configuration based on Qt's QSettings module.
 
 '''
 from PyQt4 import QtCore
-from PyQt4.Qt import QSettings, QString, QVariant
+from PyQt4.Qt import QSettings
 from os.path import join, abspath, expanduser, dirname, exists
 from os import makedirs
 import plistlib
@@ -114,13 +114,6 @@ class SettingsGroup(object):
             return [SettingsGroup.toPyObject(o) for o in obj ]
         elif isinstance(obj, dict):
             return dict([(SettingsGroup.toPyObject(o[0]), SettingsGroup.toPyObject(o[1])) for o in obj.iteritems() ])
-        #PyQtObjects
-        elif isinstance(obj, QtCore.QStringList):
-            return [SettingsGroup.toPyObject(o) for o in obj ]
-        elif isinstance(obj, QString):
-            return unicode(obj)
-        elif isinstance(obj, QVariant):
-            return SettingsGroup.toPyObject(obj.toPyObject())
         else:
             return obj
     
@@ -239,7 +232,7 @@ class PMXSettings(object):
         if name in self.__class__.__dict__:
             return self.__class__.__dict__[name]
         value = self.qsettings.value(name)
-        return value.toPyObject()
+        return value
 
     def sync(self):
         #Save capture values from qt

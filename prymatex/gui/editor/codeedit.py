@@ -287,7 +287,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 break
 
             user_data = block.userData()
-            if self.folding.getFoldingMark(block) == self.folding.FOLDING_START and user_data.folded:
+            if block.isVisible() and self.folding.getFoldingMark(block) == self.folding.FOLDING_START and user_data.folded:
                 painter.drawPixmap(font_metrics.width(block.text()) + 10,
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.sidebar.foldingEllipsisIcon.height(),
                     self.sidebar.foldingEllipsisIcon)
@@ -499,11 +499,11 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             scope = self.getCurrentScope()
             preferences = self.getPreference(scope)
             if preferences.smartTypingPairs:
-                character = doc.characterAt(cursor.position() - 1).toAscii()
+                character = doc.characterAt(cursor.position() - 1)
                 pairs = filter(lambda pair: pair[0] == character or pair[1] == character, preferences.smartTypingPairs)
-                if pairs and pairs[0][0] == character and doc.characterAt(cursor.position()).toAscii() == pairs[0][1]:
+                if pairs and pairs[0][0] == character and doc.characterAt(cursor.position()) == pairs[0][1]:
                     cursor.deleteChar()
-                elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2).toAscii() == pairs[0][0]:
+                elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2) == pairs[0][0]:
                     cursor.deletePreviousChar()
         super(PMXCodeEdit, self).keyPressEvent(event)
     
@@ -604,7 +604,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_FILENAME'] = self.parent().file.filename
             env['TM_DIRECTORY'] = self.parent().file.directory
         if cursor.hasSelection():
-            env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u'\u2029', '\n')
+            env['TM_SELECTED_TEXT'] = cursor.selectedText()
             start, end = self.getSelectionBlockStartEnd()
             env['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             env['TM_INPUT_START_LINE'] = start.blockNumber() + 1
@@ -652,7 +652,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         while True:
             user_data = block.userData()
             user_data.foldedLevel += 1
-            block.setVisible(user_data.folded)
+            block.setVisible(user_data.foldedLevel == 0)
             if block == endBlock:
                 break
             block = block.next()
@@ -671,7 +671,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         while True:
             user_data = block.userData()
             user_data.foldedLevel -= 1
-            block.setVisible(not user_data.folded)
+            block.setVisible(user_data.foldedLevel == 0)
             if block == endBlock:
                 break
             block = block.next()

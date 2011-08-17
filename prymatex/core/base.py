@@ -33,7 +33,7 @@ class PMXObject(QtCore.QObject):
     
     def __del__(self):
         self._meta.settings.removeListener(self)
-
+        
     #============================================================
     # Settings
     #============================================================
@@ -113,3 +113,9 @@ class PMXObject(QtCore.QObject):
     
     def critical(self, msg, *args, **kwargs):
         self.logger.critical(msg)
+        
+class PMXWidget(QtGui.QWidget, PMXObject):
+    def center(self):
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        size =  self.geometry()
+        self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)

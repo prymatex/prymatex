@@ -105,7 +105,7 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
         
         self.connectSignals()
         
-        self.mainWindow.tabWidget.currentEditorChanged.connect(self.syncToEditor)
+        self.mainWindow.tabWidget.tabWindowChanged.connect(self.syncToEditor)
     
     def configSyntaxMenu(self):
         self.syntaxMenu = QtGui.QComboBox(self)

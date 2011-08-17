@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 import logging
 from PyQt4.QtGui import QWidget, QDockWidget, QActionGroup, QAction, QMenu
-from PyQt4.QtCore import QVariant, SIGNAL
+from PyQt4.QtCore import SIGNAL
 from PyQt4.QtCore import Qt
 from prymatex.ui.logwidget import Ui_LogWidget
-from prymatex.gui.mixins.common import ShownByQAction
-logger = logging.getLogger(__file__)
 
 DEBUG_LEVELS = ("INFO",
                 "DEBUG",
@@ -17,7 +15,7 @@ DEBUG_LEVELS = ("INFO",
 
 DEBUG_LEVELS = dict([(name, getattr(logging, name)) for name in DEBUG_LEVELS ])
 
-class LogDockWidget(QDockWidget, Ui_LogWidget, ShownByQAction):
+class LogDockWidget(QDockWidget, Ui_LogWidget):
     '''
     Logging widget
     
@@ -38,7 +36,7 @@ class LogDockWidget(QDockWidget, Ui_LogWidget, ShownByQAction):
         for level, value in DEBUG_LEVELS.iteritems():
             action = QAction(level.title(), self)
             # Store debug info in a dict
-            action.setData(QVariant({'name': level, 'level': value}))
+            action.setData({'name': level, 'level': value})
             action.setCheckable(True)
             self.debug_levels_action_group.addAction(action)
             self.debug_levels_menu.addAction(action)
@@ -48,7 +46,7 @@ class LogDockWidget(QDockWidget, Ui_LogWidget, ShownByQAction):
         self.pushDebugLevel.setMenu(self.debug_levels_menu)
     
     def debug_level_change(self, action):
-        new_level = action.data().toPyObject()
+        new_level = action.data()
         logger.info("Level changed to %s", new_level)
         
 

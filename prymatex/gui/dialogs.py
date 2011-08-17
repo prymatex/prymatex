@@ -52,7 +52,7 @@ class PMXNewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog, PMXObject):
 
     def on_buttonCreate_pressed(self):
         #TODO: Validar que los lineEdit tengan texto
-        template = self.comboTemplates.itemData(self.comboTemplates.currentIndex()).toPyObject()
+        template = self.comboTemplates.itemData(self.comboTemplates.currentIndex())
         environment = template.buildEnvironment(directory = unicode(self.lineLocation.text()), name = unicode(self.lineFileName.text()))
         if not template:
             QMessageBox.question(self, "Information requiered", 

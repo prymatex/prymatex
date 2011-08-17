@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 from PyQt4.QtGui import QTreeView, QFileSystemModel, QMenu, QAction, QMessageBox, qApp
 from PyQt4.QtGui import QInputDialog, QApplication, QPixmap, QIcon
-from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir, pyqtSignal, QString
+from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir, pyqtSignal
 import os
 import shutil
 from os.path import join, abspath, isfile, isdir, dirname
@@ -178,9 +178,6 @@ class FSTree(QTreeView, PMXObject):
         
         if upper != current_top:
             self.setRootIndex(self.model().index(upper))
-#        print self.model().data(index).toPyObject()
-#        print self.model().data(index.parent()).toPyObject()
-#        print "Root", self.model().filePath(self.rootIndex())
     
     def on_actionSetAsRoot_triggered(self):
         index_list = self.selectedIndexes()

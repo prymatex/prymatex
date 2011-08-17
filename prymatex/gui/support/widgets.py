@@ -129,7 +129,7 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
 
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_content_textChanged(self):
         self.changes['content'] = unicode(self.content.toPlainText())
         
@@ -173,37 +173,37 @@ echo Selection: "$TM_SELECTED_TEXT"''',
     def __init__(self, parent = None):
         super(PMXCommandWidget, self).__init__(parent)
         self.setupUi(self)
-        self.comboBoxBeforeRunning.addItem("Nothing", QtCore.QVariant("nop"))
-        self.comboBoxBeforeRunning.addItem("Current File", QtCore.QVariant("saveActiveFile"))
-        self.comboBoxBeforeRunning.addItem("All Files in Project", QtCore.QVariant("saveModifiedFiles"))
+        self.comboBoxBeforeRunning.addItem("Nothing", "nop")
+        self.comboBoxBeforeRunning.addItem("Current File", "saveActiveFile")
+        self.comboBoxBeforeRunning.addItem("All Files in Project", "saveModifiedFiles")
         self.comboBoxBeforeRunning.currentIndexChanged[int].connect(self.on_comboBoxBeforeRunning_changed)
         
-        self.comboBoxInput.addItem("None", QtCore.QVariant("none"))
-        self.comboBoxInput.addItem("Selected Text", QtCore.QVariant("selection")) #selectedText
-        self.comboBoxInput.addItem("Entire Document", QtCore.QVariant("document"))
+        self.comboBoxInput.addItem("None", "none")
+        self.comboBoxInput.addItem("Selected Text", "selection") #selectedText
+        self.comboBoxInput.addItem("Entire Document", "document")
         self.comboBoxInput.currentIndexChanged[int].connect(self.on_comboBoxInput_changed)
         
-        self.comboBoxFallbackInput.addItem("Document", QtCore.QVariant("document"))
-        self.comboBoxFallbackInput.addItem("Line", QtCore.QVariant("line"))
-        self.comboBoxFallbackInput.addItem("Word", QtCore.QVariant("word"))
-        self.comboBoxFallbackInput.addItem("Character", QtCore.QVariant("character"))
-        self.comboBoxFallbackInput.addItem("Scope", QtCore.QVariant("scope"))
-        self.comboBoxFallbackInput.addItem("Nothing", QtCore.QVariant("none"))
+        self.comboBoxFallbackInput.addItem("Document", "document")
+        self.comboBoxFallbackInput.addItem("Line", "line")
+        self.comboBoxFallbackInput.addItem("Word", "word")
+        self.comboBoxFallbackInput.addItem("Character", "character")
+        self.comboBoxFallbackInput.addItem("Scope", "scope")
+        self.comboBoxFallbackInput.addItem("Nothing", "none")
         self.comboBoxFallbackInput.currentIndexChanged[int].connect(self.on_comboBoxFallbackInput_changed)
         
-        self.comboBoxOutput.addItem("Discard", QtCore.QVariant("discard"))
-        self.comboBoxOutput.addItem("Replace Selected Text", QtCore.QVariant("replaceSelectedText"))
-        self.comboBoxOutput.addItem("Replace Document", QtCore.QVariant("replaceDocument"))
-        self.comboBoxOutput.addItem("Insert as Text", QtCore.QVariant("insertText"))
-        self.comboBoxOutput.addItem("Insert as Snippet", QtCore.QVariant("insertAsSnippet"))
-        self.comboBoxOutput.addItem("Show as HTML", QtCore.QVariant("showAsHTML"))
-        self.comboBoxOutput.addItem("Show as Tool Tip", QtCore.QVariant("showAsTooltip"))
-        self.comboBoxOutput.addItem("Create New Document", QtCore.QVariant("createNewDocument"))
+        self.comboBoxOutput.addItem("Discard", "discard")
+        self.comboBoxOutput.addItem("Replace Selected Text", "replaceSelectedText")
+        self.comboBoxOutput.addItem("Replace Document", "replaceDocument")
+        self.comboBoxOutput.addItem("Insert as Text", "insertText")
+        self.comboBoxOutput.addItem("Insert as Snippet", "insertAsSnippet")
+        self.comboBoxOutput.addItem("Show as HTML", "showAsHTML")
+        self.comboBoxOutput.addItem("Show as Tool Tip", "showAsTooltip")
+        self.comboBoxOutput.addItem("Create New Document", "createNewDocument")
         self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
         
         self.command.setTabStopWidth(TABWIDTH)
 
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_command_textChanged(self):
         self.changes['command'] = unicode(self.command.toPlainText())
         
@@ -226,7 +226,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             fallbackInput = self.bundleItem.fallbackInput
             if fallbackInput is None:
                 fallbackInput = self.DEFAULTS['fallbackInput']
-            index = self.comboBoxFallbackInput.findData(QtCore.QVariant(fallbackInput))
+            index = self.comboBoxFallbackInput.findData(fallbackInput)
             if index != -1:
                 self.comboBoxFallbackInput.setCurrentIndex(index)
         else:
@@ -277,21 +277,21 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         beforeRunningCommand = bundleItem.beforeRunningCommand
         if beforeRunningCommand is None:
             beforeRunningCommand = self.changes['beforeRunningCommand'] = self.DEFAULTS['beforeRunningCommand']
-        index = self.comboBoxBeforeRunning.findData(QtCore.QVariant(beforeRunningCommand))
+        index = self.comboBoxBeforeRunning.findData(beforeRunningCommand)
         if index != -1:
             self.comboBoxBeforeRunning.setCurrentIndex(index)
         #Input
         input = bundleItem.input
         if input is None:
             input = self.changes['input'] = self.DEFAULTS['input']
-        index = self.comboBoxInput.findData(QtCore.QVariant(input))
+        index = self.comboBoxInput.findData(input)
         if index != -1:
             self.comboBoxInput.setCurrentIndex(index)
         #Output
         output = bundleItem.output
         if output is None:
             output = self.changes['output'] = self.DEFAULTS['output']
-        index = self.comboBoxOutput.findData(QtCore.QVariant(output))
+        index = self.comboBoxOutput.findData(output)
         if index != -1:
             self.comboBoxOutput.setCurrentIndex(index)
     
@@ -307,14 +307,14 @@ fi"'''}
     def __init__(self, parent = None):
         super(PMXTemplateWidget, self).__init__(parent)
         self.setupUi(self)
-        self.comboBoxOutput.addItem("Insert as Text", QtCore.QVariant("insertText"))
+        self.comboBoxOutput.addItem("Insert as Text", "insertText")
         self.command.setTabStopWidth(TABWIDTH)
 
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_command_textChanged(self):
         self.changes['command'] = unicode(self.command.toPlainText())
     
-    @QtCore.pyqtSignature('QString')
+    @QtCore.pyqtSlot(str)
     def on_lineEditExtension_textEdited(self, text):
         value = unicode(text)
         print value
@@ -353,7 +353,7 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
 
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_content_textChanged(self):
         self.changes['content'] = unicode(self.content.toPlainText())
         
@@ -386,14 +386,14 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
     def __init__(self, parent = None):
         super(PMXDragCommandWidget, self).__init__(parent)
         self.setupUi(self)
-        self.comboBoxOutput.addItem("Insert as Snippet", QtCore.QVariant("insertAsSnippet"))
+        self.comboBoxOutput.addItem("Insert as Snippet", "insertAsSnippet")
         self.command.setTabStopWidth(TABWIDTH)
     
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_command_textChanged(self):
         self.changes['command'] = unicode(self.command.toPlainText())
     
-    @QtCore.pyqtSignature('QString')
+    @QtCore.pyqtSlot(str)
     def on_lineEditExtensions_textEdited(self, text):
         value = map(lambda item: item.strip(), unicode(text).split(","))
         if value != self.bundleItem.draggedFileExtensions:
@@ -445,7 +445,7 @@ class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
     
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_content_textChanged(self):
         #Convertir a dict
         try:
@@ -479,7 +479,7 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
         self.setupUi(self)
         self.settings.setTabStopWidth(TABWIDTH)
     
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_settings_textChanged(self):
         #Convertir a dict
         try:

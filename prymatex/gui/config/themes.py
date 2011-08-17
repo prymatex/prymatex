@@ -57,17 +57,17 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     # ComboBoxThemes
     #==========================================================
     def on_comboBoxThemes_Changed(self, index):
-        uuid = self.comboBoxThemes.itemData(index).toPyObject()
+        uuid = self.comboBoxThemes.itemData(index)
         theme = self.manager.getTheme(unicode(uuid))
         self.setThemeSettings(theme)
         
     def configComboBoxThemes(self):
         #Combo Theme
         for theme in self.manager.getAllThemes():
-            self.comboBoxThemes.addItem(theme.name, QtCore.QVariant(str(theme.uuid).upper()))
+            self.comboBoxThemes.addItem(theme.name, str(theme.uuid).upper())
         self.comboBoxThemes.currentIndexChanged[int].connect(self.on_comboBoxThemes_Changed)
         uuid = self.settings.value('theme')
-        self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.findData(QtCore.QVariant(uuid.upper())))
+        self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.findData(uuid.upper()))
     
     #==========================================================
     # TableView

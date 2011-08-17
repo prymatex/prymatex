@@ -11,19 +11,13 @@ from PyQt4.QtGui import *
 from prymatex.support import PMXMenuNode
 from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
-from prymatex.gui.mixins.common import CenterWidget
-from prymatex.gui.panes.bundles import PMXBundleEditorDock
-from prymatex.gui.panes.fstree import PMXFSPaneDock
-from prymatex.gui.panes.outputpanel import PMXOutputDock
-from prymatex.gui.panes.project import PMXProjectDock
-from prymatex.gui.panes.symbols import PMXSymboldListDock
-from prymatex.gui.panes.browser import PMXBrowserPaneDock
 from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
+from prymatex.gui.splittabwidget import SplitTabWidget
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.gui.dialogs import PMXNewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
-from prymatex.core.base import PMXObject
+from prymatex.core.base import PMXWidget
 from prymatex.gui.support.bundleselector import PMXBundleItemSelector
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
@@ -34,7 +28,7 @@ from prymatex.core.filemanager import FileNotSupported
 
 logger = logging.getLogger(__name__)
 
-class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
+class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     '''
     Prymatex main window, it holds a currentEditor property which
     grants access to the focused editor.
@@ -65,7 +59,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         '''
         super(PMXMainWindow, self).__init__()
         # Initialize graphical elements
+        self.tabWidget = SplitTabWidget(self)
         self.setupUi(self)
+        self.setCentralWidget(self.tabWidget)
         
         # Create dialogs
         self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
@@ -74,7 +70,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.bundleItemSelector = PMXBundleItemSelector(self)
         
         # Connect Signals
-        self.tabWidget.currentEditorChanged.connect(self.updateWindowTitle)
+        self.tabWidget.tabWindowChanged.connect(self.updateWindowTitle)
         self.statusbar.syntaxChanged.connect(self.updateEditorSyntax)
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         
@@ -87,6 +83,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         
         self.manageFilesToOpen(files_to_open)
         self.configure()
+        self.addEmptyEditor()
+    
+    def addEmptyEditor(self):
+        fileManager = self.pmxApp.fileManager
+        empty_file = fileManager.getEmptyFile()
+        editor = PMXEditorWidget.editorFactory(empty_file, parent = self)
+        self.tabWidget.addTab(editor, empty_file.filename)
+        return editor
     
     def manageFilesToOpen(self,files):
         '''
@@ -122,6 +126,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         '''
         Basic panels, dock objects. More docks should be available via plugins
         '''
+        from prymatex.gui.panes.fstree import PMXFSPaneDock
+        from prymatex.gui.panes.project import PMXProjectDock
+        from prymatex.gui.panes.symbols import PMXSymboldListDock
+        from prymatex.gui.panes.browser import PMXBrowserPaneDock
+        from prymatex.gui.panes.console import PMXConsoleDock
+        
         self.paneFileSystem = PMXFSPaneDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
         
@@ -134,13 +144,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
                                             self.trUtf8("Show Filesystem Panel"),
                                             self.trUtf8("Hide Filesystem Panel"))
         
-        self.paneOutput = PMXOutputDock(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneOutput)
-        self.paneOutput.hide()
-        self.paneOutput.associateAction(self.actionShow_Output,
-                                        self.trUtf8("Show Output"),
-                                        self.trUtf8("Hide Output"))
-        
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
         self.paneProject.hide()
@@ -152,17 +155,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
         self.paneSymbolList.hide()
         
-        
-        self.paneBundleEditor = PMXBundleEditorDock(self)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneBundleEditor)
-        self.paneBundleEditor.hide()
-        
         self.paneBrowser = PMXBrowserPaneDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneBrowser)
         self.paneBrowser.hide()
         self.paneBrowser.associateAction(self.actionShow_Browser_Dock,
                                          self.trUtf8("Show Browser"),
                                          self.trUtf8("Hide Browser"))
+        
+        self.paneConsole = PMXConsoleDock(self)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneConsole)
+        self.paneConsole.hide()
+        self.paneConsole.associateAction(self.actionShow_Terminal_Dock,
+                                         self.trUtf8("Show Terminal"),
+                                         self.trUtf8("Hide Terminal"))
         
     #====================================================================
     # Bundle Items
@@ -217,7 +222,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
-        self.tabWidget.appendEmptyTab()
+        self.addEmptyEditor()
 
     @pyqtSignature('')
     def on_actionClose_triggered(self):
@@ -421,7 +426,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, CenterWidget, PMXObject):
     def on_actionPaste_As_New_triggered(self):
         text = qApp.instance().clipboard().text()
         if text:
-            editor = self.tabWidgetEditors.appendEmptyTab()
+            editor = self.addEmptyEditor()
             editor.appendPlainText(text)
         else:
             self.mainWindow.statusbar.showMessage(self.trUtf8("Nothing to paste."))

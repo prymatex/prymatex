@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -119,8 +119,7 @@
     <addaction name="actionShow_Project_Dock"/>
     <addaction name="actionShow_Browser_Dock"/>
     <addaction name="actionShow_Symbol_List"/>
-    <addaction name="actionTerminal"/>
-    <addaction name="actionShow_Output"/>
+    <addaction name="actionShow_Terminal_Dock"/>
     <addaction name="actionShow_Log_Window"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
@@ -536,17 +535,6 @@
     <string>F6</string>
    </property>
   </action>
-  <action name="actionShow_Output">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Output</string>
-   </property>
-   <property name="shortcut">
-    <string>Shift+F6</string>
-   </property>
-  </action>
   <action name="actionShow_Current_Scope">
    <property name="text">
     <string>Show Current Scope</string>
@@ -631,7 +619,7 @@
     <string>Alt+Shift+R</string>
    </property>
   </action>
-  <action name="actionTerminal">
+  <action name="actionShow_Terminal_Dock">
    <property name="checkable">
     <bool>true</bool>
    </property>

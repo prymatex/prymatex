@@ -1,8 +1,9 @@
 '''
 Search and replace module
 '''
-from PyQt4.Qt import QComboBox, pyqtSignal,QTextCursor,QTextDocument
-from PyQt4.Qt import QString, Qt, QRegExp
+from PyQt4 import QtCore
+from PyQt4.Qt import QComboBox, QTextCursor,QTextDocument
+from PyQt4.Qt import Qt, QRegExp
 from internalwidgets import PMXRefocusWidget
 
 class PMXFindReplaceWidget(PMXRefocusWidget):
@@ -10,9 +11,9 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
     Holds the find/replace logic
     Works with editorwidget.ui findReplaceWidget widgets (find next, find previous).
     '''
-    findMatchCountChanged = pyqtSignal(int)
-    searchFlagsChanged = pyqtSignal()
-    focusFindBox = pyqtSignal()
+    findMatchCountChanged = QtCore.pyqtSignal(int)
+    searchFlagsChanged = QtCore.pyqtSignal()
+    focusFindBox = QtCore.pyqtSignal()
     
     def findFirstTime(self, text):
         '''
@@ -110,9 +111,9 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
     
     @regexp.setter
     def regexp(self, text):
-        if isinstance(text, (basestring, QString)):
+        if isinstance(text, (basestring, str)):
             if self.useRegex:
-                regex = QRegExp(text)
+                regex = QtCore.QRegExp(text)
                 if regex.isValid() and self._isSafeRegex(text):
                     self.__regexp = regex # Avoids infinite loop   
             else:
@@ -194,9 +195,9 @@ class PMXFindBox(QComboBox):
     STYLE_NORMAL = ''
     
     # Signals
-    editionFinished = pyqtSignal()
-    findRequested = pyqtSignal(QString)
-    findNextRequested  = pyqtSignal()
+    editionFinished = QtCore.pyqtSignal()
+    findRequested = QtCore.pyqtSignal(str)
+    findNextRequested  = QtCore.pyqtSignal()
     
     def __init__(self, parent = None):
         super(PMXFindBox, self).__init__(parent)
@@ -249,8 +250,8 @@ class PMXReplaceBox(QComboBox):
     '''
     Editable QComboBox where the user types the replace text
     '''
-    editionFinished = pyqtSignal()
-    replaceTextRequested = pyqtSignal(QString)
+    editionFinished = QtCore.pyqtSignal()
+    replaceTextRequested = QtCore.pyqtSignal(str)
     
     KEY_TRIGGERS = (Qt.Key_Escape, )
     
@@ -270,7 +271,7 @@ class PMXCommonSearchBox(QComboBox):
     '''
     Common behaviour between the search and replace widgtets
     '''
-    editionFinished = pyqtSignal()
+    editionFinished = QtCore.pyqtSignal()
     KEY_TRIGGERS = (Qt.Key_Escape, )
     
     def keyPressEvent(self, event):

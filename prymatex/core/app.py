@@ -13,7 +13,6 @@ from prymatex.utils.i18n import ugettext as _
 
 from logging import getLogger
 from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
-logger = getLogger(__name__)
 
 # ipdb handling
 
@@ -71,8 +70,8 @@ class PMXApplication(QtGui.QApplication):
         
         self.checkSingleInstance()
         
-        # Bundles and Stuff
-        self.load_stuff()
+        self.loadSupportManager()
+        self.loadKernelManager()
         
         self.connect(self, QtCore.SIGNAL('aboutToQuit()'), self.cleanup)
         self.aboutToQuit.connect(self.settings.sync)
@@ -142,15 +141,6 @@ class PMXApplication(QtGui.QApplication):
     @property
     def bundleItemModel(self):
         return self.manager.model
-    
-    __supportManager = None
-    @property
-    def supportManager(self):
-        return self.__supportManager
-        
-    def load_stuff(self):
-        if not self.options.no_bundles:
-            self.__supportManager = self.load_support()
         
     def setup_splash(self):
         self.splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
@@ -178,7 +168,6 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.mainwindow import PMXMainWindow
         self.windows = []
         first_window = PMXMainWindow( files_to_open )
-        first_window.tabWidget.appendEmptyTab()
         self.splash.finish(first_window)
         first_window.show()
         self.windows.append(first_window)   # Could it be possible to hold it in
@@ -242,9 +231,15 @@ class PMXApplication(QtGui.QApplication):
     def saveState(self, session_manager):
         print "Save state", session_manager
         
+    def loadKernelManager(self):
+        from IPython.frontend.qt.kernelmanager import QtKernelManager
+        self.kernelManager = QtKernelManager()
+        self.kernelManager.start_kernel()
+        self.kernelManager.start_channels()
+        
     # Decorador para imprimir cuanto tarda
     @deco.logtime
-    def load_support(self):
+    def loadSupportManager(self):
         # Lazy load
         from prymatex.gui.support.manager import PMXSupportModelManager
 
@@ -281,7 +276,7 @@ class PMXApplication(QtGui.QApplication):
         
         self.splash.showMessage("Loading bundles...")
         manager.loadSupport()
-        return manager
+        self.supportManager = manager
 
     def checkSingleInstance(self):
         '''
