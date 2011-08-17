@@ -123,8 +123,19 @@ class FSTree(QTreeView, PMXObject):
         
         self.actionSetAsRoot = QAction(_("&Set as root"), self)
         self.actionSetAsRoot.setObjectName("actionSetAsRoot")
+        
+        self.actionCreateProjectOnPath = QAction(_("Create project"
+                                                 " on this path"), self)
+        self.actionCreateProjectOnPath.setObjectName('actionCreateProjectOnPath')
+        
+                                                 
+                                                 
+        
+        
+        # Menu oerder
         self.menuDir.addAction(self.actionSetAsRoot)
         
+        self.menuDir.addAction(self.actionCreateProjectOnPath)
         self.menuDir.addAction(self.actionRefresh)
         
         self.menuDir.addAction(self.actionRename)
