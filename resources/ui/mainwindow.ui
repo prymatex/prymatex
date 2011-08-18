@@ -37,16 +37,20 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionNewTab"/>
-    <addaction name="actionNew_from_template"/>
+    <addaction name="actionNew"/>
+    <addaction name="actionNew_From_Template"/>
+    <addaction name="separator"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionOpen_Recent"/>
+    <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionSave_All"/>
+    <addaction name="separator"/>
     <addaction name="actionReload"/>
     <addaction name="actionClose"/>
     <addaction name="actionClose_Others"/>
-    <addaction name="actionRestart"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -208,7 +212,7 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="PMXStatusBar" name="statusbar"/>
-  <action name="actionNewTab">
+  <action name="actionNew">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
@@ -222,8 +226,8 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
-     <normaloff>:/actions/resources/actions/document-open.png</normaloff>:/actions/resources/actions/document-open.png</iconset>
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/document-open.png</normaloff>:/icons/actions/document-open.png</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -813,7 +817,7 @@
     <string>Ctrl+Shift+L</string>
    </property>
   </action>
-  <action name="actionNew_from_template">
+  <action name="actionNew_From_Template">
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -952,6 +956,15 @@
   <action name="actionPanes">
    <property name="text">
     <string>Panes</string>
+   </property>
+  </action>
+  <action name="actionOpen_Recent">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/document-open-recent.png</normaloff>:/icons/actions/document-open-recent.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Recent File</string>
    </property>
   </action>
  </widget>

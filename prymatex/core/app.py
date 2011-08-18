@@ -161,7 +161,7 @@ class PMXApplication(QtGui.QApplication):
         '''
         from prymatex.gui.mainwindow import PMXMainWindow
         self.windows = []
-        first_window = PMXMainWindow( files_to_open )
+        first_window = PMXMainWindow()
         self.splash.finish(first_window)
         first_window.show()
         self.windows.append(first_window)   # Could it be possible to hold it in
@@ -292,12 +292,6 @@ class PMXApplication(QtGui.QApplication):
             f = open(lock_filename, 'w')
             f.write('%s' % os.getpid())
             f.close()
-            
-    def startDirectory(self):
-        '''
-        Returns the start dir
-        '''
-        return self.settings.PMX_USER_PATH
 
     def createRPCThread(self):
         from prymatex.core.rpcserver import PMXXMLRPCServerThread

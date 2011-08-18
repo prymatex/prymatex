@@ -6,11 +6,8 @@ from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir, pyqtSigna
 import os
 import shutil
 from os.path import join, abspath, isfile, isdir, dirname
-import logging
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.core.base import PMXObject
-
-logger = logging.getLogger(__name__)
 
 class FSTree(QTreeView, PMXObject):
     '''

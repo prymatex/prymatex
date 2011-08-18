@@ -20,3 +20,6 @@ class InvalidField(APIUsageError):
     def __init__(self, name, valid_names):
         cad = "%s is not a valid name. Valid names are: %s" % (name, ", ".join(valid_names))
         super(InvalidField, self).__init__(cad)
+        
+class FileNotSupported(Exception):
+    pass

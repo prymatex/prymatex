@@ -16,7 +16,7 @@ from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXWidget
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
-from prymatex.core.filemanager import FileNotSupported
+from prymatex.core.exceptions import FileNotSupported
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     '''
@@ -37,7 +37,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.menuBar().setShown(value)
     
     # Constructor
-    def __init__(self, files_to_open):
+    def __init__(self):
         '''
         The main window
         @param parent: The QObject parent, in this case it should be the QApp
@@ -51,6 +51,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         
         self.setupDockers()
         self.setupDialogs()
+        self.setupMenu()
         
         self.addEmptyEditor()
         
@@ -59,13 +60,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.statusbar.syntaxChanged.connect(self.setEditorSyntax)
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         
-        self.center()
-        
-        self.addBundlesToMenu()
-        self.preventMenuLock()
-        
-        self.manageFilesToOpen(files_to_open)
         self.configure()
+        self.center()
     
     #Deprecate tabWidget
     @property
@@ -77,26 +73,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         editorWidget = PMXEditorWidget.editorFactory(empty_file, parent = self)
         self.tabWidget.addTab(editorWidget, empty_file.filename)
         self.currentEditorWidget = editorWidget
-    
-    def manageFilesToOpen(self,files):
-        '''
-            Files to open
-        '''
-        map(lambda file: self.openFile(file, auto_focus=True), [ file for file in files if os.path.isfile(file) ] )
         
-    def preventMenuLock(self):
-        '''
-        Inspects the MainWindow definition and add the actions itself.
-        If menubar is hidden (Ctrl+M), actions will be available.
-        Maybe we will need to filter something, right now I don't belive
-        it'll be nesseary.
-        '''
-        # TODO: Check if there's an action
-        action_names = filter(lambda name: name.startswith('action'), dir(self))
-        for action in map(lambda name: getattr(self, name), action_names):
-            if isinstance(action, QAction):
-                self.addAction(action)
-    
     def setupDockers(self):
         '''
         Basic panels, dock objects. More docks should be available via plugins
@@ -159,6 +136,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
         self.bundleItemSelector = PMXBundleItemSelector(self)
         
+    def setupMenu(self):
+        #Open Recent
+        
+        #Bundles Menu
+        name_order = lambda b1, b2: cmp(b1.name, b2.name)
+        for bundle in sorted(self.pmxApp.supportManager.getAllBundles(), name_order):
+            menu = self.pmxApp.supportManager.buildBundleMenu(bundle, self)
+            if menu is not None:
+                self.menuBundles.addMenu(menu)
+        #Connect
+        self.pmxApp.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
     #====================================================================
     # Bundle Items
     #====================================================================
@@ -166,19 +154,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         editor = self.currentEditor
         if editor is not None:
             editor.setSyntax(syntax)
-        
-    def on_bundleItem_triggered(self, item):
-        self.currentEditor.insertBundleItem(item)
-        
-    def addBundlesToMenu(self):
-        name_order = lambda b1, b2: cmp(b1.name, b2.name)
-        #TODO: Esto ya tendria que estar ordenado
-        for bundle in sorted(self.pmxApp.supportManager.getAllBundles(), name_order):
-            menu = self.pmxApp.supportManager.buildBundleMenu(bundle, self)
-            if menu is not None:
-                self.menuBundles.addMenu(menu)
-        #Connect
-        self.pmxApp.supportManager.bundleItemTriggered.connect(self.on_bundleItem_triggered)
     
     @pyqtSignature('')
     def on_actionSelect_Bundle_Item_triggered(self):
@@ -243,7 +218,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         '''
         Opens one or more files
         '''
-        start_directory = qApp.instance().startDirectory()
+        print self.currentEditorWidget.file.path 
         files_to_open = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
                                             start_directory)
         

@@ -1,6 +1,12 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/document-open.png</file>
     <file>emblems/emblem-encrypted-locked.png</file>
+    <file>actions/document-new.png</file>
+    <file>actions/document-open-folder.png</file>
+    <file>actions/document-open-recent.png</file>
+    <file>actions/document-open-remote.png</file>
+    <file>actions/document-open.png</file>
     <file>emblems/emblem-encrypted-unlocked.png</file>
     <file>emblems/emblem-favorite.png</file>
     <file>emblems/emblem-important.png</file>
@@ -31,7 +37,6 @@
     <file>actions/debug-step-into.png</file>
     <file>actions/system-switch-user.png</file>
     <file>actions/go-jump.png</file>
-    <file>actions/document-open-remote.png</file>
     <file>actions/go-bottom.png</file>
     <file>actions/go-down.png</file>
     <file>actions/go-first-view.png</file>
@@ -48,7 +53,6 @@
     <file>actions/configure.png</file>
     <file>actions/document-close.png</file>
     <file>actions/document-edit.png</file>
-    <file>actions/document-new.png</file>
     <file>actions/application-exit.png</file>
     <file>actions/edit-copy.png</file>
     <file>actions/edit-cut.png</file>
@@ -72,7 +76,6 @@
     <file>bundles/template-files.png</file>
     <file>bundles/templates.png</file>
   </qresource>
-  <qresource prefix="newPrefix"/>
   <qresource prefix="editor">
     <file>sidebar/bookmark-flag.png</file>
     <file>sidebar/folding-bottom.png</file>

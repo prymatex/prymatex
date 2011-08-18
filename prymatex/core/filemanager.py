@@ -109,58 +109,24 @@ class PMXFile(QtCore.QObject):
     def read(self):
         if not self.path:
             return None
-        #f = open(self.path)
         f = codecs.open(self.path, 'r', 'utf-8')
         data = f.read()
         f.close()
         return data
-#        for frm, to in zip(range(0, ), range()):
-#            print frm, to
-#            buffer[frm:to]
-#            qApp.instance().processEvents()
-
+    
     def fileDestroyed(self):
         logger.debug("%s is being destoyed")
 
     def __str__(self):
         return "<PMXFile on %s>" % self.path or "no path yet"
 
-#    TODO: Check if we can implement this this as a generator
-#    READ_SIZE = 1024 * 64 # 64K
-#    def readFileContents(self, buffer):
-#        '''
-#        Reads file contents
-#        '''
-#        try:
-#            size, read_count = os.path.getsize(self.path), 0
-#            assert size > 0
-#        except OSError:
-#            logger.debug("Could not open %s", self.path)
-#        except AssertionError:
-#            logger.debug("Empty file")
-#        else:
-#            f = open(self.path, 'r')
-#            while size > read_count :
-#                content = f.read(self.READ_SIZE)
-#                read_count += len(content)
-#                self.codeEdit.insertPlainText(content)
-#                #logger.debug("%d bytes read_count from %s", read_count,
-#                #self.path)
-#            f.close()
-#            self.codeEdit.document().setModified(False)
-#            self.codeEdit.document().setUndoRedoEnabled(True)
-#        self.codeEdit.setEnabled(True)
-#
-
     __unicode__ = __repr__ = __str__
-
+    
 
 class PMXFileManager(PMXObject):
+    ''' A File Manager singleton
     '''
-    A singleton which used for
-    '''
-
-    filedOpened = QtCore.pyqtSignal(PMXFile) # A new file has been opened
+    fileOpened = QtCore.pyqtSignal(PMXFile)
 
     class Meta:
         settings = 'filemanager'
@@ -188,6 +154,7 @@ class PMXFileManager(PMXObject):
         pmx_file.references = 1
         return pmx_file
 
+
     def fileUnused(self):
         ''' Signal receiver for '''
         pmx_file = self.sender()
@@ -197,14 +164,11 @@ class PMXFileManager(PMXObject):
             del pmx_file
 
 
-
-
     def openFile(self, filepath):
         '''
         PMXFile factory
         @raise FileDoesNotExistError: If provided path does not exists
         '''
-        filepath = unicode(filepath) # QString -> unicode
         if self.isOpened(filepath):
             pmx_file = self.opened_files[filepath]
             pmx_file.references += 1
@@ -219,9 +183,10 @@ class PMXFileManager(PMXObject):
 
         return pmx_file
 
+    @property
+    def currentDirectory(self):
+        #TODO: el ultimo directorio o algo de eso :)
+        return os.path.expanduser("~") 
+    
     def recentFiles(self):
         return []
-
-
-class FileNotSupported(Exception):
-    pass

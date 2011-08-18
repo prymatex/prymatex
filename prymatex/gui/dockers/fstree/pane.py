@@ -23,8 +23,8 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         self.setObjectName('FSPaneWidget')
         self.dialogConfigFilters = PMXFSPaneConfigDialog(self)
         self.setupUi(self)
-        start_dir = qApp.instance().startDirectory()
-        self.tree.setRootIndex(self.tree.model().index(start_dir))
+
+        self.tree.setRootIndex(self.tree.model().index(self.pmxApp.fileManager.currentDirectory))
         self.setupBookmarksCombo()
         self.tree.rootChanged.connect(self.treeRootPathChanged)
         
