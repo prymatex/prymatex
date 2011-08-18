@@ -20,11 +20,10 @@ class LogDockWidget(QDockWidget, Ui_LogWidget):
     Logging widget
     
     '''
-    def __init__(self, parent = None):
+    def __init__(self, handler, parent = None):
         super(LogDockWidget, self).__init__(parent)
         self.setupUi(self)
         self.setup()
-        global handler
         handler.output = self
         handler.capacity = 1
         
@@ -80,6 +79,4 @@ class QtLogHandler(logging.handlers.BufferingHandler):
             #self.output.
             txt = '\n'.join(map(lambda log: log.getMessage(), self.buffer))
             self.output.textLog.append(txt)
-        
 
-handler = QtLogHandler()

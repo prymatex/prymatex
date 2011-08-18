@@ -6,7 +6,7 @@ from os.path import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
-from prymatex.gui.panes import PaneDockBase
+from prymatex.gui.dockers import PaneDockBase
 from prymatex.gui import PMXBaseGUIMixin
 from prymatex.utils.translation import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu

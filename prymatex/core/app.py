@@ -44,10 +44,6 @@ class PMXApplication(QtGui.QApplication):
     # File manager
     #===========================================================================
     __fileManager = None
-    #===========================================================================
-    # Bundle Editor
-    #===========================================================================
-    __bundle_editor = None
     
     #@printtime
     @deco.logtime
@@ -55,16 +51,13 @@ class PMXApplication(QtGui.QApplication):
         '''
         Inicialización de la aplicación.
         '''
-        self.options = options
+        #self.options = options
         QtGui.QApplication.__init__(self, [])
-        # Logger setup
-        self.setup_logging() 
         
-        self.settings = PMXSettings.getSettingsForProfile(self.options.profile)
-        self.settings.setValue('auto_save', True)
-        self.settings.setValue('auto_save_interval', 30)
+        self.settings = PMXSettings.getSettingsForProfile(options.profile)
         
         # Some init's
+        self._setup_logging()
         self.init_application_params()
         self.setup_splash()
         
@@ -77,10 +70,13 @@ class PMXApplication(QtGui.QApplication):
         self.aboutToQuit.connect(self.settings.sync)
         
         self.setup_file_manager()
+        
         # Config dialog
         self.setupConfigDialog()
+        
         # Setupo bundle editor
         self.setupBundleEditor()
+        
         # Creates the GUI
         self.createWindows(open_args[1:]) # Skip pmx.py
         
@@ -88,8 +84,6 @@ class PMXApplication(QtGui.QApplication):
         self.replaceSysExceptHook()
         
         self.createRPCThread()
-        
-        
     
     @property
     def options(self):
@@ -183,38 +177,32 @@ class PMXApplication(QtGui.QApplication):
         self.__logger = logger
         logger.info("Logger set in the application instance")
     
-    def setup_logging(self):
+    def _setup_logging(self):
         '''
         @see PMXObject.debug, PMXObject.info, PMXObject.warn
         '''
         import logging
         
-        logger = logging.getLogger("")
-        logger.setLevel(logging.DEBUG)
+        self.logger = logging.getLogger("")
+        self.logger.setLevel(logging.DEBUG)
+        
         # create file handler which logs even debug messages
         d = datetime.now().strftime('%d-%m-%Y-%H-%M-%S')
-        filename = self.getProfilePath('log', 'messages-%s.log' % d)
+        filename = os.path.join(self.settings.PMX_LOG_PATH, 'messages-%s.log' % d)
         try:
             fh = logging.FileHandler(filename)
         except IOError:
             fh =  logging.FileHandler()
         
         fh.setLevel(logging.DEBUG)
+        self.logger.addHandler(fh)
+        
         # create console handler with a higher log level
         ch = logging.StreamHandler()
         ch.setLevel(logging.INFO)
         
-        # create formatter and add it to the handlers
-        formatter = logging.Formatter()#"%(message)s")
-        fh.setFormatter(formatter)
-        ch.setFormatter(formatter)
-        # add the handlers to the logger
-        logger.addHandler(fh)
-        logger.addHandler(ch)
-        from prymatex.gui.logwidget import handler as qth
-        logger.addHandler(qth)
-        logger.info("Application startup")
-        self.logger = logger
+        self.logger.addHandler(ch)
+        self.logger.info("Application startup")
     
     def init_application_params(self):
         self.setApplicationName(prymatex.__doc__)
@@ -284,7 +272,7 @@ class PMXApplication(QtGui.QApplication):
         '''
         from prymatex.utils._os import pid_proc_dict
         
-        lock_filename = self.getProfilePath('var', 'prymatex.pid')
+        lock_filename = os.path.join(self.settings.PMX_VAR_PATH, 'prymatex.pid')
         
         if exists(lock_filename):
             f = open(lock_filename)
@@ -304,41 +292,12 @@ class PMXApplication(QtGui.QApplication):
             f = open(lock_filename, 'w')
             f.write('%s' % os.getpid())
             f.close()
-    
-    __profilePath = None
-    @property
-    def profilePath(self):
-        if not self.__profilePath:
-            self.__profilePath = join(expanduser('~'), '.prymatex')
-        return self.__profilePath
-    
-    
-    #@deco.printparams_and_output
-    def getProfilePath(self, what, filename):
-        '''
-        Example
-        
-        self.getProfilePath('tmp', 'log.log')
-        
-        '''
-        #from prymatex.core.config import get_prymatex_profile_path, get_prymatex_base_path
-        path = join(self.profilePath, self.options.profile )
-        final_path = abspath(join(path, what))
-        if not exists(final_path):
-            os.makedirs(final_path, 0700)
-        return join(final_path, filename)
-        
             
     def startDirectory(self):
         '''
         Returns the start dir
         '''
-        if self.options.startdir and exists(self.options.startdir):
-            return abspath(self.options.startdir)
-        else:
-            #from prymatex.utils.os import get_homedir
-            #return get_homedir()
-            return os.getcwd()
+        return self.settings.PMX_USER_PATH
 
     def createRPCThread(self):
         from prymatex.core.rpcserver import PMXXMLRPCServerThread

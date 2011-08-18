@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Thu Aug  4 22:02:52 2011
+# Created: Thu Aug 18 15:21:07 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -153,6 +153,6 @@ class Ui_FSPane(object):
         self.comboBookmarks.setItemText(0, _('Bookmarks'))
         self.comboBookmarks.setItemText(1, _('File System'))
 
-from prymatex.gui.panes.fstree.bookmarks import PMXBookmarksListView
-from prymatex.gui.panes.fstree.fstree import FSTree
+from prymatex.gui.dockers.fstree.bookmarks import PMXBookmarksListView
+from prymatex.gui.dockers.fstree.fstree import FSTree
 from prymatex import resources_rc

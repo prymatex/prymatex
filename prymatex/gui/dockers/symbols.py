@@ -4,7 +4,7 @@
 
 from PyQt4 import QtGui
 from prymatex.utils.translation import ugettext as _
-from prymatex.gui.panes import PaneDockBase
+from prymatex.gui.dockers import PaneDockBase
 from prymatex.ui.panesymbols import Ui_SymbolList
 
 class SymbolListWidget(QtGui.QWidget, Ui_SymbolList):

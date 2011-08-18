@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, logging
+import re
 from bisect import bisect
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QRect, Qt, SIGNAL
@@ -13,8 +13,6 @@ from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processors import PMXSyntaxProcessor, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
-
-logger = logging.getLogger(__name__)
 
 # Key press debugging 
 KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
@@ -194,20 +192,25 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         else:
             return self.document().findBlock(start), self.document().findBlock(end)
     
-    def updateStatusBar(self):
+    @property
+    def status(self):
+        ''' Estado actual del editor
+        '''
         status = {}
         cursor = self.textCursor()
         status['line']  = cursor.blockNumber() + 1
         status['column'] = cursor.columnNumber() + 1
         status['scope'] = self.getCurrentScope()
-        self.mainWindow.statusbar.updateStatus(status)
+        return status
+    
+    def updateStatusBar(self):
+        self.mainWindow.statusbar.updateStatus(self.status)
         
     #TODO: un setter para la syntax
     def setSyntax(self, syntax):
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
             self.folding.indentSensitive = syntax.indentSensitive
-            print self.folding.indentSensitive
             self.mainWindow.statusbar.updateSyntax(syntax)
     
     @property

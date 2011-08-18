@@ -301,12 +301,12 @@
   <customwidget>
    <class>FSTree</class>
    <extends>QTreeView</extends>
-   <header>prymatex.gui.panes.fstree.fstree</header>
+   <header>prymatex.gui.dockers.fstree.fstree</header>
   </customwidget>
   <customwidget>
    <class>PMXBookmarksListView</class>
    <extends>QListWidget</extends>
-   <header>prymatex.gui.panes.fstree.bookmarks</header>
+   <header>prymatex.gui.dockers.fstree.bookmarks</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -6,15 +6,14 @@ from PyQt4 import QtCore
 from prymatex.utils.magic import magic
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from os.path import *
 from prymatex.core.exceptions import APIUsageError, FileDoesNotExistError
-import codecs
+import os, codecs
 
 from logging import getLogger
 logger = getLogger(__file__)
 
 # TODO: Cross-platform implementation, you might not have rights to write
-MAGIC_FILE = join(dirname(abspath(magic.__file__)), 'magic.linux')
+MAGIC_FILE = os.path.join(os.path.dirname(os.path.abspath(magic.__file__)), 'magic.linux')
 
 
 class PMXFile(QtCore.QObject):
@@ -171,7 +170,7 @@ class PMXFileManager(PMXObject):
     def __init__(self, parent):
         super(PMXFileManager, self).__init__(parent)
 
-        self.magic = magic.Magic(MAGIC_FILE, self.pmxApp.getProfilePath('tmp', 'magic.cache'))
+        self.magic = magic.Magic(MAGIC_FILE, os.path.join(self.pmxApp.settings.PMX_TMP_PATH, 'magic.cache'))
         self.opened_files = {}
         self.empty_file_counter = 0
 

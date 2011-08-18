@@ -8,7 +8,7 @@ from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant,
 from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
-from prymatex.gui.panes import PaneDockBase
+from prymatex.gui.dockers import PaneDockBase
 from prymatex.ui.panebrowser import Ui_BrowserPane
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty

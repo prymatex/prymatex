@@ -5,11 +5,8 @@ Application configuration based on Qt's QSettings module.
 
 '''
 from PyQt4 import QtCore
-from PyQt4.Qt import QSettings
-from os.path import join, abspath, expanduser, dirname, exists
-from os import makedirs
-import plistlib
-from prymatex.utils import deco
+from os.path import abspath, expanduser, dirname, exists
+import os, plistlib
 
 PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"
@@ -18,27 +15,27 @@ TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TEXTMATE_PREFERENCE_NAMES = ["Library","Preferences"]
 
 def get_prymatex_base_path():
-    return abspath(join(dirname(__file__), '..'))
+    return abspath(os.path.join(dirname(__file__), '..'))
 
 def get_prymatex_user_path():
-    path = abspath(join(expanduser("~"), PRYMATEX_HOME_NAME))
+    path = abspath(os.path.join(expanduser("~"), PRYMATEX_HOME_NAME))
     if not exists(path):
-        makedirs(path)
+        os.makedirs(path)
     #Create extra paths
-    bundles = join(path, 'Bundles')
+    bundles = os.path.join(path, 'Bundles')
     if not exists(bundles):
-        makedirs(bundles)
-    themes = join(path, 'Themes')
+        os.makedirs(bundles)
+    themes = os.path.join(path, 'Themes')
     if not exists(themes):
-        makedirs(themes)
+        os.makedirs(themes)
     return path
 
 def get_textmate_preferences_user_path():
-    path = abspath(join(expanduser("~"), *TEXTMATE_PREFERENCE_NAMES))
+    path = abspath(os.path.join(expanduser("~"), *TEXTMATE_PREFERENCE_NAMES))
     if not exists(path):
-        makedirs(path)
+        os.makedirs(path)
     #Create extra files
-    webpreview = join(path, TEXTMATE_WEBPREVIEW_NAME)
+    webpreview = os.path.join(path, TEXTMATE_WEBPREVIEW_NAME)
     if not exists(webpreview):
         plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
     return path
@@ -47,14 +44,13 @@ def build_prymatex_profile(path):
     '''
     @see: PMXObject.pmxApp.getProfilePath(what, file)
     '''
-    makedirs(path)
-    makedirs(join(path, 'tmp'))
-    makedirs(join(path, 'log'))
-    makedirs(join(path, 'var'))
+    os.makedirs(path)
+    os.makedirs(os.path.join(path, 'tmp'), 0700)
+    os.makedirs(os.path.join(path, 'log'), 0700)
+    os.makedirs(os.path.join(path, 'var'), 0700)
     
-@deco.printparams_and_output
 def get_prymatex_profile_path(name, base):
-    path = abspath(join(base, name.lower()))
+    path = abspath(os.path.join(base, name.lower()))
     if not exists(path):
         build_prymatex_profile(path)
     return path
@@ -62,7 +58,7 @@ def get_prymatex_profile_path(name, base):
 #Deprecated use qApp.settings
 PMX_BASE_PATH = get_prymatex_base_path()
 #Cuidado esta la necesita el paquete support en el modulo utils, ver como quitarla igualmente
-PMX_SUPPORT_PATH = join(PMX_BASE_PATH, 'share', 'Support')
+PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
 
 TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
 
@@ -200,24 +196,23 @@ class pmxConfigPorperty(object):
 
 class PMXSettings(object):
     PMX_APP_PATH = get_prymatex_base_path()
-    PMX_SHARE_PATH = join(PMX_APP_PATH, 'share')
+    PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
     PMX_USER_PATH = get_prymatex_user_path()
     PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
-    #Profile
-    PMX_PROFILE_PATH = None
-    PMX_TMP_PATH = None
-    PMX_LOG_PATH = None
-    GROUPS = {}
+
     def __init__(self, profile_path):
-        self.qsettings = QSettings(join(profile_path, PRYMATEX_SETTING_NAME), QSettings.IniFormat)
-        self.tmsettings = TextMateSettings(join(TM_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
+        self.PMX_PROFILE_PATH = profile_path
+        self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
+        self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
+        self.PMX_VAR_PATH = os.path.join(self.PMX_PROFILE_PATH, 'var')
+        self.GROUPS = {}
+        #TODO Defaults settings
+        self.qsettings = QtCore.QSettings(os.path.join(profile_path, PRYMATEX_SETTING_NAME), QtCore.QSettings.IniFormat)
+        self.tmsettings = TextMateSettings(os.path.join(TM_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
     
     @classmethod
     def getSettingsForProfile(cls, profile):
-        cls.PMX_PROFILE_PATH = get_prymatex_profile_path(profile, cls.PMX_USER_PATH)
-        cls.PMX_TMP_PATH = join(cls.PMX_PROFILE_PATH, 'tmp')
-        cls.PMX_LOG_PATH = join(cls.PMX_PROFILE_PATH, 'log')
-        return cls(cls.PMX_PROFILE_PATH)
+        return PMXSettings(get_prymatex_profile_path(profile, cls.PMX_USER_PATH))
     
     def getGroup(self, name):
         if name not in self.GROUPS:

@@ -186,6 +186,11 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         
         self.tabCloseRequest.emit(w)
 
+    def _current_tab_changed(self, w):
+        """ A close button was clicked in one of out _TabWidgets """
+        
+        self.tabWindowChanged.emit(w)
+        
     def setCurrentWidget(self, w):
         """ Make the given widget current. """
 
@@ -741,7 +746,8 @@ class _TabWidget(QtGui.QTabWidget):
         # in PyQt v4.2 and earlier.
         self.setTabBar(_DragableTabBar(self._root, self))
 
-        self.setTabsClosable(True)        
+        self.setTabsClosable(True)
+        self.currentChanged.connect(self._current_tab_changed)  
         self.tabCloseRequested.connect(self._close_tab)        
 
     def active_icon(self):
@@ -810,6 +816,9 @@ class _TabWidget(QtGui.QTabWidget):
         if self._root._current_tab_w is self and self._root._current_tab_idx == idx:
             self._root._current_tab_w = None
 
+    def _current_tab_changed(self, index):
+        self._root._current_tab_changed(self.widget(index))
+        
     def _close_tab(self, index):
         """ Close the current tab. """
 

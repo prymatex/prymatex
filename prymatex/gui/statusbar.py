@@ -164,7 +164,9 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
         self.lineColLabel.update(status['column'], status['line'])
     
     def updateSyntax(self, syntax):
-        model =  self.syntaxMenu.model() # Proxy
+        model =  self.syntaxMenu.model()
         index = model.findItemIndex(syntax)
+        self.syntaxMenu.blockSignals(True)
         self.syntaxMenu.setCurrentIndex(index)
+        self.syntaxMenu.blockSignals(False)
         

@@ -3,29 +3,20 @@
 
 import os
 import itertools
-import logging
+from string import Template
+
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QUrl
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from prymatex.support import PMXMenuNode
 from prymatex.gui.editor.codeedit import PMXCodeEdit
-from prymatex.gui.filterdlg import PMXFilterDialog
 from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
-from prymatex.gui.dialogs import PMXNewFromTemplateDialog
 from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXWidget
-from prymatex.gui.support.bundleselector import PMXBundleItemSelector
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.core.filemanager import FileNotSupported
-
-
-#from prymatex.config.configdialog import PMXConfigDialog
-
-logger = logging.getLogger(__name__)
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     '''
@@ -38,10 +29,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         settings = 'MainWindow'
     
     # Settings
-    @pmxConfigPorperty(default = "$APPNAME")
-    def windowTitleTemplate(self, value):
-        self._windowTitleTemplate = value
-        self.updateWindowTitle()
+    windowTitleTemplate = pmxConfigPorperty(default = "$APPNAME")
     
     @pmxConfigPorperty(default = True)
     def showMenuBar(self, value):
@@ -61,19 +49,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         # Initialize graphical elements
         self.setupUi(self)
         
-        # Create dialogs
-        self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
-        self.dialogFilter = PMXFilterDialog(self)
-        self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
-        self.bundleItemSelector = PMXBundleItemSelector(self)
+        self.setupDockers()
+        self.setupDialogs()
+        
+        self.addEmptyEditor()
         
         # Connect Signals
-        self.tabWidget.tabWindowChanged.connect(self.updateWindowTitle)
-        self.statusbar.syntaxChanged.connect(self.updateEditorSyntax)
+        self.splitTabWidget.tabWindowChanged.connect(self.setCurrentEditor)
+        self.statusbar.syntaxChanged.connect(self.setEditorSyntax)
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         
-        self.setupPanes()
-        self.setupLogging()
         self.center()
         
         self.addBundlesToMenu()
@@ -81,7 +66,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         
         self.manageFilesToOpen(files_to_open)
         self.configure()
-        self.addEmptyEditor()
     
     #Deprecate tabWidget
     @property
@@ -89,11 +73,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         return self.splitTabWidget
     
     def addEmptyEditor(self):
-        fileManager = self.pmxApp.fileManager
-        empty_file = fileManager.getEmptyFile()
-        editor = PMXEditorWidget.editorFactory(empty_file, parent = self)
-        self.tabWidget.addTab(editor, empty_file.filename)
-        return editor
+        empty_file = self.pmxApp.fileManager.getEmptyFile()
+        editorWidget = PMXEditorWidget.editorFactory(empty_file, parent = self)
+        self.tabWidget.addTab(editorWidget, empty_file.filename)
+        self.currentEditorWidget = editorWidget
     
     def manageFilesToOpen(self,files):
         '''
@@ -101,17 +84,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         '''
         map(lambda file: self.openFile(file, auto_focus=True), [ file for file in files if os.path.isfile(file) ] )
         
-    def setupLogging(self):
-        '''
-        Logging Sub-Window setup
-        TODO: Fix speed issues when a big amount of events is presented
-        '''
-        from logwidget import LogDockWidget
-        self.log_dock_widget = LogDockWidget(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.log_dock_widget)
-        self.log_dock_widget.action = self.actionShow_Log_Window
-        self.log_dock_widget.hide()
-
     def preventMenuLock(self):
         '''
         Inspects the MainWindow definition and add the actions itself.
@@ -125,27 +97,23 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
             if isinstance(action, QAction):
                 self.addAction(action)
     
-    def setupPanes(self):
+    def setupDockers(self):
         '''
         Basic panels, dock objects. More docks should be available via plugins
         '''
-        from prymatex.gui.panes.fstree import PMXFSPaneDock
-        from prymatex.gui.panes.project import PMXProjectDock
-        from prymatex.gui.panes.symbols import PMXSymboldListDock
-        from prymatex.gui.panes.browser import PMXBrowserPaneDock
-        from prymatex.gui.panes.console import PMXConsoleDock
+        from prymatex.gui.dockers.fstree import PMXFSPaneDock
+        from prymatex.gui.dockers.project import PMXProjectDock
+        from prymatex.gui.dockers.symbols import PMXSymboldListDock
+        from prymatex.gui.dockers.browser import PMXBrowserPaneDock
+        from prymatex.gui.dockers.console import PMXConsoleDock
+        from prymatex.gui.logwidget import QtLogHandler, LogDockWidget
         
         self.paneFileSystem = PMXFSPaneDock(self)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
-        
-        if qApp.instance().options.startdir:
-            self.paneFileSystem.show()
-        else:
-            self.paneFileSystem.hide()
-            
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)    
         self.paneFileSystem.associateAction(self.actionShow_File_System_Pane,
                                             self.trUtf8("Show Filesystem Panel"),
                                             self.trUtf8("Hide Filesystem Panel"))
+        self.paneFileSystem.hide()
         
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
@@ -172,10 +140,29 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
                                          self.trUtf8("Show Terminal"),
                                          self.trUtf8("Hide Terminal"))
         
+        #Logging Sub-Window setup
+        qthandler = QtLogHandler()
+        self.logger.addHandler(qthandler)
+        self.paneLogging = LogDockWidget(qthandler, self)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneLogging)
+        self.paneLogging.action = self.actionShow_Log_Window
+        self.paneLogging.hide()
+    
+    def setupDialogs(self):
+        from prymatex.gui.filterdlg import PMXFilterDialog
+        from prymatex.gui.dialogs import PMXNewFromTemplateDialog
+        from prymatex.gui.support.bundleselector import PMXBundleItemSelector
+        
+        # Create dialogs
+        self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
+        self.dialogFilter = PMXFilterDialog(self)
+        self.actionGroupTabs = PMXTabActionGroup(self) # Tab handling
+        self.bundleItemSelector = PMXBundleItemSelector(self)
+        
     #====================================================================
     # Bundle Items
     #====================================================================
-    def updateEditorSyntax(self, syntax):
+    def setEditorSyntax(self, syntax):
         editor = self.currentEditor
         if editor is not None:
             editor.setSyntax(syntax)
@@ -202,27 +189,18 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         if item is not None:
             self.currentEditor.insertBundleItem(item)
 
-    counter = 0
     #===========================================================================
     # Shortcuts
     #===========================================================================
-    
-    @property
-    def currentTabWidget(self):
-        ''' Shortcut to the current editor (bypass layoutManager) '''
-        #return self.centralWidget()
-        return self.tabWidget
-
     @property
     def currentEditor(self):
         widget = self.currentEditorWidget
         if widget != None:
             return widget.codeEdit
 
-    @property
-    def currentEditorWidget(self):
-        return self.currentTabWidget.currentWidget()
-    
+    #===========================================================================
+    # Auto Connects
+    #===========================================================================    
     @pyqtSignature('')
     def on_actionNewTab_triggered(self):
         self.addEmptyEditor()
@@ -279,10 +257,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
 
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
-            url = QUrl(url)
+            url = QtCore.QUrl(url)
         source = url.queryItemValue('url')
         if source:
-            source = QUrl(source)
+            source = QtCore.QUrl(source)
             editor = self.openFile(source.path())
             line = url.queryItemValue('line')
             if line:
@@ -455,19 +433,24 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         print "MainWindow::replace"
         self.currentEditorWidget.showReplaceWidget()
     
-    def updateWindowTitle(self):
-        ''' Updates window title '''
-        from string import Template
-        #print self.windowTitleTemplate, type(self.windowTitleTemplate)
+    def setCurrentEditor(self, editorWidget):
+        
+        self.currentEditorWidget = editorWidget
+        
+        #Update status bar
+        self.statusBar().updateStatus(editorWidget.codeEdit.status)
+        self.statusBar().updateSyntax(editorWidget.codeEdit.syntax)
+        
+        #Update window title
         template = Template(self.windowTitleTemplate)
         
         extra_attrs = self.pmxApp.supportManager.buildEnvironment()
-        s = template.safe_substitute(APPNAME="Prymatex",
-                                FILE='No file',
-                                PROJECT='No project',
-                                **extra_attrs)
+        s = template.safe_substitute(APPNAME = "Prymatex",
+                                     FILE = editorWidget.file.filename,
+                                     PROJECT = 'No project',
+                                     **extra_attrs)
         self.setWindowTitle(s)
-
+    
     def closeEvent(self, event):
         unsaved = self.tabWidget.unsavedCounter
         if unsaved:
