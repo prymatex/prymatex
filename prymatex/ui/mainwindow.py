@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Tue Aug 16 20:53:21 2011
+# Created: Wed Aug 17 21:27:08 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -22,6 +22,14 @@ class Ui_MainWindow(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
+        self.centralwidget = QtGui.QWidget(MainWindow)
+        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.splitTabWidget = PMXSplitTabWidget(self.centralwidget)
+        self.splitTabWidget.setObjectName(_fromUtf8("splitTabWidget"))
+        self.verticalLayout.addWidget(self.splitTabWidget)
+        MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 20))
         self.menubar.setObjectName(_fromUtf8("menubar"))
@@ -589,4 +597,5 @@ class Ui_MainWindow(object):
         self.actionPanes.setText(_('Panes'))
 
 from prymatex.gui.statusbar import PMXStatusBar
+from prymatex.gui.splittabwidget import PMXSplitTabWidget
 from prymatex import resources_rc

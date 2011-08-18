@@ -12,7 +12,6 @@ from prymatex.support import PMXMenuNode
 from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.filterdlg import PMXFilterDialog
 from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
-from prymatex.gui.splittabwidget import SplitTabWidget
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.gui.dialogs import PMXNewFromTemplateDialog
@@ -58,10 +57,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
                               is shown in the screen.
         '''
         super(PMXMainWindow, self).__init__()
+        
         # Initialize graphical elements
-        self.tabWidget = SplitTabWidget(self)
         self.setupUi(self)
-        self.setCentralWidget(self.tabWidget)
         
         # Create dialogs
         self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
@@ -84,6 +82,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.manageFilesToOpen(files_to_open)
         self.configure()
         self.addEmptyEditor()
+    
+    #Deprecate tabWidget
+    @property
+    def tabWidget(self):
+        return self.splitTabWidget
     
     def addEmptyEditor(self):
         fileManager = self.pmxApp.fileManager

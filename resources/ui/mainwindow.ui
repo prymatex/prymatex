@@ -17,10 +17,10 @@
    <iconset resource="../resources.qrc">
     <normaloff>:/icons/icons/Prymatex_Logo.png</normaloff>:/icons/icons/Prymatex_Logo.png</iconset>
   </property>
-  <widget class="QWidget" name="foo">
+  <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="PMXTabWidget" name="tabWidget"/>
+     <widget class="PMXSplitTabWidget" name="splitTabWidget"/>
     </item>
    </layout>
   </widget>
@@ -962,9 +962,9 @@
    <header>prymatex.gui.statusbar</header>
   </customwidget>
   <customwidget>
-   <class>PMXTabWidget</class>
+   <class>PMXSplitTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>prymatex.gui.tabwidget</header>
+   <header>prymatex.gui.splittabwidget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
