@@ -8,6 +8,10 @@ from string import Template
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+
+from prymatex.ui.mainwindow import Ui_MainWindow
+
+from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
@@ -15,7 +19,6 @@ from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXWidget
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.core.exceptions import FileNotSupported
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
@@ -68,6 +71,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     def tabWidget(self):
         return self.splitTabWidget
     
+    #TODO: Crear un methodo para instanciar editor widgets y agregarlos a una lista de editores activos
     def addEmptyEditor(self):
         empty_file = self.pmxApp.fileManager.getEmptyFile()
         editorWidget = PMXEditorWidget.editorFactory(empty_file, parent = self)
@@ -218,10 +222,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         '''
         Opens one or more files
         '''
-        print self.currentEditorWidget.file.path 
-        files_to_open = QFileDialog.getOpenFileNames(self, self.trUtf8("Select Files to Open"),
-                                            start_directory)
-        
+        #TODO: El directory puede ser dependiente del current editor o del file manager
+        directory = self.pmxApp.fileManager.currentDirectory 
+        files_to_open = QFileDialog.getOpenFileNames(self, _("Select Files to Open"), directory)
+        print files_to_open
         for path in files_to_open:
             self.openFile(path, auto_focus = True)
     
