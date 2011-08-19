@@ -9,9 +9,6 @@ from prymatex.core.config import pmxConfigPorperty
 from prymatex.core.exceptions import APIUsageError, FileDoesNotExistError
 import os, codecs
 
-from logging import getLogger
-logger = getLogger(__file__)
-
 # TODO: Cross-platform implementation, you might not have rights to write
 MAGIC_FILE = os.path.join(os.path.dirname(os.path.abspath(magic.__file__)), 'magic.linux')
 
@@ -73,7 +70,7 @@ class PMXFile(QtCore.QObject):
                 (self._path, value))
             self._path = value
         else:
-            abs_path = abspath(unicode(value))
+            abs_path = os.path.abspath(unicode(value))
             self._path = abs_path
             self.fileRenamed.emit(abs_path)
 
@@ -115,7 +112,7 @@ class PMXFile(QtCore.QObject):
         return data
     
     def fileDestroyed(self):
-        logger.debug("%s is being destoyed")
+        print "%s is being destoyed"
 
     def __str__(self):
         return "<PMXFile on %s>" % self.path or "no path yet"
@@ -141,7 +138,7 @@ class PMXFileManager(PMXObject):
         self.empty_file_counter = 0
 
     def isOpened(self, filepath):
-        filepath = abspath(filepath)
+        filepath = os.path.abspath(filepath)
         if filepath in self.opened_files:
             return True
         return False
@@ -173,13 +170,13 @@ class PMXFileManager(PMXObject):
             pmx_file = self.opened_files[filepath]
             pmx_file.references += 1
             return self.opened_files[filepath]
-        if not exists(filepath):
+        if not os.path.exists(filepath):
             raise FileDoesNotExistError(filepath)
 
         pmx_file = PMXFile(self, filepath)
         pmx_file.references += 1
         self.opened_files[filepath] = pmx_file
-        self.filedOpened.emit(pmx_file)
+        self.fileOpened.emit(pmx_file)
 
         return pmx_file
 

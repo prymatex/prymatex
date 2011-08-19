@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from bisect import bisect
 from PyQt4 import QtCore, QtGui
 
-def bisect(elements, element, function):
+def bisect_key(elements, element, key = lambda x: x):
+    indexs = map(key, elements)
+    index = key(element)
+    return bisect(indexs, index)
+
+def FIXMEbisect(elements, element, function):
+    #FIXME: No funciona
     if not elements:
         return 0
     else:
@@ -50,6 +57,9 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True
     
+    def comparableValue(self, index):
+        return 0
+        
     def compareIndex(self, xindex, yindex):
         return 0
     
@@ -111,7 +121,8 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
         for i in xrange(start, end + 1):
             index = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
-                position = bisect(self.__indexMap, index, lambda xindex, yindex: self.compareIndex(xindex, yindex))
+                position = bisect_key(self.__indexMap, index, lambda index: self.comparableValue(index))
+                #position = bisect_key(self.__indexMap, index, lambda xindex, yindex: self.compareIndex(xindex, yindex))
                 self.__indexMap.insert(position, index)
     
     def on_sourceModel_rowsRemoved(self, parent, start, end):

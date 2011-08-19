@@ -431,16 +431,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.setWindowTitle(s)
     
     def closeEvent(self, event):
-        unsaved = self.tabWidget.unsavedCounter
-        if unsaved:
-            close_msg = self.trUtf8("There are %s unsaved document in this window.<br>"
-                                    "Close anyway?")
-            response = QMessageBox.question(self, self.trUtf8("Sure to close?"), 
-                             unicode(close_msg) % unsaved, 
-                             buttons=QMessageBox.Ok | QMessageBox.Cancel, 
-                             defaultButton=QMessageBox.Ok)
-            if response == QMessageBox.Cancel:
-                event.ignore()
+        #unsaved = self.tabWidget.unsavedCounter
+        #if unsaved:
+        #    close_msg = self.trUtf8("There are %s unsaved document in this window.<br>"
+        #                            "Close anyway?")
+        #    response = QMessageBox.question(self, self.trUtf8("Sure to close?"), 
+        #                     unicode(close_msg) % unsaved, 
+        #                     buttons=QMessageBox.Ok | QMessageBox.Cancel, 
+        #                     defaultButton=QMessageBox.Ok)
+        #    if response == QMessageBox.Cancel:
+        #        event.ignore()
         
         event.accept()
         self.debug("Closing window")

@@ -8,7 +8,7 @@ from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
-from prymatex.mvc.proxies import bisect
+from prymatex.mvc.proxies import bisect_key
 
 class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     #Signals
@@ -145,6 +145,11 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     
     def removeBundleItem(self, bundleItem):
         self.bundleTreeModel.removeBundleItem(bundleItem)
+        
+    def getAllBundleItems(self):
+        for bundle in self.getAllBundles():
+            for item in bundle.children:
+                yield item
     
     #---------------------------------------------------
     # TEMPLATEFILE OVERRIDE INTERFACE
@@ -159,7 +164,7 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     #---------------------------------------------------
     def addTheme(self, theme):
         themeRow = PMXThemeStyleRow(theme, self.scores)
-        index = bisect(self.themeListModel, themeRow, lambda t1, t2: cmp(t1.name, t2.name))
+        index = bisect_key(self.themeListModel, themeRow, lambda t: t.name)
         self.themeListModel.insert(index, themeRow)
         return themeRow
     

@@ -208,14 +208,14 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         self.changes['command'] = unicode(self.command.toPlainText())
         
     def on_comboBoxBeforeRunning_changed(self, index):
-        value = self.comboBoxBeforeRunning.itemData(index).toString()
+        value = self.comboBoxBeforeRunning.itemData(index)
         if value != self.bundleItem.beforeRunningCommand:
             self.changes['beforeRunningCommand'] = unicode(value)
         else:
             self.changes.pop('beforeRunningCommand', None)
             
     def on_comboBoxInput_changed(self, index):
-        value = self.comboBoxInput.itemData(index).toString()
+        value = self.comboBoxInput.itemData(index)
         if value != self.bundleItem.input:
             self.changes['input'] = unicode(value)
         else:
@@ -235,14 +235,14 @@ echo Selection: "$TM_SELECTED_TEXT"''',
             self.comboBoxFallbackInput.setVisible(False)
         
     def on_comboBoxFallbackInput_changed(self, index):
-        value = self.comboBoxFallbackInput.itemData(index).toString()
+        value = self.comboBoxFallbackInput.itemData(index)
         if value != self.bundleItem.fallbackInput and value != self.DEFAULTS['fallbackInput']:
             self.changes['fallbackInput'] = unicode(value)
         else:
             self.changes.pop('fallbackInput', None)
         
     def on_comboBoxOutput_changed(self, index):
-        value = self.comboBoxOutput.itemData(index).toString()
+        value = self.comboBoxOutput.itemData(index)
         if value != self.bundleItem.output:
             self.changes['output'] = unicode(value)
         else:

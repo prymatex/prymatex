@@ -102,4 +102,4 @@ class PMXTheme(PMXManagedObject):
             elif theme is not None:
                 theme.addNamespace(namespace)
         except Exception, e:
-            print "Error en bundle %s (%s)" % (path, e)
+            print "Error en theme %s (%s)" % (path, e)

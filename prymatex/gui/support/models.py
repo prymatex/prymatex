@@ -102,7 +102,7 @@ class PMXBundleTreeNode(object):
         return len(self.children)
 
     def row(self):  
-        if self.parent is not None:  
+        if self.parent is not None and self in self.parent.children:  
             return self.parent.children.index(self)
 
 class RootNode(object):
@@ -200,11 +200,12 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
 
         child = index.internalPointer()  
         parent = child.parent
-
-        if parent == self.root:  
+        row = parent.row()
+        
+        if parent == self.root or row is None:  
             return QtCore.QModelIndex()
 
-        return self.createIndex(parent.row(), 0, parent)
+        return self.createIndex(row, 0, parent)
     
     #========================================================================
     # Functions

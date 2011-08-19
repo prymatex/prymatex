@@ -155,7 +155,7 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
     # Filter Top Bar
     #==========================================================
     def on_comboBoxItemFilter_changed(self, index):
-        value = self.comboBoxItemFilter.itemData(index).toString()
+        value = self.comboBoxItemFilter.itemData(index)
         self.proxyTreeModel.setFilterRegExp(value)
     
     def configSelectTop(self):

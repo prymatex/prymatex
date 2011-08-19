@@ -193,7 +193,7 @@ class PMXSupportBaseManager(object):
         pass
 
     def getAllBundles(self):
-        pass
+        return []
     
     #---------------------------------------------------
     # BUNDLE CRUD
@@ -269,7 +269,7 @@ class PMXSupportBaseManager(object):
             si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
         '''
         items = self.findBundleItems(bundle = bundle)
-        print items
+
         #Primero los items
         for item in items:
             self.deleteBundleItem(item)
@@ -294,7 +294,7 @@ class PMXSupportBaseManager(object):
         pass
     
     def getAllBundleItems(self):
-        pass
+        return []
         
     #---------------------------------------------------
     # BUNDLEITEM CRUD
@@ -437,7 +437,7 @@ class PMXSupportBaseManager(object):
         pass
         
     def getAllThemes(self):
-        pass
+        return []
     
     #---------------------------------------------------
     # THEME CRUD
@@ -552,7 +552,7 @@ class PMXSupportBaseManager(object):
         '''
             Return a list of preferences bundle items
         '''
-        pass
+        return []
         
     #---------------------------------------------------------------
     # PREFERENCES
@@ -588,13 +588,13 @@ class PMXSupportBaseManager(object):
             Return a list of tab triggers
             ['class', 'def', ...]
         '''
-        pass
+        return []
     
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         '''
             Return a list of tab triggers bundle items
         '''
-        pass
+        return []
     
     #---------------------------------------------------------------
     # TABTRIGGERS
@@ -631,7 +631,7 @@ class PMXSupportBaseManager(object):
         '''
             Return a list of key equivalent bundle items
         '''
-        pass
+        return []
         
     #---------------------------------------------------------------
     # KEYEQUIVALENT
@@ -657,7 +657,7 @@ class PMXSupportBaseManager(object):
         '''
             Return action items
         '''
-        pass
+        return []
     
     #---------------------------------------------------------------
     # ACTION ITEMS FOR SCOPE
@@ -683,7 +683,7 @@ class PMXSupportBaseManager(object):
     # SYNTAXES INTERFACE
     #---------------------------------------------------
     def getAllSyntaxes(self):
-        pass
+        return []
     
     #---------------------------------------------------------------
     # SYNTAXES
