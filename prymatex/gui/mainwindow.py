@@ -181,7 +181,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     # Auto Connects
     #===========================================================================    
     @pyqtSignature('')
-    def on_actionNewTab_triggered(self):
+    def on_actionNew_triggered(self):
         self.addEmptyEditor()
 
     @pyqtSignature('')

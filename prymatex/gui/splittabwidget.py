@@ -253,6 +253,7 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         # Save the new current widget.
         self._current_tab_w = tw
         self._current_tab_idx = tidx
+        self.tabWindowChanged.emit(self._current_tab_w.widget(self._current_tab_idx))
 
     def _set_focus(self):
         """ Set the focus to an appropriate widget in the current tab. """
@@ -317,7 +318,6 @@ class PMXSplitTabWidget(QtGui.QSplitter):
                 nw = None
             else:
                 nw = ntw.widget(ntidx)
-    
             self.emit(QtCore.SIGNAL('hasFocus'), nw)
 
     def _tab_widget_of(self, target):
@@ -747,7 +747,6 @@ class _TabWidget(QtGui.QTabWidget):
         self.setTabBar(_DragableTabBar(self._root, self))
 
         self.setTabsClosable(True)
-        self.currentChanged.connect(self._current_tab_changed)  
         self.tabCloseRequested.connect(self._close_tab)        
 
     def active_icon(self):
@@ -816,14 +815,11 @@ class _TabWidget(QtGui.QTabWidget):
         if self._root._current_tab_w is self and self._root._current_tab_idx == idx:
             self._root._current_tab_w = None
 
-    def _current_tab_changed(self, index):
-        self._root._current_tab_changed(self.widget(index))
-        
     def _close_tab(self, index):
         """ Close the current tab. """
 
         self._root._close_tab_request(self.widget(index))
-        
+
 
 class _DragableTabBar(QtGui.QTabBar):
     """ The _DragableTabBar class is a QTabBar that can be dragged around. """
