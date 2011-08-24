@@ -36,6 +36,14 @@ class PMXTabWidget(QTabWidget, PMXObject):
     TABBAR_ALWAYS_SHOWN = 0x01
     TABBAR_WHEN_MULTIPLE = 0x02
     
+    
+    #===========================================================================
+    # Split Tab Widget compat
+    #===========================================================================
+    newWindowRequest = QtCore.pyqtSignal(QtCore.QPoint, QtGui.QWidget)
+    tabCloseRequest = QtCore.pyqtSignal(QWidget)
+    tabWindowChanged = QtCore.pyqtSignal(QWidget)
+    
     def setShowTabBar(self, value):
         values = [
                   self.TABBAR_NEVER_SHOWN,
