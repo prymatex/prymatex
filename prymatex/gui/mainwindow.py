@@ -59,7 +59,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         '''
         super(PMXMainWindow, self).__init__()
         # Initialize graphical elements
-        self.tabWidget = SplitTabWidget(self)
+        #self.tabWidget = SplitTabWidget(self)
+        self.tabWidget = PMXTabWidget(self)
         self.setupUi(self)
         self.setCentralWidget(self.tabWidget)
         
