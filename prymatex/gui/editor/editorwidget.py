@@ -19,23 +19,9 @@ from prymatex.core.filemanager import PMXFile
 from prymatex.core.exceptions import APIUsageError
 from prymatex.ui.editorwidget import Ui_EditorWidget
 
-#from prymatex.utils.deco import logresult
-logger = logging.getLogger(__name__)
-
-# Path correction for standalone test
-if __name__ == "__main__":
-    from os.path import abspath, join, dirname
-    pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
-    sys.path.append(pmx_base)
-    sys.path.append('../..')
-    #pmx_base = abspath(join(dirname(__file__), '..', '..', '..'))
-
-# Qt Designer's gui
-
 #===============================================================================
 # Icons
 #===============================================================================
-
 
 class PMXEditorWidget(QWidget, Ui_EditorWidget):
     '''

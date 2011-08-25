@@ -82,7 +82,7 @@ class PMXFile(QtCore.QObject):
 
     @property
     def directory(self):
-        return dirname(self.path)
+        return self.path.dirname(self.path)
 
     # Taken from Qt creator, it should disable some modification signals
     @property
