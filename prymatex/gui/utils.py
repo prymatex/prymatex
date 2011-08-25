@@ -8,7 +8,7 @@ acciones.
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import string
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 
 to_ascii = lambda s: filter(lambda c: c in string.ascii_letters, s)
 to_ascii_cap = lambda s: to_ascii(s).capitalize()

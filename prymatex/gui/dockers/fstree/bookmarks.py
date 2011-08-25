@@ -6,7 +6,6 @@ from PyQt4.Qt import Qt, QListView, QTableView, pyqtSignal
 from os.path import expanduser, exists
 import os
 import thread
-from prymatex.utils.resources import PMXKDE4ResourceManager
 from urllib import unquote, unquote_plus
 from prymatex.core.base import PMXObject
 
@@ -54,8 +53,8 @@ class PMXBookmarksKDE4Model(PMXBookmarksBaseModel):
             if mdata.tag.endswith('icon'):
                 icon = mdata.attrib['name']
                 break
-         
-        return self.resourceManager.getIcon(icon)
+        #TODO: Obterner el icono de donde corresponde
+        return icon
     
     def getKDEBookmarksPath(self):
         ''' @return: kde bookmark XML file '''
@@ -67,7 +66,6 @@ class PMXBookmarksKDE4Model(PMXBookmarksBaseModel):
                 
     def loadBookmarks(self):
         path = self.getKDEBookmarksPath()
-        self.resourceManager = PMXKDE4ResourceManager()
         from lxml import etree
         bookmarks_tree = etree.parse(path)
         for bookmark in bookmarks_tree.findall('bookmark'):

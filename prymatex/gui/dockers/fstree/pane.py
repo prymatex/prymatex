@@ -8,7 +8,7 @@ from PyQt4.QtCore import *
 
 from prymatex.gui.dockers import PaneDockBase
 from prymatex.gui import PMXBaseGUIMixin
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
 from prymatex.ui.panefilesystem import Ui_FSPane
 from prymatex.ui.filesystemsettings import Ui_FSSettingsDialog

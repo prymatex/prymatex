@@ -7,7 +7,7 @@ from PyQt4 import QtGui, QtCore
 
 import prymatex
 from prymatex import resources_rc
-from prymatex.utils import deco
+from prymatex.utils import decorator as deco
 from prymatex.core.config import PMXSettings
 from prymatex.utils.i18n import ugettext as _
 

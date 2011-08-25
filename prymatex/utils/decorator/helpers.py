@@ -1,4 +1,6 @@
-# encoding: utf-8
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+
 from time import time
 
 # Taken from http://wiki.python.org/moin/PythonDecoratorLibrary

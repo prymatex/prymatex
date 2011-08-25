@@ -18,8 +18,7 @@ def main(args):
     '''
     GUI entry point.
     '''
-    from prymatex.core import app
-    from prymatex.utils import exceptions
+    from prymatex.core import app, exceptions
     from prymatex.optargs import parser
     # TODO: Implement quit and restart
     while True:
@@ -40,7 +39,6 @@ def main(args):
         if retval == 3:
             del myapp
             reload(app)
-            reload(exceptions)
             continue
         return retval
 

@@ -1,7 +1,9 @@
-# encoding: utf-8
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+
 from os.path import *
 import shelve, pickle
-from helpers import simple_decorator
+from prymatex.utils.decorator.helpers import simple_decorator
 import atexit
 from functools import partial
 
