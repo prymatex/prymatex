@@ -78,7 +78,7 @@ class PMXFile(QtCore.QObject):
     def filename(self):
         if not self.path:
             return self.suggestedFileName()
-        return basename(self.path)
+        return os.path.basename(self.path)
 
     @property
     def directory(self):

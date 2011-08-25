@@ -225,7 +225,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         #TODO: El directory puede ser dependiente del current editor o del file manager
         directory = self.pmxApp.fileManager.currentDirectory 
         files_to_open = QFileDialog.getOpenFileNames(self, _("Select Files to Open"), directory)
-        print files_to_open
         for path in files_to_open:
             self.openFile(path, auto_focus = True)
     
@@ -257,14 +256,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         fileManager = qApp.instance().fileManager
         pmx_file = None
         try:
-            print "About to open", path
             pmx_file = fileManager.openFile(path)
         except FileDoesNotExistError, e:
             print " FileDoesNotExistError", e
             QMessageBox.critical(self, "File not found", "%s" % e, QMessageBox.Ok)
         except FileNotSupported, e:
             QMessageBox.critical(self, "%s doesn't know how to handle this kind of file", "%s" % e, QMessageBox.Ok)
-            
         except UnicodeDecodeError, e:
             print "UnicodeDecodeError", e
             QMessageBox.critical(self, "Can't decode file", "%s" % e, QMessageBox.Ok)
@@ -274,20 +271,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         if not pmx_file:
             return
         
-        if not pmx_file in self.tabWidget:
-            try:
-                editor = PMXEditorWidget.editorFactory(pmx_file)
-            except Exception, e:
-                print "Emergency"
-                from prymatex.gui.emergency import PMXTraceBackDialog
-                print e
-                dlg = PMXTraceBackDialog(e)
-                dlg.exec_()
-                return 
-            self.tabWidget.addTab(editor)
-        else:
-            editor = self.tabWidget[pmx_file]
-        self.tabWidget.focusEditor(editor)
+        editor = PMXEditorWidget.editorFactory(pmx_file)
+        self.tabWidget.addTab(editor, pmx_file.filename)
         return editor
     
     @pyqtSignature('')
