@@ -3,7 +3,7 @@
 # Created: 10/02/2010 by defo
 
 from PyQt4.QtGui import *
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.dockers import PaneDockBase
 from prymatex.ui.paneproject import Ui_ProjectPane
 

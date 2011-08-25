@@ -3,7 +3,7 @@
 
 from PyQt4.QtGui import *
 from prymatex.core.base import PMXWidget
-from prymatex.utils.translation import ugettext as _
+from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.dockers import PaneDockBase
 from IPython.frontend.qt.console.ipython_widget import IPythonWidget
 
