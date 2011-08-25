@@ -76,7 +76,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
         self.codeEdit.setPlainText(self.file.read() or '')
         self.destroyed.connect(self.releaseFile)
-
+        
     def releaseFile(self):
         print "Release file"
         

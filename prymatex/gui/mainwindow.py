@@ -325,7 +325,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
                 dlg = PMXTraceBackDialog(e)
                 dlg.exec_()
                 return 
-            self.tabWidget.addTab(editor)
+            self.tabWidget.addTab(editor, '')
         else:
             editor = self.tabWidget[pmx_file]
         self.tabWidget.focusEditor(editor)

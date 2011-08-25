@@ -256,45 +256,41 @@ class PMXTabWidget(QTabWidget, PMXObject):
         '''
         Creates a new empty tab and returns it
         '''
-        #print "** appendEmptyTab called!"
-        #import traceback
-        #traceback.print_stack()
         fileManager = qApp.instance().fileManager
         empty_file = fileManager.getEmptyFile()
-        editor = PMXEditorWidget.editorFactory(empty_file, parent = self)
-        # Title should be filled after tab insertion
-        self.addTab(editor)
-        return editor
+        return self.addFileTab(empty_file)
     
-    def addTab(self, widget, autoFocus = True):
-        ''' 
-        Overrides QTabWidget.addTab(page, title) so that
-        afterInsertion is called 
+    def addFileTab(self, file):
+        
+        editor = PMXEditorWidget.editorFactory(file)
+        # Editor should have this methods available
+        editor.fileTitleUpdate.connect(self.updateTabInfo)
+        editor.fileStatusModified.connect(self.editorModified)
+        editor.fileStatusSynced.connect(self.editorSynced)
+        
+        editor.setParent(self)
+        self.addTab(editor, file.title)
+        return editor
+
+    def removeEmptyUnmodifiedEditor(self):
+        ''' When first tab is inserted, if there was
+        an empty tab unmodified, remove it!
         '''
         if len(self) == 1:
             editor = self[0]
-            
             if editor.file.path is None and not editor.modified:
                 self.removeTab(1)
-                    
-        if type(autoFocus) is not bool:
-            # Detect old API calls
-            raise APIUsageError("addTab received somethign wierd as autoFoucs %s (should be bool)" % autoFocus)
-        
-        widget.setParent(self)
-        title = widget.file.filename
+            
+    def addTab(self, widget, title, autoFocus = True):
+        ''' 
+         
+        ''' 
         #print "Adding %s with title %s" % (widget, title)
-        index = super(PMXTabWidget, self).addTab(widget, '...')
+        index = super(PMXTabWidget, self).addTab(widget, title)
         
         self.setTabIcon(index, ICON_FILE_STATUS_NORMAL)
         
-        widget.fileTitleUpdate.connect(self.updateTabInfo)
         
-        widget.fileTitleUpdate.connect(self.updateTabInfo)
-        #self.connect(widget, SIGNAL('fileTitleUpdate()'), self.updateTabInfo)
-        
-        widget.fileStatusModified.connect(self.editorModified)
-        widget.fileStatusSynced.connect(self.editorSynced)
         
         if autoFocus:
             self.setCurrentIndex(index)
