@@ -239,7 +239,6 @@ class PMXFoldingHelper(object):
             #Update factor
             factor = factor + 1 if self.folding[previousBlock.blockNumber()] > 0 else factor - 1 if self.folding[previousBlock.blockNumber()] < 0 else factor
             startBlock = self.findPreviousNotBlankBlock(startBlock)
-        print factor
         return factor
     
     def updateIndentFoldingMarks(self, lastBlock):
@@ -273,15 +272,18 @@ class PMXFoldingHelper(object):
         nest = reduce(lambda x, y: x + y, self.folding, 0)
         while block.isValid():
             userData = block.userData()
-            mark = userData.foldingMark
-            if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
-                self.folding.append(mark)
-                nest += mark
-            elif mark == self.FOLDING_STOP:
+            if userData is None:
                 self.folding.append(self.FOLDING_NONE)
-            if block >= lastBlock and nest <= 0:
-                break
-            block = block.next()
+            else:
+                mark = userData.foldingMark
+                if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
+                    self.folding.append(mark)
+                    nest += mark
+                elif mark == self.FOLDING_STOP:
+                    self.folding.append(self.FOLDING_NONE)
+                if block >= lastBlock and nest <= 0:
+                    break
+                block = block.next()
 
     def deprecateFolding(self, index):
         self.folding = self.folding[:index]

@@ -97,6 +97,46 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
         PMXSyntaxProcessor.FORMAT_CACHE = {}
         self.rehighlight()
 
+    def _rehighlight(self, editor):
+        block = editor.document().firstBlock()
+        state = self.SINGLE_LINE
+        while block.isValid():
+            self.block_number = block.blockNumber()
+            self.userData = block.userData()
+            if self.userData == None:
+                self.userData = PMXBlockUserData()
+                block.setUserData(self.userData)
+            
+            text = block.text()
+            if state == self.MULTI_LINE:
+                #Recupero una copia del stack y los scopes del user data
+                stack, self.scopes = block.previous().userData().getStackAndScopes()
+            else:
+                #Creo un stack y scopes nuevos 
+                stack = [[self.syntax.grammar, None]]
+                self.scopes = [ self.syntax.scopeName ]
+            # A parserar mi amor, vamos a parsear mi amor
+            self.syntax.parseLine(stack, text, self)
+            
+            #End Parsing
+            self.addToken(block.length())
+            if self.scopes[-1] == self.syntax.scopeName:
+                state == self.SINGLE_LINE
+            else:
+                state == self.MULTI_LINE
+                self.userData.setStackAndScopes(stack, self.scopes)
+            block.setUserState(state)
+
+            line = unicode(block.text())
+            self.foldingMarker(line)
+            self.indentMarker(line, self.scopes[-1])
+            block = block.next()
+        print editor.document().allFormats()
+
+    def rehighlight(self):
+        self.editor.pmxApp.executor.submit(self._rehighlight, self.editor)
+        #QtGui.QSyntaxHighlighter.rehighlight(self)
+        
     def highlightBlock(self, text):
         #Start Parsing
         self.block_number = self.currentBlock().blockNumber()

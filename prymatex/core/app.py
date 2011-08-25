@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, sys
-from os.path import join, exists, dirname, abspath, expanduser
-from datetime import datetime
+from concurrent import futures
+
 from PyQt4 import QtGui, QtCore
 
 import prymatex
 from prymatex import resources_rc
 from prymatex.utils import decorator as deco
-from prymatex.core.config import PMXSettings
 from prymatex.utils.i18n import ugettext as _
 
-from logging import getLogger
 from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
 
 # ipdb handling
@@ -51,10 +49,12 @@ class PMXApplication(QtGui.QApplication):
         '''
         Inicialización de la aplicación.
         '''
+        from prymatex.core.config import PMXSettings
         #self.options = options
         QtGui.QApplication.__init__(self, [])
         
         self.settings = PMXSettings.getSettingsForProfile(options.profile)
+        self.executor = futures.ThreadPoolExecutor(max_workers=5)
         
         # Some init's
         self._setup_logging()
@@ -84,7 +84,7 @@ class PMXApplication(QtGui.QApplication):
         self.replaceSysExceptHook()
         
         self.createRPCThread()
-    
+        
     @property
     def options(self):
         return self.__options
@@ -182,6 +182,7 @@ class PMXApplication(QtGui.QApplication):
         @see PMXObject.debug, PMXObject.info, PMXObject.warn
         '''
         import logging
+        from datetime import datetime
         
         self.logger = logging.getLogger("")
         self.logger.setLevel(logging.DEBUG)
@@ -274,7 +275,7 @@ class PMXApplication(QtGui.QApplication):
         
         lock_filename = os.path.join(self.settings.PMX_VAR_PATH, 'prymatex.pid')
         
-        if exists(lock_filename):
+        if os.path.exists(lock_filename):
             f = open(lock_filename)
             pid = int(f.read())
             f.close()
