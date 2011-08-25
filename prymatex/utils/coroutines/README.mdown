@@ -1,0 +1,125 @@
+# People like to think synchronously. Computers must work asynchronously. #
+
+This is implementation of [nonpreemptive multithreading](http://en.wikipedia.org/wiki/Thread_\(computer_science\))
+inside the python script
+using [yield](http://stackoverflow.com/questions/231767/the-python-yield-keyword-explained) keyword.  
+
+![Nonpreemptive multithreading](http://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Multithreaded_process.svg/220px-Multithreaded_process.svg.png)
+
+Insert **yield** as the execution trap or **res = yield SomeClass()** as the asynchronous call.
+ 
+
+Write [PyQt](http://www.riverbankcomputing.co.uk/software/pyqt/intro) asynchronous code in the synchronous manner:
+
+    from pyqtcoroutines.coroutines import Scheduler
+
+    # coroutine example
+    def inserter( a_lot_of_records ):
+        try:
+            for record in a_lot_of_records:
+                # do small piece of work here 
+
+                ... insert one record to the sql database ...
+    
+                # This is execution trap
+                #
+                # Unlike QCoreApplication.processEvents() 
+                # we do not call new restricted event loop,
+                # we will NORMALLY RETURN to the main qt event loop!
+    
+                yield
+        except:
+            # handle all exceptions in synchronous manner
+            ...
+    
+    
+    # create scheduler to execute our inserter(..) later
+    s = Scheduler()
+
+    # It's not the inserter() call!
+    # We construct the built-in python Generator object!
+    #
+    # Execution will start after the first 
+    # coroutine.send( None ) call inside the Scheduler.
+    coroutine = inserter( a_lot_of_records )
+
+    # Let the Scheduler to start execution of 
+    # inserter(..) later inside the main qt event loop.
+    s.newTask( coroutine )
+
+
+We could **execute blocking calls asynchronously**!
+Just [inherit class Sleep](http://github.com/ddosoff/pyqtcoroutines/blob/master/coroutines.py#L86) from 
+[pyqtcoroutines.AsynchronousCall](http://github.com/ddosoff/pyqtcoroutines/blob/master/coroutines.py#L53).
+
+    def async_sleeper():
+        print 'sleep 100ms..'
+        yield Sleep( 100 )  # Sleep - class, inherited from AsynchronousCall 
+        print 'hello'
+
+
+In addition to subcoroutines and system call [David's](http://www.dabeaz.com/coroutines/) ideas,
+I added **yield Return(..)** pattern.
+
+
+    def subcoroutine():
+        # Network operations will be asyncronous,
+        # but logic looks synchronous!
+        #
+        # After the download compleete, QT will notify 
+        # DownloadSite instance with the signal
+        # and execution will be resumed. 
+        myWork = yield DownloadSite( 'http://google.com' )
+
+        # Simply return value to caller's coroutine
+        yield Return( myWork )
+    
+    
+    def coroutine():
+        value = yield subcoroutine()
+        ...
+
+
+**With the [Qt signals](http://doc.trolltech.com/4.7/signalsandslots.html) feature we could return 
+value from Task** using [signal done(..)](http://github.com/ddosoff/pyqtcoroutines/blob/master/coroutines.py#L227)
+
+
+    def coroutine():
+        ... calc return value to res...
+        yield Return( res )
+
+    class MyClass( QObject ):
+        def resReady( self, res ):
+            print res.value
+
+    l = MyClass()
+    s = Scheduler()
+    task = s.newTask( coroutine() )
+
+    # res will be printed, when coroutine done
+    task.done.connect( l.resReady )
+
+
+**Scheduler will route exceptions** raised in the subcoroutines!
+
+
+    def subcoroutine():
+        ... yield ... yield ...
+        raise Exception( 'Something wrong' )
+        ... yield ... yield ...
+
+
+    def coroutine():
+        try:
+            yield subcoroutine()
+        except:
+            # 'Something wrong' will be catched!
+            ...
+
+
+Coroutines asynchronously works with the only **one thread**.  
+Do not care about real threads, processes, ipc, syncronization primitives and hard debuging.
+
+Check out working examples:
+
+$ **python [./coroutines.py](http://github.com/ddosoff/pyqtcoroutines/blob/master/coroutines.py#L527)**
