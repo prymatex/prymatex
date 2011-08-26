@@ -11,7 +11,8 @@ PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
     "endParsing": nop,
     "openTag": nop,
     "closeTag": nop,
-    "newLine": nop
+    "beginLine": nop,
+    "endLine": nop
 })
 
 ######################### Command Processor #########################

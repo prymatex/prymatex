@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os, sys
 sys.path.append(os.path.abspath('..'))
@@ -15,18 +17,30 @@ def test_snippet(manager):
     snippet.execute(PMXDebugSnippetProcessor())
     print "Time:", time() - start
 
+text = '''#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+""" Hola mundo
+
+esto es una preuba
+"""
+class Persona(object):
+    pass'''
+    
 def test_syntax(manager):
     from prymatex.support.syntax import PMXSyntax
     from time import time
     from prymatex.gui.editor.processors.syntax import PMXProcessor
+    from pprint import pprint
     syntax = manager.getSyntaxByScopeName('source.python')
     print syntax.scopeName
-    file = open(os.path.abspath('prymatex/gui/editor/codeedit.py'), 'r')
+    #file = open(os.path.abspath('prymatex/gui/editor/codeedit.py'), 'r')
     start = time()
     processor = PMXProcessor()
-    syntax.parse(file.read(), processor)
-    file.close()
-    print processor.lines
+    syntax.parse(text, processor)
+    #syntax.parse(file.read(), processor)
+    #file.close()
+    pprint(processor.lines)
     print "Time:", time() - start
 
 def test_creationAndDeleteBundle(manager):
@@ -60,10 +74,13 @@ def test_themes(manager):
     theme = themes.pop()
     manager.updateTheme(theme, name = "Cacho")
         
+def loadCallback(message):
+    print message
+    
 if __name__ == "__main__":
     from prymatex.support.manager import PMXSupportPythonManager
     manager = PMXSupportPythonManager()
     manager.addNamespace('prymatex', os.path.abspath('../prymatex/share'))
     manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
-    manager.loadSupport()
+    manager.loadSupport(loadCallback)
     test_syntax(manager)

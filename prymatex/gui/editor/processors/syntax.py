@@ -6,9 +6,6 @@ from copy import copy
 from PyQt4 import QtCore, QtGui
 from prymatex.support import PMXSyntaxProcessor, PMXSyntax, PMXPreferenceSettings
 
-from logging import getLogger
-logger = getLogger(__file__)
-
 WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 def whiteSpace(text):
     match = WHITESPACE.match(text)
@@ -66,23 +63,23 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.cache = (stack, scopes)
 
 class PMXProcessor(PMXSyntaxProcessor):
-    def __init__(self):
-        self.lines = []
-        
     #START
-    def startParsing(self, scope, stack):
+    def startParsing(self, scope):
+        self.lines = []
         self.setScopes([ scope ])
     
-    #NEW LINE
-    def newLine(self, line, stack):
+    #BEGIN NEW LINE
+    def beginLine(self, line, stack):
         self.line = line
         self.lineIndex = 0
-        #Save current stack
-        if self.lines:
-            self.lines[-1][1] = (copy(stack), copy(self.scopes))
-        #Build new line (scopes, cache)
         self.lines.append([[], None])
         
+    def endLine(self, line, stack):
+        self.addToken(len(self.line) + 1)
+        if len(stack) != 1:
+            #Save the stack and scopes
+            self.lines[-1][1] = (copy(stack), copy(self.scopes)) 
+
     #OPEN
     def openTag(self, scope, position):
         self.addToken(position)
@@ -94,16 +91,15 @@ class PMXProcessor(PMXSyntaxProcessor):
         self.scopes.pop()
     
     #END
-    def endParsing(self, scope, stack):
-        self.addToken(len(self.line))
-        self.lines[-1][1] = (copy(stack), copy(self.scopes))
+    def endParsing(self, scope):
+        pass
     
     def setScopes(self, scopes):
         self.scopes = scopes
         
     def addToken(self, end):
         begin = self.lineIndex
-        # Solo si no estoy descartando lineas y tengo realmente algo que agregar
+        # Solo tengo realmente algo que agregar
         if begin != end:
             scopes = " ".join(self.scopes)
             self.lines[-1][0][begin:end] = [scopes for _ in xrange(end - begin)]

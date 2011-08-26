@@ -241,17 +241,17 @@ class PMXSyntax(PMXBundleItem):
         return self._grammar
         
     def parse(self, string, processor = None):
-        stack = [[self.grammar, None]]
         if processor:
-            processor.startParsing(self.scopeName, stack)
+            processor.startParsing(self.scopeName)
+        stack = [[self.grammar, None]]
         for line in SPLITLINES.split(string):
             self.parseLine(stack, line, processor)
         if processor:
-            processor.endParsing(self.scopeName, stack)
+            processor.endParsing(self.scopeName)
     
     def parseLine(self, stack, line, processor):
         if processor:
-            processor.newLine(line, stack)
+            processor.beginLine(line, stack)
         top, match = stack[-1]
         position = 0
         grammar = self.grammar
@@ -304,6 +304,8 @@ class PMXSyntax(PMXBundleItem):
                     if pattern.name and processor:
                         processor.closeTag(pattern.name, end_pos)
             position = end_pos
+        if processor:
+            processor.endLine(line, stack)
         return position
     
     def folding(self, line):

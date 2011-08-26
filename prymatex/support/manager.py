@@ -105,34 +105,42 @@ class PMXSupportBaseManager(object):
     # LOAD ALL SUPPORT
     #---------------------------------------------------
     def loadSupport(self, callback = None):
+        def passCallback(message):
+            pass
+        callback = callback or passCallback
         for ns in self.nsorder[::-1]:
-            self.loadThemes(ns)
-            self.loadBundles(ns)
+            callback("Loading themes in %s namespace" % ns)
+            self.loadThemes(ns, callback)
+            callback("Loading bundles in %s namespace" % ns)
+            self.loadBundles(ns, callback)
+        callback("Populate bundles")
         for bundle in self.getAllBundles():
-            self.populateBundle(bundle)
+            self.populateBundle(bundle, callback)
 
     #---------------------------------------------------
     # LOAD THEMES
     #---------------------------------------------------
-    def loadThemes(self, namespace):
+    def loadThemes(self, namespace, callback):
         if 'Themes' in self.namespaces[namespace]:
             paths = glob(join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
+                callback("%s: %s" % (namespace, path))
                 PMXTheme.loadTheme(path, namespace, self)
 
     #---------------------------------------------------
     # LOAD BUNDLES
     #---------------------------------------------------
-    def loadBundles(self, namespace):
+    def loadBundles(self, namespace, callback):
         if 'Bundles' in self.namespaces[namespace]:
             paths = glob(join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for path in paths:
+                callback("%s: %s" % (namespace, path))
                 PMXBundle.loadBundle(path, namespace, self)
 
     #---------------------------------------------------
     # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     #---------------------------------------------------
-    def populateBundle(self, bundle):
+    def populateBundle(self, bundle, callback):
         nss = bundle.namespaces[::-1]
         for namespace in nss:
             bpath = join(self.namespaces[namespace]['Bundles'], basename(bundle.path))
@@ -142,6 +150,7 @@ class PMXSupportBaseManager(object):
             for klass in BUNDLEITEM_CLASSES:
                 files = reduce(lambda x, y: x + glob(y), [ join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
                 for path in files:
+                    callback("%s: %s" % (namespace, path))
                     klass.loadBundleItem(path, namespace, bundle, self)
 
     #---------------------------------------------------
