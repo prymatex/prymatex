@@ -7,7 +7,6 @@ def nop(self, *args):
 ######################### SyntaxProcessor #########################
 
 PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
-    "__init__": nop,
     "startParsing": nop,
     "endParsing": nop,
     "openTag": nop,
@@ -17,7 +16,6 @@ PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
 
 ######################### Command Processor #########################
 PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
-    "__init__": nop,
     "startCommand": nop,
     "endCommand": nop,
     # beforeRunningCommand
@@ -42,7 +40,6 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
 
 ######################### Snipper Processor #########################
 PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
-    "__init__": nop,
     "startSnippet": nop,
     "endSnippet": nop,
     # transformations
@@ -60,7 +57,6 @@ PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
 
 ######################### Macro Processor #########################
 PMXMacroProcessor = type("PMXMacroProcessor", (object, ), {
-    "__init__": nop,
     "startMacro": nop,
     "endMacro": nop,
     # Move

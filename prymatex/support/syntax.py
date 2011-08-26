@@ -241,18 +241,17 @@ class PMXSyntax(PMXBundleItem):
         return self._grammar
         
     def parse(self, string, processor = None):
-        if processor:
-            processor.startParsing(self.scopeName)
         stack = [[self.grammar, None]]
+        if processor:
+            processor.startParsing(self.scopeName, stack)
         for line in SPLITLINES.split(string):
             self.parseLine(stack, line, processor)
         if processor:
-            processor.endParsing(self.scopeName)
-        return stack
+            processor.endParsing(self.scopeName, stack)
     
     def parseLine(self, stack, line, processor):
         if processor:
-            processor.newLine(line)
+            processor.newLine(line, stack)
         top, match = stack[-1]
         position = 0
         grammar = self.grammar

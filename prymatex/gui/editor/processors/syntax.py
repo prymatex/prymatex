@@ -26,9 +26,9 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     INDENT_NEXTLINE = PMXPreferenceSettings.INDENT_NEXTLINE
     UNINDENT = PMXPreferenceSettings.UNINDENT
     
-    def __init__(self):
+    def __init__(self, scopes = []):
         QtGui.QTextBlockUserData.__init__(self)
-        self.scopes = []
+        self.scopes = scopes
         self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
         self.folded = False
@@ -42,14 +42,14 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def getLastScope(self):
         return self.scopes[-1]
     
-    def addScope(self, begin, end, scope):
-        self.scopes[begin:end] = [scope for _ in xrange(end - begin)]
+    def setScopes(self, scopes):
+        self.scopes = scopes
         
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
     
     def getAllScopes(self, start = 0, end = None):
-        current = ( self.scopes[start], start )
+        current = ( self.scopes[start], start ) if start < len(self.scopes) else ("", 0)
         scopes = []
         for index, scope in enumerate(self.scopes[start:], start):
             if scope != current[0] or (end != None and index == end):
@@ -64,8 +64,53 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     
     def setStackAndScopes(self, stack, scopes):
         self.cache = (stack, scopes)
+
+class PMXProcessor(PMXSyntaxProcessor):
+    def __init__(self):
+        self.lines = []
+        
+    #START
+    def startParsing(self, scope, stack):
+        self.setScopes([ scope ])
     
-class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
+    #NEW LINE
+    def newLine(self, line, stack):
+        self.line = line
+        self.lineIndex = 0
+        #Save current stack
+        if self.lines:
+            self.lines[-1][1] = (copy(stack), copy(self.scopes))
+        #Build new line (scopes, cache)
+        self.lines.append([[], None])
+        
+    #OPEN
+    def openTag(self, scope, position):
+        self.addToken(position)
+        self.scopes.append(scope)
+
+    #CLOSE
+    def closeTag(self, scope, position):
+        self.addToken(position)
+        self.scopes.pop()
+    
+    #END
+    def endParsing(self, scope, stack):
+        self.addToken(len(self.line))
+        self.lines[-1][1] = (copy(stack), copy(self.scopes))
+    
+    def setScopes(self, scopes):
+        self.scopes = scopes
+        
+    def addToken(self, end):
+        begin = self.lineIndex
+        # Solo si no estoy descartando lineas y tengo realmente algo que agregar
+        if begin != end:
+            scopes = " ".join(self.scopes)
+            self.lines[-1][0][begin:end] = [scopes for _ in xrange(end - begin)]
+        self.lineIndex = end
+        
+class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
+    NO_STATE = -1
     SINGLE_LINE = 0
     MULTI_LINE = 1
     FORMAT_CACHE = {}
@@ -73,6 +118,7 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
     def __init__(self, editor):
         QtGui.QSyntaxHighlighter.__init__(self, editor.document())
         self.editor = editor
+        self.processor = PMXProcessor()
         self.__syntax = None
         self.__formatter = None
 
@@ -82,8 +128,9 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
     
     @syntax.setter
     def syntax(self, syntax):
-        self.__syntax =  syntax
+        self.__syntax = syntax
         self.rehighlight()
+        #self.editor.pmxApp.executor.submit(self._analyze_all_text, self.editor)
 
     @property
     def formatter(self):
@@ -97,91 +144,58 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
         PMXSyntaxProcessor.FORMAT_CACHE = {}
         self.rehighlight()
 
-    def _rehighlight(self, editor):
+    def _analyze_all_text(self, editor):
+        self.syntax.parse(editor.toPlainText(), self.processor)
         block = editor.document().firstBlock()
-        state = self.SINGLE_LINE
-        while block.isValid():
-            self.block_number = block.blockNumber()
-            self.userData = block.userData()
-            if self.userData == None:
-                self.userData = PMXBlockUserData()
-                block.setUserData(self.userData)
-            
-            text = block.text()
-            if state == self.MULTI_LINE:
-                #Recupero una copia del stack y los scopes del user data
-                stack, self.scopes = block.previous().userData().getStackAndScopes()
-            else:
-                #Creo un stack y scopes nuevos 
-                stack = [[self.syntax.grammar, None]]
-                self.scopes = [ self.syntax.scopeName ]
-            # A parserar mi amor, vamos a parsear mi amor
-            self.syntax.parseLine(stack, text, self)
-            
-            #End Parsing
-            self.addToken(block.length())
-            if self.scopes[-1] == self.syntax.scopeName:
-                state == self.SINGLE_LINE
-            else:
-                state == self.MULTI_LINE
-                self.userData.setStackAndScopes(stack, self.scopes)
-            block.setUserState(state)
 
-            line = unicode(block.text())
-            self.foldingMarker(line)
-            self.indentMarker(line, self.scopes[-1])
-            block = block.next()
-        print editor.document().allFormats()
-
-    def rehighlight(self):
-        self.editor.pmxApp.executor.submit(self._rehighlight, self.editor)
-        #QtGui.QSyntaxHighlighter.rehighlight(self)
-        
     def highlightBlock(self, text):
         #Start Parsing
-        self.block_number = self.currentBlock().blockNumber()
-        self.userData = self.currentBlock().userData()
-        if self.userData == None:
-            self.userData = PMXBlockUserData()
-            self.setCurrentBlockUserData(self.userData)
+        block_number = self.currentBlock().blockNumber()
+        userData = self.currentBlock().userData()
+        if userData == None:
+            if self.previousBlockState() == self.MULTI_LINE:
+                #Recupero una copia del stack y los scopes del user data
+                stack, scopes = self.currentBlock().previous().userData().getStackAndScopes()
+            else:
+                #Creo un stack y scopes nuevos
+                stack = [[self.syntax.grammar, None]]
+                scopes = [ self.syntax.scopeName ]
+                
+            self.processor.setScopes(scopes)
+            # A parserar mi amor, vamos a parsear mi amor
+            self.syntax.parseLine(stack, text, self.processor)
+            
+            #Meter hasta el enter
+            self.processor.addToken(self.currentBlock().length())
+
+            scopes, cache = self.processor.lines[-1]
+            print scopes
+            userData = PMXBlockUserData(scopes)
+            userData.setStackAndScopes(stack, self.processor.scopes)
         
-        text = unicode(text)
-        if self.previousBlockState() == self.MULTI_LINE:
-            #Recupero una copia del stack y los scopes del user data
-            stack, self.scopes = self.currentBlock().previous().userData().getStackAndScopes()
-        else:
-            #Creo un stack y scopes nuevos 
-            stack = [[self.syntax.grammar, None]]
-            self.scopes = [ self.syntax.scopeName ]
-        # A parserar mi amor, vamos a parsear mi amor
-        self.syntax.parseLine(stack, text, self)
+        #Folding
+        userData.foldingMark = self.syntax.folding(text)
+        self.editor.folding.deprecateFolding(block_number)
         
-        #End Parsing
-        self.addToken(self.currentBlock().length())
-        if self.scopes[-1] == self.syntax.scopeName:
+        #Indent
+        settings = self.editor.getPreference(self.syntax.scopeName)
+        userData.indentMark = settings.indent(text)
+        userData.indent = whiteSpace(text)
+        self.setCurrentBlockUserData(userData)
+        
+        #Formatear
+        for scope, start, end in userData.getAllScopes():
+            format = self.getFormat(scopes)
+            if format is not None:
+                self.setFormat(start, end - start, format)
+        '''
+        if userData. == self.syntax.scopeName:
             self.setCurrentBlockState(self.SINGLE_LINE)
         else:
             self.setCurrentBlockState(self.MULTI_LINE)
             self.userData.setStackAndScopes(stack, self.scopes)
-            
-        line = unicode(self.currentBlock().text())
-        self.foldingMarker(line)
-        self.indentMarker(line, self.scopes[-1])
-
-    def addToken(self, end):
-        begin = self.line_position
-        # Solo si no estoy descartando lineas y tengo realmente algo que agregar
-        if begin != end:
-            scopes = " ".join(self.scopes)
-            self.userData.addScope(begin, end, scopes)
-            format = self.getFormat(scopes)
-            if format is not None:
-                self.setFormat(begin, end - begin, format)
-            #preferences = self.editor.getPreference(scopes)
-            #if preferences is not None:
-            #    pass
-        self.line_position = end
-    
+        '''
+        
     def getFormat(self, scope):
         if self.formatter == None: return None
         if scope not in PMXSyntaxProcessor.FORMAT_CACHE:
@@ -200,32 +214,4 @@ class PMXSyntaxProcessor(QtGui.QSyntaxHighlighter, PMXSyntaxProcessor):
                     format.setFontItalic(True)
             PMXSyntaxProcessor.FORMAT_CACHE[scope] = format 
         return PMXSyntaxProcessor.FORMAT_CACHE[scope]
-    
-    #===============================================================================
-    # PMXSyntaxProcessor interface
-    #===============================================================================
-    #NEW LINE
-    def newLine(self, line):
-        self.line_position = 0
-
-    #OPEN
-    def openTag(self, scope, position):
-        self.addToken(position)
-        self.scopes.append(scope)
-
-    #CLOSE
-    def closeTag(self, scope, position):
-        self.addToken(position)
-        self.scopes.pop()
         
-    #===============================================================================
-    # Extra data for user data
-    #===============================================================================
-    def foldingMarker(self, line):
-        self.userData.foldingMark = self.syntax.folding(line)
-        self.editor.folding.deprecateFolding(self.block_number)
-
-    def indentMarker(self, line, scope):
-        settings = self.editor.getPreference(scope)
-        self.userData.indentMark = settings.indent(line)
-        self.userData.indent = whiteSpace(line)

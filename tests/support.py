@@ -18,13 +18,15 @@ def test_snippet(manager):
 def test_syntax(manager):
     from prymatex.support.syntax import PMXSyntax
     from time import time
-    from prymatex.support.processor import PMXSyntaxProcessor, PMXDebugSyntaxProcessor
+    from prymatex.gui.editor.processors.syntax import PMXProcessor
     syntax = manager.getSyntaxByScopeName('source.python')
     print syntax.scopeName
-    file = open('../prymatex/gui/editor/codeedit.py', 'r');
+    file = open(os.path.abspath('prymatex/gui/editor/codeedit.py'), 'r')
     start = time()
-    syntax.parse(file.read(), PMXDebugSyntaxProcessor())
+    processor = PMXProcessor()
+    syntax.parse(file.read(), processor)
     file.close()
+    print processor.lines
     print "Time:", time() - start
 
 def test_creationAndDeleteBundle(manager):
@@ -59,9 +61,9 @@ def test_themes(manager):
     manager.updateTheme(theme, name = "Cacho")
         
 if __name__ == "__main__":
-    from prymatex.support.manager import PMXSupportManager
-    manager = PMXSupportManager()
+    from prymatex.support.manager import PMXSupportPythonManager
+    manager = PMXSupportPythonManager()
     manager.addNamespace('prymatex', os.path.abspath('../prymatex/share'))
     manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     manager.loadSupport()
-    test_template(manager)
+    test_syntax(manager)

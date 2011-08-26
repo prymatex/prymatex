@@ -272,18 +272,15 @@ class PMXFoldingHelper(object):
         nest = reduce(lambda x, y: x + y, self.folding, 0)
         while block.isValid():
             userData = block.userData()
-            if userData is None:
+            mark = userData.foldingMark
+            if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
+                self.folding.append(mark)
+                nest += mark
+            elif mark == self.FOLDING_STOP:
                 self.folding.append(self.FOLDING_NONE)
-            else:
-                mark = userData.foldingMark
-                if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
-                    self.folding.append(mark)
-                    nest += mark
-                elif mark == self.FOLDING_STOP:
-                    self.folding.append(self.FOLDING_NONE)
-                if block >= lastBlock and nest <= 0:
-                    break
-                block = block.next()
+            if block >= lastBlock and nest <= 0:
+                break
+            block = block.next()
 
     def deprecateFolding(self, index):
         self.folding = self.folding[:index]

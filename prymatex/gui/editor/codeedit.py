@@ -11,7 +11,7 @@ from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
-from prymatex.gui.editor.processors import PMXSyntaxProcessor, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
+from prymatex.gui.editor.processors import PMXSyntaxHighlighter, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 
 # Key press debugging 
@@ -121,7 +121,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.sidebar = PMXSidebar(self)
         
         #Processors
-        self.syntaxProcessor = PMXSyntaxProcessor(self)
+        self.syntaxProcessor = PMXSyntaxHighlighter(self)
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
         self.snippetProcessor = PMXSnippetProcessor(self)
