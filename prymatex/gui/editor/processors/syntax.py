@@ -31,6 +31,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.folded = False
         self.indentMark = self.INDENT_NONE
         self.indent = ""
+        self.textHash = None
         self.cache = None
 
     def __nonzero__(self):
@@ -47,13 +48,13 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     
     def getAllScopes(self, start = 0, end = None):
         current = ( self.scopes[start], start ) if start < len(self.scopes) else ("", 0)
+        end = end or len(self.scopes)
         scopes = []
         for index, scope in enumerate(self.scopes[start:], start):
-            if scope != current[0] or (end != None and index == end):
+            if scope != current[0]:
                 scopes.append(( current[0], current[1], index ))
                 current = ( scope, index )
-                if end != None and index == end:
-                    break
+        scopes.append(( current[0], current[1], end ))
         return scopes
     
     def getStackAndScopes(self):
@@ -112,11 +113,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     FORMAT_CACHE = {}
     
     def __init__(self, editor):
-        QtGui.QSyntaxHighlighter.__init__(self, editor.document())
         self.editor = editor
         self.processor = PMXProcessor()
         self.__syntax = None
         self.__formatter = None
+        self.future = None
+        super(PMXSyntaxHighlighter, self).__init__(self.editor.document())
 
     @property
     def syntax(self):
@@ -125,9 +127,10 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     @syntax.setter
     def syntax(self, syntax):
         self.__syntax = syntax
-        self.rehighlight()
-        #self.editor.pmxApp.executor.submit(self._analyze_all_text, self.editor)
-
+        self.editor.document().blockSignals(True)
+        self.future = self.editor.pmxApp.executor.submit(self._analyze_all_text, self.editor.toPlainText())
+        self.future.add_done_callback(self._on_analyze_ready)
+        
     @property
     def formatter(self):
         return self.__formatter
@@ -138,59 +141,75 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         #Deprecate format cache
         self.__formatter.clearCache()
         PMXSyntaxProcessor.FORMAT_CACHE = {}
+        if self.future == None or not self.future.running():
+            self.rehighlight()
+    
+    def _on_analyze_ready(self, future):
+        self.editor.document().blockSignals(False)
         self.rehighlight()
-
-    def _analyze_all_text(self, editor):
-        self.syntax.parse(editor.toPlainText(), self.processor)
-        block = editor.document().firstBlock()
-
-    def highlightBlock(self, text):
-        #Start Parsing
-        block_number = self.currentBlock().blockNumber()
-        userData = self.currentBlock().userData()
-        if userData == None:
-            if self.previousBlockState() == self.MULTI_LINE:
-                #Recupero una copia del stack y los scopes del user data
-                stack, scopes = self.currentBlock().previous().userData().getStackAndScopes()
-            else:
-                #Creo un stack y scopes nuevos
-                stack = [[self.syntax.grammar, None]]
-                scopes = [ self.syntax.scopeName ]
-                
-            self.processor.setScopes(scopes)
-            # A parserar mi amor, vamos a parsear mi amor
-            self.syntax.parseLine(stack, text, self.processor)
-            
-            #Meter hasta el enter
-            self.processor.addToken(self.currentBlock().length())
-
-            scopes, cache = self.processor.lines[-1]
-            print scopes
-            userData = PMXBlockUserData(scopes)
-            userData.setStackAndScopes(stack, self.processor.scopes)
         
+    def _analyze_all_text(self, text):
+        self.syntax.parse(text, self.processor)
+        for index, data in enumerate(self.processor.lines):
+            block = self.editor.document().findBlockByNumber(index)
+            userData, state = self.buildBlockUserData(block, data)
+            block.setUserData(userData)
+            block.setUserState(state)
+    
+    def applyFormat(self, userData):
+        #Formatear
+        for scope, start, end in userData.getAllScopes():
+            format = self.getFormat(scope)
+            if format is not None:
+                self.setFormat(start, end - start, format)
+    
+    def buildBlockUserData(self, block, data):
+        userData = block.userData()
+        state = self.SINGLE_LINE
+        if userData is None:
+            userData = PMXBlockUserData(data[0])
+        else:
+            userData.setScopes(data[0])
+        if data[1] is not None:
+            state = self.MULTI_LINE
+            userData.setStackAndScopes(*data[1])
+        
+        text = block.text()
         #Folding
         userData.foldingMark = self.syntax.folding(text)
-        self.editor.folding.deprecateFolding(block_number)
+        userData.textHash = hash(text)
         
         #Indent
         settings = self.editor.getPreference(self.syntax.scopeName)
         userData.indentMark = settings.indent(text)
         userData.indent = whiteSpace(text)
-        self.setCurrentBlockUserData(userData)
+        return userData, state
         
-        #Formatear
-        for scope, start, end in userData.getAllScopes():
-            format = self.getFormat(scopes)
-            if format is not None:
-                self.setFormat(start, end - start, format)
-        '''
-        if userData. == self.syntax.scopeName:
-            self.setCurrentBlockState(self.SINGLE_LINE)
+    def highlightBlock(self, text):
+        #Start Parsing
+        block_number = self.currentBlock().blockNumber()
+        userData = self.currentBlock().userData()
+        
+        if userData != None and userData.textHash == hash(text):
+            self.applyFormat(userData)
         else:
-            self.setCurrentBlockState(self.MULTI_LINE)
-            self.userData.setStackAndScopes(stack, self.scopes)
-        '''
+            self.processor.startParsing(self.syntax.scopeName)
+            if self.previousBlockState() == self.MULTI_LINE:
+                #Recupero una copia del stack y los scopes del user data
+                stack, scopes = self.currentBlock().previous().userData().getStackAndScopes()
+                self.processor.setScopes(scopes)
+            else:
+                #Creo un stack y scopes nuevos
+                stack = [[self.syntax.grammar, None]]
+    
+            # A parserar mi amor, vamos a parsear mi amor
+            self.syntax.parseLine(stack, text, self.processor)
+            
+            data = self.processor.lines[-1]
+            userData, state = self.buildBlockUserData(self.currentBlock(), data)
+            self.setCurrentBlockUserData(userData)
+            self.setCurrentBlockState(state)
+            self.applyFormat(userData)
         
     def getFormat(self, scope):
         if self.formatter == None: return None

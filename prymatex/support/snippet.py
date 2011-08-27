@@ -19,8 +19,6 @@ from prymatex.support.syntax import PMXSyntax
 from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
 
-logger = logging.getLogger(__name__)
-
 SNIPPET_SYNTAX = { 
  'patterns': [{'captures': {'1': {'name': 'keyword.escape.snippet'}},
                'match': '\\\\(\\\\|\\$|`)',
@@ -103,14 +101,11 @@ class Node(object):
         self.scope = scope
 
     def open(self, scope, text):
-        logger.debug("%s open %s %s" % (self.__class__.__name__, scope, text))
         return self
 
     def close(self, scope, text):
         if scope == self.scope:
             return self.parent
-        else:
-            logger.debug("%s close %s %s" % (self.__class__.__name__, scope, text))
         return self
     
     def reset(self):
@@ -179,8 +174,6 @@ class NodeList(list):
             self.append(text)
             node = Shell(scope, self)
             self.append(node)
-        else:
-            logger.debug("%s open %s %s" % (self.__class__.__name__, scope, text))
         return node
 
     def close(self, scope, text):
@@ -190,7 +183,6 @@ class NodeList(list):
             self.append(text)
         else:
             self.append(text)
-            logger.debug("%s close %s %s" % (self.__class__.__name__, scope, text))
         return self
     
     def reset(self):
@@ -602,7 +594,7 @@ class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
                 self.taborder[self.node.index] = self.node.taborder(container)
         self.index = end
 
-    def newLine(self, line):
+    def beginLine(self, line, stack):
         if self.current != None:
             if self.index != len(self.current):
                 self.node.append(self.current[self.index:len(self.current)])

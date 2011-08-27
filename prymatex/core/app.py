@@ -9,6 +9,7 @@ import prymatex
 from prymatex import resources_rc
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
+from prymatex.utils.coroutines import Scheduler
 
 from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
 
@@ -54,7 +55,9 @@ class PMXApplication(QtGui.QApplication):
         QtGui.QApplication.__init__(self, [])
         
         self.settings = PMXSettings.getSettingsForProfile(options.profile)
+        
         self.executor = futures.ThreadPoolExecutor(max_workers=5)
+        #self.executor = Scheduler()
         
         # Some init's
         self._setup_logging()

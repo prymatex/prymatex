@@ -34,14 +34,15 @@ def test_syntax(manager):
     from pprint import pprint
     syntax = manager.getSyntaxByScopeName('source.python')
     print syntax.scopeName
-    #file = open(os.path.abspath('prymatex/gui/editor/codeedit.py'), 'r')
+    file = open(os.path.abspath('../prymatex/gui/editor/codeedit.py'), 'r')
     start = time()
     processor = PMXProcessor()
-    syntax.parse(text, processor)
-    #syntax.parse(file.read(), processor)
-    #file.close()
+    #syntax.parse(text, processor)
+    syntax.parse(file.read(), processor)
+    file.close()
+    tiempo = time() - start
     pprint(processor.lines)
-    print "Time:", time() - start
+    print "Tiempo: ", tiempo
 
 def test_creationAndDeleteBundle(manager):
     bundle = manager.createBundle('Diego')
