@@ -175,9 +175,8 @@ class PMXSplitTabWidget(QtGui.QSplitter):
 
         idx = ch.addTab(w, text)
 
-        # If the tab has been added to the current tab widget then make it the
-        # current tab.
-        if ch is not self._current_tab_w:
+        # If the tab has been added to the current tab widget then make it the current tab.
+        if ch is self._current_tab_w:
             self._set_current_tab(ch, idx)
             ch.tabBar().setFocus()
     

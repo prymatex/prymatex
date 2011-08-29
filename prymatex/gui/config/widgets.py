@@ -66,10 +66,11 @@ class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
     def __init__(self, parent = None):
         super(PMXGeneralWidget, self).__init__(parent)
         self.setupUi(self)
-        from prymatex.gui.tabwidget import PMXTabWidget
-        self.comboTabVisibility.addItem("Always shown", PMXTabWidget.TABBAR_ALWAYS_SHOWN)
-        self.comboTabVisibility.addItem("Show when more than one", PMXTabWidget.TABBAR_WHEN_MULTIPLE)
-        self.comboTabVisibility.addItem("Never show", PMXTabWidget.TABBAR_NEVER_SHOWN)
+
+        
+        #self.comboTabVisibility.addItem("Always shown", PMXTabWidget.TABBAR_ALWAYS_SHOWN)
+        #self.comboTabVisibility.addItem("Show when more than one", PMXTabWidget.TABBAR_WHEN_MULTIPLE)
+        #self.comboTabVisibility.addItem("Never show", PMXTabWidget.TABBAR_NEVER_SHOWN)
         
         self.tabwidgetSettingsGroup = self.getSettingsGroup('TabWidget')
         self.mainwindowSettingsGroup = self.getSettingsGroup('MainWindow')

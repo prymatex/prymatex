@@ -2,155 +2,31 @@
 This module is inspired in QtCretor FileManager instance
 '''
 
-from PyQt4 import QtCore 
-from prymatex.utils.magic import magic
+import os, codecs
+from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.core.exceptions import APIUsageError, FileDoesNotExistError
-import os, codecs
-
-# TODO: Cross-platform implementation, you might not have rights to write
-MAGIC_FILE = os.path.join(os.path.dirname(os.path.abspath(magic.__file__)), 'magic.linux')
-
-
-class PMXFile(QtCore.QObject):
-    #==========================================================================
-    # Signals
-    #==========================================================================
-    fileSaved = QtCore.pyqtSignal(str)
-    fileRenamed = QtCore.pyqtSignal(str)
-    fileSaveError = QtCore.pyqtSignal(str)
-    fileLostReference = QtCore.pyqtSignal()
-
-    _path = None
-    _references = 0
-
-    BUFFER_SIZE = 2 << 20
-
-    def __init__(self, parent, path=None):
-        assert isinstance(parent, PMXFileManager), ("PMXFile should have a "
-        "PMXFileManager instance as parent. PMXFileManager is a singleton"
-        " property on PMXApplication.fileManager")
-        super(PMXFile, self).__init__(parent)
-        self.path = path
-        self.fileLostReference.connect(parent.fileUnused)
-        self.destroyed.connect(self.fileDestroyed)
-
-    @property
-    def references(self):
-        return self._references
-
-    @references.setter
-    def references(self, value):
-        assert type(value) in (int, )
-        self._references = value
-        if self._references == 0:
-            self.fileLostReference.emit()
-
-    def suggestedFileName(self, editor_suffix=None):
-        title = unicode(self.trUtf8("Untitled file %d"))
-        return  title % self.parent().empty_file_counter
-
-    @property
-    def mtime(self):
-        ''' File mtime '''
-        if not self.path:
-            return None
-        raise NotImplementedError("")
-
-    @property
-    def path(self):
-        return self._path
-
-    @path.setter
-    def path(self, value):
-        if value is None:
-            if self._path:
-                raise APIUsageError("Can't change file path from %s to %s" %
-                (self._path, value))
-            self._path = value
-        else:
-            abs_path = os.path.abspath(unicode(value))
-            self._path = abs_path
-            self.fileRenamed.emit(abs_path)
-
-    @property
-    def filename(self):
-        if not self.path:
-            return self.suggestedFileName()
-        return os.path.basename(self.path)
-
-    @property
-    def directory(self):
-        return self.path.dirname(self.path)
-
-    # Taken from Qt creator, it should disable some modification signals
-    @property
-    def expect_file_changes(self):
-        return self._expect_file_changes
-
-    @expect_file_changes.setter
-    def expect_file_changes(self, value):
-        self._expect_file_changes = True
-
-    def write(self, buffer):
-        try:
-            #f = open(self.path, 'w')
-            f = codecs.open(self.path, 'w', 'utf-8')
-        except IOError, e:
-            self.fileSaveError(str(e))
-        f.write(buffer)
-        f.close()
-        self.fileSaved.emit(self.path)
-
-    def read(self):
-        if not self.path:
-            return None
-        f = codecs.open(self.path, 'r', 'utf-8')
-        data = f.read()
-        f.close()
-        return data
-    
-    def fileDestroyed(self):
-        print "%s is being destoyed"
-
-    def __str__(self):
-        return "<PMXFile on %s>" % self.path or "no path yet"
-
-    __unicode__ = __repr__ = __str__
-    
 
 class PMXFileManager(PMXObject):
-    ''' A File Manager singleton
+    ''' A File Manager
     '''
-    fileOpened = QtCore.pyqtSignal(PMXFile)
-
+    fileOpened = QtCore.pyqtSignal()
+    fileHistoryChanged = QtCore.pyqtSignal()
+    
     class Meta:
         settings = 'filemanager'
 
-    file_history = pmxConfigPorperty(default=[])
+    fileHistory = pmxConfigPorperty(default=[])
+    fileHistoryLength = pmxConfigPorperty(default=10)
 
     def __init__(self, parent):
         super(PMXFileManager, self).__init__(parent)
 
-        self.magic = magic.Magic(MAGIC_FILE, os.path.join(self.pmxApp.settings.PMX_TMP_PATH, 'magic.cache'))
         self.opened_files = {}
         self.empty_file_counter = 0
-
-    def isOpened(self, filepath):
-        filepath = os.path.abspath(filepath)
-        if filepath in self.opened_files:
-            return True
-        return False
-
-
-    def getEmptyFile(self):
-        ''' Returns a QFile '''
-        pmx_file =  PMXFile(self)
-        self.empty_file_counter += 1
-        pmx_file.references = 1
-        return pmx_file
-
+        self.iconProvider = QtGui.QFileIconProvider()
+        self.configure()
 
     def fileUnused(self):
         ''' Signal receiver for '''
@@ -160,8 +36,7 @@ class PMXFileManager(PMXObject):
             pmx_file = self.opened_files.pop(pmx_file.path)
             del pmx_file
 
-
-    def openFile(self, filepath):
+    def openFile(self, file):
         '''
         PMXFile factory
         @raise FileDoesNotExistError: If provided path does not exists
@@ -177,13 +52,31 @@ class PMXFileManager(PMXObject):
         pmx_file.references += 1
         self.opened_files[filepath] = pmx_file
         self.fileOpened.emit(pmx_file)
-
         return pmx_file
 
     @property
     def currentDirectory(self):
         #TODO: el ultimo directorio o algo de eso :)
         return os.path.expanduser("~") 
-    
-    def recentFiles(self):
-        return []
+
+    def getEmptyFile(self):
+        ''' Returns a QFile '''
+        path = os.path.join(self.currentDirectory, "untitled %d" % self.empty_file_counter)
+        self.empty_file_counter += 1
+        return QtCore.QFile(path)
+        
+    def getOpenFiles(self):
+        names = QtGui.QFileDialog.getOpenFileNames(None, "Open Files", self.currentDirectory)
+        files = map(lambda name: QtCore.QFile(name), names)
+        names.reverse()
+        self.fileHistory = names + self.fileHistory
+        if len(self.fileHistory) > self.fileHistoryLength:
+            self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
+        self.fileHistoryChanged.emit()
+        return files
+
+    def getFileIcon(self, file):
+        info = QtCore.QFileInfo(file.path)
+        if info.exists():
+            return self.iconProvider.icon(info)
+        return self.iconProvider.icon(QtGui.QFileIconProvider.File)

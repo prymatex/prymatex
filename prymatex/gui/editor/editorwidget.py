@@ -2,7 +2,7 @@
 '''
 Code Editor Widget.
 '''
-
+from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import SIGNAL, Qt, pyqtSignal, QTimer
 from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, \
     QAction, QMenu, QKeySequence, qApp, QFocusEvent
@@ -15,7 +15,6 @@ from os.path import join
 import re
 import sys
 import traceback
-from prymatex.core.filemanager import PMXFile
 from prymatex.core.exceptions import APIUsageError
 from prymatex.ui.editorwidget import Ui_EditorWidget
 
@@ -43,7 +42,7 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     fileStatusOutOfSync = pyqtSignal(object)
     fileStatusDeleted = pyqtSignal(object)
     
-    def __init__(self, pmx_file, parent = None):
+    def __init__(self, file, parent = None):
         '''
         PMXEditorWidget instances gain Qt's parent attribute on PMXTabWidget.addTab() 
         '''
@@ -55,12 +54,17 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         self.setupFindReplaceWidget()
         self.setupGoToLineWidget()
         
-        
-        self.file = pmx_file
+        self.file = file
         
         # TODO: Asyncronous I/O
         
-        self.codeEdit.setPlainText(self.file.read() or '')
+        self.file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text)
+        text = ""
+        while not self.file.atEnd():
+            text += self.file.readData(1000)
+        self.file.close()
+        
+        self.codeEdit.setPlainText(text)
         self.destroyed.connect(self.releaseFile)
 
     def releaseFile(self):
@@ -68,21 +72,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
         
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)
-    
-    @property
-    def file(self):
-        return self._file
-    
-    @file.setter
-    def file(self, file):
-        if self._file is not None:
-            raise APIUsageError("Can't set file twice")
-        from prymatex.core.filemanager import PMXFile
-        if not isinstance(file, PMXFile):
-            raise APIUsageError("%s is not an instance of PMXFile" % file)
-        self._file = file
-        self._file.fileSaved.connect( self.fileSaved )
-        
     
     def fileSaved(self):
         self.codeEdit.document().setModified(False)
@@ -129,20 +118,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     # Factory methods
     #===========================================================================
     
-    @classmethod
-    def editorFactory(cls, pmx_file, parent = None):
-        '''
-        Factory for the editors.
-        PMXEditorWidget.registerEditor( editor )
-        @param pmx_file: A PMXFile object, you can get it from qApp.instance().file_manager
-        '''
-        #TODO: Something with the pmx_file_instance
-        from prymatex.core.filemanager import PMXFile
-        if not isinstance(pmx_file, PMXFile):
-            raise APIUsageError("%s is not a valid file" % pmx_file) 
-        editor = PMXEditorWidget(pmx_file, parent = parent)
-        return editor
-
     @classmethod
     def registerEditor(cls, editor_cls):
         '''
@@ -271,16 +246,6 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
                 return True # Can close, discard changes
         return True
 
-    def zoomIn(self):
-        if self.codeEdit.font_size < self.codeEdit.MAX_FONT_POINT_SIZE:
-            self.codeEdit.font_size += 1
-
-
-    def zoomOut(self):
-        if self.codeEdit.font_size > self.codeEdit.MIN_FONT_POINT_SIZE:
-            self.codeEdit.font_size -= 1
-            
-    
     #===========================================================================
     # File Operations
     #===========================================================================

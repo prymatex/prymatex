@@ -13,7 +13,6 @@ from prymatex.ui.mainwindow import Ui_MainWindow
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.editor.codeedit import PMXCodeEdit
-from prymatex.gui.tabwidget import PMXTabWidget, PMXTabsMenu
 from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.core.exceptions import FileDoesNotExistError
@@ -62,6 +61,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.splitTabWidget.tabWindowChanged.connect(self.setCurrentEditor)
         self.statusbar.syntaxChanged.connect(self.setEditorSyntax)
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
+        self.pmxApp.fileManager.fileHistoryChanged.connect(self._update_file_history)
         
         self.configure()
         self.center()
@@ -74,8 +74,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     #TODO: Crear un methodo para instanciar editor widgets y agregarlos a una lista de editores activos
     def addEmptyEditor(self):
         empty_file = self.pmxApp.fileManager.getEmptyFile()
-        editorWidget = PMXEditorWidget.editorFactory(empty_file, parent = self)
-        self.tabWidget.addTab(editorWidget, empty_file.filename)
+        editorWidget = PMXEditorWidget(empty_file, parent = self)
+        self.tabWidget.addTab(editorWidget, empty_file.fileName())
         self.currentEditorWidget = editorWidget
         
     def setupDockers(self):
@@ -141,7 +141,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         self.bundleItemSelector = PMXBundleItemSelector(self)
         
     def setupMenu(self):
-        #Open Recent
+        #Recent files
+        self._update_file_history()
         
         #Bundles Menu
         name_order = lambda b1, b2: cmp(b1.name, b2.name)
@@ -151,6 +152,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
                 self.menuBundles.addMenu(menu)
         #Connect
         self.pmxApp.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
+
+    def _update_file_history(self):
+        menu = self.actionOpen_Recent.menu()
+        if menu is None:
+            menu = QtGui.QMenu(self)
+            self.actionOpen_Recent.setMenu(menu)
+        for file in self.pmxApp.fileManager.fileHistory:
+            action = QtGui.QAction(file, self)
+            receiver = lambda file = QtCore.QFile(file): self.openFile(file)
+            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+            menu.addAction(action)
     #====================================================================
     # Bundle Items
     #====================================================================
@@ -223,10 +235,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         Opens one or more files
         '''
         #TODO: El directory puede ser dependiente del current editor o del file manager
-        directory = self.pmxApp.fileManager.currentDirectory 
-        files_to_open = QFileDialog.getOpenFileNames(self, _("Select Files to Open"), directory)
-        for path in files_to_open:
-            self.openFile(path, auto_focus = True)
+        files = self.pmxApp.fileManager.getOpenFiles()
+        focus = len(files) == 1
+        for file in files:
+            self.openFile(file, focus)
     
     @pyqtSignature('')
     def on_actionShow_Bundle_Editor_triggered(self):
@@ -247,33 +259,18 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
             if column:
                 editor.codeEdit.goToColumn(int(column))
             
-    def openFile(self, path, auto_focus = False):
+    def openFile(self, file, focus = False):
         '''
-        Opens a file or focus its editor
-        @see: File manager to check if a file is opened
+        Opens a file
         @return: editor widget or None if it can't make it
-        '''
-        fileManager = qApp.instance().fileManager
-        pmx_file = None
-        try:
-            pmx_file = fileManager.openFile(path)
-        except FileDoesNotExistError, e:
-            print " FileDoesNotExistError", e
-            QMessageBox.critical(self, "File not found", "%s" % e, QMessageBox.Ok)
-        except FileNotSupported, e:
-            QMessageBox.critical(self, "%s doesn't know how to handle this kind of file", "%s" % e, QMessageBox.Ok)
-        except UnicodeDecodeError, e:
-            print "UnicodeDecodeError", e
-            QMessageBox.critical(self, "Can't decode file", "%s" % e, QMessageBox.Ok)
-        except Exception, e:
-            print "Exception was", e, type(e)
         
-        if not pmx_file:
-            return
-        
-        editor = PMXEditorWidget.editorFactory(pmx_file)
-        self.tabWidget.addTab(editor, pmx_file.filename)
+        editor = PMXEditorWidget(file)
+        icon = fileManager.getFileIcon(file)
+        self.tabWidget.addTab(editor, file.fileName())
+        self.tabWidget.setActiveIcon(editor, icon)
         return editor
+        '''
+        pass
     
     @pyqtSignature('')
     def on_actionAbout_Qt_triggered(self):

@@ -116,8 +116,9 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.pushButtonCaret.pressed.connect(lambda element = 'caret': self.on_pushButtonColor_pressed(element))
         #Font
         font = self.settings.value('font')
-        self.lineFont.setFont(font)
-        self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
+        if font is not None:
+            self.lineFont.setFont(font)
+            self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
     
     @QtCore.pyqtSignature('')
     def on_pushButtonChangeFont_pressed(self):
