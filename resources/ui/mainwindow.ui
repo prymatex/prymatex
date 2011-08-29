@@ -115,16 +115,10 @@
     <addaction name="separator"/>
     <addaction name="actionFree_Editing"/>
    </widget>
-   <widget class="QMenu" name="menuTools">
+   <widget class="QMenu" name="menuPanels">
     <property name="title">
      <string>&amp;Panels</string>
     </property>
-    <addaction name="actionShow_File_System_Pane"/>
-    <addaction name="actionShow_Project_Dock"/>
-    <addaction name="actionShow_Browser_Dock"/>
-    <addaction name="actionShow_Symbol_List"/>
-    <addaction name="actionShow_Terminal_Dock"/>
-    <addaction name="actionShow_Log_Window"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -205,7 +199,7 @@
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
-   <addaction name="menuTools"/>
+   <addaction name="menuPanels"/>
    <addaction name="menuText"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
@@ -977,7 +971,7 @@
   <customwidget>
    <class>PMXSplitTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>prymatex.gui.splittabwidget</header>
+   <header>prymatex.gui.splitter</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

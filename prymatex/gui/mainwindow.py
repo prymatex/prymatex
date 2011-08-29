@@ -90,43 +90,36 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         from prymatex.gui.logwidget import QtLogHandler, LogDockWidget
         
         self.paneFileSystem = PMXFSPaneDock(self)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)    
-        self.paneFileSystem.associateAction(self.actionShow_File_System_Pane,
-                                            self.trUtf8("Show Filesystem Panel"),
-                                            self.trUtf8("Hide Filesystem Panel"))
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
+        self.menuPanels.addAction(self.paneFileSystem.toggleViewAction())
         self.paneFileSystem.hide()
         
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
+        self.menuPanels.addAction(self.paneProject.toggleViewAction())
         self.paneProject.hide()
-        self.paneProject.associateAction(self.actionShow_Project_Dock,
-                                         self.trUtf8("Show Project"),
-                                         self.trUtf8("Hide Project"))
         
         self.paneSymbolList = PMXSymboldListDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
+        self.menuPanels.addAction(self.paneSymbolList.toggleViewAction())
         self.paneSymbolList.hide()
         
         self.paneBrowser = PMXBrowserPaneDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneBrowser)
+        self.menuPanels.addAction(self.paneBrowser.toggleViewAction())
         self.paneBrowser.hide()
-        self.paneBrowser.associateAction(self.actionShow_Browser_Dock,
-                                         self.trUtf8("Show Browser"),
-                                         self.trUtf8("Hide Browser"))
         
         self.paneConsole = PMXConsoleDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneConsole)
+        self.menuPanels.addAction(self.paneConsole.toggleViewAction())
         self.paneConsole.hide()
-        self.paneConsole.associateAction(self.actionShow_Terminal_Dock,
-                                         self.trUtf8("Show Terminal"),
-                                         self.trUtf8("Hide Terminal"))
         
         #Logging Sub-Window setup
         qthandler = QtLogHandler()
         self.logger.addHandler(qthandler)
         self.paneLogging = LogDockWidget(qthandler, self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneLogging)
-        self.paneLogging.action = self.actionShow_Log_Window
+        self.menuPanels.addAction(self.paneLogging.toggleViewAction())
         self.paneLogging.hide()
     
     def setupDialogs(self):

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/paneproject.ui'
 #
-# Created: Thu Aug 18 15:21:08 2011
+# Created: Mon Aug 29 18:12:50 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,7 +55,7 @@ class Ui_ProjectPane(object):
         QtCore.QMetaObject.connectSlotsByName(ProjectPane)
 
     def retranslateUi(self, ProjectPane):
-        ProjectPane.setWindowTitle(_('Form'))
+        ProjectPane.setWindowTitle(_('Project'))
         self.buttonAdd.setToolTip(_('Add files/folders'))
         self.buttonRemove.setToolTip(_('Remove File/Folders'))
 

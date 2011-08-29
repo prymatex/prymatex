@@ -86,12 +86,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         palette.setColor(QPalette.Active, QPalette.Highlight, self.colours['selection'])
         palette.setColor(QPalette.Active, QPalette.AlternateBase, self.colours['invisibles'])
         self.setPalette(palette)
+        
         #Sidebar colours
         self.sidebar.foreground = self.colours['foreground']
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
         self.highlightCurrentLine()
-    
+        
     class Meta(object):
         settings = 'Editor'
     

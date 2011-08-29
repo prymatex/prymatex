@@ -18,12 +18,6 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
     It implements the logic needed for gui defined in ui_files/editorwidget.ui
     This logic includes Go To Line and Find action behaviour.
     '''
-    
-    COLOR_MODIFIED = QColor.fromRgb(0x81, 0x81, 0x81)
-    COLOR_NORMAL = QColor("black")
-    
-    _file = None
-    
     #===========================================================================
     # Signals
     #===========================================================================
@@ -33,12 +27,8 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
     fileStatusDeleted = QtCore.pyqtSignal(object)
     
     def __init__(self, file, parent = None):
-        '''
-        PMXEditorWidget instances gain Qt's parent attribute on PMXTabWidget.addTab()
-        '''
         super(PMXEditorWidget, self).__init__(parent)
         
-        self.setupActions()
         self.setupUi(self)
         self.setupFindReplaceWidget()
         self.setupGoToLineWidget()
@@ -114,9 +104,6 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
         '''
         raise NotImplementedError("No implemented")
 
-    def setupActions(self):
-        pass
-    
     def showFindWidget(self):
         '''
         Find start point

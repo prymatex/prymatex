@@ -127,7 +127,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     @syntax.setter
     def syntax(self, syntax):
         self.__syntax = syntax
-        self.editor.document().blockSignals(True)
         self.future = self.editor.pmxApp.executor.submit(self._analyze_all_text, self.editor.toPlainText())
         self.future.add_done_callback(self._on_analyze_ready)
         
@@ -141,11 +140,9 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         #Deprecate format cache
         self.__formatter.clearCache()
         PMXSyntaxProcessor.FORMAT_CACHE = {}
-        if self.future == None or not self.future.running():
-            self.rehighlight()
+        self.rehighlight()
     
     def _on_analyze_ready(self, future):
-        self.editor.document().blockSignals(False)
         self.rehighlight()
         
     def _analyze_all_text(self, text):
@@ -177,6 +174,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         text = block.text()
         #Folding
         userData.foldingMark = self.syntax.folding(text)
+        #Deprecar cache
         userData.textHash = hash(text)
         
         #Indent
@@ -186,8 +184,10 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         return userData, state
         
     def highlightBlock(self, text):
+        if self.future != None and self.future.running():
+            return
+        
         #Start Parsing
-        block_number = self.currentBlock().blockNumber()
         userData = self.currentBlock().userData()
         
         if userData != None and userData.textHash == hash(text):

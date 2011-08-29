@@ -4,7 +4,6 @@
 
 from PyQt4 import QtGui
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.dockers import PaneDockBase
 from prymatex.ui.panesymbols import Ui_SymbolList
 
 class SymbolListWidget(QtGui.QWidget, Ui_SymbolList):
@@ -12,7 +11,7 @@ class SymbolListWidget(QtGui.QWidget, Ui_SymbolList):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
     
-class PMXSymboldListDock(PaneDockBase):
+class PMXSymboldListDock(QtGui.QDockWidget):
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Symbol List"))

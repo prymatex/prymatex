@@ -2,12 +2,11 @@
 from PyQt4.QtGui import QDialog, QMessageBox, QToolTip
 from PyQt4.QtCore import SIGNAL, QProcess
 from prymatex.ui.filterbundleitem import Ui_FilterThroughCommand
-from prymatex.gui import PMXBaseGUIMixin
 import logging
 
 logger = logging.getLogger(__name__)
 
-class PMXFilterDialog(QDialog, Ui_FilterThroughCommand, PMXBaseGUIMixin):
+class PMXFilterDialog(QDialog, Ui_FilterThroughCommand):
     def __init__(self, parent):
         QDialog.__init__(self, parent)
         self.setupUi(self)

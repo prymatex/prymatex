@@ -15,7 +15,7 @@ DEBUG_LEVELS = ("INFO",
 
 DEBUG_LEVELS = dict([(name, getattr(logging, name)) for name in DEBUG_LEVELS ])
 
-class LogDockWidget(QDockWidget, Ui_LogWidget):
+class LogDockWidget(QtGui.QDockWidget, Ui_LogWidget):
     '''
     Logging widget
     

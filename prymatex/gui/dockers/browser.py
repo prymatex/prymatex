@@ -3,14 +3,13 @@
 import os
 import codecs
 
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant, SIGNAL
 from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
-from prymatex.gui.dockers import PaneDockBase
 from prymatex.ui.panebrowser import Ui_BrowserPane
-from prymatex.core.base import PMXObject
+from prymatex.core.base import PMXWidget, PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
@@ -126,12 +125,12 @@ class TextMate(QObject):
         return True
     isBusy = pyqtProperty("bool", isBusy)
     
-class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
+class PMXBrowserPaneDock(QtGui.QDockWidget, Ui_BrowserPane, PMXWidget):
     class Meta:
         settings = 'browser'
         
     def __init__(self, parent):
-        PaneDockBase.__init__(self, parent)
+        QtGui.QDockWidget.__init__(self, parent)
         self.setupUi(self)
         #New manager
         old_manager = self.webView.page().networkAccessManager()
@@ -139,8 +138,6 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
         self.webView.page().setNetworkAccessManager(new_manager)
         self.webView.loadFinished[bool].connect(self.prepareJavaScript)
         self.bundleItem = None
-        title = unicode(self.trUtf8("%s (press Esc to close)")) % self.windowTitle()
-        self.setWindowTitle(title)
         self.configure()
         
     def prepareJavaScript(self, ready):
@@ -152,10 +149,6 @@ class PMXBrowserPaneDock(PaneDockBase, Ui_BrowserPane, PMXObject):
     def setHtml(self, string, bundleItem):
         self.bundleItem = bundleItem
         self.webView.setHtml(string)
-    
-    def keyPressEvent(self, key_event):
-        if key_event.key() == Qt.Key_Escape:
-            self.hide()
     
     ENVIROMENT_PROXY = '__ENVIROMENT_PROXY__'
     

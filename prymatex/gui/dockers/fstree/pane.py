@@ -3,23 +3,20 @@
 import os
 import shutil
 from os.path import *
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt4 import QtGui, QtCore
 
-from prymatex.gui.dockers import PaneDockBase
-from prymatex.gui import PMXBaseGUIMixin
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
 from prymatex.ui.panefilesystem import Ui_FSPane
 from prymatex.ui.filesystemsettings import Ui_FSSettingsDialog
-from prymatex.core.base import PMXObject
+from prymatex.core.base import PMXWidget
 from prymatex.core.config import pmxConfigPorperty
 
-class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
+class FSPaneWidget(PMXWidget, Ui_FSPane):
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
     def __init__(self, parent):
-        QWidget.__init__(self, parent)
+        PMXWidget.__init__(self, parent)
         self.setObjectName('FSPaneWidget')
         self.dialogConfigFilters = PMXFSPaneConfigDialog(self)
         self.setupUi(self)
@@ -65,7 +62,7 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
         self.comboBookmarks.insertSeparator(self.comboBookmarks.model().rowCount())
         #self.comboBookmarks.addItem("Cosas")
     
-    @pyqtSignature('int')
+    @QtCore.pyqtSignature('int')
     def on_comboBookmarks_currentIndexChanged(self, index):
         if index == 0:
             self.stackedWidget.setCurrentIndex(1)
@@ -79,20 +76,20 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
             #if os.path.exists(path):
             #    self.tree.setRootIndex(self.tree.model().index(path))
     
-    @pyqtSignature('bool')
+    @QtCore.pyqtSignature('bool')
     def on_buttonSyncTabFile_toggled(self, sync):
         if sync:
             # Forzamos la sincronizacion
             editor = self.mainWindow.currentEditorWidget
             self.tree.focusWidgetPath(editor)
 
-    @pyqtSignature('')
+    @QtCore.pyqtSignature('')
     def on_buttonUp_pressed(self):
         #QMessageBox.information(self, "UP", "Up")
         #self.get
         self.tree.goUp()
     
-    @pyqtSignature('')
+    @QtCore.pyqtSignature('')
     def on_buttonCollapseAll_pressed(self):
         self.tree.collapseAll()
         #self.buttonSyncTabFile.setEnabled(False)
@@ -119,13 +116,13 @@ class FSPaneWidget(QWidget, Ui_FSPane, PMXBaseGUIMixin, PMXObject):
             self.debug("Not a directory %s" % path)
     
 
-class PMXFSPaneConfigDialog(Ui_FSSettingsDialog, QDialog):
+class PMXFSPaneConfigDialog(Ui_FSSettingsDialog, QtGui.QDialog):
     def __init__(self, parent):
-        QDialog.__init__(self, parent)
+        QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
 
-class PMXFSPaneDock(PaneDockBase):
+class PMXFSPaneDock(QtGui.QDockWidget):
     def __init__(self, parent):
-        QDockWidget.__init__(self, parent)
+        QtGui.QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("File System Panel"))
         self.setWidget(FSPaneWidget(self))

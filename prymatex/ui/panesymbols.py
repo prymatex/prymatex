@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panesymbols.ui'
 #
-# Created: Thu Aug 18 15:21:07 2011
+# Created: Mon Aug 29 18:12:50 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_SymbolList(object):
     def setupUi(self, SymbolList):
         SymbolList.setObjectName(_fromUtf8("SymbolList"))
-        SymbolList.resize(184, 364)
+        SymbolList.resize(374, 364)
         self.verticalLayout = QtGui.QVBoxLayout(SymbolList)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -54,7 +54,7 @@ class Ui_SymbolList(object):
         QtCore.QMetaObject.connectSlotsByName(SymbolList)
 
     def retranslateUi(self, SymbolList):
-        SymbolList.setWindowTitle(_('Form'))
+        SymbolList.setWindowTitle(_('Symbols'))
         self.pushButton.setText(_('X'))
         self.pushButton_2.setText(_('R'))
 

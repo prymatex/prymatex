@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panebrowser.ui'
 #
-# Created: Thu Aug 18 15:21:07 2011
+# Created: Mon Aug 29 18:12:50 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,6 +35,6 @@ class Ui_BrowserPane(object):
         QtCore.QMetaObject.connectSlotsByName(BrowserPane)
 
     def retranslateUi(self, BrowserPane):
-        BrowserPane.setWindowTitle(_('Browser Panel'))
+        BrowserPane.setWindowTitle(_('Web Browser'))
 
 from PyQt4 import QtWebKit

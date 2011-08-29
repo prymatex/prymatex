@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Thu Aug 18 20:02:45 2011
+# Created: Mon Aug 29 18:05:14 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,8 +47,8 @@ class Ui_MainWindow(object):
         self.menuText.setObjectName(_fromUtf8("menuText"))
         self.menuConvert = QtGui.QMenu(self.menuText)
         self.menuConvert.setObjectName(_fromUtf8("menuConvert"))
-        self.menuTools = QtGui.QMenu(self.menubar)
-        self.menuTools.setObjectName(_fromUtf8("menuTools"))
+        self.menuPanels = QtGui.QMenu(self.menubar)
+        self.menuPanels.setObjectName(_fromUtf8("menuPanels"))
         self.menuNavigation = QtGui.QMenu(self.menubar)
         self.menuNavigation.setObjectName(_fromUtf8("menuNavigation"))
         self.menuPanes = QtGui.QMenu(self.menuNavigation)
@@ -385,12 +385,6 @@ class Ui_MainWindow(object):
         self.menuText.addAction(self.actionRun_selection)
         self.menuText.addSeparator()
         self.menuText.addAction(self.actionFree_Editing)
-        self.menuTools.addAction(self.actionShow_File_System_Pane)
-        self.menuTools.addAction(self.actionShow_Project_Dock)
-        self.menuTools.addAction(self.actionShow_Browser_Dock)
-        self.menuTools.addAction(self.actionShow_Symbol_List)
-        self.menuTools.addAction(self.actionShow_Terminal_Dock)
-        self.menuTools.addAction(self.actionShow_Log_Window)
         self.menuNavigation.addAction(self.actionToggle_Bookmark)
         self.menuNavigation.addAction(self.actionNext_Bookmark)
         self.menuNavigation.addAction(self.actionPrevious_Bookmark)
@@ -440,7 +434,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
-        self.menubar.addAction(self.menuTools.menuAction())
+        self.menubar.addAction(self.menuPanels.menuAction())
         self.menubar.addAction(self.menuText.menuAction())
         self.menubar.addAction(self.menuNavigation.menuAction())
         self.menubar.addAction(self.menuBundles.menuAction())
@@ -458,7 +452,7 @@ class Ui_MainWindow(object):
         self.menuType_Here.setTitle(_('Type Here'))
         self.menuText.setTitle(_('&Text'))
         self.menuConvert.setTitle(_('Convert'))
-        self.menuTools.setTitle(_('&Panels'))
+        self.menuPanels.setTitle(_('&Panels'))
         self.menuNavigation.setTitle(_('&Navigation'))
         self.menuPanes.setTitle(_('Panes'))
         self.menuHelp.setTitle(_('&Help'))
@@ -607,5 +601,5 @@ class Ui_MainWindow(object):
         self.actionOpen_Recent.setText(_('Open Recent File'))
 
 from prymatex.gui.statusbar import PMXStatusBar
-from prymatex.gui.splittabwidget import PMXSplitTabWidget
+from prymatex.gui.splitter import PMXSplitTabWidget
 from prymatex import resources_rc
