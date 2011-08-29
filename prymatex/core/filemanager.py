@@ -74,7 +74,11 @@ class PMXFileManager(PMXObject):
             self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
         self.fileHistoryChanged.emit()
         return files
-
+    
+    def getSaveFile(self):
+        name = QtGui.QFileDialog.getSaveFileName(None, "Save file", "", "")
+        return QtCore.QFile(name)
+    
     def getFileIcon(self, file):
         info = QtCore.QFileInfo(file.path)
         if info.exists():

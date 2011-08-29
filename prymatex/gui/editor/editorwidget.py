@@ -2,27 +2,18 @@
 '''
 Code Editor Widget.
 '''
+import os, re, sys
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import SIGNAL, Qt, pyqtSignal, QTimer
-from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, \
-    QAction, QMenu, QKeySequence, qApp, QFocusEvent
+from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, QAction, QMenu, QKeySequence, qApp, QFocusEvent
 
-from logging import getLogger
 from prymatex.support import PMXSyntax
-import logging
-import os
+from prymatex.gui.splitter import PMXMainWidget
 from os.path import join
-import re
-import sys
-import traceback
 from prymatex.core.exceptions import APIUsageError
 from prymatex.ui.editorwidget import Ui_EditorWidget
 
-#===============================================================================
-# Icons
-#===============================================================================
-
-class PMXEditorWidget(QWidget, Ui_EditorWidget):
+class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
     '''
     It implements the logic needed for gui defined in ui_files/editorwidget.ui
     This logic includes Go To Line and Find action behaviour.
@@ -36,24 +27,22 @@ class PMXEditorWidget(QWidget, Ui_EditorWidget):
     #===========================================================================
     # Signals
     #===========================================================================
-    fileTitleUpdate = pyqtSignal()
-    fileStatusModified = pyqtSignal(object)
-    fileStatusSynced = pyqtSignal(object)
-    fileStatusOutOfSync = pyqtSignal(object)
-    fileStatusDeleted = pyqtSignal(object)
+    fileStatusModified = QtCore.pyqtSignal(object)
+    fileStatusSynced = QtCore.pyqtSignal(object)
+    fileStatusOutOfSync = QtCore.pyqtSignal(object)
+    fileStatusDeleted = QtCore.pyqtSignal(object)
     
     def __init__(self, file, parent = None):
         '''
-        PMXEditorWidget instances gain Qt's parent attribute on PMXTabWidget.addTab() 
+        PMXEditorWidget instances gain Qt's parent attribute on PMXTabWidget.addTab()
         '''
         super(PMXEditorWidget, self).__init__(parent)
         
         self.setupActions()
         self.setupUi(self)
-        
         self.setupFindReplaceWidget()
         self.setupGoToLineWidget()
-        
+
         self.file = file
         
         # TODO: Asyncronous I/O

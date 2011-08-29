@@ -14,6 +14,11 @@ import sys
 import sip
 from PyQt4 import QtCore, QtGui
 
+class PMXMainWidget(QtGui.QWidget)
+    # Signals
+    iconChanged = QtCore.pyqtSignal(QtGui.QIcon)
+    titleChanged = QtCore.pyqtSignal(str)
+    
 class PMXSplitTabWidget(QtGui.QSplitter):
     """ The PMXSplitTabWidget class is a hierarchy of QSplitters the leaves of
     which are QTabWidgets.  Any tab may be moved around with the hierarchy
