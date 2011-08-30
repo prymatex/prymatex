@@ -32,8 +32,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/back.png</normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/back.png</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/go-previous.png</normaloff>:/icons/actions/go-previous.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -55,8 +55,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/next.png</normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/next.png</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/go-next.png</normaloff>:/icons/actions/go-next.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -72,8 +72,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/reload.png</normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/reload.png</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/view-refresh.png</normaloff>:/icons/actions/view-refresh.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -92,8 +92,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/stop.png</normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/stop.png</iconset>
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -121,6 +121,8 @@
    <header>QtWebKit/QWebView</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

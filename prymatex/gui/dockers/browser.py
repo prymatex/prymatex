@@ -136,7 +136,7 @@ class PMXBrowserPaneDock(QtGui.QDockWidget, Ui_BrowserPane, PMXWidget):
             network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
         else:
             protocol = QNetworkProxy.NoProxy
-            if unicode(proxy_url.scheme()).startswith('http'):
+            if proxy_url.scheme().startswith('http'):
                 protocol = QNetworkProxy.HttpProxy
             else:
                 protocol = QNetworkProxy.Socks5Proxy
@@ -157,25 +157,25 @@ class PMXBrowserPaneDock(QtGui.QDockWidget, Ui_BrowserPane, PMXWidget):
         self.webView.page().setNetworkAccessManager(new_manager)
         
         # set the default
-		self.lineUrl.setText(self.homePage)
-		self.webView.setUrl(QtCore.QUrl(self.homePage))
+        self.lineUrl.setText(self.homePage)
+        self.webView.setUrl(QtCore.QUrl(self.homePage))
         
         # history buttons:
-		self.buttonBack.setEnabled(False)
-		self.buttonNext.setEnabled(False)
+        self.buttonBack.setEnabled(False)
+        self.buttonNext.setEnabled(False)
         
         #Connects
         self.buttonBack.clicked.connect(self.back)
-		self.buttonNext.clicked.connect(self.next)
-		self.lineUrl.returnPressed.connect(self.url_changed)
-		self.webView.linkClicked[str].connect(self.link_clicked)
-		self.webView.urlChanged[str].connect(self.link_clicked)
-		self.webView.loadProgress[int].connect(self.load_progress)
+        self.buttonNext.clicked.connect(self.next)
+        self.lineUrl.returnPressed.connect(self.url_changed)
+        self.webView.linkClicked.connect(self.link_clicked)
+        self.webView.urlChanged.connect(self.link_clicked)
+        self.webView.loadProgress[int].connect(self.load_progress)
         self.webView.loadFinished[bool].connect(self.prepare_JavaScript)
-		self.webView.titleChanged[str].connect(self.title_changed)
-		self.buttonReload.clicked.connect(self.reload_page)
-		self.buttonStop.clicked.connect(self.stop_page)
-
+        self.webView.titleChanged[str].connect(self.title_changed)
+        self.buttonReload.clicked.connect(self.reload_page)
+        self.buttonStop.clicked.connect(self.stop_page)
+        
         self.bundleItem = None
         self.configure()
         
@@ -190,59 +190,54 @@ class PMXBrowserPaneDock(QtGui.QDockWidget, Ui_BrowserPane, PMXWidget):
         self.webView.setHtml(string)
     
     def url_changed(self):
-		"""Url have been changed by user
-		"""
-		page = self.webView.page()
-		history = page.history()
-		self.buttonBack.setEnabled(history.canGoBack())
-		self.buttonNext.setEnabled(history.canGoForward())
+        """Url have been changed by user"""
+
+        page = self.webView.page()
+        history = page.history()
+        self.buttonBack.setEnabled(history.canGoBack())
+        self.buttonNext.setEnabled(history.canGoForward())
+        
+        url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
+        self.webView.setUrl(url)
 		
-		url = self.lineUrl.text()
-		self.webView.setUrl(QtCore.QUrl(url))
-		
-	def stop_page(self):
-		"""Stop loading the page
-		"""
+    def stop_page(self):
+		"""Stop loading the page"""
 		self.webView.stop()
 	
-	def title_changed(self, title):
-		"""Web page title changed - change the tab name
-		"""
-		self.setWindowTitle(title)
-	
-	def reload_page(self):
-		"""Reload the web page
-		"""
-		self.webView.setUrl(QtCore.QUrl(self.lineUrl.text()))
-	
-	def link_clicked(self, url):
-		"""Update the URL if a link on a web page is clicked
-		"""
-		page = self.webView.page()
-		history = page.history()
-		self.buttonBack.setEnabled(history.canGoBack())
-		self.buttonNext.setEnabled(history.canGoForward())
-		
-		self.lineUrl.setText(url)
-	
-	def load_progress(self, load):
-		"""Page load progress
-		"""
-		self.buttonStop.setEnabled(load != 100)
-		
-	def back(self):
-		"""Back button clicked, go one page back
-		"""
-		page = self.webView.page()
-		history = page.history()
-		history.back()
-		self.buttonBack.setEnabled(history.canGoBack())
-	
-	def next(self):
-		"""Next button clicked, go to next page
-		"""
-		page = self.webView.page()
-		history = page.history()
-		history.forward()
-		self.buttonNext.setEnabled(history.canGoForward())
-		
+    def title_changed(self, title):
+    	"""Web page title changed - change the tab name"""
+    	#self.setWindowTitle(title)
+        pass
+    
+    def reload_page(self):
+    	"""Reload the web page"""
+        url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
+        self.webView.setUrl(url)
+    
+    def link_clicked(self, url):
+    	"""Update the URL if a link on a web page is clicked"""
+    	page = self.webView.page()
+    	history = page.history()
+    	self.buttonBack.setEnabled(history.canGoBack())
+    	self.buttonNext.setEnabled(history.canGoForward())
+    	
+    	self.lineUrl.setText(url.toString())
+    
+    def load_progress(self, load):
+    	"""Page load progress"""
+    	self.buttonStop.setEnabled(load != 100)
+    	
+    def back(self):
+    	"""Back button clicked, go one page back"""
+    	page = self.webView.page()
+    	history = page.history()
+    	history.back()
+    	self.buttonBack.setEnabled(history.canGoBack())
+    
+    def next(self):
+    	"""Next button clicked, go to next page"""
+    	page = self.webView.page()
+    	history = page.history()
+    	history.forward()
+    	self.buttonNext.setEnabled(history.canGoForward())
+    	

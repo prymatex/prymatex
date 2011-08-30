@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panebrowser.ui'
 #
-# Created: Mon Aug 29 18:12:50 2011
+# Created: Tue Aug 30 16:27:01 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,13 +18,53 @@ except AttributeError:
 class Ui_BrowserPane(object):
     def setupUi(self, BrowserPane):
         BrowserPane.setObjectName(_fromUtf8("BrowserPane"))
-        BrowserPane.resize(400, 300)
+        BrowserPane.resize(520, 298)
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.buttonBack = QtGui.QPushButton(self.dockWidgetContents)
+        self.buttonBack.setText(_fromUtf8(""))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-previous.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonBack.setIcon(icon)
+        self.buttonBack.setFlat(True)
+        self.buttonBack.setObjectName(_fromUtf8("buttonBack"))
+        self.horizontalLayout.addWidget(self.buttonBack)
+        self.buttonNext = QtGui.QPushButton(self.dockWidgetContents)
+        self.buttonNext.setEnabled(True)
+        self.buttonNext.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.buttonNext.setText(_fromUtf8(""))
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-next.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonNext.setIcon(icon1)
+        self.buttonNext.setFlat(True)
+        self.buttonNext.setObjectName(_fromUtf8("buttonNext"))
+        self.horizontalLayout.addWidget(self.buttonNext)
+        self.buttonReload = QtGui.QPushButton(self.dockWidgetContents)
+        self.buttonReload.setText(_fromUtf8(""))
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonReload.setIcon(icon2)
+        self.buttonReload.setFlat(True)
+        self.buttonReload.setObjectName(_fromUtf8("buttonReload"))
+        self.horizontalLayout.addWidget(self.buttonReload)
+        self.lineUrl = QtGui.QLineEdit(self.dockWidgetContents)
+        self.lineUrl.setObjectName(_fromUtf8("lineUrl"))
+        self.horizontalLayout.addWidget(self.lineUrl)
+        self.buttonStop = QtGui.QPushButton(self.dockWidgetContents)
+        self.buttonStop.setText(_fromUtf8(""))
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonStop.setIcon(icon3)
+        self.buttonStop.setFlat(True)
+        self.buttonStop.setObjectName(_fromUtf8("buttonStop"))
+        self.horizontalLayout.addWidget(self.buttonStop)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.webView = QtWebKit.QWebView(self.dockWidgetContents)
         self.webView.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
         self.webView.setObjectName(_fromUtf8("webView"))
@@ -36,5 +76,10 @@ class Ui_BrowserPane(object):
 
     def retranslateUi(self, BrowserPane):
         BrowserPane.setWindowTitle(_('Web Browser'))
+        self.buttonBack.setToolTip(_('Back'))
+        self.buttonNext.setToolTip(_('Next'))
+        self.buttonReload.setToolTip(_('Reload'))
+        self.buttonStop.setToolTip(_('Stop'))
 
 from PyQt4 import QtWebKit
+from prymatex import resources_rc

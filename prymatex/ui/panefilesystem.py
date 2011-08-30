@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Thu Aug 18 15:21:07 2011
+# Created: Tue Aug 30 16:09:22 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -141,7 +141,7 @@ class Ui_FSPane(object):
         QtCore.QMetaObject.connectSlotsByName(FSPane)
 
     def retranslateUi(self, FSPane):
-        FSPane.setWindowTitle(_('Form'))
+        FSPane.setWindowTitle(_('File System'))
         self.buttonUp.setToolTip(_('Go up one level'))
         self.buttonBackRoot.setToolTip(_('Go previous place'))
         self.pushFowardRoot.setToolTip(_('Go next place'))
