@@ -603,10 +603,10 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             env['TM_CURRENT_WORD'] = current_word
         if self.syntax != None:
             env['TM_MODE'] = self.syntax.name
-        if self.parent().file.path != None:
-            env['TM_FILEPATH'] = self.parent().file.path
-            env['TM_FILENAME'] = self.parent().file.filename
-            env['TM_DIRECTORY'] = self.parent().file.directory
+        if self.parent().file.exists():
+            env['TM_FILEPATH'] = self.parent().file.absoluteFilePath()
+            env['TM_FILENAME'] = self.parent().file.fileName()
+            env['TM_DIRECTORY'] = self.parent().file.absoluteDir().dirName()
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText()
             start, end = self.getSelectionBlockStartEnd()

@@ -73,9 +73,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     
     #TODO: Crear un methodo para instanciar editor widgets y agregarlos a una lista de editores activos
     def addEmptyEditor(self):
-        empty_file = self.pmxApp.fileManager.getEmptyFile()
-        editorWidget = PMXEditorWidget(empty_file, parent = self)
-        self.tabWidget.addTab(editorWidget, empty_file.fileName())
+        emptyFile = self.pmxApp.fileManager.getEmptyFile()
+        editorWidget = PMXEditorWidget(emptyFile, parent = self)
+        self.tabWidget.addTab(editorWidget)
         self.currentEditorWidget = editorWidget
         
     def setupDockers(self):
@@ -283,11 +283,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
 
     @pyqtSignature('')
     def on_actionSave_triggered(self):
-        self.currentEditorWidget.request_save()
+        fileInfo = self.pmxApp.fileManager.getSaveFile(title = "Save file")
+        #TODO: No te metas con el widget, pedile los datos
+        data = self.currentEditorWidget.codeEdit.document().toPlainText()
+        self.pmxApp.fileManager.saveFile(fileInfo, data)
     
     @pyqtSignature('')
     def on_actionSave_As_triggered(self):
-        self.currentEditorWidget.request_save(save_as = True)
+        fileInfo = self.pmxApp.fileManager.getSaveFile(title = "Save file as")
+        #TODO: No te metas con el widget, pedile los datos
+        data = self.currentEditorWidget.codeEdit.document().toPlainText()
+        self.pmxApp.fileManager.saveFile(fileInfo, data)
         
     @pyqtSignature('')
     def on_actionSaveAll_triggered(self):
@@ -400,7 +406,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         
         extra_attrs = self.pmxApp.supportManager.buildEnvironment()
         s = template.safe_substitute(APPNAME = "Prymatex",
-                                     FILE = editorWidget.file.filename,
+                                     FILE = editorWidget.file.fileName(),
                                      PROJECT = 'No project',
                                      **extra_attrs)
         self.setWindowTitle(s)

@@ -13,8 +13,9 @@ import sys
 # Major library imports.
 import sip
 from PyQt4 import QtCore, QtGui
+from prymatex.core.base import PMXWidget
 
-class PMXMainWidget(QtGui.QWidget):
+class PMXMainWidget(PMXWidget):
     # Signals
     iconChanged = QtCore.pyqtSignal(QtGui.QIcon)
     titleChanged = QtCore.pyqtSignal(str)
@@ -168,7 +169,7 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         # implementation).
         QtGui.QSplitter.restoreState(qsplitter, sp_qstate)
 
-    def addTab(self, w, text):
+    def addTab(self, w):
         """ Add a new tab to the main tab widget. """
 
         # Find the first tab widget going down the left of the hierarchy.  This
@@ -184,8 +185,9 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             ch = _TabWidget(self)
             self.addWidget(ch)
 
-        idx = ch.addTab(w, text)
-
+        idx = ch.addTab(w, w.getTitle())
+        self.setActiveIcon(w, w.getIcon())
+        
         # If the tab has been added to the current tab widget then make it the current tab.
         if ch is self._current_tab_w:
             self._set_current_tab(ch, idx)
@@ -209,7 +211,7 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         if tw is not None:
             self._set_current_tab(tw, tidx)
 
-    def setActiveIcon(self, w, icon=None):
+    def setActiveIcon(self, w, icon = None):
         """ Set the active icon on a widget. """
 
         tw, tidx = self._tab_widget(w)

@@ -36,24 +36,14 @@ class PMXFileManager(PMXObject):
             pmx_file = self.opened_files.pop(pmx_file.path)
             del pmx_file
 
-    def openFile(self, file):
-        '''
-        PMXFile factory
-        @raise FileDoesNotExistError: If provided path does not exists
-        '''
-        if self.isOpened(filepath):
-            pmx_file = self.opened_files[filepath]
-            pmx_file.references += 1
-            return self.opened_files[filepath]
-        if not os.path.exists(filepath):
-            raise FileDoesNotExistError(filepath)
-
-        pmx_file = PMXFile(self, filepath)
-        pmx_file.references += 1
-        self.opened_files[filepath] = pmx_file
-        self.fileOpened.emit(pmx_file)
-        return pmx_file
-
+    def openFile(self, fileInfo):
+        return QtCore.QFile(fileInfo.absoluteFilePath())
+    
+    def saveFile(self, fileInfo, data):
+        file = QtCore.QFile(fileInfo.absoluteFilePath())
+        file.open()
+        file.write(data)
+    
     @property
     def currentDirectory(self):
         #TODO: el ultimo directorio o algo de eso :)
@@ -63,11 +53,11 @@ class PMXFileManager(PMXObject):
         ''' Returns a QFile '''
         path = os.path.join(self.currentDirectory, "untitled %d" % self.empty_file_counter)
         self.empty_file_counter += 1
-        return QtCore.QFile(path)
+        return QtCore.QFileInfo(path)
         
     def getOpenFiles(self):
         names = QtGui.QFileDialog.getOpenFileNames(None, "Open Files", self.currentDirectory)
-        files = map(lambda name: QtCore.QFile(name), names)
+        files = map(lambda name: QtCore.QFileInfo(name), names)
         names.reverse()
         self.fileHistory = names + self.fileHistory
         if len(self.fileHistory) > self.fileHistoryLength:
@@ -75,12 +65,11 @@ class PMXFileManager(PMXObject):
         self.fileHistoryChanged.emit()
         return files
     
-    def getSaveFile(self):
-        name = QtGui.QFileDialog.getSaveFileName(None, "Save file", "", "")
-        return QtCore.QFile(name)
+    def getSaveFile(self, title = "Save file"):
+        name = QtGui.QFileDialog.getSaveFileName(None, title, "", "")
+        return QtCore.QFileInfo(name)
     
-    def getFileIcon(self, file):
-        info = QtCore.QFileInfo(file.path)
-        if info.exists():
-            return self.iconProvider.icon(info)
+    def getFileIcon(self, fileInfo):
+        if fileInfo.exists():
+            return self.iconProvider.icon(fileInfo)
         return self.iconProvider.icon(QtGui.QFileIconProvider.File)

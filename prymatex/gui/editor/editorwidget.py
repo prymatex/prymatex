@@ -34,21 +34,15 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
         self.setupGoToLineWidget()
 
         self.file = file
+    
+    def getTitle(self):
+        return self.file.fileName()
+    
+    
+    def getIcon(self):
+        return self.pmxApp.fileManager.getFileIcon(self.file)
         
-        # TODO: Asyncronous I/O
-        
-        self.file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text)
-        text = ""
-        while not self.file.atEnd():
-            text += self.file.readData(1000)
-        self.file.close()
-        
-        self.codeEdit.setPlainText(text)
-        self.destroyed.connect(self.releaseFile)
-
-    def releaseFile(self):
-        print "Release file"
-        
+    
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)
     
@@ -201,88 +195,7 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
     def on_pushCloseFindreplace_pressed(self):
         self.findreplaceWidget.hide()
 
-    def request_close(self):
-        '''
-        When a editor has to be closed this method is called
-        @returns true when it's safe to remove the editor wdiget, the user has been prompted
-        for save
-        '''
-        doc = self.codeEdit.document()
-        if doc.isModified():
-            r = QMessageBox.question(self, self.trUtf8("Save changes?"), 
-                                     self.trUtf8("Save changes for this file"),
-                                     QMessageBox.Save | QMessageBox.Cancel | QMessageBox.No,
-                                     QMessageBox.Cancel)
-            
-            if r == QMessageBox.Save:
-                return self.request_save()
-            elif r == QMessageBox.Cancel:
-                return False
-            elif r == QMessageBox.No:
-                return True # Can close, discard changes
-        return True
-
-    #===========================================================================
-    # File Operations
-    #===========================================================================
-    def save(self):
-        '''
-        This method is call to actually save the file, the path has to be
-        set.
-        '''
-        buffer_contents = unicode(self.codeEdit.document().toPlainText())
-        #TODO: Check exceptions, for example, disk full.
-        promise = self.file.write(buffer_contents)
-        logger.debug("Buffer saved to %s" % self.file.path)
     
-    def propmpt_file(self, title = None):
-        '''
-        Prompts the user for a file name
-        @return: filepath {unicode,str} or None if the action is cancelled
-        '''
-        if not title:
-            title = self.trUtf8("Save file...")
-            
-        syntax = self.codeEdit.syntax
-        save_path = unicode(qApp.instance().startDirectory())
-        suggested_filename = self.file.suggestedFileName()
-        
-        if syntax:
-            suffix = syntax.fileTypes[0]
-            filetypes = '%s (%s)' % (syntax.name, ' '.join(["*.%s" % f for f in syntax.fileTypes]))
-        else:
-            filetypes = 'Text files (*.*)'
-            suffix = 'txt'
-            
-        if self.file.path:
-            suggested_filename = self.file.path
-        else:
-            suggested_filename = join(save_path, suffix and "%s.%s" % (suggested_filename, 
-                                                                        suffix) or suggested_filename)
-        
-        pth = QFileDialog.getSaveFileName( self, title, suggested_filename, filetypes )
-        return pth
-    
-    def request_save(self, save_as = False):
-        '''
-        Saves the document asking the user for the required information.
-        do_save() actually saves the document, but it should no be called
-        directly because it expects self.path to be defined.
-        @param save_as: Indicates filename has to be supplied
-        '''
-        title = self.trUtf8("Save file")
-        if save_as:
-            title = self.trUtf8("Save file as")
-        if save_as or self.file.path is None:
-            path = self.propmpt_file(title = title)
-            if not path:
-                logger.info("User cancelled save dialg")
-                return False
-            self.file.path = path
-        self.save()
-        #Esto es necesario para los commandos, de este modo se enteran que el archivo se guardo
-        return True
-
     def setSyntax(self):
         syntax = PMXSyntax.findSyntaxByFileType(self.path)
         self.codeEdit.setSyntax(syntax)
@@ -290,7 +203,6 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
     @property
     def modfified(self):
         return self.codeEdit.document().isModified()
-    
     
     def blockCountChanged(self, new_count):
         self.spinLineNumbers.setMaximum(new_count)
