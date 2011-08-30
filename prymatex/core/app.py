@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+#Cosas interesantes
+#http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
+#http://www.qtcentre.org/wiki/index.php?title=Extended_Main_Window
 import os, sys
 from concurrent import futures
 

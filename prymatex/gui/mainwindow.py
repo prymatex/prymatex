@@ -84,6 +84,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         from prymatex.gui.dockers.console import PMXConsoleDock
         from prymatex.gui.dockers.logger import QtLogHandler, LogDockWidget
         
+        self.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
+        
         self.paneFileSystem = PMXFSPaneDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
         self.menuPanels.addAction(self.paneFileSystem.toggleViewAction())
