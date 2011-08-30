@@ -493,17 +493,17 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         indentMark = preference.indent(line)
         super(PMXCodeEdit, self).keyPressEvent(event)
         if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
-            print "increase"
+            self.debug("Increase indent")
             cursor.insertText(block.userData().indent + self.tabKeyBehavior)
         elif indentMark == PMXPreferenceSettings.INDENT_NEXTLINE:
-            print "increasenext"
+            self.debug("Increase next line indent")
         elif indentMark == PMXPreferenceSettings.UNINDENT:
-            print "unindent"
+            self.debug("Unindent")
         elif indentMark == PMXPreferenceSettings.INDENT_DECREASE:
-            print "decrease"
+            self.debug("Decrease indent")
             cursor.insertText(prev.userData().indent[:len(self.tabKeyBehavior)])
         else:
-            print "preserve"
+            self.debug("Preserve indent")
             cursor.insertText(block.userData().indent)
     
     #=======================================================================
@@ -536,7 +536,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
-            print "Corriendo Macro", item.name
+            self.debug("Corriendo Macro %s" % item.name)
             item.execute(self.macroProcessor)
 
     def selectBundleItem(self, items, tabTrigger = False):

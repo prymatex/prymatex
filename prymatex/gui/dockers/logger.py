@@ -3,18 +3,10 @@
 
 import logging
 from PyQt4 import QtCore, QtGui
+from prymatex.core.base import PMXWidget
 from prymatex.ui.logwidget import Ui_LogWidget
 
-DEBUG_LEVELS = ("INFO",
-                "DEBUG",
-                "WARNING",
-                "ERROR",
-                "FATAL", 
-                "CRITICAL",)
-
-DEBUG_LEVELS = dict([(name, getattr(logging, name)) for name in DEBUG_LEVELS ])
-
-class LogDockWidget(QtGui.QDockWidget, Ui_LogWidget):
+class LogDockWidget(QtGui.QDockWidget, Ui_LogWidget, PMXWidget):
     '''
     Logging widget
     
@@ -25,13 +17,13 @@ class LogDockWidget(QtGui.QDockWidget, Ui_LogWidget):
         self.setup()
         handler.output = self
         handler.capacity = 1
-        
+
     
     def setup(self):
         #self.push#
         self.debug_levels_menu = QtGui.QMenu()
         self.debug_levels_action_group = QtGui.QActionGroup(self)
-        for level, value in DEBUG_LEVELS.iteritems():
+        for level, value in filter(lambda (key, value): type(key) == str, logging._levelNames.iteritems()):
             action = QtGui.QAction(level.title(), self)
             # Store debug info in a dict
             action.setData({'name': level, 'level': value})
@@ -44,7 +36,7 @@ class LogDockWidget(QtGui.QDockWidget, Ui_LogWidget):
     
     def debug_level_change(self, action):
         new_level = action.data()
-        logger.info("Level changed to %s", new_level)
+        self.debug("Level changed to %s", new_level)
 
 from logging.handlers import BufferingHandler
 
