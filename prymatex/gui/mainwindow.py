@@ -87,7 +87,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         from prymatex.gui.dockers.symbols import PMXSymboldListDock
         from prymatex.gui.dockers.browser import PMXBrowserPaneDock
         from prymatex.gui.dockers.console import PMXConsoleDock
-        from prymatex.gui.logwidget import QtLogHandler, LogDockWidget
+        from prymatex.gui.dockers.logger import QtLogHandler, LogDockWidget
         
         self.paneFileSystem = PMXFSPaneDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)

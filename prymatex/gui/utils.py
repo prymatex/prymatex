@@ -126,7 +126,38 @@ def addActionsToMenu(menu, *action_tuples):
 #                if f:
 #                    f(value)
 
+# Key press debugging 
+KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
+                  if keyname.startswith('Key_')])
 
+ANYKEY = -1
+
+def debug_key(key_event):
+    ''' Prevents hair loss when debuging what the hell is going on '''
+    key = key_event.key()
+    mods = []
+    print "count: ", key_event.count()
+    print "isAutoRepeat: ", key_event.isAutoRepeat()
+    print "key: ", key_event.key()
+    print "nativeModifiers: ", key_event.nativeModifiers()
+    print "nativeScanCode: ", key_event.nativeScanCode()
+    print "nativeVirtualKey: ", key_event.nativeVirtualKey()
+    print "text: ", unicode(key_event.text()).encode('utf-8')
+    print "isAccepted: ", key_event.isAccepted()
+    print "modifiers: ", int(key_event.modifiers())
+    modifiers = key_event.modifiers()
+    if modifiers & Qt.AltModifier:
+        mods.append("AltModifier")
+    if modifiers & Qt.ControlModifier:
+        mods.append("ControlModifier")
+    if modifiers & Qt.MetaModifier:
+        mods.append("MetaModifier")
+    if modifiers & Qt.ShiftModifier:
+        mods.append("ShiftModifier")
+    
+    print "%s <%s> Code: %d chr(%d) = %s" % (KEY_NAMES[key],  ", ".join(mods), 
+                                              key, key, key < 255 and chr(key) 
+                                              or 'N/A')
 
 if __name__ == "__main__":
     print text_to_object_name('Button Text Editor')

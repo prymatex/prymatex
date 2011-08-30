@@ -7,46 +7,13 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QPainter, QFontMetrics, QColor
-from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax
+from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processors import PMXSyntaxHighlighter, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 
-# Key press debugging 
-KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
-                  if keyname.startswith('Key_')])
-
-ANYKEY = -1
-
-def debug_key(key_event):
-    ''' Prevents hair loss when debuging what the hell is going on '''
-    key = key_event.key()
-    mods = []
-    print "count: ", key_event.count()
-    print "isAutoRepeat: ", key_event.isAutoRepeat()
-    print "key: ", key_event.key()
-    print "nativeModifiers: ", key_event.nativeModifiers()
-    print "nativeScanCode: ", key_event.nativeScanCode()
-    print "nativeVirtualKey: ", key_event.nativeVirtualKey()
-    print "text: ", unicode(key_event.text()).encode('utf-8')
-    print "isAccepted: ", key_event.isAccepted()
-    print "modifiers: ", int(key_event.modifiers())
-    modifiers = key_event.modifiers()
-    if modifiers & Qt.AltModifier:
-        mods.append("AltModifier")
-    if modifiers & Qt.ControlModifier:
-        mods.append("ControlModifier")
-    if modifiers & Qt.MetaModifier:
-        mods.append("MetaModifier")
-    if modifiers & Qt.ShiftModifier:
-        mods.append("ShiftModifier")
-    
-    print "%s <%s> Code: %d chr(%d) = %s" % (KEY_NAMES[key],  ", ".join(mods), 
-                                              key, key, key < 255 and chr(key) 
-                                              or 'N/A')
-    
 class PMXCodeEdit(QPlainTextEdit, PMXObject):
     '''
     The GUI element which holds the editor.
@@ -56,7 +23,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     It holds the highlighter and the folding
     
     '''
-    WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
     WORD = re.compile(r'\w+', re.UNICODE)
     PREFERENCE_CACHE = {}
     
@@ -515,28 +481,30 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Return Keyboard Events
     #=======================================================================
     def returnPressEvent(self, event):
-        line = unicode(self.textCursor().block().text())
+        cursor = self.textCursor()
+        block = cursor.block()
+        prev = cursor.block().previous()
+        line = block.text()
         if self.document().blockCount() == 1:
             syntax = self.pmxApp.supportManager.findSyntaxByFirstLine(line)
             if syntax != None:
                 self.setSyntax(syntax)
+        preference = self.getPreference(block.userData().getLastScope())
+        indentMark = preference.indent(line)
         super(PMXCodeEdit, self).keyPressEvent(event)
-        cursor = self.textCursor()
-        block = cursor.block()
-        prev = cursor.block().previous()
-        if prev.userData().indentMark == PMXBlockUserData.INDENT_INCREASE:
+        if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
             print "increase"
-            cursor.insertText(prev.userData().indent + self.tabKeyBehavior)
-        elif prev.userData().indentMark == PMXBlockUserData.INDENT_NEXTLINE:
+            cursor.insertText(block.userData().indent + self.tabKeyBehavior)
+        elif indentMark == PMXPreferenceSettings.INDENT_NEXTLINE:
             print "increasenext"
-        elif prev.userData().indentMark == PMXBlockUserData.UNINDENT:
+        elif indentMark == PMXPreferenceSettings.UNINDENT:
             print "unindent"
-        elif prev.userData().indentMark == PMXBlockUserData.INDENT_DECREASE:
+        elif indentMark == PMXPreferenceSettings.INDENT_DECREASE:
             print "decrease"
             cursor.insertText(prev.userData().indent[:len(self.tabKeyBehavior)])
         else:
             print "preserve"
-            cursor.insertText(prev.userData().indent)
+            cursor.insertText(block.userData().indent)
     
     #=======================================================================
     # After Keyboard Events
@@ -546,7 +514,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         cursor = self.textCursor()
         block = cursor.block()
         prev = block.previous()
-        if block.userData().indentMark == PMXBlockUserData.INDENT_DECREASE and prev.isValid() and prev.userData().indentMark == PMXBlockUserData.INDENT_NONE and block.userData().indent == prev.userData().indent:
+        preference = self.getPreference(block.userData().getLastScope())
+        indentMark = preference.indent(block.text())
+        if indentMark == PMXPreferenceSettings.INDENT_DECREASE and prev.isValid() and block.userData().indent == prev.userData().indent:
             self.unindent()
     
     #==========================================================================

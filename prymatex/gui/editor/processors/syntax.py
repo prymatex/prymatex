@@ -4,7 +4,7 @@
 import re
 from copy import copy
 from PyQt4 import QtCore, QtGui
-from prymatex.support import PMXSyntaxProcessor, PMXSyntax, PMXPreferenceSettings
+from prymatex.support import PMXSyntaxProcessor, PMXSyntax
 
 WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 def whiteSpace(text):
@@ -17,19 +17,12 @@ def whiteSpace(text):
 
 # Syntax
 class PMXBlockUserData(QtGui.QTextBlockUserData):
-    INDENT_NONE = PMXPreferenceSettings.INDENT_NONE
-    INDENT_INCREASE = PMXPreferenceSettings.INDENT_INCREASE
-    INDENT_DECREASE = PMXPreferenceSettings.INDENT_DECREASE
-    INDENT_NEXTLINE = PMXPreferenceSettings.INDENT_NEXTLINE
-    UNINDENT = PMXPreferenceSettings.UNINDENT
-    
     def __init__(self, scopes = []):
         QtGui.QTextBlockUserData.__init__(self)
         self.scopes = scopes
         self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
         self.folded = False
-        self.indentMark = self.INDENT_NONE
         self.indent = ""
         self.textHash = None
         self.cache = None
@@ -178,8 +171,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         userData.textHash = hash(text)
         
         #Indent
-        settings = self.editor.getPreference(self.syntax.scopeName)
-        userData.indentMark = settings.indent(text)
         userData.indent = whiteSpace(text)
         return userData, state
         

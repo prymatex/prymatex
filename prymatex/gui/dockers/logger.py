@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import logging
-from PyQt4.QtGui import QWidget, QDockWidget, QActionGroup, QAction, QMenu
-from PyQt4.QtCore import SIGNAL
-from PyQt4.QtCore import Qt
+from PyQt4 import QtCore, QtGui
 from prymatex.ui.logwidget import Ui_LogWidget
 
 DEBUG_LEVELS = ("INFO",
@@ -30,29 +29,22 @@ class LogDockWidget(QtGui.QDockWidget, Ui_LogWidget):
     
     def setup(self):
         #self.push#
-        self.debug_levels_menu = QMenu()
-        self.debug_levels_action_group = QActionGroup(self)
+        self.debug_levels_menu = QtGui.QMenu()
+        self.debug_levels_action_group = QtGui.QActionGroup(self)
         for level, value in DEBUG_LEVELS.iteritems():
-            action = QAction(level.title(), self)
+            action = QtGui.QAction(level.title(), self)
             # Store debug info in a dict
             action.setData({'name': level, 'level': value})
             action.setCheckable(True)
             self.debug_levels_action_group.addAction(action)
             self.debug_levels_menu.addAction(action)
             
-        self.connect(self.debug_levels_menu, SIGNAL('triggered(QAction*)'), 
-                                                    self.debug_level_change)
+        self.debug_levels_menu.triggered.connect(self.debug_level_change)
         self.pushDebugLevel.setMenu(self.debug_levels_menu)
     
     def debug_level_change(self, action):
         new_level = action.data()
         logger.info("Level changed to %s", new_level)
-        
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
-            self.hide()
-	super(LogDockWidget, self).keyPressEvent(event)
 
 from logging.handlers import BufferingHandler
 
