@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>520</width>
+    <height>298</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,6 +21,87 @@
     <property name="margin">
      <number>0</number>
     </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="buttonBack">
+        <property name="toolTip">
+         <string>Back</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/back.png</normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/back.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonNext">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>Next</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/next.png</normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/next.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonReload">
+        <property name="toolTip">
+         <string>Reload</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/reload.png</normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/reload.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineUrl"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonStop">
+        <property name="toolTip">
+         <string>Stop</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/stop.png</normaloff>../../../../../../../Documents and Settings/dvanhaaster/Escritorio/qweb/stop.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item>
      <widget class="QWebView" name="webView">
       <property name="url">

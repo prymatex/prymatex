@@ -13,7 +13,6 @@ from prymatex.core.base import PMXWidget, PMXObject
 from prymatex.core.config import pmxConfigPorperty
 from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
-from prymatex.core.config import pmxConfigPorperty
 
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):
@@ -126,44 +125,12 @@ class TextMate(QObject):
     isBusy = pyqtProperty("bool", isBusy)
     
 class PMXBrowserPaneDock(QtGui.QDockWidget, Ui_BrowserPane, PMXWidget):
-    class Meta:
-        settings = 'browser'
-        
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
-        self.setupUi(self)
-        #New manager
-        old_manager = self.webView.page().networkAccessManager()
-        new_manager = NetworkAccessManager(self, old_manager)
-        self.webView.page().setNetworkAccessManager(new_manager)
-        self.webView.loadFinished[bool].connect(self.prepareJavaScript)
-        self.bundleItem = None
-        self.configure()
-        
-    def prepareJavaScript(self, ready):
-        if not ready:
-            return
-        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame(), self.bundleItem))
-        self.webView.page().mainFrame().evaluateJavaScript(js)
-    
-    def setHtml(self, string, bundleItem):
-        self.bundleItem = bundleItem
-        self.webView.setHtml(string)
-    
-    ENVIROMENT_PROXY = '__ENVIROMENT_PROXY__'
-    
-    @property
-    def env_proxy(self):
-        return os.environ.get('http_proxy', '')
-    
+    homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
     def proxy(self, value):
         '''
         System wide proxy
         '''
-        if value == self.ENVIROMENT_PROXY:
-            value = self.env_proxy
-        
         proxy_url = QUrl(value)    
         if not value:
             network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
@@ -174,13 +141,108 @@ class PMXBrowserPaneDock(QtGui.QDockWidget, Ui_BrowserPane, PMXWidget):
             else:
                 protocol = QNetworkProxy.Socks5Proxy
                 
-            network_proxy = QNetworkProxy(
-                                        protocol,
-                                        proxy_url.host(),
-                                        proxy_url.port(),
-                                        proxy_url.userName(),
-                                        proxy_url.password()
-                                        )
-                          
+            network_proxy = QNetworkProxy(protocol, proxy_url.host(), proxy_url.port(), proxy_url.userName(), proxy_url.password())
+
         QNetworkProxy.setApplicationProxy( network_proxy )
-                                          
+
+    class Meta:
+        settings = 'browser'
+        
+    def __init__(self, parent):
+        QtGui.QDockWidget.__init__(self, parent)
+        self.setupUi(self)
+        #New manager
+        old_manager = self.webView.page().networkAccessManager()
+        new_manager = NetworkAccessManager(self, old_manager)
+        self.webView.page().setNetworkAccessManager(new_manager)
+        
+        # set the default
+		self.lineUrl.setText(self.homePage)
+		self.webView.setUrl(QtCore.QUrl(self.homePage))
+        
+        # history buttons:
+		self.buttonBack.setEnabled(False)
+		self.buttonNext.setEnabled(False)
+        
+        #Connects
+        self.buttonBack.clicked.connect(self.back)
+		self.buttonNext.clicked.connect(self.next)
+		self.lineUrl.returnPressed.connect(self.url_changed)
+		self.webView.linkClicked[str].connect(self.link_clicked)
+		self.webView.urlChanged[str].connect(self.link_clicked)
+		self.webView.loadProgress[int].connect(self.load_progress)
+        self.webView.loadFinished[bool].connect(self.prepare_JavaScript)
+		self.webView.titleChanged[str].connect(self.title_changed)
+		self.buttonReload.clicked.connect(self.reload_page)
+		self.buttonStop.clicked.connect(self.stop_page)
+
+        self.bundleItem = None
+        self.configure()
+        
+    def prepare_JavaScript(self, ready):
+        if not ready:
+            return
+        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame(), self.bundleItem))
+        self.webView.page().mainFrame().evaluateJavaScript(js)
+    
+    def setHtml(self, string, bundleItem):
+        self.bundleItem = bundleItem
+        self.webView.setHtml(string)
+    
+    def url_changed(self):
+		"""Url have been changed by user
+		"""
+		page = self.webView.page()
+		history = page.history()
+		self.buttonBack.setEnabled(history.canGoBack())
+		self.buttonNext.setEnabled(history.canGoForward())
+		
+		url = self.lineUrl.text()
+		self.webView.setUrl(QtCore.QUrl(url))
+		
+	def stop_page(self):
+		"""Stop loading the page
+		"""
+		self.webView.stop()
+	
+	def title_changed(self, title):
+		"""Web page title changed - change the tab name
+		"""
+		self.setWindowTitle(title)
+	
+	def reload_page(self):
+		"""Reload the web page
+		"""
+		self.webView.setUrl(QtCore.QUrl(self.lineUrl.text()))
+	
+	def link_clicked(self, url):
+		"""Update the URL if a link on a web page is clicked
+		"""
+		page = self.webView.page()
+		history = page.history()
+		self.buttonBack.setEnabled(history.canGoBack())
+		self.buttonNext.setEnabled(history.canGoForward())
+		
+		self.lineUrl.setText(url)
+	
+	def load_progress(self, load):
+		"""Page load progress
+		"""
+		self.buttonStop.setEnabled(load != 100)
+		
+	def back(self):
+		"""Back button clicked, go one page back
+		"""
+		page = self.webView.page()
+		history = page.history()
+		history.back()
+		self.buttonBack.setEnabled(history.canGoBack())
+	
+	def next(self):
+		"""Next button clicked, go to next page
+		"""
+		page = self.webView.page()
+		history = page.history()
+		history.forward()
+		self.buttonNext.setEnabled(history.canGoForward())
+		
