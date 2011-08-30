@@ -42,7 +42,6 @@ class PMXFindReplaceWidget(PMXRefocusWidget):
         self.findMatchCountChanged.emit( len(found_cursors) )
         #print "findMatchCountChanged.emit(",  len(found_cursors), ")"
         
-        
     def findNext(self):
         cursor = self.textEdit.document().find(self.regexp, self.textEdit.textCursor(), self.flags)
         if cursor.isNull():

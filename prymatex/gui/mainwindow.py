@@ -10,15 +10,11 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from prymatex.ui.mainwindow import Ui_MainWindow
-
-from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.editor.codeedit import PMXCodeEdit
-from prymatex.gui.utils import addActionsToMenu, text_to_KeySequence
-from prymatex.gui.editor.editorwidget import PMXEditorWidget
-from prymatex.core.exceptions import FileDoesNotExistError
 from prymatex.core.base import PMXWidget
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.core.exceptions import FileNotSupported
+from prymatex.utils.i18n import ugettext as _
+from prymatex.gui.editor.editorwidget import PMXEditorWidget
+
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     '''
@@ -73,10 +69,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     
     #TODO: Crear un methodo para instanciar editor widgets y agregarlos a una lista de editores activos
     def addEmptyEditor(self):
-        emptyFile = self.pmxApp.fileManager.getEmptyFile()
-        editorWidget = PMXEditorWidget(emptyFile, parent = self)
+        editorWidget = PMXEditorWidget(self.pmxApp.fileManager.getNewFile(), parent = self)
         self.tabWidget.addTab(editorWidget)
-        self.currentEditorWidget = editorWidget
+        self.setCurrentEditor(editorWidget)
         
     def setupDockers(self):
         '''
@@ -151,6 +146,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         if menu is None:
             menu = QtGui.QMenu(self)
             self.actionOpen_Recent.setMenu(menu)
+        else:
+            menu.clear()
         for file in self.pmxApp.fileManager.fileHistory:
             action = QtGui.QAction(file, self)
             receiver = lambda file = QtCore.QFile(file): self.openFile(file)
@@ -164,7 +161,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         if editor is not None:
             editor.setSyntax(syntax)
     
-    @pyqtSignature('')
+
+    @QtCore.pyqtSlot()
     def on_actionSelect_Bundle_Item_triggered(self):
         editor = self.currentEditor
         scope = editor.getCurrentScope()
@@ -185,36 +183,43 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     #===========================================================================
     # Auto Connects
     #===========================================================================    
-    @pyqtSignature('')
+
+    @QtCore.pyqtSlot()
     def on_actionNew_triggered(self):
         self.addEmptyEditor()
 
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionClose_triggered(self):
         index = self.tabWidget.currentIndex()
         self.tabWidget.closeTab(index)
         if self.tabWidget.count():
             self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
 
+            
+    @QtCore.pyqtSlot()
     def on_actionQuit_triggered(self):
         QApplication.quit()
     
-    @pyqtSignature('')    
+
+    @QtCore.pyqtSlot()
     def on_actionNext_Tab_triggered(self):
         self.tabWidget.focusNextTab()
         
-    @pyqtSignature('')
+
+    @QtCore.pyqtSlot()
     def on_actionPrevious_Tab_triggered(self):
         self.tabWidget.focusPrevTab()
         
-    @pyqtSlot(bool)
+        
+    @QtCore.pyqtSlot(bool)
     def on_actionFullscreen_toggled(self, check):
         if not check and self.isFullScreen():
             self.showNormal()
         elif check:
             self.showFullScreen()
     
-    @pyqtSlot(bool)
+    @QtCore.pyqtSlot(bool)
     def on_actionShow_Menus_toggled(self, state):
         menubar = self.menuBar()
         if state:
@@ -222,18 +227,20 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         else:
             menubar.hide()
         
-    @pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         '''
         Opens one or more files
         '''
         #TODO: El directory puede ser dependiente del current editor o del file manager
         files = self.pmxApp.fileManager.getOpenFiles()
-        focus = len(files) == 1
+        editorWidget = None
         for file in files:
-            self.openFile(file, focus)
-    
-    @pyqtSignature('')
+            editorWidget = self.openFile(file)
+        if editorWidget is not None:
+            self.setCurrentEditor(editorWidget)
+        
+    @QtCore.pyqtSlot()
     def on_actionShow_Bundle_Editor_triggered(self):
         #TODO: mejorar esto
         self.pmxApp.bundleEditor.exec_()
@@ -252,59 +259,60 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
             if column:
                 editor.codeEdit.goToColumn(int(column))
             
-    def openFile(self, file, focus = False):
+    def openFile(self, file):
         '''
         Opens a file
         @return: editor widget or None if it can't make it
-        
-        editor = PMXEditorWidget(file)
-        icon = fileManager.getFileIcon(file)
-        self.tabWidget.addTab(editor, file.fileName())
-        self.tabWidget.setActiveIcon(editor, icon)
-        return editor
         '''
-        pass
+        editorWidget = PMXEditorWidget(file, parent = self)
+        editorWidget.setContent(self.pmxApp.fileManager.openFile(file))
+        self.tabWidget.addTab(editorWidget)
+        return editorWidget
     
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionAbout_Qt_triggered(self):
         qApp.aboutQt()
     
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionAbout_this_application_triggered(self):
         QMessageBox.information(self, self.trUtf8("About Prymatex"), 
                                 self.trUtf8("<h3>Prymatex</h3>"
                                 "<p>A general purpouse Text Editor</p>")
                                 )
-    
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionProjectHomePage_triggered(self):
         import webbrowser
         webbrowser.open(qApp.instance().projectUrl)
-
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
         fileInfo = self.pmxApp.fileManager.getSaveFile(title = "Save file")
         #TODO: No te metas con el widget, pedile los datos
-        data = self.currentEditorWidget.codeEdit.document().toPlainText()
-        self.pmxApp.fileManager.saveFile(fileInfo, data)
-    
-    @pyqtSignature('')
+        content = self.currentEditorWidget.getContent()
+        self.pmxApp.fileManager.saveFile(fileInfo, content)
+        
+    @QtCore.pyqtSlot()
     def on_actionSave_As_triggered(self):
         fileInfo = self.pmxApp.fileManager.getSaveFile(title = "Save file as")
         #TODO: No te metas con el widget, pedile los datos
-        data = self.currentEditorWidget.codeEdit.document().toPlainText()
+        content = self.currentEditorWidget.getContent()
         self.pmxApp.fileManager.saveFile(fileInfo, data)
         
-    @pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_actionSaveAll_triggered(self):
         for i in range(0, self.tabWidgetEditors.count()):
             if not self.tabWidgetEditors.widget(i).reqquest_save():
                 #self.statusBar().showMessage(self.trUtf8("Not all documents were saved"), 1000)
                 break
-    
+        
+    @QtCore.pyqtSlot()
     def on_actionTake_Screenshot_triggered(self):
         self.takeScreenShot()
-        
+    
+    #TODO: use new stlye in signals and slots
     @pyqtSignature('takeScreenShot()')
     def takeScreenShot(self):
         pxm = QPixmap.grabWindow(self.winId())
@@ -315,19 +323,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         pxm.save(name, format)
         self.statusBar().showMessage("Screenshot saved as <a>%s</a>" % name)
         
-    @pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_actionZoom_In_triggered(self):
         self.currentEditorWidget.codeEdit.zoomIn()
-    
-    @pyqtSignature('')
+            
+    @QtCore.pyqtSlot()
     def on_actionZoom_Out_triggered(self):
         self.currentEditorWidget.codeEdit.zoomOut()
-
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionFilter_Through_Command_triggered(self):
         self.dialogFilter.exec_()
-    
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionClose_Others_triggered(self):
         count = self.tabWidgetEditors.count()
         index = self.tabWidgetEditors.currentIndex()
@@ -339,31 +347,25 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
             i = self.tabWidgetEditors.indexOf(w)
             if not self.tabWidgetEditors.closeTab(i):
                 return
-            
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()     
     def on_actionMove_Tab_Left_triggered(self):
         self.tabWidget.moveTabLeft()
-    
-    @pyqtSignature('')    
+        
+    @QtCore.pyqtSlot()
     def on_actionMove_Tab_Right_triggered(self):
         self.tabWidget.moveTabRight()
     
     #===========================================================================
     # Dumb code :/
     #===========================================================================
-    @pyqtSignature('')
-    def on_actionPreferences_triggered(self):
-        qApp.instance().configdialog.exec_()
-    
-    def notifyCursorChange(self, editor, row, col):
-        ''' Called by editors '''
-        if editor == self.tabWidgetEditors.currentWidget():
-            self.statusBar().updateCursorPos(col, row)
         
-    def on_actionShow_Line_Numbers_toggled(self, check):
-        print "Line", check
-
-    @pyqtSlot()
+    @QtCore.pyqtSlot()
+    def on_actionPreferences_triggered(self):
+        self.pmxApp.configdialog.exec_()
+    
+        
+    @QtCore.pyqtSlot()
     def on_actionPaste_As_New_triggered(self):
         text = qApp.instance().clipboard().text()
         if text:
@@ -371,24 +373,24 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
             editor.appendPlainText(text)
         else:
             self.mainWindow.statusbar.showMessage(self.trUtf8("Nothing to paste."))
-
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionGo_To_Line_triggered(self):
         self.currentEditorWidget.goToLine()
-
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionGo_To_File_triggered(self):
         '''
         Triggers 
         '''
         self.tabWidget.chooseFileDlg.exec_()
-    
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
         print "MainWindow::find"
         self.currentEditorWidget.showFindWidget()
         
-    @pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_actionFind_Replace_triggered(self):
         print "MainWindow::replace"
         self.currentEditorWidget.showReplaceWidget()
@@ -410,6 +412,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
                                      PROJECT = 'No project',
                                      **extra_attrs)
         self.setWindowTitle(s)
+        self.currentEditorWidget.setFocus(QtCore.Qt.MouseFocusReason)
     
     def closeEvent(self, event):
         #unsaved = self.tabWidget.unsavedCounter
@@ -425,35 +428,36 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         
         event.accept()
         self.debug("Closing window")
+        
     #===========================================================
     # Templates
     #===========================================================
     def newFileFromTemplate(self, path):
         self.openFile(path, auto_focus=True)
-    
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionNew_from_template_triggered(self):
         self.dialogNewFromTemplate.exec_()
     
     #============================================================
     # Bookmarks
     #============================================================
-    @pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_actionToggle_Bookmark_triggered(self):
         editor = self.currentEditor
         editor.toggleBookmark(editor.textCursor().block().blockNumber() + 1)
-    
-    @pyqtSignature('')
+
+    @QtCore.pyqtSlot()
     def on_actionNext_Bookmark_triggered(self):
         editor = self.currentEditor
         editor.bookmarkNext(editor.textCursor().block().blockNumber() + 1)
 
-    @pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_actionPrevious_Bookmark_triggered(self):
         editor = self.currentEditor
         editor.bookmarkPrevious(editor.textCursor().block().blockNumber() + 1)
-    
-    @pyqtSignature('')
+        
+    @QtCore.pyqtSlot()
     def on_actionRemove_All_Bookmarks_triggered(self):
         editor = self.currentEditor
         editor.removeBookmarks()

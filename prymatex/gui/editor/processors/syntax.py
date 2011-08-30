@@ -120,6 +120,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     @syntax.setter
     def syntax(self, syntax):
         self.__syntax = syntax
+        self.editor.setReadOnly(True)
         self.future = self.editor.pmxApp.executor.submit(self._analyze_all_text, self.editor.toPlainText())
         self.future.add_done_callback(self._on_analyze_ready)
         
@@ -137,6 +138,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     
     def _on_analyze_ready(self, future):
         self.rehighlight()
+        self.editor.setReadOnly(False)
         
     def _analyze_all_text(self, text):
         self.syntax.parse(text, self.processor)

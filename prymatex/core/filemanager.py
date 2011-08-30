@@ -6,7 +6,7 @@ import os, codecs
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
-from prymatex.core.exceptions import APIUsageError, FileDoesNotExistError
+from prymatex.core.exceptions import APIUsageError, PrymatexIOException
 
 class PMXFileManager(PMXObject):
     ''' A File Manager
@@ -24,46 +24,61 @@ class PMXFileManager(PMXObject):
         super(PMXFileManager, self).__init__(parent)
 
         self.opened_files = {}
-        self.empty_file_counter = 0
+        self.new_file_counter = 0
         self.iconProvider = QtGui.QFileIconProvider()
         self.configure()
 
-    def fileUnused(self):
-        ''' Signal receiver for '''
-        pmx_file = self.sender()
-        print self.opened_files
-        if pmx_file.path:
-            pmx_file = self.opened_files.pop(pmx_file.path)
-            del pmx_file
-
+    def _add_file_history(self, fileInfo):
+        path = fileInfo.absoluteFilePath()
+        if path not in self.fileHistory:
+            self.fileHistory.insert(0, path)
+        if len(self.fileHistory) > self.fileHistoryLength:
+            self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
+        self.fileHistoryChanged.emit()
+        
     def openFile(self, fileInfo):
-        return QtCore.QFile(fileInfo.absoluteFilePath())
+        """Open and read a file, return the content."""
+        if not fileInfo.exists():
+            raise PrymatexIOException("The file does not exist")
+        if not fileInfo.isFile():
+            raise PrymatexIOException("%s is not a file" % fileInfo)
+        f = QtCore.QFile(fileInfo.absoluteFilePath())
+        if not f.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text):
+            raise PrymatexIOException("%s" % f.errorString())
+        stream = QtCore.QTextStream(f)
+        content = stream.readAll()
+        f.close()
+        #Update file history
+        self._add_file_history(fileInfo)
+        return content
     
-    def saveFile(self, fileInfo, data):
-        file = QtCore.QFile(fileInfo.absoluteFilePath())
-        file.open()
-        file.write(data)
+    def saveFile(self, fileInfo, content):
+        """Function that actually save the content of a file (thread)."""
+        try:
+            f = QtCore.QFile(fileInfo.absoluteFilePath())
+            if not f.open(QtCore.QIODevice.WriteOnly | QtCore.QIODevice.Truncate):
+                raise PrymatexIOException(f.errorString())
+            stream = QtCore.QTextStream(f)
+            f.write(stream)
+            f.flush()
+            f.close()
+        except:
+            raise
     
     @property
     def currentDirectory(self):
         #TODO: el ultimo directorio o algo de eso :)
         return os.path.expanduser("~") 
 
-    def getEmptyFile(self):
-        ''' Returns a QFile '''
-        path = os.path.join(self.currentDirectory, "untitled %d" % self.empty_file_counter)
-        self.empty_file_counter += 1
+    def getNewFile(self):
+        ''' Returns a new QFileInfo '''
+        path = os.path.join(self.currentDirectory, "untitled %d" % self.new_file_counter)
+        self.new_file_counter += 1
         return QtCore.QFileInfo(path)
         
     def getOpenFiles(self):
         names = QtGui.QFileDialog.getOpenFileNames(None, "Open Files", self.currentDirectory)
-        files = map(lambda name: QtCore.QFileInfo(name), names)
-        names.reverse()
-        self.fileHistory = names + self.fileHistory
-        if len(self.fileHistory) > self.fileHistoryLength:
-            self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
-        self.fileHistoryChanged.emit()
-        return files
+        return map(lambda name: QtCore.QFileInfo(name), names)
     
     def getSaveFile(self, title = "Save file"):
         name = QtGui.QFileDialog.getSaveFileName(None, title, "", "")

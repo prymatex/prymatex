@@ -1,4 +1,6 @@
-#encoding: utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 '''
 Code Editor Widget.
 '''
@@ -42,6 +44,12 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
     def getIcon(self):
         return self.pmxApp.fileManager.getFileIcon(self.file)
         
+    
+    def getContent(self):
+        return self.codeEdit.toPlainText()
+    
+    def setContent(self, content):
+        return self.codeEdit.setPlainText(content)
     
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)
