@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXWidget
 from prymatex.ui.configdialog import Ui_PMXSettingsDialog

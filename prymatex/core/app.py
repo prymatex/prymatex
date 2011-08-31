@@ -240,7 +240,7 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.support.manager import PMXSupportModelManager
 
         sharePath = self.settings.value('PMX_SHARE_PATH')
-        userPath = self.settings.value('PMX_USER_PATH')
+        homePath = self.settings.value('PMX_HOME_PATH')
 
         # esto hacerlo una propiedad del manager que corresponda
         disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
@@ -260,9 +260,9 @@ class PMXApplication(QtGui.QApplication):
                 'PMX_PID': os.getpid()
         });
 
-        manager.addNamespace('user', userPath)
+        manager.addNamespace('user', homePath)
         manager.updateEnvironment({ ##User
-                'PMX_USER_PATH': userPath,
+                'PMX_HOME_PATH': homePath,
                 'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
                 'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')

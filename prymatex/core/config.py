@@ -4,9 +4,14 @@
 Application configuration based on Qt's QSettings module.
 
 '''
-from PyQt4 import QtCore
-from os.path import abspath, expanduser, dirname, exists
 import os, plistlib
+from PyQt4 import QtCore
+
+try:
+    from win32com.shell import shellcon, shell
+    USER_HOME_PATH = shell.SHGetFolderPath(0, shellcon.CSIDL_APPDATA, 0, 0)
+except ImportError:
+    USER_HOME_PATH = os.path.expanduser("~")
 
 PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"
@@ -14,29 +19,29 @@ TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
 TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TEXTMATE_PREFERENCE_NAMES = ["Library","Preferences"]
 
-def get_prymatex_base_path():
-    return abspath(os.path.join(dirname(__file__), '..'))
+def get_prymatex_app_path():
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-def get_prymatex_user_path():
-    path = abspath(os.path.join(expanduser("~"), PRYMATEX_HOME_NAME))
-    if not exists(path):
+def get_prymatex_home_path():
+    path = os.path.join(USER_HOME_PATH, PRYMATEX_HOME_NAME)
+    if not os.path.exists(path):
         os.makedirs(path)
     #Create extra paths
     bundles = os.path.join(path, 'Bundles')
-    if not exists(bundles):
+    if not os.path.exists(bundles):
         os.makedirs(bundles, 0700)
     themes = os.path.join(path, 'Themes')
-    if not exists(themes):
+    if not os.path.exists(themes):
         os.makedirs(themes, 0700)
     return path
 
 def get_textmate_preferences_user_path():
-    path = abspath(os.path.join(expanduser("~"), *TEXTMATE_PREFERENCE_NAMES))
-    if not exists(path):
+    path = os.path.join(USER_HOME_PATH, *TEXTMATE_PREFERENCE_NAMES)
+    if not os.path.exists(path):
         os.makedirs(path)
     #Create extra files
     webpreview = os.path.join(path, TEXTMATE_WEBPREVIEW_NAME)
-    if not exists(webpreview):
+    if not os.path.exists(webpreview):
         plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
     return path
     
@@ -50,22 +55,20 @@ def build_prymatex_profile(path):
     os.makedirs(os.path.join(path, 'var'), 0700)
     
 def get_prymatex_profile_path(name, base):
-    path = abspath(os.path.join(base, name.lower()))
-    if not exists(path):
+    path = os.path.abspath(os.path.join(base, name.lower()))
+    if not os.path.exists(path):
         build_prymatex_profile(path)
     return path
 
-#Deprecated use qApp.settings
-PMX_BASE_PATH = get_prymatex_base_path()
 #Cuidado esta la necesita el paquete support en el modulo utils, ver como quitarla igualmente
-PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
+#PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
 
 TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
 
 class TextMateSettings(object):
     def __init__(self, file):
         self.file = file
-        if exists(self.file):
+        if os.path.exists(self.file):
             self.settings = plistlib.readPlist(self.file)
         else:
             self.settings = {}
@@ -195,9 +198,9 @@ class pmxConfigPorperty(object):
             self.fset(instance, value)
 
 class PMXSettings(object):
-    PMX_APP_PATH = get_prymatex_base_path()
+    PMX_APP_PATH = get_prymatex_app_path()
     PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
-    PMX_USER_PATH = get_prymatex_user_path()
+    PMX_HOME_PATH = get_prymatex_home_path()
     PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
 
     def __init__(self, profile_path):
@@ -212,7 +215,7 @@ class PMXSettings(object):
     
     @classmethod
     def getSettingsForProfile(cls, profile):
-        return PMXSettings(get_prymatex_profile_path(profile, cls.PMX_USER_PATH))
+        return PMXSettings(get_prymatex_profile_path(profile, cls.PMX_HOME_PATH))
     
     def getGroup(self, name):
         if name not in self.GROUPS:

@@ -971,7 +971,7 @@
   <customwidget>
    <class>PMXSplitTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>prymatex.gui.splitter</header>
+   <header>prymatex.gui.main.splitter</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

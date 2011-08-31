@@ -9,13 +9,14 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import SIGNAL, Qt, pyqtSignal, QTimer
 from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget, QAction, QMenu, QKeySequence, qApp, QFocusEvent
 
+from prymatex import resources
 from prymatex.support import PMXSyntax
-from prymatex.gui.splitter import PMXMainWidget
+from prymatex.gui.main.widget import PMXBaseWidget
 from os.path import join
 from prymatex.core.exceptions import APIUsageError
 from prymatex.ui.editorwidget import Ui_EditorWidget
 
-class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
+class PMXEditorWidget(PMXBaseWidget, Ui_EditorWidget):
     '''
     It implements the logic needed for gui defined in ui_files/editorwidget.ui
     This logic includes Go To Line and Find action behaviour.
@@ -28,36 +29,51 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
     fileStatusOutOfSync = QtCore.pyqtSignal(object)
     fileStatusDeleted = QtCore.pyqtSignal(object)
     
-    def __init__(self, file, parent = None):
+    def __init__(self, parent = None):
         super(PMXEditorWidget, self).__init__(parent)
         
         self.setupUi(self)
         self.setupFindReplaceWidget()
         self.setupGoToLineWidget()
-
-        self.file = file
     
-    def setFile(self, file):
-        changed = self.file.baseName() != file.baseName() or self.pmxApp.fileManager.getFileType(self.file) != self.pmxApp.fileManager.getFileType(file)
-        self.file = file
-        if changed:
-            self.tabStatusChanged.emit()
+    @classmethod
+    def factoryMethod(cls, fileInfo):
+        return cls()
+    
+    def setFileInfo(self, fileInfo):
+        self.fileInfo = fileInfo
+        self.tabStatusChanged.emit()
     
     def getTitle(self):
         return self.file.baseName()
     
-    
     def getIcon(self):
-        return self.pmxApp.fileManager.getFileIcon(self.file)
-        
-    
-    def getContent(self):
-        return self.codeEdit.toPlainText()
-    
+        if self.codeEdit.document().isModified():
+            return resources.ICONS["save"]
+        else:
+            return self.pmxApp.fileManager.getFileIcon(self.file)
     
     def setContent(self, content):
         return self.codeEdit.setPlainText(content)
     
+    def save(self):
+        fileInfo = self.fileInfo
+        newFile = fileInfo is None or not fileInfo.exists()
+        if newFile:
+            fileInfo = self.pmxApp.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file")
+        if fileInfo is not None:
+            content = self.codeEdit.toPlainText()
+            self.pmxApp.fileManager.saveFile(fileInfo, content)
+            self.codeEdit.document().setModified(False)
+            self.setFileInfo(fileInfo)
+    
+    def saveAs(self):
+        fileInfo = self.fileInfo
+        fileInfo = self.pmxApp.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file as")
+        if fileInfo is not None:
+            content = self.codeEdit.toPlainText()
+            self.pmxApp.fileManager.saveFile(fileInfo, content)
+            self.setFileInfo(fileInfo)
     
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)
@@ -67,20 +83,7 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
         self.fileTitleUpdate.emit()
     
     def on_codeEdit_modificationChanged(self, modified):
-        if modified:
-            self.fileStatusModified.emit(self)
-        else:
-            self.fileStatusSynced.emit(self)
-            
-    
-    @property
-    def tooltip(self):
-        return self.tabwidget.tabToolTip(self.index)
-    
-    @tooltip.setter
-    def tooltip(self, value):
-        self.tabwidget.setTabToolTip(self.index, value)
-    
+        self.tabStatusChanged.emit()
     
     @property
     def index(self):
@@ -95,11 +98,7 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
             w = w.parent()
         return w
         
-    def setTabTextColor(self, color):
-        self.tabwidget.tabBar().setTabTextColor(self.index, color)
-    
-    @property
-    def modified(self):
+    def isModified(self):
         return self.codeEdit.document().isModified()
     
     #===========================================================================

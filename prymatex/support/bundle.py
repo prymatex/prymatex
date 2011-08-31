@@ -272,7 +272,6 @@ class PMXBundleItem(PMXManagedObject):
             elif item is not None:
                 item.addNamespace(namespace)
         except Exception, e:
-            
             print "Error in bundle item %s (%s)" % (path, e)
     
     def execute(self, processor):

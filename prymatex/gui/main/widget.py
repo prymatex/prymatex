@@ -13,3 +13,22 @@ class PMXBaseWidget(PMXWidget):
     
     def getIcon(self):
         pass
+
+    def isModified(self):
+        return False
+    
+    def close(self):
+        pass
+    
+    def save(self):
+        pass
+    
+    def saveAs(self):
+        pass
+    
+    def setContent(self):
+        pass
+
+    @classmethod
+    def factoryMethod(cls, fileInfo):
+        pass

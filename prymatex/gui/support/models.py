@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
+from prymatex.resources import IMAGES
 from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent, RGBA2QColor, QColor2RGBA
-#from PyQt4.Qt import *
 
 #====================================================
 # Bundle Tree Model
@@ -12,15 +12,6 @@ class PMXBundleTreeNode(object):
     ''' 
         Bundle and bundle item decorator
     '''
-    ICONS = {
-             "template": QtGui.QPixmap(":/icons/bundles/templates.png"),
-             "command": QtGui.QPixmap(":/icons/bundles/commands.png"),
-             "syntax": QtGui.QPixmap(":/icons/bundles/languages.png"),
-             "preference": QtGui.QPixmap(":/icons/bundles/preferences.png"),
-             "dragcommand": QtGui.QPixmap(":/icons/bundles/drag-commands.png"),
-             "snippet": QtGui.QPixmap(":/icons/bundles/snippets.png"),
-             "macro": QtGui.QPixmap(":/icons/bundles/macros.png"),
-             "templatefile": QtGui.QPixmap(":/icons/bundles/template-files.png") }
     USED = []
     BANNED_ACCEL = ' \t'
     
@@ -42,7 +33,7 @@ class PMXBundleTreeNode(object):
     
     @property
     def icon(self):
-        icon = self.ICONS[self.TYPE] if self.TYPE in self.ICONS else None
+        icon = IMAGES[self.TYPE] if self.TYPE in IMAGES else None
         return icon
     
     @property

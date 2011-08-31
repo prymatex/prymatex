@@ -69,7 +69,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
     
     #TODO: Crear un methodo para instanciar editor widgets y agregarlos a una lista de editores activos
     def addEmptyEditor(self):
-        editorWidget = PMXEditorWidget(self.pmxApp.fileManager.getNewFile(), parent = self)
+        editorWidget = PMXEditorWidget.factoryMethod(parent = self)
         self.tabWidget.addTab(editorWidget)
         self.setCurrentEditor(editorWidget)
         
@@ -266,8 +266,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         Opens a file
         @return: editor widget or None if it can't make it
         '''
-        editorWidget = PMXEditorWidget(file, parent = self)
-        editorWidget.setContent(self.pmxApp.fileManager.openFile(file))
+        editorWidget = PMXEditorWidget(self)
+        content = self.pmxApp.fileManager.openFile(file)
+        editorWidget.setFile(file)
+        editorWidget.setContent(content)
         self.tabWidget.addTab(editorWidget)
         return editorWidget
     
@@ -291,24 +293,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
-        fileInfo = self.currentEditorWidget.file
-        newFile = not fileInfo.exists()
-        if newFile:
-            fileInfo = self.pmxApp.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file")
-        if fileInfo is not None:
-            content = self.currentEditorWidget.getContent()
-            self.pmxApp.fileManager.saveFile(fileInfo, content)
-            if newFile:
-                self.currentEditorWidget.setFile(fileInfo)
+        if self.currentEditorWidget.isModified:
+            self.currentEditorWidget.save()
         
     @QtCore.pyqtSlot()
     def on_actionSave_As_triggered(self):
-        fileInfo = self.currentEditorWidget.file
-        fileInfo = self.pmxApp.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file as")
-        if fileInfo is not None:
-            content = self.currentEditorWidget.getContent()
-            self.pmxApp.fileManager.saveFile(fileInfo, content)
-            self.currentEditorWidget.setFile(fileInfo)
+        self.currentEditorWidget.saveAs()
         
     @QtCore.pyqtSlot()
     def on_actionSaveAll_triggered(self):

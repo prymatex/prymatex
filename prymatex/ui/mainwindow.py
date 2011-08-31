@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Mon Aug 29 18:05:14 2011
+# Created: Wed Aug 31 16:28:58 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -600,6 +600,6 @@ class Ui_MainWindow(object):
         self.actionPanes.setText(_('Panes'))
         self.actionOpen_Recent.setText(_('Open Recent File'))
 
+from prymatex.gui.main.splitter import PMXSplitTabWidget
 from prymatex.gui.statusbar import PMXStatusBar
-from prymatex.gui.splitter import PMXSplitTabWidget
 from prymatex import resources_rc
