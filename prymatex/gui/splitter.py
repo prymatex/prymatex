@@ -17,8 +17,7 @@ from prymatex.core.base import PMXWidget
 
 class PMXMainWidget(PMXWidget):
     # Signals
-    iconChanged = QtCore.pyqtSignal(QtGui.QIcon)
-    titleChanged = QtCore.pyqtSignal(str)
+    tabStatusChanged = QtCore.pyqtSignal()
     
     def getTitle(self):
         pass
@@ -188,11 +187,19 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         idx = ch.addTab(w, w.getTitle())
         self.setActiveIcon(w, w.getIcon())
         
+        #Connect
+        w.tabStatusChanged.connect(self._tab_status_changed)
+        
         # If the tab has been added to the current tab widget then make it the current tab.
         if ch is self._current_tab_w:
             self._set_current_tab(ch, idx)
             ch.tabBar().setFocus()
     
+    def _tab_status_changed(self):
+        widget = self.sender()
+        self.setActiveIcon(widget, widget.getIcon())
+        self.setWidgetTitle(widget, widget.getTitle())
+        
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         

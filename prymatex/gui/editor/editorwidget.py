@@ -37,8 +37,14 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
 
         self.file = file
     
+    def setFile(self, file):
+        changed = self.file.baseName() != file.baseName() or self.pmxApp.fileManager.getFileType(self.file) != self.pmxApp.fileManager.getFileType(file)
+        self.file = file
+        if changed:
+            self.tabStatusChanged.emit()
+    
     def getTitle(self):
-        return self.file.fileName()
+        return self.file.baseName()
     
     
     def getIcon(self):
@@ -48,8 +54,10 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
     def getContent(self):
         return self.codeEdit.toPlainText()
     
+    
     def setContent(self, content):
         return self.codeEdit.setPlainText(content)
+    
     
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)
@@ -58,7 +66,6 @@ class PMXEditorWidget(PMXMainWidget, Ui_EditorWidget):
         self.codeEdit.document().setModified(False)
         self.fileTitleUpdate.emit()
     
-    # TODO: Move this thing up to tabwidget
     def on_codeEdit_modificationChanged(self, modified):
         if modified:
             self.fileStatusModified.emit(self)

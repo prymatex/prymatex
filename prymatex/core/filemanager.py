@@ -59,7 +59,8 @@ class PMXFileManager(PMXObject):
             if not f.open(QtCore.QIODevice.WriteOnly | QtCore.QIODevice.Truncate):
                 raise PrymatexIOException(f.errorString())
             stream = QtCore.QTextStream(f)
-            f.write(stream)
+            encoded_stream = stream.codec().fromUnicode(content)
+            f.write(encoded_stream)
             f.flush()
             f.close()
         except:
@@ -80,11 +81,19 @@ class PMXFileManager(PMXObject):
         names = QtGui.QFileDialog.getOpenFileNames(None, "Open Files", self.currentDirectory)
         return map(lambda name: QtCore.QFileInfo(name), names)
     
-    def getSaveFile(self, title = "Save file"):
-        name = QtGui.QFileDialog.getSaveFileName(None, title, "", "")
-        return QtCore.QFileInfo(name)
+    def getSaveFile(self, fileInfo = None, title = "Save file", filters = []):
+        if fileInfo is None:
+            fileInfo = QtCore.QFileInfo(self.currentDirectory)
+        filters = ";;".join(filters)
+        name = QtGui.QFileDialog.getSaveFileName(None, title, fileInfo.absoluteFilePath(), filters)
+        if name is not None:
+            return QtCore.QFileInfo(name)
     
     def getFileIcon(self, fileInfo):
         if fileInfo.exists():
             return self.iconProvider.icon(fileInfo)
         return self.iconProvider.icon(QtGui.QFileIconProvider.File)
+    
+    def getFileType(self, fileInfo):
+        return self.iconProvider.type(fileInfo)
+    

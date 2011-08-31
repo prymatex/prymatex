@@ -291,17 +291,24 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
-        fileInfo = self.pmxApp.fileManager.getSaveFile(title = "Save file")
-        #TODO: No te metas con el widget, pedile los datos
-        content = self.currentEditorWidget.getContent()
-        self.pmxApp.fileManager.saveFile(fileInfo, content)
+        fileInfo = self.currentEditorWidget.file
+        newFile = not fileInfo.exists()
+        if newFile:
+            fileInfo = self.pmxApp.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file")
+        if fileInfo is not None:
+            content = self.currentEditorWidget.getContent()
+            self.pmxApp.fileManager.saveFile(fileInfo, content)
+            if newFile:
+                self.currentEditorWidget.setFile(fileInfo)
         
     @QtCore.pyqtSlot()
     def on_actionSave_As_triggered(self):
-        fileInfo = self.pmxApp.fileManager.getSaveFile(title = "Save file as")
-        #TODO: No te metas con el widget, pedile los datos
-        content = self.currentEditorWidget.getContent()
-        self.pmxApp.fileManager.saveFile(fileInfo, data)
+        fileInfo = self.currentEditorWidget.file
+        fileInfo = self.pmxApp.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file as")
+        if fileInfo is not None:
+            content = self.currentEditorWidget.getContent()
+            self.pmxApp.fileManager.saveFile(fileInfo, content)
+            self.currentEditorWidget.setFile(fileInfo)
         
     @QtCore.pyqtSlot()
     def on_actionSaveAll_triggered(self):
