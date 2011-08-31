@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 #------------------------------------------------------------------------------
 # Copyright (c) 2008, Riverbank Computing Limited
 # All rights reserved.
@@ -13,17 +16,6 @@ import sys
 # Major library imports.
 import sip
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXWidget
-
-class PMXMainWidget(PMXWidget):
-    # Signals
-    tabStatusChanged = QtCore.pyqtSignal()
-    
-    def getTitle(self):
-        pass
-    
-    def getIcon(self):
-        pass
     
 class PMXSplitTabWidget(QtGui.QSplitter):
     """ The PMXSplitTabWidget class is a hierarchy of QSplitters the leaves of
