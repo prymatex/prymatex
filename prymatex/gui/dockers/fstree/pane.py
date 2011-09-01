@@ -7,17 +7,20 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
-from prymatex.ui.panefilesystem import Ui_FSPane
+from prymatex.ui.panefilesystem import Ui_FileSystemDock
 from prymatex.ui.filesystemsettings import Ui_FSSettingsDialog
 from prymatex.core.base import PMXObject
-from prymatex.core.config import pmxConfigPorperty
+from prymatex.core.settings import pmxConfigPorperty
 
-class FSPaneWidget(PMXObject, Ui_FSPane):
+class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
+    #=======================================================================
+    # Settings
+    #=======================================================================
+    SETTINGS_GROUP = 'FileSystem'
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
     def __init__(self, parent):
-        PMXObject.__init__(self, parent)
-        self.setObjectName('FSPaneWidget')
+        super(PMXFileSystemDock, self).__init__(parent)
         self.dialogConfigFilters = PMXFSPaneConfigDialog(self)
         self.setupUi(self)
 
@@ -28,9 +31,6 @@ class FSPaneWidget(PMXObject, Ui_FSPane):
         self.bookmarksView.pathChangeRequested.connect(self.openBookmark)
         self.configure()
         
-    class Meta:
-        settings = "fspane"
-    
     def treeRootPathChanged(self, path):
         #self.comboBookmarks.addItem(path)
         newPathParts = unicode(path).split(os.sep)
@@ -50,9 +50,7 @@ class FSPaneWidget(PMXObject, Ui_FSPane):
         self.comboBookmarks.setCurrentIndex(self.comboBookmarks.model().rowCount()-1)
         self.comboBookmarks.setEnabled(True)
         
-        
-        
-    
+
     def openBookmark(self, path):
         self.tree.setRootIndex(self.tree.model().index(path))
         self.comboBookmarks.setCurrentIndex(1)
@@ -116,13 +114,7 @@ class FSPaneWidget(PMXObject, Ui_FSPane):
             self.debug("Not a directory %s" % path)
     
 
-class PMXFSPaneConfigDialog(Ui_FSSettingsDialog, QtGui.QDialog):
+class PMXFSPaneConfigDialog(QtGui.QDialog, Ui_FSSettingsDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
-
-class PMXFSPaneDock(QtGui.QDockWidget):
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
-        self.setWindowTitle(_("File System Panel"))
-        self.setWidget(FSPaneWidget(self))

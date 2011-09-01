@@ -9,8 +9,8 @@ from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
 from prymatex.ui.panebrowser import Ui_BrowserPane
-from prymatex.core.base import PMXWidget, PMXObject
-from prymatex.core.config import pmxConfigPorperty
+from prymatex.core.base import PMXObject
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
 
@@ -124,7 +124,9 @@ class TextMate(QObject):
         return True
     isBusy = pyqtProperty("bool", isBusy)
     
-class PMXBrowserPaneDock(QtGui.QDockWidget, Ui_BrowserPane, PMXWidget):
+class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserPane, PMXObject):
+    SETTINGS_GROUP = "Browser"
+    
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
     def proxy(self, value):
@@ -145,11 +147,8 @@ class PMXBrowserPaneDock(QtGui.QDockWidget, Ui_BrowserPane, PMXWidget):
 
         QNetworkProxy.setApplicationProxy( network_proxy )
 
-    class Meta:
-        settings = 'browser'
-        
     def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
+        super(PMXBrowserDock, self).__init__(parent)
         self.setupUi(self)
         #New manager
         old_manager = self.webView.page().networkAccessManager()

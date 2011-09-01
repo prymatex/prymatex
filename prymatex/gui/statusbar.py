@@ -110,7 +110,7 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
     def configSyntaxMenu(self):
         self.syntaxMenu = QtGui.QComboBox(self)
         tableView = QtGui.QTableView(self)
-        tableView.setModel(self.pmxApp.supportManager.syntaxProxyModel)
+        tableView.setModel(self.application.supportManager.syntaxProxyModel)
         tableView.resizeColumnsToContents()
         tableView.resizeRowsToContents()
         tableView.verticalHeader().setVisible(False)
@@ -121,7 +121,7 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
         tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         tableView.setAutoScroll(False)
-        self.syntaxMenu.setModel(self.pmxApp.supportManager.syntaxProxyModel);
+        self.syntaxMenu.setModel(self.application.supportManager.syntaxProxyModel);
         self.syntaxMenu.setModelColumn(0);
         self.syntaxMenu.setView(tableView);
     

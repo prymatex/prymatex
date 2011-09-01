@@ -19,6 +19,12 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="margin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="PMXSplitTabWidget" name="splitTabWidget"/>
     </item>
@@ -205,7 +211,6 @@
    <addaction name="menuBundles"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="PMXStatusBar" name="statusbar"/>
   <action name="actionNew">
    <property name="icon">
     <iconset resource="../resources.qrc">
@@ -963,11 +968,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>PMXStatusBar</class>
-   <extends>QStatusBar</extends>
-   <header>prymatex.gui.statusbar</header>
-  </customwidget>
   <customwidget>
    <class>PMXSplitTabWidget</class>
    <extends>QTabWidget</extends>

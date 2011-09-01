@@ -5,12 +5,12 @@
 Some custom widgets used in the editor widget class
 '''
 
-from PyQt4.QtGui import QComboBox, QSpinBox, QWidget, QTextCursor, QTextDocument
+from PyQt4 import QtGui
+from PyQt4.QtGui import QComboBox, QWidget, QTextCursor, QTextDocument
 from PyQt4.QtCore import Qt, pyqtSignal, QRegExp
-from prymatex.core.base import PMXObject
 
 
-class PMXRefocusWidget(PMXObject):
+class PMXRefocusWidget(QtGui.QWidget):
     '''
     Refoucs Editor when the widget is hidden
     '''
@@ -24,7 +24,7 @@ class PMXRefocusWidget(PMXObject):
         super(PMXRefocusWidget, self).showEvent(event)
         self.showed.emit()
 
-class PMXSpinGoToLine(QSpinBox):
+class PMXSpinGoToLine(QtGui.QSpinBox):
     editionFinished = pyqtSignal()
     KEY_TRIGGERS = (Qt.Key_Escape, )
     

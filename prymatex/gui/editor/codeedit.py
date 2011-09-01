@@ -27,11 +27,13 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     PREFERENCE_CACHE = {}
     
     #=======================================================================
-    # Settings, config
+    # Settings
     #=======================================================================
+    SETTINGS_GROUP = 'CodeEdit'
+    
     @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
-        syntax = self.pmxApp.supportManager.getBundleItem(uuid)
+        syntax = self.application.supportManager.getBundleItem(uuid)
         if syntax != None:
             self.setSyntax(syntax)
     
@@ -41,7 +43,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
-        theme = self.pmxApp.supportManager.getTheme(uuid)
+        theme = self.application.supportManager.getTheme(uuid)
         self.syntaxProcessor.formatter = theme
         self.colours = theme.settings
         #Editor colours
@@ -58,9 +60,6 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
         self.highlightCurrentLine()
-        
-    class Meta(object):
-        settings = 'Editor'
     
     @property
     def tabKeyBehavior(self):
@@ -130,7 +129,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     def getPreference(self, scope):
         if scope not in PMXCodeEdit.PREFERENCE_CACHE:
-            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.pmxApp.supportManager.getPreferenceSettings(scope)
+            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.application.supportManager.getPreferenceSettings(scope)
         return PMXCodeEdit.PREFERENCE_CACHE[scope]
 
     def getCurrentScope(self):
@@ -171,14 +170,15 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         return status
     
     def updateStatusBar(self):
-        self.mainWindow.statusbar.updateStatus(self.status)
+        #self.mainWindow.statusbar.updateStatus(self.status)
+        pass
         
     #TODO: un setter para la syntax
     def setSyntax(self, syntax):
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
             self.folding.indentSensitive = syntax.indentSensitive
-            self.mainWindow.statusbar.updateSyntax(syntax)
+            #self.mainWindow.statusbar.updateSyntax(syntax)
     
     @property
     def syntax(self):
@@ -401,7 +401,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     def keyPressBundleItem(self, event):
         keyseq = int(event.modifiers()) + event.key()
         scope = self.getCurrentScope()
-        items = self.pmxApp.supportManager.getKeyEquivalentItem(keyseq, scope)
+        items = self.application.supportManager.getKeyEquivalentItem(keyseq, scope)
         if items:
             if len(items) == 1:
                 self.insertBundleItem(items[0])
@@ -442,9 +442,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.indent(self.tabKeyBehavior)
         else:
             scope = self.getCurrentScope()
-            trigger = self.pmxApp.supportManager.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
+            trigger = self.application.supportManager.getTabTriggerSymbol(unicode(cursor.block().text()), cursor.columnNumber())
             if trigger != None:
-                snippets = self.pmxApp.supportManager.getTabTriggerItem(trigger, scope)
+                snippets = self.application.supportManager.getTabTriggerItem(trigger, scope)
                 if len(snippets) > 1:
                     self.selectBundleItem(snippets, tabTrigger = True)
                     return
@@ -486,7 +486,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         prev = cursor.block().previous()
         line = block.text()
         if self.document().blockCount() == 1:
-            syntax = self.pmxApp.supportManager.findSyntaxByFirstLine(line)
+            syntax = self.application.supportManager.findSyntaxByFirstLine(line)
             if syntax != None:
                 self.setSyntax(syntax)
         preference = self.getPreference(block.userData().getLastScope())

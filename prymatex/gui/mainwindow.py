@@ -56,9 +56,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         
         # Connect Signals
         self.splitTabWidget.tabWindowChanged.connect(self.setCurrentEditor)
-        self.statusbar.syntaxChanged.connect(self.setEditorSyntax)
+        #self.statusbar.syntaxChanged.connect(self.setEditorSyntax)
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
-        self.pmxApp.fileManager.fileHistoryChanged.connect(self._update_file_history)
+        self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
         
         self.configure()
         self.center()
@@ -83,16 +83,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         '''
         Basic panels, dock objects. More docks should be available via plugins
         '''
-        from prymatex.gui.dockers.fstree import PMXFSPaneDock
+        from prymatex.gui.dockers.fstree import PMXFileSystemDock
         from prymatex.gui.dockers.project import PMXProjectDock
         from prymatex.gui.dockers.symbols import PMXSymboldListDock
-        from prymatex.gui.dockers.browser import PMXBrowserPaneDock
+        from prymatex.gui.dockers.browser import PMXBrowserDock
         from prymatex.gui.dockers.console import PMXConsoleDock
-        from prymatex.gui.dockers.logger import QtLogHandler, LogDockWidget
+        from prymatex.gui.dockers.logger import QtLogHandler, PMXLoggerDock
         
         self.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
         
-        self.paneFileSystem = PMXFSPaneDock(self)
+        self.paneFileSystem = PMXFileSystemDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
         self.menuPanels.addAction(self.paneFileSystem.toggleViewAction())
         self.paneFileSystem.hide()
@@ -107,7 +107,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         self.menuPanels.addAction(self.paneSymbolList.toggleViewAction())
         self.paneSymbolList.hide()
         
-        self.paneBrowser = PMXBrowserPaneDock(self)
+        self.paneBrowser = PMXBrowserDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneBrowser)
         self.menuPanels.addAction(self.paneBrowser.toggleViewAction())
         self.paneBrowser.hide()
@@ -120,7 +120,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         #Logging Sub-Window setup
         qthandler = QtLogHandler()
         self.logger.addHandler(qthandler)
-        self.paneLogging = LogDockWidget(qthandler, self)
+        self.paneLogging = PMXLoggerDock(qthandler, self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneLogging)
         self.menuPanels.addAction(self.paneLogging.toggleViewAction())
         self.paneLogging.hide()
@@ -142,12 +142,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         
         #Bundles Menu
         name_order = lambda b1, b2: cmp(b1.name, b2.name)
-        for bundle in sorted(self.pmxApp.supportManager.getAllBundles(), name_order):
-            menu = self.pmxApp.supportManager.buildBundleMenu(bundle, self)
+        for bundle in sorted(self.application.supportManager.getAllBundles(), name_order):
+            menu = self.application.supportManager.buildBundleMenu(bundle, self)
             if menu is not None:
                 self.menuBundles.addMenu(menu)
         #Connect
-        self.pmxApp.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
+        self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
 
     def _update_file_history(self):
         menu = self.actionOpen_Recent.menu()
@@ -156,7 +156,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
             self.actionOpen_Recent.setMenu(menu)
         else:
             menu.clear()
-        for file in self.pmxApp.fileManager.fileHistory:
+        for file in self.application.fileManager.fileHistory:
             action = QtGui.QAction(file, self)
             receiver = lambda file = QtCore.QFile(file): self.openFile(file)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
@@ -174,7 +174,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     def on_actionSelect_Bundle_Item_triggered(self):
         editor = self.currentEditor
         scope = editor.getCurrentScope()
-        items = self.pmxApp.supportManager.getActionItems(scope)
+        items = self.application.supportManager.getActionItems(scope)
         item = self.bundleItemSelector.select(items)
         if item is not None:
             self.currentEditor.insertBundleItem(item)
@@ -241,7 +241,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         Opens one or more files
         '''
         #TODO: El directory puede ser dependiente del current editor o del file manager
-        files = self.pmxApp.fileManager.getOpenFiles()
+        files = self.application.fileManager.getOpenFiles()
         editorWidget = None
         for file in files:
             editorWidget = self.openFile(file)
@@ -251,7 +251,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     @QtCore.pyqtSlot()
     def on_actionShow_Bundle_Editor_triggered(self):
         #TODO: mejorar esto
-        self.pmxApp.bundleEditor.exec_()
+        self.application.bundleEditor.exec_()
 
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
@@ -273,7 +273,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         @return: editor widget or None if it can't make it
         '''
         editorWidget = PMXEditorWidget(self)
-        content = self.pmxApp.fileManager.openFile(file)
+        content = self.application.fileManager.openFile(file)
         editorWidget.setFile(file)
         editorWidget.setContent(content)
         self.tabWidget.addTab(editorWidget)
@@ -326,7 +326,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         now = datetime.now()
         name = now.strftime('sshot-%Y-%m-%d-%H_%M_%S') + '.' + format
         pxm.save(name, format)
-        self.statusBar().showMessage("Screenshot saved as <a>%s</a>" % name)
+        #self.statusBar().showMessage("Screenshot saved as <a>%s</a>" % name)
         
     @QtCore.pyqtSlot()
     def on_actionZoom_In_triggered(self):
@@ -367,7 +367,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         
     @QtCore.pyqtSlot()
     def on_actionPreferences_triggered(self):
-        self.pmxApp.configdialog.exec_()
+        self.application.configdialog.exec_()
     
         
     @QtCore.pyqtSlot()
@@ -405,15 +405,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         self.currentEditorWidget = editorWidget
         
         #Update status bar
-        self.statusBar().updateStatus(editorWidget.codeEdit.status)
-        self.statusBar().updateSyntax(editorWidget.codeEdit.syntax)
+        #self.statusBar().updateStatus(editorWidget.codeEdit.status)
+        #self.statusBar().updateSyntax(editorWidget.codeEdit.syntax)
         
         #Update window title
         template = Template(self.windowTitleTemplate)
         
-        extra_attrs = self.pmxApp.supportManager.buildEnvironment()
+        extra_attrs = self.application.supportManager.buildEnvironment()
         s = template.safe_substitute(APPNAME = "Prymatex",
-                                     FILE = editorWidget.file.fileName(),
                                      PROJECT = 'No project',
                                      **extra_attrs)
         self.setWindowTitle(s)

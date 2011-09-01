@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Tue Aug 30 16:09:22 2011
+# Created: Thu Sep  1 18:16:18 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -15,22 +15,21 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_FSPane(object):
-    def setupUi(self, FSPane):
-        FSPane.setObjectName(_fromUtf8("FSPane"))
-        FSPane.resize(282, 457)
-        FSPane.setStyleSheet(_fromUtf8("QPushButton {\n"
-"    padding: 5px;\n"
-"\n"
-"}"))
-        self.verticalLayout = QtGui.QVBoxLayout(FSPane)
+class Ui_FileSystemDock(object):
+    def setupUi(self, FileSystemDock):
+        FileSystemDock.setObjectName(_fromUtf8("FileSystemDock"))
+        FileSystemDock.resize(400, 484)
+        self.dockWidgetContents = QtGui.QWidget()
+        self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
+        self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.buttonsLayout = QtGui.QHBoxLayout()
         self.buttonsLayout.setSpacing(-1)
         self.buttonsLayout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
         self.buttonsLayout.setObjectName(_fromUtf8("buttonsLayout"))
-        self.buttonUp = QtGui.QPushButton(FSPane)
+        self.buttonUp = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonUp.setMaximumSize(QtCore.QSize(24, 24))
         self.buttonUp.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
@@ -40,7 +39,7 @@ class Ui_FSPane(object):
         self.buttonUp.setFlat(True)
         self.buttonUp.setObjectName(_fromUtf8("buttonUp"))
         self.buttonsLayout.addWidget(self.buttonUp)
-        self.buttonBackRoot = QtGui.QPushButton(FSPane)
+        self.buttonBackRoot = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonBackRoot.setMaximumSize(QtCore.QSize(24, 24))
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-previous.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -49,7 +48,7 @@ class Ui_FSPane(object):
         self.buttonBackRoot.setFlat(True)
         self.buttonBackRoot.setObjectName(_fromUtf8("buttonBackRoot"))
         self.buttonsLayout.addWidget(self.buttonBackRoot)
-        self.pushFowardRoot = QtGui.QPushButton(FSPane)
+        self.pushFowardRoot = QtGui.QPushButton(self.dockWidgetContents)
         self.pushFowardRoot.setMaximumSize(QtCore.QSize(24, 24))
         self.pushFowardRoot.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
@@ -58,7 +57,7 @@ class Ui_FSPane(object):
         self.pushFowardRoot.setFlat(True)
         self.pushFowardRoot.setObjectName(_fromUtf8("pushFowardRoot"))
         self.buttonsLayout.addWidget(self.pushFowardRoot)
-        self.buttonFilter = QtGui.QPushButton(FSPane)
+        self.buttonFilter = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonFilter.setMaximumSize(QtCore.QSize(24, 24))
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-filter.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -67,7 +66,7 @@ class Ui_FSPane(object):
         self.buttonFilter.setFlat(True)
         self.buttonFilter.setObjectName(_fromUtf8("buttonFilter"))
         self.buttonsLayout.addWidget(self.buttonFilter)
-        self.buttonSyncTabFile = QtGui.QPushButton(FSPane)
+        self.buttonSyncTabFile = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonSyncTabFile.setMaximumSize(QtCore.QSize(24, 24))
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -77,7 +76,7 @@ class Ui_FSPane(object):
         self.buttonSyncTabFile.setFlat(True)
         self.buttonSyncTabFile.setObjectName(_fromUtf8("buttonSyncTabFile"))
         self.buttonsLayout.addWidget(self.buttonSyncTabFile)
-        self.buttonCollapseAll = QtGui.QPushButton(FSPane)
+        self.buttonCollapseAll = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonCollapseAll.setMaximumSize(QtCore.QSize(24, 24))
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/debug-step-into.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -86,7 +85,7 @@ class Ui_FSPane(object):
         self.buttonCollapseAll.setFlat(True)
         self.buttonCollapseAll.setObjectName(_fromUtf8("buttonCollapseAll"))
         self.buttonsLayout.addWidget(self.buttonCollapseAll)
-        self.pushShowHidden = QtGui.QPushButton(FSPane)
+        self.pushShowHidden = QtGui.QPushButton(self.dockWidgetContents)
         self.pushShowHidden.setMaximumSize(QtCore.QSize(24, 24))
         self.pushShowHidden.setText(_fromUtf8(""))
         icon6 = QtGui.QIcon()
@@ -99,7 +98,7 @@ class Ui_FSPane(object):
         spacerItem = QtGui.QSpacerItem(10, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.buttonsLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.buttonsLayout)
-        self.comboBookmarks = QtGui.QComboBox(FSPane)
+        self.comboBookmarks = QtGui.QComboBox(self.dockWidgetContents)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -113,7 +112,7 @@ class Ui_FSPane(object):
         icon8.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.comboBookmarks.addItem(icon8, _fromUtf8(""))
         self.verticalLayout.addWidget(self.comboBookmarks)
-        self.stackedWidget = QtGui.QStackedWidget(FSPane)
+        self.stackedWidget = QtGui.QStackedWidget(self.dockWidgetContents)
         self.stackedWidget.setLineWidth(0)
         self.stackedWidget.setObjectName(_fromUtf8("stackedWidget"))
         self.pageFSTree = QtGui.QWidget()
@@ -135,13 +134,14 @@ class Ui_FSPane(object):
         self.verticalLayout_3.addWidget(self.bookmarksView)
         self.stackedWidget.addWidget(self.pageBookmarks)
         self.verticalLayout.addWidget(self.stackedWidget)
+        FileSystemDock.setWidget(self.dockWidgetContents)
 
-        self.retranslateUi(FSPane)
+        self.retranslateUi(FileSystemDock)
         self.stackedWidget.setCurrentIndex(1)
-        QtCore.QMetaObject.connectSlotsByName(FSPane)
+        QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
 
-    def retranslateUi(self, FSPane):
-        FSPane.setWindowTitle(_('File System'))
+    def retranslateUi(self, FileSystemDock):
+        FileSystemDock.setWindowTitle(_('File System'))
         self.buttonUp.setToolTip(_('Go up one level'))
         self.buttonBackRoot.setToolTip(_('Go previous place'))
         self.pushFowardRoot.setToolTip(_('Go next place'))

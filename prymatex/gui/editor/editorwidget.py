@@ -37,8 +37,8 @@ class PMXEditorWidget(PMXBaseWidget, Ui_EditorWidget):
         self.setupGoToLineWidget()
     
     @classmethod
-    def factoryMethod(cls, fileInfo):
-        return cls()
+    def factoryMethod(cls, fileInfo = None, parent = None):
+        return cls(parent)
     
     def setFileInfo(self, fileInfo):
         self.fileInfo = fileInfo
@@ -51,7 +51,7 @@ class PMXEditorWidget(PMXBaseWidget, Ui_EditorWidget):
         if self.codeEdit.document().isModified():
             return resources.ICONS["save"]
         else:
-            return self.pmxApp.fileManager.getFileIcon(self.file)
+            return self.application.fileManager.getFileIcon(self.file)
     
     def setContent(self, content):
         return self.codeEdit.setPlainText(content)
@@ -60,19 +60,19 @@ class PMXEditorWidget(PMXBaseWidget, Ui_EditorWidget):
         fileInfo = self.fileInfo
         newFile = fileInfo is None or not fileInfo.exists()
         if newFile:
-            fileInfo = self.pmxApp.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file")
+            fileInfo = self.application.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file")
         if fileInfo is not None:
             content = self.codeEdit.toPlainText()
-            self.pmxApp.fileManager.saveFile(fileInfo, content)
+            self.application.fileManager.saveFile(fileInfo, content)
             self.codeEdit.document().setModified(False)
             self.setFileInfo(fileInfo)
     
     def saveAs(self):
         fileInfo = self.fileInfo
-        fileInfo = self.pmxApp.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file as")
+        fileInfo = self.application.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file as")
         if fileInfo is not None:
             content = self.codeEdit.toPlainText()
-            self.pmxApp.fileManager.saveFile(fileInfo, content)
+            self.application.fileManager.saveFile(fileInfo, content)
             self.setFileInfo(fileInfo)
     
     def focusInEvent(self, event):

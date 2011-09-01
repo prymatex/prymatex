@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Wed Aug 31 16:28:58 2011
+# Created: Thu Sep  1 18:21:16 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,6 +25,8 @@ class Ui_MainWindow(object):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.splitTabWidget = PMXSplitTabWidget(self.centralwidget)
         self.splitTabWidget.setObjectName(_fromUtf8("splitTabWidget"))
@@ -62,9 +64,6 @@ class Ui_MainWindow(object):
         self.menuBundles = QtGui.QMenu(self.menubar)
         self.menuBundles.setObjectName(_fromUtf8("menuBundles"))
         MainWindow.setMenuBar(self.menubar)
-        self.statusbar = PMXStatusBar(MainWindow)
-        self.statusbar.setObjectName(_fromUtf8("statusbar"))
-        MainWindow.setStatusBar(self.statusbar)
         self.actionNew = QtGui.QAction(MainWindow)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -601,5 +600,4 @@ class Ui_MainWindow(object):
         self.actionOpen_Recent.setText(_('Open Recent File'))
 
 from prymatex.gui.main.splitter import PMXSplitTabWidget
-from prymatex.gui.statusbar import PMXStatusBar
 from prymatex import resources_rc

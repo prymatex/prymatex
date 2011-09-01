@@ -176,8 +176,8 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             ch = _TabWidget(self)
             self.addWidget(ch)
 
-        idx = ch.addTab(w, w.getTitle())
-        self.setActiveIcon(w, w.getIcon())
+        idx = ch.addTab(w, "w.getTitle()")
+        #self.setActiveIcon(w, w.getIcon())
         
         #Connect
         w.tabStatusChanged.connect(self._tab_status_changed)
@@ -210,26 +210,20 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         if tw is not None:
             self._set_current_tab(tw, tidx)
 
-    def setActiveIcon(self, w, icon = None):
+    def setActiveIcon(self, w, icon):
         """ Set the active icon on a widget. """
 
         tw, tidx = self._tab_widget(w)
 
         if tw is not None:
-            if icon is None:
-                icon = tw.active_icon()
-            
             tw.setTabIcon(tidx, icon)
     
-    def setTabTextColor(self, w, color=None):
+    def setTabTextColor(self, w, color):
         """ Set the tab text color on a particular widget w
         """
         tw, tidx = self._tab_widget(w)
 
         if tw is not None:
-            if color is None:
-                # null color reverts to foreground role color
-                color = QtGui.QColor()
             tw.tabBar().setTabTextColor(tidx, color)
 
     def setWidgetTitle(self, w, title):
@@ -725,21 +719,8 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         return miss
 
 
-active_style = """QTabWidget::pane { /* The tab widget frame */
-     border: 2px solid #00FF00;
- }
-"""
-inactive_style = """QTabWidget::pane { /* The tab widget frame */
-     border: 2px solid #C2C7CB;
-     margin: 0px;
- }
-"""
-
 class _TabWidget(QtGui.QTabWidget):
     """ The _TabWidget class is a QTabWidget with a dragable tab bar. """
-
-    # The active icon.  It is created when it is first needed.
-    _active_icon = None
 
     def __init__(self, root, *args):
         """ Initialise the instance. """
@@ -749,7 +730,6 @@ class _TabWidget(QtGui.QTabWidget):
         # XXX this requires Qt > 4.5
         if sys.platform == 'darwin':
             self.setDocumentMode(True)
-        #self.setStyleSheet(inactive_style)
 
         self._root = root
 
@@ -759,44 +739,6 @@ class _TabWidget(QtGui.QTabWidget):
 
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self._close_tab)        
-
-    def active_icon(self):
-        """ Return the QIcon to be used to indicate an active tab page. """
-
-        if _TabWidget._active_icon is None:
-            # The gradient start and stop colours.
-            start = QtGui.QColor(0, 255, 0)
-            stop = QtGui.QColor(0, 63, 0)
-
-            size = self.iconSize()
-            width = size.width()
-            height = size.height()
-
-            pm = QtGui.QPixmap(size)
-
-            p = QtGui.QPainter()
-            p.begin(pm)
-
-            # Fill the image background from the tab background.
-            p.initFrom(self.tabBar())
-            p.fillRect(0, 0, width, height, p.background())
-
-            # Create the colour gradient.
-            rg = QtGui.QRadialGradient(width / 2, height / 2, width)
-            rg.setColorAt(0.0, start)
-            rg.setColorAt(1.0, stop)
-
-            # Draw the circle.
-            p.setBrush(rg)
-            p.setPen(QtCore.Qt.NoPen)
-            p.setRenderHint(QtGui.QPainter.Antialiasing)
-            p.drawEllipse(0, 0, width, height)
-
-            p.end()
-
-            _TabWidget._active_icon = QtGui.QIcon(pm)
-
-        return _TabWidget._active_icon
 
     def _still_needed(self):
         """ Delete the tab widget (and any relevant parent splitters) if it is
