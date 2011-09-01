@@ -40,7 +40,7 @@ class PMXNewFromTemplateDialog(QDialog, Ui_NewFromTemplateDialog, PMXObject):
         self.completerFileSystem = QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
         
-        self.templateProxyModel = self.pmxApp.supportManager.templateProxyModel
+        self.templateProxyModel = self.application.supportManager.templateProxyModel
         self.comboTemplates.setModel(self.templateProxyModel)
         self.comboTemplates.setModelColumn(0)
         self.buttonCreate.setDefault(True)

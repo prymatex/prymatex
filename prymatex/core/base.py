@@ -3,16 +3,14 @@
 
 from PyQt4 import QtCore, QtGui
 
-class PMXOptions(object):
-    def __init__(self, options):
-        self.settings = QtGui.QApplication.instance().settings.getGroup(getattr(options, 'settings', ''))
-
 class PMXObjectBase(QtCore.pyqtWrapperType):
     def __new__(cls, name, bases, attrs):
         module = attrs.pop('__module__')
         new_class = super(PMXObjectBase, cls).__new__(cls, name, bases, { '__module__': module })
-        opts = PMXOptions(attrs.get('Meta', None))
-        new_class.add_to_class('_meta', opts)
+        settings = attrs.pop('SETTINGS_GROUP', name)
+        if settings is not None:
+            settings = QtGui.QApplication.instance().settings.getGroup(settings)
+        new_class.add_to_class('settings', settings)
         for name, attr in attrs.iteritems():
             new_class.add_to_class(name, attr)
         return new_class
@@ -32,42 +30,14 @@ class PMXObject(QtCore.QObject):
     __logger = None
     
     def __del__(self):
-        self._meta.settings.removeListener(self)
+        self.settings.removeListener(self)
         
     #============================================================
     # Settings
     #============================================================
     def configure(self):
-        self._meta.settings.addListener(self)
-        self._meta.settings.configure(self)
-    
-    # Shortcuts
-    def settingsValue(self, name, default = None):
-        ''' A shortcut, for access to root settings
-            Usage: 
-                Accesss to Bar group
-                PMXObjectInstance.settingsValue("Bar/settingsAttribute");
-                PMXObjectInstance.settingsValue("Bar/settingsAttribute", default = "foo");
-                Accesss to Global group
-                PMXObjectInstance.settingsValue("settingsAttribute", default = "foo");
-        '''
-        value = self.pmxApp.settings.value(name)
-        value = value if value != None else default
-        return value
-    
-    def setSettingsValue(self, name, value):
-        ''' A shortcut, for access to root settings
-            Usage: 
-                Set settingsAttribute in Bar group
-                PMXObjectInstance.setSettingsValue("Bar/settingsAttribute", 10);
-                Set settingsAttribute in Global group
-                PMXObjectInstance.setSettingsValue("settingsAttribute", 10);
-        '''
-        value = self.pmxApp.settings.setValue(name, value)
-    
-    def getSettingsGroup(self, name):
-        ''' Shortcut '''
-        return self.pmxApp.settings.getGroup(name)
+        self.settings.addListener(self)
+        self.settings.configure(self)
     
     #============================================================
     # Shortcut
@@ -81,7 +51,7 @@ class PMXObject(QtCore.QObject):
         return self.__class__.__mainwindow
     
     @property
-    def pmxApp(self):
+    def application(self):
         '''
         Shortcut property for PyQt4.QtGui.QApplication.instance().
         '''
@@ -113,9 +83,3 @@ class PMXObject(QtCore.QObject):
     
     def critical(self, msg, *args, **kwargs):
         self.logger.critical(msg)
-        
-class PMXWidget(QtGui.QWidget, PMXObject):
-    def center(self):
-        screen = QtGui.QDesktopWidget().screenGeometry()
-        size =  self.geometry()
-        self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)

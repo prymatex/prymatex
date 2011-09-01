@@ -13,7 +13,6 @@ import prymatex
 from prymatex import resources_rc
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.coroutines import Scheduler
 
 from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
 
@@ -54,14 +53,13 @@ class PMXApplication(QtGui.QApplication):
         '''
         Inicialización de la aplicación.
         '''
-        from prymatex.core.config import PMXSettings
+        from prymatex.core.settings import PMXSettings
         #self.options = options
         QtGui.QApplication.__init__(self, [])
         
         self.settings = PMXSettings.getSettingsForProfile(options.profile)
         
         self.executor = futures.ThreadPoolExecutor(max_workers=5)
-        #self.executor = Scheduler()
         
         # Some init's
         self._setup_logging()
@@ -73,8 +71,7 @@ class PMXApplication(QtGui.QApplication):
         self.loadSupportManager()
         self.loadKernelManager()
         
-        self.connect(self, QtCore.SIGNAL('aboutToQuit()'), self.cleanup)
-        self.aboutToQuit.connect(self.settings.sync)
+        self.aboutToQuit.connect(self.cleanup)
         
         self.setup_file_manager()
         
@@ -219,7 +216,7 @@ class PMXApplication(QtGui.QApplication):
         self.projectUrl = prymatex.__url__    
     
     def cleanup(self):
-        pass
+        self.settings.sync()
     
     def commitData(self):
         print "Commit data"
@@ -237,7 +234,7 @@ class PMXApplication(QtGui.QApplication):
     @deco.logtime
     def loadSupportManager(self):
         # Lazy load
-        from prymatex.gui.support.manager import PMXSupportModelManager
+        from prymatex.gui.support.manager import PMXSupportManager
 
         sharePath = self.settings.value('PMX_SHARE_PATH')
         homePath = self.settings.value('PMX_HOME_PATH')
@@ -245,7 +242,7 @@ class PMXApplication(QtGui.QApplication):
         # esto hacerlo una propiedad del manager que corresponda
         disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
         #manager = PMXSupportManager(disabledBundles = [], deletedBundles = [])
-        manager = PMXSupportModelManager()
+        manager = PMXSupportManager()
         manager.addNamespace('prymatex', sharePath)
         manager.updateEnvironment({ #TextMate Compatible :P
                 'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),

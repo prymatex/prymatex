@@ -9,19 +9,19 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.utils import createButton, addActionsToMenu
 from prymatex.ui.panefilesystem import Ui_FSPane
 from prymatex.ui.filesystemsettings import Ui_FSSettingsDialog
-from prymatex.core.base import PMXWidget
+from prymatex.core.base import PMXObject
 from prymatex.core.config import pmxConfigPorperty
 
-class FSPaneWidget(PMXWidget, Ui_FSPane):
+class FSPaneWidget(PMXObject, Ui_FSPane):
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
     def __init__(self, parent):
-        PMXWidget.__init__(self, parent)
+        PMXObject.__init__(self, parent)
         self.setObjectName('FSPaneWidget')
         self.dialogConfigFilters = PMXFSPaneConfigDialog(self)
         self.setupUi(self)
 
-        self.tree.setRootIndex(self.tree.model().index(self.pmxApp.fileManager.currentDirectory))
+        self.tree.setRootIndex(self.tree.model().index(self.application.fileManager.currentDirectory))
         self.setupBookmarksCombo()
         self.tree.rootChanged.connect(self.treeRootPathChanged)
         

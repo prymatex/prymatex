@@ -5,12 +5,12 @@ from PyQt4 import QtCore, QtGui
 import uuid as uuidmodule
 from prymatex.support.manager import PMXSupportBaseManager
 from prymatex.core.base import PMXObject
-from prymatex.core.config import pmxConfigPorperty
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
 from prymatex.mvc.proxies import bisect_key
 
-class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
+class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     #Signals
     bundleItemTriggered = QtCore.pyqtSignal(object)
     
@@ -25,8 +25,7 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     def disabled(self, disabled):
         self.disabledObjects = map(lambda uuid: uuidmodule.UUID(uuid), disabled)
         
-    class Meta:
-        settings = 'Manager'
+    SETTINGS_GROUP = 'SupportManager'
     
     def __init__(self):
         PMXObject.__init__(self)
@@ -140,7 +139,7 @@ class PMXSupportModelManager(PMXSupportBaseManager, PMXObject):
     def addBundleItem(self, bundleItem):
         bundleItemNode = PMXBundleTreeNode(bundleItem)
         self.bundleTreeModel.appendBundleItem(bundleItemNode)
-        super(PMXSupportModelManager, self).addBundleItem(bundleItemNode)
+        super(PMXSupportManager, self).addBundleItem(bundleItemNode)
         return bundleItemNode
     
     def removeBundleItem(self, bundleItem):

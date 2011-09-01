@@ -10,23 +10,24 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from prymatex.ui.mainwindow import Ui_MainWindow
-from prymatex.core.base import PMXWidget
-from prymatex.core.config import pmxConfigPorperty
+from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.base import PMXObject
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
 
 
-class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
-    '''
-    Prymatex main window, it holds a currentEditor property which
-    grants access to the focused editor.
-    '''
+class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
+    '''Prymatex main window'''
+    ##########################################################
+    # Signals
+    ##########################################################
     newFileCreated = pyqtSignal(str)
     
-    class Meta:
-        settings = 'MainWindow'
-    
+    ##########################################################
     # Settings
+    ##########################################################
+    SETTINGS_GROUP = 'MainWindow'
+    
     windowTitleTemplate = pmxConfigPorperty(default = "$APPNAME")
     
     @pmxConfigPorperty(default = True)
@@ -61,6 +62,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXWidget):
         
         self.configure()
         self.center()
+    
+    def center(self):
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        size =  self.geometry()
+        self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
     
     #Deprecate tabWidget
     @property

@@ -1,5 +1,7 @@
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
 
-#TODO: Setup qt
+#Setup qt
 import sip
 sip.setapi('QDate', 2)
 sip.setapi('QTime', 2)

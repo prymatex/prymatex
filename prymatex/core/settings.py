@@ -180,7 +180,7 @@ class pmxConfigPorperty(object):
         self.fget = getattr(cls, name, None)
         if self.fset == None:
             self.fset = getattr(cls, "set" + name.title(), None)
-        cls._meta.settings.addSetting(self)
+        cls.settings.addSetting(self)
         setattr(cls, name, self)
     
     def __call__(self, function):

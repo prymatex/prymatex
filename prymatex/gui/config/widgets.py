@@ -5,7 +5,6 @@ from PyQt4.Qt import Qt, QVariant
 from PyQt4.QtNetwork import QNetworkProxy
 from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
 from prymatex.core.base import PMXObject
-from prymatex.core.config import pmxConfigPorperty
 
 from prymatex.ui.configupdates import Ui_Updates
 from prymatex.ui.configsave import Ui_Save
@@ -72,8 +71,8 @@ class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
         #self.comboTabVisibility.addItem("Show when more than one", PMXTabWidget.TABBAR_WHEN_MULTIPLE)
         #self.comboTabVisibility.addItem("Never show", PMXTabWidget.TABBAR_NEVER_SHOWN)
         
-        self.tabwidgetSettingsGroup = self.getSettingsGroup('TabWidget')
-        self.mainwindowSettingsGroup = self.getSettingsGroup('MainWindow')
+        self.tabwidgetSettingsGroup = self.application.settings.getGroup('TabWidget')
+        self.mainwindowSettingsGroup = self.application.settings.getGroup('MainWindow')
         
         self.comboTabVisibility.currentIndexChanged.connect(self.tabVisibilityChanged)
         self.comboApplicationTitle.editTextChanged.connect(self.updateMainWindowTitle)
@@ -254,7 +253,6 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
         if checked:
             self.proxyType = self.mapping[self.sender()]
 
-    @pmxConfigPorperty(default = 'direct')
     def proxyType(self, value):
         if   value == 'direct':
             if not self.radioDirect.isChecked():
@@ -276,14 +274,12 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
         else:
             raise ValueError("%s is not a valid proxyType value" % value)
         
-    @pmxConfigPorperty(default = '')
     def proxyManual(self, value):
         url = QUrl(value)
         self.lineProxyAddress.setText(url.host())
         self.spinProxyPort.setValue(int(url.port()))
         self._proxyManual = url
     
-    @pmxConfigPorperty(default = 'http_proxy')
     def proxyEnviromentVariable(self, value):
         self._proxyEnviromentVariable = value
         

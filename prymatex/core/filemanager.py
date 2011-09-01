@@ -5,21 +5,25 @@ This module is inspired in QtCretor FileManager instance
 import os, codecs
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
-from prymatex.core.config import pmxConfigPorperty
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.exceptions import APIUsageError, PrymatexIOException
 
 class PMXFileManager(PMXObject):
-    ''' A File Manager
-    '''
+    ''' A File Manager'''
+    ##########################################################
+    # Signals
+    ##########################################################
     fileOpened = QtCore.pyqtSignal()
     fileHistoryChanged = QtCore.pyqtSignal()
     
-    class Meta:
-        settings = 'filemanager'
+    ##########################################################
+    # Settings
+    ##########################################################
+    SETTINGS_GROUP = 'FileManager'
 
     fileHistory = pmxConfigPorperty(default=[])
     fileHistoryLength = pmxConfigPorperty(default=10)
-
+    
     def __init__(self, parent):
         super(PMXFileManager, self).__init__(parent)
 

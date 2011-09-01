@@ -4,24 +4,25 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.core.base import PMXObject
-from prymatex.core.config import pmxConfigPorperty
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.ui.bundleeditor import Ui_BundleEditor
 from prymatex.gui.support.widgets import PMXSnippetWidget, PMXCommandWidget, PMXDragCommandWidget
 from prymatex.gui.support.widgets import PMXBundleWidget,PMXTemplateFileWidget, PMXTemplateWidget
 from prymatex.gui.support.widgets import PMXPreferenceWidget, PMXLanguageWidget, PMXEditorBaseWidget
 
 class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
+    ##########################################################
+    # Settings
+    ##########################################################
+    SETTINGS_GROUP = 'BundleEditor'
     #http://manual.macromates.com/en/expert_preferences.html
     #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
     defaultBundleForNewBundleItems = pmxConfigPorperty(default = u'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = u'OakDefaultBundleForNewBundleItems')
-    
-    class Meta:
-        settings = 'BundleEditor'
         
     def __init__(self, parent = None):
         super(PMXBundleEditor, self).__init__(parent)
         self.setupUi(self)
-        self.manager = self.pmxApp.supportManager
+        self.manager = self.application.supportManager
         self.finished.connect(self.on_bundleEditor_finished)
         #Cargar los widgets editores
         self.configEditorWidgets()
@@ -187,7 +188,7 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
         self.editTreeItem(treeItem)
         
     def configTreeView(self, manager = None):
-        self.proxyTreeModel = self.pmxApp.supportManager.bundleProxyTreeModel
+        self.proxyTreeModel = self.application.supportManager.bundleProxyTreeModel
         #self.proxyTreeModel.sort(0)
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
         self.treeView.setModel(self.proxyTreeModel)

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore
-from prymatex.core.base import PMXWidget
+from PyQt4 import QtCore, QtGui
+from prymatex.core.base import PMXObject
 
-class PMXBaseWidget(PMXWidget):
+class PMXBaseWidget(QtGui.QWidget):
     # Signals
     tabStatusChanged = QtCore.pyqtSignal()
     

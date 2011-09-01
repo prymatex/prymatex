@@ -9,7 +9,7 @@ from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QPainter, QFontMetrics, QColor
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.core.base import PMXObject
-from prymatex.core.config import pmxConfigPorperty
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processors import PMXSyntaxHighlighter, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper

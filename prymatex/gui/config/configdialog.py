@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXWidget
+from prymatex.core.base import PMXObject
 from prymatex.ui.configdialog import Ui_PMXSettingsDialog
 
 class PMXSettingsItem(QtGui.QStandardItem):
@@ -22,7 +22,7 @@ class PMXNetworkConfigWidget(QtGui.QWidget):
         super(PMXNetworkConfigWidget, self).__init__()
 
 
-class PMXSettingsDialog(QtGui.QDialog, Ui_PMXSettingsDialog, PMXWidget):
+class PMXSettingsDialog(QtGui.QDialog, Ui_PMXSettingsDialog, PMXObject):
     '''
     Settings dialog, it's hold by the application under
     configdialog property

@@ -44,10 +44,10 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         super(PMXThemeConfigWidget, self).__init__(parent)
         self.setupUi(self)
         #Settings
-        self.settings = self.pmxApp.settings.getGroup('Editor')
+        self.settings = self.application.settings.getGroup('Editor')
 
         #Manager
-        self.manager = self.pmxApp.supportManager
+        self.manager = self.application.supportManager
         
         self.configComboBoxThemes()
         self.configTableView()
