@@ -43,6 +43,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     def __init__(self, parent = None):
         super(PMXThemeConfigWidget, self).__init__(parent)
         self.setupUi(self)
+        #TODO: settings es puesto por PMXObject
         #Settings
         self.settings = self.application.settings.getGroup('Editor')
 
@@ -67,7 +68,8 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
             self.comboBoxThemes.addItem(theme.name, str(theme.uuid).upper())
         self.comboBoxThemes.currentIndexChanged[int].connect(self.on_comboBoxThemes_Changed)
         uuid = self.settings.value('theme')
-        self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.findData(uuid.upper()))
+        if uuid is not None:
+            self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.findData(uuid.upper()))
     
     #==========================================================
     # TableView

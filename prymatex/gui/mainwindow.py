@@ -14,6 +14,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.editor.editorwidget import PMXEditorWidget
+from prymatex.gui import utils
 
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
@@ -51,6 +52,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         self.setupDockers()
         self.setupDialogs()
         self.setupMenu()
+        self.setupStatusBar()
         
         self.addEmptyEditor()
         
@@ -59,14 +61,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         #self.statusbar.syntaxChanged.connect(self.setEditorSyntax)
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
-        
+        utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
-        self.center()
-    
-    def center(self):
-        screen = QtGui.QDesktopWidget().screenGeometry()
-        size =  self.geometry()
-        self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
     
     #Deprecate tabWidget
     @property
@@ -78,6 +74,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         editorWidget = PMXEditorWidget.factoryMethod(parent = self)
         self.tabWidget.addTab(editorWidget)
         self.setCurrentEditor(editorWidget)
+    
+    def setupStatusBar(self):
+        from prymatex.gui.statusbar import PMXStatusBar
+        self.statusbar = PMXStatusBar(self)
+        self.setStatusBar(self.statusbar)
         
     def setupDockers(self):
         '''
@@ -218,8 +219,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     @QtCore.pyqtSlot()
     def on_actionPrevious_Tab_triggered(self):
         self.tabWidget.focusPrevTab()
-        
-        
+
     @QtCore.pyqtSlot(bool)
     def on_actionFullscreen_toggled(self, check):
         if not check and self.isFullScreen():
