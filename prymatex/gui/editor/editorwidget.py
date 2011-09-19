@@ -56,24 +56,7 @@ class PMXEditorWidget(PMXBaseWidget, Ui_EditorWidget):
     def setContent(self, content):
         return self.codeEdit.setPlainText(content)
     
-    def save(self):
-        fileInfo = self.fileInfo
-        newFile = fileInfo is None or not fileInfo.exists()
-        if newFile:
-            fileInfo = self.application.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file")
-        if fileInfo is not None:
-            content = self.codeEdit.toPlainText()
-            self.application.fileManager.saveFile(fileInfo, content)
-            self.codeEdit.document().setModified(False)
-            self.setFileInfo(fileInfo)
     
-    def saveAs(self):
-        fileInfo = self.fileInfo
-        fileInfo = self.application.fileManager.getSaveFile(fileInfo = fileInfo, title = "Save file as")
-        if fileInfo is not None:
-            content = self.codeEdit.toPlainText()
-            self.application.fileManager.saveFile(fileInfo, content)
-            self.setFileInfo(fileInfo)
     
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)

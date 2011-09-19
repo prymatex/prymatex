@@ -23,8 +23,8 @@ def main(args):
     # TODO: Implement quit and restart
     while True:
         try:
-            options, open_args = parser.parse_args(args)
-            myapp = app.PMXApplication(open_args, options = options)
+            options, args = parser.parse_args(args)
+            myapp = app.PMXApplication(args, profile = options.profile)
         except exceptions.AlreadyRunningError, e:
             return e.RETURN_VALUE
         except Exception, e:

@@ -205,7 +205,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         if self.tabWidget.count():
             self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
 
-            
+
     @QtCore.pyqtSlot()
     def on_actionQuit_triggered(self):
         QApplication.quit()

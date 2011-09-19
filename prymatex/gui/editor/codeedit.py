@@ -7,6 +7,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QPainter, QFontMetrics, QColor
+from prymatex.gui.main.widget import PMXBaseWidget
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
