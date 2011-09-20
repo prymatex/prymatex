@@ -57,7 +57,6 @@ class PMXEditorWidget(PMXBaseWidget, Ui_EditorWidget):
         return self.codeEdit.setPlainText(content)
     
     
-    
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)
     

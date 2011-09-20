@@ -27,6 +27,13 @@ parser.add_option('-R', '--reset-config', dest='reste_config',
                   default = False
                   )
 
+# Use reloader
+parser.add_option('-r', '--use-reloader', dest='use_reloader', 
+                  action= 'store_true',
+                  help='Use reloader',
+                  default = False
+                  )
+
 # A session consists in a set of opened files, thei cursor position and 
 # the document layout
 parser.add_option('-s', '--session', dest='session_name', 

@@ -28,7 +28,7 @@ class PMXApplication(QtGui.QApplication):
     
     #@printtime
     @deco.logtime
-    def __init__(self, args, profile):
+    def __init__(self, profile, args):
         '''
         Inicialización de la aplicación.
         '''
@@ -40,34 +40,65 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationDomain("org")
         self.projectUrl = prymatex.__url__    
 
-        self.checkSingleInstance()
+        self.buildSettings(profile) #Settings
+        self.checkSingleInstance()  #Single instance
         
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
         splash.show()
+
+        # Loads
+        self.loadSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
+        self.loadKernelManager()    #Console kernel Manager
         
         # Setups
-        self.setupSettings(profile) #Settings
         self.setupExecutor()        #Executor
         self.setupLogging()         #Logging
         self.setupFileManager()     #File Manager
         self.setupConfigDialog()    #Config Dialog
         self.setupBundleEditor()    #Bundle Editor
-        
-        # Loads
-        self.loadSupportManager()   #Support Manager
-        self.loadKernelManager()    #Console kernel Manager
+        self.setupRPCThread()
         
         # Creates the GUI
-        self.createWindows(args[1:]) # Skip pmx.py
+        # args[1:] para ver si quiere abrir archivos los busco en los argumentos
+        main = self.createMainWindow() # Skip pmx.py
+        main.show()
         
         # Print exceptions in a window
         self.replaceSysExceptHook()
-        
-        self.createRPCThread()
 
-        splash.finish()
+        splash.finish(main)
         
         self.aboutToQuit.connect(self.cleanup)
+
+    def buildSettings(self, profile):
+        from prymatex.core.settings import PMXSettings
+        self.settings = PMXSettings.getSettingsForProfile(profile)
+
+    def checkSingleInstance(self):
+        '''
+        Checks if there's another instance using current profile
+        '''
+        from prymatex.utils._os import pid_proc_dict
+        
+        lock_filename = os.path.join(self.settings.PMX_VAR_PATH, 'prymatex.pid')
+        
+        if os.path.exists(lock_filename):
+            f = open(lock_filename)
+            pid = int(f.read())
+            f.close()
+            print "Checking for another instance: %d" % pid
+            if pid in pid_proc_dict():
+                print "Another app running"
+                QtGui.QMessageBox.critical(None, _('Application Already Running'),
+                                     _('''%s seems to be runnig. Please
+                                     close the other instance.''' % self.applicationName()),
+                                     QtGui.QMessageBox.Ok)
+                from prymatex.utils.exceptions import AlreadyRunningError
+                raise AlreadyRunningError(pid)
+        else:
+            f = open(lock_filename, 'w')
+            f.write('%s' % os.getpid())
+            f.close()
         
     def setupConfigDialog(self):
         from prymatex.gui.config.configdialog import  PMXSettingsDialog
@@ -76,7 +107,7 @@ class PMXApplication(QtGui.QApplication):
                                                 PMXUpdatesWidget,\
                                                 PMXSaveWidget,\
                                                 PMXNetworkWidget,\
-                                                PMXBundleWidget
+                                                PMXBundleWidget 
         from prymatex.gui.config.environment import PMXEnvVariablesWidgets
         from prymatex.gui.config.themes import PMXThemeConfigWidget
                                                 
@@ -89,9 +120,6 @@ class PMXApplication(QtGui.QApplication):
         configdialog.register(PMXNetworkWidget())
         self.configDialog = configdialog
     
-    def setupSettings(self, profile):
-        from prymatex.core.settings import PMXSettings
-        self.settings = PMXSettings.getSettingsForProfile(profile)
     
     def setupExecutor(self):
         from concurrent import futures
@@ -124,17 +152,16 @@ class PMXApplication(QtGui.QApplication):
         logging.root.addHandler(ch)
         logging.root.info("Application startup")
         
-    def createWindows(self, files_to_open):
+    def createMainWindow(self):
         '''
         Creates the windows
         '''
         from prymatex.gui.mainwindow import PMXMainWindow
         self.windows = []
-        first_window = PMXMainWindow()
-        first_window.show()
-        self.windows.append(first_window)   # Could it be possible to hold it in
-                                            # its childrens?
-                                            
+        main = PMXMainWindow()
+        self.windows.append(main)   # Could it be possible to hold it in its childrens?
+        return main
+
     def cleanup(self):
         self.settings.sync()
     
@@ -152,7 +179,7 @@ class PMXApplication(QtGui.QApplication):
         
     # Decorador para imprimir cuanto tarda
     @deco.logtime
-    def loadSupportManager(self):
+    def loadSupportManager(self, callbackSplashMessage = None):
         # Lazy load
         from prymatex.gui.support.manager import PMXSupportManager
 
@@ -185,41 +212,13 @@ class PMXApplication(QtGui.QApplication):
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')
         });
         
-        splash = self.splash
-        
-        self.splash.showMessage("Loading bundles...")
+        if callbackSplashMessage is not None:
+            callbackSplashMessage("Loading bundles...")
         manager.loadSupport()
         self.supportManager = manager
 
-    def checkSingleInstance(self):
-        '''
-        Checks if there's another instance using current profile
-        '''
-        from prymatex.utils._os import pid_proc_dict
-        
-        lock_filename = os.path.join(self.settings.PMX_VAR_PATH, 'prymatex.pid')
-        
-        if os.path.exists(lock_filename):
-            f = open(lock_filename)
-            pid = int(f.read())
-            f.close()
-            self.logger.info("Checking for another instance: %s", pid in pid_proc_dict())
-            if pid in pid_proc_dict():
-                self.logger.warning("Another app running")
-                QtGui.QMessageBox.critical(None, _('Application Already Running'),
-                                     _('''%s seems to be runnig. Please
-                                     close the other instance.''' % self.applicationName()),
-                                     QtGui.QMessageBox.Ok)
-                from prymatex.utils.exceptions import AlreadyRunningError
-                raise AlreadyRunningError(pid)
             
-        else:
-            f = open(lock_filename, 'w')
-            f.write('%s' % os.getpid())
-            f.close()
-
-            
-    def createRPCThread(self):
+    def setupRPCThread(self):
         from prymatex.core.rpcserver import PMXXMLRPCServerThread
         self.RPCServerThread = PMXXMLRPCServerThread(self)
         self.RPCServerThread.start()

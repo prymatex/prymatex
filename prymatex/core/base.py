@@ -5,12 +5,16 @@ from PyQt4 import QtCore, QtGui
 
 class PMXObjectBase(QtCore.pyqtWrapperType):
     def __new__(cls, name, bases, attrs):
-        module = attrs.pop('__module__')
+        module, settings = attrs.pop('__module__'), attrs.pop('SETTINGS_GROUP', name)
+        
+        #Build class
         new_class = super(PMXObjectBase, cls).__new__(cls, name, bases, { '__module__': module })
-        settings = attrs.pop('SETTINGS_GROUP', name)
-        if settings is not None:
-            settings = QtGui.QApplication.instance().settings.getGroup(settings)
+        
+        #Settings for class
+        settings = QtGui.QApplication.instance().settings.getGroup(settings)
         new_class.add_to_class('settings', settings)
+        
+        #Other attrs
         for name, attr in attrs.iteritems():
             new_class.add_to_class(name, attr)
         return new_class
@@ -20,8 +24,6 @@ class PMXObjectBase(QtCore.pyqtWrapperType):
             value.contributeToClass(cls, name)
         else:
             setattr(cls, name, value)
-
-from logging import getLogger
 
 class PMXObject(QtCore.QObject):
     __metaclass__ = PMXObjectBase
@@ -66,6 +68,7 @@ class PMXObject(QtCore.QObject):
         Per class logger, logger instances are named after
         classes, ie: prymatex.gui.mainwindow.PMXMainWindow 
         '''
+        from logging import getLogger
         if self.__logger is None:
             t = type(self)
             loggername = '.'.join([t.__module__, t.__name__])

@@ -367,7 +367,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         
     @QtCore.pyqtSlot()
     def on_actionPreferences_triggered(self):
-        self.application.configdialog.exec_()
+        self.application.configDialog.exec_()
     
         
     @QtCore.pyqtSlot()

@@ -14,33 +14,36 @@ else:
 if project_basedir not in sys.path:
     sys.path.insert(0, project_basedir)
 
+def runPrymatexApplication(profile, args = []):
+    from prymatex.core import app, exceptions
+    try:
+        pmxapp = app.PMXApplication(profile, args)
+    except exceptions.AlreadyRunningError, e:
+        return e.RETURN_VALUE
+    except Exception, e:
+        from traceback import format_exc
+        traceback = format_exc()
+        # Something went very bad
+        # tell the user something about the emergency
+        from prymatex.gui.emergency import PMXCrashDialog
+        dlg = PMXCrashDialog(traceback)
+        dlg.exec_()
+    return pmxapp.exec_()
+    
 def main(args):
     '''
     GUI entry point.
     '''
-    from prymatex.core import app, exceptions
+    
     from prymatex.optargs import parser
-    # TODO: Implement quit and restart
-    while True:
-        try:
-            options, args = parser.parse_args(args)
-            myapp = app.PMXApplication(args, profile = options.profile)
-        except exceptions.AlreadyRunningError, e:
-            return e.RETURN_VALUE
-        except Exception, e:
-            from traceback import format_exc
-            traceback = format_exc()
-            # Something went very bad
-            # tell the user something about the emergency
-            from prymatex.gui.emergency import PMXCrashDialog
-            dlg = PMXCrashDialog(traceback)
-            dlg.exec_()
-        retval = myapp.exec_()
-        if retval == 3:
-            del myapp
-            reload(app)
-            continue
-        return retval
+    from prymatex.utils import autoreload
+    
+    options, args = parser.parse_args(args)
+    
+    if options.use_reloader:
+        autoreload.main(runPrymatexApplication, (options.profile, args))
+    else:
+        runPrymatexApplication(options.profile, args)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
