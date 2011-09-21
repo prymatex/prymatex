@@ -11,12 +11,12 @@ from PyQt4.QtGui import QFont, QMessageBox, QFileDialog, QColor, QIcon, QWidget,
 
 from prymatex import resources
 from prymatex.support import PMXSyntax
-from prymatex.gui.main.widget import PMXBaseWidget
+from prymatex.gui.central import PMXBaseTab
 from os.path import join
 from prymatex.core.exceptions import APIUsageError
 from prymatex.ui.editorwidget import Ui_EditorWidget
 
-class PMXEditorWidget(PMXBaseWidget, Ui_EditorWidget):
+class PMXEditorWidget(QtGui.QWidget, Ui_EditorWidget, PMXBaseTab):
     '''
     It implements the logic needed for gui defined in ui_files/editorwidget.ui
     This logic includes Go To Line and Find action behaviour.
@@ -30,7 +30,8 @@ class PMXEditorWidget(PMXBaseWidget, Ui_EditorWidget):
     fileStatusDeleted = QtCore.pyqtSignal(object)
     
     def __init__(self, parent = None):
-        super(PMXEditorWidget, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
+        PMXBaseTab.__init__(self)
         
         self.setupUi(self)
         self.setupFindReplaceWidget()

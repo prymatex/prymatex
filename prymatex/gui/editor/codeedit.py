@@ -7,15 +7,15 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QPainter, QFontMetrics, QColor
-from prymatex.gui.main.widget import PMXBaseWidget
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPreferenceSettings
-from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.base import PMXObject
+from prymatex.gui.central import PMXBaseTab
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processors import PMXSyntaxHighlighter, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 
-class PMXCodeEdit(QPlainTextEdit, PMXObject):
+class PMXCodeEditor(QPlainTextEdit, PMXObject):
     '''
     The GUI element which holds the editor.
     This class acts as a buffer for text, it does not know anything about
@@ -82,7 +82,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         return self.completer.popup().isVisible()
     
     def __init__(self, parent = None):
-        super(PMXCodeEdit, self).__init__(parent)
+        super(PMXCodeEditor, self).__init__(parent)
         
         #Sidebar
         self.sidebar = PMXSidebar(self)
@@ -129,9 +129,9 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     # Obteniendo datos del editor
     #=======================================================================
     def getPreference(self, scope):
-        if scope not in PMXCodeEdit.PREFERENCE_CACHE:
-            PMXCodeEdit.PREFERENCE_CACHE[scope] = self.application.supportManager.getPreferenceSettings(scope)
-        return PMXCodeEdit.PREFERENCE_CACHE[scope]
+        if scope not in PMXCodeEditor.PREFERENCE_CACHE:
+            PMXCodeEditor.PREFERENCE_CACHE[scope] = self.application.supportManager.getPreferenceSettings(scope)
+        return PMXCodeEditor.PREFERENCE_CACHE[scope]
 
     def getCurrentScope(self):
         cursor = self.textCursor()
@@ -213,7 +213,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
             self.updateLineNumberAreaWidth(0)
     
     def resizeEvent(self, event):
-        super(PMXCodeEdit, self).resizeEvent(event)
+        super(PMXCodeEditor, self).resizeEvent(event)
         cr = self.contentsRect()
         self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
         
@@ -240,7 +240,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
     #=======================================================================
     def paintEvent(self, event):
         #QPlainTextEdit.paintEvent(self, event)
-        super(PMXCodeEdit, self).paintEvent(event)
+        super(PMXCodeEditor, self).paintEvent(event)
         page_bottom = self.viewport().height()
         font_metrics = QFontMetrics(self.document().defaultFont())
 
@@ -292,33 +292,33 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.zoomOut()
             event.ignore()
         else:
-            super(PMXCodeEdit, self).wheelEvent(event)
+            super(PMXCodeEditor, self).wheelEvent(event)
 
     def mouseDoubleClickEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
             print "mouseDoubleClickEvent"
             self.cursors.mouseDoubleClickPoint(event.pos())
         else:
-            super(PMXCodeEdit, self).mouseDoubleClickEvent(event)
+            super(PMXCodeEditor, self).mouseDoubleClickEvent(event)
 
     def mousePressEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
             self.cursors.mousePressPoint(event.pos())
         else:
-            super(PMXCodeEdit, self).mousePressEvent(event)
+            super(PMXCodeEditor, self).mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
             self.cursors.mouseMovePoint(event.pos())
         else:
-            super(PMXCodeEdit, self).mouseReleaseEvent(event)
+            super(PMXCodeEditor, self).mouseReleaseEvent(event)
  
     def mouseReleaseEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
             print "mouseReleaseEvent"
             self.cursors.mouseReleasePoint(event.pos())
         else:
-            super(PMXCodeEdit, self).mouseReleaseEvent(event)
+            super(PMXCodeEditor, self).mouseReleaseEvent(event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
         '''
@@ -387,7 +387,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
         elif key == Qt.Key_Return:
             self.returnPressEvent(event)
         else:
-            super(PMXCodeEdit, self).keyPressEvent(event)
+            super(PMXCodeEditor, self).keyPressEvent(event)
 
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
@@ -428,7 +428,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 cursor.setPosition(position + len(text), QTextCursor.KeepAnchor)
             else:
                 position = cursor.position()
-                super(PMXCodeEdit, self).keyPressEvent(event)
+                super(PMXCodeEditor, self).keyPressEvent(event)
                 cursor.insertText(pairs[0][1])
                 cursor.setPosition(position + 1)
             self.setTextCursor(cursor)
@@ -476,7 +476,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                     cursor.deleteChar()
                 elif pairs and pairs[0][1] == character and doc.characterAt(cursor.position() - 2) == pairs[0][0]:
                     cursor.deletePreviousChar()
-        super(PMXCodeEdit, self).keyPressEvent(event)
+        super(PMXCodeEditor, self).keyPressEvent(event)
     
     #=======================================================================
     # Return Keyboard Events
@@ -492,7 +492,7 @@ class PMXCodeEdit(QPlainTextEdit, PMXObject):
                 self.setSyntax(syntax)
         preference = self.getPreference(block.userData().getLastScope())
         indentMark = preference.indent(line)
-        super(PMXCodeEdit, self).keyPressEvent(event)
+        super(PMXCodeEditorPMXCodeEditor, self).keyPressEvent(event)
         if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
             self.debug("Increase indent")
             cursor.insertText(block.userData().indent + self.tabKeyBehavior)

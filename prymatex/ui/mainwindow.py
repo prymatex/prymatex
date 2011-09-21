@@ -599,5 +599,5 @@ class Ui_MainWindow(object):
         self.actionPanes.setText(_('Panes'))
         self.actionOpen_Recent.setText(_('Open Recent File'))
 
-from prymatex.gui.main.splitter import PMXSplitTabWidget
+from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc

@@ -176,22 +176,14 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             ch = _TabWidget(self)
             self.addWidget(ch)
 
-        idx = ch.addTab(w, "w.getTitle()")
-        #self.setActiveIcon(w, w.getIcon())
-        
-        #Connect
-        w.tabStatusChanged.connect(self._tab_status_changed)
+        idx = ch.addTab(w, w.title)
+        w.setSplitter(self)
         
         # If the tab has been added to the current tab widget then make it the current tab.
         if ch is self._current_tab_w:
             self._set_current_tab(ch, idx)
             ch.tabBar().setFocus()
     
-    def _tab_status_changed(self):
-        widget = self.sender()
-        self.setActiveIcon(widget, widget.getIcon())
-        self.setWidgetTitle(widget, widget.getTitle())
-        
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         

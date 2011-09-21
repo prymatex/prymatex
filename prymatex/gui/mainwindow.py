@@ -272,13 +272,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         Opens a file
         @return: editor widget or None if it can't make it
         '''
-        editorWidget = PMXEditorWidget(self)
-        content = self.application.fileManager.openFile(file)
-        editorWidget.setFile(file)
-        editorWidget.setContent(content)
+        from prymatex.gui.central.viewers import PMXImageViewer
+        editorWidget = PMXImageViewer.factoryMethod(file, self)
         self.tabWidget.addTab(editorWidget)
         return editorWidget
-    
         
     @QtCore.pyqtSlot()
     def on_actionAbout_Qt_triggered(self):
