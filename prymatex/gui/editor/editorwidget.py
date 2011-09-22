@@ -48,15 +48,11 @@ class PMXEditorWidget(QtGui.QWidget, Ui_EditorWidget, PMXBaseTab):
     def getTitle(self):
         return self.file.baseName()
     
-    def getIcon(self):
-        if self.codeEdit.document().isModified():
+    def getTabIcon(self):
+        if self.document().isModified():
             return resources.ICONS["save"]
-        else:
-            return self.application.fileManager.getFileIcon(self.file)
-    
-    def setContent(self, content):
-        return self.codeEdit.setPlainText(content)
-    
+        elif self.fileInfo is not None:
+            return self.application.fileManager.getFileIcon(self.fileInfo)
     
     def focusInEvent(self, event):
         self.codeEdit.setFocus(Qt.MouseFocusReason)

@@ -13,7 +13,7 @@ from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.editor.editorwidget import PMXEditorWidget
+from prymatex.gui.editor.codeedit import PMXCodeEditor
 from prymatex.gui import utils
 
 
@@ -54,7 +54,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         self.setupMenu()
         self.setupStatusBar()
         
-        self.addEmptyEditor()
+        self.addEditor(PMXCodeEditor(self))
         
         # Connect Signals
         self.splitTabWidget.tabWindowChanged.connect(self.setCurrentEditor)
@@ -63,17 +63,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
-    
-    #Deprecate tabWidget
-    @property
-    def tabWidget(self):
-        return self.splitTabWidget
-    
-    #TODO: Crear un methodo para instanciar editor widgets y agregarlos a una lista de editores activos
-    def addEmptyEditor(self):
-        editorWidget = PMXEditorWidget.factoryMethod(parent = self)
-        self.tabWidget.addTab(editorWidget)
-        self.setCurrentEditor(editorWidget)
+     
+    def addEditor(self, editor):
+        self.splitTabWidget.addTab(editor)
+        self.setCurrentEditor(editor) 
     
     def setupStatusBar(self):
         from prymatex.gui.statusbar import PMXStatusBar
@@ -181,22 +174,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
             self.currentEditor.insertBundleItem(item)
 
     #===========================================================================
-    # Shortcuts
-    #===========================================================================
-    @property
-    def currentEditor(self):
-        widget = self.currentEditorWidget
-        if widget != None:
-            return widget.codeEdit
-
-    #===========================================================================
     # Auto Connects
     #===========================================================================    
 
     @QtCore.pyqtSlot()
     def on_actionNew_triggered(self):
-        self.addEmptyEditor()
-
+        #self.application.getEditor()
+        self.addEditor(PMXCodeEditor(self))
         
     @QtCore.pyqtSlot()
     def on_actionClose_triggered(self):
@@ -242,16 +226,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         '''
         #TODO: El directory puede ser dependiente del current editor o del file manager
         files = self.application.fileManager.getOpenFiles()
-        editorWidget = None
         for file in files:
-            editorWidget = self.openFile(file)
-        if editorWidget is not None:
-            self.setCurrentEditor(editorWidget)
+            self.openFile(file)
         
     @QtCore.pyqtSlot()
     def on_actionShow_Bundle_Editor_triggered(self):
         #TODO: mejorar esto
         self.application.bundleEditor.exec_()
+
+    def openFile(self, fileInfo):
+        #self.application.getEditorForFile(file)
+        editor = PMXCodeEditor(self)
+        self.addEditor(editor)
+        editor.open(fileInfo)
 
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
@@ -266,16 +253,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
             column = url.queryItemValue('column')
             if column:
                 editor.codeEdit.goToColumn(int(column))
-            
-    def openFile(self, file):
-        '''
-        Opens a file
-        @return: editor widget or None if it can't make it
-        '''
-        from prymatex.gui.central.viewers import PMXImageViewer
-        editorWidget = PMXImageViewer.factoryMethod(file, self)
-        self.tabWidget.addTab(editorWidget)
-        return editorWidget
         
     @QtCore.pyqtSlot()
     def on_actionAbout_Qt_triggered(self):
@@ -296,12 +273,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
-        if self.currentEditorWidget.isModified:
-            self.currentEditorWidget.save()
+        fileInfo = self.currentEditor.fileInfo or self.application.fileManager.getSaveFile(title = "Save file")
+        if fileInfo is not None:
+            self.currentEditor.save(fileInfo)
         
     @QtCore.pyqtSlot()
     def on_actionSave_As_triggered(self):
-        self.currentEditorWidget.saveAs()
+        fileInfo = self.application.fileManager.getSaveFile(title = "Save file")
+        if fileInfo is not None:
+            self.currentEditor.save(fileInfo)
         
     @QtCore.pyqtSlot()
     def on_actionSaveAll_triggered(self):
@@ -397,9 +377,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         print "MainWindow::replace"
         self.currentEditorWidget.showReplaceWidget()
     
-    def setCurrentEditor(self, editorWidget):
+    def setCurrentEditor(self, editor):
         
-        self.currentEditorWidget = editorWidget
+        self.currentEditor = editor
         
         #Update status bar
         #self.statusBar().updateStatus(editorWidget.codeEdit.status)
@@ -413,7 +393,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
                                      PROJECT = 'No project',
                                      **extra_attrs)
         self.setWindowTitle(s)
-        self.currentEditorWidget.setFocus(QtCore.Qt.MouseFocusReason)
+        self.currentEditor.setFocus(QtCore.Qt.MouseFocusReason)
     
     def closeEvent(self, event):
         #unsaved = self.tabWidget.unsavedCounter

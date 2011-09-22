@@ -5,8 +5,10 @@ import re
 from bisect import bisect
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QRect, Qt, SIGNAL
-from PyQt4.QtGui import QPlainTextEdit, QTextEdit, QTextFormat, QMenu, \
+from PyQt4.QtGui import QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QFont, QPalette, QPainter, QFontMetrics, QColor
+    
+from prymatex import resources
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
@@ -15,7 +17,7 @@ from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processors import PMXSyntaxHighlighter, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 
-class PMXCodeEditor(QPlainTextEdit, PMXObject):
+class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     '''
     The GUI element which holds the editor.
     This class acts as a buffer for text, it does not know anything about
@@ -82,8 +84,8 @@ class PMXCodeEditor(QPlainTextEdit, PMXObject):
         return self.completer.popup().isVisible()
     
     def __init__(self, parent = None):
-        super(PMXCodeEditor, self).__init__(parent)
-        
+        QtGui.QPlainTextEdit.__init__(self, parent)
+        PMXBaseTab.__init__(self)
         #Sidebar
         self.sidebar = PMXSidebar(self)
         
@@ -116,6 +118,7 @@ class PMXCodeEditor(QPlainTextEdit, PMXObject):
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.updateStatusBar)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
+        self.modificationChanged.connect(self.updateTabStatus)
 
     def setupActions(self):
         # Actions performed when a key is pressed
@@ -124,6 +127,30 @@ class PMXCodeEditor(QPlainTextEdit, PMXObject):
         self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
         self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
         self.actionFind = QAction(self.trUtf8("Find"), self)
+    
+    def isModified(self):
+        return self.document().isModified()
+    
+    def getTabTitle(self):
+        #Podemos marcar de otra forma cuando algo cambia :P
+        return PMXBaseTab.getTabTitle(self)
+    
+    def getTabIcon(self):
+        if self.isModified():
+            return resources.ICONS["save"]
+        elif self.fileInfo is not None:
+            return self.application.fileManager.getFileIcon(self.fileInfo)
+        return PMXBaseTab.getTabIcon(self)
+    
+    def open(self, fileInfo):
+        PMXBaseTab.open(self, fileInfo)
+        content = self.application.fileManager.openFile(fileInfo)
+        self.setPlainText(content)
+        
+    def save(self, fileInfo):
+        PMXBaseTab.save(self, fileInfo)
+        self.application.fileManager.saveFile(fileInfo, self.toPlainText())
+        self.document().setModified(False)
 
     #=======================================================================
     # Obteniendo datos del editor
@@ -239,7 +266,7 @@ class PMXCodeEditor(QPlainTextEdit, PMXObject):
     # QPlainTextEdit Events
     #=======================================================================
     def paintEvent(self, event):
-        #QPlainTextEdit.paintEvent(self, event)
+        #QtGui.QPlainTextEdit.paintEvent(self, event)
         super(PMXCodeEditor, self).paintEvent(event)
         page_bottom = self.viewport().height()
         font_metrics = QFontMetrics(self.document().defaultFont())
