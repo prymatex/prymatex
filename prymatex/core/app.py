@@ -9,15 +9,11 @@ import os, sys
 from PyQt4 import QtGui, QtCore
 
 import prymatex
+from prymatex.core import exceptions
 from prymatex import resources_rc
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
 
-from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
-
-# ipdb handling
-
-sys_excepthook = sys.excepthook
 class PMXApplication(QtGui.QApplication):
     '''
     The application instance.
@@ -72,7 +68,7 @@ class PMXApplication(QtGui.QApplication):
 
     def buildSettings(self, profile):
         from prymatex.core.settings import PMXSettings
-        self.settings = PMXSettings.getSettingsForProfile(profile)
+        self.settings = PMXSettings(profile)
 
     def checkSingleInstance(self):
         '''
@@ -86,15 +82,9 @@ class PMXApplication(QtGui.QApplication):
             f = open(lock_filename)
             pid = int(f.read())
             f.close()
-            print "Checking for another instance: %d" % pid
+            print "Checking for another instance with pid %d in profile %s" % (pid, self.settings.profile)
             if pid in pid_proc_dict():
-                print "Another app running"
-                QtGui.QMessageBox.critical(None, _('Application Already Running'),
-                                     _('''%s seems to be runnig. Please
-                                     close the other instance.''' % self.applicationName()),
-                                     QtGui.QMessageBox.Ok)
-                from prymatex.utils.exceptions import AlreadyRunningError
-                raise AlreadyRunningError(pid)
+                raise exceptions.AlreadyRunningError('%s seems to be runnig with pid %d. Please close the instance or run other profile.' % (self.settings.profile, pid))
         else:
             f = open(lock_filename, 'w')
             f.write('%s' % os.getpid())
@@ -211,27 +201,21 @@ class PMXApplication(QtGui.QApplication):
                 'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')
         });
-        
-        if callbackSplashMessage is not None:
-            callbackSplashMessage("Loading bundles...")
-        manager.loadSupport()
+        callbackSplashMessage("Loading...")
+        manager.loadSupport(callbackSplashMessage)
         self.supportManager = manager
 
-            
     def setupRPCThread(self):
         from prymatex.core.rpcserver import PMXXMLRPCServerThread
         self.RPCServerThread = PMXXMLRPCServerThread(self)
         self.RPCServerThread.start()
 
-        
     def displayApplicationException(self, exctype, value, traceback):
         ''' Display a nice dialog showing the python traceback'''
-        # run original trace
+        from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
         sys.__excepthook__(exctype, value, traceback)
-        print "displayApplicationException", exctype, value, traceback, type(traceback)
         dialog = PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback)
         dialog.exec_()
-        
 
     def replaceSysExceptHook(self):
         sys.excepthook = self.displayApplicationException

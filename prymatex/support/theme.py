@@ -98,6 +98,7 @@ class PMXTheme(PMXManagedObject):
                     style = PMXThemeStyle(setting, theme)
                     style = manager.addThemeStyle(style)
                     theme.styles.append(style)
+                manager.showMessage("Loading theme %s" % theme.name)
                 manager.addManagedObject(theme)
             elif theme is not None:
                 theme.addNamespace(namespace)

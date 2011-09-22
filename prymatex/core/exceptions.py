@@ -3,7 +3,7 @@
 from prymatex.utils.i18n import ugettext as _
 
 class AlreadyRunningError(Exception):
-    pass
+    title = _('Application already running')
 
     
 class UnsupportedPlatformError(Exception):

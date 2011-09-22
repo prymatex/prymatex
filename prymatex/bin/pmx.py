@@ -14,37 +14,52 @@ else:
 if project_basedir not in sys.path:
     sys.path.insert(0, project_basedir)
 
-def runPrymatexApplication(profile, args = []):
+def parseArguments(args):
+    import prymatex
+    from optparse import OptionParser
+    #usage, option_list, option_class, version, conflict_handler, description, formatter, add_help_option, prog, epilog)
+    parser = OptionParser(usage="%prog [options] [files]", description = prymatex.__doc__, version = prymatex.get_version(),
+                          epilog = "Check project page at %s" % prymatex.__url__)
+
+    # Reverts custom options
+    parser.add_option('--reset-config', dest='reste_config', action = 'store_true', default = False, 
+                        help = 'Restore default config for selected profile')
+    parser.add_option('-p', '--profile', dest='profile', default = 'default',
+                      help = "Change profile")
+
+    # Maybe useful for some debugging information
+    parser.add_option('--devel', dest='devel', action='store_true', default=False,
+                      help = 'Enable developer mode. Useful for plugin developers.')
+
+    options, args = parser.parse_args(args)
+    #parser.error("options --alert and --menu are mutually exclusive")
+    return options, args
+    
+def runPrymatexApplication(options, args):
     from prymatex.core import app, exceptions
     try:
-        pmxapp = app.PMXApplication(profile, args)
-    except exceptions.AlreadyRunningError, e:
-        return e.RETURN_VALUE
-    except Exception, e:
+        pmxapp = app.PMXApplication(options.profile, args)
+    except exceptions.AlreadyRunningError, exception:
+        from PyQt4 import QtGui
+        QtGui.QMessageBox.critical(None, excpetion.title, excpetion.message, QtGui.QMessageBox.Ok)
+        return -1
+    except:
         from traceback import format_exc
         traceback = format_exc()
-        # Something went very bad
-        # tell the user something about the emergency
+        # Something went very bad tell the user something about the emergency
         from prymatex.gui.emergency import PMXCrashDialog
         dlg = PMXCrashDialog(traceback)
         dlg.exec_()
     return pmxapp.exec_()
     
 def main(args):
-    '''
-    GUI entry point.
-    '''
+    options, args = parseArguments(args)
     
-    from prymatex.optargs import parser
-    from prymatex.utils import autoreload
-    
-    options, args = parser.parse_args(args)
-    
-    if options.use_reloader:
-        autoreload.main(runPrymatexApplication, (options.profile, args))
+    if options.devel:
+        from prymatex.utils import autoreload
+        autoreload.main(runPrymatexApplication, (options, args))
     else:
-        runPrymatexApplication(options.profile, args)
+        runPrymatexApplication(options, args)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
-    

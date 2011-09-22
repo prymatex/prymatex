@@ -203,19 +203,16 @@ class PMXSettings(object):
     PMX_HOME_PATH = get_prymatex_home_path()
     PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
 
-    def __init__(self, profile_path):
-        self.PMX_PROFILE_PATH = profile_path
+    def __init__(self, profile):
+        self.profile = profile
+        self.PMX_PROFILE_PATH = get_prymatex_profile_path(profile, self.PMX_HOME_PATH)
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
         self.PMX_VAR_PATH = os.path.join(self.PMX_PROFILE_PATH, 'var')
         self.GROUPS = {}
         #TODO Defaults settings
-        self.qsettings = QtCore.QSettings(os.path.join(profile_path, PRYMATEX_SETTING_NAME), QtCore.QSettings.IniFormat)
+        self.qsettings = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, PRYMATEX_SETTING_NAME), QtCore.QSettings.IniFormat)
         self.tmsettings = TextMateSettings(os.path.join(TM_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
-    
-    @classmethod
-    def getSettingsForProfile(cls, profile):
-        return PMXSettings(get_prymatex_profile_path(profile, cls.PMX_HOME_PATH))
     
     def getGroup(self, name):
         if name not in self.GROUPS:
