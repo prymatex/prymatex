@@ -11,8 +11,9 @@ class PMXBaseTab(object):
         PMXBaseTab.creation_counter += 1
     
     def updateTabStatus(self):
-        self.splitter.setActiveIcon(self, self.getTabIcon())
-        self.splitter.setWidgetTitle(self, self.getTabTitle())
+        if self.splitter is not None:
+            self.splitter.setActiveIcon(self, self.getTabIcon())
+            self.splitter.setWidgetTitle(self, self.getTabTitle())
     
     def setFileInfo(self, fileInfo):
         self.fileInfo = fileInfo

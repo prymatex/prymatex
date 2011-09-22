@@ -13,7 +13,7 @@ except Exception, e:
     sre = re
     OPTION_CAPTURE_GROUP = re.MULTILINE
 from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.utils import ensureShellScript, ensureEnvironment, makeExecutableTempFile
+from prymatex.support.utils import prepareShellScript
 
 def compileRegexp(string):
     #Muejejejeje
@@ -114,9 +114,9 @@ class PMXCommand(PMXBundleItem):
                 return
         processor.startCommand(self)
         input_type, input_value = self.getInputText(processor)
-        command = ensureShellScript(self.systemCommand)
-        temp_file = makeExecutableTempFile(command)
-        process = Popen([  temp_file], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(processor.environment))
+        file, env = prepareShellScript(self.systemCommand, processor.environment)
+        
+        process = Popen([ file ], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = env)
         
         if input_type != None:
             process.stdin.write(unicode(input_value).encode("utf-8"))

@@ -38,7 +38,7 @@ class PMXColorDelegate(QtGui.QStyledItemDelegate):
             colorDialog.setCurrentColor(QtGui.QColor(variant))
             
     def paint(self, painter, option, index):
-        data = index.data().toPyObject()
+        data = index.data()
         if isinstance(data, QtGui.QColor):
             painter.save()
             #Con un pixmap lindo
@@ -116,7 +116,7 @@ class PMXFontStyleDelegate(QtGui.QStyledItemDelegate):
         model.setData(index, flags)
     
     def setEditorData(self, widget, index):
-        flags = index.data().toPyObject()
+        flags = index.data()
         widget.buttonBold.setChecked('bold' in flags)
         widget.buttonItalic.setChecked('italic' in flags)
         widget.buttonUnderline.setChecked('underline' in flags)

@@ -11,7 +11,7 @@ from PyQt4.QtNetwork import QNetworkProxy
 from prymatex.ui.panebrowser import Ui_BrowserPane
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
+from prymatex.support.utils import prepareShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
 
 class TmFileReply(QNetworkReply):
@@ -72,10 +72,10 @@ TextMate.system = function(command, callback) {
 """
 
 class SystemWrapper(QObject):
-    def __init__(self, process, temp_file):
+    def __init__(self, process, file):
         QObject.__init__(self)
         self.process = process
-        self.temp_file = temp_file
+        self.file = file
     
     @pyqtSignature("write(int)")
     def write(self, flags):
@@ -87,7 +87,7 @@ class SystemWrapper(QObject):
         text = self.process.stdout.read()
         self.process.stdout.close()
         self.process.wait()
-        deleteFile(self.temp_file)
+        deleteFile(self.file)
         return text
         
     @pyqtSignature("close()")
@@ -95,14 +95,14 @@ class SystemWrapper(QObject):
         self.process.stdin.close()
         self.process.stdout.close()
         self.process.wait()
-        deleteFile(self.temp_file)
+        deleteFile(self.file)
 
     def outputString(self):
         self.process.stdin.close()
         text = self.process.stdout.read()
         self.process.stdout.close()
         self.process.wait()
-        deleteFile(self.temp_file)
+        deleteFile(self.file)
         return text
     outputString = QtCore.pyqtProperty(str, outputString)
     
@@ -115,10 +115,10 @@ class TextMate(QObject):
     @QtCore.pyqtSlot(str)
     def _system(self, command):
         environment = self.bundleItem != None and self.bundleItem.buildEnvironment() or {}
-        command = ensureShellScript(unicode(command))
-        temp_file = makeExecutableTempFile(command)
-        process = Popen([temp_file], stdout=PIPE, stdin=PIPE, stderr=STDOUT, env = ensureEnvironment(environment))
-        self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, temp_file))
+        file, env = prepareShellScript(unicode(command), environment)
+        
+        process = Popen([ file ], stdout=PIPE, stdin=PIPE, stderr=STDOUT, env = env)
+        self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, file))
     
     def isBusy(self):
         return True

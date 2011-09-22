@@ -54,19 +54,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         self.setupMenu()
         self.setupStatusBar()
         
-        self.addEditor(PMXCodeEditor(self))
-        
         # Connect Signals
         self.splitTabWidget.tabWindowChanged.connect(self.setCurrentEditor)
+        
         #self.statusbar.syntaxChanged.connect(self.setEditorSyntax)
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
         self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
+        
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
-     
-    def addEditor(self, editor):
-        self.splitTabWidget.addTab(editor)
-        self.setCurrentEditor(editor) 
+        
+        self.splitTabWidget.addTab(PMXCodeEditor(self))
     
     def setupStatusBar(self):
         from prymatex.gui.statusbar import PMXStatusBar
@@ -180,7 +178,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     @QtCore.pyqtSlot()
     def on_actionNew_triggered(self):
         #self.application.getEditor()
-        self.addEditor(PMXCodeEditor(self))
+        self.splitTabWidget.addTab(PMXCodeEditor(self))
         
     @QtCore.pyqtSlot()
     def on_actionClose_triggered(self):
@@ -237,8 +235,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     def openFile(self, fileInfo):
         #self.application.getEditorForFile(file)
         editor = PMXCodeEditor(self)
-        self.addEditor(editor)
         editor.open(fileInfo)
+        self.splitTabWidget.addTab(editor)
 
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
@@ -387,10 +385,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         
         #Update window title
         template = Template(self.windowTitleTemplate)
-        
-        self.setWindowTitle(template.safe_substitute(
-            **editor.buildEnvironment(self.application.supportManager.buildEnvironment())
-        ))
+        title = [ editor.getTabTitle() ]
+        title.append(template.safe_substitute(**editor.buildEnvironment(self.application.supportManager.buildEnvironment())))
+        self.setWindowTitle(" - ".join(title).title())
+
         self.currentEditor.setFocus(QtCore.Qt.MouseFocusReason)
     
     def closeEvent(self, event):

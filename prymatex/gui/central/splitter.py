@@ -165,24 +165,15 @@ class PMXSplitTabWidget(QtGui.QSplitter):
 
         # Find the first tab widget going down the left of the hierarchy.  This
         # will be the one in the top left corner.
-        if self.count() > 0:
-            ch = self.widget(0)
+        if self._current_tab_w is None:
+            self._current_tab_w = _TabWidget(self)
+            self.addWidget(self._current_tab_w)
 
-            while not isinstance(ch, _TabWidget):
-                assert isinstance(ch, QtGui.QSplitter)
-                ch = ch.widget(0)
-        else:
-            # There is no tab widget so create one.
-            ch = _TabWidget(self)
-            self.addWidget(ch)
-
-        idx = ch.addTab(w, "")
+        idx = self._current_tab_w.addTab(w, "")
         w.setSplitter(self)
         
-        # If the tab has been added to the current tab widget then make it the current tab.
-        if ch is self._current_tab_w:
-            self._set_current_tab(ch, idx)
-            ch.tabBar().setFocus()
+        self._set_current_tab(self._current_tab_w, idx)
+        #ch.tabBar().setFocus()
     
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """

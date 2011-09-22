@@ -54,17 +54,6 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_PMXSettingsDialog, PMXObject):
     def filterItems(self, txt):
         self.proxy_model.setFilterRegExp(QtCore.QRegExp(txt, Qt.CaseInsensitive))
     
-    def exec_(self):
-        self.center()
-        self.resize(QtCore.QSize(100, 100))
-        self.updateGeometry()
-        # No selection?
-        if not len(self.treeView.selectedIndexes()):
-            # Select first tree element then...
-            self.focusFirst()
-            self.center()
-        super(PMXSettingsDialog, self).exec_()
-    
     def changeWidget(self, index):
         #print "Cambiando al widget"
         self.container.layout().setCurrentIndex(index)

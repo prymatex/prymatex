@@ -16,7 +16,7 @@ except Exception, e:
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
-from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
+from prymatex.support.utils import prepareShellScript, deleteFile
 from subprocess import Popen, PIPE, STDOUT
 
 SNIPPET_SYNTAX = { 
@@ -519,14 +519,14 @@ class Shell(NodeList):
         return node
     
     def execute(self, processor):
-        command = ensureShellScript(unicode(self))
-        temp_command_file = makeExecutableTempFile(command)
-        process = Popen([temp_command_file], stdout=PIPE, stderr=STDOUT, env = ensureEnvironment(processor.environment))
+        file, env = prepareShellScript(unicode(self), processor.environment)
+        
+        process = Popen([ file ], stdout=PIPE, stderr=STDOUT, env = env)
         text = process.stdout.read()
         text = text.strip()
         process.stdout.close()
         _ = process.wait()
-        deleteFile(temp_command_file)
+        deleteFile(file)
         self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
         
     def render(self, processor):

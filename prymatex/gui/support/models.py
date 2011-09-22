@@ -362,8 +362,7 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
             elif column == 2 and value.canConvert(QtCore.QVariant.Color):
                 self.manager.updateThemeStyle(style, settings = {'background' : QtGui.QColor(value) })
             elif column == 3:
-                fontStyle = value.toPyObject()
-                self.manager.updateThemeStyle(style, settings = {'fontStyle' : fontStyle })
+                self.manager.updateThemeStyle(style, settings = {'fontStyle' : value })
             self.dataChanged.emit(index, index)
             return True
         return False

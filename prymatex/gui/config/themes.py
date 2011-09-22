@@ -45,7 +45,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
         self.setupUi(self)
         #TODO: settings es puesto por PMXObject
         #Settings
-        self.settings = self.application.settings.getGroup('Editor')
+        self.settings = self.application.settings.getGroup('CodeEditor')
 
         #Manager
         self.manager = self.application.supportManager
@@ -133,7 +133,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     
     @QtCore.pyqtSignature('')
     def on_pushButtonAdd_pressed(self):
-        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex()).toPyObject()
+        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex())
         theme = self.manager.getTheme(unicode(uuid))
         style = self.manager.createThemeStyle('untitled', unicode(self.comboBoxScope.currentText()), theme)
     
@@ -145,7 +145,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
             self.manager.deleteThemeStyle(style)
     
     def on_pushButtonColor_pressed(self, element):
-        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex()).toPyObject()
+        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex())
         theme = self.manager.getTheme(unicode(uuid))
         settings = theme.settings
         color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)

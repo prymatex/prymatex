@@ -32,7 +32,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     #=======================================================================
     # Settings
     #=======================================================================
-    SETTINGS_GROUP = 'CodeEdit'
+    SETTINGS_GROUP = 'CodeEditor'
     
     @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
@@ -521,7 +521,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
                 self.syntax = syntax
         preference = self.getPreference(block.userData().getLastScope())
         indentMark = preference.indent(line)
-        super(PMXCodeEditorPMXCodeEditor, self).keyPressEvent(event)
+        super(PMXCodeEditor, self).keyPressEvent(event)
         if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
             self.debug("Increase indent")
             cursor.insertText(block.userData().indent + self.tabKeyBehavior)
@@ -605,9 +605,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         if self.syntax != None:
             env['TM_MODE'] = self.syntax.name
         if self.fileInfo is not None:
-            env['TM_FILEPATH'] = self.parent().fileInfo.absoluteFilePath()
-            env['TM_FILENAME'] = self.parent().fileInfo.fileName()
-            env['TM_DIRECTORY'] = self.parent().fileInfo.absoluteDir().dirName()
+            env['TM_FILEPATH'] = self.fileInfo.absoluteFilePath()
+            env['TM_FILENAME'] = self.fileInfo.fileName()
+            env['TM_DIRECTORY'] = self.fileInfo.absoluteDir().dirName()
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText()
             start, end = self.getSelectionBlockStartEnd()

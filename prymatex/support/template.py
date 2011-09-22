@@ -11,7 +11,7 @@ import uuid as uuidmodule
 from glob import glob
 from subprocess import Popen
 from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.utils import ensureShellScript, makeExecutableTempFile, ensureEnvironment, deleteFile
+from prymatex.support.utils import prepareShellScript, deleteFile
 
 class PMXTemplateFile(object):
     TYPE = 'templatefile'
@@ -91,12 +91,12 @@ class PMXTemplate(PMXBundleItem):
         origWD = os.getcwd() # remember our original working directory
         os.chdir(self.path)
         
-        command = ensureShellScript(self.command)
-        temp_file = makeExecutableTempFile(command)  
-        process = Popen([ temp_file ], env = ensureEnvironment(environment))
+        file, env = prepareShellScript(self.command, environment)
+          
+        process = Popen([ temp_file ], env = env)
         process.wait()
         
-        deleteFile(temp_file)
+        deleteFile(file)
         os.chdir(origWD) # get back to our original working directory
         
     @classmethod

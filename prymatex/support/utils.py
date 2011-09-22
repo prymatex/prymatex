@@ -2,17 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os, stat, tempfile
-try:
-    from prymatex.core.config import PMX_SUPPORT_PATH
-except:
-    PMX_SUPPORT_PATH = "/"
 
 BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh
-%%s''' % PMX_SUPPORT_PATH
+%s'''
 
-ENV_SCRIPT = '''#!%s/bin/shebang.sh %%s
-%%s''' % PMX_SUPPORT_PATH
+ENV_SCRIPT = '''#!%s/bin/shebang.sh %s
+%s'''
 
 def has_shebang(text):
     line = text.split()[0]
@@ -26,14 +22,14 @@ def is_env_shebang(text):
     line = text.split()[0]
     return line.startswith("#!/usr/bin/env")
 
-def ensureShellScript(text):
-    if not has_shebang(text) or is_bash_shebang(text):
-        text = BASH_SCRIPT % text
-    elif is_env_shebang(text):
-        lines = text.splitlines()
+def ensureShellScript(script, supportPath):
+    if not has_shebang(script) or is_bash_shebang(script):
+        script = BASH_SCRIPT % (supportPath, script)
+    elif is_env_shebang(script):
+        lines = script.splitlines()
         shebang = lines[0].split()
-        text = ENV_SCRIPT % (" ".join(shebang[1:]), "\n".join(lines[1:])) 
-    return text
+        script = ENV_SCRIPT % (supportPath, " ".join(shebang[1:]), "\n".join(lines[1:])) 
+    return script
 
 def ensureEnvironment(environment):
     codingenv = {}
@@ -50,7 +46,14 @@ def makeExecutableTempFile(content):
     file.close()
     os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
     return name
-    
+
+def prepareShellScript(script, environment):
+    environment = ensureEnvironment(environment)
+    assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
+    script = ensureShellScript(script, environment['PMX_SUPPORT_PATH'])
+    tempFile = makeExecutableTempFile(script)
+    return tempFile, environment
+
 def deleteFile(file):
     return os.unlink(file)
 
