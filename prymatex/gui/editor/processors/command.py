@@ -81,9 +81,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.command = command
         self.disableAutoIndent = True
         
-        env = command.buildEnvironment()
-        env.update(self.editor.buildEnvironment())
-        self.__env = env
+        self.__env = self.editor.buildEnvironment(command.buildEnvironment())
 
     #beforeRunningCommand
     def saveModifiedFiles(self):

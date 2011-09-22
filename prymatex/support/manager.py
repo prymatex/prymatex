@@ -79,7 +79,7 @@ class PMXSupportBaseManager(object):
         self.environment.update(env)
 
     def buildEnvironment(self):
-        return self.environment
+        return self.environment.copy()
         
     #---------------------------------------------------
     # Tools

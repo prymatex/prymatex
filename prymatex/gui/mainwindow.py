@@ -29,7 +29,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     ##########################################################
     SETTINGS_GROUP = 'MainWindow'
     
-    windowTitleTemplate = pmxConfigPorperty(default = "$APPNAME")
+    windowTitleTemplate = pmxConfigPorperty(default = "$PMX_APP_NAME")
     
     @pmxConfigPorperty(default = True)
     def showMenuBar(self, value):
@@ -70,8 +70,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     
     def setupStatusBar(self):
         from prymatex.gui.statusbar import PMXStatusBar
-        self.statusbar = PMXStatusBar(self)
-        self.setStatusBar(self.statusbar)
+        self.setStatusBar(PMXStatusBar(self))
+        self.statusBar().hide()
         
     def setupDockers(self):
         '''
@@ -354,7 +354,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
             editor = self.addEmptyEditor()
             editor.appendPlainText(text)
         else:
-            self.mainWindow.statusbar.showMessage(self.trUtf8("Nothing to paste."))
+            self.mainWindow.statusBar().showMessage(self.trUtf8("Nothing to paste."))
         
     @QtCore.pyqtSlot()
     def on_actionGo_To_Line_triggered(self):
@@ -388,11 +388,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         #Update window title
         template = Template(self.windowTitleTemplate)
         
-        extra_attrs = self.application.supportManager.buildEnvironment()
-        s = template.safe_substitute(APPNAME = "Prymatex",
-                                     PROJECT = 'No project',
-                                     **extra_attrs)
-        self.setWindowTitle(s)
+        self.setWindowTitle(template.safe_substitute(
+            **editor.buildEnvironment(self.application.supportManager.buildEnvironment())
+        ))
         self.currentEditor.setFocus(QtCore.Qt.MouseFocusReason)
     
     def closeEvent(self, event):

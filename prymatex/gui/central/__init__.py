@@ -24,7 +24,6 @@ class PMXBaseTab(object):
 
     def getTabIcon(self):
         return QtGui.QIcon()
-        #application.fileManager.getFileIcon(self.fileInfo)
     
     def getTabTitle(self):
         if self.fileInfo is not None:

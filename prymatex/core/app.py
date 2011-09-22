@@ -31,10 +31,10 @@ class PMXApplication(QtGui.QApplication):
         super(PMXApplication, self).__init__(args)
         
         # Some init's
-        self.setApplicationName(prymatex.__doc__)
-        self.setApplicationVersion(prymatex.get_version())
-        self.setOrganizationDomain("org")
-        self.projectUrl = prymatex.__url__    
+        self.setApplicationName(prymatex.__name__)
+        self.setApplicationVersion(prymatex.__version__)
+        self.setOrganizationDomain(prymatex.__url__)
+        self.setOrganizationName(prymatex.__author__)
 
         self.buildSettings(profile) #Settings
         self.checkSingleInstance()  #Single instance
@@ -74,20 +74,15 @@ class PMXApplication(QtGui.QApplication):
         '''
         Checks if there's another instance using current profile
         '''
-        from prymatex.utils._os import pid_proc_dict
-        
-        lock_filename = os.path.join(self.settings.PMX_VAR_PATH, 'prymatex.pid')
-        
-        if os.path.exists(lock_filename):
-            f = open(lock_filename)
-            pid = int(f.read())
-            f.close()
-            print "Checking for another instance with pid %d in profile %s" % (pid, self.settings.profile)
-            if pid in pid_proc_dict():
-                raise exceptions.AlreadyRunningError('%s seems to be runnig with pid %d. Please close the instance or run other profile.' % (self.settings.profile, pid))
+        self.fileLock = os.path.join(self.settings.PMX_VAR_PATH, 'prymatex.pid')
+
+        if os.path.exists(self.fileLock):
+            #Mejorar esto
+            pass
+            #raise exceptions.AlreadyRunningError('%s seems to be runnig. Please close the instance or run other profile.' % (self.settings.PMX_PROFILE_NAME))
         else:
-            f = open(lock_filename, 'w')
-            f.write('%s' % os.getpid())
+            f = open(self.fileLock, 'w')
+            f.write('%s' % self.applicationPid())
             f.close()
         
     def setupConfigDialog(self):
@@ -154,6 +149,7 @@ class PMXApplication(QtGui.QApplication):
 
     def cleanup(self):
         self.settings.sync()
+        os.unlink(self.fileLock)
     
     def commitData(self):
         print "Commit data"
@@ -188,10 +184,11 @@ class PMXApplication(QtGui.QApplication):
                 'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
                 'TM_PID': os.getpid(),
                 #Prymatex 
+                'PMX_APP_NAME': self.applicationName(),
                 'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
-                'PMX_VERSION': prymatex.get_version(),
-                'PMX_PID': os.getpid()
+                'PMX_VERSION': self.applicationVersion(),
+                'PMX_PID': self.applicationPid()
         });
 
         manager.addNamespace('user', homePath)

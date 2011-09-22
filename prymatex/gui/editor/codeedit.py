@@ -36,9 +36,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     
     @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     def defaultSyntax(self, uuid):
-        syntax = self.application.supportManager.getBundleItem(uuid)
-        if syntax != None:
-            self.setSyntax(syntax)
+        self.syntax = self.application.supportManager.getBundleItem(uuid)
     
     softTabs = pmxConfigPorperty(default = True)
     tabSize = pmxConfigPorperty(default = 4)
@@ -143,14 +141,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         return PMXBaseTab.getTabIcon(self)
     
     def open(self, fileInfo):
-        PMXBaseTab.open(self, fileInfo)
+        syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.fileName())
+        if syntax is not None:
+            self.syntax = syntax
         content = self.application.fileManager.openFile(fileInfo)
         self.setPlainText(content)
+        PMXBaseTab.open(self, fileInfo)
         
     def save(self, fileInfo):
-        PMXBaseTab.save(self, fileInfo)
         self.application.fileManager.saveFile(fileInfo, self.toPlainText())
         self.document().setModified(False)
+        PMXBaseTab.save(self, fileInfo)
 
     #=======================================================================
     # Obteniendo datos del editor
@@ -200,18 +201,19 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     def updateStatusBar(self):
         #self.mainWindow.statusbar.updateStatus(self.status)
         pass
+
+    @property
+    def syntax(self):
+        return self.syntaxProcessor.syntax
         
-    #TODO: un setter para la syntax
-    def setSyntax(self, syntax):
+    @syntax.setter
+    def syntax(self, syntax):
+        assert syntax is not None, "Syntax can't be none"
         if self.syntaxProcessor.syntax != syntax:
             self.syntaxProcessor.syntax = syntax
             self.folding.indentSensitive = syntax.indentSensitive
             #self.mainWindow.statusbar.updateSyntax(syntax)
     
-    @property
-    def syntax(self):
-        return self.syntaxProcessor.syntax
-        
     @property
     def index(self):
         tab_widget = self.parent()
@@ -515,8 +517,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         line = block.text()
         if self.document().blockCount() == 1:
             syntax = self.application.supportManager.findSyntaxByFirstLine(line)
-            if syntax != None:
-                self.setSyntax(syntax)
+            if syntax is not None:
+                self.syntax = syntax
         preference = self.getPreference(block.userData().getLastScope())
         indentMark = preference.indent(line)
         super(PMXCodeEditorPMXCodeEditor, self).keyPressEvent(event)
@@ -562,7 +564,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             print "Corriendo Command", item.name
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
-            self.setSyntax(item)
+            self.syntax = item
         elif item.TYPE == PMXMacro.TYPE:
             self.debug("Corriendo Macro %s" % item.name)
             item.execute(self.macroProcessor)
@@ -581,13 +583,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
     
-    def buildEnvironment(self):
+    def buildEnvironment(self, env = {}):
         cursor = self.textCursor()
         line = unicode(cursor.block().text())
         scope = self.getCurrentScope()
         preferences = self.getPreference(scope)
         current_word = self.getCurrentWord()
-        env = {
+        #Combine base env from params and editor env
+        env.update({
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.columnNumber(), 
                 'TM_LINE_NUMBER': cursor.block().blockNumber() + 1,
@@ -596,15 +599,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
                 'TM_SOFT_TABS': self.softTabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': self.tabSize,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
-        }
+        })
         if current_word != None:
             env['TM_CURRENT_WORD'] = current_word
         if self.syntax != None:
             env['TM_MODE'] = self.syntax.name
-        if self.parent().file.exists():
-            env['TM_FILEPATH'] = self.parent().file.absoluteFilePath()
-            env['TM_FILENAME'] = self.parent().file.fileName()
-            env['TM_DIRECTORY'] = self.parent().file.absoluteDir().dirName()
+        if self.fileInfo is not None:
+            env['TM_FILEPATH'] = self.parent().fileInfo.absoluteFilePath()
+            env['TM_FILENAME'] = self.parent().fileInfo.fileName()
+            env['TM_DIRECTORY'] = self.parent().fileInfo.absoluteDir().dirName()
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText()
             start, end = self.getSelectionBlockStartEnd()

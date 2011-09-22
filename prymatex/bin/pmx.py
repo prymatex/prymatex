@@ -39,9 +39,9 @@ def runPrymatexApplication(options, args):
     from prymatex.core import app, exceptions
     try:
         pmxapp = app.PMXApplication(options.profile, args)
-    except exceptions.AlreadyRunningError, exception:
+    except exceptions.AlreadyRunningError, ex:
         from PyQt4 import QtGui
-        QtGui.QMessageBox.critical(None, excpetion.title, excpetion.message, QtGui.QMessageBox.Ok)
+        QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
         return -1
     except:
         from traceback import format_exc

@@ -204,7 +204,7 @@ class PMXSettings(object):
     PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
 
     def __init__(self, profile):
-        self.profile = profile
+        self.PMX_PROFILE_NAME = profile
         self.PMX_PROFILE_PATH = get_prymatex_profile_path(profile, self.PMX_HOME_PATH)
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')

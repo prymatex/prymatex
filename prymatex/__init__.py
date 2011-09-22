@@ -34,13 +34,20 @@ def get_version():
         version = "%s %s" % (version, git_rev)
     return version
 
-# Dynamically calculate the version based on prymatex.__version__
-__version__ = get_version()
-if u'GIT' in __version__:
-    __version__ = ' '.join(__version__.split(' ')[:-1])
-
-__doc__ = """A PyQt4 based TextMate clone"""
+#-----------------------------------
+# METADATA
+#-----------------------------------
+__prj__ = "prymatex"
 __author__ = "The Prymatex Team"
 __mail__ = "team at prymatex dot org"
 __url__ = "http://www.prymatex.org"
+__source__ = "http://ninja-ide.googlecode.com"
 __license__ = "GPL3"
+__version__ = get_version() # Dynamically calculate the version
+if u'GIT' in __version__:
+    __version__ = ' '.join(__version__.split(' ')[:-1])
+    
+#-----------------------------------
+# DOC
+#-----------------------------------
+"""A PyQt4 based TextMate clone"""

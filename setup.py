@@ -230,7 +230,7 @@ for dirpath, dirnames, filenames in os.walk(prymatex_dir):
 import prymatex
 
 setup(
-    name = 'Prymatex',
+    name = prymatex.__name__,
     version = str(prymatex.__version__.replace(' ', '-')),
     license = prymatex.__license__,
     author = prymatex.__author__,
