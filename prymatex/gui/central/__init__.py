@@ -7,6 +7,7 @@ class PMXBaseTab(object):
     creation_counter = 0
     def __init__(self):
         self.fileInfo = None
+        self.splitter = None
         self.creation_counter = PMXBaseTab.creation_counter
         PMXBaseTab.creation_counter += 1
     

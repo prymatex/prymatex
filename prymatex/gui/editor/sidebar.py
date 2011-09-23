@@ -4,7 +4,7 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QWidget, QPainter, QPixmap, QFontMetrics
 from PyQt4.Qt import QColor, QSize
-from prymatex.gui.editor.processors import PMXBlockUserData
+from prymatex.gui.editor.userdata import PMXBlockUserData
 from prymatex import resources_rc
 
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)

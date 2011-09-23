@@ -356,7 +356,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         
     @QtCore.pyqtSlot()
     def on_actionGo_To_Line_triggered(self):
-        self.currentEditorWidget.goToLine()
+        self.currentEditor.goToLine()
         
     @QtCore.pyqtSlot()
     def on_actionGo_To_File_triggered(self):
@@ -368,12 +368,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
         print "MainWindow::find"
-        self.currentEditorWidget.showFindWidget()
+        self.currentEditor.showFindWidget()
         
     @QtCore.pyqtSlot()
     def on_actionFind_Replace_triggered(self):
         print "MainWindow::replace"
-        self.currentEditorWidget.showReplaceWidget()
+        self.currentEditor.showReplaceWidget()
     
     def setCurrentEditor(self, editor):
         
@@ -387,7 +387,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         template = Template(self.windowTitleTemplate)
         title = [ editor.getTabTitle() ]
         title.append(template.safe_substitute(**editor.buildEnvironment(self.application.supportManager.buildEnvironment())))
-        self.setWindowTitle(" - ".join(title).title())
+        self.setWindowTitle(" - ".join(title))
 
         self.currentEditor.setFocus(QtCore.Qt.MouseFocusReason)
     

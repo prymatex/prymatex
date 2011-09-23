@@ -14,8 +14,9 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
 from prymatex.gui.central import PMXBaseTab
 from prymatex.gui.editor.sidebar import PMXSidebar
-from prymatex.gui.editor.processors import PMXSyntaxHighlighter, PMXBlockUserData, PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
+from prymatex.gui.editor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
+from prymatex.gui.editor.highlighter import PMXSyntaxHighlighter
 
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     '''
@@ -34,10 +35,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     #=======================================================================
     SETTINGS_GROUP = 'CodeEditor'
     
-    @pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
-    def defaultSyntax(self, uuid):
-        self.syntax = self.application.supportManager.getBundleItem(uuid)
-    
+    defaultSyntax = pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     softTabs = pmxConfigPorperty(default = True)
     tabSize = pmxConfigPorperty(default = 4)
     font = pmxConfigPorperty(default = QFont('Monospace', 10))
@@ -45,8 +43,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
-        self.syntaxProcessor.formatter = theme
+        self.syntaxHighlighter.setTheme(theme)
         self.colours = theme.settings
+        
         #Editor colours
         palette = self.palette()
         palette.setColor(QPalette.Active, QPalette.Text, self.colours['foreground'])
@@ -60,6 +59,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         self.sidebar.foreground = self.colours['foreground']
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
+        self.syntaxHighlighter.rehighlight()
         self.highlightCurrentLine()
     
     @property
@@ -87,8 +87,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         #Sidebar
         self.sidebar = PMXSidebar(self)
         
+        syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
+        self.syntaxHighlighter = PMXSyntaxHighlighter(self.document(), syntax)
+        
         #Processors
-        self.syntaxProcessor = PMXSyntaxHighlighter(self)
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
         self.snippetProcessor = PMXSnippetProcessor(self)
@@ -168,7 +170,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         if user_data == None:
             return ""
         #FIXME: Esta condicion con el bucle no se puede o no se deberia dar nunca
-        if not bool(user_data) and block.userState() == self.syntaxProcessor.MULTI_LINE:
+        if not bool(user_data) and block.userState() == self.syntaxHighlighter.MULTI_LINE:
             while not bool(block.userData()):
                 block = block.previous()
             return block.userData().getLastScope()
@@ -204,13 +206,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
 
     @property
     def syntax(self):
-        return self.syntaxProcessor.syntax
+        return self.syntaxHighlighter.syntax
         
     @syntax.setter
     def syntax(self, syntax):
         assert syntax is not None, "Syntax can't be none"
-        if self.syntaxProcessor.syntax != syntax:
-            self.syntaxProcessor.syntax = syntax
+        if self.syntaxHighlighter.syntax != syntax:
+            self.syntaxHighlighter.syntax = syntax
             self.folding.indentSensitive = syntax.indentSensitive
             #self.mainWindow.statusbar.updateSyntax(syntax)
     
