@@ -12,6 +12,7 @@ from prymatex import resources
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
+from prymatex.core import exceptions
 from prymatex.gui.central import PMXBaseTab
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
@@ -81,9 +82,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         """Retorna si el editor esta mostrando el completer"""
         return self.completer.popup().isVisible()
     
-    def __init__(self, parent = None):
+    def __init__(self, fielInfo = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
-        PMXBaseTab.__init__(self)
+        PMXBaseTab.__init__(self, fielInfo)
         #Sidebar
         self.sidebar = PMXSidebar(self)
         
@@ -128,6 +129,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
         self.actionFind = QAction(self.trUtf8("Find"), self)
     
+    def updateTabStatus(self):
+        self.emit(QtCore.SIGNAL("tabStatusChanged()"))
+        
     def isModified(self):
         return self.document().isModified()
     
@@ -142,19 +146,27 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             return self.application.fileManager.getFileIcon(self.fileInfo)
         return PMXBaseTab.getTabIcon(self)
     
-    def open(self, fileInfo):
-        syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.fileName())
-        if syntax is not None:
-            self.syntax = syntax
-        content = self.application.fileManager.openFile(fileInfo)
-        self.setPlainText(content)
-        PMXBaseTab.open(self, fileInfo)
-        
-    def save(self, fileInfo):
-        self.application.fileManager.saveFile(fileInfo, self.toPlainText())
-        self.document().setModified(False)
-        PMXBaseTab.save(self, fileInfo)
-
+    def save(self, saveAs = False):
+        if self.isNew() or saveAs:
+            fileInfo = self.application.fileManager.getSaveFile(title = "Save file" if saveAs else "Save file as")
+        else:
+            fileInfo = self.fileInfo
+        if fileInfo is not None:
+            self.application.fileManager.saveFile(fileInfo, self.toPlainText())
+            self.document().setModified(False)
+            self.setFileInfo(fileInfo)
+    
+    @classmethod
+    def newInstance(cls, fileInfo = None, parent = None):
+        editor = cls(fileInfo, parent)
+        if fileInfo is not None:
+            syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.fileName())
+            if syntax is not None:
+                editor.syntax = syntax
+            content = self.application.fileManager.openFile(fileInfo)
+            editor.setPlainText(content)
+        return editor
+    
     #=======================================================================
     # Obteniendo datos del editor
     #=======================================================================
@@ -836,9 +848,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
                 text = dropedText
             else:
                 text, dropedText = dropedText.split('\n', 1)
-            
-            
-             
         # Check if there were files droped
 
 # TODO: Move to a more convinient location

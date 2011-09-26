@@ -169,12 +169,18 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             self._current_tab_w = _TabWidget(self)
             self.addWidget(self._current_tab_w)
 
-        idx = self._current_tab_w.addTab(w, "")
-        w.setSplitter(self)
+        idx = self._current_tab_w.addTab(w, w.getTabTitle())
+        self.setActiveIcon(w, w.getTabIcon())
+        self.connect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
         
         self._set_current_tab(self._current_tab_w, idx)
         #ch.tabBar().setFocus()
     
+    def _update_tab_status(self):
+        sender = self.sender()
+        self.setWidgetTitle(sender, sender.getTabTitle())
+        self.setActiveIcon(sender, sender.getTabIcon())
+        
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         
@@ -217,6 +223,11 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         if tw is not None:
             tw.setTabText(idx, title)
 
+    def getAllWidgets(self):
+        for tw in self.findChildren(_TabWidget):
+            for index in xrange(tw.count()):
+                yield tw.widget(index)
+    
     def _tab_widget(self, w):
         """ Return the tab widget and index containing the given widget. """
 

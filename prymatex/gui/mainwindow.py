@@ -12,8 +12,8 @@ from PyQt4.QtGui import *
 from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
+from prymatex.core import exceptions
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.editor.codeedit import PMXCodeEditor
 from prymatex.gui import utils
 
 
@@ -64,7 +64,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
         
-        self.splitTabWidget.addTab(PMXCodeEditor(self))
+        self.splitTabWidget.addTab(self.application.getEditorInstance(parent = self))
     
     def setupStatusBar(self):
         from prymatex.gui.statusbar import PMXStatusBar
@@ -177,8 +177,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
 
     @QtCore.pyqtSlot()
     def on_actionNew_triggered(self):
-        #self.application.getEditor()
-        self.splitTabWidget.addTab(PMXCodeEditor(self))
+        editor = self.application.getEditorInstance(parent = self)
+        self.splitTabWidget.addTab(editor)
         
     @QtCore.pyqtSlot()
     def on_actionClose_triggered(self):
@@ -187,16 +187,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         if self.tabWidget.count():
             self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
 
-
     @QtCore.pyqtSlot()
     def on_actionQuit_triggered(self):
         QApplication.quit()
     
-
+    
     @QtCore.pyqtSlot()
     def on_actionNext_Tab_triggered(self):
         self.tabWidget.focusNextTab()
-        
+    
 
     @QtCore.pyqtSlot()
     def on_actionPrevious_Tab_triggered(self):
@@ -233,9 +232,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         self.application.bundleEditor.exec_()
 
     def openFile(self, fileInfo):
-        #self.application.getEditorForFile(file)
-        editor = PMXCodeEditor(self)
-        editor.open(fileInfo)
+        editor = self.application.getEditorInstance(fileInfo, self)
         self.splitTabWidget.addTab(editor)
 
     def openUrl(self, url):
@@ -271,45 +268,33 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
-        fileInfo = self.currentEditor.fileInfo or self.application.fileManager.getSaveFile(title = "Save file")
-        if fileInfo is not None:
-            self.currentEditor.save(fileInfo)
+        if self.currentEditor.isModified():
+            self.currentEditor.save()
         
     @QtCore.pyqtSlot()
     def on_actionSave_As_triggered(self):
-        fileInfo = self.application.fileManager.getSaveFile(title = "Save file")
-        if fileInfo is not None:
-            self.currentEditor.save(fileInfo)
+        self.currentEditor.save(saveAs = True)
         
     @QtCore.pyqtSlot()
     def on_actionSaveAll_triggered(self):
-        for i in range(0, self.tabWidgetEditors.count()):
-            if not self.tabWidgetEditors.widget(i).reqquest_save():
-                #self.statusBar().showMessage(self.trUtf8("Not all documents were saved"), 1000)
-                break
-        
+        for w in self.splitTabWidget.getAllWidgets():
+            w.save()
+
     @QtCore.pyqtSlot()
     def on_actionTake_Screenshot_triggered(self):
-        self.takeScreenShot()
-    
-    #TODO: use new stlye in signals and slots
-    @pyqtSignature('takeScreenShot()')
-    def takeScreenShot(self):
         pxm = QPixmap.grabWindow(self.winId())
-        format = 'png'
         from datetime import datetime
         now = datetime.now()
-        name = now.strftime('sshot-%Y-%m-%d-%H_%M_%S') + '.' + format
+        name = "%s.%s" % (now.strftime('sshot-%Y-%m-%d-%H_%M_%S'), 'png')
         pxm.save(name, format)
-        #self.statusBar().showMessage("Screenshot saved as <a>%s</a>" % name)
-        
+    
     @QtCore.pyqtSlot()
     def on_actionZoom_In_triggered(self):
-        self.currentEditorWidget.codeEdit.zoomIn()
+        self.currentEditor.zoomIn()
             
     @QtCore.pyqtSlot()
     def on_actionZoom_Out_triggered(self):
-        self.currentEditorWidget.codeEdit.zoomOut()
+        self.currentEditor.zoomOut()
         
     @QtCore.pyqtSlot()
     def on_actionFilter_Through_Command_triggered(self):
@@ -392,20 +377,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
         self.currentEditor.setFocus(QtCore.Qt.MouseFocusReason)
     
     def closeEvent(self, event):
-        #unsaved = self.tabWidget.unsavedCounter
-        #if unsaved:
-        #    close_msg = self.trUtf8("There are %s unsaved document in this window.<br>"
-        #                            "Close anyway?")
-        #    response = QMessageBox.question(self, self.trUtf8("Sure to close?"), 
-        #                     unicode(close_msg) % unsaved, 
-        #                     buttons=QMessageBox.Ok | QMessageBox.Cancel, 
-        #                     defaultButton=QMessageBox.Ok)
-        #    if response == QMessageBox.Cancel:
-        #        event.ignore()
-        
-        event.accept()
-        self.debug("Closing window")
-        
+        try:
+            for w in self.splitTabWidget.getAllWidgets():
+                w.close()
+        except exceptions.UserCancelException:
+            event.ignore()
+
     #===========================================================
     # Templates
     #===========================================================

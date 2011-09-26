@@ -17,8 +17,7 @@ from prymatex.utils.i18n import ugettext as _
 class PMXApplication(QtGui.QApplication):
     '''
     The application instance.
-    There can't be two apps running simultaneously, since configuration issues
-    may occur.
+    There can't be two apps running simultaneously, since configuration issues may occur.
     The application loads the PMX Support.
     '''
     
@@ -57,7 +56,6 @@ class PMXApplication(QtGui.QApplication):
         # Creates the GUI
         # args[1:] para ver si quiere abrir archivos los busco en los argumentos
         main = self.createMainWindow() # Skip pmx.py
-        main.show()
         
         # Print exceptions in a window
         self.replaceSysExceptHook()
@@ -184,7 +182,7 @@ class PMXApplication(QtGui.QApplication):
                 'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
                 'TM_PID': os.getpid(),
                 #Prymatex 
-                'PMX_APP_NAME': self.applicationName(),
+                'PMX_APP_NAME': self.applicationName().title(),
                 'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
                 'PMX_VERSION': self.applicationVersion(),
@@ -207,6 +205,13 @@ class PMXApplication(QtGui.QApplication):
         self.RPCServerThread = PMXXMLRPCServerThread(self)
         self.RPCServerThread.start()
 
+    def getEditorInstance(self, fileInfo = None, parent = None):
+        from prymatex.gui.editor.codeedit import PMXCodeEditor
+        return PMXCodeEditor.newInstance(fileInfo, parent)
+    
+    #---------------------------------------------------
+    # Exceptions
+    #---------------------------------------------------
     def displayApplicationException(self, exctype, value, traceback):
         ''' Display a nice dialog showing the python traceback'''
         from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
