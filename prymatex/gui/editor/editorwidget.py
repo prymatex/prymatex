@@ -183,7 +183,6 @@ class PMXEditorWidget(QtGui.QWidget, Ui_EditorWidget, PMXBaseTab):
         self.spinLineNumbers.setMaximum(linecount)
         self.spinLineNumbers.valueChanged.connect(self.moveCursorToLine)
         self.spinLineNumbers.editionFinished.connect(self.goToLineWidget.hide)
-        
 
     def on_pushCloseFindreplace_pressed(self):
         self.findreplaceWidget.hide()

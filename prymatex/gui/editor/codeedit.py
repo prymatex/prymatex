@@ -828,27 +828,25 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     def canUnindent(self):
         return True
     
-    def dragEnterEvent(self, dragEnterEvent):
-        if dragEnterEvent.mimeData().hasFormat('text/plain'):
-            dragEnterEvent.accept()
-        else:
-            dragEnterEvent.ignore()
+    def dragEnterEvent(self, event):
+        mimeData = event.mimeData()
+        if mimeData.hasUrls() or mimeData.hasText():
+            event.accept()
     
+    def dragMoveEvent(self, event):
+        cursor = self.cursorForPosition(event.pos())
+        self.setTextCursor(cursor)
     
-    def dropEvent(self, dropEvent):
+    def dropEvent(self, event):
         '''
-        When a file is dropped
+        When a url or text is dropped
         '''
-        dropedText = dropEvent.mimeData().text()
-        print dropedText
-        filesToOpen = []
-        
-        while True:
-            if dropedText and not dropedText.count('\n'):
-                text = dropedText
-            else:
-                text, dropedText = dropedText.split('\n', 1)
-        # Check if there were files droped
+        mimeData = event.mimeData()
+        if mimeData.hasText():
+            self.textCursor().insertText(mimeData.text())
+        elif mimeData.hasUrls():
+            for url in mimeData.urls():
+                self.textCursor().insertText(url.toString())
 
 # TODO: Move to a more convinient location
 from os.path import isfile, isdir

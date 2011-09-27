@@ -20,6 +20,10 @@ class PMXTemplateFile(object):
         self.name = os.path.basename(path)
         self.template = template
 
+    @property
+    def disabled(self):
+        return self.template.disabled
+        
     def getFileContent(self):
         if os.path.exists(self.path):
             f = codecs.open(self.path, 'r', 'utf-8')

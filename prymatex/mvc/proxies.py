@@ -122,7 +122,6 @@ class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
             index = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
                 position = bisect_key(self.__indexMap, index, lambda index: self.comparableValue(index))
-                #position = bisect_key(self.__indexMap, index, lambda xindex, yindex: self.compareIndex(xindex, yindex))
                 self.__indexMap.insert(position, index)
     
     def on_sourceModel_rowsRemoved(self, parent, start, end):
