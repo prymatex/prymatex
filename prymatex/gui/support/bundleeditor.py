@@ -26,6 +26,7 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
         self.finished.connect(self.on_bundleEditor_finished)
         #Cargar los widgets editores
         self.configEditorWidgets()
+        
         #Configurar filter, tree, toolbar y activaciones
         self.configSelectTop()
         self.configTreeView()
@@ -122,6 +123,10 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
             else:
                 self.manager.deleteBundleItem(item)
 
+    @QtCore.pyqtSignature('')
+    def on_pushButtonFilter_pressed(self):
+        self.bundleFilterDialog.show()
+
     def configToolbar(self):
         self.toolbarMenu = QtGui.QMenu("Menu", self)
         action = QtGui.QAction("New Command", self)
@@ -151,6 +156,7 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
         action.triggered.connect(self.on_actionBundle_triggered)
         self.toolbarMenu.addAction(action)
         self.pushButtonAdd.setMenu(self.toolbarMenu)
+        self.bundleFilterDialog = PMXBundleFilter(self)
 
     #==========================================================
     # Filter Top Bar
@@ -188,7 +194,7 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
         self.editTreeItem(treeItem)
         
     def configTreeView(self, manager = None):
-        self.proxyTreeModel = self.application.supportManager.bundleProxyTreeModel
+        self.proxyTreeModel = self.manager.bundleProxyTreeModel
         #self.proxyTreeModel.sort(0)
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
         self.treeView.setModel(self.proxyTreeModel)
@@ -272,3 +278,45 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
                 self.lineTabTriggerActivation.setText(tabTrigger)
             index = 0 if keyEquivalent else 1
             self.comboBoxActivation.setCurrentIndex(index)
+
+from prymatex.utils.i18n import ugettext as _
+from PyQt4 import QtCore, QtGui
+
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
+
+class PMXBundleFilter(QtGui.QDialog, PMXObject):
+    def __init__(self, parent = None):
+        super(PMXBundleFilter, self).__init__(parent)
+        self.setupUi(self)
+        self.manager = self.application.supportManager
+        self.setWindowFlags(QtCore.Qt.Dialog)
+        self.proxy = QtGui.QSortFilterProxyModel(self)
+        self.proxy.setSourceModel(self.manager.bundleProxyModel)
+        self.tableBundleItems.setModel(self.proxy)
+        self.tableBundleItems.resizeColumnsToContents()
+        self.tableBundleItems.resizeRowsToContents()
+        
+    def setupUi(self, BundleFilter):
+        BundleFilter.setObjectName(_fromUtf8("BundleFilter"))
+        BundleFilter.resize(300, 400)
+        BundleFilter.setMinimumSize(QtCore.QSize(300, 400))
+        self.verticalLayout = QtGui.QVBoxLayout(BundleFilter)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.tableBundleItems = QtGui.QTableView(BundleFilter)
+        self.tableBundleItems.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.tableBundleItems.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableBundleItems.setShowGrid(False)
+        self.tableBundleItems.setObjectName(_fromUtf8("tableBundleItems"))
+        self.tableBundleItems.horizontalHeader().setVisible(False)
+        self.tableBundleItems.verticalHeader().setVisible(False)
+        self.verticalLayout.addWidget(self.tableBundleItems)
+        self.retranslateUi(BundleFilter)
+        QtCore.QMetaObject.connectSlotsByName(BundleFilter)
+
+    def retranslateUi(self, BundleFilter):
+        BundleFilter.setWindowTitle(_('Bundle Filter'))

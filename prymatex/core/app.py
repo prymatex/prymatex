@@ -35,9 +35,15 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)
 
-        self.buildSettings(profile) #Settings
-        self.checkSingleInstance()  #Single instance
+        self.buildSettings(profile)
         
+        #Connects
+        self.aboutToQuit.connect(self.cleanup)
+    
+    def resetConfig(self):
+        print "nueva config"
+        
+    def exec_(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
         splash.show()
 
@@ -55,14 +61,10 @@ class PMXApplication(QtGui.QApplication):
         
         # Creates the GUI
         # args[1:] para ver si quiere abrir archivos los busco en los argumentos
-        main = self.createMainWindow() # Skip pmx.py
-        
-        # Print exceptions in a window
-        self.replaceSysExceptHook()
+        self.createMainWindow()
 
-        splash.finish(main)
-        
-        self.aboutToQuit.connect(self.cleanup)
+        splash.finish(self.mainWindow)
+        return super(PMXApplication, self).exec_()
 
     def buildSettings(self, profile):
         from prymatex.core.settings import PMXSettings
@@ -139,11 +141,10 @@ class PMXApplication(QtGui.QApplication):
         '''
         Creates the windows
         '''
+        #Por ahora solo una mainWindow
         from prymatex.gui.mainwindow import PMXMainWindow
-        self.windows = []
-        main = PMXMainWindow()
-        self.windows.append(main)   # Could it be possible to hold it in its childrens?
-        return main
+        self.mainWindow = PMXMainWindow()
+        self.mainWindow.show()
 
     def cleanup(self):
         self.settings.sync()
@@ -210,14 +211,13 @@ class PMXApplication(QtGui.QApplication):
         return PMXCodeEditor.newInstance(fileInfo, parent)
     
     #---------------------------------------------------
-    # Exceptions
+    # Exceptions, Print exceptions in a window
     #---------------------------------------------------
-    def displayApplicationException(self, exctype, value, traceback):
-        ''' Display a nice dialog showing the python traceback'''
-        from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
-        sys.__excepthook__(exctype, value, traceback)
-        dialog = PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback)
-        dialog.exec_()
-
     def replaceSysExceptHook(self):
-        sys.excepthook = self.displayApplicationException
+        def displayExceptionDialog(exctype, value, traceback):
+            ''' Display a nice dialog showing the python traceback'''
+            from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
+            sys.__excepthook__(exctype, value, traceback)
+            PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback).exec_()
+            
+        sys.excepthook = displayExceptionDialog

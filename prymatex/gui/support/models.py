@@ -112,17 +112,17 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
             return False
         elif role == QtCore.Qt.EditRole:  
             item = index.internalPointer()
-            name = unicode(value.toString())
             if item.TYPE == "bundle":
-                self.manager.updateBundle(item, name = name)
+                self.manager.updateBundle(item, name = value)
             elif item.TYPE == "templatefile":
                 pass
             else:
-                self.manager.updateBundleItem(item, name = name)
+                self.manager.updateBundleItem(item, name = value)
             self.dataChanged.emit(index, index)
             return True
         elif role == QtCore.Qt.CheckStateRole:
             item = index.internalPointer()
+            print value
             if item.TYPE == "bundle":
                 item.disabled = value.toBool()
             self.dataChanged.emit(index, index)
@@ -168,7 +168,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
     def flags(self, index):
         if not index.isValid():  
             return QtCore.Qt.NoItemFlags  
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable  
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
 
     def headerData(self, section, orientation, role):  
         return None

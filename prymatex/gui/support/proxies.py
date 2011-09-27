@@ -61,20 +61,25 @@ class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
         super(PMXBundleProxyModel, self).__init__('bundle', parent)
     
     def data(self, index, role):
-        if self.__sourceModel is None:
+        if self.sourceModel() is None:
             return QtCore.QVariant()
         
-        mIndex = self.modelIndex(index)
-        row = mIndex.row()
-        parent = mIndex.parent()
+        sIndex = self.mapToSource(index)
         
         if role == QtCore.Qt.CheckStateRole:
-            index = self.__sourceModel.index(row, 0, parent)
-            bundle = index.internalPointer()
+            bundle = sIndex.internalPointer()
             return QtCore.Qt.Checked if bundle.disabled else QtCore.Qt.Unchecked
         else:
-            return self.__sourceModel.data(self.__sourceModel.index(row, 0, parent), role)
+            return self.sourceModel().data(sIndex, role)
 
+    def columnCount(self, parent):
+        return 1
+    
+    def flags(self, index):
+        if not index.isValid():
+            return QtCore.Qt.NoItemFlags  
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
+    
 class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
     def __init__(self, parent = None):
         super(PMXSyntaxProxyModel, self).__init__('syntax', parent)
@@ -86,16 +91,13 @@ class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
         if not index.isValid():
             return None
         
-        mIndex = self.modelIndex(index)
-        row = mIndex.row()
-        parent = mIndex.parent()
+        sIndex = self.mapToSource(index)
         
         if role == QtCore.Qt.DisplayRole and index.column() == 1:
-            index = self.sourceModel().index(row, 0, parent)
-            syntax = index.internalPointer()
+            syntax = sIndex.internalPointer()
             return syntax.trigger
         elif index.column() == 0:
-            return self.sourceModel().data(self.sourceModel().index(row, 0, parent), role)
+            return self.sourceModel().data(sIndex, role)
 
     def columnCount(self, parent):
         return 2

@@ -108,7 +108,7 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         '''
         self.deletedObjects.append(uuid)
         deleted = map(lambda uuid: unicode(uuid).upper(), self.deletedObjects)
-        self._meta.settings.setValue('deleted', deleted)
+        self.settings.setValue('deleted', deleted)
 
     def isDeleted(self, uuid):
         '''

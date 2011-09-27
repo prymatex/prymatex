@@ -69,7 +69,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, PMXObject):
     def setupStatusBar(self):
         from prymatex.gui.statusbar import PMXStatusBar
         self.setStatusBar(PMXStatusBar(self))
-        self.statusBar().hide()
+        #self.statusBar().hide()
         
     def setupDockers(self):
         '''

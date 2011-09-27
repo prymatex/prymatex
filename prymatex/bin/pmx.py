@@ -38,7 +38,11 @@ def parseArguments(args):
 def runPrymatexApplication(options, args):
     from prymatex.core import app, exceptions
     try:
-        pmxapp = app.PMXApplication(options.profile, args)
+        pmx = app.PMXApplication(options.profile, args)
+        pmx.replaceSysExceptHook()
+        pmx.checkSingleInstance()
+        if options.reste_config:
+            pmx.resetConfig()
     except exceptions.AlreadyRunningError, ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
@@ -50,7 +54,7 @@ def runPrymatexApplication(options, args):
         from prymatex.gui.emergency import PMXCrashDialog
         dlg = PMXCrashDialog(traceback)
         dlg.exec_()
-    return pmxapp.exec_()
+    return pmx.exec_()    
     
 def main(args):
     options, args = parseArguments(args)
