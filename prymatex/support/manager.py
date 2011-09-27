@@ -117,7 +117,8 @@ class PMXSupportBaseManager(object):
             self.loadThemes(ns)
             self.loadBundles(ns)
         for bundle in self.getAllBundles():
-            self.populateBundle(bundle)
+            if not bundle.disabled:
+                self.populateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
 
@@ -154,7 +155,8 @@ class PMXSupportBaseManager(object):
                 files = reduce(lambda x, y: x + glob(y), [ join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
                 for path in files:
                     klass.loadBundleItem(path, namespace, bundle, self)
-
+        bundle.populated = True
+        
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
     #---------------------------------------------------
@@ -162,20 +164,23 @@ class PMXSupportBaseManager(object):
         '''
             Marcar un managed object como eliminado
         '''
-        #self.deletedBundles.append(uuid)
         pass
         
     def isDeleted(self, uuid):
         '''
             Marcar un managed object como eliminado
         '''
-        #return uuid in self.deletedBundles
         return False
 
     def isDisabled(self, uuid):
-        #return uuid in self.disabledBundles
         return False
+    
+    def setDisabled(self, uuid):
+        pass
         
+    def setEnabled(self, uuid):
+        pass
+    
     def addManagedObject(self, obj):
         obj.setManager(self)
         self.managedObjects[obj.uuid] = obj
@@ -291,7 +296,16 @@ class PMXSupportBaseManager(object):
         else:
             bundle.delete()
         self.removeBundle(bundle)
-        
+    
+    def disableBundle(self, bundle, disabled):
+        bundle.disabled = bool(disabled)
+        if bundle.disabled:
+            self.setDisabled(bundle.uuid)
+        else:
+            self.setEnabled(bundle.uuid)
+            if not bundle.populated:
+                self.populateBundle(bundle)
+    
     #---------------------------------------------------
     # BUNDLEITEM INTERFACE
     #---------------------------------------------------

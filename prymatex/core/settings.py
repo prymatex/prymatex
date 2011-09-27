@@ -86,6 +86,10 @@ class TextMateSettings(object):
         except KeyError:
             return None
     
+    def clear(self):
+        self.settings = {}
+        self.sync()
+        
     def sync(self):
         plistlib.writePlist(self.settings, self.file)
 
@@ -213,7 +217,7 @@ class PMXSettings(object):
         #TODO Defaults settings
         self.qsettings = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, PRYMATEX_SETTING_NAME), QtCore.QSettings.IniFormat)
         self.tmsettings = TextMateSettings(os.path.join(TM_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
-    
+
     def getGroup(self, name):
         if name not in self.GROUPS:
             self.GROUPS[name] = SettingsGroup(name, self.qsettings, self.tmsettings)
@@ -229,6 +233,9 @@ class PMXSettings(object):
         value = self.qsettings.value(name)
         return value
 
+    def clear(self):
+        self.qsettings.clear()
+        
     def sync(self):
         #Save capture values from qt
         for group in self.GROUPS.values():

@@ -5,17 +5,18 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
         super(PMXBundleTreeProxyModel, self).__init__(parent)
         self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax"]
+        self.setDynamicSortFilter(True)
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
-        regexp = self.filterRegExp()
-        if regexp.isEmpty():
-            return True
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         item = index.internalPointer()
-        if item.TYPE == "bundle":
-            return True
-        else:
-            return regexp.indexIn(item.TYPE) != -1
+        if item.disabled:
+            return False
+        if item.TYPE != "bundle":
+            regexp = self.filterRegExp()
+            if not regexp.isEmpty():
+                return regexp.indexIn(item.TYPE) != -1
+        return True
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True
@@ -65,19 +66,25 @@ class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
             return QtCore.QVariant()
         
         sIndex = self.mapToSource(index)
-        
         if role == QtCore.Qt.CheckStateRole:
             bundle = sIndex.internalPointer()
             return QtCore.Qt.Checked if bundle.disabled else QtCore.Qt.Unchecked
         else:
             return self.sourceModel().data(sIndex, role)
 
+    def setData(self, index, value, role):
+        if self.sourceModel() is None:
+            return False
+            
+        sIndex = self.mapToSource(index)    
+        if role == QtCore.Qt.CheckStateRole:
+            return self.sourceModel().setData(sIndex, value, role)
+        return False
+
     def columnCount(self, parent):
         return 1
     
     def flags(self, index):
-        if not index.isValid():
-            return QtCore.Qt.NoItemFlags  
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
     
 class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):

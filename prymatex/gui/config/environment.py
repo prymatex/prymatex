@@ -58,7 +58,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
             self.dataChanged.emit(index, index)
             return True;
         elif role == QtCore.Qt.CheckStateRole:
-            self.variables[index.row()]['enabled'] = value.toBool()
+            self.variables[index.row()]['enabled'] = value
             self.setSettingValue()
             self.dataChanged.emit(index, index)
             return True

@@ -111,14 +111,21 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         self.settings.setValue('deleted', deleted)
 
     def isDeleted(self, uuid):
-        '''
-            Marcar un managed object como eliminado
-        '''
         return uuid in self.deletedObjects
 
     def isDisabled(self, uuid):
         return uuid in self.disabledObjects
-
+    
+    def setDisabled(self, uuid):
+        self.disabledObjects.append(uuid)
+        disabled = map(lambda uuid: unicode(uuid).upper(), self.disabledObjects)
+        self.settings.setValue('disabled', disabled)
+        
+    def setEnabled(self, uuid):
+        self.disabledObjects.remove(uuid)
+        disabled = map(lambda uuid: unicode(uuid).upper(), self.disabledObjects)
+        self.settings.setValue('disabled', disabled)
+    
     #---------------------------------------------------
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------

@@ -129,6 +129,7 @@ class PMXBundle(PMXManagedObject):
     def __init__(self, uuid, namespace, hash, path = None):
         super(PMXBundle, self).__init__(uuid, namespace, path)
         self.disabled = False
+        self.populated = False
         self.support = None
         self.load(hash)
 
@@ -188,8 +189,8 @@ class PMXBundle(PMXManagedObject):
             bundle = manager.getManagedObject(uuid)
             if bundle is None and not manager.isDeleted(uuid):
                 bundle = cls(uuid, namespace, data, path)
-                bundle.disabled = manager.isDisabled(bundle.uuid)
                 #Add and promote, capture bundle
+                bundle.disabled = manager.isDisabled(bundle.uuid)
                 bundle = manager.addBundle(bundle)
                 manager.addManagedObject(bundle)
             elif bundle is not None:
@@ -213,7 +214,7 @@ class PMXBundleItem(PMXManagedObject):
     
     @property
     def disabled(self):
-        return self.bundle.disabled  
+        return self.bundle.disabled
     
     def load(self, hash):
         for key in PMXBundleItem.KEYS:

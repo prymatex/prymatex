@@ -40,8 +40,8 @@ class PMXApplication(QtGui.QApplication):
         #Connects
         self.aboutToQuit.connect(self.cleanup)
     
-    def resetConfig(self):
-        print "nueva config"
+    def resetSettings(self):
+        self.settings.clear()
         
     def exec_(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
@@ -113,6 +113,7 @@ class PMXApplication(QtGui.QApplication):
     def setupBundleEditor(self):
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
         self.bundleEditor = PMXBundleEditor()
+        self.bundleEditor.setModal(True)
 
     def setupFileManager(self):
         from prymatex.core.filemanager import PMXFileManager

@@ -22,8 +22,8 @@ def parseArguments(args):
                           epilog = "Check project page at %s" % prymatex.__url__)
 
     # Reverts custom options
-    parser.add_option('--reset-config', dest='reste_config', action = 'store_true', default = False, 
-                        help = 'Restore default config for selected profile')
+    parser.add_option('--reset-settings', dest='reste_settings', action = 'store_true', default = False, 
+                        help = 'Restore default settings for selected profile')
     parser.add_option('-p', '--profile', dest='profile', default = 'default',
                       help = "Change profile")
 
@@ -41,8 +41,8 @@ def runPrymatexApplication(options, args):
         pmx = app.PMXApplication(options.profile, args)
         pmx.replaceSysExceptHook()
         pmx.checkSingleInstance()
-        if options.reste_config:
-            pmx.resetConfig()
+        if options.reste_settings:
+            pmx.resetSettings()
     except exceptions.AlreadyRunningError, ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
