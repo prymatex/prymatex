@@ -12,7 +12,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.transformation = None
         self.tabreplacement = "\t"
         self.indentation = ""
-        self.tabTrigger = True
+        self.tabTriggered = True
         self.disableIndent = False
 
     @property
@@ -24,7 +24,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         return self.__env
     
     def configure(self, tabTrigger, disableIndent):
-        self.tabTrigger = tabTrigger
+        self.tabTriggered = tabTrigger
         self.disableIndent = disableIndent
         
     def startSnippet(self, snippet):
@@ -34,7 +34,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.snippet = snippet
         
         cursor = self.editor.textCursor()
-        if self.tabTrigger:
+        if self.tabTriggered:
             #Remove Trigger
             for _ in range(len(snippet.tabTrigger)):
                 cursor.deletePreviousChar()

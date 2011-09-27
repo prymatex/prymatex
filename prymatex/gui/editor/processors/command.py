@@ -9,6 +9,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
+        self.tabTriggered = False
+        self.disableIndent = True
+
+    def configure(self, tabTrigger, disableIndent):
+        self.tabTriggered = tabTrigger
+        self.disableIndent = disableIndent
 
     def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
         result = []
@@ -79,8 +85,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
     #Interface
     def startCommand(self, command):
         self.command = command
-        self.disableAutoIndent = True
-        
         self.__env = self.editor.buildEnvironment(command.buildEnvironment())
 
     #beforeRunningCommand
@@ -94,7 +98,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     # deleteFromEditor
     def deleteWord(self):
-        self.disableAutoIndent = False
         cursor = self.editor.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         cursor.removeSelectedText()
@@ -176,9 +179,13 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(text)
         
     def insertAsSnippet(self, text):
-        snippet = PMXSnippet(self.command.manager.uuidgen(), "internal", hash = { 'content': text})
+        hash = {    'content': text, 
+                       'name': self.command.name,
+                 'tabTrigger': self.command.tabTrigger,
+              'keyEquivalent': self.command.keyEquivalent }
+        snippet = PMXSnippet(self.command.manager.uuidgen(), "internal", hash = hash)
         snippet.bundle = self.command.bundle
-        self.editor.insertBundleItem(snippet, disableIndent = self.disableAutoIndent)
+        self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, text):
         self.editor.mainWindow.paneBrowser.setHtml(text, self.command)

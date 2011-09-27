@@ -490,10 +490,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             if trigger != None:
                 snippets = self.application.supportManager.getTabTriggerItem(trigger, scope)
                 if len(snippets) > 1:
-                    self.selectBundleItem(snippets, tabTrigger = True)
+                    self.selectBundleItem(snippets, tabTriggered = True)
                     return
                 elif snippets:
-                    self.insertBundleItem(snippets[0], tabTrigger = True)
+                    self.insertBundleItem(snippets[0], tabTriggered = True)
                     return
             cursor.insertText(self.tabKeyBehavior)
     
@@ -566,15 +566,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     #==========================================================================
     # BundleItems
     #==========================================================================
-    def insertBundleItem(self, item, tabTrigger = False, disableIndent = False):
+    def insertBundleItem(self, item, tabTriggered = False, disableIndent = False):
         ''' 
             Inserta un bundle item
         '''
         if item.TYPE == PMXSnippet.TYPE:
-            self.snippetProcessor.configure(tabTrigger, disableIndent)
+            self.snippetProcessor.configure(tabTriggered, disableIndent)
             print "Corriendo Snippet", item.name
             item.execute(self.snippetProcessor)
         elif item.TYPE == PMXCommand.TYPE:
+            self.commandProcessor.configure(tabTriggered, disableIndent)
             print "Corriendo Command", item.name
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
@@ -583,13 +584,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             self.debug("Corriendo Macro %s" % item.name)
             item.execute(self.macroProcessor)
 
-    def selectBundleItem(self, items, tabTrigger = False):
+    def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
         menu = QMenu()
         for index, item in enumerate(items, 1):
             action = menu.addAction(item.buildMenuTextEntry("&" + str(index)))
-            receiver = lambda item = item: self.insertBundleItem(item, tabTrigger = tabTrigger)
+            receiver = lambda item = item: self.insertBundleItem(item, tabTriggered = tabTriggered)
             self.connect(action, SIGNAL('triggered()'), receiver)
         if syntax:
             point = self.mainWindow.cursor().pos()
