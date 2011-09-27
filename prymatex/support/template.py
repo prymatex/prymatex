@@ -38,12 +38,12 @@ class PMXTemplateFile(object):
             f.close()
     content = property(getFileContent, setFileContent)
 
-    def save(self, path):
-        newpath = os.path.join(path, self.name)
-        f = codecs.open(newpath, 'w', 'utf-8')
+    def save(self, basePath = None):
+        path = os.path.join(basePath, self.name) if basePath is not None else self.path
+        f = codecs.open(path, 'w', 'utf-8')
         f.write(self.content)
         f.close()
-        self.path = newpath
+        self.path = path
     
 class PMXTemplate(PMXBundleItem):
     KEYS = [    'command', 'extension']

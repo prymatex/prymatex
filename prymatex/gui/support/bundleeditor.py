@@ -74,7 +74,7 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
         treeItem = self.manager.createBundleItem(itemName, itemType, bundle)
-        index = self.proxyTreeModel.index(treeItem.row(), 0, self.proxyTreeModel.index(treeItem.bundle.row(), 0 , QtCore.QModelIndex()))
+        index = self.proxyTreeModel.index(treeItem.row(), 0, self.proxyTreeModel.index(treeItem.bundle.row(), 0 ,QtCore.QModelIndex()))
         self.treeView.setCurrentIndex(index)
         self.treeView.edit(index)
         self.editTreeItem(treeItem)
@@ -100,8 +100,12 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
             template = self.proxyTreeModel.mapToSource(index).internalPointer()
             if template.TYPE == 'templatefile':
                 template = template.parent
-        self.manager.createTemplateFile(u"untitled", template)
-        print "TemplateFile"
+        print "New template file in ", template.name
+        treeItem = self.manager.createTemplateFile(u"untitled", template)
+        index = self.proxyTreeModel.index(treeItem.row(), 0, self.proxyTreeModel.index(treeItem.template.row(), 0 ,QtCore.QModelIndex()))
+        self.treeView.setCurrentIndex(index)
+        self.treeView.edit(index)
+        self.editTreeItem(treeItem)
         
     def on_actionPreferences_triggered(self):
         self.createBundleItem(u"untitled", "preference")

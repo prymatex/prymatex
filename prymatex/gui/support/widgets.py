@@ -131,7 +131,11 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
 
     @QtCore.pyqtSlot()
     def on_content_textChanged(self):
-        self.changes['content'] = unicode(self.content.toPlainText())
+        text = self.content.toPlainText()
+        if self.bundleItem.content != text:
+            self.changes['content'] = text
+        else:
+            self.changes.pop('content', None)
         
     @property
     def title(self):
@@ -155,7 +159,7 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
         super(PMXSnippetWidget, self).edit(bundleItem)
         content = bundleItem.content
         if content is None:
-            content = self.changes['content'] = self.DEFAULTS['content']
+            content = self.DEFAULTS['content']
         self.content.setPlainText(content)
 
 class PMXCommandWidget(PMXEditorBaseWidget, Ui_Command):
@@ -205,7 +209,11 @@ echo Selection: "$TM_SELECTED_TEXT"''',
 
     @QtCore.pyqtSlot()
     def on_command_textChanged(self):
-        self.changes['command'] = unicode(self.command.toPlainText())
+        text = self.command.toPlainText()
+        if self.bundleItem.command != text:
+            self.changes['command'] = text
+        else:
+            self.changes.pop('command', None)
         
     def on_comboBoxBeforeRunning_changed(self, index):
         value = self.comboBoxBeforeRunning.itemData(index)
@@ -271,7 +279,7 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         #Command
         command = bundleItem.command
         if command is None:
-            command = self.changes['command'] = self.DEFAULTS['command']
+            command = self.DEFAULTS['command']
         self.command.setPlainText(command)
         #BeforeRunningCommand
         beforeRunningCommand = bundleItem.beforeRunningCommand
@@ -312,14 +320,16 @@ fi"'''}
 
     @QtCore.pyqtSlot()
     def on_command_textChanged(self):
-        self.changes['command'] = unicode(self.command.toPlainText())
+        text = self.command.toPlainText()
+        if self.bundleItem.command != text:
+            self.changes['command'] = text
+        else:
+            self.changes.pop('command', None)
     
     @QtCore.pyqtSlot(str)
     def on_lineEditExtension_textEdited(self, text):
-        value = unicode(text)
-        print value
-        if value != self.bundleItem.extension:
-            self.changes['extension'] = value
+        if text != self.bundleItem.extension:
+            self.changes['extension'] = text
         else:
             self.changes.pop('extension', None)
             
@@ -333,7 +343,7 @@ fi"'''}
         super(PMXTemplateWidget, self).edit(bundleItem)
         command = bundleItem.command
         if command is None:
-            command = self.changes['command'] = self.DEFAULTS['command']
+            command = self.DEFAULTS['command']
         self.command.setPlainText(command)
         extension = bundleItem.extension
         if extension is None:
@@ -355,7 +365,11 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
 
     @QtCore.pyqtSlot()
     def on_content_textChanged(self):
-        self.changes['content'] = unicode(self.content.toPlainText())
+        text = self.content.toPlainText()
+        if self.bundleItem.content != text:
+            self.changes['content'] = text
+        else:
+            self.changes.pop('content', None)
         
     @property
     def title(self):
@@ -376,7 +390,7 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
         super(PMXTemplateFileWidget, self).edit(bundleItem)
         content = bundleItem.content
         if content is None:
-            content = self.changes['content'] = self.DEFAULTS['content']
+            content = self.DEFAULTS['content']
         self.content.setPlainText(content)
     
 class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
@@ -391,7 +405,11 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
     
     @QtCore.pyqtSlot()
     def on_command_textChanged(self):
-        self.changes['command'] = unicode(self.command.toPlainText())
+        text = self.command.toPlainText()
+        if self.bundleItem.command != text:
+            self.changes['command'] = text
+        else:
+            self.changes.pop('command', None)
     
     @QtCore.pyqtSlot(str)
     def on_lineEditExtensions_textEdited(self, text):
@@ -415,7 +433,7 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
         super(PMXDragCommandWidget, self).edit(bundleItem)
         command = bundleItem.command
         if command is None:
-            command = self.changes['command'] = self.DEFAULTS['command']
+            command = self.DEFAULTS['command']
         self.command.setPlainText(command)
         draggedFileExtensions = bundleItem.draggedFileExtensions
         if draggedFileExtensions is None:
@@ -523,7 +541,6 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         
     @property
     def isChanged(self):
-        
         return False
         
     def getScope(self):

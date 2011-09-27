@@ -433,7 +433,7 @@ class PMXSupportBaseManager(object):
         #No es la mejor forma pero es la forma de guardar el archivo
         file = self.addTemplateFile(file)
         template.files.append(file)
-        #template.save()
+        file.save()
         return file
 
     def updateTemplateFile(self, templateFile, **attrs):
