@@ -8,9 +8,16 @@ class MainWindowActions(object):
         #Bundles Menu
         self.application.supportManager.appendBundleMenuGroup(self.menuBundles)
         
-        #Connect
-        self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
-
+        #Connects
+        self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
+    
+    def on_menuFile_aboutToShow(self):
+        self.actionSave.setEnabled(self.currentEditor.isModified())
+        print "configurar menu file"
+        
+    def on_menuEdit_aboutToShow(self):
+        print "configurar menu edit"
+    
     def _update_file_history(self):
         menu = self.actionOpen_Recent.menu()
         if menu is None:
@@ -27,7 +34,6 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionAbout_Qt_triggered(self):
         qApp.aboutQt()
-    
         
     @QtCore.pyqtSlot()
     def on_actionAbout_this_application_triggered(self):

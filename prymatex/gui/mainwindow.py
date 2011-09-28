@@ -44,7 +44,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         @param files_to_open: The set of files to be opened when the window
                               is shown in the screen.
         '''
-        super(PMXMainWindow, self).__init__()
+        QtGui.QMainWindow.__init__(self)
+        
         self.setupUi(self)
         
         self.setupDockers()
@@ -54,10 +55,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         
         # Connect Signals
         self.splitTabWidget.tabWindowChanged.connect(self.setCurrentEditor)
+        self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
         
         self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
-        self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
-        
+
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
         
