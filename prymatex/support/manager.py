@@ -879,10 +879,10 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         for syntax in self.SYNTAXES.values():
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                 return syntax
-    
-    def findSyntaxByFileType(self, path):
+
+    def findSyntaxByFileType(self, suffix):
         for syntax in self.SYNTAXES.values():
             if type(syntax.fileTypes) == list:
                 for t in syntax.fileTypes:
-                    if path.endswith(t):
+                    if suffix.endswith(t):
                         return syntax

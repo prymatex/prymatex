@@ -45,12 +45,6 @@ class PMXBundleTreeNode(object):
             trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
         return ", ".join(trigger)
     
-    def action(self, parent):
-        return QtGui.QAction(QtGui.QIcon(self.icon), self.buildMenuTextEntry(), parent)
-    
-    def menu(self, parent):
-        return QtGui.QMenu(self.buildBundleAccelerator(), parent)
-    
     def buildBundleAccelerator(self):
         name = unicode(self.name)
         for index, char in enumerate(name):

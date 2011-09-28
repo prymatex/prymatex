@@ -27,29 +27,13 @@ class PMXBaseTab(object):
         return "untitled %d" % self.creation_counter
     
     def isNew(self):
-        return self.fileInfo is not None
+        return self.fileInfo is None
         
     def isEmpty(self):
         return True
         
     def isModified(self):
         return False
-    
-    def close(self):
-        while self.isModified():
-            response = QtGui.QMessageBox.question(self, "Save", 
-                unicode("Save %s" % self.getTabTitle()), 
-                buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
-                defaultButton = QMessageBox.Ok)
-            if response == QtGui.QMessageBox.Ok:
-                self.save()
-            elif response == QtGui.QMessageBox.No:
-                break
-            elif response == QtGui.QMessageBox.Cancel:
-                raise exceptions.UserCancelException()
-    
-    def save(self, saveAs = False):
-        pass
     
     def zoomIn(self):
         pass

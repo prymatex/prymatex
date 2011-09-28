@@ -90,7 +90,7 @@ class PMXFileManager(PMXObject):
             fileInfo = QtCore.QFileInfo(self.currentDirectory)
         filters = ";;".join(filters)
         name = QtGui.QFileDialog.getSaveFileName(None, title, fileInfo.absoluteFilePath(), filters)
-        if name is not None:
+        if name:
             return QtCore.QFileInfo(name)
     
     def getFileIcon(self, fileInfo):

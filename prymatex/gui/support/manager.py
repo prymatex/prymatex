@@ -10,6 +10,66 @@ from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, P
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
 from prymatex.mvc.proxies import bisect_key
 
+class PMXBundleMenuGroup(QtCore.QObject):
+    def __init__(self, manager, parent = None):
+        QtCore.QObject.__init__(self, parent)
+        self.manager = manager
+        self.bundleTreeModel = self.manager.bundleTreeModel
+        self.menus = {}
+        self.bundleTreeModel.dataChanged.connect(self.on_bundleTreeModel_dataChanged)
+        self.bundleTreeModel.rowsInserted.connect(self.on_bundleTreeModel_rowsInserted)
+        self.bundleTreeModel.rowsRemoved.connect(self.on_bundleTreeModel_rowsRemoved)
+        
+        
+    def buildMenu(self, items, menu, submenus, parent = None):
+        for uuid in items:
+            if uuid.startswith('-'):
+                menu.addSeparator()
+                continue
+            item = self.manager.getBundleItem(uuid)
+            if item != None:
+                action = QtGui.QAction(QtGui.QIcon(item.icon), item.buildMenuTextEntry(), parent)
+                receiver = lambda item = item: self.manager.bundleItemTriggered.emit(item)
+                self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+                menu.addAction(action)
+            elif uuid in submenus:
+                submenu = QtGui.QMenu(submenus[uuid]['name'], parent)
+                menu.addMenu(submenu)
+                self.buildMenu(submenus[uuid]['items'], submenu, submenus, parent)
+
+    def buildBundleMenu(self, bundle, parent):
+        menu = QtGui.QMenu(bundle.buildBundleAccelerator(), parent)
+        if bundle.mainMenu is not None:
+            submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+            self.buildMenu(items, menu, submenus, parent)
+        menu.menuAction().setVisible(not (bundle.disabled or bundle.mainMenu is None))
+        return menu
+
+    def addBundle(self, bundle):
+        self.menus[bundle] = self.buildBundleMenu(bundle, self.parent())
+        self.parent().addMenu(self.menus[bundle])
+
+    def on_bundleTreeModel_dataChanged(self, topLeft, bottomRight):
+        #TODO: ver que pasa con el bottomRight
+        item = topLeft.internalPointer()
+        if item.TYPE == "bundle":
+            self.menus[item].setTitle(item.buildBundleAccelerator())
+            self.menus[item].menuAction().setVisible(not (item.disabled or item.mainMenu is None))
+
+    def on_bundleTreeModel_rowsInserted(self, parent, start, end):
+        for row in range(start, end + 1):
+            index = self.bundleTreeModel.index(row, 0, parent)
+            item = index.internalPointer()
+            if item.TYPE == "bundle":
+                if item in self.menus:
+                    self.menus[item].menuAction().setVisible(not (item.disabled or item.mainMenu is None))
+                else:
+                    self.addBundle(item, self.parent())
+    
+    def on_bundleTreeModel_rowsRemoved(self, parent, start, end):
+        print "Remove indexes"
+
 class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     #Signals
     bundleItemTriggered = QtCore.pyqtSignal(object)
@@ -67,30 +127,12 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         self.dragProxyModel.setSourceModel(self.bundleTreeModel)
         self.configure()
 
-    def buildMenu(self, items, menu, submenus, parent = None):
-        for uuid in items:
-            if uuid.startswith('-'):
-                menu.addSeparator()
-                continue
-            item = self.getBundleItem(uuid)
-            if item != None:
-                action = item.action(parent)
-                receiver = lambda item = item: self.bundleItemTriggered.emit(item)
-                self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
-                menu.addAction(action)
-            elif uuid in submenus:
-                submenu = QtGui.QMenu(submenus[uuid]['name'], parent)
-                menu.addMenu(submenu)
-                self.buildMenu(submenus[uuid]['items'], submenu, submenus, parent)
-                
-    def buildBundleMenu(self, bundle, parent):
-        if bundle.mainMenu != None:
-            menu = bundle.menu(parent)
-            submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
-            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
-            self.buildMenu(items, menu, submenus, parent)
-            return menu
-    
+    def appendBundleMenuGroup(self, menu):
+        group = PMXBundleMenuGroup(self, menu)
+        name_order = lambda b1, b2: cmp(b1.name, b2.name)
+        for bundle in sorted(self.application.supportManager.getAllBundles(), name_order):
+            group.addBundle(bundle)
+
     def buildEnvironment(self):
         env = {}
         for var in self.shellVariables:

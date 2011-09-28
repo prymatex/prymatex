@@ -82,9 +82,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         """Retorna si el editor esta mostrando el completer"""
         return self.completer.popup().isVisible()
     
-    def __init__(self, fielInfo = None, parent = None):
+    def __init__(self, fileInfo = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
-        PMXBaseTab.__init__(self, fielInfo)
+        PMXBaseTab.__init__(self, fileInfo)
         #Sidebar
         self.sidebar = PMXSidebar(self)
         
@@ -102,7 +102,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         self.completer = PMXCompleterHelper(self)
         self.bookmarks = []
         
-        self.setupUi()
         self.setupActions()
         self.connectSignals()
         self.configure()
@@ -110,10 +109,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     #=======================================================================
     # Connect Signals and Declare Events
     #=======================================================================
-    def setupUi(self):
-        #self.updateLineNumberAreaWidth(0)
-        self.setWindowTitle(self.__class__.__name__)
-        
     def connectSignals(self):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
@@ -134,7 +129,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         
     def isModified(self):
         return self.document().isModified()
-    
+
+    def setFileInfo(self, fileInfo):
+        self.syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
+        PMXBaseTab.setFileInfo(self, fileInfo)
+        
     def getTabTitle(self):
         #Podemos marcar de otra forma cuando algo cambia :P
         return PMXBaseTab.getTabTitle(self)
@@ -146,23 +145,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             return self.application.fileManager.getFileIcon(self.fileInfo)
         return PMXBaseTab.getTabIcon(self)
     
-    def save(self, saveAs = False):
-        if self.isNew() or saveAs:
-            fileInfo = self.application.fileManager.getSaveFile(title = "Save file" if saveAs else "Save file as")
-        else:
-            fileInfo = self.fileInfo
-        if fileInfo is not None:
-            self.application.fileManager.saveFile(fileInfo, self.toPlainText())
-            self.document().setModified(False)
-            self.setFileInfo(fileInfo)
+    def save(self, fileInfo):
+        self.application.fileManager.saveFile(fileInfo, self.toPlainText())
+        self.document().setModified(False)
     
     @classmethod
     def newInstance(cls, fileInfo = None, parent = None):
         editor = cls(fileInfo, parent)
         if fileInfo is not None:
-            syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.fileName())
-            if syntax is not None:
-                editor.syntax = syntax
             content = self.application.fileManager.openFile(fileInfo)
             editor.setPlainText(content)
         return editor

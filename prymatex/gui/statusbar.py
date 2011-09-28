@@ -118,6 +118,9 @@ class PMXStatusBar(QtGui.QStatusBar, PMXObject):
         
         self.connectSignals()
     
+    def setCurrentEditor(self, editor):
+        pass
+    
     def setupSyntaxMenu(self):
         self.syntaxMenu = QtGui.QComboBox(self)
         tableView = QtGui.QTableView(self)
