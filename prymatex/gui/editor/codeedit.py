@@ -16,18 +16,15 @@ from prymatex.core import exceptions
 from prymatex.gui.central import PMXBaseTab
 from prymatex.gui.editor.sidebar import PMXSidebar
 from prymatex.gui.editor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.editor.codehelper import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
+from prymatex.gui.editor.helpers import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 from prymatex.gui.editor.highlighter import PMXSyntaxHighlighter
 
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
-    '''
-    The GUI element which holds the editor.
-    This class acts as a buffer for text, it does not know anything about
-    the underlying filesystem.
+    #=======================================================================
+    # Signals
+    #=======================================================================
+    syntaxChanged = QtCore.pyqtSignal()
     
-    It holds the highlighter and the folding
-    
-    '''
     WORD = re.compile(r'\w+', re.UNICODE)
     PREFERENCE_CACHE = {}
     
@@ -112,7 +109,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     def connectSignals(self):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
-        self.cursorPositionChanged.connect(self.updateStatusBar)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
         self.modificationChanged.connect(self.updateTabStatus)
 
@@ -190,21 +186,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             return self.document().findBlock(end), self.document().findBlock(start)
         else:
             return self.document().findBlock(start), self.document().findBlock(end)
-    
-    @property
-    def status(self):
-        ''' Estado actual del editor
-        '''
-        status = {}
-        cursor = self.textCursor()
-        status['line']  = cursor.blockNumber() + 1
-        status['column'] = cursor.columnNumber() + 1
-        status['scope'] = self.getCurrentScope()
-        return status
-    
-    def updateStatusBar(self):
-        #self.mainWindow.statusbar.updateStatus(self.status)
-        pass
 
     @property
     def syntax(self):
@@ -215,8 +196,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         assert syntax is not None, "Syntax can't be none"
         if self.syntaxHighlighter.syntax != syntax:
             self.syntaxHighlighter.syntax = syntax
+            self.syntaxHighlighter.rehighlight()
             self.folding.indentSensitive = syntax.indentSensitive
-            #self.mainWindow.statusbar.updateSyntax(syntax)
+            self.syntaxChanged.emit()
     
     @property
     def index(self):

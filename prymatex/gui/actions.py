@@ -11,19 +11,22 @@ class MainWindowActions(object):
         #Connects
         self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
     
+    #--------------------------------------------------
+    # About To Show Menus
+    #--------------------------------------------------
     def on_menuFile_aboutToShow(self):
         self.actionSave.setEnabled(self.currentEditor.isModified())
-        self.actionSave_All.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
+        self.actionSaveAll.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
         print "configurar menu file"
         
     def on_menuEdit_aboutToShow(self):
         print "configurar menu edit"
     
     def _update_file_history(self):
-        menu = self.actionOpen_Recent.menu()
+        menu = self.actionOpenRecent.menu()
         if menu is None:
             menu = QtGui.QMenu(self)
-            self.actionOpen_Recent.setMenu(menu)
+            self.actionOpenRecent.setMenu(menu)
         else:
             menu.clear()
         for file in self.application.fileManager.fileHistory:
@@ -31,7 +34,14 @@ class MainWindowActions(object):
             receiver = lambda file = QtCore.QFile(file): self.openFile(file)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
             menu.addAction(action)
-            
+    
+    #--------------------------------------------------
+    # Edit Actions
+    #--------------------------------------------------
+    @QtCore.pyqtSlot()
+    def on_actionUndo_triggered(self):
+        self.statusBar().showMessage("hola mundo")
+        
     @QtCore.pyqtSlot()
     def on_actionAbout_Qt_triggered(self):
         qApp.aboutQt()
