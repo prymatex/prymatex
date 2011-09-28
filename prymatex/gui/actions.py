@@ -13,6 +13,7 @@ class MainWindowActions(object):
     
     def on_menuFile_aboutToShow(self):
         self.actionSave.setEnabled(self.currentEditor.isModified())
+        self.actionSave_All.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
         print "configurar menu file"
         
     def on_menuEdit_aboutToShow(self):
@@ -56,7 +57,7 @@ class MainWindowActions(object):
         self.saveFile(saveAs = True)
         
     @QtCore.pyqtSlot()
-    def on_actionSaveAll_triggered(self):
+    def on_actionSave_All_triggered(self):
         for w in self.splitTabWidget.getAllWidgets():
             self.saveFile(editor = w)
 
