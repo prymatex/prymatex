@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Wed Sep 28 20:06:53 2011
+# Created: Wed Sep 28 22:46:11 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -116,7 +116,7 @@ class Ui_CodeEditorStatus(object):
 
     def retranslateUi(self, CodeEditorStatus):
         CodeEditorStatus.setWindowTitle(_('Form'))
-        self.labelLineColumn.setText(_('TextLabel'))
+        self.labelLineColumn.setText(_('Line: 0 Column: 0'))
         self.labelGoToLine.setText(_('Go to line:'))
         self.buttonGoToLine.setText(_('Go'))
         self.labelFind.setText(_('Find:'))

@@ -35,41 +35,63 @@ class MainWindowActions(object):
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
             menu.addAction(action)
     
-    #--------------------------------------------------
+    #============================================================
     # Edit Actions
-    #--------------------------------------------------
+    #============================================================
     @QtCore.pyqtSlot()
     def on_actionUndo_triggered(self):
         self.statusBar().showMessage("hola mundo")
         
+    #============================================================
+    # File Actions
+    #============================================================
     @QtCore.pyqtSlot()
-    def on_actionAbout_Qt_triggered(self):
-        qApp.aboutQt()
-        
+    def on_actionNew_triggered(self):
+        editor = self.application.getEditorInstance(parent = self)
+        self.splitTabWidget.addTab(editor)
+
     @QtCore.pyqtSlot()
-    def on_actionAbout_this_application_triggered(self):
-        QMessageBox.information(self, self.trUtf8("About Prymatex"), 
-                                self.trUtf8("<h3>Prymatex</h3>"
-                                "<p>A general purpouse Text Editor</p>")
-                                )
-        
+    def on_actionNewFromTemplate_triggered(self):
+        path = self.dialogNewFromTemplate.getNewFileFromTemplate()
+        if path:
+            self.openFile(QtCore.QFileInfo(path))
+            
     @QtCore.pyqtSlot()
-    def on_actionProjectHomePage_triggered(self):
-        import webbrowser
-        webbrowser.open(qApp.instance().projectUrl)
-        
+    def on_actionOpen_triggered(self):
+        '''
+        Opens one or more files
+        '''
+        #TODO: El directory puede ser dependiente del current editor o del file manager
+        files = self.application.fileManager.getOpenFiles()
+        for file in files:
+            self.openFile(file)
+    
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
         self.saveFile()
         
     @QtCore.pyqtSlot()
-    def on_actionSave_As_triggered(self):
+    def on_actionSaveAs_triggered(self):
         self.saveFile(saveAs = True)
         
     @QtCore.pyqtSlot()
-    def on_actionSave_All_triggered(self):
+    def on_actionSaveAll_triggered(self):
         for w in self.splitTabWidget.getAllWidgets():
             self.saveFile(editor = w)
+
+    @QtCore.pyqtSlot()
+    def on_actionCloseOthers_triggered(self):
+        count = self.tabWidgetEditors.count()
+        index = self.tabWidgetEditors.currentIndex()
+        widgets = []
+        
+        for i in range(0, index) + range(index+1, count):
+            widgets.append(self.tabWidgetEditors.widget(i))
+        for w in widgets:
+            i = self.tabWidgetEditors.indexOf(w)
+            if not self.tabWidgetEditors.closeTab(i):
+                return
+    
 
     @QtCore.pyqtSlot()
     def on_actionTake_Screenshot_triggered(self):
@@ -90,20 +112,7 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionFilter_Through_Command_triggered(self):
         self.dialogFilter.exec_()
-        
-    @QtCore.pyqtSlot()
-    def on_actionClose_Others_triggered(self):
-        count = self.tabWidgetEditors.count()
-        index = self.tabWidgetEditors.currentIndex()
-        widgets = []
-        
-        for i in range(0, index) + range(index+1, count):
-            widgets.append(self.tabWidgetEditors.widget(i))
-        for w in widgets:
-            i = self.tabWidgetEditors.indexOf(w)
-            if not self.tabWidgetEditors.closeTab(i):
-                return
-        
+            
     @QtCore.pyqtSlot()     
     def on_actionMove_Tab_Left_triggered(self):
         self.tabWidget.moveTabLeft()
@@ -120,11 +129,6 @@ class MainWindowActions(object):
         item = self.bundleItemSelector.select(items)
         if item is not None:
             self.currentEditor.insertBundleItem(item)
-
-    @QtCore.pyqtSlot()
-    def on_actionNew_triggered(self):
-        editor = self.application.getEditorInstance(parent = self)
-        self.splitTabWidget.addTab(editor)
         
     @QtCore.pyqtSlot()
     def on_actionClose_triggered(self):
@@ -148,29 +152,20 @@ class MainWindowActions(object):
         self.tabWidget.focusPrevTab()
 
     @QtCore.pyqtSlot(bool)
-    def on_actionFullscreen_toggled(self, check):
-        if not check and self.isFullScreen():
+    def on_actionFullscreen_toggled(self, checked):
+        if not checked and self.isFullScreen():
             self.showNormal()
         elif check:
             self.showFullScreen()
     
     @QtCore.pyqtSlot(bool)
-    def on_actionShow_Menus_toggled(self, state):
-        menubar = self.menuBar()
-        if state:
-            menubar.show()
-        else:
-            menubar.hide()
+    def on_actionShowMenus_toggled(self, checked):
+        self.menuBar().setVisible(checked)
         
-    @QtCore.pyqtSlot()
-    def on_actionOpen_triggered(self):
-        '''
-        Opens one or more files
-        '''
-        #TODO: El directory puede ser dependiente del current editor o del file manager
-        files = self.application.fileManager.getOpenFiles()
-        for file in files:
-            self.openFile(file)
+    @QtCore.pyqtSlot(bool)
+    def on_actionShowStatus_toggled(self, checked):
+        self.statusBar().setVisible(checked)
+        
         
     @QtCore.pyqtSlot()
     def on_actionShow_Bundle_Editor_triggered(self):
@@ -215,31 +210,41 @@ class MainWindowActions(object):
         print "MainWindow::replace"
         self.currentEditor.showReplaceWidget()
 
-    #===========================================================
-    # Templates
-    #===========================================================
-    def newFileFromTemplate(self, path):
-        self.openFile(path, auto_focus=True)
-        
-    @QtCore.pyqtSlot()
-    def on_actionNew_from_template_triggered(self):
-        self.dialogNewFromTemplate.exec_()
-    
     #============================================================
     # Bookmarks
     #============================================================
     @QtCore.pyqtSlot()
-    def on_actionToggle_Bookmark_triggered(self):
+    def on_actionToggleBookmark_triggered(self):
         self.currentEditor.toggleBookmark(editor.textCursor().block().blockNumber() + 1)
 
     @QtCore.pyqtSlot()
-    def on_actionNext_Bookmark_triggered(self):
+    def on_actionNextBookmark_triggered(self):
         self.currentEditor.bookmarkNext(editor.textCursor().block().blockNumber() + 1)
 
     @QtCore.pyqtSlot()
-    def on_actionPrevious_Bookmark_triggered(self):
+    def on_actionPreviousBookmark_triggered(self):
         self.currentEditor.bookmarkPrevious(editor.textCursor().block().blockNumber() + 1)
         
     @QtCore.pyqtSlot()
-    def on_actionRemove_All_Bookmarks_triggered(self):
+    def on_actionRemoveAllBookmarks_triggered(self):
         self.currentEditor.removeBookmarks()
+        
+    #============================================================
+    # Help Actions
+    #============================================================
+    @QtCore.pyqtSlot()
+    def on_actionAbout_Qt_triggered(self):
+        qApp.aboutQt()
+        
+    @QtCore.pyqtSlot()
+    def on_actionAbout_this_application_triggered(self):
+        QMessageBox.information(self, self.trUtf8("About Prymatex"), 
+                                self.trUtf8("<h3>Prymatex</h3>"
+                                "<p>A general purpouse Text Editor</p>")
+                                )
+        
+    @QtCore.pyqtSlot()
+    def on_actionProjectHomePage_triggered(self):
+        import webbrowser
+        webbrowser.open(qApp.instance().projectUrl)
+        

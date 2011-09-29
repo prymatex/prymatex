@@ -57,8 +57,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.splitTabWidget.tabWindowChanged.connect(self.setCurrentEditor)
         self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
         
-        self.dialogNewFromTemplate.newFileCreated.connect(self.newFileFromTemplate)
-
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
         
@@ -129,6 +127,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         
     def openFile(self, fileInfo, cursorPosition = (0,0)):
         editor = self.application.getEditorInstance(fileInfo, self)
+        content = self.application.fileManager.openFile(fileInfo)
+        editor.setPlainText(content)
         self.splitTabWidget.addTab(editor)
     
     def saveFile(self, editor = None, saveAs = False):
@@ -136,10 +136,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         if editor.isNew() or saveAs:
             fileInfo = self.application.fileManager.getSaveFile(title = "Save file" if saveAs else "Save file as")
             if fileInfo is not None:
-                editor.save(fileInfo)
+                self.application.fileManager.saveFile(fileInfo, editor.toPlainText())
                 editor.setFileInfo(fileInfo)
         else:
-            editor.save(editor.fileInfo)
+            self.application.fileManager.saveFile(fileInfo, editor.toPlainText())
     
     def closeFile(self, editor = None):
         editor = editor or self.currentEditor

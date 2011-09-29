@@ -84,17 +84,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonCancel">
-       <property name="text">
-        <string>C&amp;ancel</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources.qrc">
-         <normaloff>:/icons/actions/dialog-cancel.png</normaloff>:/icons/actions/dialog-cancel.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="buttonCreate">
        <property name="text">
         <string>&amp;Create</string>
@@ -102,6 +91,17 @@
        <property name="icon">
         <iconset resource="../resources.qrc">
          <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonCancel">
+       <property name="text">
+        <string>C&amp;ancel</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/actions/dialog-cancel.png</normaloff>:/icons/actions/dialog-cancel.png</iconset>
        </property>
       </widget>
      </item>
@@ -115,7 +115,6 @@
   <tabstop>comboTemplates</tabstop>
   <tabstop>buttonChoose</tabstop>
   <tabstop>buttonCreate</tabstop>
-  <tabstop>buttonCancel</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>

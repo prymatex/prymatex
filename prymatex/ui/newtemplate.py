@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/newtemplate.ui'
 #
-# Created: Thu Aug 18 15:21:06 2011
+# Created: Wed Sep 28 22:46:11 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,18 +55,18 @@ class Ui_NewFromTemplateDialog(object):
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.buttonCancel = QtGui.QPushButton(NewFromTemplateDialog)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonCancel.setIcon(icon)
-        self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
-        self.horizontalLayout.addWidget(self.buttonCancel)
         self.buttonCreate = QtGui.QPushButton(NewFromTemplateDialog)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonCreate.setIcon(icon1)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonCreate.setIcon(icon)
         self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
         self.horizontalLayout.addWidget(self.buttonCreate)
+        self.buttonCancel = QtGui.QPushButton(NewFromTemplateDialog)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonCancel.setIcon(icon1)
+        self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
+        self.horizontalLayout.addWidget(self.buttonCancel)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(NewFromTemplateDialog)
@@ -76,7 +76,6 @@ class Ui_NewFromTemplateDialog(object):
         NewFromTemplateDialog.setTabOrder(self.lineLocation, self.comboTemplates)
         NewFromTemplateDialog.setTabOrder(self.comboTemplates, self.buttonChoose)
         NewFromTemplateDialog.setTabOrder(self.buttonChoose, self.buttonCreate)
-        NewFromTemplateDialog.setTabOrder(self.buttonCreate, self.buttonCancel)
 
     def retranslateUi(self, NewFromTemplateDialog):
         NewFromTemplateDialog.setWindowTitle(_('New From Template'))
@@ -84,7 +83,7 @@ class Ui_NewFromTemplateDialog(object):
         self.label_2.setText(_('Location:'))
         self.buttonChoose.setText(_('Ch&oose'))
         self.label.setText(_('File Name:'))
-        self.buttonCancel.setText(_('C&ancel'))
         self.buttonCreate.setText(_('&Create'))
+        self.buttonCancel.setText(_('C&ancel'))
 
 from prymatex import resources_rc

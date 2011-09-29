@@ -22,4 +22,4 @@ class PMXStatusBar(QtGui.QStatusBar):
         
     def setCurrentEditor(self, editor):
         for widget in self.widgets:
-            widget.setCurrentEditor(editor)
+            widget.setEditor(editor)

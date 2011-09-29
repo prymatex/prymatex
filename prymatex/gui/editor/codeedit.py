@@ -128,6 +128,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
 
     def setFileInfo(self, fileInfo):
         self.syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
+        self.document().setModified(False)
         PMXBaseTab.setFileInfo(self, fileInfo)
         
     def getTabTitle(self):
@@ -140,17 +141,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         elif self.fileInfo is not None:
             return self.application.fileManager.getFileIcon(self.fileInfo)
         return PMXBaseTab.getTabIcon(self)
-    
-    def save(self, fileInfo):
-        self.application.fileManager.saveFile(fileInfo, self.toPlainText())
-        self.document().setModified(False)
-    
+        
     @classmethod
     def newInstance(cls, fileInfo = None, parent = None):
         editor = cls(fileInfo, parent)
-        if fileInfo is not None:
-            content = self.application.fileManager.openFile(fileInfo)
-            editor.setPlainText(content)
         return editor
     
     #=======================================================================

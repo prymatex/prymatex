@@ -5,7 +5,7 @@ from prymatex.ui.editorstatus import Ui_CodeEditorStatus
 class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        self.currentEditor = None
+        self.editor = None
         
         self.setupUi(self)
         self.goToLine.setVisible(False)
@@ -20,13 +20,13 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         editor.cursorPositionChanged.connect(self.updateCursorPosition)
         editor.syntaxChanged.connect(self.updateSyntax)
         
-    def setCurrentEditor(self, editor):
-        if self.currentEditor is not None:
-            self.disconnectEditor(self.currentEditor)
+    def setEditor(self, editor):
+        if self.editor is not None:
+            self.disconnectEditor(self.editor)
         self.connectEditor(editor)
         self.updateCursorPosition(editor)
         self.updateSyntax(editor)
-        self.currentEditor = editor
+        self.editor = editor
     
     def setupSyntaxMenu(self):
         tableView = QtGui.QTableView(self)
@@ -49,18 +49,18 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def on_syntaxMenu_currentIndexChanged(self, index):
         model = self.syntaxMenu.model()
         node = model.mapToSource(model.createIndex(index, 0))
-        if self.currentEditor is not None:
-            self.currentEditor.syntax = node.internalPointer()
+        if self.editor is not None:
+            self.editor.syntax = node.internalPointer()
             
     def updateCursorPosition(self, editor = None):
-        editor = editor or self.currentEditor
+        editor = editor or self.editor
         cursor = editor.textCursor()
         line = cursor.blockNumber() + 1
         column = cursor.columnNumber() + 1
         self.labelLineColumn.setText("Line: %5d Column: %5d" % (line, column))
         
     def updateSyntax(self, editor = None):
-        editor = editor or self.currentEditor
+        editor = editor or self.editor
         model = self.syntaxMenu.model()
         index = model.findItemIndex(editor.syntax)
         self.syntaxMenu.blockSignals(True)

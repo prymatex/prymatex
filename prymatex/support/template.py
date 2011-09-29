@@ -97,7 +97,7 @@ class PMXTemplate(PMXBundleItem):
         
         file, env = prepareShellScript(self.command, environment)
           
-        process = Popen([ temp_file ], env = env)
+        process = Popen([ file ], env = env)
         process.wait()
         
         deleteFile(file)
