@@ -519,14 +519,13 @@ class Shell(NodeList):
         return node
     
     def execute(self, processor):
-        file, env = prepareShellScript(unicode(self), processor.environment)
+        command, env = prepareShellScript(unicode(self), processor.environment)
         
-        process = Popen([ file ], stdout=PIPE, stderr=STDOUT, env = env)
+        process = Popen(command, stdout=PIPE, stderr=STDOUT, env = env)
         text = process.stdout.read()
         text = text.strip()
         process.stdout.close()
         _ = process.wait()
-        deleteFile(file)
         self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
         
     def render(self, processor):

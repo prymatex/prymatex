@@ -114,9 +114,9 @@ class PMXCommand(PMXBundleItem):
                 return
         processor.startCommand(self)
         input_type, input_value = self.getInputText(processor)
-        file, env = prepareShellScript(self.systemCommand, processor.environment)
+        command, env = prepareShellScript(self.systemCommand, processor.environment)
         
-        process = Popen([ file ], stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = env)
+        process = Popen(command, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = env)
         
         if input_type != None:
             process.stdin.write(unicode(input_value).encode("utf-8"))
@@ -145,9 +145,6 @@ class PMXCommand(PMXBundleItem):
         function(*args)
         
         processor.endCommand(self)
-        
-        #Podria borrar este archivo cuando de borra el objeto
-        #deleteFile(self.temp_command_file)
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]

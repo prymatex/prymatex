@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, stat, tempfile
+import re, os, stat, tempfile
 
 BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh
@@ -51,8 +51,13 @@ def prepareShellScript(script, environment):
     environment = ensureEnvironment(environment)
     assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
     script = ensureShellScript(script, environment['PMX_SUPPORT_PATH'])
-    tempFile = makeExecutableTempFile(script)
-    return tempFile, environment
+    file = makeExecutableTempFile(script)
+    if sys.platform == "win32":
+        #FIXME: re trucho pero por ahora funciona para mi :)
+        command = [ "c:\\cygwin\\bin\\env", file ]
+    else:
+        command = file
+    return command, environment
 
 def deleteFile(file):
     return os.unlink(file)
@@ -81,3 +86,25 @@ def ensurePath(path, name, suffix = 0):
             return newPath
         else:
             return ensurePath(path, name, suffix + 1)
+            
+ABSPATH_LINENO_RE = re.compile('''
+    (?P<text>(?P<path>/[\w\d\/\.]+)(:(?P<line>\d+))?)
+''', re.VERBOSE)
+
+def pathToLink(match):
+    path = match.group('path')
+    attrs = {}
+    attrs['url'] = 'file://%s' % match.group('path')
+    attrs['line'] = match.group('line')
+    #attrs['column'] = match.group('column')
+    
+    final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.iteritems() if v ])
+    text = match.group('text')
+    
+    data = dict(attrs= final_attrs, 
+                text= text)
+    link = '<a href="txmt://open/%(attrs)s">%(text)s</a>' % data 
+    return link
+
+def makeHyperlinks(text):
+    return re.sub(ABSPATH_LINENO_RE, pathToLink, text)

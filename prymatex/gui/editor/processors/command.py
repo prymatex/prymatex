@@ -123,7 +123,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     # Outpus function
     def commandError(self, text, code):
-        from prymatex.utils.pathutils import make_hyperlinks
+        from prymatex.support.utils import makeHyperlinks
         html = '''
             <html>
                 <head>
@@ -147,7 +147,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 <p>Exit code was: %(exit_code)d</p>
                 </body>
             </html>
-        ''' % {'output': make_hyperlinks(text), 
+        ''' % {'output': makeHyperlinks(text), 
                'name': self.command.name,
                'exit_code': code}
         self.showAsHTML(html)
