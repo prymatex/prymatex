@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, os, stat, tempfile
+import re, sys, os, stat, tempfile
 
 BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh

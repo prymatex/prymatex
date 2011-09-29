@@ -4,6 +4,9 @@ class MainWindowActions(object):
     def setupMenu(self):
         #Recent files
         self._update_file_history()
+        self.actionFullscreen.setChecked(self.windowState() == QtCore.Qt.WindowFullScreen)
+        self.actionShowStatus.setChecked(self.statusBar().isVisible())
+        self.actionShowMenus.setChecked(self.menuBar().isVisible())
         
         #Bundles Menu
         self.application.supportManager.appendBundleMenuGroup(self.menuBundles)
@@ -249,10 +252,10 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot(bool)
     def on_actionFullscreen_toggled(self, checked):
-        if not checked and self.isFullScreen():
-            self.showNormal()
-        elif check:
+        if checked:
             self.showFullScreen()
+        else:
+            self.showNormal()
 
     @QtCore.pyqtSlot()
     def on_actionSettings_triggered(self):

@@ -141,16 +141,16 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <widget class="QMenu" name="menuSelect_All">
+    <widget class="QMenu" name="menuSelect">
      <property name="title">
       <string>Select</string>
      </property>
-     <addaction name="actionWord"/>
-     <addaction name="actionLine"/>
-     <addaction name="actionParagraph"/>
-     <addaction name="actionEnclosing_Brackets"/>
-     <addaction name="actionCurrent_Scope"/>
-     <addaction name="actionAll"/>
+     <addaction name="actionSelectWord"/>
+     <addaction name="actionSelectLine"/>
+     <addaction name="actionSelectParagraph"/>
+     <addaction name="actionSelectEnclosingBrackets"/>
+     <addaction name="actionSelectCurrentScope"/>
+     <addaction name="actionSelectAll"/>
     </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
@@ -159,7 +159,7 @@
     <addaction name="actionCut"/>
     <addaction name="actionPaste"/>
     <addaction name="separator"/>
-    <addaction name="menuSelect_All"/>
+    <addaction name="menuSelect"/>
     <addaction name="separator"/>
     <addaction name="actionFind"/>
    </widget>
@@ -251,15 +251,6 @@
     <string>Ctrl+Alt+S</string>
    </property>
   </action>
-  <action name="actionReload">
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/icons/actions/view-refresh.png</normaloff>:/icons/actions/view-refresh.png</iconset>
-   </property>
-   <property name="text">
-    <string>Reload</string>
-   </property>
-  </action>
   <action name="actionClose">
    <property name="icon">
     <iconset resource="../resources.qrc">
@@ -278,14 +269,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+W</string>
-   </property>
-  </action>
-  <action name="actionRestart">
-   <property name="text">
-    <string>Restart</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+Shift+R</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -360,36 +343,12 @@
     <string>Ctrl+V</string>
    </property>
   </action>
-  <action name="actionPaste_As_New">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/actions/resources/actions/edit-paste.png</normaloff>:/actions/resources/actions/edit-paste.png</iconset>
-   </property>
-   <property name="text">
-    <string>Paste As New</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+V</string>
-   </property>
-  </action>
   <action name="actionFind">
    <property name="text">
     <string>Find</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
-   </property>
-  </action>
-  <action name="actionFind_Replace">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/actions/resources/actions/edit-find-replace.png</normaloff>:/actions/resources/actions/edit-find-replace.png</iconset>
-   </property>
-   <property name="text">
-    <string>Find/Replace</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionSettings">
@@ -483,65 +442,6 @@
     <string>Alt+F10</string>
    </property>
   </action>
-  <action name="actionShow_File_System_Pane">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>File System</string>
-   </property>
-   <property name="shortcut">
-    <string>F8</string>
-   </property>
-  </action>
-  <action name="actionShow_Project_Dock">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Project</string>
-   </property>
-   <property name="shortcut">
-    <string>F7</string>
-   </property>
-  </action>
-  <action name="actionShow_Symbol_List">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Symbols</string>
-   </property>
-   <property name="shortcut">
-    <string>F6</string>
-   </property>
-  </action>
-  <action name="actionShow_Current_Scope">
-   <property name="text">
-    <string>Show Current Scope</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+Shift+S</string>
-   </property>
-  </action>
-  <action name="actionShilft_Left">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/resources/actions/format-indent-less.png</normaloff>:/resources/actions/format-indent-less.png</iconset>
-   </property>
-   <property name="text">
-    <string>Shift Left</string>
-   </property>
-  </action>
-  <action name="actionShift_Right">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/resources/actions/format-indent-more.png</normaloff>:/resources/actions/format-indent-more.png</iconset>
-   </property>
-   <property name="text">
-    <string>Shift Right</string>
-   </property>
-  </action>
   <action name="actionToUppercase">
    <property name="text">
     <string>To Uppercase</string>
@@ -600,29 +500,6 @@
     <string>Alt+Shift+R</string>
    </property>
   </action>
-  <action name="actionShow_Terminal_Dock">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Terminal</string>
-   </property>
-  </action>
-  <action name="actionFile_browser">
-   <property name="text">
-    <string>File browser</string>
-   </property>
-  </action>
-  <action name="actionThis_file">
-   <property name="text">
-    <string>This file</string>
-   </property>
-  </action>
-  <action name="actionWith_options">
-   <property name="text">
-    <string>with options...</string>
-   </property>
-  </action>
   <action name="actionToggleBookmark">
    <property name="text">
     <string>Toggle Bookmark</string>
@@ -671,61 +548,6 @@
     <string>Ctrl+PgUp</string>
    </property>
   </action>
-  <action name="actionMove_Tab_Left">
-   <property name="text">
-    <string>Move Tab Left</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+PgUp</string>
-   </property>
-  </action>
-  <action name="actionMove_Tab_Right">
-   <property name="text">
-    <string>Move Tab Right</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+PgDown</string>
-   </property>
-  </action>
-  <action name="actionA">
-   <property name="text">
-    <string>No Pane</string>
-   </property>
-  </action>
-  <action name="actionGo_To_Header_Source">
-   <property name="text">
-    <string>Go To Header/Source</string>
-   </property>
-  </action>
-  <action name="actionGo_To_File">
-   <property name="text">
-    <string>Go To FIle</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+E</string>
-   </property>
-  </action>
-  <action name="actionGo_To_Symbol">
-   <property name="text">
-    <string>Go To Symbol</string>
-   </property>
-  </action>
-  <action name="actionGo_To_Matching_Bracket">
-   <property name="text">
-    <string>Go To Matching Bracket</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+B</string>
-   </property>
-  </action>
-  <action name="actionGo_To_Line">
-   <property name="text">
-    <string>Go To Line</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+G</string>
-   </property>
-  </action>
   <action name="actionReport_Bug">
    <property name="text">
     <string>Report &amp;Bug</string>
@@ -772,28 +594,6 @@
     <string>Meta+Ctrl+T</string>
    </property>
   </action>
-  <action name="actionSelect_None">
-   <property name="text">
-    <string>Select None</string>
-   </property>
-  </action>
-  <action name="actionShow_Log_Window">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Log</string>
-   </property>
-   <property name="statusTip">
-    <string>Displays Log Messages</string>
-   </property>
-   <property name="whatsThis">
-    <string>Shows logs from the application and its plugins</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+L</string>
-   </property>
-  </action>
   <action name="actionNewFromTemplate">
    <property name="enabled">
     <bool>true</bool>
@@ -807,26 +607,6 @@
    </property>
    <property name="shortcut">
     <string>Meta+Shift+N</string>
-   </property>
-  </action>
-  <action name="actionSplit_Vertically">
-   <property name="text">
-    <string>Split Vertically</string>
-   </property>
-  </action>
-  <action name="actionSplit_Horizontally">
-   <property name="text">
-    <string>Split Horizontally</string>
-   </property>
-  </action>
-  <action name="actionView_Whitespace">
-   <property name="text">
-    <string>View Whitespace</string>
-   </property>
-  </action>
-  <action name="actionView_Indentation">
-   <property name="text">
-    <string>View Indentation</string>
    </property>
   </action>
   <action name="actionShowWhitespace">
@@ -853,86 +633,39 @@
     <string>Show End of Line (EOL)</string>
    </property>
   </action>
-  <action name="actionWord_Warp">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Word Warp</string>
-   </property>
-  </action>
-  <action name="actionFree_Editing">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Free Editing</string>
-   </property>
-   <property name="statusTip">
-    <string>Enables the cursor to be positioned anywhere in the editor</string>
-   </property>
-  </action>
-  <action name="actionShow_Browser_Dock">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Web Browser</string>
-   </property>
-  </action>
   <action name="actionRead_documentation">
    <property name="text">
     <string>Read &amp;documentation</string>
    </property>
   </action>
-  <action name="actionWord">
+  <action name="actionSelectWord">
    <property name="text">
     <string>&amp;Word</string>
    </property>
   </action>
-  <action name="actionLine">
+  <action name="actionSelectLine">
    <property name="text">
     <string>&amp;Line</string>
    </property>
   </action>
-  <action name="actionParagraph">
+  <action name="actionSelectParagraph">
    <property name="text">
     <string>&amp;Paragraph</string>
    </property>
   </action>
-  <action name="actionEnclosing_Brackets">
+  <action name="actionSelectEnclosingBrackets">
    <property name="text">
     <string>Enclosing &amp;Brackets</string>
    </property>
   </action>
-  <action name="actionCurrent_Scope">
+  <action name="actionSelectCurrentScope">
    <property name="text">
     <string>Current &amp;Scope</string>
    </property>
   </action>
-  <action name="actionAll">
+  <action name="actionSelectAll">
    <property name="text">
     <string>&amp;All</string>
-   </property>
-  </action>
-  <action name="actionBundle_List">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>:/actions/resources/actions/edit-select-all.png</normaloff>:/actions/resources/actions/edit-select-all.png</iconset>
-   </property>
-   <property name="text">
-    <string>Bundle List</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+B</string>
-   </property>
-  </action>
-  <action name="actionPanes">
-   <property name="text">
-    <string>Panes</string>
    </property>
   </action>
   <action name="actionOpenRecent">
@@ -947,11 +680,6 @@
   <action name="actionCloseAll">
    <property name="text">
     <string>Close All</string>
-   </property>
-  </action>
-  <action name="actionAlgo_pepe">
-   <property name="text">
-    <string>Algo pepe</string>
    </property>
   </action>
   <action name="actionShowStatus">
