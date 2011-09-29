@@ -38,6 +38,7 @@ class PMXFileManager(PMXObject):
             self.fileHistory.insert(0, path)
         if len(self.fileHistory) > self.fileHistoryLength:
             self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
+        self.settings.setValue("fileHistory", self.fileHistory)
         self.fileHistoryChanged.emit()
         
     def openFile(self, fileInfo):

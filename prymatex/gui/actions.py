@@ -11,9 +11,9 @@ class MainWindowActions(object):
         #Connects
         self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
     
-    #--------------------------------------------------
+    #============================================================
     # About To Show Menus
-    #--------------------------------------------------
+    #============================================================
     def on_menuFile_aboutToShow(self):
         self.actionSave.setEnabled(self.currentEditor.isModified())
         self.actionSaveAll.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
@@ -31,17 +31,10 @@ class MainWindowActions(object):
             menu.clear()
         for file in self.application.fileManager.fileHistory:
             action = QtGui.QAction(file, self)
-            receiver = lambda file = QtCore.QFile(file): self.openFile(file)
+            receiver = lambda file = QtCore.QFileInfo(file): self.openFile(file)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
             menu.addAction(action)
     
-    #============================================================
-    # Edit Actions
-    #============================================================
-    @QtCore.pyqtSlot()
-    def on_actionUndo_triggered(self):
-        self.statusBar().showMessage("hola mundo")
-        
     #============================================================
     # File Actions
     #============================================================
@@ -55,7 +48,7 @@ class MainWindowActions(object):
         path = self.dialogNewFromTemplate.getNewFileFromTemplate()
         if path:
             self.openFile(QtCore.QFileInfo(path))
-            
+
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         '''
@@ -80,6 +73,20 @@ class MainWindowActions(object):
             self.saveFile(editor = w)
 
     @QtCore.pyqtSlot()
+    def on_actionClose_triggered(self):
+        index = self.tabWidget.currentIndex()
+        self.tabWidget.closeTab(index)
+        if self.tabWidget.count():
+            self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
+
+    @QtCore.pyqtSlot()
+    def on_actionCloseAll_triggered(self):
+        index = self.tabWidget.currentIndex()
+        self.tabWidget.closeTab(index)
+        if self.tabWidget.count():
+            self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
+
+    @QtCore.pyqtSlot()
     def on_actionCloseOthers_triggered(self):
         count = self.tabWidgetEditors.count()
         index = self.tabWidgetEditors.currentIndex()
@@ -92,126 +99,101 @@ class MainWindowActions(object):
             if not self.tabWidgetEditors.closeTab(i):
                 return
     
-
-    @QtCore.pyqtSlot()
-    def on_actionTake_Screenshot_triggered(self):
-        pxm = QPixmap.grabWindow(self.winId())
-        from datetime import datetime
-        now = datetime.now()
-        name = "%s.%s" % (now.strftime('sshot-%Y-%m-%d-%H_%M_%S'), 'png')
-        pxm.save(name, format)
-    
-    @QtCore.pyqtSlot()
-    def on_actionZoom_In_triggered(self):
-        self.currentEditor.zoomIn()
-            
-    @QtCore.pyqtSlot()
-    def on_actionZoom_Out_triggered(self):
-        self.currentEditor.zoomOut()
-        
-    @QtCore.pyqtSlot()
-    def on_actionFilter_Through_Command_triggered(self):
-        self.dialogFilter.exec_()
-            
-    @QtCore.pyqtSlot()     
-    def on_actionMove_Tab_Left_triggered(self):
-        self.tabWidget.moveTabLeft()
-        
-    @QtCore.pyqtSlot()
-    def on_actionMove_Tab_Right_triggered(self):
-        self.tabWidget.moveTabRight()
-
-    @QtCore.pyqtSlot()
-    def on_actionSelect_Bundle_Item_triggered(self):
-        editor = self.currentEditor
-        scope = editor.getCurrentScope()
-        items = self.application.supportManager.getActionItems(scope)
-        item = self.bundleItemSelector.select(items)
-        if item is not None:
-            self.currentEditor.insertBundleItem(item)
-        
-    @QtCore.pyqtSlot()
-    def on_actionClose_triggered(self):
-        index = self.tabWidget.currentIndex()
-        self.tabWidget.closeTab(index)
-        if self.tabWidget.count():
-            self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
-
     @QtCore.pyqtSlot()
     def on_actionQuit_triggered(self):
         QApplication.quit()
     
+    #============================================================
+    # Edit Actions
+    #============================================================
+    @QtCore.pyqtSlot()
+    def on_actionUndo_triggered(self):
+        self.statusBar().showMessage("actionUndo")
+        
+    @QtCore.pyqtSlot()
+    def on_actionRedo_triggered(self):
+        self.statusBar().showMessage("actionRedo")
+        
+    @QtCore.pyqtSlot()
+    def on_actionCopy_triggered(self):
+        self.statusBar().showMessage("actionCopy")
     
     @QtCore.pyqtSlot()
-    def on_actionNext_Tab_triggered(self):
-        self.tabWidget.focusNextTab()
-    
+    def on_actionCut_triggered(self):
+        self.statusBar().showMessage("actionCut")
+        
+    @QtCore.pyqtSlot()
+    def on_actionPaste_triggered(self):
+        self.statusBar().showMessage("actionPaste")
 
-    @QtCore.pyqtSlot()
-    def on_actionPrevious_Tab_triggered(self):
-        self.tabWidget.focusPrevTab()
-
-    @QtCore.pyqtSlot(bool)
-    def on_actionFullscreen_toggled(self, checked):
-        if not checked and self.isFullScreen():
-            self.showNormal()
-        elif check:
-            self.showFullScreen()
-    
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowMenus_toggled(self, checked):
-        self.menuBar().setVisible(checked)
-        
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowStatus_toggled(self, checked):
-        self.statusBar().setVisible(checked)
-        
-        
-    @QtCore.pyqtSlot()
-    def on_actionShow_Bundle_Editor_triggered(self):
-        #TODO: mejorar esto
-        self.application.bundleEditor.exec_()
-        
-    #===========================================================================
-    # Dumb code :/
-    #===========================================================================
-    @QtCore.pyqtSlot()
-    def on_actionPreferences_triggered(self):
-        self.application.configDialog.exec_()
-    
-        
-    @QtCore.pyqtSlot()
-    def on_actionPaste_As_New_triggered(self):
-        text = qApp.instance().clipboard().text()
-        if text:
-            editor = self.addEmptyEditor()
-            editor.appendPlainText(text)
-        else:
-            self.mainWindow.statusBar().showMessage(self.trUtf8("Nothing to paste."))
-        
-    @QtCore.pyqtSlot()
-    def on_actionGo_To_Line_triggered(self):
-        self.currentEditor.goToLine()
-        
-    @QtCore.pyqtSlot()
-    def on_actionGo_To_File_triggered(self):
-        '''
-        Triggers 
-        '''
-        self.tabWidget.chooseFileDlg.exec_()
-        
     @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
-        print "MainWindow::find"
         self.currentEditor.showFindWidget()
-        
-    @QtCore.pyqtSlot()
-    def on_actionFind_Replace_triggered(self):
-        print "MainWindow::replace"
-        self.currentEditor.showReplaceWidget()
 
     #============================================================
-    # Bookmarks
+    # View Actions
+    #============================================================
+    @QtCore.pyqtSlot()
+    def on_actionZoomIn_triggered(self):
+        self.currentEditor.zoomIn()
+            
+    @QtCore.pyqtSlot()
+    def on_actionZoomOut_triggered(self):
+        self.currentEditor.zoomOut()
+
+    @QtCore.pyqtSlot()
+    def on_actionShowFolding_triggered(self):
+        self.statusBar().showMessage("actionShowFolding")
+    
+    @QtCore.pyqtSlot()
+    def on_actionShowBookmarks_triggered(self):
+        self.statusBar().showMessage("actionShowBookmarks")
+    
+    @QtCore.pyqtSlot()
+    def on_actionShowLineNumbers_triggered(self):
+        self.statusBar().showMessage("actionShowLineNumbers")
+
+    #============================================================
+    # Text Actions
+    #============================================================
+    @QtCore.pyqtSlot()
+    def on_actionToUppercase_triggered(self):
+        self.statusBar().showMessage("actionToUppercase")
+    
+    @QtCore.pyqtSlot()
+    def on_actionToLowercase_triggered(self):
+        self.statusBar().showMessage("actionToLowercase")
+        
+    @QtCore.pyqtSlot()
+    def on_actionToTitlecase_triggered(self):
+        self.statusBar().showMessage("actionToTitlecase")
+        
+    @QtCore.pyqtSlot()
+    def on_actionToOppositeCase_triggered(self):
+        self.statusBar().showMessage("actionToOppositeCase")
+        
+    @QtCore.pyqtSlot()
+    def on_actionSpacesToTabs_triggered(self):
+        self.statusBar().showMessage("actionSpacesToTabs")
+        
+    @QtCore.pyqtSlot()
+    def on_actionTabToSpaces_triggered(self):
+        self.statusBar().showMessage("actionTabToSpaces")
+
+    @QtCore.pyqtSlot()
+    def on_actionTranspose_triggered(self):
+        self.statusBar().showMessage("actionTranspose")
+
+    @QtCore.pyqtSlot()
+    def on_actionExecute_triggered(self):
+        self.statusBar().showMessage("actionExecute")
+
+    @QtCore.pyqtSlot()
+    def on_actionFilterThroughCommand_triggered(self):
+        self.dialogFilter.exec_()
+
+    #============================================================
+    # Navigation Actions
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionToggleBookmark_triggered(self):
@@ -228,7 +210,54 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionRemoveAllBookmarks_triggered(self):
         self.currentEditor.removeBookmarks()
+
+    @QtCore.pyqtSlot()
+    def on_actionNextTab_triggered(self):
+        self.tabWidget.focusNextTab()
+
+    @QtCore.pyqtSlot()
+    def on_actionPreviousTab_triggered(self):
+        self.tabWidget.focusPrevTab()
+
+    #============================================================
+    # Bundles Actions
+    #============================================================
+    @QtCore.pyqtSlot()
+    def on_actionShowBundleEditor_triggered(self):
+        #TODO: mejorar esto
+        self.application.bundleEditor.exec_()
+
+    @QtCore.pyqtSlot()
+    def on_actionSelectBundleItem_triggered(self):
+        editor = self.currentEditor
+        scope = editor.getCurrentScope()
+        items = self.application.supportManager.getActionItems(scope)
+        item = self.bundleItemSelector.select(items)
+        if item is not None:
+            self.currentEditor.insertBundleItem(item)
+    
+    #============================================================
+    # Preferences Actions
+    #============================================================
+    @QtCore.pyqtSlot(bool)
+    def on_actionShowMenus_toggled(self, checked):
+        self.menuBar().setVisible(checked)
         
+    @QtCore.pyqtSlot(bool)
+    def on_actionShowStatus_toggled(self, checked):
+        self.statusBar().setVisible(checked)
+    
+    @QtCore.pyqtSlot(bool)
+    def on_actionFullscreen_toggled(self, checked):
+        if not checked and self.isFullScreen():
+            self.showNormal()
+        elif check:
+            self.showFullScreen()
+
+    @QtCore.pyqtSlot()
+    def on_actionSettings_triggered(self):
+        self.application.configDialog.exec_()
+            
     #============================================================
     # Help Actions
     #============================================================
@@ -244,7 +273,22 @@ class MainWindowActions(object):
                                 )
         
     @QtCore.pyqtSlot()
-    def on_actionProjectHomePage_triggered(self):
+    def on_actionProjectHomepage_triggered(self):
         import webbrowser
         webbrowser.open(qApp.instance().projectUrl)
-        
+
+    @QtCore.pyqtSlot()
+    def on_actionTakeScreenshot_triggered(self):
+        pxm = QPixmap.grabWindow(self.winId())
+        from datetime import datetime
+        now = datetime.now()
+        name = "%s.%s" % (now.strftime('sshot-%Y-%m-%d-%H_%M_%S'), 'png')
+        pxm.save(name, format)
+
+    #===========================================================================
+    # Dumb code :/
+    #===========================================================================
+    @QtCore.pyqtSlot()
+    def on_actionFindReplace_triggered(self):
+        print "MainWindow::replace"
+        self.currentEditor.showReplaceWidget()
