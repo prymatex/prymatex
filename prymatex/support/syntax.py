@@ -6,7 +6,7 @@
     http://manual.macromates.com/en/language_grammars.html
     http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
 '''
-
+import re
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp
     
