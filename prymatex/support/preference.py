@@ -23,25 +23,10 @@
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
-import re
-try:
-    from ponyguruma import sre
-except Exception, e:
-    sre = re
-from prymatex.support.bundle import PMXBundleItem
 
-def compileRegexp(string):
-    #Muejejejeje
-    try:
-        restring = string.replace('?i:', '(?i)')
-        return re.compile(unicode(restring))
-    except:
-        try:
-            return sre.compile(unicode(string))
-        except:
-            #Mala leche
-            pass
-        
+from prymatex.support.bundle import PMXBundleItem
+from prymatex.support.utils import compileRegexp
+
 DEFAULT_SETTINGS = { 'completions': [],
                      'completionCommand': '',
                      'disableDefaultCompletion': 0,
@@ -66,7 +51,7 @@ class PMXPreferenceSettings(object):
     INDENT_DECREASE = 2
     INDENT_NEXTLINE = 3
     UNINDENT = 4
-    TRANSFORMATIONPATTERN = re.compile('s/(.*)/(.*)/([mg]?);?')
+    TRANSFORMATIONPATTERN = compileRegexp('s/(.*)/(.*)/([mg]?);?')
     def __init__(self, hash):
         for key in self.KEYS:
             value = hash.get(key, None)

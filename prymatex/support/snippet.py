@@ -6,6 +6,8 @@
 '''
 import re, logging
 import uuid as uuidmodule
+
+#TODO: Ver de usar compileRegexp de prymatex.support.utils
 try:
     from ponyguruma import sre
     from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
@@ -13,10 +15,11 @@ except Exception, e:
     sre = re
     OPTION_CAPTURE_GROUP = re.MULTILINE
     OPTION_MULTILINE = re.MULTILINE
+
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
-from prymatex.support.utils import prepareShellScript, deleteFile
+from prymatex.support.utils import prepareShellScript
 from subprocess import Popen, PIPE, STDOUT
 
 SNIPPET_SYNTAX = { 
@@ -243,7 +246,7 @@ class StructureTabstop(Node):
             return super(StructureTabstop, self).close(scope, text)
         return node
 
-    def render(self, processor):
+    def render(self, processor, mirror = False):
         self.start = processor.cursorPosition()
         if self.placeholder != None:
             self.placeholder.render(processor, mirror = True)

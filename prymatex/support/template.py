@@ -7,7 +7,6 @@
 '''
 
 import os, shutil, plistlib, codecs
-import uuid as uuidmodule
 from glob import glob
 from subprocess import Popen
 from prymatex.support.bundle import PMXBundleItem
@@ -109,7 +108,7 @@ class PMXTemplate(PMXBundleItem):
         paths.remove(info)
         try:
             data = plistlib.readPlist(info)
-            uuid = uuidmodule.UUID(data.pop('uuid'))
+            uuid = manager.uuidgen(data.pop('uuid', None))
             template = manager.getManagedObject(uuid)
             if template is None and not manager.isDeleted(uuid):
                 template = cls(uuid, namespace, data, path)

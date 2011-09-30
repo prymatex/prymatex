@@ -4,28 +4,11 @@
 '''
     Command's module    
 '''
-import os, re
+import os
 from subprocess import Popen, PIPE, STDOUT
-try:
-    from ponyguruma import sre
-    from ponyguruma.constants import OPTION_CAPTURE_GROUP
-except Exception, e:
-    sre = re
-    OPTION_CAPTURE_GROUP = re.MULTILINE
-from prymatex.support.bundle import PMXBundleItem
-from prymatex.support.utils import prepareShellScript
 
-def compileRegexp(string):
-    #Muejejejeje
-    try:
-        restring = string.replace('?i:', '(?i)')
-        return re.compile(unicode(restring))
-    except:
-        try:
-            return sre.compile(unicode(string))
-        except:
-            #Mala leche
-            pass
+from prymatex.support.bundle import PMXBundleItem
+from prymatex.support.utils import compileRegexp, prepareShellScript
 
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O

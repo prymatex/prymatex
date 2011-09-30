@@ -8,7 +8,7 @@
 from prymatex.support.bundle import PMXBundleItem
 
 class PMXMacro(PMXBundleItem):
-    KEYS = [    'commands' ]
+    KEYS = [ 'commands' ]
     TYPE = 'macro'
     FOLDER = 'Macros'
     EXTENSION = 'tmMacro'

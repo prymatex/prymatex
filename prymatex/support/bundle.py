@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os, re, plistlib, shutil
-import uuid as uuidmodule
 from copy import copy
+
+from prymatex.support.utils import readPlist
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -11,25 +12,6 @@ from copy import copy
     http://blog.macromates.com/2005/introduction-to-scopes/
     http://manual.macromates.com/en/scope_selectors.html
 '''
-
-RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                 u'|' + \
-                 u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                  (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
-
-RE_XML_ILLEGAL = re.compile(RE_XML_ILLEGAL)
-
-def readPlist(file):
-    try:
-        data = plistlib.readPlist(file)
-    except:
-        data = open(file).read()
-        for match in RE_XML_ILLEGAL.finditer(data):
-            data = data[:match.start()] + "?" + data[match.end():]
-        data = plistlib.readPlistFromString(data)
-    return data
 
 #Deprecar menu
 class PMXMenuNode(object):

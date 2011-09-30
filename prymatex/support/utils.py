@@ -2,7 +2,24 @@
 # -*- coding: utf-8 -*-
 
 import re, sys, os, stat, tempfile
+try:
+    from ponyguruma import sre
+except Exception, e:
+    sre = re
 
+RE_XML_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                 u'|' + \
+                 u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                  (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
+
+RE_XML_ILLEGAL = re.compile(RE_XML_ILLEGAL)
+
+ABSPATH_LINENO_RE = re.compile('''
+    (?P<text>(?P<path>/[\w\d\/\.]+)(:(?P<line>\d+))?)
+''', re.VERBOSE)
+    
 BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh
 %s'''
@@ -87,10 +104,6 @@ def ensurePath(path, name, suffix = 0):
         else:
             return ensurePath(path, name, suffix + 1)
             
-ABSPATH_LINENO_RE = re.compile('''
-    (?P<text>(?P<path>/[\w\d\/\.]+)(:(?P<line>\d+))?)
-''', re.VERBOSE)
-
 def pathToLink(match):
     path = match.group('path')
     attrs = {}
@@ -108,3 +121,25 @@ def pathToLink(match):
 
 def makeHyperlinks(text):
     return re.sub(ABSPATH_LINENO_RE, pathToLink, text)
+
+def compileRegexp(string):
+    #Muejejejeje
+    try:
+        restring = string.replace('?i:', '(?i)')
+        return re.compile(unicode(restring))
+    except:
+        try:
+            return sre.compile(unicode(string))
+        except:
+            #Mala leche
+            pass
+
+def readPlist(file):
+    try:
+        data = plistlib.readPlist(file)
+    except:
+        data = open(file).read()
+        for match in RE_XML_ILLEGAL.finditer(data):
+            data = data[:match.start()] + "?" + data[match.end():]
+        data = plistlib.readPlistFromString(data)
+    return data

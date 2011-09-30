@@ -7,35 +7,9 @@
     http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
 '''
 
-import re
-try:
-    from ponyguruma import sre
-except Exception, e:
-    sre = re
 from prymatex.support.bundle import PMXBundleItem
-
-# Profiling
-
-try:
-    from prymatex.utils.profilehooks import profile
-    from PyQt4.Qt import qApp
-except Exception, e:
-    PROFILING_CAPABLE = False
-else:
-    PROFILING_CAPABLE = qApp.instance() != None
+from prymatex.support.utils import compileRegexp
     
-def compileRegexp(string):
-    #Muejejejeje
-    try:
-        restring = string.replace('?i:', '(?i)')
-        return re.compile(unicode(restring))
-    except:
-        try:
-            return sre.compile(unicode(string))
-        except:
-            #Mala leche
-            pass
-
 SPLITLINES = re.compile('\n')
 
 class PMXSyntaxNode(object):
@@ -318,49 +292,6 @@ class PMXSyntax(PMXBundleItem):
             fold = self.FOLDING_STOP
         return fold
                 
-    @classmethod
-    def getSyntaxesByName(cls, name):
-        stxs = []
-        for _, syntaxes in cls.SYNTAXES.iteritems():
-            for _, syntax in syntaxes.iteritems():
-                if syntax.name == name:
-                    stxs.append(syntax)
-        return stxs
-    
-    @classmethod
-    def getSyntaxByName(cls, name):
-        #TODO: if more than one, throw Exception
-        stxs = cls.getSyntaxesByName(name)
-        if stxs:
-            return stxs[0]
-    
-    @classmethod
-    def getSyntaxByScope(cls, scope):
-        for syntaxes in cls.SYNTAXES.values():
-            if scope in syntaxes:
-                return syntaxes[scope]
-        return None
-    
-    @classmethod
-    def getSyntaxesNames(cls, sort = False):
-        stxs = []
-        for syntaxes in cls.SYNTAXES.values():
-            for syntax in syntaxes.values():
-                stxs.append(syntax.name)
-        if sort:
-            return sorted(stxs)
-        return stxs
-    
-    @classmethod
-    def getSyntaxesMenuTextEntry(cls, sort = False):
-        stxs = []
-        for syntaxes in cls.SYNTAXES.values():
-            for syntax in syntaxes.values():
-                stxs.append(syntax.buildMenuTextEntry())
-        if sort:
-            return sorted(stxs)
-        return stxs
-    
     def __str__(self):
         return u"<PMXSyntax %s>" % self.name
         

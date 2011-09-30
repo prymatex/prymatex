@@ -117,7 +117,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 #Capture Text
                 cursor.setPosition(holder.start)
                 cursor.setPosition(holder.end - leng, QtGui.QTextCursor.KeepAnchor)
-                holder.setContent(unicode(cursor.selectedText()))
+                holder.setContent(cursor.selectedText())
                 #Prepare replace
                 self.selectSlice(self.snippet.start, self.snippet.end - leng)
                 self.snippet.render(self)
@@ -137,7 +137,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 #Capture Text
                 cursor.setPosition(holder.start)
                 cursor.setPosition(holder.end - 1, QtGui.QTextCursor.KeepAnchor)
-                holder.setContent(unicode(cursor.selectedText()))
+                holder.setContent(cursor.selectedText())
                 #Prepare replace
                 self.selectSlice(self.snippet.start, self.snippet.end - 1)
                 self.snippet.render(self)
@@ -159,7 +159,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 #Capture Text
                 cursor.setPosition(holder.start)
                 cursor.setPosition(holder.start + (holder.end - holder.start - leng) + 1, QtGui.QTextCursor.KeepAnchor)
-                holder.setContent(unicode(cursor.selectedText()))
+                holder.setContent(cursor.selectedText())
                 #Prepare replace
                 self.selectSlice(self.snippet.start, self.snippet.end - leng + 1)
                 self.snippet.render(self)
@@ -175,7 +175,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 #Capture Text
                 cursor.setPosition(holder.start)
                 cursor.setPosition(holder.end + 1, QtGui.QTextCursor.KeepAnchor)
-                holder.setContent(unicode(cursor.selectedText()))
+                holder.setContent(cursor.selectedText())
                 #Prepare replace
                 self.selectSlice(self.snippet.start, self.snippet.end + 1)
                 self.snippet.render(self)

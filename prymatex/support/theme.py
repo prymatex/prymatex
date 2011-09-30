@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os, plistlib
-import uuid as uuidmodule
 from xml.parsers.expat import ExpatError
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.bundle import PMXManagedObject
@@ -86,7 +85,7 @@ class PMXTheme(PMXManagedObject):
     def loadTheme(cls, path, namespace, manager):
         try:
             data = plistlib.readPlist(path)
-            uuid = uuidmodule.UUID(data.pop('uuid'))
+            uuid = manager.uuidgen(data.pop('uuid', None))
             theme = manager.getManagedObject(uuid)
             if theme is None and not manager.isDeleted(uuid):
                 theme = PMXTheme(uuid, namespace, data, path)

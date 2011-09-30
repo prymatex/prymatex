@@ -12,7 +12,8 @@ def test_findPreferences(manager):
 def test_snippet(manager):
     from prymatex.support.processor import PMXDebugSnippetProcessor
     from time import time
-    snippet = manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD')
+    snippet = manager.getBundleItem('D8DCCC81-749A-4E2A-B4BC-D109D5799CAA')
+    snippet = manager.getBundleItem('9CF008C4-A086-11D9-A5A2-000D93C8BE28')
     start = time()
     snippet.execute(PMXDebugSnippetProcessor())
     print "Time:", time() - start
@@ -84,4 +85,4 @@ if __name__ == "__main__":
     manager.addNamespace('prymatex', os.path.abspath('../prymatex/share'))
     manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     manager.loadSupport(loadCallback)
-    test_syntax(manager)
+    test_snippet(manager)
