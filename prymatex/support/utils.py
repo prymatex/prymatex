@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, sys, os, stat, tempfile
+import re, sys, os, stat, tempfile, plistlib
 try:
     from ponyguruma import sre
 except Exception, e:
