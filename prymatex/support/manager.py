@@ -39,7 +39,9 @@ class PMXSupportBaseManager(object):
     DEFAULTNS = -1
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE))
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    
     #FIXME: Dudo de la cache en este lugar
+    #TODO: Estaria bueno todo un buen manejo de cache junto con su "coherencia de cache" 
     SETTINGS_CACHE = {}
     
     def __init__(self):
@@ -713,6 +715,9 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # SYNTAXES
     #---------------------------------------------------------------
+    def getSyntaxesAsDictionary(self):
+        return dict(map(lambda syntax: (syntax.scopeName, syntax), self.getAllSyntaxes()))
+    
     def getSyntaxes(self, sort = False):
         stxs = []
         for syntax in self.getAllSyntaxes():
@@ -721,9 +726,10 @@ class PMXSupportBaseManager(object):
             return sorted(stxs, key = lambda s: s.name)
         return stxs
     
-    def getSyntaxByScopeName(self, scope):
-        if scope in self.SYNTAXES:
-            return self.SYNTAXES[scope]
+    def getSyntaxByScopeName(self, scopeName):
+        syntaxes = self.getSyntaxesAsDictionary()
+        if scopeName in syntaxes:
+            return syntaxes[scopeName]
         return None
         
     def findSyntaxByFirstLine(self, line):

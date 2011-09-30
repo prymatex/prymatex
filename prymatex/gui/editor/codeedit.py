@@ -362,7 +362,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     #=======================================================================
     def keyPressEvent(self, event):
         '''
-        This method is called whenever a key is pressed. The key code is stored in key_event.key()
+        This method is called whenever a key is pressed. The key code is stored in event.key()
         '''
 
         if self.completerMode:

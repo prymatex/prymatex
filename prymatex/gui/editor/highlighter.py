@@ -26,7 +26,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.theme = theme
 
     def setTheme(self, theme):
-        theme.clearCache()
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
         self.theme = theme
         
@@ -42,7 +41,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.setUserState(state)
     
     def applyFormat(self, userData):
-        #Formatear
+        #
         for scope, start, end in userData.getAllScopes():
             format = self.getFormat(scope)
             if format is not None:
@@ -74,6 +73,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         userData = self.currentBlock().userData()
         
         if userData != None and userData.textHash == hash(text):
+            print "solo darle color"
             self.applyFormat(userData)
         else:
             self.processor.startParsing(self.syntax.scopeName)
