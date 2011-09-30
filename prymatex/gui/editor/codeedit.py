@@ -194,11 +194,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             self.folding.indentSensitive = syntax.indentSensitive
             self.syntaxChanged.emit()
     
-    @property
-    def index(self):
-        tab_widget = self.parent()
-        return tab_widget.indexOf(self)
-
     def contextMenuEvent(self, event):
         menu = self.createStandardContextMenu()
         menu.addAction(self.actionIndent)
@@ -538,11 +533,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         '''
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(tabTriggered, disableIndent)
-            print "Corriendo Snippet", item.name
+            self.debug("Corriendo Snippet %s" % item.name)
             item.execute(self.snippetProcessor)
         elif item.TYPE == PMXCommand.TYPE:
             self.commandProcessor.configure(tabTriggered, disableIndent)
-            print "Corriendo Command", item.name
+            self.debug("Corriendo Command %s" % item.name)
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
             self.syntax = item

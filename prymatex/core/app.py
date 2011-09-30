@@ -86,7 +86,7 @@ class PMXApplication(QtGui.QApplication):
             f.close()
         
     def setupConfigDialog(self):
-        from prymatex.gui.config.configdialog import  PMXSettingsDialog
+        from prymatex.gui.config.configdialog import PMXSettingsDialog
         configdialog = PMXSettingsDialog()
         from prymatex.gui.config.widgets import PMXGeneralWidget,\
                                                 PMXUpdatesWidget,\
@@ -133,10 +133,11 @@ class PMXApplication(QtGui.QApplication):
         
         # Console handler
         ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
+        ch.setLevel(logging.DEBUG)
         
         logging.root.addHandler(ch)
         logging.root.info("Application startup")
+        logging.root.debug("Application startup debug")
         
     def createMainWindow(self):
         '''

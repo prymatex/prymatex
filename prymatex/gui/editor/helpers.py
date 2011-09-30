@@ -286,6 +286,8 @@ class PMXFoldingHelper(object):
         self.folding = self.folding[:index]
     
     def getFoldingMark(self, block):
+        #FIXME: hacer el folding para que defo se quede tranquilo
+        return self.FOLDING_NONE
         if self.indentSensitive:
             if block.blockNumber() >= len(self.folding):
                 self.updateIndentFoldingMarks(block)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from logging.handlers import BufferingHandler
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 from prymatex.ui.logwidget import Ui_LogWidget
@@ -11,21 +12,19 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXObject):
     Logging widget
     
     '''
-    def __init__(self, handler, parent = None):
+    def __init__(self, parent = None):
         super(PMXLoggerDock, self).__init__(parent)
         self.setupUi(self)
+        self.handler = QtLogHandler(self)
+        self.handler.setLevel(logging.DEBUG)
         self.setup()
-        handler.output = self
-        handler.capacity = 1
-
     
     def setup(self):
-        #self.push#
+        logging.root.addHandler(self.handler)
         self.debug_levels_menu = QtGui.QMenu()
         self.debug_levels_action_group = QtGui.QActionGroup(self)
         for level, value in filter(lambda (key, value): type(key) == str, logging._levelNames.iteritems()):
             action = QtGui.QAction(level.title(), self)
-            # Store debug info in a dict
             action.setData({'name': level, 'level': value})
             action.setCheckable(True)
             self.debug_levels_action_group.addAction(action)
@@ -38,29 +37,13 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXObject):
         new_level = action.data()
         self.debug("Level changed to %s", new_level)
 
-from logging.handlers import BufferingHandler
-
-class QtLogHandler(logging.handlers.BufferingHandler):
+class QtLogHandler(BufferingHandler):
     '''
-    A handler to store logging ouput to be shown at a QTextEdit defined in
-    LogDockWidget
+    A handler to store logging ouput to be shown at a QTextEdit defined in LogDockWidget
     '''
-    __output = None
-    
-    def __init__(self):
+    def __init__(self, widget):
         BufferingHandler.__init__(self, 100)
-    
-    @property
-    def output(self):
-        return self.__output
-    
-    @output.setter
-    def output(self, output):
-        self.__output = output
+        self.widget = widget
     
     def flush(self):
-        if self.output:
-            #self.output.
-            txt = '\n'.join(map(lambda log: log.getMessage(), self.buffer))
-            self.output.textLog.append(txt)
-
+        self.widget.textLog.append('\n'.join(map(lambda log: log.getMessage(), self.buffer)))

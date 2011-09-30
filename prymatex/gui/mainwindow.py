@@ -86,7 +86,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
         self.menuPanels.addAction(self.paneFileSystem.toggleViewAction())
         self.paneFileSystem.hide()
-        
+        '''
         self.paneProject = PMXProjectDock(self)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
         self.menuPanels.addAction(self.paneProject.toggleViewAction())
@@ -96,7 +96,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
         self.menuPanels.addAction(self.paneSymbolList.toggleViewAction())
         self.paneSymbolList.hide()
-        
+        '''
         self.paneBrowser = PMXBrowserDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneBrowser)
         self.menuPanels.addAction(self.paneBrowser.toggleViewAction())
@@ -107,10 +107,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.menuPanels.addAction(self.paneConsole.toggleViewAction())
         self.paneConsole.hide()
         
-        #Logging Sub-Window setup
-        qthandler = QtLogHandler()
-        self.logger.addHandler(qthandler)
-        self.paneLogging = PMXLoggerDock(qthandler, self)
+        self.paneLogging = PMXLoggerDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneLogging)
         self.menuPanels.addAction(self.paneLogging.toggleViewAction())
         self.paneLogging.hide()
