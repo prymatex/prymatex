@@ -64,7 +64,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     
     def setupStatusBar(self):
         from prymatex.gui.statusbar import PMXStatusBar
-        from prymatex.gui.editor.status import PMXCodeEditorStatus
+        from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
         status = PMXStatusBar(self)
         status.addPermanentWidget(PMXCodeEditorStatus(self))
         self.setStatusBar(status)

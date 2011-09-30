@@ -2,13 +2,13 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QWidget, QPainter, QPixmap, QFontMetrics
+from PyQt4.QtGui import QPixmap, QFontMetrics
 from PyQt4.Qt import QColor, QSize
-from prymatex.gui.editor.userdata import PMXBlockUserData
-from prymatex import resources_rc
+from prymatex.gui.codeeditor.userdata import PMXBlockUserData
+from prymatex import resources
 
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
-class PMXSidebar(QWidget):
+class PMXSidebar(QtGui.QWidget):
     def __init__(self, editor):
         super(PMXSidebar, self).__init__(editor)
         self.editor = editor
@@ -17,18 +17,7 @@ class PMXSidebar(QWidget):
         self.foldArea = 12
         self.foreground = None 
         self.background = None 
-        #Load Icons
-        self.foldingTopIcon = QPixmap()
-        self.foldingTopIcon.load(":/editor/sidebar/folding-top.png")
-        self.foldingBottomIcon = QPixmap()
-        self.foldingBottomIcon.load(":/editor/sidebar/folding-bottom.png")
-        self.foldingCollapsedIcon = QPixmap()
-        self.foldingCollapsedIcon.load(":/editor/sidebar/folding-collapsed.png")
-        self.foldingEllipsisIcon = QPixmap()
-        self.foldingEllipsisIcon.load(":/editor/sidebar/folding-ellipsis.png")
-        self.bookmarkFlagIcon = QPixmap()
-        self.bookmarkFlagIcon.load(":/editor/sidebar/bookmark-flag.png")
-
+        
     def sizeHint(self):
         return QtGui.QSize(self.editor.lineNumberAreaWidth(), 0)
 
@@ -37,7 +26,7 @@ class PMXSidebar(QWidget):
         font_metrics = QFontMetrics(self.editor.document().defaultFont())
         current_block = self.editor.document().findBlock(self.editor.textCursor().position())
 
-        painter = QPainter(self)
+        painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), self.background)
 
         block = self.editor.firstVisibleBlock()
@@ -66,31 +55,31 @@ class PMXSidebar(QWidget):
                 #Bookmarks
                 if line_count in self.editor.bookmarks:
                     painter.drawPixmap(1,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.bookmarkFlagIcon.height(),
-                        self.bookmarkFlagIcon)
+                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["bookmarkflag"].height(),
+                        resources.IMAGES["bookmarkflag"])
     
                 user_data = block.userData()
                 mark = self.editor.folding.getFoldingMark(block)
                 if mark == self.editor.folding.FOLDING_START:
                     if user_data.folded:
-                        painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
-                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
-                            self.foldingCollapsedIcon)
+                        painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
+                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
+                            resources.IMAGES["foldingcollapsed"])
                     else:
-                        painter.drawPixmap(self.width() - self.foldingTopIcon.width() - 1,
-                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingTopIcon.height(),
-                            self.foldingTopIcon)
+                        painter.drawPixmap(self.width() - resources.IMAGES["foldingtop"].width() - 1,
+                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingtop"].height(),
+                            resources.IMAGES["foldingtop"])
                 elif mark == self.editor.folding.FOLDING_STOP:
-                    painter.drawPixmap(self.width() - self.foldingCollapsedIcon.width() - 1,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingCollapsedIcon.height(),
-                        self.foldingBottomIcon)
+                    painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
+                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
+                        resources.IMAGES["foldingbottom"])
             
             block = block.next()
 
         self.highest_line = line_count
 
         painter.end()
-        QWidget.paintEvent(self, event)
+        QtGui.QWidget.paintEvent(self, event)
 
     def mousePressEvent(self, event):
         xofs = self.width() - self.foldArea

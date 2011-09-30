@@ -305,8 +305,8 @@ class PMXBundleFilter(QtGui.QDialog, PMXObject):
         
     def setupUi(self, BundleFilter):
         BundleFilter.setObjectName(_fromUtf8("BundleFilter"))
-        BundleFilter.resize(300, 400)
-        BundleFilter.setMinimumSize(QtCore.QSize(300, 400))
+        BundleFilter.resize(330, 400)
+        BundleFilter.setMinimumSize(QtCore.QSize(330, 400))
         self.verticalLayout = QtGui.QVBoxLayout(BundleFilter)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -319,8 +319,13 @@ class PMXBundleFilter(QtGui.QDialog, PMXObject):
         self.tableBundleItems.horizontalHeader().setVisible(False)
         self.tableBundleItems.verticalHeader().setVisible(False)
         self.verticalLayout.addWidget(self.tableBundleItems)
+        self.labelHelp = QtGui.QLabel(BundleFilter)
+        self.labelHelp.setWordWrap(True)
+        self.labelHelp.setObjectName(_fromUtf8("labelHelp"))
+        self.verticalLayout.addWidget(self.labelHelp)
         self.retranslateUi(BundleFilter)
         QtCore.QMetaObject.connectSlotsByName(BundleFilter)
 
     def retranslateUi(self, BundleFilter):
         BundleFilter.setWindowTitle(_('Bundle Filter'))
+        self.labelHelp.setText(_('You should keep the Source, Text and TextMate bundles enabled, as these provide base functionality relied upon by other bundles.'))

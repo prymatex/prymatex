@@ -14,10 +14,10 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
 from prymatex.core import exceptions
 from prymatex.gui.central import PMXBaseTab
-from prymatex.gui.editor.sidebar import PMXSidebar
-from prymatex.gui.editor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.editor.helpers import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
-from prymatex.gui.editor.highlighter import PMXSyntaxHighlighter
+from prymatex.gui.codeeditor.sidebar import PMXSidebar
+from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
+from prymatex.gui.codeeditor.helpers import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
+from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     #=======================================================================
@@ -264,8 +264,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             user_data = block.userData()
             if block.isVisible() and self.folding.getFoldingMark(block) == self.folding.FOLDING_START and user_data.folded:
                 painter.drawPixmap(font_metrics.width(block.text()) + 10,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.sidebar.foldingEllipsisIcon.height(),
-                    self.sidebar.foldingEllipsisIcon)
+                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingellipsis"].height(),
+                    resources.IMAGES["foldingellipsis"])
             
             block = block.next()
         if self.multiEditMode:
@@ -525,7 +525,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             self.unindent()
     
     #==========================================================================
-    # BundleItems
+    # Bundle Items
     #==========================================================================
     def insertBundleItem(self, item, tabTriggered = False, disableIndent = False):
         ''' 

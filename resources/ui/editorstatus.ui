@@ -21,7 +21,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QWidget" name="status" native="true">
+    <widget class="QWidget" name="widgetStatus" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QLabel" name="labelLineColumn">
@@ -31,19 +31,51 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="syntaxMenu"/>
+       <widget class="QComboBox" name="comboBoxSyntaxes"/>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox_2"/>
+       <widget class="QComboBox" name="comboBoxTabSize"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBoxSymbols"/>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="goToLine" native="true">
+    <widget class="QWidget" name="widgetCommand" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="pushButtonCommandClose">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditCommand"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBoxInput"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBoxOutput"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="widgetGoToLine" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QPushButton" name="buttonCloseGoToLine">
+       <widget class="QPushButton" name="pushButtonGoToLineClose">
         <property name="text">
          <string/>
         </property>
@@ -64,7 +96,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinGoToLine"/>
+       <widget class="QSpinBox" name="spinBoxGoToLine"/>
       </item>
       <item>
        <spacer name="spacerGoToLine">
@@ -80,7 +112,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="buttonGoToLine">
+       <widget class="QPushButton" name="pushButtonGoToLine">
         <property name="text">
          <string>Go</string>
         </property>
@@ -100,7 +132,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="findReplace" native="true">
+    <widget class="QWidget" name="widgetFindReplace" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QPushButton" name="pushButtonFindReplaceClose">
@@ -131,13 +163,13 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLineEdit" name="lineEditFind"/>
+       <widget class="QLineEdit" name="lineFind"/>
       </item>
       <item row="1" column="2">
-       <widget class="QLineEdit" name="lineEditReplace"/>
+       <widget class="QLineEdit" name="lineReplace"/>
       </item>
       <item row="0" column="3">
-       <widget class="QPushButton" name="pushFindPrevious">
+       <widget class="QPushButton" name="pushButtonFindPrevious">
         <property name="text">
          <string>Previous</string>
         </property>
@@ -148,7 +180,7 @@
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QPushButton" name="pushFindNext">
+       <widget class="QPushButton" name="pushButtonFindNext">
         <property name="toolTip">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -166,7 +198,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="1" column="3">
-       <widget class="QPushButton" name="pushReplacePrevious">
+       <widget class="QPushButton" name="pushButtonReplacePrevious">
         <property name="toolTip">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -180,7 +212,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QPushButton" name="pushReplaceNext">
+       <widget class="QPushButton" name="pushButtonReplaceNext">
         <property name="text">
          <string>Replace &amp;All</string>
         </property>

@@ -209,7 +209,7 @@ class PMXApplication(QtGui.QApplication):
         self.RPCServerThread.start()
 
     def getEditorInstance(self, fileInfo = None, parent = None):
-        from prymatex.gui.editor.codeedit import PMXCodeEditor
+        from prymatex.gui.codeeditor.editor import PMXCodeEditor
         return PMXCodeEditor.newInstance(fileInfo, parent)
     
     #---------------------------------------------------

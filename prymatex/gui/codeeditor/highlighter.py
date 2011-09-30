@@ -1,8 +1,8 @@
 import re
 from PyQt4 import QtGui
 
-from prymatex.gui.editor.processors import PMXSyntaxProcessor
-from prymatex.gui.editor.userdata import PMXBlockUserData
+from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
+from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 
 WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 def whiteSpace(text):

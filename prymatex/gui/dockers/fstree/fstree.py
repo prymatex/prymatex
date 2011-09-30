@@ -7,7 +7,6 @@ from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir, pyqtSigna
 import os
 import shutil
 from os.path import join, abspath, isfile, isdir, dirname
-from prymatex.gui.editor.editorwidget import PMXEditorWidget
 from prymatex.core.base import PMXObject
 
 class FSTree(QTreeView, PMXObject):
@@ -51,12 +50,10 @@ class FSTree(QTreeView, PMXObject):
             # The Sync checkbox is not checked so we should not
             # foucs the current file in the tree
             self.debug("No sincronizado")
-            
-        elif isinstance(widget, (PMXEditorWidget, )):
-            if widget.file.path:
-                path = widget.file.path
-                index = self.model().index(path)
-                self.setCurrentIndex(index) 
+        elif widget.fileInfo.path:
+            path = widget.file.path
+            index = self.model().index(path)
+            self.setCurrentIndex(index) 
     
     def createMenus(self):
         from prymatex.utils.i18n import ugettext as _

@@ -12,7 +12,12 @@ IMAGES = {
     "dragcommand": QtGui.QPixmap(":/icons/bundles/drag-commands.png"),
     "snippet": QtGui.QPixmap(":/icons/bundles/snippets.png"),
     "macro": QtGui.QPixmap(":/icons/bundles/macros.png"),
-    "templatefile": QtGui.QPixmap(":/icons/bundles/template-files.png")
+    "templatefile": QtGui.QPixmap(":/icons/bundles/template-files.png"),
+    "foldingtop": QtGui.QPixmap(":/editor/sidebar/folding-top.png"),
+    "foldingbottom": QtGui.QPixmap(":/editor/sidebar/folding-bottom.png"),
+    "foldingcollapsed": QtGui.QPixmap(":/editor/sidebar/folding-collapsed.png"),
+    "foldingellipsis": QtGui.QPixmap(":/editor/sidebar/folding-ellipsis.png"),
+    "bookmarkflag": QtGui.QPixmap(":/editor/sidebar/bookmark-flag.png")
 }
 
 ICONS = {
