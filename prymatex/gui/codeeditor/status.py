@@ -9,7 +9,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         
         self.setupUi(self)
         #self.widgetGoToLine.setVisible(False)
-        self.widgetFindReplace.setVisible(False)
+        #self.widgetFindReplace.setVisible(False)
         #self.widgetCommand.setVisible(False)
         self.setupWidgetStatus()
         self.setupWidgetCommand()
@@ -90,35 +90,38 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     #============================================================
     # AutoConnect FindReplace widget signals
     #============================================================    
-    def find(self):
+    @QtCore.pyqtSlot()
+    def on_pushButtonFindReplace_pressed(self):
+        self.widgetFindReplace.setVisible(False)
+    
+    @QtCore.pyqtSlot(str)
+    def on_lineEditFind_textChanged(self, text):
+        flags = QtGui.QTextDocument.FindWholeWords + QtGui.QTextDocument.FindCaseSensitively
+        self.editor.findMatch(text, flags)
+    
+    @QtCore.pyqtSlot()
+    def on_pushButtonFindNext_pressed(self):
+        '''
         s = 0 if not self._searchWidget._checkSensitive.isChecked() \
             else QTextDocument.FindCaseSensitively
         w = 0 if not self._searchWidget._checkWholeWord.isChecked() \
             else QTextDocument.FindWholeWords
         flags = s + w
-        self.editor.findMatch(self.lineEditFind.text(), flags)
+        '''
+        flags = 0 + QtGui.QTextDocument.FindWholeWords + QtGui.QTextDocument.FindCaseSensitively
+        self.editor.findMatch(self.lineEditFind.text(), flags, True)
 
-    def find_next(self):
-        s = 0 if not self._searchWidget._checkSensitive.isChecked() \
-            else QTextDocument.FindCaseSensitively
-        w = 0 if not self._searchWidget._checkWholeWord.isChecked() \
-            else QTextDocument.FindWholeWords
-        flags = 0 + s + w
-        editor = main_container.MainContainer().get_actual_editor()
-        if editor:
-            editor.find_match(unicode(self._searchWidget._line.text()),
-                flags, True)
-
-    def find_previous(self):
+    @QtCore.pyqtSlot()
+    def on_pushButtonFindPrevious_pressed(self):
+        '''
         s = 0 if not self._searchWidget._checkSensitive.isChecked() \
             else QTextDocument.FindCaseSensitively
         w = 0 if not self._searchWidget._checkWholeWord.isChecked() \
             else QTextDocument.FindWholeWords
         flags = 1 + s + w
-        editor = main_container.MainContainer().get_actual_editor()
-        if editor:
-            editor.find_match(unicode(self._searchWidget._line.text()), flags)
-
+        '''
+        flags = 1 + QtGui.QTextDocument.FindWholeWords + QtGui.QTextDocument.FindCaseSensitively
+        self.editor.findMatch(self.lineEditFind.text(), flags)
     
     #============================================================
     # Control de eventos

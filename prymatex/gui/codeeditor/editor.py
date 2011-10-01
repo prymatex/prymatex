@@ -670,6 +670,45 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     #==========================================================================
+    # Find and Replace
+    #==========================================================================    
+    def findMatch(self, word, flags, findNext = False):
+        flags = QtGui.QTextDocument.FindFlags(flags)
+        if findNext:
+            self.moveCursor(QtGui.QTextCursor.NoMove, QtGui.QTextCursor.KeepAnchor)
+        else:
+            self.moveCursor(QtGui.QTextCursor.StartOfWord, QtGui.QTextCursor.KeepAnchor)
+        found = self.find(word, flags)
+        if not found:
+            cursor = self.textCursor()
+            self.moveCursor(QTextCursor.Start)
+            found = self.find(word, flags)
+            if not found:
+                self.setTextCursor(cursor)
+
+    def replaceMatch(self, wordOld, wordNew, flags, all=False):
+        flags = QtGui.QTextDocument.FindFlags(flags)
+        self.moveCursor(QtGui.QTextCursor.NoMove, QtGui.QTextCursor.KeepAnchor)
+
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+
+        self.moveCursor(QTextCursor.Start)
+        replace = True
+        while (replace or all):
+            result = False
+            result = self.find(wordOld, flags)
+
+            if result:
+                tc = self.textCursor()
+                if tc.hasSelection():
+                    tc.insertText(wordNew)
+            else:
+                break
+            replace = False
+        cursor.endEditBlock()
+
+    #==========================================================================
     # Bookmarks and gotos
     #==========================================================================    
     def toggleBookmark(self, lineNumber = None):
