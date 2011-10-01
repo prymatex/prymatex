@@ -84,6 +84,10 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     @pmxConfigPorperty(default = [], tm_name = u'OakBundleManagerDeletedBundles')
     def disabled(self, disabled):
         self.disabledObjects = map(lambda uuid: uuidmodule.UUID(uuid), disabled)
+    
+    #http://manual.macromates.com/en/expert_preferences.html
+    #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
+    defaultBundleForNewBundleItems = pmxConfigPorperty(default = u'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = u'OakDefaultBundleForNewBundleItems')
         
     SETTINGS_GROUP = 'SupportManager'
     
@@ -181,6 +185,9 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     
     def getAllBundles(self):
         return self.bundleProxyModel.getAllItems()
+    
+    def getDefaultBundle(self):
+        return self.getBundle(self.defaultBundleForNewBundleItems)
     
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 

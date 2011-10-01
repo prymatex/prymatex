@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Thu Sep 29 14:42:05 2011
+# Created: Sat Oct  1 11:15:32 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -216,9 +216,9 @@ class Ui_MainWindow(object):
         self.actionShowIndentation = QtGui.QAction(MainWindow)
         self.actionShowIndentation.setCheckable(True)
         self.actionShowIndentation.setObjectName(_fromUtf8("actionShowIndentation"))
-        self.actionEOL = QtGui.QAction(MainWindow)
-        self.actionEOL.setCheckable(True)
-        self.actionEOL.setObjectName(_fromUtf8("actionEOL"))
+        self.actionShowEndOfLine = QtGui.QAction(MainWindow)
+        self.actionShowEndOfLine.setCheckable(True)
+        self.actionShowEndOfLine.setObjectName(_fromUtf8("actionShowEndOfLine"))
         self.actionRead_documentation = QtGui.QAction(MainWindow)
         self.actionRead_documentation.setObjectName(_fromUtf8("actionRead_documentation"))
         self.actionSelectWord = QtGui.QAction(MainWindow)
@@ -267,7 +267,7 @@ class Ui_MainWindow(object):
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionShowWhitespace)
         self.menuView.addAction(self.actionShowIndentation)
-        self.menuView.addAction(self.actionEOL)
+        self.menuView.addAction(self.actionShowEndOfLine)
         self.menuConvert.addAction(self.actionToUppercase)
         self.menuConvert.addAction(self.actionToLowercase)
         self.menuConvert.addAction(self.actionToTitlecase)
@@ -401,9 +401,7 @@ class Ui_MainWindow(object):
         self.actionSpacesToTabs.setText(_('Spaces to Tabs'))
         self.actionFilterThroughCommand.setText(_('Filter Through Command'))
         self.actionFilterThroughCommand.setIconText(_('Filter Through Command'))
-        self.actionFilterThroughCommand.setShortcut(_('Ctrl+Shift+F'))
         self.actionExecute.setText(_('Execute Line/Selection'))
-        self.actionExecute.setShortcut(_('Alt+Shift+R'))
         self.actionToggleBookmark.setText(_('Toggle Bookmark'))
         self.actionToggleBookmark.setShortcut(_('Meta+F12'))
         self.actionNextBookmark.setText(_('Next Bookmark'))
@@ -429,7 +427,7 @@ class Ui_MainWindow(object):
         self.actionNewFromTemplate.setShortcut(_('Meta+Shift+N'))
         self.actionShowWhitespace.setText(_('Show Whitespace'))
         self.actionShowIndentation.setText(_('Show Indentation'))
-        self.actionEOL.setText(_('Show End of Line (EOL)'))
+        self.actionShowEndOfLine.setText(_('Show End of Line'))
         self.actionRead_documentation.setText(_('Read &documentation'))
         self.actionSelectWord.setText(_('&Word'))
         self.actionSelectLine.setText(_('&Line'))

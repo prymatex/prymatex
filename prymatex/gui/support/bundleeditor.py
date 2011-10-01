@@ -15,9 +15,6 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
     # Settings
     ##########################################################
     SETTINGS_GROUP = 'BundleEditor'
-    #http://manual.macromates.com/en/expert_preferences.html
-    #When you create a new item in the bundle editor without having selected a bundle first, then the bundle with the UUID held by this defaults key is used as the target
-    defaultBundleForNewBundleItems = pmxConfigPorperty(default = u'B7BC3FFD-6E4B-11D9-91AF-000D93589AF6', tm_name = u'OakDefaultBundleForNewBundleItems')
         
     def __init__(self, parent = None):
         super(PMXBundleEditor, self).__init__(parent)
@@ -62,8 +59,7 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
     def getBundleForIndex(self, index):
         bundle = None
         if not index.isValid():
-            print self.defaultBundleForNewBundleItems
-            bundle = self.manager.getBundle(self.defaultBundleForNewBundleItems)
+            bundle = self.manager.getDefaultBundle()
         else:
             bundle = self.proxyTreeModel.mapToSource(index).internalPointer()
             while bundle.TYPE != 'bundle':

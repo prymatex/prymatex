@@ -189,7 +189,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionExecute_triggered(self):
-        self.statusBar().showMessage("actionExecute")
+        self.currentEditor.insertCommand()
 
     @QtCore.pyqtSlot()
     def on_actionFilterThroughCommand_triggered(self):
@@ -200,19 +200,19 @@ class MainWindowActions(object):
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionToggleBookmark_triggered(self):
-        self.currentEditor.toggleBookmark(editor.textCursor().block().blockNumber() + 1)
+        self.currentEditor.toggleBookmark()
 
     @QtCore.pyqtSlot()
     def on_actionNextBookmark_triggered(self):
-        self.currentEditor.bookmarkNext(editor.textCursor().block().blockNumber() + 1)
+        self.currentEditor.bookmarkNext()
 
     @QtCore.pyqtSlot()
     def on_actionPreviousBookmark_triggered(self):
-        self.currentEditor.bookmarkPrevious(editor.textCursor().block().blockNumber() + 1)
+        self.currentEditor.bookmarkPrevious()
         
     @QtCore.pyqtSlot()
     def on_actionRemoveAllBookmarks_triggered(self):
-        self.currentEditor.removeBookmarks()
+        self.currentEditor.removeAllBookmarks()
 
     @QtCore.pyqtSlot()
     def on_actionNextTab_triggered(self):

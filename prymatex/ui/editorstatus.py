@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Fri Sep 30 19:16:08 2011
+# Created: Sat Oct  1 11:09:14 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -69,12 +69,12 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_3 = QtGui.QHBoxLayout(self.widgetGoToLine)
         self.horizontalLayout_3.setMargin(0)
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.pushButtonCloseGoToLine = QtGui.QPushButton(self.widgetGoToLine)
-        self.pushButtonCloseGoToLine.setText(_fromUtf8(""))
-        self.pushButtonCloseGoToLine.setIcon(icon)
-        self.pushButtonCloseGoToLine.setFlat(True)
-        self.pushButtonCloseGoToLine.setObjectName(_fromUtf8("pushButtonCloseGoToLine"))
-        self.horizontalLayout_3.addWidget(self.pushButtonCloseGoToLine)
+        self.pushButtonGoToLineClose = QtGui.QPushButton(self.widgetGoToLine)
+        self.pushButtonGoToLineClose.setText(_fromUtf8(""))
+        self.pushButtonGoToLineClose.setIcon(icon)
+        self.pushButtonGoToLineClose.setFlat(True)
+        self.pushButtonGoToLineClose.setObjectName(_fromUtf8("pushButtonGoToLineClose"))
+        self.horizontalLayout_3.addWidget(self.pushButtonGoToLineClose)
         self.labelGoToLine = QtGui.QLabel(self.widgetGoToLine)
         self.labelGoToLine.setObjectName(_fromUtf8("labelGoToLine"))
         self.horizontalLayout_3.addWidget(self.labelGoToLine)

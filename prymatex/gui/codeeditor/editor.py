@@ -359,7 +359,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         '''
         This method is called whenever a key is pressed. The key code is stored in event.key()
         '''
-
         if self.completerMode:
             if event.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Tab, Qt.Key_Escape, Qt.Key_Backtab):
                 event.ignore()
@@ -546,7 +545,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             item.execute(self.macroProcessor)
 
     def selectBundleItem(self, items, tabTriggered = False):
-        #Tengo mas de uno que hago?
+        #Tengo mas de uno que hago?, muestro un menu
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
         menu = QMenu()
         for index, item in enumerate(items, 1):
@@ -559,9 +558,20 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
     
+    def insertCommand(self, command = None, input = "none", output = "insertText"):
+        if command is None:
+            command = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
+        hash = {    'command': command, 
+                       'name': command,
+                      'input': input,
+                     'output': output }
+        command = PMXCommand(self.application.supportManager.uuidgen(), "internal", hash = hash)
+        command.bundle = self.application.supportManager.getDefaultBundle()
+        self.insertBundleItem(command)
+    
     def buildEnvironment(self, env = {}):
         cursor = self.textCursor()
-        line = unicode(cursor.block().text())
+        line = cursor.block().text()
         scope = self.getCurrentScope()
         preferences = self.getPreference(scope)
         current_word = self.getCurrentWord()
@@ -597,7 +607,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     #==========================================================================
     # Completer
     #==========================================================================
-    
     def showCompleter(self, suggestions):
         completionPrefix = self.getCurrentWord()
         self.completer.setCompletionPrefix(completionPrefix)
@@ -661,43 +670,49 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
     #==========================================================================
-    # Bookmarks
+    # Bookmarks and gotos
     #==========================================================================    
-    def toggleBookmark(self, line_number):
-        if line_number in self.bookmarks:
-            self.bookmarks.remove(line_number)
+    def toggleBookmark(self, lineNumber = None):
+        if lineNumber is None:
+            lineNumber = self.textCursor().block().blockNumber() + 1
+        if lineNumber in self.bookmarks:
+            self.bookmarks.remove(lineNumber)
         else:
-            index = bisect(self.bookmarks, line_number)
-            self.bookmarks.insert(index, line_number)
+            index = bisect(self.bookmarks, lineNumber)
+            self.bookmarks.insert(index, lineNumber)
         self.sidebar.update()
     
-    def removeBookmarks(self):
+    def removeAllBookmarks(self):
         self.bookmarks = []
         self.sidebar.update()
     
-    def bookmarkNext(self, line_number):
-        index = bisect(self.bookmarks, line_number)
+    def bookmarkNext(self, lineNumber = None):
+        if lineNumber is None:
+            lineNumber = self.textCursor().block().blockNumber() + 1
+        index = bisect(self.bookmarks, lineNumber)
         if index < len(self.bookmarks):
             self.goToLine(self.bookmarks[index])
         else:
             self.goToLine(self.bookmarks[0])
     
-    def bookmarkPrevious(self, line_number):
+    def bookmarkPrevious(self, lineNumber = None):
+        if lineNumber is None:
+            lineNumber = self.textCursor().block().blockNumber() + 1
         if line_number in self.bookmarks:
-            index = self.bookmarks.index(line_number)
+            index = self.bookmarks.index(lineNumber)
         else:
-            index = bisect(self.bookmarks, line_number)
+            index = bisect(self.bookmarks, lineNumber)
         if index < len(self.bookmarks):
             self.goToLine(self.bookmarks[index - 1])
     
-    def goToLine(self, lineno):
+    def goToLine(self, lineNumber):
         cursor = self.textCursor()
         cursor.setPosition(self.document().findBlockByNumber(lineno - 1).position())
         self.setTextCursor(cursor)
     
-    def goToColumn(self, column):
+    def goToColumn(self, columnNumber):
         cursor = self.textCursor()
-        cursor.setPosition(cursor.block().position() + column)
+        cursor.setPosition(cursor.block().position() + columnNumber)
         self.setTextCursor(cursor)
     
     #===========================================================================

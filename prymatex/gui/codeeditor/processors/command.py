@@ -89,12 +89,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     #beforeRunningCommand
     def saveModifiedFiles(self):
-        results = [self.editor.mainWindow.tabWidgetEditors.widget(i).reqquest_save() for i in range(0, self.editor.mainWindow.tabWidgetEditors.count())]
-        return all(results)
+        self.editor.mainWindow.actionSaveAll.trigger()
+        return True
     
     def saveActiveFile(self):
-        value = self.editor.mainWindow.currentEditorWidget.request_save()
-        return value
+        self.editor.mainWindow.actionSave.trigger()
+        return True
     
     # deleteFromEditor
     def deleteWord(self):

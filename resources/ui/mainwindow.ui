@@ -82,7 +82,7 @@
     <addaction name="separator"/>
     <addaction name="actionShowWhitespace"/>
     <addaction name="actionShowIndentation"/>
-    <addaction name="actionEOL"/>
+    <addaction name="actionShowEndOfLine"/>
    </widget>
    <widget class="QMenu" name="menuText">
     <property name="title">
@@ -488,16 +488,10 @@
    <property name="iconText">
     <string>Filter Through Command</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+F</string>
-   </property>
   </action>
   <action name="actionExecute">
    <property name="text">
     <string>Execute Line/Selection</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+Shift+R</string>
    </property>
   </action>
   <action name="actionToggleBookmark">
@@ -625,12 +619,12 @@
     <string>Show Indentation</string>
    </property>
   </action>
-  <action name="actionEOL">
+  <action name="actionShowEndOfLine">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show End of Line (EOL)</string>
+    <string>Show End of Line</string>
    </property>
   </action>
   <action name="actionRead_documentation">

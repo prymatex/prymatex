@@ -118,7 +118,11 @@ class PMXCommand(PMXBundleItem):
             if deleteMethod != None:
                 deleteMethod()        
 
-        args = [ output_value.decode('utf-8') ]
+        try:
+            output_value = output_value.decode('utf-8')
+        except:
+            pass
+        args = [ output_value ]
         function = getattr(processor, output_handler, None)
         
         if output_handler == "commandError":

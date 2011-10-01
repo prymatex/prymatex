@@ -35,8 +35,6 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxSyntaxes.setView(tableView)
     
     def setupWidgetCommand(self):
-        #Install event filter for capture Return key
-        self.lineEditCommand.installEventFilter(self)
         self.comboBoxInput.addItem("None", "none")
         self.comboBoxInput.addItem("Selection", "selection") #selectedText
         self.comboBoxInput.addItem("Document", "document")
@@ -48,6 +46,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxOutput.addItem("Show as HTML", "showAsHTML")
         self.comboBoxOutput.addItem("Show as Tool Tip", "showAsTooltip")
         self.comboBoxOutput.addItem("Create New Document", "createNewDocument")
+        self.comboBoxOutput.setCurrentIndex(3)
     
     #============================================================
     # AutoConnect Status signals
@@ -66,25 +65,18 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def on_pushButtonCommandClose_pressed(self):
         self.widgetCommand.setVisible(False)
     
-    @QtCore.pyqtSlot(int)
-    def on_comboBoxInput_currentIndexChanged(self, index):
-        value = self.comboBoxInput.itemData(index)
-        self.debug(value)
-    
-    @QtCore.pyqtSlot(int)
-    def on_comboBoxOutput_currentIndexChanged(self, index):
-        value = self.comboBoxOutput.itemData(index)
-        self.debug(value)
-    
+    @QtCore.pyqtSlot()
+    def on_lineEditCommand_returnPressed(self):
+        command = self.lineEditCommand.text()
+        self.lineEditCommand.clear()
+        input = self.comboBoxInput.itemData(self.comboBoxInput.currentIndex())
+        output = self.comboBoxOutput.itemData(self.comboBoxOutput.currentIndex())
+        self.editor.insertCommand(command, input, output)
+        
     #============================================================
     # Control de eventos
     #============================================================
     def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.KeyPress and event.key() == QtCore.Qt.Key_Return and obj == self.lineEditCommand:
-            command = self.lineEditCommand.text()
-            self.lineEditCommand.clear()
-            self.debug("Correr comando %s" % command)
-            return True
         return QtGui.QWidget.eventFilter(self, obj, event)
     
     def disconnectEditor(self, editor):
