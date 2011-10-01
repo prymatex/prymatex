@@ -86,6 +86,39 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         #self.codeEdit.ensureCursorVisible()
         #self.debug(lineNumber)
         #self.editor.insertCommand(command, input, output)
+
+    #============================================================
+    # AutoConnect FindReplace widget signals
+    #============================================================    
+    def find(self):
+        s = 0 if not self._searchWidget._checkSensitive.isChecked() \
+            else QTextDocument.FindCaseSensitively
+        w = 0 if not self._searchWidget._checkWholeWord.isChecked() \
+            else QTextDocument.FindWholeWords
+        flags = s + w
+        self.editor.findMatch(self.lineEditFind.text(), flags)
+
+    def find_next(self):
+        s = 0 if not self._searchWidget._checkSensitive.isChecked() \
+            else QTextDocument.FindCaseSensitively
+        w = 0 if not self._searchWidget._checkWholeWord.isChecked() \
+            else QTextDocument.FindWholeWords
+        flags = 0 + s + w
+        editor = main_container.MainContainer().get_actual_editor()
+        if editor:
+            editor.find_match(unicode(self._searchWidget._line.text()),
+                flags, True)
+
+    def find_previous(self):
+        s = 0 if not self._searchWidget._checkSensitive.isChecked() \
+            else QTextDocument.FindCaseSensitively
+        w = 0 if not self._searchWidget._checkWholeWord.isChecked() \
+            else QTextDocument.FindWholeWords
+        flags = 1 + s + w
+        editor = main_container.MainContainer().get_actual_editor()
+        if editor:
+            editor.find_match(unicode(self._searchWidget._line.text()), flags)
+
     
     #============================================================
     # Control de eventos

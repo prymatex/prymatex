@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorwidget.ui'
 #
-# Created: Thu Aug 18 15:21:07 2011
+# Created: Sat Oct  1 13:08:37 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,11 +18,11 @@ except AttributeError:
 class Ui_EditorWidget(object):
     def setupUi(self, EditorWidget):
         EditorWidget.setObjectName(_fromUtf8("EditorWidget"))
-        EditorWidget.resize(825, 482)
+        EditorWidget.resize(825, 358)
         self.verticalLayout = QtGui.QVBoxLayout(EditorWidget)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.codeEdit = PMXCodeEditor(EditorWidget)
+        self.codeEdit = PMXCodeEdit(EditorWidget)
         self.codeEdit.setObjectName(_fromUtf8("codeEdit"))
         self.verticalLayout.addWidget(self.codeEdit)
         self.goToLineWidget = PMXRefocusWidget(EditorWidget)
@@ -138,7 +138,7 @@ class Ui_EditorWidget(object):
         self.pushFindPrevious.setText(_('Next'))
         self.pushFindNext.setText(_('Previous'))
 
-from prymatex.gui.editor.codeedit import PMXCodeEditor
+from prymatex.gui.editor.codeedit import PMXCodeEdit
 from prymatex.gui.editor.findreplace import PMXFindBox, PMXFindReplaceWidget, PMXReplaceBox
 from prymatex.gui.editor.internalwidgets import PMXRefocusWidget, PMXSpinGoToLine
 from prymatex import resources_rc
