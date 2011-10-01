@@ -18,8 +18,8 @@ class PMXStatusBar(QtGui.QStatusBar):
         
     def addPermanentWidget(self, widget):
         self.widgets.append(widget)
-        QtGui.QStatusBar.addPermanentWidget(self, widget)
-        
+        QtGui.QStatusBar.addPermanentWidget(self, widget, 1)
+    
     def setCurrentEditor(self, editor):
         for widget in self.widgets:
             widget.setEditor(editor)

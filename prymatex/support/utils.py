@@ -114,8 +114,7 @@ def pathToLink(match):
     final_attrs = '?%s' % '?'.join(['%s=%s' % (k, v) for k, v in attrs.iteritems() if v ])
     text = match.group('text')
     
-    data = dict(attrs= final_attrs, 
-                text= text)
+    data = dict(attrs= final_attrs, text= text)
     link = '<a href="txmt://open/%(attrs)s">%(text)s</a>' % data 
     return link
 

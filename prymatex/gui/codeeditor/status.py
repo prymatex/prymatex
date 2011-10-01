@@ -8,7 +8,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.editor = None
         
         self.setupUi(self)
-        self.widgetGoToLine.setVisible(False)
+        #self.widgetGoToLine.setVisible(False)
         self.widgetFindReplace.setVisible(False)
         #self.widgetCommand.setVisible(False)
         self.setupWidgetStatus()
@@ -72,7 +72,21 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         input = self.comboBoxInput.itemData(self.comboBoxInput.currentIndex())
         output = self.comboBoxOutput.itemData(self.comboBoxOutput.currentIndex())
         self.editor.insertCommand(command, input, output)
-        
+    
+    #============================================================
+    # AutoConnect GoToLine widget signals
+    #============================================================
+    @QtCore.pyqtSlot()
+    def on_pushButtonGoToLineClose_pressed(self):
+        self.widgetGoToLine.setVisible(False)
+    
+    @QtCore.pyqtSlot(int)
+    def on_spinBoxGoToLine_valueChanged(self, lineNumber):
+        self.editor.goToLine(lineNumber)
+        #self.codeEdit.ensureCursorVisible()
+        #self.debug(lineNumber)
+        #self.editor.insertCommand(command, input, output)
+    
     #============================================================
     # Control de eventos
     #============================================================

@@ -707,7 +707,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     
     def goToLine(self, lineNumber):
         cursor = self.textCursor()
-        cursor.setPosition(self.document().findBlockByNumber(lineno - 1).position())
+        cursor.setPosition(self.document().findBlockByNumber(lineNumber - 1).position())
         self.setTextCursor(cursor)
     
     def goToColumn(self, columnNumber):
