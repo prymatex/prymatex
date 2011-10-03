@@ -21,6 +21,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     
     def __init__(self, document, syntax, theme = None):
         super(PMXSyntaxHighlighter, self).__init__(document)
+        assert syntax is not None, "Syntax cannot be None"
         self.processor = PMXSyntaxProcessor()
         self.syntax = syntax
         self.theme = theme
@@ -97,7 +98,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def getFormat(self, scope):
         if self.theme is None:
             return None
-        if scope not in PMXSyntaxHighlighter.FORMAT_CACHE:
+        if scope not in PMXSyntaxHighlighter.FORMAT_CACHE: 
             format = QtGui.QTextCharFormat()
             settings = self.theme.getStyle(scope)
             if 'foreground' in settings:

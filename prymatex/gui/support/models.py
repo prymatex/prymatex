@@ -225,10 +225,10 @@ class PMXThemeStyleRow(object):
     ''' 
         Theme and Style decorator
     '''
-    STYLES_CACHE = {}
     def __init__(self, item, scores = None):
         self.item = item
         self.scores = scores
+        self.STYLES_CACHE = {}
     
     def __getattr__(self, name):
         return getattr(self.item, name)
@@ -255,11 +255,11 @@ class PMXThemeStyleRow(object):
         self.item.update(hash)
     
     def clearCache(self):
-        PMXThemeStyleRow.STYLES_CACHE = {}
+        self.STYLES_CACHE = {}
         
     def getStyle(self, scope = None):
-        if scope in PMXThemeStyleRow.STYLES_CACHE:
-            return PMXThemeStyleRow.STYLES_CACHE[scope]
+        if scope in self.STYLES_CACHE:
+            return self.STYLES_CACHE[scope]
         base = {}
         base.update(self.settings)
         if scope == None:
@@ -273,7 +273,7 @@ class PMXThemeStyleRow(object):
         styles.sort(key = lambda t: t[0])
         for score, style in styles:
             base.update(style.settings)
-        PMXThemeStyleRow.STYLES_CACHE[scope] = base
+        self.STYLES_CACHE[scope] = base
         return base
 
 class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):

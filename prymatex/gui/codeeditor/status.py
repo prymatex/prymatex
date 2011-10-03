@@ -67,7 +67,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         model = self.comboBoxSyntaxes.model()
         node = model.mapToSource(model.createIndex(index, 0))
         if self.currentEditor is not None:
-            self.currentEditor.syntax = node.internalPointer()
+            self.currentEditor.setSyntax(node.internalPointer())
 
     def updateCursorPosition(self, editor = None):
         editor = editor or self.currentEditor
@@ -79,7 +79,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def updateSyntax(self, editor = None):
         editor = editor or self.currentEditor
         model = self.comboBoxSyntaxes.model()
-        index = model.findItemIndex(editor.syntax)
+        index = model.findItemIndex(editor.getSyntax())
         self.comboBoxSyntaxes.blockSignals(True)
         self.comboBoxSyntaxes.setCurrentIndex(index)
         self.comboBoxSyntaxes.blockSignals(False)
@@ -128,50 +128,55 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         elif mode == 2:
             pass
         elif mode == 3:
-            match = QtCore.QRegExp(QtCore.QRegExp.escape(match))  
+            match = QtCore.QRegExp(QtCore.QRegExp.escape(match))
         flags = caseSensitively + wholeWords
         self.currentEditor.findMatch(match, flags, True)
 
     @QtCore.pyqtSlot()
     def on_pushButtonFindPrevious_pressed(self):
-        '''
-        s = 0 if not self._searchWidget._checkSensitive.isChecked() \
-            else QTextDocument.FindCaseSensitively
-        w = 0 if not self._searchWidget._checkWholeWord.isChecked() \
-            else QTextDocument.FindWholeWords
-        flags = 1 + s + w
-        '''
-        flags = 1 + QtGui.QTextDocument.FindWholeWords + QtGui.QTextDocument.FindCaseSensitively
+        flags = self.getFindFlags() | QtGui.QTextDocument.FindBackward
         self.currentEditor.findMatch(self.lineEditFind.text(), flags)
     
+    def getFindFlags(self):
+        flags = QtGui.QTextDocument.FindFlags()
+        if self.checkBoxFindCaseSensitively.isChecked():
+            flags |= QtGui.QTextDocument.FindCaseSensitively
+        return flags
+    
     #============================================================
-    # AutoConnect IFind widget signals
-    #============================================================    
+    # IFind widget
+    #============================================================
+    # AutoConnect Signals -----------------------------------------------    
     @QtCore.pyqtSlot()
     def on_pushButtonIFindClose_pressed(self):
         self.widgetIFind.setVisible(False)
     
     @QtCore.pyqtSlot(str)
     def on_lineEditIFind_textChanged(self, text):
-        flags = QtGui.QTextDocument.FindFlags()
-        if not self.checkBoxIFindCaseSensitively.isChecked():
-            flags |= QtGui.QTextDocument.FindCaseSensitively
+        _, flags = self.getIFindMatchAndFlags()
         self.currentEditor.findMatch(text, flags)
     
     @QtCore.pyqtSlot()
     def on_pushButtonIFindNext_pressed(self):
-        flags = QtGui.QTextDocument.FindFlags()
-        if self.checkBoxIFindCaseSensitively.isChecked():
-            flags |= QtGui.QTextDocument.FindCaseSensitively
-        self.currentEditor.findMatch(self.lineEditIFind.text(), flags, True)
+        match, flags = self.getIFindMatchAndFlags()
+        self.currentEditor.findMatch(match, flags, True)
 
     @QtCore.pyqtSlot()
     def on_pushButtonIFindPrevious_pressed(self):
-        flags = QtGui.QTextDocument.FindFlags()
+        match, flags = self.getIFindMatchAndFlags()
         flags |= QtGui.QTextDocument.FindBackward
+        self.currentEditor.findMatch(match, flags)
+    
+    @QtCore.pyqtSlot(int)
+    def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
+        match, flags = self.getIFindMatchAndFlags()
+        self.currentEditor.findMatch(match, flags)
+    
+    def getIFindMatchAndFlags(self):
+        flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxIFindCaseSensitively.isChecked():
             flags |= QtGui.QTextDocument.FindCaseSensitively
-        self.editor.findMatch(self.lineEditFind.text(), flags)
+        return self.lineEditIFind.text(), flags
     
     #============================================================
     # Control de eventos

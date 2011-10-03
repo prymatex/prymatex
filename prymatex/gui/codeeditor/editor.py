@@ -85,7 +85,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         #Sidebar
         self.sidebar = PMXSidebar(self)
         
-        syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
+        syntax = None
+        if fileInfo is not None:
+            syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
+        if syntax is None:
+            syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.syntaxHighlighter = PMXSyntaxHighlighter(self.document(), syntax)
         
         #Processors
@@ -188,8 +192,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             return self.document().findBlock(start), self.document().findBlock(end)
 
-    @property
-    def syntax(self):
+    def getSyntax(self):
         return self.syntaxHighlighter.syntax
         
     def setSyntax(self, syntax):
@@ -587,7 +590,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 'TM_LINE_NUMBER': cursor.block().blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.columnNumber() + 1, 
                 'TM_SCOPE': scope,
-                'TM_MODE': self.syntax.name,
+                'TM_MODE': self.getSyntax().name,
                 'TM_SOFT_TABS': self.softTabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': self.tabSize,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
@@ -682,6 +685,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             cursor.setPosition(cursor.selectionStart())
         cursor = self.document().find(match, cursor, flags)
         if cursor.isNull():
+            cursor = self.textCursor()
             if flags & QtGui.QTextDocument.FindBackward:
                 cursor.movePosition(QtGui.QTextCursor.End)
             else:
@@ -690,7 +694,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         if not cursor.isNull():
             self.setTextCursor(cursor)
 
-    def replaceMatch(self, wordOld, wordNew, flags, all=False):
+    def replaceMatch(self, wordOld, wordNew, flags, all = False):
         flags = QtGui.QTextDocument.FindFlags(flags)
         self.moveCursor(QtGui.QTextCursor.NoMove, QtGui.QTextCursor.KeepAnchor)
 
