@@ -60,7 +60,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
         
-        self.addEditor(self.application.getEditorInstance(parent = self))
+        self.addEmptyEditor()
 
     #============================================================
     # Setups
@@ -128,38 +128,41 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     #============================================================
     # Create and manage editors
     #============================================================
+    def addEmptyEditor(self):
+        editor = self.application.getEditorInstance(parent = self)
+        self.addEditor(editor)
+        self.setCurrentEditor(editor)
+        
     def addEditor(self, editor):
         self.statusBar().addEditor(editor)
         self.splitTabWidget.addTab(editor)
-        self.setCurrentEditor(editor)
-    
+
     def removeEditor(self, editor):
         self.statusBar().removeEditor(editor)
         self.splitTabWidget.removeTab(editor)
 
-    def getEditorForFile(self, fileInfo):
+    def findEditorForFile(self, fileInfo):
         for editor in self.splitTabWidget.getAllWidgets():
             if editor.fileInfo == fileInfo:
                 return editor
 
     def setCurrentEditor(self, editor):
-        print editor
-        self.currentEditor = editor
-        
+        # Handle the trivial case.
+        if self.currentEditor is editor:
+            return
+
         #Set editor to statusbar
         self.statusBar().setCurrentEditor(editor)
         
-        #Update window title
         template = Template(self.windowTitleTemplate)
-        title = [ editor.getTabTitle() ]
-        title.append(template.safe_substitute(**editor.buildEnvironment(self.application.supportManager.buildEnvironment())))
+        title = [ editor.getTabTitle() ] if editor is not None else []
+        title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
         self.setWindowTitle(" - ".join(title))
-        self.currentEditor.setFocus(QtCore.Qt.MouseFocusReason)
-        if self.sender() != self.splitTabWidget:
-            self.splitTabWidget.setCurrentWidget(editor)
-        
+        self.splitTabWidget.setCurrentWidget(editor)
+        self.currentEditor = editor
+
     def openFile(self, fileInfo, cursorPosition = (0,0)):
-        editor = self.getEditorForFile(fileInfo)
+        editor = self.findEditorForFile(fileInfo)
         if editor is None:
             editor = self.application.getEditorInstance(fileInfo, self)
             content = self.application.fileManager.openFile(fileInfo)
@@ -168,9 +171,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             self.addEditor(editor)
         else:
             editor.setCursorPosition(cursorPosition)
-            self.setCurrentEditor(editor)
+        return editor
     
-    def saveFile(self, editor = None, saveAs = False):
+    def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor
         if editor.isNew() or saveAs:
             fileInfo = self.application.fileManager.getSaveFile(title = "Save file" if saveAs else "Save file as")
@@ -182,7 +185,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             self.application.fileManager.saveFile(editor.fileInfo, editor.toPlainText())
             editor.setModified(False)
     
-    def closeFile(self, editor = None):
+    def closeEditor(self, editor = None):
         editor = editor or self.currentEditor
         while editor.isModified():
             response = QtGui.QMessageBox.question(self, "Save", 
@@ -190,7 +193,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
                 defaultButton = QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
-                self.saveFile(editor = editor)
+                self.saveEditor(editor = editor)
             elif response == QtGui.QMessageBox.No:
                 break
             elif response == QtGui.QMessageBox.Cancel:

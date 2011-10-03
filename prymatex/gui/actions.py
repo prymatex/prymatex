@@ -18,7 +18,7 @@ class MainWindowActions(object):
     # About To Show Menus
     #============================================================
     def on_menuFile_aboutToShow(self):
-        self.actionSave.setEnabled(self.currentEditor.isModified())
+        self.actionSave.setEnabled(self.currentEditor is not None and self.currentEditor.isModified())
         self.actionSaveAll.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
         print "configurar menu file"
         
@@ -43,8 +43,7 @@ class MainWindowActions(object):
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionNew_triggered(self):
-        editor = self.application.getEditorInstance(parent = self)
-        self.addEditor(editor)
+        self.addEmptyEditor()
 
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
@@ -55,47 +54,38 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         files = self.application.fileManager.getOpenFiles()
-        if files and len(self.splitTabWidget) == 1 and self.currentEditor.isEmpty() and self.currentEditor.isNew():
-            self.removeEditor(self.currentEditor)
         for file in files:
-            self.openFile(file)
+            editor = self.openFile(file)
+            self.setCurrentEditor(editor)
     
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
-        self.saveFile()
+        self.saveEditor()
         
     @QtCore.pyqtSlot()
     def on_actionSaveAs_triggered(self):
-        self.saveFile(saveAs = True)
+        self.saveEditor(saveAs = True)
         
     @QtCore.pyqtSlot()
     def on_actionSaveAll_triggered(self):
         for w in self.splitTabWidget.getAllWidgets():
-            self.saveFile(editor = w)
+            self.saveEditor(editor = w)
 
     @QtCore.pyqtSlot()
     def on_actionClose_triggered(self):
-        self.closeFile()
+        self.closeEditor()
         
     @QtCore.pyqtSlot()
     def on_actionCloseAll_triggered(self):
-        index = self.tabWidget.currentIndex()
-        self.tabWidget.closeTab(index)
-        if self.tabWidget.count():
-            self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
+        for w in self.splitTabWidget.getAllWidgets():
+            self.closeEditor(editor = w)
 
     @QtCore.pyqtSlot()
     def on_actionCloseOthers_triggered(self):
-        count = self.tabWidgetEditors.count()
-        index = self.tabWidgetEditors.currentIndex()
-        widgets = []
-        
-        for i in range(0, index) + range(index+1, count):
-            widgets.append(self.tabWidgetEditors.widget(i))
-        for w in widgets:
-            i = self.tabWidgetEditors.indexOf(w)
-            if not self.tabWidgetEditors.closeTab(i):
-                return
+        current = self.currentEditor
+        for w in self.splitTabWidget.getAllWidgets():
+            if w is not current:
+                self.closeEditor(editor = w)
     
     @QtCore.pyqtSlot()
     def on_actionQuit_triggered(self):
@@ -106,23 +96,28 @@ class MainWindowActions(object):
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionUndo_triggered(self):
-        self.statusBar().showMessage("actionUndo")
+        if self.currentEditor is not None:
+            self.currentEditor.undo()
         
     @QtCore.pyqtSlot()
     def on_actionRedo_triggered(self):
-        self.statusBar().showMessage("actionRedo")
+        if self.currentEditor is not None:
+            self.currentEditor.redo()
         
     @QtCore.pyqtSlot()
     def on_actionCopy_triggered(self):
-        self.statusBar().showMessage("actionCopy")
+        if self.currentEditor is not None:
+            self.currentEditor.copy()
     
     @QtCore.pyqtSlot()
     def on_actionCut_triggered(self):
-        self.statusBar().showMessage("actionCut")
+        if self.currentEditor is not None:
+            self.currentEditor.cut()
         
     @QtCore.pyqtSlot()
     def on_actionPaste_triggered(self):
-        self.statusBar().showMessage("actionPaste")
+        if self.currentEditor is not None:
+            self.currentEditor.paste()
 
     @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
@@ -133,11 +128,13 @@ class MainWindowActions(object):
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionZoomIn_triggered(self):
-        self.currentEditor.zoomIn()
+        if self.currentEditor is not None:
+            self.currentEditor.zoomIn()
             
     @QtCore.pyqtSlot()
     def on_actionZoomOut_triggered(self):
-        self.currentEditor.zoomOut()
+        if self.currentEditor is not None:
+            self.currentEditor.zoomOut()
 
     @QtCore.pyqtSlot()
     def on_actionShowFolding_triggered(self):

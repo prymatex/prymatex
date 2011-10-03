@@ -22,8 +22,12 @@ class PMXStatusBar(QtGui.QStatusBar):
     
     def setCurrentEditor(self, editor):
         for widget in self.widgets:
-            widget.setEditor(editor)
-    
+            if editor is not None:
+                widget.setVisible(True)
+                widget.setEditor(editor)
+            else:
+                widget.setVisible(False)
+                
     def addEditor(self, editor):
         for widget in self.widgets:
             widget.addEditor(editor)

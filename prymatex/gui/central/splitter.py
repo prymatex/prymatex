@@ -172,13 +172,24 @@ class PMXSplitTabWidget(QtGui.QSplitter):
 
         # Find the first tab widget going down the left of the hierarchy.  This
         # will be the one in the top left corner.
-        if self._current_tab_w is None:
-            self._current_tab_w = _TabWidget(self)
-            self.addWidget(self._current_tab_w)
+        if self.count() > 0:
+            ch = self.widget(0)
 
-        idx = self._current_tab_w.addTab(w, w.getTabTitle())
+            while not isinstance(ch, _TabWidget):
+                assert isinstance(ch, QtGui.QSplitter)
+                ch = ch.widget(0)
+        else:
+            # There is no tab widget so create one.
+            ch = _TabWidget(self)
+            self.addWidget(ch)
+
+        idx = ch.addTab(w, w.getTabTitle())
         self.setActiveIcon(w, w.getTabIcon())
         self.connect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
+        
+        if ch is not self._current_tab_w:
+            self._set_current_tab(ch, idx)
+            ch.tabBar().setFocus()
     
     def removeTab(self, w):
         """ Remove tab to the tab widget."""
@@ -188,7 +199,8 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         if tw is not None:
             self.disconnect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
             tw.removeTab(tidx)
-    
+        tw.tabBar().setFocus()
+        
     def _update_tab_status(self):
         sender = self.sender()
         self.setWidgetTitle(sender, sender.getTabTitle())
@@ -257,6 +269,7 @@ class PMXSplitTabWidget(QtGui.QSplitter):
 
         # Handle the trivial case.
         if self._current_tab_w is tw and self._current_tab_idx == tidx:
+            print "trivial case"
             return
 
         if tw is not None:
