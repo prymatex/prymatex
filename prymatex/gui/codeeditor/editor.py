@@ -672,19 +672,19 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     #==========================================================================
     # Find and Replace
     #==========================================================================    
-    def findMatch(self, word, flags, findNext = False):
-        flags = QtGui.QTextDocument.FindFlags(flags)
-        if findNext:
-            self.moveCursor(QtGui.QTextCursor.NoMove, QtGui.QTextCursor.KeepAnchor)
-        else:
-            self.moveCursor(QtGui.QTextCursor.StartOfWord, QtGui.QTextCursor.KeepAnchor)
-        found = self.find(word, flags)
-        if not found:
-            cursor = self.textCursor()
-            self.moveCursor(QTextCursor.Start)
-            found = self.find(word, flags)
-            if not found:
-                self.setTextCursor(cursor)
+    def findMatch(self, match, flags, findNext = False):
+        cursor = self.textCursor()
+        if not findNext and cursor.hasSelection():
+            cursor.setPosition(cursor.selectionStart())
+        cursor = self.document().find(match, cursor, flags)
+        if cursor.isNull():
+            if flags & QtGui.QTextDocument.FindBackward:
+                cursor.movePosition(QtGui.QTextCursor.End)
+            else:
+                cursor.movePosition(QtGui.QTextCursor.Start)
+            cursor = self.document().find(match, cursor, flags)
+        if not cursor.isNull():
+            self.setTextCursor(cursor)
 
     def replaceMatch(self, wordOld, wordNew, flags, all=False):
         flags = QtGui.QTextDocument.FindFlags(flags)

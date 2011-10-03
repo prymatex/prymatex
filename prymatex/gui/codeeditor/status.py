@@ -3,6 +3,7 @@ from prymatex.core.base import PMXObject
 from prymatex.ui.editorstatus import Ui_CodeEditorStatus
 
 class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
+
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
         self.editor = None
@@ -13,6 +14,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         #self.widgetCommand.setVisible(False)
         self.setupWidgetStatus()
         self.setupWidgetCommand()
+        self.setupWidgetFindReplace()
     
     #============================================================
     # Setup Widgets
@@ -48,6 +50,13 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxOutput.addItem("Create New Document", "createNewDocument")
         self.comboBoxOutput.setCurrentIndex(3)
     
+    def setupWidgetFindReplace(self):
+        #TODO: Constantes
+        self.comboBoxFindMode.addItem("Plain text", 0)
+        self.comboBoxFindMode.addItem("Whole word only", 1)
+        self.comboBoxFindMode.addItem("Escape sequences", 2)
+        self.comboBoxFindMode.addItem("Regular expressions", 3)
+        
     #============================================================
     # AutoConnect Status signals
     #============================================================
@@ -83,33 +92,28 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     @QtCore.pyqtSlot(int)
     def on_spinBoxGoToLine_valueChanged(self, lineNumber):
         self.editor.goToLine(lineNumber)
-        #self.codeEdit.ensureCursorVisible()
-        #self.debug(lineNumber)
-        #self.editor.insertCommand(command, input, output)
 
     #============================================================
     # AutoConnect FindReplace widget signals
     #============================================================    
     @QtCore.pyqtSlot()
-    def on_pushButtonFindReplace_pressed(self):
+    def on_pushButtonFindReplaceClose_pressed(self):
         self.widgetFindReplace.setVisible(False)
-    
-    @QtCore.pyqtSlot(str)
-    def on_lineEditFind_textChanged(self, text):
-        flags = QtGui.QTextDocument.FindWholeWords + QtGui.QTextDocument.FindCaseSensitively
-        self.editor.findMatch(text, flags)
     
     @QtCore.pyqtSlot()
     def on_pushButtonFindNext_pressed(self):
-        '''
-        s = 0 if not self._searchWidget._checkSensitive.isChecked() \
-            else QTextDocument.FindCaseSensitively
-        w = 0 if not self._searchWidget._checkWholeWord.isChecked() \
-            else QTextDocument.FindWholeWords
-        flags = s + w
-        '''
-        flags = 0 + QtGui.QTextDocument.FindWholeWords + QtGui.QTextDocument.FindCaseSensitively
-        self.editor.findMatch(self.lineEditFind.text(), flags, True)
+        caseSensitively = 0 if not self.checkBoxFindCaseSensitively.isChecked() else QtGui.QTextDocument.FindCaseSensitively
+        wholeWords = 0
+        match = self.lineEditFind.text()
+        mode = self.comboBoxFindMode.itemData(self.comboBoxFindMode.currentIndex())
+        if mode == 1:
+            wholeWords = QtGui.QTextDocument.FindWholeWords
+        elif mode == 2:
+            pass
+        elif mode == 3:
+            match = QtCore.QRegExp(QtCore.QRegExp.escape(match))  
+        flags = caseSensitively + wholeWords
+        self.editor.findMatch(match, flags, True)
 
     @QtCore.pyqtSlot()
     def on_pushButtonFindPrevious_pressed(self):
@@ -121,6 +125,35 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         flags = 1 + s + w
         '''
         flags = 1 + QtGui.QTextDocument.FindWholeWords + QtGui.QTextDocument.FindCaseSensitively
+        self.editor.findMatch(self.lineEditFind.text(), flags)
+    
+    #============================================================
+    # AutoConnect IFind widget signals
+    #============================================================    
+    @QtCore.pyqtSlot()
+    def on_pushButtonIFindClose_pressed(self):
+        self.widgetIFind.setVisible(False)
+    
+    @QtCore.pyqtSlot(str)
+    def on_lineEditIFind_textChanged(self, text):
+        flags = QtGui.QTextDocument.FindFlags()
+        if not self.checkBoxIFindCaseSensitively.isChecked():
+            flags |= QtGui.QTextDocument.FindCaseSensitively
+        self.editor.findMatch(text, flags)
+    
+    @QtCore.pyqtSlot()
+    def on_pushButtonIFindNext_pressed(self):
+        flags = QtGui.QTextDocument.FindFlags()
+        if self.checkBoxIFindCaseSensitively.isChecked():
+            flags |= QtGui.QTextDocument.FindCaseSensitively
+        self.editor.findMatch(self.lineEditIFind.text(), flags, True)
+
+    @QtCore.pyqtSlot()
+    def on_pushButtonIFindPrevious_pressed(self):
+        flags = QtGui.QTextDocument.FindFlags()
+        flags |= QtGui.QTextDocument.FindBackward
+        if self.checkBoxIFindCaseSensitively.isChecked():
+            flags |= QtGui.QTextDocument.FindCaseSensitively
         self.editor.findMatch(self.lineEditFind.text(), flags)
     
     #============================================================

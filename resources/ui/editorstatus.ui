@@ -143,6 +143,85 @@
     </widget>
    </item>
    <item>
+    <widget class="QWidget" name="widgetIFind" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QPushButton" name="pushButtonIFindClose">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelIFind">
+        <property name="text">
+         <string>Find:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditIFind"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonIFindNext">
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Mono L'; font-size:8pt; font-weight:600; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Find Previous&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Next</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/go-down.png</normaloff>:/icons/actions/go-down.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonIFindPrevious">
+        <property name="text">
+         <string>Previous</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/go-up.png</normaloff>:/icons/actions/go-up.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxIFindCaseSensitively">
+        <property name="text">
+         <string>Case Sensitively</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="spacerIFind">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>155</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QWidget" name="widgetFindReplace" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
@@ -164,12 +243,18 @@
         <property name="text">
          <string>Find:</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </item>
       <item row="1" column="1">
        <widget class="QLabel" name="labelReplace">
         <property name="text">
          <string>Replace:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -233,14 +318,14 @@ p, li { white-space: pre-wrap; }
        <widget class="QWidget" name="widgetFindReplaceOptions" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="labelFindMode">
            <property name="text">
             <string>Mode:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox"/>
+          <widget class="QComboBox" name="comboBoxFindMode"/>
          </item>
          <item>
           <spacer name="horizontalSpacer">
@@ -263,7 +348,7 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="pushButtonFindAll">
            <property name="text">
             <string>Find All</string>
            </property>
