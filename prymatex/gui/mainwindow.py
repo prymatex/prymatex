@@ -45,8 +45,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                               is shown in the screen.
         '''
         QtGui.QMainWindow.__init__(self)
-        
         self.setupUi(self)
+        self.currentEditor = None
         
         self.setupDockers()
         self.setupDialogs()
@@ -60,8 +60,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
         
-        self.splitTabWidget.addTab(self.application.getEditorInstance(parent = self))
-    
+        self.addEditor(self.application.getEditorInstance(parent = self))
+
+    #============================================================
+    # Setups
+    #============================================================
     def setupStatusBar(self):
         from prymatex.gui.statusbar import PMXStatusBar
         from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
@@ -121,12 +124,51 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
         self.dialogFilter = PMXFilterDialog(self)
         self.bundleItemSelector = PMXBundleItemSelector(self)
+
+    #============================================================
+    # Create and manage editors
+    #============================================================
+    def addEditor(self, editor):
+        self.statusBar().addEditor(editor)
+        self.splitTabWidget.addTab(editor)
+        self.setCurrentEditor(editor)
+    
+    def removeEditor(self, editor):
+        self.statusBar().removeEditor(editor)
+        self.splitTabWidget.removeTab(editor)
+
+    def getEditorForFile(self, fileInfo):
+        for editor in self.splitTabWidget.getAllWidgets():
+            if editor.fileInfo == fileInfo:
+                return editor
+
+    def setCurrentEditor(self, editor):
+        print editor
+        self.currentEditor = editor
+        
+        #Set editor to statusbar
+        self.statusBar().setCurrentEditor(editor)
+        
+        #Update window title
+        template = Template(self.windowTitleTemplate)
+        title = [ editor.getTabTitle() ]
+        title.append(template.safe_substitute(**editor.buildEnvironment(self.application.supportManager.buildEnvironment())))
+        self.setWindowTitle(" - ".join(title))
+        self.currentEditor.setFocus(QtCore.Qt.MouseFocusReason)
+        if self.sender() != self.splitTabWidget:
+            self.splitTabWidget.setCurrentWidget(editor)
         
     def openFile(self, fileInfo, cursorPosition = (0,0)):
-        editor = self.application.getEditorInstance(fileInfo, self)
-        content = self.application.fileManager.openFile(fileInfo)
-        editor.setPlainText(content)
-        self.splitTabWidget.addTab(editor)
+        editor = self.getEditorForFile(fileInfo)
+        if editor is None:
+            editor = self.application.getEditorInstance(fileInfo, self)
+            content = self.application.fileManager.openFile(fileInfo)
+            editor.setPlainText(content)
+            editor.setFileInfo(fileInfo)
+            self.addEditor(editor)
+        else:
+            editor.setCursorPosition(cursorPosition)
+            self.setCurrentEditor(editor)
     
     def saveFile(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor
@@ -135,14 +177,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             if fileInfo is not None:
                 self.application.fileManager.saveFile(fileInfo, editor.toPlainText())
                 editor.setFileInfo(fileInfo)
+                editor.setModified(False)
         else:
-            self.application.fileManager.saveFile(fileInfo, editor.toPlainText())
+            self.application.fileManager.saveFile(editor.fileInfo, editor.toPlainText())
+            editor.setModified(False)
     
     def closeFile(self, editor = None):
         editor = editor or self.currentEditor
         while editor.isModified():
             response = QtGui.QMessageBox.question(self, "Save", 
-                unicode("Save %s" % self.getTabTitle()), 
+                "Save %s" % editor.getTabTitle(), 
                 buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
                 defaultButton = QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
@@ -150,7 +194,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             elif response == QtGui.QMessageBox.No:
                 break
             elif response == QtGui.QMessageBox.Cancel:
-                raise exceptions.UserCancelException()
+                return
+        self.removeEditor(editor)
 
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
@@ -165,21 +210,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             column = url.queryItemValue('column')
             if column:
                 editor.codeEdit.goToColumn(int(column))
-
-    def setCurrentEditor(self, editor):
-        
-        self.currentEditor = editor
-        
-        #Set editor to statusbar
-        self.statusBar().setCurrentEditor(editor)
-        
-        #Update window title
-        template = Template(self.windowTitleTemplate)
-        title = [ editor.getTabTitle() ]
-        title.append(template.safe_substitute(**editor.buildEnvironment(self.application.supportManager.buildEnvironment())))
-        self.setWindowTitle(" - ".join(title))
-
-        self.currentEditor.setFocus(QtCore.Qt.MouseFocusReason)
     
     def closeEvent(self, event):
         try:
@@ -187,4 +217,3 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 w.close()
         except exceptions.UserCancelException:
             event.ignore()
-            

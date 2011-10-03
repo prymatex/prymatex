@@ -6,7 +6,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
 
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        self.editor = None
+        self.editors = []
+        self.currentEditor = None
         
         self.setupUi(self)
         #self.widgetGoToLine.setVisible(False)
@@ -58,14 +59,30 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxFindMode.addItem("Regular expressions", 3)
         
     #============================================================
-    # AutoConnect Status signals
+    # Status Widget
     #============================================================
+    # AutoConnect signals----------------------------------------
     @QtCore.pyqtSlot(int)
     def on_comboBoxSyntaxes_currentIndexChanged(self, index):
         model = self.comboBoxSyntaxes.model()
         node = model.mapToSource(model.createIndex(index, 0))
-        if self.editor is not None:
-            self.editor.syntax = node.internalPointer()
+        if self.currentEditor is not None:
+            self.currentEditor.syntax = node.internalPointer()
+
+    def updateCursorPosition(self, editor = None):
+        editor = editor or self.currentEditor
+        cursor = editor.textCursor()
+        line = cursor.blockNumber() + 1
+        column = cursor.columnNumber() + 1
+        self.labelLineColumn.setText("Line: %5d Column: %5d" % (line, column))
+        
+    def updateSyntax(self, editor = None):
+        editor = editor or self.currentEditor
+        model = self.comboBoxSyntaxes.model()
+        index = model.findItemIndex(editor.syntax)
+        self.comboBoxSyntaxes.blockSignals(True)
+        self.comboBoxSyntaxes.setCurrentIndex(index)
+        self.comboBoxSyntaxes.blockSignals(False)
     
     #============================================================
     # AutoConnect Command widget signals
@@ -80,7 +97,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.lineEditCommand.clear()
         input = self.comboBoxInput.itemData(self.comboBoxInput.currentIndex())
         output = self.comboBoxOutput.itemData(self.comboBoxOutput.currentIndex())
-        self.editor.insertCommand(command, input, output)
+        self.currentEditor.insertCommand(command, input, output)
     
     #============================================================
     # AutoConnect GoToLine widget signals
@@ -91,7 +108,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     
     @QtCore.pyqtSlot(int)
     def on_spinBoxGoToLine_valueChanged(self, lineNumber):
-        self.editor.goToLine(lineNumber)
+        self.currentEditor.goToLine(lineNumber)
 
     #============================================================
     # AutoConnect FindReplace widget signals
@@ -113,7 +130,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         elif mode == 3:
             match = QtCore.QRegExp(QtCore.QRegExp.escape(match))  
         flags = caseSensitively + wholeWords
-        self.editor.findMatch(match, flags, True)
+        self.currentEditor.findMatch(match, flags, True)
 
     @QtCore.pyqtSlot()
     def on_pushButtonFindPrevious_pressed(self):
@@ -125,7 +142,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         flags = 1 + s + w
         '''
         flags = 1 + QtGui.QTextDocument.FindWholeWords + QtGui.QTextDocument.FindCaseSensitively
-        self.editor.findMatch(self.lineEditFind.text(), flags)
+        self.currentEditor.findMatch(self.lineEditFind.text(), flags)
     
     #============================================================
     # AutoConnect IFind widget signals
@@ -139,14 +156,14 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         flags = QtGui.QTextDocument.FindFlags()
         if not self.checkBoxIFindCaseSensitively.isChecked():
             flags |= QtGui.QTextDocument.FindCaseSensitively
-        self.editor.findMatch(text, flags)
+        self.currentEditor.findMatch(text, flags)
     
     @QtCore.pyqtSlot()
     def on_pushButtonIFindNext_pressed(self):
         flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxIFindCaseSensitively.isChecked():
             flags |= QtGui.QTextDocument.FindCaseSensitively
-        self.editor.findMatch(self.lineEditIFind.text(), flags, True)
+        self.currentEditor.findMatch(self.lineEditIFind.text(), flags, True)
 
     @QtCore.pyqtSlot()
     def on_pushButtonIFindPrevious_pressed(self):
@@ -171,24 +188,17 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         editor.syntaxChanged.connect(self.updateSyntax)
         
     def setEditor(self, editor):
-        if self.editor is not None:
-            self.disconnectEditor(self.editor)
-        self.connectEditor(editor)
+        assert editor in self.editors, "Editor not is in editors"
         self.updateCursorPosition(editor)
         self.updateSyntax(editor)
-        self.editor = editor
+        self.currentEditor = editor
     
-    def updateCursorPosition(self, editor = None):
-        editor = editor or self.editor
-        cursor = editor.textCursor()
-        line = cursor.blockNumber() + 1
-        column = cursor.columnNumber() + 1
-        self.labelLineColumn.setText("Line: %5d Column: %5d" % (line, column))
-        
-    def updateSyntax(self, editor = None):
-        editor = editor or self.editor
-        model = self.comboBoxSyntaxes.model()
-        index = model.findItemIndex(editor.syntax)
-        self.comboBoxSyntaxes.blockSignals(True)
-        self.comboBoxSyntaxes.setCurrentIndex(index)
-        self.comboBoxSyntaxes.blockSignals(False)
+    def addEditor(self, editor):
+        assert editor not in self.editors, "Editor is in editors"
+        self.editors.append(editor)
+        self.connectEditor(editor)
+    
+    def removeEditor(self, editor):
+        assert editor in self.editors, "Editor not is in editors"
+        self.disconnectEditor(editor)
+        self.editors.remove(editor)

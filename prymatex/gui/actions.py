@@ -44,7 +44,7 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionNew_triggered(self):
         editor = self.application.getEditorInstance(parent = self)
-        self.splitTabWidget.addTab(editor)
+        self.addEditor(editor)
 
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
@@ -54,11 +54,9 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
-        '''
-        Opens one or more files
-        '''
-        #TODO: El directory puede ser dependiente del current editor o del file manager
         files = self.application.fileManager.getOpenFiles()
+        if files and len(self.splitTabWidget) == 1 and self.currentEditor.isEmpty() and self.currentEditor.isNew():
+            self.removeEditor(self.currentEditor)
         for file in files:
             self.openFile(file)
     
@@ -77,11 +75,8 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionClose_triggered(self):
-        index = self.tabWidget.currentIndex()
-        self.tabWidget.closeTab(index)
-        if self.tabWidget.count():
-            self.tabWidget.currentWidget().setFocus(Qt.TabFocusReason)
-
+        self.closeFile()
+        
     @QtCore.pyqtSlot()
     def on_actionCloseAll_triggered(self):
         index = self.tabWidget.currentIndex()

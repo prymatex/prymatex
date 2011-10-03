@@ -13,13 +13,13 @@ from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPre
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
 from prymatex.core import exceptions
-from prymatex.gui.central import PMXBaseTab
+from prymatex.gui.central.editor import PMXBaseEditor
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.helpers import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 
-class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
+class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # Signals
     #=======================================================================
@@ -81,7 +81,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     
     def __init__(self, fileInfo = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
-        PMXBaseTab.__init__(self, fileInfo)
+        PMXBaseEditor.__init__(self)
         #Sidebar
         self.sidebar = PMXSidebar(self)
         
@@ -125,22 +125,29 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         
     def isModified(self):
         return self.document().isModified()
-
+    
+    def isEmpty(self):
+        return self.document().isEmpty()
+        
+    def setModified(self, modified):
+        self.document().setModified(modified)
+        
     def setFileInfo(self, fileInfo):
-        self.syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
-        self.document().setModified(False)
-        PMXBaseTab.setFileInfo(self, fileInfo)
+        syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
+        if syntax is not None:
+            self.setSyntax(syntax)
+        PMXBaseEditor.setFileInfo(self, fileInfo)
         
     def getTabTitle(self):
         #Podemos marcar de otra forma cuando algo cambia :P
-        return PMXBaseTab.getTabTitle(self)
+        return PMXBaseEditor.getTabTitle(self)
     
     def getTabIcon(self):
         if self.isModified():
             return resources.ICONS["save"]
         elif self.fileInfo is not None:
             return self.application.fileManager.getFileIcon(self.fileInfo)
-        return PMXBaseTab.getTabIcon(self)
+        return PMXBaseEditor.getTabIcon(self)
         
     @classmethod
     def newInstance(cls, fileInfo = None, parent = None):
@@ -185,9 +192,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
     def syntax(self):
         return self.syntaxHighlighter.syntax
         
-    @syntax.setter
-    def syntax(self, syntax):
-        assert syntax is not None, "Syntax can't be none"
+    def setSyntax(self, syntax):
         if self.syntaxHighlighter.syntax != syntax:
             self.syntaxHighlighter.syntax = syntax
             self.syntaxHighlighter.rehighlight()
@@ -492,7 +497,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
         if self.document().blockCount() == 1:
             syntax = self.application.supportManager.findSyntaxByFirstLine(line)
             if syntax is not None:
-                self.syntax = syntax
+                self.setSyntax(syntax)
         preference = self.getPreference(block.userData().getLastScope())
         indentMark = preference.indent(line)
         super(PMXCodeEditor, self).keyPressEvent(event)
@@ -539,7 +544,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
             self.debug("Corriendo Command %s" % item.name)
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
-            self.syntax = item
+            self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
             self.debug("Corriendo Macro %s" % item.name)
             item.execute(self.macroProcessor)
@@ -582,14 +587,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseTab):
                 'TM_LINE_NUMBER': cursor.block().blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.columnNumber() + 1, 
                 'TM_SCOPE': scope,
+                'TM_MODE': self.syntax.name,
                 'TM_SOFT_TABS': self.softTabs and u'YES' or u'NO',
                 'TM_TAB_SIZE': self.tabSize,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
         })
         if current_word != None:
             env['TM_CURRENT_WORD'] = current_word
-        if self.syntax != None:
-            env['TM_MODE'] = self.syntax.name
         if self.fileInfo is not None:
             env['TM_FILEPATH'] = self.fileInfo.absoluteFilePath()
             env['TM_FILENAME'] = self.fileInfo.fileName()
