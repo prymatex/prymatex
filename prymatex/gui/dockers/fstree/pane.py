@@ -23,16 +23,19 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         super(PMXFileSystemDock, self).__init__(parent)
         self.dialogConfigFilters = PMXFSPaneConfigDialog(self)
         self.setupUi(self)
-
-        self.tree.setRootIndex(self.tree.model().index(self.application.fileManager.currentDirectory))
+        
+        self.dirmodelFiles = QtGui.QFileSystemModel(self)
+        self.dirmodelFiles.setRootPath(self.application.fileManager.currentDirectory)
+        
+        self.tree.setModel(self.dirmodelFiles)
         self.setupBookmarksCombo()
-        self.tree.rootChanged.connect(self.treeRootPathChanged)
         
+        self.dirmodelFiles.rootPathChanged.connect(self.treeRootPathChanged)
         self.bookmarksView.pathChangeRequested.connect(self.openBookmark)
-        self.configure()
         
+        self.configure()
+
     def treeRootPathChanged(self, path):
-        #self.comboBookmarks.addItem(path)
         newPathParts = unicode(path).split(os.sep)
         rows = self.comboBookmarks.model().rowCount()
         self.comboBookmarks.setEnabled(False)
@@ -78,7 +81,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     def on_buttonSyncTabFile_toggled(self, sync):
         if sync:
             # Forzamos la sincronizacion
-            editor = self.mainWindow.currentEditorWidget
+            editor = self.mainWindow.currentEditor
             self.tree.focusWidgetPath(editor)
 
     @QtCore.pyqtSignature('')

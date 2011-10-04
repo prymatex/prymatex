@@ -97,7 +97,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.lineEditCommand.clear()
         input = self.comboBoxInput.itemData(self.comboBoxInput.currentIndex())
         output = self.comboBoxOutput.itemData(self.comboBoxOutput.currentIndex())
-        self.currentEditor.insertCommand(command, input, output)
+        self.currentEditor.executeCommand(command, input, output)
     
     #============================================================
     # AutoConnect GoToLine widget signals
@@ -111,42 +111,54 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.currentEditor.goToLine(lineNumber)
 
     #============================================================
-    # AutoConnect FindReplace widget signals
-    #============================================================    
+    # FindReplace widget
+    #============================================================
+    # AutoConnect Signals ---------------------------------------
     @QtCore.pyqtSlot()
     def on_pushButtonFindReplaceClose_pressed(self):
         self.widgetFindReplace.setVisible(False)
     
     @QtCore.pyqtSlot()
     def on_pushButtonFindNext_pressed(self):
-        caseSensitively = 0 if not self.checkBoxFindCaseSensitively.isChecked() else QtGui.QTextDocument.FindCaseSensitively
-        wholeWords = 0
-        match = self.lineEditFind.text()
-        mode = self.comboBoxFindMode.itemData(self.comboBoxFindMode.currentIndex())
-        if mode == 1:
-            wholeWords = QtGui.QTextDocument.FindWholeWords
-        elif mode == 2:
-            pass
-        elif mode == 3:
-            match = QtCore.QRegExp(QtCore.QRegExp.escape(match))
-        flags = caseSensitively + wholeWords
+        match, flags = self.getFindMatchAndFlags()
         self.currentEditor.findMatch(match, flags, True)
 
     @QtCore.pyqtSlot()
     def on_pushButtonFindPrevious_pressed(self):
-        flags = self.getFindFlags() | QtGui.QTextDocument.FindBackward
-        self.currentEditor.findMatch(self.lineEditFind.text(), flags)
+        match, flags = self.getFindMatchAndFlags()
+        flags |= QtGui.QTextDocument.FindBackward
+        self.currentEditor.findMatch(match, flags)
     
-    def getFindFlags(self):
+    @QtCore.pyqtSlot()
+    def on_pushButtonReplace_pressed(self):
+        match, flags = self.getFindMatchAndFlags()
+        replace = self.lineEditReplace.text()
+        self.currentEditor.replaceMatch(match, replace, flags)
+    
+    @QtCore.pyqtSlot()
+    def on_pushButtonReplaceAll_pressed(self):
+        match, flags = self.getFindMatchAndFlags()
+        replace = self.lineEditReplace.text()
+        self.currentEditor.replaceMatch(match, replace, flags, True)
+    
+    def getFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxFindCaseSensitively.isChecked():
             flags |= QtGui.QTextDocument.FindCaseSensitively
-        return flags
+        match = self.lineEditFind.text()
+        mode = self.comboBoxFindMode.itemData(self.comboBoxFindMode.currentIndex())
+        if mode == 1:
+            flags |= QtGui.QTextDocument.FindWholeWords
+        elif mode == 2:
+            pass
+        elif mode == 3:
+            match = QtCore.QRegExp(QtCore.QRegExp.escape(match))
+        return match, flags
     
     #============================================================
     # IFind widget
     #============================================================
-    # AutoConnect Signals -----------------------------------------------    
+    # AutoConnect Signals ---------------------------------------
     @QtCore.pyqtSlot()
     def on_pushButtonIFindClose_pressed(self):
         self.widgetIFind.setVisible(False)

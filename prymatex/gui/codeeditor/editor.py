@@ -566,7 +566,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         menu.exec_(point)
     
-    def insertCommand(self, command = None, input = "none", output = "insertText"):
+    def executeCommand(self, command = None, input = "none", output = "insertText"):
         if command is None:
             command = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
         hash = {    'command': command, 
@@ -693,28 +693,21 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             cursor = self.document().find(match, cursor, flags)
         if not cursor.isNull():
             self.setTextCursor(cursor)
+            return True
+        return False
 
-    def replaceMatch(self, wordOld, wordNew, flags, all = False):
-        flags = QtGui.QTextDocument.FindFlags(flags)
-        self.moveCursor(QtGui.QTextCursor.NoMove, QtGui.QTextCursor.KeepAnchor)
-
+    def replaceMatch(self, match, text, flags, all = False):
         cursor = self.textCursor()
         cursor.beginEditBlock()
-
-        self.moveCursor(QTextCursor.Start)
-        replace = True
-        while (replace or all):
-            result = False
-            result = self.find(wordOld, flags)
-
-            if result:
-                tc = self.textCursor()
-                if tc.hasSelection():
-                    tc.insertText(wordNew)
-            else:
-                break
-            replace = False
+        replaced = False
+        while True:
+            replace = self.findMatch(match, flags)
+            if not replace: break
+            cursor = self.textCursor()
+            cursor.insertText(text)
+            if not all: break
         cursor.endEditBlock()
+        return replaced
 
     #==========================================================================
     # Bookmarks and gotos

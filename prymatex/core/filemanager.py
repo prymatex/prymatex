@@ -40,7 +40,31 @@ class PMXFileManager(PMXObject):
             self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
         self.settings.setValue("fileHistory", self.fileHistory)
         self.fileHistoryChanged.emit()
-        
+    
+    def createDirectory(self, base, name = None):
+        """Create a new directory."""
+        if name is None:
+            name, ok = QtGui.QInputDialog.getText(self, "New directoy name", "Please enter the new directoy name in < /br>%s:" % base)
+            if not ok:
+                return None
+        path = os.path.join(base, name)
+        if os.path.exists(path):
+            raise PrymatexIOException("The directory already exist") 
+        os.mkdir(path)
+        return QtCore.QFileInfo(path)
+    
+    def deletePath(self, path):
+        ok = QtGui.QMessageBox.question(self, "Deletion Confirmation", "Are you sure you want to delete <b>%s</b>?" % path,
+                QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
+        if resp == QtGui.QMessageBox.Ok:
+            if os.path.isfile(path):
+                # Primero hay que cerrar el editor si hay
+                os.unlink(path)
+            else:
+                shutil.rmtree(path)
+            return True
+        return False
+    
     def openFile(self, fileInfo):
         """Open and read a file, return the content."""
         if not fileInfo.exists():

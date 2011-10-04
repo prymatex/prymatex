@@ -120,6 +120,30 @@ class MainWindowActions(object):
             self.currentEditor.paste()
 
     @QtCore.pyqtSlot()
+    def on_actionSelectWord_triggered(self):
+        pass
+    
+    @QtCore.pyqtSlot()
+    def on_actionSelectLine_triggered(self):
+        pass
+    
+    @QtCore.pyqtSlot()
+    def on_actionSelectParagraph_triggered(self):
+        pass
+    
+    @QtCore.pyqtSlot()
+    def on_actionSelectEnclosingBrackets_triggered(self):
+        pass
+        
+    @QtCore.pyqtSlot()
+    def on_actionSelectCurrentScope_triggered(self):
+        pass
+        
+    @QtCore.pyqtSlot()
+    def on_actionSelectAll_triggered(self):
+        pass
+
+    @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
         self.currentEditor.showFindWidget()
 
@@ -181,7 +205,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionExecute_triggered(self):
-        self.currentEditor.insertCommand()
+        self.currentEditor.executeCommand()
 
     @QtCore.pyqtSlot()
     def on_actionFilterThroughCommand_triggered(self):

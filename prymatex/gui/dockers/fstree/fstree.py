@@ -1,189 +1,194 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4.QtGui import QTreeView, QFileSystemModel, QMenu, QAction, QMessageBox, qApp
-from PyQt4.QtGui import QInputDialog, QApplication, QPixmap, QIcon
+from PyQt4.QtGui import QMenu, QAction, QMessageBox, qApp
+from PyQt4.QtGui import QApplication, QPixmap, QIcon
 from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir, pyqtSignal
+
 import os
 import shutil
 from os.path import join, abspath, isfile, isdir, dirname
+from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 
-class FSTree(QTreeView, PMXObject):
-    '''
-    File tree panel
-    '''
-    rootChanged = pyqtSignal(object)
-    
-    class Meta:
-        settings = 'fspane.fstree'
-    
+class FSTree(QtGui.QTreeView, PMXObject):
     def __init__(self, parent = None):
-        QTreeView.__init__(self, parent)
+        QtGui.QTreeView.__init__(self, parent)
+        self.setupMenus()
         
-        
-        self.dirmodelFiles = QFileSystemModel(self)
-        self.dirmodelFiles.setRootPath('.')
-        self.createMenus()        
-        self.setModel(self.dirmodelFiles)
-        for i in range(1,self.dirmodelFiles.columnCount()):
-            self.setColumnHidden(i, True)
         self.setAnimated(False)
         self.setIndentation(20)
         self.setSortingEnabled(True)
-        self.dirmodelFiles.sort(0)
-        print self.mainWindow
-        #self.mainWindow.tabWidget.currentEditorChanged.connect(self.focusWidgetPath)
-        self.setExpandsOnDoubleClick(True)
-        QMetaObject.connectSlotsByName(self)
-    
-    def followWidgetFoucs(self, follow):
-        print "Follow", follow
-    
-    
-    def focusWidgetPath(self, widget):
-        '''
-        Editor has been hanged in the main window
-        '''
-        # Is sync enabled?
-        if not self.parent().buttonSyncTabFile.isChecked():
-            # The Sync checkbox is not checked so we should not
-            # foucs the current file in the tree
-            self.debug("No sincronizado")
-        elif widget.fileInfo.path:
-            path = widget.file.path
-            index = self.model().index(path)
-            self.setCurrentIndex(index) 
-    
-    def createMenus(self):
+
+    #======================================================
+    # Menus
+    #======================================================
+    def setupMenus(self):
         from prymatex.utils.i18n import ugettext as _
         # File Menu
         self.menuFile = QMenu(self)
         self.menuFile.setObjectName('menuFile')
         
         # Directory Menu
-        self.menuDir = QMenu(self)
-        self.menuDir.setObjectName('menuDir')
+        self.menuDirectory = QMenu(self)
+        self.menuDirectory.setObjectName('menuDirectory')
         
         # Default menu 
         self.defaultMenu = QMenu(self)
         self.defaultMenu.setObjectName("defaultMenu")
         
         # Actions for those menus
-        self.actionCopyPathToClipBoard = QAction(_("Copy Path To &Clipboard"), self)
-        self.actionCopyPathToClipBoard.setObjectName("actionCopyPathToClipBoard")
-        self.actionCopyPathToClipBoard.triggered.connect(self.copyPathToClipboard)
-        self.menuFile.addAction(self.actionCopyPathToClipBoard)
+        #Copy to ClipBoard
+        actionCopyPathToClipBoard = QtGui.QAction(_("Copy Path To &Clipboard"), self)
+        actionCopyPathToClipBoard.setObjectName("actionCopyPathToClipBoard")
+        actionCopyPathToClipBoard.triggered.connect(self.pathToClipboard)
+        self.menuFile.addAction(actionCopyPathToClipBoard)
+        self.menuDirectory.addAction(actionCopyPathToClipBoard)
         
-        self.actionRename = QAction(_("&Rename"), self)
-        self.actionRename.setIcon(QIcon(":/icons/actions/edit-rename.png"))
-        self.actionRename.setObjectName("actionRename")
-        self.menuFile.addAction(self.actionRename)
+        #Rename
+        actionRename = QAction(_("&Rename"), self)
+        actionRename.setObjectName("actionRename")
+        actionRename.setIcon(QIcon(":/icons/actions/edit-rename.png"))
+        actionRename.triggered.connect(self.pathRename)
+        self.menuFile.addAction(actionRename)
+        self.menuDirectory.addAction(actionRename)
         
-        self.actionDelete = QAction(_("&Delete"), self)
-        self.actionDelete.setObjectName("actionDelete")
-        self.menuFile.addAction(self.actionDelete)
+        #Delete
+        actionDelete = QAction(_("&Delete"), self)
+        actionDelete.setObjectName("actionDelete")
+        actionDelete.triggered.connect(self.pathDelete)
+        self.menuFile.addAction(actionDelete)
+        self.menuDirectory.addAction(actionDelete)
         
-        self.actionFileOpen = QAction(_("&Open"), self)
-        self.actionFileOpen.setObjectName("actionFileOpen")
-        self.actionFileOpen.setIcon(QIcon(":/icons/actions/document-open.png"))
-        self.menuFile.addAction(self.actionFileOpen)
+        #Open
+        actionOpen = QAction(_("&Open"), self)
+        actionOpen.setObjectName("actionFileOpen")
+        actionOpen.setIcon(QIcon(":/icons/actions/document-open.png"))
+        actionOpen.triggered.connect(self.pathOpen)
+        self.menuFile.addAction(actionOpen)
         
-        self.actionRefresh = QAction(_("&Refresh"), self)
-        self.actionRefresh.setIcon(QIcon(":/icons/actions/view-refresh.png"))
-        self.actionRefresh.setObjectName("actionRefresh")
-        self.menuFile.addAction(self.actionRefresh)
+        #Refresh
+        actionRefresh = QAction(_("&Refresh"), self)
+        actionRefresh.setObjectName("actionRefresh")
+        actionRefresh.setIcon(QIcon(":/icons/actions/view-refresh.png"))
+        actionRefresh.triggered.connect(self.pathRefresh)
+        self.menuFile.addAction(actionRefresh)
+        self.menuDirectory.addAction(actionRefresh)
+        self.defaultMenu.addAction(actionRefresh)
         
-        self.actionProperties = QAction(_("&Properties"), self)
-        self.actionProperties.setObjectName("actionProperties")
-        self.actionProperties.setIcon(QIcon(":/icons/actions/document-properties.png"))
-        #self.actionProperties.setShortcut("")
-        self.menuFile.addAction(self.actionProperties)
+        #Properties
+        actionProperties = QAction(_("&Properties"), self)
+        actionProperties.setObjectName("actionProperties")
+        actionProperties.setIcon(QIcon(":/icons/actions/document-properties.png"))
+        actionProperties.triggered.connect(self.pathProperties)
+        self.menuFile.addAction(actionProperties)
+        self.menuDirectory.addAction(actionProperties)
+
+        # Set As Root
+        actionSetAsRoot = QAction(_("&Set as root"), self)
+        actionSetAsRoot.setObjectName("actionSetAsRoot")
+        actionSetAsRoot.triggered.connect(self.pathSetAsRoot)
+        self.menuDirectory.addAction(actionSetAsRoot)
         
-        
-        # Directory Menus
+        # New Menu
         self.menuNewFileSystemElement = QMenu(_("&New.."), self)
         self.menuNewFileSystemElement.setObjectName('menuNewFileSystemElement')
         self.menuNewFileSystemElement.setIcon(QIcon(":/icons/actions/document-new.png"))
-        self.actionFileNew = self.menuNewFileSystemElement.addAction('File')
-        self.actionFileNew.setObjectName("actionFileNew")
-        
-        self.menuNewFileSystemElement.setObjectName('newFile')
-        self.actionDirNew = self.menuNewFileSystemElement.addAction('Directory')
-        self.actionDirNew.setObjectName("actionDirNew")
-        
-        
-        self.menuDir.addMenu(self.menuNewFileSystemElement)
-        self.menuDir.addAction(self.actionCopyPathToClipBoard)
-        
-        self.actionSetAsRoot = QAction(_("&Set as root"), self)
-        self.actionSetAsRoot.setObjectName("actionSetAsRoot")
-        self.menuDir.addAction(self.actionSetAsRoot)
-        
-        self.menuDir.addAction(self.actionRefresh)
-        
-        self.menuDir.addAction(self.actionRename)
-        self.menuDir.addAction(self.actionDelete)
-        
-        self.menuDir.addAction(self.actionProperties)
-        
-        
-        
+        self.menuDirectory.addMenu(self.menuNewFileSystemElement)
         self.defaultMenu.addMenu(self.menuNewFileSystemElement)
-        self.defaultMenu.addAction(self.actionRefresh)
-        #self.defaultMenu.addAction()
-    
-    def copyPathToClipboard(self):
+        
+        # New File
+        actionFileNew = QAction(_("&File"), self)
+        actionFileNew.setObjectName("actionFileNew")
+        actionFileNew.triggered.connect(self.newFile)
+        self.menuNewFileSystemElement.addAction(actionFileNew)
+        
+        # New Directory
+        actionDirNew = QAction(_("&Directory"), self)
+        actionDirNew.setObjectName("actionDirNew")
+        actionDirNew.triggered.connect(self.newDirectory)
+        self.menuNewFileSystemElement.addAction(actionDirNew)
+        
+    #======================================================
+    # Menu Actions
+    #======================================================
+    def pathToClipboard(self):
         paths = map(self.model().filePath, self.selectedIndexes())
         if len(paths) == 1:
             QApplication.clipboard().setText(paths[0])
-            
     
+    def pathRename(self):
+        pass
+    
+    def pathDelete(self):
+        curpath = self.current_selected_path
+        self.application.fileManager.deletePath(curpath)
+
+    def pathOpen(self):
+        pass
+        
+    def pathRefresh(self):
+        self.model().refresh()
+        
+    def pathProperties(self):
+        pass
+    
+    def pathSetAsRoot(self):
+        index_list = self.selectedIndexes()
+        if len(index_list) == 1:
+            index = index_list[0]
+            self.setRootIndex(index)
+
+    def newFile(self):
+        pass
+    
+    def newDirectory(self):
+        curpath = self.current_selected_path
+        dir = self.application.fileManager.createDirectory(curpath)
+        print dir
+        
+    #======================================================
+    # Mouse events
+    #======================================================
+    # Trigger correct menu for path
+    def mouseReleaseEvent(self, event):
+        QtGui.QTreeView.mouseReleaseEvent(self, event)
+        if event.button() == Qt.RightButton:
+            index = self.indexAt(event.pos())
+            data = self.model().filePath(index)
+            if os.path.isfile(data):
+                self.menuFile.popup(event.globalPos())
+            elif os.path.isdir(data):
+                self.menuDirectory.popup(event.globalPos())
+            else:
+                self.defaultMenu.popup(event.globalPos())
+
     def mouseDoubleClickEvent(self, event):
         if event.button() != Qt.LeftButton:
             return
-        QTreeView.mouseDoubleClickEvent(self, event)
+        QtGui.QTreeView.mouseDoubleClickEvent(self, event)
         
         index = self.indexAt(event.pos())
-        path = unicode(self.model().filePath(index))
-        print path
+        path = self.model().filePath(index)
         if os.path.isfile(path):
-            self.mainWindow.openFile(path)
-            
+            self.mainWindow.openFile(QtCore.QFileInfo(path))
         if os.path.isdir(path):
             if self.model().hasChildren(index):
                 self.setRootIndex(index)
 
-        
+    def focusEditorPath(self, editor):
+        path = editor.fileInfo.absoluteFilePath()
+        index = self.model().index(path)
+        self.setCurrentIndex(index)
+    
     def goUp(self):
-        current_top = unicode(self.model().filePath(self.rootIndex()))
+        current_top = self.model().filePath(self.rootIndex())
         #self.tree.setRootIndex(self.tree.model().index(QDir.currentPath()))
         upper = abspath(join(current_top, '..'))
         
         if upper != current_top:
             self.setRootIndex(self.model().index(upper))
     
-    def on_actionSetAsRoot_triggered(self):
-        index_list = self.selectedIndexes()
-        if len(index_list) == 1:
-            index = index_list[0]
-            self.setRootIndex(index)
-    
-    
-    
-    def mouseReleaseEvent(self, event):
-        QTreeView.mouseReleaseEvent(self, event)
-        if event.button() == Qt.RightButton:
-            index = self.indexAt(event.pos())
-            data = unicode(self.model().filePath(index))
-            if os.path.isfile(data):
-                self.menuFile.popup(event.globalPos())
-            elif os.path.isdir(data):
-                self.menuDir.popup(event.globalPos())
-            else:
-                self.defaultMenu.popup(event.globalPos())
-    
-
     @property
     def current_selected_path(self):
         index_list = self.selectedIndexes()
@@ -191,61 +196,4 @@ class FSTree(QTreeView, PMXObject):
             index = index_list[0]
         else:
             index = self.rootIndex()
-        return unicode(self.model().filePath(index))
-    
-    def on_actionCopyPathToClipboard_triggered(self):
-        index_list = self.selectedIndexes()
-        if len(index_list) == 1:
-            index = index_list[0]
-            #QClipboard.setText(self.model().data(index))
-            qApp.instance().clipboard().setText(self.model().filePath(index))
-    
-    
-    @pyqtSignature('')
-    def on_actionDirNew_triggered(self):
-        from prymatex.utils.i18n import ugettext as _
-        
-        pth = self.current_selected_path
-        base = isdir(pth) and pth or dirname(pth)
-        
-        
-        newdir_name, ok = QInputDialog.getText(self, _("New directoy name"),
-                             _("Please enter the new directoy name in < /br>%s:", base))
-        print newdir_name, ok
-    
-    @pyqtSignature('')
-    def on_actionFileNew_triggered(self):
-        print ("New file")
-    
-    @pyqtSignature('')
-    def on_actionRefresh_triggered(self):
-        self.model().refresh()
-        print "Refresh"
-    
-    @pyqtSignature('')
-    def on_actionDelete_triggered(self):
-        curpath = abspath(self.current_selected_path)
-        filename = curpath.split(os.sep)[-1]
-#        if isfile(filename):
-#            file = basename(filename)
-#        else:
-#            filename = file.split(os.sep)[-1]
-            
-        resp = QMessageBox.question(self, _("Deletion Confirmation"), 
-                             _("Are you sure you want to delete <b>%s</b>?", 
-                               filename),
-                               QMessageBox.Ok | QMessageBox.No | QMessageBox.Cancel
-                             )
-        if resp == QMessageBox.Ok:
-            if isfile(curpath):
-                # Primero hay que cerrar el editor si hay
-                os.unlink(curpath)
-            else:
-                shutil.rmtree(curpath)
-            self.actionRefresh.trigger()
-
-    def setRootIndex(self, index):
-        path = self.model().filePath(index)
-        super(FSTree, self).setRootIndex(index)
-        self.rootChanged.emit(path)
-        
+        return self.model().filePath(index)
