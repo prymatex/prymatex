@@ -66,6 +66,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     # Setups
     #============================================================
     def setupStatusBar(self):
+        #TODO: este estado pertenece a un tipo de editor, ver como establecer la relacion
         from prymatex.gui.statusbar import PMXStatusBar
         from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
         status = PMXStatusBar(self)
@@ -116,13 +117,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.paneLogging.hide()
     
     def setupDialogs(self):
-        from prymatex.gui.filterdlg import PMXFilterDialog
         from prymatex.gui.dialogs import PMXNewFromTemplateDialog
         from prymatex.gui.support.bundleselector import PMXBundleItemSelector
         
         # Create dialogs
         self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
-        self.dialogFilter = PMXFilterDialog(self)
         self.bundleItemSelector = PMXBundleItemSelector(self)
 
     #============================================================

@@ -25,9 +25,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal()
     
-    WORD = re.compile(r'\w+', re.UNICODE)
-    PREFERENCE_CACHE = {}
-    
     #=======================================================================
     # Settings
     #=======================================================================
@@ -60,10 +57,21 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.syntaxHighlighter.rehighlight()
         self.highlightCurrentLine()
     
-    @property
-    def tabKeyBehavior(self):
-        return self.softTabs and u' ' * self.tabSize or u'\t'
+    #Selection types
+    SelectWord = QtGui.QTextCursor.WordUnderCursor #0
+    SelectLine = QtGui.QTextCursor.LineUnderCursor #1
+    SelectParagraph = QtGui.QTextCursor.BlockUnderCursor #2 este no es un paragraph pero no  importa
+    SelectAll = QtGui.QTextCursor.Document #3
+    SelectEnclosingBrackets = 4
+    SelectCurrentScope = 5
     
+    #Cache de preferencias
+    PREFERENCE_CACHE = {}
+    
+    
+    #================================================================
+    # Editor Modes
+    #================================================================
     @property
     def snippetMode(self):
         """Retorna si el editor esta en modo snippet"""
@@ -78,6 +86,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def completerMode(self):
         """Retorna si el editor esta mostrando el completer"""
         return self.completer.popup().isVisible()
+    
+    @property
+    def tabKeyBehavior(self):
+        return self.softTabs and u' ' * self.tabSize or u'\t'
     
     def __init__(self, fileInfo = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -247,6 +259,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
 
+    def select(self, selection):
+        if selection in range(4):
+            self.textCursor().select(selection)
+            
     #=======================================================================
     # QPlainTextEdit Events
     #=======================================================================

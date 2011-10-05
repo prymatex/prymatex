@@ -20,10 +20,12 @@ class MainWindowActions(object):
     def on_menuFile_aboutToShow(self):
         self.actionSave.setEnabled(self.currentEditor is not None and self.currentEditor.isModified())
         self.actionSaveAll.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
-        print "configurar menu file"
         
     def on_menuEdit_aboutToShow(self):
-        print "configurar menu edit"
+        pass
+    
+    def on_menuView_aboutToShow(self):
+        pass
     
     def _update_file_history(self):
         menu = self.actionOpenRecent.menu()
@@ -121,15 +123,18 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSelectWord_triggered(self):
-        pass
+        if self.currentEditor is not None:
+            self.currentEditor.select(0)
     
     @QtCore.pyqtSlot()
     def on_actionSelectLine_triggered(self):
-        pass
+        if self.currentEditor is not None:
+            self.currentEditor.select(1)
     
     @QtCore.pyqtSlot()
     def on_actionSelectParagraph_triggered(self):
-        pass
+        if self.currentEditor is not None:
+            self.currentEditor.select(2)
     
     @QtCore.pyqtSlot()
     def on_actionSelectEnclosingBrackets_triggered(self):
@@ -141,12 +146,17 @@ class MainWindowActions(object):
         
     @QtCore.pyqtSlot()
     def on_actionSelectAll_triggered(self):
-        pass
+        if self.currentEditor is not None:
+            self.currentEditor.select(3)
 
     @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
-        self.currentEditor.showFindWidget()
+        self.statusBar().showFind()
 
+    @QtCore.pyqtSlot()
+    def on_actionFindReplace_triggered(self):
+        self.statusBar().showFindReplace()
+        
     #============================================================
     # View Actions
     #============================================================
@@ -209,7 +219,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionFilterThroughCommand_triggered(self):
-        self.dialogFilter.exec_()
+        self.statusBar().showCommand()
 
     #============================================================
     # Navigation Actions
@@ -303,11 +313,4 @@ class MainWindowActions(object):
         now = datetime.now()
         name = "%s.%s" % (now.strftime('sshot-%Y-%m-%d-%H_%M_%S'), 'png')
         pxm.save(name, format)
-
-    #===========================================================================
-    # Dumb code :/
-    #===========================================================================
-    @QtCore.pyqtSlot()
-    def on_actionFindReplace_triggered(self):
-        print "MainWindow::replace"
-        self.currentEditor.showReplaceWidget()
+        

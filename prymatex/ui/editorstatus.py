@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Sun Oct  2 14:33:46 2011
+# Created: Tue Oct  4 19:39:29 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -155,12 +155,12 @@ class Ui_CodeEditorStatus(object):
         self.lineEditReplace = QtGui.QLineEdit(self.widgetFindReplace)
         self.lineEditReplace.setObjectName(_fromUtf8("lineEditReplace"))
         self.gridLayout.addWidget(self.lineEditReplace, 1, 2, 1, 1)
-        self.pushButtonReplacePrevious = QtGui.QPushButton(self.widgetFindReplace)
-        self.pushButtonReplacePrevious.setObjectName(_fromUtf8("pushButtonReplacePrevious"))
-        self.gridLayout.addWidget(self.pushButtonReplacePrevious, 1, 4, 1, 1)
-        self.pushButtonReplaceNext = QtGui.QPushButton(self.widgetFindReplace)
-        self.pushButtonReplaceNext.setObjectName(_fromUtf8("pushButtonReplaceNext"))
-        self.gridLayout.addWidget(self.pushButtonReplaceNext, 1, 5, 1, 1)
+        self.pushButtonReplace = QtGui.QPushButton(self.widgetFindReplace)
+        self.pushButtonReplace.setObjectName(_fromUtf8("pushButtonReplace"))
+        self.gridLayout.addWidget(self.pushButtonReplace, 1, 4, 1, 1)
+        self.pushButtonReplaceAll = QtGui.QPushButton(self.widgetFindReplace)
+        self.pushButtonReplaceAll.setObjectName(_fromUtf8("pushButtonReplaceAll"))
+        self.gridLayout.addWidget(self.pushButtonReplaceAll, 1, 5, 1, 1)
         self.pushButtonFindPrevious = QtGui.QPushButton(self.widgetFindReplace)
         self.pushButtonFindPrevious.setIcon(icon2)
         self.pushButtonFindPrevious.setObjectName(_fromUtf8("pushButtonFindPrevious"))
@@ -208,9 +208,9 @@ class Ui_CodeEditorStatus(object):
         self.checkBoxIFindCaseSensitively.setText(_('Case Sensitively'))
         self.labelFind.setText(_('Find:'))
         self.labelReplace.setText(_('Replace:'))
-        self.pushButtonReplacePrevious.setToolTip(_('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Replace &amp; Find Previous</p></body></html>'))
-        self.pushButtonReplacePrevious.setText(_('Replace'))
-        self.pushButtonReplaceNext.setText(_('Replace &All'))
+        self.pushButtonReplace.setToolTip(_('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Replace &amp; Find Previous</p></body></html>'))
+        self.pushButtonReplace.setText(_('Replace'))
+        self.pushButtonReplaceAll.setText(_('Replace &All'))
         self.pushButtonFindPrevious.setText(_('Previous'))
         self.pushButtonFindNext.setToolTip(_('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:\'Nimbus Mono L\'; font-size:8pt; font-weight:600; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Find Previous</p></body></html>'))
         self.pushButtonFindNext.setText(_('Next'))

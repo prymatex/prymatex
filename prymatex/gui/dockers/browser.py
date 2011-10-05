@@ -177,7 +177,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserPane, PMXObject):
         
         self.bundleItem = None
         self.configure()
-        
+    
     def prepare_JavaScript(self, ready):
         if not ready:
             return

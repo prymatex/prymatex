@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Thu Sep  1 18:16:18 2011
+# Created: Tue Oct  4 21:03:50 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -122,6 +122,7 @@ class Ui_FileSystemDock(object):
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.tree = FSTree(self.pageFSTree)
         self.tree.setObjectName(_fromUtf8("tree"))
+        self.tree.header().setVisible(False)
         self.verticalLayout_2.addWidget(self.tree)
         self.stackedWidget.addWidget(self.pageFSTree)
         self.pageBookmarks = QtGui.QWidget()
@@ -137,7 +138,7 @@ class Ui_FileSystemDock(object):
         FileSystemDock.setWidget(self.dockWidgetContents)
 
         self.retranslateUi(FileSystemDock)
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
 
     def retranslateUi(self, FileSystemDock):

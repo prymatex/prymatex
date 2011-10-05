@@ -162,6 +162,7 @@
     <addaction name="menuSelect"/>
     <addaction name="separator"/>
     <addaction name="actionFind"/>
+    <addaction name="actionFindReplace"/>
    </widget>
    <widget class="QMenu" name="menuBundles">
     <property name="title">
@@ -682,6 +683,11 @@
    </property>
    <property name="text">
     <string>Show Status</string>
+   </property>
+  </action>
+  <action name="actionFindReplace">
+   <property name="text">
+    <string>Replace</string>
    </property>
   </action>
  </widget>

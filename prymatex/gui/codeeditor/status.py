@@ -3,19 +3,25 @@ from prymatex.core.base import PMXObject
 from prymatex.ui.editorstatus import Ui_CodeEditorStatus
 
 class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
-
+    FIND_STYLE_NO_MATCH = 'background-color: red; color: #fff;'
+    FIND_STYLE_MATCH = 'background-color: #dea;'
+    FIND_STYLE_NORMAL = ''
+    
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
         self.editors = []
         self.currentEditor = None
         
         self.setupUi(self)
-        #self.widgetGoToLine.setVisible(False)
-        #self.widgetFindReplace.setVisible(False)
-        #self.widgetCommand.setVisible(False)
+        self.widgetGoToLine.setVisible(False)
+        self.widgetFindReplace.setVisible(False)
+        self.widgetCommand.setVisible(False)
         self.setupWidgetStatus()
         self.setupWidgetCommand()
         self.setupWidgetFindReplace()
+    
+    def hideAllWidgets(self):
+        map(lambda widget: widget.setVisible(False), [self.widgetGoToLine, self.widgetFindReplace, self.widgetCommand, self.widgetIFind])
     
     #============================================================
     # Setup Widgets
@@ -99,6 +105,10 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         output = self.comboBoxOutput.itemData(self.comboBoxOutput.currentIndex())
         self.currentEditor.executeCommand(command, input, output)
     
+    def showCommand(self):
+        self.hideAllWidgets()
+        self.widgetCommand.setVisible(True)
+    
     #============================================================
     # AutoConnect GoToLine widget signals
     #============================================================
@@ -110,6 +120,10 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def on_spinBoxGoToLine_valueChanged(self, lineNumber):
         self.currentEditor.goToLine(lineNumber)
 
+    def showGoToLine(self):
+        self.hideAllWidgets()
+        self.widgetGoToLine.setVisible(True)
+        
     #============================================================
     # FindReplace widget
     #============================================================
@@ -134,6 +148,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         match, flags = self.getFindMatchAndFlags()
         replace = self.lineEditReplace.text()
         self.currentEditor.replaceMatch(match, replace, flags)
+        self.currentEditor.findMatch(match, flags)
     
     @QtCore.pyqtSlot()
     def on_pushButtonReplaceAll_pressed(self):
@@ -155,6 +170,10 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
             match = QtCore.QRegExp(QtCore.QRegExp.escape(match))
         return match, flags
     
+    def showFindReplace(self):
+        self.hideAllWidgets()
+        self.widgetFindReplace.setVisible(True)
+        
     #============================================================
     # IFind widget
     #============================================================
@@ -165,8 +184,14 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     
     @QtCore.pyqtSlot(str)
     def on_lineEditIFind_textChanged(self, text):
-        _, flags = self.getIFindMatchAndFlags()
-        self.currentEditor.findMatch(text, flags)
+        if text:
+            _, flags = self.getIFindMatchAndFlags()
+            if self.currentEditor.findMatch(text, flags):
+                self.lineEditIFind.setStyleSheet(self.FIND_STYLE_MATCH)
+            else:
+                self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NO_MATCH)
+        else:
+            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NORMAL)
     
     @QtCore.pyqtSlot()
     def on_pushButtonIFindNext_pressed(self):
@@ -182,7 +207,10 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     @QtCore.pyqtSlot(int)
     def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
         match, flags = self.getIFindMatchAndFlags()
-        self.currentEditor.findMatch(match, flags)
+        if self.currentEditor.findMatch(text, flags):
+            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_MATCH)
+        else:
+            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NO_MATCH)
     
     def getIFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
@@ -190,6 +218,10 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
             flags |= QtGui.QTextDocument.FindCaseSensitively
         return self.lineEditIFind.text(), flags
     
+    def showFind(self):
+        self.hideAllWidgets()
+        self.widgetIFind.setVisible(True)
+        
     #============================================================
     # Control de eventos
     #============================================================
@@ -204,11 +236,12 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         editor.cursorPositionChanged.connect(self.updateCursorPosition)
         editor.syntaxChanged.connect(self.updateSyntax)
         
-    def setEditor(self, editor):
+    def setCurrentEditor(self, editor):
         assert editor in self.editors, "Editor not is in editors"
         self.updateCursorPosition(editor)
         self.updateSyntax(editor)
         self.currentEditor = editor
+        self.hideAllWidgets()
     
     def addEditor(self, editor):
         assert editor not in self.editors, "Editor is in editors"

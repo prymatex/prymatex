@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Sat Oct  1 11:15:32 2011
+# Created: Tue Oct  4 21:00:17 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -243,6 +243,8 @@ class Ui_MainWindow(object):
         self.actionShowStatus = QtGui.QAction(MainWindow)
         self.actionShowStatus.setCheckable(True)
         self.actionShowStatus.setObjectName(_fromUtf8("actionShowStatus"))
+        self.actionFindReplace = QtGui.QAction(MainWindow)
+        self.actionFindReplace.setObjectName(_fromUtf8("actionFindReplace"))
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionNewFromTemplate)
         self.menuFile.addAction(self.actionOpen)
@@ -312,6 +314,7 @@ class Ui_MainWindow(object):
         self.menuEdit.addAction(self.menuSelect.menuAction())
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionFind)
+        self.menuEdit.addAction(self.actionFindReplace)
         self.menuBundles.addAction(self.actionShowBundleEditor)
         self.menuBundles.addAction(self.actionSelectBundleItem)
         self.menuBundles.addSeparator()
@@ -438,6 +441,7 @@ class Ui_MainWindow(object):
         self.actionOpenRecent.setText(_('Open Recent'))
         self.actionCloseAll.setText(_('Close All'))
         self.actionShowStatus.setText(_('Show Status'))
+        self.actionFindReplace.setText(_('Replace'))
 
 from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc
