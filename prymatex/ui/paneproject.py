@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/paneproject.ui'
+# Form implementation generated from reading ui file 'resources\ui\paneproject.ui'
 #
-# Created: Mon Aug 29 18:12:50 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed Oct 05 09:02:11 2011
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 

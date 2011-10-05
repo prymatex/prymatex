@@ -6,18 +6,23 @@ from PyQt4.QtGui import QApplication, QPixmap, QIcon
 from PyQt4.QtCore import QMetaObject, Qt, pyqtSignature, SIGNAL, QDir, pyqtSignal
 
 import os
-import shutil
 from os.path import join, abspath, isfile, isdir, dirname
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 
-class FSTree(QtGui.QTreeView, PMXObject):
+from prymatex.gui.dockers.fstree.bookmarks import PMXBookmarkModelFactory
+
+class PMXFileSystemTreeView(QtGui.QTreeView, PMXObject):
     def __init__(self, parent = None):
         QtGui.QTreeView.__init__(self, parent)
         self.setupMenus()
-        
         self.setAnimated(False)
-        self.setIndentation(20)
+        #self.setIndentation(20)
+
+    def setModel(self, model):
+        QtGui.QTreeView.setModel(self, model)
+        self.setHeaderHidden(True)
+        self.setUniformRowHeights(False)
         self.setSortingEnabled(True)
 
     #======================================================
@@ -181,14 +186,6 @@ class FSTree(QtGui.QTreeView, PMXObject):
         index = self.model().index(path)
         self.setCurrentIndex(index)
     
-    def goUp(self):
-        current_top = self.model().filePath(self.rootIndex())
-        #self.tree.setRootIndex(self.tree.model().index(QDir.currentPath()))
-        upper = abspath(join(current_top, '..'))
-        
-        if upper != current_top:
-            self.setRootIndex(self.model().index(upper))
-    
     @property
     def current_selected_path(self):
         index_list = self.selectedIndexes()
@@ -197,3 +194,19 @@ class FSTree(QtGui.QTreeView, PMXObject):
         else:
             index = self.rootIndex()
         return self.model().filePath(index)
+        
+class PMXBookmarksListView(QtGui.QListView):
+    '''
+    Bookmarks view
+    '''
+    pathChangeRequested = QtCore.pyqtSignal(str)
+    
+    def __init__(self, parent = None):
+        QtGui.QListView.__init__(self,parent)
+        self.modelFactory = PMXBookmarkModelFactory(self)
+        self.setModel(self.modelFactory.bookmarksModel)
+        self.doubleClicked.connect(self.itemDoubleClicked)
+    
+    def itemDoubleClicked(self, index):
+        path = self.model().index(index.row(), 1).data()
+        self.pathChangeRequested.emit(path)

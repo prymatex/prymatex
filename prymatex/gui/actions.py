@@ -3,42 +3,41 @@ from PyQt4 import QtCore, QtGui
 class MainWindowActions(object):
     def setupMenu(self):
         #Recent files
-        self._update_file_history()
         self.actionFullscreen.setChecked(self.windowState() == QtCore.Qt.WindowFullScreen)
         self.actionShowStatus.setChecked(self.statusBar().isVisible())
         self.actionShowMenus.setChecked(self.menuBar().isVisible())
         
         #Bundles Menu
         self.application.supportManager.appendBundleMenuGroup(self.menuBundles)
-        
-        #Connects
-        self.application.fileManager.fileHistoryChanged.connect(self._update_file_history)
-    
+
     #============================================================
     # About To Show Menus
     #============================================================
     def on_menuFile_aboutToShow(self):
         self.actionSave.setEnabled(self.currentEditor is not None and self.currentEditor.isModified())
         self.actionSaveAll.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
+        self.menuRecentFiles.menuAction().setEnabled(bool(self.application.fileManager.fileHistory))
+        
+    def on_menuFile_aboutToShow(self):
+        self.actionSave.setEnabled(self.currentEditor is not None and self.currentEditor.isModified())
+        self.actionSaveAll.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
+    
+    def on_menuRecentFiles_aboutToShow(self):
+        self.menuRecentFiles.clear()
+        for file in self.application.fileManager.fileHistory:
+            action = QtGui.QAction(file, self)
+            receiver = lambda file = QtCore.QFileInfo(file): self.openFile(file)
+            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+            self.menuRecentFiles.addAction(action)
+        self.menuRecentFiles.addSeparator()
+        self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
+        self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         
     def on_menuEdit_aboutToShow(self):
         pass
     
     def on_menuView_aboutToShow(self):
         pass
-    
-    def _update_file_history(self):
-        menu = self.actionOpenRecent.menu()
-        if menu is None:
-            menu = QtGui.QMenu(self)
-            self.actionOpenRecent.setMenu(menu)
-        else:
-            menu.clear()
-        for file in self.application.fileManager.fileHistory:
-            action = QtGui.QAction(file, self)
-            receiver = lambda file = QtCore.QFileInfo(file): self.openFile(file)
-            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
-            menu.addAction(action)
     
     #============================================================
     # File Actions
@@ -60,6 +59,14 @@ class MainWindowActions(object):
             editor = self.openFile(file)
             self.setCurrentEditor(editor)
     
+    def on_actionOpenAllRecentFiles_triggered(self):
+        for file in self.application.fileManager.fileHistory:
+            fileInfo = QtCore.QFileInfo(file)
+            self.openFile(fileInfo)
+
+    def on_actionRemoveAllRecentFiles_triggered(self):
+        self.application.fileManager.clearFileHistory()
+
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
         self.saveEditor()

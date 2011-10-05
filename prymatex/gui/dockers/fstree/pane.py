@@ -2,15 +2,13 @@
 #-*- encoding: utf-8 -*-
 import os
 import shutil
-from os.path import *
 from PyQt4 import QtGui, QtCore
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.utils import createButton, addActionsToMenu
 from prymatex.ui.panefilesystem import Ui_FileSystemDock
-from prymatex.ui.filesystemsettings import Ui_FSSettingsDialog
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
+from prymatex.gui.dockers.fstree.proxies import PMXFileSystemProxyModel
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     #=======================================================================
@@ -21,16 +19,23 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     
     def __init__(self, parent):
         super(PMXFileSystemDock, self).__init__(parent)
-        self.dialogConfigFilters = PMXFSPaneConfigDialog(self)
         self.setupUi(self)
         
-        self.dirmodelFiles = QtGui.QFileSystemModel(self)
-        self.dirmodelFiles.setRootPath(self.application.fileManager.currentDirectory)
+        self.fileSystemModel = QtGui.QFileSystemModel(self)
+        #http://doc.qt.nokia.com/latest/qdir.html#Filter-enum
+        self.fileSystemModel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllEntries)
+        dir = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.DesktopLocation)
+        self.fileSystemModel.setRootPath(dir)
         
-        self.tree.setModel(self.dirmodelFiles)
+        self.fileSystemProxyModel = PMXFileSystemProxyModel(self)
+        self.fileSystemProxyModel.setSourceModel(self.fileSystemModel)
+        
+        self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
+        index = self.fileSystemModel.index(self.application.fileManager.currentDirectory)
+        self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
         self.setupBookmarksCombo()
         
-        self.dirmodelFiles.rootPathChanged.connect(self.treeRootPathChanged)
+        self.fileSystemModel.rootPathChanged.connect(self.treeRootPathChanged)
         self.bookmarksView.pathChangeRequested.connect(self.openBookmark)
         
         self.configure()
@@ -47,17 +52,15 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
             if not name:
                 continue
             path = os.sep.join(newPathParts[:i+1])
-            model = self.tree.model()
+            model = self.treeViewFileSystem.model()
             icon = model.fileIcon(model.index(path))
             self.comboBookmarks.addItem(icon, name, path)
         self.comboBookmarks.setCurrentIndex(self.comboBookmarks.model().rowCount()-1)
         self.comboBookmarks.setEnabled(True)
-        
 
     def openBookmark(self, path):
-        self.tree.setRootIndex(self.tree.model().index(path))
+        self.treeViewFileSystem.setRootIndex(self.treeViewFileSystem.model().index(path))
         self.comboBookmarks.setCurrentIndex(1)
-    
     
     def setupBookmarksCombo(self):
         self.comboBookmarks.insertSeparator(self.comboBookmarks.model().rowCount())
@@ -72,27 +75,32 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         
         else:
             path = self.comboBookmarks.itemData(index)
-            if self.tree.model().index(path) != self.tree.rootIndex():
+            if self.treeViewFileSystem.model().index(path) != self.treeViewFileSystem.rootIndex():
                 print "Should Change"
             #if os.path.exists(path):
-            #    self.tree.setRootIndex(self.tree.model().index(path))
+            #    self.treeViewFileSystem.setRootIndex(self.treeViewFileSystem.model().index(path))
     
     @QtCore.pyqtSignature('bool')
     def on_buttonSyncTabFile_toggled(self, sync):
         if sync:
             # Forzamos la sincronizacion
             editor = self.mainWindow.currentEditor
-            self.tree.focusWidgetPath(editor)
+            self.treeViewFileSystem.focusWidgetPath(editor)
 
     @QtCore.pyqtSignature('')
     def on_buttonUp_pressed(self):
-        #QMessageBox.information(self, "UP", "Up")
-        #self.get
-        self.tree.goUp()
-    
+        index = self.treeViewFileSystem.rootIndex()
+        sIndex = self.fileSystemProxyModel.mapToSource(index)
+        currentPath = self.fileSystemModel.filePath(sIndex)
+        newPath = os.path.abspath(os.path.join(currentPath, '..'))
+        
+        if newPath != self.fileSystemModel.rootPath():
+            index = self.fileSystemModel.index(newPath)
+            self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
+
     @QtCore.pyqtSignature('')
     def on_buttonCollapseAll_pressed(self):
-        self.tree.collapseAll()
+        self.treeViewFileSystem.collapseAll()
         #self.buttonSyncTabFile.setEnabled(False)
     
     def on_buttonFilter_pressed(self):
@@ -115,9 +123,3 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
                                                     'icon': QIcon()})
         else:
             self.debug("Not a directory %s" % path)
-    
-
-class PMXFSPaneConfigDialog(QtGui.QDialog, Ui_FSSettingsDialog):
-    def __init__(self, parent):
-        QtGui.QDialog.__init__(self, parent)
-        self.setupUi(self)

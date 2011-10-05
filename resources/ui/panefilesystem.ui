@@ -24,7 +24,7 @@
     <item>
      <layout class="QHBoxLayout" name="buttonsLayout">
       <property name="spacing">
-       <number>-1</number>
+       <number>6</number>
       </property>
       <property name="sizeConstraint">
        <enum>QLayout::SetMinimumSize</enum>
@@ -44,7 +44,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/actions/go-up.png</normaloff>:/icons/actions/go-up.png</iconset>
         </property>
         <property name="iconSize">
@@ -70,7 +70,7 @@
          <string>Go previous place</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/actions/go-previous.png</normaloff>:/icons/actions/go-previous.png</iconset>
         </property>
         <property name="iconSize">
@@ -99,7 +99,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/actions/go-next.png</normaloff>:/icons/actions/go-next.png</iconset>
         </property>
         <property name="flat">
@@ -119,7 +119,7 @@
          <string>Filter settings</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/actions/view-filter.png</normaloff>:/icons/actions/view-filter.png</iconset>
         </property>
         <property name="iconSize">
@@ -145,7 +145,7 @@
          <string>Sync folder with current editor file path</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
         </property>
         <property name="iconSize">
@@ -174,7 +174,7 @@
          <string>Collapse Folder</string>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/actions/debug-step-into.png</normaloff>:/icons/actions/debug-step-into.png</iconset>
         </property>
         <property name="iconSize">
@@ -203,7 +203,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset>
           <normaloff>:/icons/actions/help-hint.png</normaloff>:/icons/actions/help-hint.png</iconset>
         </property>
         <property name="checkable">
@@ -248,7 +248,7 @@
         <string>Bookmarks</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
+        <iconset>
          <normaloff>:/icons/emblems/emblem-favorite.png</normaloff>:/icons/emblems/emblem-favorite.png</iconset>
        </property>
       </item>
@@ -257,7 +257,7 @@
         <string>File System</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
+        <iconset>
          <normaloff>:/icons/actions/document-open.png</normaloff>:/icons/actions/document-open.png</iconset>
        </property>
       </item>
@@ -271,13 +271,13 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="pageFSTree">
+      <widget class="QWidget" name="pageFileSystemTree">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="margin">
          <number>0</number>
         </property>
         <item>
-         <widget class="FSTree" name="tree">
+         <widget class="PMXFileSystemTreeView" name="treeViewFileSystem">
           <attribute name="headerVisible">
            <bool>false</bool>
           </attribute>
@@ -302,14 +302,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>FSTree</class>
+   <class>PMXFileSystemTreeView</class>
    <extends>QTreeView</extends>
-   <header>prymatex.gui.dockers.fstree.fstree</header>
+   <header>prymatex.gui.dockers.fstree.views</header>
   </customwidget>
   <customwidget>
    <class>PMXBookmarksListView</class>
    <extends>QListWidget</extends>
-   <header>prymatex.gui.dockers.fstree.bookmarks</header>
+   <header>prymatex.gui.dockers.fstree.views</header>
   </customwidget>
  </customwidgets>
  <resources>

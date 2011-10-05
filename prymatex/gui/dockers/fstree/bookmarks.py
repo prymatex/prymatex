@@ -78,34 +78,3 @@ class PMXBookmarksKDE4Model(PMXBookmarksBaseModel):
             
             title = bookmark.find('title').text
             self.addItem(title, path, icon)
-    
-
-class PMXBookmarksListView(QListView):
-    '''
-    Bookmarks view
-    '''
-    pathChangeRequested = QtCore.pyqtSignal(str)
-    
-    def __init__(self, parent = None):
-        super(PMXBookmarksListView, self).__init__(parent)
-        self.modelFactory = PMXBookmarkModelFactory(self)
-        self.setModel(self.modelFactory.bookmarksModel)
-        self.doubleClicked.connect(self.itemDoubleClicked)
-    
-    def itemDoubleClicked(self, index):
-        path = self.model().index(index.row(), 1).data()
-        self.pathChangeRequested.emit(path)
-        
-        
-if __name__ == "__main__":
-    from PyQt4.QtGui import QApplication
-    import sys
-    app = QApplication(sys.argv)
-    def test_signal(path):
-        print "You clicked ", path
-    win = PMXBookmarksListView()
-    win.pathChangeRequested.connect(test_signal)
-    win.show()
-    
-    sys.exit(app.exec_())
-    

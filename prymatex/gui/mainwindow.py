@@ -141,6 +141,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.splitTabWidget.removeTab(editor)
 
     def findEditorForFile(self, fileInfo):
+        # Find open editor for fileInfo
         for editor in self.splitTabWidget.getAllWidgets():
             if editor.fileInfo == fileInfo:
                 return editor
@@ -160,16 +161,21 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.splitTabWidget.setCurrentWidget(editor)
         self.currentEditor = editor
 
-    def openFile(self, fileInfo, cursorPosition = (0,0)):
+    def openFile(self, fileInfo, cursorPosition = (0,0), focus = True):
         editor = self.findEditorForFile(fileInfo)
         if editor is None:
-            editor = self.application.getEditorInstance(fileInfo, self)
+            if self.currentEditor.isNew() and not self.currentEditor.isModified():
+                editor = self.currentEditor
+            else:
+                editor = self.application.getEditorInstance(fileInfo, self)
+                self.addEditor(editor)
             content = self.application.fileManager.openFile(fileInfo)
             editor.setPlainText(content)
             editor.setFileInfo(fileInfo)
-            self.addEditor(editor)
         else:
             editor.setCursorPosition(cursorPosition)
+        if focus:
+            self.setCurrentEditor(editor)
         return editor
     
     def saveEditor(self, editor = None, saveAs = False):

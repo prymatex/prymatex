@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
+# Form implementation generated from reading ui file 'resources\ui\panefilesystem.ui'
 #
-# Created: Tue Oct  4 21:03:50 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed Oct 05 11:30:40 2011
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +26,7 @@ class Ui_FileSystemDock(object):
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.buttonsLayout = QtGui.QHBoxLayout()
-        self.buttonsLayout.setSpacing(-1)
+        self.buttonsLayout.setSpacing(6)
         self.buttonsLayout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
         self.buttonsLayout.setObjectName(_fromUtf8("buttonsLayout"))
         self.buttonUp = QtGui.QPushButton(self.dockWidgetContents)
@@ -115,19 +115,21 @@ class Ui_FileSystemDock(object):
         self.stackedWidget = QtGui.QStackedWidget(self.dockWidgetContents)
         self.stackedWidget.setLineWidth(0)
         self.stackedWidget.setObjectName(_fromUtf8("stackedWidget"))
-        self.pageFSTree = QtGui.QWidget()
-        self.pageFSTree.setObjectName(_fromUtf8("pageFSTree"))
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.pageFSTree)
+        self.pageFileSystemTree = QtGui.QWidget(self.stackedWidget)
+        self.pageFileSystemTree.setObjectName(_fromUtf8("pageFileSystemTree"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.pageFileSystemTree)
+        self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.tree = FSTree(self.pageFSTree)
-        self.tree.setObjectName(_fromUtf8("tree"))
-        self.tree.header().setVisible(False)
-        self.verticalLayout_2.addWidget(self.tree)
-        self.stackedWidget.addWidget(self.pageFSTree)
-        self.pageBookmarks = QtGui.QWidget()
+        self.treeViewFileSystem = PMXFileSystemTreeView(self.pageFileSystemTree)
+        self.treeViewFileSystem.setObjectName(_fromUtf8("treeViewFileSystem"))
+        self.treeViewFileSystem.header().setVisible(False)
+        self.verticalLayout_2.addWidget(self.treeViewFileSystem)
+        self.stackedWidget.addWidget(self.pageFileSystemTree)
+        self.pageBookmarks = QtGui.QWidget(self.stackedWidget)
         self.pageBookmarks.setObjectName(_fromUtf8("pageBookmarks"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.pageBookmarks)
+        self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.bookmarksView = PMXBookmarksListView(self.pageBookmarks)
@@ -154,6 +156,5 @@ class Ui_FileSystemDock(object):
         self.comboBookmarks.setItemText(0, _('Bookmarks'))
         self.comboBookmarks.setItemText(1, _('File System'))
 
-from prymatex.gui.dockers.fstree.bookmarks import PMXBookmarksListView
-from prymatex.gui.dockers.fstree.fstree import FSTree
+from prymatex.gui.dockers.fstree.views import PMXFileSystemTreeView, PMXBookmarksListView
 from prymatex import resources_rc

@@ -14,7 +14,6 @@ class PMXFileManager(PMXObject):
     # Signals
     ##########################################################
     fileOpened = QtCore.pyqtSignal()
-    fileHistoryChanged = QtCore.pyqtSignal()
     
     ##########################################################
     # Settings
@@ -34,12 +33,16 @@ class PMXFileManager(PMXObject):
 
     def _add_file_history(self, fileInfo):
         path = fileInfo.absoluteFilePath()
-        if path not in self.fileHistory:
-            self.fileHistory.insert(0, path)
+        if path in self.fileHistory:
+            self.fileHistory.remove(path)
+        self.fileHistory.insert(0, path)
         if len(self.fileHistory) > self.fileHistoryLength:
             self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
         self.settings.setValue("fileHistory", self.fileHistory)
-        self.fileHistoryChanged.emit()
+    
+    def clearFileHistory(self):
+        self.fileHistory = []
+        self.settings.setValue("fileHistory", self.fileHistory)
     
     def createDirectory(self, base, name = None):
         """Create a new directory."""

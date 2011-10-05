@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
+# Form implementation generated from reading ui file 'resources\ui\mainwindow.ui'
 #
-# Created: Tue Oct  4 21:00:17 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed Oct 05 09:42:09 2011
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -33,10 +33,12 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.splitTabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 18))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
+        self.menuRecentFiles = QtGui.QMenu(self.menuFile)
+        self.menuRecentFiles.setObjectName(_fromUtf8("menuRecentFiles"))
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setObjectName(_fromUtf8("menuView"))
         self.menuGutter = QtGui.QMenu(self.menuView)
@@ -233,11 +235,6 @@ class Ui_MainWindow(object):
         self.actionSelectCurrentScope.setObjectName(_fromUtf8("actionSelectCurrentScope"))
         self.actionSelectAll = QtGui.QAction(MainWindow)
         self.actionSelectAll.setObjectName(_fromUtf8("actionSelectAll"))
-        self.actionOpenRecent = QtGui.QAction(MainWindow)
-        icon17 = QtGui.QIcon()
-        icon17.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open-recent.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionOpenRecent.setIcon(icon17)
-        self.actionOpenRecent.setObjectName(_fromUtf8("actionOpenRecent"))
         self.actionCloseAll = QtGui.QAction(MainWindow)
         self.actionCloseAll.setObjectName(_fromUtf8("actionCloseAll"))
         self.actionShowStatus = QtGui.QAction(MainWindow)
@@ -245,10 +242,16 @@ class Ui_MainWindow(object):
         self.actionShowStatus.setObjectName(_fromUtf8("actionShowStatus"))
         self.actionFindReplace = QtGui.QAction(MainWindow)
         self.actionFindReplace.setObjectName(_fromUtf8("actionFindReplace"))
+        self.actionOpenAllRecentFiles = QtGui.QAction(MainWindow)
+        self.actionOpenAllRecentFiles.setObjectName(_fromUtf8("actionOpenAllRecentFiles"))
+        self.actionRemoveAllRecentFiles = QtGui.QAction(MainWindow)
+        self.actionRemoveAllRecentFiles.setObjectName(_fromUtf8("actionRemoveAllRecentFiles"))
+        self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
+        self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionNewFromTemplate)
         self.menuFile.addAction(self.actionOpen)
-        self.menuFile.addAction(self.actionOpenRecent)
+        self.menuFile.addAction(self.menuRecentFiles.menuAction())
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSaveAs)
@@ -339,6 +342,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_('Prymatex Text Editor'))
         self.menuFile.setTitle(_('&File'))
+        self.menuRecentFiles.setTitle(_('Recent Files'))
         self.menuView.setTitle(_('&View'))
         self.menuGutter.setTitle(_('Gutter'))
         self.menuFont.setTitle(_('Font'))
@@ -438,10 +442,11 @@ class Ui_MainWindow(object):
         self.actionSelectEnclosingBrackets.setText(_('Enclosing &Brackets'))
         self.actionSelectCurrentScope.setText(_('Current &Scope'))
         self.actionSelectAll.setText(_('&All'))
-        self.actionOpenRecent.setText(_('Open Recent'))
         self.actionCloseAll.setText(_('Close All'))
         self.actionShowStatus.setText(_('Show Status'))
         self.actionFindReplace.setText(_('Replace'))
+        self.actionOpenAllRecentFiles.setText(_('Open All Recent Files'))
+        self.actionRemoveAllRecentFiles.setText(_('Remove All Recent Files'))
 
 from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc
