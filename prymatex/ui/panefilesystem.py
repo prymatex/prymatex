@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources\ui\panefilesystem.ui'
+# Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Wed Oct 05 11:30:40 2011
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Wed Oct  5 17:39:16 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -115,10 +115,9 @@ class Ui_FileSystemDock(object):
         self.stackedWidget = QtGui.QStackedWidget(self.dockWidgetContents)
         self.stackedWidget.setLineWidth(0)
         self.stackedWidget.setObjectName(_fromUtf8("stackedWidget"))
-        self.pageFileSystemTree = QtGui.QWidget(self.stackedWidget)
+        self.pageFileSystemTree = QtGui.QWidget()
         self.pageFileSystemTree.setObjectName(_fromUtf8("pageFileSystemTree"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.pageFileSystemTree)
-        self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.treeViewFileSystem = PMXFileSystemTreeView(self.pageFileSystemTree)
@@ -126,10 +125,9 @@ class Ui_FileSystemDock(object):
         self.treeViewFileSystem.header().setVisible(False)
         self.verticalLayout_2.addWidget(self.treeViewFileSystem)
         self.stackedWidget.addWidget(self.pageFileSystemTree)
-        self.pageBookmarks = QtGui.QWidget(self.stackedWidget)
+        self.pageBookmarks = QtGui.QWidget()
         self.pageBookmarks.setObjectName(_fromUtf8("pageBookmarks"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.pageBookmarks)
-        self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.bookmarksView = PMXBookmarksListView(self.pageBookmarks)

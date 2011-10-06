@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -46,6 +46,10 @@
     <widget class="QMenu" name="menuRecentFiles">
      <property name="title">
       <string>Recent Files</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/icons/actions/document-open-recent.png</normaloff>:/icons/actions/document-open-recent.png</iconset>
      </property>
      <addaction name="actionOpenAllRecentFiles"/>
      <addaction name="actionRemoveAllRecentFiles"/>
@@ -152,6 +156,10 @@
      <property name="title">
       <string>Select</string>
      </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/icons/actions/edit-select-all.png</normaloff>:/icons/actions/edit-select-all.png</iconset>
+     </property>
      <addaction name="actionSelectWord"/>
      <addaction name="actionSelectLine"/>
      <addaction name="actionSelectParagraph"/>
@@ -201,7 +209,7 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
    </property>
    <property name="text">
@@ -213,7 +221,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-open.png</normaloff>:/icons/actions/document-open.png</iconset>
    </property>
    <property name="text">
@@ -225,7 +233,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-save.png</normaloff>:/icons/actions/document-save.png</iconset>
    </property>
    <property name="text">
@@ -237,7 +245,7 @@
   </action>
   <action name="actionSaveAs">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-save-as.png</normaloff>:/icons/actions/document-save-as.png</iconset>
    </property>
    <property name="text">
@@ -249,7 +257,7 @@
   </action>
   <action name="actionSaveAll">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-save-all.png</normaloff>:/icons/actions/document-save-all.png</iconset>
    </property>
    <property name="text">
@@ -261,8 +269,8 @@
   </action>
   <action name="actionClose">
    <property name="icon">
-    <iconset>
-     <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
    </property>
    <property name="text">
     <string>Close</string>
@@ -281,7 +289,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/application-exit.png</normaloff>:/icons/actions/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -293,8 +301,8 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset>
-     <normaloff>:/actions/resources/actions/edit-undo.png</normaloff>:/actions/resources/actions/edit-undo.png</iconset>
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/edit-undo.png</normaloff>:/icons/actions/edit-undo.png</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -305,8 +313,8 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset>
-     <normaloff>:/actions/resources/actions/edit-redo.png</normaloff>:/actions/resources/actions/edit-redo.png</iconset>
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/edit-redo.png</normaloff>:/icons/actions/edit-redo.png</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -317,7 +325,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
@@ -329,7 +337,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
@@ -341,7 +349,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
@@ -352,6 +360,10 @@
    </property>
   </action>
   <action name="actionFind">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/edit-find.png</normaloff>:/icons/actions/edit-find.png</iconset>
+   </property>
    <property name="text">
     <string>Find</string>
    </property>
@@ -361,7 +373,7 @@
   </action>
   <action name="actionSettings">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
    </property>
    <property name="text">
@@ -601,7 +613,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
    </property>
    <property name="text">

@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/edit-undo.png</file>
+    <file>actions/edit-redo.png</file>
+    <file>actions/view-fullscreen.png</file>
     <file>actions/document-open.png</file>
     <file>emblems/emblem-encrypted-locked.png</file>
     <file>actions/document-new.png</file>
@@ -7,26 +10,6 @@
     <file>actions/document-open-recent.png</file>
     <file>actions/document-open-remote.png</file>
     <file>actions/document-open.png</file>
-    <file>emblems/emblem-encrypted-unlocked.png</file>
-    <file>emblems/emblem-favorite.png</file>
-    <file>emblems/emblem-important.png</file>
-    <file>emblems/emblem-locked.png</file>
-    <file>emblems/emblem-mounted.png</file>
-    <file>emblems/emblem-new.png</file>
-    <file>emblems/emblem-symbolic-link.png</file>
-    <file>emblems/emblem-unlocked.png</file>
-    <file>emblems/emblem-unmounted.png</file>
-    <file>emblems/image-has-versions-open.png</file>
-    <file>emblems/image-has-versions.png</file>
-    <file>emblems/image-stack-open.png</file>
-    <file>emblems/image-stack.png</file>
-    <file>emblems/vcs-added.png</file>
-    <file>emblems/vcs-conflicting.png</file>
-    <file>emblems/vcs-locally-modified-unstaged.png</file>
-    <file>emblems/vcs-locally-modified.png</file>
-    <file>emblems/vcs-normal.png</file>
-    <file>emblems/vcs-removed.png</file>
-    <file>emblems/vcs-update-required.png</file>
     <file>actions/edit-rename.png</file>
     <file>actions/document-open.png</file>
     <file>actions/document-properties.png</file>
@@ -49,6 +32,8 @@
     <file>actions/go-top.png</file>
     <file>actions/go-up.png</file>
     <file>actions/go-previous.png</file>
+    <file>actions/edit-select-all.png</file>
+    <file>actions/edit-clear.png</file>
     <file>actions/go-next-view.png</file>
     <file>actions/configure.png</file>
     <file>actions/document-close.png</file>

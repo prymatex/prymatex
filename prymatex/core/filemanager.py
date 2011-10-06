@@ -57,16 +57,11 @@ class PMXFileManager(PMXObject):
         return QtCore.QFileInfo(path)
     
     def deletePath(self, path):
-        ok = QtGui.QMessageBox.question(self, "Deletion Confirmation", "Are you sure you want to delete <b>%s</b>?" % path,
-                QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
-        if resp == QtGui.QMessageBox.Ok:
-            if os.path.isfile(path):
-                # Primero hay que cerrar el editor si hay
-                os.unlink(path)
-            else:
-                shutil.rmtree(path)
-            return True
-        return False
+        if os.path.isfile(path):
+            # Mandar señal para cerrar editores
+            os.unlink(path)
+        else:
+            shutil.rmtree(path)
     
     def openFile(self, fileInfo):
         """Open and read a file, return the content."""
