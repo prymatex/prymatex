@@ -1,6 +1,5 @@
-'''
-This module is inspired in QtCretor FileManager instance
-'''
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
 
 import os, codecs
 from PyQt4 import QtCore, QtGui
