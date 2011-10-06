@@ -70,19 +70,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     
     
     #================================================================
-    # Editor Modes
+    # Editor more Modes
     #================================================================
-    @property
     def snippetMode(self):
         """Retorna si el editor esta en modo snippet"""
         return self.snippetProcessor.hasSnippet
     
-    @property
     def multiEditMode(self):
         """Retorna si el editor esta en modo multiedit"""
         return self.cursors.hasCursors
     
-    @property
     def completerMode(self):
         """Retorna si el editor esta mostrando el completer"""
         return self.completer.popup().isVisible()
@@ -243,7 +240,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         
     def highlightCurrentLine(self):
         extraSelections = []
-        if self.multiEditMode:
+        if self.multiEditMode():
             for cursor in self.cursors:
                 if cursor.hasSelection():
                     selection = QTextEdit.ExtraSelection()
@@ -292,7 +289,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                     resources.IMAGES["foldingellipsis"])
             
             block = block.next()
-        if self.multiEditMode:
+        if self.multiEditMode():
             for cursor in self.cursors:
                 rec = self.cursorRect(cursor)
                 cursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
@@ -383,7 +380,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         '''
         This method is called whenever a key is pressed. The key code is stored in event.key()
         '''
-        if self.completerMode:
+        if self.completerMode():
             if event.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Tab, Qt.Key_Escape, Qt.Key_Backtab):
                 event.ignore()
                 self.completer.popup().hide()
@@ -393,12 +390,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         
         #Si lo toma un bundle item retorno
         if self.keyPressBundleItem(event):
-            if self.multiEditMode:
+            if self.multiEditMode():
                 self.cursors.removeAll()
             return
-        elif self.snippetMode and self.snippetProcessor.keyPressEvent(event): #Modo Snippet
+        elif self.snippetMode() and self.snippetProcessor.keyPressEvent(event): #Modo Snippet
             return
-        elif self.multiEditMode and self.cursors.keyPressEvent(event): #Modo MultiEdit
+        elif self.multiEditMode() and self.cursors.keyPressEvent(event): #Modo MultiEdit
             return
         elif self.keyPressSmartTyping(event): #Modo Normal
             return
@@ -413,13 +410,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.backspacePressEvent(event)
         elif key == Qt.Key_Return:
             self.returnPressEvent(event)
+        elif key == Qt.Key_Insert:
+            self.setOverwriteMode(not self.overwriteMode())
         else:
             super(PMXCodeEditor, self).keyPressEvent(event)
 
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
             self.keyPressIndent(event)
-            if self.completerMode:
+            if self.completerMode():
                 completionPrefix = self.getCurrentWord()
                 self.completer.setCompletionPrefix(completionPrefix)
                 #self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))

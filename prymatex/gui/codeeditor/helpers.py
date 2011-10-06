@@ -185,6 +185,8 @@ class PMXCursorsHelper(object):
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
             pass
+        elif event.key() in [QtCore.Qt.Key_Insert]:
+            self.editor.setOverwriteMode(not self.editor.overwriteMode())
         elif event.text():
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
