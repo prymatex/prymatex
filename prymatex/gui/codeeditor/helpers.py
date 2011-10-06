@@ -38,7 +38,7 @@ class PMXCursorsHelper(object):
         for tupla in points:
             if tupla[0] == tupla[1]:
                 cursor = self.editor.cursorForPosition(QtCore.QPoint(*tupla[0]))
-                self.addCursor(cursor)
+                cursor = self.addMergeCursor(cursor)
                 #self.editor.document().markContentsDirty(cursor.position(), cursor.position())
                 continue
             #Sentido en el que queda el cursor
@@ -51,7 +51,7 @@ class PMXCursorsHelper(object):
                     rect = self.editor.cursorRect(ecursor)
                     if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
                         cursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
-                        self.addCursor(cursor)
+                        cursor = self.addMergeCursor(cursor)
                     #self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
             else: # Derecha a izquierda
                 start, end = tupla
@@ -62,7 +62,7 @@ class PMXCursorsHelper(object):
                     rect = self.editor.cursorRect(ecursor)
                     if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
                         ecursor.setPosition(cursor.position(), QtGui.QTextCursor.KeepAnchor)
-                        self.addCursor(ecursor)
+                        ecursor = self.addMergeCursor(ecursor)
                     #self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
 
         #Clean last acction
@@ -84,19 +84,59 @@ class PMXCursorsHelper(object):
         puntos.append( ( (sx, ey), (ex, ey) ) )
         return hight, width, puntos
         
-    def addCursor(self, cursor):
+    def addMergeCursor(self, cursor):
         '''
-            Solo se pueden incorporar cursores nuevos.
+            Only can add new cursors, if the cursor has selection then try to merge with others
         '''
-        new_begin, new_end = (cursor.selectionStart(), cursor.selectionEnd()) if cursor.hasSelection() else (cursor.position(), cursor.position())
-        for c in self.cursors:
-            c_begin, c_end = (c.selectionStart(), c.selectionEnd()) if c.hasSelection() else (c.position(), c.position())
-            if c_begin <= new_begin <= new_end <= c_end:
-                #Esta contenido
-                return
-        self.editor.setTextCursor(cursor)
-        self.cursors.append(cursor)
-    
+        if cursor.hasSelection():
+            newCursor = None
+            removeCursor = None
+            new_begin, new_end = cursor.selectionStart(), cursor.selectionEnd()
+            for c in self.cursors:
+                c_begin, c_end = c.selectionStart(), c.selectionEnd()
+                if c_begin <= new_begin <= new_end <= c_end:
+                    return
+                elif c_begin <= new_begin <= c_end:
+                    # Extiende por detras
+                    newCursor = QtGui.QTextCursor(self.editor.document())
+                    if c.position() > new_begin:
+                        newCursor.setPosition(c_begin)
+                        newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
+                    else:
+                        newCursor.setPosition(new_end)
+                        newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                    removeCursor = c
+                    break
+                elif c_begin <= new_end <= c_end:
+                    #Extiende por el frente
+                    newCursor = QtGui.QTextCursor(self.editor.document())
+                    if c.position() < new_end:
+                        newCursor.setPosition(c_end)
+                        newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
+                    else:
+                        newCursor.setPosition(new_begin)
+                        newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                    removeCursor = c
+                    break
+                elif new_begin <= c_begin <= c_end <= new_end:
+                    #Contiene al cursor
+                    newCursor = QtGui.QTextCursor(self.editor.document())
+                    removeCursor = c
+                    break
+            if newCursor is not None:
+                self.cursors.remove(removeCursor)
+                self.addMergeCursor(newCursor)
+            else:
+                self.editor.setTextCursor(cursor)
+                self.cursors.append(cursor)
+        else:
+            for c in self.cursors:
+                begin, end = c.selectionStart(), c.selectionEnd()
+                if begin <= cursor.position() <= end:
+                    return
+            self.editor.setTextCursor(cursor)
+            self.cursors.append(cursor)
+
     def removeAll(self):
         self.cursors = []
     
