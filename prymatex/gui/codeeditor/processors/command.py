@@ -56,7 +56,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def character(self, format = None):
         cursor = self.editor.textCursor()
-        return cursor.document().characterAt(cursor.position()).toAscii()
+        return cursor.document().characterAt(cursor.position())
         
     def scope(self, format = None):
         return self.environment['TM_SCOPE']

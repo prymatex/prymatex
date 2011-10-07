@@ -41,6 +41,8 @@ def is_env_shebang(text):
 
 def ensureShellScript(script, supportPath):
     if not has_shebang(script) or is_bash_shebang(script):
+        if sys.platform == "win32":
+            supportPath = supportPath.replace("\\",'/')
         script = BASH_SCRIPT % (supportPath, script)
     elif is_env_shebang(script):
         lines = script.splitlines()

@@ -98,21 +98,20 @@ class PMXFileManager(PMXObject):
         self.new_file_counter += 1
         return QtCore.QFileInfo(path)
     
-    def getOpenDirectory(self, fileInfo = None):
+    def getDirectory(self, fileInfo = None):
         if fileInfo is None:
             return os.path.expanduser("~") 
         return fileInfo.absoluteFilePath() if fileInfo.isDir() else os.path.dirname(fileInfo.absoluteFilePath())
         
     def getOpenFiles(self, fileInfo = None):
-        directory = self.getOpenDirectory(fileInfo)
+        directory = self.getDirectory(fileInfo)
         names = QtGui.QFileDialog.getOpenFileNames(None, "Open Files", directory)
         return map(lambda name: QtCore.QFileInfo(name), names)
     
     def getSaveFile(self, fileInfo = None, title = "Save file", filters = []):
-        if fileInfo is None:
-            fileInfo = QtCore.QFileInfo(self.currentDirectory)
+        directory = self.getDirectory(fileInfo)
         filters = ";;".join(filters)
-        name = QtGui.QFileDialog.getSaveFileName(None, title, fileInfo.absoluteFilePath(), filters)
+        name = QtGui.QFileDialog.getSaveFileName(None, title, directory, filters)
         if name:
             return QtCore.QFileInfo(name)
     

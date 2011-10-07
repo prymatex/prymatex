@@ -40,7 +40,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     def setupComboBoxLocation(self):
         self.comboBoxLocation.setModel(self.dirModel)
         self.comboBoxLocation.installEventFilter(self)
-        self.comboBoxLocation.lineEdit().setText(self.application.fileManager.getOpenDirectory())
+        self.comboBoxLocation.lineEdit().setText(self.application.fileManager.getDirectory())
     
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj == self.comboBoxLocation and event.key() == QtCore.Qt.Key_Return:
@@ -54,7 +54,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
-        index = self.fileSystemModel.index(self.application.fileManager.getOpenDirectory())
+        index = self.fileSystemModel.index(self.application.fileManager.getDirectory())
         self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
         
         self.treeViewFileSystem.setHeaderHidden(True)
@@ -104,7 +104,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     @QtCore.pyqtSlot()
     def on_puchButtonSync_pressed(self):
         editor = self.mainWindow.currentEditor
-        path = self.application.fileManager.getOpenDirectory(editor.fileInfo)
+        path = self.application.fileManager.getDirectory(editor.fileInfo)
         sIndex = self.fileSystemModel.index(path)
         self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(sIndex))
         self.comboBoxLocation.lineEdit().setText(dir.path())
