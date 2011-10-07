@@ -54,7 +54,8 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
-        files = self.application.fileManager.getOpenFiles()
+        fileInfo = self.currentEditor.fileInfo if self.currentEditor is not None else None
+        files = self.application.fileManager.getOpenFiles(fileInfo = fileInfo)
         for file in files:
             editor = self.openFile(file)
             self.setCurrentEditor(editor)

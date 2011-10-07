@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
+# Created: Thu Oct  6 19:30:42 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -219,7 +219,6 @@ class Ui_MainWindow(object):
         self.actionSelectBundleItem.setObjectName(_fromUtf8("actionSelectBundleItem"))
         self.actionNewFromTemplate = QtGui.QAction(MainWindow)
         self.actionNewFromTemplate.setEnabled(True)
-        self.actionNewFromTemplate.setIcon(icon3)
         self.actionNewFromTemplate.setObjectName(_fromUtf8("actionNewFromTemplate"))
         self.actionShowWhitespace = QtGui.QAction(MainWindow)
         self.actionShowWhitespace.setCheckable(True)

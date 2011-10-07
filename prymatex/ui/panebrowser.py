@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panebrowser.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
+# Created: Thu Oct  6 18:55:52 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -15,10 +15,10 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_BrowserPane(object):
-    def setupUi(self, BrowserPane):
-        BrowserPane.setObjectName(_fromUtf8("BrowserPane"))
-        BrowserPane.resize(520, 298)
+class Ui_BrowserDock(object):
+    def setupUi(self, BrowserDock):
+        BrowserDock.setObjectName(_fromUtf8("BrowserDock"))
+        BrowserDock.resize(520, 298)
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
@@ -26,6 +26,7 @@ class Ui_BrowserPane(object):
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setSpacing(2)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.buttonBack = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonBack.setText(_fromUtf8(""))
@@ -69,13 +70,13 @@ class Ui_BrowserPane(object):
         self.webView.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
         self.webView.setObjectName(_fromUtf8("webView"))
         self.verticalLayout.addWidget(self.webView)
-        BrowserPane.setWidget(self.dockWidgetContents)
+        BrowserDock.setWidget(self.dockWidgetContents)
 
-        self.retranslateUi(BrowserPane)
-        QtCore.QMetaObject.connectSlotsByName(BrowserPane)
+        self.retranslateUi(BrowserDock)
+        QtCore.QMetaObject.connectSlotsByName(BrowserDock)
 
-    def retranslateUi(self, BrowserPane):
-        BrowserPane.setWindowTitle(_('Web Browser'))
+    def retranslateUi(self, BrowserDock):
+        BrowserDock.setWindowTitle(_('Web Browser'))
         self.buttonBack.setToolTip(_('Back'))
         self.buttonNext.setToolTip(_('Next'))
         self.buttonReload.setToolTip(_('Reload'))

@@ -22,6 +22,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         self.setupUi(self)
         
         self.fileSystemModel = QtGui.QFileSystemModel(self)
+        self.dirModel = QtGui.QDirModel(self)
+        self.comboBoxLocation.setModel(self.dirModel)
+        
         #http://doc.qt.nokia.com/latest/qdir.html#Filter-enum
         self.fileSystemModel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllEntries)
         dir = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.DesktopLocation)
@@ -31,10 +34,6 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         self.fileSystemProxyModel.setSourceModel(self.fileSystemModel)
         
         self.setupTreeViewFileSystem()
-        self.setupBookmarksCombo()
-        
-        #self.fileSystemModel.rootPathChanged.connect(self.treeRootPathChanged)
-        self.bookmarksView.pathChangeRequested.connect(self.openBookmark)
         
         self.configure()
 
@@ -43,144 +42,57 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         index = self.fileSystemModel.index(self.application.fileManager.currentDirectory)
         self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
         
+        self.treeViewFileSystem.setHeaderHidden(True)
+        self.treeViewFileSystem.setUniformRowHeights(False)
+        
         #Setup Context Menu
-        # File Menu
-        self.menuFile = QtGui.QMenu(self)
-        self.menuFile.setObjectName('menuFile')
+        self.fileSystemMenu = QtGui.QMenu(self)
+        self.fileSystemMenu.setObjectName('fileSystemMenu')
         
-        # Directory Menu
-        self.menuDirectory = QtGui.QMenu(self)
-        self.menuDirectory.setObjectName('menuDirectory')
+        self.newMenu = QtGui.QMenu("New", self)
+        self.newMenu.setObjectName('newMenu')
+        self.newMenu.addAction(self.actionNewFolder)
+        self.newMenu.addAction(self.actionNewFile)
+        self.newMenu.addSeparator()
+        self.newMenu.addAction(self.actionNewFromTemplate)
         
-        # Default menu 
-        self.defaultMenu = QtGui.QMenu(self)
-        self.defaultMenu.setObjectName("defaultMenu")
+        self.fileSystemMenu.addMenu(self.newMenu)
+        self.fileSystemMenu.addAction(self.actionDelete)
         
-        # Actions for those menus
-        #Copy to ClipBoard
-        actionCopyPathToClipBoard = QtGui.QAction(_("Copy Path To &Clipboard"), self)
-        actionCopyPathToClipBoard.setObjectName("actionCopyPathToClipBoard")
-        actionCopyPathToClipBoard.triggered.connect(self.pathToClipboard)
-        self.menuFile.addAction(actionCopyPathToClipBoard)
-        self.menuDirectory.addAction(actionCopyPathToClipBoard)
+        self.orderMenu = QtGui.QMenu("Order", self)
+        self.orderMenu.setObjectName("orderMenu")
+        self.orderGroup = QtGui.QActionGroup(self.orderMenu)
+        self.orderGroup.setExclusive(True)
+        orderActions = [self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType]
+        map(self.orderMenu.addAction, orderActions)
+        map(lambda action: action.setActionGroup(self.orderGroup), orderActions)
         
-        #Rename
-        actionRename = QtGui.QAction(_("&Rename"), self)
-        actionRename.setObjectName("actionRename")
-        actionRename.setIcon(QtGui.QIcon(":/icons/actions/edit-rename.png"))
-        actionRename.triggered.connect(self.pathRename)
-        self.menuFile.addAction(actionRename)
-        self.menuDirectory.addAction(actionRename)
+        self.actionOrderByName.trigger()
         
-        #Delete
-        actionDelete = QtGui.QAction(_("&Delete"), self)
-        actionDelete.setObjectName("actionDelete")
-        actionDelete.triggered.connect(self.pathDelete)
-        self.menuFile.addAction(actionDelete)
-        self.menuDirectory.addAction(actionDelete)
+        self.orderMenu.addSeparator()
+        self.orderMenu.addAction(self.actionOrderDescending)
+        self.orderMenu.addAction(self.actionOrderFoldersFirst)
         
-        #Open
-        actionOpen = QtGui.QAction(_("&Open"), self)
-        actionOpen.setObjectName("actionFileOpen")
-        actionOpen.setIcon(QtGui.QIcon(":/icons/actions/document-open.png"))
-        actionOpen.triggered.connect(self.pathOpen)
-        self.menuFile.addAction(actionOpen)
-        
-        #Refresh
-        actionRefresh = QtGui.QAction(_("&Refresh"), self)
-        actionRefresh.setObjectName("actionRefresh")
-        actionRefresh.setIcon(QtGui.QIcon(":/icons/actions/view-refresh.png"))
-        actionRefresh.triggered.connect(self.pathRefresh)
-        self.menuFile.addAction(actionRefresh)
-        self.menuDirectory.addAction(actionRefresh)
-        self.defaultMenu.addAction(actionRefresh)
-        
-        #Properties
-        actionProperties = QtGui.QAction(_("&Properties"), self)
-        actionProperties.setObjectName("actionProperties")
-        actionProperties.setIcon(QtGui.QIcon(":/icons/actions/document-properties.png"))
-        actionProperties.triggered.connect(self.pathProperties)
-        self.menuFile.addAction(actionProperties)
-        self.menuDirectory.addAction(actionProperties)
-
-        # Set As Root
-        actionSetAsRoot = QtGui.QAction(_("&Set as root"), self)
-        actionSetAsRoot.setObjectName("actionSetAsRoot")
-        actionSetAsRoot.triggered.connect(self.pathSetAsRoot)
-        self.menuDirectory.addAction(actionSetAsRoot)
-        
-        # New Menu
-        self.menuNewFileSystemElement = QtGui.QMenu(_("&New.."), self)
-        self.menuNewFileSystemElement.setObjectName('menuNewFileSystemElement')
-        self.menuNewFileSystemElement.setIcon(QtGui.QIcon(":/icons/actions/document-new.png"))
-        self.menuDirectory.addMenu(self.menuNewFileSystemElement)
-        self.defaultMenu.addMenu(self.menuNewFileSystemElement)
-        
-        # New File
-        actionFileNew = QtGui.QAction(_("&File"), self)
-        actionFileNew.setObjectName("actionFileNew")
-        actionFileNew.triggered.connect(self.newFile)
-        self.menuNewFileSystemElement.addAction(actionFileNew)
-        
-        # New Directory
-        actionDirNew = QtGui.QAction(_("&Directory"), self)
-        actionDirNew.setObjectName("actionDirNew")
-        actionDirNew.triggered.connect(self.newDirectory)
-        self.menuNewFileSystemElement.addAction(actionDirNew)
+        self.fileSystemMenu.addSeparator()
+        self.fileSystemMenu.addMenu(self.orderMenu)
         
         #Connect context menu
         self.treeViewFileSystem.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewFileSystem.customContextMenuRequested.connect(self.showTreeViewFileSystemContextMenu)
-        
-    def treeRootPathChanged(self, path):
-        newPathParts = unicode(path).split(os.sep)
-        rows = self.comboBookmarks.model().rowCount()
-        self.comboBookmarks.setEnabled(False)
-        self.comboBookmarks.model().removeRows(2, rows -2)
-        self.comboBookmarks.insertSeparator(2)
-        for i in range(len(newPathParts)):
-            
-            name = newPathParts[i]
-            if not name:
-                continue
-            path = os.sep.join(newPathParts[:i+1])
-            model = self.treeViewFileSystem.model()
-            icon = model.fileIcon(model.index(path))
-            self.comboBookmarks.addItem(icon, name, path)
-        self.comboBookmarks.setCurrentIndex(self.comboBookmarks.model().rowCount()-1)
-        self.comboBookmarks.setEnabled(True)
-
-    def openBookmark(self, path):
-        self.treeViewFileSystem.setRootIndex(self.treeViewFileSystem.model().index(path))
-        self.comboBookmarks.setCurrentIndex(1)
-    
-    def setupBookmarksCombo(self):
-        self.comboBookmarks.insertSeparator(self.comboBookmarks.model().rowCount())
-        #self.comboBookmarks.addItem("Cosas")
     
     @QtCore.pyqtSignature('int')
-    def on_comboBookmarks_currentIndexChanged(self, index):
-        if index == 0:
-            self.stackedWidget.setCurrentIndex(1)
-        elif index == 1:
-            self.stackedWidget.setCurrentIndex(0)
-        
-        else:
-            path = self.comboBookmarks.itemData(index)
-            if self.treeViewFileSystem.model().index(path) != self.treeViewFileSystem.rootIndex():
-                print "Should Change"
-            #if os.path.exists(path):
-            #    self.treeViewFileSystem.setRootIndex(self.treeViewFileSystem.model().index(path))
+    def on_comboBoxLocation_currentIndexChanged(self, index):
+        pass
     
     @QtCore.pyqtSignature('bool')
-    def on_buttonSyncTabFile_toggled(self, sync):
+    def on_puchButtonSync_toggled(self, sync):
         if sync:
             # Forzamos la sincronizacion
             editor = self.mainWindow.currentEditor
             self.treeViewFileSystem.focusWidgetPath(editor)
 
     @QtCore.pyqtSignature('')
-    def on_buttonUp_pressed(self):
+    def on_pusButtonUp_pressed(self):
         index = self.treeViewFileSystem.rootIndex()
         sIndex = self.fileSystemProxyModel.mapToSource(index)
         currentPath = self.fileSystemModel.filePath(sIndex)
@@ -220,15 +132,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     # Tree View File System
     #================================================
     def showTreeViewFileSystemContextMenu(self, point):
-        index = self.treeViewFileSystem.indexAt(point)
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
-        if os.path.isfile(path):
-            self.menuFile.popup(self.treeViewFileSystem.mapToGlobal(point))
-        elif os.path.isdir(path):
-            self.menuDirectory.popup(self.treeViewFileSystem.mapToGlobal(point))
-        else:
-            self.defaultMenu.popup(self.treeViewFileSystem.mapToGlobal(point))
+        self.fileSystemMenu.popup(self.treeViewFileSystem.mapToGlobal(point))
                 
     def on_treeViewFileSystem_activated(self, index):
         sIndex = self.fileSystemProxyModel.mapToSource(index)
@@ -287,10 +191,47 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
             index = index_list[0]
             self.setRootIndex(index)
 
-    def newFile(self, checked = False):
-        pass
-    
     def newDirectory(self, checked = False):
         curpath = self.current_selected_path
         dir = self.application.fileManager.createDirectory(curpath)
         print dir
+    
+    @QtCore.pyqtSlot()
+    def on_actionNewFolder_triggered(self):
+        pass
+
+    @QtCore.pyqtSlot()
+    def on_actionNewFile_triggered(self):
+        pass
+        
+    @QtCore.pyqtSlot()
+    def on_actionNewFromTemplate_triggered(self):
+        pass
+
+    @QtCore.pyqtSlot()
+    def on_actionDelete_triggered(self):
+        pass
+                
+    @QtCore.pyqtSlot()
+    def on_actionOrderByName_triggered(self):
+        self.fileSystemProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderBySize_triggered(self):
+        self.fileSystemProxyModel.sortBy("size", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderByDate_triggered(self):
+        self.fileSystemProxyModel.sortBy("date", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderByType_triggered(self):
+        self.fileSystemProxyModel.sortBy("type", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderDescending_triggered(self):
+        self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderFoldersFirst_triggered(self):
+        self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())

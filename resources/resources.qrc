@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/folder-new.png</file>
     <file>actions/edit-undo.png</file>
     <file>actions/edit-redo.png</file>
     <file>actions/view-fullscreen.png</file>

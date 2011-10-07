@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BrowserPane</class>
- <widget class="QDockWidget" name="BrowserPane">
+ <class>BrowserDock</class>
+ <widget class="QDockWidget" name="BrowserDock">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,6 +23,9 @@
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>2</number>
+      </property>
       <item>
        <widget class="QPushButton" name="buttonBack">
         <property name="toolTip">

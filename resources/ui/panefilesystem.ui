@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>330</width>
     <height>484</height>
    </rect>
   </property>
@@ -24,13 +24,13 @@
     <item>
      <layout class="QHBoxLayout" name="buttonsLayout">
       <property name="spacing">
-       <number>6</number>
+       <number>2</number>
       </property>
       <property name="sizeConstraint">
        <enum>QLayout::SetMinimumSize</enum>
       </property>
       <item>
-       <widget class="QPushButton" name="buttonUp">
+       <widget class="QPushButton" name="pushButtonUp">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -44,7 +44,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/icons/actions/go-up.png</normaloff>:/icons/actions/go-up.png</iconset>
         </property>
         <property name="iconSize">
@@ -59,7 +59,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="buttonBackRoot">
+       <widget class="QPushButton" name="pushButtonBack">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -70,7 +70,7 @@
          <string>Go previous place</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/icons/actions/go-previous.png</normaloff>:/icons/actions/go-previous.png</iconset>
         </property>
         <property name="iconSize">
@@ -85,7 +85,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushFowardRoot">
+       <widget class="QPushButton" name="pushButtonFoward">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -99,7 +99,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/icons/actions/go-next.png</normaloff>:/icons/actions/go-next.png</iconset>
         </property>
         <property name="flat">
@@ -108,33 +108,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="buttonFilter">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Filter settings</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>:/icons/actions/view-filter.png</normaloff>:/icons/actions/view-filter.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>16</width>
-          <height>16</height>
-         </size>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="buttonSyncTabFile">
+       <widget class="QPushButton" name="pushButtonSync">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -145,7 +119,7 @@
          <string>Sync folder with current editor file path</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
         </property>
         <property name="iconSize">
@@ -153,58 +127,6 @@
           <width>16</width>
           <height>16</height>
          </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="buttonCollapseAll">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Collapse Folder</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>:/icons/actions/debug-step-into.png</normaloff>:/icons/actions/debug-step-into.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>16</width>
-          <height>16</height>
-         </size>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushShowHidden">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Show Hidden Files</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>:/icons/actions/help-hint.png</normaloff>:/icons/actions/help-hint.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -233,7 +155,7 @@
      </layout>
     </item>
     <item>
-     <widget class="QComboBox" name="comboBookmarks">
+     <widget class="QComboBox" name="comboBoxLocation">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -243,75 +165,107 @@
       <property name="toolTip">
        <string>Folders</string>
       </property>
-      <item>
-       <property name="text">
-        <string>Bookmarks</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>:/icons/emblems/emblem-favorite.png</normaloff>:/icons/emblems/emblem-favorite.png</iconset>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>File System</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>:/icons/actions/document-open.png</normaloff>:/icons/actions/document-open.png</iconset>
-       </property>
-      </item>
+      <property name="editable">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
     <item>
-     <widget class="QStackedWidget" name="stackedWidget">
-      <property name="lineWidth">
-       <number>0</number>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="pageFileSystemTree">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="margin">
-         <number>0</number>
+     <widget class="QTreeView" name="treeViewFileSystem"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Filter:</string>
         </property>
-        <item>
-         <widget class="PMXFileSystemTreeView" name="treeViewFileSystem">
-          <attribute name="headerVisible">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="pageBookmarks">
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="margin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="PMXBookmarksListView" name="bookmarksView"/>
-        </item>
-       </layout>
-      </widget>
-     </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditFilter"/>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
+  <action name="actionNewFile">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
+   </property>
+   <property name="text">
+    <string>File</string>
+   </property>
+  </action>
+  <action name="actionNewFolder">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/folder-new.png</normaloff>:/icons/actions/folder-new.png</iconset>
+   </property>
+   <property name="text">
+    <string>Folder</string>
+   </property>
+  </action>
+  <action name="actionNewFromTemplate">
+   <property name="text">
+    <string>From Template</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionOrderByName">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Name</string>
+   </property>
+  </action>
+  <action name="actionOrderBySize">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Size</string>
+   </property>
+  </action>
+  <action name="actionOrderByDate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Date</string>
+   </property>
+  </action>
+  <action name="actionOrderByType">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Type</string>
+   </property>
+  </action>
+  <action name="actionOrderDescending">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Descending</string>
+   </property>
+  </action>
+  <action name="actionOrderFoldersFirst">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Folders First</string>
+   </property>
+  </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>PMXFileSystemTreeView</class>
-   <extends>QTreeView</extends>
-   <header>prymatex.gui.dockers.fstree.views</header>
-  </customwidget>
-  <customwidget>
-   <class>PMXBookmarksListView</class>
-   <extends>QListWidget</extends>
-   <header>prymatex.gui.dockers.fstree.views</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="../resources.qrc"/>
  </resources>

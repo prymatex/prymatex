@@ -8,7 +8,7 @@ from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant,
 from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
-from prymatex.ui.panebrowser import Ui_BrowserPane
+from prymatex.ui.panebrowser import Ui_BrowserDock
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
@@ -124,7 +124,7 @@ class TextMate(QObject):
         return True
     isBusy = pyqtProperty("bool", isBusy)
     
-class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserPane, PMXObject):
+class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
     SETTINGS_GROUP = "Browser"
     
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
