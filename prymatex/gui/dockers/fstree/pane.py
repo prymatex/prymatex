@@ -211,7 +211,11 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
         pass
-                
+    
+    @QtCore.pyqtSlot(str)
+    def on_lineEditFilter_textChanged(self, text):
+        self.fileSystemProxyModel.setFilterRegExp(text)
+    
     @QtCore.pyqtSlot()
     def on_actionOrderByName_triggered(self):
         self.fileSystemProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())

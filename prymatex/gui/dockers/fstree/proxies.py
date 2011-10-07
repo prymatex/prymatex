@@ -1,4 +1,5 @@
 import os
+import fnmatch
 from PyQt4 import QtCore, QtGui
 
 def orderFileByName(left, right, folderFirst):
@@ -58,6 +59,11 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         path = self.sourceModel().filePath(sIndex)
+        regexp = self.filterRegExp()
+        if not regexp.isEmpty():
+            pattern = regexp.pattern()
+            accept = any(map(lambda p: fnmatch.fnmatch(path, p), map(lambda p: p.strip(), pattern.split(",")))) if not os.path.isdir(path) else True
+            return accept
         return True
     
     def columnCount(self, parent):
