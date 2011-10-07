@@ -17,29 +17,44 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     SETTINGS_GROUP = 'FileSystem'
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
-    def __init__(self, parent):
-        super(PMXFileSystemDock, self).__init__(parent)
+    def __init__(self, parent = None):
+        super(PMXFileSystemDock, self).__init__(parent = None)
         self.setupUi(self)
         
+        #File System model
         self.fileSystemModel = QtGui.QFileSystemModel(self)
+        self.fileSystemModel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllEntries) #http://doc.qt.nokia.com/latest/qdir.html#Filter-enum
+        self.fileSystemModel.setRootPath(QtCore.QDir.rootPath())
+        #Dir Model
         self.dirModel = QtGui.QDirModel(self)
-        self.comboBoxLocation.setModel(self.dirModel)
         
-        #http://doc.qt.nokia.com/latest/qdir.html#Filter-enum
-        self.fileSystemModel.setFilter(QtCore.QDir.NoDotAndDotDot | QtCore.QDir.AllEntries)
-        dir = QtGui.QDesktopServices.storageLocation(QtGui.QDesktopServices.DesktopLocation)
-        self.fileSystemModel.setRootPath(dir)
-        
+        #Proxy para el file system tree view
         self.fileSystemProxyModel = PMXFileSystemProxyModel(self)
         self.fileSystemProxyModel.setSourceModel(self.fileSystemModel)
         
+        self.setupComboBoxLocation()
         self.setupTreeViewFileSystem()
         
         self.configure()
 
+    def setupComboBoxLocation(self):
+        self.comboBoxLocation.setModel(self.dirModel)
+        self.comboBoxLocation.installEventFilter(self)
+        self.comboBoxLocation.lineEdit().setText(self.application.fileManager.getOpenDirectory())
+    
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress and obj == self.comboBoxLocation and event.key() == QtCore.Qt.Key_Return:
+            path = self.comboBoxLocation.lineEdit().text()
+            dIndex = self.dirModel.index(path)
+            if dIndex.isValid():
+                self.on_comboBoxLocation_currentIndexChanged(path)
+                return True
+        else:
+            return QtCore.QObject.eventFilter(self, obj, event)
+    
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
-        index = self.fileSystemModel.index(self.application.fileManager.currentDirectory)
+        index = self.fileSystemModel.index(self.application.fileManager.getOpenDirectory())
         self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
         
         self.treeViewFileSystem.setHeaderHidden(True)
@@ -67,6 +82,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         map(self.orderMenu.addAction, orderActions)
         map(lambda action: action.setActionGroup(self.orderGroup), orderActions)
         
+        self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
         
         self.orderMenu.addSeparator()
@@ -80,41 +96,29 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         self.treeViewFileSystem.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewFileSystem.customContextMenuRequested.connect(self.showTreeViewFileSystemContextMenu)
     
-    @QtCore.pyqtSignature('int')
-    def on_comboBoxLocation_currentIndexChanged(self, index):
-        pass
+    @QtCore.pyqtSlot(str)
+    def on_comboBoxLocation_currentIndexChanged(self, path):
+        sIndex = self.fileSystemModel.index(path)
+        self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(sIndex))
     
-    @QtCore.pyqtSignature('bool')
-    def on_puchButtonSync_toggled(self, sync):
-        if sync:
-            # Forzamos la sincronizacion
-            editor = self.mainWindow.currentEditor
-            self.treeViewFileSystem.focusWidgetPath(editor)
+    @QtCore.pyqtSlot()
+    def on_puchButtonSync_pressed(self):
+        editor = self.mainWindow.currentEditor
+        path = self.application.fileManager.getOpenDirectory(editor.fileInfo)
+        sIndex = self.fileSystemModel.index(path)
+        self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(sIndex))
+        self.comboBoxLocation.lineEdit().setText(dir.path())
 
-    @QtCore.pyqtSignature('')
-    def on_pusButtonUp_pressed(self):
+    @QtCore.pyqtSlot()
+    def on_pushButtonUp_pressed(self):
         index = self.treeViewFileSystem.rootIndex()
         sIndex = self.fileSystemProxyModel.mapToSource(index)
-        currentPath = self.fileSystemModel.filePath(sIndex)
-        newPath = os.path.abspath(os.path.join(currentPath, '..'))
-        
-        if newPath != self.fileSystemModel.rootPath():
-            index = self.fileSystemModel.index(newPath)
+        dir = QtCore.QDir(self.fileSystemModel.filePath(sIndex))
+        if dir.cdUp():
+            index = self.fileSystemModel.index(dir.path())
             self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
+            self.comboBoxLocation.lineEdit().setText(dir.path())
 
-    @QtCore.pyqtSignature('')
-    def on_buttonCollapseAll_pressed(self):
-        self.treeViewFileSystem.collapseAll()
-        #self.buttonSyncTabFile.setEnabled(False)
-    
-    def on_buttonFilter_pressed(self):
-        self.dialogConfigFilters.exec_()
-    
-    def changeToFavourite(self, index):
-        print "-"*40
-        #print index, self.comboFavourites.
-        print "-"*40
-    
     def addPathToFavourites(self, path):
         '''
         Adds an entry to the File Manager 
@@ -141,6 +145,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
             self.mainWindow.openFile(QtCore.QFileInfo(path))
         if os.path.isdir(path):
             self.treeViewFileSystem.setRootIndex(index)
+            self.comboBoxLocation.lineEdit().setText(path)
     
     def on_treeViewFileSystem_doubleClicked(self, index):
         sIndex = self.fileSystemProxyModel.mapToSource(index)
@@ -149,6 +154,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
             self.mainWindow.openFile(QtCore.QFileInfo(path))
         if os.path.isdir(path):
             self.treeViewFileSystem.setRootIndex(index)
+            self.comboBoxLocation.lineEdit().setText(path)
 
     #======================================================
     # Tree View Context Menu Actions
@@ -158,47 +164,10 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         if len(paths) == 1:
             QApplication.clipboard().setText(paths[0])
     
-    def pathRename(self, checked = False):
-        pass
-    
-    def pathDelete(self, checked = False):
-        index = self.treeViewFileSystem.currentIndex()
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
-        ok = QtGui.QMessageBox.question(self, "Deletion Confirmation", "Are you sure you want to delete <b>%s</b>?" % path,
-                QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
-        if ok == QtGui.QMessageBox.Ok:
-            self.application.fileManager.deletePath(path)
-
-    def pathOpen(self, checked = False):
-        index = self.treeViewFileSystem.currentIndex()
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
-        if os.path.isfile(path):
-            self.mainWindow.openFile(QtCore.QFileInfo(path))
-        if os.path.isdir(path):
-            self.treeViewFileSystem.setRootIndex(index)
-        
-    def pathRefresh(self, checked = False):
-        self.model().refresh()
-        
-    def pathProperties(self, checked = False):
-        pass
-    
-    def pathSetAsRoot(self, checked = False):
-        index_list = self.selectedIndexes()
-        if len(index_list) == 1:
-            index = index_list[0]
-            self.setRootIndex(index)
-
-    def newDirectory(self, checked = False):
-        curpath = self.current_selected_path
-        dir = self.application.fileManager.createDirectory(curpath)
-        print dir
-    
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
-        pass
+        curpath = self.current_selected_path
+        dir = self.application.fileManager.createDirectory(curpath)
 
     @QtCore.pyqtSlot()
     def on_actionNewFile_triggered(self):
@@ -210,7 +179,13 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
-        pass
+        index = self.treeViewFileSystem.currentIndex()
+        sIndex = self.fileSystemProxyModel.mapToSource(index)
+        path = self.fileSystemModel.filePath(sIndex)
+        ok = QtGui.QMessageBox.question(self, "Deletion Confirmation", "Are you sure you want to delete <b>%s</b>?" % path,
+            QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
+        if ok == QtGui.QMessageBox.Ok:
+            self.application.fileManager.deletePath(path)
     
     @QtCore.pyqtSlot(str)
     def on_lineEditFilter_textChanged(self, text):

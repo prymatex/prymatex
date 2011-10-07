@@ -92,20 +92,15 @@ class PMXFileManager(PMXObject):
         except:
             raise
     
-    @property
-    def currentDirectory(self):
-        #TODO: el ultimo directorio o algo de eso :)
-        return os.path.expanduser("~") 
-
     def getNewFile(self):
         ''' Returns a new QFileInfo '''
         path = os.path.join(self.currentDirectory, "untitled %d" % self.new_file_counter)
         self.new_file_counter += 1
         return QtCore.QFileInfo(path)
     
-    def getOpenDirectory(self, fileInfo):
+    def getOpenDirectory(self, fileInfo = None):
         if fileInfo is None:
-            return self.currentDirectory
+            return os.path.expanduser("~") 
         return fileInfo.absoluteFilePath() if fileInfo.isDir() else os.path.dirname(fileInfo.absoluteFilePath())
         
     def getOpenFiles(self, fileInfo = None):
