@@ -171,8 +171,13 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         """ Add a new tab to the main tab widget. """
 
         if self.count() > 0:
-            ch = self.findFirstTabWidget()
-            ch.show()
+            # Find the first tab widget going down the left of the hierarchy. This
+            # will be the one in the top left corner.
+            
+            ch = self.widget(0)
+            while not isinstance(ch, _TabWidget):
+                assert isinstance(ch, QtGui.QSplitter)
+                ch = ch.widget(0)
         else:
             # There is no tab widget so create one.
             ch = _TabWidget(self)
@@ -186,23 +191,22 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             self._set_current_tab(ch, idx)
             ch.tabBar().setFocus()
     
-    def findFirstTabWidget(self):
-        # Find the first tab widget going down the left of the hierarchy.  This
-        # will be the one in the top left corner.
-        ch = self.widget(0)
-        while not isinstance(ch, _TabWidget):
-            assert isinstance(ch, QtGui.QSplitter)
-            ch = ch.widget(0)
-        return ch
-    
     def removeTab(self, w):
         """ Remove tab to the tab widget."""
         tw, tidx = self._tab_widget(w)
 
         if tw is not None:
             self.disconnect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
-            tw.removeTab(tidx)
-            #TODO: que pasa si el tw se queda sin tabs
+            self._remove_tab(tw, tidx)
+            if tw.count() == 0 and self.count() > 1:
+                for tw in self.findChildren(_TabWidget):
+                    if tw.count() != 0:
+                        break
+                self._set_current_tab(tw, 0)
+            elif tidx != 0:
+                self._set_current_tab(tw, tidx - 1)
+            else:
+                self._set_current_tab(tw, tidx)
             tw.tabBar().setFocus()
         
     def _update_tab_status(self):
@@ -273,7 +277,6 @@ class PMXSplitTabWidget(QtGui.QSplitter):
 
         # Handle the trivial case.
         if self._current_tab_w is tw and self._current_tab_idx == tidx:
-            print "trivial case"
             return
 
         if tw is not None:
