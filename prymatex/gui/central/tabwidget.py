@@ -52,15 +52,16 @@ class _TabWidget(QtGui.QTabWidget):
             while parent is not self._root and parent.count() == 1:
                 prune = parent
                 parent = prune.parent()
-
+            
             prune.hide()
-            prune.deleteLater()
+            if parent is not self._root:
+                prune.deleteLater()
 
     def tabRemoved(self, idx):
         """ Reimplemented to update the record of the current tab if it is
         removed.
         """
-
+        
         self._still_needed()
 
         if self._root._current_tab_w is self and self._root._current_tab_idx == idx:

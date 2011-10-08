@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panefilesystem.ui'
 #
-# Created: Thu Oct  6 21:22:15 2011
+# Created: Fri Oct  7 21:13:43 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -31,11 +31,9 @@ class Ui_FileSystemDock(object):
         self.buttonsLayout.setObjectName(_fromUtf8("buttonsLayout"))
         self.pushButtonUp = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButtonUp.setMaximumSize(QtCore.QSize(24, 24))
-        self.pushButtonUp.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-up.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonUp.setIcon(icon)
-        self.pushButtonUp.setIconSize(QtCore.QSize(16, 16))
         self.pushButtonUp.setFlat(True)
         self.pushButtonUp.setObjectName(_fromUtf8("pushButtonUp"))
         self.buttonsLayout.addWidget(self.pushButtonUp)
@@ -44,13 +42,11 @@ class Ui_FileSystemDock(object):
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-previous.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonBack.setIcon(icon1)
-        self.pushButtonBack.setIconSize(QtCore.QSize(16, 16))
         self.pushButtonBack.setFlat(True)
         self.pushButtonBack.setObjectName(_fromUtf8("pushButtonBack"))
         self.buttonsLayout.addWidget(self.pushButtonBack)
         self.pushButtonFoward = QtGui.QPushButton(self.dockWidgetContents)
         self.pushButtonFoward.setMaximumSize(QtCore.QSize(24, 24))
-        self.pushButtonFoward.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-next.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonFoward.setIcon(icon2)
@@ -62,8 +58,6 @@ class Ui_FileSystemDock(object):
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonSync.setIcon(icon3)
-        self.pushButtonSync.setIconSize(QtCore.QSize(16, 16))
-        self.pushButtonSync.setCheckable(True)
         self.pushButtonSync.setFlat(True)
         self.pushButtonSync.setObjectName(_fromUtf8("pushButtonSync"))
         self.buttonsLayout.addWidget(self.pushButtonSync)

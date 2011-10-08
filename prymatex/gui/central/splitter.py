@@ -170,14 +170,9 @@ class PMXSplitTabWidget(QtGui.QSplitter):
     def addTab(self, w):
         """ Add a new tab to the main tab widget. """
 
-        # Find the first tab widget going down the left of the hierarchy.  This
-        # will be the one in the top left corner.
         if self.count() > 0:
-            ch = self.widget(0)
-
-            while not isinstance(ch, _TabWidget):
-                assert isinstance(ch, QtGui.QSplitter)
-                ch = ch.widget(0)
+            ch = self.findFirstTabWidget()
+            ch.show()
         else:
             # There is no tab widget so create one.
             ch = _TabWidget(self)
@@ -191,15 +186,24 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             self._set_current_tab(ch, idx)
             ch.tabBar().setFocus()
     
+    def findFirstTabWidget(self):
+        # Find the first tab widget going down the left of the hierarchy.  This
+        # will be the one in the top left corner.
+        ch = self.widget(0)
+        while not isinstance(ch, _TabWidget):
+            assert isinstance(ch, QtGui.QSplitter)
+            ch = ch.widget(0)
+        return ch
+    
     def removeTab(self, w):
         """ Remove tab to the tab widget."""
-        
         tw, tidx = self._tab_widget(w)
 
         if tw is not None:
             self.disconnect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
             tw.removeTab(tidx)
-        tw.tabBar().setFocus()
+            #TODO: que pasa si el tw se queda sin tabs
+            tw.tabBar().setFocus()
         
     def _update_tab_status(self):
         sender = self.sender()

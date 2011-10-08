@@ -135,12 +135,21 @@ def compileRegexp(string):
             #Mala leche
             pass
 
+REPLACES = {
+    '': " ",    #Este caracter es usado en el autocompletado pongo un espacio
+    '': "*",    #Conitnue bullet del bundle text
+    '': "-"     #El backspace en una macro de latex
+}
+
 def readPlist(file):
     try:
         data = plistlib.readPlist(file)
-    except:
+    except Exception, e:
         data = open(file).read()
         for match in RE_XML_ILLEGAL.finditer(data):
-            data = data[:match.start()] + "?" + data[match.end():]
+            char = data[match.start():match.end()]
+            if char in REPLACES:
+                char = REPLACES[char]
+            data = data[:match.start()] + char + data[match.end():]
         data = plistlib.readPlistFromString(data)
     return data

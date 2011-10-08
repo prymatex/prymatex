@@ -139,6 +139,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     def removeEditor(self, editor):
         self.statusBar().removeEditor(editor)
         self.splitTabWidget.removeTab(editor)
+        del editor
 
     def findEditorForFile(self, fileInfo):
         # Find open editor for fileInfo
@@ -164,11 +165,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     def openFile(self, fileInfo, cursorPosition = (0,0), focus = True):
         editor = self.findEditorForFile(fileInfo)
         if editor is None:
-            if self.currentEditor.isNew() and not self.currentEditor.isModified():
-                editor = self.currentEditor
-            else:
-                editor = self.application.getEditorInstance(fileInfo, self)
-                self.addEditor(editor)
+            if self.currentEditor is not None and self.currentEditor.isNew() and not self.currentEditor.isModified():
+                self.closeEditor(self.currentEditor)
+            editor = self.application.getEditorInstance(fileInfo, self)
+            self.addEditor(editor)
             content = self.application.fileManager.openFile(fileInfo)
             editor.setPlainText(content)
             editor.setFileInfo(fileInfo)

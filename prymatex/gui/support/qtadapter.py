@@ -64,6 +64,7 @@ QTCHARCODES = {9: Qt.Key_Backspace,
                63272: Qt.Key_F7}
 
 KEYMAP = get_keymap_table()
+
 def keyboardLayoutQtKeys(character):
     keys = []
 

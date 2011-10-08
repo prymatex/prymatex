@@ -18,7 +18,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
     def __init__(self, parent = None):
-        super(PMXFileSystemDock, self).__init__(parent = None)
+        QtGui.QDockWidget.__init__(self, parent)
         self.setupUi(self)
         
         #File System model
@@ -102,12 +102,12 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
         self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(sIndex))
     
     @QtCore.pyqtSlot()
-    def on_puchButtonSync_pressed(self):
+    def on_pushButtonSync_pressed(self):
         editor = self.mainWindow.currentEditor
         path = self.application.fileManager.getDirectory(editor.fileInfo)
         sIndex = self.fileSystemModel.index(path)
         self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(sIndex))
-        self.comboBoxLocation.lineEdit().setText(dir.path())
+        self.comboBoxLocation.lineEdit().setText(path)
 
     @QtCore.pyqtSlot()
     def on_pushButtonUp_pressed(self):
