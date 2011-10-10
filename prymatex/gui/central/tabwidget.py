@@ -39,9 +39,7 @@ class _TabWidget(QtGui.QTabWidget):
         self.tabCloseRequested.connect(self._close_tab)        
 
     def _still_needed(self):
-        """ Delete the tab widget (and any relevant parent splitters) if it is
-        no longer needed.
-        """
+        """ Delete the tab widget (and any relevant parent splitters) if it is no longer needed. """
 
         if self.count() == 0:
             prune = self
@@ -60,9 +58,7 @@ class _TabWidget(QtGui.QTabWidget):
             prune.deleteLater()
 
     def tabRemoved(self, idx):
-        """ Reimplemented to update the record of the current tab if it is
-        removed.
-        """
+        """ Reimplemented to update the record of the current tab if it is removed. """
         
         self._still_needed()
 
@@ -92,7 +88,7 @@ class _DragableTabBar(QtGui.QTabBar):
 
     def keyPressEvent(self, e):
         """ Reimplemented to handle traversal across different tab widgets. """
-
+        print "mover"
         if e.key() == QtCore.Qt.Key_Left:
             self._root._move_left(self.parent(), self.currentIndex())
         elif e.key() == QtCore.Qt.Key_Right:
@@ -102,33 +98,48 @@ class _DragableTabBar(QtGui.QTabBar):
 
     def mousePressEvent(self, e):
         """ Reimplemented to handle mouse press events. """
+        if e.button() == QtCore.Qt.RightButton:
+            widget = self._tab_at(e.pos())
+            
+            #show menu
+            menu = QtGui.QMenu()
+            actionClose = menu.addAction("Close")
+            actionCloseAll = menu.addAction("Close All")
+            actionCloseAllNotThis = menu.addAction("Close Other")
+            menu.addSeparator()
+            actionSplitH = menu.addAction("Split Horizontally")
+            actionSplitV = menu.addAction("Split Vertically")
+            menu.addSeparator()
+            #Create custom menu
+            menu.exec_(e.globalPos())
+        elif e.button() == QtCore.Qt.LeftButton:
 
-        # There is something odd in the focus handling where focus temporarily
-        # moves elsewhere (actually to a View) when switching to a different
-        # tab page.  We suppress the notification so that the workbench doesn't
-        # temporarily make the View active.
-        self._root._repeat_focus_changes = False
-        QtGui.QTabBar.mousePressEvent(self, e)
-        self._root._repeat_focus_changes = True
-
-        # Update the current tab.
-        self._root._set_current_tab(self.parent(), self.currentIndex())
-        self._root._set_focus()
-
-        if e.button() != QtCore.Qt.LeftButton:
-            return
-
-        if self._drag_state is not None:
-            return
-
-        # Potentially start dragging if the tab under the mouse is the current
-        # one (which will eliminate disabled tabs).
-        tab = self._tab_at(e.pos())
-
-        if tab < 0 or tab != self.currentIndex():
-            return
-
-        self._drag_state = _DragState(self._root, self, tab, e.pos())
+            # There is something odd in the focus handling where focus temporarily
+            # moves elsewhere (actually to a View) when switching to a different
+            # tab page.  We suppress the notification so that the workbench doesn't
+            # temporarily make the View active.
+            self._root._repeat_focus_changes = False
+            QtGui.QTabBar.mousePressEvent(self, e)
+            self._root._repeat_focus_changes = True
+    
+            # Update the current tab.
+            self._root._set_current_tab(self.parent(), self.currentIndex())
+            self._root._set_focus()
+    
+            if e.button() != QtCore.Qt.LeftButton:
+                return
+    
+            if self._drag_state is not None:
+                return
+    
+            # Potentially start dragging if the tab under the mouse is the current
+            # one (which will eliminate disabled tabs).
+            tab = self._tab_at(e.pos())
+    
+            if tab < 0 or tab != self.currentIndex():
+                return
+    
+            self._drag_state = _DragState(self._root, self, tab, e.pos())
 
     def mouseMoveEvent(self, e):
         """ Reimplemented to handle mouse move events. """

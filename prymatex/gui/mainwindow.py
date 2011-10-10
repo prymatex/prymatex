@@ -77,7 +77,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         '''
         Basic panels, dock objects. More docks should be available via plugins
         '''
-        from prymatex.gui.dockers.fstree import PMXFileSystemDock
+        from prymatex.gui.dockers.filesystem import PMXFileSystemDock
         from prymatex.gui.dockers.project import PMXProjectDock
         from prymatex.gui.dockers.symbols import PMXSymboldListDock
         from prymatex.gui.dockers.browser import PMXBrowserDock

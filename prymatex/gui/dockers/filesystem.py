@@ -8,7 +8,7 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.ui.panefilesystem import Ui_FileSystemDock
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui.dockers.fstree.proxies import PMXFileSystemProxyModel
+from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
     #=======================================================================
@@ -39,19 +39,16 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
 
     def setupComboBoxLocation(self):
         self.comboBoxLocation.setModel(self.dirModel)
-        self.comboBoxLocation.installEventFilter(self)
         self.comboBoxLocation.lineEdit().setText(self.application.fileManager.getDirectory())
+        self.comboBoxLocation.lineEdit().returnPressed.connect(self.on_lineEdit_returnPressed)
     
-    def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.KeyPress and obj == self.comboBoxLocation and event.key() == QtCore.Qt.Key_Return:
-            path = self.comboBoxLocation.lineEdit().text()
-            dIndex = self.dirModel.index(path)
-            if dIndex.isValid():
-                self.on_comboBoxLocation_currentIndexChanged(path)
-                return True
-        else:
-            return QtCore.QObject.eventFilter(self, obj, event)
-    
+    def on_lineEdit_returnPressed(self):
+        path = self.comboBoxLocation.lineEdit().text()
+        print path
+        dIndex = self.dirModel.index(path)
+        if dIndex.isValid():
+            self.on_comboBoxLocation_currentIndexChanged(path)
+                
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
         index = self.fileSystemModel.index(self.application.fileManager.getDirectory())
