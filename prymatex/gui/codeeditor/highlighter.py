@@ -19,9 +19,10 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     MULTI_LINE = 1
     FORMAT_CACHE = {}
     
-    def __init__(self, document, syntax, theme = None):
-        super(PMXSyntaxHighlighter, self).__init__(document)
+    def __init__(self, editor, syntax, theme = None):
+        super(PMXSyntaxHighlighter, self).__init__(editor.document())
         assert syntax is not None, "Syntax cannot be None"
+        self.editor = editor
         self.processor = PMXSyntaxProcessor()
         self.syntax = syntax
         self.theme = theme
@@ -29,9 +30,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
         self.theme = theme
-        
-    def _on_analyze_ready(self, future):
-        self.rehighlight()
         
     def _analyze_all_text(self, text):
         self.syntax.parse(text, self.processor)
@@ -42,7 +40,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.setUserState(state)
     
     def applyFormat(self, userData):
-        #
         for scope, start, end in userData.getAllScopes():
             format = self.getFormat(scope)
             if format is not None:
@@ -63,7 +60,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         #Folding
         userData.foldingMark = self.syntax.folding(text)
         #Deprecar cache
-        userData.textHash = hash(text)
+        userData.textHash = hash(self.syntax.scopeName) + hash(text)
         
         #Indent
         userData.indent = whiteSpace(text)
@@ -73,7 +70,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         #Start Parsing
         userData = self.currentBlock().userData()
         
-        if userData != None and userData.textHash == hash(text):
+        if userData != None and userData.textHash == hash(self.syntax.scopeName) + hash(text):
             print "solo darle color"
             self.applyFormat(userData)
         else:
@@ -93,6 +90,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData, state = self.buildBlockUserData(self.currentBlock(), data)
             self.setCurrentBlockUserData(userData)
             self.setCurrentBlockState(state)
+            self.editor.folding.deprecateFolding(self.currentBlock().blockNumber())
             self.applyFormat(userData)
         
     def getFormat(self, scope):

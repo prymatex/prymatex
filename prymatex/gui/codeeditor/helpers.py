@@ -264,11 +264,21 @@ class PMXFoldingHelper(object):
                 break
         return block
     
+    def findPreviousMoreNestedBlock(self, block):
+        """ Return previous block if text in block is not "" """
+        indent = block.userData().indent
+        block = self.findPreviousNotBlankBlock(block)
+        while block.isValid():
+            if block.userData().indent > indent:
+                break
+            block = self.findPreviousNotBlankBlock(block)
+        return block
+    
     def closePreviousBlock(self, block):
         #Le pongo un "corcho" al anterior
         factor = 1
         userData = block.userData()
-        startBlock = previousBlock = self.findPreviousNotBlankBlock(block)
+        startBlock = previousBlock = self.findPreviousMoreNestedBlock(block)
         while startBlock.isValid():
             #Busco uno que abre al mismo nivel
             if startBlock.userData().foldingMark == self.FOLDING_START and startBlock.userData().indent == userData.indent:

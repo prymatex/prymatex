@@ -99,7 +99,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
         if syntax is None:
             syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
-        self.syntaxHighlighter = PMXSyntaxHighlighter(self.document(), syntax)
+        self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
         
         #Processors
         self.commandProcessor = PMXCommandProcessor(self)
