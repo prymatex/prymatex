@@ -257,9 +257,7 @@ class PMXFoldingHelper(object):
         self.folding = []
     
     def findPreviousNotBlankBlock(self, block):
-        """
-            Return previous block if text in block is not ""
-        """
+        """ Return previous block if text in block is not "" """
         while block.isValid():
             block = block.previous()
             if block.text().strip() != "":
@@ -329,7 +327,6 @@ class PMXFoldingHelper(object):
     
     def getFoldingMark(self, block):
         #FIXME: hacer el folding para que defo se quede tranquilo
-        return self.FOLDING_NONE
         if self.indentSensitive:
             if block.blockNumber() >= len(self.folding):
                 self.updateIndentFoldingMarks(block)

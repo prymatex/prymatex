@@ -159,7 +159,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         title = [ editor.getTabTitle() ] if editor is not None else []
         title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
         self.setWindowTitle(" - ".join(title))
-        self.splitTabWidget.setCurrentWidget(editor)
         self.currentEditor = editor
 
     def openFile(self, fileInfo, cursorPosition = (0,0), focus = True):
