@@ -19,10 +19,31 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.setupWidgetStatus()
         self.setupWidgetCommand()
         self.setupWidgetFindReplace()
+        self.setupEvents()
     
     def hideAllWidgets(self):
         map(lambda widget: widget.setVisible(False), [self.widgetGoToLine, self.widgetFindReplace, self.widgetCommand, self.widgetIFind])
-    
+
+    #============================================================
+    # Setup Events
+    #============================================================    
+    def setupEvents(self):
+        self.lineEditIFind.installEventFilter(self)
+        self.lineEditCommand.installEventFilter(self)
+        
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress and obj is self.lineEditIFind:
+            if event.key() == QtCore.Qt.Key_Escape:
+                self.widgetIFind.hide()
+                return True
+            elif event.key() == QtCore.Qt.Key_Return and event.modifiers() == QtCore.Qt.ShiftModifier:
+                self.pushButtonIFindPrevious.click()
+                return True
+            elif event.key() == QtCore.Qt.Key_Return:
+                self.pushButtonIFindNext.click()
+                return True
+        return QtGui.QWidget.eventFilter(self, obj, event)
+
     #============================================================
     # Setup Widgets
     #============================================================
@@ -108,6 +129,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def showCommand(self):
         self.hideAllWidgets()
         self.widgetCommand.setVisible(True)
+        self.lineEditCommand.setFocus()
     
     #============================================================
     # AutoConnect GoToLine widget signals
@@ -221,13 +243,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def showFind(self):
         self.hideAllWidgets()
         self.widgetIFind.setVisible(True)
+        self.lineEditIFind.setFocus()
         
-    #============================================================
-    # Control de eventos
-    #============================================================
-    def eventFilter(self, obj, event):
-        return QtGui.QWidget.eventFilter(self, obj, event)
-    
     def disconnectEditor(self, editor):
         editor.cursorPositionChanged.disconnect(self.updateCursorPosition)
         editor.syntaxChanged.disconnect(self.updateSyntax)

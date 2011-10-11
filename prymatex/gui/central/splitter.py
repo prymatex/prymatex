@@ -257,9 +257,11 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             tw.setTabText(idx, title)
 
     def getAllWidgets(self):
+        widgets = []
         for tw in self.findChildren(_TabWidget):
             for index in xrange(tw.count()):
-                yield tw.widget(index)
+                widgets.append(tw.widget(index))
+        return widgets
     
     def _tab_widget(self, w):
         """ Return the tab widget and index containing the given widget. """

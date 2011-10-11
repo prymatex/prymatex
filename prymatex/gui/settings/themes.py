@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.config.widgets import PMXConfigBaseWidget
+from prymatex.gui.settings.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
 from prymatex.mvc.delegates import PMXColorDelegate, PMXFontStyleDelegate
 from prymatex.ui.configthemes import Ui_FontThemeConfig

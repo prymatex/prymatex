@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/configdialog.ui'
+# Form implementation generated from reading ui file 'resources/ui/settingsdialog.ui'
 #
-# Created: Tue Oct 11 15:57:19 2011
+# Created: Tue Oct 11 15:58:28 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!

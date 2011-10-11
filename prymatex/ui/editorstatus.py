@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
+# Created: Tue Oct 11 20:55:15 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,24 +23,6 @@ class Ui_CodeEditorStatus(object):
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.widgetStatus = QtGui.QWidget(CodeEditorStatus)
-        self.widgetStatus.setObjectName(_fromUtf8("widgetStatus"))
-        self.horizontalLayout_2 = QtGui.QHBoxLayout(self.widgetStatus)
-        self.horizontalLayout_2.setMargin(0)
-        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        self.labelLineColumn = QtGui.QLabel(self.widgetStatus)
-        self.labelLineColumn.setObjectName(_fromUtf8("labelLineColumn"))
-        self.horizontalLayout_2.addWidget(self.labelLineColumn)
-        self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
-        self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
-        self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
-        self.comboBoxTabSize = QtGui.QComboBox(self.widgetStatus)
-        self.comboBoxTabSize.setObjectName(_fromUtf8("comboBoxTabSize"))
-        self.horizontalLayout_2.addWidget(self.comboBoxTabSize)
-        self.comboBoxSymbols = QtGui.QComboBox(self.widgetStatus)
-        self.comboBoxSymbols.setObjectName(_fromUtf8("comboBoxSymbols"))
-        self.horizontalLayout_2.addWidget(self.comboBoxSymbols)
-        self.verticalLayout.addWidget(self.widgetStatus)
         self.widgetCommand = QtGui.QWidget(CodeEditorStatus)
         self.widgetCommand.setObjectName(_fromUtf8("widgetCommand"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.widgetCommand)
@@ -190,13 +172,30 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_4.addWidget(self.pushButtonFindAll)
         self.gridLayout.addWidget(self.widgetFindReplaceOptions, 2, 1, 1, 5)
         self.verticalLayout.addWidget(self.widgetFindReplace)
+        self.widgetStatus = QtGui.QWidget(CodeEditorStatus)
+        self.widgetStatus.setObjectName(_fromUtf8("widgetStatus"))
+        self.horizontalLayout_2 = QtGui.QHBoxLayout(self.widgetStatus)
+        self.horizontalLayout_2.setMargin(0)
+        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        self.labelLineColumn = QtGui.QLabel(self.widgetStatus)
+        self.labelLineColumn.setObjectName(_fromUtf8("labelLineColumn"))
+        self.horizontalLayout_2.addWidget(self.labelLineColumn)
+        self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
+        self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
+        self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
+        self.comboBoxTabSize = QtGui.QComboBox(self.widgetStatus)
+        self.comboBoxTabSize.setObjectName(_fromUtf8("comboBoxTabSize"))
+        self.horizontalLayout_2.addWidget(self.comboBoxTabSize)
+        self.comboBoxSymbols = QtGui.QComboBox(self.widgetStatus)
+        self.comboBoxSymbols.setObjectName(_fromUtf8("comboBoxSymbols"))
+        self.horizontalLayout_2.addWidget(self.comboBoxSymbols)
+        self.verticalLayout.addWidget(self.widgetStatus)
 
         self.retranslateUi(CodeEditorStatus)
         QtCore.QMetaObject.connectSlotsByName(CodeEditorStatus)
 
     def retranslateUi(self, CodeEditorStatus):
         CodeEditorStatus.setWindowTitle(_('Form'))
-        self.labelLineColumn.setText(_('Line: 0 Column: 0'))
         self.label.setText(_('Command:'))
         self.label_2.setText(_('Input:'))
         self.label_3.setText(_('Output:'))
@@ -217,5 +216,6 @@ class Ui_CodeEditorStatus(object):
         self.labelFindMode.setText(_('Mode:'))
         self.checkBoxFindCaseSensitively.setText(_('Case Sensitively'))
         self.pushButtonFindAll.setText(_('Find All'))
+        self.labelLineColumn.setText(_('Line: 0 Column: 0'))
 
 from prymatex import resources_rc

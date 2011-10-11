@@ -3,7 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
-from prymatex.ui.configdialog import Ui_PMXSettingsDialog
+from prymatex.ui.settingsdialog import Ui_SettingsDialog
 
 class PMXSettingsItem(QtGui.QStandardItem):
     def __init__(self, name, widget_index, parent = None):
@@ -21,41 +21,37 @@ class PMXNetworkConfigWidget(QtGui.QWidget):
     def __init__(self):
         super(PMXNetworkConfigWidget, self).__init__()
 
-
-class PMXSettingsDialog(QtGui.QDialog, Ui_PMXSettingsDialog, PMXObject):
+class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog, PMXObject):
     '''
     Settings dialog, it's hold by the application under
     configdialog property
     '''
-    def __init__(self):
-        super(PMXSettingsDialog, self).__init__()
+    def __init__(self, parent = None):
+        QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         self.model = QtGui.QStandardItemModel(self)
         
         self.proxy_model = QtGui.QSortFilterProxyModel(self)
         self.proxy_model.setSourceModel(self.model)
         
-        self.treeView.setModel(self.proxy_model)
-        self.treeView.setModel(self.model)
-        self.treeView.widgetChanged.connect(self.changeWidget)
+        self.treeViewSettings.setModel(self.proxy_model)
+        self.treeViewSettings.setModel(self.model)
         #self.model.setHeaderData(0, Qt.Horizontal, self.trUtf8("Option"))
         self.stackLayout = QtGui.QStackedLayout()
         self.container.setLayout(self.stackLayout)
-        
-        self.lineFilter.textChanged.connect(self.filterItems)
         
         # Focus first item
     
     def focusFirst(self):
         index = self.model.index(0, 0)
         self.model.itemFromIndex(index)
-        self.treeView.setCurrentIndex(index)
+        self.treeViewSettings.setCurrentIndex(index)
     
-    def filterItems(self, txt):
-        self.proxy_model.setFilterRegExp(QtCore.QRegExp(txt, Qt.CaseInsensitive))
+    def on_lineEditFilter_textChanged(self, text):
+        self.proxy_model.setFilterRegExp(QtCore.QRegExp(text, Qt.CaseInsensitive))
     
-    def changeWidget(self, index):
-        #print "Cambiando al widget"
+    def on_treeViewSettings_activated(self, index):
+        print "Cambiando al widget"
         self.container.layout().setCurrentIndex(index)
         title = self.container.layout().currentWidget().windowTitle()
         self.labelTitle.setText( title )

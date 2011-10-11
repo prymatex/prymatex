@@ -1,2 +1,0 @@
-from crashdialog import PMXCrashDialog
-from tracedialog import PMXTraceBackDialog
