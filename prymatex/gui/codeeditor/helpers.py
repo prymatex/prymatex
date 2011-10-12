@@ -214,8 +214,8 @@ class PMXCompleterHelper(QtGui.QCompleter):
         self.activated[str].connect(self.insertCompletion)
 
     def insertCompletion(self, insert):
-        extra = insert.length() - self.completionPrefix().length()
-        self.editor.textCursor().insertText(insert.right(extra))
+        self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])
+        self.popup().hide()
 
     def complete(self, rect, suggestions = None):
         try:
@@ -227,7 +227,8 @@ class PMXCompleterHelper(QtGui.QCompleter):
             rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 10)
             self.popupView.updateGeometries()
             super(PMXCompleterHelper, self).complete(rect)
-        except:
+        except Exception, e:
+            print e
             return
 
     def buildModelItems(self, suggestions):

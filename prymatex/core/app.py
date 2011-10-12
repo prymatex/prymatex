@@ -57,7 +57,7 @@ class PMXApplication(QtGui.QApplication):
         self.setupFileManager()     #File Manager
         self.setupConfigDialog()    #Config Dialog
         self.setupBundleEditor()    #Bundle Editor
-        self.setupRPCThread()
+        self.setupServerThread()
         
         # Creates the GUI
         # args[1:] para ver si quiere abrir archivos los busco en los argumentos
@@ -203,15 +203,23 @@ class PMXApplication(QtGui.QApplication):
         manager.loadSupport(callbackSplashMessage)
         self.supportManager = manager
 
-    def setupRPCThread(self):
-        from prymatex.core.rpcserver import PMXXMLRPCServerThread
-        self.RPCServerThread = PMXXMLRPCServerThread(self)
-        self.RPCServerThread.start()
+    def setupServerThread(self):
+        from prymatex.core.server import PMXServerThread
+        self.serverThread = PMXServerThread(self)
+        self.serverThread.menuRequest.connect(self.on_menuRequest_triggered)
+        self.serverThread.start()
 
     def getEditorInstance(self, fileInfo = None, parent = None):
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
         return PMXCodeEditor.newInstance(fileInfo, parent)
     
+    #---------------------------------------------------
+    # Server Thread, signal handlers
+    #---------------------------------------------------
+    def on_menuRequest_triggered(self, menu):
+        print menu
+        self.mainWindow.currentEditor.showCompleter(menu["menuItems"])
+        
     #---------------------------------------------------
     # Exceptions, Print exceptions in a window
     #---------------------------------------------------

@@ -36,8 +36,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     
     @pmxConfigPorperty(default = QtGui.QFont('Monospace', 10))
     def font(self, font):
-        font.setStyleStrategy(QFont.ForceIntegerMetrics | QFont.PreferAntialias)
-        font.setStyleHint(QFont.Monospace)
+        font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics | QtGui.QFont.PreferAntialias)
+        font.setStyleHint(QtGui.QFont.Monospace)
         self.document().setDefaultFont(font)
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
@@ -638,8 +638,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def showCompleter(self, suggestions):
         completionPrefix = self.getCurrentWord()
         self.completer.setCompletionPrefix(completionPrefix)
-        #self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
-        #self.completer.setCurrentRow(0)
         cr = self.cursorRect()
         self.completer.complete(cr, suggestions)
     

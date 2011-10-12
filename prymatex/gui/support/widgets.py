@@ -532,8 +532,8 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         self.setupUi(self)
         assert parent != None and hasattr(parent, 'manager'), "Set parent and manager"
         self.manager = parent.manager
-        self.treeExcludedWidget.installEventManager(self)
-        self.treeMenuWidget.installEventManager(self)
+        self.treeExcludedWidget.installEventFilter(self)
+        self.treeMenuWidget.installEventFilter(self)
     
     def eventFilter(self, obj, event):
         if obj is self.treeMenuWidget and event.type() == QtCore.QEvent.Drop:
