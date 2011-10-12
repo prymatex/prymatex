@@ -6,7 +6,7 @@ from bisect import bisect
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QRect, Qt, SIGNAL
 from PyQt4.QtGui import QTextEdit, QTextFormat, QMenu, \
-    QTextCursor, QAction, QFont, QPalette, QPainter, QFontMetrics, QColor
+    QTextCursor, QAction, QPalette, QPainter, QColor
     
 from prymatex import resources
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPreferenceSettings
@@ -31,9 +31,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     SETTINGS_GROUP = 'CodeEditor'
     
     defaultSyntax = pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
-    softTabs = pmxConfigPorperty(default = True)
-    tabSize = pmxConfigPorperty(default = 4)
-    font = pmxConfigPorperty(default = QFont('Monospace', 10))
+    tabStopSoft = pmxConfigPorperty(default = True)
+    tabStopWidth = pmxConfigPorperty(default = 4)
+    
+    @pmxConfigPorperty(default = QtGui.QFont('Monospace', 10))
+    def font(self, font):
+        font.setStyleStrategy(QFont.ForceIntegerMetrics | QFont.PreferAntialias)
+        font.setStyleHint(QFont.Monospace)
+        self.document().setDefaultFont(font)
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
@@ -86,7 +91,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     
     @property
     def tabKeyBehavior(self):
-        return self.softTabs and u' ' * self.tabSize or u'\t'
+        return self.tabStopSoft and u' ' * self.tabStopWidth or u'\t'
     
     def __init__(self, fileInfo = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -267,7 +272,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         #QtGui.QPlainTextEdit.paintEvent(self, event)
         super(PMXCodeEditor, self).paintEvent(event)
         page_bottom = self.viewport().height()
-        font_metrics = QFontMetrics(self.document().defaultFont())
+        font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
 
         painter = QPainter(self.viewport())
         
@@ -606,10 +611,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 'TM_COLUMN_NUMBER': cursor.columnNumber() + 1, 
                 'TM_SCOPE': scope,
                 'TM_MODE': self.getSyntax().name,
-                'TM_SOFT_TABS': self.softTabs and u'YES' or u'NO',
-                'TM_TAB_SIZE': self.tabSize,
+                'TM_SOFT_TABS': self.tabStopSoft and u'YES' or u'NO',
+                'TM_TAB_SIZE': self.tabStopWidth,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
         })
+
         if current_word != None:
             env['TM_CURRENT_WORD'] = current_word
         if self.fileInfo is not None:
@@ -821,7 +827,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
 
     def unindent(self):
         cursor = self.textCursor()
-        #counter = self.tabSize if self.softTabs else 1
         if cursor.hasSelection():
             start, end = cursor.selectionStart(), cursor.selectionEnd()
             if start > end:
@@ -832,10 +837,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             new_cursor = QTextCursor(cursor)
             while True:
                 data = start.userData()
-                counter = self.tabSize if len(data.indent) > self.tabSize else len(data.indent)
+                counter = self.tabStopWidth if len(data.indent) > self.tabStopWidth else len(data.indent)
                 if counter > 0:
                     new_cursor.setPosition(start.position())
-                    for _j in range(self.tabSize):
+                    for _j in range(self.tabStopWidth):
                         new_cursor.deleteChar()
                 if start == end:
                     break
@@ -845,10 +850,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             block = cursor.block()
             data = cursor.block().userData()
-            counter = self.tabSize if len(data.indent) > self.tabSize else len(data.indent)
+            counter = self.tabStopWidth if len(data.indent) > self.tabStopWidth else len(data.indent)
             if counter > 0:
                 cursor.beginEditBlock()
-                position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabSize else cursor.position() - counter
+                position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabStopWidth else cursor.position() - counter
                 cursor.setPosition(block.position()) 
                 for _ in range(counter):
                     cursor.deleteChar()

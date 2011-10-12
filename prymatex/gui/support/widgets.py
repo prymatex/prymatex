@@ -32,7 +32,7 @@ class PMXEditorBaseWidget(QtGui.QWidget):
     TYPE = ''
     
     def __init__(self, parent = None):
-        super(PMXEditorBaseWidget, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
         #The bundle item
         self.bundleItem = None
         self.changes = {}
@@ -532,6 +532,17 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         self.setupUi(self)
         assert parent != None and hasattr(parent, 'manager'), "Set parent and manager"
         self.manager = parent.manager
+        self.treeExcludedWidget.installEventManager(self)
+        self.treeMenuWidget.installEventManager(self)
+    
+    def eventFilter(self, obj, event):
+        if obj is self.treeMenuWidget and event.type() == QtCore.QEvent.Drop:
+            print "drop"
+            return True
+        elif obj is self.treeExcludedWidget and event.type() == QtCore.QEvent.DragMove:
+            print "drag"
+            return True
+        return PMXEditorBaseWidget.eventFilter(self, obj, event)
     
     @property
     def title(self):

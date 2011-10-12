@@ -30,18 +30,42 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def setupEvents(self):
         self.lineEditIFind.installEventFilter(self)
         self.lineEditCommand.installEventFilter(self)
+        self.lineEditFind.installEventFilter(self)
+        self.lineEditReplace.installEventFilter(self)
         
     def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.KeyPress and obj is self.lineEditIFind:
-            if event.key() == QtCore.Qt.Key_Escape:
-                self.widgetIFind.hide()
-                return True
-            elif event.key() == QtCore.Qt.Key_Return and event.modifiers() == QtCore.Qt.ShiftModifier:
-                self.pushButtonIFindPrevious.click()
-                return True
-            elif event.key() == QtCore.Qt.Key_Return:
-                self.pushButtonIFindNext.click()
-                return True
+        if event.type() == QtCore.QEvent.KeyPress:
+            if obj is self.lineEditIFind:
+                if event.key() == QtCore.Qt.Key_Escape:
+                    self.pushButtonIFindClose.click()
+                    return True
+                elif event.key() == QtCore.Qt.Key_Return and event.modifiers() == QtCore.Qt.ShiftModifier:
+                    self.pushButtonIFindPrevious.click()
+                    return True
+                elif event.key() == QtCore.Qt.Key_Return:
+                    self.pushButtonIFindNext.click()
+                    return True
+            elif obj is self.lineEditCommand:
+                if event.key() == QtCore.Qt.Key_Escape:
+                    self.pushButtonCommandClose.click()
+                    return True
+            elif obj is self.lineEditFind:
+                if event.key() == QtCore.Qt.Key_Escape:
+                    self.pushButtonFindReplaceClose.click()
+                    return True
+                elif event.key() == QtCore.Qt.Key_Return and event.modifiers() == QtCore.Qt.ShiftModifier:
+                    self.pushButtonFindPrevious.click()
+                    return True
+                elif event.key() == QtCore.Qt.Key_Return:
+                    self.pushButtonFindNext.click()
+                    return True
+            elif  obj is lineEditReplace:
+                if event.key() == QtCore.Qt.Key_Escape:
+                    self.pushButtonFindReplaceClose.click()
+                    return True
+                elif event.key() == QtCore.Qt.Key_Return:
+                    self.pushButtonReplace.click()
+                    return True
         return QtGui.QWidget.eventFilter(self, obj, event)
 
     #============================================================
@@ -156,6 +180,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def showGoToLine(self):
         self.hideAllWidgets()
         self.widgetGoToLine.setVisible(True)
+        self.spinBoxGoToLine.setFocus()
         
     #============================================================
     # FindReplace widget
@@ -206,6 +231,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def showFindReplace(self):
         self.hideAllWidgets()
         self.widgetFindReplace.setVisible(True)
+        self.lineEditFind.setFocus()
         
     #============================================================
     # IFind widget
