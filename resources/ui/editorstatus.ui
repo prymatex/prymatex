@@ -349,10 +349,24 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxSyntaxes"/>
+       <widget class="QComboBox" name="comboBoxSyntaxes">
+        <property name="maximumSize">
+         <size>
+          <width>160</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxTabSize"/>
+       <widget class="QComboBox" name="comboBoxTabSize">
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QComboBox" name="comboBoxSymbols"/>

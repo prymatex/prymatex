@@ -63,7 +63,13 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxSyntaxes.setModel(self.application.supportManager.syntaxProxyModel);
         self.comboBoxSyntaxes.setModelColumn(0)
         self.comboBoxSyntaxes.setView(tableView)
-    
+        self.comboBoxTabSize.addItem("2", 2)
+        self.comboBoxTabSize.addItem("4", 4)
+        self.comboBoxTabSize.addItem("8", 8)
+        self.comboBoxTabSize.addItem("Other", -1)
+        self.comboBoxTabSize.insertSeparator(4)
+        self.comboBoxTabSize.addItem("Soft Tabs (Spaces)", -2)
+        
     def setupWidgetCommand(self):
         self.comboBoxInput.addItem("None", "none")
         self.comboBoxInput.addItem("Selection", "selection") #selectedText
@@ -95,6 +101,11 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         node = model.mapToSource(model.createIndex(index, 0))
         if self.currentEditor is not None:
             self.currentEditor.setSyntax(node.internalPointer())
+
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxTabSize_currentIndexChanged(self, index):
+        data = self.comboBoxTabSize.itemData(index)
+        print data
 
     def updateCursorPosition(self, editor = None):
         editor = editor or self.currentEditor

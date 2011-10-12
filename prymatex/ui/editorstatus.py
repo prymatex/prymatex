@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Tue Oct 11 20:55:15 2011
+# Created: Tue Oct 11 21:49:53 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -181,9 +181,11 @@ class Ui_CodeEditorStatus(object):
         self.labelLineColumn.setObjectName(_fromUtf8("labelLineColumn"))
         self.horizontalLayout_2.addWidget(self.labelLineColumn)
         self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
+        self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(160, 16777215))
         self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
         self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
         self.comboBoxTabSize = QtGui.QComboBox(self.widgetStatus)
+        self.comboBoxTabSize.setMaximumSize(QtCore.QSize(120, 16777215))
         self.comboBoxTabSize.setObjectName(_fromUtf8("comboBoxTabSize"))
         self.horizontalLayout_2.addWidget(self.comboBoxTabSize)
         self.comboBoxSymbols = QtGui.QComboBox(self.widgetStatus)
