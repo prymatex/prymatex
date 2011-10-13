@@ -62,6 +62,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.syntaxHighlighter.rehighlight()
         self.highlightCurrentLine()
     
+    #================================================================
+    # Regular expresions
+    #================================================================
+    RE_WORD = re.compile('\w+')
+    
     #Selection types
     SelectWord = QtGui.QTextCursor.WordUnderCursor #0
     SelectLine = QtGui.QTextCursor.LineUnderCursor #1
@@ -72,7 +77,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     
     #Cache de preferencias
     PREFERENCE_CACHE = {}
-    
     
     #================================================================
     # Editor more Modes
@@ -193,10 +197,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             return block.userData().getLastScope()
         return user_data.getScopeAtPosition(cursor.columnNumber())
     
-    def getCurrentWord(self):
+    def getTextUnderCursor(self):
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText()
+        
+    def getCurrentWord(self):
+        #Current word is not the same that current Text
+        word = self.getTextUnderCursor()
+        if self.RE_WORD.match(word):
+            return word
+        return ""
     
     def getSelectionBlockStartEnd(self):
         cursor = self.textCursor()
@@ -221,8 +232,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         menu.addAction(self.actionIndent)
         menu.addAction(self.actionUnindent)
         self.actionUnindent.setEnabled(self.canUnindent())
-        menu.exec_(event.globalPos());
-        del menu
+        menu.popup(event.globalPos());
         
     def lineNumberAreaWidth(self):
         return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + self.sidebar.bookmarkArea + self.sidebar.foldArea 
@@ -388,10 +398,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         if self.completerMode():
             if event.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Tab, Qt.Key_Escape, Qt.Key_Backtab):
                 event.ignore()
-                self.completer.popup().hide()
                 return
-            elif event.key == Qt.Key_Space:
-                self.completer.popup().hide()
         
         #Si lo toma un bundle item retorno
         if self.keyPressBundleItem(event):
@@ -423,11 +430,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
             self.keyPressIndent(event)
-            if self.completerMode():
-                completionPrefix = self.getCurrentWord()
+            completionPrefix = self.getCurrentWord()
+            if self.completerMode() and completionPrefix != self.completer.completionPrefix():
                 self.completer.setCompletionPrefix(completionPrefix)
-                #self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
-                #self.completer.setCurrentRow(0)
                 self.completer.complete(self.cursorRect())
     
     def keyPressBundleItem(self, event):
@@ -575,7 +580,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
-        menu = QMenu()
+        menu = QtGui.QMenu(self)
         for index, item in enumerate(items, 1):
             action = menu.addAction(item.buildMenuTextEntry("&" + str(index)))
             receiver = lambda item = item: self.insertBundleItem(item, tabTriggered = tabTriggered)
@@ -584,7 +589,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             point = self.mainWindow.cursor().pos()
         else:
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
-        menu.exec_(point)
+        menu.popup(point)
     
     def executeCommand(self, command = None, input = "none", output = "insertText"):
         if command is None:

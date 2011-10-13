@@ -3,6 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 from prymatex.support import PMXSyntax
+from prymatex import resources
 
 class PMXCursorsHelper(object):
     def __init__(self, editor):
@@ -198,14 +199,46 @@ class PMXCursorsHelper(object):
     
     def __iter__(self):
         return iter(self.cursors)
+        
+#=========================================================
+# Completer
+#=========================================================
+class CompleterModel(QtCore.QAbstractListModel): 
+    def __init__(self, suggestions, parent=None): 
+        QtCore.QAbstractListModel.__init__(self, parent) 
+        self.suggestions = suggestions 
 
+    def index (self, row, column = 0, parent = None):
+        if row < len(self.suggestions):
+            return self.createIndex(row, column, parent)
+        else:
+            return QtCore.QModelIndex()
+
+    def rowCount (self, parent = None):
+        return len(self.suggestions)
+
+    def data (self, index, role = QtCore.Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        suggestion = self.suggestions[index.row()]
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole, QtCore.Qt.EditRole]:
+            if 'display' in suggestion:
+                return suggestion['display']
+            elif 'title' in suggestion:
+                return suggestion['title']
+        elif role == QtCore.Qt.DecorationRole:
+            if 'image' in suggestion:
+                return QtGui.QIcon(suggestion['image'])
+            else:
+                return resources.ICONS['save']
+                #'insert', 'image', 'match', 'title'
+        
 class PMXCompleterHelper(QtGui.QCompleter):
     def __init__(self, editor):
-        super(PMXCompleterHelper, self).__init__()
+        QtGui.QCompleter.__init__(self, editor)
         self.editor = editor
         self.setWidget(self.editor)
-        #TODO: Mi propio modelo para autocompletado
-        self.popupView = QtGui.QListWidget()
+        self.popupView = QtGui.QListView()
         self.popupView.setAlternatingRowColors(True)
         self.popupView.setWordWrap(False)
         self.setPopup(self.popupView)
@@ -215,38 +248,14 @@ class PMXCompleterHelper(QtGui.QCompleter):
 
     def insertCompletion(self, insert):
         self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])
-        self.popup().hide()
 
     def complete(self, rect, suggestions = None):
-        try:
-            if suggestions is not None:
-                self.popupView.clear()
-                model = self.buildModelItems(suggestions)
-                self.setModel(model)
-                self.popup().setCurrentIndex(model.index(0, 0))
-            rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 10)
-            self.popupView.updateGeometries()
-            super(PMXCompleterHelper, self).complete(rect)
-        except Exception, e:
-            print e
-            return
-
-    def buildModelItems(self, suggestions):
-        for suggestion in suggestions:
-            if 'display' in suggestion:
-                item = QtGui.QListWidgetItem(suggestion['display'])
-                if 'insert' in suggestion:
-                    print "no, por ahora"
-                if 'image' in suggestion:
-                    item.setIcon(QtGui.QIcon(suggestion['image']))
-                if 'match' in suggestion:
-                    print "no, por ahora"
-            elif 'title' in suggestion:
-                item = QtGui.QListWidgetItem(suggestion['title'])
-            else:
-                continue
-            self.popupView.addItem(item)
-        return self.popupView.model()
+        if suggestions is not None:
+            model = CompleterModel(suggestions, self)
+            self.setModel(model)
+        self.popup().setCurrentIndex(self.completionModel().index(0, 0))
+        rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width())
+        QtGui.QCompleter.complete(self, rect)
 
 class PMXFoldingHelper(object):
     FOLDING_NONE = PMXSyntax.FOLDING_NONE              #Cuidado esto tiene que ser 0
