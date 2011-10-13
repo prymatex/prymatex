@@ -230,8 +230,7 @@ class CompleterModel(QtCore.QAbstractListModel):
             if 'image' in suggestion:
                 return QtGui.QIcon(suggestion['image'])
             else:
-                return resources.ICONS['save']
-                #'insert', 'image', 'match', 'title'
+                return resources.ICONS['inserttext']
         
 class PMXCompleterHelper(QtGui.QCompleter):
     def __init__(self, editor):
@@ -254,7 +253,7 @@ class PMXCompleterHelper(QtGui.QCompleter):
             model = CompleterModel(suggestions, self)
             self.setModel(model)
         self.popup().setCurrentIndex(self.completionModel().index(0, 0))
-        rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width())
+        rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 20)
         QtGui.QCompleter.complete(self, rect)
 
 class PMXFoldingHelper(object):
