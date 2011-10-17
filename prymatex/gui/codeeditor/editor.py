@@ -18,12 +18,17 @@ from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.helpers import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
+from prymatex.gui.codeeditor.models import PMXBookmarkListModel, PMXSymbolListModel, PMXCompleterListModel
 
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal()
+    symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
+    foldingChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
+    bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
+    textBlocksRemoved = QtCore.pyqtSignal()
     
     #=======================================================================
     # Settings
@@ -110,6 +115,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
         
+        #Models
+        self.bookmarks = PMXBookmarkListModel(self)
+        self.symbols = PMXSymbolListModel(self)
+        
         #Processors
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
@@ -119,7 +128,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.cursors = PMXCursorsHelper(self)
         self.folding = PMXFoldingHelper(self)
         self.completer = PMXCompleterHelper(self)
-        self.bookmarks = []
         
         self.setupActions()
         self.connectSignals()
@@ -644,7 +652,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         completionPrefix = self.getCurrentWord()
         self.completer.setCompletionPrefix(completionPrefix)
         cr = self.cursorRect()
-        self.completer.complete(cr, suggestions)
+        self.completer.setModel(PMXCompleterListModel(suggestions, self))
+        self.completer.complete(cr)
     
     #==========================================================================
     # Folding
