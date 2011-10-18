@@ -2,7 +2,6 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.gui.codeeditor.models import PMXCompleterListModel
 from prymatex.support import PMXSyntax
 from prymatex import resources
 
@@ -200,7 +199,7 @@ class PMXCursorsHelper(object):
     
     def __iter__(self):
         return iter(self.cursors)
-
+        
 class PMXCompleterHelper(QtGui.QCompleter):
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)
@@ -212,14 +211,12 @@ class PMXCompleterHelper(QtGui.QCompleter):
         self.setPopup(self.popupView)
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self.activated.connect(self.insertCompletion)
+        self.activated[str].connect(self.insertCompletion)
 
-    def insertCompletion(self, index):
-        item = index.data()
-        print item
+    def insertCompletion(self, insert):
         self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])
 
-    def complete(self, rect, suggestions = None):
+    def complete(self, rect):
         self.popup().setCurrentIndex(self.completionModel().index(0, 0))
         rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 20)
         QtGui.QCompleter.complete(self, rect)

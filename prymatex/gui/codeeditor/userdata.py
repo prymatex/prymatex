@@ -6,13 +6,19 @@ from PyQt4 import QtGui
 from prymatex.support.syntax import PMXSyntax
 
 class PMXBlockUserData(QtGui.QTextBlockUserData):
-    def __init__(self, scopes = []):
+    def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
-        self.scopes = scopes
+        self.scopes = []
+        #Folding
         self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
         self.folded = False
+        #Bookmark
+        self.bookmark = False
+        #Indent
         self.indent = ""
+        #Symbols
+        self.symbol = None
         self.textHash = None
         self.cache = None
 

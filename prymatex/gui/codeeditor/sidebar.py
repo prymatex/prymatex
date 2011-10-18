@@ -52,16 +52,18 @@ class PMXSidebar(QtGui.QWidget):
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 1,
                     str(line_count))
 
+                userData = block.userData()
+                
                 #Bookmarks
-                if line_count in self.editor.bookmarks:
+                if userData.bookmark:
                     painter.drawPixmap(1,
                         round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["bookmarkflag"].height(),
                         resources.IMAGES["bookmarkflag"])
-    
-                user_data = block.userData()
+                    
+                #Folding
                 mark = self.editor.folding.getFoldingMark(block)
                 if mark == self.editor.folding.FOLDING_START:
-                    if user_data.folded:
+                    if userData.folded:
                         painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
                             round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
                             resources.IMAGES["foldingcollapsed"])
@@ -98,13 +100,12 @@ class PMXSidebar(QtGui.QWidget):
                 if position.y() > page_bottom:
                     break
                 if position.y() < ys and (position.y() + fh) > ys:
-                    lineNumber = block.blockNumber() + 1
                     break
                 block = block.next()
             if event.pos().x() > xofs:
                 if block.userData().folded:
-                    self.editor.codeFoldingUnfold(lineNumber)
+                    self.editor.codeFoldingUnfold(block)
                 else:
-                    self.editor.codeFoldingFold(lineNumber)
+                    self.editor.codeFoldingFold(block)
             else:
-                self.editor.toggleBookmark(lineNumber)
+                self.editor.toggleBookmark(block)

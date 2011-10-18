@@ -13,6 +13,8 @@ class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog):
         self.model = QtGui.QStandardItemModel(self)
         self.proxy = QtGui.QSortFilterProxyModel(self)
         self.proxy.setSourceModel(self.model)
+        self.tableBundleItems.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableBundleItems.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableBundleItems.setModel(self.proxy)
         
     def select(self, items):
@@ -23,8 +25,6 @@ class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog):
         self.lineFilter.setFocus()
         for item in items:
             self.model.appendRow([ QtGui.QStandardItem(QtGui.QIcon(item.icon), item.name), QtGui.QStandardItem(item.trigger) ])
-        self.tableBundleItems.resizeColumnsToContents()
-        self.tableBundleItems.resizeRowsToContents()
         self.exec_()
         return self.item
     

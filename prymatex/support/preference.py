@@ -104,7 +104,6 @@ class PMXPreferenceSettings(object):
         #DecreasePattern evaluate line to decrease, no requiere del return
         #IncreaseOnlyNextLine on return indent nextline only
         #IgnoringLines evaluate line to unindent, no require el return
-        line = line.encode('utf-8')
         if self.decreaseIndentPattern != None and self.decreaseIndentPattern.search(line):
             return self.INDENT_DECREASE
         elif self.increaseIndentPattern != None and self.increaseIndentPattern.search(line):
@@ -114,6 +113,31 @@ class PMXPreferenceSettings(object):
         elif self.unIndentedLinePattern != None and self.unIndentedLinePattern.search(line):
             return self.UNINDENT
         return self.INDENT_NONE
+    
+    @staticmethod
+    def prepare_replacement(text):
+        repl = None
+        def expand(m, template):
+            def handle(match):
+                numeric, named = match.groups()
+                if numeric:
+                    return m.group(int(numeric)) or ""
+                return m.group(named) or ""
+            return compileRegexp(u"\$(?:(\d+)|g<(.+?)>)").sub(handle, template)
+        if '$' in text:
+            repl = lambda m, r = text: expand(m, r)
+        else:
+            repl = lambda m, r = text: r
+        return repl
+    
+    def extractSymbol(self, text):
+        if self.symbolTransformation is not None:
+            for regexp, transf, m in self.symbolTransformation:
+                pattern = compileRegexp(regexp)
+                if pattern.match(text):
+                    repl = self.prepare_replacement(transf)
+                    result = pattern.sub(repl, text)
+                    return result
     
 class PMXPreference(PMXBundleItem):
     KEYS = [ 'settings' ]

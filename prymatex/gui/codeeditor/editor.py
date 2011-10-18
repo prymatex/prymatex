@@ -18,16 +18,16 @@ from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.helpers import PMXCursorsHelper, PMXFoldingHelper, PMXCompleterHelper
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
-from prymatex.gui.codeeditor.models import PMXBookmarkListModel, PMXSymbolListModel, PMXCompleterListModel
+from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
 
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal()
+    bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     foldingChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
-    bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     textBlocksRemoved = QtCore.pyqtSignal()
     
     #=======================================================================
@@ -119,15 +119,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.bookmarks = PMXBookmarkListModel(self)
         self.symbols = PMXSymbolListModel(self)
         
-        #Processors
-        self.commandProcessor = PMXCommandProcessor(self)
-        self.macroProcessor = PMXMacroProcessor(self)
-        self.snippetProcessor = PMXSnippetProcessor(self)
-        
         #Helpers
         self.cursors = PMXCursorsHelper(self)
         self.folding = PMXFoldingHelper(self)
         self.completer = PMXCompleterHelper(self)
+        
+        #Processors
+        self.commandProcessor = PMXCommandProcessor(self)
+        self.macroProcessor = PMXMacroProcessor(self)
+        self.snippetProcessor = PMXSnippetProcessor(self)
         
         self.setupActions()
         self.connectSignals()
@@ -149,7 +149,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
         self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
         self.actionFind = QAction(self.trUtf8("Find"), self)
-    
+        
     def updateTabStatus(self):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
         
@@ -651,8 +651,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def showCompleter(self, suggestions):
         completionPrefix = self.getCurrentWord()
         self.completer.setCompletionPrefix(completionPrefix)
-        cr = self.cursorRect()
         self.completer.setModel(PMXCompleterListModel(suggestions, self))
+        cr = self.cursorRect()
         self.completer.complete(cr)
     
     #==========================================================================
@@ -745,18 +745,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #==========================================================================
     # Bookmarks and gotos
     #==========================================================================    
-    def toggleBookmark(self, lineNumber = None):
-        if lineNumber is None:
-            lineNumber = self.textCursor().block().blockNumber() + 1
-        if lineNumber in self.bookmarks:
-            self.bookmarks.remove(lineNumber)
-        else:
-            index = bisect(self.bookmarks, lineNumber)
-            self.bookmarks.insert(index, lineNumber)
+    def toggleBookmark(self, block = None):
+        block = block or self.textCursor().block()
+        block.userData().bookmark = not block.userData().bookmark
         self.sidebar.update()
     
     def removeAllBookmarks(self):
-        self.bookmarks = []
         self.sidebar.update()
     
     def bookmarkNext(self, lineNumber = None):

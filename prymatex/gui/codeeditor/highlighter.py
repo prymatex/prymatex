@@ -3,6 +3,7 @@ from PyQt4 import QtGui
 
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
+from prymatex.support.syntax import PMXSyntax
 
 WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 def whiteSpace(text):
@@ -26,6 +27,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor = PMXSyntaxProcessor()
         self.syntax = syntax
         self.theme = theme
+        self.lastBlockCount = 0
 
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
@@ -45,33 +47,38 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if format is not None:
                 self.setFormat(start, end - start, format)
     
-    def buildBlockUserData(self, block, data):
-        userData = block.userData()
+    def setupBlockUserData(self, block, userData, data):
         state = self.SINGLE_LINE
-        if userData is None:
-            userData = PMXBlockUserData(data[0])
-        else:
-            userData.setScopes(data[0])
+        userData.setScopes(data[0])
         if data[1] is not None:
             state = self.MULTI_LINE
             userData.setStackAndScopes(*data[1])
         
         text = block.text()
+        
         #Folding
         userData.foldingMark = self.syntax.folding(text)
-        #Deprecar cache
-        userData.textHash = hash(self.syntax.scopeName) + hash(text)
         
         #Indent
         userData.indent = whiteSpace(text)
-        return userData, state
+        
+        #Symbols
+        spaceLen = len(userData.indent)
+        scope = userData.getScopeAtPosition(spaceLen)
+        preferences = self.editor.getPreference(scope)
+        userData.symbol = preferences.extractSymbol(text[spaceLen:])
+        
+        #Hash the text and scope
+        userData.textHash = hash(self.syntax.scopeName) + hash(text)
+        
+        return state
         
     def highlightBlock(self, text):
-        #Start Parsing
-        userData = self.currentBlock().userData()
+        if self.lastBlockCount > self.document().blockCount():
+            self.editor.textBlocksRemoved.emit()
         
-        if userData != None and userData.textHash == hash(self.syntax.scopeName) + hash(text):
-            print "solo darle color"
+        userData = self.currentBlock().userData()
+        if userData is not None and userData.textHash == hash(self.syntax.scopeName) + hash(text):
             self.applyFormat(userData)
         else:
             self.processor.startParsing(self.syntax.scopeName)
@@ -87,11 +94,24 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.syntax.parseLine(stack, text, self.processor)
             
             data = self.processor.lines[-1]
-            userData, state = self.buildBlockUserData(self.currentBlock(), data)
-            self.setCurrentBlockUserData(userData)
+            if userData is None:
+                userData = PMXBlockUserData()
+                self.setCurrentBlockUserData(userData)
+            
+            oldSymbol = userData.symbol
+            oldFoldingMark = userData.foldingMark
+            
+            state = self.setupBlockUserData(self.currentBlock(), userData, data)
             self.setCurrentBlockState(state)
-            self.editor.folding.deprecateFolding(self.currentBlock().blockNumber())
+            
+            if userData.symbol != oldSymbol:
+                self.editor.symbolChanged.emit(self.currentBlock())
+            if userData.foldingMark != oldFoldingMark:
+                self.editor.foldingChanged.emit(self.currentBlock())
+            #self.editor.folding.deprecateFolding(self.currentBlock().blockNumber())
             self.applyFormat(userData)
+        
+        self.lastBlockCount = self.document().blockCount()
         
     def getFormat(self, scope):
         if self.theme is None:

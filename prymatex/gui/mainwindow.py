@@ -83,6 +83,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         from prymatex.gui.dockers.browser import PMXBrowserDock
         from prymatex.gui.dockers.console import PMXConsoleDock
         from prymatex.gui.dockers.logger import QtLogHandler, PMXLoggerDock
+        from prymatex.gui.codeeditor.dockers import PMXCodeSymbolsDock
         
         self.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
         
@@ -95,12 +96,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
         self.menuPanels.addAction(self.paneProject.toggleViewAction())
         self.paneProject.hide()
-        
-        self.paneSymbolList = PMXSymboldListDock(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneSymbolList)
-        self.menuPanels.addAction(self.paneSymbolList.toggleViewAction())
-        self.paneSymbolList.hide()
         '''
+        
         self.paneBrowser = PMXBrowserDock(self)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneBrowser)
         self.menuPanels.addAction(self.paneBrowser.toggleViewAction())
@@ -115,6 +112,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneLogging)
         self.menuPanels.addAction(self.paneLogging.toggleViewAction())
         self.paneLogging.hide()
+    
+        codeSymbols = PMXCodeSymbolsDock(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, codeSymbols)
+        self.menuPanels.addAction(codeSymbols.toggleViewAction())
+        self.dockers = [codeSymbols]
     
     def setupDialogs(self):
         from prymatex.gui.dialogs import PMXNewFromTemplateDialog
@@ -154,6 +156,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
 
         #Set editor to statusbar
         self.statusBar().setCurrentEditor(editor)
+        
+        #Set editor to Dockers
+        for docker in self.dockers:
+            docker.setCurrentEditor(editor)
         
         template = Template(self.windowTitleTemplate)
         title = [ editor.getTabTitle() ] if editor is not None else []
