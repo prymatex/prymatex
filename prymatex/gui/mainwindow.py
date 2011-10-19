@@ -139,11 +139,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     def addEmptyEditor(self):
         editor = self.application.getEditorInstance(parent = self)
         self.addEditor(editor)
-        self.setCurrentEditor(editor)
         
-    def addEditor(self, editor):
+    def addEditor(self, editor, focus = True):
         self.statusBar().addEditor(editor)
         self.splitTabWidget.addTab(editor)
+        if focus:
+            self.splitTabWidget.setCurrentWidget(editor)
 
     def removeEditor(self, editor):
         self.statusBar().removeEditor(editor)
@@ -180,14 +181,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             if self.currentEditor is not None and self.currentEditor.isNew() and not self.currentEditor.isModified():
                 self.closeEditor(self.currentEditor)
             editor = self.application.getEditorInstance(fileInfo, self)
-            self.addEditor(editor)
+            self.addEditor(editor, focus)
             content = self.application.fileManager.openFile(fileInfo)
             editor.setPlainText(content)
             editor.setFileInfo(fileInfo)
-        else:
-            editor.setCursorPosition(cursorPosition)
-        if focus:
-            self.setCurrentEditor(editor)
+        else:            
+            editor.setCursorPosition(cursorPosition)            
         return editor
     
     def saveEditor(self, editor = None, saveAs = False):
