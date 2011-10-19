@@ -23,9 +23,11 @@
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
-
+import uuid as uuidmodule
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp
+from prymatex.support.snippet import PMXSnippet
+from prymatex.support.processor import PMXDebugSnippetProcessor
 
 DEFAULT_SETTINGS = { 'completions': [],
                      'completionCommand': '',
@@ -51,7 +53,6 @@ class PMXPreferenceSettings(object):
     INDENT_DECREASE = 2
     INDENT_NEXTLINE = 3
     UNINDENT = 4
-    TRANSFORMATIONPATTERN = compileRegexp('s/(.*)/(.*)/([mg]?);?')
     def __init__(self, hash):
         for key in self.KEYS:
             value = hash.get(key, None)
@@ -61,7 +62,7 @@ class PMXPreferenceSettings(object):
                 elif key in [ 'shellVariables' ]:
                     value = dict(map(lambda d: (d['name'], d['value']), value))
                 elif key in [ 'symbolTransformation' ]:
-                    value = self.TRANSFORMATIONPATTERN.findall(value)
+                    value = map(lambda value: value.strip(), value.split(";"))
             setattr(self, key, value)
     
     @property
@@ -75,10 +76,7 @@ class PMXPreferenceSettings(object):
                 elif key in [ 'shellVariables' ]:
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
                 elif key in [ 'symbolTransformation' ]:
-                    symbols = []
-                    for v in value:
-                        symbols.append('s/' + v[0] + '/' + v[1] + '/' + v[2])
-                    value = ";".join(symbols) + ";"
+                    value = ";".join(value) + ";"
                 hash[key] = value
         return hash
     
@@ -114,30 +112,26 @@ class PMXPreferenceSettings(object):
             return self.UNINDENT
         return self.INDENT_NONE
     
-    @staticmethod
-    def prepare_replacement(text):
-        repl = None
-        def expand(m, template):
-            def handle(match):
-                numeric, named = match.groups()
-                if numeric:
-                    return m.group(int(numeric)) or ""
-                return m.group(named) or ""
-            return compileRegexp(u"\$(?:(\d+)|g<(.+?)>)").sub(handle, template)
-        if '$' in text:
-            repl = lambda m, r = text: expand(m, r)
-        else:
-            repl = lambda m, r = text: r
-        return repl
+    def compileSymbolTransformation(self):
+        self.snippetsTransformation = []
+        for symbol in self.symbolTransformation:
+            symbol = "${SYMBOL" + symbol[1:] + "}"
+            hash = {    'content': symbol, 
+                           'name': symbol }
+            snippet = PMXSnippet(uuidmodule.uuid1(), "internal", hash = hash)
+            self.snippetsTransformation.append(snippet)
     
     def transformSymbol(self, text):
-        if self.symbolTransformation is not None:
-            for regexp, transf, m in self.symbolTransformation:
-                pattern = compileRegexp(regexp)
-                if pattern.match(text):
-                    repl = self.prepare_replacement(transf)
-                    result = pattern.sub(repl, text)
-                    text = result
+        #TODO: Hacer la transformacion de los simbolos
+        return text
+        if not hasattr(self, 'snippetsTransformation'):
+            self.compileSymbolTransformation()
+        pro = PMXDebugSnippetProcessor()
+        for snippet in self.snippetsTransformation:
+            snippet.execute(pro)
+            text = pro.text
+            if text:
+                return text
         return text
     
 class PMXPreference(PMXBundleItem):

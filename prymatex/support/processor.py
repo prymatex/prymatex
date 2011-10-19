@@ -135,9 +135,10 @@ class PMXDebugSnippetProcessor(PMXSnippetProcessor):
     
     def startSnippet(self, snippet):
         self.snippet = snippet
+        self.text = ""
         self.position = 0
-        env = snippet.buildEnvironment()
-        self.__env = env
+        #env = snippet.buildEnvironment()
+        self.__env = {}
     
     def endSnippet(self):
         self.snippet = None
@@ -160,5 +161,5 @@ class PMXDebugSnippetProcessor(PMXSnippetProcessor):
         if self.transformation:
             self.capture += text
         else:
-            print text,
+            self.text += text
             self.position += len(text)
