@@ -30,7 +30,7 @@ from prymatex.support.utils import compileRegexp
 DEFAULT_SETTINGS = { 'completions': [],
                      'completionCommand': '',
                      'disableDefaultCompletion': 0,
-                     'showInSymbolList': None,
+                     'showInSymbolList': 0,
                      'symbolTransformation': None,
                      'highlightPairs': [],
                      'smartTypingPairs': [],
@@ -130,14 +130,15 @@ class PMXPreferenceSettings(object):
             repl = lambda m, r = text: r
         return repl
     
-    def extractSymbol(self, text):
+    def transformSymbol(self, text):
         if self.symbolTransformation is not None:
             for regexp, transf, m in self.symbolTransformation:
                 pattern = compileRegexp(regexp)
                 if pattern.match(text):
                     repl = self.prepare_replacement(transf)
                     result = pattern.sub(repl, text)
-                    return result
+                    text = result
+        return text
     
 class PMXPreference(PMXBundleItem):
     KEYS = [ 'settings' ]

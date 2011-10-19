@@ -9,12 +9,26 @@ from prymatex import resources
 #=========================================================
 class PMXBookmarkListModel(QtCore.QAbstractListModel): 
     def __init__(self, editor): 
-        QtCore.QAbstractListModel.__init__(self, editor) 
+        QtCore.QAbstractListModel.__init__(self, editor)
+        self.editor = editor
+        self.editor.textBlocksRemoved.connect(self.on_textBlocksRemoved)
         self.blocks = []
 
+    def __contains__(self, block):
+        return block in self.blocks
+        
+    def on_textBlocksRemoved(self):
+        remove = filter(lambda block: block.userData() is None, self.blocks)
+        if remove:
+            sIndex = self.blocks.index(remove[0])
+            eIndex = self.blocks.index(remove[-1])
+            self.beginRemoveRows(QtCore.QModelIndex(), sIndex, eIndex)
+            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
+            self.endRemoveRows()
+            
     def index (self, row, column = 0, parent = None):
         if row < len(self.blocks):
-            return self.createIndex(row, column, parent)
+            return self.createIndex(row, column, self.blocks[row])
         else:
             return QtCore.QModelIndex()
 
@@ -28,7 +42,41 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return block.text()
         elif role == QtCore.Qt.DecorationRole:
-            return resources.ICONS['inserttext']
+            return resources.IMAGES['bookmarkflag']
+    
+    def toggleBookmark(self, block):
+        try:
+            index = self.blocks.index(block)
+            self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+            self.blocks.remove(block)
+            self.endRemoveRows()
+        except ValueError:
+            indexes = map(lambda block: block.blockNumber(), self.blocks)
+            index = bisect(indexes, block.blockNumber())
+            self.beginInsertRows(QtCore.QModelIndex(), index, index)
+            self.blocks.insert(index, block)
+            self.endInsertRows()
+
+    def removeAllBookmarks(self):
+        self.beginRemoveRows(QtCore.QModelIndex(), 0, len(self.blocks))
+        self.blocks = []
+        self.endRemoveRows()
+    
+    def nextBookmark(self, block):
+        if not len(self.blocks): return None
+        indexes = map(lambda block: block.blockNumber(), self.blocks)
+        index = bisect(indexes, block.blockNumber())
+        if index == len(self.blocks):
+            index = 0
+        return self.blocks[index]
+    
+    def previousBookmark(self, block):
+        if not len(self.blocks): return None
+        indexes = map(lambda block: block.blockNumber(), self.blocks)
+        index = bisect(indexes, block.blockNumber()) if block not in self.blocks else bisect(indexes, block.blockNumber() - 1)
+        if index == 0:
+            index = len(self.blocks) - 1
+        return self.blocks[index - 1]
     
 #=========================================================
 # Symbol
@@ -60,7 +108,6 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
     
     def on_textBlocksRemoved(self):
         remove = filter(lambda block: block.userData() is None, self.blocks)
-        print remove
         if remove:
             sIndex = self.blocks.index(remove[0])
             eIndex = self.blocks.index(remove[-1])
@@ -93,7 +140,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
 class PMXCompleterListModel(QtCore.QAbstractListModel): 
     def __init__(self, suggestions, editor): 
         QtCore.QAbstractListModel.__init__(self, editor) 
-        self.suggestions = suggestions 
+        self.suggestions = suggestions
 
     def index (self, row, column = 0, parent = None):
         if row < len(self.suggestions):
@@ -109,12 +156,15 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
             return None
         suggestion = self.suggestions[index.row()]
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole, QtCore.Qt.EditRole]:
-            if 'display' in suggestion:
-                return suggestion['display']
-            elif 'title' in suggestion:
-                return suggestion['title']
+            if isinstance(suggestion, dict):
+                if 'display' in suggestion:
+                    return suggestion['display']
+                elif 'title' in suggestion:
+                    return suggestion['title']
+            else:
+                return suggestion
         elif role == QtCore.Qt.DecorationRole:
-            if 'image' in suggestion:
+            if isinstance(suggestion, dict) and 'image' in suggestion:
                 return QtGui.QIcon(suggestion['image'])
             else:
                 return resources.ICONS['inserttext']

@@ -31,3 +31,31 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget):
     def on_tableViewSymbols_doubleClicked(self, index):
         block = index.internalPointer()
         self.currentEditor.goToBlock(block)
+        
+class PMXCodeBookmarksDock(QtGui.QDockWidget):
+    def __init__(self, parent):
+        QtGui.QDockWidget.__init__(self, parent)
+        self.setWindowTitle(_("Bookmarks"))
+        self.tableViewBookmarks = QtGui.QTableView()
+        self.tableViewBookmarks.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.tableViewBookmarks.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableViewBookmarks.setShowGrid(False)
+        self.tableViewBookmarks.horizontalHeader().setVisible(False)
+        self.tableViewBookmarks.verticalHeader().setVisible(False)
+        self.tableViewBookmarks.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewBookmarks.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewBookmarks.activated.connect(self.on_tableViewBookmarks_activated)
+        self.tableViewBookmarks.doubleClicked.connect(self.on_tableViewBookmarks_doubleClicked)
+        self.setWidget(self.tableViewBookmarks)
+        
+    def setCurrentEditor(self, editor):
+        self.currentEditor = editor
+        self.tableViewBookmarks.setModel(editor.bookmarks)
+        
+    def on_tableViewBookmarks_activated(self, index):
+        block = index.internalPointer()
+        self.currentEditor.goToBlock(block)
+    
+    def on_tableViewBookmarks_doubleClicked(self, index):
+        block = index.internalPointer()
+        self.currentEditor.goToBlock(block)

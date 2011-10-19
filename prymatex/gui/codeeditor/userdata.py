@@ -13,8 +13,6 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
         self.folded = False
-        #Bookmark
-        self.bookmark = False
         #Indent
         self.indent = ""
         #Symbols

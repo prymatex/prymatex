@@ -62,17 +62,23 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         #Indent
         userData.indent = whiteSpace(text)
         
-        #Symbols
-        spaceLen = len(userData.indent)
-        scope = userData.getScopeAtPosition(spaceLen)
-        preferences = self.editor.getPreference(scope)
-        userData.symbol = preferences.extractSymbol(text[spaceLen:])
+        self.setupPreferences(text, userData)
         
         #Hash the text and scope
         userData.textHash = hash(self.syntax.scopeName) + hash(text)
         
         return state
+
+    def setupPreferences(self, text, userData):
+        preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.getAllScopes())
         
+        symbolRange = filter(lambda (preference, start, end): preference.showInSymbolList == 1, preferences)
+        if symbolRange:
+            symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
+            userData.symbol = symbolRange[0][0].transformSymbol(symbol)
+        else:
+            userData.symbol = None
+
     def highlightBlock(self, text):
         if self.lastBlockCount > self.document().blockCount():
             self.editor.textBlocksRemoved.emit()
@@ -108,9 +114,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.editor.symbolChanged.emit(self.currentBlock())
             if userData.foldingMark != oldFoldingMark:
                 self.editor.foldingChanged.emit(self.currentBlock())
-            #self.editor.folding.deprecateFolding(self.currentBlock().blockNumber())
             self.applyFormat(userData)
-        
+
         self.lastBlockCount = self.document().blockCount()
         
     def getFormat(self, scope):

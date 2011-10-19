@@ -52,14 +52,14 @@ class PMXSidebar(QtGui.QWidget):
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 1,
                     str(line_count))
 
-                userData = block.userData()
-                
                 #Bookmarks
-                if userData.bookmark:
+                if block in self.editor.bookmarks:
                     painter.drawPixmap(1,
                         round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["bookmarkflag"].height(),
                         resources.IMAGES["bookmarkflag"])
-                    
+                        
+                userData = block.userData()
+                
                 #Folding
                 mark = self.editor.folding.getFoldingMark(block)
                 if mark == self.editor.folding.FOLDING_START:

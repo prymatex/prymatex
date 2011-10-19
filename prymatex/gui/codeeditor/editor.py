@@ -421,7 +421,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             return
         
         key = event.key()
-    
+        modifiers = event.modifiers()
         if key == Qt.Key_Tab:
             self.tabPressEvent(event)
         elif key == Qt.Key_Backtab:
@@ -432,6 +432,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.returnPressEvent(event)
         elif key == Qt.Key_Insert:
             self.setOverwriteMode(not self.overwriteMode())
+        elif key == Qt.Key_Space and modifiers == Qt.ControlModifier:
+            self._find_completion()
         else:
             super(PMXCodeEditor, self).keyPressEvent(event)
 
@@ -648,6 +650,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #==========================================================================
     # Completer
     #==========================================================================
+    def _find_completion(self):
+        scope = self.getCurrentScope()
+        preferences = self.getPreference(scope)
+        print preferences.completionCommand
+        if preferences.completions:
+            self.showCompleter(preferences.completions)
+        
     def showCompleter(self, suggestions):
         completionPrefix = self.getCurrentWord()
         self.completer.setCompletionPrefix(completionPrefix)
@@ -747,30 +756,24 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #==========================================================================    
     def toggleBookmark(self, block = None):
         block = block or self.textCursor().block()
-        block.userData().bookmark = not block.userData().bookmark
+        self.bookmarks.toggleBookmark(block)
         self.sidebar.update()
     
     def removeAllBookmarks(self):
+        self.bookmarks.removeAllBookmarks()
         self.sidebar.update()
     
-    def bookmarkNext(self, lineNumber = None):
-        if lineNumber is None:
-            lineNumber = self.textCursor().block().blockNumber() + 1
-        index = bisect(self.bookmarks, lineNumber)
-        if index < len(self.bookmarks):
-            self.goToLine(self.bookmarks[index])
-        else:
-            self.goToLine(self.bookmarks[0])
-    
-    def bookmarkPrevious(self, lineNumber = None):
-        if lineNumber is None:
-            lineNumber = self.textCursor().block().blockNumber() + 1
-        if line_number in self.bookmarks:
-            index = self.bookmarks.index(lineNumber)
-        else:
-            index = bisect(self.bookmarks, lineNumber)
-        if index < len(self.bookmarks):
-            self.goToLine(self.bookmarks[index - 1])
+    def bookmarkNext(self, block = None):
+        block = block or self.textCursor().block()
+        block = self.bookmarks.nextBookmark(block)
+        if block is not None:
+            self.goToBlock(block)
+
+    def bookmarkPrevious(self, block = None):
+        block = block or self.textCursor().block()
+        block = self.bookmarks.previousBookmark(block)
+        if block is not None:
+            self.goToBlock(block)
 
     def goToBlock(self, block):
         cursor = self.textCursor()

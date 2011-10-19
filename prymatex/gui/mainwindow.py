@@ -83,7 +83,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         from prymatex.gui.dockers.browser import PMXBrowserDock
         from prymatex.gui.dockers.console import PMXConsoleDock
         from prymatex.gui.dockers.logger import QtLogHandler, PMXLoggerDock
-        from prymatex.gui.codeeditor.dockers import PMXCodeSymbolsDock
+        from prymatex.gui.codeeditor.dockers import PMXCodeSymbolsDock, PMXCodeBookmarksDock
         
         self.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
         
@@ -112,11 +112,18 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.addDockWidget(Qt.BottomDockWidgetArea, self.paneLogging)
         self.menuPanels.addAction(self.paneLogging.toggleViewAction())
         self.paneLogging.hide()
-    
+
+        codeBookmarks = PMXCodeBookmarksDock(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, codeBookmarks)
+        self.menuPanels.addAction(codeBookmarks.toggleViewAction())
+        
         codeSymbols = PMXCodeSymbolsDock(self)
         self.addDockWidget(Qt.RightDockWidgetArea, codeSymbols)
         self.menuPanels.addAction(codeSymbols.toggleViewAction())
-        self.dockers = [codeSymbols]
+        
+        self.tabifyDockWidget(codeSymbols, codeBookmarks)
+        
+        self.dockers = [codeSymbols, codeBookmarks]
     
     def setupDialogs(self):
         from prymatex.gui.dialogs import PMXNewFromTemplateDialog
