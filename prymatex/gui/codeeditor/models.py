@@ -75,7 +75,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         indexes = map(lambda block: block.blockNumber(), self.blocks)
         index = bisect(indexes, block.blockNumber()) if block not in self.blocks else bisect(indexes, block.blockNumber() - 1)
         if index == 0:
-            index = len(self.blocks) - 1
+            index = len(self.blocks)
         return self.blocks[index - 1]
     
 #=========================================================
