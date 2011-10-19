@@ -27,7 +27,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
             self.endRemoveRows()
             
     def index (self, row, column = 0, parent = None):
-        if row < len(self.blocks):
+        if 0 <= row < len(self.blocks):
             return self.createIndex(row, column, self.blocks[row])
         else:
             return QtCore.QModelIndex()
@@ -116,7 +116,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             self.endRemoveRows()
             
     def index (self, row, column = 0, parent = None):
-        if row < len(self.blocks):
+        if 0 <= row < len(self.blocks):
             return self.createIndex(row, column, self.blocks[row])
         else:
             return QtCore.QModelIndex()
