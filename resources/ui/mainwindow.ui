@@ -88,6 +88,12 @@
      <addaction name="actionZoomIn"/>
      <addaction name="actionZoomOut"/>
     </widget>
+    <widget class="QMenu" name="menuPanels">
+     <property name="title">
+      <string>Panels</string>
+     </property>
+    </widget>
+    <addaction name="menuPanels"/>
     <addaction name="menuFont"/>
     <addaction name="menuGutter"/>
     <addaction name="separator"/>
@@ -117,11 +123,6 @@
     <addaction name="separator"/>
     <addaction name="actionExecute"/>
     <addaction name="actionFilterThroughCommand"/>
-   </widget>
-   <widget class="QMenu" name="menuPanels">
-    <property name="title">
-     <string>&amp;Panels</string>
-    </property>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -200,7 +201,6 @@
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
-   <addaction name="menuPanels"/>
    <addaction name="menuText"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
@@ -704,6 +704,11 @@
   <action name="actionRemoveAllRecentFiles">
    <property name="text">
     <string>Remove All Recent Files</string>
+   </property>
+  </action>
+  <action name="actionRr">
+   <property name="text">
+    <string>rr</string>
    </property>
   </action>
  </widget>

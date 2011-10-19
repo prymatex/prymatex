@@ -771,7 +771,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             index = bisect(self.bookmarks, lineNumber)
         if index < len(self.bookmarks):
             self.goToLine(self.bookmarks[index - 1])
-    
+
+    def goToBlock(self, block):
+        cursor = self.textCursor()
+        cursor.setPosition(block.position())
+        self.setTextCursor(cursor)    
+
     def goToLine(self, lineNumber):
         cursor = self.textCursor()
         cursor.setPosition(self.document().findBlockByNumber(lineNumber - 1).position())

@@ -23,4 +23,5 @@ IMAGES = {
 ICONS = {
     "save": QtGui.QIcon(":/icons/actions/document-save.png"),
     "inserttext": QtGui.QIcon(":/icons/actions/insert-text.png"),
+    "codefunction": QtGui.QIcon(":/icons/actions/code-function.png")
 }

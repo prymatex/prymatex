@@ -16,7 +16,18 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget):
         self.tableViewSymbols.verticalHeader().setVisible(False)
         self.tableViewSymbols.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableViewSymbols.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewSymbols.activated.connect(self.on_tableViewSymbols_activated)
+        self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
         self.setWidget(self.tableViewSymbols)
         
     def setCurrentEditor(self, editor):
+        self.currentEditor = editor
         self.tableViewSymbols.setModel(editor.symbols)
+        
+    def on_tableViewSymbols_activated(self, index):
+        block = index.internalPointer()
+        self.currentEditor.goToBlock(block)
+    
+    def on_tableViewSymbols_doubleClicked(self, index):
+        block = index.internalPointer()
+        self.currentEditor.goToBlock(block)

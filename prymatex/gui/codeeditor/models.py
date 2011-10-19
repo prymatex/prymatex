@@ -29,7 +29,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
             return block.text()
         elif role == QtCore.Qt.DecorationRole:
             return resources.ICONS['inserttext']
-
+    
 #=========================================================
 # Symbol
 #=========================================================
@@ -70,7 +70,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             
     def index (self, row, column = 0, parent = None):
         if row < len(self.blocks):
-            return self.createIndex(row, column, parent)
+            return self.createIndex(row, column, self.blocks[row])
         else:
             return QtCore.QModelIndex()
 
@@ -85,7 +85,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
         elif role == QtCore.Qt.DecorationRole:
-            return resources.ICONS['inserttext']
+            return resources.ICONS['codefunction']
 
 #=========================================================
 # Completer

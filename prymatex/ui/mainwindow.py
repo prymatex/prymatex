@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Thu Oct 13 20:28:16 2011
+# Created: Tue Oct 18 21:27:00 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -48,12 +48,12 @@ class Ui_MainWindow(object):
         self.menuGutter.setObjectName(_fromUtf8("menuGutter"))
         self.menuFont = QtGui.QMenu(self.menuView)
         self.menuFont.setObjectName(_fromUtf8("menuFont"))
+        self.menuPanels = QtGui.QMenu(self.menuView)
+        self.menuPanels.setObjectName(_fromUtf8("menuPanels"))
         self.menuText = QtGui.QMenu(self.menubar)
         self.menuText.setObjectName(_fromUtf8("menuText"))
         self.menuConvert = QtGui.QMenu(self.menuText)
         self.menuConvert.setObjectName(_fromUtf8("menuConvert"))
-        self.menuPanels = QtGui.QMenu(self.menubar)
-        self.menuPanels.setObjectName(_fromUtf8("menuPanels"))
         self.menuNavigation = QtGui.QMenu(self.menubar)
         self.menuNavigation.setObjectName(_fromUtf8("menuNavigation"))
         self.menuHelp = QtGui.QMenu(self.menubar)
@@ -254,6 +254,8 @@ class Ui_MainWindow(object):
         self.actionOpenAllRecentFiles.setObjectName(_fromUtf8("actionOpenAllRecentFiles"))
         self.actionRemoveAllRecentFiles = QtGui.QAction(MainWindow)
         self.actionRemoveAllRecentFiles.setObjectName(_fromUtf8("actionRemoveAllRecentFiles"))
+        self.actionRr = QtGui.QAction(MainWindow)
+        self.actionRr.setObjectName(_fromUtf8("actionRr"))
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuFile.addAction(self.actionNew)
@@ -275,6 +277,7 @@ class Ui_MainWindow(object):
         self.menuGutter.addAction(self.actionShowLineNumbers)
         self.menuFont.addAction(self.actionZoomIn)
         self.menuFont.addAction(self.actionZoomOut)
+        self.menuView.addAction(self.menuPanels.menuAction())
         self.menuView.addAction(self.menuFont.menuAction())
         self.menuView.addAction(self.menuGutter.menuAction())
         self.menuView.addSeparator()
@@ -337,7 +340,6 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
-        self.menubar.addAction(self.menuPanels.menuAction())
         self.menubar.addAction(self.menuText.menuAction())
         self.menubar.addAction(self.menuNavigation.menuAction())
         self.menubar.addAction(self.menuBundles.menuAction())
@@ -354,9 +356,9 @@ class Ui_MainWindow(object):
         self.menuView.setTitle(_('&View'))
         self.menuGutter.setTitle(_('Gutter'))
         self.menuFont.setTitle(_('Font'))
+        self.menuPanels.setTitle(_('Panels'))
         self.menuText.setTitle(_('&Text'))
         self.menuConvert.setTitle(_('Convert'))
-        self.menuPanels.setTitle(_('&Panels'))
         self.menuNavigation.setTitle(_('&Navigation'))
         self.menuHelp.setTitle(_('&Help'))
         self.menuEdit.setTitle(_('&Edit'))
@@ -455,6 +457,7 @@ class Ui_MainWindow(object):
         self.actionFindReplace.setText(_('Replace'))
         self.actionOpenAllRecentFiles.setText(_('Open All Recent Files'))
         self.actionRemoveAllRecentFiles.setText(_('Remove All Recent Files'))
+        self.actionRr.setText(_('rr'))
 
 from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc
