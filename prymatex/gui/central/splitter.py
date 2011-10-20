@@ -283,11 +283,12 @@ class PMXSplitTabWidget(QtGui.QSplitter):
 
         if tw is not None:
             tw.setCurrentIndex(tidx)
-
+        
         # Save the new current widget.
         self._current_tab_w = tw
-        self._current_tab_idx = tidx
-        self.tabWindowChanged.emit(self._current_tab_w.widget(self._current_tab_idx))
+        widget = self._current_tab_w.widget(tidx)
+        self._current_tab_idx = tidx if widget is not None else -1
+        self.tabWindowChanged.emit(widget)
 
     def _set_focus(self):
         """ Set the focus to an appropriate widget in the current tab. """

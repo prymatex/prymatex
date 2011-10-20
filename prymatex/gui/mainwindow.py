@@ -54,7 +54,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.setupStatusBar()
         
         # Connect Signals
-        self.splitTabWidget.tabWindowChanged.connect(self.setCurrentEditor)
+        self.splitTabWidget.tabWindowChanged.connect(self._set_current_editor)
+        self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
         
         utils.centerWidget(self, scale = (0.9, 0.8))
@@ -157,7 +158,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             if editor.fileInfo == fileInfo:
                 return editor
 
-    def setCurrentEditor(self, editor):
+    def _set_current_editor(self, editor):
         # Handle the trivial case.
         if self.currentEditor is editor:
             return
