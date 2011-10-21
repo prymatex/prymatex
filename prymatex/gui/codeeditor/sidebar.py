@@ -57,12 +57,12 @@ class PMXSidebar(QtGui.QWidget):
                     painter.drawPixmap(1,
                         round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["bookmarkflag"].height(),
                         resources.IMAGES["bookmarkflag"])
-                        
+
                 userData = block.userData()
-                
+
                 #Folding
                 mark = self.editor.folding.getFoldingMark(block)
-                if mark == self.editor.folding.FOLDING_START:
+                if self.editor.folding.isStart(mark):
                     if userData.folded:
                         painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
                             round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
@@ -71,7 +71,7 @@ class PMXSidebar(QtGui.QWidget):
                         painter.drawPixmap(self.width() - resources.IMAGES["foldingtop"].width() - 1,
                             round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingtop"].height(),
                             resources.IMAGES["foldingtop"])
-                elif mark == self.editor.folding.FOLDING_STOP:
+                elif self.editor.folding.isStop(mark):
                     painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
                         round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
                         resources.IMAGES["foldingbottom"])

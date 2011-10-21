@@ -59,7 +59,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
                 elif event.key() == QtCore.Qt.Key_Return:
                     self.pushButtonFindNext.click()
                     return True
-            elif  obj is lineEditReplace:
+            elif obj is self.lineEditReplace:
                 if event.key() == QtCore.Qt.Key_Escape:
                     self.pushButtonFindReplaceClose.click()
                     return True
@@ -116,6 +116,35 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxFindMode.addItem("Regular expressions", 3)
         
     #============================================================
+    # Handle editors
+    #============================================================
+    def disconnectEditor(self, editor):
+        editor.cursorPositionChanged.disconnect(self.on_cursorPositionChanged)
+        editor.syntaxChanged.disconnect(self.on_syntaxChanged)
+        
+    def connectEditor(self, editor):
+        editor.cursorPositionChanged.connect(self.on_cursorPositionChanged)
+        editor.syntaxChanged.connect(self.on_syntaxChanged)
+        
+    def setCurrentEditor(self, editor):
+        assert editor in self.editors, "Editor not is in editors"
+        self.currentEditor = editor
+        self.comboBoxSymbols.setModel(editor.symbols)
+        self.on_cursorPositionChanged(editor)
+        self.on_syntaxChanged(editor)
+        self.hideAllWidgets()
+
+    def addEditor(self, editor):
+        assert editor not in self.editors, "Editor is in editors"
+        self.editors.append(editor)
+        self.connectEditor(editor)
+    
+    def removeEditor(self, editor):
+        assert editor in self.editors, "Editor not is in editors"
+        self.disconnectEditor(editor)
+        self.editors.remove(editor)
+        
+    #============================================================
     # Status Widget
     #============================================================
     # AutoConnect signals----------------------------------------
@@ -129,16 +158,32 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     @QtCore.pyqtSlot(int)
     def on_comboBoxTabSize_currentIndexChanged(self, index):
         data = self.comboBoxTabSize.itemData(index)
-        print data
+    
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxSymbols_currentIndexChanged(self, pos):
+        model = self.comboBoxSymbols.model()
+        index = model.index(pos)
+        if index.isValid():
+            block = index.internalPointer()
+            self.currentEditor.goToBlock(block)
+            self.currentEditor.setFocus()
 
-    def updateCursorPosition(self, editor = None):
+    def on_cursorPositionChanged(self, editor = None):
         editor = editor or self.currentEditor
         cursor = editor.textCursor()
         line = cursor.blockNumber() + 1
         column = cursor.columnNumber() + 1
-        self.labelLineColumn.setText("Line: %5d Column: %5d" % (line, column))
+        selection = cursor.selectionEnd() - cursor.selectionStart()
+        self.labelLineColumn.setText("Line: %5d Column: %5d Selection: %5d" % (line, column, selection))
+        #Symbols
+        model = self.comboBoxSymbols.model()
+        index = model.findBlockIndex(cursor.block())
+        if index >= 0:
+            self.comboBoxSymbols.blockSignals(True)
+            self.comboBoxSymbols.setCurrentIndex(index)
+            self.comboBoxSymbols.blockSignals(False)
         
-    def updateSyntax(self, editor = None):
+    def on_syntaxChanged(self, editor = None):
         editor = editor or self.currentEditor
         model = self.comboBoxSyntaxes.model()
         index = model.findItemIndex(editor.getSyntax())
@@ -281,29 +326,3 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.hideAllWidgets()
         self.widgetIFind.setVisible(True)
         self.lineEditIFind.setFocus()
-        
-    def disconnectEditor(self, editor):
-        editor.cursorPositionChanged.disconnect(self.updateCursorPosition)
-        editor.syntaxChanged.disconnect(self.updateSyntax)
-        
-    def connectEditor(self, editor):
-        editor.cursorPositionChanged.connect(self.updateCursorPosition)
-        editor.syntaxChanged.connect(self.updateSyntax)
-        
-    def setCurrentEditor(self, editor):
-        assert editor in self.editors, "Editor not is in editors"
-        self.updateCursorPosition(editor)
-        self.updateSyntax(editor)
-        self.comboBoxSymbols.setModel(editor.symbols)
-        self.currentEditor = editor
-        self.hideAllWidgets()
-    
-    def addEditor(self, editor):
-        assert editor not in self.editors, "Editor is in editors"
-        self.editors.append(editor)
-        self.connectEditor(editor)
-    
-    def removeEditor(self, editor):
-        assert editor in self.editors, "Editor not is in editors"
-        self.disconnectEditor(editor)
-        self.editors.remove(editor)

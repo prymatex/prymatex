@@ -117,10 +117,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         codeBookmarks = PMXCodeBookmarksDock(self)
         self.addDockWidget(Qt.RightDockWidgetArea, codeBookmarks)
         self.menuPanels.addAction(codeBookmarks.toggleViewAction())
-        
+        codeBookmarks.hide()        
+
         codeSymbols = PMXCodeSymbolsDock(self)
         self.addDockWidget(Qt.RightDockWidgetArea, codeSymbols)
         self.menuPanels.addAction(codeSymbols.toggleViewAction())
+        codeSymbols.hide()
         
         self.tabifyDockWidget(codeSymbols, codeBookmarks)
         

@@ -56,9 +56,9 @@ class MainWindowActions(object):
     def on_actionOpen_triggered(self):
         fileInfo = self.currentEditor.fileInfo if self.currentEditor is not None else None
         files = self.application.fileManager.getOpenFiles(fileInfo = fileInfo)
+        focus = len(files) == 1
         for file in files:
-            editor = self.openFile(file)
-            self.setCurrentEditor(editor)
+            editor = self.openFile(file, focus = focus)
     
     def on_actionOpenAllRecentFiles_triggered(self):
         for file in self.application.fileManager.fileHistory:

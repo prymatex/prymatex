@@ -28,10 +28,12 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget):
     def on_tableViewSymbols_activated(self, index):
         block = index.internalPointer()
         self.currentEditor.goToBlock(block)
+        self.currentEditor.setFocus()
     
     def on_tableViewSymbols_doubleClicked(self, index):
         block = index.internalPointer()
         self.currentEditor.goToBlock(block)
+        self.currentEditor.setFocus()
         
 class PMXCodeBookmarksDock(QtGui.QDockWidget):
     def __init__(self, parent):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-
+from bisect import bisect
 from PyQt4 import QtCore, QtGui
 from prymatex.support import PMXSyntax
 from prymatex import resources
@@ -222,16 +222,45 @@ class PMXCompleterHelper(QtGui.QCompleter):
         QtGui.QCompleter.complete(self, rect)
 
 class PMXFoldingHelper(object):
-    FOLDING_NONE = PMXSyntax.FOLDING_NONE              #Cuidado esto tiene que ser 0
-    FOLDING_START = PMXSyntax.FOLDING_START            #Cuidado esto tiene que ser +1
-    FOLDING_STOP = PMXSyntax.FOLDING_STOP              #Cuidado esto tiene que ser -1
     def __init__(self, editor):
         self.editor = editor
         self.indentSensitive = False
+        self.editor.foldingChanged.connect(self.on_foldingChanged)
+        self.editor.textBlocksRemoved.connect(self.on_textBlocksRemoved)
+        self.blocks = []
         self.folding = []
-    
+
+    def on_foldingChanged(self, block):
+        if block in self.blocks:
+            userData = block.userData()
+            if userData.foldingMark == PMXSyntax.FOLDING_NONE:
+                self.blocks.remove(block)
+        else:
+            indexes = map(lambda block: block.blockNumber(), self.blocks)
+            index = bisect(indexes, block.blockNumber())
+            self.blocks.insert(index, block)
+        self.updateFoldingBlocks()
+        
+    def updateFoldingBlocks(self):
+        self.folding = []
+        nest = 0
+        for block in self.blocks:
+            userData = block.userData()
+            nest += userData.foldingMark
+            if nest >= 0:
+                self.folding.append(block)
+        print map(lambda block: block.userData().foldingMark, self.folding)
+        
+    def on_textBlocksRemoved(self):
+        remove = filter(lambda block: block.userData() is None, self.blocks)
+        if remove:
+            sIndex = self.blocks.index(remove[0])
+            eIndex = self.blocks.index(remove[-1])
+            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
+        self.updateFoldingBlocks()
+        
     def findPreviousNotBlankBlock(self, block):
-        """ Return previous block if text in block is not "" """
+        """ Return previous block if text in block is not """
         while block.isValid():
             block = block.previous()
             if block.text().strip() != "":
@@ -239,7 +268,7 @@ class PMXFoldingHelper(object):
         return block
     
     def findPreviousMoreNestedBlock(self, block):
-        """ Return previous block if text in block is not "" """
+        """ Return previous block if text in block is not """
         indent = block.userData().indent
         block = self.findPreviousNotBlankBlock(block)
         while block.isValid():
@@ -264,7 +293,7 @@ class PMXFoldingHelper(object):
             factor = factor + 1 if self.folding[previousBlock.blockNumber()] > 0 else factor - 1 if self.folding[previousBlock.blockNumber()] < 0 else factor
             startBlock = self.findPreviousNotBlankBlock(startBlock)
         return factor
-    
+
     def updateIndentFoldingMarks(self, lastBlock):
         index = len(self.folding)
         block = self.editor.document().findBlockByNumber(index)
@@ -289,71 +318,47 @@ class PMXFoldingHelper(object):
             if block >= lastBlock:
                 break
             block = block.next()
-    
-    def updateFoldingMarks(self, lastBlock):
-        index = len(self.folding)
-        block = self.editor.document().findBlockByNumber(index)
-        nest = reduce(lambda x, y: x + y, self.folding, 0)
-        while block.isValid():
-            userData = block.userData()
-            mark = userData.foldingMark
-            if mark != self.FOLDING_STOP or (mark == self.FOLDING_STOP and nest > 0):
-                self.folding.append(mark)
-                nest += mark
-            elif mark == self.FOLDING_STOP:
-                self.folding.append(self.FOLDING_NONE)
-            if block >= lastBlock and nest <= 0:
-                break
-            block = block.next()
 
-    def deprecateFolding(self, index):
-        self.folding = self.folding[:index]
-    
     def getFoldingMark(self, block):
-        #FIXME: hacer el folding para que defo se quede tranquilo
-        if self.indentSensitive:
-            if block.blockNumber() >= len(self.folding):
-                self.updateIndentFoldingMarks(block)
-            if self.folding[block.blockNumber()] < 0:
-                return self.FOLDING_STOP
-            elif self.folding[block.blockNumber()] > 0:
-                return self.FOLDING_START
-            else:
-                return self.FOLDING_NONE
-        else:
-            if block.blockNumber() >= len(self.folding):
-                self.updateFoldingMarks(block)
-            return self.folding[block.blockNumber()]
+        if block in self.folding:
+            userData = block.userData()
+            return userData.foldingMark
+        return PMXSyntax.FOLDING_NONE
     
     def findBlockFoldClose(self, block):
         nest = 0
-        #DEBUG
-        index = block.blockNumber()
-        print self.folding[index]
-        
-        while block.isValid():
-            index = block.blockNumber()
-            nest += self.folding[index]
+        assert block in self.folding, "The block is not in folding"
+        index = self.folding.index(block)
+        for block in self.folding[index:]:
+            userData = block.userData()
+            if userData.foldingMark >= PMXSyntax.FOLDING_START or userData.foldingMark <= PMXSyntax.FOLDING_STOP:
+                nest += userData.foldingMark
             if nest <= 0:
                 break
-            block = block.next()
         #return the founded block or the last valid block
         return block if block.isValid() else block.previous()
     
     def findBlockFoldOpen(self, block):
         nest = 0
-        #DEBUG
-        index = block.blockNumber()
-        print self.folding[index]
-        
-        while block.isValid():
-            index = block.blockNumber()
-            nest += self.folding[index]
+        assert block in self.folding, "The block is not in folding"
+        index = self.folding.index(block)
+        folding = self.folding[:index]
+        folding.reverse()
+        for block in folding:
+            userData = block.userData()
+            if userData.foldingMark >= PMXSyntax.FOLDING_START or userData.foldingMark <= PMXSyntax.FOLDING_STOP:
+                nest += userData.foldingMark
             if nest >= 0:
                 break
-            block = block.previous()
+
         #return the founded block or the first valid block
         return block if block.isValid() else block.next()
     
     def getNestedLevel(self, index):
-        return reduce(lambda x, y: x + y, self.folding[:index], 0)
+        return reduce(lambda x, y: x + y, map(lambda block: block.userData().foldingMark, self.folding[:index]), 0)
+        
+    def isStart(self, mark):
+        return mark >= PMXSyntax.FOLDING_START
+
+    def isStop(self, mark):
+        return mark <= PMXSyntax.FOLDING_STOP

@@ -115,7 +115,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
             self.endRemoveRows()
             
-    def index (self, row, column = 0, parent = None):
+    def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
             return self.createIndex(row, column, self.blocks[row])
         else:
@@ -133,6 +133,10 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             return userData.symbol
         elif role == QtCore.Qt.DecorationRole:
             return resources.ICONS['codefunction']
+    
+    def findBlockIndex(self, block):
+        indexes = map(lambda block: block.blockNumber(), self.blocks)
+        return bisect(indexes, block.blockNumber()) - 1
 
 #=========================================================
 # Completer

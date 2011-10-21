@@ -88,7 +88,6 @@ class _DragableTabBar(QtGui.QTabBar):
 
     def keyPressEvent(self, e):
         """ Reimplemented to handle traversal across different tab widgets. """
-        print "mover"
         if e.key() == QtCore.Qt.Key_Left:
             self._root._move_left(self.parent(), self.currentIndex())
         elif e.key() == QtCore.Qt.Key_Right:
@@ -106,9 +105,10 @@ class _DragableTabBar(QtGui.QTabBar):
             actionClose = menu.addAction("Close")
             actionCloseAll = menu.addAction("Close All")
             actionCloseAllNotThis = menu.addAction("Close Other")
-            menu.addSeparator()
-            actionSplitH = menu.addAction("Split Horizontally")
-            actionSplitV = menu.addAction("Split Vertically")
+            if self.parent().count() > 1:
+                menu.addSeparator()
+                actionSplitH = menu.addAction("Split Horizontally")
+                actionSplitV = menu.addAction("Split Vertically")
             menu.addSeparator()
             #Create custom menu
             menu.exec_(e.globalPos())

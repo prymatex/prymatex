@@ -627,6 +627,8 @@ class PMXSupportBaseManager(object):
     # TABTRIGGERS
     #---------------------------------------------------------------
     def getTabTriggerSymbol(self, line, index):
+        #TODO: Mejorar aca para obtener bien los tabrigger symbol
+        bestMatch = None
         line = line[:index]
         tiggers = self.getAllTabTriggersMnemonics()
         for tabSplit in self.TABTRIGGERSPLITS:
@@ -634,8 +636,9 @@ class PMXSupportBaseManager(object):
             if matchs:
                 match = matchs.pop()
                 word = line[match.start():match.end()]
-                if word in tiggers:
-                    return word
+                if word in tiggers and (bestMatch is None or len(bestMatch) < len(word)):
+                    bestMatch = word
+        return bestMatch
     
     def getTabTriggerItem(self, keyword, scope):
         with_scope = []

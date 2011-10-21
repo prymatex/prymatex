@@ -306,7 +306,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 break
 
             user_data = block.userData()
-            if block.isVisible() and self.folding.getFoldingMark(block) == self.folding.FOLDING_START and user_data.folded:
+            if block.isVisible() and self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
                 painter.drawPixmap(font_metrics.width(block.text()) + 10,
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingellipsis"].height(),
                     resources.IMAGES["foldingellipsis"])
@@ -667,31 +667,30 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #==========================================================================
     # Folding
     #==========================================================================
-    def codeFoldingFold(self, line_number):
-        self._fold(line_number)
+    def codeFoldingFold(self, block):
+        self._fold(block)
         self.update()
         self.sidebar.update()
     
-    def codeFoldingUnfold(self, line_number):
-        self._unfold(line_number)
+    def codeFoldingUnfold(self, block):
+        self._unfold(block)
         self.update()
         self.sidebar.update()
         
-    def _fold(self, line_number):
-        milestone = self.document().findBlockByNumber(line_number - 1)
-        if self.folding.getFoldingMark(milestone) == self.folding.FOLDING_START:
+    def _fold(self, block):
+        milestone = block
+        if self.folding.isStart(self.folding.getFoldingMark(milestone)):
             startBlock = milestone.next()
             endBlock = self.folding.findBlockFoldClose(milestone)
         else:
             endBlock = milestone
             milestone = self.folding.findBlockFoldOpen(endBlock)
             startBlock = milestone.next()
-        print startBlock.blockNumber(), milestone.blockNumber(), endBlock.blockNumber()
         block = startBlock
         while True:
-            user_data = block.userData()
-            user_data.foldedLevel += 1
-            block.setVisible(user_data.foldedLevel == 0)
+            userData = block.userData()
+            userData.foldedLevel += 1
+            block.setVisible(userData.foldedLevel == 0)
             if block == endBlock:
                 break
             block = block.next()
@@ -699,8 +698,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         milestone.userData().folded = True
         self.document().markContentsDirty(startBlock.position(), endBlock.position())
 
-    def _unfold(self, line_number):
-        milestone = self.document().findBlockByNumber(line_number - 1)
+    def _unfold(self, block):
+        milestone = block
         startBlock = milestone.next()
         endBlock = self.folding.findBlockFoldClose(milestone)
         if endBlock == None:
@@ -708,9 +707,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         
         block = startBlock
         while True:
-            user_data = block.userData()
-            user_data.foldedLevel -= 1
-            block.setVisible(user_data.foldedLevel == 0)
+            userData = block.userData()
+            userData.foldedLevel -= 1
+            block.setVisible(userData.foldedLevel == 0)
             if block == endBlock:
                 break
             block = block.next()
@@ -898,8 +897,3 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         elif mimeData.hasUrls():
             for url in mimeData.urls():
                 self.textCursor().insertText(url.toString())
-
-# TODO: Move to a more convinient location
-from os.path import isfile, isdir
-isFile = lambda s: s.startswith('file://') and isfile(s[7:])
-isDir = lambda s: s.startswith('file://') and isdir(s[7:])
