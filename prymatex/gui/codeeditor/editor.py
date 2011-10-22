@@ -37,9 +37,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     
     defaultSyntax = pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
     tabStopSoft = pmxConfigPorperty(default = True)
-    tabStopWidth = pmxConfigPorperty(default = 4)
+    @pmxConfigPorperty(default = 4)
+    def tabStopSize(self, size):
+        """docstring for tabStopSize"""
+        self.setTabStopWidth(size * 10)
     
-    @pmxConfigPorperty(default = QtGui.QFont('Monospace', 10))
+    @pmxConfigPorperty(default = QtGui.QFont())
     def font(self, font):
         font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics | QtGui.QFont.PreferAntialias)
         font.setStyleHint(QtGui.QFont.Monospace)
@@ -100,7 +103,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     
     @property
     def tabKeyBehavior(self):
-        return self.tabStopSoft and u' ' * self.tabStopWidth or u'\t'
+        return self.tabStopSoft and u' ' * self.tabStopSize or u'\t'
     
     def __init__(self, fileInfo = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -627,7 +630,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 'TM_SCOPE': scope,
                 'TM_MODE': self.getSyntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and u'YES' or u'NO',
-                'TM_TAB_SIZE': self.tabStopWidth,
+                'TM_TAB_SIZE': self.tabStopSize,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
         })
 
@@ -850,10 +853,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             new_cursor = QTextCursor(cursor)
             while True:
                 data = start.userData()
-                counter = self.tabStopWidth if len(data.indent) > self.tabStopWidth else len(data.indent)
+                counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
                 if counter > 0:
                     new_cursor.setPosition(start.position())
-                    for _j in range(self.tabStopWidth):
+                    for _j in range(self.tabStopSize):
                         new_cursor.deleteChar()
                 if start == end:
                     break
@@ -863,10 +866,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             block = cursor.block()
             data = cursor.block().userData()
-            counter = self.tabStopWidth if len(data.indent) > self.tabStopWidth else len(data.indent)
+            counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
             if counter > 0:
                 cursor.beginEditBlock()
-                position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabStopWidth else cursor.position() - counter
+                position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabStopSize else cursor.position() - counter
                 cursor.setPosition(block.position()) 
                 for _ in range(counter):
                     cursor.deleteChar()

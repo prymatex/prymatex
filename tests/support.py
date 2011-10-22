@@ -12,10 +12,11 @@ def test_findPreferences(manager):
 def test_snippet(manager):
     from prymatex.support.processor import PMXDebugSnippetProcessor
     from time import time
-    snippet = manager.getBundleItem('D8DCCC81-749A-4E2A-B4BC-D109D5799CAA')
-    snippet = manager.getBundleItem('9CF008C4-A086-11D9-A5A2-000D93C8BE28')
+    snippet = manager.getBundleItem('659D189C-EC3E-4C4E-9377-B7F5F5216CBD')
     start = time()
-    snippet.execute(PMXDebugSnippetProcessor())
+    processor = PMXDebugSnippetProcessor()
+    snippet.execute(processor)
+    print processor.text
     print "Time:", time() - start
 
 text = '''#!/usr/bin/env python

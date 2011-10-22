@@ -32,7 +32,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.lineEditCommand.installEventFilter(self)
         self.lineEditFind.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
-        
+    
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
             if obj is self.lineEditIFind:
@@ -87,12 +87,9 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxSyntaxes.setModel(self.application.supportManager.syntaxProxyModel);
         self.comboBoxSyntaxes.setModelColumn(0)
         self.comboBoxSyntaxes.setView(tableView)
-        self.comboBoxTabSize.addItem("2", 2)
-        self.comboBoxTabSize.addItem("4", 4)
-        self.comboBoxTabSize.addItem("8", 8)
-        self.comboBoxTabSize.addItem("Other", -1)
-        self.comboBoxTabSize.insertSeparator(4)
-        self.comboBoxTabSize.addItem("Soft Tabs (Spaces)", -2)
+         #Connect tab size context menu
+        self.labelTabSize.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.labelTabSize.customContextMenuRequested.connect(self.showTabSizeContextMenu)
         
     def setupWidgetCommand(self):
         self.comboBoxInput.addItem("None", "none")
@@ -132,6 +129,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxSymbols.setModel(editor.symbols)
         self.on_cursorPositionChanged(editor)
         self.on_syntaxChanged(editor)
+        self.setTabSizeLabel(editor)
         self.hideAllWidgets()
 
     def addEditor(self, editor):
@@ -149,18 +147,18 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     #============================================================
     # AutoConnect signals----------------------------------------
     @QtCore.pyqtSlot(int)
-    def on_comboBoxSyntaxes_currentIndexChanged(self, index):
+    def on_comboBoxSyntaxes_activated(self, index):
         model = self.comboBoxSyntaxes.model()
         node = model.mapToSource(model.createIndex(index, 0))
         if self.currentEditor is not None:
             self.currentEditor.setSyntax(node.internalPointer())
 
     @QtCore.pyqtSlot(int)
-    def on_comboBoxTabSize_currentIndexChanged(self, index):
+    def on_comboBoxTabSize_activated(self, index):
         data = self.comboBoxTabSize.itemData(index)
     
     @QtCore.pyqtSlot(int)
-    def on_comboBoxSymbols_currentIndexChanged(self, pos):
+    def on_comboBoxSymbols_activated(self, pos):
         model = self.comboBoxSymbols.model()
         index = model.index(pos)
         if index.isValid():
@@ -187,10 +185,46 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         editor = editor or self.currentEditor
         model = self.comboBoxSyntaxes.model()
         index = model.findItemIndex(editor.getSyntax())
-        self.comboBoxSyntaxes.blockSignals(True)
+        #self.comboBoxSyntaxes.blockSignals(True)
         self.comboBoxSyntaxes.setCurrentIndex(index)
-        self.comboBoxSyntaxes.blockSignals(False)
+        #self.comboBoxSyntaxes.blockSignals(False)
+
+    def showTabSizeContextMenu(self, point):
+        editor = self.currentEditor
+        #Setup Context Menu
+        menu = QtGui.QMenu(self)
+        menu.setObjectName('tabSizeMenu')
+        
+        for size in [2, 4, 8]:
+            action = menu.addAction("%d" % size, lambda size = size: self.setCurrentEditorTabSize(size))
+            action.setCheckable(True)
+            action.setChecked(editor.tabStopSize == size)
+        
+        if editor.tabStopSize not in [2,4,8]:
+            action = menu.addAction("Other (%d)" % editor.tabStopSize)
+            action.setCheckable(True)
+            action.setChecked(True)
+        else:
+            action = menu.addAction("Other")
+            action.setCheckable(True)
+        
+        menu.addSeparator()
+        action = menu.addAction("Soft Tabs (Spaces)", lambda soft = not editor.tabStopSoft: self.setCurrentEditorTabSoft(soft))
+        action.setCheckable(True)        
+        action.setChecked(editor.tabStopSoft == True)
+        menu.popup(self.labelTabSize.mapToGlobal(point))
     
+    def setCurrentEditorTabSoft(self, soft):
+        self.currentEditor.tabStopSoft = soft
+        
+    def setCurrentEditorTabSize(self, size):
+        self.currentEditor.tabStopSize = size
+        self.setTabSizeLabel(self.currentEditor)
+        
+    def setTabSizeLabel(self, editor):
+        #Tab Size
+        self.labelTabSize.setText("Soft Tab: %d" % editor.tabStopSize if editor.tabStopSoft else "Hard Tab: %d" % editor.tabStopSize)
+        
     #============================================================
     # AutoConnect Command widget signals
     #============================================================

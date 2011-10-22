@@ -536,11 +536,8 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         self.treeMenuWidget.installEventFilter(self)
     
     def eventFilter(self, obj, event):
-        if obj is self.treeMenuWidget and event.type() == QtCore.QEvent.Drop:
+        if event.type() == QtCore.QEvent.Drop:
             print "drop"
-            return True
-        elif obj is self.treeExcludedWidget and event.type() == QtCore.QEvent.DragMove:
-            print "drag"
             return True
         return PMXEditorBaseWidget.eventFilter(self, obj, event)
     

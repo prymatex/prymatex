@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Tue Oct 11 21:49:53 2011
+# Created: Sat Oct 22 19:27:19 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -180,15 +180,16 @@ class Ui_CodeEditorStatus(object):
         self.labelLineColumn = QtGui.QLabel(self.widgetStatus)
         self.labelLineColumn.setObjectName(_fromUtf8("labelLineColumn"))
         self.horizontalLayout_2.addWidget(self.labelLineColumn)
+        self.labelTabSize = QtGui.QLabel(self.widgetStatus)
+        self.labelTabSize.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.labelTabSize.setObjectName(_fromUtf8("labelTabSize"))
+        self.horizontalLayout_2.addWidget(self.labelTabSize)
         self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
         self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(160, 16777215))
         self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
         self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
-        self.comboBoxTabSize = QtGui.QComboBox(self.widgetStatus)
-        self.comboBoxTabSize.setMaximumSize(QtCore.QSize(120, 16777215))
-        self.comboBoxTabSize.setObjectName(_fromUtf8("comboBoxTabSize"))
-        self.horizontalLayout_2.addWidget(self.comboBoxTabSize)
         self.comboBoxSymbols = QtGui.QComboBox(self.widgetStatus)
+        self.comboBoxSymbols.setMaximumSize(QtCore.QSize(220, 16777215))
         self.comboBoxSymbols.setObjectName(_fromUtf8("comboBoxSymbols"))
         self.horizontalLayout_2.addWidget(self.comboBoxSymbols)
         self.verticalLayout.addWidget(self.widgetStatus)
@@ -219,5 +220,6 @@ class Ui_CodeEditorStatus(object):
         self.checkBoxFindCaseSensitively.setText(_('Case Sensitively'))
         self.pushButtonFindAll.setText(_('Find All'))
         self.labelLineColumn.setText(_('Line: 0 Column: 0'))
+        self.labelTabSize.setText(_('Tab Size'))
 
 from prymatex import resources_rc

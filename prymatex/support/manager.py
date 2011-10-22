@@ -630,13 +630,15 @@ class PMXSupportBaseManager(object):
         #TODO: Mejorar aca para obtener bien los tabrigger symbol
         bestMatch = None
         line = line[:index]
-        tiggers = self.getAllTabTriggersMnemonics()
+        triggers = self.getAllTabTriggersMnemonics()
+        print triggers
         for tabSplit in self.TABTRIGGERSPLITS:
             matchs = filter(lambda m: m.start() <= index <= m.end(), tabSplit.finditer(line))
             if matchs:
                 match = matchs.pop()
                 word = line[match.start():match.end()]
-                if word in tiggers and (bestMatch is None or len(bestMatch) < len(word)):
+                if word in triggers and (bestMatch is None or len(bestMatch) < len(word)):
+                    print "find", word
                     bestMatch = word
         return bestMatch
     
