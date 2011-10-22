@@ -342,7 +342,7 @@ class PMXFoldingHelper(object):
         nest = 0
         assert block in self.folding, "The block is not in folding"
         index = self.folding.index(block)
-        folding = self.folding[:index]
+        folding = self.folding[:index + 1]
         folding.reverse()
         for block in folding:
             userData = block.userData()

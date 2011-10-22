@@ -375,7 +375,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QComboBox" name="comboBoxSymbols">
         <property name="maximumSize">
          <size>
-          <width>220</width>
+          <width>300</width>
           <height>16777215</height>
          </size>
         </property>
