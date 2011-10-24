@@ -117,14 +117,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         PMXBaseEditor.__init__(self)
         #Sidebar
         self.sidebar = PMXSidebar(self)
-        
-        syntax = None
-        if fileInfo is not None:
-            syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
-        if syntax is None:
-            syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
-        self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
-        
+
         #Models
         self.bookmarks = PMXBookmarkListModel(self)
         self.symbols = PMXSymbolListModel(self)
@@ -138,7 +131,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
         self.snippetProcessor = PMXSnippetProcessor(self)
-        
+
+        #Set syntax for fileInfo
+        syntax = None
+        if fileInfo is not None:
+            syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
+        if syntax is None:
+            syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
+        self.setSyntax(syntax)
+
         self.setupActions()
         self.connectSignals()
         self.configure()
@@ -266,11 +267,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         return self.syntaxHighlighter.syntax
         
     def setSyntax(self, syntax):
-        if self.syntaxHighlighter.syntax != syntax:
-            self.syntaxHighlighter.syntax = syntax
-            self.syntaxHighlighter.rehighlight()
+        if hasattr(self, "syntaxHighlighter"):
+            if self.syntaxHighlighter.syntax != syntax:
+                self.syntaxHighlighter.syntax = syntax
+                self.folding.indentSensitive = syntax.indentSensitive
+                self.syntaxHighlighter.rehighlight()
+                self.syntaxChanged.emit()
+        else:
+            self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
             self.folding.indentSensitive = syntax.indentSensitive
-            self.syntaxChanged.emit()
     
     def contextMenuEvent(self, event):
         menu = self.createStandardContextMenu()

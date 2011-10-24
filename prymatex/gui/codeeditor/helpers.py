@@ -239,7 +239,21 @@ class PMXFoldingHelper(object):
             indexes = map(lambda block: block.blockNumber(), self.blocks)
             index = bisect(indexes, block.blockNumber())
             self.blocks.insert(index, block)
-        self.updateFoldingBlocks()
+        if self.indentSensitive:
+            self.updateIndentFoldingBlocks()
+        else:
+            self.updateFoldingBlocks()
+    
+    def on_textBlocksRemoved(self):
+        remove = filter(lambda block: block.userData() is None, self.blocks)
+        if remove:
+            sIndex = self.blocks.index(remove[0])
+            eIndex = self.blocks.index(remove[-1])
+            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
+        if self.indentSensitive:
+            self.updateIndentFoldingBlocks()
+        else:
+            self.updateFoldingBlocks()
         
     def updateFoldingBlocks(self):
         self.folding = []
@@ -250,75 +264,50 @@ class PMXFoldingHelper(object):
             if nest >= 0:
                 self.folding.append(block)
         print map(lambda block: block.userData().foldingMark, self.folding)
-        
-    def on_textBlocksRemoved(self):
-        remove = filter(lambda block: block.userData() is None, self.blocks)
-        if remove:
-            sIndex = self.blocks.index(remove[0])
-            eIndex = self.blocks.index(remove[-1])
-            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
-        self.updateFoldingBlocks()
-        
-    def findPreviousNotBlankBlock(self, block):
-        """ Return previous block if text in block is not """
+
+    def updateIndentFoldingBlocks(self):
+        self.folding = []
+        nest = 0
+        lastOpenIndent = currentIndent = ""
+        for block in self.blocks:
+            userData = block.userData()
+            if userData.foldingMark <= PMXSyntax.FOLDING_STOP:
+                #Esta cerrando, es blank?
+                if block.text().strip() == "":
+                    continue
+            elif userData.foldingMark >= PMXSyntax.FOLDING_START:
+                #Esta abriendo, esta menos indentado?
+                if userData.indent <= currentIndent and len(self.folding) > 0:
+                    #Hay que cerrar algo antes
+                    closeBlock = self.findPreviousMoreIndentBlock(block)
+                    closeBlock.userData().foldingMark = - (len(currentIndent) / len(userData.indent))
+                    self.folding.append(closeBlock)
+                    nest += closeBlock.userData().foldingMark
+                else:
+                    #Store last valid indent
+                    lastOpenIndent = currentIndent
+            nest += userData.foldingMark
+            currentIndent = userData.indent if userData.foldingMark >= PMXSyntax.FOLDING_START else lastOpenIndent
+            if nest >= 0:
+                self.folding.append(block)
+        if nest > 0:
+            #Tengo que cerrar el ultimo
+            closeBlock = self.editor.document().lastBlock()
+            userData = closeBlock.userData()
+            if userData is not None:
+                closeBlock.userData().foldingMark = -nest
+                self.folding.append(closeBlock)
+        print map(lambda block: block.userData().foldingMark, self.folding)
+
+    def findPreviousMoreIndentBlock(self, block):
+        """ Return previous block if text in block is not bank """
+        indent = block.userData().indent
         while block.isValid():
             block = block.previous()
-            if block.text().strip() != "":
+            if indent < block.userData().indent:
                 break
         return block
     
-    def findPreviousMoreNestedBlock(self, block):
-        """ Return previous block if text in block is not """
-        indent = block.userData().indent
-        block = self.findPreviousNotBlankBlock(block)
-        while block.isValid():
-            if block.userData().indent > indent:
-                break
-            block = self.findPreviousNotBlankBlock(block)
-        return block
-    
-    def closePreviousBlock(self, block):
-        #Le pongo un "corcho" al anterior
-        factor = 1
-        userData = block.userData()
-        startBlock = previousBlock = self.findPreviousMoreNestedBlock(block)
-        while startBlock.isValid():
-            #Busco uno que abre al mismo nivel
-            if startBlock.userData().foldingMark == self.FOLDING_START and startBlock.userData().indent == userData.indent:
-                self.folding[previousBlock.blockNumber()] = -1 * factor
-                break
-            elif startBlock.userData().indent <= userData.indent:
-                break
-            #Update factor
-            factor = factor + 1 if self.folding[previousBlock.blockNumber()] > 0 else factor - 1 if self.folding[previousBlock.blockNumber()] < 0 else factor
-            startBlock = self.findPreviousNotBlankBlock(startBlock)
-        return factor
-
-    def updateIndentFoldingMarks(self, lastBlock):
-        index = len(self.folding)
-        block = self.editor.document().findBlockByNumber(index)
-        nest = reduce(lambda x, y: x + y, self.folding, 0)
-        #Find Start
-        last = self.findPreviousNotBlankBlock(block)
-        lastIndent = last.userData().indent if last.isValid() else ""
-        while block.isValid():
-            userData = block.userData()
-            mark = userData.foldingMark
-            if mark == self.FOLDING_START or (mark == self.FOLDING_STOP and nest > 0 and block.text().strip() != ""):
-                if mark == self.FOLDING_START and nest > 0:
-                    nest -= self.closePreviousBlock(block)
-                self.folding.append(mark)
-                nest += mark
-            elif lastIndent > userData.indent and block.text().strip() != "" and nest > 0:
-                nest -= self.closePreviousBlock(block)
-                lastIndent = userData.indent
-                self.folding.append(self.FOLDING_NONE)
-            else:
-                self.folding.append(self.FOLDING_NONE)
-            if block >= lastBlock:
-                break
-            block = block.next()
-
     def getFoldingMark(self, block):
         if block in self.folding:
             userData = block.userData()
