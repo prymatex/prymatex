@@ -12,6 +12,9 @@ class PMXSidebar(QtGui.QWidget):
     def __init__(self, editor):
         super(PMXSidebar, self).__init__(editor)
         self.editor = editor
+        self.showBookmarks = True
+        self.showLineNumbers = True
+        self.showFolding = False
         self.highest_line = 0
         self.bookmarkArea = 12
         self.foldArea = 12

@@ -37,7 +37,13 @@ class MainWindowActions(object):
         pass
     
     def on_menuView_aboutToShow(self):
-        pass
+        if self.currentEditor is not None:
+            flags = self.currentEditor.getFlags()
+            self.actionShowWhitespace.setChecked(flags & self.currentEditor.ShowWhitespaces)
+            self.actionShowEndOfLine.setChecked(flags & self.currentEditor.ShowEndOfLines)
+            self.actionShowLineNumbers.setChecked(flags & self.currentEditor.ShowLineNumbers)
+            self.actionShowFolding.setChecked(flags & self.currentEditor.ShowFolding)
+            self.actionShowBookmarks.setChecked(flags & self.currentEditor.ShowBookmarks)
     
     #============================================================
     # File Actions
@@ -84,7 +90,7 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionClose_triggered(self):
         self.closeEditor()
-        
+
     @QtCore.pyqtSlot()
     def on_actionCloseAll_triggered(self):
         for w in self.splitTabWidget.getAllWidgets():
@@ -108,7 +114,7 @@ class MainWindowActions(object):
     def on_actionUndo_triggered(self):
         if self.currentEditor is not None:
             self.currentEditor.undo()
-        
+
     @QtCore.pyqtSlot()
     def on_actionRedo_triggered(self):
         if self.currentEditor is not None:
@@ -178,17 +184,35 @@ class MainWindowActions(object):
         if self.currentEditor is not None:
             self.currentEditor.zoomOut()
 
-    @QtCore.pyqtSlot()
-    def on_actionShowFolding_triggered(self):
-        self.statusBar().showMessage("actionShowFolding")
+    @QtCore.pyqtSlot(bool)
+    def on_actionShowBookmarks_toggled(self, checked):
+        if self.currentEditor is not None:
+            flags = self.currentEditor.getFlags()
+            self.currentEditor.setFlags(flags | self.currentEditor.ShowBookmarks)
     
-    @QtCore.pyqtSlot()
-    def on_actionShowBookmarks_triggered(self):
-        self.statusBar().showMessage("actionShowBookmarks")
+    @QtCore.pyqtSlot(bool)
+    def on_actionShowLineNumbers_toggled(self, checked):
+        if self.currentEditor is not None:
+            flags = self.currentEditor.getFlags()
+            self.currentEditor.setFlags(flags | self.currentEditor.ShowLineNumbers)
+        
+    @QtCore.pyqtSlot(bool)
+    def on_actionShowFolding_toggled(self, checked):
+        if self.currentEditor is not None:
+            flags = self.currentEditor.getFlags()
+            self.currentEditor.setFlags(flags | self.currentEditor.ShowFolding)
     
-    @QtCore.pyqtSlot()
-    def on_actionShowLineNumbers_triggered(self):
-        self.statusBar().showMessage("actionShowLineNumbers")
+    @QtCore.pyqtSlot(bool)
+    def on_actionShowWhitespace_toggled(self, checked):
+        if self.currentEditor is not None:
+            flags = self.currentEditor.getFlags()
+            self.currentEditor.setFlags(flags | self.currentEditor.ShowWhitespaces)
+    
+    @QtCore.pyqtSlot(bool)
+    def on_actionShowEndOfLine_toggled(self, checked):
+        if self.currentEditor is not None:
+            flags = self.currentEditor.getFlags()
+            self.currentEditor.setFlags(flags | self.currentEditor.ShowEndOfLines)
 
     #============================================================
     # Text Actions

@@ -83,6 +83,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     SelectEnclosingBrackets = 4
     SelectCurrentScope = 5
     
+    #Flags
+    ShowWhitespaces = 0x01
+    ShowEndOfLines = 0x02
+    ShowBookmarks = 0x04
+    ShowLineNumbers = 0x08
+    ShowFolding = 0x10
+    
     #Cache de preferencias
     PREFERENCE_CACHE = {}
     
@@ -147,15 +154,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
 
     def setupActions(self):
         # Actions performed when a key is pressed
-        self.actionIndent = QAction(self.trUtf8("Increase indentation"), self )
-        self.connect(self.actionIndent, SIGNAL("triggered()"), self.indent)
-        self.actionUnindent = QAction(self.trUtf8("Decrease indentation"), self )
-        self.connect(self.actionUnindent, SIGNAL("triggered()"), self.unindent)
-        self.actionFind = QAction(self.trUtf8("Find"), self)
-        
+        pass
+
     def updateTabStatus(self):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
-        
+
+    #=======================================================================
+    # Base Editor Interface
+    #=======================================================================
     def isModified(self):
         return self.document().isModified()
     
@@ -186,7 +192,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def newInstance(cls, fileInfo = None, parent = None):
         editor = cls(fileInfo, parent)
         return editor
-    
+
     #=======================================================================
     # Obteniendo datos del editor
     #=======================================================================
@@ -228,6 +234,34 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             return self.document().findBlock(start), self.document().findBlock(end)
 
+    def getFlags(self):
+        flags = 0
+        options = self.document().defaultTextOption()
+        if options.flags() & QtGui.QTextOption.ShowTabsAndSpaces:
+            flags |= self.ShowWhitespaces
+        if options.flags() & QtGui.QTextOption.ShowLineAndParagraphSeparators:
+            flags |= self.ShowEndOfLines
+        if self.sidebar.showBookmarks:
+            flags |= self.ShowBookmarks
+        if self.sidebar.showLineNumbers:
+            flags |= self.ShowLineNumbers
+        if self.sidebar.showFolding:
+            flags |= self.ShowFolding
+        return flags
+        
+    def setFlags(self, flags):
+        if flags & self.ShowWhitespaces:
+            options = self.document().defaultTextOption()
+            options.setFlags(QtGui.QTextOption.ShowTabsAndSpaces)
+            self.document().setDefaultTextOption(options)
+        if flags & self.ShowEndOfLines:
+            options = self.document().defaultTextOption()
+            options.setFlags(QtGui.QTextOption.ShowLineAndParagraphSeparators)
+            self.document().setDefaultTextOption(options)
+        self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
+        self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
+        self.sidebar.showFolding = bool(flags & self.ShowFolding)
+        
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
         
@@ -240,10 +274,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     
     def contextMenuEvent(self, event):
         menu = self.createStandardContextMenu()
-        menu.addAction(self.actionIndent)
-        menu.addAction(self.actionUnindent)
-        self.actionUnindent.setEnabled(self.canUnindent())
-        menu.popup(event.globalPos());
+        menu.popup(event.globalPos())
         
     def lineNumberAreaWidth(self):
         return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + self.sidebar.bookmarkArea + self.sidebar.foldArea 
