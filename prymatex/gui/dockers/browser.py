@@ -4,7 +4,7 @@ import os
 import codecs
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, QVariant, SIGNAL
+from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, SIGNAL
 from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
@@ -21,8 +21,8 @@ class TmFileReply(QNetworkReply):
         self.content = file.read().encode('utf-8')
         self.offset = 0
         
-        self.setHeader(QNetworkRequest.ContentTypeHeader, QVariant("text/html; charset=utf-8"))
-        self.setHeader(QNetworkRequest.ContentLengthHeader, QVariant(len(self.content)))
+        self.setHeader(QNetworkRequest.ContentTypeHeader, "text/html; charset=utf-8")
+        self.setHeader(QNetworkRequest.ContentLengthHeader, len(self.content))
         QTimer.singleShot(0, self, SIGNAL("readyRead()"))
         QTimer.singleShot(0, self, SIGNAL("finished()"))
         self.open(self.ReadOnly | self.Unbuffered)
@@ -133,6 +133,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
         '''
         System wide proxy
         '''
+        print value
         proxy_url = QUrl(value)    
         if not value:
             network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
@@ -186,7 +187,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
     
     def setHtml(self, string, bundleItem):
         self.bundleItem = bundleItem
-        self.webView.setHtml(string)
+        url = QtCore.QUrl.fromUserInput(bundleItem.name)
+        self.lineUrl.setText(url.toString())
+        self.webView.setHtml(string, url)
     
     def url_changed(self):
         """Url have been changed by user"""
