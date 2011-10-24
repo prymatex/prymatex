@@ -52,7 +52,7 @@ class PMXApplication(QtGui.QApplication):
         self.loadKernelManager()    #Console kernel Manager
         
         # Setups
-        self.setupExecutor()        #Executor
+        #self.setupExecutor()        #Executor
         self.setupLogging()         #Logging
         self.setupFileManager()     #File Manager
         self.setupConfigDialog()    #Config Dialog
