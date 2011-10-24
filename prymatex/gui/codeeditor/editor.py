@@ -252,11 +252,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def setFlags(self, flags):
         if flags & self.ShowWhitespaces:
             options = self.document().defaultTextOption()
-            options.setFlags(QtGui.QTextOption.ShowTabsAndSpaces)
+            options.setFlags(options.flags() | QtGui.QTextOption.ShowTabsAndSpaces)
             self.document().setDefaultTextOption(options)
         if flags & self.ShowEndOfLines:
             options = self.document().defaultTextOption()
-            options.setFlags(QtGui.QTextOption.ShowLineAndParagraphSeparators)
+            options.setFlags(options.flags() | QtGui.QTextOption.ShowLineAndParagraphSeparators)
             self.document().setDefaultTextOption(options)
         self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
         self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
