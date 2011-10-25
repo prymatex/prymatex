@@ -3,7 +3,7 @@
 import os
 import codecs
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, SIGNAL
 from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
@@ -151,12 +151,16 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
     def __init__(self, parent):
         super(PMXBrowserDock, self).__init__(parent)
         self.setupUi(self)
+        
+        #Developers, developers, developers!!! Extras
+        QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
+        
         #New manager
         old_manager = self.webView.page().networkAccessManager()
         new_manager = NetworkAccessManager(self, old_manager)
         self.webView.page().setNetworkAccessManager(new_manager)
-        
-        # set the default
+
+        # Set the default home page
         self.lineUrl.setText(self.homePage)
         self.webView.setUrl(QtCore.QUrl(self.homePage))
         
