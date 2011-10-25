@@ -119,7 +119,7 @@ class PMXSupportBaseManager(object):
             self.loadThemes(ns)
             self.loadBundles(ns)
         for bundle in self.getAllBundles():
-            if not bundle.disabled:
+            if bundle.enabled:
                 self.populateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
@@ -174,7 +174,7 @@ class PMXSupportBaseManager(object):
         '''
         return False
 
-    def isDisabled(self, uuid):
+    def isEnabled(self, uuid):
         return False
     
     def setDisabled(self, uuid):
@@ -300,8 +300,8 @@ class PMXSupportBaseManager(object):
         self.removeBundle(bundle)
     
     def disableBundle(self, bundle, disabled):
-        bundle.disabled = bool(disabled)
-        if bundle.disabled:
+        bundle.enabled = not bool(disabled)
+        if not bundle.enabled:
             self.setDisabled(bundle.uuid)
         else:
             self.setEnabled(bundle.uuid)

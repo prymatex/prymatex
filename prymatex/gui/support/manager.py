@@ -16,8 +16,8 @@ class PMXBundleMenuGroup(QtCore.QObject):
         self.manager = manager
         self.bundleTreeModel = self.manager.bundleTreeModel
         self.menus = {}
+        self.manager.bundlePopulated.connect(self.on_manager_bundlePopulated)
         self.bundleTreeModel.dataChanged.connect(self.on_bundleTreeModel_dataChanged)
-        self.bundleTreeModel.rowsInserted.connect(self.on_bundleTreeModel_rowsInserted)
         self.bundleTreeModel.rowsRemoved.connect(self.on_bundleTreeModel_rowsRemoved)
         
     def buildMenu(self, items, menu, submenus, parent = None):
@@ -42,7 +42,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
             submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
             items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
             self.buildMenu(items, menu, submenus, parent)
-        menu.menuAction().setVisible(not (bundle.disabled or bundle.mainMenu is None))
+        menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
         return menu
 
     def addBundle(self, bundle):
@@ -54,17 +54,11 @@ class PMXBundleMenuGroup(QtCore.QObject):
         item = topLeft.internalPointer()
         if item.TYPE == "bundle":
             self.menus[item].setTitle(item.buildBundleAccelerator())
-            self.menus[item].menuAction().setVisible(not (item.disabled or item.mainMenu is None))
+            self.menus[item].menuAction().setVisible(item.enabled and item.mainMenu is not None)
 
-    def on_bundleTreeModel_rowsInserted(self, parent, start, end):
-        for row in range(start, end + 1):
-            index = self.bundleTreeModel.index(row, 0, parent)
-            item = index.internalPointer()
-            if item.TYPE == "bundle":
-                if item in self.menus:
-                    self.menus[item].menuAction().setVisible(not (item.disabled or item.mainMenu is None))
-                else:
-                    self.addBundle(item, self.parent())
+    def on_manager_bundlePopulated(self, bundle):
+        if bundle in self.menus:
+            self.addBundle(bundle)
     
     def on_bundleTreeModel_rowsRemoved(self, parent, start, end):
         print "Remove indexes"
@@ -72,6 +66,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
 class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     #Signals
     bundleItemTriggered = QtCore.pyqtSignal(object)
+    bundlePopulated = QtCore.pyqtSignal(object)
     
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
@@ -143,7 +138,12 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
                 env[var['variable']] = var['value']
         env.update(self.environment)
         return env
-
+    
+    # Override populate bundle for emit signal
+    def populateBundle(self, bundle):
+        PMXSupportBaseManager.populateBundle(self, bundle)
+        self.bundlePopulated.emit(bundle)
+    
     #---------------------------------------------------
     # MANAGED OBJECTS OVERRIDE INTERFACE
     #---------------------------------------------------
@@ -158,8 +158,8 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     def isDeleted(self, uuid):
         return uuid in self.deletedObjects
 
-    def isDisabled(self, uuid):
-        return uuid in self.disabledObjects
+    def isEnabled(self, uuid):
+        return uuid not in self.disabledObjects
     
     def setDisabled(self, uuid):
         self.disabledObjects.append(uuid)

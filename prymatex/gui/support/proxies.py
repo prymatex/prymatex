@@ -10,7 +10,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         item = index.internalPointer()
-        if item.disabled:
+        if not item.enabled:
             return False
         if item.TYPE != "bundle":
             regexp = self.filterRegExp()
@@ -68,7 +68,7 @@ class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
         sIndex = self.mapToSource(index)
         if role == QtCore.Qt.CheckStateRole:
             bundle = sIndex.internalPointer()
-            return QtCore.Qt.Checked if bundle.disabled else QtCore.Qt.Unchecked
+            return QtCore.Qt.Checked if bundle.enabled else QtCore.Qt.Unchecked
         else:
             return self.sourceModel().data(sIndex, role)
 

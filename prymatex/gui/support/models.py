@@ -117,7 +117,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         elif role == QtCore.Qt.CheckStateRole:
             item = index.internalPointer()
             if item.TYPE == "bundle":
-                self.manager.disableBundle(item, value)
+                self.manager.disableBundle(item, not value)
             self.dataChanged.emit(index, index)
             return True
         return False
