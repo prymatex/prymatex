@@ -20,8 +20,8 @@ class PMXTemplateFile(object):
         self.template = template
 
     @property
-    def disabled(self):
-        return self.template.disabled
+    def enabled(self):
+        return self.template.enabled
         
     def getFileContent(self):
         if os.path.exists(self.path):

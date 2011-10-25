@@ -161,7 +161,8 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
     #==========================================================
     # Filter Top Bar
     #==========================================================
-    def on_comboBoxItemFilter_changed(self, index):
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
         self.proxyTreeModel.setFilterRegExp(value)
     
@@ -174,7 +175,6 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/drag-commands.png"), "DragCommands", "dragcommand")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/preferences.png"), "Preferences", "preference")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template*")
-        self.comboBoxItemFilter.currentIndexChanged[int].connect(self.on_comboBoxItemFilter_changed)
     
     #==========================================================
     # Tree View
@@ -320,8 +320,7 @@ class PMXBundleFilter(QtGui.QDialog, PMXObject):
         self.labelHelp.setObjectName(_fromUtf8("labelHelp"))
         self.verticalLayout.addWidget(self.labelHelp)
         self.retranslateUi(BundleFilter)
-        QtCore.QMetaObject.connectSlotsByName(BundleFilter)
 
     def retranslateUi(self, BundleFilter):
-        BundleFilter.setWindowTitle(_('Bundle Filter'))
+        BundleFilter.setWindowTitle(_('Enable/Disable Bundles'))
         self.labelHelp.setText(_('You should keep the Source, Text and TextMate bundles enabled, as these provide base functionality relied upon by other bundles.'))
