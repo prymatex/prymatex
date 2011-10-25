@@ -319,6 +319,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     @QtCore.pyqtSlot()
     def on_pushButtonIFindClose_pressed(self):
         self.widgetIFind.setVisible(False)
+        self.currentEditor.setFocus()
     
     @QtCore.pyqtSlot(str)
     def on_lineEditIFind_textChanged(self, text):
