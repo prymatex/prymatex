@@ -15,11 +15,16 @@ class PMXSidebar(QtGui.QWidget):
         self.showBookmarks = True
         self.showLineNumbers = True
         self.showFolding = False
-        self.highest_line = 0
         self.bookmarkArea = 12
         self.foldArea = 12
         self.foreground = None 
         self.background = None 
+    
+    @property
+    def padding(self):
+        if self.showLineNumbers or self.showFolding or self.showBookmarks:
+            return 3
+        return 0
         
     def sizeHint(self):
         return QtGui.QSize(self.editor.lineNumberAreaWidth(), 0)
@@ -51,37 +56,41 @@ class PMXSidebar(QtGui.QWidget):
             # Draw the line number right justified at the y position of the
             # line. 3 is a magic padding number. drawText(x, y, text).
             if block.isVisible():
-                painter.drawText(self.width() - self.foldArea - font_metrics.width(str(line_count)) - 3,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 1,
-                    str(line_count))
+                #Line Numbers
+                if self.showLineNumbers:
+                    leftPosition = self.width() - font_metrics.width(str(line_count)) - 2
+                    if self.showFolding:
+                        leftPosition -= self.foldArea
+                    painter.drawText(leftPosition,
+                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 1,
+                        str(line_count))
 
                 #Bookmarks
-                if block in self.editor.bookmarks:
-                    painter.drawPixmap(1,
+                if self.showBookmarks and block in self.editor.bookmarks:
+                    painter.drawPixmap(2,
                         round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["bookmarkflag"].height(),
                         resources.IMAGES["bookmarkflag"])
-
-                userData = block.userData()
-
+                
                 #Folding
-                mark = self.editor.folding.getFoldingMark(block)
-                if self.editor.folding.isStart(mark):
-                    if userData.folded:
+                if self.showFolding:
+                    userData = block.userData()
+    
+                    mark = self.editor.folding.getFoldingMark(block)
+                    if self.editor.folding.isStart(mark):
+                        if userData.folded:
+                            painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
+                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
+                                resources.IMAGES["foldingcollapsed"])
+                        else:
+                            painter.drawPixmap(self.width() - resources.IMAGES["foldingtop"].width() - 1,
+                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingtop"].height(),
+                                resources.IMAGES["foldingtop"])
+                    elif self.editor.folding.isStop(mark):
                         painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
                             round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
-                            resources.IMAGES["foldingcollapsed"])
-                    else:
-                        painter.drawPixmap(self.width() - resources.IMAGES["foldingtop"].width() - 1,
-                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingtop"].height(),
-                            resources.IMAGES["foldingtop"])
-                elif self.editor.folding.isStop(mark):
-                    painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
-                        resources.IMAGES["foldingbottom"])
+                            resources.IMAGES["foldingbottom"])
             
             block = block.next()
-
-        self.highest_line = line_count
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
@@ -92,8 +101,7 @@ class PMXSidebar(QtGui.QWidget):
         font_metrics = QFontMetrics(self.editor.document().defaultFont())
         fh = font_metrics.lineSpacing()
         ys = event.posF().y()
-        lineNumber = 0
-
+        
         if event.pos().x() > xofs or event.pos().x() < xobs:
             block = self.editor.firstVisibleBlock()
             viewport_offset = self.editor.contentOffset()
@@ -105,7 +113,7 @@ class PMXSidebar(QtGui.QWidget):
                 if position.y() < ys and (position.y() + fh) > ys:
                     break
                 block = block.next()
-            if event.pos().x() > xofs:
+            if event.pos().x() > xofs and self.editor.folding.isFoldingMark(block):
                 if block.userData().folded:
                     self.editor.codeFoldingUnfold(block)
                 else:

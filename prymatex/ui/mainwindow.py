@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Tue Oct 18 21:27:00 2011
+# Created: Mon Oct 24 21:05:33 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -220,15 +220,15 @@ class Ui_MainWindow(object):
         self.actionNewFromTemplate = QtGui.QAction(MainWindow)
         self.actionNewFromTemplate.setEnabled(True)
         self.actionNewFromTemplate.setObjectName(_fromUtf8("actionNewFromTemplate"))
-        self.actionShowWhitespace = QtGui.QAction(MainWindow)
-        self.actionShowWhitespace.setCheckable(True)
-        self.actionShowWhitespace.setObjectName(_fromUtf8("actionShowWhitespace"))
+        self.actionShowTabsAndSpaces = QtGui.QAction(MainWindow)
+        self.actionShowTabsAndSpaces.setCheckable(True)
+        self.actionShowTabsAndSpaces.setObjectName(_fromUtf8("actionShowTabsAndSpaces"))
         self.actionShowIndentation = QtGui.QAction(MainWindow)
         self.actionShowIndentation.setCheckable(True)
         self.actionShowIndentation.setObjectName(_fromUtf8("actionShowIndentation"))
-        self.actionShowEndOfLine = QtGui.QAction(MainWindow)
-        self.actionShowEndOfLine.setCheckable(True)
-        self.actionShowEndOfLine.setObjectName(_fromUtf8("actionShowEndOfLine"))
+        self.actionShowLineAndParagraphs = QtGui.QAction(MainWindow)
+        self.actionShowLineAndParagraphs.setCheckable(True)
+        self.actionShowLineAndParagraphs.setObjectName(_fromUtf8("actionShowLineAndParagraphs"))
         self.actionRead_documentation = QtGui.QAction(MainWindow)
         self.actionRead_documentation.setObjectName(_fromUtf8("actionRead_documentation"))
         self.actionSelectWord = QtGui.QAction(MainWindow)
@@ -281,9 +281,8 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.menuFont.menuAction())
         self.menuView.addAction(self.menuGutter.menuAction())
         self.menuView.addSeparator()
-        self.menuView.addAction(self.actionShowWhitespace)
-        self.menuView.addAction(self.actionShowIndentation)
-        self.menuView.addAction(self.actionShowEndOfLine)
+        self.menuView.addAction(self.actionShowTabsAndSpaces)
+        self.menuView.addAction(self.actionShowLineAndParagraphs)
         self.menuConvert.addAction(self.actionToUppercase)
         self.menuConvert.addAction(self.actionToLowercase)
         self.menuConvert.addAction(self.actionToTitlecase)
@@ -442,9 +441,9 @@ class Ui_MainWindow(object):
         self.actionSelectBundleItem.setShortcut(_('Meta+Ctrl+T'))
         self.actionNewFromTemplate.setText(_('New From Template'))
         self.actionNewFromTemplate.setShortcut(_('Meta+Shift+N'))
-        self.actionShowWhitespace.setText(_('Show Whitespace'))
+        self.actionShowTabsAndSpaces.setText(_('Show Tabs And Spaces'))
         self.actionShowIndentation.setText(_('Show Indentation'))
-        self.actionShowEndOfLine.setText(_('Show End of Line'))
+        self.actionShowLineAndParagraphs.setText(_('Show Line And Paragraph'))
         self.actionRead_documentation.setText(_('Read &documentation'))
         self.actionSelectWord.setText(_('&Word'))
         self.actionSelectLine.setText(_('&Line'))

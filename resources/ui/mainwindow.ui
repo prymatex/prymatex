@@ -97,9 +97,8 @@
     <addaction name="menuFont"/>
     <addaction name="menuGutter"/>
     <addaction name="separator"/>
-    <addaction name="actionShowWhitespace"/>
-    <addaction name="actionShowIndentation"/>
-    <addaction name="actionShowEndOfLine"/>
+    <addaction name="actionShowTabsAndSpaces"/>
+    <addaction name="actionShowLineAndParagraphs"/>
    </widget>
    <widget class="QMenu" name="menuText">
     <property name="title">
@@ -619,12 +618,12 @@
     <string>Meta+Shift+N</string>
    </property>
   </action>
-  <action name="actionShowWhitespace">
+  <action name="actionShowTabsAndSpaces">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Whitespace</string>
+    <string>Show Tabs And Spaces</string>
    </property>
   </action>
   <action name="actionShowIndentation">
@@ -635,12 +634,12 @@
     <string>Show Indentation</string>
    </property>
   </action>
-  <action name="actionShowEndOfLine">
+  <action name="actionShowLineAndParagraphs">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show End of Line</string>
+    <string>Show Line And Paragraph</string>
    </property>
   </action>
   <action name="actionRead_documentation">

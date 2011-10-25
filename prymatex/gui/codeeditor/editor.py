@@ -84,8 +84,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     SelectCurrentScope = 5
     
     #Flags
-    ShowWhitespaces = 0x01
-    ShowEndOfLines = 0x02
+    ShowTabsAndSpaces = 0x01
+    ShowLineAndParagraphs = 0x02
     ShowBookmarks = 0x04
     ShowLineNumbers = 0x08
     ShowFolding = 0x10
@@ -239,9 +239,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         flags = 0
         options = self.document().defaultTextOption()
         if options.flags() & QtGui.QTextOption.ShowTabsAndSpaces:
-            flags |= self.ShowWhitespaces
+            flags |= self.ShowTabsAndSpaces
         if options.flags() & QtGui.QTextOption.ShowLineAndParagraphSeparators:
-            flags |= self.ShowEndOfLines
+            flags |= self.ShowLineAndParagraphs
         if self.sidebar.showBookmarks:
             flags |= self.ShowBookmarks
         if self.sidebar.showLineNumbers:
@@ -251,17 +251,23 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         return flags
         
     def setFlags(self, flags):
-        if flags & self.ShowWhitespaces:
-            options = self.document().defaultTextOption()
-            options.setFlags(options.flags() | QtGui.QTextOption.ShowTabsAndSpaces)
-            self.document().setDefaultTextOption(options)
-        if flags & self.ShowEndOfLines:
-            options = self.document().defaultTextOption()
-            options.setFlags(options.flags() | QtGui.QTextOption.ShowLineAndParagraphSeparators)
-            self.document().setDefaultTextOption(options)
+        options = self.document().defaultTextOption()
+        oFlags = options.flags()
+        if flags & self.ShowTabsAndSpaces:
+            oFlags |= QtGui.QTextOption.ShowTabsAndSpaces
+        else:
+            oFlags &= ~QtGui.QTextOption.ShowTabsAndSpaces
+        if flags & self.ShowLineAndParagraphs:
+            oFlags |= QtGui.QTextOption.ShowLineAndParagraphSeparators
+        else:
+            oFlags &= ~QtGui.QTextOption.ShowLineAndParagraphSeparators
+        options.setFlags(oFlags)
+        self.document().setDefaultTextOption(options)
         self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
         self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
         self.sidebar.showFolding = bool(flags & self.ShowFolding)
+        self.updateLineNumberAreaWidth(0)
+        self.viewport().repaint(self.viewport().visibleRegion())
         
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
@@ -280,9 +286,19 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def contextMenuEvent(self, event):
         menu = self.createStandardContextMenu()
         menu.popup(event.globalPos())
-        
+    
+    #=======================================================================
+    # Espacio para la sidebar
+    #=======================================================================
     def lineNumberAreaWidth(self):
-        return 3 + self.fontMetrics().width('9') * len(str(self.blockCount())) + self.sidebar.bookmarkArea + self.sidebar.foldArea 
+        area = self.sidebar.padding
+        if self.sidebar.showLineNumbers:
+            area += self.fontMetrics().width('0') * len(str(self.blockCount()))
+        if self.sidebar.showBookmarks:
+            area += self.sidebar.bookmarkArea
+        if self.sidebar.showFolding:
+            area += self.sidebar.foldArea
+        return area
         
     def updateLineNumberAreaWidth(self, newBlockCount):
         self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
@@ -291,8 +307,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         if dy:
             self.sidebar.scroll(0, dy);
         else:
-            self.sidebar.update(0, rect.y(), self.sidebar.width(), rect.height());
-        if (rect.contains(self.viewport().rect())):
+            self.sidebar.update(0, rect.y(), self.sidebar.width(), rect.height())
+        if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
     
     def resizeEvent(self, event):

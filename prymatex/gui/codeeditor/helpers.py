@@ -263,7 +263,6 @@ class PMXFoldingHelper(object):
             nest += userData.foldingMark
             if nest >= 0:
                 self.folding.append(block)
-        print map(lambda block: block.userData().foldingMark, self.folding)
 
     def updateIndentFoldingBlocks(self):
         self.folding = []
@@ -280,7 +279,11 @@ class PMXFoldingHelper(object):
                 if userData.indent <= currentIndent and len(self.folding) > 0:
                     #Hay que cerrar algo antes
                     closeBlock = self.findPreviousMoreIndentBlock(block)
-                    closeBlock.userData().foldingMark = - (len(currentIndent) / len(userData.indent))
+                    lenIndent = len(userData.indent)
+                    if lenIndent:
+                        closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent)
+                    else:
+                        closeBlock.userData().foldingMark = -nest
                     self.folding.append(closeBlock)
                     nest += closeBlock.userData().foldingMark
                 else:
@@ -297,7 +300,6 @@ class PMXFoldingHelper(object):
             if userData is not None:
                 closeBlock.userData().foldingMark = -nest
                 self.folding.append(closeBlock)
-        print map(lambda block: block.userData().foldingMark, self.folding)
 
     def findPreviousMoreIndentBlock(self, block):
         """ Return previous block if text in block is not bank """
@@ -351,3 +353,6 @@ class PMXFoldingHelper(object):
 
     def isStop(self, mark):
         return mark <= PMXSyntax.FOLDING_STOP
+        
+    def isFoldingMark(self, block):
+        return block in self.folding

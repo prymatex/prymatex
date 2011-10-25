@@ -187,7 +187,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
     
     def setHtml(self, string, bundleItem):
         self.bundleItem = bundleItem
-        url = QtCore.QUrl.fromUserInput(bundleItem.name)
+        url = QtCore.QUrl.fromUserInput("about:%s" % bundleItem.name)
+        print url.toString()
         self.lineUrl.setText(url.toString())
         self.webView.setHtml(string, url)
     

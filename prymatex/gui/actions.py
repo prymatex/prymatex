@@ -39,12 +39,12 @@ class MainWindowActions(object):
     def on_menuView_aboutToShow(self):
         if self.currentEditor is not None:
             flags = self.currentEditor.getFlags()
-            self.actionShowWhitespace.setChecked(flags & self.currentEditor.ShowWhitespaces)
-            self.actionShowEndOfLine.setChecked(flags & self.currentEditor.ShowEndOfLines)
+            self.actionShowTabsAndSpaces.setChecked(flags & self.currentEditor.ShowTabsAndSpaces)
+            self.actionShowLineAndParagraphs.setChecked(flags & self.currentEditor.ShowLineAndParagraphs)
+            self.actionShowBookmarks.setChecked(flags & self.currentEditor.ShowBookmarks)
             self.actionShowLineNumbers.setChecked(flags & self.currentEditor.ShowLineNumbers)
             self.actionShowFolding.setChecked(flags & self.currentEditor.ShowFolding)
-            self.actionShowBookmarks.setChecked(flags & self.currentEditor.ShowBookmarks)
-    
+            
     #============================================================
     # File Actions
     #============================================================
@@ -187,32 +187,47 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot(bool)
     def on_actionShowBookmarks_toggled(self, checked):
         if self.currentEditor is not None:
-            flags = self.currentEditor.getFlags()
-            self.currentEditor.setFlags(flags | self.currentEditor.ShowBookmarks)
+            if checked:
+                flags = self.currentEditor.getFlags() | self.currentEditor.ShowBookmarks
+            else:
+                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowBookmarks
+            self.currentEditor.setFlags(flags)
     
     @QtCore.pyqtSlot(bool)
     def on_actionShowLineNumbers_toggled(self, checked):
         if self.currentEditor is not None:
-            flags = self.currentEditor.getFlags()
-            self.currentEditor.setFlags(flags | self.currentEditor.ShowLineNumbers)
+            if checked:
+                flags = self.currentEditor.getFlags() | self.currentEditor.ShowLineNumbers
+            else:
+                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowLineNumbers
+            self.currentEditor.setFlags(flags)
         
     @QtCore.pyqtSlot(bool)
     def on_actionShowFolding_toggled(self, checked):
         if self.currentEditor is not None:
-            flags = self.currentEditor.getFlags()
-            self.currentEditor.setFlags(flags | self.currentEditor.ShowFolding)
+            if checked:
+                flags = self.currentEditor.getFlags() | self.currentEditor.ShowFolding
+            else:
+                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowFolding
+            self.currentEditor.setFlags(flags)
     
     @QtCore.pyqtSlot(bool)
-    def on_actionShowWhitespace_toggled(self, checked):
+    def on_actionShowTabsAndSpaces_toggled(self, checked):
         if self.currentEditor is not None:
-            flags = self.currentEditor.getFlags()
-            self.currentEditor.setFlags(flags | self.currentEditor.ShowWhitespaces)
+            if checked:
+                flags = self.currentEditor.getFlags() | self.currentEditor.ShowTabsAndSpaces
+            else:
+                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowTabsAndSpaces
+            self.currentEditor.setFlags(flags)
     
     @QtCore.pyqtSlot(bool)
-    def on_actionShowEndOfLine_toggled(self, checked):
+    def on_actionShowLineAndParagraphs_toggled(self, checked):
         if self.currentEditor is not None:
-            flags = self.currentEditor.getFlags()
-            self.currentEditor.setFlags(flags | self.currentEditor.ShowEndOfLines)
+            if checked:
+                flags = self.currentEditor.getFlags() | self.currentEditor.ShowLineAndParagraphs
+            else:
+                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowLineAndParagraphs
+            self.currentEditor.setFlags(flags)
 
     #============================================================
     # Text Actions
