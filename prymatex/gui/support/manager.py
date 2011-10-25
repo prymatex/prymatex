@@ -20,7 +20,6 @@ class PMXBundleMenuGroup(QtCore.QObject):
         self.bundleTreeModel.rowsInserted.connect(self.on_bundleTreeModel_rowsInserted)
         self.bundleTreeModel.rowsRemoved.connect(self.on_bundleTreeModel_rowsRemoved)
         
-        
     def buildMenu(self, items, menu, submenus, parent = None):
         for uuid in items:
             if uuid.startswith('-'):
