@@ -49,7 +49,11 @@ class PMXApplication(QtGui.QApplication):
 
         # Loads
         self.loadSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
-        self.loadKernelManager()    #Console kernel Manager
+        try:
+            self.loadKernelManager()    #Console kernel Manager
+        except ImportError:
+            self.kernelManager = None
+
         
         # Setups
         #self.setupExecutor()        #Executor
