@@ -1,0 +1,2 @@
+pygments
+-e git+https://github.com/D3f0/ponyguruma.git#egg=ponyguruma
