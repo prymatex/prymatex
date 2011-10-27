@@ -5,6 +5,10 @@ from PyQt4 import QtGui, QtCore
 from prymatex.core import exceptions
 
 class PMXBaseEditor(object):
+    '''
+    Every editor should extend this class in order to guarantee it'll be able
+    to be place in tab.
+    '''
     #tabStatusChanged
     
     creation_counter = 0

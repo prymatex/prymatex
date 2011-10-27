@@ -357,7 +357,11 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
             flags |= QtGui.QTextDocument.FindCaseSensitively
         return self.lineEditIFind.text(), flags
     
-    def showFind(self):
+    def showIFind(self):
         self.hideAllWidgets()
+        cursor = self.currentEditor.textCursor()
+        self.info("Getting selected text")
+        if cursor.hasSelection():
+            self.lineEditIFind.setText(cursor.selectedText())
         self.widgetIFind.setVisible(True)
         self.lineEditIFind.setFocus()

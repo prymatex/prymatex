@@ -108,7 +108,8 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
         self.model = PMXEnvVariablesTableModel(self.application.settings.getGroup('Manager'), self.application.supportManager.shellVariables, self.application.supportManager.environment, self)
         self.tableView.setModel(self.model)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-        
+        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableView.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.model.rowsInserted.connect(self.tableView.resizeRowsToContents)
         self.model.rowsRemoved.connect(self.tableView.resizeRowsToContents)
         self.tableView.resizeRowsToContents()
