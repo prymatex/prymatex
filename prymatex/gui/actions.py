@@ -14,14 +14,8 @@ class MainWindowActions(object):
     # About To Show Menus
     #============================================================
     def on_menuFile_aboutToShow(self):
-        self.actionSave.setEnabled(self.currentEditor is not None and self.currentEditor.isModified())
-        self.actionSaveAll.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
-        self.menuRecentFiles.menuAction().setEnabled(bool(self.application.fileManager.fileHistory))
-        
-    def on_menuFile_aboutToShow(self):
-        self.actionSave.setEnabled(self.currentEditor is not None and self.currentEditor.isModified())
-        self.actionSaveAll.setEnabled(any(map(lambda editor: editor.isModified(), self.splitTabWidget.getAllWidgets())))
-    
+        pass
+
     def on_menuRecentFiles_aboutToShow(self):
         self.menuRecentFiles.clear()
         for file in self.application.fileManager.fileHistory:
@@ -32,19 +26,13 @@ class MainWindowActions(object):
         self.menuRecentFiles.addSeparator()
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
-        
+
     def on_menuEdit_aboutToShow(self):
         pass
     
     def on_menuView_aboutToShow(self):
-        if self.currentEditor is not None:
-            flags = self.currentEditor.getFlags()
-            self.actionShowTabsAndSpaces.setChecked(flags & self.currentEditor.ShowTabsAndSpaces)
-            self.actionShowLineAndParagraphs.setChecked(flags & self.currentEditor.ShowLineAndParagraphs)
-            self.actionShowBookmarks.setChecked(flags & self.currentEditor.ShowBookmarks)
-            self.actionShowLineNumbers.setChecked(flags & self.currentEditor.ShowLineNumbers)
-            self.actionShowFolding.setChecked(flags & self.currentEditor.ShowFolding)
-            
+        pass
+
     #============================================================
     # File Actions
     #============================================================
