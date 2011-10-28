@@ -64,6 +64,14 @@ class PMXBundleTreeNode(object):
             text += u"\t%s" % (self.trigger)
         return text.replace('&', '&&')
     
+    def triggerItemAction(self, parent = None):
+        if not hasattr(self, "action"):
+            assert parent is not None, "Parent of action mustn't be None"
+            self.action = QtGui.QAction(QtGui.QIcon(self.icon), self.buildMenuTextEntry(), parent)
+            receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
+            parent.connect(self.action, QtCore.SIGNAL('triggered()'), receiver)
+        return self.action
+    
     def update(self, hash):
         if 'keyEquivalent' in hash:
             hash['keyEquivalent'] = buildKeyEquivalent(hash['keyEquivalent'])

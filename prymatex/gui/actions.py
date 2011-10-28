@@ -8,7 +8,7 @@ class MainWindowActions(object):
         self.actionShowMenus.setChecked(self.menuBar().isVisible())
         
         #Bundles Menu
-        self.application.supportManager.appendBundleMenuGroup(self.menuBundles)
+        self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
 
     #============================================================
     # About To Show Menus
