@@ -13,6 +13,7 @@ from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
 from subprocess import Popen, PIPE, STDOUT
+from prymatex.gui.dockers.base import PMXBaseDock
 
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):
@@ -124,7 +125,7 @@ class TextMate(QObject):
         return True
     isBusy = pyqtProperty("bool", isBusy)
     
-class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
+class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
     SETTINGS_GROUP = "Browser"
     
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
@@ -148,9 +149,12 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
 
         QNetworkProxy.setApplicationProxy( network_proxy )
 
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F12")
+    
     def __init__(self, parent):
-        super(PMXBrowserDock, self).__init__(parent)
+        QtGui.QDockWidget.__init__(self, parent)
         self.setupUi(self)
+        PMXBaseDock.__init__(self)
         
         #Developers, developers, developers!!! Extras
         QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
@@ -170,7 +174,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
         
         #Connects
         self.buttonBack.clicked.connect(self.back)
-        self.buttonNext.clicked.connect(self.next)
+        self.buttonNext.clicked.connect(self.forward)
         self.lineUrl.returnPressed.connect(self.url_changed)
         self.webView.linkClicked.connect(self.link_clicked)
         self.webView.urlChanged.connect(self.link_clicked)
@@ -182,6 +186,16 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
         
         self.bundleItem = None
         self.configure()
+        self.installEventFilter(self)
+    
+    
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            if event.key() == QtCore.Qt.Key_Escape:
+                self.close()
+                return True
+            
+        return QtGui.QDockWidget.eventFilter(self, obj, event)
     
     def prepare_JavaScript(self, ready):
         if not ready:
@@ -206,45 +220,44 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject):
         
         url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
         self.webView.setUrl(url)
-		
+
     def stop_page(self):
-		"""Stop loading the page"""
-		self.webView.stop()
-	
+        """Stop loading the page"""
+        self.webView.stop()
+
     def title_changed(self, title):
-    	"""Web page title changed - change the tab name"""
-    	#self.setWindowTitle(title)
+        """Web page title changed - change the tab name"""
+        #self.setWindowTitle(title)
         pass
     
     def reload_page(self):
-    	"""Reload the web page"""
+        """Reload the web page"""
         url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
         self.webView.setUrl(url)
     
     def link_clicked(self, url):
-    	"""Update the URL if a link on a web page is clicked"""
-    	page = self.webView.page()
-    	history = page.history()
-    	self.buttonBack.setEnabled(history.canGoBack())
-    	self.buttonNext.setEnabled(history.canGoForward())
-    	
-    	self.lineUrl.setText(url.toString())
-    
+        """Update the URL if a link on a web page is clicked"""
+        page = self.webView.page()
+        history = page.history()
+        self.buttonBack.setEnabled(history.canGoBack())
+        self.buttonNext.setEnabled(history.canGoForward())
+        
+        self.lineUrl.setText(url.toString())
+
     def load_progress(self, load):
-    	"""Page load progress"""
-    	self.buttonStop.setEnabled(load != 100)
-    	
+        """Page load progress"""
+        self.buttonStop.setEnabled(load != 100)
+        
     def back(self):
-    	"""Back button clicked, go one page back"""
-    	page = self.webView.page()
-    	history = page.history()
-    	history.back()
-    	self.buttonBack.setEnabled(history.canGoBack())
+        """Back button clicked, go one page back"""
+        page = self.webView.page()
+        history = page.history()
+        history.back()
+        self.buttonBack.setEnabled(history.canGoBack())
     
-    def next(self):
-    	"""Next button clicked, go to next page"""
-    	page = self.webView.page()
-    	history = page.history()
-    	history.forward()
-    	self.buttonNext.setEnabled(history.canGoForward())
-    	
+    def forward(self):
+        """Next button clicked, go to next page"""
+        page = self.webView.page()
+        history = page.history()
+        history.forward()
+        self.buttonNext.setEnabled(history.canGoForward())
