@@ -60,7 +60,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
     
     def addToContainers(self, menu):
         for containter in self.containers:
-            containter.addMenu(menus)
+            containter.addMenu(menu)
 
     def on_bundleTreeModel_dataChanged(self, topLeft, bottomRight):
         #TODO: ver que pasa con el bottomRight

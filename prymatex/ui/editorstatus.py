@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Mon Oct 24 22:36:34 2011
+# Created: Fri Oct 28 18:56:50 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName(_fromUtf8("CodeEditorStatus"))
-        CodeEditorStatus.resize(721, 254)
+        CodeEditorStatus.resize(629, 240)
         self.verticalLayout = QtGui.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -178,18 +178,27 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_2.setMargin(0)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.labelLineColumn = QtGui.QLabel(self.widgetStatus)
+        self.labelLineColumn.setMaximumSize(QtCore.QSize(250, 16777215))
         self.labelLineColumn.setObjectName(_fromUtf8("labelLineColumn"))
         self.horizontalLayout_2.addWidget(self.labelLineColumn)
         self.labelTabSize = QtGui.QLabel(self.widgetStatus)
         self.labelTabSize.setMaximumSize(QtCore.QSize(80, 16777215))
         self.labelTabSize.setObjectName(_fromUtf8("labelTabSize"))
         self.horizontalLayout_2.addWidget(self.labelTabSize)
+        self.pushButtonMenuBundle = QtGui.QPushButton(self.widgetStatus)
+        self.pushButtonMenuBundle.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.pushButtonMenuBundle.setText(_fromUtf8(""))
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/run-build.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButtonMenuBundle.setIcon(icon3)
+        self.pushButtonMenuBundle.setFlat(True)
+        self.pushButtonMenuBundle.setObjectName(_fromUtf8("pushButtonMenuBundle"))
+        self.horizontalLayout_2.addWidget(self.pushButtonMenuBundle)
         self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
-        self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(160, 16777215))
+        self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(250, 16777215))
         self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
         self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
         self.comboBoxSymbols = QtGui.QComboBox(self.widgetStatus)
-        self.comboBoxSymbols.setMaximumSize(QtCore.QSize(350, 16777215))
         self.comboBoxSymbols.setObjectName(_fromUtf8("comboBoxSymbols"))
         self.horizontalLayout_2.addWidget(self.comboBoxSymbols)
         self.verticalLayout.addWidget(self.widgetStatus)
@@ -219,7 +228,7 @@ class Ui_CodeEditorStatus(object):
         self.labelFindMode.setText(_('Mode:'))
         self.checkBoxFindCaseSensitively.setText(_('Case Sensitively'))
         self.pushButtonFindAll.setText(_('Find All'))
-        self.labelLineColumn.setText(_('Line: 0 Column: 0'))
+        self.labelLineColumn.setText(_('Line: 0 Column: 0 Selection: 0'))
         self.labelTabSize.setText(_('Tab Size'))
 
 from prymatex import resources_rc

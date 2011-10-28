@@ -87,9 +87,15 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxSyntaxes.setModel(self.application.supportManager.syntaxProxyModel);
         self.comboBoxSyntaxes.setModelColumn(0)
         self.comboBoxSyntaxes.setView(tableView)
-         #Connect tab size context menu
+        
+        #Connect tab size context menu
         self.labelTabSize.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.labelTabSize.customContextMenuRequested.connect(self.showTabSizeContextMenu)
+        
+        #Create bundle menu
+        self.menuBundle = QtGui.QMenu(self)
+        self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundle)
+        self.pushButtonMenuBundle.setMenu(self.menuBundle)
         
     def setupWidgetCommand(self):
         self.comboBoxInput.addItem("None", "none")
