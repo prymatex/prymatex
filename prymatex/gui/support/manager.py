@@ -11,14 +11,24 @@ from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeF
 from prymatex.mvc.proxies import bisect_key
 
 class PMXBundleMenuGroup(QtCore.QObject):
-    def __init__(self, manager, parent = None):
-        QtCore.QObject.__init__(self, parent)
+    def __init__(self, manager):
+        QtCore.QObject.__init__(self, manager)
         self.manager = manager
+        #TODO: No conectar al modelo preferir manager sobre modelo
         self.bundleTreeModel = self.manager.bundleTreeModel
+        #The bundle menues
         self.menus = {}
+        #The qt menus where a bundle menu is added
+        self.containers = []
         self.manager.bundlePopulated.connect(self.on_manager_bundlePopulated)
         self.bundleTreeModel.dataChanged.connect(self.on_bundleTreeModel_dataChanged)
-        self.bundleTreeModel.rowsRemoved.connect(self.on_bundleTreeModel_rowsRemoved)
+    
+    def appendMenu(self, menu):
+        if menu not in self.containers:
+            self.containers.append(menu)
+        #Append all bundle menus
+        for m in self.menus.values():
+            menu.addMenu(m)
         
     def buildMenu(self, items, menu, submenus, parent = None):
         for uuid in items:
@@ -27,27 +37,30 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 continue
             item = self.manager.getBundleItem(uuid)
             if item != None:
-                action = QtGui.QAction(QtGui.QIcon(item.icon), item.buildMenuTextEntry(), parent)
-                receiver = lambda item = item: self.manager.bundleItemTriggered.emit(item)
-                self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+                action = item.triggerItemAction(parent)
                 menu.addAction(action)
             elif uuid in submenus:
                 submenu = QtGui.QMenu(submenus[uuid]['name'], parent)
                 menu.addMenu(submenu)
                 self.buildMenu(submenus[uuid]['items'], submenu, submenus, parent)
 
-    def buildBundleMenu(self, bundle, parent):
-        menu = QtGui.QMenu(bundle.buildBundleAccelerator(), parent)
+    def buildBundleMenu(self, bundle):
+        menu = QtGui.QMenu(bundle.buildBundleAccelerator())
         if bundle.mainMenu is not None:
             submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
             items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
-            self.buildMenu(items, menu, submenus, parent)
-        menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
+            self.buildMenu(items, menu, submenus, menu)
         return menu
 
     def addBundle(self, bundle):
-        self.menus[bundle] = self.buildBundleMenu(bundle, self.parent())
-        self.parent().addMenu(self.menus[bundle])
+        menu = self.buildBundleMenu(bundle)
+        self.menus[bundle] = menu
+        menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
+        self.addToContainers(menu)
+    
+    def addToContainers(self, menu):
+        for containter in self.containers:
+            containter.addMenu(menus)
 
     def on_bundleTreeModel_dataChanged(self, topLeft, bottomRight):
         #TODO: ver que pasa con el bottomRight
@@ -55,13 +68,13 @@ class PMXBundleMenuGroup(QtCore.QObject):
         if item.TYPE == "bundle":
             self.menus[item].setTitle(item.buildBundleAccelerator())
             self.menus[item].menuAction().setVisible(item.enabled and item.mainMenu is not None)
+        else:
+            action = item.triggerItemAction()
+            action.setText(item.name)
 
     def on_manager_bundlePopulated(self, bundle):
-        if bundle in self.menus:
+        if bundle not in self.menus:
             self.addBundle(bundle)
-    
-    def on_bundleTreeModel_rowsRemoved(self, parent, start, end):
-        print "Remove indexes"
 
 class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     #Signals
@@ -123,13 +136,13 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         #DRAGCOMMANDS
         self.dragProxyModel = PMXBundleTypeFilterProxyModel("dragcommand", self)
         self.dragProxyModel.setSourceModel(self.bundleTreeModel)
+        
+        #BUNDLEMENUGROUP
+        self.bundleMenuGroup = PMXBundleMenuGroup(self)
         self.configure()
 
-    def appendBundleMenuGroup(self, menu):
-        group = PMXBundleMenuGroup(self, menu)
-        name_order = lambda b1, b2: cmp(b1.name, b2.name)
-        for bundle in sorted(self.application.supportManager.getAllBundles(), name_order):
-            group.addBundle(bundle)
+    def appendMenuToBundleMenuGroup(self, menu):
+        self.bundleMenuGroup.appendMenu(menu)
 
     def buildEnvironment(self):
         env = {}
