@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Fri Oct 28 18:56:50 2011
+# Created: Fri Oct 28 20:36:38 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -181,10 +181,10 @@ class Ui_CodeEditorStatus(object):
         self.labelLineColumn.setMaximumSize(QtCore.QSize(250, 16777215))
         self.labelLineColumn.setObjectName(_fromUtf8("labelLineColumn"))
         self.horizontalLayout_2.addWidget(self.labelLineColumn)
-        self.labelTabSize = QtGui.QLabel(self.widgetStatus)
-        self.labelTabSize.setMaximumSize(QtCore.QSize(80, 16777215))
-        self.labelTabSize.setObjectName(_fromUtf8("labelTabSize"))
-        self.horizontalLayout_2.addWidget(self.labelTabSize)
+        self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
+        self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(250, 16777215))
+        self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
+        self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
         self.pushButtonMenuBundle = QtGui.QPushButton(self.widgetStatus)
         self.pushButtonMenuBundle.setMaximumSize(QtCore.QSize(50, 16777215))
         self.pushButtonMenuBundle.setText(_fromUtf8(""))
@@ -194,10 +194,10 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonMenuBundle.setFlat(True)
         self.pushButtonMenuBundle.setObjectName(_fromUtf8("pushButtonMenuBundle"))
         self.horizontalLayout_2.addWidget(self.pushButtonMenuBundle)
-        self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
-        self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(250, 16777215))
-        self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
-        self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
+        self.labelTabSize = QtGui.QLabel(self.widgetStatus)
+        self.labelTabSize.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.labelTabSize.setObjectName(_fromUtf8("labelTabSize"))
+        self.horizontalLayout_2.addWidget(self.labelTabSize)
         self.comboBoxSymbols = QtGui.QComboBox(self.widgetStatus)
         self.comboBoxSymbols.setObjectName(_fromUtf8("comboBoxSymbols"))
         self.horizontalLayout_2.addWidget(self.comboBoxSymbols)

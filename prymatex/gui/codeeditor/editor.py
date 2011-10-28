@@ -112,7 +112,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def tabKeyBehavior(self):
         return self.tabStopSoft and u' ' * self.tabStopSize or u'\t'
     
-    def __init__(self, fileInfo = None, parent = None):
+    def __init__(self, fileInfo = None, project = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self)
         #Sidebar
@@ -457,6 +457,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def keyPressEvent(self, event):
         '''
         This method is called whenever a key is pressed. The key code is stored in event.key()
+        http://manual.macromates.com/en/working_with_text
         '''
         if self.completerMode():
             if event.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Tab, Qt.Key_Escape, Qt.Key_Backtab):
@@ -668,6 +669,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.insertBundleItem(command)
     
     def buildEnvironment(self, env = {}):
+        """ http://manual.macromates.com/en/environment_variables.html """
         cursor = self.textCursor()
         line = cursor.block().text()
         scope = self.getCurrentScope()
@@ -692,6 +694,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             env['TM_FILEPATH'] = self.fileInfo.absoluteFilePath()
             env['TM_FILENAME'] = self.fileInfo.fileName()
             env['TM_DIRECTORY'] = self.fileInfo.absoluteDir().dirName()
+        if self.project is not None:
+            env['TM_PROJECT_DIRECTORY'] = ""
+            env['TM_SELECTED_FILES'] = ""
+            env['TM_SELECTED_FILE'] = ""
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText()
             start, end = self.getSelectionBlockStartEnd()

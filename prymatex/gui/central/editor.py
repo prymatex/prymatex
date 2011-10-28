@@ -14,6 +14,7 @@ class PMXBaseEditor(object):
     creation_counter = 0
     def __init__(self):
         self.fileInfo = None
+        self.project = None
         self.creation_counter = PMXBaseEditor.creation_counter
         PMXBaseEditor.creation_counter += 1
         

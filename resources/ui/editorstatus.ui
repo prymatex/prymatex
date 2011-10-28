@@ -355,15 +355,12 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="labelTabSize">
+       <widget class="QComboBox" name="comboBoxSyntaxes">
         <property name="maximumSize">
          <size>
-          <width>80</width>
+          <width>250</width>
           <height>16777215</height>
          </size>
-        </property>
-        <property name="text">
-         <string>Tab Size</string>
         </property>
        </widget>
       </item>
@@ -388,12 +385,15 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxSyntaxes">
+       <widget class="QLabel" name="labelTabSize">
         <property name="maximumSize">
          <size>
-          <width>250</width>
+          <width>80</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="text">
+         <string>Tab Size</string>
         </property>
        </widget>
       </item>
