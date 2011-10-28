@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>721</width>
-    <height>254</height>
+    <width>629</width>
+    <height>240</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -343,8 +343,14 @@ p, li { white-space: pre-wrap; }
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QLabel" name="labelLineColumn">
+        <property name="maximumSize">
+         <size>
+          <width>250</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
-         <string>Line: 0 Column: 0</string>
+         <string>Line: 0 Column: 0 Selection: 0</string>
         </property>
        </widget>
       </item>
@@ -362,24 +368,37 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButtonMenuBundle">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources.qrc">
+          <normaloff>:/icons/actions/run-build.png</normaloff>:/icons/actions/run-build.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QComboBox" name="comboBoxSyntaxes">
         <property name="maximumSize">
          <size>
-          <width>160</width>
+          <width>250</width>
           <height>16777215</height>
          </size>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBoxSymbols">
-        <property name="maximumSize">
-         <size>
-          <width>350</width>
-          <height>16777215</height>
-         </size>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="comboBoxSymbols"/>
       </item>
      </layout>
     </widget>

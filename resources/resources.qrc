@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/run-build.png</file>
     <file>actions/insert-text.png</file>
     <file>actions/code-function.png</file>
     <file>actions/folder-new.png</file>
