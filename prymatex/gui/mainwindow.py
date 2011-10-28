@@ -80,7 +80,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         '''
         from prymatex.gui.dockers.filesystem import PMXFileSystemDock
         from prymatex.gui.dockers.project import PMXProjectDock
-        from prymatex.gui.dockers.symbols import PMXSymboldListDock
         from prymatex.gui.dockers.browser import PMXBrowserDock
         from prymatex.gui.dockers.console import PMXConsoleDock
         from prymatex.gui.dockers.logger import QtLogHandler, PMXLoggerDock

@@ -186,15 +186,13 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         
         self.bundleItem = None
         self.configure()
-        self.installEventFilter(self)
-        # Ensure focus so shortcuts are available
-        self.toggleViewAction().toggled[bool].connect(self.actionToggleView_toggled)
+
+    def showEvent(self, event):
+        self.setFocus()
+           
+
     
-    def actionToggleView_toggled(self, shown):
-        if shown:
-            self.setFocus()
-    
-    def eventFilter(self, obj, event):
+    def event(self, event):
         if event.type() == QtCore.QEvent.KeyPress:
             if event.key() == QtCore.Qt.Key_Escape:
                 self.close()
@@ -203,7 +201,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
                 self.lineUrl.setFocus()
                 self.lineUrl.selectAll()
                 return True
-        return QtGui.QDockWidget.eventFilter(self, obj, event)
+        return QtGui.QDockWidget.event(self, event)
     
     def prepare_JavaScript(self, ready):
         if not ready:

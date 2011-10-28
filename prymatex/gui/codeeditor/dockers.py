@@ -3,11 +3,15 @@
 
 from PyQt4 import QtGui
 from prymatex.utils.i18n import ugettext as _
+from prymatex.gui.dockers.base import PMXBaseDock
 
-class PMXCodeSymbolsDock(QtGui.QDockWidget):
+class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F7")
+    
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Symbols"))
+        PMXBaseDock.__init__(self)
         self.tableViewSymbols = QtGui.QTableView()
         self.tableViewSymbols.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.tableViewSymbols.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)

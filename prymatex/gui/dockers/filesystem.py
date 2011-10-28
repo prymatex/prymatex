@@ -39,6 +39,21 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         self.setupTreeViewFileSystem()
         
         self.configure()
+        
+        self.installEventFilter(self)
+        
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            #print "Key press", obj #
+            if obj in (self, self.treeViewFileSystem) and event.key() == QtCore.Qt.Key_Backspace:
+                self.pushButtonUp.click()
+                return True
+            if event.key() == QtCore.Qt.Key_F and event.modifiers() == QtCore.Qt.ControlModifier:
+                # FIXME: Get Ctrl + F before editor's find, all the foucs is belong to us right now :P
+                self.lineEditFilter.setFocus()
+                return True
+        return QtGui.QDockWidget.eventFilter(self, obj, event)
+        
 
     def setupComboBoxLocation(self):
         self.comboBoxLocation.setModel(self.dirModel)
