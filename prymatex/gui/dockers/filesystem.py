@@ -9,17 +9,20 @@ from prymatex.ui.panefilesystem import Ui_FileSystemDock
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
+from prymatex.gui.dockers.base import PMXBaseDock
 
-class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject):
+class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBaseDock):
     #=======================================================================
     # Settings
     #=======================================================================
     SETTINGS_GROUP = 'FileSystem'
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, parent)
         self.setupUi(self)
+        PMXBaseDock.__init__(self)        
         
         #File System model
         self.fileSystemModel = QtGui.QFileSystemModel(self)

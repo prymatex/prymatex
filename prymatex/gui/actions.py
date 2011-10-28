@@ -153,7 +153,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
-        self.statusBar().showFind()
+        self.statusBar().showIFind()
 
     @QtCore.pyqtSlot()
     def on_actionFindReplace_triggered(self):
