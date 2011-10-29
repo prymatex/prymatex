@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/bundle.ui'
 #
-# Created: Wed Oct  5 17:39:17 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_Menu(object):
     def setupUi(self, Menu):
         Menu.setObjectName(_fromUtf8("Menu"))
         Menu.resize(458, 349)
+        Menu.setWindowTitle(_('Form'))
         self.horizontalLayout_2 = QtGui.QHBoxLayout(Menu)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.treeView = QtGui.QTreeView(Menu)
@@ -32,5 +33,5 @@ class Ui_Menu(object):
         QtCore.QMetaObject.connectSlotsByName(Menu)
 
     def retranslateUi(self, Menu):
-        Menu.setWindowTitle(_('Form'))
+        pass
 

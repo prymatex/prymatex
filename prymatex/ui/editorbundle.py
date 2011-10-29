@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorbundle.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_Menu(object):
     def setupUi(self, Menu):
         Menu.setObjectName(_fromUtf8("Menu"))
         Menu.resize(458, 349)
+        Menu.setWindowTitle(_('Form'))
         self.horizontalLayout_2 = QtGui.QHBoxLayout(Menu)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.treeMenuWidget = QtGui.QTreeWidget(Menu)
@@ -27,19 +28,19 @@ class Ui_Menu(object):
         self.treeMenuWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
         self.treeMenuWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.treeMenuWidget.setObjectName(_fromUtf8("treeMenuWidget"))
+        self.treeMenuWidget.headerItem().setText(0, _('Menu Structure'))
         self.horizontalLayout_2.addWidget(self.treeMenuWidget)
         self.treeExcludedWidget = QtGui.QTreeWidget(Menu)
         self.treeExcludedWidget.setDragEnabled(True)
         self.treeExcludedWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
         self.treeExcludedWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.treeExcludedWidget.setObjectName(_fromUtf8("treeExcludedWidget"))
+        self.treeExcludedWidget.headerItem().setText(0, _('Excluded Items'))
         self.horizontalLayout_2.addWidget(self.treeExcludedWidget)
 
         self.retranslateUi(Menu)
         QtCore.QMetaObject.connectSlotsByName(Menu)
 
     def retranslateUi(self, Menu):
-        Menu.setWindowTitle(_('Form'))
-        self.treeMenuWidget.headerItem().setText(0, _('Menu Structure'))
-        self.treeExcludedWidget.headerItem().setText(0, _('Excluded Items'))
+        pass
 

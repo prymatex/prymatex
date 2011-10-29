@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/template.ui'
 #
-# Created: Wed Oct  5 17:39:17 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_Template(object):
     def setupUi(self, Template):
         Template.setObjectName(_fromUtf8("Template"))
         Template.resize(361, 237)
+        Template.setWindowTitle(_('Form'))
         self.formLayout_2 = QtGui.QFormLayout(Template)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout_2.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
@@ -26,6 +27,7 @@ class Ui_Template(object):
         self.formLayout_2.setSpacing(2)
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
         self.label = QtGui.QLabel(Template)
+        self.label.setText(_('Extension:'))
         self.label.setObjectName(_fromUtf8("label"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
@@ -35,6 +37,7 @@ class Ui_Template(object):
         self.horizontalLayout_2.addWidget(self.lineEditExtension)
         self.formLayout_2.setLayout(0, QtGui.QFormLayout.FieldRole, self.horizontalLayout_2)
         self.label_2 = QtGui.QLabel(Template)
+        self.label_2.setText(_('Command(s):'))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_2)
         self.command = QtGui.QPlainTextEdit(Template)
@@ -46,6 +49,7 @@ class Ui_Template(object):
         self.command.setObjectName(_fromUtf8("command"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.command)
         self.label_4 = QtGui.QLabel(Template)
+        self.label_4.setText(_('Output:'))
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_4)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
@@ -61,8 +65,5 @@ class Ui_Template(object):
         QtCore.QMetaObject.connectSlotsByName(Template)
 
     def retranslateUi(self, Template):
-        Template.setWindowTitle(_('Form'))
-        self.label.setText(_('Extension:'))
-        self.label_2.setText(_('Command(s):'))
-        self.label_4.setText(_('Output:'))
+        pass
 

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/test.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
         Dialog.resize(330, 300)
+        Dialog.setWindowTitle(_('Dialog'))
         Dialog.setModal(True)
         self.verticalLayout = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout.setSpacing(2)
@@ -28,6 +29,7 @@ class Ui_Dialog(object):
         self.tableView.setObjectName(_fromUtf8("tableView"))
         self.verticalLayout.addWidget(self.tableView)
         self.label = QtGui.QLabel(Dialog)
+        self.label.setText(_('You should keep the Source, Text and TextMate bundles enabled, as these provide base functionality relied upon by other bundles.'))
         self.label.setWordWrap(True)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
@@ -36,6 +38,5 @@ class Ui_Dialog(object):
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(_('Dialog'))
-        self.label.setText(_('You should keep the Source, Text and TextMate bundles enabled, as these provide base functionality relied upon by other bundles.'))
+        pass
 

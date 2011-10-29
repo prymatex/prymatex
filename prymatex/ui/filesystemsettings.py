@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/filesystemsettings.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_FSSettingsDialog(object):
     def setupUi(self, FSSettingsDialog):
         FSSettingsDialog.setObjectName(_fromUtf8("FSSettingsDialog"))
         FSSettingsDialog.resize(503, 291)
+        FSSettingsDialog.setWindowTitle(_('File System Panel Settings'))
         self.verticalLayout = QtGui.QVBoxLayout(FSSettingsDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -30,9 +31,11 @@ class Ui_FSSettingsDialog(object):
         self.gridLayout = QtGui.QGridLayout(self.tabFilters)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.label = QtGui.QLabel(self.tabFilters)
+        self.label.setText(_('Include Files...'))
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.label_2 = QtGui.QLabel(self.tabFilters)
+        self.label_2.setText(_('Exclude Files...'))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout.addWidget(self.label_2, 0, 1, 1, 1)
         self.texteditIncludeFiles = QtGui.QTextEdit(self.tabFilters)
@@ -42,9 +45,11 @@ class Ui_FSSettingsDialog(object):
         self.texteditExcludeFiles.setObjectName(_fromUtf8("texteditExcludeFiles"))
         self.gridLayout.addWidget(self.texteditExcludeFiles, 1, 1, 1, 1)
         self.label_3 = QtGui.QLabel(self.tabFilters)
+        self.label_3.setText(_('Include Dirs...'))
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.gridLayout.addWidget(self.label_3, 2, 0, 1, 1)
         self.label_4 = QtGui.QLabel(self.tabFilters)
+        self.label_4.setText(_('Exclude Dirs...'))
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.gridLayout.addWidget(self.label_4, 2, 1, 1, 1)
         self.texteditIncludeDirs = QtGui.QTextEdit(self.tabFilters)
@@ -59,6 +64,7 @@ class Ui_FSSettingsDialog(object):
 "    background: white;\n"
 "    padding: 6px;\n"
 "}"))
+        self.label_5.setText(_('Use commas for filter separation, i.e. *.o, *~'))
         self.label_5.setObjectName(_fromUtf8("label_5"))
         self.gridLayout.addWidget(self.label_5, 4, 0, 1, 2)
         self.tabWidget.addTab(self.tabFilters, _fromUtf8(""))
@@ -84,12 +90,6 @@ class Ui_FSSettingsDialog(object):
         QtCore.QMetaObject.connectSlotsByName(FSSettingsDialog)
 
     def retranslateUi(self, FSSettingsDialog):
-        FSSettingsDialog.setWindowTitle(_('File System Panel Settings'))
-        self.label.setText(_('Include Files...'))
-        self.label_2.setText(_('Exclude Files...'))
-        self.label_3.setText(_('Include Dirs...'))
-        self.label_4.setText(_('Exclude Dirs...'))
-        self.label_5.setText(_('Use commas for filter separation, i.e. *.o, *~'))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabFilters), _('Filters'))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabEnviroment), _('Enviroment'))
 

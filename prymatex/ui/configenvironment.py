@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configenvironment.ui'
 #
-# Created: Wed Oct  5 17:39:17 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,12 +19,14 @@ class Ui_EnvVariables(object):
     def setupUi(self, EnvVariables):
         EnvVariables.setObjectName(_fromUtf8("EnvVariables"))
         EnvVariables.resize(400, 449)
+        EnvVariables.setWindowTitle(_('Enviroment Variables'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         EnvVariables.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(EnvVariables)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label = QtGui.QLabel(EnvVariables)
+        self.label.setText(_('Enviroment Variables'))
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
         self.tableView = QtGui.QTableView(EnvVariables)
@@ -37,9 +39,11 @@ class Ui_EnvVariables(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.pushAdd = QtGui.QPushButton(EnvVariables)
+        self.pushAdd.setText(_('+'))
         self.pushAdd.setObjectName(_fromUtf8("pushAdd"))
         self.horizontalLayout.addWidget(self.pushAdd)
         self.pushRemove = QtGui.QPushButton(EnvVariables)
+        self.pushRemove.setText(_('-'))
         self.pushRemove.setObjectName(_fromUtf8("pushRemove"))
         self.horizontalLayout.addWidget(self.pushRemove)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -48,9 +52,6 @@ class Ui_EnvVariables(object):
         QtCore.QMetaObject.connectSlotsByName(EnvVariables)
 
     def retranslateUi(self, EnvVariables):
-        EnvVariables.setWindowTitle(_('Enviroment Variables'))
-        self.label.setText(_('Enviroment Variables'))
-        self.pushAdd.setText(_('+'))
-        self.pushRemove.setText(_('-'))
+        pass
 
 from prymatex import resources_rc

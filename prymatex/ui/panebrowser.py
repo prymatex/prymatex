@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panebrowser.ui'
 #
-# Created: Thu Oct  6 18:55:52 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_BrowserDock(object):
     def setupUi(self, BrowserDock):
         BrowserDock.setObjectName(_fromUtf8("BrowserDock"))
         BrowserDock.resize(520, 298)
+        BrowserDock.setWindowTitle(_('Web Browser'))
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
@@ -29,6 +30,7 @@ class Ui_BrowserDock(object):
         self.horizontalLayout.setSpacing(2)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.buttonBack = QtGui.QPushButton(self.dockWidgetContents)
+        self.buttonBack.setToolTip(_('Back'))
         self.buttonBack.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-previous.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -38,6 +40,7 @@ class Ui_BrowserDock(object):
         self.horizontalLayout.addWidget(self.buttonBack)
         self.buttonNext = QtGui.QPushButton(self.dockWidgetContents)
         self.buttonNext.setEnabled(True)
+        self.buttonNext.setToolTip(_('Next'))
         self.buttonNext.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.buttonNext.setText(_fromUtf8(""))
         icon1 = QtGui.QIcon()
@@ -47,6 +50,7 @@ class Ui_BrowserDock(object):
         self.buttonNext.setObjectName(_fromUtf8("buttonNext"))
         self.horizontalLayout.addWidget(self.buttonNext)
         self.buttonReload = QtGui.QPushButton(self.dockWidgetContents)
+        self.buttonReload.setToolTip(_('Reload'))
         self.buttonReload.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -58,6 +62,7 @@ class Ui_BrowserDock(object):
         self.lineUrl.setObjectName(_fromUtf8("lineUrl"))
         self.horizontalLayout.addWidget(self.lineUrl)
         self.buttonStop = QtGui.QPushButton(self.dockWidgetContents)
+        self.buttonStop.setToolTip(_('Stop'))
         self.buttonStop.setText(_fromUtf8(""))
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -76,11 +81,7 @@ class Ui_BrowserDock(object):
         QtCore.QMetaObject.connectSlotsByName(BrowserDock)
 
     def retranslateUi(self, BrowserDock):
-        BrowserDock.setWindowTitle(_('Web Browser'))
-        self.buttonBack.setToolTip(_('Back'))
-        self.buttonNext.setToolTip(_('Next'))
-        self.buttonReload.setToolTip(_('Reload'))
-        self.buttonStop.setToolTip(_('Stop'))
+        pass
 
 from PyQt4 import QtWebKit
 from prymatex import resources_rc

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorlanguage.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_Language(object):
     def setupUi(self, Language):
         Language.setObjectName(_fromUtf8("Language"))
         Language.resize(274, 210)
+        Language.setWindowTitle(_('Form'))
         self.verticalLayout = QtGui.QVBoxLayout(Language)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -31,5 +32,5 @@ class Ui_Language(object):
         QtCore.QMetaObject.connectSlotsByName(Language)
 
     def retranslateUi(self, Language):
-        Language.setWindowTitle(_('Form'))
+        pass
 

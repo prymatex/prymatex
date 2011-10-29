@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/emergencycrash.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_CrashDialog(object):
     def setupUi(self, CrashDialog):
         CrashDialog.setObjectName(_fromUtf8("CrashDialog"))
         CrashDialog.resize(579, 411)
+        CrashDialog.setWindowTitle(_('Prymatex Crash'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         CrashDialog.setWindowIcon(icon)
@@ -27,17 +28,20 @@ class Ui_CrashDialog(object):
         self.label = QtGui.QLabel(CrashDialog)
         font = QtGui.QFont()
         font.setPointSize(14)
-        font.setWeight(75)
         font.setBold(True)
+        font.setWeight(75)
         self.label.setFont(font)
+        self.label.setText(_('Prymatex Has Crashed'))
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
         self.label_2 = QtGui.QLabel(CrashDialog)
+        self.label_2.setText(_('Prymatex has crashed, an uncattched exception has been risen somewhere.\nIf you\'re a developer you could dig into the code and send a path if appopiate.\nFull detail about the exception has been pasted below.'))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout.addWidget(self.label_2)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.label_3 = QtGui.QLabel(CrashDialog)
+        self.label_3.setToolTip(_('No monkeys have been hurt in the process'))
         self.label_3.setText(_fromUtf8(""))
         self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8(":/icons/resources/icons/Prymatex_Logo.png")))
         self.label_3.setScaledContents(False)
@@ -55,15 +59,18 @@ class Ui_CrashDialog(object):
         self.horizontalLayout_2.addItem(spacerItem)
         self.pushSendTraceback = QtGui.QPushButton(CrashDialog)
         self.pushSendTraceback.setEnabled(False)
+        self.pushSendTraceback.setText(_('Send'))
         self.pushSendTraceback.setObjectName(_fromUtf8("pushSendTraceback"))
         self.horizontalLayout_2.addWidget(self.pushSendTraceback)
         self.pushCopyTraceback = QtGui.QPushButton(CrashDialog)
+        self.pushCopyTraceback.setText(_('Copy'))
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushCopyTraceback.setIcon(icon1)
         self.pushCopyTraceback.setObjectName(_fromUtf8("pushCopyTraceback"))
         self.horizontalLayout_2.addWidget(self.pushCopyTraceback)
         self.pushClose = QtGui.QPushButton(CrashDialog)
+        self.pushClose.setText(_('Close'))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/application-exit.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushClose.setIcon(icon2)
@@ -76,12 +83,6 @@ class Ui_CrashDialog(object):
         QtCore.QMetaObject.connectSlotsByName(CrashDialog)
 
     def retranslateUi(self, CrashDialog):
-        CrashDialog.setWindowTitle(_('Prymatex Crash'))
-        self.label.setText(_('Prymatex Has Crashed'))
-        self.label_2.setText(_('Prymatex has crashed, an uncattched exception has been risen somewhere.\nIf you\'re a developer you could dig into the code and send a path if appopiate.\nFull detail about the exception has been pasted below.'))
-        self.label_3.setToolTip(_('No monkeys have been hurt in the process'))
-        self.pushSendTraceback.setText(_('Send'))
-        self.pushCopyTraceback.setText(_('Copy'))
-        self.pushClose.setText(_('Close'))
+        pass
 
 from prymatex import resources_rc

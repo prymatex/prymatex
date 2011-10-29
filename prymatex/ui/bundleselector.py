@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/bundleselector.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,6 +20,7 @@ class Ui_BundleSelector(object):
         BundleSelector.setObjectName(_fromUtf8("BundleSelector"))
         BundleSelector.resize(600, 371)
         BundleSelector.setMinimumSize(QtCore.QSize(600, 371))
+        BundleSelector.setWindowTitle(_('Bundle Selector'))
         self.verticalLayout = QtGui.QVBoxLayout(BundleSelector)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -40,5 +41,5 @@ class Ui_BundleSelector(object):
         QtCore.QMetaObject.connectSlotsByName(BundleSelector)
 
     def retranslateUi(self, BundleSelector):
-        BundleSelector.setWindowTitle(_('Bundle Selector'))
+        pass
 

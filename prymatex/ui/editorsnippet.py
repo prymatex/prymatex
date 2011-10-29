@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorsnippet.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_Snippet(object):
     def setupUi(self, Snippet):
         Snippet.setObjectName(_fromUtf8("Snippet"))
         Snippet.resize(274, 210)
+        Snippet.setWindowTitle(_('Form'))
         self.verticalLayout = QtGui.QVBoxLayout(Snippet)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -31,5 +32,5 @@ class Ui_Snippet(object):
         QtCore.QMetaObject.connectSlotsByName(Snippet)
 
     def retranslateUi(self, Snippet):
-        Snippet.setWindowTitle(_('Form'))
+        pass
 

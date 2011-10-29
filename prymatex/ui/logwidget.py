@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/logwidget.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -24,6 +24,7 @@ class Ui_LogWidget(object):
         LogWidget.setWindowIcon(icon)
         LogWidget.setFloating(True)
         LogWidget.setAllowedAreas(QtCore.Qt.BottomDockWidgetArea|QtCore.Qt.RightDockWidgetArea|QtCore.Qt.TopDockWidgetArea)
+        LogWidget.setWindowTitle(_('Log'))
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
@@ -47,6 +48,7 @@ class Ui_LogWidget(object):
         self.pushDebugLevel.setObjectName(_fromUtf8("pushDebugLevel"))
         self.horizontalLayout.addWidget(self.pushDebugLevel)
         self.lineEdit = QtGui.QLineEdit(self.dockWidgetContents)
+        self.lineEdit.setToolTip(_('Filter debugging output'))
         self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
         self.horizontalLayout.addWidget(self.lineEdit)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -64,7 +66,6 @@ class Ui_LogWidget(object):
         QtCore.QMetaObject.connectSlotsByName(LogWidget)
 
     def retranslateUi(self, LogWidget):
-        LogWidget.setWindowTitle(_('Log'))
-        self.lineEdit.setToolTip(_('Filter debugging output'))
+        pass
 
 from prymatex import resources_rc

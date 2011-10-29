@@ -173,7 +173,23 @@ echo Selection: "$TM_SELECTED_TEXT"''',
                 'input': 'selection',
                 'fallbackInput': 'document',
                 'output': 'replaceSelectedText'}
-
+    
+    COMMAND_TEMPLATES = {
+                         'Default': '''# just to remind you of some useful environment variables
+# see Help / Environment Variables for the full list
+echo File: "$TM_FILEPATH"
+echo Word: "$TM_CURRENT_WORD"
+echo Selection: "$TM_SELECTED_TEXT"''',
+                         'Python': '''#!/usr/bin/env python
+# just to remind you of some useful environment variables
+# see Help / Environment Variables for the full list
+import os
+print "File:",  os.environ("TM_FILEPATH")
+print "Word:",  os.environ("TM_CURRENT_WORD")
+print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
+                         
+    }
+    
     def __init__(self, parent = None):
         super(PMXCommandWidget, self).__init__(parent)
         self.setupUi(self)
@@ -206,6 +222,14 @@ echo Selection: "$TM_SELECTED_TEXT"''',
         self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
         
         self.command.setTabStopWidth(TABWIDTH)
+        self.menuCommandTemplates = QtGui.QMenu()
+        
+        for name, templateText in self.COMMAND_TEMPLATES.iteritems():
+            action = self.menuCommandTemplates.addAction(name)
+            receiver = lambda template=templateText: self.command.setPlainText(template)
+            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+            
+        self.pushButtonTemplates.setMenu(self.menuCommandTemplates)
 
     @QtCore.pyqtSlot()
     def on_command_textChanged(self):

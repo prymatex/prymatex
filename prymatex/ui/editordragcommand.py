@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editordragcommand.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_DragCommand(object):
     def setupUi(self, DragCommand):
         DragCommand.setObjectName(_fromUtf8("DragCommand"))
         DragCommand.resize(361, 237)
+        DragCommand.setWindowTitle(_('Form'))
         self.formLayout_2 = QtGui.QFormLayout(DragCommand)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout_2.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
@@ -26,6 +27,7 @@ class Ui_DragCommand(object):
         self.formLayout_2.setSpacing(2)
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
         self.label = QtGui.QLabel(DragCommand)
+        self.label.setText(_('File Types:'))
         self.label.setObjectName(_fromUtf8("label"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
@@ -35,6 +37,7 @@ class Ui_DragCommand(object):
         self.horizontalLayout_2.addWidget(self.lineEditExtensions)
         self.formLayout_2.setLayout(0, QtGui.QFormLayout.FieldRole, self.horizontalLayout_2)
         self.label_2 = QtGui.QLabel(DragCommand)
+        self.label_2.setText(_('Command(s):'))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_2)
         self.command = QtGui.QPlainTextEdit(DragCommand)
@@ -46,6 +49,7 @@ class Ui_DragCommand(object):
         self.command.setObjectName(_fromUtf8("command"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.command)
         self.label_4 = QtGui.QLabel(DragCommand)
+        self.label_4.setText(_('Output:'))
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_4)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
@@ -61,8 +65,5 @@ class Ui_DragCommand(object):
         QtCore.QMetaObject.connectSlotsByName(DragCommand)
 
     def retranslateUi(self, DragCommand):
-        DragCommand.setWindowTitle(_('Form'))
-        self.label.setText(_('File Types:'))
-        self.label_2.setText(_('Command(s):'))
-        self.label_4.setText(_('Output:'))
+        pass
 

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/panesymbols.ui'
 #
-# Created: Wed Oct  5 17:39:17 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_SymbolList(object):
     def setupUi(self, SymbolList):
         SymbolList.setObjectName(_fromUtf8("SymbolList"))
         SymbolList.resize(374, 364)
+        SymbolList.setWindowTitle(_('Symbols'))
         self.verticalLayout = QtGui.QVBoxLayout(SymbolList)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -33,6 +34,7 @@ class Ui_SymbolList(object):
 "padding: 0px;\n"
 "margin: 0px;\n"
 "}"))
+        self.pushButton.setText(_('X'))
         self.pushButton.setFlat(True)
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.horizontalLayout.addWidget(self.pushButton)
@@ -43,6 +45,7 @@ class Ui_SymbolList(object):
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.pushButton_2 = QtGui.QPushButton(SymbolList)
+        self.pushButton_2.setText(_('R'))
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
         self.horizontalLayout_2.addWidget(self.pushButton_2)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -54,7 +57,5 @@ class Ui_SymbolList(object):
         QtCore.QMetaObject.connectSlotsByName(SymbolList)
 
     def retranslateUi(self, SymbolList):
-        SymbolList.setWindowTitle(_('Symbols'))
-        self.pushButton.setText(_('X'))
-        self.pushButton_2.setText(_('R'))
+        pass
 

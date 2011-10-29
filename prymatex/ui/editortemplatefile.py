@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editortemplatefile.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,6 +19,7 @@ class Ui_TemplateFile(object):
     def setupUi(self, TemplateFile):
         TemplateFile.setObjectName(_fromUtf8("TemplateFile"))
         TemplateFile.resize(274, 210)
+        TemplateFile.setWindowTitle(_('Form'))
         self.verticalLayout = QtGui.QVBoxLayout(TemplateFile)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -31,5 +32,5 @@ class Ui_TemplateFile(object):
         QtCore.QMetaObject.connectSlotsByName(TemplateFile)
 
     def retranslateUi(self, TemplateFile):
-        TemplateFile.setWindowTitle(_('Form'))
+        pass
 

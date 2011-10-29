@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settingsdialog.ui'
 #
-# Created: Tue Oct 11 15:58:28 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -24,6 +24,7 @@ class Ui_SettingsDialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(SettingsDialog.sizePolicy().hasHeightForWidth())
         SettingsDialog.setSizePolicy(sizePolicy)
+        SettingsDialog.setWindowTitle(_('Prymatex Settings'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         SettingsDialog.setWindowIcon(icon)
@@ -60,9 +61,10 @@ class Ui_SettingsDialog(object):
         self.labelTitle.setMaximumSize(QtCore.QSize(16777215, 40))
         font = QtGui.QFont()
         font.setPointSize(16)
-        font.setWeight(75)
         font.setBold(True)
+        font.setWeight(75)
         self.labelTitle.setFont(font)
+        self.labelTitle.setText(_('TextLabel'))
         self.labelTitle.setObjectName(_fromUtf8("labelTitle"))
         self.verticalLayout_3.addWidget(self.labelTitle)
         self.container = QtGui.QWidget(self.mainContainer)
@@ -74,7 +76,6 @@ class Ui_SettingsDialog(object):
         QtCore.QMetaObject.connectSlotsByName(SettingsDialog)
 
     def retranslateUi(self, SettingsDialog):
-        SettingsDialog.setWindowTitle(_('Prymatex Settings'))
-        self.labelTitle.setText(_('TextLabel'))
+        pass
 
 from prymatex import resources_rc

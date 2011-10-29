@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configgeneral.ui'
 #
-# Created: Wed Oct  5 17:39:16 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Oct 28 21:42:07 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,37 +19,46 @@ class Ui_General(object):
     def setupUi(self, General):
         General.setObjectName(_fromUtf8("General"))
         General.resize(454, 300)
+        General.setWindowTitle(_('General'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         General.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(General)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.checkBox = QtGui.QCheckBox(General)
+        self.checkBox.setText(_('Highlight curent line'))
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
         self.verticalLayout.addWidget(self.checkBox)
         self.checkBox_2 = QtGui.QCheckBox(General)
+        self.checkBox_2.setText(_('Show right margin indicator'))
         self.checkBox_2.setObjectName(_fromUtf8("checkBox_2"))
         self.verticalLayout.addWidget(self.checkBox_2)
         self.groupBox = QtGui.QGroupBox(General)
+        self.groupBox.setTitle(_('Window Title'))
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.gridLayout = QtGui.QGridLayout(self.groupBox)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.label = QtGui.QLabel(self.groupBox)
+        self.label.setText(_('Title template'))
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
         self.comboTabVisibility = QtGui.QComboBox(self.groupBox)
         self.comboTabVisibility.setObjectName(_fromUtf8("comboTabVisibility"))
         self.gridLayout.addWidget(self.comboTabVisibility, 3, 1, 1, 3)
         self.labelTabVisibility = QtGui.QLabel(self.groupBox)
+        self.labelTabVisibility.setText(_('Tab visibilty'))
         self.labelTabVisibility.setObjectName(_fromUtf8("labelTabVisibility"))
         self.gridLayout.addWidget(self.labelTabVisibility, 3, 0, 1, 1)
         self.pushInsertAppName = QtGui.QPushButton(self.groupBox)
+        self.pushInsertAppName.setText(_('Application Name'))
         self.pushInsertAppName.setObjectName(_fromUtf8("pushInsertAppName"))
         self.gridLayout.addWidget(self.pushInsertAppName, 2, 1, 1, 1)
         self.pushInsertProject = QtGui.QPushButton(self.groupBox)
+        self.pushInsertProject.setText(_('Project Name'))
         self.pushInsertProject.setObjectName(_fromUtf8("pushInsertProject"))
         self.gridLayout.addWidget(self.pushInsertProject, 2, 2, 1, 1)
         self.pushInsertFile = QtGui.QPushButton(self.groupBox)
+        self.pushInsertFile.setText(_('File Name'))
         self.pushInsertFile.setObjectName(_fromUtf8("pushInsertFile"))
         self.gridLayout.addWidget(self.pushInsertFile, 2, 3, 1, 1)
         self.comboApplicationTitle = QtGui.QComboBox(self.groupBox)
@@ -64,14 +73,6 @@ class Ui_General(object):
         QtCore.QMetaObject.connectSlotsByName(General)
 
     def retranslateUi(self, General):
-        General.setWindowTitle(_('General'))
-        self.checkBox.setText(_('Highlight curent line'))
-        self.checkBox_2.setText(_('Show right margin indicator'))
-        self.groupBox.setTitle(_('Window Title'))
-        self.label.setText(_('Title template'))
-        self.labelTabVisibility.setText(_('Tab visibilty'))
-        self.pushInsertAppName.setText(_('Application Name'))
-        self.pushInsertProject.setText(_('Project Name'))
-        self.pushInsertFile.setText(_('File Name'))
+        pass
 
 from prymatex import resources_rc
