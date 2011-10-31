@@ -151,7 +151,7 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.mainwindow import PMXMainWindow
         self.mainWindow = PMXMainWindow()
         self.mainWindow.show()
-
+    
     def cleanup(self):
         self.settings.sync()
         os.unlink(self.fileLock)
@@ -173,10 +173,10 @@ class PMXApplication(QtGui.QApplication):
     def loadSupportManager(self, callbackSplashMessage = None):
         # Lazy load
         from prymatex.gui.support.manager import PMXSupportManager
-
+        
         sharePath = self.settings.value('PMX_SHARE_PATH')
         homePath = self.settings.value('PMX_HOME_PATH')
-
+        
         # esto hacerlo una propiedad del manager que corresponda
         disabled = self.settings.value("disabledBundles") if self.settings.value("disabledBundles") != None else []
         #manager = PMXSupportManager(disabledBundles = [], deletedBundles = [])
@@ -194,25 +194,25 @@ class PMXApplication(QtGui.QApplication):
                 'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
                 'PMX_VERSION': self.applicationVersion(),
                 'PMX_PID': self.applicationPid()
-        });
-
+        })
+        
         manager.addNamespace('user', homePath)
         manager.updateEnvironment({ ##User
                 'PMX_HOME_PATH': homePath,
                 'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
                 'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')
-        });
+        })
         callbackSplashMessage("Loading...")
         manager.loadSupport(callbackSplashMessage)
         self.supportManager = manager
-
+    
     def setupServerThread(self):
         from prymatex.core.server import PMXServerThread
         self.serverThread = PMXServerThread(self)
         self.serverThread.menuRequest.connect(self.on_menuRequest_triggered)
         self.serverThread.start()
-
+    
     def getEditorInstance(self, fileInfo = None, parent = None):
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
         return PMXCodeEditor.newInstance(fileInfo, parent)
@@ -223,7 +223,7 @@ class PMXApplication(QtGui.QApplication):
     def on_menuRequest_triggered(self, menu):
         print menu
         self.mainWindow.currentEditor.showCompleter(menu["menuItems"])
-        
+    
     #---------------------------------------------------
     # Exceptions, Print exceptions in a window
     #---------------------------------------------------
@@ -233,5 +233,5 @@ class PMXApplication(QtGui.QApplication):
             from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
             sys.__excepthook__(exctype, value, traceback)
             PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback).exec_()
-            
+    
         sys.excepthook = displayExceptionDialog

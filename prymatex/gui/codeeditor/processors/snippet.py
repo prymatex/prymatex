@@ -3,11 +3,12 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 from prymatex.support.processor import PMXSnippetProcessor
+from prymatex.gui.codeeditor.editor import PMXEditorMode
 
-class PMXSnippetProcessor(PMXSnippetProcessor):
+class PMXSnippetProcessor(PMXSnippetProcessor, PMXEditorMode):
     def __init__(self, editor):
         super(PMXSnippetProcessor, self).__init__()
-        self.editor = editor
+        PMXEditorMode.__init__(self, editor)
         self.snippet = None
         self.transformation = None
         self.tabreplacement = "\t"
@@ -15,10 +16,13 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.tabTriggered = True
         self.disableIndent = False
 
-    @property
-    def hasSnippet(self):
+    def isActive(self):
         return self.snippet is not None
     
+    def setActive(self, active):
+        if not active:
+            self.snippet = None
+            
     @property
     def environment(self, format = None):
         return self.__env
@@ -94,7 +98,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 holder = self.snippet.setDefaultHolder(cursor.position())
             if holder == None:
                 self.endSnippet()
-                return False
             if key == Qt.Key_Tab:
                 holder = self.snippet.next()
             else:
@@ -103,13 +106,11 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 self.setCursorPosition(self.snippet.end)
             else:
                 self.selectHolder(holder)
-            return True
         elif key == Qt.Key_Backspace or key == Qt.Key_Delete:
             if cursor.hasSelection():
                 holder = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
                 if holder == None:
                     self.endSnippet()
-                    return False
                 #Posicion relativa al holder
                 position = cursor.selectionStart() - holder.start
                 leng = cursor.selectionEnd() - cursor.selectionStart()
@@ -129,7 +130,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                     holder = self.snippet.setDefaultHolder(cursor.position() - 1)
                 if holder == None:
                     self.endSnippet()
-                    return False
                 #Posicion relativa al holder
                 position = cursor.position() - holder.start
                 leng = cursor.selectionEnd() - cursor.selectionStart()
@@ -145,13 +145,11 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                     self.setCursorPosition(holder.start + position)
                 else:
                     self.setCursorPosition(holder.start + position - 1)
-            return True
         elif event.text():
             if cursor.hasSelection():
                 holder = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
                 if holder == None or holder.last:
                     self.endSnippet()
-                    return False
                 #Posicion relativa al holder
                 position = cursor.selectionStart() - holder.start
                 leng = cursor.selectionEnd() - cursor.selectionStart()
@@ -168,7 +166,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 holder = self.snippet.setDefaultHolder(cursor.position())
                 if holder == None or holder.last:
                     self.endSnippet()
-                    return False
                 QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
                 #Posicion relativa al holder
                 position = cursor.position() - holder.start
@@ -180,4 +177,3 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
                 self.selectSlice(self.snippet.start, self.snippet.end + 1)
                 self.snippet.render(self)
                 self.setCursorPosition(holder.start + position)
-            return True

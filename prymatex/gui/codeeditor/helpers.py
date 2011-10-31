@@ -4,16 +4,20 @@ from bisect import bisect
 from PyQt4 import QtCore, QtGui
 from prymatex.support import PMXSyntax
 from prymatex import resources
+from prymatex.gui.codeeditor.editor import PMXEditorMode
 
-class PMXCursorsHelper(object):
+class PMXCursorsHelper(PMXEditorMode):
     def __init__(self, editor):
-        self.editor = editor
+        PMXEditorMode.__init__(self, editor)
         self.cursors = []
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
     
-    @property
-    def hasCursors(self):
+    def isActive(self):
         return bool(self.cursors)
+    
+    def setActive(self, active):
+        if not active:
+            self.cursors = []
 
     @property
     def isDragCursor(self):
@@ -158,7 +162,7 @@ class PMXCursorsHelper(object):
             self.editor.setTextCursor(ecursor)
             self.removeAll()
             self.editor.highlightCurrentLine()
-            return False
+            #Se termino la joda
         elif event.modifiers() & QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
         elif event.key() == QtCore.Qt.Key_Right:
@@ -195,15 +199,14 @@ class PMXCursorsHelper(object):
                 self.editor.setTextCursor(cursor)
                 QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             cursor.endEditBlock()
-        return True
     
     def __iter__(self):
         return iter(self.cursors)
         
-class PMXCompleterHelper(QtGui.QCompleter):
+class PMXCompleterHelper(QtGui.QCompleter, PMXEditorMode):
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)
-        self.editor = editor
+        PMXEditorMode.__init__(self, editor)
         self.setWidget(self.editor)
         self.popupView = QtGui.QListView()
         self.popupView.setAlternatingRowColors(True)
@@ -212,7 +215,19 @@ class PMXCompleterHelper(QtGui.QCompleter):
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.activated[str].connect(self.insertCompletion)
+    
+    def isActive(self):
+        return self.popup().isVisible()
+        
+    def setActive(self, active):
+        pass
 
+    def keyPressEvent(self, event):
+        if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
+            event.ignore()
+        else:
+            self.editor.keyPressEvent(event)
+    
     def insertCompletion(self, insert):
         self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])
 
