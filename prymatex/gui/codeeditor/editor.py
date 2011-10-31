@@ -20,6 +20,33 @@ from prymatex.gui.codeeditor.helpers import PMXCursorsHelper, PMXFoldingHelper, 
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
 
+class PMXEditorMode(object):
+    def __init__(self, editor):
+        self.editor = editor
+        
+    def isActive(self):
+        return False
+        
+    def setActive(self, active):
+        pass
+        
+    def keyPressEvent(self, event):
+        self.editor.keyPressEvent(event)
+
+#Test modes
+class OverwriteText(PMXEditorMode):
+    def isActive(self):
+        return self.editor.overwriteMode()
+        
+    def setActive(self, active)
+        self.editor.setOverwriteMode(active)
+        
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Insert:
+            self.setActive(not self.isActive())
+        else:
+            self.editor.keyPressEvent(event)
+
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # Signals
@@ -75,7 +102,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #================================================================
     RE_WORD = re.compile('\w+')
     
-    #Selection types
+    #================================================================
+    # Selection types
+    #================================================================
     SelectWord = QtGui.QTextCursor.WordUnderCursor #0
     SelectLine = QtGui.QTextCursor.LineUnderCursor #1
     SelectParagraph = QtGui.QTextCursor.BlockUnderCursor #2 este no es un paragraph pero no  importa
@@ -83,30 +112,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     SelectEnclosingBrackets = 4
     SelectCurrentScope = 5
     
-    #Flags
+    #================================================================
+    # Editor Flags
+    #================================================================
     ShowTabsAndSpaces = 0x01
     ShowLineAndParagraphs = 0x02
     ShowBookmarks = 0x04
     ShowLineNumbers = 0x08
     ShowFolding = 0x10
     
+    #TODO: Move to the manager
     #Cache de preferencias
     PREFERENCE_CACHE = {}
-    
-    #================================================================
-    # Editor more Modes
-    #================================================================
-    def snippetMode(self):
-        """Retorna si el editor esta en modo snippet"""
-        return self.snippetProcessor.hasSnippet
-    
-    def multiEditMode(self):
-        """Retorna si el editor esta en modo multiedit"""
-        return self.cursors.hasCursors
-    
-    def completerMode(self):
-        """Retorna si el editor esta mostrando el completer"""
-        return self.completer.popup().isVisible()
     
     @property
     def tabKeyBehavior(self):
@@ -132,6 +149,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.macroProcessor = PMXMacroProcessor(self)
         self.snippetProcessor = PMXSnippetProcessor(self)
 
+        #Install editor modes OverwriteText for testing
+        self.editorModes = [ OverwriteText(self), self.snippetProcessor, self.completer, self.cursors ]
+
         #Set syntax for fileInfo
         syntax = None
         if fileInfo is not None:
@@ -140,22 +160,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.setSyntax(syntax)
 
-        self.setupActions()
         self.connectSignals()
         self.configure()
 
     #=======================================================================
-    # Connect Signals and Declare Events
+    # Connect Signals
     #=======================================================================
     def connectSignals(self):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
         self.modificationChanged.connect(self.updateTabStatus)
-
-    def setupActions(self):
-        # Actions performed when a key is pressed
-        pass
 
     def updateTabStatus(self):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
@@ -341,6 +356,34 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # QPlainTextEdit Events
     #=======================================================================
+    def event(self, event):
+        #ACA VAMOS
+        if event.type() == QtCore.QEvent.KeyPress:
+            #Buscamos entre los key equivalent en el manager
+            keyseq = int(event.modifiers()) + event.key()
+            scope = self.getCurrentScope()
+            items = self.application.supportManager.getKeyEquivalentItem(keyseq, scope)
+            if items:
+                map(lambda mode: mode.setActive(False), self.editorModes) #Inactive modes
+                if len(items) == 1:
+                    self.insertBundleItem(items[0])
+                elif len(items) == 2 and items[0].TYPE != items[1].TYPE:
+                    #Son distintos desempato, el primero es el que mejor se ajusta
+                    self.insertBundleItem(items[0])
+                else:
+                    self.selectBundleItem(items)
+                return True
+            else:
+                #Buscar entre los modos instalados
+                for mode in self.self.editorModes:
+                    if mode.isActive():
+                        mode.keyPressEvent(event)
+                        return True
+        elif event.type() == QtCore.QEvent.KeyRelease:
+            #Aca se puede ver el tema de la indentacion post tecla
+            pass
+        return QtGui.QPlainTextEdit.event(self, event)
+
     def paintEvent(self, event):
         #QtGui.QPlainTextEdit.paintEvent(self, event)
         super(PMXCodeEditor, self).paintEvent(event)
@@ -459,23 +502,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         This method is called whenever a key is pressed. The key code is stored in event.key()
         http://manual.macromates.com/en/working_with_text
         '''
-        if self.completerMode():
-            if event.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Tab, Qt.Key_Escape, Qt.Key_Backtab):
-                event.ignore()
-                return
-        
-        #Si lo toma un bundle item retorno
-        if self.keyPressBundleItem(event):
-            if self.multiEditMode():
-                self.cursors.removeAll()
+        if self.keyPressSmartTyping(event): #Modo Normal
             return
-        elif self.snippetMode() and self.snippetProcessor.keyPressEvent(event): #Modo Snippet
-            return
-        elif self.multiEditMode() and self.cursors.keyPressEvent(event): #Modo MultiEdit
-            return
-        elif self.keyPressSmartTyping(event): #Modo Normal
-            return
-        
+
         key = event.key()
         modifiers = event.modifiers()
         if key == Qt.Key_Tab:
@@ -487,7 +516,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         elif key == Qt.Key_Return:
             self.returnPressEvent(event)
         elif key == Qt.Key_Insert:
-            self.setOverwriteMode(not self.overwriteMode())
+            self.setOverwriteMode(True)
         elif key == Qt.Key_Space and modifiers == Qt.ControlModifier:
             self._find_completion()
         else:
@@ -500,20 +529,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             if self.completerMode() and completionPrefix != self.completer.completionPrefix():
                 self.completer.setCompletionPrefix(completionPrefix)
                 self.completer.complete(self.cursorRect())
-    
-    def keyPressBundleItem(self, event):
-        keyseq = int(event.modifiers()) + event.key()
-        scope = self.getCurrentScope()
-        items = self.application.supportManager.getKeyEquivalentItem(keyseq, scope)
-        if items:
-            if len(items) == 1:
-                self.insertBundleItem(items[0])
-            elif len(items) == 2 and items[0].TYPE != items[1].TYPE:
-                #Son distintos desempato, el primero es el que mejor se ajusta
-                self.insertBundleItem(items[0])
-            else:
-                self.selectBundleItem(items)
-            return True
     
     def keyPressSmartTyping(self, event):
         cursor = self.textCursor()
