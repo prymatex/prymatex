@@ -1,14 +1,84 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-from bisect import bisect
 from PyQt4 import QtCore, QtGui
-from prymatex.support import PMXSyntax
-from prymatex import resources
-from prymatex.gui.codeeditor.editor import PMXEditorMode
 
-class PMXCursorsHelper(PMXEditorMode):
+class PMXBaseHelper(object):
     def __init__(self, editor):
-        PMXEditorMode.__init__(self, editor)
+        self.editor = editor
+    
+    def active(self, event):
+        pass
+    
+    def isActive(self):
+        return False
+        
+    def inactive(self):
+        pass
+        
+    def keyPressEvent(self, event):
+        self.editor.keyPressEvent(event)
+
+class KeyEquivalentHelper(PMXBaseHelper):
+    def active(self, event):
+        keyseq = int(event.modifiers()) + event.key()
+        scope = self.editor.getCurrentScope()
+        self.items = self.editor.application.supportManager.getKeyEquivalentItem(keyseq, scope)
+    
+    def inactive(self):
+        self.items = []
+        
+    def isActive(self):
+        return bool(self.items)
+    
+    def keyPressEvent(self, event):
+        if len(self.items) == 1:
+            self.editor.insertBundleItem(self.items[0])
+        elif len(self.items) == 2 and self.items[0].TYPE != self.items[1].TYPE:
+            #Son distintos desempato, el primero es el que mejor se ajusta
+            self.editor.insertBundleItem(self.items[0])
+        else:
+            self.editor.selectBundleItem(self.items)
+
+class SmartTypingHelper(PMXBaseHelper):
+    def active(self, event):
+        scope = self.editor.getCurrentScope()
+        preferences = self.editor.getPreference(scope)        
+        if event.key() == QtCore.Qt.Key_Backspace and not self.editor.textCursor().hasSelection():
+            character = self.editor.document().characterAt(self.editor.textCursor().position() - 1)
+        else:
+            character = event.text()
+        self.pairs = filter(lambda pair: pair[0] == character, preferences.smartTypingPairs)
+
+    def inactive(self):
+        self.pairs = []
+    
+    def isActive(self):
+        return bool(self.pairs)
+            
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Backspace:
+            if self.pairs and self.pairs[0][0] == event.text() and self.editor.document().characterAt(cursor.position()) == self.pairs[0][1]:
+                self.editor.textCursor().deleteChar()
+            elif self.pairs and self.pairs[0][1] == event.text() and self.editor.document().characterAt(cursor.position() - 2) == self.pairs[0][0]:
+                self.editor.textCursor().deletePreviousChar()
+        else:
+            cursor = self.editor.textCursor()
+            if cursor.hasSelection():
+                position = cursor.selectionStart()
+                text = self.pairs[0][0] + cursor.selectedText() + self.pairs[0][1]
+                cursor.insertText(text)
+                cursor.setPosition(position)
+                cursor.setPosition(position + len(text), QTextCursor.KeepAnchor)
+            else:
+                position = cursor.position()
+                QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+                cursor.insertText(self.pairs[0][1])
+                cursor.setPosition(position + 1)
+            self.editor.setTextCursor(cursor)
+
+class PMXCursorsHelper(PMXBaseHelper):
+    def __init__(self, editor):
+        PMXBaseHelper.__init__(self, editor)
         self.cursors = []
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
     
@@ -203,10 +273,10 @@ class PMXCursorsHelper(PMXEditorMode):
     def __iter__(self):
         return iter(self.cursors)
         
-class PMXCompleterHelper(QtGui.QCompleter, PMXEditorMode):
+class PMXCompleterHelper(QtGui.QCompleter, PMXBaseHelper):
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)
-        PMXEditorMode.__init__(self, editor)
+        PMXBaseHelper.__init__(self, editor)
         self.setWidget(self.editor)
         self.popupView = QtGui.QListView()
         self.popupView.setAlternatingRowColors(True)
@@ -235,139 +305,3 @@ class PMXCompleterHelper(QtGui.QCompleter, PMXEditorMode):
         self.popup().setCurrentIndex(self.completionModel().index(0, 0))
         rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 20)
         QtGui.QCompleter.complete(self, rect)
-
-class PMXFoldingHelper(object):
-    def __init__(self, editor):
-        self.editor = editor
-        self.indentSensitive = False
-        self.editor.foldingChanged.connect(self.on_foldingChanged)
-        self.editor.textBlocksRemoved.connect(self.on_textBlocksRemoved)
-        self.blocks = []
-        self.folding = []
-
-    def on_foldingChanged(self, block):
-        if block in self.blocks:
-            userData = block.userData()
-            if userData.foldingMark == PMXSyntax.FOLDING_NONE:
-                self.blocks.remove(block)
-        else:
-            indexes = map(lambda block: block.blockNumber(), self.blocks)
-            index = bisect(indexes, block.blockNumber())
-            self.blocks.insert(index, block)
-        if self.indentSensitive:
-            self.updateIndentFoldingBlocks()
-        else:
-            self.updateFoldingBlocks()
-    
-    def on_textBlocksRemoved(self):
-        remove = filter(lambda block: block.userData() is None, self.blocks)
-        if remove:
-            sIndex = self.blocks.index(remove[0])
-            eIndex = self.blocks.index(remove[-1])
-            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
-        if self.indentSensitive:
-            self.updateIndentFoldingBlocks()
-        else:
-            self.updateFoldingBlocks()
-        
-    def updateFoldingBlocks(self):
-        self.folding = []
-        nest = 0
-        for block in self.blocks:
-            userData = block.userData()
-            nest += userData.foldingMark
-            if nest >= 0:
-                self.folding.append(block)
-
-    def updateIndentFoldingBlocks(self):
-        self.folding = []
-        nest = 0
-        lastOpenIndent = currentIndent = ""
-        for block in self.blocks:
-            userData = block.userData()
-            if userData.foldingMark <= PMXSyntax.FOLDING_STOP:
-                #Esta cerrando, es blank?
-                if block.text().strip() == "":
-                    continue
-            elif userData.foldingMark >= PMXSyntax.FOLDING_START:
-                #Esta abriendo, esta menos indentado?
-                if userData.indent <= currentIndent and len(self.folding) > 0:
-                    #Hay que cerrar algo antes
-                    closeBlock = self.findPreviousMoreIndentBlock(block)
-                    lenIndent = len(userData.indent)
-                    if lenIndent:
-                        closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent)
-                    else:
-                        closeBlock.userData().foldingMark = -nest
-                    self.folding.append(closeBlock)
-                    nest += closeBlock.userData().foldingMark
-                else:
-                    #Store last valid indent
-                    lastOpenIndent = currentIndent
-            nest += userData.foldingMark
-            currentIndent = userData.indent if userData.foldingMark >= PMXSyntax.FOLDING_START else lastOpenIndent
-            if nest >= 0:
-                self.folding.append(block)
-        if nest > 0:
-            #Tengo que cerrar el ultimo
-            closeBlock = self.editor.document().lastBlock()
-            userData = closeBlock.userData()
-            if userData is not None:
-                closeBlock.userData().foldingMark = -nest
-                self.folding.append(closeBlock)
-
-    def findPreviousMoreIndentBlock(self, block):
-        """ Return previous block if text in block is not bank """
-        indent = block.userData().indent
-        while block.isValid():
-            block = block.previous()
-            if indent < block.userData().indent:
-                break
-        return block
-    
-    def getFoldingMark(self, block):
-        if block in self.folding:
-            userData = block.userData()
-            return userData.foldingMark
-        return PMXSyntax.FOLDING_NONE
-    
-    def findBlockFoldClose(self, block):
-        nest = 0
-        assert block in self.folding, "The block is not in folding"
-        index = self.folding.index(block)
-        for block in self.folding[index:]:
-            userData = block.userData()
-            if userData.foldingMark >= PMXSyntax.FOLDING_START or userData.foldingMark <= PMXSyntax.FOLDING_STOP:
-                nest += userData.foldingMark
-            if nest <= 0:
-                break
-        #return the founded block or the last valid block
-        return block if block.isValid() else block.previous()
-    
-    def findBlockFoldOpen(self, block):
-        nest = 0
-        assert block in self.folding, "The block is not in folding"
-        index = self.folding.index(block)
-        folding = self.folding[:index + 1]
-        folding.reverse()
-        for block in folding:
-            userData = block.userData()
-            if userData.foldingMark >= PMXSyntax.FOLDING_START or userData.foldingMark <= PMXSyntax.FOLDING_STOP:
-                nest += userData.foldingMark
-            if nest >= 0:
-                break
-
-        #return the founded block or the first valid block
-        return block if block.isValid() else block.next()
-    
-    def getNestedLevel(self, index):
-        return reduce(lambda x, y: x + y, map(lambda block: block.userData().foldingMark, self.folding[:index]), 0)
-        
-    def isStart(self, mark):
-        return mark >= PMXSyntax.FOLDING_START
-
-    def isStop(self, mark):
-        return mark <= PMXSyntax.FOLDING_STOP
-        
-    def isFoldingMark(self, block):
-        return block in self.folding
