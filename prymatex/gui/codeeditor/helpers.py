@@ -9,7 +9,7 @@ class PMXCursorsHelper(object):
     def __init__(self, editor):
         self.editor = editor
         self.cursors = []
-        self.scursor = self.dragPoint = self.startPoint = None
+        self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
     
     @property
     def hasCursors(self):
@@ -27,7 +27,7 @@ class PMXCursorsHelper(object):
         self.startPoint = point
 
     def mouseDoubleClickPoint(self, point):
-        self.startPoint = point
+        self.doublePoint = point
         
     def mouseMovePoint(self, point):
         self.dragPoint = point
@@ -67,7 +67,7 @@ class PMXCursorsHelper(object):
                     #self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
 
         #Clean last acction
-        self.scursor = self.dragPoint = self.startPoint = None
+        self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
         self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
 
     def getPoints(self, start, end):

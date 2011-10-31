@@ -26,11 +26,14 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog, PMXObject):
         self.proxyModelSettings.setSourceModel(self.model)
         
         self.treeViewSettings.setModel(self.proxyModelSettings)
+        self.treeViewSettings.setHeaderHidden(True)
+        self.treeViewSettings.setAnimated(True)
+        
         self.stackLayout = QtGui.QStackedLayout()
         self.container.setLayout(self.stackLayout)
         
     def on_lineEditFilter_textChanged(self, text):
-        self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, Qt.CaseInsensitive))
+        self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
     
     def on_treeViewSettings_activated(self, index):
         sIndex = self.proxyModelSettings.mapToSource(index)

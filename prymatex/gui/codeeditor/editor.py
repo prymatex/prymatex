@@ -395,33 +395,37 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 self.zoomOut()
             event.ignore()
         else:
-            super(PMXCodeEditor, self).wheelEvent(event)
+            QtGui.QPlainTextEdit.wheelEvent(self, event)
 
     def mouseDoubleClickEvent(self, event):
+        QtGui.QPlainTextEdit.mouseDoubleClickEvent(self, event)
         if event.modifiers() == Qt.ControlModifier:
-            print "mouseDoubleClickEvent"
             self.cursors.mouseDoubleClickPoint(event.pos())
-        else:
-            super(PMXCodeEditor, self).mouseDoubleClickEvent(event)
 
     def mousePressEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
+            self.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
             self.cursors.mousePressPoint(event.pos())
         else:
-            super(PMXCodeEditor, self).mousePressEvent(event)
+            QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
             self.cursors.mouseMovePoint(event.pos())
         else:
-            super(PMXCodeEditor, self).mouseReleaseEvent(event)
+            QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
-            print "mouseReleaseEvent"
-            self.cursors.mouseReleasePoint(event.pos())
+            if self.cursors.doublePoint is not None:
+                QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+                self.cursors.addMergeCursor(self.textCursor())
+                self.cursors.doublePoint = None
+            else:
+                self.cursors.mouseReleasePoint(event.pos())
+                self.application.restoreOverrideCursor()
         else:
-            super(PMXCodeEditor, self).mouseReleaseEvent(event)
+            QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
     def inserSpacesUpToPoint(self, point, spacing_character = ' '):
         '''
