@@ -252,19 +252,43 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             event.acceptProposedAction()
     
     def dropEvent(self, event):
-        def collectFiles(fInfos):
+        def collectFiles(paths):
+            from glob import glob
             ''' Recursively collect fileInfos '''
-            for fInfo in fInfos:
-                if fInfo.isFile():
-                    yield fInfo
-                elif fInfo.isDir():
-                    entries = fInfo.dir().entryInfoList()
-                    break
-                    for entry in collectFiles(entries):
+            for path in paths:
+                if os.path.isfile(path):
+                    yield path
+                elif os.path.isdir(path):
+                    dirSubEntries = glob(os.path.join(path, '*'))
+                    for entry in collectFiles(dirSubEntries):
                         yield entry
                         
-        fileInfos = map(lambda url: QtCore.QFileInfo(url.toLocalFile()), event.mimeData().urls())
-        for fileInfo in collectFiles(fileInfos):
-            self.openFile(fileInfo, focus = False)
+        urls = map(lambda url: url.toLocalFile(), event.mimeData().urls())
+        
+        for path in collectFiles(urls):
+            # TODO: Take this code somewhere else, this should change as more editor are added
+            if not self.canBeOpened(path):
+                self.debug("Skipping dropped element %s" % path)
+                continue
+            self.debug("Opening dropped file %s" % path)
+            self.openFile(QtCore.QFileInfo(path), focus = False)
             
         event.acceptProposedAction()
+    
+    FILE_SIZE_THERESHOLD = 1024 ** 2 # 1MB file is enough, ain't it?
+    STARTSWITH_BLACKLIST = ['.', '#', ]
+    ENDSWITH_BLACKLIST = ['~', 'pyc', 'bak', 'old', 'tmp', 'swp', '#', ]
+    
+    def canBeOpened(self, path):
+        # Is there any support for it?
+        if not self.application.supportManager.findSyntaxByFileType(path):
+            return False
+        for start in self.STARTSWITH_BLACKLIST:
+            if path.startswith(start):
+                return False
+        for end in self.ENDSWITH_BLACKLIST:
+            if path.endswith(end):
+                return False
+        if os.path.getsize(path) > self.FILE_SIZE_THERESHOLD:
+            return False
+        return True
