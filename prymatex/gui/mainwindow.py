@@ -61,6 +61,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
         
+        self.setAcceptDrops(True)
+        
         self.addEmptyEditor()
 
     #============================================================
@@ -240,3 +242,29 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 w.close()
         except exceptions.UserCancelException:
             event.ignore()
+    
+    #===========================================================================
+    # Drag and Drop
+    #===========================================================================
+    
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.acceptProposedAction()
+    
+    def dropEvent(self, event):
+        def collectFiles(fInfos):
+            ''' Recursively collect fileInfos '''
+            for fInfo in fInfos:
+                if fInfo.isFile():
+                    yield fInfo
+                elif fInfo.isDir():
+                    entries = fInfo.dir().entryInfoList()
+                    break
+                    for entry in collectFiles(entries):
+                        yield entry
+                        
+        fileInfos = map(lambda url: QtCore.QFileInfo(url.toLocalFile()), event.mimeData().urls())
+        for fileInfo in collectFiles(fileInfos):
+            self.openFile(fileInfo, focus = False)
+            
+        event.acceptProposedAction()
