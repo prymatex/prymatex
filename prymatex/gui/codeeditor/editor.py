@@ -876,3 +876,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         elif mimeData.hasUrls():
             for url in mimeData.urls():
                 self.textCursor().insertText(url.toString())
+    
+    def focusOutEvent(self, event):
+        if self.parent().currentWidget() == self:
+            self.setFocus()
+            return
+        return QtGui.QPlainTextEdit.focusOutEvent(self, event)

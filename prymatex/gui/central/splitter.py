@@ -46,16 +46,23 @@ class PMXSplitTabWidget(QtGui.QSplitter):
 
         self.clear()
 
-        QtCore.QObject.connect(QtGui.qApp,
-                QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'),
-                self._focus_changed)
-    
+        self.connect(QtGui.qApp,
+                     QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'),
+                     self._focus_changed)
+        
+        # Hack for text focus when moving arround  
+        self.tabWindowChanged.connect(self._forceTextFoucsChange)
+        
     def __len__(self):
         count = 0
         for tw in self.findChildren(_TabWidget):
             count += tw.count()
         return count
-
+    
+    def _forceTextFoucsChange(self, w):
+        if w:
+            w.setFocus()
+            
     def clear(self):
         """ Restore the widget to its pristine state. """
 

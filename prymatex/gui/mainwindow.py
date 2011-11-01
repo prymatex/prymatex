@@ -147,7 +147,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.splitTabWidget.addTab(editor)
         if focus:
             self.splitTabWidget.setCurrentWidget(editor)
-
+        # Hack
+        self.splitTabWidget._forceTextFoucsChange(editor)
+        
     def removeEditor(self, editor):
         self.statusBar().removeEditor(editor)
         self.splitTabWidget.removeTab(editor)
