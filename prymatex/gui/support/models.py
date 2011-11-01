@@ -75,7 +75,7 @@ class PMXBundleTreeNode(object):
         #If receiver is none set the default 
         if receiver is None:
             receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
-        parent.connect(self.action, QtCore.SIGNAL('triggered()'), receiver)
+        parent.connect(action, QtCore.SIGNAL('triggered()'), receiver)
         return action
     
     def update(self, hash):
