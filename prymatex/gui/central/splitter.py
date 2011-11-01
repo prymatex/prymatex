@@ -60,8 +60,11 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         return count
     
     def _forceTextFoucsChange(self, w):
+        ''' Let all the focus thing go through in Qt land, hooking a 0 time timer that
+        regains focus on the text edit'''
         if w:
-            w.setFocus()
+            timer = QtCore.QTimer(self)
+            timer.singleShot(0, lambda widget=w: widget.setFocus())
             
     def clear(self):
         """ Restore the widget to its pristine state. """
