@@ -874,3 +874,5 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         elif mimeData.hasUrls():
             for url in mimeData.urls():
                 self.textCursor().insertText(url.toString())
+    
+    
