@@ -47,7 +47,7 @@ class SmartTypingHelper(PMXBaseHelper):
             character = self.editor.document().characterAt(self.editor.textCursor().position() - 1)
         else:
             character = event.text()
-        self.pairs = filter(lambda pair: pair[0] == character, preferences.smartTypingPairs)
+        self.pairs = filter(lambda pair: character in pair, preferences.smartTypingPairs)
 
     def inactive(self):
         self.pairs = []
@@ -285,18 +285,27 @@ class PMXCompleterHelper(QtGui.QCompleter, PMXBaseHelper):
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.activated[str].connect(self.insertCompletion)
-    
+        self.completions = []
+
+    def active(self, event):
+        if event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
+            scope = self.editor.getCurrentScope()
+            preferences = self.editor.getPreference(scope)
+            self.completions = preferences.completions
+
     def isActive(self):
-        return self.popup().isVisible()
+        return bool(self.completions) or self.popup().isVisible()
         
-    def setActive(self, active):
-        pass
+    def inactive(self):
+        self.completions = []
 
     def keyPressEvent(self, event):
         if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
             event.ignore()
+        elif self.completions:
+            self.editor.showCompleter(self.completions)
         else:
-            self.editor.keyPressEvent(event)
+            QtGui.QPlainTextEdit.self.keyPressEvent(self.editor, event)
     
     def insertCompletion(self, insert):
         self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])
