@@ -248,7 +248,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     #===========================================================================
     
     def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat('text/plain'):
+        if event.mimeData().hasUrls():
             event.acceptProposedAction()
     
     def dropEvent(self, event):
@@ -272,9 +272,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 continue
             self.debug("Opening dropped file %s" % path)
             self.openFile(QtCore.QFileInfo(path), focus = False)
-            
-        event.acceptProposedAction()
-    
+
     FILE_SIZE_THERESHOLD = 1024 ** 2 # 1MB file is enough, ain't it?
     STARTSWITH_BLACKLIST = ['.', '#', ]
     ENDSWITH_BLACKLIST = ['~', 'pyc', 'bak', 'old', 'tmp', 'swp', '#', ]
