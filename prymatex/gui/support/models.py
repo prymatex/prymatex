@@ -56,10 +56,10 @@ class PMXBundleTreeNode(object):
                 return name[0:index] + '&' + name[index:]
         return name
     
-    def buildMenuTextEntry(self, nemonic = ''):
+    def buildMenuTextEntry(self, mnemonic = ''):
         text = unicode(self.name)
-        if nemonic:
-            return text.replace('&', '&&') + u"\t" + nemonic
+        if mnemonic:
+            return text.replace('&', '&&') + u"\t" + mnemonic
         else:
             text += u"\t%s" % (self.trigger)
         return text.replace('&', '&&')
@@ -67,10 +67,16 @@ class PMXBundleTreeNode(object):
     def triggerItemAction(self, parent = None):
         if not hasattr(self, "action"):
             assert parent is not None, "Parent of action mustn't be None"
-            self.action = QtGui.QAction(QtGui.QIcon(self.icon), self.buildMenuTextEntry(), parent)
-            receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
-            parent.connect(self.action, QtCore.SIGNAL('triggered()'), receiver)
+            self.action = self.buildTriggerItemAction(parent)
         return self.action
+    
+    def buildTriggerItemAction(self, parent, mnemonic = '', receiver = None):
+        action = QtGui.QAction(QtGui.QIcon(self.icon), self.buildMenuTextEntry(mnemonic), parent)
+        #If receiver is none set the default 
+        if receiver is None:
+            receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
+        parent.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+        return action
     
     def update(self, hash):
         if 'keyEquivalent' in hash:

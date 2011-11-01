@@ -167,7 +167,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         # Handle the trivial case.
         if self.currentEditor is editor:
             return
-
+        
         #Set editor to statusbar
         self.statusBar().setCurrentEditor(editor)
         

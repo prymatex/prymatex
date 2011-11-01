@@ -125,8 +125,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.macroProcessor = PMXMacroProcessor(self)
         self.snippetProcessor = PMXSnippetProcessor(self)
 
-        #Install editor modes OverwriteText for testing
-        self.editorModes = [    KeyEquivalentHelper(self), 
+        #Install editor helpers OverwriteText for testing
+        self.editorHelpers = [  KeyEquivalentHelper(self), 
                                 SmartTypingHelper(self),
                                 self.snippetProcessor,
                                 self.completer,
@@ -307,7 +307,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.updateLineNumberAreaWidth(0)
     
     def resizeEvent(self, event):
-        super(PMXCodeEditor, self).resizeEvent(event)
+        QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
         self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
         
@@ -338,7 +338,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     def paintEvent(self, event):
         #QtGui.QPlainTextEdit.paintEvent(self, event)
-        super(PMXCodeEditor, self).paintEvent(event)
+        QtGui.QPlainTextEdit.paintEvent(self, event)
         page_bottom = self.viewport().height()
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
 
@@ -443,24 +443,31 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
+    def activeHelper(self):
+        #retorna el primer helper activo
+        for h in self.editorHelpers:
+            if h.isActive():
+                return h
+
     def keyPressEvent(self, event):
         '''
         This method is called whenever a key is pressed. The key code is stored in event.key()
         http://manual.macromates.com/en/working_with_text
         '''
         
-        #Buscar entre los modos instalados
-        map(lambda mode: mode.active(event), self.editorModes)
-        modes = filter(lambda mode: mode.isActive(), self.editorModes)
-        if modes:
-            #If more than one mode 
-            mode = modes[0]
-            map(lambda m: m.inactive(), filter(lambda m: m != mode, self.editorModes ))
-            return mode.keyPressEvent(event)
+        helper = self.activeHelper()
+        if helper is None:
+            scope = self.getCurrentScope()
+            #Enviar activar a los helpers hasta que uno retorne True
+            for helper in self.editorHelpers:
+                helper.active(event, scope)
+                if helper.isActive():
+                    return helper.keyPressEvent(event)
+        else:
+            return helper.keyPressEvent(event)
 
-        #Modo Normal
+        #No tengo ningun helper trabajando voy con el Modo Normal
         key = event.key()
-        modifiers = event.modifiers()
         if key == Qt.Key_Tab:
             self.tabPressEvent(event)
         elif key == Qt.Key_Backtab:
@@ -469,10 +476,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.returnPressEvent(event)
         elif key == Qt.Key_Insert:
             self.setOverwriteMode(not self.overwriteMode())
-        elif key == Qt.Key_Space and modifiers == Qt.ControlModifier:
-            self._find_completion()
         else:
-            super(PMXCodeEditor, self).keyPressEvent(event)
+            QtGui.QPlainTextEdit.keyPressEvent(self, event)
 
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
@@ -566,9 +571,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
         menu = QtGui.QMenu(self)
         for index, item in enumerate(items, 1):
-            action = menu.addAction(item.buildMenuTextEntry("&" + str(index)))
             receiver = lambda item = item: self.insertBundleItem(item, tabTriggered = tabTriggered)
-            self.connect(action, SIGNAL('triggered()'), receiver)
+            action = item.buildTriggerItemAction(menu, mnemonic = "&" + str(index), receiver = receiver)
+            menu.addAction(action)
         if syntax:
             point = self.mainWindow.cursor().pos()
         else:
@@ -629,13 +634,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #==========================================================================
     # Completer
     #==========================================================================
-    def _find_completion(self):
-        scope = self.getCurrentScope()
-        preferences = self.getPreference(scope)
-        print preferences.completionCommand
-        if preferences.completions:
-            self.showCompleter(preferences.completions)
-        
     def showCompleter(self, suggestions):
         completionPrefix = self.getCurrentWord()
         self.completer.setCompletionPrefix(completionPrefix)

@@ -6,7 +6,7 @@ class PMXBaseHelper(object):
     def __init__(self, editor):
         self.editor = editor
     
-    def active(self, event):
+    def active(self, event, scope):
         pass
     
     def isActive(self):
@@ -19,17 +19,20 @@ class PMXBaseHelper(object):
         self.editor.keyPressEvent(event)
 
 class KeyEquivalentHelper(PMXBaseHelper):
-    def active(self, event):
-        keyseq = int(event.modifiers()) + event.key()
-        scope = self.editor.getCurrentScope()
-        self.items = self.editor.application.supportManager.getKeyEquivalentItem(keyseq, scope)
-    
-    def inactive(self):
+    def __init__(self, editor):
+        PMXBaseHelper.__init__(self, editor)
         self.items = []
-        
+
+    def active(self, event, scope):
+        keyseq = int(event.modifiers()) + event.key()
+        self.items = self.editor.application.supportManager.getKeyEquivalentItem(keyseq, scope)
+
     def isActive(self):
         return bool(self.items)
-    
+
+    def inactive(self):
+        self.items = []
+
     def keyPressEvent(self, event):
         if len(self.items) == 1:
             self.editor.insertBundleItem(self.items[0])
@@ -38,16 +41,20 @@ class KeyEquivalentHelper(PMXBaseHelper):
             self.editor.insertBundleItem(self.items[0])
         else:
             self.editor.selectBundleItem(self.items)
+        self.inactive()
 
 class SmartTypingHelper(PMXBaseHelper):
-    def active(self, event):
-        scope = self.editor.getCurrentScope()
+    def __init__(self, editor):
+        PMXBaseHelper.__init__(self, editor)
+        self.pairs = []
+        
+    def active(self, event, scope):
         preferences = self.editor.getPreference(scope)        
         if event.key() == QtCore.Qt.Key_Backspace and not self.editor.textCursor().hasSelection():
             character = self.editor.document().characterAt(self.editor.textCursor().position() - 1)
         else:
             character = event.text()
-        self.pairs = filter(lambda pair: pair[0] == character, preferences.smartTypingPairs)
+        self.pairs = filter(lambda pair: character in pair, preferences.smartTypingPairs)
 
     def inactive(self):
         self.pairs = []
@@ -75,6 +82,7 @@ class SmartTypingHelper(PMXBaseHelper):
                 cursor.insertText(self.pairs[0][1])
                 cursor.setPosition(position + 1)
             self.editor.setTextCursor(cursor)
+        self.inactive()
 
 class PMXCursorsHelper(PMXBaseHelper):
     def __init__(self, editor):
@@ -85,10 +93,9 @@ class PMXCursorsHelper(PMXBaseHelper):
     def isActive(self):
         return bool(self.cursors)
     
-    def setActive(self, active):
-        if not active:
-            self.cursors = []
-
+    def inactive(self):
+        self.cursors = []
+    
     @property
     def isDragCursor(self):
         return self.dragPoint != None
@@ -212,9 +219,6 @@ class PMXCursorsHelper(PMXBaseHelper):
             self.editor.setTextCursor(cursor)
             self.cursors.append(cursor)
 
-    def removeAll(self):
-        self.cursors = []
-    
     def canMoveRight(self):
         return all(map(lambda c: not c.atEnd(), self.cursors))
     
@@ -230,7 +234,7 @@ class PMXCursorsHelper(PMXBaseHelper):
             if ecursor.hasSelection():
                 ecursor.clearSelection()
             self.editor.setTextCursor(ecursor)
-            self.removeAll()
+            self.inactive()
             self.editor.highlightCurrentLine()
             #Se termino la joda
         elif event.modifiers() & QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
@@ -285,18 +289,27 @@ class PMXCompleterHelper(QtGui.QCompleter, PMXBaseHelper):
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.activated[str].connect(self.insertCompletion)
-    
+        self.completions = []
+
+    def active(self, event, scope):
+        if event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
+            preferences = self.editor.getPreference(scope)
+            self.completions = preferences.completions
+
     def isActive(self):
         return self.popup().isVisible()
         
-    def setActive(self, active):
-        pass
+    def inactive(self):
+        self.completions = []
 
     def keyPressEvent(self, event):
         if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
+            self.inactive()
             event.ignore()
+        elif self.completions:
+            self.editor.showCompleter(self.completions)
         else:
-            self.editor.keyPressEvent(event)
+            QtGui.QPlainTextEdit.self.keyPressEvent(self.editor, event)
     
     def insertCompletion(self, insert):
         self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])

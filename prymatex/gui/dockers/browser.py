@@ -189,8 +189,6 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
 
     def showEvent(self, event):
         self.setFocus()
-           
-
     
     def event(self, event):
         if event.type() == QtCore.QEvent.KeyPress:
