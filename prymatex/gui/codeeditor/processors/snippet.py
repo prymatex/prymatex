@@ -15,9 +15,8 @@ class PMXSnippetProcessor(PMXSnippetProcessor, PMXBaseHelper):
         self.tabTriggered = True
         self.disableIndent = False
 
-    def active(self, event):
+    def active(self, event, scope):
         if event.key() == QtCore.Qt.Key_Tab:
-            scope = self.editor.getCurrentScope()
             cursor = self.editor.textCursor()
             trigger = self.editor.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
             if trigger != None:
@@ -95,7 +94,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor, PMXBaseHelper):
             self.editor.textCursor().insertText(text)
     
     def endSnippet(self):
-        self.snippet = None
+        self.inactive()
         
     def keyPressEvent(self, event):
         key = event.key()

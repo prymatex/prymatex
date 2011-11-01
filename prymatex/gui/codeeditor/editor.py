@@ -307,7 +307,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.updateLineNumberAreaWidth(0)
     
     def resizeEvent(self, event):
-        super(PMXCodeEditor, self).resizeEvent(event)
+        QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
         self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
         
@@ -338,7 +338,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     def paintEvent(self, event):
         #QtGui.QPlainTextEdit.paintEvent(self, event)
-        super(PMXCodeEditor, self).paintEvent(event)
+        QtGui.QPlainTextEdit.paintEvent(self, event)
         page_bottom = self.viewport().height()
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
 
@@ -443,22 +443,30 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
+    def activeHelper(self):
+        #retorna el primer helper activo
+        for h in self.editorHelpers:
+            if h.isActive():
+                return h
+
     def keyPressEvent(self, event):
         '''
         This method is called whenever a key is pressed. The key code is stored in event.key()
         http://manual.macromates.com/en/working_with_text
         '''
         
-        #Buscar entre los helpers instalados
-        map(lambda mode: mode.active(event), self.editorHelpers)
-        modes = filter(lambda mode: mode.isActive(), self.editorHelpers)
-        if modes:
-            #If more than one helper
-            mode = modes[0]
-            map(lambda m: m.inactive(), filter(lambda m: m != mode, self.editorHelpers ))
-            return mode.keyPressEvent(event)
+        helper = self.activeHelper()
+        if helper is None:
+            scope = self.getCurrentScope()
+            #Enviar activar a los helpers hasta que uno retorne True
+            for helper in self.editorHelpers:
+                helper.active(event, scope)
+                if helper.isActive():
+                    return helper.keyPressEvent(event)
+        else:
+            return helper.keyPressEvent(event)
 
-        #Modo Normal
+        #No tengo ningun helper trabajando voy con el Modo Normal
         key = event.key()
         if key == Qt.Key_Tab:
             self.tabPressEvent(event)
@@ -469,7 +477,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         elif key == Qt.Key_Insert:
             self.setOverwriteMode(not self.overwriteMode())
         else:
-            super(PMXCodeEditor, self).keyPressEvent(event)
+            QtGui.QPlainTextEdit.keyPressEvent(self, event)
 
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
@@ -563,9 +571,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
         menu = QtGui.QMenu(self)
         for index, item in enumerate(items, 1):
-            action = menu.addAction(item.buildMenuTextEntry("&" + str(index)))
             receiver = lambda item = item: self.insertBundleItem(item, tabTriggered = tabTriggered)
-            self.connect(action, SIGNAL('triggered()'), receiver)
+            action = item.buildTriggerItemAction(menu, mnemonic = "&" + str(index), receiver = receiver)
+            menu.addAction(action)
         if syntax:
             point = self.mainWindow.cursor().pos()
         else:
