@@ -84,7 +84,10 @@ class PMXEditorFolding(object):
 
     def findPreviousMoreIndentBlock(self, block):
         """ Return previous block if text in block is not bank """
-        indent = block.userData().indent
+        userData = block.userData()
+        if userData is None:
+            return block
+        indent = userData.indent
         while block.isValid():
             block = block.previous()
             if indent < block.userData().indent:

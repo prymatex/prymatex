@@ -3,11 +3,10 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 from prymatex.support.processor import PMXSnippetProcessor
-from prymatex.gui.codeeditor.helpers import PMXBaseHelper
 
-class PMXSnippetProcessor(PMXSnippetProcessor, PMXBaseHelper):
+class PMXSnippetProcessor(PMXSnippetProcessor):
     def __init__(self, editor):
-        PMXBaseHelper.__init__(self, editor)
+        self.editor = editor
         self.snippet = None
         self.transformation = None
         self.tabreplacement = "\t"
@@ -15,23 +14,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor, PMXBaseHelper):
         self.tabTriggered = True
         self.disableIndent = False
 
-    def active(self, event, scope):
-        if event.key() == QtCore.Qt.Key_Tab:
-            cursor = self.editor.textCursor()
-            trigger = self.editor.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
-            if trigger != None:
-                snippets = self.editor.application.supportManager.getTabTriggerItem(trigger, scope)
-                if len(snippets) > 1:
-                    self.editor.selectBundleItem(snippets, tabTriggered = True)
-                elif snippets:
-                    self.editor.insertBundleItem(snippets[0], tabTriggered = True)
-        
-    def isActive(self):
-        return self.snippet is not None
-    
-    def inactive(self):
-        self.snippet = None
-            
     @property
     def environment(self, format = None):
         return self.__env
@@ -94,15 +76,13 @@ class PMXSnippetProcessor(PMXSnippetProcessor, PMXBaseHelper):
             self.editor.textCursor().insertText(text)
     
     def endSnippet(self):
-        self.inactive()
+        self.snippet = None
         
     def keyPressEvent(self, event):
         key = event.key()
         cursor = self.editor.textCursor()
         
-        if key == Qt.Key_Escape:
-            self.inactive()
-        elif key == Qt.Key_Tab or key == Qt.Key_Backtab:
+        if key == Qt.Key_Tab or key == Qt.Key_Backtab:
             if cursor.hasSelection():
                 holder = self.snippet.setDefaultHolder(cursor.selectionStart(), cursor.selectionEnd())
             else:

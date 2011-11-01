@@ -16,7 +16,7 @@ from prymatex.core import exceptions
 from prymatex.gui.central.editor import PMXBaseEditor
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.codeeditor.helpers import KeyEquivalentHelper, SmartTypingHelper, PMXCursorsHelper, PMXCompleterHelper
+from prymatex.gui.codeeditor.helpers import KeyEquivalentHelper, TabTriggerHelper, SmartTypingHelper, PMXCursorsHelper, PMXCompleterHelper
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
@@ -127,8 +127,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
 
         #Install editor helpers OverwriteText for testing
         self.editorHelpers = [  KeyEquivalentHelper(self), 
+                                TabTriggerHelper(self),
                                 SmartTypingHelper(self),
-                                self.snippetProcessor,
                                 self.completer,
                                 self.cursors ]
 
@@ -561,6 +561,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.debug("Corriendo Command %s" % item.name)
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
+            self.debug("Cambiando syntax %s" % item.name)
             self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
             self.debug("Corriendo Macro %s" % item.name)
@@ -572,7 +573,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         menu = QtGui.QMenu(self)
         for index, item in enumerate(items, 1):
             receiver = lambda item = item: self.insertBundleItem(item, tabTriggered = tabTriggered)
-            action = item.buildTriggerItemAction(menu, mnemonic = "&" + str(index), receiver = receiver)
+            action = item.buildTriggerItemAction(menu, receiver, mnemonic = "&" + str(index))
             menu.addAction(action)
         if syntax:
             point = self.mainWindow.cursor().pos()

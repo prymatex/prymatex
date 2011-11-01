@@ -67,14 +67,12 @@ class PMXBundleTreeNode(object):
     def triggerItemAction(self, parent = None):
         if not hasattr(self, "action"):
             assert parent is not None, "Parent of action mustn't be None"
-            self.action = self.buildTriggerItemAction(parent)
+            receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
+            self.action = self.buildTriggerItemAction(parent, receiver)
         return self.action
     
-    def buildTriggerItemAction(self, parent, mnemonic = '', receiver = None):
+    def buildTriggerItemAction(self, parent, receiver, mnemonic = ''):
         action = QtGui.QAction(QtGui.QIcon(self.icon), self.buildMenuTextEntry(mnemonic), parent)
-        #If receiver is none set the default 
-        if receiver is None:
-            receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
         parent.connect(action, QtCore.SIGNAL('triggered()'), receiver)
         return action
     

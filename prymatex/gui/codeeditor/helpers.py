@@ -36,12 +36,42 @@ class KeyEquivalentHelper(PMXBaseHelper):
     def keyPressEvent(self, event):
         if len(self.items) == 1:
             self.editor.insertBundleItem(self.items[0])
-        elif len(self.items) == 2 and self.items[0].TYPE != self.items[1].TYPE:
-            #Son distintos desempato, el primero es el que mejor se ajusta
-            self.editor.insertBundleItem(self.items[0])
         else:
             self.editor.selectBundleItem(self.items)
         self.inactive()
+
+class TabTriggerHelper(PMXBaseHelper):
+    def __init__(self, editor):
+        PMXBaseHelper.__init__(self, editor)
+        self.items = []
+
+    def active(self, event, scope):
+        if event.key() == QtCore.Qt.Key_Tab:
+            cursor = self.editor.textCursor()
+            trigger = self.editor.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
+            if trigger != None:
+                self.items = self.editor.application.supportManager.getTabTriggerItem(trigger, scope)
+
+    def isActive(self):
+        return bool(self.items) or self.editor.snippetProcessor.snippet is not None
+
+    def inactive(self):
+        self.items = []
+
+    def keyPressEvent(self, event):
+        if self.items:
+            #Inserto los items
+            if len(self.items) == 1:
+                self.editor.insertBundleItem(self.items[0], tabTriggered = True)
+            else:
+                self.editor.selectBundleItem(self.items, tabTriggered = True)
+            self.inactive()
+        elif event.key() == QtCore.Qt.Key_Escape:
+            #Terminar explicitamente un snippet
+            self.editor.snippetProcessor.endSnippet()
+        else:
+            self.editor.snippetProcessor.keyPressEvent(event)
+            
 
 class SmartTypingHelper(PMXBaseHelper):
     def __init__(self, editor):
@@ -63,25 +93,34 @@ class SmartTypingHelper(PMXBaseHelper):
         return bool(self.pairs)
             
     def keyPressEvent(self, event):
+        cursor = self.editor.textCursor()
         if event.key() == QtCore.Qt.Key_Backspace:
-            if self.pairs and self.pairs[0][0] == event.text() and self.editor.document().characterAt(cursor.position()) == self.pairs[0][1]:
-                self.editor.textCursor().deleteChar()
-            elif self.pairs and self.pairs[0][1] == event.text() and self.editor.document().characterAt(cursor.position() - 2) == self.pairs[0][0]:
-                self.editor.textCursor().deletePreviousChar()
-        else:
-            cursor = self.editor.textCursor()
-            if cursor.hasSelection():
-                position = cursor.selectionStart()
-                text = self.pairs[0][0] + cursor.selectedText() + self.pairs[0][1]
-                cursor.insertText(text)
-                cursor.setPosition(position)
-                cursor.setPosition(position + len(text), QTextCursor.KeepAnchor)
+            cPosition = self.editor.document().characterAt(cursor.position())
+            cBefore = self.editor.document().characterAt(cursor.position() - 1)
+            cBeforeBefore = self.editor.document().characterAt(cursor.position() - 2)
+            if cBefore == self.pairs[0][0] and cPosition == self.pairs[0][1]:
+                cursor.deleteChar()
+                cursor.deletePreviousChar()
+            elif cBeforeBefore == self.pairs[0][0] and cBefore == self.pairs[0][1]:
+                cursor.deletePreviousChar()
+                cursor.deletePreviousChar()
             else:
-                position = cursor.position()
                 QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-                cursor.insertText(self.pairs[0][1])
-                cursor.setPosition(position + 1)
+        elif cursor.hasSelection():
+            position = cursor.selectionStart()
+            text = self.pairs[0][0] + cursor.selectedText() + self.pairs[0][1]
+            cursor.insertText(text)
+            cursor.setPosition(position)
+            cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
             self.editor.setTextCursor(cursor)
+        elif cursor.atBlockEnd():
+            position = cursor.position()
+            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+            cursor.insertText(self.pairs[0][1])
+            cursor.setPosition(position + 1)
+            self.editor.setTextCursor(cursor)
+        else:
+            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
         self.inactive()
 
 class PMXCursorsHelper(PMXBaseHelper):
