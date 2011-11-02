@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+import fnmatch
 import uuid as uuidmodule
+from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportBaseManager
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
@@ -134,8 +135,8 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         self.preferenceProxyModel.setSourceModel(self.bundleTreeModel)
         
         #DRAGCOMMANDS
-        self.dragProxyModel = PMXBundleTypeFilterProxyModel("dragcommand", self)
-        self.dragProxyModel.setSourceModel(self.bundleTreeModel)
+        self.dragcommandProxyModel = PMXBundleTypeFilterProxyModel("dragcommand", self)
+        self.dragcommandProxyModel.setSourceModel(self.bundleTreeModel)
         
         #BUNDLEMENUGROUP
         self.bundleMenuGroup = PMXBundleMenuGroup(self)
@@ -279,6 +280,16 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         for syntax in self.syntaxProxyModel.getAllItems():
             if syntax.keyEquivalent == keyEquivalent:
                 yield syntax
+        else:
+            raise StopIteration()
+    
+    #---------------------------------------------------
+    # FILE EXTENSION OVERRIDE INTERFACE
+    #---------------------------------------------------
+    def getAllBundleItemsByFileExtension(self, path):
+        for item in self.dragcommandProxyModel.getAllItems():
+            if any(map(lambda extension: fnmatch.fnmatch(path, "*.%s" % extension), item.draggedFileExtensions)):
+                yield item
         else:
             raise StopIteration()
     

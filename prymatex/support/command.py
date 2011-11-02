@@ -144,7 +144,10 @@ class PMXDragCommand(PMXCommand):
     def load(self, hash):
         super(PMXDragCommand, self).load(hash)
         for key in PMXDragCommand.KEYS:
-            setattr(self, key, hash.get(key, None))
+            value = hash.get(key, None)
+            if key in [ 'draggedFileExtensions' ]:
+                value = map(lambda extension: extension.strip(), value.split(","))
+            setattr(self, key, value)
     
     @property
     def hash(self):
@@ -152,6 +155,8 @@ class PMXDragCommand(PMXCommand):
         for key in PMXDragCommand.KEYS:
             value = getattr(self, key)
             if value != None:
+                if key in [ 'draggedFileExtensions' ]:
+                    value = ", ".join(self.draggedFileExtensions)
                 hash[key] = value
         return hash
             

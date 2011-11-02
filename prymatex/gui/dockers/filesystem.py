@@ -153,15 +153,6 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     def showTreeViewFileSystemContextMenu(self, point):
         self.fileSystemMenu.popup(self.treeViewFileSystem.mapToGlobal(point))
                 
-    def on_treeViewFileSystem_activated(self, index):
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
-        if os.path.isfile(path):
-            self.mainWindow.openFile(QtCore.QFileInfo(path))
-        if os.path.isdir(path):
-            self.treeViewFileSystem.setRootIndex(index)
-            self.comboBoxLocation.lineEdit().setText(path)
-    
     def on_treeViewFileSystem_doubleClicked(self, index):
         sIndex = self.fileSystemProxyModel.mapToSource(index)
         path = self.fileSystemModel.filePath(sIndex)
