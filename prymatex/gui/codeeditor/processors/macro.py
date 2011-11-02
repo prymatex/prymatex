@@ -8,6 +8,10 @@ class PMXMacroProcessor(PMXMacroProcessor):
     def __init__(self, editor):
         super(PMXMacroProcessor, self).__init__()
         self.editor = editor
+        self.settings = {}
+
+    def configure(self, settings):
+        self.settings = settings
 
     def startMacro(self, macro):
         """docstring for startMacro"""

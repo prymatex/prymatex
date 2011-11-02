@@ -548,16 +548,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #==========================================================================
     # Bundle Items
     #==========================================================================
-    def insertBundleItem(self, item, tabTriggered = False, disableIndent = False):
+    def insertBundleItem(self, item, **processorSettings):
         ''' 
             Inserta un bundle item
         '''
         if item.TYPE == PMXSnippet.TYPE:
-            self.snippetProcessor.configure(tabTriggered, disableIndent)
+            self.snippetProcessor.configure(processorSettings)
             self.debug("Corriendo Snippet %s" % item.name)
             item.execute(self.snippetProcessor)
-        elif item.TYPE == PMXCommand.TYPE:
-            self.commandProcessor.configure(tabTriggered, disableIndent)
+        elif item.TYPE == PMXCommand.TYPE or item.TYPE == PMXDragCommand.TYPE:
+            self.commandProcessor.configure(processorSettings)
             self.debug("Corriendo Command %s" % item.name)
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:

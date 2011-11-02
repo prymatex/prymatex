@@ -9,9 +9,13 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
+        self.settings = {}
         self.tabTriggered = False
         self.disableIndent = True
 
+    def configure(self, settings):
+        self.settings = settings
+        
     def configure(self, tabTrigger, disableIndent):
         self.tabTriggered = tabTrigger
         self.disableIndent = disableIndent
