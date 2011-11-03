@@ -49,12 +49,8 @@ class PMXApplication(QtGui.QApplication):
 
         # Loads
         self.loadSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
-        try:
-            self.loadKernelManager()    #Console kernel Manager
-        except ImportError:
-            self.kernelManager = None
+        self.loadKernelManager()    #Console kernel Manager
 
-        
         # Setups
         #self.setupExecutor()        #Executor
         self.setupLogging()         #Logging
@@ -163,11 +159,14 @@ class PMXApplication(QtGui.QApplication):
         print "Save state", session_manager
         
     def loadKernelManager(self):
-        from IPython.frontend.qt.kernelmanager import QtKernelManager
-        self.kernelManager = QtKernelManager()
-        self.kernelManager.start_kernel()
-        self.kernelManager.start_channels()
-        
+        try:
+            from IPython.frontend.qt.kernelmanager import QtKernelManager
+            self.kernelManager = QtKernelManager()
+            self.kernelManager.start_kernel()
+            self.kernelManager.start_channels()
+        except ImportError:
+            self.kernelManager = None
+
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def loadSupportManager(self, callbackSplashMessage = None):
