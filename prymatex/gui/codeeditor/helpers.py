@@ -2,19 +2,13 @@
 #-*- encoding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
 
-class PMXBaseHelper(object):
+class PMXBaseEditorHelper(object):
     def __init__(self, editor):
         self.editor = editor
     
     def active(self, event, scope):
         pass
     
-    def isActive(self):
-        return False
-        
-    def inactive(self):
-        pass
-        
     def keyPressEvent(self, event):
         self.editor.keyPressEvent(event)
 

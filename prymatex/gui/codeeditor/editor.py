@@ -412,34 +412,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
-    def inserSpacesUpToPoint(self, point, spacing_character = ' '):
-        '''
-        Inserts whitespace up to a point
-        '''
-        cursor = self.cursorForPosition(point)
-        block = cursor.block()
-        if not block.isValid():
-            return
-        text = block.text()
-        self.fontMetrics()
-        font_width = self.fontMetrics().width(' ')
-        line_width = font_width * text.length()
-        # Cast to int if Py > 3.x
-        char_number = int(point.x() / font_width)
-        char_number_delta = char_number - text.length()
-        if char_number_delta > 0:
-            # Insert some empty characters
-            cursor.beginEditBlock()
-            cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor, 1)
-            #print "Inserting", char_number_delta
-            cursor.insertText(spacing_character * char_number_delta)
-            cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor, 1)
-            cursor.endEditBlock()
-            self.setTextCursor(cursor)
-            
-        #print block.blockNumber(), ":", text, line_width, "px"
-        #print char_number, text.length()
-    
     #=======================================================================
     # Keyboard Events
     #=======================================================================
@@ -454,6 +426,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         This method is called whenever a key is pressed. The key code is stored in event.key()
         http://manual.macromates.com/en/working_with_text
         '''
+        #TODO, primero ver si tengo un modo activo, luego obtener key, scope y cursor y preguntar a cada helper, al helper que diga que si pasarle el evento,
+        # para activar helpers vamos de lo general (cualquier tecla) a lo particular el orden importa
         
         helper = self.activeHelper()
         if helper is None:
@@ -476,6 +450,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.returnPressEvent(event)
         elif key == Qt.Key_Insert:
             self.setOverwriteMode(not self.overwriteMode())
+        elif key == Qt.Key_Home:
+            self.homePressEvent(event)
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
 
@@ -531,11 +507,20 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             self.debug("Preserve indent")
             cursor.insertText(block.userData().indent)
-    
+
+    #=======================================================================
+    # Home Keyboard Events
+    #=======================================================================
+    def homePressEvent(self, event):
+        cursor = self.textCursor()
+        block = cursor.block()
+        newPosition = block.position() + len(block.userData().indent)
+        cursor.setPosition(newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
+        self.setTextCursor(cursor)
+        
     #=======================================================================
     # After Keyboard Events
     #=======================================================================
-    
     def keyPressIndent(self, event):
         cursor = self.textCursor()
         block = cursor.block()
