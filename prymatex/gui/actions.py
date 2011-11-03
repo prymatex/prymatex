@@ -1,6 +1,9 @@
 from PyQt4 import QtCore, QtGui
 
 class MainWindowActions(object):
+    
+    splitTabWidget = None #Overriden in GUI Setup
+    
     def setupMenu(self):
         #Recent files
         self.actionFullscreen.setChecked(self.windowState() == QtCore.Qt.WindowFullScreen)
@@ -93,7 +96,7 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionQuit_triggered(self):
-        QApplication.quit()
+        QtGui.QApplication.quit()
     
     #============================================================
     # Edit Actions
@@ -277,11 +280,11 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionNextTab_triggered(self):
-        self.tabWidget.focusNextTab()
+        self.splitTabWidget.focusNextTab()
 
     @QtCore.pyqtSlot()
     def on_actionPreviousTab_triggered(self):
-        self.tabWidget.focusPrevTab()
+        self.splitTabWidget.focusPreviousTab()
 
     #============================================================
     # Bundles Actions
@@ -327,11 +330,11 @@ class MainWindowActions(object):
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionAbout_Qt_triggered(self):
-        qApp.aboutQt()
+        QtGui.qApp.aboutQt()
         
     @QtCore.pyqtSlot()
     def on_actionAbout_this_application_triggered(self):
-        QMessageBox.information(self, self.trUtf8("About Prymatex"), 
+        QtGui.QMessageBox.information(self, self.trUtf8("About Prymatex"), 
                                 self.trUtf8("<h3>Prymatex</h3>"
                                 "<p>A general purpouse Text Editor</p>")
                                 )
@@ -339,11 +342,11 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionProjectHomepage_triggered(self):
         import webbrowser
-        webbrowser.open(qApp.instance().projectUrl)
+        webbrowser.open(QtGui.qApp.instance().projectUrl)
 
     @QtCore.pyqtSlot()
     def on_actionTakeScreenshot_triggered(self):
-        pxm = QPixmap.grabWindow(self.winId())
+        pxm = QtGui.QPixmap.grabWindow(self.winId())
         from datetime import datetime
         now = datetime.now()
         name = "%s.%s" % (now.strftime('sshot-%Y-%m-%d-%H_%M_%S'), 'png')
