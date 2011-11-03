@@ -16,7 +16,8 @@ from prymatex.core import exceptions
 from prymatex.gui.central.editor import PMXBaseEditor
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.codeeditor.helpers import KeyEquivalentHelper, TabTriggerHelper, SmartTypingHelper, PMXCursorsHelper, PMXCompleterHelper
+from prymatex.gui.codeeditor.helpers import KeyEquivalentHelper, TabTriggerHelper, SmartTypingHelper, MoveCursorToHomeHelper, OverwriteHelper
+from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
@@ -95,6 +96,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     ShowLineNumbers = 0x08
     ShowFolding = 0x10
     
+    editorHelpers = {
+        QtCore.Qt.Key_Any: [ KeyEquivalentHelper(), SmartTypingHelper()],
+        QtCore.Qt.Key_Tab: [ TabTriggerHelper()],
+        QtCore.Qt.Key_Home: [ MoveCursorToHomeHelper() ],
+        QtCore.Qt.Key_Insert: [ OverwriteHelper() ]
+    }
+    
     #TODO: Move to the manager
     #Cache de preferencias
     PREFERENCE_CACHE = {}
@@ -116,21 +124,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         #Folding
         self.folding = PMXEditorFolding(self)
         
-        #Helpers
-        self.cursors = PMXCursorsHelper(self)
-        self.completer = PMXCompleterHelper(self)
-        
         #Processors
         self.commandProcessor = PMXCommandProcessor(self)
         self.macroProcessor = PMXMacroProcessor(self)
         self.snippetProcessor = PMXSnippetProcessor(self)
 
-        #Install editor helpers OverwriteText for testing
-        self.editorHelpers = [  KeyEquivalentHelper(self), 
-                                TabTriggerHelper(self),
-                                SmartTypingHelper(self),
-                                self.completer,
-                                self.cursors ]
+        #Modes
+        self.multiCursorMode = PMXMultiCursorEditorMode(self)
+        self.completerMode = PMXCompleterEditorMode(self)
+        self.snippetMode = PMXSnippetEditorMode(self)
 
         #Set syntax for fileInfo
         syntax = None
@@ -313,8 +315,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         
     def highlightCurrentLine(self):
         extraSelections = []
-        if self.cursors.isActive():
-            for cursor in self.cursors:
+        if self.multiCursorMode.isActive():
+            for cursor in self.multiCursorMode:
                 if cursor.hasSelection():
                     selection = QTextEdit.ExtraSelection()
                     selection.format.setBackground(self.colours['selection'])
@@ -362,13 +364,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                     resources.IMAGES["foldingellipsis"])
             
             block = block.next()
-        if self.cursors.isActive():
-            for cursor in self.cursors:
+        if self.multiCursorMode.isActive():
+            for cursor in self.multiCursorMode:
                 rec = self.cursorRect(cursor)
                 cursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
                 painter.setPen(QtGui.QPen(self.colours['caret']))
                 painter.drawLine(cursor)
-        if self.cursors.isDragCursor:
+        if self.multiCursorMode.isDragCursor:
             pen = QtGui.QPen(self.colours['caret'])
             pen.setWidth(2)
             painter.setPen(pen)
@@ -376,7 +378,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             color.setAlpha(128)
             painter.setBrush(QtGui.QBrush(color))
             painter.setOpacity(0.2)
-            painter.drawRect(self.cursors.getDragCursorRect())
+            painter.drawRect(self.multiCursorMode.getDragCursorRect())
         painter.end()
 
     #=======================================================================
@@ -395,19 +397,19 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def mousePressEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
             self.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-            self.cursors.mousePressPoint(event.pos())
+            self.multiCursorMode.mousePressPoint(event.pos())
         else:
             QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
-            self.cursors.mouseMovePoint(event.pos())
+            self.multiCursorMode.mouseMovePoint(event.pos())
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
         if event.modifiers() == Qt.ControlModifier:
-            self.cursors.mouseReleasePoint(event.pos())
+            self.multiCursorMode.mouseReleasePoint(event.pos())
             self.application.restoreOverrideCursor()
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
@@ -415,30 +417,38 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
-    def activeHelper(self):
+    def activeMode(self):
         #retorna el primer helper activo
-        for h in self.editorHelpers:
-            if h.isActive():
-                return h
+        for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
+            if mode.isActive():
+                return mode
 
     def keyPressEvent(self, event):
         '''
         This method is called whenever a key is pressed. The key code is stored in event.key()
         http://manual.macromates.com/en/working_with_text
         '''
-        #TODO, primero ver si tengo un modo activo, luego obtener key, scope y cursor y preguntar a cada helper, al helper que diga que si pasarle el evento,
+        #TODO, luego , al helper que diga que si pasarle el evento,
         # para activar helpers vamos de lo general (cualquier tecla) a lo particular el orden importa
         
-        helper = self.activeHelper()
-        if helper is None:
-            scope = self.getCurrentScope()
-            #Enviar activar a los helpers hasta que uno retorne True
-            for helper in self.editorHelpers:
-                helper.active(event, scope)
-                if helper.isActive():
-                    return helper.keyPressEvent(event)
+        #Primero ver si tengo un modo activo,
+        mode = self.activeMode()
+        if mode is not None:
+            return mode.keyPressEvent(event)
         else:
-            return helper.keyPressEvent(event)
+            #Obtener key, scope y cursor
+            scope = self.getCurrentScope()
+            cursor = self.textCursor()
+            #Preparar teclas
+            keys = set([ QtCore.Qt.Key_Any, event.key() ])
+            for key in keys:
+                #Obtener Helpers
+                helpers = self.editorHelpers.get(key, [])
+                for helper in helpers:
+                    #Buscar Entre los helpers
+                    if helper.accept(event, cursor, scope):
+                        #pasarle el evento
+                        return helper.execute(self, event)
 
         #No tengo ningun helper trabajando voy con el Modo Normal
         key = event.key()
@@ -448,10 +458,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.backtabPressEvent(event)
         elif key == Qt.Key_Return:
             self.returnPressEvent(event)
-        elif key == Qt.Key_Insert:
-            self.setOverwriteMode(not self.overwriteMode())
-        elif key == Qt.Key_Home:
-            self.homePressEvent(event)
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
 
@@ -459,9 +465,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         if event.text() != "":
             self.keyPressIndent(event)
             completionPrefix = self.getCurrentWord()
-            if self.completer.isActive() and completionPrefix != self.completer.completionPrefix():
-                self.completer.setCompletionPrefix(completionPrefix)
-                self.completer.complete(self.cursorRect())
+            if self.completerMode.isActive() and completionPrefix != self.completerMode.completionPrefix():
+                self.completerMode.setCompletionPrefix(completionPrefix)
+                self.completerMode.complete(self.cursorRect())
     
     #=======================================================================
     # Tab Keyboard Events
@@ -507,16 +513,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             self.debug("Preserve indent")
             cursor.insertText(block.userData().indent)
-
-    #=======================================================================
-    # Home Keyboard Events
-    #=======================================================================
-    def homePressEvent(self, event):
-        cursor = self.textCursor()
-        block = cursor.block()
-        newPosition = block.position() + len(block.userData().indent)
-        cursor.setPosition(newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
-        self.setTextCursor(cursor)
         
     #=======================================================================
     # After Keyboard Events
@@ -623,10 +619,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #==========================================================================
     def showCompleter(self, suggestions):
         completionPrefix = self.getCurrentWord()
-        self.completer.setCompletionPrefix(completionPrefix)
-        self.completer.setModel(PMXCompleterListModel(suggestions, self))
+        self.completerMode.setCompletionPrefix(completionPrefix)
+        self.completerMode.setModel(PMXCompleterListModel(suggestions, self))
         cr = self.cursorRect()
-        self.completer.complete(cr)
+        self.completerMode.complete(cr)
     
     #==========================================================================
     # Folding
