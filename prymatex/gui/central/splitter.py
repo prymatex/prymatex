@@ -10,9 +10,6 @@
 
 #------------------------------------------------------------------------------
 
-# Standard library imports.
-import sys
-
 # Major library imports.
 import sip
 from PyQt4 import QtCore, QtGui
@@ -762,3 +759,15 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
     def mouseDoubleClickEvent(self, event):
         ''' Add an empty editor when the tab bar is double clicked '''
         self.mainWindow.addEmptyEditor()
+        
+    def moveCurrentTabLeft(self):
+        self._move_left(self._current_tab_w, self._current_tab_idx)   
+
+    def moveCurrentTabRight(self):
+        self._move_right(self._current_tab_w, self._current_tab_idx)
+    
+    def focusNextTab(self):
+        print "Focus next"
+    
+    def focusPreviousTab(self):
+        print "Focus previous"

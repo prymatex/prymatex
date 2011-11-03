@@ -1,6 +1,9 @@
 from PyQt4 import QtCore, QtGui
 
 class MainWindowActions(object):
+    
+    splitTabWidget = None #Overriden in GUI Setup
+    
     def setupMenu(self):
         #Recent files
         self.actionFullscreen.setChecked(self.windowState() == QtCore.Qt.WindowFullScreen)
@@ -277,11 +280,11 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionNextTab_triggered(self):
-        self.tabWidget.focusNextTab()
+        self.splitTabWidget.focusNextTab()
 
     @QtCore.pyqtSlot()
     def on_actionPreviousTab_triggered(self):
-        self.tabWidget.focusPrevTab()
+        self.splitTabWidget.focusPreviousTab()
 
     #============================================================
     # Bundles Actions

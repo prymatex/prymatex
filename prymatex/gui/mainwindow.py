@@ -287,3 +287,4 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         if os.path.getsize(path) > self.FILE_SIZE_THERESHOLD:
             return False
         return True
+        
