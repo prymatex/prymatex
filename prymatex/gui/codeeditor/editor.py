@@ -9,7 +9,7 @@ from PyQt4.QtGui import QTextEdit, QTextFormat, QMenu, \
     QTextCursor, QAction, QPalette, QPainter, QColor
     
 from prymatex import resources
-from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXSyntax, PMXPreferenceSettings
+from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
 from prymatex.core import exceptions
@@ -870,10 +870,26 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         When a url or text is dropped
         '''
         mimeData = event.mimeData()
-        if mimeData.hasText():
-            self.textCursor().insertText(mimeData.text())
-        elif mimeData.hasUrls():
-            for url in mimeData.urls():
-                self.textCursor().insertText(url.toString())
-    
+        if event.mimeData().hasUrls():
+            files = map(lambda url: url.toLocalFile(), event.mimeData().urls())
+            scope = self.getCurrentScope()
+            for file in files:                
+                items = self.application.supportManager.getFileExtensionItem(file, scope)
+                if items:
+                    item = items[0]
+                    fileInfo = QtCore.QFileInfo(file)
+                    env = { 
+                            #relative path of the file dropped (relative to the document directory, which is also set as the current directory).
+                            'TM_DROPPED_FILE': file,
+                            #the absolute path of the file dropped.
+                            'TM_DROPPED_FILEPATH': file,
+                            #the modifier keys which were held down when the file got dropped.
+                            #This is a bitwise OR in the form: SHIFT|CONTROL|OPTION|COMMAND (in case all modifiers were down).
+                            'TM_MODIFIER_FLAGS': file
+                    }
+                    self.insertBundleItem(item, environment = env)
+        elif event.mimeData().hasText():
+            self.textCursor().insertText(event.mimeData().text())
+                
+                
     

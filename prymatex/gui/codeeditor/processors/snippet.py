@@ -11,20 +11,15 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.transformation = None
         self.tabreplacement = "\t"
         self.indentation = ""
-        self.settings = {}
-        self.tabTriggered = True
-        self.disableIndent = False
 
     @property
     def environment(self, format = None):
         return self.__env
     
     def configure(self, settings):
-        self.settings = settings
-    
-    def configure(self, tabTrigger, disableIndent):
-        self.tabTriggered = tabTrigger
-        self.disableIndent = disableIndent
+        self.tabTriggered = settings.get("tabTriggered", True)
+        self.disableIndent = settings.get("disableIndent", False)
+        self.baseEnvironment = settings.get("environment", {})
         
     def startSnippet(self, snippet):
         '''

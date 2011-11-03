@@ -145,8 +145,6 @@ class PMXDragCommand(PMXCommand):
         super(PMXDragCommand, self).load(hash)
         for key in PMXDragCommand.KEYS:
             value = hash.get(key, None)
-            if key in [ 'draggedFileExtensions' ]:
-                value = map(lambda extension: extension.strip(), value.split(","))
             setattr(self, key, value)
     
     @property
@@ -154,19 +152,6 @@ class PMXDragCommand(PMXCommand):
         hash = super(PMXDragCommand, self).hash
         for key in PMXDragCommand.KEYS:
             value = getattr(self, key)
-            if value != None:
-                if key in [ 'draggedFileExtensions' ]:
-                    value = ", ".join(self.draggedFileExtensions)
-                hash[key] = value
+            hash[key] = value
         return hash
-            
-    def buildEnvironment(self, directory = "", name = ""):
-        env = super(PMXDragCommand, self).buildEnvironment()
-        # TM_DROPPED_FILE � relative path of the file dropped (relative to the document directory, which is also set as the current directory).
-        env['TM_DROPPED_FILE'] = os.path.join(directory)
-        #TM_DROPPED_FILEPATH � the absolute path of the file dropped.
-        env['TM_DROPPED_FILEPATH'] = os.path.join(directory)
-        #TM_MODIFIER_FLAGS � the modifier keys which were held down when the file got dropped.
-        #This is a bitwise OR in the form: SHIFT|CONTROL|OPTION|COMMAND (in case all modifiers were down).
-        env['TM_MODIFIER_FLAGS'] = directory
-        return env
+        
