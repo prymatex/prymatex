@@ -8,15 +8,22 @@ class PMXMacroProcessor(PMXMacroProcessor):
     def __init__(self, editor):
         super(PMXMacroProcessor, self).__init__()
         self.editor = editor
-        self.settings = {}
 
+    @property
+    def environment(self):
+        return self.__env
+        
     def configure(self, settings):
-        self.settings = settings
+        self.tabTriggered = settings.get("tabTriggered", False)
+        self.disableIndent = settings.get("disableIndent", False)
+        self.baseEnvironment = settings.get("environment", {})
 
     def startMacro(self, macro):
         """docstring for startMacro"""
         self.macro = macro
-    
+        self.__env = self.editor.buildEnvironment(command.buildEnvironment())
+        self.__env.update(self.baseEnvironment)
+        
     def endMacro(self, macro):
         pass
 

@@ -66,7 +66,7 @@ class PMXCommand(PMXBundleItem):
     
     def getInputText(self, processor):
         def getInputTypeAndValue(input):
-            if input == "none": return None, None
+            if input is None or input == "none": return None, None
             return input, getattr(processor, input)(self.inputFormat)
         input, value = getInputTypeAndValue(self.input)
         if value == None and self.fallbackInput != None:

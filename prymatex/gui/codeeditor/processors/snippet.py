@@ -37,6 +37,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.indentation = "" if self.disableIndent else cursor.block().userData().indent
         
         self.__env = self.editor.buildEnvironment(snippet.buildEnvironment())
+        self.__env.update(self.baseEnvironment)
 
     def startTransformation(self, transformation):
         #TODO: que pasa si tiene transformaciones anidadas, creo que es mejor una lista

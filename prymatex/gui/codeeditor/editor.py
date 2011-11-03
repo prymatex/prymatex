@@ -564,6 +564,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.debug("Cambiando syntax %s" % item.name)
             self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
+            self.macroProcessor.configure(processorSettings)
             self.debug("Corriendo Macro %s" % item.name)
             item.execute(self.macroProcessor)
 

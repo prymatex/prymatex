@@ -10,6 +10,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
 
+    @property
+    def environment(self):
+        return self.__env
+
     def configure(self, settings):
         self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", True)
@@ -77,14 +81,11 @@ class PMXCommandProcessor(PMXCommandProcessor):
         if 'TM_CURRENT_WORD' in self.environment:
             return self.environment['TM_CURRENT_WORD']
     
-    @property
-    def environment(self, format = None):
-        return self.__env
-    
     #Interface
     def startCommand(self, command):
         self.command = command
         self.__env = self.editor.buildEnvironment(command.buildEnvironment())
+        self.__env.update(self.baseEnvironment)
 
     #beforeRunningCommand
     def saveModifiedFiles(self):
