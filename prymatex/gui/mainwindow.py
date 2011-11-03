@@ -2,12 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-import itertools
 from string import Template
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
 
 from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.gui.actions import MainWindowActions
@@ -22,7 +19,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     ##########################################################
     # Signals
     ##########################################################
-    newFileCreated = pyqtSignal(str)
+    newFileCreated = QtCore.pyqtSignal(str)
     
     ##########################################################
     # Settings
@@ -90,7 +87,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
         
         self.paneFileSystem = PMXFileSystemDock(self)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneFileSystem)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.paneFileSystem)
         self.menuPanels.addAction(self.paneFileSystem.toggleViewAction())
         self.paneFileSystem.hide()
         '''
@@ -101,27 +98,27 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         '''
         
         self.paneBrowser = PMXBrowserDock(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneBrowser)
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneBrowser)
         self.menuPanels.addAction(self.paneBrowser.toggleViewAction())
         self.paneBrowser.hide()
         
         self.paneConsole = PMXConsoleDock(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneConsole)
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneConsole)
         self.menuPanels.addAction(self.paneConsole.toggleViewAction())
         self.paneConsole.hide()
         
         self.paneLogging = PMXLoggerDock(self)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.paneLogging)
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneLogging)
         self.menuPanels.addAction(self.paneLogging.toggleViewAction())
         self.paneLogging.hide()
 
         codeBookmarks = PMXCodeBookmarksDock(self)
-        self.addDockWidget(Qt.RightDockWidgetArea, codeBookmarks)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, codeBookmarks)
         self.menuPanels.addAction(codeBookmarks.toggleViewAction())
         codeBookmarks.hide()        
 
         codeSymbols = PMXCodeSymbolsDock(self)
-        self.addDockWidget(Qt.RightDockWidgetArea, codeSymbols)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, codeSymbols)
         self.menuPanels.addAction(codeSymbols.toggleViewAction())
         codeSymbols.hide()
         
@@ -213,7 +210,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             response = QtGui.QMessageBox.question(self, "Save", 
                 "Save %s" % editor.getTabTitle(), 
                 buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
-                defaultButton = QMessageBox.Ok)
+                defaultButton = QtGui.QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
                 self.saveEditor(editor = editor)
             elif response == QtGui.QMessageBox.No:
