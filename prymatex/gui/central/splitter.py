@@ -761,13 +761,14 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         self.mainWindow.addEmptyEditor()
         
     def moveCurrentTabLeft(self):
-        self._move_left(self._current_tab_w, self._current_tab_idx)   
+        raise NotImplementedError("Not implemented yet")   
 
     def moveCurrentTabRight(self):
-        self._move_right(self._current_tab_w, self._current_tab_idx)
+        raise NotImplementedError("Not implemented yet")
     
     def focusNextTab(self):
-        print "Focus next"
+        self._move_right(self._current_tab_w, self._current_tab_idx)
     
     def focusPreviousTab(self):
-        print "Focus previous"
+        self._move_left(self._current_tab_w, self._current_tab_idx)
+        
