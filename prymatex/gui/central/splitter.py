@@ -17,8 +17,9 @@ import sys
 import sip
 from PyQt4 import QtCore, QtGui
 from prymatex.gui.central.tabwidget import _TabWidget, _DragableTabBar
+from prymatex.core.base import PMXObject
 
-class PMXSplitTabWidget(QtGui.QSplitter):
+class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
     """ The PMXSplitTabWidget class is a hierarchy of QSplitters the leaves of
     which are QTabWidgets.  Any tab may be moved around with the hierarchy
     automatically extended and reduced as required.
@@ -757,3 +758,7 @@ class PMXSplitTabWidget(QtGui.QSplitter):
                 return (tw, self._HS_AFTER_LAST_TAB, (gx, gy, w, h))
                 
         return miss
+    
+    def mouseDoubleClickEvent(self, event):
+        ''' Add an empty editor when the tab bar is double clicked '''
+        self.mainWindow.addEmptyEditor()
