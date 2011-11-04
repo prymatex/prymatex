@@ -477,7 +477,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         preference = self.getPreference(block.userData().getLastScope())
         indentMark = preference.indent(block.text())
         if indentMark == PMXPreferenceSettings.INDENT_DECREASE and prev.isValid() and block.userData().indent == prev.userData().indent:
-            self.unindent()
+            self.unindentBlocks()
     
     #==========================================================================
     # Bundle Items
@@ -730,7 +730,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.indent(indentation + (self.tabKeyBehavior))
     
     def decreaseIndent(self, indentation):
-        self.unindent()
+        self.unindentBlocks()
         
     def indentBlocks(self):
         '''

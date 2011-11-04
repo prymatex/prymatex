@@ -721,12 +721,6 @@ class PMXSnippet(PMXBundleItem):
     def setCurrentHolder(self, holder):
         self.index = self.taborder.index(holder)
     
-    def setDefaultHolder(self, start, end = None):
-        holder = self.getHolder(start, end)
-        if holder != None:
-            self.setCurrentHolder(holder)
-        return holder
-    
     def current(self):
         if self.index == -1:
             self.index = 0
