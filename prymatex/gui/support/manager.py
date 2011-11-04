@@ -47,6 +47,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
 
     def buildBundleMenu(self, bundle):
         menu = QtGui.QMenu(bundle.buildBundleAccelerator())
+        menu.ID = id(bundle.mainMenu)
         if bundle.mainMenu is not None:
             submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
             items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
@@ -67,11 +68,24 @@ class PMXBundleMenuGroup(QtCore.QObject):
         #TODO: ver que pasa con el bottomRight
         item = topLeft.internalPointer()
         if item.TYPE == "bundle":
-            self.menus[item].setTitle(item.buildBundleAccelerator())
-            self.menus[item].menuAction().setVisible(item.enabled and item.mainMenu is not None)
+            menu = self.menus.get(item, None)
+            if menu is not None:
+                title = item.buildBundleAccelerator()
+                if title != menu.title():
+                    menu.setTitle(title)
+                if item.enabled != menu.menuAction().isVisible():
+                    menu.menuAction().setVisible(item.enabled and item.mainMenu is not None)
+                if id(item.mainMenu) != menu.ID:
+                    menu.clear()
+                    submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+                    items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+                    self.buildMenu(items, menu, submenus, menu)
+                    menu.ID = id(item.mainMenu)
         else:
             action = item.triggerItemAction()
-            action.setText(item.name)
+            text = item.buildMenuTextEntry()
+            if text != action.text():
+                action.setText(text)
 
     def on_manager_bundlePopulated(self, bundle):
         if bundle not in self.menus:
