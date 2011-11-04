@@ -16,7 +16,7 @@ from prymatex.core import exceptions
 from prymatex.gui.central.editor import PMXBaseEditor
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.codeeditor.helpers import KeyEquivalentHelper, TabTriggerHelper, SmartTypingHelper, MoveCursorToHomeHelper, OverwriteHelper
+from prymatex.gui.codeeditor import helpers
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
@@ -97,10 +97,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     ShowFolding = 0x10
     
     editorHelpers = {
-        QtCore.Qt.Key_Any: [ KeyEquivalentHelper(), SmartTypingHelper()],
-        QtCore.Qt.Key_Tab: [ TabTriggerHelper()],
-        QtCore.Qt.Key_Home: [ MoveCursorToHomeHelper() ],
-        QtCore.Qt.Key_Insert: [ OverwriteHelper() ]
+        QtCore.Qt.Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper()],
+        QtCore.Qt.Key_Tab: [ helpers.TabTriggerHelper(), helpers.TabIndentHelper() ],
+        QtCore.Qt.Key_Backtab: [ helpers.BacktabUnindentHelper() ],
+        QtCore.Qt.Key_Home: [ helpers.MoveCursorToHomeHelper() ],
+        QtCore.Qt.Key_Return: [ helpers.SmartSyntaxHelper(), helpers.SmartIndentHelper() ],
+        QtCore.Qt.Key_Insert: [ helpers.OverwriteHelper() ]
     }
     
     #TODO: Move to the manager
@@ -447,17 +449,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                     if helper.accept(event, cursor, scope):
                         #pasarle el evento
                         return helper.execute(self, event)
-
-        #No tengo ningun helper trabajando voy con el Modo Normal
-        key = event.key()
-        if key == Qt.Key_Tab:
-            self.tabPressEvent(event)
-        elif key == Qt.Key_Backtab:
-            self.backtabPressEvent(event)
-        elif key == Qt.Key_Return:
-            self.returnPressEvent(event)
-        else:
-            QtGui.QPlainTextEdit.keyPressEvent(self, event)
+        
+        #No tengo helper paso el evento a la base
+        QtGui.QPlainTextEdit.keyPressEvent(self, event)
 
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
@@ -467,41 +461,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 self.completerMode.setCompletionPrefix(completionPrefix)
                 self.completerMode.complete(self.cursorRect())
     
-    #=======================================================================
-    # Backtab Keyboard Events
-    #=======================================================================
-    def backtabPressEvent(self, event):
-        self.unindent()
-    
-    #=======================================================================
-    # Return Keyboard Events
-    #=======================================================================
-    def returnPressEvent(self, event):
-        cursor = self.textCursor()
-        block = cursor.block()
-        prev = cursor.block().previous()
-        line = block.text()
-        if self.document().blockCount() == 1:
-            syntax = self.application.supportManager.findSyntaxByFirstLine(line)
-            if syntax is not None:
-                self.setSyntax(syntax)
-        preference = self.getPreference(block.userData().getLastScope())
-        indentMark = preference.indent(line)
-        super(PMXCodeEditor, self).keyPressEvent(event)
-        if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
-            self.debug("Increase indent")
-            cursor.insertText(block.userData().indent + self.tabKeyBehavior)
-        elif indentMark == PMXPreferenceSettings.INDENT_NEXTLINE:
-            self.debug("Increase next line indent")
-        elif indentMark == PMXPreferenceSettings.UNINDENT:
-            self.debug("Unindent")
-        elif indentMark == PMXPreferenceSettings.INDENT_DECREASE:
-            self.debug("Decrease indent")
-            cursor.insertText(prev.userData().indent[:len(self.tabKeyBehavior)])
-        else:
-            self.debug("Preserve indent")
-            cursor.insertText(block.userData().indent)
-        
     #=======================================================================
     # After Keyboard Events
     #=======================================================================
@@ -784,42 +743,23 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         del new_cursor
         cursor.endEditBlock()        
 
-    def unindent(self):
+    def unindentBlocks(self):
         cursor = self.textCursor()
-        if cursor.hasSelection():
-            start, end = cursor.selectionStart(), cursor.selectionEnd()
-            if start > end:
-                end, start = self.document().findBlock(start), self.document().findBlock(end)
-            else:
-                end, start = self.document().findBlock(end), self.document().findBlock(start)
-            cursor.beginEditBlock()
-            new_cursor = QTextCursor(cursor)
-            while True:
-                data = start.userData()
-                counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
-                if counter > 0:
-                    new_cursor.setPosition(start.position())
-                    for _j in range(self.tabStopSize):
-                        new_cursor.deleteChar()
-                if start == end:
-                    break
-                start = start.next()
-            del new_cursor
-            cursor.endEditBlock()
-        else:
-            block = cursor.block()
-            data = cursor.block().userData()
+        start, end = self.getSelectionBlockStartEnd()
+        new_cursor = QTextCursor(cursor)
+        while True:
+            data = start.userData()
             counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
             if counter > 0:
-                cursor.beginEditBlock()
-                position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabStopSize else cursor.position() - counter
-                cursor.setPosition(block.position()) 
-                for _ in range(counter):
-                    cursor.deleteChar()
-                cursor.setPosition(position)
-                self.setTextCursor(cursor)
-                cursor.endEditBlock()
-                
+                new_cursor.setPosition(start.position())
+                for _j in range(self.tabStopSize):
+                    new_cursor.deleteChar()
+            if start == end:
+                break
+            start = start.next()
+        del new_cursor
+        cursor.endEditBlock()
+
     # FIXME: Return something sensible :P
     def canUnindent(self):
         return True

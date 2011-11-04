@@ -38,7 +38,7 @@ class TabTriggerHelper(PMXBaseEditorHelper):
         else:
             editor.selectBundleItem(self.items, tabTriggered = True)    
 
-class SmartTypingHelper(PMXBaseEditorHelper):
+class SmartTypingPairsHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
     def accept(self, event, cursor, scope):
         preferences = self.application.supportManager.getPreferenceSettings(scope)
@@ -76,7 +76,7 @@ class OverwriteHelper(PMXBaseEditorHelper):
     def execute(self, editor, event):
         editor.setOverwriteMode(not editor.overwriteMode())
         
-class IndentHelper(PMXBaseEditorHelper):
+class TabIndentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Tab
     def execute(self, editor, event):
         start, end = editor.getSelectionBlockStartEnd()
@@ -88,13 +88,67 @@ class IndentHelper(PMXBaseEditorHelper):
             position = cursor.position()
             blockPosition = cursor.block().position()
             indent = cursor.block().userData().indent
-            if position <= blockPosition + len(indent):
-                delta = len(indent) % editor.tabStopSize
-                cursor.insertText(editor.tabStopSoft and u' ' * delta or u'\t' * delta)
-            else:
-                
-            position - blockPosition
-            
-            self.tabKeyBehavior
+            editor.textCursor().insertText(self.tabKeyBehavior)
         else:
             editor.textCursor().insertText(self.tabKeyBehavior)
+
+class BacktabUnindentHelper(PMXBaseEditorHelper):
+    KEY = QtCore.Qt.Key_Backtab
+    def execute(self, editor, event):
+        start, end = editor.getSelectionBlockStartEnd()
+        if start != end:
+            editor.unindentBlocks()
+        else:
+            cursor = editor.textCursor()
+            block = cursor.block()
+            userData = cursor.block().userData()
+            counter = editor.tabStopSize if len(userData.indent) > editor.tabStopSize else len(userData.indent)
+            if counter > 0:
+                cursor.beginEditBlock()
+                position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabStopSize else cursor.position() - counter
+                cursor.setPosition(block.position()) 
+                for _ in range(counter):
+                    cursor.deleteChar()
+                cursor.setPosition(position)
+                self.setTextCursor(cursor)
+                cursor.endEditBlock()
+
+class SmartIndentHelper(PMXBaseEditorHelper):
+    KEY = QtCore.Qt.Key_Return
+    def execute(self, editor, event):
+        cursor = editor.textCursor()
+        block = cursor.block()
+        prev = cursor.block().previous()
+        line = block.text()
+        if editor.document().blockCount() == 1:
+            syntax = self.application.supportManager.findSyntaxByFirstLine(line)
+            if syntax is not None:
+                editor.setSyntax(syntax)
+        preference = editor.getPreference(block.userData().getLastScope())
+        indentMark = preference.indent(line)
+        super(PMXCodeEditor, self).keyPressEvent(event)
+        if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
+            self.debug("Increase indent")
+            cursor.insertText(block.userData().indent + editor.tabKeyBehavior)
+        elif indentMark == PMXPreferenceSettings.INDENT_NEXTLINE:
+            self.debug("Increase next line indent")
+        elif indentMark == PMXPreferenceSettings.UNINDENT:
+            self.debug("Unindent")
+        elif indentMark == PMXPreferenceSettings.INDENT_DECREASE:
+            self.debug("Decrease indent")
+            cursor.insertText(prev.userData().indent[:len(editor.tabKeyBehavior)])
+        else:
+            self.debug("Preserve indent")
+            cursor.insertText(block.userData().indent)
+
+class SmartSyntaxHelper(PMXBaseEditorHelper):
+    KEY = QtCore.Qt.Key_Return
+    def accept(self, event, cursor, scope):
+        if cursor.document().blockCount() == 1:
+            self.syntax = self.application.supportManager.findSyntaxByFirstLine(cursor.block().text())
+            return bool(self.syntax)
+        return False
+        
+    def execute(self, editor, event):
+        editor.setSyntax(self.syntax)
+        QtGui.QPlainTextEdit.keyPressEvent(editor, event)
