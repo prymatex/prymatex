@@ -32,6 +32,14 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def getScopeAtPosition(self, pos):
         return self.scopes[pos]
     
+    def getScopeRange(self, pos):
+        ranges = self.getScopeRanges()
+        range = filter(lambda (scope, start, end): start <= pos <= end, ranges)
+        assert len(range) >= 1, "More than one range"
+        range = range[0] if len(range) == 1 else None
+        return range
+    
+    #Deprecated name, use getScopeRanges
     def getAllScopes(self, start = 0, end = None):
         current = ( self.scopes[start], start ) if start < len(self.scopes) else ("", 0)
         end = end or len(self.scopes)
@@ -43,6 +51,12 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         scopes.append(( current[0], current[1], end ))
         return scopes
     
+    def getScopeRanges(self, start = 0, end = None):
+        return self.getAllScopes(start, end)
+    
+    #================================================
+    # Cache Handle
+    #================================================
     def getStackAndScopes(self):
         return copy(self.cache[0]), copy(self.cache[1])
     

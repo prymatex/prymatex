@@ -82,7 +82,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #================================================================
     SelectWord = QtGui.QTextCursor.WordUnderCursor #0
     SelectLine = QtGui.QTextCursor.LineUnderCursor #1
-    SelectParagraph = QtGui.QTextCursor.BlockUnderCursor #2 este no es un paragraph pero no  importa
+    SelectParagraph = QtGui.QTextCursor.BlockUnderCursor #2 este no es un paragraph pero no importa
     SelectAll = QtGui.QTextCursor.Document #3
     SelectEnclosingBrackets = 4
     SelectCurrentScope = 5
@@ -204,15 +204,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def getCurrentScope(self):
         cursor = self.textCursor()
         block = cursor.block()
-        user_data = block.userData()
-        if user_data == None:
-            return ""
-        #FIXME: Esta condicion con el bucle no se puede o no se deberia dar nunca
-        if not bool(user_data) and block.userState() == self.syntaxHighlighter.MULTI_LINE:
-            while not bool(block.userData()):
-                block = block.previous()
-            return block.userData().getLastScope()
-        return user_data.getScopeAtPosition(cursor.columnNumber())
+        userData = block.userData()
+        return userData.getScopeAtPosition(cursor.columnNumber())
     
     def getTextUnderCursor(self):
         cursor = self.textCursor()
@@ -334,9 +327,22 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.setExtraSelections(extraSelections)
 
     def select(self, selection):
-        if selection in range(4):
-            self.textCursor().select(selection)
-            
+        cursor = self.textCursor()
+        if selection in [self.SelectWord, self.SelectLine, self.SelectParagraph, self.SelectAll]:
+            #Handle by editor
+            cursor.select(selection)
+        elif selection == self.SelectEnclosingBrackets:
+            pass
+        elif selection == self.SelectCurrentScope:
+            block = cursor.block()
+            beginPosition = block.position()
+            range = block.userData().getScopeRange(cursor.columnNumber())
+            if range is not None:
+                scope, start, end = range
+                cursor.setPosition(beginPosition + start)
+                cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
+        self.setTextCursor(cursor)
+
     #=======================================================================
     # QPlainTextEdit Events
     #=======================================================================

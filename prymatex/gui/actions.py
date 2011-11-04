@@ -143,11 +143,13 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionSelectEnclosingBrackets_triggered(self):
-        pass
+        if self.currentEditor is not None:
+            self.currentEditor.select(self.currentEditor.SelectEnclosingBrackets)
         
     @QtCore.pyqtSlot()
     def on_actionSelectCurrentScope_triggered(self):
-        pass
+        if self.currentEditor is not None:
+            self.currentEditor.select(self.currentEditor.SelectCurrentScope)
         
     @QtCore.pyqtSlot()
     def on_actionSelectAll_triggered(self):

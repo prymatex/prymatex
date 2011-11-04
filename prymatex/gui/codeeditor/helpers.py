@@ -2,6 +2,7 @@
 #-*- encoding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
+from prymatex.support import PMXPreferenceSettings
 
 class PMXBaseEditorHelper(PMXObject):
     KEY = None
@@ -126,7 +127,7 @@ class SmartIndentHelper(PMXBaseEditorHelper):
                 editor.setSyntax(syntax)
         preference = editor.getPreference(block.userData().getLastScope())
         indentMark = preference.indent(line)
-        super(PMXCodeEditor, self).keyPressEvent(event)
+        QtGui.QPlainTextEdit.keyPressEvent(editor, event)
         if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
             self.debug("Increase indent")
             cursor.insertText(block.userData().indent + editor.tabKeyBehavior)
