@@ -16,6 +16,7 @@ from prymatex.support.template import PMXTemplate, PMXTemplateFile
 from prymatex.support.theme import PMXTheme, PMXThemeStyle
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
+from prymatex.utils.decorator.helpers import printtime
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
@@ -601,6 +602,7 @@ class PMXSupportBaseManager(object):
             with_scope.append(p)
         return with_scope + without_scope
 
+    @printtime
     def getPreferenceSettings(self, scope):
         if scope not in self.SETTINGS_CACHE:
             preferences = self.getPreferences(scope)
@@ -626,6 +628,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # TABTRIGGERS
     #---------------------------------------------------------------
+    @printtime
     def getTabTriggerSymbol(self, line, index):
         #TODO: Mejorar aca para obtener bien los tabrigger symbol
         bestMatch = None
@@ -641,7 +644,8 @@ class PMXSupportBaseManager(object):
                     print "find", word
                     bestMatch = word
         return bestMatch
-    
+
+    @printtime    
     def getTabTriggerItem(self, keyword, scope):
         with_scope = []
         without_scope = []
@@ -668,6 +672,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # KEYEQUIVALENT
     #---------------------------------------------------------------
+    @printtime
     def getKeyEquivalentItem(self, code, scope):
         with_scope = []
         without_scope = []
@@ -694,6 +699,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # FILE EXTENSION, for drag commands
     #---------------------------------------------------------------
+    @printtime
     def getFileExtensionItem(self, path, scope):
         with_scope = []
         without_scope = []
@@ -720,6 +726,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # ACTION ITEMS FOR SCOPE
     #---------------------------------------------------------------
+    @printtime
     def getActionItems(self, scope):
         '''
             Return a list of actions items for scope and without scope

@@ -75,3 +75,26 @@ class OverwriteHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Insert
     def execute(self, editor, event):
         editor.setOverwriteMode(not editor.overwriteMode())
+        
+class IndentHelper(PMXBaseEditorHelper):
+    KEY = QtCore.Qt.Key_Tab
+    def execute(self, editor, event):
+        start, end = editor.getSelectionBlockStartEnd()
+        if start != end:
+            editor.indentBlocks()
+        elif editor.getSyntax().indentSensitive:
+            #Smart indent
+            cursor = editor.textCursor()
+            position = cursor.position()
+            blockPosition = cursor.block().position()
+            indent = cursor.block().userData().indent
+            if position <= blockPosition + len(indent):
+                delta = len(indent) % editor.tabStopSize
+                cursor.insertText(editor.tabStopSoft and u' ' * delta or u'\t' * delta)
+            else:
+                
+            position - blockPosition
+            
+            self.tabKeyBehavior
+        else:
+            editor.textCursor().insertText(self.tabKeyBehavior)

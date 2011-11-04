@@ -14,7 +14,7 @@ class PMXBaseEditorMode(object):
         
     def inactive(self):
         pass
-        
+               
     def keyPressEvent(self, event):
         pass
         

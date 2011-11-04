@@ -428,8 +428,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         This method is called whenever a key is pressed. The key code is stored in event.key()
         http://manual.macromates.com/en/working_with_text
         '''
-        #TODO, luego , al helper que diga que si pasarle el evento,
-        # para activar helpers vamos de lo general (cualquier tecla) a lo particular el orden importa
         
         #Primero ver si tengo un modo activo,
         mode = self.activeMode()
@@ -468,16 +466,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             if self.completerMode.isActive() and completionPrefix != self.completerMode.completionPrefix():
                 self.completerMode.setCompletionPrefix(completionPrefix)
                 self.completerMode.complete(self.cursorRect())
-    
-    #=======================================================================
-    # Tab Keyboard Events
-    #=======================================================================
-    def tabPressEvent(self, event):
-        cursor = self.textCursor()
-        if cursor.hasSelection():
-            self.indent(self.tabKeyBehavior)
-        else:
-            cursor.insertText(self.tabKeyBehavior)
     
     #=======================================================================
     # Backtab Keyboard Events
@@ -779,11 +767,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def decreaseIndent(self, indentation):
         self.unindent()
         
-    # TODO: Word wrapping fix
-    # TODO: Correct whitespace mix
-    def indent(self, indentation):
+    def indentBlocks(self):
         '''
-        Indents text, it take cares of block selections.
+        Indents text, block selections.
         '''
         cursor = self.textCursor()
         start, end = self.getSelectionBlockStartEnd()
@@ -791,7 +777,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         new_cursor = QTextCursor(cursor)
         while True:
             new_cursor.setPosition(start.position())
-            new_cursor.insertText(indentation)
+            new_cursor.insertText(self.tabKeyBehavior)
             if start == end:
                 break
             start = start.next()
