@@ -1,5 +1,5 @@
 pygments
 -e git+https://github.com/D3f0/ponyguruma.git#egg=ponyguruma
-pyzmq>=2.1.4
+pyzmq==2.1.4
 ipython>=0.11
 
