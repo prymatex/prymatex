@@ -27,6 +27,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal()
+    modeChanged = QtCore.pyqtSignal()
     bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     foldingChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
@@ -197,9 +198,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     # Obteniendo datos del editor
     #=======================================================================
     def getPreference(self, scope):
-        if scope not in PMXCodeEditor.PREFERENCE_CACHE:
-            PMXCodeEditor.PREFERENCE_CACHE[scope] = self.application.supportManager.getPreferenceSettings(scope)
-        return PMXCodeEditor.PREFERENCE_CACHE[scope]
+        return self.application.supportManager.getPreferenceSettings(scope)
 
     def getCurrentScope(self):
         cursor = self.textCursor()

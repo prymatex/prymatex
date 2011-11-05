@@ -22,10 +22,11 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.baseEnvironment = settings.get("environment", {})
         
     def startSnippet(self, snippet):
-        '''
-            Inicia el snippet
-        '''
+        """
+        Inicia el snippet
+        """
         self.snippet = snippet
+        self.editor.modeChanged.emit()
         
         cursor = self.editor.textCursor()
         if self.tabTriggered:
@@ -38,6 +39,13 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         
         self.__env = self.editor.buildEnvironment(snippet.buildEnvironment())
         self.__env.update(self.baseEnvironment)
+    
+    def endSnippet(self):
+        """
+        Termina el snippet
+        """
+        self.snippet = None
+        self.editor.modeChanged.emit()
 
     def startTransformation(self, transformation):
         #TODO: que pasa si tiene transformaciones anidadas, creo que es mejor una lista
@@ -60,9 +68,6 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
             self.capture += text
         else:
             self.editor.textCursor().insertText(text)
-    
-    def endSnippet(self):
-        self.snippet = None
     
     def selectHolder(self, holder):
         cursor = self.editor.textCursor()

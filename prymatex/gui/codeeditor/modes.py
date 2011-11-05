@@ -143,6 +143,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     
     def inactive(self):
         self.cursors = []
+        self.editor.modeChanged.emit()
     
     @property
     def isDragCursor(self):
@@ -165,6 +166,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def mouseReleasePoint(self, endPoint):
         _, width, points = self.getPoints(self.startPoint, endPoint)
         
+        emit = points and not self.isActive()
         for tupla in points:
             if tupla[0] == tupla[1]:
                 cursor = self.editor.cursorForPosition(QtCore.QPoint(*tupla[0]))
@@ -194,7 +196,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                         ecursor.setPosition(cursor.position(), QtGui.QTextCursor.KeepAnchor)
                         ecursor = self.addMergeCursor(ecursor)
                     #self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
-
+        
+        if emit:
+            #Arranco modo multicursor
+            self.editor.modeChanged.emit()
         #Clean last acction
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
         self.editor.viewport().repaint(self.editor.viewport().visibleRegion())

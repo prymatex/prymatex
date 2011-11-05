@@ -54,8 +54,10 @@ class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
                 return num
     
     def getAllItems(self):
+        items = []
         for index in self.indexMap():
-            yield index.internalPointer()
+            items.append(index.internalPointer())
+        return items
 
 class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
     def __init__(self, parent = None):

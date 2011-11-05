@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorcommand.ui'
 #
-# Created: Fri Oct 28 21:42:07 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Fri Nov  4 14:38:48 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,7 +19,6 @@ class Ui_Command(object):
     def setupUi(self, Command):
         Command.setObjectName(_fromUtf8("Command"))
         Command.resize(361, 331)
-        Command.setWindowTitle(_('Form'))
         self.formLayout_2 = QtGui.QFormLayout(Command)
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout_2.setLabelAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
@@ -27,7 +26,6 @@ class Ui_Command(object):
         self.formLayout_2.setSpacing(2)
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
         self.label = QtGui.QLabel(Command)
-        self.label.setText(_('Save:'))
         self.label.setObjectName(_fromUtf8("label"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
@@ -38,12 +36,10 @@ class Ui_Command(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
         self.pushButtonTemplates = QtGui.QPushButton(Command)
-        self.pushButtonTemplates.setText(_('Templates'))
         self.pushButtonTemplates.setObjectName(_fromUtf8("pushButtonTemplates"))
         self.horizontalLayout_2.addWidget(self.pushButtonTemplates)
         self.formLayout_2.setLayout(0, QtGui.QFormLayout.FieldRole, self.horizontalLayout_2)
         self.label_2 = QtGui.QLabel(Command)
-        self.label_2.setText(_('Command(s):'))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_2)
         self.command = QtGui.QPlainTextEdit(Command)
@@ -55,7 +51,6 @@ class Ui_Command(object):
         self.command.setObjectName(_fromUtf8("command"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.command)
         self.label_3 = QtGui.QLabel(Command)
-        self.label_3.setText(_('Input:'))
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_3)
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -64,7 +59,6 @@ class Ui_Command(object):
         self.comboBoxInput.setObjectName(_fromUtf8("comboBoxInput"))
         self.horizontalLayout.addWidget(self.comboBoxInput)
         self.labelInputOption = QtGui.QLabel(Command)
-        self.labelInputOption.setText(_('or'))
         self.labelInputOption.setObjectName(_fromUtf8("labelInputOption"))
         self.horizontalLayout.addWidget(self.labelInputOption)
         self.comboBoxFallbackInput = QtGui.QComboBox(Command)
@@ -74,7 +68,6 @@ class Ui_Command(object):
         self.horizontalLayout.addItem(spacerItem1)
         self.formLayout_2.setLayout(2, QtGui.QFormLayout.FieldRole, self.horizontalLayout)
         self.label_4 = QtGui.QLabel(Command)
-        self.label_4.setText(_('Output:'))
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.formLayout_2.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_4)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
@@ -90,5 +83,11 @@ class Ui_Command(object):
         QtCore.QMetaObject.connectSlotsByName(Command)
 
     def retranslateUi(self, Command):
-        pass
+        Command.setWindowTitle(_('Form'))
+        self.label.setText(_('Save:'))
+        self.pushButtonTemplates.setText(_('Templates'))
+        self.label_2.setText(_('Command(s):'))
+        self.label_3.setText(_('Input:'))
+        self.labelInputOption.setText(_('or'))
+        self.label_4.setText(_('Output:'))
 

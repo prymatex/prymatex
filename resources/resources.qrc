@@ -65,6 +65,11 @@
     <file>bundles/template-files.png</file>
     <file>bundles/templates.png</file>
   </qresource>
+  <qresource prefix="modes">
+    <file>modes/overwrite.png</file>
+    <file>modes/snippet.png</file>
+    <file>modes/multicursor.png</file>
+  </qresource>
   <qresource prefix="editor">
     <file>sidebar/bookmark-flag.png</file>
     <file>sidebar/folding-bottom.png</file>

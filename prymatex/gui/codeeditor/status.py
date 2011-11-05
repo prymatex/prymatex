@@ -124,10 +124,12 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def disconnectEditor(self, editor):
         editor.cursorPositionChanged.disconnect(self.on_cursorPositionChanged)
         editor.syntaxChanged.disconnect(self.on_syntaxChanged)
+        editor.modeChanged.disconnect(self.on_modeChanged)
         
     def connectEditor(self, editor):
         editor.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         editor.syntaxChanged.connect(self.on_syntaxChanged)
+        editor.modeChanged.connect(self.on_modeChanged)
         
     def setCurrentEditor(self, editor):
         assert editor in self.editors, "Editor not is in editors"
@@ -135,6 +137,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxSymbols.setModel(editor.symbols)
         self.on_cursorPositionChanged(editor)
         self.on_syntaxChanged(editor)
+        self.on_modeChanged(editor)
         self.setTabSizeLabel(editor)
         self.hideAllWidgets()
 
@@ -191,10 +194,14 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         editor = editor or self.currentEditor
         model = self.comboBoxSyntaxes.model()
         index = model.findItemIndex(editor.getSyntax())
-        #self.comboBoxSyntaxes.blockSignals(True)
         self.comboBoxSyntaxes.setCurrentIndex(index)
-        #self.comboBoxSyntaxes.blockSignals(False)
 
+    def on_modeChanged(self, editor = None):
+        editor = editor or self.currentEditor
+        self.pushButtonMultiCursor.setEnabled(editor.multiCursorMode.isActive())
+        self.pushButtonSnippet.setEnabled(editor.snippetMode.isActive())
+        self.pushButtonOverwrite.setEnabled(editor.overwriteMode())
+        
     def showTabSizeContextMenu(self, point):
         editor = self.currentEditor
         #Setup Context Menu

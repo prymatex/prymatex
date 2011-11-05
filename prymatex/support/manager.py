@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, string, unicodedata
+import re, os, string, unicodedata
 import uuid as uuidmodule
-from os.path import join, basename, dirname, exists
 
 from glob import glob
+
 from prymatex.support.bundle import PMXBundle, PMXBundleItem
 from prymatex.support.macro import PMXMacro
 from prymatex.support.syntax import PMXSyntax
@@ -16,6 +16,8 @@ from prymatex.support.template import PMXTemplate, PMXTemplateFile
 from prymatex.support.theme import PMXTheme, PMXThemeStyle
 from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
+from prymatex.support.cache import PMXSupportCache
+
 from prymatex.utils.decorator.helpers import printtime
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
@@ -41,8 +43,6 @@ class PMXSupportBaseManager(object):
     TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE))
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     
-    #FIXME: Dudo de la cache en este lugar
-    #TODO: Estaria bueno todo un buen manejo de cache junto con su "coherencia de cache" 
     SETTINGS_CACHE = {}
     
     def __init__(self):
@@ -51,6 +51,7 @@ class PMXSupportBaseManager(object):
         self.nsorder = []
         self.environment = {}
         self.managedObjects = {}
+        self.cache = PMXSupportCache()
         self.scores = PMXScoreManager()
     
     #---------------------------------------------------
@@ -60,8 +61,8 @@ class PMXSupportBaseManager(object):
         self.namespaces[name] = {}
         self.nsorder.append(name)
         for element in self.ELEMENTS:
-            epath = join(path, element)
-            if not exists(epath):
+            epath = os.path.join(path, element)
+            if not os.path.exists(epath):
                 continue
             #Si es el primero es el protegido
             if len(self.nsorder) == 1:
@@ -130,7 +131,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     def loadThemes(self, namespace):
         if 'Themes' in self.namespaces[namespace]:
-            paths = glob(join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
+            paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
                 PMXTheme.loadTheme(path, namespace, self)
 
@@ -139,7 +140,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     def loadBundles(self, namespace):
         if 'Bundles' in self.namespaces[namespace]:
-            paths = glob(join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
+            paths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for path in paths:
                 PMXBundle.loadBundle(path, namespace, self)
 
@@ -149,13 +150,13 @@ class PMXSupportBaseManager(object):
     def populateBundle(self, bundle):
         nss = bundle.namespaces[::-1]
         for namespace in nss:
-            bpath = join(self.namespaces[namespace]['Bundles'], basename(bundle.path))
+            bpath = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path))
             # Search for support
-            if bundle.support == None and exists(join(bpath, 'Support')):
-                bundle.setSupport(join(bpath, 'Support'))
+            if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
+                bundle.setSupport(os.path.join(bpath, 'Support'))
             self.showMessage("Loading bundle %s" % bundle.name)
             for klass in BUNDLEITEM_CLASSES:
-                files = reduce(lambda x, y: x + glob(y), [ join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
+                files = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
                 for path in files:
                     klass.loadBundleItem(path, namespace, bundle, self)
         bundle.populated = True
@@ -241,7 +242,7 @@ class PMXSupportBaseManager(object):
         if len(self.nsorder) < 2:
             return None
         if namespace is None: namespace = self.defaultNamespace
-        path = join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
+        path = os.path.join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
         bundle = PMXBundle(self.uuidgen(), namespace, { 'name': name }, path)
         bundle = self.addBundle(bundle)
         self.addManagedObject(bundle)
@@ -271,11 +272,11 @@ class PMXSupportBaseManager(object):
         if bundle.isProtected:
             if not bundle.isSafe:
                 namespace = self.defaultNamespace
-                attrs["path"] = join(self.namespaces[namespace]['Bundles'], basename(bundle.path))
+                attrs["path"] = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path))
                 bundle.addNamespace(namespace)
         else:
             if "name" in attrs:
-                attrs["path"] = ensurePath(join(dirname(bundle.path), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
+                attrs["path"] = ensurePath(os.path.join(os.path.dirname(bundle.path), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
                 bundle.relocate(attrs["path"])
         bundle.update(attrs)
         bundle.save()
@@ -356,7 +357,7 @@ class PMXSupportBaseManager(object):
         if len(klass) != 1:
             raise Exception("No class type for %s" % tipo)
         klass = klass.pop()
-        path = join(bundle.path, klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
+        path = os.path.join(bundle.path, klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
 
         item = klass(self.uuidgen(), namespace, { 'name': name }, path)
         item.setBundle(bundle)
@@ -390,12 +391,12 @@ class PMXSupportBaseManager(object):
         if item.isProtected:
             if not item.isSafe:
                 namespace = self.defaultNamespace
-                attrs["path"] = join(item.bundle.path, item.FOLDER, basename(item.path))
+                attrs["path"] = os.path.join(item.bundle.path, item.FOLDER, os.path.basename(item.path))
                 item.addNamespace(namespace)
         else:
             if "name" in attrs:
                 namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
-                attrs["path"] = ensurePath(join(item.bundle.path, item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
+                attrs["path"] = ensurePath(os.path.join(item.bundle.path, item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
                 item.relocate(attrs["path"])
         item.update(attrs)
         item.save()
@@ -431,7 +432,7 @@ class PMXSupportBaseManager(object):
     def createTemplateFile(self, name, template):
         if template.isProtected and not template.isSafe:
             self.updateBundleItem(template)
-        path = join(template.path, "%s.%s" % (self.convertToValidPath(name), template.extension))
+        path = os.path.join(template.path, "%s.%s" % (self.convertToValidPath(name), template.extension))
         file = PMXTemplateFile(path, template)
         #No es la mejor forma pero es la forma de guardar el archivo
         file = self.addTemplateFile(file)
@@ -486,7 +487,7 @@ class PMXSupportBaseManager(object):
         if len(self.nsorder) < 2:
             return None
         if namespace is None: namespace = self.defaultNamespace
-        path = join(self.namespaces[namespace]['Themes'], "%s.tmTheme" % self.convertToValidPath(name))
+        path = os.path.join(self.namespaces[namespace]['Themes'], "%s.tmTheme" % self.convertToValidPath(name))
         theme = PMXTheme(self.uuidgen(), namespace, { 'name': name }, path)
         theme = self.addTheme(theme)
         self.addManagedObject(theme)
@@ -511,11 +512,11 @@ class PMXSupportBaseManager(object):
         if theme.isProtected:
             if not theme.isSafe:
                 namespace = self.defaultNamespace
-                attrs["path"] = join(self.namespaces[namespace]['Themes'], basename(theme.path))
+                attrs["path"] = os.path.join(self.namespaces[namespace]['Themes'], os.path.basename(theme.path))
                 theme.addNamespace(namespace)
         else:
             if "name" in attrs:
-                attrs["path"] = ensurePath(join(dirname(theme.path), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
+                attrs["path"] = ensurePath(os.path.join(os.path.dirname(theme.path), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
                 theme.relocate(attrs["path"])
         theme.update(attrs)
         theme.save()
@@ -577,10 +578,10 @@ class PMXSupportBaseManager(object):
     # PREFERENCES INTERFACE
     #---------------------------------------------------
     def getAllPreferences(self):
-        '''
-            Return a list of preferences bundle items
-        '''
-        return []
+        """
+        Return a list of all preferences bundle items
+        """
+        raise NotImplementedError
         
     #---------------------------------------------------------------
     # PREFERENCES
@@ -588,7 +589,7 @@ class PMXSupportBaseManager(object):
     def getPreferences(self, scope):
         with_scope = []
         without_scope = []
-        for preference in self.getAllPreferences():
+        for preference in self.cache.setcallable("preferences", self.getAllPreferences):
             if preference.scope == None:
                 without_scope.append(preference)
             else:
@@ -633,8 +634,7 @@ class PMXSupportBaseManager(object):
         #TODO: Mejorar aca para obtener bien los tabrigger symbol
         bestMatch = None
         line = line[:index]
-        triggers = self.getAllTabTriggersMnemonics()
-        print triggers
+        triggers = self.cache.setcallable("tabtriggers", self.getAllTabTriggersMnemonics)
         for tabSplit in self.TABTRIGGERSPLITS:
             matchs = filter(lambda m: m.start() <= index <= m.end(), tabSplit.finditer(line))
             if matchs:
@@ -649,7 +649,7 @@ class PMXSupportBaseManager(object):
     def getTabTriggerItem(self, keyword, scope):
         with_scope = []
         without_scope = []
-        for item in self.getAllBundleItemsByTabTrigger(keyword):
+        for item in self.cache.setcallable(keyword, self.getAllBundleItemsByTabTrigger, keyword):
             if item.scope == None:
                 without_scope.append(item)
             else:
@@ -676,7 +676,7 @@ class PMXSupportBaseManager(object):
     def getKeyEquivalentItem(self, code, scope):
         with_scope = []
         without_scope = []
-        for item in self.getAllBundleItemsByKeyEquivalent(code):
+        for item in self.cache.setcallable(code, self.getAllBundleItemsByKeyEquivalent, code):
             if item.scope == None:
                 without_scope.append(item)
             else:

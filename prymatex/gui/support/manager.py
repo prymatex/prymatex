@@ -229,10 +229,12 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         self.bundleTreeModel.removeBundleItem(bundleItem)
         
     def getAllBundleItems(self):
+        items = []
         for bundle in self.getAllBundles():
             for item in bundle.children:
-                yield item
-    
+                items.append(item)
+        return items
+        
     #---------------------------------------------------
     # TEMPLATEFILE OVERRIDE INTERFACE
     #---------------------------------------------------
@@ -271,41 +273,41 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllTabTriggersMnemonics(self):
+        tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
-                yield item.tabTrigger
-        else:
-            raise StopIteration()
+                tabTriggers.append(item.tabTrigger)
+        return tabTriggers
             
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
+        items = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger == tabTrigger:
-                yield item
-        else:
-            raise StopIteration()
+                items.append(item)
+        return items
             
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+        items = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.keyEquivalent == keyEquivalent:
-                yield item
+                items.append(item)
         for syntax in self.syntaxProxyModel.getAllItems():
             if syntax.keyEquivalent == keyEquivalent:
-                yield syntax
-        else:
-            raise StopIteration()
+                items.append(syntax)
+        return items
     
     #---------------------------------------------------
     # FILE EXTENSION OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllBundleItemsByFileExtension(self, path):
+        items = []
         for item in self.dragcommandProxyModel.getAllItems():
             if any(map(lambda extension: fnmatch.fnmatch(path, "*.%s" % extension), item.draggedFileExtensions)):
-                yield item
-        else:
-            raise StopIteration()
+                items.append(item)
+        return items
     
     #---------------------------------------------------
     # ACTION ITEMS OVERRIDE INTERFACE

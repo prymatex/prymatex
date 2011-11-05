@@ -60,13 +60,14 @@ class PMXEditorFolding(object):
                 if userData.indent <= currentIndent and len(self.folding) > 0:
                     #Hay que cerrar algo antes
                     closeBlock = self.findPreviousMoreIndentBlock(block)
-                    lenIndent = len(userData.indent)
-                    if lenIndent:
-                        closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent)
-                    else:
-                        closeBlock.userData().foldingMark = -nest
-                    self.folding.append(closeBlock)
-                    nest += closeBlock.userData().foldingMark
+                    if closeBlock is not None:
+                        lenIndent = len(userData.indent)
+                        if lenIndent:
+                            closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent)
+                        else:
+                            closeBlock.userData().foldingMark = -nest
+                        self.folding.append(closeBlock)
+                        nest += closeBlock.userData().foldingMark
                 else:
                     #Store last valid indent
                     lastOpenIndent = currentIndent
@@ -85,10 +86,11 @@ class PMXEditorFolding(object):
     def findPreviousMoreIndentBlock(self, block):
         """ Return previous more indent block """
         indent = block.userData().indent
-        while block.isValid():
-            block = block.previous()
-            userData = block.userData()
-            if userData is not None and indent < userData.indent:
+        while True:
+            block = block.previous()            
+            if not block.isValid() or block.userData() is None:
+                return None
+            if indent < block.userData().indent:
                 break
         return block
     
@@ -135,6 +137,6 @@ class PMXEditorFolding(object):
 
     def isStop(self, mark):
         return mark <= PMXSyntax.FOLDING_STOP
-        
+
     def isFoldingMark(self, block):
         return block in self.folding

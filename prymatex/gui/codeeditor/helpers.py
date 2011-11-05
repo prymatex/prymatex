@@ -42,10 +42,11 @@ class TabTriggerHelper(PMXBaseEditorHelper):
 class SmartTypingPairsHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
     def accept(self, event, cursor, scope):
-        preferences = self.application.supportManager.getPreferenceSettings(scope)
-        if not cursor.atBlockEnd(): return False
-        pairs = filter(lambda pair: event.text() == pair[0], preferences.smartTypingPairs)
+        settings = self.application.supportManager.getPreferenceSettings(scope)
+        pairs = filter(lambda pair: event.text() == pair[0], settings.smartTypingPairs)
         self.pair = pairs[0] if len(pairs) == 1 else []
+        if cursor.hasSelection(): return bool(self.pair)
+        #No Tengo seleccion vamos a intentar algo radical        
         return bool(self.pair)
             
     def execute(self, editor, event):
@@ -76,6 +77,7 @@ class OverwriteHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Insert
     def execute(self, editor, event):
         editor.setOverwriteMode(not editor.overwriteMode())
+        editor.modeChanged.emit()
         
 class TabIndentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Tab
@@ -89,9 +91,9 @@ class TabIndentHelper(PMXBaseEditorHelper):
             position = cursor.position()
             blockPosition = cursor.block().position()
             indent = cursor.block().userData().indent
-            editor.textCursor().insertText(self.tabKeyBehavior)
+            editor.textCursor().insertText(editor.tabKeyBehavior)
         else:
-            editor.textCursor().insertText(self.tabKeyBehavior)
+            editor.textCursor().insertText(editor.tabKeyBehavior)
 
 class BacktabUnindentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Backtab
@@ -104,15 +106,8 @@ class BacktabUnindentHelper(PMXBaseEditorHelper):
             block = cursor.block()
             userData = cursor.block().userData()
             counter = editor.tabStopSize if len(userData.indent) > editor.tabStopSize else len(userData.indent)
-            if counter > 0:
-                cursor.beginEditBlock()
-                position = block.position() if block.position() <= cursor.position() <= block.position() + self.tabStopSize else cursor.position() - counter
-                cursor.setPosition(block.position()) 
-                for _ in range(counter):
-                    cursor.deleteChar()
-                cursor.setPosition(position)
-                self.setTextCursor(cursor)
-                cursor.endEditBlock()
+            for _ in range(counter):
+                cursor.deletePreviousChar()
 
 class SmartIndentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Return

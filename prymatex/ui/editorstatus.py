@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
 #
-# Created: Fri Oct 28 20:36:38 2011
+# Created: Sat Nov  5 08:23:43 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -181,6 +181,33 @@ class Ui_CodeEditorStatus(object):
         self.labelLineColumn.setMaximumSize(QtCore.QSize(250, 16777215))
         self.labelLineColumn.setObjectName(_fromUtf8("labelLineColumn"))
         self.horizontalLayout_2.addWidget(self.labelLineColumn)
+        self.pushButtonOverwrite = QtGui.QPushButton(self.widgetStatus)
+        self.pushButtonOverwrite.setMaximumSize(QtCore.QSize(30, 16777215))
+        self.pushButtonOverwrite.setText(_fromUtf8(""))
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/modes/modes/overwrite.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButtonOverwrite.setIcon(icon3)
+        self.pushButtonOverwrite.setFlat(True)
+        self.pushButtonOverwrite.setObjectName(_fromUtf8("pushButtonOverwrite"))
+        self.horizontalLayout_2.addWidget(self.pushButtonOverwrite)
+        self.pushButtonMultiCursor = QtGui.QPushButton(self.widgetStatus)
+        self.pushButtonMultiCursor.setMaximumSize(QtCore.QSize(30, 16777215))
+        self.pushButtonMultiCursor.setText(_fromUtf8(""))
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/modes/modes/multicursor.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButtonMultiCursor.setIcon(icon4)
+        self.pushButtonMultiCursor.setFlat(True)
+        self.pushButtonMultiCursor.setObjectName(_fromUtf8("pushButtonMultiCursor"))
+        self.horizontalLayout_2.addWidget(self.pushButtonMultiCursor)
+        self.pushButtonSnippet = QtGui.QPushButton(self.widgetStatus)
+        self.pushButtonSnippet.setMaximumSize(QtCore.QSize(30, 16777215))
+        self.pushButtonSnippet.setText(_fromUtf8(""))
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/modes/modes/snippet.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButtonSnippet.setIcon(icon5)
+        self.pushButtonSnippet.setFlat(True)
+        self.pushButtonSnippet.setObjectName(_fromUtf8("pushButtonSnippet"))
+        self.horizontalLayout_2.addWidget(self.pushButtonSnippet)
         self.comboBoxSyntaxes = QtGui.QComboBox(self.widgetStatus)
         self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(250, 16777215))
         self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
@@ -188,9 +215,9 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonMenuBundle = QtGui.QPushButton(self.widgetStatus)
         self.pushButtonMenuBundle.setMaximumSize(QtCore.QSize(50, 16777215))
         self.pushButtonMenuBundle.setText(_fromUtf8(""))
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/run-build.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButtonMenuBundle.setIcon(icon3)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/run-build.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButtonMenuBundle.setIcon(icon6)
         self.pushButtonMenuBundle.setFlat(True)
         self.pushButtonMenuBundle.setObjectName(_fromUtf8("pushButtonMenuBundle"))
         self.horizontalLayout_2.addWidget(self.pushButtonMenuBundle)
