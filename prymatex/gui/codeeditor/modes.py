@@ -144,7 +144,23 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def inactive(self):
         self.cursors = []
         self.editor.modeChanged.emit()
-    
+
+    def extraSelections(self):
+        extraSelections = []
+        for cursor in self.cursors:
+            selection = QtGui.QTextEdit.ExtraSelection()
+            selection.format.setBackground(self.editor.colours['lineHighlight'])
+            selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+            selection.cursor = QtGui.QTextCursor(cursor)
+            selection.cursor.clearSelection()
+            extraSelections.append(selection)
+            if cursor.hasSelection():
+                selection = QtGui.QTextEdit.ExtraSelection()
+                selection.format.setBackground(self.editor.colours['selection'])
+                selection.cursor = cursor
+                extraSelections.append(selection)
+        return extraSelections
+
     @property
     def isDragCursor(self):
         return self.dragPoint != None
@@ -200,6 +216,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         if emit:
             #Arranco modo multicursor
             self.editor.modeChanged.emit()
+        self.editor.highlightCurrentLine()
         #Clean last acction
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
         self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
@@ -327,9 +344,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             cursor.endEditBlock()
     
-    def __iter__(self):
-        return iter(self.cursors)
-        
 class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)

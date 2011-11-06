@@ -337,16 +337,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def highlightCurrentLine(self):
         extraSelections = []
         if self.multiCursorMode.isActive():
-            for cursor in self.multiCursorMode:
-                if cursor.hasSelection():
-                    selection = QTextEdit.ExtraSelection()
-                    selection.format.setBackground(self.colours['selection'])
-                    selection.cursor = cursor
-                    extraSelections.append(selection)
-        if not self.isReadOnly():
+            extraSelections = self.multiCursorMode.extraSelections()
+        elif not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
             selection.format.setBackground(self.colours['lineHighlight'])
-            selection.format.setProperty(QTextFormat.FullWidthSelection, True)
+            selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
             extraSelections.append(selection)
@@ -359,26 +354,26 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         openBraces = map(lambda pair: pair[0], braces)
         closeBraces = map(lambda pair: pair[1], braces)
         if character in openBraces:
-            openBrace = cursor
+            openCursor = cursor
             index = openBraces.index(character)
-            closeBrace = self.findTypingPair(character, closeBraces[index], cursor)
+            closeCursor = self.findTypingPair(character, closeBraces[index], openCursor)
         elif character in closeBraces:
-            closeBrace = cursor
+            closeCursor = cursor
             index = closeBraces.index(character)
-            openBrace = self.findTypingPair(character, openBraces[index], cursor, True)
+            openCursor = self.findTypingPair(character, openBraces[index], closeCursor, True)
         else:
             self.setExtraSelections(extraSelections)
             return
-        if closeBrace is not None:
+        if closeCursor is not None:
             selection = QTextEdit.ExtraSelection()
             selection.format.setForeground(self.colours['invisibles'])
             selection.format.setBackground(self.colours['selection'])
-            selection.cursor = openBrace
+            selection.cursor = openCursor
             extraSelections.append(selection)
             selection = QTextEdit.ExtraSelection()
             selection.format.setForeground(self.colours['invisibles'])
             selection.format.setBackground(self.colours['selection'])
-            selection.cursor = closeBrace
+            selection.cursor = closeCursor
             selection.cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.KeepAnchor)
             extraSelections.append(selection)
         else:
@@ -436,7 +431,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             
             block = block.next()
         if self.multiCursorMode.isActive():
-            for cursor in self.multiCursorMode:
+            for cursor in self.multiCursorMode.cursors:
                 rec = self.cursorRect(cursor)
                 cursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
                 painter.setPen(QtGui.QPen(self.colours['caret']))
