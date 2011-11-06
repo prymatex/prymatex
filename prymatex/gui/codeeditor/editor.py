@@ -102,7 +102,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         QtCore.Qt.Key_Tab: [ helpers.TabTriggerHelper(), helpers.TabIndentHelper() ],
         QtCore.Qt.Key_Backtab: [ helpers.BacktabUnindentHelper() ],
         QtCore.Qt.Key_Home: [ helpers.MoveCursorToHomeHelper() ],
-        QtCore.Qt.Key_Return: [ helpers.SmartSyntaxHelper(), helpers.SmartIndentHelper() ],
+        QtCore.Qt.Key_Return: [ helpers.SmartIndentHelper() ],
         QtCore.Qt.Key_Insert: [ helpers.OverwriteHelper() ]
     }
     
@@ -226,6 +226,33 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             return self.document().findBlock(start), self.document().findBlock(end)
 
+    def findTypingPair(self, b1, b2, cursor, backward = False):
+        flags = QtGui.QTextDocument.FindFlags()
+        if backward:
+            flags |= QtGui.QTextDocument.FindBackward
+        if cursor.hasSelection():
+            if backward:
+                cursor.setPosition(cursor.selectionStart())
+            else:
+                cursor.setPosition(cursor.selectionEnd())
+        c1 = cursor.document().find(b1, cursor, flags)
+        c2 = cursor.document().find(b2, cursor, flags)
+        if backward:
+            while c1 > c2:
+                c1 = cursor.document().find(b1, c1.selectionStart(), flags)
+                if c1 > c2:
+                    c2 = cursor.document().find(b2, c2.selectionStart(), flags)
+                else:
+                    break
+        else:
+            while c1 < c2:
+                c2 = cursor.document().find(b2, c2.selectionEnd(), flags)
+                if c1 < c2:
+                    c1 = cursor.document().find(b1, c1.selectionEnd(), flags)
+                else:
+                    break
+        return c2
+        
     def getFlags(self):
         flags = 0
         options = self.document().defaultTextOption()
@@ -273,7 +300,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
             self.folding.indentSensitive = syntax.indentSensitive
-    
+
     def contextMenuEvent(self, event):
         menu = self.createStandardContextMenu()
         menu.popup(event.globalPos())
@@ -322,6 +349,43 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             selection.format.setProperty(QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
+            extraSelections.append(selection)
+        cursor = self.textCursor()
+        scope = self.getCurrentScope()
+        cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+        character = cursor.selectedText()
+        settings = self.application.supportManager.getPreferenceSettings(scope)
+        braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
+        openBraces = map(lambda pair: pair[0], braces)
+        closeBraces = map(lambda pair: pair[1], braces)
+        if character in openBraces:
+            openBrace = cursor
+            index = openBraces.index(character)
+            closeBrace = self.findTypingPair(character, closeBraces[index], cursor)
+        elif character in closeBraces:
+            closeBrace = cursor
+            index = closeBraces.index(character)
+            openBrace = self.findTypingPair(character, openBraces[index], cursor, True)
+        else:
+            self.setExtraSelections(extraSelections)
+            return
+        if closeBrace is not None:
+            selection = QTextEdit.ExtraSelection()
+            selection.format.setForeground(self.colours['invisibles'])
+            selection.format.setBackground(self.colours['selection'])
+            selection.cursor = openBrace
+            extraSelections.append(selection)
+            selection = QTextEdit.ExtraSelection()
+            selection.format.setForeground(self.colours['invisibles'])
+            selection.format.setBackground(self.colours['selection'])
+            selection.cursor = closeBrace
+            selection.cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.KeepAnchor)
+            extraSelections.append(selection)
+        else:
+            selection = QTextEdit.ExtraSelection()
+            selection.format.setBackground(self.colours['invisibles'])
+            selection.format.setForeground(self.colours['selection'])
+            selection.cursor = cursor
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
 
@@ -381,7 +445,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             pen = QtGui.QPen(self.colours['caret'])
             pen.setWidth(2)
             painter.setPen(pen)
-            color = QColor(self.colours['selection'])
+            color = QtGui.QColor(self.colours['selection'])
             color.setAlpha(128)
             painter.setBrush(QtGui.QBrush(color))
             painter.setOpacity(0.2)
@@ -451,7 +515,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 helpers = self.editorHelpers.get(key, [])
                 for helper in helpers:
                     #Buscar Entre los helpers
-                    if helper.accept(event, cursor, scope):
+                    if helper.accept(self, event, cursor, scope):
                         #pasarle el evento
                         return helper.execute(self, event)
         

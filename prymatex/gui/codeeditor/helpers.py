@@ -6,15 +6,15 @@ from prymatex.support import PMXPreferenceSettings
 
 class PMXBaseEditorHelper(PMXObject):
     KEY = None
-    def accept(self, event, cursor, scope):
+    def accept(self, editor, event, cursor, scope):
         return event.key() == self.KEY
     
     def execute(self, editor, event):
-        editor.keyPressEvent(event)
+        pass
 
 class KeyEquivalentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
-    def accept(self, event, cursor, scope):
+    def accept(self, editor, event, cursor, scope):
         keyseq = int(event.modifiers()) + event.key()
         self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, scope)
         return bool(self.items)
@@ -27,7 +27,7 @@ class KeyEquivalentHelper(PMXBaseEditorHelper):
 
 class TabTriggerHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Tab
-    def accept(self, event, cursor, scope):
+    def accept(self, editor, event, cursor, scope):
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
         self.items = self.application.supportManager.getTabTriggerItem(trigger, scope) if trigger is not None else []
         return bool(self.items)
@@ -41,12 +41,61 @@ class TabTriggerHelper(PMXBaseEditorHelper):
 
 class SmartTypingPairsHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
-    def accept(self, event, cursor, scope):
+    
+    def accept(self, editor, event, cursor, scope):
         settings = self.application.supportManager.getPreferenceSettings(scope)
-        pairs = filter(lambda pair: event.text() == pair[0], settings.smartTypingPairs)
+        character = event.text()
+        pairs = filter(lambda pair: character in pair, settings.smartTypingPairs)
         self.pair = pairs[0] if len(pairs) == 1 else []
         if cursor.hasSelection(): return bool(self.pair)
-        #No Tengo seleccion vamos a intentar algo radical        
+        if not bool(self.pair): return False
+        #No Tengo seleccion vamos a intentar algo radical
+        open = map(lambda pair: pair[0], settings.smartTypingPairs)
+        close = map(lambda pair: pair[1], settings.smartTypingPairs)
+        self.cursorOpen = self.cursorClose = None
+        
+        if character in open:
+            rightChar = cursor.document().characterAt(cursor.position())
+            leftChar = cursor.document().characterAt(cursor.position() - 1)
+            #Buscar de izquierda a derecha por dentro
+            pairs = filter(lambda pair: leftChar == pair[0] and rightChar != pair[1], settings.smartTypingPairs)
+            if pairs:
+                pair = pairs[0]
+                self.cursorOpen = cursor
+                self.cursorClose = editor.findTypingPair(pair[0], pair[1], self.cursorOpen)
+                self.cursorClose.setPosition(self.cursorClose.selectionStart())
+                return bool(self.pair)
+            #Buscar de izquierda a derecha por fuera
+            pairs = filter(lambda pair: rightChar == pair[0], settings.smartTypingPairs)
+            if pairs:
+                pair = pairs[0]
+                self.cursorOpen = cursor
+                cursor = QtGui.QTextCursor(self.cursorOpen)
+                cursor.setPosition(cursor.position() + 1)
+                self.cursorClose = editor.findTypingPair(pair[0], pair[1], cursor)
+                self.cursorClose.setPosition(self.cursorClose.selectionEnd())
+                return bool(self.pair)
+        elif character in close and character not in open:
+            rightChar = cursor.document().characterAt(cursor.position())
+            leftChar = cursor.document().characterAt(cursor.position() - 1)
+            #Buscar de derecha a izquierda por dentro
+            pairs = filter(lambda pair: rightChar == pair[1] and leftChar != pair[0], settings.smartTypingPairs)
+            if pairs:
+                pair = pairs[0]
+                self.cursorClose = cursor
+                cursor = QtGui.QTextCursor(self.cursorClose)
+                cursor.setPosition(cursor.position() + 1)
+                self.cursorOpen = editor.findTypingPair(pair[1], pair[0], cursor, True)
+                self.cursorOpen.setPosition(self.cursorOpen.selectionEnd())
+                return bool(self.pair)
+            #Buscar de derecha a izquierda por fuera
+            pairs = filter(lambda pair: leftChar == pair[1], settings.smartTypingPairs)
+            if pairs:
+                pair = pairs[0]
+                self.cursorClose = cursor
+                self.cursorOpen = editor.findTypingPair(pair[1], pair[0], self.cursorClose, True)
+                self.cursorOpen.setPosition(self.cursorOpen.selectionStart())
+                return bool(self.pair)
         return bool(self.pair)
             
     def execute(self, editor, event):
@@ -57,12 +106,15 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
             cursor.insertText(text)
             cursor.setPosition(position)
             cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
-            editor.setTextCursor(cursor)
-        else:
+            #editor.setTextCursor(cursor)
+        elif self.cursorOpen is None:
             position = cursor.position()
             cursor.insertText("%s%s" % (self.pair[0], self.pair[1]))
             cursor.setPosition(position + 1)
             editor.setTextCursor(cursor)
+        else:
+            self.cursorOpen.insertText(self.pair[0])
+            self.cursorClose.insertText(self.pair[1])
 
 class MoveCursorToHomeHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Home
@@ -136,15 +188,3 @@ class SmartIndentHelper(PMXBaseEditorHelper):
         else:
             self.debug("Preserve indent")
             cursor.insertText(block.userData().indent)
-
-class SmartSyntaxHelper(PMXBaseEditorHelper):
-    KEY = QtCore.Qt.Key_Return
-    def accept(self, event, cursor, scope):
-        if cursor.document().blockCount() == 1:
-            self.syntax = self.application.supportManager.findSyntaxByFirstLine(cursor.block().text())
-            return bool(self.syntax)
-        return False
-        
-    def execute(self, editor, event):
-        editor.setSyntax(self.syntax)
-        QtGui.QPlainTextEdit.keyPressEvent(editor, event)
