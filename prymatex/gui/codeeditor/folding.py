@@ -24,7 +24,8 @@ class PMXEditorFolding(object):
             self.updateIndentFoldingBlocks()
         else:
             self.updateFoldingBlocks()
-    
+        self.editor.sidebar.update()
+        
     def on_textBlocksRemoved(self):
         remove = filter(lambda block: block.userData() is None, self.blocks)
         if remove:
@@ -35,6 +36,7 @@ class PMXEditorFolding(object):
             self.updateIndentFoldingBlocks()
         else:
             self.updateFoldingBlocks()
+        self.editor.sidebar.update()
         
     def updateFoldingBlocks(self):
         self.folding = []

@@ -140,7 +140,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         if syntax is None:
             syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.setSyntax(syntax)
-
+        
+        #Block Count
+        self.lastBlockCount = self.document().blockCount()
+        
         self.connectSignals()
         self.configure()
 
@@ -149,6 +152,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     def connectSignals(self):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
+        self.blockCountChanged.connect(self.detectRemovedBlocks)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrent)
         self.modificationChanged.connect(self.updateTabStatus)
@@ -156,6 +160,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def updateTabStatus(self):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
 
+    def detectRemovedBlocks(self):
+        if self.lastBlockCount > self.document().blockCount():
+            #TODO: Detectar cuales se removieron desde la posicion del cursor quiza :)
+            self.textBlocksRemoved.emit()
+        self.lastBlockCount = self.document().blockCount()
+        
     #=======================================================================
     # Base Editor Interface
     #=======================================================================

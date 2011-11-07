@@ -27,7 +27,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor = PMXSyntaxProcessor()
         self.syntax = syntax
         self.theme = theme
-        self.lastBlockCount = 0
 
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
@@ -80,9 +79,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData.symbol = None
 
     def highlightBlock(self, text):
-        if self.lastBlockCount > self.document().blockCount():
-            self.editor.textBlocksRemoved.emit()
-        
         userData = self.currentBlock().userData()
         if userData is not None and userData.textHash == hash(self.syntax.scopeName) + hash(text):
             self.applyFormat(userData)
@@ -116,8 +112,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.editor.foldingChanged.emit(self.currentBlock())
             self.applyFormat(userData)
 
-        self.lastBlockCount = self.document().blockCount()
-        
     def getFormat(self, scope):
         if self.theme is None:
             return None
