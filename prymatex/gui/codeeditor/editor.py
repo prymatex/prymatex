@@ -106,10 +106,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         QtCore.Qt.Key_Insert: [ helpers.OverwriteHelper() ]
     }
     
-    #TODO: Move to the manager
-    #Cache de preferencias
-    PREFERENCE_CACHE = {}
-    
     @property
     def tabKeyBehavior(self):
         return self.tabStopSoft and u' ' * self.tabStopSize or u'\t'
@@ -226,28 +222,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         else:
             return self.document().findBlock(start), self.document().findBlock(end)
 
-    def findTypingPair(self, b1, b2, cursor, backward = False):
-        flags = QtGui.QTextDocument.FindFlags()
-        if backward:
-            flags |= QtGui.QTextDocument.FindBackward
-        if cursor.hasSelection():
-            startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
-        else:
-            startPosition = cursor.position()
-        c1 = cursor.document().find(b1, startPosition, flags)
-        c2 = cursor.document().find(b2, startPosition, flags)
-        if backward:
-            while c1 > c2:
-                c1 = cursor.document().find(b1, c1.selectionStart(), flags)
-                if c1 > c2:
-                    c2 = cursor.document().find(b2, c2.selectionStart(), flags)
-        else:
-            while c1 < c2:
-                c1 = cursor.document().find(b1, c1.selectionEnd(), flags)
-                if c1 < c2:
-                    c2 = cursor.document().find(b2, c2.selectionEnd(), flags)
-        return c2
-
     def getFlags(self):
         flags = 0
         options = self.document().defaultTextOption()
@@ -296,9 +270,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
             self.folding.indentSensitive = syntax.indentSensitive
 
-    def contextMenuEvent(self, event):
-        menu = self.createStandardContextMenu()
-        menu.popup(event.globalPos())
+    #=======================================================================
+    # Context Menu
+    #=======================================================================
+    #def contextMenuEvent(self, event):
+    #    menu = self.createStandardContextMenu()
+    #    menu.popup(event.globalPos())
     
     #=======================================================================
     # Espacio para la sidebar
@@ -324,10 +301,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
     
-    def resizeEvent(self, event):
-        QtGui.QPlainTextEdit.resizeEvent(self, event)
-        cr = self.contentsRect()
-        self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+    #=======================================================================
+    # Highlight Editor
+    #=======================================================================
+    def highlightCurrent(self):
+        #Clean current extra selection
+        self.setExtraSelections([])
+        if self.multiCursorMode.isActive():
+            self.multiCursorMode.highlightCurrentLines()
+        else:
+            self.highlightCurrentLine()
+        self.highlightCurrentBrace()
 
     def highlightCurrentBrace(self, cursor = None):
         cursor = QtGui.QTextCursor(self.textCursor())
@@ -383,15 +367,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 extraSelections.append(selection)
             self.setExtraSelections(extraSelections)
 
-    def highlightCurrent(self):
-        #Clean current selection
-        self.setExtraSelections([])
-        if self.multiCursorMode.isActive():
-            self.multiCursorMode.highlightCurrentLines()
-        else:
-            self.highlightCurrentLine()
-        self.highlightCurrentBrace()
-        
     def highlightCurrentLine(self):
         extraSelections = self.extraSelections()
         selection = QTextEdit.ExtraSelection()
@@ -422,6 +397,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # QPlainTextEdit Events
     #=======================================================================
+    def resizeEvent(self, event):
+        QtGui.QPlainTextEdit.resizeEvent(self, event)
+        cr = self.contentsRect()
+        self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+    
     def paintEvent(self, event):
         #QtGui.QPlainTextEdit.paintEvent(self, event)
         QtGui.QPlainTextEdit.paintEvent(self, event)
@@ -501,12 +481,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
-    def activeMode(self):
-        #retorna el primer helper activo
-        for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
-            if mode.isActive():
-                return mode
-
     def keyPressEvent(self, event):
         '''
         This method is called whenever a key is pressed. The key code is stored in event.key()
@@ -514,23 +488,24 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         '''
         
         #Primero ver si tengo un modo activo,
-        mode = self.activeMode()
-        if mode is not None:
-            return mode.keyPressEvent(event)
-        else:
-            #Obtener key, scope y cursor
-            scope = self.getCurrentScope()
-            cursor = self.textCursor()
-            #Preparar teclas
-            keys = set([ QtCore.Qt.Key_Any, event.key() ])
-            for key in keys:
-                #Obtener Helpers
-                helpers = self.editorHelpers.get(key, [])
-                for helper in helpers:
-                    #Buscar Entre los helpers
-                    if helper.accept(self, event, cursor, scope):
-                        #pasarle el evento
-                        return helper.execute(self, event)
+        for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
+            if mode.isActive():
+                return mode.keyPressEvent(event)
+        
+        #No tengo modo activo, intento con los helpers
+        #Obtener key, scope y cursor
+        scope = self.getCurrentScope()
+        cursor = self.textCursor()
+        #Preparar teclas
+        keys = set([ QtCore.Qt.Key_Any, event.key() ])
+        for key in keys:
+            #Obtener Helpers
+            helpers = self.editorHelpers.get(key, [])
+            for helper in helpers:
+                #Buscar Entre los helpers
+                if helper.accept(self, event, cursor, scope):
+                    #pasarle el evento
+                    return helper.execute(self, event)
         
         #No tengo helper paso el evento a la base
         QtGui.QPlainTextEdit.keyPressEvent(self, event)
@@ -709,6 +684,28 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #==========================================================================
     # Find and Replace
     #==========================================================================    
+    def findTypingPair(self, b1, b2, cursor, backward = False):
+        flags = QtGui.QTextDocument.FindFlags()
+        if backward:
+            flags |= QtGui.QTextDocument.FindBackward
+        if cursor.hasSelection():
+            startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
+        else:
+            startPosition = cursor.position()
+        c1 = cursor.document().find(b1, startPosition, flags)
+        c2 = cursor.document().find(b2, startPosition, flags)
+        if backward:
+            while c1 > c2:
+                c1 = cursor.document().find(b1, c1.selectionStart(), flags)
+                if c1 > c2:
+                    c2 = cursor.document().find(b2, c2.selectionStart(), flags)
+        else:
+            while c1 < c2:
+                c1 = cursor.document().find(b1, c1.selectionEnd(), flags)
+                if c1 < c2:
+                    c2 = cursor.document().find(b2, c2.selectionEnd(), flags)
+        return c2
+
     def findMatch(self, match, flags, findNext = False):
         cursor = self.textCursor()
         if not findNext and cursor.hasSelection():
@@ -846,6 +843,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def canUnindent(self):
         return True
     
+    #===========================================================================
+    # Drag and Drop
+    #===========================================================================
     def dragEnterEvent(self, event):
         mimeData = event.mimeData()
         if mimeData.hasUrls() or mimeData.hasText():
@@ -880,6 +880,3 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                     self.insertBundleItem(item, environment = env)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
-                
-                
-    

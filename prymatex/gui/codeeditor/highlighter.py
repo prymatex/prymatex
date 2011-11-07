@@ -103,13 +103,13 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if userData is None:
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
-            
+
             oldSymbol = userData.symbol
             oldFoldingMark = userData.foldingMark
-            
+
             state = self.setupBlockUserData(self.currentBlock(), userData, data)
             self.setCurrentBlockState(state)
-            
+
             if userData.symbol != oldSymbol:
                 self.editor.symbolChanged.emit(self.currentBlock())
             if userData.foldingMark != oldFoldingMark:

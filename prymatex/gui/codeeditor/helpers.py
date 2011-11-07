@@ -62,7 +62,9 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
             if pairs:
                 pair = pairs[0]
                 self.cursorOpen = cursor
-                self.cursorClose = editor.findTypingPair(pair[0], pair[1], self.cursorOpen)
+                cursor = QtGui.QTextCursor(self.cursorOpen)
+                cursor.setPosition(cursor.position() - 1)
+                self.cursorClose = editor.findTypingPair(pair[0], pair[1], cursor)
                 self.cursorClose.setPosition(self.cursorClose.selectionStart())
                 return bool(self.pair)
             #Buscar de izquierda a derecha por fuera
@@ -70,9 +72,7 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
             if pairs:
                 pair = pairs[0]
                 self.cursorOpen = cursor
-                cursor = QtGui.QTextCursor(self.cursorOpen)
-                cursor.setPosition(cursor.position() + 1)
-                self.cursorClose = editor.findTypingPair(pair[0], pair[1], cursor)
+                self.cursorClose = editor.findTypingPair(pair[0], pair[1], self.cursorOpen)
                 self.cursorClose.setPosition(self.cursorClose.selectionEnd())
                 return bool(self.pair)
         elif character in close and character not in open:
@@ -93,7 +93,7 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
             if pairs:
                 pair = pairs[0]
                 self.cursorClose = cursor
-                self.cursorOpen = editor.findTypingPair(pair[1], pair[0], self.cursorClose, True)
+                self.cursorOpen = editor.findTypingPair(pair[1], pair[0], cursor, True)
                 self.cursorOpen.setPosition(self.cursorOpen.selectionStart())
                 return bool(self.pair)
         return bool(self.pair)
@@ -106,7 +106,7 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
             cursor.insertText(text)
             cursor.setPosition(position)
             cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
-            #editor.setTextCursor(cursor)
+            editor.setTextCursor(cursor)
         elif self.cursorOpen is None:
             position = cursor.position()
             cursor.insertText("%s%s" % (self.pair[0], self.pair[1]))

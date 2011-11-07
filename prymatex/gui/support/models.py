@@ -268,7 +268,7 @@ class PMXThemeStyleRow(object):
     
     def clearCache(self):
         self.STYLES_CACHE = {}
-        
+
     def getStyle(self, scope = None):
         if scope in self.STYLES_CACHE:
             return self.STYLES_CACHE[scope]

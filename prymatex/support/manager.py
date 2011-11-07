@@ -603,22 +603,21 @@ class PMXSupportBaseManager(object):
             with_scope.append(p)
         return with_scope + without_scope
 
-    @printtime
     def getPreferenceSettings(self, scope):
-        if scope not in self.SETTINGS_CACHE:
+        if not self.cache.hasSettings(scope):
             preferences = self.getPreferences(scope)
-            self.SETTINGS_CACHE[scope] = PMXPreference.buildSettings(preferences)
-        return self.SETTINGS_CACHE[scope]
+            self.cache.setSettings(scope, PMXPreference.buildSettings(preferences))
+        return self.cache.getSettings(scope)
     
     #---------------------------------------------------
     # TABTRIGGERS INTERFACE
     #---------------------------------------------------
     def getAllTabTriggersMnemonics(self):
-        '''
-            Return a list of tab triggers
-            ['class', 'def', ...]
-        '''
-        return []
+        """
+        Return a list of all tab triggers
+        ['class', 'def', ...]
+        """
+        raise NotImplementedError
     
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         '''
