@@ -5,13 +5,12 @@ import codecs
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, SIGNAL
-from PyQt4.QtCore import Qt, QUrl
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
 from prymatex.ui.panebrowser import Ui_BrowserDock
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.support.utils import prepareShellScript, makeExecutableTempFile, deleteFile, ensureEnvironment
+from prymatex.support.utils import prepareShellScript, deleteFile
 from subprocess import Popen, PIPE, STDOUT
 from prymatex.gui.dockers.base import PMXBaseDock
 
@@ -135,7 +134,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         System wide proxy
         '''
         print value
-        proxy_url = QUrl(value)    
+        proxy_url = QtCore.QUrl(value)    
         if not value:
             network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
         else:
@@ -194,6 +193,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         if event.type() == QtCore.QEvent.KeyPress:
             if event.key() == QtCore.Qt.Key_Escape:
                 self.close()
+                self.mainWindow.currentEditor.setFocus()
                 return True
             elif event.key() == QtCore.Qt.Key_L and event.modifiers() == QtCore.Qt.ControlModifier:
                 self.lineUrl.setFocus()
