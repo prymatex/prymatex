@@ -231,10 +231,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         if backward:
             flags |= QtGui.QTextDocument.FindBackward
         if cursor.hasSelection():
+            print cursor.selectedText()
             if backward:
-                cursor.setPosition(cursor.selectionStart())
-            else:
                 cursor.setPosition(cursor.selectionEnd())
+            else:
+                cursor.setPosition(cursor.selectionStart())
         c1 = cursor.document().find(b1, cursor, flags)
         c2 = cursor.document().find(b2, cursor, flags)
         if backward:
@@ -366,20 +367,20 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             return
         if closeCursor is not None:
             selection = QTextEdit.ExtraSelection()
-            selection.format.setForeground(self.colours['invisibles'])
-            selection.format.setBackground(self.colours['selection'])
+            #selection.format.setFontWeight(QtGui.QFont.Bold)
+            selection.format.setFontStrikeOut(True)
             selection.cursor = openCursor
             extraSelections.append(selection)
             selection = QTextEdit.ExtraSelection()
-            selection.format.setForeground(self.colours['invisibles'])
-            selection.format.setBackground(self.colours['selection'])
+            #selection.format.setFontWeight(QtGui.QFont.Bold)
+            selection.format.setFontStrikeOut(True)
             selection.cursor = closeCursor
             selection.cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.KeepAnchor)
             extraSelections.append(selection)
         else:
             selection = QTextEdit.ExtraSelection()
-            selection.format.setBackground(self.colours['invisibles'])
-            selection.format.setForeground(self.colours['selection'])
+            #selection.format.setFontWeight(QtGui.QFont.Bold)
+            selection.format.setFontStrikeOut(True)
             selection.cursor = cursor
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
