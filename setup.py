@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# For further info, check  https://launchpad.net/encuentro
+# For further info, check http://www.prymatex.org/
 
 """Build tar.gz for prymatex.
 
@@ -58,9 +58,10 @@ class QtBuild(build):
         """Compile the .ui files to python modules."""
         # Search for pyuic4 in python bin dir, then in the $Path.
         if py_file is None:
+            py_path = os.path.join('prymatex', *fullsplit(ui_file)[1:-1])
             py_file = os.path.split(ui_file)[1]
             py_file = os.path.splitext(py_file)[0] + '.py'
-            py_file = os.path.join('prymatex', 'ui', py_file)
+            py_file = os.path.join(py_path, py_file)
             
         
         if has_been_updated(ui_file, py_file) or self.force:
@@ -93,14 +94,26 @@ class QtBuild(build):
         elif self.verbose > 1:
             print("%s has not been modified" % rc_file )
 
+    def create_package(self, dirpath):
+        pkgpath = os.path.join("prymatex", *fullsplit(dirpath)[1:])
+        if not os.path.exists(pkgpath):        
+            os.makedirs(pkgpath)
+        init = os.path.join(pkgpath, '__init__.py')
+        if not os.path.isfile(init):
+            f = open(init, 'w')
+            f.flush()
+            f.close()
+
     def run(self):
         """Execute the command."""
         #import ipdb; ipdb.set_trace()
         self._wrapuic()
         basepath = os.path.join('resources', 'ui')
         for dirpath, _, filenames in os.walk(basepath):
+            self.create_package(dirpath)
             for filename in filenames:
                 if filename.endswith('.ui'):
+                    
                     self.compile_ui(os.path.join(dirpath, filename))
         self.compile_rc(os.path.join('resources', 'resources.qrc'))
     _wrappeduic = False

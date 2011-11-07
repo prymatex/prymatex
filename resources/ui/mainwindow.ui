@@ -183,8 +183,21 @@
     <property name="title">
      <string>&amp;Bundles</string>
     </property>
-    <addaction name="actionShowBundleEditor"/>
+    <widget class="QMenu" name="menuBundle_Editor">
+     <property name="title">
+      <string>Bundle Editor</string>
+     </property>
+     <addaction name="actionShowBundleEditor"/>
+     <addaction name="separator"/>
+     <addaction name="actionEditCommands"/>
+     <addaction name="actionEditLanguages"/>
+     <addaction name="actionEditSnippets"/>
+     <addaction name="separator"/>
+     <addaction name="actionReloadBundles"/>
+    </widget>
     <addaction name="actionSelectBundleItem"/>
+    <addaction name="separator"/>
+    <addaction name="menuBundle_Editor"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuPreferences">
@@ -591,22 +604,6 @@
     <string>About &amp;Qt</string>
    </property>
   </action>
-  <action name="actionShowBundleEditor">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Show Bundle Editor</string>
-   </property>
-  </action>
-  <action name="actionSelectBundleItem">
-   <property name="text">
-    <string>Select Bundle Item</string>
-   </property>
-   <property name="shortcut">
-    <string>Meta+Ctrl+T</string>
-   </property>
-  </action>
   <action name="actionNewFromTemplate">
    <property name="enabled">
     <bool>true</bool>
@@ -624,14 +621,6 @@
    </property>
    <property name="text">
     <string>Show Tabs And Spaces</string>
-   </property>
-  </action>
-  <action name="actionShowIndentation">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show Indentation</string>
    </property>
   </action>
   <action name="actionShowLineAndParagraphs">
@@ -705,9 +694,49 @@
     <string>Remove All Recent Files</string>
    </property>
   </action>
-  <action name="actionRr">
+  <action name="actionShowBundleEditor">
    <property name="text">
-    <string>rr</string>
+    <string>Show Bundle Editor</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+Alt+B</string>
+   </property>
+  </action>
+  <action name="actionEditCommands">
+   <property name="text">
+    <string>Edit Commands</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+Alt+C</string>
+   </property>
+  </action>
+  <action name="actionEditLanguages">
+   <property name="text">
+    <string>Edit Languages</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+Alt+L</string>
+   </property>
+  </action>
+  <action name="actionEditSnippets">
+   <property name="text">
+    <string>Edit Snippets</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+Alt+S</string>
+   </property>
+  </action>
+  <action name="actionReloadBundles">
+   <property name="text">
+    <string>Reload Bundles</string>
+   </property>
+  </action>
+  <action name="actionSelectBundleItem">
+   <property name="text">
+    <string>Select Bundle Item</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+T</string>
    </property>
   </action>
  </widget>

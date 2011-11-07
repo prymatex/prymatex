@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TemplateFile</class>
- <widget class="QWidget" name="TemplateFile">
+ <class>Macro</class>
+ <widget class="QWidget" name="Macro">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -20,6 +20,13 @@
    <property name="margin">
     <number>0</number>
    </property>
+   <item>
+    <widget class="QListView" name="listViewAction">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QPlainTextEdit" name="content"/>
    </item>

@@ -294,8 +294,23 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionShowBundleEditor_triggered(self):
         #TODO: mejorar esto
-        self.application.bundleEditor.exec_()
+        self.application.bundleEditor.execEditor()
 
+    @QtCore.pyqtSlot()
+    def on_actionEditCommands_triggered(self):
+        #TODO: mejorar esto
+        self.application.bundleEditor.execCommand()
+    
+    @QtCore.pyqtSlot()
+    def on_actionEditLanguages_triggered(self):
+        #TODO: mejorar esto
+        self.application.bundleEditor.execLanguage()
+    
+    @QtCore.pyqtSlot()
+    def on_actionEditSnippets_triggered(self):
+        #TODO: mejorar esto
+        self.application.bundleEditor.execSnippet()
+        
     @QtCore.pyqtSlot()
     def on_actionSelectBundleItem_triggered(self):
         editor = self.currentEditor

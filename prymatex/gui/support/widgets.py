@@ -3,14 +3,15 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.ui.editorsnippet import Ui_Snippet
-from prymatex.ui.editorcommand import Ui_Command
-from prymatex.ui.editortemplate import Ui_Template
-from prymatex.ui.editordragcommand import Ui_DragCommand
-from prymatex.ui.editorlanguage import Ui_Language
-from prymatex.ui.editorbundle import Ui_Menu
-from prymatex.ui.editortemplatefile import Ui_TemplateFile
-from prymatex.ui.editorpreference import Ui_Preference
+from prymatex.ui.support.snippet import Ui_Snippet
+from prymatex.ui.support.command import Ui_Command
+from prymatex.ui.support.template import Ui_Template
+from prymatex.ui.support.dragcommand import Ui_DragCommand
+from prymatex.ui.support.language import Ui_Language
+from prymatex.ui.support.bundle import Ui_Menu
+from prymatex.ui.support.templatefile import Ui_TemplateFile
+from prymatex.ui.support.preference import Ui_Preference
+from prymatex.ui.support.macro import Ui_Macro
 from pprint import pformat
 import ast
 
@@ -541,6 +542,32 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     
     def edit(self, bundleItem):
         super(PMXPreferenceWidget, self).edit(bundleItem)
+        content = bundleItem.hash
+        self.settings.setPlainText(pformat(content['settings']))
+
+class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
+    TYPE = 'macro'
+    def __init__(self, parent = None):
+        super(PMXMacroWidget, self).__init__(parent)
+        self.setupUi(self)
+        self.settings.setTabStopWidth(TABWIDTH)
+    
+    @property
+    def title(self):
+        if self.bundleItem != None:
+            return 'Macro (read only): "%s"' % self.bundleItem.name
+        return super(PMXMacroWidget, self).title()
+    
+    @property
+    def isChanged(self):
+        return False
+        
+    def getScope(self):
+        scope = super(PMXMacroWidget, self).getScope()
+        return scope is not None and scope or ""
+    
+    def edit(self, bundleItem):
+        super(PMXMacroWidget, self).edit(bundleItem)
         content = bundleItem.hash
         self.settings.setPlainText(pformat(content['settings']))
 

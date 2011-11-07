@@ -10,7 +10,7 @@ from prymatex.gui.support.widgets import PMXSnippetWidget, PMXCommandWidget, PMX
 from prymatex.gui.support.widgets import PMXBundleWidget,PMXTemplateFileWidget, PMXTemplateWidget
 from prymatex.gui.support.widgets import PMXPreferenceWidget, PMXLanguageWidget, PMXEditorBaseWidget
 
-class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
+class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     ##########################################################
     # Settings
     ##########################################################
@@ -33,6 +33,25 @@ class PMXBundleEditor(Ui_BundleEditor, QtGui.QDialog, PMXObject):
 
     def on_bundleEditor_finished(self, code):
         self.saveChanges()
+    
+    #==========================================================
+    # exec the dialog Show
+    #==========================================================
+    def execEditor(self):
+        self.proxyTreeModel.setFilterRegExp("")
+        return self.exec_()
+    
+    def execCommand(self):
+        self.proxyTreeModel.setFilterRegExp("command")
+        return self.exec_()
+    
+    def execLanguage(self):
+        self.proxyTreeModel.setFilterRegExp("syntax")
+        return self.exec_()
+    
+    def execSnippet(self):
+        self.proxyTreeModel.setFilterRegExp("snippet")
+        return self.exec_()
         
     def configEditorWidgets(self):
         self.stackedWidget = QtGui.QStackedWidget()
