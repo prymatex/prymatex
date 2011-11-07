@@ -47,14 +47,28 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
         character = event.text()
         pairs = filter(lambda pair: character in pair, settings.smartTypingPairs)
         self.pair = pairs[0] if len(pairs) == 1 else []
-        if cursor.hasSelection(): return bool(self.pair)
-        if not bool(self.pair): return False
-        #No Tengo seleccion vamos a intentar algo radical
-        open = map(lambda pair: pair[0], settings.smartTypingPairs)
-        close = map(lambda pair: pair[1], settings.smartTypingPairs)
-        self.cursorOpen = self.cursorClose = None
         
-        if character in open:
+        #Si no tengo nada termino
+        if not bool(self.pair): return False
+
+        #Vamos a intentar algo radical
+        openBraces = map(lambda pair: pair[0], settings.smartTypingPairs)
+        closeBraces = map(lambda pair: pair[1], settings.smartTypingPairs)
+        self.cursorOpen = self.cursorClose = None
+        if cursor.hasSelection():
+            current = cursor.selectedText()
+            if character in openBraces:
+                #Es un caracter especial de apertura
+                self.cursorOpen = cursor
+                index = openBraces.index(character)
+                self.cursorClose = editor.findTypingPair(character, closeBraces[index], cursor)
+            elif character in closeBraces:
+                #Es un caracter especial de cierre
+                self.cursorClose = cursor
+                index = closeBraces.index(character)
+                self.cursorOpen = editor.findTypingPair(character, openBraces[index], cursor, True)
+            return True
+        elif character in openBraces:
             leftChar = cursor.document().characterAt(cursor.position() - 1)
             rightChar = cursor.document().characterAt(cursor.position())
             #Buscar de izquierda a derecha por dentro
@@ -75,7 +89,7 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
                 self.cursorClose = editor.findTypingPair(pair[0], pair[1], self.cursorOpen)
                 self.cursorClose.setPosition(self.cursorClose.selectionEnd())
                 return bool(self.pair)
-        elif character in close and character not in open:
+        elif character in closeBraces and character not in openBraces:
             rightChar = cursor.document().characterAt(cursor.position())
             leftChar = cursor.document().characterAt(cursor.position() - 1)
             #Buscar de derecha a izquierda por dentro
@@ -97,16 +111,23 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
                 self.cursorOpen.setPosition(self.cursorOpen.selectionStart())
                 return bool(self.pair)
         return bool(self.pair)
-            
+            #438833 421870 saraniti dito para el miercoles 23 (cancelar)
+            # olmos 16 ecografia obstetrica
+
     def execute(self, editor, event):
         cursor = editor.textCursor()
+        cursor.beginEditBlock()
         if cursor.hasSelection():
-            position = cursor.selectionStart()
-            text = self.pair[0] + cursor.selectedText() + self.pair[1]
-            cursor.insertText(text)
-            cursor.setPosition(position)
-            cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
-            editor.setTextCursor(cursor)
+            if self.cursorClose is not None and self.cursorOpen is not None:
+                self.cursorOpen.insertText(self.pair[0])
+                self.cursorClose.insertText(self.pair[1])
+            else:
+                position = cursor.selectionStart()
+                text = self.pair[0] + cursor.selectedText() + self.pair[1]
+                cursor.insertText(text)
+                cursor.setPosition(position)
+                cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
+                editor.setTextCursor(cursor)
         elif self.cursorOpen is None:
             position = cursor.position()
             cursor.insertText("%s%s" % (self.pair[0], self.pair[1]))
@@ -115,6 +136,7 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
         else:
             self.cursorOpen.insertText(self.pair[0])
             self.cursorClose.insertText(self.pair[1])
+        cursor.endEditBlock()
 
 class MoveCursorToHomeHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Home

@@ -12,9 +12,9 @@ class PMXEditorFolding(object):
         self.folding = []
 
     def on_foldingChanged(self, block):
-        if block in self.blocks:
+        if block in self.folding:
             userData = block.userData()
-            if userData.foldingMark == PMXSyntax.FOLDING_NONE:
+            if userData.foldingMark == PMXSyntax.FOLDING_NONE and block in self.blocks:
                 self.blocks.remove(block)
         else:
             indexes = map(lambda block: block.blockNumber(), self.blocks)
@@ -89,7 +89,7 @@ class PMXEditorFolding(object):
         """ Return previous more indent block """
         indent = block.userData().indent
         while True:
-            block = block.previous()            
+            block = block.previous()    
             if not block.isValid() or block.userData() is None:
                 return None
             if indent < block.userData().indent:
