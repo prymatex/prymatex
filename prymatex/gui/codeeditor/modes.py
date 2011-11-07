@@ -145,8 +145,8 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.cursors = []
         self.editor.modeChanged.emit()
 
-    def extraSelections(self):
-        extraSelections = []
+    def highlightCurrentLines(self):
+        extraSelections = self.editor.extraSelections()
         for cursor in self.cursors:
             selection = QtGui.QTextEdit.ExtraSelection()
             selection.format.setBackground(self.editor.colours['lineHighlight'])
@@ -159,7 +159,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 selection.format.setBackground(self.editor.colours['selection'])
                 selection.cursor = cursor
                 extraSelections.append(selection)
-        return extraSelections
+        self.editor.setExtraSelections(extraSelections)
 
     @property
     def isDragCursor(self):
@@ -216,7 +216,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         if emit:
             #Arranco modo multicursor
             self.editor.modeChanged.emit()
-        self.editor.highlightCurrentLine()
+        self.editor.highlightCurrent()
         #Clean last acction
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
         self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
@@ -305,7 +305,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 ecursor.clearSelection()
             self.editor.setTextCursor(ecursor)
             self.inactive()
-            self.editor.highlightCurrentLine()
+            self.editor.highlightCurrent()
             #Se termino la joda
         elif event.modifiers() & QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)

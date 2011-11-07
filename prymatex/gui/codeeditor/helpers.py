@@ -55,8 +55,8 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
         self.cursorOpen = self.cursorClose = None
         
         if character in open:
-            rightChar = cursor.document().characterAt(cursor.position())
             leftChar = cursor.document().characterAt(cursor.position() - 1)
+            rightChar = cursor.document().characterAt(cursor.position())
             #Buscar de izquierda a derecha por dentro
             pairs = filter(lambda pair: leftChar == pair[0] and rightChar != pair[1], settings.smartTypingPairs)
             if pairs:

@@ -71,7 +71,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
         self.syntaxHighlighter.rehighlight()
-        self.highlightCurrentLine()
+        self.highlightCurrent()
     
     #================================================================
     # Regular expresions
@@ -154,7 +154,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def connectSignals(self):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
-        self.cursorPositionChanged.connect(self.highlightCurrentLine)
+        self.cursorPositionChanged.connect(self.highlightCurrent)
         self.modificationChanged.connect(self.updateTabStatus)
 
     def updateTabStatus(self):
@@ -231,29 +231,23 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         if backward:
             flags |= QtGui.QTextDocument.FindBackward
         if cursor.hasSelection():
-            print cursor.selectedText()
-            if backward:
-                cursor.setPosition(cursor.selectionEnd())
-            else:
-                cursor.setPosition(cursor.selectionStart())
-        c1 = cursor.document().find(b1, cursor, flags)
-        c2 = cursor.document().find(b2, cursor, flags)
+            startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
+        else:
+            startPosition = cursor.position()
+        c1 = cursor.document().find(b1, startPosition, flags)
+        c2 = cursor.document().find(b2, startPosition, flags)
         if backward:
             while c1 > c2:
                 c1 = cursor.document().find(b1, c1.selectionStart(), flags)
                 if c1 > c2:
                     c2 = cursor.document().find(b2, c2.selectionStart(), flags)
-                else:
-                    break
         else:
             while c1 < c2:
-                c2 = cursor.document().find(b2, c2.selectionEnd(), flags)
+                c1 = cursor.document().find(b1, c1.selectionEnd(), flags)
                 if c1 < c2:
-                    c1 = cursor.document().find(b1, c1.selectionEnd(), flags)
-                else:
-                    break
+                    c2 = cursor.document().find(b2, c2.selectionEnd(), flags)
         return c2
-        
+
     def getFlags(self):
         flags = 0
         options = self.document().defaultTextOption()
@@ -334,57 +328,80 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
         self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+
+    def highlightCurrentBrace(self, cursor = None):
+        cursor = QtGui.QTextCursor(self.textCursor())
+        cursor.clearSelection()
+        scope = cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
+        settings = self.application.supportManager.getPreferenceSettings(scope)
+        differentPairs = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
+        openBraces = map(lambda pair: pair[0], differentPairs)
+        closeBraces = map(lambda pair: pair[1], differentPairs)
+        
+        closeCursor = openCursor = None
+        leftChar = cursor.document().characterAt(cursor.position() - 1)
+        rightChar = cursor.document().characterAt(cursor.position())
+        
+        if leftChar in openBraces or rightChar in openBraces:
+            if leftChar in openBraces:
+                cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+                index = openBraces.index(leftChar)
+                openCursor = cursor
+                closeCursor = self.findTypingPair(leftChar, closeBraces[index], openCursor)
+            else:
+                cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+                index = openBraces.index(rightChar)
+                openCursor = cursor
+                closeCursor = self.findTypingPair(rightChar, closeBraces[index], openCursor)
+        elif leftChar in closeBraces or rightChar in closeBraces:
+            if leftChar in closeBraces:
+                cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+                closeCursor = cursor
+                index = closeBraces.index(leftChar)
+                openCursor = self.findTypingPair(leftChar, openBraces[index], closeCursor, True)
+            else:
+                cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+                closeCursor = cursor
+                index = closeBraces.index(rightChar)
+                openCursor = self.findTypingPair(rightChar, openBraces[index], closeCursor, True)
+
+        if closeCursor is not None or openCursor is not None:
+            extraSelections = self.extraSelections()
+            if openCursor is not None:
+                selection = QTextEdit.ExtraSelection()
+                selection.format.setForeground(QtGui.QBrush(self.colours['selection']))
+                #backgroundColor = self.colours['lineHighlight'] if cursor.block() == openCursor.block() else self.colours['background']
+                selection.format.setBackground(QtGui.QBrush(QtCore.Qt.transparent))
+                selection.cursor = closeCursor
+                extraSelections.append(selection)
+            if closeCursor is not None:
+                selection = QTextEdit.ExtraSelection()
+                selection.format.setForeground(QtGui.QBrush(self.colours['selection']))
+                #backgroundColor = self.colours['lineHighlight'] if cursor.block() == closeCursor.block() else self.colours['background']
+                selection.format.setBackground(QtGui.QBrush(QtCore.Qt.transparent))
+                selection.cursor = openCursor
+                extraSelections.append(selection)
+            self.setExtraSelections(extraSelections)
+
+    def highlightCurrent(self):
+        #Clean current selection
+        self.setExtraSelections([])
+        if self.multiCursorMode.isActive():
+            self.multiCursorMode.highlightCurrentLines()
+        else:
+            self.highlightCurrentLine()
+        self.highlightCurrentBrace()
         
     def highlightCurrentLine(self):
-        extraSelections = []
-        if self.multiCursorMode.isActive():
-            extraSelections = self.multiCursorMode.extraSelections()
-        elif not self.isReadOnly():
-            selection = QTextEdit.ExtraSelection()
-            selection.format.setBackground(self.colours['lineHighlight'])
-            selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-            selection.cursor = self.textCursor()
-            selection.cursor.clearSelection()
-            extraSelections.append(selection)
-        cursor = self.textCursor()
-        scope = self.getCurrentScope()
-        cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-        character = cursor.selectedText()
-        settings = self.application.supportManager.getPreferenceSettings(scope)
-        braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
-        openBraces = map(lambda pair: pair[0], braces)
-        closeBraces = map(lambda pair: pair[1], braces)
-        if character in openBraces:
-            openCursor = cursor
-            index = openBraces.index(character)
-            closeCursor = self.findTypingPair(character, closeBraces[index], openCursor)
-        elif character in closeBraces:
-            closeCursor = cursor
-            index = closeBraces.index(character)
-            openCursor = self.findTypingPair(character, openBraces[index], closeCursor, True)
-        else:
-            self.setExtraSelections(extraSelections)
-            return
-        if closeCursor is not None:
-            selection = QTextEdit.ExtraSelection()
-            #selection.format.setFontWeight(QtGui.QFont.Bold)
-            selection.format.setFontStrikeOut(True)
-            selection.cursor = openCursor
-            extraSelections.append(selection)
-            selection = QTextEdit.ExtraSelection()
-            #selection.format.setFontWeight(QtGui.QFont.Bold)
-            selection.format.setFontStrikeOut(True)
-            selection.cursor = closeCursor
-            selection.cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.KeepAnchor)
-            extraSelections.append(selection)
-        else:
-            selection = QTextEdit.ExtraSelection()
-            #selection.format.setFontWeight(QtGui.QFont.Bold)
-            selection.format.setFontStrikeOut(True)
-            selection.cursor = cursor
-            extraSelections.append(selection)
+        extraSelections = self.extraSelections()
+        selection = QTextEdit.ExtraSelection()
+        selection.format.setBackground(self.colours['lineHighlight'])
+        selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+        selection.cursor = self.textCursor()
+        selection.cursor.clearSelection()
+        extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
-
+            
     def select(self, selection):
         cursor = self.textCursor()
         if selection in [self.SelectWord, self.SelectLine, self.SelectParagraph, self.SelectAll]:
