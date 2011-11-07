@@ -56,7 +56,7 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
         closeBraces = map(lambda pair: pair[1], settings.smartTypingPairs)
         self.cursorOpen = self.cursorClose = None
         if cursor.hasSelection():
-            current = cursor.selectedText()
+            character = cursor.selectedText()
             if character in openBraces:
                 #Es un caracter especial de apertura
                 self.cursorOpen = cursor
@@ -111,8 +111,6 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
                 self.cursorOpen.setPosition(self.cursorOpen.selectionStart())
                 return bool(self.pair)
         return bool(self.pair)
-            #438833 421870 saraniti dito para el miercoles 23 (cancelar)
-            # olmos 16 ecografia obstetrica
 
     def execute(self, editor, event):
         cursor = editor.textCursor()
