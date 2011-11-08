@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Mon Nov  7 18:33:20 2011
+# Created: Tue Nov  8 19:16:50 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,8 +67,8 @@ class Ui_MainWindow(object):
         self.menuSelect.setObjectName(_fromUtf8("menuSelect"))
         self.menuBundles = QtGui.QMenu(self.menubar)
         self.menuBundles.setObjectName(_fromUtf8("menuBundles"))
-        self.menuBundle_Editor = QtGui.QMenu(self.menuBundles)
-        self.menuBundle_Editor.setObjectName(_fromUtf8("menuBundle_Editor"))
+        self.menuBundleEditor = QtGui.QMenu(self.menuBundles)
+        self.menuBundleEditor.setObjectName(_fromUtf8("menuBundleEditor"))
         self.menuPreferences = QtGui.QMenu(self.menubar)
         self.menuPreferences.setObjectName(_fromUtf8("menuPreferences"))
         MainWindow.setMenuBar(self.menubar)
@@ -260,6 +260,12 @@ class Ui_MainWindow(object):
         self.actionReloadBundles.setObjectName(_fromUtf8("actionReloadBundles"))
         self.actionSelectBundleItem = QtGui.QAction(MainWindow)
         self.actionSelectBundleItem.setObjectName(_fromUtf8("actionSelectBundleItem"))
+        self.actionGoToLine = QtGui.QAction(MainWindow)
+        self.actionGoToLine.setObjectName(_fromUtf8("actionGoToLine"))
+        self.actionGoToTab = QtGui.QAction(MainWindow)
+        self.actionGoToTab.setObjectName(_fromUtf8("actionGoToTab"))
+        self.actionGoToSymbol = QtGui.QAction(MainWindow)
+        self.actionGoToSymbol.setObjectName(_fromUtf8("actionGoToSymbol"))
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuFile.addAction(self.actionNew)
@@ -307,6 +313,10 @@ class Ui_MainWindow(object):
         self.menuNavigation.addSeparator()
         self.menuNavigation.addAction(self.actionNextTab)
         self.menuNavigation.addAction(self.actionPreviousTab)
+        self.menuNavigation.addAction(self.actionGoToSymbol)
+        self.menuNavigation.addAction(self.actionGoToTab)
+        self.menuNavigation.addSeparator()
+        self.menuNavigation.addAction(self.actionGoToLine)
         self.menuHelp.addAction(self.actionReport_Bug)
         self.menuHelp.addAction(self.actionTranslate_this_application)
         self.menuHelp.addAction(self.actionProjectHomepage)
@@ -332,16 +342,16 @@ class Ui_MainWindow(object):
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionFind)
         self.menuEdit.addAction(self.actionFindReplace)
-        self.menuBundle_Editor.addAction(self.actionShowBundleEditor)
-        self.menuBundle_Editor.addSeparator()
-        self.menuBundle_Editor.addAction(self.actionEditCommands)
-        self.menuBundle_Editor.addAction(self.actionEditLanguages)
-        self.menuBundle_Editor.addAction(self.actionEditSnippets)
-        self.menuBundle_Editor.addSeparator()
-        self.menuBundle_Editor.addAction(self.actionReloadBundles)
+        self.menuBundleEditor.addAction(self.actionShowBundleEditor)
+        self.menuBundleEditor.addSeparator()
+        self.menuBundleEditor.addAction(self.actionEditCommands)
+        self.menuBundleEditor.addAction(self.actionEditLanguages)
+        self.menuBundleEditor.addAction(self.actionEditSnippets)
+        self.menuBundleEditor.addSeparator()
+        self.menuBundleEditor.addAction(self.actionReloadBundles)
         self.menuBundles.addAction(self.actionSelectBundleItem)
         self.menuBundles.addSeparator()
-        self.menuBundles.addAction(self.menuBundle_Editor.menuAction())
+        self.menuBundles.addAction(self.menuBundleEditor.menuAction())
         self.menuBundles.addSeparator()
         self.menuPreferences.addAction(self.actionShowMenus)
         self.menuPreferences.addAction(self.actionShowStatus)
@@ -375,7 +385,7 @@ class Ui_MainWindow(object):
         self.menuEdit.setTitle(_('&Edit'))
         self.menuSelect.setTitle(_('Select'))
         self.menuBundles.setTitle(_('&Bundles'))
-        self.menuBundle_Editor.setTitle(_('Bundle Editor'))
+        self.menuBundleEditor.setTitle(_('Bundle Editor'))
         self.menuPreferences.setTitle(_('Preferences'))
         self.actionNew.setText(_('&New'))
         self.actionNew.setShortcut(_('Ctrl+N'))
@@ -476,6 +486,9 @@ class Ui_MainWindow(object):
         self.actionReloadBundles.setText(_('Reload Bundles'))
         self.actionSelectBundleItem.setText(_('Select Bundle Item'))
         self.actionSelectBundleItem.setShortcut(_('Meta+Ctrl+T'))
+        self.actionGoToLine.setText(_('Go To Line'))
+        self.actionGoToTab.setText(_('Go To Tab'))
+        self.actionGoToSymbol.setText(_('Go To Symbol'))
 
 from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc

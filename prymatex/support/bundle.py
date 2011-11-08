@@ -112,7 +112,7 @@ class PMXBundle(PMXManagedObject):
         super(PMXBundle, self).__init__(uuid, namespace, path)
         self.enabled = True
         self.populated = False
-        self.support = None
+        self.support = None    #supportPath
         self.load(hash)
 
     def setSupport(self, support):

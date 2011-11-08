@@ -167,6 +167,18 @@ class TabIndentHelper(PMXBaseEditorHelper):
         else:
             editor.textCursor().insertText(editor.tabKeyBehavior)
 
+class BackspaceUnindentHelper(PMXBaseEditorHelper):
+    KEY = QtCore.Qt.Key_Backspace
+    def accept(self, editor, event, cursor, scope):
+        if cursor.hasSelection(): return False
+        indent = len(cursor.block().userData().indent)
+        return indent != 0 and indent == cursor.columnNumber()
+        
+    def execute(self, editor, event):
+        cursor = editor.textCursor()
+        for _ in range(len(editor.tabKeyBehavior)):
+            cursor.deletePreviousChar()
+
 class BacktabUnindentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Backtab
     def execute(self, editor, event):
@@ -181,19 +193,41 @@ class BacktabUnindentHelper(PMXBaseEditorHelper):
             for _ in range(counter):
                 cursor.deletePreviousChar()
 
+class SmartUnindentHelper(PMXBaseEditorHelper):
+    KEY = QtCore.Qt.Key_Any
+    def accept(self, editor, event, cursor, scope):
+        if event.text():
+            settings = self.application.supportManager.getPreferenceSettings(scope)
+            block = cursor.block()
+            indentMark = settings.indent(block.text() + event.text())
+            if indentMark == PMXPreferenceSettings.INDENT_DECREASE:
+                previous = block.previous()
+                return previous.isValid() and block.userData().indent >= previous.userData().indent
+        return False
+        
+    def execute(self, editor, event):
+        QtGui.QPlainTextEdit.keyPressEvent(editor, event)
+        cursor = editor.textCursor()
+        cursor.setPosition(cursor.block().position())
+        for _ in range(len(editor.tabKeyBehavior)):
+            cursor.deleteChar()
+
 class SmartIndentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Return
+    def accept(self, editor, event, cursor, scope):
+        self.settings = self.application.supportManager.getPreferenceSettings(scope)
+        return True
+        
     def execute(self, editor, event):
         cursor = editor.textCursor()
         block = cursor.block()
-        prev = cursor.block().previous()
-        line = block.text()
+        previousBlock = block.previous()
+        text = block.text()[:cursor.columnNumber()]
         if editor.document().blockCount() == 1:
-            syntax = self.application.supportManager.findSyntaxByFirstLine(line)
+            syntax = self.application.supportManager.findSyntaxByFirstLine(text)
             if syntax is not None:
                 editor.setSyntax(syntax)
-        preference = editor.getPreference(block.userData().getLastScope())
-        indentMark = preference.indent(line)
+        indentMark = self.settings.indent(text)
         QtGui.QPlainTextEdit.keyPressEvent(editor, event)
         if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
             self.debug("Increase indent")
@@ -204,7 +238,8 @@ class SmartIndentHelper(PMXBaseEditorHelper):
             self.debug("Unindent")
         elif indentMark == PMXPreferenceSettings.INDENT_DECREASE:
             self.debug("Decrease indent")
-            cursor.insertText(prev.userData().indent[:len(editor.tabKeyBehavior)])
+            if previousBlock.isValid():
+                cursor.insertText(previousBlock.userData().indent)
         else:
             self.debug("Preserve indent")
             cursor.insertText(block.userData().indent)

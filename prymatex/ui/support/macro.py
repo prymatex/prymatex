@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/macro.ui'
 #
-# Created: Mon Nov  7 18:31:02 2011
+# Created: Tue Nov  8 19:16:51 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,13 +23,14 @@ class Ui_Macro(object):
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.listViewAction = QtGui.QListView(Macro)
-        self.listViewAction.setAlternatingRowColors(True)
-        self.listViewAction.setObjectName(_fromUtf8("listViewAction"))
-        self.verticalLayout.addWidget(self.listViewAction)
-        self.content = QtGui.QPlainTextEdit(Macro)
-        self.content.setObjectName(_fromUtf8("content"))
-        self.verticalLayout.addWidget(self.content)
+        self.listActionWidget = QtGui.QListWidget(Macro)
+        self.listActionWidget.setAlternatingRowColors(True)
+        self.listActionWidget.setObjectName(_fromUtf8("listActionWidget"))
+        self.verticalLayout.addWidget(self.listActionWidget)
+        self.argument = QtGui.QPlainTextEdit(Macro)
+        self.argument.setReadOnly(True)
+        self.argument.setObjectName(_fromUtf8("argument"))
+        self.verticalLayout.addWidget(self.argument)
 
         self.retranslateUi(Macro)
         QtCore.QMetaObject.connectSlotsByName(Macro)

@@ -551,7 +551,7 @@ class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
     def __init__(self, parent = None):
         super(PMXMacroWidget, self).__init__(parent)
         self.setupUi(self)
-        self.content.setTabStopWidth(TABWIDTH)
+        self.argument.setTabStopWidth(TABWIDTH)
     
     @property
     def title(self):
@@ -566,12 +566,13 @@ class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
     def on_listActionWidget_itemClicked(self, item):
         index = self.listActionWidget.indexFromItem(item)
         row = index.row()
-        print row
-        argument = bundleItem.commands[row]['argument']
-        self.argument.setPlainText(pformat(argument))
+        if 'argument' in self.bundleItem.commands[row]:
+            argument = self.bundleItem.commands[row]['argument']
+            self.argument.setPlainText(pformat(argument))
 
     def edit(self, bundleItem):
         super(PMXMacroWidget, self).edit(bundleItem)
+        self.listActionWidget.clear()
         commands = bundleItem.commands
         for command in commands:
             item = QtGui.QListWidgetItem(command['command'], self.listActionWidget, self.COMMAND)

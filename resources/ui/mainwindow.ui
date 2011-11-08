@@ -134,6 +134,10 @@
     <addaction name="separator"/>
     <addaction name="actionNextTab"/>
     <addaction name="actionPreviousTab"/>
+    <addaction name="actionGoToSymbol"/>
+    <addaction name="actionGoToTab"/>
+    <addaction name="separator"/>
+    <addaction name="actionGoToLine"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -183,7 +187,7 @@
     <property name="title">
      <string>&amp;Bundles</string>
     </property>
-    <widget class="QMenu" name="menuBundle_Editor">
+    <widget class="QMenu" name="menuBundleEditor">
      <property name="title">
       <string>Bundle Editor</string>
      </property>
@@ -197,7 +201,7 @@
     </widget>
     <addaction name="actionSelectBundleItem"/>
     <addaction name="separator"/>
-    <addaction name="menuBundle_Editor"/>
+    <addaction name="menuBundleEditor"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuPreferences">
@@ -737,6 +741,21 @@
    </property>
    <property name="shortcut">
     <string>Meta+Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionGoToLine">
+   <property name="text">
+    <string>Go To Line</string>
+   </property>
+  </action>
+  <action name="actionGoToTab">
+   <property name="text">
+    <string>Go To Tab</string>
+   </property>
+  </action>
+  <action name="actionGoToSymbol">
+   <property name="text">
+    <string>Go To Symbol</string>
    </property>
   </action>
  </widget>

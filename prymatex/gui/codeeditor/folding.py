@@ -62,7 +62,7 @@ class PMXEditorFolding(object):
                 #Esta abriendo, esta menos indentado?
                 if userData.indent <= currentIndent and len(self.folding) > 0:
                     #Hay que cerrar algo antes
-                    closeBlock = self.findPreviousMoreIndentBlock(block)
+                    closeBlock = self.editor.findPreviousMoreIndentBlock(block)
                     if closeBlock is not None:
                         lenIndent = len(userData.indent)
                         if lenIndent:
@@ -86,17 +86,6 @@ class PMXEditorFolding(object):
                 closeBlock.userData().foldingMark = -nest
                 self.folding.append(closeBlock)
 
-    def findPreviousMoreIndentBlock(self, block):
-        """ Return previous more indent block """
-        indent = block.userData().indent
-        while True:
-            block = block.previous()    
-            if not block.isValid() or block.userData() is None:
-                return None
-            if indent < block.userData().indent:
-                break
-        return block
-    
     def getFoldingMark(self, block):
         if block in self.folding:
             userData = block.userData()

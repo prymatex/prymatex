@@ -98,9 +98,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     ShowFolding = 0x10
     
     editorHelpers = {
-        QtCore.Qt.Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper()],
+        QtCore.Qt.Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper(), helpers.SmartUnindentHelper() ],
         QtCore.Qt.Key_Tab: [ helpers.TabTriggerHelper(), helpers.TabIndentHelper() ],
         QtCore.Qt.Key_Backtab: [ helpers.BacktabUnindentHelper() ],
+        QtCore.Qt.Key_Backspace: [ helpers.BackspaceUnindentHelper() ],
         QtCore.Qt.Key_Home: [ helpers.MoveCursorToHomeHelper() ],
         QtCore.Qt.Key_Return: [ helpers.SmartIndentHelper() ],
         QtCore.Qt.Key_Insert: [ helpers.OverwriteHelper() ]
@@ -492,10 +493,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     # Keyboard Events
     #=======================================================================
     def keyPressEvent(self, event):
-        '''
+        """
         This method is called whenever a key is pressed. The key code is stored in event.key()
         http://manual.macromates.com/en/working_with_text
-        '''
+        """
         
         #Primero ver si tengo un modo activo,
         for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
@@ -522,23 +523,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
 
         #Luego de tratar el evento, solo si se inserto algo de texto
         if event.text() != "":
-            self.keyPressIndent(event)
             completionPrefix = self.getCurrentWord()
             if self.completerMode.isActive() and completionPrefix != self.completerMode.completionPrefix():
                 self.completerMode.setCompletionPrefix(completionPrefix)
                 self.completerMode.complete(self.cursorRect())
-    
-    #=======================================================================
-    # After Keyboard Events
-    #=======================================================================
-    def keyPressIndent(self, event):
-        cursor = self.textCursor()
-        block = cursor.block()
-        prev = block.previous()
-        preference = self.getPreference(block.userData().getLastScope())
-        indentMark = preference.indent(block.text())
-        if indentMark == PMXPreferenceSettings.INDENT_DECREASE and prev.isValid() and block.userData().indent == prev.userData().indent:
-            self.unindentBlocks()
     
     #==========================================================================
     # Bundle Items
@@ -809,12 +797,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     #===========================================================================
     # Text Indentation
     #===========================================================================
-    def increaseIndent(self, indentation):
-        self.indent(indentation + (self.tabKeyBehavior))
-    
-    def decreaseIndent(self, indentation):
-        self.unindentBlocks()
-        
+    def findPreviousMoreIndentBlock(self, block):
+        """ Return previous more indent block """
+        indent = block.userData().indent
+        while True:
+            block = block.previous()    
+            if not block.isValid() or block.userData() is None:
+                return None
+            if indent < block.userData().indent:
+                break
+        return block
+     
     def indentBlocks(self):
         '''
         Indents text, block selections.
@@ -848,10 +841,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
             start = start.next()
         del new_cursor
         cursor.endEditBlock()
-
-    # FIXME: Return something sensible :P
-    def canUnindent(self):
-        return True
     
     #===========================================================================
     # Drag and Drop

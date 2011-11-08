@@ -36,21 +36,20 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     #==========================================================
     # exec the dialog Show
     #==========================================================
-    def execEditor(self):
-        self.proxyTreeModel.setFilterRegExp("")
+    def execEditor(self, filter = ""):
+        index = self.comboBoxItemFilter.findData(filter)
+        self.comboBoxItemFilter.setCurrentIndex(index)
+        self.proxyTreeModel.setFilterRegExp(filter)
         return self.exec_()
     
     def execCommand(self):
-        self.proxyTreeModel.setFilterRegExp("command")
-        return self.exec_()
+        return self.execEditor("command")
     
     def execLanguage(self):
-        self.proxyTreeModel.setFilterRegExp("syntax")
-        return self.exec_()
+        return self.execEditor("syntax")
     
     def execSnippet(self):
-        self.proxyTreeModel.setFilterRegExp("snippet")
-        return self.exec_()
+        return self.execEditor("snippet")
         
     def configEditorWidgets(self):
         self.stackedWidget = QtGui.QStackedWidget()
