@@ -550,7 +550,7 @@ class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
     def __init__(self, parent = None):
         super(PMXMacroWidget, self).__init__(parent)
         self.setupUi(self)
-        self.settings.setTabStopWidth(TABWIDTH)
+        self.content.setTabStopWidth(TABWIDTH)
     
     @property
     def title(self):
@@ -561,15 +561,11 @@ class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
     @property
     def isChanged(self):
         return False
-        
-    def getScope(self):
-        scope = super(PMXMacroWidget, self).getScope()
-        return scope is not None and scope or ""
-    
+            
     def edit(self, bundleItem):
         super(PMXMacroWidget, self).edit(bundleItem)
-        content = bundleItem.hash
-        self.settings.setPlainText(pformat(content['settings']))
+        commands = bundleItem.commands
+        self.content.setPlainText(pformat(commands))
 
 class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     TYPE = 'bundle'

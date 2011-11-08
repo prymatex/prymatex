@@ -53,6 +53,7 @@ class PMXEditorFolding(object):
         lastOpenIndent = currentIndent = ""
         for block in self.blocks:
             userData = block.userData()
+            if userData is None: break #FIXME: PARCHAZO PARA VER
             if userData.foldingMark <= PMXSyntax.FOLDING_STOP:
                 #Esta cerrando, es blank?
                 if block.text().strip() == "":
