@@ -43,6 +43,7 @@ class PMXEditorFolding(object):
         nest = 0
         for block in self.blocks:
             userData = block.userData()
+            if userData is None: break #FIXME: PARCHAZO PARA VER
             nest += userData.foldingMark
             if nest >= 0:
                 self.folding.append(block)
