@@ -28,16 +28,62 @@ class PMXMacroProcessor(PMXMacroProcessor):
         pass
 
     # Move
+    # QTextCursor::NoMove 0 Keep the cursor where it is 
+    # QTextCursor::Start 1 Move to the start of the document. 
+    # QTextCursor::StartOfLine 3 Move to the start of the current line. 
+    # QTextCursor::StartOfBlock 4 Move to the start of the current block. 
+    # QTextCursor::StartOfWord 5 Move to the start of the current word. 
+    # QTextCursor::PreviousBlock 6 Move to the start of the previous block. 
+    # QTextCursor::PreviousCharacter 7 Move to the previous character. 
+    # QTextCursor::PreviousWord 8 Move to the beginning of the previous word. 
+    # QTextCursor::WordLeft 10 Move left one word. 
+    # QTextCursor::End 11 Move to the end of the document. 
+    # QTextCursor::EndOfWord 14 Move to the end of the current word. 
+    # QTextCursor::EndOfBlock 15 Move to the end of the current block. 
+    # QTextCursor::NextBlock 16 Move to the beginning of the next block. 
+    # QTextCursor::NextCharacter 17 Move to the next character. 
+    # QTextCursor::NextWord 18 Move to the next word. 
+    # QTextCursor::WordRight 20 Move right one word. 
+    # QTextCursor::NextCell 21 Move to the beginning of the next table cell inside the current table. If the current cell is the last cell in the row, the cursor will move to the first cell in the next row. 
+    # QTextCursor::PreviousCell 22 Move to the beginning of the previous table cell inside the current table. If the current cell is the first cell in the row, the cursor will move to the last cell in the previous row. 
+    # QTextCursor::NextRow 23 Move to the first new cell of the next row in the current table. 
+    # QTextCursor::PreviousRow 24 Move to the last cell of the previous row in the current table. 
+
     def moveRight(self):
-        cursor = self.editor.textCursor()
-        cursor.setPosition(cursor.position() + 1)
-        self.editor.setTextCursor(cursor)
-   
+        #QTextCursor::Right 19 Move right one character. 
+        self.editor.textCursor().movePosition(QtGui.QTextCursor.Right)
+
     def moveLeft(self):
-        cursor = self.editor.textCursor()
-        cursor.setPosition(cursor.position() - 1)
-        self.editor.setTextCursor(cursor)
+        #QTextCursor::Left 9 Move left one character.
+        self.editor.textCursor().movePosition(QtGui.QTextCursor.Left)
+
+    def moveUp(self):
+        #QTextCursor::Up 2 Move up one line.
+        self.editor.textCursor().movePosition(QtGui.QTextCursor.Up)
+    
+    def moveDown(self):
+        #QTextCursor::Down 12 Move down one line. 
+        self.editor.textCursor().movePosition(QtGui.QTextCursor.Down)
+    
+    def moveToEndOfLine(self):
+        #QTextCursor::EndOfLine 13 Move to the end of the current line. 
+        self.editor.textCursor().movePosition(QtGui.QTextCursor.EndOfLine)
         
+    def moveToEndOfParagraph(self):
+        pass
+        
+    def moveToBeginningOfLine(self):
+        pass
+        
+    def moveToEndOfDocumentAndModifySelection(self):
+        pass
+    
+    def moveToBeginningOfDocumentAndModifySelection(self):
+        pass
+    
+    def moveRightAndModifySelection(self):
+        pass
+    
     def selectHardLine(self):
         cursor = self.editor.textCursor()
         block = cursor.block()

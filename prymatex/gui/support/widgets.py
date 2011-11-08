@@ -547,6 +547,7 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
 
 class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
     TYPE = 'macro'
+    COMMAND = 0
     def __init__(self, parent = None):
         super(PMXMacroWidget, self).__init__(parent)
         self.setupUi(self)
@@ -561,11 +562,20 @@ class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
     @property
     def isChanged(self):
         return False
-            
+    
+    def on_listActionWidget_itemClicked(self, item):
+        index = self.listActionWidget.indexFromItem(item)
+        row = index.row()
+        print row
+        argument = bundleItem.commands[row]['argument']
+        self.argument.setPlainText(pformat(argument))
+
     def edit(self, bundleItem):
         super(PMXMacroWidget, self).edit(bundleItem)
         commands = bundleItem.commands
-        self.content.setPlainText(pformat(commands))
+        for command in commands:
+            item = QtGui.QListWidgetItem(command['command'], self.listActionWidget, self.COMMAND)
+            self.listActionWidget.addItem(item)
 
 class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     TYPE = 'bundle'
