@@ -1,4 +1,6 @@
 .project
+*~
+dict.*
 *.swp
 .pydevproject
 .settings
