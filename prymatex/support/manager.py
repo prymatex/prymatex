@@ -171,13 +171,16 @@ class PMXSupportBaseManager(object):
         pass
         
     def isDeleted(self, uuid):
-        '''
-            Marcar un managed object como eliminado
-        '''
+        """
+        Retorna si un bundle item esta eliminado
+        """
         return False
 
     def isEnabled(self, uuid):
-        return False
+        """
+        Retorna si un bundle item esta activo
+        """
+        return True
     
     def setDisabled(self, uuid):
         pass
