@@ -36,8 +36,15 @@ class PMXMessageOverlay(object):
         ''' Override '''
         pass
     
-    def showMessage(self, message, timeout = 1000, icon = None, pos = None ):
+    def showMessage(self, message, timeout = 2000, icon = None, pos = None ):
+        '''
+        @param message: Text message, can be HTML
+        @param timeout: Timeout before message fades
+        @param icon: A QIcon instance to show
+        @param pos: An x, y tuple with message position
+        '''
         self.messageOverlay.setText(message)
+        self.messageOverlay.pos = pos
         self.messageOverlay.updatePosition()
         self.messageOverlay.adjustSize()
         if unicode(message):
@@ -88,6 +95,7 @@ class LabelOverlayWidget(QtGui.QLabel):
         padding: 2px;
     }
     '''
+    pos = None
     
     def __init__(self, text="", parent=None):
         print "Parent del mensaje oculto es", parent
@@ -106,18 +114,33 @@ class LabelOverlayWidget(QtGui.QLabel):
         self.updatePosition()
         return super(LabelOverlayWidget, self).setParent(parent)
   
+    __pos = None
+    @property
+    def pos(self):
+        return self.__pos
+    
+    @pos.setter       
+    def pos(self, value):
+        if not value is None:
+            assert len(value) == 2
+            assert type(value[0]) == int
+            assert type(value[1]) == int
+        self.__pos = value
+    
     def updatePosition(self):
-        
-        if hasattr(self.parent(), 'viewport'):
-            parentRect = self.parent().viewport().rect()
+        if self.pos is not None:
+            x, y = self.pos
         else:
-            parentRect = self.parent().rect()
-            
-        if not parentRect:
-            return
-            
-        x = parentRect.width() - self.width() - self.paddingLeft
-        y = parentRect.height() - self.height() - self.paddingBottom
+            if hasattr(self.parent(), 'viewport'):
+                parentRect = self.parent().viewport().rect()
+            else:
+                parentRect = self.parent().rect()
+                
+            if not parentRect:
+                return
+                
+            x = parentRect.width() - self.width() - self.paddingLeft
+            y = parentRect.height() - self.height() - self.paddingBottom
         self.setGeometry(x, y, self.width(), self.height())
         
         
