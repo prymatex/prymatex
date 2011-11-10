@@ -41,8 +41,11 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             else:
                 holder = self.editor.snippetProcessor.previousHolder(holder)
             if holder == None:
+                self.editor.showMessage("Last Holder")
                 self.setCursorPosition(self.editor.snippetProcessor.endPosition())
+                self.endSnippet()
             else:
+                self.editor.showMessage("Holder %s of %s" % (self.editor.snippetProcessor.snippet.index + 1, len(self.editor.snippetProcessor.snippet.taborder)))
                 self.editor.snippetProcessor.selectHolder(holder)
         elif event.text():
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())

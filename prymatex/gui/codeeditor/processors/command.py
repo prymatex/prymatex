@@ -16,7 +16,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     def configure(self, settings):
         self.tabTriggered = settings.get("tabTriggered", False)
-        self.disableIndent = settings.get("disableIndent", True)
+        self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
 
     def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):

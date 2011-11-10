@@ -3,10 +3,13 @@
 
 from PyQt4 import QtCore, QtGui
 from prymatex.resources import IMAGES
-from prymatex.gui.support.qtadapter import buildKeySequence, buildKeyEquivalent, RGBA2QColor, QColor2RGBA
+
+from prymatex.gui.mimes import PyMimeData
+from prymatex.gui.support import qtadapter
+from prymatex.gui.support.qtadapter import buildKeyEquivalent, RGBA2QColor, QColor2RGBA
 
 #====================================================
-# Bundle Tree Model
+# Bundle Tree Node
 #====================================================
 class PMXBundleTreeNode(object):
     ''' 
@@ -29,7 +32,7 @@ class PMXBundleTreeNode(object):
     @property
     def keyEquivalent(self):
         if self.item.keyEquivalent is not None:
-            return buildKeySequence(self.item.keyEquivalent)
+            return qtadapter.buildKeySequence(self.item.keyEquivalent)
     
     @property
     def icon(self):
@@ -107,6 +110,9 @@ class RootNode(object):
         self.name = "root"
         self.TYPE = "root"
 
+#====================================================
+# Bundle Tree Model
+#====================================================
 class PMXBundleTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, manager, parent = None):
         super(PMXBundleTreeModel, self).__init__(parent)
@@ -230,9 +236,8 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         self.endRemoveRows()
     
 #====================================================
-# Themes Styles
+# Themes Styles Row
 #====================================================
-
 class PMXThemeStyleRow(object):
     ''' 
         Theme and Style decorator
@@ -288,6 +293,9 @@ class PMXThemeStyleRow(object):
         self.STYLES_CACHE[scope] = base
         return base
 
+#====================================================
+# Themes Style Table Model
+#====================================================
 class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
     def __init__(self, manager, parent = None):
         super(PMXThemeStylesTableModel, self).__init__(parent)
@@ -304,7 +312,7 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
     def data(self, index, role):
         if not index.isValid(): 
             return QtCore.QVariant() 
-        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
             row = index.row()
             column = index.column()
             style = self.styles[row]
@@ -402,4 +410,262 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
         self.beginRemoveRows(QtCore.QModelIndex(), index, index)
         self.styles.remove(style)
         self.endRemoveRows()
+
+#===============================================
+# Bundle Menu Node
+#===============================================
+class PMXBundleMenuNode(object):
+    ITEM = 0
+    SUBMENU = 1
+    SEPARATOR = 2
+    def __init__(self, item, nodeType, parent = None):
+        self.item = item
+        self.nodeType = nodeType
+        self.parent = parent
+        self.children = []
         
+    def name(self):
+        if self.nodeType == PMXBundleMenuNode.SEPARATOR:
+            return '--------------------------------'
+        elif self.nodeType == PMXBundleMenuNode.SUBMENU:
+            return self.item['name']
+        return self.item.name
+    
+    def appendChild(self, child):
+        self.children.append(child)
+        child.parent = self
+
+    def removeChild(self, child):
+        self.children.remove(child)
+        
+    def child(self, row):
+        if len(self.children) > row:
+            return self.children[row]
+
+    def childCount(self):
+        return len(self.children)
+
+    def row(self):
+        if self.parent is not None and self in self.parent.children:  
+            return self.parent.children.index(self)
+
+    def insertChild(self, index, child):
+        self.children.insert(index, child)
+        child.parent = self
+
+#===============================================
+# Bundle Menu Tree Model
+#===============================================
+class PMXMenuTreeModel(QtCore.QAbstractItemModel):
+    def __init__(self, manager):
+        QtCore.QAbstractItemModel.__init__(self)
+        self.manager = manager
+
+    def buildMenu(self, items, parent, submenus = {}):
+        for uuid in items:
+            if uuid.startswith("-"):
+                parent.appendChild(PMXBundleMenuNode(uuid, PMXBundleMenuNode.SEPARATOR, parent))
+            else:
+                item = self.manager.getBundleItem(uuid)
+                if item != None:
+                    parent.appendChild(PMXBundleMenuNode(item, PMXBundleMenuNode.ITEM, parent))
+                elif uuid in submenus:
+                    submenu = PMXBundleMenuNode({"uuid": uuid, "name": submenus[uuid]['name']}, PMXBundleMenuNode.SUBMENU, parent)
+                    parent.appendChild(submenu)
+                    self.buildMenu(submenus[uuid]['items'], submenu, submenus)
+
+    def setMainMenu(self, mainMenu):
+        # 'items' 'submenus'
+        self.root = PMXBundleMenuNode({ "uuid":"root", "name": "root" }, PMXBundleMenuNode.SUBMENU)
+        if mainMenu is not None:
+            self.buildMenu(mainMenu['items'], self.root, mainMenu['submenus'])
+        self.layoutChanged.emit()
+        
+    def index(self, row, column, parent):
+        if not parent.isValid():
+            parent = self.root
+        else:
+            parent = parent.internalPointer()
+        
+        child = parent.child(row)
+        if child:
+            return self.createIndex(row, column, child)
+        else:
+            return QtCore.QModelIndex()
+
+    def parent(self, index):
+        if not index.isValid():
+            return QtCore.QModelIndex()  
+
+        child = index.internalPointer()
+        parent = child.parent
+        row = parent.row()
+        
+        if parent == self.root or row is None:  
+            return QtCore.QModelIndex()
+
+        return self.createIndex(row, 0, parent)
+    
+    def rowCount(self, parent):
+        if parent.column() > 0:  
+            return 0  
+
+        if not parent.isValid():  
+            parent = self.root  
+        else:
+            parent = parent.internalPointer()  
+
+        return parent.childCount()
+    
+    def columnCount(self, parent):  
+        return 1
+
+    def data(self, index, role):
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
+            node = index.internalPointer()
+            return node.name()
+        else:
+            return None
+
+    def setData(self, index, value, role):  
+        if not index.isValid():  
+            return False
+        if role == QtCore.Qt.EditRole:  
+            node = index.internalPointer()
+            if node.nodeType == node.SUBMENU:
+                node.item['name'] = value
+            elif node.nodeType == node.ITEM:
+                self.manager.updateBundle(node.item, name = value)
+            self.dataChanged.emit(index, index)
+            return True
+        return False
+
+    def supportedDropActions(self): 
+        return QtCore.Qt.MoveAction     
+
+    def flags(self, index):
+        if not index.isValid():
+            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
+        defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
+        node = index.internalPointer()
+        if node.nodeType == PMXBundleMenuNode.SUBMENU:
+            return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsEditable
+        elif node.nodeType == PMXBundleMenuNode.SEPARATOR:
+            return defaultFlags | QtCore.Qt.ItemIsDragEnabled
+        elif node.nodeType == PMXBundleMenuNode.ITEM:
+            return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsEditable
+
+    def mimeTypes(self):
+        return [ 'application/x-ets-qt4-instance' ]
+
+    def mimeData(self, index):
+        node = index[0].internalPointer()
+        mimeData = PyMimeData(node)
+        return mimeData
+
+    def dropMimeData(self, mimedata, action, row, column, parentIndex):
+        if action == QtCore.Qt.IgnoreAction:
+            return True
+        
+        if not mimedata.hasFormat("application/x-ets-qt4-instance"):
+            return False
+        
+        dragNode = mimedata.instance()
+        
+        if not parentIndex.isValid():
+            parentNode = self.root
+        else:
+            parentNode = parentIndex.internalPointer()
+
+        if dragNode.parent == parentNode:
+            currentRow = dragNode.row()
+            row = row if currentRow >= row else row - 1
+            dragNode.parent.removeChild(dragNode)
+            dragNode.parent.insertChild(row, dragNode)
+        else:
+            dragNode.parent.removeChild(dragNode)
+            parentNode.insertChild(row, dragNode)
+        
+        self.layoutChanged.emit()
+        return True
+
+#===============================================
+# Bundle Excluded Menu List Model
+#===============================================
+class PMXExcludedListModel(QtCore.QAbstractListModel):
+    def __init__(self, manager):
+        QtCore.QAbstractListModel.__init__(self)
+        self.manager = manager
+    
+    def setMainMenu(self, mainMenu):
+        items = [   PMXBundleMenuNode({ "uuid":"", "name": "New Group" }, PMXBundleMenuNode.SUBMENU),
+                    PMXBundleMenuNode("-", PMXBundleMenuNode.SEPARATOR) ]
+        if mainMenu is not None and "excludedItems" in mainMenu:
+            for uuid in mainMenu["excludedItems"]:
+                item = self.manager.getBundleItem(uuid)
+                if item != None:
+                    items.append(PMXBundleMenuNode(item, PMXBundleMenuNode.ITEM))
+        self.items = items
+        self.layoutChanged.emit()
+    
+    def index(self, row, column, parent):
+        return self.createIndex(row, column, self.items[row])
+    
+    def rowCount(self, parent):
+        return len(self.items)
+    
+    def data(self, index, role):
+        if role == QtCore.Qt.DisplayRole:
+            node = self.items[index.row()]
+            return node.name()
+        else:
+            return None
+    
+    def columnCount(self, parent):  
+        return 1
+
+    def supportedDropActions(self): 
+        return QtCore.Qt.MoveAction     
+
+    def flags(self, index):
+        if not index.isValid():
+            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
+        defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
+        node = index.internalPointer()
+        if node.nodeType == node.SUBMENU:
+            return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
+        return defaultFlags | QtCore.Qt.ItemIsDragEnabled
+    
+    def mimeTypes(self):
+        return [ 'application/x-ets-qt4-instance' ]
+
+    def mimeData(self, index):
+        node = index[0].internalPointer()
+        mimeData = PyMimeData(node)
+        return mimeData
+
+    def dropMimeData(self, mimedata, action, row, column, parentIndex):
+        if action == QtCore.Qt.IgnoreAction:
+            return True
+        
+        if not mimedata.hasFormat("application/x-ets-qt4-instance"):
+            return False
+        
+        dragNode = mimedata.instance()
+        
+        if not parentIndex.isValid():
+            parentNode = self.root
+        else:
+            parentNode = parentIndex.internalPointer()
+
+        if dragNode.parent == parentNode:
+            currentRow = dragNode.row()
+            row = row if currentRow >= row else row - 1
+            dragNode.parent.removeChild(dragNode)
+            dragNode.parent.insertChild(row, dragNode)
+        else:
+            dragNode.parent.removeChild(dragNode)
+            parentNode.insertChild(row, dragNode)
+        
+        self.layoutChanged.emit()
+        return True

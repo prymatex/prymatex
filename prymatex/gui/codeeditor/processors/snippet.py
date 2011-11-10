@@ -17,7 +17,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         return self.__env
     
     def configure(self, settings):
-        self.tabTriggered = settings.get("tabTriggered", True)
+        self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
         

@@ -114,7 +114,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     ShowFolding = 0x10
     
     editorHelpers = {
-        QtCore.Qt.Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper(), helpers.SmartUnindentHelper() ],
+        QtCore.Qt.Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper() ], #helpers.SmartUnindentHelper()
         QtCore.Qt.Key_Tab: [ helpers.TabTriggerHelper(), helpers.TabIndentHelper() ],
         QtCore.Qt.Key_Backtab: [ helpers.BacktabUnindentHelper() ],
         QtCore.Qt.Key_Backspace: [ helpers.BackspaceUnindentHelper() ],
@@ -363,6 +363,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                 cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
                 index = openBraces.index(leftChar)
                 openCursor = cursor
+                print cursor.selectedText()
                 closeCursor = self.findTypingPair(leftChar, closeBraces[index], openCursor)
             else:
                 cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
@@ -559,18 +560,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         '''
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
-            self.debug("Corriendo Snippet %s" % item.name)
+            self.showMessage("Insert snippet %s" % item.name)
             item.execute(self.snippetProcessor)
         elif item.TYPE == PMXCommand.TYPE or item.TYPE == PMXDragCommand.TYPE:
             self.commandProcessor.configure(processorSettings)
-            self.debug("Corriendo Command %s" % item.name)
+            self.showMessage("Runing command %s" % item.name)
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
-            self.debug("Cambiando syntax %s" % item.name)
             self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
             self.macroProcessor.configure(processorSettings)
-            self.debug("Corriendo Macro %s" % item.name)
+            self.showMessage("Execute macro %s" % item.name)
             item.execute(self.macroProcessor)
 
     def selectBundleItem(self, items, tabTriggered = False):

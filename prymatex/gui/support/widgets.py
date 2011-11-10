@@ -12,6 +12,7 @@ from prymatex.ui.support.bundle import Ui_Menu
 from prymatex.ui.support.templatefile import Ui_TemplateFile
 from prymatex.ui.support.preference import Ui_Preference
 from prymatex.ui.support.macro import Ui_Macro
+from prymatex.gui.support.models import PMXMenuTreeModel, PMXExcludedListModel
 from pprint import pformat
 import ast
 
@@ -587,7 +588,11 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         self.setupUi(self)
         assert parent != None and hasattr(parent, 'manager'), "Set parent and manager"
         self.manager = parent.manager
-    
+        self.treeMenuModel = PMXMenuTreeModel(self.manager)
+        self.listExcludedModel = PMXExcludedListModel(self.manager)
+        self.treeMenuView.setModel(self.treeMenuModel)
+        self.listExcludedView.setModel(self.listExcludedModel)
+
     @property
     def title(self):
         if self.bundleItem != None:
@@ -609,3 +614,5 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     
     def edit(self, bundleItem):
         super(PMXBundleWidget, self).edit(bundleItem)
+        self.treeMenuModel.setMainMenu(bundleItem.mainMenu)
+        self.listExcludedModel.setMainMenu(bundleItem.mainMenu)

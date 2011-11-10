@@ -13,63 +13,6 @@ from prymatex.support.utils import readPlist
     http://manual.macromates.com/en/scope_selectors.html
 '''
 
-#Deprecar menu
-class PMXMenuNode(object):
-    MENU_SPACE = '-' * 36
-    def __init__(self, name = None, items = [], excludedItems = [], submenus = {}):
-        self.name = name
-        self.items = items
-        self.excludedItems = excludedItems
-        self.submenus = submenus
-        self.main = dict(map(lambda i: (i, None), filter(lambda x: x != self.MENU_SPACE, self.items)))
-        for uuid, submenu in self.submenus.iteritems():
-            self[uuid] = PMXMenuNode(**submenu)
-
-    @property
-    def hash(self):
-        hash = { 'items': self.items }
-        if self.name != None:
-            hash['name'] = self.name
-        if self.excludedItems:
-            hash['excludedItems'] = self.excludedItems
-        if self.submenus:
-            hash['submenus'] = {}
-        for uuid in self.submenus.keys():
-            submenu = self[uuid]
-            if submenu != None:
-                hash['submenus'].update( { uuid: submenu.hash } )
-        return hash
-            
-    def __contains__(self, key):
-        return key in self.main or any(map(lambda submenu: key in submenu, filter(lambda x: isinstance(x, PMXMenuNode), self.main.values())))
-
-    def __getitem__(self, key):
-        try:
-            return self.main[key]
-        except KeyError:
-            for submenu in filter(lambda x: isinstance(x, PMXMenuNode), self.main.values()):
-                if key in submenu:
-                    return submenu[key]
-        raise KeyError(key)
-    
-    def __setitem__(self, key, menu):
-        if key in self.main:
-            self.main[key] = menu
-        else:
-            for submenu in filter(lambda x: isinstance(x, PMXMenuNode), self.main.values()):
-                if key in submenu:
-                    submenu[key] = menu
-
-    def iteritems(self):
-        items = self.items
-        if self.excludedItems:
-            items = filter(lambda x: not x in self.excludedItems, items)
-        for item in items:
-            if item != self.MENU_SPACE:
-                yield (item, self[item])
-            else:
-                yield (self.MENU_SPACE, self.MENU_SPACE)
-
 class PMXManagedObject(object):
     def __init__(self, uuid, namespace, path):
         self.uuid = uuid
@@ -122,8 +65,6 @@ class PMXBundle(PMXManagedObject):
         for key in PMXBundle.KEYS:
             value = hash.get(key, None)
             setattr(self, key, value)
-        #if self.mainMenu != None:
-        #    self.mainMenu = PMXMenuNode(**self.mainMenu)
 
     def update(self, hash):
         for key in hash.keys():
@@ -135,8 +76,6 @@ class PMXBundle(PMXManagedObject):
         for key in PMXBundle.KEYS:
             value = getattr(self, key)
             if value != None:
-                #if key in ['mainMenu']:
-                #    value = self.mainMenu.hash
                 hash[key] = value
         return hash
 

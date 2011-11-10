@@ -89,27 +89,19 @@ class PyMimeData(QtCore.QMimeData):
         return None
 
 class PMXBundleMenuNode(object):
-    def __init__(self, item, parent = None):
+    ITEM = 0
+    SUBMENU = 1
+    SEPARATOR = 2
+    def __init__(self, item, nodeType, parent = None):
         self.item = item
+        self.nodeType = nodeType
         self.parent = parent
         self.children = []
-    
-    def __deepcopy__(self, memo):
-        new = PMXBundleMenuNode(self.item)
-        new.children = self.children[:]
-        return new
-    
-    def type(self):
-        if isinstance(self.item, (str, unicode)) and self.item.startswith("-"):
-            return 0
-        elif isinstance(self.item, dict):
-            return 1
-        return 2
-    
+        
     def name(self):
-        if isinstance(self.item, (str, unicode)) and self.item.startswith("-"):
+        if self.nodeType == self.SEPARATOR:
             return '--------------------------------'
-        elif isinstance(self.item, dict):
+        elif self.nodeType == self.SUBMENU:
             return self.item['name']
         return self.item.name
     
@@ -135,7 +127,7 @@ class PMXBundleMenuNode(object):
         self.children.insert(index, child)
         child.parent = self
         
-class TreeModel(QtCore.QAbstractItemModel):
+class PMXMenuTreeModel(QtCore.QAbstractItemModel):
     def __init__(self, manager):
         QtCore.QAbstractItemModel.__init__(self)
         self.manager = manager
@@ -143,13 +135,13 @@ class TreeModel(QtCore.QAbstractItemModel):
     def buildMenu(self, items, parent, submenus = {}):
         for uuid in items:
             if uuid.startswith("-"):
-                parent.appendChild(PMXBundleMenuNode(uuid, parent))
+                parent.appendChild(PMXBundleMenuNode(uuid, PMXBundleMenuNode.SEPARATOR, parent))
             else:
                 item = self.manager.getBundleItem(uuid)
                 if item != None:
-                    parent.appendChild(PMXBundleMenuNode(item, parent))
+                    parent.appendChild(PMXBundleMenuNode(item, PMXBundleMenuNode.ITEM, parent))
                 elif uuid in submenus:
-                    submenu = PMXBundleMenuNode({"uuid": uuid, "name": submenus[uuid]['name']}, parent)
+                    submenu = PMXBundleMenuNode({"uuid": uuid, "name": submenus[uuid]['name']}, PMXBundleMenuNode.SUBMENU, parent)
                     parent.appendChild(submenu)
                     self.buildMenu(submenus[uuid]['items'], submenu, submenus)
 
@@ -250,7 +242,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         self.layoutChanged.emit()
         return True
 
-class PMXExcludedItemModel(QtCore.QAbstractListModel):
+class PMXExcludedListModel(QtCore.QAbstractListModel):
     def __init__(self, manager):
         QtCore.QAbstractListModel.__init__(self)
         self.manager = manager
