@@ -31,7 +31,10 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
         self.theme = theme
-        
+    
+    def hasTheme(self):  
+        return self.theme is not None
+    
     def _analyze_all_text(self, text):
         self.syntax.parse(text, self.processor)
         for index, data in enumerate(self.processor.lines):

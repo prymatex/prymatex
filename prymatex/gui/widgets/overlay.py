@@ -52,7 +52,11 @@ class PMXMessageOverlay(object):
     def updateMessagePosition(self):
         self.messageOverlay.updatePosition()
 
-        
+    def setMessageTextColor(self, color):
+        self.messageOverlay.color = color
+    
+    def setMessageBackgroundColor(self, color):
+        self.messageOverlay.backgroundColor = color
         
 class LabelOverlayWidget(QtGui.QLabel):
     ''' 
@@ -77,6 +81,7 @@ class LabelOverlayWidget(QtGui.QLabel):
     '''
     
     def __init__(self, text="", parent=None):
+        print "Parent del mensaje oculto es", parent
         super(LabelOverlayWidget, self).__init__(text, parent)
         self.paddingLeft = 10
         self.paddingBottom = 10

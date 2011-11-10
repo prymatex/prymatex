@@ -136,7 +136,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.currentEditor = editor
         self.comboBoxSymbols.setModel(editor.symbols)
         self.on_cursorPositionChanged(editor)
-        self.on_syntaxChanged(editor)
+        self.on_syntaxChanged(editor.getSyntax())
         self.on_modeChanged(editor)
         self.setTabSizeLabel(editor)
         self.hideAllWidgets()
@@ -190,10 +190,9 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
             self.comboBoxSymbols.setCurrentIndex(index)
             self.comboBoxSymbols.blockSignals(False)
         
-    def on_syntaxChanged(self, editor = None):
-        editor = editor or self.currentEditor
+    def on_syntaxChanged(self, syntax):
         model = self.comboBoxSyntaxes.model()
-        index = model.findItemIndex(editor.getSyntax())
+        index = model.findItemIndex(syntax)
         self.comboBoxSyntaxes.setCurrentIndex(index)
 
     def on_modeChanged(self, editor = None):

@@ -21,12 +21,13 @@ from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleter
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
+from prymatex.gui.widgets.overlay import PMXMessageOverlay
 
-class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
+class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseEditor, ):
     #=======================================================================
     # Signals
     #=======================================================================
-    syntaxChanged = QtCore.pyqtSignal()
+    syntaxChanged = QtCore.pyqtSignal(object)
     modeChanged = QtCore.pyqtSignal()
     bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
@@ -54,6 +55,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
+
+        firstTime = not self.syntaxHighlighter.hasTheme()
         self.syntaxHighlighter.setTheme(theme)
         self.colours = theme.settings
         
@@ -66,12 +69,24 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         palette.setColor(QPalette.Active, QPalette.AlternateBase, self.colours['invisibles'])
         self.setPalette(palette)
         
+        # Update Message Colors
+        self.setMessageTextColor( self.colours['background'])
+        self.setMessageBackgroundColor( self.colours['foreground'] )
+        
         #Sidebar colours
         self.sidebar.foreground = self.colours['foreground']
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
         self.syntaxHighlighter.rehighlight()
         self.highlightCurrent()
+        if not firstTime:
+            message = "<b>%s</b> theme set " % theme.name
+            if theme.author is not None:
+                message += "<i>(by %s)</i>" % theme.author
+            self.showMessage(message)
+            
+    
+    
     
     #================================================================
     # Regular expresions
@@ -114,6 +129,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
     def __init__(self, fileInfo = None, project = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self)
+        PMXMessageOverlay.__init__(self)
         #Sidebar
         self.sidebar = PMXSidebar(self)
 
@@ -157,6 +173,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrent)
         self.modificationChanged.connect(self.updateTabStatus)
+        self.syntaxChanged.connect(self.showSyntaxMessage)
+        
+    def showSyntaxMessage(self, syntax):
+        self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
 
     def updateTabStatus(self):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
@@ -276,7 +296,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
                 self.syntaxHighlighter.syntax = syntax
                 self.folding.indentSensitive = syntax.indentSensitive
                 self.syntaxHighlighter.rehighlight()
-                self.syntaxChanged.emit()
+                self.syntaxChanged.emit(syntax)
         else:
             self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
             self.folding.indentSensitive = syntax.indentSensitive
@@ -412,6 +432,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXBaseEditor):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
         self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+        self.updateMessagePosition()
     
     def paintEvent(self, event):
         #QtGui.QPlainTextEdit.paintEvent(self, event)
