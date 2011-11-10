@@ -72,6 +72,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         # Update Message Colors
         self.setMessageTextColor( self.colours['background'])
         self.setMessageBackgroundColor( self.colours['foreground'] )
+        self.setMessageBorderColor(self.colours['selection'])
         
         #Sidebar colours
         self.sidebar.foreground = self.colours['foreground']

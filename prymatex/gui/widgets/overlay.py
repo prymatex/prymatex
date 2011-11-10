@@ -19,6 +19,8 @@ class PMXMessageOverlay(object):
         self.messageOverlay.fadedOut.connect(self.messageFadedOut)
         self.messageOverlay.messageClicked.connect(self.messageClicked)
         self.messageOverlay.linkActivated.connect(self.messageLinkActivated)
+        self.fadeOutTimer = QtCore.QTimer(self)
+        self.fadeOutTimer.timeout.connect(self.messageOverlay.fadeOut)
         
     def messageFadedIn(self):
         ''' Override '''
@@ -34,20 +36,24 @@ class PMXMessageOverlay(object):
         ''' Override '''
         pass
     
-    def showMessage(self, message, timeout = None, icon = None, pos = None ):
+    def showMessage(self, message, timeout = 1000, icon = None, pos = None ):
         self.messageOverlay.setText(message)
         self.messageOverlay.updatePosition()
         self.messageOverlay.adjustSize()
         if unicode(message):
             self.messageOverlay.fadeIn()
+            if timeout:
+                print "Launching fadeout timer"
+                self.fadeOutTimer.start(timeout)
         else:
+            self.fadeOutTimer.stop()
             self.messageOverlay.fadeOut()
             
-    def clarMessage(self):
+    def clearMessage(self):
         self.messageOverlay.fadeOut()
     
     def messageClicked(self):
-        self.clarMessage()       
+        self.clearMessage()       
         
     def updateMessagePosition(self):
         self.messageOverlay.updatePosition()
@@ -57,6 +63,9 @@ class PMXMessageOverlay(object):
     
     def setMessageBackgroundColor(self, color):
         self.messageOverlay.backgroundColor = color
+        
+    def setMessageBorderColor(self, color):
+        self.messageOverlay.borderColor = color
         
 class LabelOverlayWidget(QtGui.QLabel):
     ''' 
