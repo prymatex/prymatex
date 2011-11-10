@@ -48,3 +48,6 @@ class PMXBaseEditor(object):
     @classmethod
     def newInstance(cls, fileInfo = None, parent = None):
         return cls(fileInfo, parent)
+    
+    def showMessage(self, message, timeout = None, icon = None):
+        raise NotImplementedError("You need to extend PMXMessageOverlay")
