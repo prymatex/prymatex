@@ -192,9 +192,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.mainWindow.paneBrowser.show()
         
     def showAsTooltip(self, text):
-        cursor = self.editor.textCursor()
-        point = self.editor.viewport().mapToGlobal(self.editor.cursorRect(cursor).bottomRight())
-        QtGui.QToolTip.showText(point, text.strip(), self.editor, self.editor.rect())
+        self.editor.showMessage(text.strip())
+        #cursor = self.editor.textCursor()
+        #point = self.editor.viewport().mapToGlobal(self.editor.cursorRect(cursor).bottomRight())
+        #QtGui.QToolTip.showText(point, text.strip(), self.editor, self.editor.rect())
         
     def createNewDocument(self, text):
         print "Nuevo documento", text
