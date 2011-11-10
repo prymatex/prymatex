@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/command.ui'
 #
-# Created: Mon Nov  7 18:31:02 2011
+# Created: Wed Nov  9 21:34:48 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,9 +35,9 @@ class Ui_Command(object):
         self.horizontalLayout_2.addWidget(self.comboBoxBeforeRunning)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
-        self.pushButtonTemplates = QtGui.QPushButton(Command)
-        self.pushButtonTemplates.setObjectName(_fromUtf8("pushButtonTemplates"))
-        self.horizontalLayout_2.addWidget(self.pushButtonTemplates)
+        self.pushButtonOptions = QtGui.QPushButton(Command)
+        self.pushButtonOptions.setObjectName(_fromUtf8("pushButtonOptions"))
+        self.horizontalLayout_2.addWidget(self.pushButtonOptions)
         self.formLayout_2.setLayout(0, QtGui.QFormLayout.FieldRole, self.horizontalLayout_2)
         self.label_2 = QtGui.QLabel(Command)
         self.label_2.setObjectName(_fromUtf8("label_2"))
@@ -85,7 +85,7 @@ class Ui_Command(object):
     def retranslateUi(self, Command):
         Command.setWindowTitle(_('Form'))
         self.label.setText(_('Save:'))
-        self.pushButtonTemplates.setText(_('Templates'))
+        self.pushButtonOptions.setText(_('Options'))
         self.label_2.setText(_('Command(s):'))
         self.label_3.setText(_('Input:'))
         self.labelInputOption.setText(_('or'))

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/bundle.ui'
 #
-# Created: Mon Nov  7 18:31:02 2011
+# Created: Wed Nov  9 21:34:48 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,26 +20,21 @@ class Ui_Menu(object):
         Menu.setObjectName(_fromUtf8("Menu"))
         Menu.resize(458, 349)
         self.horizontalLayout_2 = QtGui.QHBoxLayout(Menu)
+        self.horizontalLayout_2.setSpacing(2)
+        self.horizontalLayout_2.setMargin(0)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        self.treeMenuWidget = QtGui.QTreeWidget(Menu)
-        self.treeMenuWidget.setDragEnabled(True)
-        self.treeMenuWidget.setDragDropOverwriteMode(False)
-        self.treeMenuWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
-        self.treeMenuWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
-        self.treeMenuWidget.setObjectName(_fromUtf8("treeMenuWidget"))
-        self.horizontalLayout_2.addWidget(self.treeMenuWidget)
-        self.treeExcludedWidget = QtGui.QTreeWidget(Menu)
-        self.treeExcludedWidget.setDragEnabled(True)
-        self.treeExcludedWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
-        self.treeExcludedWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
-        self.treeExcludedWidget.setObjectName(_fromUtf8("treeExcludedWidget"))
-        self.horizontalLayout_2.addWidget(self.treeExcludedWidget)
+        self.treeMenuView = QtGui.QTreeView(Menu)
+        self.treeMenuView.setAlternatingRowColors(True)
+        self.treeMenuView.setObjectName(_fromUtf8("treeMenuView"))
+        self.horizontalLayout_2.addWidget(self.treeMenuView)
+        self.listExcludedView = QtGui.QListView(Menu)
+        self.listExcludedView.setAlternatingRowColors(True)
+        self.listExcludedView.setObjectName(_fromUtf8("listExcludedView"))
+        self.horizontalLayout_2.addWidget(self.listExcludedView)
 
         self.retranslateUi(Menu)
         QtCore.QMetaObject.connectSlotsByName(Menu)
 
     def retranslateUi(self, Menu):
         Menu.setWindowTitle(_('Form'))
-        self.treeMenuWidget.headerItem().setText(0, _('Menu Structure'))
-        self.treeExcludedWidget.headerItem().setText(0, _('Excluded Items'))
 

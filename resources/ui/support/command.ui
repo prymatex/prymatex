@@ -55,9 +55,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonTemplates">
+      <widget class="QPushButton" name="pushButtonOptions">
        <property name="text">
-        <string>Templates</string>
+        <string>Options</string>
        </property>
       </widget>
      </item>

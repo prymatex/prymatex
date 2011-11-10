@@ -227,10 +227,10 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         
         for name, templateText in self.COMMAND_TEMPLATES.iteritems():
             action = self.menuCommandTemplates.addAction(name)
-            receiver = lambda template=templateText: self.command.setPlainText(template)
+            receiver = lambda template = templateText: self.command.setPlainText(template)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
             
-        self.pushButtonTemplates.setMenu(self.menuCommandTemplates)
+        self.pushButtonOptions.setMenu(self.menuCommandTemplates)
 
     @QtCore.pyqtSlot()
     def on_command_textChanged(self):
@@ -567,12 +567,14 @@ class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
         index = self.listActionWidget.indexFromItem(item)
         row = index.row()
         if 'argument' in self.bundleItem.commands[row]:
-            argument = self.bundleItem.commands[row]['argument']
-            self.argument.setPlainText(pformat(argument))
+            self.argument.setPlainText(pformat(self.bundleItem.commands[row]['argument']))
+        else:
+            self.argument.clear()
 
     def edit(self, bundleItem):
         super(PMXMacroWidget, self).edit(bundleItem)
         self.listActionWidget.clear()
+        self.argument.clear()
         commands = bundleItem.commands
         for command in commands:
             item = QtGui.QListWidgetItem(command['command'], self.listActionWidget, self.COMMAND)
@@ -580,24 +582,11 @@ class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
 
 class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     TYPE = 'bundle'
-    BUNDLEITEM = 0
-    SEPARATOR = 1
-    SUBMENU = 2
-    NEWGROUP = 3
-    NEWSEPARATOR = 4
     def __init__(self, parent = None):
         super(PMXBundleWidget, self).__init__(parent)
         self.setupUi(self)
         assert parent != None and hasattr(parent, 'manager'), "Set parent and manager"
         self.manager = parent.manager
-        self.treeExcludedWidget.installEventFilter(self)
-        self.treeMenuWidget.installEventFilter(self)
-    
-    def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.Drop:
-            print "drop"
-            return True
-        return PMXEditorBaseWidget.eventFilter(self, obj, event)
     
     @property
     def title(self):
@@ -618,40 +607,5 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def getKeyEquivalent(self):
         return None
     
-    def buildMenu(self, items, parent, submenus = {}):
-        for uuid in items:
-            if uuid.startswith('-'):
-                separator = QtGui.QTreeWidgetItem(parent, self.SEPARATOR)
-                separator.setData(0, QtCore.Qt.EditRole, "")
-                separator.setText(0, '--------------------------------')
-                continue
-            item = self.manager.getBundleItem(uuid)
-            if item != None:
-                node = QtGui.QTreeWidgetItem(parent, self.BUNDLEITEM)
-                node.setData(0, QtCore.Qt.EditRole, uuid)
-                node.setText(0, item.name)
-            elif uuid in submenus:
-                submenu = QtGui.QTreeWidgetItem(parent, self.SUBMENU)
-                submenu.setData(0, QtCore.Qt.EditRole, uuid)
-                submenu.setText(0, submenus[uuid]['name'])
-                self.buildMenu(submenus[uuid]['items'], submenu, submenus)
-    
     def edit(self, bundleItem):
         super(PMXBundleWidget, self).edit(bundleItem)
-        self.treeExcludedWidget.clear()
-        self.treeMenuWidget.clear()
-        newGroup = QtGui.QTreeWidgetItem(self.treeExcludedWidget, self.NEWGROUP)
-        newGroup.setText(0, 'New Group')
-        separator = QtGui.QTreeWidgetItem(self.treeExcludedWidget, self.NEWSEPARATOR)
-        separator.setText(0, '--------------------------------')
-        if bundleItem.mainMenu == None:
-            return
-        if 'items' in bundleItem.mainMenu:
-            self.buildMenu(bundleItem.mainMenu['items'], self.treeMenuWidget, bundleItem.mainMenu['submenus'])
-        if 'excludedItems' in bundleItem.mainMenu:
-            for uuid in bundleItem.mainMenu['excludedItems']:
-                item = self.manager.getBundleItem(uuid)
-                if item != None:
-                    node = QtGui.QTreeWidgetItem(self.treeExcludedWidget, self.BUNDLEITEM)
-                    node.setText(0, item.name)
-    
