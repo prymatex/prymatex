@@ -423,6 +423,9 @@ class PMXBundleMenuNode(object):
         self.nodeType = nodeType
         self.parent = parent
         self.children = []
+    
+    def removeAll(self):
+        self.children = []
         
     def name(self):
         if self.nodeType == PMXBundleMenuNode.SEPARATOR:
@@ -460,6 +463,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
     def __init__(self, manager):
         QtCore.QAbstractItemModel.__init__(self)
         self.manager = manager
+        self.root = PMXBundleMenuNode({ "uuid":"", "name": "root" }, PMXBundleMenuNode.SUBMENU)
 
     def buildMenu(self, items, parent, submenus = {}):
         for uuid in items:
@@ -475,8 +479,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
                     self.buildMenu(submenus[uuid]['items'], submenu, submenus)
 
     def setMainMenu(self, mainMenu):
-        # 'items' 'submenus'
-        self.root = PMXBundleMenuNode({ "uuid":"root", "name": "root" }, PMXBundleMenuNode.SUBMENU)
+        self.root.removeAll()
         if mainMenu is not None:
             self.buildMenu(mainMenu['items'], self.root, mainMenu['submenus'])
         self.layoutChanged.emit()
@@ -596,16 +599,15 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
     def __init__(self, manager):
         QtCore.QAbstractListModel.__init__(self)
         self.manager = manager
-    
+        self.items = [   PMXBundleMenuNode({ "uuid":"", "name": "New Group" }, PMXBundleMenuNode.SUBMENU), PMXBundleMenuNode("-", PMXBundleMenuNode.SEPARATOR) ]
+                    
     def setMainMenu(self, mainMenu):
-        items = [   PMXBundleMenuNode({ "uuid":"", "name": "New Group" }, PMXBundleMenuNode.SUBMENU),
-                    PMXBundleMenuNode("-", PMXBundleMenuNode.SEPARATOR) ]
+        self.items = self.items[:2]
         if mainMenu is not None and "excludedItems" in mainMenu:
             for uuid in mainMenu["excludedItems"]:
                 item = self.manager.getBundleItem(uuid)
                 if item != None:
-                    items.append(PMXBundleMenuNode(item, PMXBundleMenuNode.ITEM))
-        self.items = items
+                    self.items.append(PMXBundleMenuNode(item, PMXBundleMenuNode.ITEM))
         self.layoutChanged.emit()
     
     def index(self, row, column, parent):
