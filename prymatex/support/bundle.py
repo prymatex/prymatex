@@ -82,7 +82,7 @@ class PMXBundle(PMXManagedObject):
     def save(self):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
-        file = os.path.join(self.path , self.FILE)
+        file = os.path.join(self.path, self.FILE)
         plistlib.writePlist(self.hash, file)
 
     def delete(self):

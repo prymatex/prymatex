@@ -142,14 +142,4 @@ REPLACES = {
 }
 
 def readPlist(file):
-    try:
-        data = plistlib.readPlist(file)
-    except Exception, e:
-        data = open(file).read()
-        for match in RE_XML_ILLEGAL.finditer(data):
-            char = data[match.start():match.end()]
-            if char in REPLACES:
-                char = REPLACES[char]
-            data = data[:match.start()] + char + data[match.end():]
-        data = plistlib.readPlistFromString(data)
-    return data
+    raise DeprecationWarning("Use prymatex.utils.plist")
