@@ -114,7 +114,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     ShowFolding = 0x10
     
     editorHelpers = {
-        QtCore.Qt.Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper() ], #helpers.SmartUnindentHelper()
+        QtCore.Qt.Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper(), helpers.SmartUnindentHelper() ],
         QtCore.Qt.Key_Tab: [ helpers.TabTriggerHelper(), helpers.TabIndentHelper() ],
         QtCore.Qt.Key_Backtab: [ helpers.BacktabUnindentHelper() ],
         QtCore.Qt.Key_Backspace: [ helpers.BackspaceUnindentHelper() ],
@@ -184,7 +184,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
 
     def detectRemovedBlocks(self):
         if self.lastBlockCount > self.document().blockCount():
-            #TODO: Detectar cuales se removieron desde la posicion del cursor quiza :)
             self.textBlocksRemoved.emit()
         self.lastBlockCount = self.document().blockCount()
         
@@ -239,8 +238,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText()
         
-    def getCurrentWord(self, pat = RE_WORD, direction="both"):
-        #Current word is not the same that current Text
+    def getCurrentWord(self, pat = RE_WORD, direction = "both"):
+        #Current word is not the same that word under cursor
         cursor = self.textCursor()
         line = cursor.block().text()
         position = cursor.columnNumber()
@@ -248,30 +247,29 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         first_part, last_part = line[:position][::-1], line[position:]
         m = self.RE_WORD.match(first_part)
         if m and direction in ("left", "both"):
-            lword = m.group(0)[::-1]
-            if lword:
-                return lword
-            #Salir a buscar una palabra
-            for i in range(len(first_part)):
-                lword += first_part[i]
-                m = self.RE_WORD.search(first_part[i + 1:], i )
-                if m.group(0):
-                    lword += m.group(0)
-                    lword = lword[::-1]
-                    break
+            word = m.group(0)[::-1]
+            if word: return word
         m = self.RE_WORD.match(last_part)
         if m and direction in ("right", "both"):
-            rword = m.group(0)
-            if rword:
-                return rword
-            #Salir a buscar una palabra
-            for i in range(len(last_part)):
-                rword += last_part[i]
-                m = self.RE_WORD.search(last_part[i:], i )
-                if m.group(0):
-                    rword += m.group(0)
-                    rword = rword
-                    break
+            word = m.group(0)
+            if word: return word
+
+        lword = rword = ""
+        #Buscar una por izquierda
+        for i in range(len(first_part)):
+            lword += first_part[i]
+            m = self.RE_WORD.search(first_part[i + 1:], i )
+            if m.group(0):
+                lword += m.group(0)
+                lword = lword[::-1]
+                break
+        #Buscar por derecha
+        for i in range(len(last_part)):
+            rword += last_part[i]
+            m = self.RE_WORD.search(last_part[i:], i )
+            if m.group(0):
+                rword += m.group(0)
+                break
         return lword + rword
     
     def getSelectionBlockStartEnd(self):
