@@ -45,7 +45,9 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 self.setCursorPosition(self.editor.snippetProcessor.endPosition())
                 self.endSnippet()
             else:
-                self.editor.showMessage("Holder %s of %s" % (self.editor.snippetProcessor.snippet.index + 1, len(self.editor.snippetProcessor.snippet.taborder)))
+                #(self.editor.snippetProcessor.snippet.index + 1, len(self.editor.snippetProcessor.snippet.taborder))
+                snippet = self.editor.snippetProcessor.snippet 
+                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index, len(snippet) -1))
                 self.editor.snippetProcessor.selectHolder(holder)
         elif event.text():
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())

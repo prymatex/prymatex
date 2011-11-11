@@ -588,11 +588,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         '''
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
-            self.showMessage("Insert snippet %s" % item.name)
+            self.showMessage("Snippet <i>&laquo;%s&raquo;</i> activated" % item.name)
             item.execute(self.snippetProcessor)
         elif item.TYPE == PMXCommand.TYPE or item.TYPE == PMXDragCommand.TYPE:
             self.commandProcessor.configure(processorSettings)
-            self.showMessage("Runing command %s" % item.name)
+            self.showMessage("Command <i>&laquo;%s&raquo;</i>" % item.name)
             item.execute(self.commandProcessor)
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)

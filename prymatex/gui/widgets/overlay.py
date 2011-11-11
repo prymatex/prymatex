@@ -21,7 +21,7 @@ class PMXMessageOverlay(object):
         self.messageOverlay.linkActivated.connect(self.messageLinkActivated)
         self.fadeOutTimer = QtCore.QTimer(self)
         self.fadeOutTimer.timeout.connect(self.messageOverlay.fadeOut)
-        
+    
     def messageFadedIn(self):
         ''' Override '''
         #print "Message appeared"
@@ -36,15 +36,16 @@ class PMXMessageOverlay(object):
         ''' Override '''
         pass
     
-    def showMessage(self, message, timeout = 2000, icon = None, pos = None ):
+    def showMessage(self, message, timeout = 2000, icon = None, pos = None, link_map = {} ):
         '''
         @param message: Text message, can be HTML
         @param timeout: Timeout before message fades
         @param icon: A QIcon instance to show
         @param pos: An x, y tuple with message position
+        @param link_map: 
         '''
         self.messageOverlay.setText(message)
-        self.messageOverlay.pos = pos
+        self.messageOverlay.position = pos
         self.messageOverlay.updatePosition()
         self.messageOverlay.adjustSize()
         if unicode(message):
@@ -60,11 +61,16 @@ class PMXMessageOverlay(object):
         self.messageOverlay.fadeOut()
     
     def messageClicked(self):
+        ''' Overrride '''
         self.clearMessage()       
         
     def updateMessagePosition(self):
+        ''' Override '''
         self.messageOverlay.updatePosition()
 
+    #===========================================================================
+    # Label Colors
+    #===========================================================================
     def setMessageTextColor(self, color):
         self.messageOverlay.color = color
     
@@ -95,7 +101,22 @@ class LabelOverlayWidget(QtGui.QLabel):
         padding: 2px;
     }
     '''
-    pos = None
+    
+    __position = None
+    @property
+    def position(self):
+        return self.__position
+    
+    @position.setter       
+    def position(self, value):
+        if isinstance(value, QtCore.QPoint):
+            value = (value.x(), value.y())
+        elif value is not None:
+            assert len(value) == 2
+            assert type(value[0]) in (int, float)
+            assert type(value[1]) in (int, float)
+        self.__position = value
+    
     
     def __init__(self, text="", parent=None):
         print "Parent del mensaje oculto es", parent
@@ -114,22 +135,10 @@ class LabelOverlayWidget(QtGui.QLabel):
         self.updatePosition()
         return super(LabelOverlayWidget, self).setParent(parent)
   
-    __pos = None
-    @property
-    def pos(self):
-        return self.__pos
-    
-    @pos.setter       
-    def pos(self, value):
-        if not value is None:
-            assert len(value) == 2
-            assert type(value[0]) == int
-            assert type(value[1]) == int
-        self.__pos = value
-    
+
     def updatePosition(self):
-        if self.pos is not None:
-            x, y = self.pos
+        if self.position is not None:
+            x, y = self.position
         else:
             if hasattr(self.parent(), 'viewport'):
                 parentRect = self.parent().viewport().rect()
@@ -157,15 +166,40 @@ class LabelOverlayWidget(QtGui.QLabel):
         """ Mouse hovered the messge """
         pass
     
+    def mousePressEvent(self, event):
+        self.messageClicked.emit()
+    
+    
+    __linkMap = {}
+    @property
+    def linkMap(self):
+        return self.__linkMap
+    
+    @linkMap.setter       
+    def linkMap(self, value):
+        for href, callback in value.iteritems():
+            assert isinstance(href, basestring), "%s is not valid map"
+            assert callable(callback), "%s is not valid callback (under %s)" % (callback, value)
+        self.__linkMap = value
+    
+    #===========================================================================
+    # Transparency handling
+    #===========================================================================
+    
+    # Maximum transparency level
     FULL_THERSHOLD = 0.7
+    # Transparency increment (linear transition)
     DEFAULT_FADE_SPEED = 0.15
     
+    
     def fadeIn(self, force = False):
+        ''' Triggers transparency fade in transition '''
         self.opacity = 0
         self.speed = self.DEFAULT_FADE_SPEED
         self.timer.start()
         
     def fadeOut(self, force = False):
+        ''' Triggers transparency fade out transition '''
         self.opacity = self.FULL_THERSHOLD
         self.speed = -self.DEFAULT_FADE_SPEED
         self.timer.start()
@@ -216,8 +250,6 @@ class LabelOverlayWidget(QtGui.QLabel):
         self.__opacity = value
         self._updateStylesheetAlpha()
     
-    def mousePressEvent(self, event):
-        self.messageClicked.emit()
     
     def updateOpacity(self):
         

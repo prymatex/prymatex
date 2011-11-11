@@ -744,3 +744,6 @@ class PMXSnippet(PMXBundleItem):
         if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "insert"):
             self.taborder[index].clear()
             self.taborder[index].insert(text, 0)
+    
+    def __len__(self):
+        return len(self.taborder)
