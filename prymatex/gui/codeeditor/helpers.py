@@ -199,8 +199,9 @@ class SmartUnindentHelper(PMXBaseEditorHelper):
         if event.text():
             settings = self.application.supportManager.getPreferenceSettings(scope)
             block = cursor.block()
-            indentMark = settings.indent(block.text() + event.text())
-            if indentMark == PMXPreferenceSettings.INDENT_DECREASE:
+            text = block.text()[:cursor.columnNumber()] + event.text()
+            indentMarks = settings.indent(text)
+            if PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
                 previous = block.previous()
                 return previous.isValid() and block.userData().indent >= previous.userData().indent
         return False
@@ -221,25 +222,23 @@ class SmartIndentHelper(PMXBaseEditorHelper):
     def execute(self, editor, event):
         cursor = editor.textCursor()
         block = cursor.block()
-        previousBlock = block.previous()
         text = block.text()[:cursor.columnNumber()]
         if editor.document().blockCount() == 1:
             syntax = self.application.supportManager.findSyntaxByFirstLine(text)
             if syntax is not None:
                 editor.setSyntax(syntax)
-        indentMark = self.settings.indent(text)
+        indentMarks = self.settings.indent(text)
         QtGui.QPlainTextEdit.keyPressEvent(editor, event)
-        if indentMark == PMXPreferenceSettings.INDENT_INCREASE:
+        print indentMarks
+        if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.debug("Increase indent")
             cursor.insertText(block.userData().indent + editor.tabKeyBehavior)
-        elif indentMark == PMXPreferenceSettings.INDENT_NEXTLINE:
+        elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
             self.debug("Increase next line indent")
-        elif indentMark == PMXPreferenceSettings.UNINDENT:
+        elif PMXPreferenceSettings.UNINDENT in indentMarks:
             self.debug("Unindent")
-        elif indentMark == PMXPreferenceSettings.INDENT_DECREASE:
-            self.debug("Decrease indent")
-            if previousBlock.isValid():
-                cursor.insertText(previousBlock.userData().indent)
+        elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
+            cursor.insertText(block.userData().indent[:len(editor.tabKeyBehavior)])
         else:
             self.debug("Preserve indent")
             cursor.insertText(block.userData().indent)

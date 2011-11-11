@@ -634,7 +634,7 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
         defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
         node = index.internalPointer()
-        if node.nodeType == node.SUBMENU:
+        if node.nodeType == PMXBundleMenuNode.SUBMENU:
             return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
         return defaultFlags | QtCore.Qt.ItemIsDragEnabled
     

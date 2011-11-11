@@ -48,11 +48,10 @@ class PMXPreferenceSettings(object):
     KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
                 'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking',
                 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
-    INDENT_NONE = 0
-    INDENT_INCREASE = 1
-    INDENT_DECREASE = 2
-    INDENT_NEXTLINE = 3
-    UNINDENT = 4
+    INDENT_INCREASE = 0
+    INDENT_DECREASE = 1
+    INDENT_NEXTLINE = 2
+    UNINDENT = 3
     def __init__(self, hash):
         for key in self.KEYS:
             value = hash.get(key, None)
@@ -102,15 +101,16 @@ class PMXPreferenceSettings(object):
         #DecreasePattern evaluate line to decrease, no requiere del return
         #IncreaseOnlyNextLine on return indent nextline only
         #IgnoringLines evaluate line to unindent, no require el return
+        indent = []
         if self.decreaseIndentPattern != None and self.decreaseIndentPattern.search(line):
-            return self.INDENT_DECREASE
-        elif self.increaseIndentPattern != None and self.increaseIndentPattern.search(line):
-            return self.INDENT_INCREASE
-        elif self.indentNextLinePattern != None and self.indentNextLinePattern.search(line):
-            return self.INDENT_NEXTLINE
-        elif self.unIndentedLinePattern != None and self.unIndentedLinePattern.search(line):
-            return self.UNINDENT
-        return self.INDENT_NONE
+            indent.append(self.INDENT_DECREASE)
+        if self.increaseIndentPattern != None and self.increaseIndentPattern.search(line):
+            indent.append(self.INDENT_INCREASE)
+        if self.indentNextLinePattern != None and self.indentNextLinePattern.search(line):
+            indent.append(self.INDENT_NEXTLINE)
+        if self.unIndentedLinePattern != None and self.unIndentedLinePattern.search(line):
+            indent.append(self.UNINDENT)
+        return indent
     
     def compileSymbolTransformation(self):
         self.snippetsTransformation = []
