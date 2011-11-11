@@ -30,7 +30,9 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.scopes = scopes
         
     def getScopeAtPosition(self, pos):
-        return self.scopes[pos]
+        #FIXME: Voy a poner algo mentiroso si pos no esta en self.scopes
+        scope = self.scopes[pos] if pos < len(self.scopes) else self.scopes[-1]
+        return scope
     
     def getScopeRange(self, pos):
         ranges = self.getScopeRanges()

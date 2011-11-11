@@ -92,7 +92,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #================================================================
     # Regular expresions
     #================================================================
-    RE_WORD = re.compile('\w+')
+    RE_WORD = re.compile(r"[A-Za-z_]*")
     
     #================================================================
     # Selection types
@@ -234,17 +234,45 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         userData = block.userData()
         return userData.getScopeAtPosition(cursor.columnNumber())
     
-    def getTextUnderCursor(self):
+    def getWordUnderCursor(self):
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText()
         
-    def getCurrentWord(self):
+    def getCurrentWord(self, pat = RE_WORD, direction="both"):
         #Current word is not the same that current Text
-        word = self.getTextUnderCursor()
-        if self.RE_WORD.match(word):
-            return word
-        return ""
+        cursor = self.textCursor()
+        line = cursor.block().text()
+        position = cursor.columnNumber()
+        # get text before and after the index.
+        first_part, last_part = line[:position][::-1], line[position:]
+        m = self.RE_WORD.match(first_part)
+        if m and direction in ("left", "both"):
+            lword = m.group(0)[::-1]
+            if lword:
+                return lword
+            #Salir a buscar una palabra
+            for i in range(len(first_part)):
+                lword += first_part[i]
+                m = self.RE_WORD.search(first_part[i + 1:], i )
+                if m.group(0):
+                    lword += m.group(0)
+                    lword = lword[::-1]
+                    break
+        m = self.RE_WORD.match(last_part)
+        if m and direction in ("right", "both"):
+            rword = m.group(0)
+            if rword:
+                return rword
+            #Salir a buscar una palabra
+            for i in range(len(last_part)):
+                rword += last_part[i]
+                m = self.RE_WORD.search(last_part[i:], i )
+                if m.group(0):
+                    rword += m.group(0)
+                    rword = rword
+                    break
+        return lword + rword
     
     def getSelectionBlockStartEnd(self):
         cursor = self.textCursor()
@@ -618,7 +646,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
         })
 
-        if current_word != None:
+        if current_word:
             env['TM_CURRENT_WORD'] = current_word
         if self.fileInfo is not None:
             env['TM_FILEPATH'] = self.fileInfo.absoluteFilePath()
