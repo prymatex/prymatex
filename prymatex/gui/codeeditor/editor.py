@@ -261,8 +261,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             m = self.RE_WORD.search(first_part[i + 1:], i )
             if m.group(0):
                 lword += m.group(0)
-                lword = lword[::-1]
                 break
+        lword = lword[::-1]
         #Buscar por derecha
         for i in range(len(last_part)):
             rword += last_part[i]
@@ -270,7 +270,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             if m.group(0):
                 rword += m.group(0)
                 break
-        return lword + rword
+        return (lword + rword).strip()
     
     def getSelectionBlockStartEnd(self):
         cursor = self.textCursor()
