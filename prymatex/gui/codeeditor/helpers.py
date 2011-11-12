@@ -39,6 +39,23 @@ class TabTriggerHelper(PMXBaseEditorHelper):
         else:
             editor.selectBundleItem(self.items, tabTriggered = True)    
 
+class CompleterHelper(PMXBaseEditorHelper):
+    KEY = QtCore.Qt.Key_Space
+    def accept(self, editor, event, cursor, scope):
+        """accept the completer event"""
+        if event.modifiers() == QtCore.Qt.ControlModifier:
+            settings = self.application.supportManager.getPreferenceSettings(scope)
+            #an array of additional candidates when cycling through completion candidates from the current document.
+            self.completions = settings.completions
+            #a shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
+            self.completionCommand = settings.completionCommand
+            self.disableDefaultCompletion = settings.disableDefaultCompletion
+            return bool(self.completions)
+        return False
+            
+    def execute(self, editor, event):
+        editor.showCompleter(self.completions)
+
 class SmartTypingPairsHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
     

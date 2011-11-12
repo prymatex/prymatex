@@ -202,7 +202,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
         cursor = self.editor.textCursor()
         point = self.editor.cursorRect(cursor).bottomRight()
-        self.editor.showMessage(text.strip(), timeout = timeout * self.timespanFactor, pos = (point.x() + 30, point.y()+5))
+        self.editor.showMessage(text.strip(), timeout = timeout * self.timespanFactor, pos = (point.x() + 30, point.y() + 5))
         #QtGui.QToolTip.showText(point, text.strip(), self.editor, self.editor.rect())
         
     def createNewDocument(self, text):

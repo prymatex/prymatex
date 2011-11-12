@@ -119,7 +119,6 @@ class LabelOverlayWidget(QtGui.QLabel):
     
     
     def __init__(self, text="", parent=None):
-        print "Parent del mensaje oculto es", parent
         super(LabelOverlayWidget, self).__init__(text, parent)
         self.paddingLeft = 10
         self.paddingBottom = 10

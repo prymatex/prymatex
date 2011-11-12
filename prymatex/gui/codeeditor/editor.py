@@ -113,10 +113,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     ShowLineNumbers = 0x08
     ShowFolding = 0x10
     
+    Key_Any = 0
     editorHelpers = {
-        QtCore.Qt.Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper(), helpers.SmartUnindentHelper() ],
+        Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper(), helpers.SmartUnindentHelper() ],
         QtCore.Qt.Key_Tab: [ helpers.TabTriggerHelper(), helpers.TabIndentHelper() ],
         QtCore.Qt.Key_Backtab: [ helpers.BacktabUnindentHelper() ],
+        QtCore.Qt.Key_Space: [ helpers.CompleterHelper() ],
         QtCore.Qt.Key_Backspace: [ helpers.BackspaceUnindentHelper() ],
         QtCore.Qt.Key_Home: [ helpers.MoveCursorToHomeHelper() ],
         QtCore.Qt.Key_Return: [ helpers.SmartIndentHelper() ],
@@ -557,7 +559,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         scope = self.getCurrentScope()
         cursor = self.textCursor()
         #Preparar teclas
-        keys = set([ QtCore.Qt.Key_Any, event.key() ])
+        keys = [ self.Key_Any, event.key() ]
         for key in keys:
             #Obtener Helpers
             helpers = self.editorHelpers.get(key, [])
@@ -569,13 +571,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         
         #No tengo helper paso el evento a la base
         QtGui.QPlainTextEdit.keyPressEvent(self, event)
-
-        #Luego de tratar el evento, solo si se inserto algo de texto
-        if event.text() != "":
-            completionPrefix = self.getCurrentWord()
-            if self.completerMode.isActive() and completionPrefix != self.completerMode.completionPrefix():
-                self.completerMode.setCompletionPrefix(completionPrefix)
-                self.completerMode.complete(self.cursorRect())
     
     #==========================================================================
     # Bundle Items

@@ -311,32 +311,26 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.activated[str].connect(self.insertCompletion)
-        self.completions = []
-
-    def active(self, event, scope):
-        if event.key() == QtCore.Qt.Key_Space and event.modifiers() == QtCore.Qt.ControlModifier:
-            preferences = self.editor.getPreference(scope)
-            self.completions = preferences.completions
 
     def isActive(self):
         return self.popup().isVisible()
         
-    def inactive(self):
-        self.completions = []
-
     def keyPressEvent(self, event):
         if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
-            self.inactive()
             event.ignore()
-        elif self.completions:
-            self.editor.showCompleter(self.completions)
         else:
-            QtGui.QPlainTextEdit.self.keyPressEvent(self.editor, event)
-    
+            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+            #Luego de tratar el evento, solo si se inserto algo de texto
+            if event.text() != "":
+                completionPrefix = self.editor.getCurrentWord()
+                if completionPrefix != self.completionPrefix():
+                    self.setCompletionPrefix(completionPrefix)
+                    self.complete(self.editor.cursorRect())
+                
     def insertCompletion(self, insert):
         self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])
 
     def complete(self, rect):
         self.popup().setCurrentIndex(self.completionModel().index(0, 0))
-        rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 20)
+        rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 30)
         QtGui.QCompleter.complete(self, rect)
