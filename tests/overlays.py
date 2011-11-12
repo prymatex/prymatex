@@ -120,6 +120,12 @@ class ExampleOverlayedText(QtGui.QPlainTextEdit, PMXMessageOverlay):
         QtGui.QTextEdit.__init__(self, parent)
         PMXMessageOverlay.__init__(self)
         self.blockCountChanged.connect(self.showBlockCount)
+        self.selectionChanged.connect(self.showRandomMessage)
+        
+        
+    def showRandomMessage(self):
+        x, y = random.randint(0, self.width() - self.messageOverlay.width()), random.randint(0, self.height() - self.messageOverlay.width())
+        self.showMessage("Selection changed", pos = (x, y))
               
     def resizeEvent(self, event):
         super(ExampleOverlayedText, self).resizeEvent(event)
@@ -131,7 +137,8 @@ class ExampleOverlayedText(QtGui.QPlainTextEdit, PMXMessageOverlay):
     def showBlockCount(self, newCount):
         self.showMessage("Block count changed to <i><b>%s</b></i>" % newCount)
     
-
+import random
+random.seed(os.getpid())
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     
