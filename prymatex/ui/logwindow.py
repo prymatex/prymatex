@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/logwindow.ui'
 #
-# Created: Fri Oct 28 21:42:07 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Sun Nov 13 18:07:37 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,7 +19,6 @@ class Ui_LogWidget(object):
     def setupUi(self, LogWidget):
         LogWidget.setObjectName(_fromUtf8("LogWidget"))
         LogWidget.resize(400, 103)
-        LogWidget.setWindowTitle(_('Log'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/actions/resources/actions/document-preview.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         LogWidget.setWindowIcon(icon)
@@ -37,7 +36,6 @@ class Ui_LogWidget(object):
         self.Clear.setObjectName(_fromUtf8("Clear"))
         self.horizontalLayout.addWidget(self.Clear)
         self.pushButton_2 = QtGui.QPushButton(LogWidget)
-        self.pushButton_2.setText(_('Filter'))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-filter.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_2.setIcon(icon2)
@@ -54,6 +52,7 @@ class Ui_LogWidget(object):
         QtCore.QMetaObject.connectSlotsByName(LogWidget)
 
     def retranslateUi(self, LogWidget):
-        pass
+        LogWidget.setWindowTitle(_('Log'))
+        self.pushButton_2.setText(_('Filter'))
 
 from prymatex import resources_rc

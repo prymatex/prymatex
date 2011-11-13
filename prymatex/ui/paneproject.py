@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/paneproject.ui'
 #
-# Created: Fri Oct 28 21:42:07 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Sun Nov 13 18:07:38 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,7 +19,6 @@ class Ui_ProjectPane(object):
     def setupUi(self, ProjectPane):
         ProjectPane.setObjectName(_fromUtf8("ProjectPane"))
         ProjectPane.resize(213, 464)
-        ProjectPane.setWindowTitle(_('Project'))
         self.verticalLayout = QtGui.QVBoxLayout(ProjectPane)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -30,7 +29,6 @@ class Ui_ProjectPane(object):
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.buttonAdd = QtGui.QPushButton(ProjectPane)
-        self.buttonAdd.setToolTip(_('Add files/folders'))
         self.buttonAdd.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/resources/actions/list-add.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -38,7 +36,6 @@ class Ui_ProjectPane(object):
         self.buttonAdd.setObjectName(_fromUtf8("buttonAdd"))
         self.horizontalLayout.addWidget(self.buttonAdd)
         self.buttonRemove = QtGui.QPushButton(ProjectPane)
-        self.buttonRemove.setToolTip(_('Remove File/Folders'))
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/resources/actions/list-remove.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonRemove.setIcon(icon1)
@@ -58,6 +55,8 @@ class Ui_ProjectPane(object):
         QtCore.QMetaObject.connectSlotsByName(ProjectPane)
 
     def retranslateUi(self, ProjectPane):
-        pass
+        ProjectPane.setWindowTitle(_('Project'))
+        self.buttonAdd.setToolTip(_('Add files/folders'))
+        self.buttonRemove.setToolTip(_('Remove File/Folders'))
 
 from prymatex import resources_rc

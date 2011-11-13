@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configbundles.ui'
 #
-# Created: Fri Oct 28 21:42:07 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Sun Nov 13 18:07:37 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,28 +19,23 @@ class Ui_Bundles(object):
     def setupUi(self, Bundles):
         Bundles.setObjectName(_fromUtf8("Bundles"))
         Bundles.resize(400, 359)
-        Bundles.setWindowTitle(_('Bundle Paths'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/shapes.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Bundles.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(Bundles)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label_2 = QtGui.QLabel(Bundles)
-        self.label_2.setText(_('Bundle paths'))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout.addWidget(self.label_2)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.label = QtGui.QLabel(Bundles)
-        self.label.setText(_('Path'))
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_2.addWidget(self.label)
         self.linePath = QtGui.QLineEdit(Bundles)
-        self.linePath.setToolTip(_('Bundles contain syntax definition, commands and snippets,\nyou can add bundles to this directory but make sure you\ninclude the upper level folder containing the .tmBundle\ndirectory.'))
         self.linePath.setObjectName(_fromUtf8("linePath"))
         self.horizontalLayout_2.addWidget(self.linePath)
         self.pushAddPath = QtGui.QPushButton(Bundles)
-        self.pushAddPath.setText(_('Add path'))
         self.pushAddPath.setObjectName(_fromUtf8("pushAddPath"))
         self.horizontalLayout_2.addWidget(self.pushAddPath)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
@@ -52,11 +47,9 @@ class Ui_Bundles(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.pushEdit = QtGui.QPushButton(Bundles)
-        self.pushEdit.setText(_('Edit'))
         self.pushEdit.setObjectName(_fromUtf8("pushEdit"))
         self.horizontalLayout.addWidget(self.pushEdit)
         self.pushRemove = QtGui.QPushButton(Bundles)
-        self.pushRemove.setText(_('Remove'))
         self.pushRemove.setObjectName(_fromUtf8("pushRemove"))
         self.horizontalLayout.addWidget(self.pushRemove)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -65,6 +58,12 @@ class Ui_Bundles(object):
         QtCore.QMetaObject.connectSlotsByName(Bundles)
 
     def retranslateUi(self, Bundles):
-        pass
+        Bundles.setWindowTitle(_('Bundle Paths'))
+        self.label_2.setText(_('Bundle paths'))
+        self.label.setText(_('Path'))
+        self.linePath.setToolTip(_('Bundles contain syntax definition, commands and snippets,\nyou can add bundles to this directory but make sure you\ninclude the upper level folder containing the .tmBundle\ndirectory.'))
+        self.pushAddPath.setText(_('Add path'))
+        self.pushEdit.setText(_('Edit'))
+        self.pushRemove.setText(_('Remove'))
 
 from prymatex import resources_rc

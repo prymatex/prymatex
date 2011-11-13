@@ -1,5 +1,5 @@
 from PyQt4 import QtCore, QtGui
-from prymatex.ui.bundleselector import Ui_BundleSelector
+from prymatex.ui.support.selector import Ui_BundleSelector
 
 class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog):
     '''

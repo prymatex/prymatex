@@ -88,23 +88,15 @@ class PMXApplication(QtGui.QApplication):
     def setupConfigDialog(self):
         from prymatex.gui.settings.settingsdialog import PMXSettingsDialog
         configdialog = PMXSettingsDialog()
-        from prymatex.gui.settings.widgets import PMXGeneralWidget,\
-                                                PMXUpdatesWidget,\
-                                                PMXSaveWidget,\
-                                                PMXNetworkWidget,\
-                                                PMXBundleWidget 
+        from prymatex.gui.settings.widgets import PMXGeneralWidget, PMXNetworkWidget
         from prymatex.gui.settings.environment import PMXEnvVariablesWidgets
         from prymatex.gui.settings.themes import PMXThemeConfigWidget
                                                 
         configdialog.register(PMXGeneralWidget())
         configdialog.register(PMXThemeConfigWidget())
-        configdialog.register(PMXUpdatesWidget())
-        configdialog.register(PMXSaveWidget())
-        configdialog.register(PMXBundleWidget())
         configdialog.register(PMXEnvVariablesWidgets())
         configdialog.register(PMXNetworkWidget())
         self.configDialog = configdialog
-    
     
     def setupExecutor(self):
         from concurrent import futures

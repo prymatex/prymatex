@@ -7,16 +7,8 @@ from PyQt4.QtCore import pyqtSignal, QDir
 from PyQt4.Qt import SIGNAL
 from PyQt4.QtGui import QCompleter, QFileSystemModel, QMessageBox
 from prymatex.core.base import PMXObject
-from prymatex.ui.multiclose import Ui_SaveMultipleDialog
 from prymatex.ui.newtemplate import Ui_NewFromTemplateDialog
-    
-class MultiCloseDialog(QtGui.QDialog, Ui_SaveMultipleDialog):
-    '''
-    @todo: Implement PMXTabWidget model
-    '''
-    def __init__(self, parent):
-        super(MultiCloseDialog, self).__init__(parent)
-        self.setupUi(self)
+
 
 class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObject):
     def __init__(self, parent = None):

@@ -4,10 +4,10 @@ import os
 import codecs
 
 from PyQt4 import QtCore, QtGui, QtWebKit
-from PyQt4.QtCore import QObject, pyqtSignature, pyqtProperty, QTimer, SIGNAL
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
-from prymatex.ui.panebrowser import Ui_BrowserDock
+
+from prymatex.ui.dockers.browser import Ui_BrowserDock
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
@@ -23,8 +23,8 @@ class TmFileReply(QNetworkReply):
         
         self.setHeader(QNetworkRequest.ContentTypeHeader, "text/html; charset=utf-8")
         self.setHeader(QNetworkRequest.ContentLengthHeader, len(self.content))
-        QTimer.singleShot(0, self, SIGNAL("readyRead()"))
-        QTimer.singleShot(0, self, SIGNAL("finished()"))
+        QtCore.QTimer.singleShot(0, self, QtCore.SIGNAL("readyRead()"))
+        QtCore.QTimer.singleShot(0, self, QtCore.SIGNAL("finished()"))
         self.open(self.ReadOnly | self.Unbuffered)
         self.setUrl(url)
     
@@ -71,17 +71,17 @@ TextMate.system = function(command, callback) {
 }
 """
 
-class SystemWrapper(QObject):
+class SystemWrapper(QtCore.QObject):
     def __init__(self, process, file):
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
         self.process = process
         self.file = file
     
-    @pyqtSignature("write(int)")
+    @QtCore.pyqtSignature("write(int)")
     def write(self, flags):
         self.process.stdin.write()
     
-    @pyqtSignature("write(int)")
+    @QtCore.pyqtSignature("write(int)")
     def read(self, flags):
         self.process.stdin.close()
         text = self.process.stdout.read()
@@ -90,7 +90,7 @@ class SystemWrapper(QObject):
         deleteFile(self.file)
         return text
         
-    @pyqtSignature("close()")
+    @QtCore.pyqtSignature("close()")
     def close(self):
         self.process.stdin.close()
         self.process.stdout.close()
@@ -106,9 +106,9 @@ class SystemWrapper(QObject):
         return text
     outputString = QtCore.pyqtProperty(str, outputString)
     
-class TextMate(QObject):
+class TextMate(QtCore.QObject):
     def __init__(self, mainFrame, bundleItem = None):
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
         self.mainFrame = mainFrame
         self.bundleItem = bundleItem
         
@@ -122,7 +122,7 @@ class TextMate(QObject):
     
     def isBusy(self):
         return True
-    isBusy = pyqtProperty("bool", isBusy)
+    isBusy = QtCore.pyqtProperty("bool", isBusy)
     
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
     SETTINGS_GROUP = "Browser"

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/tabchoose.ui'
 #
-# Created: Fri Oct 28 21:42:07 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Sun Nov 13 18:07:37 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,7 +19,6 @@ class Ui_ChooseTab(object):
     def setupUi(self, ChooseTab):
         ChooseTab.setObjectName(_fromUtf8("ChooseTab"))
         ChooseTab.resize(310, 170)
-        ChooseTab.setWindowTitle(_('Dialog'))
         self.verticalLayout = QtGui.QVBoxLayout(ChooseTab)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -34,12 +33,10 @@ class Ui_ChooseTab(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.pushOpen = QtGui.QPushButton(ChooseTab)
-        self.pushOpen.setText(_('OK'))
         self.pushOpen.setDefault(True)
         self.pushOpen.setObjectName(_fromUtf8("pushOpen"))
         self.horizontalLayout.addWidget(self.pushOpen)
         self.pushCancel = QtGui.QPushButton(ChooseTab)
-        self.pushCancel.setText(_('Cancel'))
         self.pushCancel.setObjectName(_fromUtf8("pushCancel"))
         self.horizontalLayout.addWidget(self.pushCancel)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -48,5 +45,7 @@ class Ui_ChooseTab(object):
         QtCore.QMetaObject.connectSlotsByName(ChooseTab)
 
     def retranslateUi(self, ChooseTab):
-        pass
+        ChooseTab.setWindowTitle(_('Dialog'))
+        self.pushOpen.setText(_('OK'))
+        self.pushCancel.setText(_('Cancel'))
 

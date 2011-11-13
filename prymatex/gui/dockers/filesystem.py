@@ -3,13 +3,12 @@
 import os
 import shutil
 from PyQt4 import QtGui, QtCore
-
 from prymatex.utils.i18n import ugettext as _
-from prymatex.ui.panefilesystem import Ui_FileSystemDock
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
 from prymatex.gui.dockers.base import PMXBaseDock
+from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBaseDock):
     #=======================================================================

@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from PyQt4.QtGui import *
-from PyQt4.Qt import Qt, QVariant
+from PyQt4 import QtGui, QtCore
+from PyQt4.Qt import Qt
 from PyQt4.QtNetwork import QNetworkProxy
-from PyQt4.QtCore import pyqtSignal, pyqtSignature, QUrl
 from prymatex.core.base import PMXObject
 
-from prymatex.ui.configupdates import Ui_Updates
-from prymatex.ui.configsave import Ui_Save
-from prymatex.ui.confignetwork import Ui_Network
-from prymatex.ui.configgeneral import Ui_General
-from prymatex.ui.configbundles import Ui_Bundles
+#from prymatex.ui.configupdates import Ui_Updates
+#from prymatex.ui.configsave import Ui_Save
+from prymatex.ui.settings.network import Ui_Network
+from prymatex.ui.settings.general import Ui_General
+#from prymatex.ui.settings.bundles import Ui_Bundles
 
-class PMXConfigTreeView(QTreeView):
+class PMXConfigTreeView(QtGui.QTreeView):
     _model = None
     
-    widgetChanged = pyqtSignal(int)
+    widgetChanged = QtCore.pyqtSignal(int)
     
     def __init__(self, parent = None):
         super(PMXConfigTreeView, self).__init__(parent)
@@ -31,11 +30,11 @@ class PMXConfigTreeView(QTreeView):
 #===============================================================================
 # 
 #===============================================================================
-CONFIG_WIDGETS = (QLineEdit, QSpinBox, QCheckBox,)
+CONFIG_WIDGETS = (QtGui.QLineEdit, QtGui.QSpinBox, QtGui.QCheckBox,)
 
 filter_config_widgets = lambda ws: filter(lambda w: isinstance(w, CONFIG_WIDGETS), ws)
 
-class PMXConfigBaseWidget(QWidget, PMXObject):
+class PMXConfigBaseWidget(QtGui.QWidget, PMXObject):
     '''
     Base class for configuration widgets
     '''
@@ -56,14 +55,14 @@ class PMXConfigBaseWidget(QWidget, PMXObject):
     def discard(self):
         QMessageBox.information(self, "Discard %s..." % self.windowTitle(), "Discard settings")
 
-class PMXUpdatesWidget(QWidget, Ui_Updates):
-    def __init__(self, parent = None):
-        super(PMXUpdatesWidget, self).__init__(parent)
-        self.setupUi(self)
+# class PMXUpdatesWidget(QtGui.QWidget, Ui_Updates):
+#    def __init__(self, parent = None):
+#        super(PMXUpdatesWidget, self).__init__(parent)
+#        self.setupUi(self)
 
-class PMXGeneralWidget(QWidget, Ui_General, PMXObject):
+class PMXGeneralWidget(QtGui.QWidget, Ui_General, PMXObject):
     def __init__(self, parent = None):
-        super(PMXGeneralWidget, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
 
         
@@ -206,13 +205,13 @@ for codline in CODECS:
                                      lang.strip().title(), ) 
     )
  
-class PMXSaveWidget(QWidget, Ui_Save):
-    def __init__(self, parent = None):
-        super(PMXSaveWidget, self).__init__(parent)
-        self.setupUi(self)
-        for code, alias, lang in CODECS_CODEC_ALIAS_LANG:
-            name = "%s%s %s" % (code, alias and " (%s)" % alias or '', lang)
-            self.comboEncodings.addItem(name, None)
+#class PMXSaveWidget(QtGui.QWidget, Ui_Save):
+#    def __init__(self, parent = None):
+#        QtGui.QWidget.__init__(self, parent)
+#        self.setupUi(self)
+#        for code, alias, lang in CODECS_CODEC_ALIAS_LANG:
+#            name = "%s%s %s" % (code, alias and " (%s)" % alias or '', lang)
+#            self.comboEncodings.addItem(name, None)
 
 class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
     '''
@@ -275,7 +274,7 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
             raise ValueError("%s is not a valid proxyType value" % value)
         
     def proxyManual(self, value):
-        url = QUrl(value)
+        url = QtCore.QUrl(value)
         self.lineProxyAddress.setText(url.host())
         self.spinProxyPort.setValue(int(url.port()))
         self._proxyManual = url
@@ -283,16 +282,16 @@ class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
     def proxyEnviromentVariable(self, value):
         self._proxyEnviromentVariable = value
         
-class PMXBundleWidget(PMXConfigBaseWidget, Ui_Bundles):
-    def __init__(self, parent = None):
-        super(PMXConfigBaseWidget, self).__init__(parent)
-        self.setupUi(self)
-        
-    def on_pushAddPath_pressed(self):
-        pth = QFileDialog.getExistingDirectory(self, self.trUtf8("Select bundle dir"))
-    
-    def on_pushRemove_pressed(self):
-        print "Remove"
-    
-    def on_pushEdit_pressed(self):
-        print "Edit"
+#class PMXBundleWidget(PMXConfigBaseWidget, Ui_Bundles):
+#    def __init__(self, parent = None):
+#        super(PMXConfigBaseWidget, self).__init__(parent)
+#        self.setupUi(self)
+#        
+#    def on_pushAddPath_pressed(self):
+#        pth = QFileDialog.getExistingDirectory(self, self.trUtf8("Select bundle dir"))
+#    
+#    def on_pushRemove_pressed(self):
+#        print "Remove"
+#    
+#    def on_pushEdit_pressed(self):
+#        print "Edit"

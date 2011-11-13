@@ -4,11 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.settings.widgets import PMXConfigBaseWidget
 from prymatex.core.base import PMXObject
-from prymatex.ui.configenvironment import Ui_EnvVariables
-from logging import getLogger
-
-logger = getLogger(__name__)
-
+from prymatex.ui.settings.environment import Ui_EnvVariables
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
     def __init__(self, settingGroup, user, system, parent = None):
