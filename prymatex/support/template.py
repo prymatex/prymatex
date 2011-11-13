@@ -6,11 +6,12 @@
     http://manual.macromates.com/en/templates
 '''
 
-import os, shutil, plistlib, codecs
+import os, shutil, codecs
 from glob import glob
 from subprocess import Popen
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import prepareShellScript
+from prymatex.utils import plist
 
 class PMXTemplateFile(object):
     TYPE = 'templatefile'
@@ -77,7 +78,7 @@ class PMXTemplate(PMXBundleItem):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         file = os.path.join(self.path , self.FILE)
-        plistlib.writePlist(self.hash, file)
+        plist.writePlist(self.hash, file)
         #Hora los archivos del template
         for file in self.files:
             if file.path != self.path:
@@ -107,7 +108,7 @@ class PMXTemplate(PMXBundleItem):
         paths = glob(os.path.join(path, '*'))
         paths.remove(info)
         try:
-            data = plistlib.readPlist(info)
+            data = plist.readPlist(info)
             uuid = manager.uuidgen(data.pop('uuid', None))
             template = manager.getManagedObject(uuid)
             if template is None and not manager.isDeleted(uuid):
