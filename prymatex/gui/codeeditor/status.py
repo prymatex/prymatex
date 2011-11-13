@@ -372,8 +372,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def showIFind(self):
         self.hideAllWidgets()
         cursor = self.currentEditor.textCursor()
-        self.info("Getting selected text")
-        if cursor.hasSelection():
-            self.lineEditIFind.setText(cursor.selectedText())
+        word = cursor.selectedText() if cursor.hasSelection() else self.currentEditor.getCurrentWord()
+        self.lineEditIFind.setText(word)        
         self.widgetIFind.setVisible(True)
+        self.lineEditIFind.selectAll()
         self.lineEditIFind.setFocus()

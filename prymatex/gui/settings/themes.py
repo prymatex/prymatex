@@ -43,7 +43,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     def __init__(self, parent = None):
         super(PMXThemeConfigWidget, self).__init__(parent)
         self.setupUi(self)
-        #TODO: settings es puesto por PMXObject
+        
         #Settings
         self.settings = self.application.settings.getGroup('CodeEditor')
 
@@ -57,19 +57,24 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     #==========================================================
     # ComboBoxThemes
     #==========================================================
-    def on_comboBoxThemes_Changed(self, index):
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxThemes_activated(self, index):
         uuid = self.comboBoxThemes.itemData(index)
-        theme = self.manager.getTheme(unicode(uuid))
+        theme = self.manager.getTheme(uuid)
         self.setThemeSettings(theme)
         
     def configComboBoxThemes(self):
         #Combo Theme
+        currentTheme = None
+        currentThemeUUID = self.settings.value('theme').upper()
         for theme in self.manager.getAllThemes():
-            self.comboBoxThemes.addItem(theme.name, str(theme.uuid).upper())
-        self.comboBoxThemes.currentIndexChanged[int].connect(self.on_comboBoxThemes_Changed)
-        uuid = self.settings.value('theme')
-        if uuid is not None:
-            self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.findData(uuid.upper()))
+            uuid = unicode(theme.uuid).upper()
+            self.comboBoxThemes.addItem(theme.name, uuid)
+            if uuid == currentThemeUUID:
+                currentTheme = theme
+        if currentTheme is not None:
+            self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.findData(currentThemeUUID))
+            self.setThemeSettings(currentTheme)
     
     #==========================================================
     # TableView
