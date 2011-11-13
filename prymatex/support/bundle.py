@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, re, plistlib, shutil
+import os, re, shutil
 from copy import copy
 
-from prymatex.support.utils import readPlist
+from prymatex.utils import plist
 
 '''
     Este es el unico camino -> http://manual.macromates.com/en/
@@ -83,7 +83,7 @@ class PMXBundle(PMXManagedObject):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         file = os.path.join(self.path, self.FILE)
-        plistlib.writePlist(self.hash, file)
+        plist.writePlist(self.hash, file)
 
     def delete(self):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
@@ -105,7 +105,7 @@ class PMXBundle(PMXManagedObject):
     def loadBundle(cls, path, namespace, manager):
         info_file = os.path.join(path, cls.FILE)
         try:
-            data = readPlist(info_file)
+            data = plist.readPlist(info_file)
             uuid = manager.uuidgen(data.pop('uuid', None))
             bundle = manager.getManagedObject(uuid)
             if bundle is None and not manager.isDeleted(uuid):
@@ -164,7 +164,7 @@ class PMXBundleItem(PMXManagedObject):
         dir = os.path.dirname(self.path)
         if not os.path.exists(dir):
             os.makedirs(dir)
-        plistlib.writePlist(self.hash, self.path)
+        plist.writePlist(self.hash, self.path)
     
     def delete(self):
         os.unlink(self.path)
@@ -182,7 +182,7 @@ class PMXBundleItem(PMXManagedObject):
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
         try:
-            data = readPlist(path)
+            data = plist.readPlist(path)
             uuid = manager.uuidgen(data.pop('uuid', None))
             item = manager.getManagedObject(uuid)
             if item is None and not manager.isDeleted(uuid):

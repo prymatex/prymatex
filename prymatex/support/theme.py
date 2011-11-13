@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, plistlib
-from xml.parsers.expat import ExpatError
-from prymatex.support.score import PMXScoreManager
+import os
 from prymatex.support.bundle import PMXManagedObject
+from prymatex.utils import plist
 
 '''
     foreground, background, selection, invisibles, lineHighlight, caret, gutter
@@ -79,12 +78,12 @@ class PMXTheme(PMXManagedObject):
         dir = os.path.dirname(self.path)
         if not os.path.exists(dir):
             os.makedirs(dir)
-        plistlib.writePlist(self.hash, self.path)
+        plist.writePlist(self.hash, self.path)
 
     @classmethod
     def loadTheme(cls, path, namespace, manager):
         try:
-            data = plistlib.readPlist(path)
+            data = plist.readPlist(path)
             uuid = manager.uuidgen(data.pop('uuid', None))
             theme = manager.getManagedObject(uuid)
             if theme is None and not manager.isDeleted(uuid):
