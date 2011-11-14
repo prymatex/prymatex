@@ -684,9 +684,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         if self.folding.isStart(self.folding.getFoldingMark(milestone)):
             startBlock = milestone.next()
             endBlock = self.folding.findBlockFoldClose(milestone)
+            if endBlock is None:
+                return
         else:
             endBlock = milestone
             milestone = self.folding.findBlockFoldOpen(endBlock)
+            if milestone is None:
+                return
             startBlock = milestone.next()
         block = startBlock
         while True:

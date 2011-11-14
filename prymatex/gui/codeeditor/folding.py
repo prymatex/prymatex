@@ -12,9 +12,10 @@ class PMXEditorFolding(object):
         self.folding = []
 
     def on_foldingChanged(self, block):
-        if block in self.folding:
+        print "Agregando", block.blockNumber(), "a", map(lambda b: b.blockNumber(), self.blocks)
+        if block in self.blocks:
             userData = block.userData()
-            if userData.foldingMark == PMXSyntax.FOLDING_NONE and block in self.blocks:
+            if userData.foldingMark == PMXSyntax.FOLDING_NONE:
                 self.blocks.remove(block)
         else:
             indexes = map(lambda block: block.blockNumber(), self.blocks)
@@ -25,6 +26,8 @@ class PMXEditorFolding(object):
         else:
             self.updateFoldingBlocks()
         self.editor.sidebar.update()
+        print "Quedaron", map(lambda b: b.blockNumber(), self.folding)
+        print "Marcas", map(lambda b: b.userData().foldingMark, self.folding)
         
     def on_textBlocksRemoved(self):
         remove = filter(lambda block: block.userData() is None, self.blocks)
@@ -54,10 +57,9 @@ class PMXEditorFolding(object):
         lastOpenIndent = currentIndent = ""
         for block in self.blocks:
             userData = block.userData()
-            if userData is None: break #FIXME: PARCHAZO PARA VER
             if userData.foldingMark <= PMXSyntax.FOLDING_STOP:
-                #Esta cerrando, es blank?
-                if block.text().strip() == "":
+                #Esta cerrando, si no puede cerrar nada continuo?
+                if nest <= 0:
                     continue
             elif userData.foldingMark >= PMXSyntax.FOLDING_START:
                 #Esta abriendo, esta menos indentado?
@@ -102,9 +104,7 @@ class PMXEditorFolding(object):
             if userData.foldingMark >= PMXSyntax.FOLDING_START or userData.foldingMark <= PMXSyntax.FOLDING_STOP:
                 nest += userData.foldingMark
             if nest <= 0:
-                break
-        #return the founded block or the last valid block
-        return block if block.isValid() else block.previous()
+                return block
     
     def findBlockFoldOpen(self, block):
         nest = 0
@@ -117,10 +117,7 @@ class PMXEditorFolding(object):
             if userData.foldingMark >= PMXSyntax.FOLDING_START or userData.foldingMark <= PMXSyntax.FOLDING_STOP:
                 nest += userData.foldingMark
             if nest >= 0:
-                break
-
-        #return the founded block or the first valid block
-        return block if block.isValid() else block.next()
+                return block
     
     def getNestedLevel(self, index):
         return reduce(lambda x, y: x + y, map(lambda block: block.userData().foldingMark, self.folding[:index]), 0)
