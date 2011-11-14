@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/settingsdialog.ui'
+# Form implementation generated from reading ui file 'resources/ui/settings/dialog.ui'
 #
-# Created: Sun Nov 13 18:07:37 2011
+# Created: Mon Nov 14 16:19:58 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,6 +28,7 @@ class Ui_SettingsDialog(object):
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         SettingsDialog.setWindowIcon(icon)
         self.verticalLayout_2 = QtGui.QVBoxLayout(SettingsDialog)
+        self.verticalLayout_2.setSpacing(2)
         self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.splitter = QtGui.QSplitter(SettingsDialog)
@@ -36,7 +37,7 @@ class Ui_SettingsDialog(object):
         self.layoutWidget = QtGui.QWidget(self.splitter)
         self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.layoutWidget)
-        self.verticalLayout.setSpacing(-1)
+        self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.lineEditFilter = QtGui.QLineEdit(self.layoutWidget)
@@ -54,15 +55,11 @@ class Ui_SettingsDialog(object):
         self.mainContainer.setMinimumSize(QtCore.QSize(470, 0))
         self.mainContainer.setObjectName(_fromUtf8("mainContainer"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.mainContainer)
+        self.verticalLayout_3.setSpacing(2)
+        self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.labelTitle = QtGui.QLabel(self.mainContainer)
-        self.labelTitle.setMaximumSize(QtCore.QSize(16777215, 40))
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        font.setWeight(75)
-        font.setBold(True)
-        self.labelTitle.setFont(font)
         self.labelTitle.setObjectName(_fromUtf8("labelTitle"))
         self.verticalLayout_3.addWidget(self.labelTitle)
         self.container = QtGui.QWidget(self.mainContainer)

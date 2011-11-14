@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
-from prymatex.ui.editorstatus import Ui_CodeEditorStatus
+from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
 class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     FIND_STYLE_NO_MATCH = 'background-color: red; color: #fff;'
@@ -29,7 +29,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     #============================================================    
     def setupEvents(self):
         self.lineEditIFind.installEventFilter(self)
-        self.lineEditCommand.installEventFilter(self)
+        self.comboBoxCommand.installEventFilter(self)
         self.lineEditFind.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
     
@@ -45,7 +45,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
                 elif event.key() == QtCore.Qt.Key_Return:
                     self.pushButtonIFindNext.click()
                     return True
-            elif obj is self.lineEditCommand:
+            elif obj is self.comboBoxCommand:
                 if event.key() == QtCore.Qt.Key_Escape:
                     self.pushButtonCommandClose.click()
                     return True
@@ -245,9 +245,9 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.widgetCommand.setVisible(False)
     
     @QtCore.pyqtSlot()
-    def on_lineEditCommand_returnPressed(self):
-        command = self.lineEditCommand.text()
-        self.lineEditCommand.clear()
+    def on_comboBoxCommand_returnPressed(self):
+        command = self.comboBoxCommand.text()
+        self.comboBoxCommand.clear()
         input = self.comboBoxInput.itemData(self.comboBoxInput.currentIndex())
         output = self.comboBoxOutput.itemData(self.comboBoxOutput.currentIndex())
         self.currentEditor.executeCommand(command, input, output)
@@ -255,7 +255,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def showCommand(self):
         self.hideAllWidgets()
         self.widgetCommand.setVisible(True)
-        self.lineEditCommand.setFocus()
+        self.comboBoxCommand.setFocus()
     
     #============================================================
     # AutoConnect GoToLine widget signals

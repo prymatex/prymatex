@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import os
 from PyQt4 import QtCore, QtGui
-from PyQt4.Qt import QDialog, QVBoxLayout, QPushButton, QFileDialog, QVariant
-from PyQt4.QtCore import pyqtSignal, QDir
-from PyQt4.Qt import SIGNAL
-from PyQt4.QtGui import QCompleter, QFileSystemModel, QMessageBox
 from prymatex.core.base import PMXObject
-from prymatex.ui.newtemplate import Ui_NewFromTemplateDialog
+from prymatex.ui.others.newtemplate import Ui_NewFromTemplateDialog
 
 
 class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObject):
@@ -16,7 +13,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
         self.setupUi(self)
         model = QtGui.QFileSystemModel(self)
         model.setRootPath("")
-        model.setFilter(QDir.Dirs)
+        model.setFilter(QtCore.QDir.Dirs)
         self.completerFileSystem = QtGui.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
         
@@ -27,7 +24,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
         self.fileCreated = None
     
     def on_buttonChoose_pressed(self):
-        path = QFileDialog.getExistingDirectory(self, self.trUtf8("Choose Location for Template"))
+        path = QtGui.QFileDialog.getExistingDirectory(self, self.trUtf8("Choose Location for Template"))
         if path:
             self.lineLocation.setText(path)
 

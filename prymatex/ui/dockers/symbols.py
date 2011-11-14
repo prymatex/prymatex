@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/editorsymbols.ui'
+# Form implementation generated from reading ui file 'resources/ui/dockers/symbols.ui'
 #
-# Created: Sun Nov 13 18:07:38 2011
+# Created: Mon Nov 14 16:19:58 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!

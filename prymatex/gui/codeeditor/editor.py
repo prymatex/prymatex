@@ -129,7 +129,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def tabKeyBehavior(self):
         return self.tabStopSoft and u' ' * self.tabStopSize or u'\t'
     
-    def __init__(self, fileInfo = None, project = None, parent = None):
+    def __init__(self, syntax, fileInfo = None, project = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self)
         PMXMessageOverlay.__init__(self)
@@ -152,7 +152,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
         self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
-
+        
+        self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
+        
         #Block Count
         self.lastBlockCount = self.document().blockCount()
         
@@ -217,9 +219,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             if syntax is None:
                 raise exceptions.FileNotSupported()
         else:
-            syntax = application.supportManager.getBundleItem(self.defaultSyntax)
-        editor = cls(fileInfo, parent)
-        editor.setSyntax(syntax)
+            #TODO: defaultSyntax va en el manager
+            syntax = application.supportManager.getBundleItem(cls.defaultSyntax)
+        editor = cls(syntax, fileInfo, parent)
         return editor
 
     #=======================================================================
@@ -319,15 +321,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         return self.syntaxHighlighter.syntax
         
     def setSyntax(self, syntax):
-        if hasattr(self, "syntaxHighlighter"):
-            if self.syntaxHighlighter.syntax != syntax:
-                self.syntaxHighlighter.syntax = syntax
-                self.folding.indentSensitive = syntax.indentSensitive
-                self.syntaxHighlighter.rehighlight()
-                self.syntaxChanged.emit(syntax)
-        else:
-            self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
+        if self.syntaxHighlighter.syntax != syntax:
+            self.syntaxHighlighter.syntax = syntax
             self.folding.indentSensitive = syntax.indentSensitive
+            self.syntaxHighlighter.rehighlight()
+            self.syntaxChanged.emit(syntax)
 
     #=======================================================================
     # Context Menu

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/editorstatus.ui'
+# Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
 #
-# Created: Sun Nov 13 18:07:37 2011
+# Created: Mon Nov 14 16:33:13 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,19 +39,22 @@ class Ui_CodeEditorStatus(object):
         self.label = QtGui.QLabel(self.widgetCommand)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
-        self.lineEditCommand = QtGui.QLineEdit(self.widgetCommand)
-        self.lineEditCommand.setObjectName(_fromUtf8("lineEditCommand"))
-        self.horizontalLayout.addWidget(self.lineEditCommand)
+        self.comboBoxCommand = QtGui.QComboBox(self.widgetCommand)
+        self.comboBoxCommand.setEditable(True)
+        self.comboBoxCommand.setObjectName(_fromUtf8("comboBoxCommand"))
+        self.horizontalLayout.addWidget(self.comboBoxCommand)
         self.label_2 = QtGui.QLabel(self.widgetCommand)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.horizontalLayout.addWidget(self.label_2)
         self.comboBoxInput = QtGui.QComboBox(self.widgetCommand)
+        self.comboBoxInput.setMaximumSize(QtCore.QSize(120, 16777215))
         self.comboBoxInput.setObjectName(_fromUtf8("comboBoxInput"))
         self.horizontalLayout.addWidget(self.comboBoxInput)
         self.label_3 = QtGui.QLabel(self.widgetCommand)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.horizontalLayout.addWidget(self.label_3)
         self.comboBoxOutput = QtGui.QComboBox(self.widgetCommand)
+        self.comboBoxOutput.setMaximumSize(QtCore.QSize(160, 16777215))
         self.comboBoxOutput.setObjectName(_fromUtf8("comboBoxOutput"))
         self.horizontalLayout.addWidget(self.comboBoxOutput)
         self.verticalLayout.addWidget(self.widgetCommand)

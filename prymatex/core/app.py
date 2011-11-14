@@ -86,7 +86,7 @@ class PMXApplication(QtGui.QApplication):
             f.close()
         
     def setupConfigDialog(self):
-        from prymatex.gui.settings.settingsdialog import PMXSettingsDialog
+        from prymatex.gui.settings.dialog import PMXSettingsDialog
         configdialog = PMXSettingsDialog()
         from prymatex.gui.settings.widgets import PMXGeneralWidget, PMXNetworkWidget
         from prymatex.gui.settings.environment import PMXEnvVariablesWidgets
@@ -206,7 +206,7 @@ class PMXApplication(QtGui.QApplication):
     
     def getEditorInstance(self, fileInfo = None, parent = None):
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
-        return PMXCodeEditor.newInstance(fileInfo, self, parent)
+        return PMXCodeEditor.newInstance(self, fileInfo, parent)
 
     #---------------------------------------------------
     # Server Thread, signal handlers
