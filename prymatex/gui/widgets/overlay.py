@@ -14,13 +14,21 @@ class PMXMessageOverlay(object):
     '''
     def __init__(self):
         # Signals
-        self.messageOverlay = LabelOverlayWidget(text = "", parent = self)
-        self.messageOverlay.fadedIn.connect(self.messageFadedIn)
-        self.messageOverlay.fadedOut.connect(self.messageFadedOut)
-        self.messageOverlay.messageClicked.connect(self.messageClicked)
-        self.messageOverlay.linkActivated.connect(self.messageLinkActivated)
+        self.messageOverlay = self.buildLabel(self)
+        
         self.fadeOutTimer = QtCore.QTimer(self)
         self.fadeOutTimer.timeout.connect(self.messageOverlay.fadeOut)
+        self.messageOverlay.mouseIn.connect(self.fadeOutTimer.stop)
+    
+    def buildLabel(self, parent):
+        # TODO: Delegate responsability
+        messageOverlay = LabelOverlayWidget(text = "", parent = parent)
+        messageOverlay.fadedIn.connect(self.messageFadedIn)
+        messageOverlay.fadedOut.connect(self.messageFadedOut)
+        messageOverlay.messageClicked.connect(self.messageClicked)
+        #messageOverlay.linkActivated.connect(self.messageLinkActivated)
+        return messageOverlay
+        
     
     def messageFadedIn(self):
         ''' Override '''
@@ -89,7 +97,7 @@ class LabelOverlayWidget(QtGui.QLabel):
     fadedOut = QtCore.pyqtSignal()
     fadedIn = QtCore.pyqtSignal()
     messageClicked = QtCore.pyqtSignal()
-    
+    mouseIn = QtCore.pyqtSignal()
     
     STYLESHEET = '''
     QLabel, QLabel link {
@@ -117,23 +125,47 @@ class LabelOverlayWidget(QtGui.QLabel):
             assert type(value[1]) in (int, float)
         self.__position = value
     
+    # Padding
+    paddingLeft = 10
+    # Padding
+    paddingBottom = 10
+    # When mouse gets in
+    mousePreventsFadeout = True
     
-    def __init__(self, text="", parent=None):
+    _hovered = False
+    
+    def __init__(self, text="", parent=None, ):
+        '''
+        This label is managed from PMXMessageOverlay mixin, should not be
+        used outside this module
+        '''
         super(LabelOverlayWidget, self).__init__(text, parent)
-        self.paddingLeft = 10
-        self.paddingBottom = 10
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(32)
         self.timer.timeout.connect(self.updateOpacity)
         self.speed = 0
         self.setStyleSheet(self.STYLESHEET)
         self.opacity = 0
+        self.linkActivated.connect(self.linkHandler)
     
     
     def setParent(self, parent):
         self.updatePosition()
         return super(LabelOverlayWidget, self).setParent(parent)
   
+    def linkHandler(self, link):
+        callback = self.linkMap.get(link, None)
+        if callback is None:
+            return
+        if not callable(callback):
+            print "Error"
+            return
+        callback()
+  
+    def setText(self, text):
+        QtGui.QLabel.setText(self, text)
+        self._hovered = False
+        self.linkMap = {}
 
     def updatePosition(self):
         if self.position is not None:
@@ -151,7 +183,6 @@ class LabelOverlayWidget(QtGui.QLabel):
             y = parentRect.height() - self.height() - self.paddingBottom
         self.setGeometry(x, y, self.width(), self.height())
         
-        
     
     def resizeEvent(self, event):
         super(LabelOverlayWidget, self).resizeEvent(event)
@@ -163,7 +194,14 @@ class LabelOverlayWidget(QtGui.QLabel):
   
     def enterEvent(self, event):
         """ Mouse hovered the messge """
-        pass
+        if self.mousePreventsFadeout:
+            self._hovered = True
+            self.mouseIn.emit()
+    
+    def leaveEvent(self, event):
+        ''' Leave '''
+        if self.isVisible() and self._hovered:
+            self.fadeOut()
     
     def mousePressEvent(self, event):
         self.messageClicked.emit()

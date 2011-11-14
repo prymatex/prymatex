@@ -204,7 +204,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         else:
             self.application.fileManager.saveFile(editor.fileInfo, editor.toPlainText())
             editor.setModified(False)
-        editor.showMessage("<i>%s</i> saved" % editor.fileInfo.fileName())
+            
+        if editor.fileInfo:
+            editor.showMessage("<i>%s</i> saved" % editor.fileInfo.fileName())
     
     def closeEditor(self, editor = None):
         editor = editor or self.currentEditor
