@@ -46,7 +46,7 @@ class PMXBaseEditor(object):
         pass
     
     @classmethod
-    def newInstance(cls, fileInfo = None, parent = None):
+    def newInstance(cls, application, fileInfo = None, parent = None):
         return cls(fileInfo, parent)
     
     def showMessage(self, message, timeout = None, icon = None):

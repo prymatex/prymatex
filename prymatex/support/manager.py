@@ -623,10 +623,10 @@ class PMXSupportBaseManager(object):
         raise NotImplementedError
     
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
-        '''
-            Return a list of tab triggers bundle items
-        '''
-        return []
+        """
+        Return a list of tab triggers bundle items
+        """
+        raise NotImplementedError
     
     #---------------------------------------------------------------
     # TABTRIGGERS
@@ -666,10 +666,10 @@ class PMXSupportBaseManager(object):
     # KEYEQUIVALENT INTERFACE
     #---------------------------------------------------
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
-        '''
-            Return a list of key equivalent bundle items
-        '''
-        return []
+        """
+        Return a list of key equivalent bundle items
+        """
+        raise NotImplementedError
         
     #---------------------------------------------------------------
     # KEYEQUIVALENT
@@ -693,10 +693,10 @@ class PMXSupportBaseManager(object):
     # FILE EXTENSION INTERFACE
     #---------------------------------------------------
     def getAllBundleItemsByFileExtension(self, path):
-        '''
-            Return a list of file extension bundle items
-        '''
-        return []
+        """
+        Return a list of file extension bundle items
+        """
+        raise NotImplementedError
         
     #---------------------------------------------------------------
     # FILE EXTENSION, for drag commands
@@ -720,19 +720,19 @@ class PMXSupportBaseManager(object):
     # ACTION ITEMS INTERFACE
     #---------------------------------------------------
     def getAllActionItems(self):
-        '''
-            Return action items
-        '''
-        return []
+        """
+        Return action items
+        """
+        raise NotImplementedError
     
     #---------------------------------------------------------------
     # ACTION ITEMS FOR SCOPE
     #---------------------------------------------------------------
     @printtime
     def getActionItems(self, scope):
-        '''
-            Return a list of actions items for scope and without scope
-        '''
+        """
+        Return a list of actions items for scope and without scope
+        """
         with_scope = []
         without_scope = []
         for item in self.getAllActionItems():
@@ -750,7 +750,7 @@ class PMXSupportBaseManager(object):
     # SYNTAXES INTERFACE
     #---------------------------------------------------
     def getAllSyntaxes(self):
-        return []
+        raise NotImplementedError
     
     #---------------------------------------------------------------
     # SYNTAXES

@@ -23,7 +23,7 @@ from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
 from prymatex.gui.widgets.overlay import PMXMessageOverlay
 
-class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseEditor, ):
+class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseEditor):
     #=======================================================================
     # Signals
     #=======================================================================
@@ -153,14 +153,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
 
-        #Set syntax for fileInfo
-        syntax = None
-        if fileInfo is not None:
-            syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
-        if syntax is None:
-            syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
-        self.setSyntax(syntax)
-        
         #Block Count
         self.lastBlockCount = self.document().blockCount()
         
@@ -219,8 +211,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         return PMXBaseEditor.getTabIcon(self)
         
     @classmethod
-    def newInstance(cls, fileInfo = None, parent = None):
+    def newInstance(cls, application, fileInfo = None, parent = None):
+        if fileInfo is not None:
+            syntax = application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
+            if syntax is None:
+                raise exceptions.FileNotSupported()
+        else:
+            syntax = application.supportManager.getBundleItem(self.defaultSyntax)
         editor = cls(fileInfo, parent)
+        editor.setSyntax(syntax)
         return editor
 
     #=======================================================================
@@ -381,11 +380,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         differentPairs = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
         openBraces = map(lambda pair: pair[0], differentPairs)
         closeBraces = map(lambda pair: pair[1], differentPairs)
-        
+
         closeCursor = openCursor = None
         leftChar = cursor.document().characterAt(cursor.position() - 1)
         rightChar = cursor.document().characterAt(cursor.position())
-        
+
         if leftChar in openBraces or rightChar in openBraces:
             if leftChar in openBraces:
                 cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
