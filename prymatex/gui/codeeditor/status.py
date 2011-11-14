@@ -110,6 +110,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.comboBoxOutput.addItem("Show as Tool Tip", "showAsTooltip")
         self.comboBoxOutput.addItem("Create New Document", "createNewDocument")
         self.comboBoxOutput.setCurrentIndex(3)
+        self.comboBoxCommand.lineEdit().returnPressed.connect(self.on_comboBoxCommand_returnPressed)
     
     def setupWidgetFindReplace(self):
         #TODO: Constantes
@@ -246,11 +247,11 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     
     @QtCore.pyqtSlot()
     def on_comboBoxCommand_returnPressed(self):
-        command = self.comboBoxCommand.text()
-        self.comboBoxCommand.clear()
+        command = self.comboBoxCommand.lineEdit().text()
         input = self.comboBoxInput.itemData(self.comboBoxInput.currentIndex())
         output = self.comboBoxOutput.itemData(self.comboBoxOutput.currentIndex())
         self.currentEditor.executeCommand(command, input, output)
+        self.comboBoxCommand.lineEdit().clear()
     
     def showCommand(self):
         self.hideAllWidgets()

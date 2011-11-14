@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
 #
-# Created: Mon Nov 14 16:33:13 2011
+# Created: Mon Nov 14 16:51:25 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -40,6 +40,11 @@ class Ui_CodeEditorStatus(object):
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
         self.comboBoxCommand = QtGui.QComboBox(self.widgetCommand)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBoxCommand.sizePolicy().hasHeightForWidth())
+        self.comboBoxCommand.setSizePolicy(sizePolicy)
         self.comboBoxCommand.setEditable(True)
         self.comboBoxCommand.setObjectName(_fromUtf8("comboBoxCommand"))
         self.horizontalLayout.addWidget(self.comboBoxCommand)
