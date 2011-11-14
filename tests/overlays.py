@@ -122,7 +122,6 @@ class ExampleOverlayedText(QtGui.QPlainTextEdit, PMXMessageOverlay):
         self.blockCountChanged.connect(self.showBlockCount)
         self.selectionChanged.connect(self.showRandomMessage)
         
-        
     def showRandomMessage(self):
         x, y = random.randint(0, self.width() - self.messageOverlay.width()), random.randint(0, self.height() - self.messageOverlay.width())
         self.showMessage("Selection changed", pos = (x, y))
@@ -135,17 +134,19 @@ class ExampleOverlayedText(QtGui.QPlainTextEdit, PMXMessageOverlay):
         QtGui.QMessageBox.information(self, "Link activated", "You just clicked on %s" % link)
 
     def showBlockCount(self, newCount):
-        self.showMessage("Block count changed to <i><b>%s</b></i>" % newCount)
+        text = "<a href='coquitos'>Copy</a> Block count changed to <i><b>%s</b></i>" % newCount
+        self.showMessage(text,
+                         link_map={'coquitos': lambda s=text: QtGui.qApp.instance().setClipboard(s)})
     
 import random
 random.seed(os.getpid())
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     
-    rst = ExampleOverlayedText()
-    rst.setWindowTitle('reSt')
-    hl=Highlighter(rst.document(),"rest")
-    rst.show()
+#    rst = ExampleOverlayedText()
+#    rst.setWindowTitle('reSt')
+#    hl=Highlighter(rst.document(),"rest")
+#    rst.show()
 
     python = ExampleOverlayedText()
     python.setWindowTitle('python')
