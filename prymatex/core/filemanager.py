@@ -8,7 +8,9 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.exceptions import APIUsageError, PrymatexIOException
 
 class PMXFileManager(PMXObject):
-    ''' A File Manager'''
+    """
+    A File Manager
+    """
     ##########################################################
     # Signals
     ##########################################################

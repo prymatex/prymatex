@@ -206,15 +206,15 @@ class PMXApplication(QtGui.QApplication):
     
     def getEditorInstance(self, fileInfo = None, parent = None):
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
-        return PMXCodeEditor.newInstance(fileInfo, parent)
-    
+        return PMXCodeEditor.newInstance(fileInfo, self, parent)
+
     #---------------------------------------------------
     # Server Thread, signal handlers
     #---------------------------------------------------
     def on_menuRequest_triggered(self, menu):
         print menu
         self.mainWindow.currentEditor.showCompleter(menu["menuItems"])
-    
+
     #---------------------------------------------------
     # Exceptions, Print exceptions in a window
     #---------------------------------------------------
@@ -224,5 +224,5 @@ class PMXApplication(QtGui.QApplication):
             from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
             sys.__excepthook__(exctype, value, traceback)
             PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback).exec_()
-    
+
         sys.excepthook = displayExceptionDialog

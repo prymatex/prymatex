@@ -9,9 +9,9 @@ class UnsupportedPlatformError(Exception):
     pass
     
 class APIUsageError(Exception):
-    '''
+    """
     Thrown when something is violating the way Prymatex is meant to be used
-    '''
+    """
     pass
 
 class PrymatexIOException(Exception):
