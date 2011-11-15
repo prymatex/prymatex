@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+
 import os
 import shutil
+
 from PyQt4 import QtGui, QtCore
+
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty

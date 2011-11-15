@@ -54,9 +54,9 @@ class PMXObject(QtCore.QObject):
     
     @property
     def application(self):
-        '''
+        """
         Shortcut property for PyQt4.QtGui.QApplication.instance().
-        '''
+        """
         return self.__app
 
     #============================================================
@@ -64,10 +64,10 @@ class PMXObject(QtCore.QObject):
     #============================================================
     @property
     def logger(self):
-        '''
+        """
         Per class logger, logger instances are named after
         classes, ie: prymatex.gui.mainwindow.PMXMainWindow 
-        '''
+        """
         from logging import getLogger
         if self.__logger is None:
             t = type(self)

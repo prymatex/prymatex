@@ -82,6 +82,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData.symbol = None
 
     def highlightBlock(self, text):
+        print "highlightBlock"
         userData = self.currentBlock().userData()
         if userData is not None and userData.textHash == hash(self.syntax.scopeName) + hash(text):
             self.applyFormat(userData)

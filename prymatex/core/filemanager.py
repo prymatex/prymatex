@@ -11,14 +11,14 @@ class PMXFileManager(PMXObject):
     """
     A File Manager
     """
-    ##########################################################
+    #=========================================================
     # Signals
-    ##########################################################
+    #=========================================================
     fileOpened = QtCore.pyqtSignal()
     
-    ##########################################################
+    #=========================================================
     # Settings
-    ##########################################################
+    #=========================================================
     SETTINGS_GROUP = 'FileManager'
 
     fileHistory = pmxConfigPorperty(default=[])
@@ -95,7 +95,9 @@ class PMXFileManager(PMXObject):
             raise
     
     def getNewFile(self):
-        ''' Returns a new QFileInfo '''
+        """
+        Returns a new QFileInfo
+        """
         path = os.path.join(self.currentDirectory, "untitled %d" % self.new_file_counter)
         self.new_file_counter += 1
         return QtCore.QFileInfo(path)

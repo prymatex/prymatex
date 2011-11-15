@@ -1,18 +1,25 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
+#=======================================================================
+# Standard library imports
+#=======================================================================
 import re
 from bisect import bisect
+
+#=======================================================================
+# Related third party imports
+#=======================================================================
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QRect, Qt, SIGNAL
-from PyQt4.QtGui import QTextEdit, QTextFormat, QMenu, \
-    QTextCursor, QAction, QPalette, QPainter, QColor
     
+#=======================================================================
+# Local application / Library specific imports
+#=======================================================================
 from prymatex import resources
-from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.base import PMXObject
 from prymatex.core import exceptions
+from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui.central.editor import PMXBaseEditor
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
@@ -62,11 +69,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         
         #Editor colours
         palette = self.palette()
-        palette.setColor(QPalette.Active, QPalette.Text, self.colours['foreground'])
-        palette.setColor(QPalette.Active, QPalette.Base, self.colours['background'])
-        palette.setColor(QPalette.Inactive, QPalette.Base, self.colours['background'])
-        palette.setColor(QPalette.Active, QPalette.Highlight, self.colours['selection'])
-        palette.setColor(QPalette.Active, QPalette.AlternateBase, self.colours['invisibles'])
+        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, self.colours['foreground'])
+        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.colours['background'])
+        palette.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Base, self.colours['background'])
+        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Highlight, self.colours['selection'])
+        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.AlternateBase, self.colours['invisibles'])
         self.setPalette(palette)
         
         # Update Message Colors
@@ -230,35 +237,38 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def getPreference(self, scope):
         return self.application.supportManager.getPreferenceSettings(scope)
 
-    def getCurrentScope(self):
-        cursor = self.textCursor()
-        block = cursor.block()
-        userData = block.userData()
-        return userData.getScopeAtPosition(cursor.columnNumber())
-    
     def getWordUnderCursor(self):
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText()
-        
+
+    def getCurrentScope(self):
+        cursor = self.textCursor()
+        return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
+    
     def getCurrentWord(self, pat = RE_WORD, direction = "both"):
-        #Current word is not the same that word under cursor
+        #First, native
+        word = self.getWordUnderCursor()
+        if word: return word
+        
         cursor = self.textCursor()
         line = cursor.block().text()
         position = cursor.columnNumber()
-        # get text before and after the index.
+        #Get text before and after the cursor position.
         first_part, last_part = line[:position][::-1], line[position:]
+        #Try left word
         m = self.RE_WORD.match(first_part)
         if m and direction in ("left", "both"):
             word = m.group(0)[::-1]
             if word: return word
+        #Try right word
         m = self.RE_WORD.match(last_part)
         if m and direction in ("right", "both"):
             word = m.group(0)
             if word: return word
-
+        
         lword = rword = ""
-        #Buscar una por izquierda
+        #Search left word
         for i in range(len(first_part)):
             lword += first_part[i]
             m = self.RE_WORD.search(first_part[i + 1:], i )
@@ -266,7 +276,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                 lword += m.group(0)
                 break
         lword = lword[::-1]
-        #Buscar por derecha
+        #Search right word
         for i in range(len(last_part)):
             rword += last_part[i]
             m = self.RE_WORD.search(last_part[i:], i )
@@ -362,6 +372,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     # Highlight Editor
     #=======================================================================
     def highlightCurrent(self):
+        print "highlightCurrent"
         #Clean current extra selection
         self.setExtraSelections([])
         if self.multiCursorMode.isActive():
@@ -410,14 +421,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         if closeCursor is not None or openCursor is not None:
             extraSelections = self.extraSelections()
             if openCursor is not None:
-                selection = QTextEdit.ExtraSelection()
+                selection = QtGui.QTextEdit.ExtraSelection()
                 selection.format.setForeground(QtGui.QBrush(self.colours['selection']))
                 #backgroundColor = self.colours['lineHighlight'] if cursor.block() == openCursor.block() else self.colours['background']
                 selection.format.setBackground(QtGui.QBrush(QtCore.Qt.transparent))
                 selection.cursor = closeCursor
                 extraSelections.append(selection)
             if closeCursor is not None:
-                selection = QTextEdit.ExtraSelection()
+                selection = QtGui.QTextEdit.ExtraSelection()
                 selection.format.setForeground(QtGui.QBrush(self.colours['selection']))
                 #backgroundColor = self.colours['lineHighlight'] if cursor.block() == closeCursor.block() else self.colours['background']
                 selection.format.setBackground(QtGui.QBrush(QtCore.Qt.transparent))
@@ -427,7 +438,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
 
     def highlightCurrentLine(self):
         extraSelections = self.extraSelections()
-        selection = QTextEdit.ExtraSelection()
+        selection = QtGui.QTextEdit.ExtraSelection()
         selection.format.setBackground(self.colours['lineHighlight'])
         selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
         selection.cursor = self.textCursor()
@@ -458,7 +469,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
-        self.sidebar.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+        self.sidebar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
         self.updateMessagePosition()
     
     def paintEvent(self, event):
@@ -467,7 +478,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         page_bottom = self.viewport().height()
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
 
-        painter = QPainter(self.viewport())
+        painter = QtGui.QPainter(self.viewport())
         
         block = self.firstVisibleBlock()
         viewport_offset = self.contentOffset()
@@ -508,7 +519,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     # Mouse Events
     #=======================================================================
     def wheelEvent(self, event):
-        if event.modifiers() == Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.ControlModifier:
             if event.delta() == 120:
                 self.zoomIn()
             elif event.delta() == -120:
@@ -518,20 +529,20 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             QtGui.QPlainTextEdit.wheelEvent(self, event)
 
     def mousePressEvent(self, event):
-        if event.modifiers() == Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.ControlModifier:
             self.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
             self.multiCursorMode.mousePressPoint(event.pos())
         else:
             QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
-        if event.modifiers() == Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.ControlModifier:
             self.multiCursorMode.mouseMovePoint(event.pos())
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
-        if event.modifiers() == Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.ControlModifier:
             self.multiCursorMode.mouseReleasePoint(event.pos())
             self.application.restoreOverrideCursor()
         else:
@@ -572,24 +583,40 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #==========================================================================
     # Bundle Items
     #==========================================================================
+    def beginAutomatedAction(self):
+        """Begin an edition motivated from internal reasons, snippets, commands, macros, others"""
+        self.textCursor().beginEditBlock()
+        self.blockSignals(True)
+    
+    def endAutomatedAction(self):
+        """End an edition motivated from internal reasons, snippets, commands, macros, others"""
+        self.blockSignals(False)
+        self.textCursor().endEditBlock()
+        
     def insertBundleItem(self, item, **processorSettings):
-        ''' 
-            Inserta un bundle item
-        '''
+        """
+        Inserta un bundle item
+        """
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
             self.showMessage("Snippet <i>&laquo;%s&raquo;</i> activated" % item.name)
+            self.beginAutomatedAction()
             item.execute(self.snippetProcessor)
+            self.endAutomatedAction()
         elif item.TYPE == PMXCommand.TYPE or item.TYPE == PMXDragCommand.TYPE:
             self.commandProcessor.configure(processorSettings)
             self.showMessage("Command <i>&laquo;%s&raquo;</i>" % item.name)
+            self.beginAutomatedAction()
             item.execute(self.commandProcessor)
+            self.endAutomatedAction()
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
             self.macroProcessor.configure(processorSettings)
             self.showMessage("Execute macro %s" % item.name)
+            self.beginAutomatedAction()
             item.execute(self.macroProcessor)
+            self.endAutomatedAction()
 
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
@@ -859,7 +886,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         cursor = self.textCursor()
         start, end = self.getSelectionBlockStartEnd()
         cursor.beginEditBlock()
-        new_cursor = QTextCursor(cursor)
+        new_cursor = QtGui.QTextCursor(cursor)
         while True:
             new_cursor.setPosition(start.position())
             new_cursor.insertText(self.tabKeyBehavior)
@@ -872,7 +899,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def unindentBlocks(self):
         cursor = self.textCursor()
         start, end = self.getSelectionBlockStartEnd()
-        new_cursor = QTextCursor(cursor)
+        new_cursor = QtGui.QTextCursor(cursor)
         while True:
             data = start.userData()
             counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)

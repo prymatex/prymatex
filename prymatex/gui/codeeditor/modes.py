@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 
 class PMXBaseEditorMode(object):
@@ -53,9 +54,11 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if currentHolder is None or currentHolder.last:
                 return self.endSnippet(event)
+            self.editor.beginAutomatedAction()
             holderPosition = cursor.selectionStart() - currentHolder.start
             positionBefore = cursor.selectionStart()
             charactersBefore = cursor.document().characterCount()
+            #Insert Text
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             positionAfter = cursor.position()
             charactersAfter = cursor.document().characterCount()
@@ -64,10 +67,11 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             cursor.setPosition(currentHolder.start)
             cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
             currentHolder.setContent(cursor.selectedText())
-            #Prepare replace
+            #Replace Text
             self.selectSlice(self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length)
             self.editor.snippetProcessor.render()
             self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
+            self.editor.endAutomatedAction()
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)                
 
@@ -192,9 +196,9 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return hight, width, puntos
         
     def addMergeCursor(self, cursor):
-        '''
-            Only can add new cursors, if the cursor has selection then try to merge with others
-        '''
+        """
+        Only can add new cursors, if the cursor has selection then try to merge with others
+        """
         if cursor.hasSelection():
             newCursor = None
             removeCursor = None

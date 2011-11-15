@@ -48,9 +48,7 @@ PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
     "endTransformation": nop,
     # cursor or carret
     "cursorPosition": nop,
-    "setCursorPosition": nop,
     # select
-    "selectSlice": nop,
     "selectHolder": nop,
     # insert
     "insertText": nop

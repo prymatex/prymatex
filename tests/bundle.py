@@ -147,7 +147,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
 
     def setMainMenu(self, mainMenu):
         # 'items' 'submenus'
-        self.root = PMXBundleMenuNode({ "uuid":"root", "name": "root" })
+        self.root = PMXBundleMenuNode({ "uuid":"root", "name": "root" }, PMXBundleMenuNode.SUBMENU)
         self.buildMenu(mainMenu['items'], self.root, mainMenu['submenus'])
         
     def index(self, row, column, parent):
@@ -204,7 +204,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
         defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
         node = index.internalPointer()
-        if node.type() == 1:
+        if node.nodeType == PMXBundleMenuNode.SUBMENU:
             return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
         return defaultFlags | QtCore.Qt.ItemIsDragEnabled
 
@@ -246,7 +246,7 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
     def __init__(self, manager):
         QtCore.QAbstractListModel.__init__(self)
         self.manager = manager
-        self.items = [PMXBundleMenuNode({ "uuid":"", "name": "New Group" }), PMXBundleMenuNode("-")]
+        self.items = [PMXBundleMenuNode({ "uuid":"", "name": "New Group" }, PMXBundleMenuNode.SUBMENU),  PMXBundleMenuNode("-", PMXBundleMenuNode.SEPARATOR)]
     
     def setExcludedItems(self, items):
         pass
@@ -322,14 +322,16 @@ class Ui_Menu(object):
         self.horizontalLayout_2 = QtGui.QHBoxLayout(Menu)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.treeMenuWidget = QtGui.QTreeView(Menu)
+        self.treeMenuWidget.setAlternatingRowColors(True)
         self.treeMenuWidget.setDragEnabled(True)
         self.treeMenuWidget.setAcceptDrops(True)
-        self.treeMenuWidget.setDropIndicatorShown(True)
+        #self.treeMenuWidget.setDropIndicatorShown(True)
         #self.treeMenuWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
-        self.treeMenuWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
+        #self.treeMenuWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.treeMenuWidget.setObjectName(_fromUtf8("treeMenuWidget"))
         self.horizontalLayout_2.addWidget(self.treeMenuWidget)
         self.treeExcludedWidget = QtGui.QListView(Menu)
+        self.treeExcludedWidget.setAlternatingRowColors(True)
         self.treeExcludedWidget.setDragEnabled(True)
         self.treeExcludedWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
         self.treeExcludedWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
@@ -353,8 +355,8 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
         self.manager = manager
-        self.treeModel = TreeModel(manager)
-        self.listModel = PMXExcludedItemModel(manager)
+        self.treeModel = PMXMenuTreeModel(manager)
+        self.listModel = PMXExcludedListModel(manager)
         self.treeMenuWidget.setModel(self.treeModel)
         self.treeExcludedWidget.setModel(self.listModel)
 
