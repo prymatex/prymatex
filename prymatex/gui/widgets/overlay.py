@@ -1,6 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import re
-
+from logging import getLogger
+logger = getLogger(__name__)
 
 
 class PMXMessageOverlay(object):
@@ -44,7 +45,7 @@ class PMXMessageOverlay(object):
         ''' Override '''
         pass
     
-    def showMessage(self, message, timeout = 2000, icon = None, pos = None, link_map = {} ):
+    def showMessage(self, message, timeout = 2000, icon = None, pos = None, hrefCallbacks = {} ):
         '''
         @param message: Text message, can be HTML
         @param timeout: Timeout before message fades
@@ -56,6 +57,7 @@ class PMXMessageOverlay(object):
         self.messageOverlay.position = pos
         self.messageOverlay.updatePosition()
         self.messageOverlay.adjustSize()
+        self.messageOverlay.linkMap = hrefCallbacks
         if unicode(message):
             self.messageOverlay.fadeIn()
             if timeout:
@@ -156,10 +158,13 @@ class LabelOverlayWidget(QtGui.QLabel):
     def linkHandler(self, link):
         callback = self.linkMap.get(link, None)
         if callback is None:
+            logger.warn("No callback for %s" % link)
             return
         if not callable(callback):
-            print "Error"
+            logger.warn("Callback for %s is not callable: %s" % (link, callback))
             return
+        
+        logger.debug( "Running callback: %s %s" % (link, callback))
         callback()
   
     def setText(self, text):
