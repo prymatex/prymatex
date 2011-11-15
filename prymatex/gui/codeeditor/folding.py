@@ -68,10 +68,7 @@ class PMXEditorFolding(object):
                     closeBlock = self.editor.findPreviousMoreIndentBlock(block)
                     if closeBlock is not None:
                         lenIndent = len(userData.indent)
-                        if lenIndent:
-                            closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent)
-                        else:
-                            closeBlock.userData().foldingMark = -nest
+                        closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent) if lenIndent else -nest
                         self.folding.append(closeBlock)
                         nest += closeBlock.userData().foldingMark
                 else:
@@ -82,12 +79,15 @@ class PMXEditorFolding(object):
             if nest >= 0:
                 self.folding.append(block)
         if nest > 0:
-            #Tengo que cerrar el ultimo
-            closeBlock = self.editor.document().lastBlock()
-            userData = closeBlock.userData()
-            if userData is not None:
-                closeBlock.userData().foldingMark = -nest
-                self.folding.append(closeBlock)
+            #Quedo abierto, tengo que buscar el que cierra o uso el ultimo
+            lastBlock = self.editor.document().lastBlock()
+            openBlock = self.editor.findPreviousLessIndentBlock(lastBlock)
+            if openBlock is None: return
+            closeBlock = self.editor.findPreviousMoreIndentBlock(openBlock)
+            if closeBlock is None: return
+            lenIndent = len(closeBlock.userData().indent)
+            closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent) if lenIndent else -nest
+            self.folding.append(closeBlock)
 
     def getFoldingMark(self, block):
         if block in self.folding:

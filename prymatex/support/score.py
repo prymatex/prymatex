@@ -3,7 +3,9 @@
 
 import re
 
-################################## ScoreManager ###################################
+#=============================================== 
+# ScoreManager
+#=============================================== 
 
 class PMXScoreManager(object):
     POINT_DEPTH    = 4
@@ -11,6 +13,8 @@ class PMXScoreManager(object):
     START_VALUE    = 2 ** ( POINT_DEPTH * NESTING_DEPTH )
     BASE           = 2 ** POINT_DEPTH
     SPLITER        = re.compile("\B-")
+    OR             = " | "
+    AND            = " & "
     def __init__(self):
         self.scores = {}
     
@@ -18,13 +22,15 @@ class PMXScoreManager(object):
         maxi = 0
         for scope in search_scope.split( ',' ):
             arrays =  self.SPLITER.split(scope)
-            #remove space
-            arrays = map(lambda scope: scope.strip(), arrays)
+            arrays = map(lambda s: s.strip(), arrays)
             if len(arrays) == 1:
                 maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
             elif len(arrays) > 1:
                 excluded = False
                 for a in arrays[1:]:
+                    #Probando forma pedorra de quitar parentesis, a este nivel hay que resolver los parentesis
+                    if a[0] == '(' and a[-1] == ')':
+                        a = a[1:-1]
                     if self.score_term( a, reference_scope ) > 0:
                         excluded = True
                         break
@@ -37,7 +43,18 @@ class PMXScoreManager(object):
     def score_term(self, search_scope, reference_scope):
         if reference_scope not in self.scores or search_scope not in self.scores[reference_scope]:
             self.scores.setdefault(reference_scope, {})
-            self.scores[reference_scope][search_scope] = self.score_array( search_scope.split(' '), reference_scope.split(' ') )
+            if search_scope.find(self.OR):
+                comparation = max
+                scopes = search_scope.split(self.OR)
+            elif search_scope.find(self.AND):
+                comparation = min
+                scopes = search_scope.split(self.AND)
+            else:
+                comparation = max
+                scopes = [ search_scope ]
+            self.scores[reference_scope][search_scope] = 0
+            for scope in scopes:
+                self.scores[reference_scope][search_scope] = comparation([self.scores[reference_scope][search_scope], self.score_array( scope.split(' '), reference_scope.split(' ') )])
         return self.scores[reference_scope][search_scope]
       
     def score_array(self, search_array, reference_array):

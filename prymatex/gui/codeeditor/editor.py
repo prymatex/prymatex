@@ -389,7 +389,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         differentPairs = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
         openBraces = map(lambda pair: pair[0], differentPairs)
         closeBraces = map(lambda pair: pair[1], differentPairs)
-
+        print openBraces, closeBraces
+        
         closeCursor = openCursor = None
         leftChar = cursor.document().characterAt(cursor.position() - 1)
         rightChar = cursor.document().characterAt(cursor.position())
@@ -878,7 +879,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             if indent < block.userData().indent:
                 break
         return block
-     
+    
+    def findPreviousLessIndentBlock(self, block):
+        """ Return previous more indent block """
+        indent = block.userData().indent
+        while True:
+            block = block.previous()    
+            if not block.isValid() or block.userData() is None:
+                return None
+            if indent > block.userData().indent:
+                break
+        return block
+    
     def indentBlocks(self):
         '''
         Indents text, block selections.

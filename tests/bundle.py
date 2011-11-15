@@ -315,34 +315,7 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         self.layoutChanged.emit()
         return True
     
-class Ui_Menu(object):
-    def setupUi(self, Menu):
-        Menu.setObjectName(_fromUtf8("Menu"))
-        Menu.resize(458, 349)
-        self.horizontalLayout_2 = QtGui.QHBoxLayout(Menu)
-        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        self.treeMenuWidget = QtGui.QTreeView(Menu)
-        self.treeMenuWidget.setAlternatingRowColors(True)
-        self.treeMenuWidget.setDragEnabled(True)
-        self.treeMenuWidget.setAcceptDrops(True)
-        #self.treeMenuWidget.setDropIndicatorShown(True)
-        #self.treeMenuWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
-        #self.treeMenuWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
-        self.treeMenuWidget.setObjectName(_fromUtf8("treeMenuWidget"))
-        self.horizontalLayout_2.addWidget(self.treeMenuWidget)
-        self.treeExcludedWidget = QtGui.QListView(Menu)
-        self.treeExcludedWidget.setAlternatingRowColors(True)
-        self.treeExcludedWidget.setDragEnabled(True)
-        self.treeExcludedWidget.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
-        self.treeExcludedWidget.setDefaultDropAction(QtCore.Qt.MoveAction)
-        self.treeExcludedWidget.setObjectName(_fromUtf8("treeExcludedWidget"))
-        self.horizontalLayout_2.addWidget(self.treeExcludedWidget)
-
-        self.retranslateUi(Menu)
-        QtCore.QMetaObject.connectSlotsByName(Menu)
-
-    def retranslateUi(self, Menu):
-        Menu.setWindowTitle(_('Form'))
+from prymatex.ui.support.bundle import Ui_Menu
 
 class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
     TYPE = 'bundle'
@@ -352,13 +325,16 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
     NEWGROUP = 3
     NEWSEPARATOR = 4
     def __init__(self, manager, parent = None):
+        from prymatex.gui.support.models import PMXMenuTreeModel as RealPMXMenuTreeModel
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
         self.manager = manager
-        self.treeModel = PMXMenuTreeModel(manager)
+        self.treeModel = RealPMXMenuTreeModel(manager)
         self.listModel = PMXExcludedListModel(manager)
-        self.treeMenuWidget.setModel(self.treeModel)
-        self.treeExcludedWidget.setModel(self.listModel)
+        self.treeMenuView.setModel(self.treeModel)
+        self.listExcludedView.setModel(self.listModel)
+        #Para poder hacer drag and drop sobre los modelos
+        self.setAcceptDrops(False)
 
     def edit(self, bundleItem):
         if bundleItem.mainMenu == None:

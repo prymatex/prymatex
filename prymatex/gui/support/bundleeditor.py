@@ -10,9 +10,9 @@ from prymatex.gui.support import widgets
 
 
 class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
-    ##########################################################
+    #=========================================================
     # Settings
-    ##########################################################
+    #=========================================================
     SETTINGS_GROUP = 'BundleEditor'
         
     def __init__(self, parent = None):

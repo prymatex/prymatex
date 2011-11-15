@@ -127,7 +127,7 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
   Escape Codes     \$ \` \\'''}
 
     def __init__(self, parent = None):
-        super(PMXSnippetWidget, self).__init__(parent)
+        PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
 
@@ -193,7 +193,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
     }
     
     def __init__(self, parent = None):
-        super(PMXCommandWidget, self).__init__(parent)
+        PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.comboBoxBeforeRunning.addItem("Nothing", "nop")
         self.comboBoxBeforeRunning.addItem("Current File", "saveActiveFile")
@@ -339,7 +339,7 @@ class PMXTemplateWidget(PMXEditorBaseWidget, Ui_Template):
      < template_in.txt > "$TM_NEW_FILE"
 fi"'''}
     def __init__(self, parent = None):
-        super(PMXTemplateWidget, self).__init__(parent)
+        PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.comboBoxOutput.addItem("Insert as Text", "insertText")
         self.command.setTabStopWidth(TABWIDTH)
@@ -385,7 +385,7 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
 //  Copyright (c) ${TM_YEAR} ${TM_ORGANIZATION_NAME}. All rights reserved.
 //'''}
     def __init__(self, parent = None):
-        super(PMXTemplateFileWidget, self).__init__(parent)
+        PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
 
@@ -424,7 +424,7 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
     DEFAULTS = {'draggedFileExtensions': ['png', 'jpg'],
                 'command': '''echo "$TM_DROPPED_FILE"'''}
     def __init__(self, parent = None):
-        super(PMXDragCommandWidget, self).__init__(parent)
+        PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.comboBoxOutput.addItem("Insert as Snippet", "insertAsSnippet")
         self.command.setTabStopWidth(TABWIDTH)
@@ -485,7 +485,7 @@ class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
        ]}
     }
     def __init__(self, parent = None):
-        super(PMXLanguageWidget, self).__init__(parent)
+        PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.content.setTabStopWidth(TABWIDTH)
     
@@ -519,7 +519,7 @@ class PMXLanguageWidget(PMXEditorBaseWidget, Ui_Language):
 class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     TYPE = 'preference'
     def __init__(self, parent = None):
-        super(PMXPreferenceWidget, self).__init__(parent)
+        PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.settings.setTabStopWidth(TABWIDTH)
     
@@ -550,7 +550,7 @@ class PMXMacroWidget(PMXEditorBaseWidget, Ui_Macro):
     TYPE = 'macro'
     COMMAND = 0
     def __init__(self, parent = None):
-        super(PMXMacroWidget, self).__init__(parent)
+        PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
         self.argument.setTabStopWidth(TABWIDTH)
     
