@@ -202,7 +202,18 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
         cursor = self.editor.textCursor()
         point = self.editor.cursorRect(cursor).bottomRight()
-        self.editor.showMessage(text.strip(), timeout = timeout * self.timespanFactor, pos = (point.x() + 30, point.y() + 5))
+        html = """
+            <span>%s</span><hr>
+            <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
+            </div>""" % text.strip().replace('\n', '<br/>')
+        timeout = timeout * self.timespanFactor
+        callbacks = {
+                   'copy': lambda s=text: QtGui.qApp.instance().clipboard().setText(s)
+        }
+        pos = (point.x() + 30, point.y() + 5)
+        timeout = timeout * self.timespanFactor
+        
+        self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
         #QtGui.QToolTip.showText(point, text.strip(), self.editor, self.editor.rect())
         
     def createNewDocument(self, text):
