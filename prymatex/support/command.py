@@ -10,7 +10,7 @@ from collections import namedtuple
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp, prepareShellScript
 
-class PMXCommandHandler(object):
+class PMXCommandContext(object):
     def __init__(self, command, environment, inputType, inputValue, outputType = None, outputValue = None):
         self.command = command
         self.environment = environment
@@ -18,7 +18,6 @@ class PMXCommandHandler(object):
         self.inputValue = inputValue
         self.outputType = outputType
         self.outputValue = outputValue
-        self.callback = None
 
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
@@ -108,20 +107,19 @@ class PMXCommand(PMXBundleItem):
         inputType, inputValue = self.getInputText(processor)
         shellCommand, environment = prepareShellScript(self.systemCommand(), processor.environment(self))
         
-        handler = PMXCommandHandler(self, environment, inputType, inputValue)
-        handler.callback = self.afterExecute
+        context = PMXCommandContext(self, environment, inputType, inputValue)
         
-        processor.runCommand(handler, shellCommand)
+        processor.runCommand(context, shellCommand, self.afterExecute)
     
-    def afterExecute(self, processor, handler):
-        outputHandler = self.getOutputHandler(handler.outputType)
+    def afterExecute(self, processor, context):
+        outputHandler = self.getOutputHandler(context.outputType)
         # Remove old
-        if handler.inputType != None and outputHandler in [ "insertText", "insertAsSnippet", "replaceSelectedText" ]:
-            deleteMethod = getattr(processor, 'delete' + handler.inputType.title(), None)
+        if context.inputType != None and outputHandler in [ "insertText", "insertAsSnippet", "replaceSelectedText" ]:
+            deleteMethod = getattr(processor, 'delete' + context.inputType.title(), None)
             if deleteMethod != None:
                 deleteMethod()
 
-        getattr(processor, outputHandler, None)(handler)
+        getattr(processor, outputHandler, None)(context)
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]

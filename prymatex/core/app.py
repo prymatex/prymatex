@@ -49,10 +49,11 @@ class PMXApplication(QtGui.QApplication):
 
         # Loads
         self.loadSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
-        self.loadKernelManager()    #Console kernel Manager
+        self.setupKernelManager()    #Console kernel Manager
+        self.setupMessageQueue()
 
         # Setups
-        #self.setupExecutor()        #Executor
+        #self.setupExecutor()       #Executor
         self.setupLogging()         #Logging
         self.setupFileManager()     #File Manager
         self.setupConfigDialog()    #Config Dialog
@@ -150,7 +151,7 @@ class PMXApplication(QtGui.QApplication):
     def saveState(self, session_manager):
         print "Save state", session_manager
         
-    def loadKernelManager(self):
+    def setupKernelManager(self):
         try:
             from IPython.frontend.qt.kernelmanager import QtKernelManager
             self.kernelManager = QtKernelManager()
@@ -159,6 +160,15 @@ class PMXApplication(QtGui.QApplication):
         except ImportError:
             self.kernelManager = None
 
+    def setupMessageQueue(self):
+        try:
+            import zmq
+            context = zmq.Context()
+            self.messageQueue = context.socket(zmq.UPSTREAM)
+            self.messageQueue.bind("ipc:///tmp/prymatex.mqueue")
+        except ImportError:
+            self.messageQueue = None
+            
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def loadSupportManager(self, callbackSplashMessage = None):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import uuid as uuidmodule
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from subprocess import Popen, PIPE, STDOUT
 from prymatex.support.processor import PMXCommandProcessor
@@ -82,22 +82,52 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     def word(self, format = None):
         return self.editor.getCurrentWord()
-
-    #Interface
-    def runCommand(self, handler, shellCommand, callback):
-        process = Popen(shellCommand, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = handler.environment)
+    
+    def runCommand(self, context, shellCommand, callback):
+        return self.runQProcessCommand(context, shellCommand, callback)
+    
+    def runPopenCommand(self, context, shellCommand, callback):
+        process = Popen(shellCommand, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = context.environment)
         
-        if handler.inputType != None:
-            process.stdin.write(unicode(handler.inputValue).encode("utf-8"))
+        if context.inputType != None:
+            process.stdin.write(unicode(context.inputValue).encode("utf-8"))
         process.stdin.close()
         try:
             outputValue = process.stdout.read()
         except IOError:
             outputValue = ""
         process.stdout.close()
-        handler.outputType = process.wait()
-        callback(self, handler)
+        context.outputType = process.wait()
+        callback(self, context)
     
+    #Interface
+    def runQProcessCommand(self, context, shellCommand, callback):
+        process = QtCore.QProcess(self.editor)
+        #TODO: context.environment ya tiene las variables de system ver que hacer
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        for key, value in context.environment.iteritems():
+            env.insert(key, value)
+        process.setProcessEnvironment(env)
+
+        def onQProcessFinished(process, context, callback):
+            def runCallback(exitCode):
+                context.outputValue = str(process.readAll()).decode("utf-8")
+                context.outputType = exitCode
+                callback(self, context)
+            return runCallback
+        
+        process.finished[int].connect(onQProcessFinished(process, context, callback))
+
+        if context.inputType != None:
+            process.start(shellCommand, QtCore.QIODevice.ReadWrite)
+            if not process.waitForStarted():
+                raise Exception("No puedo correr")
+            print shellCommand, context.inputValue
+            process.write(unicode(context.inputValue).encode("utf-8"))
+            process.closeWriteChannel()
+        else:
+            process.start(shellCommand, QtCore.QIODevice.ReadOnly)
+
     #beforeRunningCommand
     def saveModifiedFiles(self):
         self.editor.mainWindow.actionSaveAll.trigger()
@@ -133,9 +163,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.document().clear()
         
     # Outpus function
-    def error(self, handler):
+    def error(self, context):
         from prymatex.support.utils import makeHyperlinks
-        html = '''
+        context.outputValue = '''
             <html>
                 <head>
                     <title>Error</title>
@@ -158,54 +188,54 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 <p>Exit code was: %(exit_code)d</p>
                 </body>
             </html>
-        ''' % {'output': makeHyperlinks(handler.outputValue), 
-               'name': handler.command.name,
-               'exit_code': handler.outputType}
-        self.showAsHTML(html)
+        ''' % {'output': makeHyperlinks(context.outputValue), 
+               'name': context.command.name,
+               'exit_code': context.outputType}
+        self.showAsHTML(context)
         
-    def discard(self, handler):
+    def discard(self, context):
         pass
         
-    def replaceSelectedText(self, handler):
+    def replaceSelectedText(self, context):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
             position = cursor.selectionStart()
-            cursor.insertText(handler.outputValue)
-            cursor.setPosition(position, position + len(handler.outputValue))
+            cursor.insertText(context.outputValue)
+            cursor.setPosition(position, position + len(context.outputValue))
         else:
-            cursor.insertText(handler.outputValue)
+            cursor.insertText(context.outputValue)
         self.editor.setTextCursor(cursor)
         
-    def replaceDocument(self, handler):
-        self.editor.document().setPlainText(handler.outputValue)
+    def replaceDocument(self, context):
+        self.editor.document().setPlainText(context.outputValue)
         
-    def insertText(self, handler):
+    def insertText(self, context):
         cursor = self.editor.textCursor()
-        cursor.insertText(handler.outputValue)
+        cursor.insertText(context.outputValue)
         
-    def afterSelectedText(self, handler):
+    def afterSelectedText(self, context):
         cursor = self.editor.textCursor()
         position = cursor.selectionEnd()
         cursor.setPosition(position)
-        cursor.insertText(handler.outputValue)
+        cursor.insertText(context.outputValue)
         
-    def insertAsSnippet(self, handler):
-        hash = {    'content': handler.outputValue, 
-                       'name': handler.command.name,
-                 'tabTrigger': handler.command.tabTrigger,
-              'keyEquivalent': handler.command.keyEquivalent }
-        snippet = PMXSnippet(handler.command.manager.uuidgen(), "internal", hash = hash)
-        snippet.bundle = handler.command.bundle
+    def insertAsSnippet(self, context):
+        hash = {    'content': context.outputValue, 
+                       'name': context.command.name,
+                 'tabTrigger': context.command.tabTrigger,
+              'keyEquivalent': context.command.keyEquivalent }
+        snippet = PMXSnippet(context.command.manager.uuidgen(), "internal", hash = hash)
+        snippet.bundle = context.command.bundle
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
-    def showAsHTML(self, handler):
-        self.editor.mainWindow.paneBrowser.setHtml(handler.outputValue, handler.command)
+    def showAsHTML(self, context):
+        self.editor.mainWindow.paneBrowser.setHtml(context.outputValue, context.command)
         self.editor.mainWindow.paneBrowser.show()
 
     timespanFactor = 1        
-    def showAsTooltip(self, handler):
+    def showAsTooltip(self, context):
         # Chicho's sense of statistics
-        linesToRead = handler.outputValue.count('\n') or handler.outputValue.count('<br')
+        linesToRead = context.outputValue.count('\n') or context.outputValue.count('<br')
         if linesToRead > 10:
             timeout = 8000
         else:
@@ -216,19 +246,19 @@ class PMXCommandProcessor(PMXCommandProcessor):
         html = """
             <span>%s</span><hr>
             <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
-            </div>""" % handler.outputValue.strip().replace('\n', '<br/>')
+            </div>""" % context.outputValue.strip().replace('\n', '<br/>')
         timeout = timeout * self.timespanFactor
         callbacks = {
-                   'copy': lambda s=handler.outputValue: QtGui.qApp.instance().clipboard().setText(s)
+                   'copy': lambda s=context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
         }
         pos = (point.x() + 30, point.y() + 5)
         timeout = timeout * self.timespanFactor
         
         self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
         
-    def createNewDocument(self, handler):
-        print "Nuevo documento", handler.outputValue
+    def createNewDocument(self, context):
+        print "Nuevo documento", context.outputValue
         
-    def openAsNewDocument(self, handler):
+    def openAsNewDocument(self, context):
         editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
-        editor_widget.codeEdit.setPlainText(handler.outputValue)
+        editor_widget.codeEdit.setPlainText(context.outputValue)

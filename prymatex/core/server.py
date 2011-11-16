@@ -10,7 +10,7 @@ PORT = 4612
 
 class PMXCommandDispatcher():
     def __init__(self, thread):
-        self.main = thread
+        self.thread = thread
     
     def nib(self, options, args):
         print "nib: ", options, args
@@ -22,7 +22,8 @@ class PMXCommandDispatcher():
     
     def menu(self, plist):
         data = plistlib.readPlistFromString(plist)
-        self.main.menuRequest.emit(data)
+        self.thread.menuRequest.emit(data)
+        #msg = self.thread.messageQueue.recv()
         return plistlib.writePlistToString({})
     
     def popup(self, options, args):
@@ -50,6 +51,7 @@ class PMXServerThread(QtCore.QThread):
     
     def __init__(self, parent):
         QtCore.QThread.__init__(self, parent)
+        self.messageQueue = parent.messageQueue
         self.server = self.getServer(PORT, PORT + 10)
         self.dispatcher = PMXCommandDispatcher(self)
         self.server.register_instance(self.dispatcher)
