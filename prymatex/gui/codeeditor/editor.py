@@ -222,6 +222,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     @classmethod
     def newInstance(cls, application, fileInfo = None, parent = None):
         if fileInfo is not None:
+            assert isinstance(fileInfo, QtCore.QFileInfo), "%s is not QFileInfo" % fileInfo
             syntax = application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
             if syntax is None:
                 raise exceptions.FileNotSupported()

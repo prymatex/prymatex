@@ -229,7 +229,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         source = url.queryItemValue('url')
         if source:
             source = QtCore.QUrl(source)
-            editor = self.openFile(source.path())
+            editor = self.openFile(QtCore.QFileInfo(source.path()))
             line = url.queryItemValue('line')
             if line:
                 editor.codeEdit.goToLine(int(line))
