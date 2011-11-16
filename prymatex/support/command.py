@@ -5,10 +5,20 @@
     Command's module    
 '''
 import os
-from subprocess import Popen, PIPE, STDOUT
+from collections import namedtuple
 
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp, prepareShellScript
+
+class PMXCommandHandler(object):
+    def __init__(self, command, environment, inputType, inputValue, outputType = None, outputValue = None):
+        self.command = command
+        self.environment = environment
+        self.inputType = inputType
+        self.inputValue = inputValue
+        self.outputType = outputType
+        self.outputValue = outputValue
+        self.callback = None
 
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
@@ -54,8 +64,24 @@ class PMXCommand(PMXBundleItem):
                     value = unicode(value)
                 hash[key] = value
         return hash
-        
-    @property
+
+    def getInputText(self, processor):
+        def getInputTypeAndValue(input, format):
+            if input is None or input == "none": return None, None
+            return input, getattr(processor, input)(format)
+        input, value = getInputTypeAndValue(self.input, self.inputFormat)
+        if value == None and self.fallbackInput != None:
+            input, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat)
+        if value == None and self.standardInput != None:
+            input, value = getInputTypeAndValue(self.standardInput, self.inputFormat)
+
+        if input == 'selection' and value == None:
+            value = processor.document(self.inputFormat)
+            input = "document"
+        elif value == None:
+            input = None
+        return input, value
+    
     def systemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:
             return self.winCommand
@@ -64,74 +90,38 @@ class PMXCommand(PMXBundleItem):
         else:
             return self.command
     
-    def getInputText(self, processor):
-        def getInputTypeAndValue(input):
-            if input is None or input == "none": return None, None
-            return input, getattr(processor, input)(self.inputFormat)
-        input, value = getInputTypeAndValue(self.input)
-        if value == None and self.fallbackInput != None:
-            input, value = getInputTypeAndValue(self.fallbackInput)
-        if value == None and self.standardInput != None:
-            input, value = getInputTypeAndValue(self.standardInput)
-            
-        if input == 'selection' and value == None:
-            value = processor.document(self.inputFormat)
-            input = "document"
-        elif value == None:
-            input = None
-        return input, value
-
     def getOutputHandler(self, code):
         if self.output != 'showAsHTML' and code in self.exit_codes:
             return self.exit_codes[code]
         elif code != 0:
-            return "commandError"
+            return "error"
         else:
             return self.output
     
-    def execute(self, processor):
-        if hasattr(self, 'beforeRunningCommand') and self.beforeRunningCommand != None:
-            value = getattr(processor, self.beforeRunningCommand)()
-            #Solo si es falso, intenta ejecutar para todos los otros valores
-            if value == False:
-                return
-        processor.startCommand(self)
-        input_type, input_value = self.getInputText(processor)
-        command, env = prepareShellScript(self.systemCommand, processor.environment)
-        
-        process = Popen(command, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = env)
-        
-        if input_type != None:
-            process.stdin.write(unicode(input_value).encode("utf-8"))
-        process.stdin.close()
-        try:
-            output_value = process.stdout.read()
-        except IOError:
-            pass
-        process.stdout.close()
-        output_type = process.wait()
-        output_handler = self.getOutputHandler(output_type)
-        # Remove old
-        if input_type != None and output_handler in [ "insertText", "insertAsSnippet", "replaceSelectedText" ]:
-            print 'delete' + input_type.title()
-            deleteMethod = getattr(processor, 'delete' + input_type.title(), None)
-            if deleteMethod != None:
-                deleteMethod()        
+    def beforeExecute(self, processor):
+        if not hasattr(self, 'beforeRunningCommand') or self.beforeRunningCommand == None: return True
+        return getattr(processor, self.beforeRunningCommand)()
 
-        try:
-            output_value = output_value.decode('utf-8')
-        except:
-            pass
-        args = [ output_value ]
-        function = getattr(processor, output_handler, None)
+    def execute(self, processor):
+        #if not self.beforeExecute(processor): return
+        print "corriendo"
+        inputType, inputValue = self.getInputText(processor)
+        shellCommand, environment = prepareShellScript(self.systemCommand(), processor.environment(self))
         
-        if output_handler == "commandError":
-            args.append(output_type)
-            
-        # Insert New
-        function(*args)
+        handler = PMXCommandHandler(self, environment, inputType, inputValue)
+        handler.callback = self.afterExecute
         
-        processor.endCommand(self)
+        processor.runCommand(handler, shellCommand)
+    
+    def afterExecute(self, processor, handler):
+        outputHandler = self.getOutputHandler(handler.outputType)
+        # Remove old
+        if handler.inputType != None and outputHandler in [ "insertText", "insertAsSnippet", "replaceSelectedText" ]:
+            deleteMethod = getattr(processor, 'delete' + handler.inputType.title(), None)
+            if deleteMethod != None:
+                deleteMethod()
+
+        getattr(processor, outputHandler, None)(handler)
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]

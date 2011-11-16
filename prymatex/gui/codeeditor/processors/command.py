@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from PyQt4 import QtGui
 import uuid as uuidmodule
+from PyQt4 import QtGui
+
+from subprocess import Popen, PIPE, STDOUT
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
 
@@ -10,9 +12,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         super(PMXCommandProcessor, self).__init__()
         self.editor = editor
 
-    @property
-    def environment(self):
-        return self.__env
+    def environment(self, command):
+        environment = self.editor.buildEnvironment(command.buildEnvironment())
+        environment.update(self.baseEnvironment)
+        return environment
 
     def configure(self, settings):
         self.tabTriggered = settings.get("tabTriggered", False)
@@ -55,18 +58,18 @@ class PMXCommandProcessor(PMXCommandProcessor):
             return text
         
     def line(self, format = None):
-        return self.environment['TM_CURRENT_LINE']
+        return self.editor.textCursor().block().text()
         
     def character(self, format = None):
         cursor = self.editor.textCursor()
         return cursor.document().characterAt(cursor.position())
         
     def scope(self, format = None):
-        return self.environment['TM_SCOPE']
+        return self.editor.getCurrentScope()
     
     def selection(self, format = None):
-        if 'TM_SELECTED_TEXT' in self.environment:
-            text = unicode(self.environment['TM_SELECTED_TEXT'])
+        if self.editor.textCursor().hasSelection():
+            text = self.editor.textCursor().selectedText()
             if format == "xml":
                 cursor = self.editor.textCursor()
                 firstBlock, lastBlock = self.editor.getSelectionBlockStartEnd()
@@ -78,15 +81,23 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return self.selection
     
     def word(self, format = None):
-        if 'TM_CURRENT_WORD' in self.environment:
-            return self.environment['TM_CURRENT_WORD']
-    
-    #Interface
-    def startCommand(self, command):
-        self.command = command
-        self.__env = self.editor.buildEnvironment(command.buildEnvironment())
-        self.__env.update(self.baseEnvironment)
+        return self.editor.getCurrentWord()
 
+    #Interface
+    def runCommand(self, handler, shellCommand, callback):
+        process = Popen(shellCommand, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = handler.environment)
+        
+        if handler.inputType != None:
+            process.stdin.write(unicode(handler.inputValue).encode("utf-8"))
+        process.stdin.close()
+        try:
+            outputValue = process.stdout.read()
+        except IOError:
+            outputValue = ""
+        process.stdout.close()
+        handler.outputType = process.wait()
+        callback(self, handler)
+    
     #beforeRunningCommand
     def saveModifiedFiles(self):
         self.editor.mainWindow.actionSaveAll.trigger()
@@ -122,7 +133,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.document().clear()
         
     # Outpus function
-    def commandError(self, text, code):
+    def error(self, handler):
         from prymatex.support.utils import makeHyperlinks
         html = '''
             <html>
@@ -147,54 +158,54 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 <p>Exit code was: %(exit_code)d</p>
                 </body>
             </html>
-        ''' % {'output': makeHyperlinks(text), 
-               'name': self.command.name,
-               'exit_code': code}
+        ''' % {'output': makeHyperlinks(handler.outputValue), 
+               'name': handler.command.name,
+               'exit_code': handler.outputType}
         self.showAsHTML(html)
         
-    def discard(self, text):
+    def discard(self, handler):
         pass
         
-    def replaceSelectedText(self, text):
+    def replaceSelectedText(self, handler):
         cursor = self.editor.textCursor()
         if cursor.hasSelection():
             position = cursor.selectionStart()
-            cursor.insertText(text)
-            cursor.setPosition(position, position + len(text))
+            cursor.insertText(handler.outputValue)
+            cursor.setPosition(position, position + len(handler.outputValue))
         else:
-            cursor.insertText(text)
+            cursor.insertText(handler.outputValue)
         self.editor.setTextCursor(cursor)
         
-    def replaceDocument(self, text):
-        self.editor.document().setPlainText(text)
+    def replaceDocument(self, handler):
+        self.editor.document().setPlainText(handler.outputValue)
         
-    def insertText(self, text):
+    def insertText(self, handler):
         cursor = self.editor.textCursor()
-        cursor.insertText(text)
+        cursor.insertText(handler.outputValue)
         
-    def afterSelectedText(self, text):
+    def afterSelectedText(self, handler):
         cursor = self.editor.textCursor()
         position = cursor.selectionEnd()
         cursor.setPosition(position)
-        cursor.insertText(text)
+        cursor.insertText(handler.outputValue)
         
-    def insertAsSnippet(self, text):
-        hash = {    'content': text, 
-                       'name': self.command.name,
-                 'tabTrigger': self.command.tabTrigger,
-              'keyEquivalent': self.command.keyEquivalent }
-        snippet = PMXSnippet(self.command.manager.uuidgen(), "internal", hash = hash)
-        snippet.bundle = self.command.bundle
+    def insertAsSnippet(self, handler):
+        hash = {    'content': handler.outputValue, 
+                       'name': handler.command.name,
+                 'tabTrigger': handler.command.tabTrigger,
+              'keyEquivalent': handler.command.keyEquivalent }
+        snippet = PMXSnippet(handler.command.manager.uuidgen(), "internal", hash = hash)
+        snippet.bundle = handler.command.bundle
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
-    def showAsHTML(self, text):
-        self.editor.mainWindow.paneBrowser.setHtml(text, self.command)
+    def showAsHTML(self, handler):
+        self.editor.mainWindow.paneBrowser.setHtml(handler.outputValue, handler.command)
         self.editor.mainWindow.paneBrowser.show()
 
     timespanFactor = 1        
-    def showAsTooltip(self, text):
+    def showAsTooltip(self, handler):
         # Chicho's sense of statistics
-        linesToRead = text.count('\n') or text.count('<br')
+        linesToRead = handler.outputValue.count('\n') or handler.outputValue.count('<br')
         if linesToRead > 10:
             timeout = 8000
         else:
@@ -205,20 +216,19 @@ class PMXCommandProcessor(PMXCommandProcessor):
         html = """
             <span>%s</span><hr>
             <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
-            </div>""" % text.strip().replace('\n', '<br/>')
+            </div>""" % handler.outputValue.strip().replace('\n', '<br/>')
         timeout = timeout * self.timespanFactor
         callbacks = {
-                   'copy': lambda s=text: QtGui.qApp.instance().clipboard().setText(s)
+                   'copy': lambda s=handler.outputValue: QtGui.qApp.instance().clipboard().setText(s)
         }
         pos = (point.x() + 30, point.y() + 5)
         timeout = timeout * self.timespanFactor
         
         self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
-        #QtGui.QToolTip.showText(point, text.strip(), self.editor, self.editor.rect())
         
-    def createNewDocument(self, text):
-        print "Nuevo documento", text
+    def createNewDocument(self, handler):
+        print "Nuevo documento", handler.outputValue
         
-    def openAsNewDocument(self, text):
+    def openAsNewDocument(self, handler):
         editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
-        editor_widget.codeEdit.setPlainText(text)
+        editor_widget.codeEdit.setPlainText(handler.outputValue)
