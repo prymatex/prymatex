@@ -247,25 +247,23 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
     
     def getCurrentWord(self, pat = RE_WORD, direction = "both"):
-        #First, native
-        word = self.getWordUnderCursor()
-        if word: return word
-        
         cursor = self.textCursor()
         line = cursor.block().text()
         position = cursor.columnNumber()
         #Get text before and after the cursor position.
         first_part, last_part = line[:position][::-1], line[position:]
         #Try left word
+        lword = rword = ""
         m = self.RE_WORD.match(first_part)
         if m and direction in ("left", "both"):
-            word = m.group(0)[::-1]
-            if word: return word
+            lword = m.group(0)[::-1]
         #Try right word
         m = self.RE_WORD.match(last_part)
         if m and direction in ("right", "both"):
-            word = m.group(0)
-            if word: return word
+            rword = m.group(0)
+        
+        if lword or rword: 
+            return lword + rword
         
         lword = rword = ""
         #Search left word
@@ -687,8 +685,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #==========================================================================
     # Completer
     #==========================================================================
-    def showCompleter(self, suggestions):
-        completionPrefix = self.getCurrentWord()
+    def showCompleter(self, suggestions, completionPrefix = ""):
         self.completerMode.setCompletionPrefix(completionPrefix)
         self.completerMode.setModel(PMXCompleterListModel(suggestions, self))
         cr = self.cursorRect()

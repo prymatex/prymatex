@@ -50,11 +50,13 @@ class CompleterHelper(PMXBaseEditorHelper):
             #a shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
             self.completionCommand = settings.completionCommand
             self.disableDefaultCompletion = settings.disableDefaultCompletion
+            print self.completions, self.completionCommand, self.disableDefaultCompletion
             return bool(self.completions)
         return False
             
     def execute(self, editor, event):
-        editor.showCompleter(self.completions)
+        completionPrefix = editor.getCurrentWord()
+        editor.showCompleter(self.completions, completionPrefix = completionPrefix)
 
 class SmartTypingPairsHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
