@@ -98,7 +98,7 @@ class PMXFileManager(PMXObject):
         """
         Returns a new QFileInfo
         """
-        path = os.path.join(self.currentDirectory, "untitled %d" % self.new_file_counter)
+        path = os.path.join(self.currentDirectory, "Untitled %d" % self.new_file_counter)
         self.new_file_counter += 1
         return QtCore.QFileInfo(path)
     

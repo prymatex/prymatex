@@ -66,7 +66,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     def configComboBoxThemes(self):
         #Combo Theme
         currentTheme = None
-        currentThemeUUID = self.settings.value('theme').upper()
+        currentThemeUUID = self.settings.hasValue('theme') and self.settings.value('theme').upper() or None 
         for theme in self.manager.getAllThemes():
             uuid = unicode(theme.uuid).upper()
             self.comboBoxThemes.addItem(theme.name, uuid)

@@ -25,10 +25,11 @@ class PMXBaseEditor(object):
     def getTabIcon(self):
         return QtGui.QIcon()
     
+    UNTITLED_FILE_TEMPLATE = "Untitled {creation_counter}"
     def getTabTitle(self):
         if self.fileInfo is not None:
             return self.fileInfo.fileName()
-        return "untitled %d" % self.creation_counter
+        return self.UNTITLED_FILE_TEMPLATE.format(creation_counter = self.creation_counter)
     
     def isNew(self):
         return self.fileInfo is None
