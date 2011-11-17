@@ -86,6 +86,7 @@ class TextMateSettings(object):
         except KeyError:
             return None
     
+    
     def clear(self):
         self.settings = {}
         self.sync()
@@ -129,6 +130,16 @@ class SettingsGroup(object):
             return self.settings[name].getDefault()
         return SettingsGroup.toPyObject(value)
         
+    def hasValue(self, name):
+        self.qsettings.beginGroup(self.name)
+        value = self.qsettings.value(name)
+        self.qsettings.endGroup()
+        if value == None and name in self.settings:
+            #TODO: ver si tengo que pasarle un objeto
+            return True
+        else:
+            return SettingsGroup.toPyObject(value) is not None
+    
     def addSetting(self, setting):
         self.settings[setting.name] = setting
         if setting.tm_name != None and self.tmsettings.value(setting.tm_name) == None:
