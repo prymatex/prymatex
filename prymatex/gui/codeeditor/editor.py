@@ -39,7 +39,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     foldingChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
-    textBlocksRemoved = QtCore.pyqtSignal()
+    blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
+    blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     
     #=======================================================================
     # Settings
@@ -173,7 +174,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #=======================================================================
     def connectSignals(self):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
-        self.blockCountChanged.connect(self.detectRemovedBlocks)
+        self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrent)
         self.modificationChanged.connect(self.updateTabStatus)
@@ -185,9 +186,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def updateTabStatus(self):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
 
-    def detectRemovedBlocks(self):
+    def on_blockCountChanged(self, newBlockCount):
+        block = self.textCursor().block()
         if self.lastBlockCount > self.document().blockCount():
-            self.textBlocksRemoved.emit()
+            print "se quitaron bloques"
+            self.blocksRemoved.emit(block, self.lastBlockCount - newBlockCount)
+        else:
+            print "se agregaron bloques"
+            self.blocksAdded.emit(block, newBlockCount - self.lastBlockCount)
         self.lastBlockCount = self.document().blockCount()
         
     #=======================================================================
@@ -585,15 +591,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #==========================================================================
     def beginAutomatedAction(self):
         """Begin an edition motivated from internal reasons, snippets, commands, macros, others"""
-        print "begin automated"
+        self.cursorPositionChanged.disconnect(self.highlightCurrent)
         self.textCursor().beginEditBlock()
-        self.blockSignals(True)
     
     def endAutomatedAction(self):
         """End an edition motivated from internal reasons, snippets, commands, macros, others"""
-        self.blockSignals(False)
         self.textCursor().endEditBlock()
-        print "end automated"
+        self.cursorPositionChanged.connect(self.highlightCurrent)
+        self.highlightCurrent()
         
     def insertBundleItem(self, item, **processorSettings):
         """

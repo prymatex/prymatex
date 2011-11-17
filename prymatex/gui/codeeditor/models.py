@@ -11,13 +11,10 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        self.editor.textBlocksRemoved.connect(self.on_textBlocksRemoved)
+        self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
         self.blocks = []
 
-    def __contains__(self, block):
-        return block in self.blocks
-        
-    def on_textBlocksRemoved(self):
+    def purgeBlocks(self):
         remove = filter(lambda block: block.userData() is None, self.blocks)
         if remove:
             sIndex = self.blocks.index(remove[0])
@@ -26,6 +23,12 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
             self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
             self.endRemoveRows()
             
+    def __contains__(self, block):
+        return block in self.blocks
+        
+    def on_textBlocksRemoved(self, block, length):
+        self.purgeBlocks()
+
     def index (self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
             return self.createIndex(row, column, self.blocks[row])
@@ -86,10 +89,21 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
         self.editor.symbolChanged.connect(self.on_symbolChanged)
-        self.editor.textBlocksRemoved.connect(self.on_textBlocksRemoved)
+        self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
         self.blocks = []
+        #TODO: ver que pasa si ponemos un purge always
+
+    def purgeBlocks(self):
+        remove = filter(lambda block: block.userData() is None, self.blocks)
+        if remove:
+            sIndex = self.blocks.index(remove[0])
+            eIndex = self.blocks.index(remove[-1])
+            self.beginRemoveRows(QtCore.QModelIndex(), sIndex, eIndex)
+            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
+            self.endRemoveRows()
 
     def on_symbolChanged(self, block):
+        self.purgeBlocks()
         if block in self.blocks:
             index = self.blocks.index(block)
             userData = block.userData()
@@ -106,14 +120,8 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             self.blocks.insert(index, block)
             self.endInsertRows()
     
-    def on_textBlocksRemoved(self):
-        remove = filter(lambda block: block.userData() is None, self.blocks)
-        if remove:
-            sIndex = self.blocks.index(remove[0])
-            eIndex = self.blocks.index(remove[-1])
-            self.beginRemoveRows(QtCore.QModelIndex(), sIndex, eIndex)
-            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
-            self.endRemoveRows()
+    def on_textBlocksRemoved(self, block, length):
+        self.purgeBlocks()
             
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):

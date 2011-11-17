@@ -7,12 +7,19 @@ class PMXEditorFolding(object):
         self.editor = editor
         self.indentSensitive = False
         self.editor.foldingChanged.connect(self.on_foldingChanged)
-        self.editor.textBlocksRemoved.connect(self.on_textBlocksRemoved)
+        self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
         self.blocks = []
         self.folding = []
 
+    def purgeBlocks(self):
+        remove = filter(lambda block: block.userData() is None, self.blocks)
+        if remove:
+            sIndex = self.blocks.index(remove[0])
+            eIndex = self.blocks.index(remove[-1])
+            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
+
     def on_foldingChanged(self, block):
-        print "Agregando", block.blockNumber(), "a", map(lambda b: b.blockNumber(), self.blocks)
+        self.purgeBlocks()
         if block in self.blocks:
             userData = block.userData()
             if userData.foldingMark == PMXSyntax.FOLDING_NONE:
@@ -21,20 +28,16 @@ class PMXEditorFolding(object):
             indexes = map(lambda block: block.blockNumber(), self.blocks)
             index = bisect(indexes, block.blockNumber())
             self.blocks.insert(index, block)
+        return
         if self.indentSensitive:
             self.updateIndentFoldingBlocks()
         else:
             self.updateFoldingBlocks()
         self.editor.sidebar.update()
-        print "Quedaron", map(lambda b: b.blockNumber(), self.folding)
-        print "Marcas", map(lambda b: b.userData().foldingMark, self.folding)
         
-    def on_textBlocksRemoved(self):
-        remove = filter(lambda block: block.userData() is None, self.blocks)
-        if remove:
-            sIndex = self.blocks.index(remove[0])
-            eIndex = self.blocks.index(remove[-1])
-            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
+    def on_textBlocksRemoved(self, block, length):
+        self.purgeBlocks()
+        return
         if self.indentSensitive:
             self.updateIndentFoldingBlocks()
         else:
