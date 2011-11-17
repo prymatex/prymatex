@@ -122,7 +122,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
             process.start(shellCommand, QtCore.QIODevice.ReadWrite)
             if not process.waitForStarted():
                 raise Exception("No puedo correr")
-            print shellCommand, context.inputValue
             process.write(unicode(context.inputValue).encode("utf-8"))
             process.closeWriteChannel()
         else:

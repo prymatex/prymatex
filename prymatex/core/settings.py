@@ -17,7 +17,7 @@ PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"
 TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
 TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
-TEXTMATE_PREFERENCE_NAMES = ["Library","Preferences"]
+TEXTMATE_PREFERENCE_NAMES = ["Library", "Preferences"]
 
 def get_prymatex_app_path():
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

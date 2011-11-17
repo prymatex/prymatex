@@ -68,11 +68,14 @@ class PMXBundleTreeNode(object):
         return text.replace('&', '&&')
     
     def triggerItemAction(self, parent = None):
-        if not hasattr(self, "action"):
-            assert parent is not None, "Parent of action mustn't be None"
+        """
+        Build and return de QAction related to this bundle item.
+        if bundle item haven't action is created whit the given parent, otherwise return None
+        """
+        if not hasattr(self, "action") and parent is not None:
             receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
             self.action = self.buildTriggerItemAction(parent, receiver)
-        return self.action
+        return getattr(self, "action", None)
     
     def buildTriggerItemAction(self, parent, receiver, mnemonic = ''):
         action = QtGui.QAction(QtGui.QIcon(self.icon), self.buildMenuTextEntry(mnemonic), parent)

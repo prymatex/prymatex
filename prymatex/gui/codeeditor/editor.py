@@ -585,6 +585,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #==========================================================================
     def beginAutomatedAction(self):
         """Begin an edition motivated from internal reasons, snippets, commands, macros, others"""
+        print "begin automated"
         self.textCursor().beginEditBlock()
         self.blockSignals(True)
     
@@ -592,6 +593,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         """End an edition motivated from internal reasons, snippets, commands, macros, others"""
         self.blockSignals(False)
         self.textCursor().endEditBlock()
+        print "end automated"
         
     def insertBundleItem(self, item, **processorSettings):
         """

@@ -83,9 +83,10 @@ class PMXBundleMenuGroup(QtCore.QObject):
                     menu.ID = id(item.mainMenu)
         else:
             action = item.triggerItemAction()
-            text = item.buildMenuTextEntry()
-            if text != action.text():
-                action.setText(text)
+            if action is not None:
+                text = item.buildMenuTextEntry()
+                if text != action.text():
+                    action.setText(text)
 
     def on_manager_bundlePopulated(self, bundle):
         if bundle not in self.menus:

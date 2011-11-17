@@ -16,43 +16,37 @@ PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
 })
 
 ######################### Command Processor #########################
-class PMXCommandProcessor(object):
-    runCommand = nop
-    
-    # Input functions
-    environment = nop
-
+PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
+    "runCommand": nop,
+    "environment": nop,
     #Inputs
-    document = nop
-    line = nop
-    character = nop
-    scope = nop
-    selection = nop
-    selectedText = nop
-    word = nop
-    
+    "document": nop,
+    "line": nop,
+    "character": nop,
+    "scope": nop,
+    "selection": nop,
+    "selectedText": nop,
+    "word": nop,
     # beforeRunningCommand
-    saveActiveFile = nop
-    saveModifiedFiles = nop
-    nop = nop
-    
+    "saveActiveFile": nop,
+    "saveModifiedFiles": nop,
+    "nop": nop,
     # deleteFromEditor
-    deleteWord = nop
-    deleteSelection = nop
-    deleteCharacter = nop
-    
+    "deleteWord": nop,
+    "deleteSelection": nop,
+    "deleteCharacter": nop,
     # Outpu functions
-    error = nop
-    discard = nop
-    replaceSelectedText = nop
-    replaceDocument = nop
-    insertText = nop
-    afterSelectedText = nop
-    insertAsSnippet = nop
-    showAsHTML = nop
-    showAsTooltip = nop
-    createNewDocument = nop
-
+    "error": nop,
+    "discard": nop,
+    "replaceSelectedText": nop,
+    "replaceDocument": nop,
+    "insertText": nop,
+    "afterSelectedText": nop,
+    "insertAsSnippet": nop,
+    "showAsHTML": nop,
+    "showAsTooltip": nop,
+    "createNewDocument": nop
+})
 
 ######################### Snipper Processor #########################
 PMXSnippetProcessor = type("PMXSnippetProcessor", (object, ), {
