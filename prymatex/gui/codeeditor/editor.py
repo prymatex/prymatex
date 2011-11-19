@@ -168,7 +168,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         
         self.connectSignals()
         self.configure()
-
+        
+        self.poorManFoldingHack()
+        
+    def poorManFoldingHack(self):
+        self.setUpdatesEnabled(False)
+        self.setPlainText('\n')
+        self.setPlainText('')
+        self.setUpdatesEnabled(True)
+        
     #=======================================================================
     # Connect Signals
     #=======================================================================
@@ -230,8 +238,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         if fileInfo is not None:
             assert isinstance(fileInfo, QtCore.QFileInfo), "%s is not QFileInfo" % fileInfo
             syntax = application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
-            if syntax is None:
-                raise exceptions.FileNotSupported()
+            # TODO: This prevents unrecognised to be opened
+            #if syntax is None:
+            #    raise exceptions.FileNotSupported()
         else:
             #TODO: defaultSyntax va en el manager
             syntax = application.supportManager.getBundleItem(cls.defaultSyntax)

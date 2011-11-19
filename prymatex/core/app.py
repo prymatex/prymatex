@@ -13,6 +13,9 @@ from prymatex.core import exceptions
 from prymatex import resources_rc
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 class PMXApplication(QtGui.QApplication):
     '''
@@ -148,8 +151,7 @@ class PMXApplication(QtGui.QApplication):
         print "Commit data"
         
     def saveState(self, session_manager):
-        #print "Save state", session_manager
-        pass
+        logger.debug( "Save state %s" % session_manager)
         
     def setupKernelManager(self):
         try:
