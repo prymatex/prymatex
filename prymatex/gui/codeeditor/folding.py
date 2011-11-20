@@ -6,7 +6,6 @@ class PMXEditorFolding(object):
     def __init__(self, editor):
         self.editor = editor
         self.indentSensitive = False
-        self.editor.foldingChanged.connect(self.on_foldingChanged)
         self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
         self.blocks = []
         self.folding = []
@@ -18,16 +17,22 @@ class PMXEditorFolding(object):
             eIndex = self.blocks.index(remove[-1])
             self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
 
-    def on_foldingChanged(self, block):
-        self.purgeBlocks()
-        if block in self.blocks:
-            userData = block.userData()
-            if userData.foldingMark == PMXSyntax.FOLDING_NONE:
-                self.blocks.remove(block)
-        else:
+    def addFoldingBlock(self, block):
+        if block not in self.blocks:
             indexes = map(lambda block: block.blockNumber(), self.blocks)
             index = bisect(indexes, block.blockNumber())
             self.blocks.insert(index, block)
+        return
+        
+        if self.indentSensitive:
+            self.updateIndentFoldingBlocks()
+        else:
+            self.updateFoldingBlocks()
+        self.editor.sidebar.update()
+        
+    def removeFoldingBlock(self, block):
+        assert block in self.blocks, "block is not in blocks"
+        self.blocks.remove(block)
         return
         if self.indentSensitive:
             self.updateIndentFoldingBlocks()
@@ -96,7 +101,6 @@ class PMXEditorFolding(object):
         if block in self.folding:
             userData = block.userData()
             return userData.foldingMark
-        return PMXSyntax.FOLDING_NONE
     
     def findBlockFoldClose(self, block):
         nest = 0
@@ -126,9 +130,11 @@ class PMXEditorFolding(object):
         return reduce(lambda x, y: x + y, map(lambda block: block.userData().foldingMark, self.folding[:index]), 0)
         
     def isStart(self, mark):
+        if mark is None: return False
         return mark >= PMXSyntax.FOLDING_START
 
     def isStop(self, mark):
+        if mark is None: return False
         return mark <= PMXSyntax.FOLDING_STOP
 
     def isFoldingMark(self, block):

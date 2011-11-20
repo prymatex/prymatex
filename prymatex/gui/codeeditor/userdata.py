@@ -10,7 +10,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         QtGui.QTextBlockUserData.__init__(self)
         self.scopes = []
         #Folding
-        self.foldingMark = PMXSyntax.FOLDING_NONE
+        self.foldingMark = None
         self.foldedLevel = 0
         self.folded = False
         #Indent

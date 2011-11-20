@@ -36,9 +36,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
     modeChanged = QtCore.pyqtSignal()
-    bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
-    symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
-    foldingChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
+    #bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
+    #symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
+    #foldingChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     
@@ -87,6 +87,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
         self.syntaxHighlighter.rehighlight()
+        self.updateLineNumberAreaWidth(0)
         self.highlightCurrent()
         if not firstTime:
             message = "<b>%s</b> theme set " % theme.name
@@ -168,14 +169,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         
         self.connectSignals()
         self.configure()
-        
-        self.poorManFoldingHack()
-        
-    def poorManFoldingHack(self):
-        self.setUpdatesEnabled(False)
-        self.setPlainText('\n')
-        self.setPlainText('')
-        self.setUpdatesEnabled(True)
         
     #=======================================================================
     # Connect Signals
@@ -357,6 +350,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #def contextMenuEvent(self, event):
     #    menu = self.createStandardContextMenu()
     #    menu.popup(event.globalPos())
+        
     
     #=======================================================================
     # Espacio para la sidebar
@@ -376,7 +370,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     
     def updateLineNumberArea(self, rect, dy):
         if dy:
-            self.sidebar.scroll(0, dy);
+            self.sidebar.scroll(0, dy)
         else:
             self.sidebar.update(0, rect.y(), self.sidebar.width(), rect.height())
         if rect.contains(self.viewport().rect()):
@@ -600,14 +594,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #==========================================================================
     def beginAutomatedAction(self):
         """Begin an edition motivated from internal reasons, snippets, commands, macros, others"""
-        self.cursorPositionChanged.disconnect(self.highlightCurrent)
-        self.textCursor().beginEditBlock()
+        #Esto es delicado
+        self.blockSignals(True) #Bloqueo señales
+        self.textCursor().beginEditBlock() #Inicio editBlock
     
     def endAutomatedAction(self):
         """End an edition motivated from internal reasons, snippets, commands, macros, others"""
-        self.textCursor().endEditBlock()
-        self.cursorPositionChanged.connect(self.highlightCurrent)
-        self.highlightCurrent()
+        self.textCursor().endEditBlock() #Termino editBlock
+        self.blockSignals(False) #Desblockeo señales
+        self.cursorPositionChanged.emit()
+        self.lastBlockCount = self.document().blockCount()
+        self.sidebar.update()
+        #self.blockCountChanged.emit(self.document().blockCount())
         
     def insertBundleItem(self, item, **processorSettings):
         """
