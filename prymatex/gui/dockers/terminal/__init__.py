@@ -17,8 +17,11 @@ class PMXTerminalWidget(QtGui.QDockWidget, PMXObject, PMXBaseDock):
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, )
         PMXObject.__init__(self)
+        PMXBaseDock.__init__(self)
         self.setWindowTitle("Terminal")
         term = TabbedTerminal(self)
+        # Buggy
+        #term.lastTerminalClosed.connect(self.hide)
         self.setWidget(term)
-        
         self.configure()
+        

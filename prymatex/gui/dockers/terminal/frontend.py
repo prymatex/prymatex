@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import sys
-import time
 from PyQt4 import QtCore
 from PyQt4 import QtGui 
 
@@ -79,7 +78,7 @@ class TerminalWidget(QtGui.QWidget):
     session_closed = QtCore.pyqtSignal()
 
     DEFAULT_FONT_NAME = "Monospace"
-    DEFAULT_FONT_SIZE = 10
+    DEFAULT_FONT_SIZE = 12
 
     def __init__(self, parent=None, command=None, 
                  font_name=DEFAULT_FONT_NAME,
@@ -155,7 +154,6 @@ class TerminalWidget(QtGui.QWidget):
     def setFont(self, font):
         super(TerminalWidget, self).setFont(font)
         self._update_metrics()
-
         
     def focusNextPrevChild(self, next):
         if not self._session.is_alive():
@@ -170,8 +168,10 @@ class TerminalWidget(QtGui.QWidget):
             self.killTimer(self._timer_id)
         self._timer_id = self.startTimer(250)
         self.update_screen()
+        #self.send('~l')
 
-
+    
+    
     def focusOutEvent(self, event):
         if not self._session.is_alive():
             return
