@@ -2,6 +2,8 @@
 import sys
 from PyQt4 import QtCore
 from PyQt4 import QtGui 
+from logging import getLogger
+logger = getLogger(__name__)
 
 # Import fiexes for stand alone testing
 try:
@@ -106,31 +108,32 @@ class TerminalWidget(QtGui.QWidget):
         self._selection = None
         self._clipboard = QtGui.QApplication.clipboard()
         QtGui.QApplication.instance().lastWindowClosed.connect(Session.close_all)
+        self.command = command or self.userShell()
         self.execute()
 
     # Rosale's words, not even Phi should be hardcoded!
     USER_INDEX  =  0
     SHELL_INDEX = -1
-    def execute(self, command = None):
+    @classmethod
+    def userShell(cls):
+        with open('/etc/passwd') as passwd:
+            # Read passwd lines and prepare a user, shell tuple
+            passwd_splitter = lambda line: line.strip().split(':')
+            userlines = map(passwd_splitter, passwd.readlines())
+            user_shell_getter = lambda parts: (parts[cls.USER_INDEX],
+                                           parts[cls.SHELL_INDEX])
+            userlines = map(user_shell_getter, userlines)
+            try:
+                user = os.getlogin()
+            except OSError:
+                user = os.getenv('USER')
+            shell = dict(userlines)[user]
+        return shell
+    
+    def execute(self):
         
-        if command is None:
-            with open('/etc/passwd') as passwd:
-                # Read passwd lines and prepare a user, shell tuple
-                passwd_splitter = lambda line: line.strip().split(':')
-                userlines = map(passwd_splitter, passwd.readlines())
-                user_shell_getter = lambda parts: (parts[self.USER_INDEX],
-                                               parts[self.SHELL_INDEX])
-                userlines = map(user_shell_getter, userlines)
-                try:
-                    user = os.getlogin()
-                except OSError:
-                    user = os.getenv('USER')
-                command = dict(userlines)[user]
-                print command
-            
-        command = '/bin/zsh'
         self._session = Session()
-        self._session.start(command)
+        self._session.start(self.command)
         self._timer_id = None
         # start timer either with high or low priority
         if self.hasFocus():
@@ -138,8 +141,8 @@ class TerminalWidget(QtGui.QWidget):
         else:
             self.focusOutEvent(None)
             
-            
     def send(self, s):
+        print "Sending %s %s", (s, map(ord, s)) 
         self._session.write(s)
 
         
@@ -187,8 +190,13 @@ class TerminalWidget(QtGui.QWidget):
             return
         self._columns, self._rows = self._pixel2pos(self.width(), self.height())
         self._session.resize(self._columns, self._rows)
-
-
+        self.resetTerminaWindow()
+    
+    def resetTerminaWindow(self):
+        if any(map(lambda s: s in self.command, ["bash", "zsh"])):
+            self.send(chr(12))
+        
+    
     def closeEvent(self, event):
         if not self._session.is_alive():
             return
