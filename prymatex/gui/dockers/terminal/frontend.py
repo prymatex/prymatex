@@ -1,27 +1,21 @@
 # -*- coding: utf-8 -*-
 import sys
 import time
+from PyQt4 import QtCore
+from PyQt4 import QtGui 
 
-from PyQt4.QtCore import QRect, Qt, pyqtSignal
-from PyQt4.QtGui import (
-       QApplication, QClipboard, QWidget, QPainter, QFont, QBrush, QColor, 
-       QPen, QPixmap, QImage, QContextMenuEvent)
-
+# Import fiexes for stand alone testing
 try:
     from .backend import Session
 except ValueError:
     from backend import Session
 
-
 import os
-
 
 DEBUG = False
 
-
-
-class TerminalWidget(QWidget):
-
+class TerminalWidget(QtGui.QWidget):
+    ''' Terminal front end, connected to a Python only backend '''
     
     foreground_color_map = {
       0: "#000",
@@ -55,36 +49,34 @@ class TerminalWidget(QWidget):
       15: "#fff", # negative
     }
     keymap = {
-       Qt.Key_Backspace: chr(127),
-       Qt.Key_Escape: chr(27),
-       Qt.Key_AsciiTilde: "~~",
-       Qt.Key_Up: "~A",
-       Qt.Key_Down: "~B",
-       Qt.Key_Left: "~D", 
-       Qt.Key_Right: "~C", 
-       Qt.Key_PageUp: "~1", 
-       Qt.Key_PageDown: "~2", 
-       Qt.Key_Home: "~H", 
-       Qt.Key_End: "~F", 
-       Qt.Key_Insert: "~3",
-       Qt.Key_Delete: "~4", 
-       Qt.Key_F1: "~a",
-       Qt.Key_F2: "~b", 
-       Qt.Key_F3:  "~c", 
-       Qt.Key_F4:  "~d", 
-       Qt.Key_F5:  "~e", 
-       Qt.Key_F6:  "~f", 
-       Qt.Key_F7:  "~g", 
-       Qt.Key_F8:  "~h", 
-       Qt.Key_F9:  "~i", 
-       Qt.Key_F10:  "~j", 
-       Qt.Key_F11:  "~k", 
-       Qt.Key_F12:  "~l", 
+       QtCore.Qt.Key_Backspace: chr(127),
+       QtCore.Qt.Key_Escape: chr(27),
+       QtCore.Qt.Key_AsciiTilde: "~~",
+       QtCore.Qt.Key_Up: "~A",
+       QtCore.Qt.Key_Down: "~B",
+       QtCore.Qt.Key_Left: "~D", 
+       QtCore.Qt.Key_Right: "~C", 
+       QtCore.Qt.Key_PageUp: "~1", 
+       QtCore.Qt.Key_PageDown: "~2", 
+       QtCore.Qt.Key_Home: "~H", 
+       QtCore.Qt.Key_End: "~F", 
+       QtCore.Qt.Key_Insert: "~3",
+       QtCore.Qt.Key_Delete: "~4", 
+       QtCore.Qt.Key_F1: "~a",
+       QtCore.Qt.Key_F2: "~b", 
+       QtCore.Qt.Key_F3:  "~c", 
+       QtCore.Qt.Key_F4:  "~d", 
+       QtCore.Qt.Key_F5:  "~e", 
+       QtCore.Qt.Key_F6:  "~f", 
+       QtCore.Qt.Key_F7:  "~g", 
+       QtCore.Qt.Key_F8:  "~h", 
+       QtCore.Qt.Key_F9:  "~i", 
+       QtCore.Qt.Key_F10:  "~j", 
+       QtCore.Qt.Key_F11:  "~k", 
+       QtCore.Qt.Key_F12:  "~l", 
     }
 
-
-    session_closed = pyqtSignal()
-
+    session_closed = QtCore.pyqtSignal()
 
     DEFAULT_FONT_NAME = "Monospace"
     DEFAULT_FONT_SIZE = 10
@@ -93,13 +85,13 @@ class TerminalWidget(QWidget):
                  font_name=DEFAULT_FONT_NAME,
                  font_size=DEFAULT_FONT_SIZE):
         super(TerminalWidget, self).__init__(parent)
-        
-        #self.parent().setTabOrder(self, self)
-        self.setFocusPolicy(Qt.WheelFocus)
+        if isinstance(self.parent(), QtGui.QTabWidget):
+            self.parent().setTabOrder(self, self)
+        self.setFocusPolicy(QtCore.Qt.WheelFocus)
         self.setAutoFillBackground(False)
-        self.setAttribute(Qt.WA_OpaquePaintEvent, True)
-        self.setCursor(Qt.IBeamCursor)
-        font = QFont(font_name)
+        self.setAttribute(QtCore.Qt.WA_OpaquePaintEvent, True)
+        self.setCursor(QtCore.Qt.IBeamCursor)
+        font = QtGui.QFont(font_name)
         font.setPixelSize(font_size)
         self.setFont(font)
         self._session = None
@@ -113,8 +105,8 @@ class TerminalWidget(QWidget):
         self._blink = False
         self._press_pos = None
         self._selection = None
-        self._clipboard = QApplication.clipboard()
-        QApplication.instance().lastWindowClosed.connect(Session.close_all)
+        self._clipboard = QtGui.QApplication.clipboard()
+        QtGui.QApplication.instance().lastWindowClosed.connect(Session.close_all)
         self.execute()
 
     # Rosale's words, not even Phi should be hardcoded!
@@ -190,7 +182,6 @@ class TerminalWidget(QWidget):
             self.killTimer(self._timer_id)
         self._timer_id = self.startTimer(750)
 
-
     def resizeEvent(self, event):
         if not self._session.is_alive():
             return
@@ -236,7 +227,7 @@ class TerminalWidget(QWidget):
 
     def _update_cursor_rect(self):
         cx, cy = self._pos2pixel(self._cursor_col, self._cursor_row)
-        self._cursor_rect = QRect(cx, cy, self._char_width, self._char_height)
+        self._cursor_rect = QtCore.QRect(cx, cy, self._char_width, self._char_height)
 
         
     def _reset(self):
@@ -252,7 +243,7 @@ class TerminalWidget(QWidget):
 
         
     def paintEvent(self, event):
-        painter = QPainter(self)
+        painter = QtGui.QPainter(self)
         if self._dirty:
             self._dirty = False
             self._paint_screen(painter)
@@ -281,13 +272,13 @@ class TerminalWidget(QWidget):
             color = "#aaa"
         else:
             color = "#fff"
-        painter.setPen(QPen(QColor(color)))
+        painter.setPen(QtGui.QPen(QtGui.QColor(color)))
         painter.drawRect(self._cursor_rect)
 
 
     def _paint_screen(self, painter):
         # Speed hacks: local name lookups are faster
-        vars().update(QColor=QColor, QBrush=QBrush, QPen=QPen, QRect=QRect)
+        vars().update(QColor=QtGui.QColor, QBrush=QtGui.QBrush, QPen=QtGui.QPen, QRect=QtCore.QRect)
         background_color_map = self.background_color_map
         foreground_color_map = self.foreground_color_map
         char_width = self._char_width
@@ -295,13 +286,13 @@ class TerminalWidget(QWidget):
         painter_drawText = painter.drawText
         painter_fillRect = painter.fillRect
         painter_setPen = painter.setPen
-        align = Qt.AlignTop | Qt.AlignLeft
+        align = QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft
         # set defaults
         background_color = background_color_map[14]
         foreground_color = foreground_color_map[15]
-        brush = QBrush(QColor(background_color))
+        brush = QtGui.QBrush(QtGui.QColor(background_color))
         painter_fillRect(self.rect(), brush)
-        pen = QPen(QColor(foreground_color))
+        pen = QtGui.QPen(QtGui.QColor(foreground_color))
         painter_setPen(pen)
         y = 0
         text = []
@@ -313,7 +304,7 @@ class TerminalWidget(QWidget):
                 if isinstance(item, basestring):
                     x = col * char_width
                     length = len(item)
-                    rect = QRect(x, y, x + char_width * length, y + char_height)
+                    rect = QtCore.QRect(x, y, x + char_width * length, y + char_height)
                     painter_fillRect(rect, brush)
                     painter_drawText(rect, align, item)
                     col += length
@@ -322,8 +313,8 @@ class TerminalWidget(QWidget):
                     foreground_color_idx, background_color_idx, underline_flag = item
                     foreground_color = foreground_color_map[foreground_color_idx]
                     background_color = background_color_map[background_color_idx]
-                    pen = QPen(QColor(foreground_color))
-                    brush = QBrush(QColor(background_color))
+                    pen = QtGui.QPen(QtGui.QColor(foreground_color))
+                    brush = QtGui.QBrush(QtGui.QColor(background_color))
                     painter_setPen(pen)
                     #painter.setBrush(brush)
             y += char_height
@@ -332,16 +323,16 @@ class TerminalWidget(QWidget):
 
             
     def _paint_selection(self, painter):
-        pcol = QColor(200, 200, 200, 50)
-        pen = QPen(pcol)
-        bcol = QColor(230, 230, 230, 50)
-        brush = QBrush(bcol)
+        pcol = QtGui.QColor(200, 200, 200, 50)
+        pen = QtGui.QPen(pcol)
+        bcol = QtGui.QColor(230, 230, 230, 50)
+        brush = QtGui.QBrush(bcol)
         painter.setPen(pen)
         painter.setBrush(brush)        
         for (start_col, start_row, end_col, end_row) in self._selection:
             x, y = self._pos2pixel(start_col, start_row)
             width, height = self._pos2pixel(end_col - start_col, end_row - start_row)
-            rect = QRect(x, y, width, height)
+            rect = QtCore.QRect(x, y, width, height)
             #painter.drawRect(rect)
             painter.fillRect(rect, brush)
 
@@ -360,19 +351,19 @@ class TerminalWidget(QWidget):
         self._reset()
         
 
-    return_pressed = pyqtSignal()
+    return_pressed = QtCore.pyqtSignal()
 
     def keyPressEvent(self, event):
         text = unicode(event.text())
         key = event.key()
         modifiers = event.modifiers()
-        ctrl = modifiers == Qt.ControlModifier
-        if ctrl and key == Qt.Key_Plus:
+        ctrl = modifiers == QtCore.Qt.ControlModifier
+        if ctrl and key == QtCore.Qt.Key_Plus:
             self.zoom_in()
-        elif ctrl and key == Qt.Key_Minus:
+        elif ctrl and key == QtCore.Qt.Key_Minus:
                 self.zoom_out()
         else:
-            if text and key != Qt.Key_Backspace:
+            if text and key != QtCore.Qt.Key_Backspace:
                 self.send(text.encode("utf-8"))
             else:
                 s = self.keymap.get(key)
@@ -382,32 +373,32 @@ class TerminalWidget(QWidget):
                     print "Unkonwn key combination"
                     print "Modifiers:", modifiers
                     print "Key:", key
-                    for name in dir(Qt):
+                    for name in dir(QtCore.Qt):
                         if not name.startswith("Key_"):
                             continue
-                        value = getattr(Qt, name)
+                        value = getattr(QtCore.Qt, name)
                         if value == key:
                             print "Symbol: Qt.%s" % name
                     print "Text: %r" % text
         event.accept()
-        if key in (Qt.Key_Enter, Qt.Key_Return):
+        if key in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return):
             self.return_pressed.emit()
 
 
     def mousePressEvent(self, event):
         button = event.button()
-        if button == Qt.RightButton:
-            ctx_event = QContextMenuEvent(QContextMenuEvent.Mouse, event.pos())
+        if button == QtCore.Qt.RightButton:
+            ctx_event = QtGui.QContextMenuEvent(QtGui.QContextMenuEvent.Mouse, event.pos())
             self.contextMenuEvent(ctx_event)
             self._press_pos = None
-        elif button == Qt.LeftButton:
+        elif button == QtCore.Qt.LeftButton:
             self._press_pos = event.pos()
             self._selection = None
             self.update_screen()
-        elif button == Qt.MiddleButton:
+        elif button == QtCore.Qt.MiddleButton:
             self._press_pos = None
             self._selection = None
-            text = unicode(self._clipboard.text(QClipboard.Selection))
+            text = unicode(self._clipboard.text(QtGui.QClipboard.Selection))
             self.send(text.encode("utf-8"))
             #self.update_screen()
 
@@ -480,7 +471,7 @@ class TerminalWidget(QWidget):
             sel = self.text_selection()
             if DEBUG:
                 print "%r copied to xselection" % sel
-            self._clipboard.setText(sel, QClipboard.Selection)
+            self._clipboard.setText(sel, QtGui.QClipboard.Selection)
             
             self.update_screen()
 
@@ -516,7 +507,7 @@ class TerminalWidget(QWidget):
         sel = self.text_selection()
         if DEBUG:
             print "%r copied to xselection" % sel
-        self._clipboard.setText(sel, QClipboard.Selection)
+        self._clipboard.setText(sel, QtGui.QClipboard.Selection)
 
         self.update_screen()
 
@@ -524,12 +515,11 @@ class TerminalWidget(QWidget):
     def is_alive(self):
         return (self._session and self._session.is_alive()) or False
 
-        
+    
 if __name__ == "__main__":
-  from PyQt4 import QtGui
-  import sys
-  sys.path.append('..')
-  app = QtGui.QApplication(sys.argv)
-  widget = TerminalWidget()
-  widget.show()
-  sys.exit(app.exec_())
+    from PyQt4 import QtGui
+    sys.path.append('..')
+    app = QtGui.QApplication(sys.argv)
+    widget = TerminalWidget()
+    widget.show()
+    sys.exit(app.exec_())

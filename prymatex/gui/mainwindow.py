@@ -127,7 +127,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.paneTerminal = PMXTerminalWidget(self)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneTerminal)
         self.menuPanels.addAction(self.paneTerminal.toggleViewAction())
-        #self.paneTerminal.hide()
+        self.paneTerminal.hide()
         
         self.tabifyDockWidget(codeSymbols, codeBookmarks)
         

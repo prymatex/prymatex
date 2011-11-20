@@ -8,14 +8,7 @@ from PyQt4.QtGui import QApplication, QTabWidget, QPushButton
 
 from prymatex.gui.dockers.terminal.frontend import TerminalWidget
 from prymatex.gui.dockers.terminal.procinfo import ProcessInfo
-
-
-def printexec(f):
-    def wrapper(*largs, **kwargs):
-        print f
-        retval = f(*largs, **kwargs)
-        return retval
-    return wrapper
+from prymatex.utils.decorator.helpers import printparams_and_output
 
 
 class TabbedTerminal(QTabWidget):
@@ -26,18 +19,18 @@ class TabbedTerminal(QTabWidget):
 		self.proc_info = ProcessInfo()
 		self.setTabPosition(QTabWidget.South)
 		self._new_button = QPushButton(self)
-		self._new_button.setText("New")
+		self._new_button.setText("+")
 		self._new_button.clicked.connect(self.new_terminal)
 		self.setCornerWidget(self._new_button)
 		self.setTabsClosable(True)
 		self.setMovable(True)
 		self.setWindowTitle("Terminal")
-		self.resize(800, 600)
+		self.resize(300, 100)
 		self._terms = []
 		self.tabCloseRequested[int].connect(self._on_close_request)
 		self.currentChanged[int].connect(self._on_current_changed)
 		QTimer.singleShot(0, self.new_terminal) # create lazy on idle
-		self.startTimer(1000)
+		self.startTimer(333)
 
 
 	def _on_close_request(self, idx):
@@ -82,7 +75,7 @@ class TabbedTerminal(QTabWidget):
 		self.setTabText(idx, title)
 		self.setWindowTitle(title)
 
-	@printexec
+	@printparams_and_output
 	def _on_session_closed(self):
 		term = self.sender()
 		try:

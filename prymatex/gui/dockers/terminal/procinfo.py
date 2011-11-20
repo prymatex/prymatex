@@ -6,10 +6,8 @@ import re
 
 class ProcessInfo(object):
 
-
 	def __init__(self):
 		self.update()
-		
 
 	def update(self):
 		processes = [int(entry) for entry in os.listdir("/proc") if entry.isdigit()]
@@ -39,12 +37,10 @@ class ProcessInfo(object):
 			cl.extend(self.children.get(child_pid, []))
 		return cl
 
-
 	def dump(self, pid, _depth=0):
 		print " " * (_depth*2), pid, self.commands[pid]
 		for child_pid in self.children.get(pid, []):
 			self.dump(child_pid, _depth+1)
-
 
 	def cwd(self, pid):
 		try:
@@ -54,9 +50,9 @@ class ProcessInfo(object):
 		return path
 
 
-if __name__ == "__main__":
-	pi = ProcessInfo()
-	pi.dump(4984)
-	print pi.all_children(4984)
-	print pi.cwd(4984)
-	print pi.cwd(pi.all_children(4984)[-1])
+#if __name__ == "__main__":
+#	pi = ProcessInfo()
+#	pi.dump(4984)
+#	print pi.all_children(4984)
+#	print pi.cwd(4984)
+#	print pi.cwd(pi.all_children(4984)[-1])
