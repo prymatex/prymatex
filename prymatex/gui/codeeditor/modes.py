@@ -54,27 +54,44 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if currentHolder is None or currentHolder.last:
                 return self.endSnippet(event)
-            self.editor.beginAutomatedAction()
+            
+            #Cuidado con los extremos del holder
+            if not cursor.hasSelection():
+                if event.key() == QtCore.Qt.Key_Backspace and cursor.position() == currentHolder.start:
+                    return self.endSnippet(event)
+                
+                if event.key() == QtCore.Qt.Key_Delete and cursor.position() == currentHolder.end:
+                    return self.endSnippet(event)
+                
             holderPosition = cursor.selectionStart() - currentHolder.start
             positionBefore = cursor.selectionStart()
             charactersBefore = cursor.document().characterCount()
+            
             #Insert Text
+            self.editor.beginAutomatedAction()
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             positionAfter = cursor.position()
             charactersAfter = cursor.document().characterCount()
-            length = charactersBefore - charactersAfter
+            length = charactersBefore - charactersAfter 
+            
             #Capture Text
             cursor.setPosition(currentHolder.start)
             cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
             currentHolder.setContent(cursor.selectedText())
-            #Replace Text
+            
+            #Remove text
             self.selectSlice(self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length)
+            self.editor.textCursor().removeSelectedText()
+            self.editor.symbols.purgeBlocks()
+            self.editor.folding.purgeBlocks()
+            
+            #Insert snippet
             self.editor.snippetProcessor.render()
             self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
             self.editor.endAutomatedAction()
         else:
-            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)                
-
+            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+            
     def endSnippet(self, event = None):
         self.editor.snippetProcessor.endSnippet()
         if event is not None:

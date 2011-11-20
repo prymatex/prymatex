@@ -111,9 +111,15 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.setCurrentBlockState(state)
 
             if userData.symbol != oldSymbol:
-                self.editor.symbolChanged.emit(self.currentBlock())
+                if userData.symbol == None:
+                    self.editor.symbols.removeSymbolBlock(self.currentBlock())
+                else:
+                    self.editor.symbols.addSymbolBlock(self.currentBlock())
             if userData.foldingMark != oldFoldingMark:
-                self.editor.foldingChanged.emit(self.currentBlock())
+                if userData.foldingMark == None:
+                    self.editor.folding.removeFoldingBlock(self.currentBlock())
+                else:
+                    self.editor.folding.addFoldingBlock(self.currentBlock())
             self.applyFormat(userData)
 
     def getFormat(self, scope):
