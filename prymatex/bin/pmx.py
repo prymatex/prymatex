@@ -2,6 +2,12 @@
 #-*- encoding: utf-8 -*-
 import os
 import sys
+try:
+    import psyco
+    print "Psyco accel found"
+except ImportError, e:
+    pass
+
     
 # this will be replaced at install time
 INSTALLED_BASE_DIR = "@ INSTALLED_BASE_DIR @"
