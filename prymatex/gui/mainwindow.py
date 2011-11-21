@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 from string import Template
 
 from PyQt4 import QtCore, QtGui
@@ -84,7 +85,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         from prymatex.gui.dockers.console import PMXConsoleDock
         from prymatex.gui.dockers.logger import QtLogHandler, PMXLoggerDock
         from prymatex.gui.codeeditor.dockers import PMXCodeSymbolsDock, PMXCodeBookmarksDock
-        from prymatex.gui.dockers.terminal import PMXTerminalWidget
+        
         
         self.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
         
@@ -124,11 +125,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.menuPanels.addAction(codeSymbols.toggleViewAction())
         codeSymbols.hide()
         
-        self.paneTerminal = PMXTerminalWidget(self)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneTerminal)
-        self.menuPanels.addAction(self.paneTerminal.toggleViewAction())
-        self.paneTerminal.hide()
-        
+        # Terminal is avaliable in Unix like systems right now
+        if any(map(lambda s: s in sys.platform), ("linux", "osx")):
+            from prymatex.gui.dockers.terminal import PMXTerminalWidget
+            self.paneTerminal = PMXTerminalWidget(self)
+            self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneTerminal)
+            self.menuPanels.addAction(self.paneTerminal.toggleViewAction())
+            self.paneTerminal.hide()
+            
         self.tabifyDockWidget(codeSymbols, codeBookmarks)
         
         self.dockers = [codeSymbols, codeBookmarks]
