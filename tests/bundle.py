@@ -1,7 +1,16 @@
-import sys
+import os, sys
+#Setup qt
+import sip
+sip.setapi('QDate', 2)
+sip.setapi('QTime', 2)
+sip.setapi('QDateTime', 2)
+sip.setapi('QUrl', 2)
+sip.setapi('QTextStream', 2)
+sip.setapi('QVariant', 2)
+sip.setapi('QString', 2)
+
 from PyQt4 import QtCore, QtGui
 
-import os, sys
 import cPickle
 import StringIO
 from copy import deepcopy
@@ -149,7 +158,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
         # 'items' 'submenus'
         self.root = PMXBundleMenuNode({ "uuid":"root", "name": "root" }, PMXBundleMenuNode.SUBMENU)
         self.buildMenu(mainMenu['items'], self.root, mainMenu['submenus'])
-        
+
     def index(self, row, column, parent):
         if not parent.isValid():
             parent = self.root
@@ -326,21 +335,22 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
     NEWSEPARATOR = 4
     def __init__(self, manager, parent = None):
         from prymatex.gui.support.models import PMXMenuTreeModel as RealPMXMenuTreeModel
+        from prymatex.gui.support.models import PMXExcludedListModel as RealPMXExcludedListModel
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
         self.manager = manager
         self.treeModel = RealPMXMenuTreeModel(manager)
-        self.listModel = PMXExcludedListModel(manager)
+        self.listModel = RealPMXExcludedListModel(manager)
         self.treeMenuView.setModel(self.treeModel)
         self.listExcludedView.setModel(self.listModel)
         #Para poder hacer drag and drop sobre los modelos
         self.setAcceptDrops(False)
 
     def edit(self, bundleItem):
-        if bundleItem.mainMenu == None:
-            return
-        self.treeModel.setMainMenu(bundleItem.mainMenu)
-        self.listModel.setExcludedItems(bundleItem.mainMenu['excludedItems'])
+        if bundleItem.mainMenu != None:
+            self.treeModel.setMainMenu(bundleItem.mainMenu)
+            if "excludedItems" in bundleItem.mainMenu:
+                self.listModel.setExcludedItems(bundleItem.mainMenu['excludedItems'])
 
 def loadManager():
     from prymatex.support.manager import PMXSupportPythonManager
@@ -348,13 +358,18 @@ def loadManager():
         print message
     manager = PMXSupportPythonManager()
     manager.addNamespace('prymatex', os.path.abspath('../prymatex/share'))
+    userPath = os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex'))
+    print userPath
+    manager.addNamespace('user', userPath)
     manager.loadSupport(loadCallback)
     return manager
     
 if __name__ == "__main__":
+    from pprint import pprint
     manager = loadManager()
     app = QtGui.QApplication(sys.argv)
     window = PMXBundleWidget(manager)
-    window.edit(manager.getBundle("4676FC6D-6227-11D9-BFB1-000D93589AF6"))
+    html = manager.getBundle("4676FC6D-6227-11D9-BFB1-000D93589AF6")
+    window.edit(html)
     window.show()
     sys.exit(app.exec_())
