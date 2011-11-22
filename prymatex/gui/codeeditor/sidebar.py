@@ -23,7 +23,7 @@ class PMXSidebar(QtGui.QWidget):
     @property
     def padding(self):
         if self.showLineNumbers or self.showFolding or self.showBookmarks:
-            return 3
+            return 10
         return 0
         
     def sizeHint(self):
@@ -53,8 +53,7 @@ class PMXSidebar(QtGui.QWidget):
             font.setBold(block == current_block)
             painter.setFont(font)
 
-            # Draw the line number right justified at the y position of the
-            # line. 3 is a magic padding number. drawText(x, y, text).
+            # Draw the line number right justified at the y position of the line.
             if block.isVisible():
                 #Line Numbers
                 if self.showLineNumbers:
