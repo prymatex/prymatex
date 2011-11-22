@@ -10,47 +10,40 @@ class PMXEditorFolding(object):
         self.blocks = []
         self.folding = []
 
-    def purgeBlocks(self):
-        remove = filter(lambda block: block.userData() is None, self.blocks)
+    def _purge_blocks(self, startIndex = None, endIndex = None):
+        remove = filter(lambda block: block.userData() is None, self.blocks[startIndex:endIndex])
         if remove:
-            sIndex = self.blocks.index(remove[0])
-            eIndex = self.blocks.index(remove[-1])
-            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
+            startIndex = self.blocks.index(remove[0])
+            endIndex = self.blocks.index(remove[-1])
+            self.blocks = self.blocks[:startIndex] + self.blocks[endIndex + 1:]
 
     def addFoldingBlock(self, block):
         if block not in self.blocks:
             indexes = map(lambda block: block.blockNumber(), self.blocks)
             index = bisect(indexes, block.blockNumber())
             self.blocks.insert(index, block)
-        return
-        
-        if self.indentSensitive:
-            self.updateIndentFoldingBlocks()
-        else:
-            self.updateFoldingBlocks()
-        self.editor.sidebar.update()
+        self.updateFolding()
         
     def removeFoldingBlock(self, block):
-        assert block in self.blocks, "block is not in blocks"
+        index = self.blocks.index(block)
+        self._purge_blocks(startIndex = index)
         self.blocks.remove(block)
-        return
-        if self.indentSensitive:
-            self.updateIndentFoldingBlocks()
-        else:
-            self.updateFoldingBlocks()
-        self.editor.sidebar.update()
-        
+        self.updateFolding()
+
     def on_textBlocksRemoved(self, block, length):
-        self.purgeBlocks()
-        return
+        self._purge_blocks()
+        self.updateFolding()
+    
+    def updateFolding(self):
+        self.folding = []
         if self.indentSensitive:
-            self.updateIndentFoldingBlocks()
+            pass
+            #self.updateIndentFoldingBlocks()
         else:
             self.updateFoldingBlocks()
         self.editor.sidebar.update()
         
     def updateFoldingBlocks(self):
-        self.folding = []
         nest = 0
         for block in self.blocks:
             userData = block.userData()
@@ -60,7 +53,6 @@ class PMXEditorFolding(object):
                 self.folding.append(block)
 
     def updateIndentFoldingBlocks(self):
-        self.folding = []
         nest = 0
         lastOpenIndent = currentIndent = ""
         for block in self.blocks:

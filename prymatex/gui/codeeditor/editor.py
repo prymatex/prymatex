@@ -186,14 +186,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
 
     def updateTabStatus(self):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
-
+    
     def on_blockCountChanged(self, newBlockCount):
         block = self.textCursor().block()
         if self.lastBlockCount > self.document().blockCount():
-            print "se quitaron bloques"
             self.blocksRemoved.emit(block, self.lastBlockCount - newBlockCount)
         else:
-            print "se agregaron bloques"
             self.blocksAdded.emit(block, newBlockCount - self.lastBlockCount)
         self.lastBlockCount = self.document().blockCount()
         
@@ -380,14 +378,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     # Highlight Editor
     #=======================================================================
     def highlightCurrent(self):
-        print "highlightCurrent"
         #Clean current extra selection
         self.setExtraSelections([])
         if self.multiCursorMode.isActive():
             self.multiCursorMode.highlightCurrentLines()
         else:
             self.highlightCurrentLine()
-        self.highlightCurrentBrace()
+            self.highlightCurrentBrace()
 
     def highlightCurrentBrace(self, cursor = None):
         cursor = QtGui.QTextCursor(self.textCursor())
@@ -397,7 +394,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         differentPairs = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
         openBraces = map(lambda pair: pair[0], differentPairs)
         closeBraces = map(lambda pair: pair[1], differentPairs)
-        print openBraces, closeBraces
         
         closeCursor = openCursor = None
         leftChar = cursor.document().characterAt(cursor.position() - 1)
@@ -408,7 +404,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                 cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
                 index = openBraces.index(leftChar)
                 openCursor = cursor
-                print cursor.selectedText()
                 closeCursor = self.findTypingPair(leftChar, closeBraces[index], openCursor)
             else:
                 cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
