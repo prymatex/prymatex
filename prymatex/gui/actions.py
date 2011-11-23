@@ -359,7 +359,9 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionProjectHomepage_triggered(self):
         import webbrowser
-        webbrowser.open(QtGui.qApp.instance().projectUrl)
+        import prymatex
+        url = getattr(prymatex, '__url__', "https://github.com/D3f0/prymatex")
+        webbrowser.open(url)
 
     @QtCore.pyqtSlot()
     def on_actionTakeScreenshot_triggered(self):
