@@ -64,7 +64,7 @@ def prepareShellScript(script, environment):
     file = makeExecutableTempFile(script)
     if sys.platform == "win32":
         #FIXME: re trucho pero por ahora funciona para mi :)
-        command = [ "c:\\cygwin\\bin\\env", file ]
+        command = "c:\\cygwin\\bin\\env %s" % file
     else:
         command = file
     return command, environment

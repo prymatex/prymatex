@@ -49,42 +49,50 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if format is not None:
                 self.setFormat(start, end - start, format)
     
-    def setupBlockUserData(self, block, userData, data):
+    def setupBlockUserData(self, text, userData, data):
         state = self.SINGLE_LINE
         userData.setScopes(data[0])
         if data[1] is not None:
             state = self.MULTI_LINE
             userData.setStackAndScopes(*data[1])
         
-        text = block.text()
-        
-        #Folding
-        userData.foldingMark = self.syntax.folding(text)
-        
-        #Indent
+        #1 Update Indent
         userData.indent = whiteSpace(text)
         
-        self.setupPreferences(text, userData)
-        
-        #Hash the text and scope
-        userData.textHash = hash(self.syntax.scopeName) + hash(text)
-        
-        return state
+        #2 Update Folding
+        foldingMark = self.syntax.folding(text)
+        if userData.foldingMark != foldingMark:
+            userData.foldingMark = foldingMark
+            if userData.foldingMark == None:
+                self.editor.folding.removeFoldingBlock(self.currentBlock())
+            else:
+                self.editor.folding.addFoldingBlock(self.currentBlock())
 
-    def setupPreferences(self, text, userData):
+        #3 Update Symbols
         preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.getAllScopes())
         
         symbolRange = filter(lambda (preference, start, end): preference.showInSymbolList == 1, preferences)
         if symbolRange:
             symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
-            userData.symbol = symbolRange[0][0].transformSymbol(symbol)
+            symbol = symbolRange[0][0].transformSymbol(symbol)
         else:
-            userData.symbol = None
+            symbol = None
+
+        if userData.symbol != symbol:
+            userData.symbol = symbol
+            if userData.symbol == None:
+                self.editor.symbols.removeSymbolBlock(self.currentBlock())
+            else:
+                self.editor.symbols.addSymbolBlock(self.currentBlock())
+
+        #4 Save the hash the text, scope and state
+        userData.textHash = hash(text) + hash(self.syntax.scopeName) + state
+
+        return state
 
     def highlightBlock(self, text):
-        print "highlightBlock"
         userData = self.currentBlock().userData()
-        if userData is not None and userData.textHash == hash(self.syntax.scopeName) + hash(text):
+        if userData is not None and userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
             self.applyFormat(userData)
         else:
             self.processor.startParsing(self.syntax.scopeName)
@@ -107,19 +115,9 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             oldSymbol = userData.symbol
             oldFoldingMark = userData.foldingMark
 
-            state = self.setupBlockUserData(self.currentBlock(), userData, data)
+            state = self.setupBlockUserData(text, userData, data)
             self.setCurrentBlockState(state)
 
-            if userData.symbol != oldSymbol:
-                if userData.symbol == None:
-                    self.editor.symbols.removeSymbolBlock(self.currentBlock())
-                else:
-                    self.editor.symbols.addSymbolBlock(self.currentBlock())
-            if userData.foldingMark != oldFoldingMark:
-                if userData.foldingMark == None:
-                    self.editor.folding.removeFoldingBlock(self.currentBlock())
-                else:
-                    self.editor.folding.addFoldingBlock(self.currentBlock())
             self.applyFormat(userData)
 
     def getFormat(self, scope):

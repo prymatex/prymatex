@@ -157,11 +157,16 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
 
 class MoveCursorToHomeHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Home
-    def execute(self, editor, event):
-        cursor = editor.textCursor()
+    def accept(self, editor, event, cursor, scope):
+        #Solo si el cursor no esta al final de la indentacion
         block = cursor.block()
-        newPosition = block.position() + len(block.userData().indent)
-        cursor.setPosition(newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
+        self.newPosition = block.position() + len(block.userData().indent)
+        return self.newPosition != cursor.position()
+        
+    def execute(self, editor, event):
+        #Lo muevo al final de la indentacion
+        cursor = editor.textCursor()
+        cursor.setPosition(self.newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
         editor.setTextCursor(cursor)
 
 class OverwriteHelper(PMXBaseEditorHelper):
