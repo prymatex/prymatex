@@ -197,7 +197,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 editor.setReadOnly(True)
                 for line in content.splitlines():
                     editor.appendPlainText(line)
-                    yield coroutines.Sleep(100)
+                    yield
                 editor.setModified(False)
                 editor.setReadOnly(False)
                 yield coroutines.Return(editor, fileInfo)
