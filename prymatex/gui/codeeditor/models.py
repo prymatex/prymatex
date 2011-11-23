@@ -22,14 +22,14 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
             self.beginRemoveRows(QtCore.QModelIndex(), sIndex, eIndex)
             self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
             self.endRemoveRows()
-            
+
     def __contains__(self, block):
         return block in self.blocks
         
     def on_textBlocksRemoved(self, block, length):
         self.purgeBlocks()
 
-    def index (self, row, column = 0, parent = None):
+    def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
             return self.createIndex(row, column, self.blocks[row])
         else:
@@ -46,7 +46,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
             return block.text()
         elif role == QtCore.Qt.DecorationRole:
             return resources.IMAGES['bookmarkflag']
-    
+
     def toggleBookmark(self, block):
         try:
             index = self.blocks.index(block)
@@ -91,13 +91,14 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
         self.blocks = []
 
-    def purgeBlocks(self):
-        remove = filter(lambda block: block.userData() is None, self.blocks)
+    def _purge_blocks(self, startIndex = None, endIndex = None):
+        remove = filter(lambda block: block.userData() is None, self.blocks[startIndex:endIndex])
+        print self.blocks, remove
         if remove:
-            sIndex = self.blocks.index(remove[0])
-            eIndex = self.blocks.index(remove[-1])
-            self.beginRemoveRows(QtCore.QModelIndex(), sIndex, eIndex)
-            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
+            startIndex = self.blocks.index(remove[0])
+            endIndex = self.blocks.index(remove[-1])
+            self.beginRemoveRows(QtCore.QModelIndex(), startIndex, endIndex)
+            self.blocks = self.blocks[:startIndex] + self.blocks[endIndex + 1:]
             self.endRemoveRows()
 
     def addSymbolBlock(self, block):
@@ -113,12 +114,13 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
     
     def removeSymbolBlock(self, block):
         index = self.blocks.index(block)
+        self._purge_blocks(startIndex = index)
         self.beginRemoveRows(QtCore.QModelIndex(), index, index)
         self.blocks.remove(block)
         self.endRemoveRows()
         
     def on_textBlocksRemoved(self, block, length):
-        self.purgeBlocks()
+        self._purge_blocks()
             
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
