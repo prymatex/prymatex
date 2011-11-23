@@ -598,7 +598,7 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         if self.bundleItem != None:
             return 'Edit Menu: "%s"' % self.bundleItem.name
         return super(PMXBundleWidget, self).title()
-        
+
     @property
     def isChanged(self):
         return False
@@ -614,5 +614,8 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     
     def edit(self, bundleItem):
         super(PMXBundleWidget, self).edit(bundleItem)
-        self.treeMenuModel.setMainMenu(bundleItem.mainMenu)
-        self.listExcludedModel.setMainMenu(bundleItem.mainMenu)
+        if bundleItem.mainMenu is not None:
+            self.treeMenuModel.setMainMenu(bundleItem.mainMenu)
+            if "setExcludedItems" in bundleItem.mainMenu:
+                self.listExcludedModel.setExcludedItems(bundleItem.mainMenu["setExcludedItems"])
+        #TODO: sino limpiar los modelos y agregar items para armar menu
