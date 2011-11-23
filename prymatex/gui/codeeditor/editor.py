@@ -223,7 +223,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         elif self.fileInfo is not None:
             return self.application.fileManager.getFileIcon(self.fileInfo)
         return PMXBaseEditor.getTabIcon(self)
-        
+    
     @classmethod
     def newInstance(cls, application, fileInfo = None, parent = None):
         if fileInfo is not None:
@@ -449,7 +449,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         selection.cursor.clearSelection()
         extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
-            
+
     def select(self, selection):
         cursor = self.textCursor()
         if selection in [self.SelectWord, self.SelectLine, self.SelectParagraph, self.SelectAll]:

@@ -53,6 +53,7 @@ class PMXApplication(QtGui.QApplication):
         self.setupSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
         self.setupKernelManager()    #Console kernel Manager
         self.setupMessageQueue()
+        self.setupCoroutines()
 
         # Setups
         #self.setupExecutor()       #Executor
@@ -171,6 +172,10 @@ class PMXApplication(QtGui.QApplication):
         except ImportError:
             self.messageQueue = None
             
+    def setupCoroutines(self):
+        from prymatex.utils.coroutines import Scheduler
+        self.scheduler = Scheduler(self)
+
     # Decorador para imprimir cuanto tarda
     @deco.logtime
     def setupSupportManager(self, callbackSplashMessage = None):

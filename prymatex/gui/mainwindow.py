@@ -13,19 +13,20 @@ from prymatex.core.base import PMXObject
 from prymatex.core import exceptions
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils
+from prymatex.utils import coroutines
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObject):
     """ 
     Prymatex main window
     """
-    ##########################################################
+    #=========================================================
     # Signals
-    ##########################################################
+    #=========================================================
     newFileCreated = QtCore.pyqtSignal(str)
     
-    ##########################################################
+    #=========================================================
     # Settings
-    ##########################################################
+    #=========================================================
     SETTINGS_GROUP = 'MainWindow'
 
     windowTitleTemplate = pmxConfigPorperty(default = "$PMX_APP_NAME")
@@ -191,10 +192,21 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             if self.currentEditor is not None and self.currentEditor.isNew() and not self.currentEditor.isModified():
                 self.closeEditor(self.currentEditor)
             editor = self.application.getEditorInstance(fileInfo, self)
-            content = self.application.fileManager.openFile(fileInfo)
-            editor.setPlainText(content)
-            editor.setFileInfo(fileInfo)
-            self.addEditor(editor, focus)
+            def appendChunksTask(editor, lines):
+                content = self.application.fileManager.openFile(fileInfo)
+                editor.setReadOnly(True)
+                for line in content.splitlines():
+                    editor.appendPlainText(line)
+                    yield coroutines.Sleep(100)
+                editor.setModified(False)
+                editor.setReadOnly(False)
+                yield coroutines.Return(editor, fileInfo)
+            def on_editorReady(result):
+                editor, fileInfo = result.value
+                editor.setFileInfo(fileInfo)
+                self.addEditor(editor, focus)
+            task = self.application.scheduler.newTask( appendChunksTask(editor, fileInfo) )
+            task.done.connect( on_editorReady  )
         else:            
             editor.setCursorPosition(cursorPosition)            
         return editor
