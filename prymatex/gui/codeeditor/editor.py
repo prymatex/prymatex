@@ -918,18 +918,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def unindentBlocks(self):
         cursor = self.textCursor()
         start, end = self.getSelectionBlockStartEnd()
-        new_cursor = QtGui.QTextCursor(cursor)
+        cursor = QtGui.QTextCursor(cursor)
+        cursor.beginEditBlock()
         while True:
             data = start.userData()
             counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
             if counter > 0:
-                new_cursor.setPosition(start.position())
-                for _j in range(self.tabStopSize):
-                    new_cursor.deleteChar()
+                cursor.setPosition(start.position())
+                for _ in range(self.tabStopSize):
+                    cursor.deleteChar()
             if start == end:
                 break
             start = start.next()
-        del new_cursor
         cursor.endEditBlock()
     
     #===========================================================================
