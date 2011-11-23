@@ -51,7 +51,6 @@ class PMXServerThread(QtCore.QThread):
     
     def __init__(self, parent):
         QtCore.QThread.__init__(self, parent)
-        self.messageQueue = parent.messageQueue
         self.server = self.getServer(PORT, PORT + 10)
         self.dispatcher = PMXCommandDispatcher(self)
         self.server.register_instance(self.dispatcher)

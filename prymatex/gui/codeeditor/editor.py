@@ -36,9 +36,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
     modeChanged = QtCore.pyqtSignal()
-    #bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
-    #symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
-    #foldingChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     
@@ -94,9 +91,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             if theme.author is not None:
                 message += "<i>(by %s)</i>" % theme.author
             self.showMessage(message)
-            
-    
-    
     
     #================================================================
     # Regular expresions

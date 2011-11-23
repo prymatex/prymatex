@@ -13,9 +13,6 @@ from prymatex.core import exceptions
 from prymatex import resources_rc
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
-from logging import getLogger
-
-logger = getLogger(__name__)
 
 class PMXApplication(QtGui.QApplication):
     '''
@@ -52,7 +49,6 @@ class PMXApplication(QtGui.QApplication):
         # Loads
         self.setupSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
         self.setupKernelManager()    #Console kernel Manager
-        self.setupMessageQueue()
         self.setupCoroutines()
 
         # Setups
@@ -108,7 +104,7 @@ class PMXApplication(QtGui.QApplication):
     
     def setupBundleEditor(self):
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
-        self.bundleEditor = PMXBundleEditor()
+        self.bundleEditor = PMXBundleEditor(self)
         self.bundleEditor.setModal(True)
 
     def setupFileManager(self):
@@ -163,15 +159,6 @@ class PMXApplication(QtGui.QApplication):
         except ImportError:
             self.kernelManager = None
 
-    def setupMessageQueue(self):
-        try:
-            import zmq
-            context = zmq.Context()
-            self.messageQueue = context.socket(zmq.UPSTREAM)
-            self.messageQueue.bind("inproc://prymatex")
-        except ImportError:
-            self.messageQueue = None
-            
     def setupCoroutines(self):
         from prymatex.utils.coroutines import Scheduler
         self.scheduler = Scheduler(self)
