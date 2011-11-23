@@ -56,22 +56,23 @@ class PMXScoreManager(object):
             for scope in scopes:
                 self.scores[reference_scope][search_scope] = comparation([self.scores[reference_scope][search_scope], self.score_array( scope.split(' '), reference_scope.split(' ') )])
         return self.scores[reference_scope][search_scope]
-      
-    def score_array(self, search_array, reference_array):
+    
+    @classmethod  
+    def score_array(cls, search_array, reference_array):
         pending = search_array
         current = reference_array[-1]
         reg = re.compile( "^%s" % re.escape( pending[-1] ))
-        multiplier = self.START_VALUE
+        multiplier = cls.START_VALUE
         result = 0
         while len(pending) > 0 and current:
             match = reg.search(current)
             if match:
-                point_score = (2 ** self.POINT_DEPTH) - current.count( '.' ) + match.group().count( '.' )
+                point_score = (2 ** cls.POINT_DEPTH) - current.count( '.' ) + match.group().count( '.' )
                 result += point_score * multiplier
                 pending.pop()
                 if len(pending) > 0:
                     reg = re.compile( "^%s" % re.escape( pending[-1] ) )
-            multiplier = multiplier / self.BASE
+            multiplier = multiplier / cls.BASE
             reference_array.pop()
             current = reference_array[-1] if reference_array else None
         if len(pending) > 0:
