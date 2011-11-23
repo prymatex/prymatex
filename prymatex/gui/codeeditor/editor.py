@@ -36,9 +36,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
     modeChanged = QtCore.pyqtSignal()
-    #bookmarkChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
-    #symbolChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
-    #foldingChanged = QtCore.pyqtSignal(QtGui.QTextBlock)
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     
@@ -94,9 +91,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             if theme.author is not None:
                 message += "<i>(by %s)</i>" % theme.author
             self.showMessage(message)
-            
-    
-    
     
     #================================================================
     # Regular expresions
@@ -223,7 +217,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         elif self.fileInfo is not None:
             return self.application.fileManager.getFileIcon(self.fileInfo)
         return PMXBaseEditor.getTabIcon(self)
-        
+    
     @classmethod
     def newInstance(cls, application, fileInfo = None, parent = None):
         if fileInfo is not None:
@@ -449,7 +443,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         selection.cursor.clearSelection()
         extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
-            
+
     def select(self, selection):
         cursor = self.textCursor()
         if selection in [self.SelectWord, self.SelectLine, self.SelectParagraph, self.SelectAll]:
@@ -918,18 +912,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def unindentBlocks(self):
         cursor = self.textCursor()
         start, end = self.getSelectionBlockStartEnd()
-        new_cursor = QtGui.QTextCursor(cursor)
+        cursor = QtGui.QTextCursor(cursor)
+        cursor.beginEditBlock()
         while True:
             data = start.userData()
             counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
             if counter > 0:
-                new_cursor.setPosition(start.position())
-                for _j in range(self.tabStopSize):
-                    new_cursor.deleteChar()
+                cursor.setPosition(start.position())
+                for _ in range(self.tabStopSize):
+                    cursor.deleteChar()
             if start == end:
                 break
             start = start.next()
-        del new_cursor
         cursor.endEditBlock()
     
     #===========================================================================

@@ -79,7 +79,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             symbol = None
 
         if userData.symbol != symbol:
-            print userData.symbol, symbol
             userData.symbol = symbol
             if userData.symbol == None:
                 self.editor.symbols.removeSymbolBlock(self.currentBlock())

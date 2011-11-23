@@ -16,7 +16,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     SETTINGS_GROUP = 'BundleEditor'
         
     def __init__(self, parent = None):
-        super(PMXBundleEditor, self).__init__(parent)
+        super(PMXBundleEditor, self).__init__()
         self.setupUi(self)
         self.manager = self.application.supportManager
         self.finished.connect(self.on_bundleEditor_finished)
