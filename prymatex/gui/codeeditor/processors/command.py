@@ -6,6 +6,7 @@ from PyQt4 import QtGui, QtCore
 from subprocess import Popen, PIPE, STDOUT
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
+from prymatex.support.command import PMXCommand
 
 class PMXCommandProcessor(PMXCommandProcessor):
     def __init__(self, editor):
@@ -111,7 +112,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):
-                context.outputValue = str(process.readAll()).decode("utf-8")
+                #context.outputValue = str(process.readAll()).decode("utf-8")
+                context.errorValue = str(process.readAllStandardError ()).decode("utf-8")
+                context.outputValue = str(process.readAllStandardOutput ()).decode("utf-8")
+                #context.outputValue = str(process.readAll()).decode("utf-8")
                 context.outputType = exitCode
                 callback(self, context)
             return runCallback
@@ -164,32 +168,24 @@ class PMXCommandProcessor(PMXCommandProcessor):
     # Outpus function
     def error(self, context):
         from prymatex.support.utils import makeHyperlinks
-        context.outputValue = '''
-            <html>
-                <head>
-                    <title>Error</title>
-                    <style>
-                        body {
-                            background: #999;
-                            
-                        }
-                        pre {
-                            border: 1px dashed #222;
-                            background: #ccc;
-                            text: #000;
-                            padding: 2%%;
-                        }
-                    </style>
-                </head>
-                <body>
-                <h3>An error has occurred while executing command "%(name)s"</h3>
-                <pre>%(output)s</pre>
-                <p>Exit code was: %(exit_code)d</p>
-                </body>
-            </html>
-        ''' % {'output': makeHyperlinks(context.outputValue), 
+        command = '''
+            source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
+            
+            html_header "An error has occurred while executing command %(name)s"
+            echo -e "<pre>%(output)s</pre>"
+            echo -e "<p>Exit code was: %(exit_code)d</p>"
+            html_footer
+        ''' % {'output': makeHyperlinks(context.errorValue), 
                'name': context.command.name,
                'exit_code': context.outputType}
+        hash = {    'command': command, 
+                       'name': "Error" + context.command.name,
+                      'input': 'none',
+                     'output': 'showAsHTML' }
+        command = PMXCommand(context.command.manager.uuidgen(), "internal", hash = hash)
+        command.bundle = context.command.bundle
+        self.editor.insertBundleItem(command)
+            
         self.showAsHTML(context)
         
     def discard(self, context):
