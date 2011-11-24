@@ -11,22 +11,27 @@ from prymatex.ui.settings.network import Ui_Network
 from prymatex.ui.settings.general import Ui_General
 #from prymatex.ui.settings.bundles import Ui_Bundles
 
-class PMXConfigTreeView(QtGui.QTreeView):
-    _model = None
-    
-    widgetChanged = QtCore.pyqtSignal(int)
-    
-    def __init__(self, parent = None):
-        super(PMXConfigTreeView, self).__init__(parent)
-        self.setAnimated(True)
-        self.setHeaderHidden(True)
-        
-    def currentChanged(self, new, old):
-        model = self.model()#.sourceModel()
-        new, old = map( lambda indx: model.itemFromIndex(indx), (new, old))
-        #print new, old, map(type, [old, new])
-        self.widgetChanged.emit(new.widget_index)
-
+#class PMXConfigTreeView(QtGui.QTreeView):
+#    _model = None
+#    
+#    widgetChanged = QtCore.pyqtSignal(int)
+#    
+#    def __init__(self, parent = None):
+#        super(PMXConfigTreeView, self).__init__(parent)
+#        self.setAnimated(True)
+#        self.setHeaderHidden(True)
+#        raise Exception("X")
+#    
+#    def currentChanged(self, new, old):
+#        model = self.model()#.sourceModel()
+#        new, old = map( lambda indx: model.itemFromIndex(indx), (new, old))
+#        #print new, old, map(type, [old, new])
+#        self.widgetChanged.emit(new.widget_index)
+#    
+#    
+#    def showEvent(self):
+#        super(PMXConfigTreeView, self).showEvent()
+#        print self.currentIndex()
 #===============================================================================
 # 
 #===============================================================================
@@ -50,10 +55,10 @@ class PMXConfigBaseWidget(QtGui.QWidget, PMXObject):
         map(lambda w: w.setEnabled(enabled), self.all_widgets)
     
     def apply(self):
-        QMessageBox.information(self, "Apply %s..." % self.windowTitle(), "Apply settings")
+        QtGui.QMessageBox.information(self, "Apply %s..." % self.windowTitle(), "Apply settings")
     
     def discard(self):
-        QMessageBox.information(self, "Discard %s..." % self.windowTitle(), "Discard settings")
+        QtGui.QMessageBox.information(self, "Discard %s..." % self.windowTitle(), "Discard settings")
 
 # class PMXUpdatesWidget(QtGui.QWidget, Ui_Updates):
 #    def __init__(self, parent = None):
