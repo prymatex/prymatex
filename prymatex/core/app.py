@@ -39,6 +39,8 @@ class PMXApplication(QtGui.QApplication):
 
         self.buildSettings(profile)
         
+        self.setupLogging()         #Logging
+
         #Connects
         self.aboutToQuit.connect(self.cleanup)
     
@@ -56,7 +58,6 @@ class PMXApplication(QtGui.QApplication):
 
         # Setups
         #self.setupExecutor()       #Executor
-        self.setupLogging()         #Logging
         self.setupFileManager()     #File Manager
         self.setupConfigDialog()    #Config Dialog
         self.setupBundleEditor()    #Bundle Editor
@@ -134,6 +135,8 @@ class PMXApplication(QtGui.QApplication):
         logging.root.info("Application startup")
         logging.root.debug("Application startup debug")
         
+        self.logger = logging.root
+        
     def createMainWindow(self):
         '''
         Creates the windows
@@ -151,7 +154,7 @@ class PMXApplication(QtGui.QApplication):
         print "Commit data"
         
     def saveState(self, session_manager):
-        logger.debug( "Save state %s" % session_manager)
+        self.logger.debug( "Save state %s" % session_manager)
         
     def setupKernelManager(self):
         try:
