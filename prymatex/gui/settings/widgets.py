@@ -12,6 +12,7 @@ from prymatex.ui.settings.general import Ui_General
 #from prymatex.ui.settings.bundles import Ui_Bundles
 import constants
 from prymatex.ui.settings.filemanager import Ui_FileManagerDialog
+from prymatex.core.settings import pmxConfigPorperty
 
 CONFIG_WIDGETS = (QtGui.QLineEdit, QtGui.QSpinBox, QtGui.QCheckBox,)
 
@@ -75,24 +76,44 @@ class PMXGeneralWidget(QtGui.QWidget, Ui_General, PMXObject):
 #            self.comboEncodings.addItem(name, None)
 
 class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog, PMXObject):
+    SETTINGS_GROUP = 'FileSaveSettings'
+    #DEFAULTS = {}
+    
+    @pmxConfigPorperty(default = "unix")
+    def lineEndings(self, ending):
+        print "Setter line ending"
+        self.comboBoxLineEnding.setCurrentIndex(self.comboBoxLineEnding.findData(ending))
+
+    @pmxConfigPorperty(default = 'utf-8')
+    def encoding(self, enc):
+        print "Setter encoding"
+        self.comboBoxEncoding.setCurrentIndex(self.comboBoxEncoding.findData(enc))
+        
+    
     def __init__(self, parent = None):
         super(PMXFileManagerSettings, self).__init__(parent)
         self.setupUi(self)
         self.loadEncodings()
+        self.setupLineEndings()
+        self.configure()
     
-#    for codline in constants.TM_CODECS:
-#    code, alias, lang = codline.split('    ')
-#    #print code.upper().replace('_', '-'), '(', alias, ')', lang.strip().title()
-#    CODECS_CODEC_ALIAS_LANG.append( (code.upper().replace('_', '-').strip(), 
-#                                     alias.strip(), 
-#                                     lang.strip().title(), ) 
-#    )
-        
+
+    def setupLineEndings(self):
+        ''' Populate line endings '''
+        self.comboBoxLineEnding.addItem(r"Unix (\n)", "unix")
+        self.comboBoxLineEnding.addItem(r"Windows (\r\n)", "windows")
+    
+    @QtCore.pyqtSignature("int")
+    def on_comboBoxLineEnding_currentIndexChanged(self, index):
+        data = self.comboBoxLineEnding.itemData(index)
+        self.lineEndings = data
+        self.settings.setValue('lineEndings', data)
+    
     def loadEncodings(self):
+        ''' Populate ComboBox from constants '''
         from constants import TM_CODECS
         
         for codec_line in TM_CODECS.split('\n'):
-            print ">>>", codec_line
             if not codec_line:
                 continue
             userData, titleInformation = codec_line.split('    ', 1)
@@ -102,13 +123,13 @@ class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog, PMXObject):
             else:
                 title = "%s (%s)" % (title_data, userData)
             self.comboBoxEncoding.addItem(title.strip().title(), userData.replace('_', '-'))
+    
 
 class PMXNetworkWidget(QtGui.QWidget, Ui_Network, PMXObject):
     '''
     Setup network connection
     '''
-    class Meta:
-        settings = 'network'
+    SETTINGS_GROUP = "Network"
         
     def __init__(self, parent = None):
         super(PMXNetworkWidget, self).__init__(parent)
