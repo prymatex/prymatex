@@ -32,16 +32,33 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog, PMXObject):
         self.stackLayout = QtGui.QStackedLayout()
         self.container.setLayout(self.stackLayout)
         
+        #self.treeTextToSectionTitle( index = None) # Grab initial
+        
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
     
     def on_treeViewSettings_activated(self, index):
-        sIndex = self.proxyModelSettings.mapToSource(index)
+        self.treeTextToSectionTitle(index)
+    
+    def treeTextToSectionTitle(self, index = None):
+        ''' Grab the index title taking into account inital settings '''
+        if index:
+            sIndex = self.proxyModelSettings.mapToSource(index)
+        else:
+            sIndex = self.proxyModelSettings.index(0, 0)
         item = self.model.itemFromIndex(sIndex)
-        self.container.layout().setCurrentIndex(item.stackIndex)
+        if index:
+            self.container.layout().setCurrentIndex(item.stackIndex)
         title = self.container.layout().currentWidget().windowTitle()
         self.labelTitle.setText(title)
-        
+    
+    firstTitleTaken = False
+    def showEvent(self, event):
+        if not self.firstTitleTaken:
+            self.treeTextToSectionTitle(index = None)
+            self.firstTitleTaken = True
+        super(PMXSettingsDialog, self).showEvent(event)
+    
     def register(self, widget, parentNode = None):
         index = self.stackLayout.addWidget(widget)
         item = PMXSettingsItem(widget.windowTitle(), index)
