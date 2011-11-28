@@ -82,11 +82,11 @@ shift_jis    csshiftjis, shiftjis, sjis, s_jis    Japanese
 shift_jis_2004    shiftjis2004, sjis_2004, sjis2004    Japanese
 shift_jisx0213    shiftjisx0213, sjisx0213, s_jisx0213    Japanese
 utf_32    U32, utf32    all languages
-utf_32_be    UTF-32BE    all languages
+utf_32_be    UTF-32BE    all languageschecked
 utf_32_le    UTF-32LE    all languages
 utf_16    U16, utf16    all languages
 utf_16_be    UTF-16BE    all languages (BMP only)
 utf_16_le    UTF-16LE    all languages (BMP only)
 utf_7    U7, unicode-1-1-utf-7    all languages
 utf_8    U8, UTF, utf8    all languages
-utf_8_sig         all languages'''.split('\n')
+utf_8_sig         all languages'''

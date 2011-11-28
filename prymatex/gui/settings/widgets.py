@@ -15,28 +15,13 @@ from prymatex.ui.settings.filemanager import Ui_FileManagerDialog
 
 CONFIG_WIDGETS = (QtGui.QLineEdit, QtGui.QSpinBox, QtGui.QCheckBox,)
 
-filter_config_widgets = lambda ws: filter(lambda w: isinstance(w, CONFIG_WIDGETS), ws)
-
-class PMXConfigBaseWidget(QtGui.QWidget, PMXObject):
-    '''
-    Base class for configuration widgets
-    '''
-    _widgets = None
-    
-    @property
-    def all_widgets(self):
-        if not self._widgets:
-            self._widgets = filter_config_widgets(self.children())
-        return self._widgets
-    
-    def enableAllWidgets(self, enabled):
-        map(lambda w: w.setEnabled(enabled), self.all_widgets)
-    
-
 # class PMXUpdatesWidget(QtGui.QWidget, Ui_Updates):
 #    def __init__(self, parent = None):
 #        super(PMXUpdatesWidget, self).__init__(parent)
 #        self.setupUi(self)
+
+class PMXConfigBaseWidget(QtGui.QWidget):
+    pass
 
 class PMXGeneralWidget(QtGui.QWidget, Ui_General, PMXObject):
     def __init__(self, parent = None):
@@ -80,14 +65,6 @@ class PMXGeneralWidget(QtGui.QWidget, Ui_General, PMXObject):
         self.mainwindowSettingsGroup.setValue('windowTitleTemplate', unicode(text))
         
 
-CODECS_CODEC_ALIAS_LANG = []
-for codline in constants.TM_CODECS:
-    code, alias, lang = codline.split('    ')
-    #print code.upper().replace('_', '-'), '(', alias, ')', lang.strip().title()
-    CODECS_CODEC_ALIAS_LANG.append( (code.upper().replace('_', '-').strip(), 
-                                     alias.strip(), 
-                                     lang.strip().title(), ) 
-    )
  
 #class PMXSaveWidget(QtGui.QWidget, Ui_Save):
 #    def __init__(self, parent = None):
@@ -101,9 +78,32 @@ class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog, PMXObject):
     def __init__(self, parent = None):
         super(PMXFileManagerSettings, self).__init__(parent)
         self.setupUi(self)
-        print "ohoh"
+        self.loadEncodings()
+    
+#    for codline in constants.TM_CODECS:
+#    code, alias, lang = codline.split('    ')
+#    #print code.upper().replace('_', '-'), '(', alias, ')', lang.strip().title()
+#    CODECS_CODEC_ALIAS_LANG.append( (code.upper().replace('_', '-').strip(), 
+#                                     alias.strip(), 
+#                                     lang.strip().title(), ) 
+#    )
+        
+    def loadEncodings(self):
+        from constants import TM_CODECS
+        
+        for codec_line in TM_CODECS.split('\n'):
+            print ">>>", codec_line
+            if not codec_line:
+                continue
+            userData, titleInformation = codec_line.split('    ', 1)
+            title_data = titleInformation.split('   ')
+            if len(title_data) > 1:
+                title = "%s (%s)" % (title_data[-1].strip().title(), title_data[0])
+            else:
+                title = "%s (%s)" % (title_data, userData)
+            self.comboBoxEncoding.addItem(title.strip().title(), userData.replace('_', '-'))
 
-class PMXNetworkWidget(PMXConfigBaseWidget, Ui_Network, PMXObject):
+class PMXNetworkWidget(QtGui.QWidget, Ui_Network, PMXObject):
     '''
     Setup network connection
     '''
