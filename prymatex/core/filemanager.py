@@ -45,10 +45,10 @@ class PMXFileManager(PMXObject):
         self.fileHistory = []
         self.settings.setValue("fileHistory", self.fileHistory)
     
-    def createDirectory(self, base, name = None):
+    def createDirectory(self, base, name = None, parent = None):
         """Create a new directory."""
         if name is None:
-            name, ok = QtGui.QInputDialog.getText(self, "New directoy name", "Please enter the new directoy name in < /br>%s:" % base)
+            name, ok = QtGui.QInputDialog.getText(parent, "New directoy name", "Please enter the new directoy name in < /br>%s:" % base)
             if not ok:
                 return None
         path = os.path.join(base, name)
@@ -57,7 +57,22 @@ class PMXFileManager(PMXObject):
         os.mkdir(path)
         return QtCore.QFileInfo(path)
     
-    def deletePath(self, path):
+    def createFile(self, base, name = None, parent = None):
+        """Create a new file."""
+        if name is None:
+            name, ok = QtGui.QInputDialog.getText(parent, "New file name", "Please enter the new file name in < /br>%s:" % base)
+            if not ok:
+                return None
+        path = os.path.join(base, name)
+        if os.path.exists(path):
+            raise PrymatexIOException("The file already exist") 
+        open(path, 'w').close()
+        return QtCore.QFileInfo(path)
+    
+    def deletePath(self, path, parent = None):
+        ok = QtGui.QMessageBox.question(parent, "Deletion Confirmation", "Are you sure you want to delete <b>%s</b>?" % path, 
+            QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
+        if not ok: return ok
         if os.path.isfile(path):
             # Mandar señal para cerrar editores
             os.unlink(path)

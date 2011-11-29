@@ -92,8 +92,10 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.settings.widgets import PMXGeneralWidget, PMXNetworkWidget
         from prymatex.gui.settings.environment import PMXEnvVariablesWidgets
         from prymatex.gui.settings.themes import PMXThemeConfigWidget
+        from prymatex.gui.settings.widgets import PMXFileManagerSettings
                                                 
         configdialog.register(PMXGeneralWidget())
+        configdialog.register(PMXFileManagerSettings())
         configdialog.register(PMXThemeConfigWidget())
         configdialog.register(PMXEnvVariablesWidgets())
         configdialog.register(PMXNetworkWidget())

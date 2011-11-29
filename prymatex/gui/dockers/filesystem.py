@@ -137,10 +137,10 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
             self.comboBoxLocation.lineEdit().setText(dir.path())
 
     def addPathToFavourites(self, path):
-        '''
+        """
         Adds an entry to the File Manager 
         @param path: Adds parameter to path
-        '''
+        """
         if isdir(unicode(path)):
             root, dirname_part = path.rsplit(os.sep, 1)
             self.comboFavourites.addItem(dirname_part, {
@@ -174,12 +174,13 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
-        curpath = self.current_selected_path
-        dir = self.application.fileManager.createDirectory(curpath)
+        path = self.fileSystemModel.filePath(sIndex)
+        dir = self.application.fileManager.createDirectory(path, parent = None)
 
     @QtCore.pyqtSlot()
     def on_actionNewFile_triggered(self):
-        pass
+        path = self.fileSystemModel.filePath(sIndex)
+        dir = self.application.fileManager.createFile(path, parent = None)
         
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
@@ -190,10 +191,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         index = self.treeViewFileSystem.currentIndex()
         sIndex = self.fileSystemProxyModel.mapToSource(index)
         path = self.fileSystemModel.filePath(sIndex)
-        ok = QtGui.QMessageBox.question(self, "Deletion Confirmation", "Are you sure you want to delete <b>%s</b>?" % path,
-            QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
-        if ok == QtGui.QMessageBox.Ok:
-            self.application.fileManager.deletePath(path)
+        ok = self.application.fileManager.deletePath(path, parent = self)
     
     @QtCore.pyqtSlot(str)
     def on_lineEditFilter_textChanged(self, text):

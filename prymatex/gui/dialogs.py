@@ -41,7 +41,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
             pass
         
     def check_valid_location(self):
-        ''' Disable file '''
+        """ Disable file """
         if os.path.isdir(self.lineLocation.text()) and self.lineFileName.text():
             self.buttonCreate.setEnabled(True)
              
@@ -50,12 +50,12 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
     
     def on_lineLocation_textChanged(self, text):
         self.check_valid_location()
-            
+
     def on_buttonClose_pressed(self):
         self.reject()
-    
-    def getNewFileFromTemplate(self):
-        self.lineFileName.setText("")
+
+    def getNewFileFromTemplate(self, fileDirectory = "", fileName = ""):
+        self.lineFileName.setText(fileName)
         self.buttonCreate.setEnabled(False)
         if self.exec_() == self.Accepted:
             return self.fileCreated

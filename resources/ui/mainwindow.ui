@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -138,6 +138,8 @@
     <addaction name="actionGoToTab"/>
     <addaction name="separator"/>
     <addaction name="actionGoToLine"/>
+    <addaction name="separator"/>
+    <addaction name="action_Choose_tab"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -189,7 +191,7 @@
     </property>
     <widget class="QMenu" name="menuBundleEditor">
      <property name="title">
-      <string>Bundle Editor</string>
+      <string>Bundle &amp;Editor</string>
      </property>
      <addaction name="actionShowBundleEditor"/>
      <addaction name="separator"/>
@@ -532,7 +534,7 @@
   </action>
   <action name="actionToggleBookmark">
    <property name="text">
-    <string>Toggle Bookmark</string>
+    <string>&amp;Toggle Bookmark</string>
    </property>
    <property name="shortcut">
     <string>Meta+F12</string>
@@ -540,7 +542,7 @@
   </action>
   <action name="actionNextBookmark">
    <property name="text">
-    <string>Next Bookmark</string>
+    <string>&amp;Next Bookmark</string>
    </property>
    <property name="shortcut">
     <string>Meta+Alt+F12</string>
@@ -548,7 +550,7 @@
   </action>
   <action name="actionPreviousBookmark">
    <property name="text">
-    <string>Previous Bookmark</string>
+    <string>&amp;Previous Bookmark</string>
    </property>
    <property name="shortcut">
     <string>Meta+Shift+F12</string>
@@ -556,7 +558,7 @@
   </action>
   <action name="actionRemoveAllBookmarks">
    <property name="text">
-    <string>Remove All Bookmarks</string>
+    <string>&amp;Remove All Bookmarks</string>
    </property>
    <property name="shortcut">
     <string>Meta+Ctrl+F12</string>
@@ -564,7 +566,7 @@
   </action>
   <action name="actionNextTab">
    <property name="text">
-    <string>Next Tab</string>
+    <string>N&amp;ext Tab</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+PgDown</string>
@@ -572,7 +574,7 @@
   </action>
   <action name="actionPreviousTab">
    <property name="text">
-    <string>Previous Tab</string>
+    <string>P&amp;revious Tab</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+PgUp</string>
@@ -700,7 +702,7 @@
   </action>
   <action name="actionShowBundleEditor">
    <property name="text">
-    <string>Show Bundle Editor</string>
+    <string>Show Bundle &amp;Editor</string>
    </property>
    <property name="shortcut">
     <string>Meta+Ctrl+Alt+B</string>
@@ -708,7 +710,7 @@
   </action>
   <action name="actionEditCommands">
    <property name="text">
-    <string>Edit Commands</string>
+    <string>Edit &amp;Commands</string>
    </property>
    <property name="shortcut">
     <string>Meta+Ctrl+Alt+C</string>
@@ -716,7 +718,7 @@
   </action>
   <action name="actionEditLanguages">
    <property name="text">
-    <string>Edit Languages</string>
+    <string>Edit &amp;Languages</string>
    </property>
    <property name="shortcut">
     <string>Meta+Ctrl+Alt+L</string>
@@ -724,7 +726,7 @@
   </action>
   <action name="actionEditSnippets">
    <property name="text">
-    <string>Edit Snippets</string>
+    <string>Edit &amp;Snippets</string>
    </property>
    <property name="shortcut">
     <string>Meta+Ctrl+Alt+S</string>
@@ -732,12 +734,12 @@
   </action>
   <action name="actionReloadBundles">
    <property name="text">
-    <string>Reload Bundles</string>
+    <string>Reload &amp;Bundles</string>
    </property>
   </action>
   <action name="actionSelectBundleItem">
    <property name="text">
-    <string>Select Bundle Item</string>
+    <string>&amp;Select Bundle Item</string>
    </property>
    <property name="shortcut">
     <string>Meta+Ctrl+T</string>
@@ -745,17 +747,22 @@
   </action>
   <action name="actionGoToLine">
    <property name="text">
-    <string>Go To Line</string>
+    <string>Go To &amp;Line</string>
    </property>
   </action>
   <action name="actionGoToTab">
    <property name="text">
-    <string>Go To Tab</string>
+    <string>Go To Ta&amp;b</string>
    </property>
   </action>
   <action name="actionGoToSymbol">
    <property name="text">
-    <string>Go To Symbol</string>
+    <string>&amp;Go To Symbol</string>
+   </property>
+  </action>
+  <action name="action_Choose_tab">
+   <property name="text">
+    <string>&amp;Choose tab...</string>
    </property>
   </action>
  </widget>
