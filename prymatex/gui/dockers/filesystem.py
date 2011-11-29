@@ -20,7 +20,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     SETTINGS_GROUP = 'FileSystem'
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, parent)
         self.setupUi(self)

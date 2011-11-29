@@ -84,6 +84,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         from prymatex.gui.dockers.browser import PMXBrowserDock
         from prymatex.gui.dockers.console import PMXConsoleDock
         from prymatex.gui.dockers.logger import QtLogHandler, PMXLoggerDock
+        from prymatex.gui.dockers.project import PMXProjectDock
         from prymatex.gui.codeeditor.dockers import PMXCodeSymbolsDock, PMXCodeBookmarksDock
         #from prymatex.gui.dockers.terminal import PMXTerminalWidget
         
@@ -93,12 +94,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.paneFileSystem)
         self.menuPanels.addAction(self.paneFileSystem.toggleViewAction())
         self.paneFileSystem.hide()
-        '''
+        
         self.paneProject = PMXProjectDock(self)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.paneProject)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.paneProject)
         self.menuPanels.addAction(self.paneProject.toggleViewAction())
         self.paneProject.hide()
-        '''
         
         self.paneBrowser = PMXBrowserDock(self)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneBrowser)
