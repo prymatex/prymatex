@@ -220,13 +220,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     
     @classmethod
     def newInstance(cls, application, fileInfo = None, parent = None):
+        syntax = None
         if fileInfo is not None:
             assert isinstance(fileInfo, QtCore.QFileInfo), "%s is not QFileInfo" % fileInfo
             syntax = application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
             # TODO: This prevents unrecognised to be opened
-            #if syntax is None:
             #    raise exceptions.FileNotSupported()
-        else:
+        if fileInfo is None or syntax is None:
             #TODO: defaultSyntax va en el manager
             syntax = application.supportManager.getBundleItem(cls.defaultSyntax)
         editor = cls(syntax, fileInfo, parent)
