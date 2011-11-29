@@ -168,17 +168,22 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     # Tree View Context Menu Actions
     #======================================================
     def pathToClipboard(self, checked = False):
-        paths = map(self.model().filePath, self.selectedIndexes())
-        if len(paths) == 1:
-            QApplication.clipboard().setText(paths[0])
+        index = self.treeViewFileSystem.currentIndex()
+        sIndex = self.fileSystemProxyModel.mapToSource(index)
+        path = self.fileSystemModel.filePath(sIndex)
+        QApplication.clipboard().setText(path)
     
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
+        index = self.treeViewFileSystem.currentIndex()
+        sIndex = self.fileSystemProxyModel.mapToSource(index)
         path = self.fileSystemModel.filePath(sIndex)
         dir = self.application.fileManager.createDirectory(path, parent = None)
 
     @QtCore.pyqtSlot()
     def on_actionNewFile_triggered(self):
+        index = self.treeViewFileSystem.currentIndex()
+        sIndex = self.fileSystemProxyModel.mapToSource(index)
         path = self.fileSystemModel.filePath(sIndex)
         dir = self.application.fileManager.createFile(path, parent = None)
         

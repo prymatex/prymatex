@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os, codecs
+import os, codecs, shutil
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
