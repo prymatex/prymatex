@@ -28,26 +28,9 @@ run_flags= "-i"             # flags to for IPython's run magic when using <F5>
 import sys
 import os
 
-pmx_encoding = os.environ['PMX_ENCODING'] or 'utf-8'
-
-try:
-    sys.stdout.flush
-except AttributeError:
-    # IPython complains if stderr and stdout don't have flush
-    # this is fixed in newer version of Vim
-    class WithFlush(object):
-        def __init__(self,noflush):
-            self.write=noflush.write
-            self.writelines=noflush.writelines
-        def flush(self):pass
-    sys.stdout = WithFlush(sys.stdout)
-    sys.stderr = WithFlush(sys.stderr)
+pmx_encoding = os.environ['PMX_ENCODING'] if 'PMX_ENCODING' in os.environ and os.environ['PMX_ENCODING'] else 'utf-8'
 
 ip = '127.0.0.1'
-try:
-    km
-except NameError:
-    km = None
 
 def km_from_string(s=''):
     """create kernel manager from IPKernelApp string
@@ -102,118 +85,16 @@ def km_from_string(s=''):
             echo("^-- failed --"+e.message.replace('_port','')+" not specified", "Error")
             return
     km.start_channels()
-    send = km.shell_channel.execute
     return km
 
 def echo(arg, style="Question"):
-    #Llamar a pmx con tooltips o algo
     try:
-        print style, arg
-    except:
+        print arg, style
+    except vim.error:
         print "-- %s" % arg
     
-def disconnect():
-    "disconnect kernel manager"
-    # XXX: make a prompt here if this km owns the kernel
-    pass
-
-def get_doc(word):
-    if km is None:
-        return ["Not connected to IPython, cannot query \"%s\"" %word]
-    msg_id = km.shell_channel.object_info(word)
-    doc = get_doc_msg(msg_id)
-    # get around unicode problems when interfacing with vim
-    return [d.encode(pmx_encoding) for d in doc]
-
-import re
-# from http://serverfault.com/questions/71285/in-centos-4-4-how-can-i-strip-escape-sequences-from-a-text-file
-strip = re.compile('\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]')
-def strip_color_escapes(s):
-    return strip.sub('',s)
-    
-def get_doc_msg(msg_id):
-    n = 13 # longest field name (empirically)
-    b=[]
-    try:
-        content = get_child_msg(msg_id)['content']
-    except Empty:
-        # timeout occurred
-        return ["no reply from IPython kernel"]
-
-    if not content['found']:
-        return b
-
-    for field in ['type_name','base_class','string_form','namespace',
-            'file','length','definition','source','docstring']:
-        c = content.get(field,None)
-        if c:
-            if field in ['definition']:
-                c = strip_color_escapes(c).rstrip()
-            s = field.replace('_',' ').title()+':'
-            s = s.ljust(n)
-            if c.find('\n')==-1:
-                b.append(s+c)
-            else:
-                b.append(s)
-                b.extend(c.splitlines())
-    return b
-    
-def get_child_msg(msg_id):
-    # XXX: message handling should be split into its own process in the future
-    while True:
-        # get_msg will raise with Empty exception if no messages arrive in 1 second
-        m= km.shell_channel.get_msg(timeout=1)
-        if m['parent_header']['msg_id'] == msg_id:
-            break
-        else:
-            #got a message, but not the one we were looking for
-            echo('skipping a message on shell_channel','WarningMsg')
-    return m
-            
-def print_prompt(prompt,msg_id=None):
-    """Print In[] or In[42] style messages"""
-    global show_execution_count
-    if show_execution_count and msg_id:
-        # wait to get message back from kernel
-        try:
-            child = get_child_msg(msg_id)
-            count = child['content']['execution_count']
-            echo("In[%d]: %s" %(count, prompt))
-        except Empty:
-            echo("In[]: %s (no reply from IPython kernel)" % prompt)
-    else:
-        echo("In[]: %s" % prompt)
-
-def run_this_file(filePath):
-    msg_id = send('run %s %s' % (run_flags, filePath))
-    print_prompt("In[]: run %s %s" % (run_flags, filePath, msg_id)
-
-def run_this_line(line):
-    msg_id = send(line)
-    print_prompt(line, msg_id)
-
-def run_these_lines(lines):
-    r = {"start": 2, "end": 50}
-    lines = "\n".join(lines)
-    msg_id = send(lines)
-
-    prompt = "lines %d-%d "% (r["start"] + 1, r["end"] + 1)
-    print_prompt(prompt, msg_id)
-
-def dedent_run_this_line():
-    vim.command("left")
-    run_this_line()
-    vim.command("silent undo")
-
-def dedent_run_these_lines():
-    r = vim.current.range
-    shiftwidth = vim.eval('&shiftwidth')
-    count = int(vim.eval('indent(%d+1)/%s' % (r.start,shiftwidth)))
-    vim.command("'<,'>" + "<"*count)
-    run_these_lines()
-    vim.command("silent undo")
-
-def toggle_reselect():
-    global reselect
-    reselect=not reselect
-    print "F9 will%sreselect lines after sending to ipython"% (reselect and " " or " not ")
+if __name__ == "__main__":
+    connection = " ".join(sys.argv[1:])
+    print connection
+    kernel = km_from_string(connection)
+    kernel.shell_channel.execute("a = 2")
