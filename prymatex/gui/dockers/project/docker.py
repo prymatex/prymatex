@@ -25,6 +25,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock):
         self.prjectsModel = PMXProjectsTreeModel()
         self.treeViewProjects.setModel(self.prjectsModel)
         
+        self.prjectsModel.addProject("diego", "/")
+        self.prjectsModel.addProject("workspace", "/")
+        
         #Setup Context Menu
         self.projectsMenu = QtGui.QMenu(self)
         self.projectsMenu.setObjectName('projectsMenu')
