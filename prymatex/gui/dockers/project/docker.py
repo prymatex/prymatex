@@ -24,7 +24,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock):
     def setupTreeViewProjects(self):
         self.prjectsModel = PMXProjectsTreeModel()
         self.treeViewProjects.setModel(self.prjectsModel)
-        g
         self.prjectsModel.addProject("diego", "/")
         self.prjectsModel.addProject("workspace", "/")
         
