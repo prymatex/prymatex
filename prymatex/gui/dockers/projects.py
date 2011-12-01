@@ -7,7 +7,7 @@ import codecs
 from PyQt4 import QtCore, QtGui
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.dockers.project.model import PMXProjectsTreeModel
+from prymatex.gui.project.model import PMXProjectsTreeModel
 from prymatex.gui.dockers.base import PMXBaseDock
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 
@@ -24,8 +24,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock):
     def setupTreeViewProjects(self):
         self.prjectsModel = PMXProjectsTreeModel()
         self.treeViewProjects.setModel(self.prjectsModel)
-        self.prjectsModel.addProject("diego", "/")
-        self.prjectsModel.addProject("workspace", "/")
+        self.prjectsModel.addProject("diego", "c:\\cygwin")
+        self.prjectsModel.addProject("workspace", "c:\\cygwin")
         
         #Setup Context Menu
         self.projectsMenu = QtGui.QMenu(self)
