@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -108,17 +108,27 @@
      <property name="title">
       <string>Convert</string>
      </property>
-     <addaction name="actionToUppercase"/>
-     <addaction name="actionToLowercase"/>
-     <addaction name="actionToTitlecase"/>
-     <addaction name="actionToOppositeCase"/>
+     <addaction name="actionConvertToUppercase"/>
+     <addaction name="actionConvertToLowercase"/>
+     <addaction name="actionConvertToTitlecase"/>
+     <addaction name="actionConvertToOppositeCase"/>
      <addaction name="separator"/>
-     <addaction name="actionSpacesToTabs"/>
-     <addaction name="actionTabToSpaces"/>
+     <addaction name="actionConvertSpacesToTabs"/>
+     <addaction name="actionConvertTabToSpaces"/>
      <addaction name="separator"/>
-     <addaction name="actionTranspose"/>
+     <addaction name="actionConvertTranspose"/>
+    </widget>
+    <widget class="QMenu" name="menuMove">
+     <property name="title">
+      <string>Move</string>
+     </property>
+     <addaction name="actionMoveLineUp"/>
+     <addaction name="actionMoveLineDown"/>
+     <addaction name="actionMoveColumnLeft"/>
+     <addaction name="actionMoveColumnRight"/>
     </widget>
     <addaction name="menuConvert"/>
+    <addaction name="menuMove"/>
     <addaction name="separator"/>
     <addaction name="actionExecute"/>
     <addaction name="actionFilterThroughCommand"/>
@@ -139,7 +149,7 @@
     <addaction name="separator"/>
     <addaction name="actionGoToLine"/>
     <addaction name="separator"/>
-    <addaction name="action_Choose_tab"/>
+    <addaction name="actionChooseTab"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -480,37 +490,52 @@
     <string>Alt+F10</string>
    </property>
   </action>
-  <action name="actionToUppercase">
+  <action name="actionConvertToUppercase">
    <property name="text">
     <string>To Uppercase</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
   </action>
-  <action name="actionToLowercase">
+  <action name="actionConvertToLowercase">
    <property name="text">
     <string>To Lowercase</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+U</string>
+   </property>
   </action>
-  <action name="actionToTitlecase">
+  <action name="actionConvertToTitlecase">
    <property name="text">
     <string>To Titlecase</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+U</string>
+   </property>
   </action>
-  <action name="actionToOppositeCase">
+  <action name="actionConvertToOppositeCase">
    <property name="text">
     <string>To Opposite Case</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
   </action>
-  <action name="actionTranspose">
+  <action name="actionConvertTranspose">
    <property name="text">
     <string>Transpose</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
   </action>
-  <action name="actionTabToSpaces">
+  <action name="actionConvertTabToSpaces">
    <property name="text">
     <string>Tab to Spaces</string>
    </property>
   </action>
-  <action name="actionSpacesToTabs">
+  <action name="actionConvertSpacesToTabs">
    <property name="text">
     <string>Spaces to Tabs</string>
    </property>
@@ -760,9 +785,41 @@
     <string>&amp;Go To Symbol</string>
    </property>
   </action>
-  <action name="action_Choose_tab">
+  <action name="actionChooseTab">
    <property name="text">
-    <string>&amp;Choose tab...</string>
+    <string>&amp;Choose Tab...</string>
+   </property>
+  </action>
+  <action name="actionMoveLineUp">
+   <property name="text">
+    <string>Line Up</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+Up</string>
+   </property>
+  </action>
+  <action name="actionMoveLineDown">
+   <property name="text">
+    <string>Line Down</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+Down</string>
+   </property>
+  </action>
+  <action name="actionMoveColumnRight">
+   <property name="text">
+    <string>Column Right</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="actionMoveColumnLeft">
+   <property name="text">
+    <string>Column Left</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+Ctrl+Left</string>
    </property>
   </action>
  </widget>

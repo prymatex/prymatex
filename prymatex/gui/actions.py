@@ -226,33 +226,61 @@ class MainWindowActions(object):
     # Text Actions
     #============================================================
     @QtCore.pyqtSlot()
-    def on_actionToUppercase_triggered(self):
-        self.statusBar().showMessage("actionToUppercase")
+    def on_actionConvertToUppercase_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.ConvertText(self.currentEditor.ConvertToUppercase)
     
     @QtCore.pyqtSlot()
-    def on_actionToLowercase_triggered(self):
-        self.statusBar().showMessage("actionToLowercase")
+    def on_actionConvertToLowercase_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.ConvertText(self.currentEditor.ConvertToLowercase)
         
     @QtCore.pyqtSlot()
-    def on_actionToTitlecase_triggered(self):
-        self.statusBar().showMessage("actionToTitlecase")
+    def on_actionConvertToTitlecase_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.ConvertText(self.currentEditor.ConvertToTitlecase)
         
     @QtCore.pyqtSlot()
-    def on_actionToOppositeCase_triggered(self):
-        self.statusBar().showMessage("actionToOppositeCase")
+    def on_actionConvertToOppositeCase_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.ConvertText(self.currentEditor.ConvertToOppositeCase)
         
     @QtCore.pyqtSlot()
-    def on_actionSpacesToTabs_triggered(self):
-        self.statusBar().showMessage("actionSpacesToTabs")
+    def on_actionConvertSpacesToTabs_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.ConvertText(self.currentEditor.ConvertSpacesToTabs)
         
     @QtCore.pyqtSlot()
-    def on_actionTabToSpaces_triggered(self):
-        self.statusBar().showMessage("actionTabToSpaces")
+    def on_actionConvertTabToSpaces_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.ConvertText(self.currentEditor.ConvertTabToSpaces)
 
     @QtCore.pyqtSlot()
-    def on_actionTranspose_triggered(self):
-        self.statusBar().showMessage("actionTranspose")
+    def on_actionConvertTranspose_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.ConvertText(self.currentEditor.ConvertTranspose)
 
+    #Move Menu
+    @QtCore.pyqtSlot()
+    def on_actionMoveLineUp_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.MoveText(self.currentEditor.MoveLineUp)
+    
+    @QtCore.pyqtSlot()
+    def on_actionMoveLineDown_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.MoveText(self.currentEditor.MoveLineDown)
+            
+    @QtCore.pyqtSlot()
+    def on_actionMoveColumnLeft_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.MoveText(self.currentEditor.MoveColumnLeft)
+            
+    @QtCore.pyqtSlot()
+    def on_actionMoveColumnRight_triggered(self):
+        if self.currentEditor is not None:
+            self.currentEditor.MoveText(self.currentEditor.MoveColumnRight)
+    
     @QtCore.pyqtSlot()
     def on_actionExecute_triggered(self):
         self.currentEditor.executeCommand()

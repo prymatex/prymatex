@@ -82,7 +82,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return self.selection
     
     def word(self, format = None):
-        return self.editor.getCurrentWord()
+        word, start, end = self.editor.getCurrentWord()
+        return word
     
     def runCommand(self, context, shellCommand, callback):
         return self.runQProcessCommand(context, shellCommand, callback)

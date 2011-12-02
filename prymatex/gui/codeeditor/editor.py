@@ -108,6 +108,25 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     SelectCurrentScope = 5
     
     #================================================================
+    # Move types
+    #================================================================
+    MoveLineUp = QtGui.QTextCursor.Up
+    MoveLineDown = QtGui.QTextCursor.Down
+    MoveColumnLeft = QtGui.QTextCursor.Left
+    MoveColumnRight = QtGui.QTextCursor.Right
+    
+    #================================================================
+    # Convert types
+    #================================================================
+    ConvertToUppercase = 0
+    ConvertToLowercase = 1
+    ConvertToTitlecase = 2
+    ConvertToOppositeCase = 3
+    ConvertSpacesToTabs = 4
+    ConvertTabToSpaces = 5
+    ConvertTranspose = 6
+    
+    #================================================================
     # Editor Flags
     #================================================================
     ShowTabsAndSpaces = 0x01
@@ -241,18 +260,19 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def getWordUnderCursor(self):
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
-        return cursor.selectedText()
+        return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
 
     def getCurrentScope(self):
         cursor = self.textCursor()
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
-    
+#te amo!!!!    
     def getCurrentWord(self, pat = RE_WORD, direction = "both"):
         cursor = self.textCursor()
         line = cursor.block().text()
-        position = cursor.columnNumber()
+        position = cursor.position()
+        columnNumber = cursor.columnNumber()
         #Get text before and after the cursor position.
-        first_part, last_part = line[:position][::-1], line[position:]
+        first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
         #Try left word
         lword = rword = ""
         m = self.RE_WORD.match(first_part)
@@ -264,7 +284,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             rword = m.group(0)
         
         if lword or rword: 
-            return lword + rword
+            return lword + rword, position - len(lword), position + len(rword)
         
         lword = rword = ""
         #Search left word
@@ -282,7 +302,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             if m.group(0):
                 rword += m.group(0)
                 break
-        return (lword + rword).strip()
+        lword = lword.lstrip()
+        rword = rword.rstrip()
+        return lword + rword, position - len(lword), position + len(rword)
     
     def getSelectionBlockStartEnd(self):
         cursor = self.textCursor()
@@ -292,6 +314,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         else:
             return self.document().findBlock(start), self.document().findBlock(end)
 
+    # Flags
     def getFlags(self):
         flags = 0
         options = self.document().defaultTextOption()
@@ -326,6 +349,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.updateLineNumberAreaWidth(0)
         self.viewport().repaint(self.viewport().visibleRegion())
         
+    # Syntax
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
         
@@ -336,6 +360,47 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             self.syntaxHighlighter.rehighlight()
             self.syntaxChanged.emit(syntax)
 
+    # Move text
+    def MoveText(self, moveType):
+        #Solo si tiene seleccion puede mover derecha y izquierda
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            if (moveType == QtGui.QTextCursor.Left and cursor.selectionStart() == 0) or (moveType == QtGui.QTextCursor.Right and cursor.selectionEnd() == self.document().characterCount()):
+                return
+            openRight = cursor.position() == cursor.selectionEnd()
+            text = cursor.selectedText()
+            cursor.removeSelectedText()
+            cursor.movePosition(moveType)
+            start = cursor.position()
+            cursor.insertText(text)
+            end = cursor.position()
+            if openRight:
+                cursor.setPosition(start)
+                cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+            else:
+                cursor.setPosition(end)
+                cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
+            self.setTextCursor(cursor)
+        elif moveType in [QtGui.QTextCursor.Up, QtGui.QTextCursor.Down]:
+            if (moveType == QtGui.QTextCursor.Up and cursor.block() == cursor.document().firstBlock()) or (moveType == QtGui.QTextCursor.Down and cursor.block() == cursor.document().lastBlock()):
+                return
+            column = cursor.columnNumber()
+            cursor.select(QtGui.QTextCursor.LineUnderCursor)
+            text1 = cursor.selectedText()
+            cursor2 = QtGui.QTextCursor(cursor)
+            otherBlock = cursor.block().next() if moveType == QtGui.QTextCursor.Down else cursor.block().previous()
+            cursor2.setPosition(otherBlock.position())
+            cursor2.select(QtGui.QTextCursor.LineUnderCursor)
+            text2 = cursor2.selectedText()
+            cursor.insertText(text2)
+            cursor2.insertText(text1)
+            cursor.setPosition(otherBlock.position() + column)
+            self.setTextCursor(cursor)
+            
+    # Convert Text
+    def ConvertText(self, convertType):
+        print convertType
+        
     #=======================================================================
     # Context Menu
     #=======================================================================
@@ -446,9 +511,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
 
     def select(self, selection):
         cursor = self.textCursor()
-        if selection in [self.SelectWord, self.SelectLine, self.SelectParagraph, self.SelectAll]:
+        if selection in [self.SelectLine, self.SelectParagraph, self.SelectAll]:
             #Handle by editor
             cursor.select(selection)
+        elif selection == self.SelectWord:
+            word, start, end = self.getCurrentWord()
+            cursor.setPosition(start)
+            cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         elif selection == self.SelectEnclosingBrackets:
             pass
         elif selection == self.SelectCurrentScope:
@@ -652,7 +721,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         line = cursor.block().text()
         scope = self.getCurrentScope()
         preferences = self.getPreference(scope)
-        current_word = self.getCurrentWord()
+        current_word, start, end = self.getCurrentWord()
         #Combine base env from params and editor env
         env.update({
                 'TM_CURRENT_LINE': line,

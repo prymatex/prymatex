@@ -1,30 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Vim integration with IPython 0.11+
-#
-# A two-way integration between Vim and IPython. 
-#
-# Using this plugin, you can send lines or whole files for IPython to execute,
-# and also get back object introspection and word completions in Vim, like
-# what you get with: object?<enter> object.<tab> in IPython
-#
-# -----------------
-# Quickstart Guide:
-# -----------------
-# Start ipython qtconsole and copy the connection string.
-# Source this file, which provides new IPython command
-#   :source ipy.vim  
-#   :IPythonClipboard   
-#   (or :IPythonXSelection if you're using X11 without having to copy)
-#
-# written by Paul Ivanov (http://pirsquared.org)
-
-reselect = False            # reselect lines after sending from Visual mode
-show_execution_count = True # wait to get numbers for In[43]: feedback?
-monitor_subchannel = True   # update vim-ipython 'shell' on every send?
-run_flags= "-i"             # flags to for IPython's run magic when using <F5>
-
 import sys
 import os
 
@@ -38,11 +14,10 @@ def km_from_string(s=''):
     or just 'kernel-12345.json' for IPython 0.12
     """
     from os.path import join as pjoin
-    from IPython.zmq.blockingkernelmanager import BlockingKernelManager, Empty
+    from IPython.zmq.blockingkernelmanager import BlockingKernelManager
     from IPython.config.loader import KeyValueConfigLoader
     from IPython.zmq.kernelapp import kernel_aliases
-    global km,send,Empty
-
+    
     s = s.replace('--existing', '')
     if 'connection_file' in BlockingKernelManager.class_trait_names():
         from IPython.lib.kernel import find_connection_file
@@ -96,5 +71,5 @@ def echo(arg, style="Question"):
 if __name__ == "__main__":
     connection = " ".join(sys.argv[1:])
     print connection
-    kernel = km_from_string(connection)
-    kernel.shell_channel.execute("a = 2")
+    kernel = km_from_string("--shell=59077 --iopub=43198 --stdin=33484 --hb=54664")
+    print kernel.shell_channel.execute("a = 5")

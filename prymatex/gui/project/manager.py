@@ -18,4 +18,6 @@ class PMXProjectManager(PMXObject):
     def __init__(self, parent = None):
         PMXObject.__init__(self)
         self.projectTreeModel = PMXProjectTreeModel(self)
+        self.projectTreeModel.addProject("workspace", "/home/diego/workspace")
+        self.projectTreeModel.addProject("home", "/home/diego")
         self.configure()

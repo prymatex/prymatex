@@ -55,7 +55,7 @@ class CompleterHelper(PMXBaseEditorHelper):
         return False
             
     def execute(self, editor, event):
-        completionPrefix = editor.getCurrentWord()
+        completionPrefix, start, end = editor.getCurrentWord()
         editor.showCompleter(self.completions, completionPrefix = completionPrefix)
 
 class SmartTypingPairsHelper(PMXBaseEditorHelper):

@@ -343,7 +343,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             #Luego de tratar el evento, solo si se inserto algo de texto
             if event.text() != "":
-                completionPrefix = self.editor.getCurrentWord()
+                completionPrefix, start, end = self.editor.getCurrentWord()
                 if completionPrefix != self.completionPrefix():
                     self.setCompletionPrefix(completionPrefix)
                     self.complete(self.editor.cursorRect())
