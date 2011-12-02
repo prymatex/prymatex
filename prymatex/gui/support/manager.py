@@ -114,7 +114,7 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         
     SETTINGS_GROUP = 'SupportManager'
     
-    def __init__(self):
+    def __init__(self, parent = None):
         PMXObject.__init__(self)
         PMXSupportBaseManager.__init__(self)
         self.bundleTreeModel = PMXBundleTreeModel(self)

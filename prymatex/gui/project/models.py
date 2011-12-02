@@ -116,7 +116,7 @@ class PMXProjectItem(object):
     def parent(self):
         return self._parent
 
-class PMXProjectsTreeModel(QtCore.QAbstractItemModel):  
+class PMXProjectTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, parent = None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self.workspace = PMXWorkspace()

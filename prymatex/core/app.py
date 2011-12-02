@@ -15,17 +15,16 @@ from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
 
 class PMXApplication(QtGui.QApplication):
-    '''
+    """
     The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
     The application loads the PMX Support.
-    '''
+    """
     
-    @deco.logtime
     def __init__(self, profile, args):
-        '''
+        """
         Inicialización de la aplicación.
-        '''
+        """
         QtGui.QApplication.__init__(self, args)
         
         # Some init's
@@ -36,7 +35,7 @@ class PMXApplication(QtGui.QApplication):
 
         self.buildSettings(profile)
         
-        self.setupLogging()         #Logging
+        self.setupLogging()
 
         #Connects
         self.aboutToQuit.connect(self.cleanup)
@@ -50,12 +49,13 @@ class PMXApplication(QtGui.QApplication):
 
         # Loads
         self.setupSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
+        self.setupFileManager()      #File Manager
+        self.setupProjectManager()   #Project Manager
         self.setupKernelManager()    #Console kernel Manager
         self.setupCoroutines()
 
-        # Setups
+        # Setup Dialogs
         #self.setupExecutor()       #Executor
-        self.setupFileManager()     #File Manager
         self.setupConfigDialog()    #Config Dialog
         self.setupBundleEditor()    #Bundle Editor
         self.setupServerThread()
@@ -85,7 +85,62 @@ class PMXApplication(QtGui.QApplication):
             f = open(self.fileLock, 'w')
             f.write('%s' % self.applicationPid())
             f.close()
-        
+            
+    #========================================================
+    # Managers
+    #========================================================
+    @deco.logtime
+    def setupSupportManager(self, callbackSplashMessage = None):
+        from prymatex.gui.support.manager import PMXSupportManager
+
+        sharePath = self.settings.value('PMX_SHARE_PATH')
+        homePath = self.settings.value('PMX_HOME_PATH')
+
+        #Prepare prymatex namespace
+        manager = PMXSupportManager(self)
+        manager.addNamespace('prymatex', sharePath)
+        manager.updateEnvironment({ #TextMate Compatible :P
+                'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
+                'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
+                'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
+                'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
+                'TM_PID': os.getpid(),
+                #Prymatex 
+                'PMX_APP_NAME': self.applicationName().title(),
+                'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
+                'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
+                'PMX_VERSION': self.applicationVersion(),
+                'PMX_PID': self.applicationPid()
+        })
+
+        #Prepare user namespace
+        manager.addNamespace('user', homePath)
+        manager.updateEnvironment({
+                'PMX_HOME_PATH': homePath,
+                'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
+                'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
+                'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')
+        })
+        manager.loadSupport(callbackSplashMessage)
+        self.supportManager = manager
+
+    def setupFileManager(self):
+        from prymatex.core.filemanager import PMXFileManager
+        self.fileManager = PMXFileManager(self)
+    
+    def setupProjectManager(self):
+        from prymatex.gui.project.manager import PMXProjectManager
+        self.projectManager = PMXProjectManager(self)
+    
+    def setupKernelManager(self):
+        try:
+            from IPython.frontend.qt.kernelmanager import QtKernelManager
+            self.kernelManager = QtKernelManager()
+            self.kernelManager.start_kernel()
+            self.kernelManager.start_channels()
+        except ImportError:
+            self.kernelManager = None
+
     def setupConfigDialog(self):
         from prymatex.gui.settings.dialog import PMXSettingsDialog
         configdialog = PMXSettingsDialog()
@@ -109,10 +164,6 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
         self.bundleEditor = PMXBundleEditor(self)
         self.bundleEditor.setModal(True)
-
-    def setupFileManager(self):
-        from prymatex.core.filemanager import PMXFileManager
-        self.fileManager = PMXFileManager(self)
 
     def setupLogging(self):
         '''
@@ -155,54 +206,9 @@ class PMXApplication(QtGui.QApplication):
     def saveState(self, session_manager):
         self.logger.debug( "Save state %s" % session_manager)
         
-    def setupKernelManager(self):
-        try:
-            from IPython.frontend.qt.kernelmanager import QtKernelManager
-            self.kernelManager = QtKernelManager()
-            self.kernelManager.start_kernel()
-            self.kernelManager.start_channels()
-        except ImportError:
-            self.kernelManager = None
-
     def setupCoroutines(self):
         from prymatex.utils.coroutines import Scheduler
         self.scheduler = Scheduler(self)
-
-    # Decorador para imprimir cuanto tarda
-    @deco.logtime
-    def setupSupportManager(self, callbackSplashMessage = None):
-        from prymatex.gui.support.manager import PMXSupportManager
-
-        sharePath = self.settings.value('PMX_SHARE_PATH')
-        homePath = self.settings.value('PMX_HOME_PATH')
-
-        #Prepare prymatex namespace
-        manager = PMXSupportManager()
-        manager.addNamespace('prymatex', sharePath)
-        manager.updateEnvironment({ #TextMate Compatible :P
-                'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
-                'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
-                'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
-                'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
-                'TM_PID': os.getpid(),
-                #Prymatex 
-                'PMX_APP_NAME': self.applicationName().title(),
-                'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
-                'PMX_PREFERENCES_PATH': self.settings.value('PMX_PREFERENCES_PATH'),
-                'PMX_VERSION': self.applicationVersion(),
-                'PMX_PID': self.applicationPid()
-        })
-
-        #Prepare user namespace
-        manager.addNamespace('user', homePath)
-        manager.updateEnvironment({
-                'PMX_HOME_PATH': homePath,
-                'PMX_PROFILE_PATH': self.settings.value('PMX_PROFILE_PATH'),
-                'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
-                'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')
-        })
-        manager.loadSupport(callbackSplashMessage)
-        self.supportManager = manager
 
     def setupServerThread(self):
         from prymatex.core.server import PMXServerThread

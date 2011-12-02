@@ -48,7 +48,7 @@ class PMXFileManager(PMXObject):
     def createDirectory(self, base, name = None, parent = None):
         """Create a new directory."""
         if name is None:
-            name, ok = QtGui.QInputDialog.getText(parent, "New directoy name", "Please enter the new directoy name in < /br>%s:" % base)
+            name, ok = QtGui.QInputDialog.getText(parent, "New directoy name", "<p>Please enter the new directoy name in</p><p>%s</p>" % base)
             if not ok:
                 return None
         path = os.path.join(base, name)
@@ -60,7 +60,7 @@ class PMXFileManager(PMXObject):
     def createFile(self, base, name = None, parent = None):
         """Create a new file."""
         if name is None:
-            name, ok = QtGui.QInputDialog.getText(parent, "New file name", "Please enter the new file name in < /br>%s:" % base)
+            name, ok = QtGui.QInputDialog.getText(parent, "New file name", "<p>Please enter the new file name in</p><p>%s</p>" % base)
             if not ok:
                 return None
         path = os.path.join(base, name)
@@ -70,14 +70,14 @@ class PMXFileManager(PMXObject):
         return QtCore.QFileInfo(path)
     
     def deletePath(self, path, parent = None):
-        ok = QtGui.QMessageBox.question(parent, "Deletion Confirmation", "Are you sure you want to delete <b>%s</b>?" % path, 
-            QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
-        if not ok: return ok
-        if os.path.isfile(path):
-            # Mandar señal para cerrar editores
-            os.unlink(path)
-        else:
-            shutil.rmtree(path)
+        ok = QtGui.QMessageBox.question(parent, "Deletion confirmation", "<p>Are you sure you want to delete</p><p>%s</p>" % path, 
+            QtGui.QMessageBox.Ok | QtGui.QMessageBox.No)
+        if ok == QtGui.QMessageBox.Ok: 
+            if os.path.isfile(path):
+                # Mandar señal para cerrar editores
+                os.unlink(path)
+            else:
+                shutil.rmtree(path)
     
     def openFile(self, fileInfo):
         """Open and read a file, return the content."""

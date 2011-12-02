@@ -166,11 +166,11 @@ class SettingsGroup(object):
                 self.qsettings.beginGroup(self.name)
                 self.qsettings.setValue(key, setting.getDefault(self.listeners[0]))
                 self.qsettings.endGroup()
-                
+
 class pmxConfigPorperty(object):
-    '''
+    """
     Configuration descriptor
-    '''
+    """
     def __init__(self, default = None, fset = None, tm_name = None):
         self.default = default
         self.fset = fset
@@ -189,7 +189,7 @@ class pmxConfigPorperty(object):
         elif self.fget != None:
             obj_type = type(self.fget(obj))
         return obj_type(obj)
-        
+
     def contributeToClass(self, cls, name):
         self.name = name
         self.fget = getattr(cls, name, None)

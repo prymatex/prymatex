@@ -6,27 +6,23 @@ import codecs
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.core.base import PMXObject
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.project.model import PMXProjectsTreeModel
+from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.dockers.base import PMXBaseDock
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 
-class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock):
+class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
-        self.setupUi(self)
         PMXBaseDock.__init__(self)
-        self._actualProject = None
+        self.setupUi(self)
+        self.treeViewProjects.setModel(self.application.projectManager.projectTreeModel)
         
         self.setupTreeViewProjects()
 
     def setupTreeViewProjects(self):
-        self.prjectsModel = PMXProjectsTreeModel()
-        self.treeViewProjects.setModel(self.prjectsModel)
-        self.prjectsModel.addProject("diego", "c:\\cygwin")
-        self.prjectsModel.addProject("workspace", "c:\\cygwin")
-        
         #Setup Context Menu
         self.projectsMenu = QtGui.QMenu(self)
         self.projectsMenu.setObjectName('projectsMenu')
