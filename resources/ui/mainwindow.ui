@@ -99,6 +99,7 @@
     <addaction name="separator"/>
     <addaction name="actionShowTabsAndSpaces"/>
     <addaction name="actionShowLineAndParagraphs"/>
+    <addaction name="actionWordWrap"/>
    </widget>
    <widget class="QMenu" name="menuText">
     <property name="title">
@@ -820,6 +821,14 @@
    </property>
    <property name="shortcut">
     <string>Meta+Ctrl+Left</string>
+   </property>
+  </action>
+  <action name="actionWordWrap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Word Wrap</string>
    </property>
   </action>
  </widget>

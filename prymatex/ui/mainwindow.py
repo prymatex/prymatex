@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Fri Dec  2 15:19:24 2011
+# Created: Sat Dec  3 17:17:59 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -278,6 +278,9 @@ class Ui_MainWindow(object):
         self.actionMoveColumnRight.setObjectName(_fromUtf8("actionMoveColumnRight"))
         self.actionMoveColumnLeft = QtGui.QAction(MainWindow)
         self.actionMoveColumnLeft.setObjectName(_fromUtf8("actionMoveColumnLeft"))
+        self.actionWordWrap = QtGui.QAction(MainWindow)
+        self.actionWordWrap.setCheckable(True)
+        self.actionWordWrap.setObjectName(_fromUtf8("actionWordWrap"))
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuFile.addAction(self.actionNew)
@@ -305,6 +308,7 @@ class Ui_MainWindow(object):
         self.menuView.addSeparator()
         self.menuView.addAction(self.actionShowTabsAndSpaces)
         self.menuView.addAction(self.actionShowLineAndParagraphs)
+        self.menuView.addAction(self.actionWordWrap)
         self.menuConvert.addAction(self.actionConvertToUppercase)
         self.menuConvert.addAction(self.actionConvertToLowercase)
         self.menuConvert.addAction(self.actionConvertToTitlecase)
@@ -523,6 +527,7 @@ class Ui_MainWindow(object):
         self.actionMoveColumnRight.setShortcut(_('Meta+Ctrl+Right'))
         self.actionMoveColumnLeft.setText(_('Column Left'))
         self.actionMoveColumnLeft.setShortcut(_('Meta+Ctrl+Left'))
+        self.actionWordWrap.setText(_('Word Wrap'))
 
 from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc

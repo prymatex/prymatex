@@ -221,6 +221,15 @@ class MainWindowActions(object):
             else:
                 flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowLineAndParagraphs
             self.currentEditor.setFlags(flags)
+            
+    @QtCore.pyqtSlot(bool)
+    def on_actionWordWrap_toggled(self, checked):
+        if self.currentEditor is not None:
+            if checked:
+                flags = self.currentEditor.getFlags() | self.currentEditor.WordWrap
+            else:
+                flags = self.currentEditor.getFlags() & ~self.currentEditor.WordWrap
+            self.currentEditor.setFlags(flags)
 
     #============================================================
     # Text Actions
@@ -228,58 +237,58 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionConvertToUppercase_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.ConvertText(self.currentEditor.ConvertToUppercase)
+            self.currentEditor.convertText(self.currentEditor.ConvertToUppercase)
     
     @QtCore.pyqtSlot()
     def on_actionConvertToLowercase_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.ConvertText(self.currentEditor.ConvertToLowercase)
+            self.currentEditor.convertText(self.currentEditor.ConvertToLowercase)
         
     @QtCore.pyqtSlot()
     def on_actionConvertToTitlecase_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.ConvertText(self.currentEditor.ConvertToTitlecase)
+            self.currentEditor.convertText(self.currentEditor.ConvertToTitlecase)
         
     @QtCore.pyqtSlot()
     def on_actionConvertToOppositeCase_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.ConvertText(self.currentEditor.ConvertToOppositeCase)
+            self.currentEditor.convertText(self.currentEditor.ConvertToOppositeCase)
         
     @QtCore.pyqtSlot()
     def on_actionConvertSpacesToTabs_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.ConvertText(self.currentEditor.ConvertSpacesToTabs)
+            self.currentEditor.convertText(self.currentEditor.ConvertSpacesToTabs)
         
     @QtCore.pyqtSlot()
     def on_actionConvertTabToSpaces_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.ConvertText(self.currentEditor.ConvertTabToSpaces)
+            self.currentEditor.convertText(self.currentEditor.ConvertTabsToSpaces)
 
     @QtCore.pyqtSlot()
     def on_actionConvertTranspose_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.ConvertText(self.currentEditor.ConvertTranspose)
+            self.currentEditor.convertText(self.currentEditor.ConvertTranspose)
 
     #Move Menu
     @QtCore.pyqtSlot()
     def on_actionMoveLineUp_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.MoveText(self.currentEditor.MoveLineUp)
+            self.currentEditor.moveText(self.currentEditor.MoveLineUp)
     
     @QtCore.pyqtSlot()
     def on_actionMoveLineDown_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.MoveText(self.currentEditor.MoveLineDown)
+            self.currentEditor.moveText(self.currentEditor.MoveLineDown)
             
     @QtCore.pyqtSlot()
     def on_actionMoveColumnLeft_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.MoveText(self.currentEditor.MoveColumnLeft)
+            self.currentEditor.moveText(self.currentEditor.MoveColumnLeft)
             
     @QtCore.pyqtSlot()
     def on_actionMoveColumnRight_triggered(self):
         if self.currentEditor is not None:
-            self.currentEditor.MoveText(self.currentEditor.MoveColumnRight)
+            self.currentEditor.moveText(self.currentEditor.MoveColumnRight)
     
     @QtCore.pyqtSlot()
     def on_actionExecute_triggered(self):

@@ -29,6 +29,7 @@ from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
 from prymatex.gui.widgets.overlay import PMXMessageOverlay
+from prymatex.utils.text import convert_functions
 
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseEditor):
     #=======================================================================
@@ -49,13 +50,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     @pmxConfigPorperty(default = 4)
     def tabStopSize(self, size):
         """docstring for tabStopSize"""
-        self.setTabStopWidth(size * 10)
+        self.setTabStopWidth(size * 9)
     
     @pmxConfigPorperty(default = QtGui.QFont())
     def font(self, font):
         font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics | QtGui.QFont.PreferAntialias)
         font.setStyleHint(QtGui.QFont.Monospace)
         self.document().setDefaultFont(font)
+        self.setTabStopWidth(self.tabStopSize * 9)
     
     @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
@@ -116,16 +118,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     MoveColumnRight = QtGui.QTextCursor.Right
     
     #================================================================
-    # Convert types
+    # Convert types, los numeros son los indeces de convert_functions
     #================================================================
     ConvertToUppercase = 0
     ConvertToLowercase = 1
     ConvertToTitlecase = 2
     ConvertToOppositeCase = 3
     ConvertSpacesToTabs = 4
-    ConvertTabToSpaces = 5
+    ConvertTabsToSpaces = 5
     ConvertTranspose = 6
-    
+
     #================================================================
     # Editor Flags
     #================================================================
@@ -134,6 +136,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     ShowBookmarks = 0x04
     ShowLineNumbers = 0x08
     ShowFolding = 0x10
+    WordWrap = 0x20
     
     Key_Any = 0
     editorHelpers = {
@@ -265,7 +268,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def getCurrentScope(self):
         cursor = self.textCursor()
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
-#te amo!!!!    
+
     def getCurrentWord(self, pat = RE_WORD, direction = "both"):
         cursor = self.textCursor()
         line = cursor.block().text()
@@ -328,6 +331,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             flags |= self.ShowLineNumbers
         if self.sidebar.showFolding:
             flags |= self.ShowFolding
+        if options.wrapMode() & QtGui.QTextOption.WordWrap:
+            flags |= self.WordWrap
         return flags
         
     def setFlags(self, flags):
@@ -341,6 +346,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             oFlags |= QtGui.QTextOption.ShowLineAndParagraphSeparators
         else:
             oFlags &= ~QtGui.QTextOption.ShowLineAndParagraphSeparators
+        if flags & self.WordWrap:
+            options.setWrapMode(QtGui.QTextOption.WordWrap)
+        else:
+            options.setWrapMode(QtGui.QTextOption.NoWrap)
         options.setFlags(oFlags)
         self.document().setDefaultTextOption(options)
         self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
@@ -361,12 +370,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             self.syntaxChanged.emit(syntax)
 
     # Move text
-    def MoveText(self, moveType):
+    def moveText(self, moveType):
         #Solo si tiene seleccion puede mover derecha y izquierda
         cursor = self.textCursor()
         if cursor.hasSelection():
             if (moveType == QtGui.QTextCursor.Left and cursor.selectionStart() == 0) or (moveType == QtGui.QTextCursor.Right and cursor.selectionEnd() == self.document().characterCount()):
                 return
+            cursor.beginEditBlock()
             openRight = cursor.position() == cursor.selectionEnd()
             text = cursor.selectedText()
             cursor.removeSelectedText()
@@ -380,10 +390,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             else:
                 cursor.setPosition(end)
                 cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
+            cursor.endEditBlock()
             self.setTextCursor(cursor)
         elif moveType in [QtGui.QTextCursor.Up, QtGui.QTextCursor.Down]:
             if (moveType == QtGui.QTextCursor.Up and cursor.block() == cursor.document().firstBlock()) or (moveType == QtGui.QTextCursor.Down and cursor.block() == cursor.document().lastBlock()):
                 return
+            cursor.beginEditBlock()
             column = cursor.columnNumber()
             cursor.select(QtGui.QTextCursor.LineUnderCursor)
             text1 = cursor.selectedText()
@@ -395,11 +407,36 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             cursor.insertText(text2)
             cursor2.insertText(text1)
             cursor.setPosition(otherBlock.position() + column)
+            cursor.endEditBlock()
             self.setTextCursor(cursor)
-            
+    
     # Convert Text
-    def ConvertText(self, convertType):
-        print convertType
+    def convertText(self, convertType):
+        cursor = self.textCursor()
+        convertFunction = convert_functions[convertType]
+        if convertType == self.ConvertSpacesToTabs:
+            self.replaceSpacesForTabs()
+        elif convertType == self.ConvertTabsToSpaces:
+            self.replaceTabsForSpaces()
+        else:
+            if not cursor.hasSelection():
+                word, start, end = self.getCurrentWord()
+                position = cursor.position()
+                cursor.setPosition(start)
+                cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+                cursor.insertText(convertFunction(word))
+                cursor.setPosition(position)
+            else:
+                openRight = cursor.position() == cursor.selectionEnd()
+                start, end = cursor.selectionStart(), cursor.selectionEnd()
+                cursor.insertText(convertFunction(cursor.selectedText()))
+                if openRight:
+                    cursor.setPosition(start)
+                    cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+                else:
+                    cursor.setPosition(end)
+                    cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
+            self.setTextCursor(cursor)
         
     #=======================================================================
     # Context Menu
@@ -876,6 +913,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         cursor.endEditBlock()
         return replaced
 
+    def replaceTabsForSpaces(self):
+        match = QtCore.QRegExp("\t")
+        self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
+        
+    def replaceSpacesForTabs(self):
+        match = QtCore.QRegExp(" " * self.tabStopSize)
+        self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
+        
     #==========================================================================
     # Bookmarks and gotos
     #==========================================================================    
