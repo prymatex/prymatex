@@ -242,9 +242,9 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
 # Themes Styles Row
 #====================================================
 class PMXThemeStyleRow(object):
-    ''' 
-        Theme and Style decorator
-    '''
+    """
+    Theme and Style decorator
+    """
     def __init__(self, item, scores = None):
         self.item = item
         self.scores = scores
@@ -362,9 +362,9 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
                 return settings['background']
 
     def setData(self, index, value, role):
-        '''
-            Retornar verdadero si se puedo hacer el camio, falso en caso contratio
-        '''
+        """
+        Retornar verdadero si se puedo hacer el camio, falso en caso contratio
+        """
         if not index.isValid: return False
 
         if role == QtCore.Qt.EditRole:

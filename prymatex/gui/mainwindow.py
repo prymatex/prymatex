@@ -38,12 +38,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     
     # Constructor
     def __init__(self):
-        '''
+        """
         The main window
         @param parent: The QObject parent, in this case it should be the QApp
         @param files_to_open: The set of files to be opened when the window
                               is shown in the screen.
-        '''
+        """
         QtGui.QMainWindow.__init__(self)
         self.setupUi(self)
         self.currentEditor = None
@@ -259,12 +259,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 editor.codeEdit.goToColumn(int(column))
     
     def closeEvent(self, event):
+        self.debug("CloseEvent")
         try:
-            for w in self.splitTabWidget.getAllWidgets():
-                w.close()
+            for editor in self.splitTabWidget.getAllWidgets():
+                self.closeEditor(editor)
         except exceptions.UserCancelException:
             event.ignore()
-    
+
     #===========================================================================
     # Drag and Drop
     #===========================================================================

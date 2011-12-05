@@ -38,11 +38,8 @@ class PMXApplication(QtGui.QApplication):
         self.setupLogging()
 
         #Connects
-        self.aboutToQuit.connect(self.cleanup)
+        self.aboutToQuit.connect(self.closePrymatex)
     
-    def resetSettings(self):
-        self.settings.clear()
-        
     def exec_(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
         splash.show()
@@ -67,14 +64,17 @@ class PMXApplication(QtGui.QApplication):
         splash.finish(self.mainWindow)
         return super(PMXApplication, self).exec_()
 
+    def resetSettings(self):
+        self.settings.clear()
+        
     def buildSettings(self, profile):
         from prymatex.core.settings import PMXSettings
         self.settings = PMXSettings(profile)
 
     def checkSingleInstance(self):
-        '''
+        """
         Checks if there's another instance using current profile
-        '''
+        """
         self.fileLock = os.path.join(self.settings.PMX_VAR_PATH, 'prymatex.pid')
 
         if os.path.exists(self.fileLock):
@@ -166,9 +166,9 @@ class PMXApplication(QtGui.QApplication):
         self.bundleEditor.setModal(True)
 
     def setupLogging(self):
-        '''
+        """
         @see PMXObject.debug, PMXObject.info, PMXObject.warn
-        '''
+        """
         import logging
         from datetime import datetime
         
@@ -188,15 +188,25 @@ class PMXApplication(QtGui.QApplication):
         self.logger = logging.root
         
     def createMainWindow(self):
-        '''
+        """
         Creates the windows
-        '''
+        """
         #Por ahora solo una mainWindow
         from prymatex.gui.mainwindow import PMXMainWindow
+        geometry = self.settings.value("mainWindowGeometry")
+        state = self.settings.value("mainWindowState")
+        
         self.mainWindow = PMXMainWindow()
+        if geometry:
+            self.mainWindow.restoreGeometry(geometry)
+        if state:
+            self.mainWindow.restoreState(state)
         self.mainWindow.show()
     
-    def cleanup(self):
+    def closePrymatex(self):
+        self.logger.debug("Close")
+        self.settings.setValue("mainWindowGeometry", self.mainWindow.saveGeometry())
+        self.settings.setValue("mainWindowState", self.mainWindow.saveState())
         self.settings.sync()
         os.unlink(self.fileLock)
     

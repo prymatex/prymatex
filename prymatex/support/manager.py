@@ -165,9 +165,9 @@ class PMXSupportBaseManager(object):
     # MANAGED OBJECTS INTERFACE
     #---------------------------------------------------
     def setDeleted(self, uuid):
-        '''
-            Marcar un managed object como eliminado
-        '''
+        """
+        Marcar un managed object como eliminado
+        """
         pass
         
     def isDeleted(self, uuid):
@@ -204,15 +204,15 @@ class PMXSupportBaseManager(object):
         return bundle
         
     def modifyBundle(self, bundle):
-        '''
-            Llamado luego de modificar un bundle
-        '''
+        """
+        Llamado luego de modificar un bundle
+        """
         pass
 
     def removeBundle(self, bundle):
-        '''
-            Llamado luego de eliminar un bundle
-        '''
+        """
+        Llamado luego de eliminar un bundle
+        """
         pass
 
     def getAllBundles(self):
@@ -222,9 +222,9 @@ class PMXSupportBaseManager(object):
     # BUNDLE CRUD
     #---------------------------------------------------
     def findBundles(self, **attrs):
-        '''
-            Retorna todos los bundles que cumplan con attrs
-        '''
+        """
+        Retorna todos los bundles que cumplan con attrs
+        """
         bundles = []
         keys = PMXBundle.KEYS
         keys.extend([key for key in attrs.keys() if key not in keys])
@@ -234,14 +234,14 @@ class PMXSupportBaseManager(object):
         return bundles
     
     def createBundle(self, name, namespace = None):
-        '''
-            Crea un bundle nuevo lo agrega en los bundles y lo retorna,
-            Precondiciones:
-                Tenes por lo menos dos espacios de nombre el base o proteguido y uno donde generar los nuevos bundles
-                El nombre tipo Title.
-                El nombre no este entre los nombres ya cargados.
-            Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
-        '''
+        """
+        Crea un bundle nuevo lo agrega en los bundles y lo retorna,
+        Precondiciones:
+            Tenes por lo menos dos espacios de nombre el base o proteguido y uno donde generar los nuevos bundles
+            El nombre tipo Title.
+            El nombre no este entre los nombres ya cargados.
+        Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
+        """
         if len(self.nsorder) < 2:
             return None
         if namespace is None: namespace = self.defaultNamespace
@@ -287,10 +287,9 @@ class PMXSupportBaseManager(object):
         return bundle
         
     def deleteBundle(self, bundle):
-        '''
-            Elimina un bundle,
-            si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
-        '''
+        """
+        Elimina un bundle, si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
+        """
         items = self.findBundleItems(bundle = bundle)
 
         #Primero los items
@@ -332,9 +331,9 @@ class PMXSupportBaseManager(object):
     # BUNDLEITEM CRUD
     #---------------------------------------------------
     def findBundleItems(self, **attrs):
-        '''
-            Retorna todos los items que complan las condiciones en attrs
-        '''
+        """
+        Retorna todos los items que complan las condiciones en attrs
+        """
         items = []
         keys = PMXBundleItem.KEYS
         keys.extend([key for key in attrs.keys() if key not in keys])
@@ -344,13 +343,13 @@ class PMXSupportBaseManager(object):
         return items
 
     def createBundleItem(self, name, tipo, bundle, namespace = None):
-        '''
-            Crea un bundle item nuevo lo agrega en los bundle items y lo retorna,
-            Precondiciones:
-                Tenes por lo menos dos nombres en el espacio de nombres
-                El tipo tiene que ser uno de los conocidos
-            Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
-        '''
+        """
+        Crea un bundle item nuevo lo agrega en los bundle items y lo retorna,
+        Precondiciones:
+            Tenes por lo menos dos nombres en el espacio de nombres
+            El tipo tiene que ser uno de los conocidos
+        Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
+        """
         if len(self.nsorder) < 2:
             return None
         if bundle.isProtected and not bundle.isSafe:
@@ -369,9 +368,9 @@ class PMXSupportBaseManager(object):
         return item
     
     def readBundleItem(self, **attrs):
-        '''
-            Retorna un bundle item por sus atributos
-        '''
+        """
+        Retorna un bundle item por sus atributos
+        """
         items = self.findBundleItems(**attrs)
         if len(items) > 1:
             raise Exception("More than one bundle item")
@@ -381,9 +380,9 @@ class PMXSupportBaseManager(object):
         return self.getManagedObject(uuid)
     
     def updateBundleItem(self, item, **attrs):
-        '''
-            Actualiza un bundle item
-        '''
+        """
+        Actualiza un bundle item
+        """
         if len(self.nsorder) < 2:
             return None
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
@@ -407,10 +406,10 @@ class PMXSupportBaseManager(object):
         return item
     
     def deleteBundleItem(self, item):
-        '''
-            Elimina un bundle por su uuid,
-            si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
-        '''
+        """
+        Elimina un bundle por su uuid,
+        si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
+        """
         #Si el espacio de nombres es distinto al protegido lo elimino
         if item.isProtected:
             if item.isSafe:
@@ -475,9 +474,9 @@ class PMXSupportBaseManager(object):
     # THEME CRUD
     #---------------------------------------------------
     def findThemes(self, **attrs):
-        '''
-            Retorna todos los themes que complan las condiciones en attrs
-        '''
+        """
+        Retorna todos los themes que complan las condiciones en attrs
+        """
         items = []
         keys = PMXTheme.KEYS
         keys.extend([key for key in attrs.keys() if key not in keys])
@@ -497,9 +496,9 @@ class PMXSupportBaseManager(object):
         return theme
 
     def readTheme(self, **attrs):
-        '''
-            Retorna un bundle item por sus atributos
-        '''
+        """
+        Retorna un bundle item por sus atributos
+        """
         items = self.findThemes(**attrs)
         if len(items) > 1:
             raise Exception("More than one theme")
@@ -509,9 +508,9 @@ class PMXSupportBaseManager(object):
         return self.getManagedObject(uuid)
     
     def updateTheme(self, theme, **attrs):
-        '''
-            Actualiza un themes
-        '''
+        """
+        Actualiza un themes
+        """
         if theme.isProtected:
             if not theme.isSafe:
                 namespace = self.defaultNamespace
@@ -527,9 +526,9 @@ class PMXSupportBaseManager(object):
         return theme
         
     def deleteTheme(self, theme):
-        '''
-            Elimina un theme por su uuid
-        '''
+        """
+        Elimina un theme por su uuid
+        """
         self.removeTheme(theme)
         #Si el espacio de nombres es distinto al protegido lo elimino
         if theme.isProtected:
@@ -883,16 +882,16 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
     # TABTRIGGERS INTERFACE
     #---------------------------------------------------
     def getAllTabTriggersMnemonics(self):
-        '''
-            Return a list of tab triggers
-            ['class', 'def', ...]
-        '''
+        """
+        Return a list of tab triggers
+        ['class', 'def', ...]
+        """
         return self.TAB_TRIGGERS.keys()
     
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
-        '''
-            Return a list of tab triggers bundle items
-        '''
+        """
+        Return a list of tab triggers bundle items
+        """
         if tabTrigger not in self.TAB_TRIGGERS:
             return []
         return self.TAB_TRIGGERS[tabTrigger]
@@ -901,9 +900,9 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
     # KEYEQUIVALENT INTERFACE
     #---------------------------------------------------
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
-        '''
-            Return a list of key equivalent bundle items
-        '''
+        """
+        Return a list of key equivalent bundle items
+        """
         if keyEquivalent not in self.KEY_EQUIVALENTS:
             return [] 
         return self.KEY_EQUIVALENTS[keyEquivalent]
