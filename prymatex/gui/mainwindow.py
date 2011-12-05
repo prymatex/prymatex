@@ -179,7 +179,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         #Set editor to Dockers
         for docker in self.dockers:
             docker.setCurrentEditor(editor)
-        
+
+        #Update Menu
+        self.updateMenuForEditor(editor)        
+
         template = Template(self.windowTitleTemplate)
         title = [ editor.getTabTitle() ] if editor is not None else []
         title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))

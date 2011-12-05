@@ -13,6 +13,15 @@ class MainWindowActions(object):
         #Bundles Menu
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
 
+    def updateMenuForEditor(self, editor):
+        flags = editor.getFlags()
+        self.actionShowLineNumbers.setChecked(flags & editor.ShowLineNumbers)
+        self.actionShowFolding.setChecked(flags & editor.ShowFolding)
+        self.actionShowBookmarks.setChecked(flags & editor.ShowBookmarks)
+        self.actionShowTabsAndSpaces.setChecked(flags & editor.ShowTabsAndSpaces)
+        self.actionShowLineAndParagraphs.setChecked(flags & editor.ShowLineAndParagraphs)
+        self.actionWordWrap.setChecked(flags & editor.WordWrap)
+        
     #============================================================
     # About To Show Menus
     #============================================================
