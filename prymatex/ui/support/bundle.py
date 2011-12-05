@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/bundle.ui'
 #
-# Created: Tue Nov 29 17:28:36 2011
+# Created: Mon Dec  5 19:49:37 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,6 +27,7 @@ class Ui_Menu(object):
         self.treeMenuView.setDragEnabled(True)
         self.treeMenuView.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
         self.treeMenuView.setAlternatingRowColors(True)
+        self.treeMenuView.setHeaderHidden(True)
         self.treeMenuView.setObjectName(_fromUtf8("treeMenuView"))
         self.horizontalLayout_2.addWidget(self.treeMenuView)
         self.listExcludedView = QtGui.QListView(Menu)

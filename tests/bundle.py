@@ -209,13 +209,13 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
         return QtCore.Qt.MoveAction     
 
     def flags(self, index):
-        if not index.isValid():
-            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
         defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
-        node = index.internalPointer()
-        if node.nodeType == PMXBundleMenuNode.SUBMENU:
-            return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
-        return defaultFlags | QtCore.Qt.ItemIsDragEnabled
+        if index.isValid():
+            node = index.internalPointer()
+            print node.type()
+            if node.type() == 1:
+                return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
+        return defaultFlags | QtCore.Qt.ItemIsDropEnabled
 
     def mimeTypes(self):
         return [ 'application/x-ets-qt4-instance' ]
@@ -282,13 +282,13 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         return QtCore.Qt.MoveAction     
 
     def flags(self, index):
-        if not index.isValid():
-            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
         defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
-        node = index.internalPointer()
-        if node.type() == 1:
-            return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
-        return defaultFlags | QtCore.Qt.ItemIsDragEnabled
+        if index.isValid():
+            node = index.internalPointer()
+            print node.type()
+            if node.type() == 1:
+                return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
+        return defaultFlags | QtCore.Qt.ItemIsDropEnabled
     
     def mimeTypes(self):
         return [ 'application/x-ets-qt4-instance' ]
@@ -342,9 +342,9 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
         self.treeModel = RealPMXMenuTreeModel(manager)
         self.listModel = RealPMXExcludedListModel(manager)
         self.treeMenuView.setModel(self.treeModel)
+        self.treeMenuView.setAcceptDrops(True)
+        self.treeMenuView.setDropIndicatorShown(True)
         self.listExcludedView.setModel(self.listModel)
-        #Para poder hacer drag and drop sobre los modelos
-        self.setAcceptDrops(False)
 
     def edit(self, bundleItem):
         if bundleItem.mainMenu != None:

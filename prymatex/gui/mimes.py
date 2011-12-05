@@ -23,8 +23,9 @@ class PyMimeData(QtCore.QMimeData):
             # We may not be able to pickle the data.
             try:
                 pdata = cPickle.dumps(data)
-            except:
-                return
+            except Exception, e:
+                pdata = ""
+                #return
     
             # This format (as opposed to using a single sequence) allows the
             # type to be extracted without unpickling the data itself.

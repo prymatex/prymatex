@@ -429,7 +429,7 @@ class PMXBundleMenuNode(object):
     
     def removeAll(self):
         self.children = []
-        
+    
     def name(self):
         if self.nodeType == PMXBundleMenuNode.SEPARATOR:
             return '--------------------------------'
@@ -443,7 +443,7 @@ class PMXBundleMenuNode(object):
 
     def removeChild(self, child):
         self.children.remove(child)
-        
+
     def child(self, row):
         if len(self.children) > row:
             return self.children[row]
@@ -487,7 +487,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
             self._build_menu(mainMenu['items'], self.root, mainMenu['submenus'])
         self.layoutChanged.emit()
     
-    def _add_submenu(self, submenuNode, submenus):
+    def add_submenu(self, submenuNode, submenus):
         items = []
         submenu = submenuNode.item
         for node in submenuNode.children:
@@ -571,20 +571,21 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
         return False
 
     def supportedDropActions(self): 
-        return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction 
+        return QtCore.Qt.MoveAction
 
     def flags(self, index):
         defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
-        if not index.isValid():
-            return defaultFlags | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled
-        node = index.internalPointer()
-        if node.nodeType == PMXBundleMenuNode.SUBMENU:
-            return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsEditable
-        elif node.nodeType == PMXBundleMenuNode.SEPARATOR:
-            return defaultFlags | QtCore.Qt.ItemIsDragEnabled
-        elif node.nodeType == PMXBundleMenuNode.ITEM:
-            return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsEditable
-
+        if index.isValid():
+            node = index.internalPointer()
+            if node.nodeType == PMXBundleMenuNode.SUBMENU:
+                return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsEditable
+            elif node.nodeType == PMXBundleMenuNode.SEPARATOR:
+                return defaultFlags | QtCore.Qt.ItemIsDragEnabled
+            elif node.nodeType == PMXBundleMenuNode.ITEM:
+                return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsEditable
+        else:        
+            return QtCore.Qt.ItemIsDropEnabled | defaultFlags
+    
     def mimeTypes(self):
         return [ 'application/x-ets-qt4-instance' ]
 
@@ -609,17 +610,34 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
 
         if dragNode.parent == None:
             #Es un nodo que viene de otro lado
-            parentNode.insertChild(row, dragNode)
+            if dragNode.nodeType == PMXBundleMenuNode.SEPARATOR:
+                separator = PMXBundleMenuNode('-', PMXBundleMenuNode.SEPARATOR)
+                parentNode.insertChild(row, separator)
+            elif dragNode.nodeType == PMXBundleMenuNode.SUBMENU:
+                uuid = self.manager.uuidgen()
+                submenu = PMXBundleMenuNode({"uuid": uuid, "name": dragNode.name()}, PMXBundleMenuNode.SUBMENU)
+                parentNode.insertChild(row, submenu)
+            elif dragNode.nodeType == PMXBundleMenuNode.ITEM:
+                #TODO: Quitarlo del excluded list
+                parentNode.insertChild(row, dragNode)
         elif dragNode.parent == parentNode:
-            currentRow = dragNode.row()
-            row = row if currentRow >= row else row - 1
-            dragNode.parent.removeChild(dragNode)
             dragNode.parent.insertChild(row, dragNode)
         else:
-            dragNode.parent.removeChild(dragNode)
             parentNode.insertChild(row, dragNode)
         
         self.layoutChanged.emit()
+        return True
+    
+    def insertRows(self, row, count, parentIndex):
+        print "yo me llamo"
+        
+    def removeRows(self, row, count, parentIndex):
+        if not parentIndex.isValid():
+            parentNode = self.root
+        else:
+            parentNode = parentIndex.internalPointer()
+        childNode = parentNode.child(row)
+        parentNode.removeChild(childNode)
         return True
 
 #===============================================

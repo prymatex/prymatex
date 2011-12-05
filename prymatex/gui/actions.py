@@ -14,6 +14,8 @@ class MainWindowActions(object):
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
 
     def updateMenuForEditor(self, editor):
+        #TODO: if editor is none set disabled accions
+        if editor is None: return
         flags = editor.getFlags()
         self.actionShowLineNumbers.setChecked(flags & editor.ShowLineNumbers)
         self.actionShowFolding.setChecked(flags & editor.ShowFolding)
