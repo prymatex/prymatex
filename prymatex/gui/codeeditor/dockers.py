@@ -11,6 +11,7 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Symbols"))
+        self.setObjectName(_("SymbolsDock"))
         PMXBaseDock.__init__(self)
         self.tableViewSymbols = QtGui.QTableView()
         self.tableViewSymbols.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
@@ -43,6 +44,7 @@ class PMXCodeBookmarksDock(QtGui.QDockWidget):
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Bookmarks"))
+        self.setObjectName(_("BookmarksDock"))
         self.tableViewBookmarks = QtGui.QTableView()
         self.tableViewBookmarks.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.tableViewBookmarks.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
