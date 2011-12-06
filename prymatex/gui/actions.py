@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from PyQt4 import QtCore, QtGui
 
 class MainWindowActions(object):

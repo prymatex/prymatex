@@ -242,7 +242,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         editor = editor or self.currentEditor
         while editor and editor.isModified():
             response = QtGui.QMessageBox.question(self, "Save", 
-                "Save %s" % editor.getTabTitle(), 
+                "Save %s" % editor.tabTitle(), 
                 buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
                 defaultButton = QtGui.QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
