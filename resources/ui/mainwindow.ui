@@ -730,6 +730,9 @@
    <property name="text">
     <string>Replace</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
   </action>
   <action name="actionOpenAllRecentFiles">
    <property name="text">
