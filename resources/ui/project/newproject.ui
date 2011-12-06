@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NewFromTemplateDialog</class>
- <widget class="QDialog" name="NewFromTemplateDialog">
+ <class>NewProject</class>
+ <widget class="QDialog" name="NewProject">
   <property name="windowModality">
    <enum>Qt::WindowModal</enum>
   </property>
@@ -14,7 +14,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>New From Template</string>
+   <string>New Project</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../resources.qrc">
+    <normaloff>:/icons/icons/Prymatex_Logo.png</normaloff>:/icons/icons/Prymatex_Logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -25,21 +29,27 @@
    </property>
    <item>
     <layout class="QFormLayout" name="formLayout_2">
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::ExpandingFieldsGrow</enum>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>Template:</string>
+        <string>Project Name:</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="lineFileName"/>
+     </item>
+     <item row="2" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Location:</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QLineEdit" name="lineLocation"/>
@@ -53,18 +63,15 @@
        </item>
       </layout>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="checkBox">
        <property name="text">
-        <string>File Name:</string>
+        <string>Use default location</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="lineFileName"/>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="comboTemplates"/>
      </item>
     </layout>
    </item>
@@ -89,8 +96,8 @@
         <string>&amp;Create</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
-         <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
+        <iconset resource="../../resources.qrc">
+         <normaloff>:/icons/actions/project-development-new-template.png</normaloff>:/icons/actions/project-development-new-template.png</iconset>
        </property>
       </widget>
      </item>
@@ -100,7 +107,7 @@
         <string>C&amp;ancel</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
+        <iconset resource="../../resources.qrc">
          <normaloff>:/icons/actions/dialog-cancel.png</normaloff>:/icons/actions/dialog-cancel.png</iconset>
        </property>
       </widget>
@@ -112,18 +119,17 @@
  <tabstops>
   <tabstop>lineFileName</tabstop>
   <tabstop>lineLocation</tabstop>
-  <tabstop>comboTemplates</tabstop>
   <tabstop>buttonChoose</tabstop>
   <tabstop>buttonCreate</tabstop>
  </tabstops>
  <resources>
-  <include location="../resources.qrc"/>
+  <include location="../../resources.qrc"/>
  </resources>
  <connections>
   <connection>
    <sender>buttonCancel</sender>
    <signal>clicked()</signal>
-   <receiver>NewFromTemplateDialog</receiver>
+   <receiver>NewProject</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

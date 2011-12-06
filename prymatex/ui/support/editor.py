@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
 #
-# Created: Mon Nov  7 18:31:02 2011
+# Created: Mon Dec  5 20:57:09 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -24,6 +24,8 @@ class Ui_BundleEditor(object):
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         BundleEditor.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(BundleEditor)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.splitter = QtGui.QSplitter(BundleEditor)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)

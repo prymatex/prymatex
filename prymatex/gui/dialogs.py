@@ -4,7 +4,7 @@
 import os
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
-from prymatex.ui.others.newtemplate import Ui_NewFromTemplateDialog
+from prymatex.ui.dialogs.newfromtemplate import Ui_NewFromTemplateDialog
 
 
 class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObject):
