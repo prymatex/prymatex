@@ -20,7 +20,7 @@
    <string>Prymatex Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../resources.qrc">
+   <iconset>
     <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -68,13 +68,6 @@
        <property name="margin">
         <number>0</number>
        </property>
-       <item>
-        <widget class="QLabel" name="labelTitle">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QWidget" name="container" native="true"/>
        </item>
