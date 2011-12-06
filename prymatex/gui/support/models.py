@@ -570,9 +570,6 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
             return True
         return False
 
-    def supportedDropActions(self): 
-        return QtCore.Qt.MoveAction
-
     def flags(self, index):
         defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
         if index.isValid():
@@ -609,29 +606,42 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
             parentNode = parentIndex.internalPointer()
 
         if dragNode.parent == None:
-            #Es un nodo que viene de otro lado
+            #The node belongs to a exludeList
             if dragNode.nodeType == PMXBundleMenuNode.SEPARATOR:
+                #Make a copy of separator
                 separator = PMXBundleMenuNode('-', PMXBundleMenuNode.SEPARATOR)
                 parentNode.insertChild(row, separator)
+                self.layoutChanged.emit()
+                return False
             elif dragNode.nodeType == PMXBundleMenuNode.SUBMENU:
+                #Make a copy of submenu
                 uuid = self.manager.uuidgen()
                 submenu = PMXBundleMenuNode({"uuid": uuid, "name": dragNode.name()}, PMXBundleMenuNode.SUBMENU)
                 parentNode.insertChild(row, submenu)
+                self.layoutChanged.emit()
+                return False
             elif dragNode.nodeType == PMXBundleMenuNode.ITEM:
-                #TODO: Quitarlo del excluded list
+                #Insertar el Nodo aca, quitarlo de la otra lista
                 parentNode.insertChild(row, dragNode)
+                self.layoutChanged.emit()
+                return True
         elif dragNode.parent == parentNode:
+            #Reparent
+            currentRow = dragNode.row()
+            row = row if currentRow >= row else row - 1
+            dragNode.parent.removeChild(dragNode)
             dragNode.parent.insertChild(row, dragNode)
+            self.layoutChanged.emit()
+            return False
         else:
+            #Reparent
+            dragNode.parent.removeChild(dragNode)
             parentNode.insertChild(row, dragNode)
-        
-        self.layoutChanged.emit()
-        return True
-    
-    def insertRows(self, row, count, parentIndex):
-        print "yo me llamo"
-        
+            self.layoutChanged.emit()
+            return False
+
     def removeRows(self, row, count, parentIndex):
+        print "quitar"
         if not parentIndex.isValid():
             parentNode = self.root
         else:
@@ -679,9 +689,6 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
     def columnCount(self, parent):  
         return 1
 
-    def supportedDropActions(self): 
-        return QtCore.Qt.MoveAction     
-
     def flags(self, index):
         if not index.isValid():
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDropEnabled
@@ -708,19 +715,20 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         
         dragNode = mimedata.instance()
         
-        if not parentIndex.isValid():
-            parentNode = self.root
-        else:
-            parentNode = parentIndex.internalPointer()
-
-        if dragNode.parent == parentNode:
-            currentRow = dragNode.row()
-            row = row if currentRow >= row else row - 1
-            dragNode.parent.removeChild(dragNode)
-            dragNode.parent.insertChild(row, dragNode)
-        else:
-            dragNode.parent.removeChild(dragNode)
-            parentNode.insertChild(row, dragNode)
+        if dragNode.nodeType == PMXBundleMenuNode.SEPARATOR:
+            return True
+        elif dragNode.nodeType == PMXBundleMenuNode.SUBMENU:
+            #TODO: Tomar todos sus items y meterlos en el exclude
+            self.layoutChanged.emit()
+            return True
+        elif dragNode.nodeType == PMXBundleMenuNode.ITEM:
+            if dragNode not in self.items:
+                dragNode.parent = None
+                self.items.append(dragNode)
+                self.layoutChanged.emit()
+                return True
+        return False
         
-        self.layoutChanged.emit()
+    def removeRows(self, row, count, parentIndex):
+        print "quitar de la lista"
         return True
