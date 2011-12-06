@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/dialog.ui'
 #
-# Created: Tue Dec  6 17:39:08 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Tue Dec  6 18:22:05 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -24,7 +24,6 @@ class Ui_SettingsDialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(SettingsDialog.sizePolicy().hasHeightForWidth())
         SettingsDialog.setSizePolicy(sizePolicy)
-        SettingsDialog.setWindowTitle(_('Prymatex Settings'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         SettingsDialog.setWindowIcon(icon)
@@ -69,6 +68,6 @@ class Ui_SettingsDialog(object):
         QtCore.QMetaObject.connectSlotsByName(SettingsDialog)
 
     def retranslateUi(self, SettingsDialog):
-        pass
+        SettingsDialog.setWindowTitle(_('Prymatex Settings'))
 
 from prymatex import resources_rc
