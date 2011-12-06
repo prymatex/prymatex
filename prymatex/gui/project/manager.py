@@ -12,7 +12,7 @@ from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.project.proxies import PMXProjectTreeProxyModel
 from prymatex.gui.project.base import PMXProject
 
-class PMXProjectManager(QtGui.QWidget, PMXObject):
+class PMXProjectManager(PMXObject):
     #Signals
     projectClosed = QtCore.pyqtSignal(object)
     projectOpened = QtCore.pyqtSignal(object)
@@ -20,7 +20,7 @@ class PMXProjectManager(QtGui.QWidget, PMXObject):
     #Settings
     workspacePath  = pmxConfigPorperty(default = os.path.join(USER_HOME_PATH, "workspace"))  #Eclipse muejejeje
     projects = pmxConfigPorperty(default = [])
-    sets = pmxConfigPorperty(default = {})
+    workingSets = pmxConfigPorperty(default = {})
     
     SETTINGS_GROUP = 'ProjectManager'
     
@@ -39,14 +39,13 @@ class PMXProjectManager(QtGui.QWidget, PMXObject):
         pass
 
     def createProject(self):
-        # Mostrar Dialogo
         project = PMXProject("diego", self.workspacePath)
         self.projectTreeModel.appendProject(project)
 
     def deleteProject(self):
         pass
 
-    def setSet(self, set, project):
-        projects = self.sets.setdefault(set)
+    def setWorkingSet(self, workingSet, project):
+        projects = self.workingSets.setdefault(workingSet)
         projects.append(project.path)
-        project.setSet(set)
+        project.setWorkingSet(workingSet)

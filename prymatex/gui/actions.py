@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 
 class MainWindowActions(object):
@@ -17,7 +20,7 @@ class MainWindowActions(object):
         #TODO: if editor is none set disabled accions
         if editor is None: return
         flags = editor.getFlags()
-        #TODO: Desconectar señales para poder hacer el set, medio raro
+        #TODO: Desconectar seÃ±ales para poder hacer el set, medio raro
         self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
         self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
         self.actionShowBookmarks.setChecked(bool(flags & editor.ShowBookmarks))
@@ -52,11 +55,17 @@ class MainWindowActions(object):
     # File Actions
     #============================================================
     @QtCore.pyqtSlot()
-    def on_actionNew_triggered(self):
+    def on_actionNewEditor_triggered(self):
         self.addEmptyEditor()
 
     @QtCore.pyqtSlot()
-    def on_actionNewFromTemplate_triggered(self):
+    def on_actionNewFileFromTemplate_triggered(self):
+        path = self.dialogNewFromTemplate.getNewFileFromTemplate()
+        if path:
+            self.openFile(QtCore.QFileInfo(path))
+    
+    @QtCore.pyqtSlot()
+    def on_actionNewProject_triggered(self):
         path = self.dialogNewFromTemplate.getNewFileFromTemplate()
         if path:
             self.openFile(QtCore.QFileInfo(path))

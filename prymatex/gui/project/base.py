@@ -24,7 +24,7 @@ metaData: Datos de los editores por cada documento abierto, es un diccionario in
                                                     'line': 52}},
 openDocuments: Documentos abiertos en el editor es una lista, cada entrada de aca tiene una en metaData
 showFileHierarchyDrawer: Mostrar la docker
-windowFrame: El Tampaño del a ventana de projecto en tm
+windowFrame: El TampaÃ±o del a ventana de projecto en tm
 """
 
 class PMXProject(object):
@@ -33,7 +33,7 @@ class PMXProject(object):
         self.filePath = filePath
         self.__name = os.path.splitext(os.path.basename(filePath))[0]
         self.dirPath = os.path.dirname(filePath)
-        self.__set = None
+        self.workingSet = None
         self.workspace = None
         self.load(hash)
         self.children = []
@@ -84,8 +84,8 @@ class PMXProject(object):
         self.workspace = workspace
         self.rootIndex = workspace.fileSystem.index(self.dirPath)
 
-    def setSet(self, set):
-        self.__set = set
+    def setWorkingSet(self, workingSet):
+        self.workingSet = set
 
     #==================================================
     # Tree Node interface

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/newfromtemplate.ui'
 #
-# Created: Mon Dec  5 20:57:08 2011
+# Created: Tue Dec  6 17:12:47 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -78,7 +78,7 @@ class Ui_NewFromTemplateDialog(object):
         NewFromTemplateDialog.setTabOrder(self.buttonChoose, self.buttonCreate)
 
     def retranslateUi(self, NewFromTemplateDialog):
-        NewFromTemplateDialog.setWindowTitle(_('New From Template'))
+        NewFromTemplateDialog.setWindowTitle(_('New File From Template'))
         self.label_3.setText(_('Template:'))
         self.label_2.setText(_('Location:'))
         self.buttonChoose.setText(_('Ch&oose'))

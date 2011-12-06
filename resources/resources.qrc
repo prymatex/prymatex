@@ -1,6 +1,15 @@
 <RCC>
   <qresource prefix="icons">
+    <file>mimetypes/text-plain.png</file>
     <file>actions/project-development-close.png</file>
+    <file>actions/run-build-clean.png</file>
+    <file>actions/run-build-clean.png</file>
+    <file>actions/run-build-configure.png</file>
+    <file>actions/run-build-file.png</file>
+    <file>actions/run-build-install-root.png</file>
+    <file>actions/run-build-install.png</file>
+    <file>actions/run-build-prune.png</file>
+    <file>actions/run-build.png</file>
     <file>actions/project-development.png</file>
     <file>actions/project-open.png</file>
     <file>actions/project-development-close-all.png</file>

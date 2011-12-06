@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>New From Template</string>
+   <string>New File From Template</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
