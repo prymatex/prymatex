@@ -205,11 +205,9 @@ class PMXApplication(QtGui.QApplication):
         if state:
             self.mainWindow.restoreState(state)
         self.mainWindow.show()
+        # Open files
+        self.openFilePaths(self.initialArguments[1:])
         
-        filesPaths = self.initialArguments[1:]
-        for filePath in filesPaths:
-            self.mainWindow.openLocalPath(filePath)
-    
     def closePrymatex(self):
         self.logger.debug("Close")
         self.settings.setValue("mainWindowGeometry", self.mainWindow.saveGeometry())
@@ -255,3 +253,23 @@ class PMXApplication(QtGui.QApplication):
             PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback).exec_()
 
         sys.excepthook = displayExceptionDialog
+    
+    # FIXME: Refactor
+    def openFilePaths(self, filePaths):
+        if not isinstance(filePaths, (list, tuple)):
+            filePaths = [filePaths, ]
+        from prymatex.gui.mainwindow import PMXMainWindow
+        mainwindows = filter(lambda w: isinstance(w, PMXMainWindow),  self.allWidgets())
+        if not mainwindows:
+            QtGui.QMessageBox.critical("No Main Window", "No window found while trying to open a file")
+            return
+        mw = mainwindows[0]
+        for filePath in filter(lambda f: os.path.exists(f), filePaths):
+            if os.path.isfile(filePath):
+                mw.openLocalPath(filePath)
+            else:
+                self.openAllSupportedFilesInDirectory(filePath)
+    
+    def openAllSupportedFilesInDirectory(self, filePaths):
+        raise NotImplementedError("Directory contents should be opened as files here")
+        
