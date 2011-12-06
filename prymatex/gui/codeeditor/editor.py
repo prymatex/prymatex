@@ -340,6 +340,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         if self.sidebar.showFolding:
             flags |= self.ShowFolding
         if options.wrapMode() & QtGui.QTextOption.WordWrap:
+            print "pongo word wrap"
             flags |= self.WordWrap
         return flags
         
@@ -355,6 +356,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         else:
             oFlags &= ~QtGui.QTextOption.ShowLineAndParagraphSeparators
         if flags & self.WordWrap:
+            print "set word wrap"
             options.setWrapMode(QtGui.QTextOption.WordWrap)
         else:
             options.setWrapMode(QtGui.QTextOption.NoWrap)

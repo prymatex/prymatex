@@ -17,12 +17,13 @@ class MainWindowActions(object):
         #TODO: if editor is none set disabled accions
         if editor is None: return
         flags = editor.getFlags()
-        self.actionShowLineNumbers.setChecked(flags & editor.ShowLineNumbers)
-        self.actionShowFolding.setChecked(flags & editor.ShowFolding)
-        self.actionShowBookmarks.setChecked(flags & editor.ShowBookmarks)
-        self.actionShowTabsAndSpaces.setChecked(flags & editor.ShowTabsAndSpaces)
-        self.actionShowLineAndParagraphs.setChecked(flags & editor.ShowLineAndParagraphs)
-        self.actionWordWrap.setChecked(flags & editor.WordWrap)
+        #TODO: Desconectar señales para poder hacer el set, medio raro
+        self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
+        self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
+        self.actionShowBookmarks.setChecked(bool(flags & editor.ShowBookmarks))
+        self.actionShowTabsAndSpaces.setChecked(bool(flags & editor.ShowTabsAndSpaces))
+        self.actionShowLineAndParagraphs.setChecked(bool(flags & editor.ShowLineAndParagraphs))
+        self.actionWordWrap.setChecked(bool(flags & editor.WordWrap))
         
     #============================================================
     # About To Show Menus
