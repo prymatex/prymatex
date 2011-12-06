@@ -27,9 +27,8 @@ class PMXFileManager(PMXObject):
     def __init__(self, parent):
         super(PMXFileManager, self).__init__(parent)
 
-        self.opened_files = {}
-        self.new_file_counter = 0
         self.iconProvider = QtGui.QFileIconProvider()
+        self._default_directory = QtCore.QDir(self.application.settings.USER_HOME_PATH)
         self.configure()
 
     def _add_file_history(self, fileInfo):
@@ -92,11 +91,14 @@ class PMXFileManager(PMXObject):
         content = stream.readAll()
         f.close()
         #Update file history
+        self._default_directory = fileInfo.dir()
         self._add_file_history(fileInfo)
         return content
     
     def saveFile(self, fileInfo, content):
-        """Function that actually save the content of a file (thread)."""
+        """
+        Function that actually save the content of a file.
+        """
         try:
             f = QtCore.QFile(fileInfo.absoluteFilePath())
             if not f.open(QtCore.QIODevice.WriteOnly | QtCore.QIODevice.Truncate):
@@ -109,28 +111,26 @@ class PMXFileManager(PMXObject):
         except:
             raise
     
-    def getNewFile(self):
-        """
-        Returns a new QFileInfo
-        """
-        path = os.path.join(self.currentDirectory, "Untitled %d" % self.new_file_counter)
-        self.new_file_counter += 1
-        return QtCore.QFileInfo(path)
-    
     def getDirectory(self, fileInfo = None):
+        """
+        Obtiene un directorio para el fileInfo
+        """
         if fileInfo is None:
-            return os.path.expanduser("~") 
-        return fileInfo.absoluteFilePath() if fileInfo.isDir() else os.path.dirname(fileInfo.absoluteFilePath())
+            #if fileInfo is None return the las directory or the home directory
+            return self._default_directory
+        return fileInfo.dir()
         
     def getOpenFiles(self, fileInfo = None):
         directory = self.getDirectory(fileInfo)
-        names = QtGui.QFileDialog.getOpenFileNames(None, "Open Files", directory)
+        names = QtGui.QFileDialog.getOpenFileNames(None, "Open Files", directory.absolutePath())
         return map(lambda name: QtCore.QFileInfo(name), names)
     
-    def getSaveFile(self, fileInfo = None, title = "Save file", filters = []):
+    def getSaveFile(self, fileInfo = None, name = "", title = "Save file", filters = []):
         directory = self.getDirectory(fileInfo)
+        filePath = directory.absoluteFilePath(name) if name else directory.absolutePath()
+
         filters = ";;".join(filters)
-        name = QtGui.QFileDialog.getSaveFileName(None, title, directory, filters)
+        name = QtGui.QFileDialog.getSaveFileName(None, title, filePath, filters)
         if name:
             return QtCore.QFileInfo(name)
     

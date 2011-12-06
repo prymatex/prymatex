@@ -184,7 +184,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.updateMenuForEditor(editor)        
 
         template = Template(self.windowTitleTemplate)
-        title = [ editor.getTabTitle() ] if editor is not None else []
+        title = [ editor.tabTitle() ] if editor is not None else []
         title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
         self.setWindowTitle(" - ".join(title))
         self.currentEditor = editor
@@ -217,7 +217,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor
         if editor.isNew() or saveAs:
-            fileInfo = self.application.fileManager.getSaveFile(title = "Save file" if saveAs else "Save file as")
+            fileName = editor.fileName()
+            fileFilters = editor.fileFilters()
+            fileInfo = self.application.fileManager.getSaveFile(title = "Save file as" if saveAs else "Save file", 
+                                                                filters = fileFilters, 
+                                                                name = fileName)
             if fileInfo is not None:
                 self.application.fileManager.saveFile(fileInfo, editor.toPlainText())
                 editor.setFileInfo(fileInfo)

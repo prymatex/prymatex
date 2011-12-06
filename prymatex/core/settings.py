@@ -216,6 +216,7 @@ class PMXSettings(object):
     PMX_APP_PATH = get_prymatex_app_path()
     PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
     PMX_HOME_PATH = get_prymatex_home_path()
+    USER_HOME_PATH = USER_HOME_PATH
     PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
 
     def __init__(self, profile):

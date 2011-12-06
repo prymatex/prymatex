@@ -191,8 +191,8 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
             ch = _TabWidget(self)
             self.addWidget(ch)
 
-        idx = ch.addTab(w, w.getTabTitle())
-        self.setActiveIcon(w, w.getTabIcon())
+        idx = ch.addTab(w, w.tabTitle())
+        self.setActiveIcon(w, w.tabIcon())
         self.connect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
         
         if ch is not self._current_tab_w:
@@ -219,8 +219,8 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         
     def _update_tab_status(self):
         sender = self.sender()
-        self.setWidgetTitle(sender, sender.getTabTitle())
-        self.setActiveIcon(sender, sender.getTabIcon())
+        self.setWidgetTitle(sender, sender.tabTitle())
+        self.setActiveIcon(sender, sender.tabIcon())
         
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
@@ -757,7 +757,9 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         return miss
     
     def mouseDoubleClickEvent(self, event):
-        ''' Add an empty editor when the tab bar is double clicked '''
+        """
+        Add an empty editor when the tab bar is double clicked
+        """
         self.mainWindow.addEmptyEditor()
         
     def moveCurrentTabLeft(self):

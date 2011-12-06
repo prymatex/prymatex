@@ -229,16 +229,24 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             self.setSyntax(syntax)
         PMXBaseEditor.setFileInfo(self, fileInfo)
         
-    def getTabTitle(self):
+    def tabTitle(self):
         #Podemos marcar de otra forma cuando algo cambia :P
-        return PMXBaseEditor.getTabTitle(self)
+        return PMXBaseEditor.tabTitle(self)
     
-    def getTabIcon(self):
+    def fileName(self):
+        """docstring for fileName"""
+        return self.tabTitle()
+    
+    def fileFilters(self):
+        """docstring for fileFilters"""
+        return []
+    
+    def tabIcon(self):
         if self.isModified():
             return resources.ICONS["save"]
         elif self.fileInfo is not None:
             return self.application.fileManager.getFileIcon(self.fileInfo)
-        return PMXBaseEditor.getTabIcon(self)
+        return PMXBaseEditor.tabIcon(self)
     
     @classmethod
     def newInstance(cls, application, fileInfo = None, parent = None):

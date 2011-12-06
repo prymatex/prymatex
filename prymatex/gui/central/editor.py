@@ -5,10 +5,10 @@ from PyQt4 import QtGui, QtCore
 from prymatex.core import exceptions
 
 class PMXBaseEditor(object):
-    '''
+    """
     Every editor should extend this class in order to guarantee it'll be able
     to be place in tab.
-    '''
+    """
     #tabStatusChanged
     
     creation_counter = 0
@@ -22,14 +22,20 @@ class PMXBaseEditor(object):
         self.fileInfo = fileInfo
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
         
-    def getTabIcon(self):
+    def tabIcon(self):
         return QtGui.QIcon()
     
     UNTITLED_FILE_TEMPLATE = "Untitled {creation_counter}"
-    def getTabTitle(self):
+    def tabTitle(self):
         if self.fileInfo is not None:
             return self.fileInfo.fileName()
         return self.UNTITLED_FILE_TEMPLATE.format(creation_counter = self.creation_counter)
+    
+    def fileName():
+        pass
+        
+    def fileFilters(self):
+        pass
     
     def isNew(self):
         return self.fileInfo is None
