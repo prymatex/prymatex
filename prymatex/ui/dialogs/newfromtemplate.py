@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/newfromtemplate.ui'
 #
-# Created: Tue Dec  6 17:12:47 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Tue Dec  6 17:39:08 2011
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,6 +20,7 @@ class Ui_NewFromTemplateDialog(object):
         NewFromTemplateDialog.setObjectName(_fromUtf8("NewFromTemplateDialog"))
         NewFromTemplateDialog.setWindowModality(QtCore.Qt.WindowModal)
         NewFromTemplateDialog.resize(450, 115)
+        NewFromTemplateDialog.setWindowTitle(_('New From Template'))
         self.verticalLayout = QtGui.QVBoxLayout(NewFromTemplateDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -27,9 +28,11 @@ class Ui_NewFromTemplateDialog(object):
         self.formLayout_2 = QtGui.QFormLayout()
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
         self.label_3 = QtGui.QLabel(NewFromTemplateDialog)
+        self.label_3.setText(_('Template:'))
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_3)
         self.label_2 = QtGui.QLabel(NewFromTemplateDialog)
+        self.label_2.setText(_('Location:'))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_2)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
@@ -38,10 +41,12 @@ class Ui_NewFromTemplateDialog(object):
         self.lineLocation.setObjectName(_fromUtf8("lineLocation"))
         self.horizontalLayout_5.addWidget(self.lineLocation)
         self.buttonChoose = QtGui.QPushButton(NewFromTemplateDialog)
+        self.buttonChoose.setText(_('Ch&oose'))
         self.buttonChoose.setObjectName(_fromUtf8("buttonChoose"))
         self.horizontalLayout_5.addWidget(self.buttonChoose)
         self.formLayout_2.setLayout(1, QtGui.QFormLayout.FieldRole, self.horizontalLayout_5)
         self.label = QtGui.QLabel(NewFromTemplateDialog)
+        self.label.setText(_('File Name:'))
         self.label.setObjectName(_fromUtf8("label"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
         self.lineFileName = QtGui.QLineEdit(NewFromTemplateDialog)
@@ -56,12 +61,14 @@ class Ui_NewFromTemplateDialog(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.buttonCreate = QtGui.QPushButton(NewFromTemplateDialog)
+        self.buttonCreate.setText(_('&Create'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCreate.setIcon(icon)
         self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
         self.horizontalLayout.addWidget(self.buttonCreate)
         self.buttonCancel = QtGui.QPushButton(NewFromTemplateDialog)
+        self.buttonCancel.setText(_('C&ancel'))
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCancel.setIcon(icon1)

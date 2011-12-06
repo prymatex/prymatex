@@ -20,6 +20,9 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog, PMXObject):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
+        
+        self.baseWindowTitle = self.windowTitle()
+        
         self.model = QtGui.QStandardItemModel(self)
         
         self.proxyModelSettings = QtGui.QSortFilterProxyModel(self)
@@ -50,7 +53,11 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog, PMXObject):
         if index:
             self.container.layout().setCurrentIndex(item.stackIndex)
         title = self.container.layout().currentWidget().windowTitle()
-        self.labelTitle.setText(title)
+        #self.labelTitle.setText(title)
+        self.updateTitle(title)
+    
+    def updateTitle(self, subTitle):
+        self.setWindowTitle("%s - %s" % (self.baseWindowTitle, subTitle))
     
     firstTitleTaken = False
     def showEvent(self, event):

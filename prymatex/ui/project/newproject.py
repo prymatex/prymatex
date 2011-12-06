@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'resources/ui/project/newproject.ui'
 #
 # Created: Tue Dec  6 17:12:48 2011
-#      by: PyQt4 UI code generator 4.8.4
+#      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,6 +20,7 @@ class Ui_NewProject(object):
         NewProject.setObjectName(_fromUtf8("NewProject"))
         NewProject.setWindowModality(QtCore.Qt.WindowModal)
         NewProject.resize(450, 134)
+        NewProject.setWindowTitle(_('New Project'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         NewProject.setWindowIcon(icon)
@@ -31,12 +32,14 @@ class Ui_NewProject(object):
         self.formLayout_2.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
         self.label = QtGui.QLabel(NewProject)
+        self.label.setText(_('Project Name:'))
         self.label.setObjectName(_fromUtf8("label"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
         self.lineProjectName = QtGui.QLineEdit(NewProject)
         self.lineProjectName.setObjectName(_fromUtf8("lineProjectName"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.lineProjectName)
         self.label_2 = QtGui.QLabel(NewProject)
+        self.label_2.setText(_('Location:'))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.formLayout_2.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_2)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
@@ -72,12 +75,14 @@ class Ui_NewProject(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.buttonCreate = QtGui.QPushButton(NewProject)
+        self.buttonCreate.setText(_('&Create'))
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/project-development-new-template.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCreate.setIcon(icon1)
         self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
         self.horizontalLayout.addWidget(self.buttonCreate)
         self.buttonCancel = QtGui.QPushButton(NewProject)
+        self.buttonCancel.setText(_('C&ancel'))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.buttonCancel.setIcon(icon2)
@@ -93,6 +98,7 @@ class Ui_NewProject(object):
         NewProject.setTabOrder(self.buttonChoose, self.buttonCreate)
 
     def retranslateUi(self, NewProject):
+        pass
         NewProject.setWindowTitle(_('New Project'))
         self.label.setText(_('Project Name:'))
         self.label_2.setText(_('Location:'))

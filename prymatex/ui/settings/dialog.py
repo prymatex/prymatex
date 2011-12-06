@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/dialog.ui'
 #
-# Created: Sun Nov 27 22:45:28 2011
+# Created: Tue Dec  6 17:39:08 2011
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -60,10 +60,6 @@ class Ui_SettingsDialog(object):
         self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.labelTitle = QtGui.QLabel(self.mainContainer)
-        self.labelTitle.setText(_('TextLabel'))
-        self.labelTitle.setObjectName(_fromUtf8("labelTitle"))
-        self.verticalLayout_3.addWidget(self.labelTitle)
         self.container = QtGui.QWidget(self.mainContainer)
         self.container.setObjectName(_fromUtf8("container"))
         self.verticalLayout_3.addWidget(self.container)
