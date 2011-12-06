@@ -45,7 +45,9 @@ class PMXFileManager(PMXObject):
         self.settings.setValue("fileHistory", self.fileHistory)
     
     def createDirectory(self, base, name = None, parent = None):
-        """Create a new directory."""
+        """
+        Create a new directory.
+        """
         if name is None:
             name, ok = QtGui.QInputDialog.getText(parent, "New directoy name", "<p>Please enter the new directoy name in</p><p>%s</p>" % base)
             if not ok:

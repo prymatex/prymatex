@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import os
 from PyQt4 import QtCore, QtGui
 
 """
@@ -25,11 +26,14 @@ openDocuments: Documentos abiertos en el editor es una lista, cada entrada de ac
 showFileHierarchyDrawer: Mostrar la docker
 windowFrame: El Tampaño del a ventana de projecto en tm
 """
+
 class PMXProject(object):
     KEYS = [    'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
-    def __init__(self, name, path, hash):
-        self._name = name
-        self.rootPath = path
+    def __init__(self, filePath, hash):
+        self.filePath = filePath
+        self.__name = os.path.splitext(os.path.basename(filePath))[0]
+        self.dirPath = os.path.dirname(filePath)
+        self.__set = None
         self.workspace = None
         self.load(hash)
         self.children = []
@@ -40,12 +44,48 @@ class PMXProject(object):
             setattr(self, key, value)
     
     @property
+    def hash(self):
+        hash = {}
+        for key in PMXProject.KEYS:
+            value = getattr(self, key)
+            if value != None:
+                hash[key] = value
+        return hash
+
+    def save(self):
+        file = os.path.join(self.filePath)
+        plist.writePlist(self.hash, file)
+
+    def delete(self, hard = False):
+        os.unlink(os.path.join(self.filePath))
+        if hard:
+            try:
+                os.rmdir(self.dirPath)
+            except os.OSError:
+                pass
+
+    def buildEnvironment(self):
+        return {}
+
+    @classmethod
+    def loadProject(cls, filePath, manager):
+        try:
+            data = plist.readPlist(filePath)
+            project = cls(filePath, data)
+            manager.addProject(project)
+        except Exception, e:
+            print "Error in project %s (%s)" % (info_file, e)
+    
+    @property
     def fileSystem(self):
         return self.workspace.fileSystem
     
     def setWorkspace(self, workspace):
         self.workspace = workspace
-        self.rootIndex = workspace.fileSystem.index(self.rootPath)
+        self.rootIndex = workspace.fileSystem.index(self.dirPath)
+
+    def setSet(self, set):
+        self.__set = set
 
     #==================================================
     # Tree Node interface
@@ -54,7 +94,7 @@ class PMXProject(object):
         return None
         
     def name(self):
-        return self._name
+        return self.__name
     
     def child(self, row, column):
         child = self.rootIndex.child(row, column)
@@ -77,19 +117,22 @@ class PMXProjectItem(object):
     def __init__(self, path, project):
         self.path = path
         self.project = project
-        self._parent = None
+        self.__parent = None
         self.children = []
 
     @property
     def fileSystem(self):
         return self.project.fileSystem
         
-    def setParent(self, parent):
-        self._parent = parent
-
     #==================================================
     # Tree Node interface
-    #==================================================
+    #==================================================    
+    def setParent(self, parent):
+        self.__parent = parent
+
+    def parent(self):
+        return self.__parent
+    
     def icon(self):
         index = self.fileSystem.index(self.path)
         return self.fileSystem.fileIcon(index)
@@ -113,6 +156,3 @@ class PMXProjectItem(object):
     
     def row(self):
         return self.parent().children.index(self)
-    
-    def parent(self):
-        return self._parent
