@@ -240,7 +240,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     
     def closeEditor(self, editor = None):
         editor = editor or self.currentEditor
-        while editor.isModified():
+        while editor and editor.isModified():
             response = QtGui.QMessageBox.question(self, "Save", 
                 "Save %s" % editor.getTabTitle(), 
                 buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
@@ -251,7 +251,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 break
             elif response == QtGui.QMessageBox.Cancel:
                 return
-        self.removeEditor(editor)
+        if editor:
+            self.removeEditor(editor)
 
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):

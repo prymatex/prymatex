@@ -128,12 +128,10 @@ class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog, PMXObject):
     
     @pmxConfigPorperty(default = "unix")
     def lineEndings(self, ending):
-        print "Setter line ending"
         self.comboBoxLineEnding.setCurrentIndex(self.comboBoxLineEnding.findData(ending))
 
     @pmxConfigPorperty(default = 'utf-8')
     def encoding(self, enc):
-        print "Setter encoding"
         self.comboBoxEncoding.setCurrentIndex(self.comboBoxEncoding.findData(enc))
         
     
