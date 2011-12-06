@@ -190,6 +190,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.currentEditor = editor
 
     def openFile(self, fileInfo, cursorPosition = (0,0), focus = True):
+        assert isinstance(fileInfo, QtCore.QFileInfo)
         editor = self.findEditorForFile(fileInfo)
         if editor is None:
             if self.currentEditor is not None and self.currentEditor.isNew() and not self.currentEditor.isModified():
@@ -213,6 +214,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         else:            
             editor.setCursorPosition(cursorPosition)            
         return editor
+    
+    def openLocalPath(self, path, focus = False):
+        '''Focus'''
+        self.openFile(QtCore.QFileInfo(path), focus = focus)
     
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor

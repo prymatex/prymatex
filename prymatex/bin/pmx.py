@@ -40,7 +40,9 @@ def parseArguments(args):
     options, args = parser.parse_args(args)
     #parser.error("options --alert and --menu are mutually exclusive")
     return options, args
-    
+
+
+# TODO: Accept Qt Arguments to QtApplication
 def runPrymatexApplication(options, args):
     from prymatex.core import app, exceptions
     try:

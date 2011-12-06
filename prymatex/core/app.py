@@ -39,6 +39,9 @@ class PMXApplication(QtGui.QApplication):
 
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
+        
+        self.initialArguments = args
+        
     
     def exec_(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
@@ -202,6 +205,10 @@ class PMXApplication(QtGui.QApplication):
         if state:
             self.mainWindow.restoreState(state)
         self.mainWindow.show()
+        
+        filesPaths = self.initialArguments[1:]
+        for filePath in filesPaths:
+            self.mainWindow.openLocalPath(filePath)
     
     def closePrymatex(self):
         self.logger.debug("Close")
