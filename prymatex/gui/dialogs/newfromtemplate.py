@@ -11,6 +11,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
         super(PMXNewFromTemplateDialog, self).__init__(parent)
         self.setupUi(self)
         model = QtGui.QFileSystemModel(self)
+        model.setRootPath(QtCore.QDir.rootPath())
         model.setFilter(QtCore.QDir.Dirs)
         self.completerFileSystem = QtGui.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)

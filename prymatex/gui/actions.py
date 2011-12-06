@@ -60,13 +60,13 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionNewFileFromTemplate_triggered(self):
-        path = self.dialogNewFromTemplate.getNewFileFromTemplate()
+        path = self.newFromTemplateDialog.getNewFileFromTemplate()
         if path:
             self.openFile(QtCore.QFileInfo(path))
     
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
-        path = self.dialogNewFromTemplate.getNewFileFromTemplate()
+        path = self.newProjectDialog.getNewProject()
         if path:
             self.openFile(QtCore.QFileInfo(path))
 
@@ -374,7 +374,7 @@ class MainWindowActions(object):
         editor = self.currentEditor
         scope = editor.getCurrentScope()
         items = self.application.supportManager.getActionItems(scope)
-        item = self.bundleItemSelector.select(items)
+        item = self.bundleSelectorDialog.select(items)
         if item is not None:
             self.currentEditor.insertBundleItem(item)
     

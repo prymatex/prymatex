@@ -1,13 +1,16 @@
-from PyQt4 import QtCore, QtGui
-from prymatex.ui.support.selector import Ui_BundleSelector
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-class PMXBundleItemSelector(Ui_BundleSelector, QtGui.QDialog):
+from PyQt4 import QtCore, QtGui
+from prymatex.ui.dialogs.bundleselector import Ui_BundleSelectorDialog
+
+class PMXBundleSelectorDialog(QtGui.QDialog, Ui_BundleSelectorDialog):
     '''
     This dialog allow the user to search through commands, snippets and macros in the current scope easily.
     An instance is hold in the main window and triggered with an action.
     '''
     def __init__(self, parent = None):
-        super(PMXBundleItemSelector, self).__init__(parent)
+        QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         self.setWindowFlags(QtCore.Qt.Dialog)
         self.model = QtGui.QStandardItemModel(self)

@@ -18,7 +18,7 @@ class PMXProjectManager(PMXObject):
     projectOpened = QtCore.pyqtSignal(object)
     
     #Settings
-    workspacePath  = pmxConfigPorperty(default = os.path.join(USER_HOME_PATH, "workspace"))  #Eclipse muejejeje
+    workspaceDirectory  = pmxConfigPorperty(default = os.path.join(USER_HOME_PATH, "workspace"))  #Eclipse muejejeje
     projects = pmxConfigPorperty(default = [])
     workingSets = pmxConfigPorperty(default = {})
     

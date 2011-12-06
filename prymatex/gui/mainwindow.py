@@ -135,12 +135,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.dockers = [codeSymbols, codeBookmarks]
     
     def setupDialogs(self):
-        from prymatex.gui.dialogs import PMXNewFromTemplateDialog
-        from prymatex.gui.support.bundleselector import PMXBundleItemSelector
-        
+        from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
+        from prymatex.gui.dialogs.bundleselector import PMXBundleSelectorDialog
+        from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
+                
         # Create dialogs
-        self.dialogNewFromTemplate = PMXNewFromTemplateDialog(self)
-        self.bundleItemSelector = PMXBundleItemSelector(self)
+        self.newFromTemplateDialog = PMXNewFromTemplateDialog(self)
+        self.newProjectDialog = PMXNewProjectDialog(self)
+        self.bundleSelectorDialog = PMXBundleSelectorDialog(self)
 
     #============================================================
     # Create and manage editors
