@@ -3,9 +3,9 @@ from time import sleep
 from select import select
 from bisect import bisect, insort
 
-from nitro.async import AsyncOp
-from nitro.hirestimer import seconds
-from nitro.reactor import Reactor
+from prymatex.nitro.async import AsyncOp
+from prymatex.nitro.hirestimer import seconds
+from prymatex.nitro.reactor import Reactor
 
 logger = logging.getLogger( 'nitro.selectreactor' )
 

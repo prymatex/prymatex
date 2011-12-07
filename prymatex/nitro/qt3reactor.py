@@ -1,6 +1,7 @@
 import sys, logging
-from nitro.async import AsyncOp
-from nitro.reactor import Reactor
+
+from prymatex.nitro.async import AsyncOp
+from prymatex.nitro.reactor import Reactor
 
 from qt import *
 

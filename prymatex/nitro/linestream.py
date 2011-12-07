@@ -1,4 +1,4 @@
-from nitro.tcp import TCPStream
+from prymatex.nitro.tcp import TCPStream
 
 class TCPLineStream( object ) :
     def __init__( self, sock, reactor ) :

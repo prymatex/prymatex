@@ -5,8 +5,8 @@ from socket import IPPROTO_IP, IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP
 from socket import error as sock_error
 from urlparse import urljoin
 from elementtree import ElementTree
-from nitro.async import AsyncOp
-from nitro.http import HttpRequest
+from prymatex.nitro.async import AsyncOp
+from prymatex.nitro.http import HttpRequest
 
 logger = logging.getLogger( 'nitro.upnp' )
 

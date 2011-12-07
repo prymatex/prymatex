@@ -3,8 +3,8 @@ from struct import pack, unpack
 from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SO_ERROR
 from socket import error as sock_error
 
-from nitro.async import AsyncOp
-from nitro.errors import *
+from prymatex.nitro.async import AsyncOp
+from prymatex.nitro.errors import *
 
 def tcpListen( addr, reactor, callback ) :
     l = TCPListener( reactor, callback )

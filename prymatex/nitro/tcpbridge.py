@@ -1,7 +1,7 @@
 from time import time
 from socket import error as sock_error
 
-from nitro.errors import EWOULDBLOCK, EAGAIN
+from prymatex.nitro.errors import EWOULDBLOCK, EAGAIN
 
 class StreamState(object) :
     def __init__( self, srcSock, destSock ) :

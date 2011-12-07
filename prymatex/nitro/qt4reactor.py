@@ -1,8 +1,8 @@
 import sys, logging
 from PyQt4.QtCore import QObject, SIGNAL, SLOT, QSocketNotifier, QTimer
 
-from nitro.async import AsyncOp
-from nitro.reactor import Reactor
+from prymatex.nitro.async import AsyncOp
+from prymatex.nitro.reactor import Reactor
 
 logger = logging.getLogger( 'nitro.qt4reactor' )
 

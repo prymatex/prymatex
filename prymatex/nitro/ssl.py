@@ -2,7 +2,7 @@ from struct import pack, unpack
 
 from ncrypt.ssl import SSLWantReadError, SSLWantWriteError, SSLWantError, SSLError
 
-from nitro.async import AsyncOp
+from prymatex.nitro.async import AsyncOp
 
 def sslAccept( sslConn, reactor, callback=None ) :
     return SSLInitiator( sslConn, SSLInitiator.ACCEPT, reactor, callback ).getOp()

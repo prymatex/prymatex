@@ -1,5 +1,5 @@
 import pycurl
-from nitro.async import AsyncOp
+from prymatex.nitro.async import AsyncOp
 
 def curlPerform( curlHandle, reactor, callback=None ) :
     return CurlPerformer(curlHandle,reactor,callback).getOp()
