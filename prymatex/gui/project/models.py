@@ -76,6 +76,13 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
 
         return self.workspace
 
+    #========================================================================
+    # Custom methods
+    #========================================================================
+    def getAllProjects(self):
+        """docstring for getAllProjects"""
+        return self.workspace.projects
+    
     def appendProject(self, project):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.workspace), len(self.workspace))
         self.workspace.appendProject(project)

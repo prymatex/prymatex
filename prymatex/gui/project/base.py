@@ -31,8 +31,8 @@ class PMXProject(object):
     KEYS = [    'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
     def __init__(self, filePath, hash):
         self.filePath = filePath
+        self.directory = os.path.dirname(filePath)
         self.__name = os.path.splitext(os.path.basename(filePath))[0]
-        self.dirPath = os.path.dirname(filePath)
         self.workingSet = None
         self.workspace = None
         self.load(hash)
@@ -60,7 +60,7 @@ class PMXProject(object):
         os.unlink(os.path.join(self.filePath))
         if hard:
             try:
-                os.rmdir(self.dirPath)
+                os.rmdir(self.directory)
             except os.OSError:
                 pass
 
@@ -82,7 +82,7 @@ class PMXProject(object):
     
     def setWorkspace(self, workspace):
         self.workspace = workspace
-        self.rootIndex = workspace.fileSystem.index(self.dirPath)
+        self.rootIndex = workspace.fileSystem.index(self.directory)
 
     def setWorkingSet(self, workingSet):
         self.workingSet = set

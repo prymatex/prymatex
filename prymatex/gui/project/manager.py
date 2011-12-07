@@ -32,13 +32,17 @@ class PMXProjectManager(PMXObject):
         
         self.configure()
 
+    def loadProjects(self, filePath):
+        project = PMXProject("diego", self.workspacePath)
+        self.projectTreeModel.appendProject(project)    
+
     def addProject(self, project):
-        pass
+        self.projectTreeModel.appendProject(project)
         
     def openProject(self):
         pass
 
-    def createProject(self):
+    def createProject(self, filePath):
         project = PMXProject("diego", self.workspacePath)
         self.projectTreeModel.appendProject(project)
 
@@ -49,3 +53,8 @@ class PMXProjectManager(PMXObject):
         projects = self.workingSets.setdefault(workingSet)
         projects.append(project.path)
         project.setWorkingSet(workingSet)
+        
+    def findProjectForFile(self, fileInfo):
+        for project in self.projectTreeModel.getAllProjects():
+            if os.path.commonprefix([project.directory, fileInfo.absolutePath()]) == project.directory:
+                return project
