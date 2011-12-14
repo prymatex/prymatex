@@ -24,6 +24,7 @@ except AttributeError:
     _fromUtf8 = lambda s: s
 
 from prymatex.ui.support.bundle import Ui_Menu
+from prymatex.utils import zeromqt
 
 class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
     TYPE = 'bundle'
@@ -37,6 +38,14 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
         from prymatex.gui.support.models import PMXExcludedListModel
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
+        self.context = zeromqt.ZeroMQTContext(parent = self)
+        self.socket = self.context.socket(zeromqt.REP)
+        self.socket.bind('tcp://127.0.0.1:10001')
+        self.socket.readyRead.connect(self.socketReadyRead)
+        self.socket.readyWrite.connect(self.socketReadyWrite)
+        self.publisher = self.context.socket(zeromqt.PUB)
+        self.publisher.bind('tcp://127.0.0.1:10002')
+        
         self.manager = manager
         self.treeModel = PMXMenuTreeModel(manager)
         self.listModel = PMXExcludedListModel(manager)
@@ -44,7 +53,19 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
         self.treeMenuView.setAcceptDrops(True)
         self.treeMenuView.setDropIndicatorShown(True)
         self.listExcludedView.setModel(self.listModel)
+        self.treeMenuView.collapsed.connect(self.nodeCollapsed) 
 
+    def socketReadyWrite(self):
+        print "puedo mandar"
+        self.socket.send("oka")
+        
+    def socketReadyRead(self):
+        print self.socket.recv()
+    
+    def nodeCollapsed(self, index):
+        print "send"
+        self.publisher.send_pyobj({"Node": index.data(), "Row": index.row(), "Column": index.column()})
+    
     def edit(self, bundleItem):
         if bundleItem.mainMenu != None:
             self.treeModel.setMainMenu(bundleItem.mainMenu)

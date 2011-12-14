@@ -18,7 +18,7 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog, PMXObject):
     configdialog property
     """
     def __init__(self, parent = None):
-        QtGui.QDialog.__init__(self, parent)
+        QtGui.QDialog.__init__(self)
         self.setupUi(self)
         
         self.baseWindowTitle = self.windowTitle()

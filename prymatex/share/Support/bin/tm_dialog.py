@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from xmlrpclib import ServerProxy
+import zmq
 import sys, tempfile
+
 from optparse import OptionParser, OptionGroup
 # sum(map(lambda c: ord(c), 'Prymatex is an open source textmate replacement'))
 
@@ -305,7 +306,9 @@ PARSERS = {
 
 class CommandHandler(object):
     def __init__(self):
-        self.server = ServerProxy('http://localhost:%d' % PORT)
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REQ)
+        self.socket.connect('tcp://127.0.0.1:%d' % PORT)
         
     def nib(self, args):
         options, args = nib_parse_args(args)
@@ -318,9 +321,10 @@ class CommandHandler(object):
     def menu(self, options):
         if options.parameters == None:
             options.parameters = sys.stdin.readlines()
-        result = self.server.menu("".join(options.parameters))
-        if not options.quiet:
-            sys.stdout.write(result)
+        command = {"name": "menu", "args": "".join(options.parameters)}
+        self.socket.send_pyobj(command)
+        result = self.socket.recv_pyobj()
+        sys.stdout.write(result["data"])
         
     def popup(self, args):
         options, args = popup_parse_args(args)
@@ -339,7 +343,8 @@ class CommandHandler(object):
         self.server.alert(str(options), str(args))
         
     def debug(self, options, args):
-        self.server.debug(str(options), str(args))
+        command = {"name": "debug", "args": str(args)}
+        self.socket.send_pyobj(command)
     
 def main(args):
     if len(args) >= 1 and args[0] in PARSERS:

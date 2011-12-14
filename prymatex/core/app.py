@@ -41,7 +41,6 @@ class PMXApplication(QtGui.QApplication):
         self.aboutToQuit.connect(self.closePrymatex)
         
         self.initialArguments = args
-        
     
     def exec_(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
@@ -53,12 +52,10 @@ class PMXApplication(QtGui.QApplication):
         self.setupProjectManager()   #Project Manager
         self.setupKernelManager()    #Console kernel Manager
         self.setupCoroutines()
+        self.setupZeroMQContext()
 
         # Setup Dialogs
-        #self.setupExecutor()       #Executor
-        self.setupConfigDialog()    #Config Dialog
-        self.setupBundleEditor()    #Bundle Editor
-        self.setupServerThread()
+        self.setupDialogs()         #Config Dialog
         
         # Creates the GUI
         # args[1:] para ver si quiere abrir archivos los busco en los argumentos
@@ -88,7 +85,29 @@ class PMXApplication(QtGui.QApplication):
             f = open(self.fileLock, 'w')
             f.write('%s' % self.applicationPid())
             f.close()
-            
+
+    def setupLogging(self):
+        """
+        @see PMXObject.debug, PMXObject.info, PMXObject.warn
+        """
+        import logging
+        from datetime import datetime
+        
+        # File name
+        d = datetime.now().strftime('%d-%m-%Y-%H-%M-%S')
+        filename = os.path.join(self.settings.PMX_LOG_PATH, 'messages-%s.log' % d)
+        logging.basicConfig(filename=filename, level=logging.DEBUG)
+        
+        # Console handler
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        
+        logging.root.addHandler(ch)
+        logging.root.info("Application startup")
+        logging.root.debug("Application startup debug")
+        
+        self.logger = logging.root
+
     #========================================================
     # Managers
     #========================================================
@@ -144,52 +163,40 @@ class PMXApplication(QtGui.QApplication):
         except ImportError:
             self.kernelManager = None
 
-    def setupConfigDialog(self):
+    def setupCoroutines(self):
+        from prymatex.utils.coroutines import Scheduler
+        self.scheduler = Scheduler(self)
+
+    def setupZeroMQContext(self):
+        from prymatex.utils import zeromqt
+        self.zmqContext = zeromqt.ZeroMQTContext(parent = self)
+
+    #========================================================
+    # Dialogs
+    #========================================================
+    def setupDialogs(self):
+        #Settings
         from prymatex.gui.settings.dialog import PMXSettingsDialog
-        configdialog = PMXSettingsDialog()
         from prymatex.gui.settings.widgets import PMXGeneralWidget, PMXNetworkWidget
         from prymatex.gui.settings.environment import PMXEnvVariablesWidgets
         from prymatex.gui.settings.themes import PMXThemeConfigWidget
         from prymatex.gui.settings.widgets import PMXFileManagerSettings
-                                                
-        configdialog.register(PMXGeneralWidget())
-        configdialog.register(PMXFileManagerSettings())
-        configdialog.register(PMXThemeConfigWidget())
-        configdialog.register(PMXEnvVariablesWidgets())
-        configdialog.register(PMXNetworkWidget())
-        self.configDialog = configdialog
-    
-    def setupExecutor(self):
-        from concurrent import futures
-        self.executor = futures.ThreadPoolExecutor(max_workers=5)
-    
-    def setupBundleEditor(self):
+        self.configDialog = PMXSettingsDialog(self)
+        self.configDialog.register(PMXGeneralWidget())
+        self.configDialog.register(PMXFileManagerSettings())
+        self.configDialog.register(PMXThemeConfigWidget())
+        self.configDialog.register(PMXEnvVariablesWidgets())
+        self.configDialog.register(PMXNetworkWidget())
+        
+        #Bundle Editor
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
         self.bundleEditor = PMXBundleEditor(self)
-        self.bundleEditor.setModal(True)
-
-    def setupLogging(self):
-        """
-        @see PMXObject.debug, PMXObject.info, PMXObject.warn
-        """
-        import logging
-        from datetime import datetime
+        #self.bundleEditor.setModal(True)
         
-        # File name
-        d = datetime.now().strftime('%d-%m-%Y-%H-%M-%S')
-        filename = os.path.join(self.settings.PMX_LOG_PATH, 'messages-%s.log' % d)
-        logging.basicConfig(filename=filename, level=logging.DEBUG)
-        
-        # Console handler
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        
-        logging.root.addHandler(ch)
-        logging.root.info("Application startup")
-        logging.root.debug("Application startup debug")
-        
-        self.logger = logging.root
-        
+        #Dialog System
+        from prymatex.dialog.base import PMXDialogSystem
+        self.dialogSystem = PMXDialogSystem(self)
+    
     def createMainWindow(self):
         """
         Creates the windows
@@ -221,16 +228,6 @@ class PMXApplication(QtGui.QApplication):
     def saveState(self, session_manager):
         self.logger.debug( "Save state %s" % session_manager)
         
-    def setupCoroutines(self):
-        from prymatex.utils.coroutines import Scheduler
-        self.scheduler = Scheduler(self)
-
-    def setupServerThread(self):
-        from prymatex.core.server import PMXServerThread
-        self.serverThread = PMXServerThread(self)
-        self.serverThread.menuRequest.connect(self.on_menuRequest_triggered)
-        self.serverThread.start()
-    
     def getEditorInstance(self, fileInfo = None, parent = None):
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
         return PMXCodeEditor.newInstance(self, fileInfo, parent)
@@ -239,7 +236,6 @@ class PMXApplication(QtGui.QApplication):
     # Server Thread, signal handlers
     #---------------------------------------------------
     def on_menuRequest_triggered(self, menu):
-        print menu
         self.mainWindow.currentEditor.showCompleter(menu["menuItems"])
 
     #---------------------------------------------------
