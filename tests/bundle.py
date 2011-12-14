@@ -38,7 +38,7 @@ class PMXBundleWidget(QtGui.QWidget, Ui_Menu):
         from prymatex.gui.support.models import PMXExcludedListModel
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
-        self.context = zeromqt.ZeroMQTContext(parent = self)
+        self.context = zeromqt.ZeroMQTContext()
         self.socket = self.context.socket(zeromqt.REP)
         self.socket.bind('tcp://127.0.0.1:10001')
         self.socket.readyRead.connect(self.socketReadyRead)

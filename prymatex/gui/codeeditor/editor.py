@@ -805,11 +805,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #==========================================================================
     # Completer
     #==========================================================================
-    def showCompleter(self, suggestions, completionPrefix = ""):
+    def showCompleter(self, suggestions):
+        completionPrefix, start, end = editor.getCurrentWord()
         self.completerMode.setCompletionPrefix(completionPrefix)
         self.completerMode.setModel(PMXCompleterListModel(suggestions, self))
-        cr = self.cursorRect()
-        self.completerMode.complete(cr)
+        self.completerMode.complete(self.cursorRect())
     
     #==========================================================================
     # Folding

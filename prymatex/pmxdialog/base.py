@@ -9,13 +9,13 @@ PORT = 4612
 
 class PMXDialogSystem(QtCore.QObject):
     def __init__(self, parent = None):
+        QtCore.QObject.__init__(self)
         self.socket = parent.zmqContext.socket(zmq.REP)
         self.socket.bind('tcp://127.0.0.1:%s' % PORT)
         self.socket.readyRead.connect(self.socketReadyRead)
     
     def socketReadyRead(self):
         command = self.socket.recv_pyobj()
-        print command
         method = getattr(self, command["name"])
         method(command["args"])
 
@@ -30,7 +30,7 @@ class PMXDialogSystem(QtCore.QObject):
     def menu(self, plist):
         #TODO: Instanciar un completer y pasarle los valores
         data = plistlib.readPlistFromString(plist)
-        print data
+        print data, data["menuItems"]
         self.socket.send_pyobj({ "status": "ok", "data": plistlib.writePlistToString({})})
     
     def popup(self, options, args):

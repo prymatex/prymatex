@@ -28,14 +28,11 @@ class ZeroMQTSocket(QtCore.QObject):
         self.fd = self.zmq_socket.getsockopt(zmq.FD)
         self.readNotifier = QtCore.QSocketNotifier(self.fd, QtCore.QSocketNotifier.Read, self)
         self.readNotifier.activated.connect(self.notifierActivity)
-        self.writeNotifier = QtCore.QSocketNotifier(self.fd, QtCore.QSocketNotifier.Write, self)
-        self.writeNotifier.activated.connect(self.notifierActivity)
+        #self.writeNotifier = QtCore.QSocketNotifier(self.fd, QtCore.QSocketNotifier.Write, self)
+        #self.writeNotifier.activated.connect(self.notifierActivity)
     
     def notifierActivity(self, value):
-        print value
-        self.readNotifier.setEnabled(False)
-        self.writeNotifier.setEnabled(False)
-        events = self.getsockopt(zmq.EVENTS)
+        events = self.zmq_socket.getsockopt(zmq.EVENTS)
         if events & zmq.POLLIN:
             self.readyRead.emit()
         if events & zmq.POLLOUT:
@@ -45,9 +42,13 @@ class ZeroMQTSocket(QtCore.QObject):
 
     def __getattr__(self, name):
         zmqSocketMethod = getattr(self.zmq_socket, name)
-        def decorate(*args, **kwargs):
-            returnValue = zmqSocketMethod(*args, **kwargs)
-            self.readNotifier.setEnabled(True)
-            self.writeNotifier.setEnabled(True)
-            return returnValue
-        return decorate
+        if any(map(lambda methodName: name.startswith(methodName), ["send", "recv"])):
+            def decorateZmqSocketMethod(*args, **kwargs):
+                self.readNotifier.setEnabled(False)
+                #self.writeNotifier.setEnabled(False)
+                returnValue = zmqSocketMethod(*args, **kwargs)
+                self.readNotifier.setEnabled(True)
+                #self.writeNotifier.setEnabled(True)
+                return returnValue
+            return decorateZmqSocketMethod
+        return zmqSocketMethod

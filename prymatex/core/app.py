@@ -194,7 +194,7 @@ class PMXApplication(QtGui.QApplication):
         #self.bundleEditor.setModal(True)
         
         #Dialog System
-        from prymatex.dialog.base import PMXDialogSystem
+        from prymatex.pmxdialog.base import PMXDialogSystem
         self.dialogSystem = PMXDialogSystem(self)
     
     def createMainWindow(self):
@@ -231,12 +231,6 @@ class PMXApplication(QtGui.QApplication):
     def getEditorInstance(self, fileInfo = None, parent = None):
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
         return PMXCodeEditor.newInstance(self, fileInfo, parent)
-
-    #---------------------------------------------------
-    # Server Thread, signal handlers
-    #---------------------------------------------------
-    def on_menuRequest_triggered(self, menu):
-        self.mainWindow.currentEditor.showCompleter(menu["menuItems"])
 
     #---------------------------------------------------
     # Exceptions, Print exceptions in a window
