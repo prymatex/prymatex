@@ -20,17 +20,19 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog, PMXObject):
         self.projectCreated = None
     
     def on_buttonChoose_pressed(self):
-        path = QtGui.QFileDialog.getExistingDirectory(self, self.trUtf8("Choose Location for Template"))
+        path = QtGui.QFileDialog.getExistingDirectory(self, self.trUtf8("Choose Location for Project"))
         if path:
             self.lineLocation.setText(path)
 
     def on_buttonCreate_pressed(self):
-        template = index.internalPointer()
-        environment = template.buildEnvironment(directory = self.lineLocation.text(), name = self.lineFileName.text())
-        template.resolve(environment)
-        self.projectCreated = environment['TM_NEW_FILE']
+        name = self.lineProjectName.text()
+        location = self.lineLocation.text()
+        self.projectCreated = self.application.projectManager.createProject(name, location)
+        if self.checkBoxAddToWorkingSet.isChecked():
+            workingSet = self.comboBoxWorkingSet.lineEdit().text()
+            self.application.projectManager.setWorkingSet(self.projectCreated, workingSet)
         self.accept()
-        
+
     def on_lineProjectName_textChanged(self, text):
         if self.checkBoxUseDefaultLocation.isChecked():
             self.application.projectManager.workspaceDirectory

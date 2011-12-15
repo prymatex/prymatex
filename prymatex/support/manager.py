@@ -89,6 +89,7 @@ class PMXSupportBaseManager(object):
     # Tools
     #---------------------------------------------------
     def uuidgen(self, uuid = None):
+        # TODO: ver que el uuid generado no este entre los elementos existentes
         if uuid is None:
             return uuidmodule.uuid1()
         try:
@@ -98,7 +99,6 @@ class PMXSupportBaseManager(object):
             return uuidmodule.uuid3(uuidmodule.NAMESPACE_DNS, uuid)
 
     def convertToValidPath(self, name):
-        # TODO: ver que el uuid generado no este entre los elementos existentes
         validPath = []
         for char in unicodedata.normalize('NFKD', unicode(name)).encode('ASCII', 'ignore'):
             char = char if char in self.VALID_PATH_CARACTERS else '-'

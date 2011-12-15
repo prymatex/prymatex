@@ -23,5 +23,8 @@ IMAGES = {
 ICONS = {
     "save": QtGui.QIcon(":/icons/actions/document-save.png"),
     "inserttext": QtGui.QIcon(":/icons/actions/insert-text.png"),
-    "codefunction": QtGui.QIcon(":/icons/actions/code-function.png")
+    "codefunction": QtGui.QIcon(":/icons/actions/code-function.png"),
+    "projectnew": QtGui.QIcon(":/icons/actions/project-development-new-template.png"),
+    "projectopen": QtGui.QIcon(":/icons/actions/project-open.png"),
+    "projectclose": QtGui.QIcon(":/icons/actions/project-development-close.png"),
 }

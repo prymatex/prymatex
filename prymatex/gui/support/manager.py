@@ -177,9 +177,9 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     # MANAGED OBJECTS OVERRIDE INTERFACE
     #---------------------------------------------------
     def setDeleted(self, uuid):
-        '''
-            Marcar un managed object como eliminado
-        '''
+        """
+        Marcar un managed object como eliminado
+        """
         self.deletedObjects.append(uuid)
         deleted = map(lambda uuid: unicode(uuid).upper(), self.deletedObjects)
         self.settings.setValue('deleted', deleted)

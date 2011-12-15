@@ -153,6 +153,7 @@ class PMXApplication(QtGui.QApplication):
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
         self.projectManager = PMXProjectManager(self)
+        self.projectManager.loadProject()
     
     def setupKernelManager(self):
         try:

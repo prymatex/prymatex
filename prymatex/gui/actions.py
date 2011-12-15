@@ -66,9 +66,7 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
-        path = self.newProjectDialog.getNewProject()
-        if path:
-            self.openFile(QtCore.QFileInfo(path))
+        self.newProjectDialog.getNewProject()
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):

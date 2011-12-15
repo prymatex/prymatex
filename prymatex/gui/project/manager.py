@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+import os, string, unicodedata
 import fnmatch
 
 from PyQt4 import QtCore, QtGui
@@ -18,41 +18,68 @@ class PMXProjectManager(PMXObject):
     projectOpened = QtCore.pyqtSignal(object)
     
     #Settings
+    SETTINGS_GROUP = 'ProjectManager'
+    
     workspaceDirectory  = pmxConfigPorperty(default = os.path.join(USER_HOME_PATH, "workspace"))  #Eclipse muejejeje
-    projects = pmxConfigPorperty(default = [])
+    knownProjects = pmxConfigPorperty(default = [])
     workingSets = pmxConfigPorperty(default = {})
     
-    SETTINGS_GROUP = 'ProjectManager'
+    VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     
     def __init__(self, parent = None):
         PMXObject.__init__(self)
         self.projectTreeModel = PMXProjectTreeModel(self)
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
-        
         self.configure()
 
-    def loadProjects(self, filePath):
-        project = PMXProject("diego", self.workspacePath)
-        self.projectTreeModel.appendProject(project)    
+    def convertToValidPath(self, name):
+        #TODO: este y el del manager de bundles pasarlos a utils
+        validPath = []
+        for char in unicodedata.normalize('NFKD', unicode(name)).encode('ASCII', 'ignore'):
+            char = char if char in self.VALID_PATH_CARACTERS else '-'
+            validPath.append(char)
+        return ''.join(validPath)
+        
+    def loadProject(self):
+        for filePath in self.knownProjects:
+            project = PMXProject.loadProject(filePath, self)
+
+    def isOpen(self, project):
+        return True
+        
+    def createProject(self, name, directory, reuseDirectory = True):
+        """
+        Crea un proyecto nuevo lo agrega en los existentes y lo retorna,
+        """
+        #TODO: dejar este trabajo al file manager
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        elif not reuseDirectory:
+            raise Exception()
+        filePath = os.path.join(directory, "%s.pmxproj" % self.convertToValidPath(name))
+        project = PMXProject(name, directory, filePath, {})
+        project.save()
+        self.addProject(project)
+        self.knownProjects.append(project.filePath)
+        self.settings.setValue('knownProjects', self.knownProjects)
+        return project
 
     def addProject(self, project):
+        project.setManager(self)
         self.projectTreeModel.appendProject(project)
-        
+
     def openProject(self):
         pass
-
-    def createProject(self, filePath):
-        project = PMXProject("diego", self.workspacePath)
-        self.projectTreeModel.appendProject(project)
 
     def deleteProject(self):
         pass
 
-    def setWorkingSet(self, workingSet, project):
+    def setWorkingSet(self, project, workingSet):
         projects = self.workingSets.setdefault(workingSet)
-        projects.append(project.path)
+        projects.append(project.filePath)
         project.setWorkingSet(workingSet)
+        #TODO: avisar que se movio el projecto al proxy
         
     def findProjectForFile(self, fileInfo):
         for project in self.projectTreeModel.getAllProjects():

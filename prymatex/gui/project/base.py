@@ -2,7 +2,9 @@
 #-*- encoding: utf-8 -*-
 
 import os
-from PyQt4 import QtCore, QtGui
+
+from prymatex.utils import plist
+from prymatex.resources import ICONS
 
 """
 currentDocument: Documento actual en el editor
@@ -29,17 +31,18 @@ windowFrame: El Tampaño del a ventana de projecto en tm
 
 class PMXProject(object):
     KEYS = [    'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
-    def __init__(self, filePath, hash):
+    def __init__(self, name, directory, filePath, hash):
+        self.__name = name
+        self.directory = directory
         self.filePath = filePath
-        self.directory = os.path.dirname(filePath)
-        self.__name = os.path.splitext(os.path.basename(filePath))[0]
         self.workingSet = None
         self.workspace = None
+        self.manager = None
         self.load(hash)
         self.children = []
     
     def load(self, hash):
-        for key in PMXBundle.KEYS:
+        for key in PMXProject.KEYS:
             value = hash.get(key, None)
             setattr(self, key, value)
     
@@ -69,9 +72,11 @@ class PMXProject(object):
 
     @classmethod
     def loadProject(cls, filePath, manager):
+        name = os.path.splitext(os.path.basename(filePath))[0]
+        directory = os.path.dirname(filePath)
         try:
             data = plist.readPlist(filePath)
-            project = cls(filePath, data)
+            project = cls(name, directory, filePath, data)
             manager.addProject(project)
         except Exception, e:
             print "Error in project %s (%s)" % (info_file, e)
@@ -83,7 +88,10 @@ class PMXProject(object):
     def setWorkspace(self, workspace):
         self.workspace = workspace
         self.rootIndex = workspace.fileSystem.index(self.directory)
-
+    
+    def setManager(self, manager):
+        self.manager = manager
+    
     def setWorkingSet(self, workingSet):
         self.workingSet = set
 
@@ -91,8 +99,11 @@ class PMXProject(object):
     # Tree Node interface
     #==================================================
     def icon(self):
-        return None
-        
+        if self.manager.isOpen(self):
+            return ICONS["projectopen"]
+        else:
+            return ICONS["projectclose"]
+
     def name(self):
         return self.__name
     
