@@ -27,7 +27,6 @@ class PMXFileManager(PMXObject):
     def __init__(self, parent):
         super(PMXFileManager, self).__init__(parent)
 
-        self.iconProvider = QtGui.QFileIconProvider()
         self._default_directory = QtCore.QDir(self.application.settings.USER_HOME_PATH)
         self.configure()
 
@@ -135,12 +134,4 @@ class PMXFileManager(PMXObject):
         name = QtGui.QFileDialog.getSaveFileName(None, title, filePath, filters)
         if name:
             return QtCore.QFileInfo(name)
-    
-    def getFileIcon(self, fileInfo):
-        if fileInfo.exists():
-            return self.iconProvider.icon(fileInfo)
-        return self.iconProvider.icon(QtGui.QFileIconProvider.File)
-    
-    def getFileType(self, fileInfo):
-        return self.iconProvider.type(fileInfo)
     

@@ -1,27 +1,31 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-'''
-Algunas definciones en Python para tareas
-'''
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
 import string
+
+from PyQt4 import QtGui, QtCore
+
 from prymatex.utils.i18n import ugettext as _
+
+"""
+Algunas definciones en Python para tareas de Gui
+"""
 
 to_ascii = lambda s: filter(lambda c: c in string.ascii_letters, s)
 to_ascii_cap = lambda s: to_ascii(s).capitalize()
 
 def centerWidget(widget, scale = None):
-    '''
-        Scale is a tuple with width and height ex: (0.7, 0.65)
-    '''
+    """
+    Center de widget in the screen
+    Scale is a tuple with width and height ex: (0.7, 0.65)
+    """
     screen = QtGui.QDesktopWidget().screenGeometry()
     if scale is not None:
         widget.resize(screen.width() * scale[0], screen.height() * scale[1])
     widget.move((screen.width() - widget.size().width()) / 2, (screen.height() - widget.size().height()) / 2)
 
+
+    
 def text_to_object_name(text, prefix = None):
     '''
     &Text Button name -> %{prefix}TextButtonName

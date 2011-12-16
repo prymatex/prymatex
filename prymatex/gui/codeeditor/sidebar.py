@@ -17,9 +17,12 @@ class PMXSidebar(QtGui.QWidget):
         self.showFolding = False
         self.bookmarkArea = 12
         self.foldArea = 12
-        self.foreground = None 
-        self.background = None 
-    
+        self.foreground = None
+        self.background = None
+        self.images = {}
+        for key in ["bookmarkflag", "foldingcollapsed", "foldingtop", "foldingbottom"]:
+            self.images[key] = resources.getImage(key)
+
     @property
     def padding(self):
         if self.showLineNumbers or self.showFolding or self.showBookmarks:
@@ -67,8 +70,8 @@ class PMXSidebar(QtGui.QWidget):
                 #Bookmarks
                 if self.showBookmarks and block in self.editor.bookmarks:
                     painter.drawPixmap(2,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["bookmarkflag"].height(),
-                        resources.IMAGES["bookmarkflag"])
+                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["bookmarkflag"].height(),
+                        self.images["bookmarkflag"])
                 
                 #Folding
                 if self.showFolding:
@@ -77,17 +80,17 @@ class PMXSidebar(QtGui.QWidget):
                     mark = self.editor.folding.getFoldingMark(block)
                     if self.editor.folding.isStart(mark):
                         if userData.folded:
-                            painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
-                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
-                                resources.IMAGES["foldingcollapsed"])
+                            painter.drawPixmap(self.width() - self.images["foldingcollapsed"].width() - 1,
+                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["foldingcollapsed"].height(),
+                                self.images["foldingcollapsed"])
                         else:
-                            painter.drawPixmap(self.width() - resources.IMAGES["foldingtop"].width() - 1,
-                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingtop"].height(),
-                                resources.IMAGES["foldingtop"])
+                            painter.drawPixmap(self.width() - self.images["foldingtop"].width() - 1,
+                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["foldingtop"].height(),
+                                self.images["foldingtop"])
                     elif self.editor.folding.isStop(mark):
-                        painter.drawPixmap(self.width() - resources.IMAGES["foldingcollapsed"].width() - 1,
-                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingcollapsed"].height(),
-                            resources.IMAGES["foldingbottom"])
+                        painter.drawPixmap(self.width() - self.images["foldingcollapsed"].width() - 1,
+                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["foldingcollapsed"].height(),
+                            self.images["foldingbottom"])
             
             block = block.next()
 

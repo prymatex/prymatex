@@ -243,9 +243,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     
     def tabIcon(self):
         if self.isModified():
-            return resources.ICONS["save"]
+            return resources.getIcon("save")
         elif self.fileInfo is not None:
-            return self.application.fileManager.getFileIcon(self.fileInfo)
+            return resources.getIcon(self.fileInfo)
         return PMXBaseEditor.tabIcon(self)
     
     @classmethod
@@ -608,8 +608,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             user_data = block.userData()
             if block.isVisible() and self.folding.isStart(self.folding.getFoldingMark(block)) and user_data.folded:
                 painter.drawPixmap(font_metrics.width(block.text()) + 10,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.IMAGES["foldingellipsis"].height(),
-                    resources.IMAGES["foldingellipsis"])
+                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
+                    resources.getImage("foldingellipsis"))
             
             block = block.next()
         if self.multiCursorMode.isActive():
