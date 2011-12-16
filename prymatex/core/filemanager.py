@@ -5,7 +5,7 @@ import os, codecs, shutil
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.exceptions import APIUsageError, PrymatexIOException
+from prymatex.core.exceptions import APIUsageError, PrymatexIOException, PrymatexFileExistsException
 
 class PMXFileManager(PMXObject):
     """
@@ -43,41 +43,41 @@ class PMXFileManager(PMXObject):
         self.fileHistory = []
         self.settings.setValue("fileHistory", self.fileHistory)
     
-    def createDirectory(self, base, name = None, parent = None):
+    def createDirectory(self, directory):
         """
         Create a new directory.
         """
-        if name is None:
-            name, ok = QtGui.QInputDialog.getText(parent, "New directoy name", "<p>Please enter the new directoy name in</p><p>%s</p>" % base)
-            if not ok:
-                return None
-        path = os.path.join(base, name)
-        if os.path.exists(path):
+        if os.path.exists(directory):
             raise PrymatexIOException("The directory already exist") 
-        os.mkdir(path)
-        return QtCore.QFileInfo(path)
+        os.mkdir(directory)
     
-    def createFile(self, base, name = None, parent = None):
+    def createDirectories(directory):
+        """Create a group of directory, one inside the other."""
+        if os.path.exists(directory):
+            raise PrymatexIOException("The folder already exist")
+        os.makedirs(directory)
+    
+    def createFile(self, file):
         """Create a new file."""
-        if name is None:
-            name, ok = QtGui.QInputDialog.getText(parent, "New file name", "<p>Please enter the new file name in</p><p>%s</p>" % base)
-            if not ok:
-                return None
-        path = os.path.join(base, name)
-        if os.path.exists(path):
+        if os.path.exists(file):
             raise PrymatexIOException("The file already exist") 
         open(path, 'w').close()
-        return QtCore.QFileInfo(path)
     
-    def deletePath(self, path, parent = None):
-        ok = QtGui.QMessageBox.question(parent, "Deletion confirmation", "<p>Are you sure you want to delete</p><p>%s</p>" % path, 
-            QtGui.QMessageBox.Ok | QtGui.QMessageBox.No)
-        if ok == QtGui.QMessageBox.Ok: 
-            if os.path.isfile(path):
-                # Mandar señal para cerrar editores
-                os.unlink(path)
-            else:
-                shutil.rmtree(path)
+    def renameFile(old, new):
+        """Rename a file, changing its name from 'old' to 'new'."""
+        if os.path.isfile(old):
+            if os.path.exists(new):
+                raise NinjaFileExistsException(new)
+            os.rename(old, new)
+            return new
+        return ''
+    
+    def deletePath(self, path):
+        if os.path.isfile(path):
+            # Mandar señal para cerrar editores
+            os.unlink(path)
+        else:
+            shutil.rmtree(path)
     
     def openFile(self, fileInfo):
         """Open and read a file, return the content."""
@@ -120,18 +120,3 @@ class PMXFileManager(PMXObject):
             #if fileInfo is None return the las directory or the home directory
             return self._default_directory
         return fileInfo.dir()
-        
-    def getOpenFiles(self, fileInfo = None):
-        directory = self.getDirectory(fileInfo)
-        names = QtGui.QFileDialog.getOpenFileNames(None, "Open Files", directory.absolutePath())
-        return map(lambda name: QtCore.QFileInfo(name), names)
-    
-    def getSaveFile(self, fileInfo = None, name = "", title = "Save file", filters = []):
-        directory = self.getDirectory(fileInfo)
-        filePath = directory.absoluteFilePath(name) if name else directory.absolutePath()
-
-        filters = ";;".join(filters)
-        name = QtGui.QFileDialog.getSaveFileName(None, title, filePath, filters)
-        if name:
-            return QtCore.QFileInfo(name)
-    

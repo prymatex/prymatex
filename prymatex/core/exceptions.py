@@ -16,6 +16,9 @@ class APIUsageError(Exception):
 
 class PrymatexIOException(Exception):
     pass
+    
+class PrymatexFileExistsException(Exception):
+    pass
 
 class FileNotSupported(Exception):
     pass
