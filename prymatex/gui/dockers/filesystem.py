@@ -58,7 +58,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
 
     def setupComboBoxLocation(self):
         self.comboBoxLocation.setModel(self.dirModel)
-        self.comboBoxLocation.lineEdit().setText(self.application.fileManager.getDirectory().absolutePath())
+        self.comboBoxLocation.lineEdit().setText(self.application.fileManager.getDirectory())
         self.comboBoxLocation.lineEdit().returnPressed.connect(self.on_lineEdit_returnPressed)
     
     def on_lineEdit_returnPressed(self):
@@ -70,7 +70,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
                 
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
-        index = self.fileSystemModel.index(self.application.fileManager.getDirectory().absolutePath())
+        index = self.fileSystemModel.index(self.application.fileManager.getDirectory())
         self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
         
         self.treeViewFileSystem.setHeaderHidden(True)

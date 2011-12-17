@@ -4,7 +4,7 @@
 import os
 
 from prymatex.utils import plist
-from prymatex.resources import ICONS
+from prymatex import resources
 
 """
 currentDocument: Documento actual en el editor
@@ -100,9 +100,9 @@ class PMXProject(object):
     #==================================================
     def icon(self):
         if self.manager.isOpen(self):
-            return ICONS["projectopen"]
+            return resources.getIcon("projectopen")
         else:
-            return ICONS["projectclose"]
+            return resources.getIcon("projectclose")
 
     def name(self):
         return self.__name

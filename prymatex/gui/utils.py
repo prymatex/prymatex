@@ -51,12 +51,12 @@ def createButton(parent, text, shortcut = None, object_name = None, do_i18n = Fa
     return button
 
 
-_available_keys = filter(lambda s: s.startswith('Key_'), dir(Qt))
-KEYS_DICT = dict([(name[4:], getattr(Qt, name)) for name in _available_keys])
-KEYS_DICT.update({'Ctrl': Qt.CTRL, 'Control': Qt.CTRL, 'CTRL': Qt.CTRL, 
-                  'Shift': Qt.SHIFT, 'Shift': Qt.SHIFT,
-                  'Alt': Qt.ALT, 'ALT': Qt.ALT,
-                  'Meta': Qt.META, 'META': Qt.META,
+_available_keys = filter(lambda s: s.startswith('Key_'), dir(QtCore.Qt))
+KEYS_DICT = dict([(name[4:], getattr(QtCore.Qt, name)) for name in _available_keys])
+KEYS_DICT.update({'Ctrl': QtCore.Qt.CTRL, 'Control': QtCore.Qt.CTRL, 'CTRL': QtCore.Qt.CTRL, 
+                  'Shift': QtCore.Qt.SHIFT, 'Shift': QtCore.Qt.SHIFT,
+                  'Alt': QtCore.Qt.ALT, 'ALT': QtCore.Qt.ALT,
+                  'Meta': QtCore.Qt.META, 'META': QtCore.Qt.META,
                   })
 
 
@@ -140,7 +140,7 @@ def addActionsToMenu(menu, *action_tuples):
 #                    f(value)
 
 # Key press debugging 
-KEY_NAMES = dict([(getattr(Qt, keyname), keyname) for keyname in dir(Qt) 
+KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) 
                   if keyname.startswith('Key_')])
 
 ANYKEY = -1
@@ -159,13 +159,13 @@ def debug_key(key_event):
     print "isAccepted: ", key_event.isAccepted()
     print "modifiers: ", int(key_event.modifiers())
     modifiers = key_event.modifiers()
-    if modifiers & Qt.AltModifier:
+    if modifiers & QtCore.Qt.AltModifier:
         mods.append("AltModifier")
-    if modifiers & Qt.ControlModifier:
+    if modifiers & QtCore.Qt.ControlModifier:
         mods.append("ControlModifier")
-    if modifiers & Qt.MetaModifier:
+    if modifiers & QtCore.Qt.MetaModifier:
         mods.append("MetaModifier")
-    if modifiers & Qt.ShiftModifier:
+    if modifiers & QtCore.Qt.ShiftModifier:
         mods.append("ShiftModifier")
     
     print "%s <%s> Code: %d chr(%d) = %s" % (KEY_NAMES[key],  ", ".join(mods), 

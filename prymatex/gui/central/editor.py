@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+
 from PyQt4 import QtGui, QtCore
 from prymatex.core import exceptions
 
@@ -13,22 +15,25 @@ class PMXBaseEditor(object):
     
     creation_counter = 0
     def __init__(self):
-        self.fileInfo = None
+        self.filePath = None
         self.project = None
         self.creation_counter = PMXBaseEditor.creation_counter
         PMXBaseEditor.creation_counter += 1
         
-    def setFileInfo(self, fileInfo):
-        self.fileInfo = fileInfo
+    def setFilePath(self, filePath):
+        self.filePath = filePath
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
+        
+    def setProject(self, project):
+        self.project = project
         
     def tabIcon(self):
         return QtGui.QIcon()
     
     UNTITLED_FILE_TEMPLATE = "Untitled {creation_counter}"
     def tabTitle(self):
-        if self.fileInfo is not None:
-            return self.fileInfo.fileName()
+        if self.filePath is not None:
+            return os.path.basename(self.filePath)
         return self.UNTITLED_FILE_TEMPLATE.format(creation_counter = self.creation_counter)
     
     def fileName():
@@ -38,7 +43,7 @@ class PMXBaseEditor(object):
         pass
     
     def isNew(self):
-        return self.fileInfo is None
+        return self.filePath is None
         
     def isEmpty(self):
         return True
@@ -53,8 +58,8 @@ class PMXBaseEditor(object):
         pass
     
     @classmethod
-    def newInstance(cls, application, fileInfo = None, parent = None):
-        return cls(fileInfo, parent)
+    def newInstance(cls, application, filePath = None, parent = None):
+        return cls(filePath, parent)
     
     def showMessage(self, message, timeout = None, icon = None):
         raise NotImplementedError("You need to extend PMXMessageOverlay")

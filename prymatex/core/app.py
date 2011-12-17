@@ -11,6 +11,8 @@ from PyQt4 import QtGui, QtCore
 import prymatex
 from prymatex.core import exceptions
 from prymatex import resources_rc
+
+from prymatex.utils import coroutines
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
 
@@ -58,7 +60,6 @@ class PMXApplication(QtGui.QApplication):
         self.setupDialogs()         #Config Dialog
         
         # Creates the GUI
-        # args[1:] para ver si quiere abrir archivos los busco en los argumentos
         self.createMainWindow()
 
         splash.finish(self.mainWindow)
@@ -165,8 +166,7 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = None
 
     def setupCoroutines(self):
-        from prymatex.utils.coroutines import Scheduler
-        self.scheduler = Scheduler(self)
+        self.scheduler = coroutines.Scheduler(self)
 
     def setupZeroMQContext(self):
         from prymatex.utils import zeromqt
@@ -197,24 +197,6 @@ class PMXApplication(QtGui.QApplication):
         #Dialog System
         from prymatex.pmxdialog.base import PMXDialogSystem
         self.dialogSystem = PMXDialogSystem(self)
-    
-    def createMainWindow(self):
-        """
-        Creates the windows
-        """
-        #Por ahora solo una mainWindow
-        from prymatex.gui.mainwindow import PMXMainWindow
-        geometry = self.settings.value("mainWindowGeometry")
-        state = self.settings.value("mainWindowState")
-        
-        self.mainWindow = PMXMainWindow()
-        if geometry:
-            self.mainWindow.restoreGeometry(geometry)
-        if state:
-            self.mainWindow.restoreState(state)
-        self.mainWindow.show()
-        # Open files
-        self.openFilePaths(self.initialArguments[1:])
         
     def closePrymatex(self):
         self.logger.debug("Close")
@@ -228,22 +210,60 @@ class PMXApplication(QtGui.QApplication):
         
     def saveState(self, session_manager):
         self.logger.debug( "Save state %s" % session_manager)
+    
+    #---------------------------------------------------
+    # Editors and mainWindow handle
+    #---------------------------------------------------
+    def createMainWindow(self):
+        """
+        Creates the windows
+        """
+        #Por ahora solo una mainWindow
+        from prymatex.gui.mainwindow import PMXMainWindow
+        geometry = self.settings.value("mainWindowGeometry")
+        state = self.settings.value("mainWindowState")
         
-    def getEditorInstance(self, fileInfo = None, parent = None):
+        self.mainWindow = PMXMainWindow(self)
+        if geometry:
+            self.mainWindow.restoreGeometry(geometry)
+        if state:
+            self.mainWindow.restoreState(state)
+        self.mainWindow.show()
+        # Open files
+        self.openFilePaths(self.initialArguments[1:])
+
+    def findEditorForFile(self, filePath):
+        #Para cada mainwindow buscar el editor
+        return self.mainWindow, self.mainWindow.findEditorForFile(filePath)
+            
+    def getEditorInstance(self, filePath = None, parent = None):
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
-        return PMXCodeEditor.newInstance(self, fileInfo, parent)
+        return PMXCodeEditor.newInstance(self, filePath, parent)
 
-    #---------------------------------------------------
-    # Exceptions, Print exceptions in a window
-    #---------------------------------------------------
-    def replaceSysExceptHook(self):
-        def displayExceptionDialog(exctype, value, traceback):
-            ''' Display a nice dialog showing the python traceback'''
-            from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
-            sys.__excepthook__(exctype, value, traceback)
-            PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback).exec_()
-
-        sys.excepthook = displayExceptionDialog
+    def openFile(self, filePath, cursorPosition = (0,0), focus = True):
+        if self.fileManager.isOpen(filePath):
+            mainWindow, editor = self.findEditorForFile(filePath)
+            if editor is not None:
+                mainWindow.setCurrentEditor(editor)
+                editor.setCursorPosition(cursorPosition)
+        else:
+            self.mainWindow.tryCloseEmptyEditor()
+            editor = self.getEditorInstance(filePath, self)
+            def appendChunksTask(editor, filePath):
+                content = self.fileManager.openFile(filePath)
+                editor.setReadOnly(True)
+                for line in content.splitlines():
+                    editor.appendPlainText(line)
+                    yield
+                editor.setModified(False)
+                editor.setReadOnly(False)
+                yield coroutines.Return(editor, filePath)
+            def on_editorReady(result):
+                editor, filePath = result.value
+                editor.setFilePath(filePath)
+                self.mainWindow.addEditor(editor, focus)
+            task = self.scheduler.newTask( appendChunksTask(editor, filePath) )
+            task.done.connect( on_editorReady  )
     
     # FIXME: Refactor
     def openFilePaths(self, filePaths):
@@ -264,3 +284,14 @@ class PMXApplication(QtGui.QApplication):
     def openAllSupportedFilesInDirectory(self, filePaths):
         raise NotImplementedError("Directory contents should be opened as files here")
         
+    #---------------------------------------------------
+    # Exceptions, Print exceptions in a window
+    #---------------------------------------------------
+    def replaceSysExceptHook(self):
+        def displayExceptionDialog(exctype, value, traceback):
+            ''' Display a nice dialog showing the python traceback'''
+            from prymatex.gui.emergency.tracedialog import PMXTraceBackDialog
+            sys.__excepthook__(exctype, value, traceback)
+            PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback).exec_()
+
+        sys.excepthook = displayExceptionDialog

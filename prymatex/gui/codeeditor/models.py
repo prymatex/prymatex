@@ -45,7 +45,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return block.text()
         elif role == QtCore.Qt.DecorationRole:
-            return resources.IMAGES['bookmarkflag']
+            return resources.getIcon('bookmarkflag')
 
     def toggleBookmark(self, block):
         try:
@@ -139,7 +139,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
         elif role == QtCore.Qt.DecorationRole:
-            return resources.ICONS['codefunction']
+            return resources.getIcon('codefunction')
     
     def findBlockIndex(self, block):
         indexes = map(lambda block: block.blockNumber(), self.blocks)
@@ -178,4 +178,4 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
             if isinstance(suggestion, dict) and 'image' in suggestion:
                 return QtGui.QIcon(suggestion['image'])
             else:
-                return resources.ICONS['inserttext']
+                return resources.getIcon('inserttext')

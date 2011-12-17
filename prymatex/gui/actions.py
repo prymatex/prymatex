@@ -3,6 +3,8 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.gui.dialogs import input
+
 class MainWindowActions(object):
     
     splitTabWidget = None #Overriden in GUI Setup
@@ -36,9 +38,10 @@ class MainWindowActions(object):
 
     def on_menuRecentFiles_aboutToShow(self):
         self.menuRecentFiles.clear()
-        for file in self.application.fileManager.fileHistory:
-            action = QtGui.QAction(file, self)
-            receiver = lambda file = QtCore.QFileInfo(file): self.openFile(file)
+        for filePath in self.application.fileManager.fileHistory:
+            actionText = "%s (%s)"% (self.application.fileManager.fileName(filePath), filePath)
+            action = QtGui.QAction(actionText, self)
+            receiver = lambda file = filePath: self.application.openFile(file)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
             self.menuRecentFiles.addAction(action)
         self.menuRecentFiles.addSeparator()
@@ -60,9 +63,9 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionNewFileFromTemplate_triggered(self):
-        path = self.newFromTemplateDialog.getNewFileFromTemplate()
+        filePath = self.newFromTemplateDialog.getNewFileFromTemplate()
         if path:
-            self.openFile(QtCore.QFileInfo(path))
+            self.application.openFile(filePath)
     
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
@@ -70,16 +73,15 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
-        fileInfo = self.currentEditor.fileInfo if self.currentEditor is not None else None
-        files = self.application.fileManager.getOpenFiles(fileInfo = fileInfo)
+        filePath = self.currentEditor.filePath if self.currentEditor is not None else None
+        files = input.getOpenFiles(directory = self.application.fileManager.getDirectory(filePath))
         focus = len(files) == 1
-        for file in files:
-            editor = self.openFile(file, focus = focus)
+        for filePath in files:
+            editor = self.application.openFile(filePath, focus = focus)
     
     def on_actionOpenAllRecentFiles_triggered(self):
-        for file in self.application.fileManager.fileHistory:
-            fileInfo = QtCore.QFileInfo(file)
-            self.openFile(fileInfo)
+        for filePath in self.application.fileManager.fileHistory:
+            self.application.openFile(filePath)
 
     def on_actionRemoveAllRecentFiles_triggered(self):
         self.application.fileManager.clearFileHistory()

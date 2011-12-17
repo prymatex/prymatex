@@ -37,7 +37,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.menuBar().setShown(value)
     
     # Constructor
-    def __init__(self):
+    def __init__(self, parent = None):
         """
         The main window
         @param parent: The QObject parent, in this case it should be the QApp
@@ -54,7 +54,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.setupStatusBar()
         
         # Connect Signals
-        self.splitTabWidget.tabWindowChanged.connect(self._set_current_editor)
+        self.splitTabWidget.tabWindowChanged.connect(self.on_tabWindowChanged)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
         
@@ -155,7 +155,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.statusBar().addEditor(editor)
         self.splitTabWidget.addTab(editor)
         if focus:
-            self.splitTabWidget.setCurrentWidget(editor)
+            self.setCurrentEditor(editor)
         # Hack
         self.splitTabWidget._forceTextFoucsChange(editor)
         
@@ -164,13 +164,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.splitTabWidget.removeTab(editor)
         del editor
 
-    def findEditorForFile(self, fileInfo):
+    def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
         for editor in self.splitTabWidget.getAllWidgets():
-            if editor.fileInfo == fileInfo:
+            if editor.filePath == filePath:
                 return editor
 
-    def _set_current_editor(self, editor):
+    def setCurrentEditor(self, editor):
+        self.splitTabWidget.setCurrentWidget(editor)
+        
+    def on_tabWindowChanged(self, editor):
         # Handle the trivial case.
         if self.currentEditor is editor:
             return
@@ -190,36 +193,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
         self.setWindowTitle(" - ".join(title))
         self.currentEditor = editor
-
-    def openFile(self, fileInfo, cursorPosition = (0,0), focus = True):
-        assert isinstance(fileInfo, QtCore.QFileInfo)
-        editor = self.findEditorForFile(fileInfo)
-        if editor is None:
-            if self.currentEditor is not None and self.currentEditor.isNew() and not self.currentEditor.isModified():
-                self.closeEditor(self.currentEditor)
-            editor = self.application.getEditorInstance(fileInfo, self)
-            def appendChunksTask(editor, lines):
-                content = self.application.fileManager.openFile(fileInfo)
-                editor.setReadOnly(True)
-                for line in content.splitlines():
-                    editor.appendPlainText(line)
-                    yield
-                editor.setModified(False)
-                editor.setReadOnly(False)
-                yield coroutines.Return(editor, fileInfo)
-            def on_editorReady(result):
-                editor, fileInfo = result.value
-                editor.setFileInfo(fileInfo)
-                self.addEditor(editor, focus)
-            task = self.application.scheduler.newTask( appendChunksTask(editor, fileInfo) )
-            task.done.connect( on_editorReady  )
-        else:            
-            editor.setCursorPosition(cursorPosition)            
-        return editor
-    
-    def openLocalPath(self, path, focus = False):
-        '''Focus'''
-        self.openFile(QtCore.QFileInfo(path), focus = focus)
     
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor
@@ -255,7 +228,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 return
         if editor:
             self.removeEditor(editor)
-
+    
+    def tryCloseEmptyEditor(self):
+        if self.currentEditor is not None and self.currentEditor.isNew() and not self.currentEditor.isModified():
+            self.closeEditor(self.currentEditor)
+    
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
             url = QtCore.QUrl(url)

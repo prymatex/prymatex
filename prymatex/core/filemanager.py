@@ -27,14 +27,14 @@ class PMXFileManager(PMXObject):
     def __init__(self, parent):
         super(PMXFileManager, self).__init__(parent)
 
-        self._default_directory = QtCore.QDir(self.application.settings.USER_HOME_PATH)
+        self.last_directory = self.application.settings.USER_HOME_PATH
+        self.open_files = []
         self.configure()
 
-    def _add_file_history(self, fileInfo):
-        path = fileInfo.absoluteFilePath()
-        if path in self.fileHistory:
-            self.fileHistory.remove(path)
-        self.fileHistory.insert(0, path)
+    def add_file_history(self, filePath):
+        if filePath in self.fileHistory:
+            self.fileHistory.remove(filePath)
+        self.fileHistory.insert(0, filePath)
         if len(self.fileHistory) > self.fileHistoryLength:
             self.fileHistory = self.fileHistory[0:self.fileHistoryLength]
         self.settings.setValue("fileHistory", self.fileHistory)
@@ -51,7 +51,7 @@ class PMXFileManager(PMXObject):
             raise PrymatexIOException("The directory already exist") 
         os.mkdir(directory)
     
-    def createDirectories(directory):
+    def createDirectories(self, directory):
         """Create a group of directory, one inside the other."""
         if os.path.exists(directory):
             raise PrymatexIOException("The folder already exist")
@@ -79,21 +79,42 @@ class PMXFileManager(PMXObject):
         else:
             shutil.rmtree(path)
     
-    def openFile(self, fileInfo):
-        """Open and read a file, return the content."""
-        if not fileInfo.exists():
+    def fileExtension(self, filePath):
+        """
+        Get the file extension in the form of: 'py'
+        """
+        return os.path.splitext(filePath.lower())[-1][1:]
+    
+    def fileDirectory(self, filePath):
+        """
+        Get the file extension in the form of: 'py'
+        """
+        return os.path.dirname(filePath)
+    
+    def fileName(self, filePath):
+        return os.path.basename(filePath)
+    
+    def isOpen(self, filePath):
+        return filePath in self.open_files
+    
+    def openFile(self, filePath):
+        """
+        Open and read a file, return the content.
+        """
+        if not os.path.exists(filePath):
             raise PrymatexIOException("The file does not exist")
-        if not fileInfo.isFile():
-            raise PrymatexIOException("%s is not a file" % fileInfo)
-        f = QtCore.QFile(fileInfo.absoluteFilePath())
+        if not os.path.isfile(filePath):
+            raise PrymatexIOException("%s is not a file" % filePath)
+        f = QtCore.QFile(filePath)
         if not f.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text):
             raise PrymatexIOException("%s" % f.errorString())
         stream = QtCore.QTextStream(f)
         content = stream.readAll()
         f.close()
         #Update file history
-        self._default_directory = fileInfo.dir()
-        self._add_file_history(fileInfo)
+        self.last_directory = os.path.dirname(filePath)
+        self.add_file_history(filePath)
+        self.open_files.append(filePath)
         return content
     
     def saveFile(self, fileInfo, content):
@@ -112,11 +133,11 @@ class PMXFileManager(PMXObject):
         except:
             raise
     
-    def getDirectory(self, fileInfo = None):
+    def getDirectory(self, filePath = None):
         """
         Obtiene un directorio para el fileInfo
         """
-        if fileInfo is None:
+        if filePath is None:
             #if fileInfo is None return the las directory or the home directory
-            return self._default_directory
-        return fileInfo.dir()
+            return self.last_directory
+        return os.path.dirname(filePath)

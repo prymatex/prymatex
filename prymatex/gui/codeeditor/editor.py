@@ -154,7 +154,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def tabKeyBehavior(self):
         return self.tabStopSoft and u' ' * self.tabStopSize or u'\t'
     
-    def __init__(self, syntax, fileInfo = None, project = None, parent = None):
+    def __init__(self, syntax, project = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self)
         PMXMessageOverlay.__init__(self)
@@ -223,11 +223,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def setModified(self, modified):
         self.document().setModified(modified)
         
-    def setFileInfo(self, fileInfo):
-        syntax = self.application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
+    def setFilePath(self, filePath):
+        syntax = self.application.supportManager.findSyntaxByFileType(self.application.fileManager.fileExtension(filePath))
         if syntax is not None:
             self.setSyntax(syntax)
-        PMXBaseEditor.setFileInfo(self, fileInfo)
+        PMXBaseEditor.setFilePath(self, filePath)
         
     def tabTitle(self):
         #Podemos marcar de otra forma cuando algo cambia :P
@@ -244,22 +244,21 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def tabIcon(self):
         if self.isModified():
             return resources.getIcon("save")
-        elif self.fileInfo is not None:
-            return resources.getIcon(self.fileInfo)
+        elif self.filePath is not None:
+            return resources.getIcon(self.filePath)
         return PMXBaseEditor.tabIcon(self)
     
     @classmethod
-    def newInstance(cls, application, fileInfo = None, parent = None):
+    def newInstance(cls, application, filePath = None, parent = None):
         syntax = None
-        if fileInfo is not None:
-            assert isinstance(fileInfo, QtCore.QFileInfo), "%s is not QFileInfo" % fileInfo
-            syntax = application.supportManager.findSyntaxByFileType(fileInfo.completeSuffix())
+        if filePath is not None:
+            syntax = application.supportManager.findSyntaxByFileType(application.fileManager.fileExtension(filePath))
             # TODO: This prevents unrecognised to be opened
             #    raise exceptions.FileNotSupported()
-        if fileInfo is None or syntax is None:
+        if filePath is None or syntax is None:
             #TODO: defaultSyntax va en el manager
             syntax = application.supportManager.getBundleItem(cls.defaultSyntax)
-        editor = cls(syntax, fileInfo, parent)
+        editor = cls(syntax, parent)
         return editor
 
     #=======================================================================
@@ -784,10 +783,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
 
         if current_word:
             env['TM_CURRENT_WORD'] = current_word
-        if self.fileInfo is not None:
-            env['TM_FILEPATH'] = self.fileInfo.absoluteFilePath()
-            env['TM_FILENAME'] = self.fileInfo.fileName()
-            env['TM_DIRECTORY'] = self.fileInfo.absoluteDir().dirName()
+        if self.filePath is not None:
+            env['TM_FILEPATH'] = self.filePath
+            env['TM_FILENAME'] = self.application.fileManager.fileName(self.filePath)
+            env['TM_DIRECTORY'] = self.application.fileManager.fileDirectory(self.filePath)
         if self.project is not None:
             env['TM_PROJECT_DIRECTORY'] = self.project.rootPath
             env['TM_SELECTED_FILES'] = ""
@@ -1074,7 +1073,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                 items = self.application.supportManager.getFileExtensionItem(file, scope)
                 if items:
                     item = items[0]
-                    fileInfo = QtCore.QFileInfo(file)
                     env = { 
                             #relative path of the file dropped (relative to the document directory, which is also set as the current directory).
                             'TM_DROPPED_FILE': file,
