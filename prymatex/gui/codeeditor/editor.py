@@ -233,13 +233,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         #Podemos marcar de otra forma cuando algo cambia :P
         return PMXBaseEditor.tabTitle(self)
     
-    def fileName(self):
-        """docstring for fileName"""
-        return self.tabTitle()
-    
     def fileFilters(self):
-        """docstring for fileFilters"""
-        return []
+        if self.getSyntax() is not None:
+            return [ "%s (%s)" % (self.getSyntax().bundle.name, " ".join(map(lambda ft: "*." + ft, self.getSyntax().fileTypes))) ]
+        return PMXBaseEditor.fileFilters(self)
     
     def tabIcon(self):
         if self.isModified():

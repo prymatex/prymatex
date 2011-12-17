@@ -3,7 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.dialogs import input
+from prymatex.gui import dialogs
 
 class MainWindowActions(object):
     
@@ -74,7 +74,7 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         filePath = self.currentEditor.filePath if self.currentEditor is not None else None
-        files = input.getOpenFiles(directory = self.application.fileManager.getDirectory(filePath))
+        files = dialogs.getOpenFiles(directory = self.application.fileManager.getDirectory(filePath))
         focus = len(files) == 1
         for filePath in files:
             editor = self.application.openFile(filePath, focus = focus)

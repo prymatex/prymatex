@@ -55,7 +55,7 @@ class NetworkAccessManager(QNetworkAccessManager, PMXObject):
     
     def createRequest(self, operation, request, data):
         if request.url().scheme() == "txmt":
-            self.mainWindow.openUrl(request.url())
+            self.application.openUrl(request.url())
         elif request.url().scheme() == "tm-file" and operation == self.GetOperation:
             reply = TmFileReply(self, request.url(), self.GetOperation)
             return reply

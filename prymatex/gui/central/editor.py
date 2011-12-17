@@ -36,11 +36,14 @@ class PMXBaseEditor(object):
             return os.path.basename(self.filePath)
         return self.UNTITLED_FILE_TEMPLATE.format(creation_counter = self.creation_counter)
     
-    def fileName():
-        pass
+    def fileDirectory(self):
+        return self.application.fileManager.getDirectory(self.filePath)
+    
+    def fileName(self):
+        return self.tabTitle()
         
     def fileFilters(self):
-        pass
+        return []
     
     def isNew(self):
         return self.filePath is None

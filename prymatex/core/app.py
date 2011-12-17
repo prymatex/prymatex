@@ -265,6 +265,21 @@ class PMXApplication(QtGui.QApplication):
             task = self.scheduler.newTask( appendChunksTask(editor, filePath) )
             task.done.connect( on_editorReady  )
     
+    def openUrl(self, url):
+        if isinstance(url, (str, unicode)):
+            url = QtCore.QUrl(url)
+        source = url.queryItemValue('url')
+        if source:
+            source = QtCore.QUrl(source)
+            position = (0, 0)
+            line = url.queryItemValue('line')
+            if line:
+                position = (int(line), position[1])
+            column = url.queryItemValue('column')
+            if column:
+                position = (position[0], int(column))
+            editor = self.openFile(source.path(), position)
+    
     # FIXME: Refactor
     def openFilePaths(self, filePaths):
         if not isinstance(filePaths, (list, tuple)):

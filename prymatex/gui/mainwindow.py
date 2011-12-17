@@ -13,6 +13,7 @@ from prymatex.core.base import PMXObject
 from prymatex.core import exceptions
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils
+from prymatex.gui import dialogs
 from prymatex.utils import coroutines
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObject):
@@ -197,21 +198,21 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor
         if editor.isNew() or saveAs:
+            fileDirectory = editor.fileDirectory()
             fileName = editor.fileName()
             fileFilters = editor.fileFilters()
-            fileInfo = self.application.fileManager.getSaveFile(title = "Save file as" if saveAs else "Save file", 
-                                                                filters = fileFilters, 
-                                                                name = fileName)
-            if fileInfo is not None:
-                self.application.fileManager.saveFile(fileInfo, editor.toPlainText())
-                editor.setFileInfo(fileInfo)
+            filePath = dialogs.getSaveFile(fileDirectory, title = "Save file as" if saveAs else "Save file", 
+                                            filters = fileFilters, 
+                                            name = fileName)
+            if filePath is not None:
+                self.application.fileManager.saveFile(filePath, editor.toPlainText())
+                editor.setFilePath(filePath)
                 editor.setModified(False)
+                editor.showMessage("<i>%s</i> saved" % editor.filePath)
         else:
-            self.application.fileManager.saveFile(editor.fileInfo, editor.toPlainText())
+            self.application.fileManager.saveFile(editor.filePath, editor.toPlainText())
             editor.setModified(False)
-            
-        if editor.fileInfo:
-            editor.showMessage("<i>%s</i> saved" % editor.fileInfo.fileName())
+            editor.showMessage("<i>%s</i> saved" % editor.filePath)
     
     def closeEditor(self, editor = None):
         editor = editor or self.currentEditor
@@ -232,20 +233,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     def tryCloseEmptyEditor(self):
         if self.currentEditor is not None and self.currentEditor.isNew() and not self.currentEditor.isModified():
             self.closeEditor(self.currentEditor)
-    
-    def openUrl(self, url):
-        if isinstance(url, (str, unicode)):
-            url = QtCore.QUrl(url)
-        source = url.queryItemValue('url')
-        if source:
-            source = QtCore.QUrl(source)
-            editor = self.openFile(QtCore.QFileInfo(source.path()))
-            line = url.queryItemValue('line')
-            if line:
-                editor.codeEdit.goToLine(int(line))
-            column = url.queryItemValue('column')
-            if column:
-                editor.codeEdit.goToColumn(int(column))
     
     def closeEvent(self, event):
         self.debug("CloseEvent")
