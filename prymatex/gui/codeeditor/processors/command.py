@@ -169,6 +169,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     # Outpus function
     def error(self, context):
         from prymatex.support.utils import makeHyperlinks
+        print context.errorValue
         command = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             

@@ -81,7 +81,8 @@ class PMXProjectManager(PMXObject):
         project.setWorkingSet(workingSet)
         #TODO: avisar que se movio el projecto al proxy
         
-    def findProjectForFile(self, fileInfo):
+    def findProjectForFile(self, filePath):
         for project in self.projectTreeModel.getAllProjects():
-            if os.path.commonprefix([project.directory, fileInfo.absolutePath()]) == project.directory:
+            print [project.directory, filePath]
+            if os.path.commonprefix([project.directory, filePath]) == project.directory:
                 return project

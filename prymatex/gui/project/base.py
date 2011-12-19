@@ -68,7 +68,11 @@ class PMXProject(object):
                 pass
 
     def buildEnvironment(self):
-        return {}
+        env = {}
+        env['TM_PROJECT_DIRECTORY'] = self.directory
+        env['TM_SELECTED_FILES'] = ""
+        env['TM_SELECTED_FILE'] = ""
+        return env
 
     @classmethod
     def loadProject(cls, filePath, manager):

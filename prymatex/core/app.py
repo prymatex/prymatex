@@ -261,6 +261,10 @@ class PMXApplication(QtGui.QApplication):
             def on_editorReady(result):
                 editor, filePath = result.value
                 editor.setFilePath(filePath)
+                #Belongs to project?
+                project = self.projectManager.findProjectForFile(filePath)
+                if project is not None:
+                    editor.setProject(project)
                 self.mainWindow.addEditor(editor, focus)
             task = self.scheduler.newTask( appendChunksTask(editor, filePath) )
             task.done.connect( on_editorReady  )

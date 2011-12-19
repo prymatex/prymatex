@@ -785,9 +785,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             env['TM_FILENAME'] = self.application.fileManager.fileName(self.filePath)
             env['TM_DIRECTORY'] = self.application.fileManager.fileDirectory(self.filePath)
         if self.project is not None:
-            env['TM_PROJECT_DIRECTORY'] = self.project.rootPath
-            env['TM_SELECTED_FILES'] = ""
-            env['TM_SELECTED_FILE'] = ""
+            env.update(self.project.buildEnvironment())
         if cursor.hasSelection():
             env['TM_SELECTED_TEXT'] = cursor.selectedText()
             start, end = self.getSelectionBlockStartEnd()
