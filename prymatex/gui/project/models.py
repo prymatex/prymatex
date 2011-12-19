@@ -8,28 +8,27 @@ from PyQt4 import QtCore, QtGui
 
 class PMXWorkspace(object):
     def __init__(self):
-        self.fileSystem = QtGui.QDirModel()
-        self.projects = []
+        self.children = []
 
     def __len__(self):
-        return len(self.projects)
+        return len(self.children)
     
     def appendProject(self, project):
-        self.projects.append(project)
-        project.setWorkspace(self)
+        self.children.append(project)
+        project.parent = self
 
     def removeProject(self, project):
-        self.projects.remove(project)
-        
+        self.children.remove(project)
+
     #==================================================
     # Tree Node interface
     #==================================================
     def child(self, row, column):
-        if len(self.projects) > row:
-            return self.projects[row]
+        if len(self.children) > row:
+            return self.children[row]
 
     def childCount(self):
-        return len(self.projects)
+        return len(self.children)
 
 class PMXProjectTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, parent = None):
@@ -39,9 +38,9 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
     def data(self, index, role):  
         node = self.getNode(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return node.name()
+            return node.name
         elif role == QtCore.Qt.DecorationRole:
-            return node.icon()
+            return node.icon
 
     def rowCount(self, parent):
         parentNode = self.getNode(parent)
@@ -61,7 +60,7 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
 
     def parent(self, index):
         node = self.getNode(index)
-        parentNode = node.parent()
+        parentNode = node.parent
 
         if parentNode == self.workspace:
             return QtCore.QModelIndex()
@@ -81,9 +80,14 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
     #========================================================================
     def getAllProjects(self):
         """docstring for getAllProjects"""
-        return self.workspace.projects
+        return self.workspace.children
     
     def appendProject(self, project):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.workspace), len(self.workspace))
         self.workspace.appendProject(project)
         self.endInsertRows()
+        
+    def refreshProject(self, project, relativePath = ""):
+        node = project.findDirectoryNode(relativePath)
+        parent = self.createIndex(node.row(), 0, node)
+        node.doRefresh()

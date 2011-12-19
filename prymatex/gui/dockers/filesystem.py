@@ -77,6 +77,18 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         self.treeViewFileSystem.setUniformRowHeights(False)
         
         #Setup Context Menu
+        #TODO
+        #menuItems = [
+            #{"New": [
+                #action1, action2, action3, "-", action4
+            #]},
+            #{"Order": [
+                #(gaction1, qaction2, qaction3),
+                #"-", action1, action2
+            #]}
+        #]
+        #self.fileSystemMenu = buildMenu("Menu Name", self, menuItems)
+
         self.fileSystemMenu = QtGui.QMenu(self)
         self.fileSystemMenu.setObjectName('fileSystemMenu')
         

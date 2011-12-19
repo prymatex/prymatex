@@ -23,13 +23,11 @@ def centerWidget(widget, scale = None):
     if scale is not None:
         widget.resize(screen.width() * scale[0], screen.height() * scale[1])
     widget.move((screen.width() - widget.size().width()) / 2, (screen.height() - widget.size().height()) / 2)
-
-
     
-def text_to_object_name(text, prefix = None):
-    '''
-    &Text Button name -> %{prefix}TextButtonName
-    '''
+def text_to_object_name(text, sufix = None):
+    """
+    &Text Button name -> TextButtonName%{sufix}
+    """
     words = text.split(' ')
     name = ''.join(map(to_ascii_cap, words))
     if prefix:
