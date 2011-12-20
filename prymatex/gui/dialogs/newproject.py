@@ -4,6 +4,7 @@
 import os
 from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
+from prymatex.utils.i18n import ugettext as _
 from prymatex.ui.dialogs.newproject import Ui_NewProjectDialog
 
 class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog, PMXObject):
@@ -20,7 +21,8 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog, PMXObject):
         self.projectCreated = None
     
     def on_buttonChoose_pressed(self):
-        path = QtGui.QFileDialog.getExistingDirectory(self, self.trUtf8("Choose Location for Project"))
+        directory = self.application.fileManager.getDirectory()
+        path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
         if path:
             self.lineLocation.setText(path)
 

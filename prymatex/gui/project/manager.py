@@ -59,6 +59,9 @@ class PMXProjectManager(PMXObject):
     def isOpen(self, project):
         return True
 
+    #---------------------------------------------------
+    # PROJECT CRUD
+    #---------------------------------------------------
     def createProject(self, name, directory, reuseDirectory = True):
         """
         Crea un proyecto nuevo lo agrega en los existentes y lo retorna,
@@ -76,10 +79,20 @@ class PMXProjectManager(PMXObject):
         self.settings.setValue('knownProjects', self.knownProjects)
         return project
 
+    def deleteProject(self, project, removeFiles = False):
+        """
+        Elimina un proyecto
+        """
+        project.delete(removeFiles)
+        self.removeProject(project)
+
     def addProject(self, project):
         project.setManager(self)
         self.projectTreeModel.appendProject(project)
 
+    def removeProject(self, project):
+        self.projectTreeModel.removeProject(project)
+        
     def openProject(self):
         pass
 

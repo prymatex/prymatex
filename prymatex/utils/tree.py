@@ -26,5 +26,4 @@ class TreeNode(object):
             return self.children[row]
     
     def row(self):
-        if self.parent is not None:
-            return self.parent.childIndex(self)
+        return self.parent.childIndex(self)

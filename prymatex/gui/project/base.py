@@ -43,10 +43,6 @@ class FileSystemTreeNode(TreeNode):
     def icon(self):
         return resources.getIcon(self.path)
 
-class PMXWorkspace(FileSystemTreeNode):
-    def __init__(self):
-        FileSystemTreeNode.__init__(self, "Workspace")
-
 class PMXProject(FileSystemTreeNode):
     KEYS = [    'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
     def __init__(self, name, directory, filePath, hash):
@@ -75,7 +71,7 @@ class PMXProject(FileSystemTreeNode):
         file = os.path.join(self.filePath)
         plist.writePlist(self.hash, file)
 
-    def delete(self, hard = False):
+    def delete(self, removeFiles = False):
         os.unlink(os.path.join(self.filePath))
         if hard:
             try:

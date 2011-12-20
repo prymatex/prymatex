@@ -23,10 +23,11 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
         self.fileCreated = None
     
     def on_buttonChoose_pressed(self):
-        path = QtGui.QFileDialog.getExistingDirectory(self, self.trUtf8("Choose Location for Template"))
+        directory = self.application.fileManager.getDirectory()
+        path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Template"), directory)
         if path:
             self.lineLocation.setText(path)
-
+        
     def on_buttonCreate_pressed(self):
         index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboTemplates.currentIndex(), 0))
         if index.isValid():

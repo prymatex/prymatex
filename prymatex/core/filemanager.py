@@ -117,12 +117,12 @@ class PMXFileManager(PMXObject):
         self.open_files.append(filePath)
         return content
     
-    def saveFile(self, fileInfo, content):
+    def saveFile(self, filePath, content):
         """
         Function that actually save the content of a file.
         """
         try:
-            f = QtCore.QFile(fileInfo.absoluteFilePath())
+            f = QtCore.QFile(filePath)
             if not f.open(QtCore.QIODevice.WriteOnly | QtCore.QIODevice.Truncate):
                 raise PrymatexIOException(f.errorString())
             stream = QtCore.QTextStream(f)

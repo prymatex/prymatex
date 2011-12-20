@@ -15,7 +15,7 @@ from prymatex.gui.support.qtadapter import buildKeyEquivalent, RGBA2QColor, QCol
 #====================================================
 class PMXBundleTreeNode(TreeNode):
     """
-        Bundle and bundle item decorator
+    Bundle and bundle item decorator
     """
     USED = []
     BANNED_ACCEL = ' \t'
@@ -162,29 +162,30 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
         return None
 
     def index(self, row, column, parent):
-        if not parent.isValid():
-            parent = self.root
-        else:
-            parent = parent.internalPointer()
+        parentNode = self.getNode(parent)
+        childItem = parentNode.child(row)
         
-        child = parent.child(row)
-        if child:
-            return self.createIndex(row, column, child)
+        if childItem is not None:
+            return self.createIndex(row, column, childItem)
         else:
             return QtCore.QModelIndex()
 
     def parent(self, index):
-        if not index.isValid():  
-            return QtCore.QModelIndex()  
+        node = self.getNode(index)
+        parentNode = node.parent
 
-        child = index.internalPointer()  
-        parent = child.parent
-        row = parent.row()
-        
-        if parent == self.root or row is None:  
+        if parentNode == self.root:
             return QtCore.QModelIndex()
 
-        return self.createIndex(row, 0, parent)
+        return self.createIndex(parentNode.row(), 0, parentNode)
+    
+    def getNode(self, index):
+        if index.isValid():
+            node = index.internalPointer()
+            if node:
+                return node
+
+        return self.root
     
     #========================================================================
     # Functions

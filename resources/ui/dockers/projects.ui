@@ -26,9 +26,9 @@
       <property name="uniformRowHeights">
        <bool>true</bool>
       </property>
-      <attribute name="headerVisible">
-       <bool>false</bool>
-      </attribute>
+      <property name="headerHidden">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
    </layout>
@@ -90,6 +90,23 @@
    </property>
    <property name="text">
     <string>Open</string>
+   </property>
+  </action>
+  <action name="actionProperties">
+   <property name="text">
+    <string>Properties</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/view-refresh.png</normaloff>:/icons/actions/view-refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
  </widget>

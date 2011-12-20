@@ -18,7 +18,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
         self.setupUi(self)
-        self.treeViewProjects.setModel(self.application.projectManager.projectTreeProxyModel)
+        self.projectModel = self.application.projectManager.projectTreeProxyModel
+        self.treeViewProjects.setModel(self.projectModel)
 
         self.setupTreeViewProjects()
 
@@ -45,6 +46,90 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
         #Connect context menu
         self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewProjects.customContextMenuRequested.connect(self.showProjectTreeViewContextMenu)
-        
+    
+        #self.actionNewFile
+        #self.actionNewFolder
+        #self.actionNewFromTemplate
+        #self.actionDelete
+        #self.actionNewProject
+        #self.actionCloseProject
+        #self.actionOpenProject
+        #self.actionProperties
+        #self.actionRefresh
+
     def showProjectTreeViewContextMenu(self, point):
         self.projectsMenu.popup(self.treeViewProjects.mapToGlobal(point))
+    
+    #Actions
+    
+    @QtCore.pyqtSlot()
+    def on_actionNewFile_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path
+        
+    @QtCore.pyqtSlot()
+    def on_actionNewFolder_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path
+    
+    @QtCore.pyqtSlot()
+    def on_actionNewFromTemplate_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path
+    
+    @QtCore.pyqtSlot()
+    def on_actionDelete_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path
+    
+    @QtCore.pyqtSlot()
+    def on_actionNewProject_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path
+    
+    @QtCore.pyqtSlot()
+    def on_actionCloseProject_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path
+    
+    @QtCore.pyqtSlot()
+    def on_actionOpenProject_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path
+    
+    @QtCore.pyqtSlot()
+    def on_actionProperties_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path
+    
+    @QtCore.pyqtSlot()
+    def on_actionRefresh_triggered(self):
+        index = self.treeViewProjects.currentIndex()
+        sIndex = self.projectModel.mapToSource(index)
+        sourceModel = self.projectModel.sourceModel()
+        path = sourceModel.filePath(sIndex)
+        print path

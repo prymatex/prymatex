@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/projects.ui'
 #
-# Created: Tue Dec  6 17:39:08 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Tue Dec 20 19:26:03 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,7 +19,6 @@ class Ui_ProjectsDock(object):
     def setupUi(self, ProjectsDock):
         ProjectsDock.setObjectName(_fromUtf8("ProjectsDock"))
         ProjectsDock.resize(330, 484)
-        ProjectsDock.setWindowTitle(_('Projects'))
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
@@ -28,52 +27,62 @@ class Ui_ProjectsDock(object):
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.treeViewProjects = QtGui.QTreeView(self.dockWidgetContents)
         self.treeViewProjects.setUniformRowHeights(True)
+        self.treeViewProjects.setHeaderHidden(True)
         self.treeViewProjects.setObjectName(_fromUtf8("treeViewProjects"))
-        self.treeViewProjects.header().setVisible(False)
         self.verticalLayout.addWidget(self.treeViewProjects)
         ProjectsDock.setWidget(self.dockWidgetContents)
         self.actionNewFile = QtGui.QAction(ProjectsDock)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionNewFile.setIcon(icon)
-        self.actionNewFile.setText(_('File'))
         self.actionNewFile.setObjectName(_fromUtf8("actionNewFile"))
         self.actionNewFolder = QtGui.QAction(ProjectsDock)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/folder-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionNewFolder.setIcon(icon1)
-        self.actionNewFolder.setText(_('Folder'))
         self.actionNewFolder.setObjectName(_fromUtf8("actionNewFolder"))
         self.actionNewFromTemplate = QtGui.QAction(ProjectsDock)
         self.actionNewFromTemplate.setIcon(icon)
-        self.actionNewFromTemplate.setText(_('From Template'))
         self.actionNewFromTemplate.setObjectName(_fromUtf8("actionNewFromTemplate"))
         self.actionDelete = QtGui.QAction(ProjectsDock)
-        self.actionDelete.setText(_('Delete'))
         self.actionDelete.setObjectName(_fromUtf8("actionDelete"))
         self.actionNewProject = QtGui.QAction(ProjectsDock)
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/project-development-new-template.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionNewProject.setIcon(icon2)
-        self.actionNewProject.setText(_('Project'))
         self.actionNewProject.setObjectName(_fromUtf8("actionNewProject"))
         self.actionCloseProject = QtGui.QAction(ProjectsDock)
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/project-development-close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionCloseProject.setIcon(icon3)
-        self.actionCloseProject.setText(_('Close'))
         self.actionCloseProject.setObjectName(_fromUtf8("actionCloseProject"))
         self.actionOpenProject = QtGui.QAction(ProjectsDock)
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/project-open.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionOpenProject.setIcon(icon4)
-        self.actionOpenProject.setText(_('Open'))
         self.actionOpenProject.setObjectName(_fromUtf8("actionOpenProject"))
+        self.actionProperties = QtGui.QAction(ProjectsDock)
+        self.actionProperties.setObjectName(_fromUtf8("actionProperties"))
+        self.actionRefresh = QtGui.QAction(ProjectsDock)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionRefresh.setIcon(icon5)
+        self.actionRefresh.setObjectName(_fromUtf8("actionRefresh"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
 
     def retranslateUi(self, ProjectsDock):
-        pass
+        ProjectsDock.setWindowTitle(_('Projects'))
+        self.actionNewFile.setText(_('File'))
+        self.actionNewFolder.setText(_('Folder'))
+        self.actionNewFromTemplate.setText(_('From Template'))
+        self.actionDelete.setText(_('Delete'))
+        self.actionNewProject.setText(_('Project'))
+        self.actionCloseProject.setText(_('Close'))
+        self.actionOpenProject.setText(_('Open'))
+        self.actionProperties.setText(_('Properties'))
+        self.actionRefresh.setText(_('Refresh'))
+        self.actionRefresh.setShortcut(_('F5'))
 
 from prymatex import resources_rc

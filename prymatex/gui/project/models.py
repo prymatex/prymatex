@@ -6,13 +6,14 @@ import codecs
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.project.base import PMXWorkspace, FileSystemTreeNode
+from prymatex.utils.tree import TreeNode
+from prymatex.gui.project.base import FileSystemTreeNode
 
 class PMXProjectTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, manager, parent = None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self.manager = manager
-        self.workspace = PMXWorkspace()
+        self.workspace = TreeNode("Workspace")
 
     def data(self, index, role):
         node = self.getNode(index)
@@ -51,13 +52,12 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
             node = index.internalPointer()
             if node:
                 return node
-
         return self.workspace
 
     #========================================================================
     # Custom methods
     #========================================================================
-    def loadDirectory(self, parentNode, parentIndex):
+    def _load_directory(self, parentNode, parentIndex):
         names = os.listdir(parentNode.path)
         self.beginInsertRows(parentIndex, 0, len(names) - 1)
         for name in names:
@@ -67,23 +67,24 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
         for child in parentNode.children:
             if child.isdir:
                 index = self.index(child.row(), 0, parentIndex)
-                self.loadDirectory(child, index)
+                self._load_directory(child, index)
 
     def filePath(self, index):
         return index.internalPointer().path
-    
-    def getAllProjects(self):
-        """docstring for getAllProjects"""
-        return self.workspace.children
     
     def appendProject(self, project):
         self.beginInsertRows(QtCore.QModelIndex(), self.workspace.childCount(), self.workspace.childCount())
         self.workspace.appendChild(project)
         self.endInsertRows()
         index = self.index(project.row(), 0, QtCore.QModelIndex())
-        self.loadDirectory(project, index)
+        self._load_directory(project, index)
+    
+    def removeProject(self, project):
+        self.beginRemoveRows(QtCore.QModelIndex(), project.row(), project.row())
+        self.workspace.removeChild(project)
+        self.endRemoveRows()
         
-    def refreshProject(self, project, path = ""):
-        node = project.findDirectoryNode(relativePath)
-        parent = self.createIndex(node.row(), 0, node)
-        node.doRefresh()
+    def getAllProjects(self):
+        """docstring for getAllProjects"""
+        return self.workspace.children
+        
