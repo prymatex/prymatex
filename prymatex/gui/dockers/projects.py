@@ -18,7 +18,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
         self.setupUi(self)
-        self.treeViewProjects.setModel(self.application.projectManager.projectTreeModel)
+        self.treeViewProjects.setModel(self.application.projectManager.projectTreeProxyModel)
+        #self.application.projectManager.projectTreeProxyModel.sort(0, QtCore.Qt.AscendingOrder)
         
         self.setupTreeViewProjects()
 

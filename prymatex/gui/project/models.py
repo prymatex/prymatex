@@ -6,45 +6,39 @@ import codecs
 
 from PyQt4 import QtCore, QtGui
 
-class PMXWorkspace(object):
-    def __init__(self):
-        self.fileSystem = QtGui.QDirModel()
-        self.projects = []
-
-    def __len__(self):
-        return len(self.projects)
-    
-    def appendProject(self, project):
-        self.projects.append(project)
-        project.setWorkspace(self)
-
-    def removeProject(self, project):
-        self.projects.remove(project)
-        
-    #==================================================
-    # Tree Node interface
-    #==================================================
-    def child(self, row, column):
-        if len(self.projects) > row:
-            return self.projects[row]
-
-    def childCount(self):
-        return len(self.projects)
+from prymatex.gui.project.base import PMXWorkspace, PMXProjectItem
 
 class PMXProjectTreeModel(QtCore.QAbstractItemModel):  
-    def __init__(self, parent = None):
+    def __init__(self, manager, parent = None):
         QtCore.QAbstractItemModel.__init__(self, parent)
+        self.manager = manager
         self.workspace = PMXWorkspace()
 
+    def populateNode(self, node, index):
+        path = node.path
+        node.isdir = os.path.isdir(path)
+        if node.isdir:
+            self.manager.fileWatcher.addPath(path)
+            names = os.listdir(path)
+            self.beginInsertRows(index, 0, len(names))  
+            for name in names:
+                newNode = PMXProjectItem(name, self)
+                newNode.parent = node
+                node.children.append(newNode)
+            self.endInsertRows()
+        node.populated = True
+        
     def data(self, index, role):  
         node = self.getNode(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return node.name()
+            return node.name
         elif role == QtCore.Qt.DecorationRole:
-            return node.icon()
+            return node.icon
 
     def rowCount(self, parent):
         parentNode = self.getNode(parent)
+        if not parentNode.populated:
+            self.populateNode(parentNode, parent)
         return parentNode.childCount()
 
     def columnCount(self, parent):  
@@ -61,7 +55,7 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
 
     def parent(self, index):
         node = self.getNode(index)
-        parentNode = node.parent()
+        parentNode = node.parent
 
         if parentNode == self.workspace:
             return QtCore.QModelIndex()
@@ -79,11 +73,19 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
     #========================================================================
     # Custom methods
     #========================================================================
+    def filePath(self, index):
+        return index.internalPointer().path
+    
     def getAllProjects(self):
         """docstring for getAllProjects"""
-        return self.workspace.projects
+        return self.workspace.children
     
     def appendProject(self, project):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.workspace), len(self.workspace))
         self.workspace.appendProject(project)
         self.endInsertRows()
+        
+    def refreshProject(self, project, path = ""):
+        node = project.findDirectoryNode(relativePath)
+        parent = self.createIndex(node.row(), 0, node)
+        node.doRefresh()

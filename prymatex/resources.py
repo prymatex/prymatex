@@ -43,6 +43,8 @@ def getIcon(index):
         #Try file path
         if os.path.isfile(index):
             return FileIconProvider.icon(QtCore.QFileInfo(index))
+        elif os.path.isdir(index):
+            return FileIconProvider.icon(QtGui.QFileIconProvider.Folder)
         return FileIconProvider.icon(QtGui.QFileIconProvider.File)
     elif isinstance(index, int):
         return FileIconProvider.icon(index)

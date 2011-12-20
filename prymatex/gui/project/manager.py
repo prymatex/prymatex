@@ -31,8 +31,16 @@ class PMXProjectManager(PMXObject):
         self.projectTreeModel = PMXProjectTreeModel(self)
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
+        
+        self.fileWatcher = QtCore.QFileSystemWatcher()
+        self.fileWatcher.directoryChanged.connect(self.refreshProjectByPath)
+        
         self.configure()
-
+    
+    def refreshProjectByPath(self, path):
+        project = self.findProjectForPath(path)
+        self.projectTreeModel.refreshProject(project, path)
+    
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils
         validPath = []
@@ -40,14 +48,14 @@ class PMXProjectManager(PMXObject):
             char = char if char in self.VALID_PATH_CARACTERS else '-'
             validPath.append(char)
         return ''.join(validPath)
-        
+
     def loadProject(self):
         for filePath in self.knownProjects:
             project = PMXProject.loadProject(filePath, self)
 
     def isOpen(self, project):
         return True
-        
+
     def createProject(self, name, directory, reuseDirectory = True):
         """
         Crea un proyecto nuevo lo agrega en los existentes y lo retorna,
@@ -81,8 +89,7 @@ class PMXProjectManager(PMXObject):
         project.setWorkingSet(workingSet)
         #TODO: avisar que se movio el projecto al proxy
         
-    def findProjectForFile(self, filePath):
+    def findProjectForPath(self, path):
         for project in self.projectTreeModel.getAllProjects():
-            print [project.directory, filePath]
-            if os.path.commonprefix([project.directory, filePath]) == project.directory:
+            if os.path.commonprefix([project.directory, path]) == project.directory:
                 return project

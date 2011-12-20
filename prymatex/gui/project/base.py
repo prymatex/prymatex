@@ -29,16 +29,43 @@ showFileHierarchyDrawer: Mostrar la docker
 windowFrame: El Tampaño del a ventana de projecto en tm
 """
 
+class PMXWorkspace(object):
+    def __init__(self):
+        self.children = []
+        self.populated = True
+
+    def __len__(self):
+        return len(self.children)
+    
+    def appendProject(self, project):
+        self.children.append(project)
+        project.parent = self
+
+    def removeProject(self, project):
+        self.children.remove(project)
+
+    #==================================================
+    # Tree Node interface
+    #==================================================
+    def child(self, row, column):
+        if len(self.children) > row:
+            return self.children[row]
+
+    def childCount(self):
+        return len(self.children)
+
 class PMXProject(object):
     KEYS = [    'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
     def __init__(self, name, directory, filePath, hash):
-        self.__name = name
+        self.name = name
         self.directory = directory
         self.filePath = filePath
         self.workingSet = None
-        self.workspace = None
         self.manager = None
         self.load(hash)
+        
+        self.populated = False
+        self.parent = None
         self.children = []
     
     def load(self, hash):
@@ -83,15 +110,7 @@ class PMXProject(object):
             project = cls(name, directory, filePath, data)
             manager.addProject(project)
         except Exception, e:
-            print "Error in project %s (%s)" % (info_file, e)
-    
-    @property
-    def fileSystem(self):
-        return self.workspace.fileSystem
-    
-    def setWorkspace(self, workspace):
-        self.workspace = workspace
-        self.rootIndex = workspace.fileSystem.index(self.directory)
+            print "Error in project %s (%s)" % (filePath, e)
     
     def setManager(self, manager):
         self.manager = manager
@@ -102,72 +121,61 @@ class PMXProject(object):
     #==================================================
     # Tree Node interface
     #==================================================
+    @property
+    def path(self):
+        return self.directory
+
+    @property
     def icon(self):
         if self.manager.isOpen(self):
             return resources.getIcon("projectopen")
         else:
             return resources.getIcon("projectclose")
 
-    def name(self):
-        return self.__name
-    
     def child(self, row, column):
-        child = self.rootIndex.child(row, column)
-        path = self.fileSystem.filePath(child)
-        item = PMXProjectItem(path, self)
-        item.setParent(self)
-        self.children.append(item)
-        return item
-    
-    def row(self):
-        return self.parent().projects.index(self)
-    
-    def parent(self):
-        return self.workspace
+        return self.children[row]
     
     def childCount(self):
-        return self.fileSystem.rowCount(self.rootIndex)
-
+        return len(self.children)
+    
+    def row(self):
+        return self.parent.children.index(self)
+    
+    def findDirectoryNode(self, path):
+        current = self
+        for part in path.split(os.path.sep):
+            nodes = filter(lambda node: node.isdir and node.name == part, current.children)
+            assert len(nodes) <= 1, "More than one node"
+            #TODO: Arregrlar el detalle del split con cadena vacia
+            if len(nodes):
+                current = nodes.pop()
+        return current
+    
 class PMXProjectItem(object):
-    def __init__(self, path, project):
-        self.path = path
+    def __init__(self, name, project):
+        self.name = name
         self.project = project
-        self.__parent = None
+        
+        self.populated = False
+        self.parent = None
         self.children = []
 
-    @property
-    def fileSystem(self):
-        return self.project.fileSystem
-        
     #==================================================
     # Tree Node interface
-    #==================================================    
-    def setParent(self, parent):
-        self.__parent = parent
-
-    def parent(self):
-        return self.__parent
+    #==================================================
+    @property
+    def path(self):
+        return os.path.join(self.parent.path, self.name)
     
+    @property
     def icon(self):
-        index = self.fileSystem.index(self.path)
-        return self.fileSystem.fileIcon(index)
+        return resources.getIcon(self.path)
         
-    def name(self):
-        index = self.fileSystem.index(self.path)
-        return self.fileSystem.fileName(index)
-    
     def childCount(self):
-        index = self.fileSystem.index(self.path)
-        return self.fileSystem.rowCount(index)
+        return len(self.children)
     
     def child(self, row, column):
-        index = self.fileSystem.index(self.path)
-        child = index.child(row, column)
-        path = self.fileSystem.filePath(child)
-        item = PMXProjectItem(path, self.project)
-        item.setParent(self)
-        self.children.append(item)
-        return item
+        return self.children[row]
     
     def row(self):
-        return self.parent().children.index(self)
+        return self.parent.children.index(self)

@@ -77,6 +77,18 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         self.treeViewFileSystem.setUniformRowHeights(False)
         
         #Setup Context Menu
+        #TODO
+        #menuItems = [
+            #{"New": [
+                #action1, action2, action3, "-", action4
+            #]},
+            #{"Order": [
+                #(gaction1, qaction2, qaction3),
+                #"-", action1, action2
+            #]}
+        #]
+        #self.fileSystemMenu = buildMenu("Menu Name", self, menuItems)
+
         self.fileSystemMenu = QtGui.QMenu(self)
         self.fileSystemMenu.setObjectName('fileSystemMenu')
         
@@ -158,7 +170,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         sIndex = self.fileSystemProxyModel.mapToSource(index)
         path = self.fileSystemModel.filePath(sIndex)
         if os.path.isfile(path):
-            self.mainWindow.openFile(QtCore.QFileInfo(path))
+            self.application.openFile(path)
         if os.path.isdir(path):
             self.treeViewFileSystem.setRootIndex(index)
             self.comboBoxLocation.lineEdit().setText(path)

@@ -262,7 +262,7 @@ class PMXApplication(QtGui.QApplication):
                 editor, filePath = result.value
                 editor.setFilePath(filePath)
                 #Belongs to project?
-                project = self.projectManager.findProjectForFile(filePath)
+                project = self.projectManager.findProjectForPath(filePath)
                 if project is not None:
                     editor.setProject(project)
                 self.mainWindow.addEditor(editor, focus)
