@@ -32,6 +32,9 @@ class PMXProjectManager(PMXObject):
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
         
+        #Force sort for 
+        #self.projectTreeProxyModel.sort(0, QtCore.Qt.AscendingOrder)
+        
         self.fileWatcher = QtCore.QFileSystemWatcher()
         self.fileWatcher.directoryChanged.connect(self.refreshProjectByPath)
         

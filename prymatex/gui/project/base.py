@@ -3,6 +3,7 @@
 
 import os
 
+from prymatex.utils.tree import TreeNode
 from prymatex.utils import plist
 from prymatex import resources
 
@@ -29,45 +30,33 @@ showFileHierarchyDrawer: Mostrar la docker
 windowFrame: El Tampaño del a ventana de projecto en tm
 """
 
-class PMXWorkspace(object):
-    def __init__(self):
-        self.children = []
-        self.populated = True
-
-    def __len__(self):
-        return len(self.children)
+class FileSystemTreeNode(TreeNode):
+    @property
+    def path(self):
+        return os.path.join(self.parent.path, self.name)
     
-    def appendProject(self, project):
-        self.children.append(project)
-        project.parent = self
+    @property
+    def isdir(self):
+        return os.path.isdir(self.path)
+    
+    @property
+    def icon(self):
+        return resources.getIcon(self.path)
 
-    def removeProject(self, project):
-        self.children.remove(project)
+class PMXWorkspace(FileSystemTreeNode):
+    def __init__(self):
+        FileSystemTreeNode.__init__(self, "Workspace")
 
-    #==================================================
-    # Tree Node interface
-    #==================================================
-    def child(self, row, column):
-        if len(self.children) > row:
-            return self.children[row]
-
-    def childCount(self):
-        return len(self.children)
-
-class PMXProject(object):
+class PMXProject(FileSystemTreeNode):
     KEYS = [    'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
     def __init__(self, name, directory, filePath, hash):
-        self.name = name
+        FileSystemTreeNode.__init__(self, name)
         self.directory = directory
         self.filePath = filePath
         self.workingSet = None
         self.manager = None
         self.load(hash)
         
-        self.populated = False
-        self.parent = None
-        self.children = []
-    
     def load(self, hash):
         for key in PMXProject.KEYS:
             value = hash.get(key, None)
@@ -118,9 +107,6 @@ class PMXProject(object):
     def setWorkingSet(self, workingSet):
         self.workingSet = set
 
-    #==================================================
-    # Tree Node interface
-    #==================================================
     @property
     def path(self):
         return self.directory
@@ -132,15 +118,6 @@ class PMXProject(object):
         else:
             return resources.getIcon("projectclose")
 
-    def child(self, row, column):
-        return self.children[row]
-    
-    def childCount(self):
-        return len(self.children)
-    
-    def row(self):
-        return self.parent.children.index(self)
-    
     def findDirectoryNode(self, path):
         current = self
         for part in path.split(os.path.sep):
@@ -150,32 +127,4 @@ class PMXProject(object):
             if len(nodes):
                 current = nodes.pop()
         return current
-    
-class PMXProjectItem(object):
-    def __init__(self, name, project):
-        self.name = name
-        self.project = project
         
-        self.populated = False
-        self.parent = None
-        self.children = []
-
-    #==================================================
-    # Tree Node interface
-    #==================================================
-    @property
-    def path(self):
-        return os.path.join(self.parent.path, self.name)
-    
-    @property
-    def icon(self):
-        return resources.getIcon(self.path)
-        
-    def childCount(self):
-        return len(self.children)
-    
-    def child(self, row, column):
-        return self.children[row]
-    
-    def row(self):
-        return self.parent.children.index(self)

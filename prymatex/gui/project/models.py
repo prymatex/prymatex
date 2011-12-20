@@ -6,7 +6,7 @@ import codecs
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.project.base import PMXWorkspace, PMXProjectItem
+from prymatex.gui.project.base import PMXWorkspace, FileSystemTreeNode
 
 class PMXProjectTreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, manager, parent = None):
@@ -14,21 +14,7 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
         self.manager = manager
         self.workspace = PMXWorkspace()
 
-    def populateNode(self, node, index):
-        path = node.path
-        node.isdir = os.path.isdir(path)
-        if node.isdir:
-            self.manager.fileWatcher.addPath(path)
-            names = os.listdir(path)
-            self.beginInsertRows(index, 0, len(names))  
-            for name in names:
-                newNode = PMXProjectItem(name, self)
-                newNode.parent = node
-                node.children.append(newNode)
-            self.endInsertRows()
-        node.populated = True
-        
-    def data(self, index, role):  
+    def data(self, index, role):
         node = self.getNode(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             return node.name
@@ -37,18 +23,16 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
 
     def rowCount(self, parent):
         parentNode = self.getNode(parent)
-        if not parentNode.populated:
-            self.populateNode(parentNode, parent)
         return parentNode.childCount()
 
-    def columnCount(self, parent):  
+    def columnCount(self, parent):
         return 1
 
     def index(self, row, column, parent = QtCore.QModelIndex()):
         parentNode = self.getNode(parent)
-        childItem = parentNode.child(row, column)
+        childItem = parentNode.child(row)
         
-        if childItem:
+        if childItem is not None:
             return self.createIndex(row, column, childItem)
         else:
             return QtCore.QModelIndex()
@@ -73,6 +57,18 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
     #========================================================================
     # Custom methods
     #========================================================================
+    def loadDirectory(self, parentNode, parentIndex):
+        names = os.listdir(parentNode.path)
+        self.beginInsertRows(parentIndex, 0, len(names) - 1)
+        for name in names:
+            node = FileSystemTreeNode(name, parentNode)
+            parentNode.appendChild(node)
+        self.endInsertRows()
+        for child in parentNode.children:
+            if child.isdir:
+                index = self.index(child.row(), 0, parentIndex)
+                self.loadDirectory(child, index)
+
     def filePath(self, index):
         return index.internalPointer().path
     
@@ -81,9 +77,11 @@ class PMXProjectTreeModel(QtCore.QAbstractItemModel):
         return self.workspace.children
     
     def appendProject(self, project):
-        self.beginInsertRows(QtCore.QModelIndex(), len(self.workspace), len(self.workspace))
-        self.workspace.appendProject(project)
+        self.beginInsertRows(QtCore.QModelIndex(), self.workspace.childCount(), self.workspace.childCount())
+        self.workspace.appendChild(project)
         self.endInsertRows()
+        index = self.index(project.row(), 0, QtCore.QModelIndex())
+        self.loadDirectory(project, index)
         
     def refreshProject(self, project, path = ""):
         node = project.findDirectoryNode(relativePath)

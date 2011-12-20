@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.resources import IMAGES
 
+from prymatex.utils.tree import TreeNode
+
+from prymatex import resources
 from prymatex.gui.mimes import PyMimeData
 from prymatex.gui.support import qtadapter
 from prymatex.gui.support.qtadapter import buildKeyEquivalent, RGBA2QColor, QColor2RGBA
@@ -11,18 +13,17 @@ from prymatex.gui.support.qtadapter import buildKeyEquivalent, RGBA2QColor, QCol
 #====================================================
 # Bundle Tree Node
 #====================================================
-class PMXBundleTreeNode(object):
-    ''' 
+class PMXBundleTreeNode(TreeNode):
+    """
         Bundle and bundle item decorator
-    '''
+    """
     USED = []
     BANNED_ACCEL = ' \t'
     
     def __init__(self, item, parent = None):
+        TreeNode.__init__(self, item.name, parent)
         self.item = item
-        self.parent = parent
-        self.children = []
-    
+
     def __getattr__(self, name):
         return getattr(self.item, name)
     
@@ -36,8 +37,7 @@ class PMXBundleTreeNode(object):
     
     @property
     def icon(self):
-        icon = IMAGES[self.TYPE] if self.TYPE in IMAGES else None
-        return icon
+        return resources.getIcon(self.TYPE)
     
     @property
     def trigger(self):
@@ -86,32 +86,6 @@ class PMXBundleTreeNode(object):
         if 'keyEquivalent' in hash:
             hash['keyEquivalent'] = buildKeyEquivalent(hash['keyEquivalent'])
         self.item.update(hash)
-    
-    #==================================================
-    # Tree Node interface
-    #==================================================
-    def appendChild(self, child):
-        self.children.append(child)
-        child.parent = self
-
-    def removeChild(self, child):
-        self.children.remove(child)
-        
-    def child(self, row):
-        if len(self.children) > row:
-            return self.children[row]
-
-    def childCount(self):
-        return len(self.children)
-
-    def row(self):  
-        if self.parent is not None and self in self.parent.children:  
-            return self.parent.children.index(self)
-
-class RootNode(object):
-    def __init__(self):
-        self.name = "root"
-        self.TYPE = "root"
 
 #====================================================
 # Bundle Tree Model
@@ -120,7 +94,7 @@ class PMXBundleTreeModel(QtCore.QAbstractItemModel):
     def __init__(self, manager, parent = None):
         super(PMXBundleTreeModel, self).__init__(parent)
         self.manager = manager
-        self.root = PMXBundleTreeNode(RootNode())
+        self.root = TreeNode("Root")
     
     def setData(self, index, value, role):  
         if not index.isValid():  
