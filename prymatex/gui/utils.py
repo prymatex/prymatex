@@ -24,118 +24,48 @@ def centerWidget(widget, scale = None):
         widget.resize(screen.width() * scale[0], screen.height() * scale[1])
     widget.move((screen.width() - widget.size().width()) / 2, (screen.height() - widget.size().height()) / 2)
     
-def text_to_object_name(text, sufix = None):
+def createObjectName(text, sufix = "", prefix = ""):
     """
-    &Text Button name -> TextButtonName%{sufix}
+    &Text Button name -> %{prefix}TextButtonName%{sufix}
     """
     words = text.split(' ')
     name = ''.join(map(to_ascii_cap, words))
-    if prefix:
-        name = prefix + name
-    return name
+    return prefix + name + sufix
 
-def createButton(parent, text, shortcut = None, object_name = None, do_i18n = False, **opts):
-    text = do_i18n and _(text) or text
-    if shortcut:
-        shortcut = do_i18n and _(shortcut) or shortcut
-    
-    button = QPushButton(text, parent)
-    if not object_name:
-        object_name = text_to_object_name(text, 'button')
-    button.setObjectName(object_name)
-    #buttons.setKey
-    button.setFlat(True)
-    setattr(parent, object_name, button)
-    return button
-
-
-_available_keys = filter(lambda s: s.startswith('Key_'), dir(QtCore.Qt))
-KEYS_DICT = dict([(name[4:], getattr(QtCore.Qt, name)) for name in _available_keys])
-KEYS_DICT.update({'Ctrl': QtCore.Qt.CTRL, 'Control': QtCore.Qt.CTRL, 'CTRL': QtCore.Qt.CTRL, 
-                  'Shift': QtCore.Qt.SHIFT, 'Shift': QtCore.Qt.SHIFT,
-                  'Alt': QtCore.Qt.ALT, 'ALT': QtCore.Qt.ALT,
-                  'Meta': QtCore.Qt.META, 'META': QtCore.Qt.META,
-                  })
-
-
-def text_to_KeySequence(text):
-    try:
-        ints = [ KEYS_DICT[k] for k in text.split('+') ]
-        ks = QKeySequence(sum(ints))
-        #ks = QKeySequence.fromString(text)
-        
-    except Exception, e:
-        print "Error en shortcut", e, text
-        return QKeySequence()
-    
-    return ks
-
-def createAction(parent, caption, 
-                 shortcut = None, # QKeySequence
-                 name = None,
-                 do_i18n = True,
-                 checkable = False, 
-                 addToParent = True): # Name, 
-    '''
-    @param parent: Objeto
-    @param name: Nombre de la propiedad
-    @param caption: Texto de la acción a ser i18nalizdo
-    @param shortcut: Texto del atajo a ser i18nalizdo
-    '''
-    caption = do_i18n and _(caption) or caption
-    action = QAction(_(caption), parent)
-    if not name:
-        name = caption.replace(' ', '')
-        name = name.replace('&', '')
-        #print name
-    actionName = 'action' + name
-    action.setObjectName(actionName)
-    if shortcut:
-        shortcut = do_i18n and _(shortcut) or shortcut 
-        sequence = text_to_KeySequence(shortcut)
-        action.setShortcut(sequence)
-    setattr(parent, actionName, action )
-    if checkable:
-        action.setCheckable(checkable)
-    parent.addAction(action)
-    return action
-
-def addActionsToMenu(menu, *action_tuples):
-    '''
-    Helper for mass menu action creation
-    Usage:
-    addActionsToMenu(menu,
-                     ("&Open", "Ctrl+O", "actionFOpen", {do_i18n = False}),
-                     (pos1, pos2, pos3, {x = 2}),
-                     None,
-                     ()
-    )
-    '''
-    actions = []
-    for action_params in action_tuples:
-        parent = menu.parent()
-        assert parent is not None
-        if not action_params:
+def createQMenu(title, menuItems, parent):
+    """
+    menuItems = [
+            {"title": "New",
+             "menuItems": [
+                action1, action2, action3, "-", action4
+            ]},
+            {"title": "Order",
+             "menuItems": [
+                (gaction1, qaction2, qaction3),
+                "-", action1, action2
+            ]}
+        ]
+    """
+    menu = QtGui.QMenu(parent)
+    object_name = createObjectName(title, sufix = "Menu")
+    menu.setObjectName(object_name)
+    for item in menuItems:
+        if item == "-":
             menu.addSeparator()
-        elif type(action_params) is QMenu:
-            menu.addMenu(action_params)
-        elif isinstance(action_params, QAction):
-            menu.addAction(action_params)
+        elif isinstance(item, dict):
+            for key, value in item.iteritems():
+                submenu = createQMenu(key, value, menu)
+                menu.addMenu(submenu)
+        elif isinstance(item, QtGui.QAction):
+            menu.addAction(item)
+        elif isinstance(item, tuple):
+            actionGroup = QtGui.QActionGroup(menu)
+            actionGroup.setExclusive(True)
+            map(menu.addAction, item)
+            map(lambda action: action.setActionGroup(actionGroup), item)
         else:
-            kwargs = {}
-            if isinstance(action_params[-1], dict):
-                largs = action_params[:-1]
-                kwargs.update(action_params[-1])
-            else:
-                largs = action_params
-            action = menu.addAction(createAction(parent, *largs, **kwargs))
-            actions.append(action)
-    return actions
-            #action = menu.addAction(createAction(parent, *largs))
-#            for key, value in kwargs.iteritems():
-#                f = getattr(action, 'set'+key.capitalize(), None)
-#                if f:
-#                    f(value)
+            raise Exception("%s" % item)
+    return menu
 
 # Key press debugging 
 KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) 

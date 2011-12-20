@@ -11,6 +11,7 @@ from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
 from prymatex.gui.dockers.base import PMXBaseDock
+from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBaseDock):
@@ -77,48 +78,21 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         self.treeViewFileSystem.setUniformRowHeights(False)
         
         #Setup Context Menu
-        #TODO
-        #menuItems = [
-            #{"New": [
-                #action1, action2, action3, "-", action4
-            #]},
-            #{"Order": [
-                #(gaction1, qaction2, qaction3),
-                #"-", action1, action2
-            #]}
-        #]
-        #self.fileSystemMenu = buildMenu("Menu Name", self, menuItems)
+        menuItems = [
+            {"New": [
+                self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
+            ]},
+            "-",
+            self.actionDelete,
+            {"Order": [
+                (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
+                "-", self.actionOrderDescending, self.actionOrderFoldersFirst
+            ]}
+        ]
+        self.fileSystemMenu = createQMenu("File System", menuItems, self)
 
-        self.fileSystemMenu = QtGui.QMenu(self)
-        self.fileSystemMenu.setObjectName('fileSystemMenu')
-        
-        self.newMenu = QtGui.QMenu("New", self)
-        self.newMenu.setObjectName('newMenu')
-        self.newMenu.addAction(self.actionNewFolder)
-        self.newMenu.addAction(self.actionNewFile)
-        self.newMenu.addSeparator()
-        self.newMenu.addAction(self.actionNewFromTemplate)
-        
-        self.fileSystemMenu.addMenu(self.newMenu)
-        self.fileSystemMenu.addAction(self.actionDelete)
-        
-        self.orderMenu = QtGui.QMenu("Order", self)
-        self.orderMenu.setObjectName("orderMenu")
-        self.orderGroup = QtGui.QActionGroup(self.orderMenu)
-        self.orderGroup.setExclusive(True)
-        orderActions = [self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType]
-        map(self.orderMenu.addAction, orderActions)
-        map(lambda action: action.setActionGroup(self.orderGroup), orderActions)
-        
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
-        
-        self.orderMenu.addSeparator()
-        self.orderMenu.addAction(self.actionOrderDescending)
-        self.orderMenu.addAction(self.actionOrderFoldersFirst)
-        
-        self.fileSystemMenu.addSeparator()
-        self.fileSystemMenu.addMenu(self.orderMenu)
         
         #Connect context menu
         self.treeViewFileSystem.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
