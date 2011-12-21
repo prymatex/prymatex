@@ -24,7 +24,7 @@ def centerWidget(widget, scale = None):
         widget.resize(screen.width() * scale[0], screen.height() * scale[1])
     widget.move((screen.width() - widget.size().width()) / 2, (screen.height() - widget.size().height()) / 2)
     
-def createObjectName(text, sufix = "", prefix = ""):
+def textToObjectName(text, sufix = "", prefix = ""):
     """
     &Text Button name -> %{prefix}TextButtonName%{sufix}
     """
@@ -32,34 +32,40 @@ def createObjectName(text, sufix = "", prefix = ""):
     name = ''.join(map(to_ascii_cap, words))
     return prefix + name + sufix
 
-def createQMenu(title, menuItems, parent):
+def createQMenu(settings, parent):
     """
-    menuItems = [
-            {"title": "New",
-             "menuItems": [
-                action1, action2, action3, "-", action4
-            ]},
-            {"title": "Order",
-             "menuItems": [
-                (gaction1, qaction2, qaction3),
-                "-", action1, action2
-            ]}
-        ]
+    settings = {
+            "title": "Menu Title",
+            "icon": "resourece icon key"
+            "items": [
+                action1, action2, 
+                {"title": "SubMenu Title",
+                 "items": [
+                    (gaction1, qaction2, qaction3),
+                    "-", action1, action2
+                ],
+                 "exclusives": [ True ]}
+                action3, "-", action4
+            ]
+        }
     """
-    menu = QtGui.QMenu(parent)
-    object_name = createObjectName(title, sufix = "Menu")
+    title = settings.get("title", "Menu Title")
+    icon = settings.get("icon")
+    items = settings.get("items")
+    menu = QtGui.QMenu(title, parent)
+    object_name = textToObjectName(title, sufix = "Menu")
     menu.setObjectName(object_name)
-    for item in menuItems:
+    for item in items:
         if item == "-":
             menu.addSeparator()
         elif isinstance(item, dict):
-            for key, value in item.iteritems():
-                submenu = createQMenu(key, value, menu)
-                menu.addMenu(submenu)
+            submenu = createQMenu(item, menu)
+            menu.addMenu(submenu)
         elif isinstance(item, QtGui.QAction):
             menu.addAction(item)
         elif isinstance(item, tuple):
             actionGroup = QtGui.QActionGroup(menu)
+            #TODO: optional exclusive
             actionGroup.setExclusive(True)
             map(menu.addAction, item)
             map(lambda action: action.setActionGroup(actionGroup), item)

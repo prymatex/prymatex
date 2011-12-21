@@ -169,17 +169,17 @@ class PMXCommandProcessor(PMXCommandProcessor):
     # Outpus function
     def error(self, context):
         from prymatex.support.utils import makeHyperlinks
-        print context.errorValue
+        print context.errorValue, makeHyperlinks(context.errorValue)
         command = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             
             html_header "An error has occurred while executing command %(name)s"
             echo -e "<pre>%(output)s</pre>"
-            echo -e "<p>Exit code was: %(exit_code)d</p>"
+            echo -e "<p>Exit code was: %(exitcode)d</p>"
             html_footer
-        ''' % {'output': makeHyperlinks(context.errorValue), 
+        ''' % {'output': context.errorValue, 
                'name': context.command.name,
-               'exit_code': context.outputType}
+               'exitcode': context.outputType}
         hash = {    'command': command, 
                        'name': "Error" + context.command.name,
                       'input': 'none',

@@ -11,9 +11,18 @@ class TreeNode(object):
         self.children.append(child)
         child.parent = self
 
+    def insertChild(self, index, child):
+        self.children.insert(index, child)
+        child.parent = self
+
     def removeChild(self, child):
         self.children.remove(child)
         child.parent = None
+
+    def removeAllChild(self):
+        for child in self.children:
+            child.parent = None
+        self.children = []
 
     def childIndex(self, child):
         return self.children.index(child)

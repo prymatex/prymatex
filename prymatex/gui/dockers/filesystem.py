@@ -78,18 +78,25 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         self.treeViewFileSystem.setUniformRowHeights(False)
         
         #Setup Context Menu
-        menuItems = [
-            {"New": [
-                self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
-            ]},
-            "-",
-            self.actionDelete,
-            {"Order": [
-                (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
-                "-", self.actionOrderDescending, self.actionOrderFoldersFirst
-            ]}
-        ]
-        self.fileSystemMenu = createQMenu("File System", menuItems, self)
+        menuSettings = { 
+            "title": "File System",
+            "items": [
+                {   "title": "New",
+                    "items": [
+                        self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
+                    ]
+                },
+                "-",
+                self.actionDelete,
+                {   "title": "Order",
+                    "items": [
+                        (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
+                        "-", self.actionOrderDescending, self.actionOrderFoldersFirst
+                    ]
+                }
+            ]
+        }
+        self.fileSystemMenu = createQMenu(menuSettings, self)
 
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
