@@ -80,3 +80,6 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         self.folderFirst = folderFirst
         QtGui.QSortFilterProxyModel.sort(self, 0, order)
         
+    def filePath(self, index):
+        sIndex = self.fileSystemProxyModel.mapToSource(index)
+        return self.sourceModel().filePath(sIndex)

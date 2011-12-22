@@ -141,3 +141,13 @@ class PMXFileManager(PMXObject):
             #if fileInfo is None return the las directory or the home directory
             return self.last_directory
         return os.path.dirname(filePath)
+
+    def lastModification(self, filePath):
+        return QtCore.QFileInfo(filePath).lastModified()
+
+    def checkExternalModification(filePath, oldmtime):
+        """Check if the file was modified external."""
+        mtime = self.lastModification(filePath)
+        if mtime > oldmtime:
+            return True
+        return False

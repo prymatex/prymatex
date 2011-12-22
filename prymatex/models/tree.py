@@ -41,7 +41,7 @@ class TreeNode(object):
         
 class TreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, parent = None):
-        super(PMXBundleTreeModel, self).__init__(parent)
+        QtCore.QAbstractItemModel.__init__(self, parent)
         self.rootNode = TreeNode("Root")
     
     def rowCount(self, parent):

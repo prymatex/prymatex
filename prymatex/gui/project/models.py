@@ -6,7 +6,7 @@ import codecs
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.models.tree import TreeNode, TreeModel
+from prymatex.models.tree import TreeModel
 from prymatex.gui.project.base import FileSystemTreeNode
 
 class PMXProjectTreeModel(TreeModel):  
@@ -40,18 +40,18 @@ class PMXProjectTreeModel(TreeModel):
         return index.internalPointer().path
     
     def appendProject(self, project):
-        self.beginInsertRows(QtCore.QModelIndex(), self.workspace.childCount(), self.workspace.childCount())
-        self.workspace.appendChild(project)
+        self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
+        self.rootNode.appendChild(project)
         self.endInsertRows()
         index = self.index(project.row(), 0, QtCore.QModelIndex())
         self._load_directory(project, index)
     
     def removeProject(self, project):
         self.beginRemoveRows(QtCore.QModelIndex(), project.row(), project.row())
-        self.workspace.removeChild(project)
+        self.rootNode.removeChild(project)
         self.endRemoveRows()
         
     def getAllProjects(self):
         """docstring for getAllProjects"""
-        return self.workspace.children
+        return self.rootNode.children
         

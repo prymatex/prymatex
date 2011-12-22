@@ -112,8 +112,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     
     @QtCore.pyqtSlot()
     def on_pushButtonSync_pressed(self):
-        editor = self.mainWindow.currentEditor
-        path = self.application.fileManager.getDirectory(editor.fileInfo)
+        editor = self.application.currentEditor()
+        path = self.application.fileManager.getDirectory(editor.filePath)
         sIndex = self.fileSystemModel.index(path)
         self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(sIndex))
         self.comboBoxLocation.lineEdit().setText(path)
@@ -148,8 +148,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         self.fileSystemMenu.popup(self.treeViewFileSystem.mapToGlobal(point))
                 
     def on_treeViewFileSystem_doubleClicked(self, index):
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
+        path = self.fileSystemProxyModel.filePath(index)
         if os.path.isfile(path):
             self.application.openFile(path)
         if os.path.isdir(path):
@@ -160,23 +159,17 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     # Tree View Context Menu Actions
     #======================================================
     def pathToClipboard(self, checked = False):
-        index = self.treeViewFileSystem.currentIndex()
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
+        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         QApplication.clipboard().setText(path)
     
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
-        index = self.treeViewFileSystem.currentIndex()
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
+        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         dir = self.application.fileManager.createDirectory(path, parent = None)
 
     @QtCore.pyqtSlot()
     def on_actionNewFile_triggered(self):
-        index = self.treeViewFileSystem.currentIndex()
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
+        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         dir = self.application.fileManager.createFile(path, parent = None)
         
     @QtCore.pyqtSlot()
@@ -185,9 +178,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
-        index = self.treeViewFileSystem.currentIndex()
-        sIndex = self.fileSystemProxyModel.mapToSource(index)
-        path = self.fileSystemModel.filePath(sIndex)
+        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         ok = self.application.fileManager.deletePath(path, parent = self)
     
     @QtCore.pyqtSlot(str)

@@ -9,7 +9,7 @@ from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
-from prymatex.mvc.proxies import bisect_key
+from prymatex.models.proxies import bisect_key
 
 class PMXBundleMenuGroup(QtCore.QObject):
     def __init__(self, manager):

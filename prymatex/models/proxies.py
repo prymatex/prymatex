@@ -30,7 +30,7 @@ class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
     Proxy for create flat models from tree models
     """
     def __init__(self, parent = None):
-        super(PMXFlatBaseProxyModel, self).__init__(parent)
+        QtCore.QAbstractItemModel.__init__(self, parent)
         self.__indexMap = []
         self.__sourceModel = None
 

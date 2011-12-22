@@ -41,8 +41,6 @@ class PMXApplication(QtGui.QApplication):
 
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
-        
-        self.initialArguments = args
     
     def exec_(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
@@ -229,8 +227,9 @@ class PMXApplication(QtGui.QApplication):
         if state:
             self.mainWindow.restoreState(state)
         self.mainWindow.show()
-        # Open files
-        self.openFilePaths(self.initialArguments[1:])
+
+    def currentEditor(self):
+        return self.mainWindow.currentEditor()
 
     def findEditorForFile(self, filePath):
         #Para cada mainwindow buscar el editor
@@ -260,7 +259,7 @@ class PMXApplication(QtGui.QApplication):
                 yield coroutines.Return(editor, filePath)
             def on_editorReady(result):
                 editor, filePath = result.value
-                editor.setFilePath(filePath)
+                editor.opened(filePath)
                 #Belongs to project?
                 project = self.projectManager.findProjectForPath(filePath)
                 if project is not None:

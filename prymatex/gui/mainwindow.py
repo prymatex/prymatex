@@ -47,7 +47,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         """
         QtGui.QMainWindow.__init__(self)
         self.setupUi(self)
-        self.currentEditor = None
         
         self.setupDockers()
         self.setupDialogs()
@@ -57,7 +56,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         # Connect Signals
         self.splitTabWidget.tabWindowChanged.connect(self.on_tabWindowChanged)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
-        self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor.insertBundleItem(item))
+        self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor().insertBundleItem(item))
         
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.configure()
@@ -78,9 +77,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.setStatusBar(status)
         
     def setupDockers(self):
-        '''
+        """
         Basic panels, dock objects. More docks should be available via plugins
-        '''
+        """
         from prymatex.gui.dockers.filesystem import PMXFileSystemDock
         from prymatex.gui.dockers.browser import PMXBrowserDock
         from prymatex.gui.dockers.console import PMXConsoleDock
@@ -173,12 +172,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
 
     def setCurrentEditor(self, editor):
         self.splitTabWidget.setCurrentWidget(editor)
-        
+    
+    def currentEditor(self):
+        return self.splitTabWidget.currentWidget()
+    
     def on_tabWindowChanged(self, editor):
-        # Handle the trivial case.
-        if self.currentEditor is editor:
-            return
-        
         #Set editor to statusbar
         self.statusBar().setCurrentEditor(editor)
         
@@ -193,29 +191,26 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         title = [ editor.tabTitle() ] if editor is not None else []
         title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
         self.setWindowTitle(" - ".join(title))
-        self.currentEditor = editor
     
     def saveEditor(self, editor = None, saveAs = False):
-        editor = editor or self.currentEditor
+        editor = editor or self.currentEditor()
         if editor.isNew() or saveAs:
             fileDirectory = editor.fileDirectory()
             fileName = editor.fileName()
             fileFilters = editor.fileFilters()
-            filePath = dialogs.getSaveFile(fileDirectory, title = "Save file as" if saveAs else "Save file", 
+            filePath = dialogs.getSaveFile( fileDirectory, title = "Save file as" if saveAs else "Save file", 
                                             filters = fileFilters, 
                                             name = fileName)
-            if filePath is not None:
-                self.application.fileManager.saveFile(filePath, editor.toPlainText())
-                editor.setFilePath(filePath)
-                editor.setModified(False)
-                editor.showMessage("<i>%s</i> saved" % editor.filePath)
         else:
-            self.application.fileManager.saveFile(editor.filePath, editor.toPlainText())
-            editor.setModified(False)
-            editor.showMessage("<i>%s</i> saved" % editor.filePath)
+            filePath = editor.filePath
+
+        if filePath is not None:
+            self.application.fileManager.saveFile(filePath, editor.toPlainText())
+            self.editor.saved(filePath)
     
     def closeEditor(self, editor = None):
-        editor = editor or self.currentEditor
+        editor = editor or self.currentEditor()
+        if editor is None: return
         while editor and editor.isModified():
             response = QtGui.QMessageBox.question(self, "Save", 
                 "Save %s" % editor.tabTitle(), 
@@ -223,16 +218,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 defaultButton = QtGui.QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
                 self.saveEditor(editor = editor)
+                editor.closed()
             elif response == QtGui.QMessageBox.No:
                 break
             elif response == QtGui.QMessageBox.Cancel:
                 return
-        if editor:
-            self.removeEditor(editor)
+        self.removeEditor(editor)
     
-    def tryCloseEmptyEditor(self):
-        if self.currentEditor is not None and self.currentEditor.isNew() and not self.currentEditor.isModified():
-            self.closeEditor(self.currentEditor)
+    def tryCloseEmptyEditor(self, editor = None):
+        editor = editor or self.currentEditor()
+        if editor is not None and editor.isNew() and not editor.isModified():
+            self.closeEditor(editor)
     
     def closeEvent(self, event):
         self.debug("CloseEvent")

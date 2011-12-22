@@ -49,7 +49,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
                      self._focus_changed)
         
         # Hack for text focus when moving arround  
-        self.tabWindowChanged.connect(self._forceTextFoucsChange)
+        #self.tabWindowChanged.connect(self._forceTextFoucsChange)
         
     def __len__(self):
         count = 0
@@ -58,8 +58,10 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         return count
     
     def _forceTextFoucsChange(self, w):
-        ''' Let all the focus thing go through in Qt land, hooking a 0 time timer that
-        regains focus on the text edit'''
+        """ 
+        Let all the focus thing go through in Qt land, hooking a 0 time timer that
+        regains focus on the text edit 
+        """
         if w:
             timer = QtCore.QTimer(self)
             timer.singleShot(0, lambda widget=w: widget.setFocus())
@@ -216,7 +218,21 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
             else:
                 self._set_current_tab(tw, tidx)
             tw.tabBar().setFocus()
+
+    def setCurrentWidget(self, w):
+        """ Make the given widget current. """
+
+        tw, tidx = self._tab_widget(w)
+
+        if tw is not None:
+            self._set_current_tab(tw, tidx)
+
+    def currentWidget(self):
+        """ Return current widget. """
         
+        if self._current_tab_w != None and self._current_tab_idx != -1:
+            return self._current_tab_w.widget(self._current_tab_idx)
+
     def _update_tab_status(self):
         sender = self.sender()
         self.setWidgetTitle(sender, sender.tabTitle())
@@ -232,14 +248,6 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         
         self.tabWindowChanged.emit(w)
         
-    def setCurrentWidget(self, w):
-        """ Make the given widget current. """
-
-        tw, tidx = self._tab_widget(w)
-
-        if tw is not None:
-            self._set_current_tab(tw, tidx)
-
     def setActiveIcon(self, w, icon):
         """ Set the active icon on a widget. """
 

@@ -17,8 +17,25 @@ class PMXBaseEditor(object):
     def __init__(self):
         self.filePath = None
         self.project = None
+        self.mtime = None
         self.creation_counter = PMXBaseEditor.creation_counter
         PMXBaseEditor.creation_counter += 1
+    
+    def saved(self, filePath):
+        if filePath != self.filePath:
+            self.setFilePath(filePath)
+        self.mtime = self.application.fileManager.lastModification(filePath)
+        self.setModified(False)
+        self.showMessage("<i>%s</i> saved" % self.filePath)
+    
+    def opened(self, filePath):
+        #TODO: Decrese creation counter
+        self.setFilePath(filePath)
+        self.mtime = self.application.fileManager.lastModification(filePath)
+
+    def closed(self):
+        #TODO: Decrese creation counter
+        pass
         
     def setFilePath(self, filePath):
         self.filePath = filePath
@@ -59,6 +76,11 @@ class PMXBaseEditor(object):
     
     def setCursorPosition(self, cursorPosition):
         pass
+    
+    def checkExternalModification(self):
+        if self.isNew():
+            return False
+        return self.application.fileManager.checkExternalModification(self.filePath, self.mtime)
     
     @classmethod
     def newInstance(cls, application, filePath = None, parent = None):

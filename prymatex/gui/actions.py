@@ -73,7 +73,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
-        filePath = self.currentEditor.filePath if self.currentEditor is not None else None
+        filePath = self.currentEditor().filePath if self.currentEditor() is not None else None
         files = dialogs.getOpenFiles(directory = self.application.fileManager.getDirectory(filePath))
         focus = len(files) == 1
         for filePath in files:
@@ -110,7 +110,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionCloseOthers_triggered(self):
-        current = self.currentEditor
+        current = self.currentEditor()
         for w in self.splitTabWidget.getAllWidgets():
             if w is not current:
                 self.closeEditor(editor = w)
@@ -124,58 +124,58 @@ class MainWindowActions(object):
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionUndo_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.undo()
+        if self.currentEditor() is not None:
+            self.currentEditor().undo()
 
     @QtCore.pyqtSlot()
     def on_actionRedo_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.redo()
+        if self.currentEditor() is not None:
+            self.currentEditor().redo()
         
     @QtCore.pyqtSlot()
     def on_actionCopy_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.copy()
+        if self.currentEditor() is not None:
+            self.currentEditor().copy()
     
     @QtCore.pyqtSlot()
     def on_actionCut_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.cut()
+        if self.currentEditor() is not None:
+            self.currentEditor().cut()
         
     @QtCore.pyqtSlot()
     def on_actionPaste_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.paste()
+        if self.currentEditor() is not None:
+            self.currentEditor().paste()
 
     @QtCore.pyqtSlot()
     def on_actionSelectWord_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.select(0)
+        if self.currentEditor() is not None:
+            self.currentEditor().select(0)
     
     @QtCore.pyqtSlot()
     def on_actionSelectLine_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.select(1)
+        if self.currentEditor() is not None:
+            self.currentEditor().select(1)
     
     @QtCore.pyqtSlot()
     def on_actionSelectParagraph_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.select(2)
+        if self.currentEditor() is not None:
+            self.currentEditor().select(2)
     
     @QtCore.pyqtSlot()
     def on_actionSelectEnclosingBrackets_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.select(self.currentEditor.SelectEnclosingBrackets)
+        if self.currentEditor() is not None:
+            self.currentEditor().select(self.currentEditor().SelectEnclosingBrackets)
         
     @QtCore.pyqtSlot()
     def on_actionSelectCurrentScope_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.select(self.currentEditor.SelectCurrentScope)
+        if self.currentEditor() is not None:
+            self.currentEditor().select(self.currentEditor().SelectCurrentScope)
         
     @QtCore.pyqtSlot()
     def on_actionSelectAll_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.select(3)
+        if self.currentEditor() is not None:
+            self.currentEditor().select(3)
 
     @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
@@ -190,130 +190,130 @@ class MainWindowActions(object):
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionZoomIn_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.zoomIn()
+        if self.currentEditor() is not None:
+            self.currentEditor().zoomIn()
             
     @QtCore.pyqtSlot()
     def on_actionZoomOut_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.zoomOut()
+        if self.currentEditor() is not None:
+            self.currentEditor().zoomOut()
 
     @QtCore.pyqtSlot(bool)
     def on_actionShowBookmarks_toggled(self, checked):
-        if self.currentEditor is not None:
+        if self.currentEditor() is not None:
             if checked:
-                flags = self.currentEditor.getFlags() | self.currentEditor.ShowBookmarks
+                flags = self.currentEditor().getFlags() | self.currentEditor().ShowBookmarks
             else:
-                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowBookmarks
-            self.currentEditor.setFlags(flags)
+                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowBookmarks
+            self.currentEditor().setFlags(flags)
     
     @QtCore.pyqtSlot(bool)
     def on_actionShowLineNumbers_toggled(self, checked):
-        if self.currentEditor is not None:
+        if self.currentEditor() is not None:
             if checked:
-                flags = self.currentEditor.getFlags() | self.currentEditor.ShowLineNumbers
+                flags = self.currentEditor().getFlags() | self.currentEditor().ShowLineNumbers
             else:
-                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowLineNumbers
-            self.currentEditor.setFlags(flags)
+                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowLineNumbers
+            self.currentEditor().setFlags(flags)
         
     @QtCore.pyqtSlot(bool)
     def on_actionShowFolding_toggled(self, checked):
-        if self.currentEditor is not None:
+        if self.currentEditor() is not None:
             if checked:
-                flags = self.currentEditor.getFlags() | self.currentEditor.ShowFolding
+                flags = self.currentEditor().getFlags() | self.currentEditor().ShowFolding
             else:
-                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowFolding
-            self.currentEditor.setFlags(flags)
+                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowFolding
+            self.currentEditor().setFlags(flags)
     
     @QtCore.pyqtSlot(bool)
     def on_actionShowTabsAndSpaces_toggled(self, checked):
-        if self.currentEditor is not None:
+        if self.currentEditor() is not None:
             if checked:
-                flags = self.currentEditor.getFlags() | self.currentEditor.ShowTabsAndSpaces
+                flags = self.currentEditor().getFlags() | self.currentEditor().ShowTabsAndSpaces
             else:
-                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowTabsAndSpaces
-            self.currentEditor.setFlags(flags)
+                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowTabsAndSpaces
+            self.currentEditor().setFlags(flags)
     
     @QtCore.pyqtSlot(bool)
     def on_actionShowLineAndParagraphs_toggled(self, checked):
-        if self.currentEditor is not None:
+        if self.currentEditor() is not None:
             if checked:
-                flags = self.currentEditor.getFlags() | self.currentEditor.ShowLineAndParagraphs
+                flags = self.currentEditor().getFlags() | self.currentEditor().ShowLineAndParagraphs
             else:
-                flags = self.currentEditor.getFlags() & ~self.currentEditor.ShowLineAndParagraphs
-            self.currentEditor.setFlags(flags)
+                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowLineAndParagraphs
+            self.currentEditor().setFlags(flags)
             
     @QtCore.pyqtSlot(bool)
     def on_actionWordWrap_toggled(self, checked):
-        if self.currentEditor is not None:
+        if self.currentEditor() is not None:
             if checked:
-                flags = self.currentEditor.getFlags() | self.currentEditor.WordWrap
+                flags = self.currentEditor().getFlags() | self.currentEditor().WordWrap
             else:
-                flags = self.currentEditor.getFlags() & ~self.currentEditor.WordWrap
-            self.currentEditor.setFlags(flags)
+                flags = self.currentEditor().getFlags() & ~self.currentEditor().WordWrap
+            self.currentEditor().setFlags(flags)
 
     #============================================================
     # Text Actions
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionConvertToUppercase_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.convertText(self.currentEditor.ConvertToUppercase)
+        if self.currentEditor() is not None:
+            self.currentEditor().convertText(self.currentEditor().ConvertToUppercase)
     
     @QtCore.pyqtSlot()
     def on_actionConvertToLowercase_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.convertText(self.currentEditor.ConvertToLowercase)
+        if self.currentEditor() is not None:
+            self.currentEditor().convertText(self.currentEditor().ConvertToLowercase)
         
     @QtCore.pyqtSlot()
     def on_actionConvertToTitlecase_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.convertText(self.currentEditor.ConvertToTitlecase)
+        if self.currentEditor() is not None:
+            self.currentEditor().convertText(self.currentEditor().ConvertToTitlecase)
         
     @QtCore.pyqtSlot()
     def on_actionConvertToOppositeCase_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.convertText(self.currentEditor.ConvertToOppositeCase)
+        if self.currentEditor() is not None:
+            self.currentEditor().convertText(self.currentEditor().ConvertToOppositeCase)
         
     @QtCore.pyqtSlot()
     def on_actionConvertSpacesToTabs_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.convertText(self.currentEditor.ConvertSpacesToTabs)
+        if self.currentEditor() is not None:
+            self.currentEditor().convertText(self.currentEditor().ConvertSpacesToTabs)
         
     @QtCore.pyqtSlot()
     def on_actionConvertTabToSpaces_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.convertText(self.currentEditor.ConvertTabsToSpaces)
+        if self.currentEditor() is not None:
+            self.currentEditor().convertText(self.currentEditor().ConvertTabsToSpaces)
 
     @QtCore.pyqtSlot()
     def on_actionConvertTranspose_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.convertText(self.currentEditor.ConvertTranspose)
+        if self.currentEditor() is not None:
+            self.currentEditor().convertText(self.currentEditor().ConvertTranspose)
 
     #Move Menu
     @QtCore.pyqtSlot()
     def on_actionMoveLineUp_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.moveText(self.currentEditor.MoveLineUp)
+        if self.currentEditor() is not None:
+            self.currentEditor().moveText(self.currentEditor().MoveLineUp)
     
     @QtCore.pyqtSlot()
     def on_actionMoveLineDown_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.moveText(self.currentEditor.MoveLineDown)
+        if self.currentEditor() is not None:
+            self.currentEditor().moveText(self.currentEditor().MoveLineDown)
             
     @QtCore.pyqtSlot()
     def on_actionMoveColumnLeft_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.moveText(self.currentEditor.MoveColumnLeft)
+        if self.currentEditor() is not None:
+            self.currentEditor().moveText(self.currentEditor().MoveColumnLeft)
             
     @QtCore.pyqtSlot()
     def on_actionMoveColumnRight_triggered(self):
-        if self.currentEditor is not None:
-            self.currentEditor.moveText(self.currentEditor.MoveColumnRight)
+        if self.currentEditor() is not None:
+            self.currentEditor().moveText(self.currentEditor().MoveColumnRight)
     
     @QtCore.pyqtSlot()
     def on_actionExecute_triggered(self):
-        self.currentEditor.executeCommand()
+        self.currentEditor().executeCommand()
 
     @QtCore.pyqtSlot()
     def on_actionFilterThroughCommand_triggered(self):
@@ -324,19 +324,19 @@ class MainWindowActions(object):
     #============================================================
     @QtCore.pyqtSlot()
     def on_actionToggleBookmark_triggered(self):
-        self.currentEditor.toggleBookmark()
+        self.currentEditor().toggleBookmark()
 
     @QtCore.pyqtSlot()
     def on_actionNextBookmark_triggered(self):
-        self.currentEditor.bookmarkNext()
+        self.currentEditor().bookmarkNext()
 
     @QtCore.pyqtSlot()
     def on_actionPreviousBookmark_triggered(self):
-        self.currentEditor.bookmarkPrevious()
+        self.currentEditor().bookmarkPrevious()
         
     @QtCore.pyqtSlot()
     def on_actionRemoveAllBookmarks_triggered(self):
-        self.currentEditor.removeAllBookmarks()
+        self.currentEditor().removeAllBookmarks()
 
     @QtCore.pyqtSlot()
     def on_actionNextTab_triggered(self):
@@ -371,12 +371,12 @@ class MainWindowActions(object):
         
     @QtCore.pyqtSlot()
     def on_actionSelectBundleItem_triggered(self):
-        editor = self.currentEditor
+        editor = self.currentEditor()
         scope = editor.getCurrentScope()
         items = self.application.supportManager.getActionItems(scope)
         item = self.bundleSelectorDialog.select(items)
         if item is not None:
-            self.currentEditor.insertBundleItem(item)
+            self.currentEditor().insertBundleItem(item)
     
     #============================================================
     # Preferences Actions

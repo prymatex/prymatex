@@ -138,13 +138,13 @@ class PMXBundleTreeModel(TreeModel):
     # Functions
     #========================================================================
     def appendBundle(self, bundle):
-        self.beginInsertRows(QtCore.QModelIndex(), self.root.childCount(), self.root.childCount())
-        self.root.appendChild(bundle)
+        self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
+        self.rootNode.appendChild(bundle)
         self.endInsertRows()
     
     def removeBundle(self, bundle):
         self.beginRemoveRows(QtCore.QModelIndex(), bundle.row(), bundle.row())
-        self.root.removeChild(bundle)
+        self.rootNode.removeChild(bundle)
         self.endRemoveRows()
     
     def appendBundleItem(self, bundleItem):
@@ -378,9 +378,9 @@ class PMXMenuTreeModel(TreeModel):
                     self._build_menu(submenus[uuid]['items'], submenu, submenus)
 
     def setMainMenu(self, mainMenu):
-        self.root.removeAllChild()
+        self.rootNode.removeAllChild()
         if mainMenu is not None:
-            self._build_menu(mainMenu['items'], self.root, mainMenu['submenus'])
+            self._build_menu(mainMenu['items'], self.rootNode, mainMenu['submenus'])
         self.layoutChanged.emit()
     
     def add_submenu(self, submenuNode, submenus):
@@ -398,7 +398,7 @@ class PMXMenuTreeModel(TreeModel):
     def getMainMenu(self):
         items = []
         submenus = {}
-        for node in self.root.children:
+        for node in self.rootNode.children:
             if node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 items.append(str(node.item.uuid).upper())
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
@@ -457,10 +457,7 @@ class PMXMenuTreeModel(TreeModel):
         
         dragNode = mimedata.instance()
         
-        if not parentIndex.isValid():
-            parentNode = self.root
-        else:
-            parentNode = self.node(parentIndex)
+        parentNode = self.node(parentIndex)
 
         if dragNode.parent == None:
             #The node belongs to a exludeList
