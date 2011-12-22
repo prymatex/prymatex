@@ -6,53 +6,20 @@ import codecs
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.utils.tree import TreeNode
+from prymatex.models.tree import TreeNode, TreeModel
 from prymatex.gui.project.base import FileSystemTreeNode
 
-class PMXProjectTreeModel(QtCore.QAbstractItemModel):  
+class PMXProjectTreeModel(TreeModel):  
     def __init__(self, manager, parent = None):
-        QtCore.QAbstractItemModel.__init__(self, parent)
         self.manager = manager
-        self.workspace = TreeNode("Workspace")
+        TreeModel.__init__(self, parent)
 
     def data(self, index, role):
-        node = self.getNode(index)
+        node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             return node.name
         elif role == QtCore.Qt.DecorationRole:
             return node.icon
-
-    def rowCount(self, parent):
-        parentNode = self.getNode(parent)
-        return parentNode.childCount()
-
-    def columnCount(self, parent):
-        return 1
-
-    def index(self, row, column, parent = QtCore.QModelIndex()):
-        parentNode = self.getNode(parent)
-        childItem = parentNode.child(row)
-        
-        if childItem is not None:
-            return self.createIndex(row, column, childItem)
-        else:
-            return QtCore.QModelIndex()
-
-    def parent(self, index):
-        node = self.getNode(index)
-        parentNode = node.parent
-
-        if parentNode == self.workspace:
-            return QtCore.QModelIndex()
-
-        return self.createIndex(parentNode.row(), 0, parentNode)
-
-    def getNode(self, index):
-        if index.isValid():
-            node = index.internalPointer()
-            if node:
-                return node
-        return self.workspace
 
     #========================================================================
     # Custom methods

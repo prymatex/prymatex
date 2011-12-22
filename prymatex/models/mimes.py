@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+
 import cPickle
 import StringIO
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 
 class PyMimeData(QtCore.QMimeData):
     """ 

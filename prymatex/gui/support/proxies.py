@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.mvc.proxies import PMXFlatBaseProxyModel
+from prymatex.models.proxies import PMXFlatTreeProxyModel
 
 class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
@@ -32,7 +32,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         else:
             return self.bundleItemTypeOrder.index(rightData.TYPE) > self.bundleItemTypeOrder.index(leftData.TYPE)
 
-class PMXBundleTypeFilterProxyModel(PMXFlatBaseProxyModel):
+class PMXBundleTypeFilterProxyModel(PMXFlatTreeProxyModel):
     def __init__(self, tipos, parent = None):
         super(PMXBundleTypeFilterProxyModel, self).__init__(parent)
         self.tipos = tipos if isinstance(tipos, list) else [ tipos ]

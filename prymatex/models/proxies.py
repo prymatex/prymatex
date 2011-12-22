@@ -25,10 +25,10 @@ def FIXMEbisect(elements, element, function):
         else:
             return index
 
-class PMXFlatBaseProxyModel(QtCore.QAbstractItemModel):
-    '''
-        Proxy for create flat models from tree models
-    '''
+class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
+    """
+    Proxy for create flat models from tree models
+    """
     def __init__(self, parent = None):
         super(PMXFlatBaseProxyModel, self).__init__(parent)
         self.__indexMap = []

@@ -3,12 +3,10 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.utils.tree import TreeNode
-
 from prymatex import resources
-from prymatex.gui.mimes import PyMimeData
+from prymatex.models.tree import TreeNode, TreeModel
+from prymatex.models.mimes import PyMimeData
 from prymatex.gui.support import qtadapter
-from prymatex.gui.support.qtadapter import buildKeyEquivalent, RGBA2QColor, QColor2RGBA
 
 #====================================================
 # Bundle Tree Node
@@ -84,102 +82,58 @@ class PMXBundleTreeNode(TreeNode):
     
     def update(self, hash):
         if 'keyEquivalent' in hash:
-            hash['keyEquivalent'] = buildKeyEquivalent(hash['keyEquivalent'])
+            hash['keyEquivalent'] = qtadapter.buildKeyEquivalent(hash['keyEquivalent'])
         self.item.update(hash)
 
 #====================================================
 # Bundle Tree Model
 #====================================================
-class PMXBundleTreeModel(QtCore.QAbstractItemModel):  
+class PMXBundleTreeModel(TreeModel):  
     def __init__(self, manager, parent = None):
-        super(PMXBundleTreeModel, self).__init__(parent)
         self.manager = manager
-        self.root = TreeNode("Root")
+        TreeModel.__init__(self, parent)
     
     def setData(self, index, value, role):  
         if not index.isValid():  
             return False
         elif role == QtCore.Qt.EditRole:  
-            item = index.internalPointer()
-            if item.TYPE == "bundle":
-                self.manager.updateBundle(item, name = value)
-            elif item.TYPE == "templatefile":
+            node = self.node(index)
+            if node.TYPE == "bundle":
+                self.manager.updateBundle(node, name = value)
+            elif node.TYPE == "templatefile":
                 pass
             else:
-                self.manager.updateBundleItem(item, name = value)
+                self.manager.updateBundleItem(node, name = value)
             self.dataChanged.emit(index, index)
             return True
         elif role == QtCore.Qt.CheckStateRole:
-            item = index.internalPointer()
-            if item.TYPE == "bundle":
-                self.manager.disableBundle(item, not value)
+            node = self.node(index)
+            if node.TYPE == "bundle":
+                self.manager.disableBundle(node, not value)
             self.dataChanged.emit(index, index)
             return True
         return False
      
-    def removeRows(self, position = 0, count = 1,  parent=QtCore.QModelIndex()):
-        node = self.nodeFromIndex(parent)
-        self.beginRemoveRows(parent, position, position + count - 1)  
-        node.children.pop(position)  
-        self.endRemoveRows()  
-
-    def nodeFromIndex(self, index):  
-        if index.isValid():  
-            return index.internalPointer()  
-        else:
-            return self.root  
-
-    def rowCount(self, parent):
-        parentNode = self.getNode(parent)
-        return parentNode.childCount()
-    
-    def columnCount(self, parent):  
-        return 1  
-
     def data(self, index, role):  
         if not index.isValid():  
             return None
         elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            item = index.internalPointer()
-            return item.name
+            node = self.node(index)
+            return node.name
         elif role == QtCore.Qt.DecorationRole:
-            item = index.internalPointer()
-            return item.icon
+            node = self.node(index)
+            return node.icon
 
     def flags(self, index):
         if not index.isValid():  
             return QtCore.Qt.NoItemFlags  
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
 
-    def headerData(self, section, orientation, role):  
-        return None
-
-    def index(self, row, column, parent):
-        parentNode = self.getNode(parent)
-        childItem = parentNode.child(row)
-        
-        if childItem is not None:
-            return self.createIndex(row, column, childItem)
-        else:
-            return QtCore.QModelIndex()
-
-    def parent(self, index):
-        node = self.getNode(index)
-        parentNode = node.parent
-
-        if parentNode == self.root:
-            return QtCore.QModelIndex()
-
-        return self.createIndex(parentNode.row(), 0, parentNode)
-    
-    def getNode(self, index):
-        if index.isValid():
-            node = index.internalPointer()
-            if node:
-                return node
-
-        return self.root
-    
+    def removeRows(self, position = 0, count = 1,  parent=QtCore.QModelIndex()):
+        node = self.node(parent)
+        self.beginRemoveRows(parent, position, position + count - 1)  
+        node.children.pop(position)  
+        self.endRemoveRows()
     #========================================================================
     # Functions
     #========================================================================
@@ -226,7 +180,7 @@ class PMXThemeStyleRow(object):
         settings = {}
         for color_key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
             if color_key in self.item.settings and self.item.settings[color_key]:
-                color = RGBA2QColor(self.item.settings[color_key])
+                color = qtadapter.RGBA2QColor(self.item.settings[color_key])
                 settings[color_key] = color
         settings['fontStyle'] = self.item.settings['fontStyle'].split() if 'fontStyle' in self.item.settings else []
         return settings
@@ -236,7 +190,7 @@ class PMXThemeStyleRow(object):
             settings = {}
             for key in hash['settings'].keys():
                 if key in ['foreground', 'background', 'selection', 'invisibles', 'lineHighlight', 'caret', 'gutter']:
-                    settings[key] = QColor2RGBA(hash['settings'][key])
+                    settings[key] = qtadapter.QColor2RGBA(hash['settings'][key])
             if 'fontStyle' in hash['settings']:
                 settings['fontStyle'] = " ".join(hash['settings']['fontStyle'])
             hash['settings'] = settings
@@ -269,7 +223,7 @@ class PMXThemeStyleRow(object):
 #====================================================
 class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
     def __init__(self, manager, parent = None):
-        super(PMXThemeStylesTableModel, self).__init__(parent)
+        QtCore.QAbstractTableModel.__init__(self, parent)
         self.manager = manager
         self.styles = []
         self.headers = ['Element', 'Fg', 'Bg', 'Font Style']
@@ -405,11 +359,10 @@ class PMXBundleMenuTreeNode(TreeNode):
 #===============================================
 # Bundle Menu Tree Model
 #===============================================
-class PMXMenuTreeModel(QtCore.QAbstractItemModel):
-    def __init__(self, manager):
-        QtCore.QAbstractItemModel.__init__(self)
+class PMXMenuTreeModel(TreeModel):
+    def __init__(self, manager, parent = None):
         self.manager = manager
-        self.root = TreeNode("root")
+        TreeModel.__init__(self, parent)
 
     def _build_menu(self, items, parent, submenus = {}):
         for uuid in items:
@@ -454,41 +407,9 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
                 items.append(node.item)
         return {"items": items, "submenus": submenus }
 
-    def rowCount(self, parent):
-        parentNode = self.getNode(parent)
-        return parentNode.childCount()
-
-    def index(self, row, column, parent):
-        parentNode = self.getNode(parent)
-        childItem = parentNode.child(row)
-        
-        if childItem is not None:
-            return self.createIndex(row, column, childItem)
-        else:
-            return QtCore.QModelIndex()
-
-    def parent(self, index):
-        node = self.getNode(index)
-        parentNode = node.parent
-
-        if parentNode == self.root:
-            return QtCore.QModelIndex()
-
-        return self.createIndex(parentNode.row(), 0, parentNode)
-    
-    def getNode(self, index):
-        if index.isValid():
-            node = index.internalPointer()
-            if node:
-                return node
-        return self.root
-    
-    def columnCount(self, parent):  
-        return 1
-
     def data(self, index, role):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
-            node = index.internalPointer()
+            node = self.node(index)
             return node.name
         else:
             return None
@@ -497,7 +418,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():  
             return False
         if role == QtCore.Qt.EditRole:  
-            node = index.internalPointer()
+            node = self.node(index)
             if node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
                 node.item['name'] = value
             elif node.nodeType == PMXBundleMenuTreeNode.ITEM:
@@ -509,7 +430,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
     def flags(self, index):
         defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
         if index.isValid():
-            node = index.internalPointer()
+            node = self.node(index)
             if node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
                 return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsEditable
             elif node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
@@ -523,7 +444,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
         return [ 'application/x-ets-qt4-instance' ]
 
     def mimeData(self, index):
-        node = index[0].internalPointer()
+        node = self.node(index[0])
         mimeData = PyMimeData(node)
         return mimeData
 
@@ -539,7 +460,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
         if not parentIndex.isValid():
             parentNode = self.root
         else:
-            parentNode = parentIndex.internalPointer()
+            parentNode = self.node(parentIndex)
 
         if dragNode.parent == None:
             #The node belongs to a exludeList
@@ -577,11 +498,7 @@ class PMXMenuTreeModel(QtCore.QAbstractItemModel):
             return False
 
     def removeRows(self, row, count, parentIndex):
-        print "quitar"
-        if not parentIndex.isValid():
-            parentNode = self.root
-        else:
-            parentNode = parentIndex.internalPointer()
+        parentNode = self.node(parentIndex)
         childNode = parentNode.child(row)
         parentNode.removeChild(childNode)
         return True
