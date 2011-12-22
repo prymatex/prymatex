@@ -3,7 +3,7 @@
 
 import os
 
-from prymatex.utils.tree import TreeNode
+from prymatex.models.tree import TreeNode
 from prymatex.utils import plist
 from prymatex import resources
 
