@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/projects.ui'
 #
-# Created: Tue Dec 20 19:26:03 2011
+# Created: Thu Dec 22 23:22:43 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -68,6 +68,12 @@ class Ui_ProjectsDock(object):
         icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRefresh.setIcon(icon5)
         self.actionRefresh.setObjectName(_fromUtf8("actionRefresh"))
+        self.actionOpen = QtGui.QAction(ProjectsDock)
+        self.actionOpen.setObjectName(_fromUtf8("actionOpen"))
+        self.actionOpenSystemEditor = QtGui.QAction(ProjectsDock)
+        self.actionOpenSystemEditor.setObjectName(_fromUtf8("actionOpenSystemEditor"))
+        self.actionOpenDefaultEditor = QtGui.QAction(ProjectsDock)
+        self.actionOpenDefaultEditor.setObjectName(_fromUtf8("actionOpenDefaultEditor"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
@@ -84,5 +90,8 @@ class Ui_ProjectsDock(object):
         self.actionProperties.setText(_('Properties'))
         self.actionRefresh.setText(_('Refresh'))
         self.actionRefresh.setShortcut(_('F5'))
+        self.actionOpen.setText(_('Open'))
+        self.actionOpenSystemEditor.setText(_('System Editor'))
+        self.actionOpenDefaultEditor.setText(_('Default Editor'))
 
 from prymatex import resources_rc

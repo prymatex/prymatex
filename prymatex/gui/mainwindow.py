@@ -206,7 +206,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
 
         if filePath is not None:
             self.application.fileManager.saveFile(filePath, editor.toPlainText())
-            self.editor.saved(filePath)
+            editor.saved(filePath)
     
     def closeEditor(self, editor = None):
         editor = editor or self.currentEditor()

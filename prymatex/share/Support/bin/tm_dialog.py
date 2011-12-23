@@ -126,7 +126,7 @@ def popup_parse_args(args):
         --caseInsensitive
     '''
     parser = OptionParser()
-    parser.add_option('--suggestions', action = 'store', dest="parameters")
+    parser.add_option('--suggestions', action = 'store', dest="suggestions")
     parser.add_option('--returnChoice', action = 'store_true')
     parser.add_option('--alreadyTyped', action = 'store')
     parser.add_option('--staticPrefix', action = 'store')
@@ -156,12 +156,12 @@ def defaults_parse_args(args):
 # images 
 # ##############################################################################
 def images_parse_args(args):
-    '''
+    """
     Add image files as named images for use by other commands/nibs.
 
     images usage:
         "$DIALOG" images --register  "{ macro = '$(find_app com.macromates.textmate)/Contents/Resources/Bundle Item Icons/Macros.png'; }"
-    ''' 
+    """ 
     parser = OptionParser()
     parser.add_option('--register', action = 'store', dest="plist")
     
@@ -310,35 +310,54 @@ class CommandHandler(object):
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect('tcp://127.0.0.1:%d' % PORT)
         
-    def nib(self, args):
+    def nib(self, options, args):
         options, args = nib_parse_args(args)
         self.server.nib(str(options), str(args))
         
-    def tooltip(self, args):
+    def tooltip(self, options, args):
         options, args = tooltip_parse_args(args)
         self.server.tooltip(str(options), str(args))
         
     def menu(self, options):
         if options.parameters == None:
             options.parameters = sys.stdin.readlines()
-        command = {"name": "menu", "args": "".join(options.parameters)}
+        command = {"name": "menu", "args": [ "".join(options.parameters) ], "kwargs": {}}
         self.socket.send_pyobj(command)
         result = self.socket.recv_pyobj()
         sys.stdout.write(result["data"])
         
-    def popup(self, args):
-        options, args = popup_parse_args(args)
-        self.server.popup(str(options), str(args))
+    def popup(self, options, args):
+        if options.suggestions == None:
+            options.suggestions = sys.stdin.readlines()
         
-    def defaults(self, args):
+        kwargs = {
+            "returnChoice": options.returnChoice,
+            "alreadyTyped": options.alreadyTyped,
+            "staticPrefix": options.staticPrefix,
+            "additionalWordCharacters": options.additionalWordCharacters,
+            "caseInsensitive": options.caseInsensitive
+        }
+        
+        command = {"name": "popup", "args": [ "".join(options.suggestions) ], "kwargs": kwargs}
+        
+        self.socket.send_pyobj(command)
+        result = self.socket.recv_pyobj()
+        sys.stdout.write(result["data"])
+        
+    def defaults(self, options, args):
         options, args = defaults_parse_args(args)
         self.server.defaults(str(options), str(args))
         
-    def images(self, args):
-        options, args = images_parse_args(args)
-        self.server.images(str(options), str(args))
+    def images(self, options, args):
+        if options.plist == None:
+            options.plist = sys.stdin.readlines()
+
+        command = {"name": "images", "args": [ "".join(options.plist) ], "kwargs": {}}
+        self.socket.send_pyobj(command)
+        result = self.socket.recv_pyobj()
+        sys.stdout.write(result["data"])
         
-    def alert(self, args):
+    def alert(self, options, args):
         options, args = alert_parse_args(args)
         self.server.alert(str(options), str(args))
         
@@ -347,15 +366,20 @@ class CommandHandler(object):
         self.socket.send_pyobj(command)
     
 def main(args):
-    if len(args) >= 1 and args[0] in PARSERS:
-        options, args = PARSERS[args[0]](args[1:])
-    else:
-        options, args = new_dialgo_parse_args(args)
     handler = CommandHandler()
-    if options.menu:
-        handler.menu(options)
+    if len(args) >= 1 and args[0] in PARSERS:
+        #Old dialog
+        commandName = args[0]
+        parser = PARSERS[commandName]
+        options, args = parser(args[1:])
+        getattr(handler, commandName)(options, args)
     else:
-        handler.debug(options, args)
-        
+        #New dialog
+        options, args = new_dialgo_parse_args(args)
+        if options.menu:
+            handler.menu(options)
+        else:
+            handler.debug(options, args)
+
 if __name__ == '__main__':
     main(sys.argv[1:])

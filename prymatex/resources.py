@@ -5,7 +5,7 @@ import os
 from PyQt4 import QtGui, QtCore
 from prymatex import resources_rc
 
-IMAGES = {
+INTERNAL = {
     #Bundles
     "template": ":/icons/bundles/templates.png",
     "command": ":/icons/bundles/commands.png",
@@ -30,15 +30,22 @@ IMAGES = {
     "projectclose": ":/icons/actions/project-development-close.png",
 }
 
+EXTERNAL = {}
+
 FileIconProvider = QtGui.QFileIconProvider()
 
+def getImagePath(index):
+    return INTERNAL.get(index) or EXTERNAL.get(index)
+
 def getImage(index):
-    if isinstance(index, (str, unicode)) and index in IMAGES:
-        return QtGui.QPixmap(IMAGES[index])
+    path = getImagePath(index) 
+    if path is not None:
+        return QtGui.QPixmap(path)
 
 def getIcon(index):
-    if index in IMAGES:
-        return QtGui.QIcon(IMAGES[index])
+    path = getImagePath(index)
+    if path is not None:
+        return QtGui.QIcon(path)
     elif isinstance(index, (str, unicode)):
         #Try file path
         if os.path.isfile(index):
@@ -51,3 +58,6 @@ def getIcon(index):
 
 def getFileType(fileInfo):
     return FileIconProvider.type(fileInfo)
+
+def registerImagePath(index, path):
+    EXTERNAL[index] = path

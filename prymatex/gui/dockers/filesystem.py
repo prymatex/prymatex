@@ -87,6 +87,13 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
                     ]
                 },
                 "-",
+                self.actionOpen,
+                {   "title": "Open With",
+                    "items": [
+                        self.actionOpenDefaultEditor, self.actionOpenSystemEditor 
+                    ]
+                },
+                "-",
                 self.actionDelete,
                 {   "title": "Order",
                     "items": [
@@ -161,6 +168,23 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     def pathToClipboard(self, checked = False):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         QApplication.clipboard().setText(path)
+    
+    @QtCore.pyqtSlot()
+    def on_actionOpen_triggered(self):
+        path = self.fileSystemProxyModel.filePath(index)
+        if os.path.isfile(path):
+            self.application.openFile(path)
+    
+    @QtCore.pyqtSlot()
+    def on_actionOpenSystemEditor_triggered(self):
+        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
+    
+    @QtCore.pyqtSlot()
+    def on_actionOpenDefaultEditor_triggered(self):
+        path = self.fileSystemProxyModel.filePath(index)
+        if os.path.isfile(path):
+            self.application.openFile(path)
     
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):

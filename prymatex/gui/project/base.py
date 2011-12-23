@@ -44,11 +44,11 @@ class FileSystemTreeNode(TreeNode):
         return resources.getIcon(self.path)
 
 class PMXProject(FileSystemTreeNode):
-    KEYS = [    'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
-    def __init__(self, name, directory, filePath, hash):
-        FileSystemTreeNode.__init__(self, name)
+    KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
+    FILE = '.pmxproject'
+    def __init__(self, directory, hash):
+        FileSystemTreeNode.__init__(self, "Project Name")
         self.directory = directory
-        self.filePath = filePath
         self.workingSet = None
         self.manager = None
         self.load(hash)
@@ -68,11 +68,12 @@ class PMXProject(FileSystemTreeNode):
         return hash
 
     def save(self):
-        file = os.path.join(self.filePath)
-        plist.writePlist(self.hash, file)
+        filePath = os.path.join(self.directory, self.FILE)
+        plist.writePlist(self.hash, filePath)
 
     def delete(self, removeFiles = False):
-        os.unlink(os.path.join(self.filePath))
+        filePath = os.path.join(self.directory, self.FILE)
+        os.unlink(os.path.join(filePath))
         if hard:
             try:
                 os.rmdir(self.directory)
@@ -87,12 +88,11 @@ class PMXProject(FileSystemTreeNode):
         return env
 
     @classmethod
-    def loadProject(cls, filePath, manager):
-        name = os.path.splitext(os.path.basename(filePath))[0]
-        directory = os.path.dirname(filePath)
+    def loadProject(cls, path, manager):
+        filePath = os.path.join(path, cls.FILE)
         try:
             data = plist.readPlist(filePath)
-            project = cls(name, directory, filePath, data)
+            project = cls(path, data)
             manager.addProject(project)
         except Exception, e:
             print "Error in project %s (%s)" % (filePath, e)
@@ -106,7 +106,7 @@ class PMXProject(FileSystemTreeNode):
     @property
     def path(self):
         return self.directory
-
+    
     @property
     def icon(self):
         if self.manager.isOpen(self):

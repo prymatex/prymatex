@@ -162,7 +162,7 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
     def rowCount (self, parent = None):
         return len(self.suggestions)
 
-    def data (self, index, role = QtCore.Qt.DisplayRole):
+    def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         suggestion = self.suggestions[index.row()]
@@ -176,6 +176,6 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
                 return suggestion
         elif role == QtCore.Qt.DecorationRole:
             if isinstance(suggestion, dict) and 'image' in suggestion:
-                return QtGui.QIcon(suggestion['image'])
+                return resources.getIcon(suggestion['image'])
             else:
                 return resources.getIcon('inserttext')

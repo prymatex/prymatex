@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Mon Nov  7 18:31:02 2011
+# Created: Thu Dec 22 23:22:44 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -118,6 +118,12 @@ class Ui_FileSystemDock(object):
         self.actionOrderFoldersFirst = QtGui.QAction(FileSystemDock)
         self.actionOrderFoldersFirst.setCheckable(True)
         self.actionOrderFoldersFirst.setObjectName(_fromUtf8("actionOrderFoldersFirst"))
+        self.actionOpen = QtGui.QAction(FileSystemDock)
+        self.actionOpen.setObjectName(_fromUtf8("actionOpen"))
+        self.actionOpenSystemEditor = QtGui.QAction(FileSystemDock)
+        self.actionOpenSystemEditor.setObjectName(_fromUtf8("actionOpenSystemEditor"))
+        self.actionOpenDefaultEditor = QtGui.QAction(FileSystemDock)
+        self.actionOpenDefaultEditor.setObjectName(_fromUtf8("actionOpenDefaultEditor"))
 
         self.retranslateUi(FileSystemDock)
         QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
@@ -140,5 +146,8 @@ class Ui_FileSystemDock(object):
         self.actionOrderByType.setText(_('By Type'))
         self.actionOrderDescending.setText(_('Descending'))
         self.actionOrderFoldersFirst.setText(_('Folders First'))
+        self.actionOpen.setText(_('Open'))
+        self.actionOpenSystemEditor.setText(_('System Editor'))
+        self.actionOpenDefaultEditor.setText(_('Default Editor'))
 
 from prymatex import resources_rc

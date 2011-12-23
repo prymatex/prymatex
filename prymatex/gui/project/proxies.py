@@ -28,6 +28,10 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         rightPath = self.sourceModel().filePath(right)
         return ORDERS[self.orderBy](leftPath, rightPath, self.folderFirst)
 
+    def filePath(self, index):
+        sIndex = self.mapToSource(index)
+        return self.sourceModel().filePath(sIndex)
+    
     def sortBy(self, orderBy, folderFirst = True, descending = False):
         order = QtCore.Qt.AscendingOrder if not descending else QtCore.Qt.DescendingOrder
         self.orderBy = orderBy

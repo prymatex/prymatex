@@ -32,9 +32,6 @@ class PMXProjectManager(PMXObject):
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
         
-        #Force sort for 
-        #self.projectTreeProxyModel.sort(0, QtCore.Qt.AscendingOrder)
-        
         self.fileWatcher = QtCore.QFileSystemWatcher()
         self.fileWatcher.directoryChanged.connect(self.refreshProjectByPath)
         
@@ -53,8 +50,8 @@ class PMXProjectManager(PMXObject):
         return ''.join(validPath)
 
     def loadProject(self):
-        for filePath in self.knownProjects:
-            project = PMXProject.loadProject(filePath, self)
+        for path in self.knownProjects:
+            project = PMXProject.loadProject(path, self)
 
     def isOpen(self, project):
         return True
@@ -71,11 +68,10 @@ class PMXProjectManager(PMXObject):
             os.makedirs(directory)
         elif not reuseDirectory:
             raise Exception()
-        filePath = os.path.join(directory, "%s.pmxproj" % self.convertToValidPath(name))
-        project = PMXProject(name, directory, filePath, {})
+        project = PMXProject(directory, { "name": name })
         project.save()
         self.addProject(project)
-        self.knownProjects.append(project.filePath)
+        self.knownProjects.append(project.path)
         self.settings.setValue('knownProjects', self.knownProjects)
         return project
 

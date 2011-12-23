@@ -800,7 +800,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     # Completer
     #==========================================================================
     def showCompleter(self, suggestions):
-        completionPrefix, start, end = editor.getCurrentWord()
+        completionPrefix, start, end = self.getCurrentWord()
         self.completerMode.setCompletionPrefix(completionPrefix)
         self.completerMode.setModel(PMXCompleterListModel(suggestions, self))
         self.completerMode.complete(self.cursorRect())

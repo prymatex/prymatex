@@ -109,6 +109,21 @@
     <string>F5</string>
    </property>
   </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionOpenSystemEditor">
+   <property name="text">
+    <string>System Editor</string>
+   </property>
+  </action>
+  <action name="actionOpenDefaultEditor">
+   <property name="text">
+    <string>Default Editor</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../../resources.qrc"/>
