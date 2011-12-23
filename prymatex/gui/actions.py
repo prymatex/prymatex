@@ -64,7 +64,7 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionNewFileFromTemplate_triggered(self):
         filePath = self.newFromTemplateDialog.getNewFileFromTemplate()
-        if path:
+        if filePath:
             self.application.openFile(filePath)
     
     @QtCore.pyqtSlot()
