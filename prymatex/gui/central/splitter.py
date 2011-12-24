@@ -219,13 +219,15 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
                 self._set_current_tab(tw, tidx)
             tw.tabBar().setFocus()
 
-    def setCurrentWidget(self, w):
+    def setCurrentWidget(self, w, focus = False):
         """ Make the given widget current. """
 
         tw, tidx = self._tab_widget(w)
 
         if tw is not None:
             self._set_current_tab(tw, tidx)
+            if focus:
+                tw.setFocus()
 
     def currentWidget(self):
         """ Return current widget. """

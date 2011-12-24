@@ -98,6 +98,10 @@ def dictToStandardItem(a_dict):
     item.setText(a_dict.get('title', ''))
     image = a_dict.get('image')
     if image is not None:
-        item.setIcon(resources.getIcon(image))
+        if isinstance(image, QtGui.QIcon):
+            item.setIcon(image)
+        else:
+            image = resources.getIcon(image) or QtGui.QIcon()
+        item.setIcon(image)
     return item
         

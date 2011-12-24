@@ -348,13 +348,19 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSelectTab_triggered(self):
-        items = []
-        def itemsToDict(items):
-            for item in items:
-                yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
-        index = self.bundleSelectorDialog.select(itemsToDict(items))
+        ''' Shows select tab '''
+        tabs = self.splitTabWidget.getAllWidgets()
+        def tabsToDict(tabs):
+            for tab in tabs:
+                image = tab.tabIcon()
+                if image is None: image = QtGui.QIcon()
+                yield [dict(title = tab.tabTitle(), image = image), dict(title = tab.filePath)]
+        index = self.tabSelector.select(tabsToDict(tabs))
         if index is not None:
-            self.currentEditor().insertBundleItem(items[index])
+            tab = tabs[index]
+            self.splitTabWidget.setCurrentWidget(tab, focus = True)
+            
+        
         
     @QtCore.pyqtSlot()
     def on_actionGoToLine_triggered(self):
