@@ -43,6 +43,11 @@ def getImage(index):
         return QtGui.QPixmap(path)
 
 def getIcon(index):
+    '''
+    Makes the best effort to find an icon for an index.
+    Index can be a path, a Qt resource path, an integer.
+    @return: QIcon instance or None if no icon could be retrieved
+    '''
     path = getImagePath(index)
     if path is not None:
         return QtGui.QIcon(path)
@@ -55,6 +60,11 @@ def getIcon(index):
         return FileIconProvider.icon(QtGui.QFileIconProvider.File)
     elif isinstance(index, int):
         return FileIconProvider.icon(index)
+    
+    # Fallback 
+    #elif isinstance(index, QtGui.QIcon):
+    #    return index
+    #return QtGui.QIcon() # Empty Icon
 
 def getFileType(fileInfo):
     return FileIconProvider.type(fileInfo)
