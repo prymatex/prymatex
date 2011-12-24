@@ -95,4 +95,6 @@ class PMXProjectManager(PMXObject):
         #TODO: avisar que se movio el projecto al proxy
         
     def findProjectForPath(self, path):
-        return self.projectTreeModel.findProjectForPath(path)
+        node = self.projectTreeModel.nodeForPath(path)
+        if isinstance(node, PMXProject):
+            return node
