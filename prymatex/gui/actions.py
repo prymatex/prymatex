@@ -346,6 +346,44 @@ class MainWindowActions(object):
     def on_actionPreviousTab_triggered(self):
         self.splitTabWidget.focusPreviousTab()
 
+    @QtCore.pyqtSlot()
+    def on_actionSelectTab_triggered(self):
+        items = []
+        def itemsToDict(items):
+            for item in items:
+                yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
+        index = self.bundleSelectorDialog.select(itemsToDict(items))
+        if index is not None:
+            self.currentEditor().insertBundleItem(items[index])
+        
+    @QtCore.pyqtSlot()
+    def on_actionGoToLine_triggered(self):
+        self.statusBar().showGoToLine()
+        
+    @QtCore.pyqtSlot()
+    def on_actionGoToSymbol_triggered(self):
+        editor = self.currentEditor()
+        scope = editor.getCurrentScope()
+        items = self.application.supportManager.getActionItems(scope)
+        def itemsToDict(items):
+            for item in items:
+                yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
+        index = self.bundleSelectorDialog.select(itemsToDict(items))
+        if index is not None:
+            self.currentEditor().insertBundleItem(items[index])
+        
+    @QtCore.pyqtSlot()
+    def on_actionGoToBookmark_triggered(self):
+        editor = self.currentEditor()
+        scope = editor.getCurrentScope()
+        items = self.application.supportManager.getActionItems(scope)
+        def itemsToDict(items):
+            for item in items:
+                yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
+        index = self.bundleSelectorDialog.select(itemsToDict(items))
+        if index is not None:
+            self.currentEditor().insertBundleItem(items[index])
+            
     #============================================================
     # Bundles Actions
     #============================================================
@@ -378,7 +416,6 @@ class MainWindowActions(object):
             for item in items:
                 yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
         index = self.bundleSelectorDialog.select(itemsToDict(items))
-        print index
         if index is not None:
             self.currentEditor().insertBundleItem(items[index])
     

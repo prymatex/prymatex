@@ -32,14 +32,7 @@ class PMXProjectManager(PMXObject):
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
         
-        self.fileWatcher = QtCore.QFileSystemWatcher()
-        self.fileWatcher.directoryChanged.connect(self.refreshProjectByPath)
-        
         self.configure()
-    
-    def refreshProjectByPath(self, path):
-        project = self.findProjectForPath(path)
-        self.projectTreeModel.refreshProject(project, path)
     
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils
@@ -102,6 +95,4 @@ class PMXProjectManager(PMXObject):
         #TODO: avisar que se movio el projecto al proxy
         
     def findProjectForPath(self, path):
-        for project in self.projectTreeModel.getAllProjects():
-            if os.path.commonprefix([project.directory, path]) == project.directory:
-                return project
+        return self.projectTreeModel.findProjectForPath(path)

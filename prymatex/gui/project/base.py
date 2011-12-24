@@ -31,13 +31,13 @@ windowFrame: El Tampaño del a ventana de projecto en tm
 """
 
 class FileSystemTreeNode(TreeNode):
+    def __init__(self, name, parent = None):
+        TreeNode.__init__(self, name, parent)
+        self.isdir = os.path.isdir(self.path)
+        
     @property
     def path(self):
         return os.path.join(self.parent.path, self.name)
-    
-    @property
-    def isdir(self):
-        return os.path.isdir(self.path)
     
     @property
     def icon(self):
@@ -47,8 +47,8 @@ class PMXProject(FileSystemTreeNode):
     KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
     FILE = '.pmxproject'
     def __init__(self, directory, hash):
-        FileSystemTreeNode.__init__(self, "Project Name")
         self.directory = directory
+        FileSystemTreeNode.__init__(self, "Project Name")
         self.workingSet = None
         self.manager = None
         self.load(hash)
@@ -113,14 +113,4 @@ class PMXProject(FileSystemTreeNode):
             return resources.getIcon("projectopen")
         else:
             return resources.getIcon("projectclose")
-
-    def findDirectoryNode(self, path):
-        current = self
-        for part in path.split(os.path.sep):
-            nodes = filter(lambda node: node.isdir and node.name == part, current.children)
-            assert len(nodes) <= 1, "More than one node"
-            #TODO: Arregrlar el detalle del split con cadena vacia
-            if len(nodes):
-                current = nodes.pop()
-        return current
-        
+    

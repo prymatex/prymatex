@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Fri Dec 23 21:25:34 2011
+# Created: Sat Dec 24 10:55:28 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -291,6 +291,8 @@ class Ui_MainWindow(object):
         icon21.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/project-development-new-template.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionNewProject.setIcon(icon21)
         self.actionNewProject.setObjectName(_fromUtf8("actionNewProject"))
+        self.actionGoToBookmark = QtGui.QAction(MainWindow)
+        self.actionGoToBookmark.setObjectName(_fromUtf8("actionGoToBookmark"))
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuNew.addAction(self.actionNewEditor)
@@ -357,7 +359,7 @@ class Ui_MainWindow(object):
         self.menuNavigation.addSeparator()
         self.menuNavigation.addAction(self.actionGoToLine)
         self.menuNavigation.addAction(self.actionGoToSymbol)
-        self.menuNavigation.addSeparator()
+        self.menuNavigation.addAction(self.actionGoToBookmark)
         self.menuHelp.addAction(self.actionReport_Bug)
         self.menuHelp.addAction(self.actionTranslate_this_application)
         self.menuHelp.addAction(self.actionProjectHomepage)
@@ -545,6 +547,7 @@ class Ui_MainWindow(object):
         self.actionWordWrap.setText(_('Word Wrap'))
         self.actionNewProject.setText(_('Project'))
         self.actionNewProject.setShortcut(_('Ctrl+Alt+N'))
+        self.actionGoToBookmark.setText(_('Go To Bookmark'))
 
 from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc
