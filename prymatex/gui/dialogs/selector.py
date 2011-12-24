@@ -4,12 +4,12 @@
 from PyQt4 import QtCore, QtGui
 from prymatex.ui.dialogs.bundleselector import Ui_BundleSelectorDialog
 
-class PMXBundleSelectorDialog(QtGui.QDialog, Ui_BundleSelectorDialog):
+class PMXSelectorDialog(QtGui.QDialog, Ui_BundleSelectorDialog):
     '''
     This dialog allow the user to search through commands, snippets and macros in the current scope easily.
     An instance is hold in the main window and triggered with an action.
     '''
-    def __init__(self, parent = None):
+    def __init__(self, parent = None, title = "Select item"):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         
@@ -24,6 +24,7 @@ class PMXBundleSelectorDialog(QtGui.QDialog, Ui_BundleSelectorDialog):
         self.tableBundleItems.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableBundleItems.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableBundleItems.setModel(self.proxy)
+        self.setWindowTitle(title)
         
     def select(self, items):
         ''' 

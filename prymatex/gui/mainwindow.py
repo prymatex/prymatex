@@ -136,13 +136,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     
     def setupDialogs(self):
         from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
-        from prymatex.gui.dialogs.bundleselector import PMXBundleSelectorDialog
+        from prymatex.gui.dialogs.selector import PMXSelectorDialog
         from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
                 
         # Create dialogs
         self.newFromTemplateDialog = PMXNewFromTemplateDialog(self)
         self.newProjectDialog = PMXNewProjectDialog(self)
-        self.bundleSelectorDialog = PMXBundleSelectorDialog(self)
+        self.bundleSelectorDialog = PMXSelectorDialog(self, title = _("Select Bundle Item"))
+        # TODO: Connect these selectors 
+        self.tabSelector = PMXSelectorDialog(self, title = _("Select tab"))
+        self.symbolSelector = PMXSelectorDialog(self, title = _("Select Symbol"))
 
     #============================================================
     # Create and manage editors
