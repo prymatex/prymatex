@@ -26,16 +26,23 @@ class PMXBundleSelectorDialog(QtGui.QDialog, Ui_BundleSelectorDialog):
         self.tableBundleItems.setModel(self.proxy)
         
     def select(self, items):
-        self.item = None
-        self.items = items
+        ''' 
+            @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
+            @return: The selected index
+        '''
+        self.index = None
         self.model.clear()
         self.lineFilter.clear()
         self.lineFilter.setFocus()
-        for item in items:
-            self.model.appendRow([ QtGui.QStandardItem(QtGui.QIcon(item.icon), item.name), QtGui.QStandardItem(item.trigger) ])
+        for row in items:
+            items = map(dictToStandardItem, row)
+            self.model.appendRow(items)
+            
+            #self.model.appendRow([ QtGui.QStandardItem(QtGui.QIcon(item.icon), item.name), QtGui.QStandardItem(item.trigger) ])
         self.tableBundleItems.selectRow(0)
-        self.exec_()
-        return self.item
+        if self.exec_() == self.Accepted:
+            print "Selecciono", self.index
+            return self.index
     
     def eventFilter(self, obj, event):
         '''Filters lineEdit key strokes to select model items'''
@@ -66,19 +73,30 @@ class PMXBundleSelectorDialog(QtGui.QDialog, Ui_BundleSelectorDialog):
         
     def on_tableBundleItems_activated(self, index):
         sIndex = self.proxy.mapToSource(index)
-        self.item = self.items[sIndex.row()]
+        self.index = sIndex.row()
         self.accept()
         
     def on_tableBundleItems_doubleClicked(self, index):
         sIndex = self.proxy.mapToSource(index)
-        self.item = self.items[sIndex.row()]
+        self.index = sIndex.row()
         self.accept()
     
     
         
     def on_lineFilter_returnPressed(self):
-        index = self.tableBundleItems.selectedIndexes()[0]
-        if index.isValid():
-            sIndex = self.proxy.mapToSource(index)
-            self.item = self.items[sIndex.row()]
+        indexes = self.tableBundleItems.selectedIndexes()
+        if indexes:
+            sIndex = self.proxy.mapToSource(indexes[0])
+            self.index = sIndex.row()
             self.accept()
+
+# TODO: Move to proper place
+from prymatex import resources
+def dictToStandardItem(a_dict):
+    item = QtGui.QStandardItem()
+    item.setText(a_dict.get('title', ''))
+    image = a_dict.get('image')
+    if image is not None:
+        item.setIcon(resources.getIcon(image))
+    return item
+        
