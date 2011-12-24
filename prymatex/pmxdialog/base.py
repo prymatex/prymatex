@@ -29,7 +29,7 @@ class PMXDialogSystem(QtCore.QObject):
         method(*args, **kwargs)
 
     def sendResult(self, value = None):
-        value = str(value) if value is not None else ""
+        value = str(value) if value is not None else "ok"
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
         self.socket.send_pyobj({ "result": value })
         
@@ -61,6 +61,7 @@ class PMXDialogSystem(QtCore.QObject):
         data = plistlib.readPlistFromString(plist)
         for name, path in data["register"].iteritems():
             resources.registerImagePath(name, path)
+        self.sendResult()
     
     def alert(self, args):
         print "alert: ", options, args

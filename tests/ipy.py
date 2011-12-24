@@ -71,5 +71,5 @@ def echo(arg, style="Question"):
 if __name__ == "__main__":
     connection = " ".join(sys.argv[1:])
     print connection
-    kernel = km_from_string("--shell=59077 --iopub=43198 --stdin=33484 --hb=54664")
-    print kernel.shell_channel.execute("a = 5")
+    kernel = km_from_string("--existing /tmp/tmp9E8aQb.json")
+    print kernel.shell_channel.execute("a = 21")
