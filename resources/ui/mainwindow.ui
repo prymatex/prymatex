@@ -172,7 +172,7 @@
     <addaction name="separator"/>
     <addaction name="actionGoToLine"/>
     <addaction name="actionGoToSymbol"/>
-    <addaction name="actionGoToBookmark"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -801,7 +801,7 @@
     <string>&amp;Go To Symbol</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+O</string>
+    <string>Ctrl+Shift+O</string>
    </property>
   </action>
   <action name="actionSelectTab">
@@ -862,11 +862,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+N</string>
-   </property>
-  </action>
-  <action name="actionGoToBookmark">
-   <property name="text">
-    <string>Go To Bookmark</string>
    </property>
   </action>
  </widget>
