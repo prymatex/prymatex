@@ -1,2 +1,3 @@
+
 all:
-	python setup.py build_ui
+	python2.7 setup.py build_ui
