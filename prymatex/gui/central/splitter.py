@@ -49,7 +49,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
                      self._focus_changed)
         
         # Hack for text focus when moving arround  
-        #self.tabWindowChanged.connect(self._forceTextFoucsChange)
+        self.tabWindowChanged.connect(self._forceTextFoucsChange)
         
     def __len__(self):
         count = 0
