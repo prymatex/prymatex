@@ -336,7 +336,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         if self.sidebar.showFolding:
             flags |= self.ShowFolding
         if options.wrapMode() & QtGui.QTextOption.WordWrap:
-            print "pongo word wrap"
             flags |= self.WordWrap
         return flags
         
@@ -352,7 +351,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         else:
             oFlags &= ~QtGui.QTextOption.ShowLineAndParagraphSeparators
         if flags & self.WordWrap:
-            print "set word wrap"
             options.setWrapMode(QtGui.QTextOption.WordWrap)
         else:
             options.setWrapMode(QtGui.QTextOption.NoWrap)
@@ -736,16 +734,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
-        menu = QtGui.QMenu(self)
-        for index, item in enumerate(items, 1):
-            receiver = lambda item = item: self.insertBundleItem(item, tabTriggered = tabTriggered)
-            action = item.buildTriggerItemAction(menu, receiver, mnemonic = "&" + str(index))
-            menu.addAction(action)
-        if syntax:
-            point = self.mainWindow.cursor().pos()
-        else:
-            point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
-        menu.popup(point)
+        options = []
+        for index, item in enumerate(items):
+            options.append({ "title": item.buildMenuTextEntry(False), "image": item.TYPE})
+            
+        def insertBundleItem(index):
+            self.insertBundleItem(items[index], tabTriggered = tabTriggered)
+        
+        self.showFlatPopupMenu(options, insertBundleItem, cursorPosition = not syntax)
     
     def executeCommand(self, command = None, input = "none", output = "insertText"):
         if command is None:
@@ -797,11 +793,31 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         return env
 
     #==========================================================================
+    # Popup Menu
+    #==========================================================================
+    def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
+        menu = QtGui.QMenu(self)
+        for index, item in enumerate(menuItems, 1):
+            action = QtGui.QAction("%s \t&%d" % (item["title"], index), menu)
+            if "image" in item:
+                action.setIcon(resources.getIcon(item["image"]))
+            receiver = lambda index = index: callback(index - 1)
+            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+            menu.addAction(action)
+        if cursorPosition:
+            point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
+        else:
+            point = self.mainWindow.cursor().pos()
+        menu.popup(point)
+        
+    #==========================================================================
     # Completer
     #==========================================================================
-    def showCompleter(self, suggestions):
-        completionPrefix, start, end = self.getCurrentWord()
-        self.completerMode.setCompletionPrefix(completionPrefix)
+    def showCompleter(self, suggestions, alreadyTyped = "", caseInsensitive = True):
+        case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
+        self.completerMode.setCaseSensitivity(case)
+        
+        self.completerMode.setCompletionPrefix(alreadyTyped)
         self.completerMode.setModel(PMXCompleterListModel(suggestions, self))
         self.completerMode.complete(self.cursorRect())
     
@@ -1011,9 +1027,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         return block
     
     def indentBlocks(self):
-        '''
+        """
         Indents text, block selections.
-        '''
+        """
         cursor = self.textCursor()
         start, end = self.getSelectionBlockStartEnd()
         cursor.beginEditBlock()

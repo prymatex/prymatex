@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BundleSelectorDialog</class>
- <widget class="QDialog" name="BundleSelectorDialog">
+ <class>SelectorDialog</class>
+ <widget class="QDialog" name="SelectorDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -16,9 +16,6 @@
     <height>371</height>
    </size>
   </property>
-  <property name="windowTitle">
-   <string>Bundle Selector</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>2</number>
@@ -30,7 +27,7 @@
     <widget class="QLineEdit" name="lineFilter"/>
    </item>
    <item>
-    <widget class="QTableView" name="tableBundleItems">
+    <widget class="QTableView" name="tableItems">
      <property name="selectionMode">
       <enum>QAbstractItemView::SingleSelection</enum>
      </property>

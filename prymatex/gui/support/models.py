@@ -57,11 +57,9 @@ class PMXBundleTreeNode(TreeNode):
                 return name[0:index] + '&' + name[index:]
         return name
     
-    def buildMenuTextEntry(self, mnemonic = ''):
+    def buildMenuTextEntry(self, mnemonic = True):
         text = unicode(self.name)
         if mnemonic:
-            return text.replace('&', '&&') + u"\t" + mnemonic
-        else:
             text += u"\t%s" % (self.trigger)
         return text.replace('&', '&&')
     
@@ -75,8 +73,8 @@ class PMXBundleTreeNode(TreeNode):
             self.action = self.buildTriggerItemAction(parent, receiver)
         return getattr(self, "action", None)
     
-    def buildTriggerItemAction(self, parent, receiver, mnemonic = ''):
-        action = QtGui.QAction(QtGui.QIcon(self.icon), self.buildMenuTextEntry(mnemonic), parent)
+    def buildTriggerItemAction(self, parent, receiver):
+        action = QtGui.QAction(self.icon, self.buildMenuTextEntry(), parent)
         parent.connect(action, QtCore.SIGNAL('triggered()'), receiver)
         return action
     

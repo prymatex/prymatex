@@ -321,6 +321,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             cursor.endEditBlock()
     
 class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
+    #TODO: Agregar al commpleter el control de la posicion del cursor
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)
         PMXBaseEditorMode.__init__(self, editor)
@@ -330,7 +331,6 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.popupView.setWordWrap(False)
         self.setPopup(self.popupView)
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
-        self.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.activated[str].connect(self.insertCompletion)
 
     def isActive(self):
@@ -343,10 +343,11 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             #Luego de tratar el evento, solo si se inserto algo de texto
             if event.text() != "":
-                completionPrefix, start, end = self.editor.getCurrentWord()
-                if completionPrefix != self.completionPrefix():
-                    self.setCompletionPrefix(completionPrefix)
-                    self.complete(self.editor.cursorRect())
+                currentWord, start, end = self.editor.getCurrentWord()
+                print currentWord
+                if currentWord != self.completionPrefix():
+                    self.setCompletionPrefix(currentWord)
+                self.complete(self.editor.cursorRect())
                 
     def insertCompletion(self, insert):
         self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])

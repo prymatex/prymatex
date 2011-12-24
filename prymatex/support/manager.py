@@ -40,7 +40,6 @@ class PMXSupportBaseManager(object):
     VAR_PREFIX = 'PMX'
     PROTECTEDNS = 0
     DEFAULTNS = -1
-    TABTRIGGERSPLITS = (re.compile(r"\s+", re.UNICODE), re.compile(r"\w+", re.UNICODE), re.compile(r"\W+", re.UNICODE), re.compile(r"\W", re.UNICODE))
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     
     SETTINGS_CACHE = {}
@@ -632,19 +631,16 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     @printtime
     def getTabTriggerSymbol(self, line, index):
-        #TODO: Mejorar aca para obtener bien los tabrigger symbol
-        bestMatch = None
-        line = line[:index]
+        line = line[:index][::-1]
         triggers = self.cache.setcallable("tabtriggers", self.getAllTabTriggersMnemonics)
-        for tabSplit in self.TABTRIGGERSPLITS:
-            matchs = filter(lambda m: m.start() <= index <= m.end(), tabSplit.finditer(line))
-            if matchs:
-                match = matchs.pop()
-                word = line[match.start():match.end()]
-                if word in triggers and (bestMatch is None or len(bestMatch) < len(word)):
-                    print "find", word
-                    bestMatch = word
-        return bestMatch
+        search = map(lambda trigger: (trigger, line.find(trigger[::-1]), len(trigger)), triggers)
+        search = filter(lambda (trigger, value, length): value == 0, search)
+        if search:
+            best = ("", 0)
+            for trigger, value, length in search:
+                if length > best[1]:
+                    best = (trigger, length)
+            return best[0]
 
     @printtime    
     def getTabTriggerItem(self, keyword, scope):

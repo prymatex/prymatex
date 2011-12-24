@@ -323,8 +323,8 @@ class CommandHandler(object):
             options.parameters = sys.stdin.readlines()
         command = {"name": "menu", "args": [ "".join(options.parameters) ], "kwargs": {}}
         self.socket.send_pyobj(command)
-        result = self.socket.recv_pyobj()
-        sys.stdout.write(result["data"])
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
         
     def popup(self, options, args):
         if options.suggestions == None:
@@ -341,8 +341,8 @@ class CommandHandler(object):
         command = {"name": "popup", "args": [ "".join(options.suggestions) ], "kwargs": kwargs}
         
         self.socket.send_pyobj(command)
-        result = self.socket.recv_pyobj()
-        sys.stdout.write(result["data"])
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
         
     def defaults(self, options, args):
         options, args = defaults_parse_args(args)
@@ -354,8 +354,8 @@ class CommandHandler(object):
 
         command = {"name": "images", "args": [ "".join(options.plist) ], "kwargs": {}}
         self.socket.send_pyobj(command)
-        result = self.socket.recv_pyobj()
-        sys.stdout.write(result["data"])
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
         
     def alert(self, options, args):
         options, args = alert_parse_args(args)

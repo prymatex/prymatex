@@ -166,7 +166,7 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
         if not index.isValid():
             return None
         suggestion = self.suggestions[index.row()]
-        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole, QtCore.Qt.EditRole]:
+        if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             if isinstance(suggestion, dict):
                 if 'display' in suggestion:
                     return suggestion['display']
@@ -179,3 +179,5 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
                 return resources.getIcon(suggestion['image'])
             else:
                 return resources.getIcon('inserttext')
+        elif role == QtCore.Qt.ToolTipRole:
+            return "tooltip help"

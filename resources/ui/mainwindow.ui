@@ -139,6 +139,18 @@
      <addaction name="actionMoveColumnLeft"/>
      <addaction name="actionMoveColumnRight"/>
     </widget>
+    <widget class="QMenu" name="menuSelect">
+     <property name="title">
+      <string>Select</string>
+     </property>
+     <addaction name="actionSelectWord"/>
+     <addaction name="actionSelectLine"/>
+     <addaction name="actionSelectParagraph"/>
+     <addaction name="actionSelectEnclosingBrackets"/>
+     <addaction name="actionSelectCurrentScope"/>
+     <addaction name="actionSelectAll"/>
+    </widget>
+    <addaction name="menuSelect"/>
     <addaction name="menuConvert"/>
     <addaction name="menuMove"/>
     <addaction name="separator"/>
@@ -156,12 +168,11 @@
     <addaction name="separator"/>
     <addaction name="actionNextTab"/>
     <addaction name="actionPreviousTab"/>
-    <addaction name="actionGoToSymbol"/>
-    <addaction name="actionGoToTab"/>
+    <addaction name="actionSelectTab"/>
     <addaction name="separator"/>
     <addaction name="actionGoToLine"/>
+    <addaction name="actionGoToSymbol"/>
     <addaction name="separator"/>
-    <addaction name="actionChooseTab"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -180,29 +191,12 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <widget class="QMenu" name="menuSelect">
-     <property name="title">
-      <string>Select</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../resources.qrc">
-       <normaloff>:/icons/actions/edit-select-all.png</normaloff>:/icons/actions/edit-select-all.png</iconset>
-     </property>
-     <addaction name="actionSelectWord"/>
-     <addaction name="actionSelectLine"/>
-     <addaction name="actionSelectParagraph"/>
-     <addaction name="actionSelectEnclosingBrackets"/>
-     <addaction name="actionSelectCurrentScope"/>
-     <addaction name="actionSelectAll"/>
-    </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="actionCopy"/>
     <addaction name="actionCut"/>
     <addaction name="actionPaste"/>
-    <addaction name="separator"/>
-    <addaction name="menuSelect"/>
     <addaction name="separator"/>
     <addaction name="actionFind"/>
     <addaction name="actionFindReplace"/>
@@ -793,6 +787,9 @@
    <property name="text">
     <string>Go To &amp;Line</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
   </action>
   <action name="actionGoToTab">
    <property name="text">
@@ -803,10 +800,16 @@
    <property name="text">
     <string>&amp;Go To Symbol</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
-  <action name="actionChooseTab">
+  <action name="actionSelectTab">
    <property name="text">
-    <string>&amp;Choose Tab...</string>
+    <string>&amp;Select Tab</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionMoveLineUp">

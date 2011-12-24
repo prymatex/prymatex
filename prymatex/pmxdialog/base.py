@@ -6,7 +6,7 @@ import zmq
 
 from prymatex import resources
 
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 
 PORT = 4612
 
@@ -20,12 +20,19 @@ class PMXDialogSystem(QtCore.QObject):
     
     def socketReadyRead(self):
         command = self.socket.recv_pyobj()
-        method = getattr(self, command["name"])
-        value = method(*command["args"], **command["kwargs"])
-        if value is None:
-            value = ""
-        self.socket.send_pyobj({ "status": "ok", "data": value })
+        name = command.get("name")
+        args = command.get("args", [])
+        kwargs = command.get("kwargs", {})
+        print name, args, kwargs
+        
+        method = getattr(self, name)
+        method(*args, **kwargs)
 
+    def sendResult(self, value = None):
+        value = str(value) if value is not None else ""
+        #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
+        self.socket.send_pyobj({ "result": value })
+        
     def nib(self, args):
         print "nib: ", options, args
         return True
@@ -37,12 +44,14 @@ class PMXDialogSystem(QtCore.QObject):
     def menu(self, plist):
         #TODO: Instanciar un completer y pasarle los valores
         data = plistlib.readPlistFromString(plist)
-        print data, data["menuItems"]
-        return plistlib.writePlistToString({})
-            
+        def sendSelectedIndex(index):
+            self.sendResult(plistlib.writePlistToString({"selectedIndex": index}))
+        self.application.currentEditor().showFlatPopupMenu(data["menuItems"], sendSelectedIndex)
+
     def popup(self, suggestions, returnChoice = False, caseInsensitive = True, alreadyTyped = "", staticPrefix = "", additionalWordCharacters = ""):
         suggestions = plistlib.readPlistFromString(suggestions)
-        self.application.currentEditor().showCompleter(suggestions["suggestions"])
+        self.application.currentEditor().showCompleter(suggestions["suggestions"], alreadyTyped = alreadyTyped, caseInsensitive = caseInsensitive)
+        self.sendResult()
     
     def defaults(self, args):
         print "defaults: ", options, args
@@ -59,4 +68,4 @@ class PMXDialogSystem(QtCore.QObject):
     
     def debug(self, args):
         print args
-        self.socket.send_pyobj({ "status": "ok", "data": ""})
+        self.sendResult()

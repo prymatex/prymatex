@@ -55,7 +55,9 @@ class CompleterHelper(PMXBaseEditorHelper):
         return False
             
     def execute(self, editor, event):
-        editor.showCompleter(self.completions)
+        currentWord, start, end = editor.getCurrentWord()
+        #alreadyTyped
+        editor.showCompleter(self.completions, currentWord)
 
 class SmartTypingPairsHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
