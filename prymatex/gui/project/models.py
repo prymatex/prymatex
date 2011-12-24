@@ -76,15 +76,25 @@ class PMXProjectTreeModel(TreeModel):
     def nodeForPath(self, path):
         currentNode = self.rootNode
         while currentNode.children:
+            goAhead = False
             for node in currentNode.children:
-                if os.path.commonprefix([node.path, path]) == path:
+                prefix = os.path.commonprefix([node.path, path])
+                if prefix == path:
                     return node
-                if os.path.commonprefix([node.path, path]) == node.path:
+                elif prefix == node.path:
                     currentNode = node
+                    goAhead = True
                     break
-        if currentNode != self.rootNode:   
-            return currentNode
-            
+            if not goAhead:
+                break
+        if currentNode != self.rootNode:
+            return currentNode 
+
+    def projectForPath(self, path):
+        for project in self.rootNode.children:
+            if os.path.commonprefix([project.path, path]) == project.path:
+                return project
+        
     def filePath(self, index):
         return index.internalPointer().path
     
