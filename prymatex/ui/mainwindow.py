@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Sat Dec 24 12:42:47 2011
-#      by: PyQt4 UI code generator 4.9
+# Created: Sun Dec 25 19:24:05 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -269,8 +269,6 @@ class Ui_MainWindow(object):
         self.actionSelectBundleItem.setObjectName(_fromUtf8("actionSelectBundleItem"))
         self.actionGoToLine = QtGui.QAction(MainWindow)
         self.actionGoToLine.setObjectName(_fromUtf8("actionGoToLine"))
-        self.actionGoToTab = QtGui.QAction(MainWindow)
-        self.actionGoToTab.setObjectName(_fromUtf8("actionGoToTab"))
         self.actionGoToSymbol = QtGui.QAction(MainWindow)
         self.actionGoToSymbol.setObjectName(_fromUtf8("actionGoToSymbol"))
         self.actionSelectTab = QtGui.QAction(MainWindow)
@@ -291,6 +289,8 @@ class Ui_MainWindow(object):
         icon21.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/project-development-new-template.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionNewProject.setIcon(icon21)
         self.actionNewProject.setObjectName(_fromUtf8("actionNewProject"))
+        self.actionGoToBookmark = QtGui.QAction(MainWindow)
+        self.actionGoToBookmark.setObjectName(_fromUtf8("actionGoToBookmark"))
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuNew.addAction(self.actionNewEditor)
@@ -357,7 +357,7 @@ class Ui_MainWindow(object):
         self.menuNavigation.addSeparator()
         self.menuNavigation.addAction(self.actionGoToLine)
         self.menuNavigation.addAction(self.actionGoToSymbol)
-        self.menuNavigation.addSeparator()
+        self.menuNavigation.addAction(self.actionGoToBookmark)
         self.menuHelp.addAction(self.actionReport_Bug)
         self.menuHelp.addAction(self.actionTranslate_this_application)
         self.menuHelp.addAction(self.actionProjectHomepage)
@@ -528,8 +528,7 @@ class Ui_MainWindow(object):
         self.actionSelectBundleItem.setText(_('&Select Bundle Item'))
         self.actionSelectBundleItem.setShortcut(_('Meta+Ctrl+T'))
         self.actionGoToLine.setText(_('Go To &Line'))
-        self.actionGoToLine.setShortcut(_('Ctrl+G'))
-        self.actionGoToTab.setText(_('Go To Ta&b'))
+        self.actionGoToLine.setShortcut(_('Ctrl+Shift+G'))
         self.actionGoToSymbol.setText(_('&Go To Symbol'))
         self.actionGoToSymbol.setShortcut(_('Ctrl+Shift+O'))
         self.actionSelectTab.setText(_('&Select Tab'))
@@ -545,6 +544,8 @@ class Ui_MainWindow(object):
         self.actionWordWrap.setText(_('Word Wrap'))
         self.actionNewProject.setText(_('Project'))
         self.actionNewProject.setShortcut(_('Ctrl+Alt+N'))
+        self.actionGoToBookmark.setText(_('Go To Bookmark'))
+        self.actionGoToBookmark.setShortcut(_('Ctrl+Shift+B'))
 
 from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc

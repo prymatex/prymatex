@@ -151,3 +151,13 @@ class PMXFileManager(PMXObject):
         if mtime > oldmtime:
             return True
         return False
+    
+    def compareFiles(self, filePath1, filePath2, compareBy = "name"):
+        value1, value2 = filePath1, filePath2
+        if compareBy == "size":
+            value1, value2 = os.path.getsize(filePath1), os.path.getsize(filePath2)
+        elif compareBy == "date":
+            value1, value2 = os.path.getctime(filePath1), os.path.getctime(filePath2)
+        elif compareBy == "type":
+            value1, value2 = self.fileExtension(filePath1), self.fileExtension(filePath2)
+        return cmp(value1, value2)

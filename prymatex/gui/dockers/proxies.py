@@ -1,24 +1,14 @@
-import os
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+
 import fnmatch
+
 from PyQt4 import QtCore, QtGui
-
-def orderFileByName(left, right):
-    return left < right
-
-def orderFileBySize(left, right):
-    return os.path.getsize(left) > os.path.getsize(right)
-
-def orderFileByDate(left, right):
-    return os.path.getctime(left) > os.path.getctime(right)
-
-def orderFileByType(left, right):
-    return os.path.splitext(left)[-1] > os.path.splitext(right)[-1]
-
-ORDERS = {"name": orderFileByName, "type": orderFileByType, "date": orderFileByDate, "size": orderFileBySize}
 
 class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
-        super(PMXFileSystemProxyModel, self).__init__(parent)
+        QtGui.QSortFilterProxyModel.__init__(self, parent)
+        self.application = QtGui.QApplication.instance()
         self.orderBy = "name"
         self.folderFirst = True
         self.descending = False
@@ -46,7 +36,7 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         else:
             leftPath = self.sourceModel().filePath(left)
             rightPath = self.sourceModel().filePath(right)
-            return ORDERS[self.orderBy](leftPath, rightPath)
+            return self.application.fileManager.compareFiles(leftPath, rightPath, self.orderBy)
 
     def sortBy(self, orderBy, folderFirst = True, descending = False):
         order = QtCore.Qt.AscendingOrder if not descending else QtCore.Qt.DescendingOrder

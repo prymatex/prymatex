@@ -3,6 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
 from prymatex.gui import dialogs
 
 class MainWindowActions(object):
@@ -79,10 +80,12 @@ class MainWindowActions(object):
         for filePath in files:
             editor = self.application.openFile(filePath, focus = focus)
     
+    @QtCore.pyqtSlot()
     def on_actionOpenAllRecentFiles_triggered(self):
         for filePath in self.application.fileManager.fileHistory:
             self.application.openFile(filePath)
 
+    @QtCore.pyqtSlot()
     def on_actionRemoveAllRecentFiles_triggered(self):
         self.application.fileManager.clearFileHistory()
 
@@ -348,19 +351,19 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSelectTab_triggered(self):
-        ''' Shows select tab '''
+        """ 
+        Shows select tab, and change to selected 
+        """
         tabs = self.splitTabWidget.getAllWidgets()
         def tabsToDict(tabs):
             for tab in tabs:
                 image = tab.tabIcon()
                 if image is None: image = QtGui.QIcon()
-                yield [dict(title = tab.tabTitle(), image = image), dict(title = tab.filePath)]
-        index = self.tabSelector.select(tabsToDict(tabs))
+                yield [ dict(title = tab.tabTitle(), image = image), dict(title = tab.filePath) ]
+        index = self.tabSelectorDialog.select(tabsToDict(tabs))
         if index is not None:
             tab = tabs[index]
             self.splitTabWidget.setCurrentWidget(tab, focus = True)
-            
-        
         
     @QtCore.pyqtSlot()
     def on_actionGoToLine_triggered(self):
@@ -369,26 +372,25 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionGoToSymbol_triggered(self):
         editor = self.currentEditor()
-        scope = editor.getCurrentScope()
-        items = self.application.supportManager.getActionItems(scope)
-        def itemsToDict(items):
-            for item in items:
-                yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
-        index = self.bundleSelectorDialog.select(itemsToDict(items))
+        blocks = editor.symbolListModel.blocks
+        def symbolToDict(blocks):
+            for block in blocks:
+                userData = block.userData() 
+                yield [dict(title = userData.symbol, image = resources.getIcon('codefunction'))]
+        index = self.symbolSelectorDialog.select(symbolToDict(blocks))
         if index is not None:
-            self.currentEditor().insertBundleItem(items[index])
+            editor.goToBlock(blocks[index])
         
     @QtCore.pyqtSlot()
     def on_actionGoToBookmark_triggered(self):
         editor = self.currentEditor()
-        scope = editor.getCurrentScope()
-        items = self.application.supportManager.getActionItems(scope)
-        def itemsToDict(items):
-            for item in items:
-                yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
-        index = self.bundleSelectorDialog.select(itemsToDict(items))
+        blocks = editor.bookmarkListModel.blocks
+        def bookmarkToDict(blocks):
+            for block in blocks:
+                yield [dict(title = block.text(), image = resources.getIcon('bookmarkflag'))]
+        index = self.bookmarkSelectorDialog.select(bookmarkToDict(blocks))
         if index is not None:
-            self.currentEditor().insertBundleItem(items[index])
+            editor.goToBlock(blocks[index])
             
     #============================================================
     # Bundles Actions

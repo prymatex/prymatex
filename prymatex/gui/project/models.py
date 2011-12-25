@@ -72,7 +72,8 @@ class PMXProjectTreeModel(TreeModel):
             if child.isdir:
                 index = self.index(child.row(), 0, parentIndex)
                 self._load_directory(child, index)
-                
+        self.sort()
+        
     def nodeForPath(self, path):
         currentNode = self.rootNode
         while currentNode.children:
@@ -109,5 +110,4 @@ class PMXProjectTreeModel(TreeModel):
         self.beginRemoveRows(QtCore.QModelIndex(), project.row(), project.row())
         self.rootNode.removeChild(project)
         self.endRemoveRows()
-
         

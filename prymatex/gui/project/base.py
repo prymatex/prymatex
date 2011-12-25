@@ -34,7 +34,8 @@ class FileSystemTreeNode(TreeNode):
     def __init__(self, name, parent = None):
         TreeNode.__init__(self, name, parent)
         self.isdir = os.path.isdir(self.path)
-        
+        self.ishidden = name.startswith('.')
+
     @property
     def path(self):
         return os.path.join(self.parent.path, self.name)

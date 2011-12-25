@@ -162,8 +162,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.sidebar = PMXSidebar(self)
 
         #Models
-        self.bookmarks = PMXBookmarkListModel(self)
-        self.symbols = PMXSymbolListModel(self)
+        self.bookmarkListModel = PMXBookmarkListModel(self)
+        self.symbolListModel = PMXSymbolListModel(self)
         
         #Folding
         self.folding = PMXEditorFolding(self)
@@ -946,22 +946,22 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #==========================================================================    
     def toggleBookmark(self, block = None):
         block = block or self.textCursor().block()
-        self.bookmarks.toggleBookmark(block)
+        self.bookmarkListModel.toggleBookmark(block)
         self.sidebar.update()
     
     def removeAllBookmarks(self):
-        self.bookmarks.removeAllBookmarks()
+        self.bookmarkListModel.removeAllBookmarks()
         self.sidebar.update()
     
     def bookmarkNext(self, block = None):
         block = block or self.textCursor().block()
-        block = self.bookmarks.nextBookmark(block)
+        block = self.bookmarkListModel.nextBookmark(block)
         if block is not None:
             self.goToBlock(block)
 
     def bookmarkPrevious(self, block = None):
         block = block or self.textCursor().block()
-        block = self.bookmarks.previousBookmark(block)
+        block = self.bookmarkListModel.previousBookmark(block)
         if block is not None:
             self.goToBlock(block)
 

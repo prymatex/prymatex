@@ -135,7 +135,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def setCurrentEditor(self, editor):
         assert editor in self.editors, "Editor not is in editors"
         self.currentEditor = editor
-        self.comboBoxSymbols.setModel(editor.symbols)
+        self.comboBoxSymbols.setModel(editor.symbolListModel)
         self.on_cursorPositionChanged(editor)
         self.on_syntaxChanged(editor.getSyntax())
         self.on_modeChanged(editor)

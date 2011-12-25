@@ -144,8 +144,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.newProjectDialog = PMXNewProjectDialog(self)
         self.bundleSelectorDialog = PMXSelectorDialog(self, title = _("Select Bundle Item"))
         # TODO: Connect these selectors 
-        self.tabSelector = PMXSelectorDialog(self, title = _("Select tab"))
-        self.symbolSelector = PMXSelectorDialog(self, title = _("Select Symbol"))
+        self.tabSelectorDialog = PMXSelectorDialog(self, title = _("Select tab"))
+        self.symbolSelectorDialog = PMXSelectorDialog(self, title = _("Select Symbol"))
+        self.bookmarkSelectorDialog = PMXSelectorDialog(self, title = _("Select Bookmark"))
 
     #============================================================
     # Create and manage editors

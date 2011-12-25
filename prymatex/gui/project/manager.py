@@ -29,6 +29,7 @@ class PMXProjectManager(PMXObject):
     def __init__(self, parent = None):
         PMXObject.__init__(self)
         self.projectTreeModel = PMXProjectTreeModel(self)
+        
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
         

@@ -28,7 +28,7 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     def setCurrentEditor(self, editor):
         self.currentEditor = editor
         if editor is not None:
-            self.tableViewSymbols.setModel(editor.symbols)
+            self.tableViewSymbols.setModel(editor.symbolListModel)
         
     def on_tableViewSymbols_activated(self, index):
         block = index.internalPointer()
@@ -60,7 +60,7 @@ class PMXCodeBookmarksDock(QtGui.QDockWidget):
     def setCurrentEditor(self, editor):
         self.currentEditor = editor
         if editor is not None:
-            self.tableViewBookmarks.setModel(editor.bookmarks)
+            self.tableViewBookmarks.setModel(editor.bookmarkListModel)
         
     def on_tableViewBookmarks_activated(self, index):
         block = index.internalPointer()

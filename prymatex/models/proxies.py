@@ -113,7 +113,6 @@ class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
     #=========================================
     # source model handler
     #=========================================
-    
     def on_sourceModel_dataChanged(self, topLeft, bottomRight):
         print "cambiaron los datos", topLeft, bottomRight
     

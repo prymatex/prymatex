@@ -81,9 +81,9 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         if userData.symbol != symbol:
             userData.symbol = symbol
             if userData.symbol == None:
-                self.editor.symbols.removeSymbolBlock(self.currentBlock())
+                self.editor.symbolListModel.removeSymbolBlock(self.currentBlock())
             else:
-                self.editor.symbols.addSymbolBlock(self.currentBlock())
+                self.editor.symbolListModel.addSymbolBlock(self.currentBlock())
 
         #4 Save the hash the text, scope and state
         userData.textHash = hash(text) + hash(self.syntax.scopeName) + state

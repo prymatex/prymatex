@@ -144,7 +144,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
     def findBlockIndex(self, block):
         indexes = map(lambda block: block.blockNumber(), self.blocks)
         return bisect(indexes, block.blockNumber()) - 1
-
+    
 #=========================================================
 # Completer
 #=========================================================

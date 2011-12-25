@@ -68,7 +68,7 @@ class PMXSidebar(QtGui.QWidget):
                         str(line_count))
 
                 #Bookmarks
-                if self.showBookmarks and block in self.editor.bookmarks:
+                if self.showBookmarks and block in self.editor.bookmarkListModel:
                     painter.drawPixmap(2,
                         round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["bookmarkflag"].height(),
                         self.images["bookmarkflag"])
