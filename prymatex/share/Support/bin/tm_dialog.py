@@ -275,15 +275,15 @@ Note:
     
     #Async Window Options
     group = OptionGroup(parser, "Async Window Options")
-    group.add_option('-a', '--async-window', action = 'store_true', default = False,
+    group.add_option('-a', '--async_window', action = 'store_true', default = False,
                           help = 'Displays the window and returns a reference token for it in the output property list.')
-    group.add_option('-l', '--list-windows', action = 'store_true', default = False,
+    group.add_option('-l', '--list_windows', action = 'store_true', default = False,
                           help = 'List async window tokens.')
-    group.add_option('-t', '--update-window', action = 'store', dest="token",
+    group.add_option('-t', '--update_window', action = 'store', dest="token",
                           help = 'Update an async window with new parameter values. Use the --parameters argument (or stdin) to specify the updated parameters.')
-    group.add_option('-x', '--close-window', action = 'store', dest="token",
+    group.add_option('-x', '--close_window', action = 'store', dest="token",
                           help = 'Close and release an async window.')
-    group.add_option('-w', '--wait-for-input', action = 'store', dest="token",
+    group.add_option('-w', '--wait_for_input', action = 'store', dest="token",
                           help = 'Wait for user input from the given async window.')
     parser.add_option_group(group)
     
@@ -310,18 +310,38 @@ class CommandHandler(object):
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect('tcp://127.0.0.1:%d' % PORT)
         
-    def nib(self, options, args):
-        options, args = nib_parse_args(args)
-        self.server.nib(str(options), str(args))
+    def async_window(self, options, args):
+        if options.parameters == None:
+            parameters = sys.stdin.readlines()
+            args.append( "".join(parameters))
         
+        command = {"name": "async_window", "args": args, "kwargs": {}}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
+        
+    def update_window(self, options, args):
+        """docstring for update_window"""
+        args.append(options.token)    
+        if options.parameters == None:
+            parameters = sys.stdin.readlines()
+            args.append( "".join(parameters))
+        
+        command = {"name": "debug", "args": args, "kwargs": {}}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
+    
     def tooltip(self, options, args):
         options, args = tooltip_parse_args(args)
         self.server.tooltip(str(options), str(args))
         
-    def menu(self, options):
+    def menu(self, options, args):
         if options.parameters == None:
-            options.parameters = sys.stdin.readlines()
-        command = {"name": "menu", "args": [ "".join(options.parameters) ], "kwargs": {}}
+            parameters = sys.stdin.readlines()
+            args.append("".join(parameters))
+
+        command = {"name": "menu", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
         value = self.socket.recv_pyobj()
         sys.stdout.write(value["result"])
@@ -362,8 +382,14 @@ class CommandHandler(object):
         self.server.alert(str(options), str(args))
         
     def debug(self, options, args):
-        command = {"name": "debug", "args": str(args)}
+        if options.parameters == None:
+            options.parameters = sys.stdin.readlines()
+        args.append( "".join(options.parameters))
+        
+        command = {"name": "debug", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
     
 def main(args):
     handler = CommandHandler()
@@ -377,7 +403,11 @@ def main(args):
         #New dialog
         options, args = new_dialgo_parse_args(args)
         if options.menu:
-            handler.menu(options)
+            handler.menu(options, args)
+        elif options.async_window:
+            handler.async_window(options, args)
+        elif options.token:
+            handler.update_window(options, args)
         else:
             handler.debug(options, args)
 

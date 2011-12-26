@@ -33,9 +33,9 @@ class PMXDialogSystem(QtCore.QObject):
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
         self.socket.send_pyobj({ "result": value })
         
-    def nib(self, args):
-        print "nib: ", options, args
-        return True
+    def async_window(self, *args, **kwargs):
+        print "async_window: ", args, kwargs
+        self.sendResult("1234")
     
     def tooltip(self, args):
         print "Tooltip: ", options, args
@@ -67,6 +67,6 @@ class PMXDialogSystem(QtCore.QObject):
         print "alert: ", options, args
         return True
     
-    def debug(self, args):
-        print args
+    def debug(self, *args, **kwargs):
+        print args, kwargs
         self.sendResult()
