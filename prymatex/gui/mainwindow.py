@@ -54,8 +54,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.setupStatusBar()
         
         # Connect Signals
-        self.splitTabWidget.tabWindowChanged.connect(self.on_tabWindowChanged)
+        self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
+        self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
         self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor().insertBundleItem(item))
         
         utils.centerWidget(self, scale = (0.9, 0.8))
@@ -178,7 +179,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     def currentEditor(self):
         return self.splitTabWidget.currentWidget()
     
-    def on_tabWindowChanged(self, editor):
+    def on_currentWidgetChanged(self, editor):
         #Set editor to statusbar
         self.statusBar().setCurrentEditor(editor)
         

@@ -23,10 +23,11 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
     """
     
     # Signals
-    newWindowRequest = QtCore.pyqtSignal(QtCore.QPoint, QtGui.QWidget)
+    #newWindowRequest = QtCore.pyqtSignal(QtCore.QPoint, QtGui.QWidget)
     tabCloseRequest = QtCore.pyqtSignal(QtGui.QWidget)
-    tabWindowChanged = QtCore.pyqtSignal(QtGui.QWidget)
-
+    tabCreateRequest = QtCore.pyqtSignal()
+    currentWidgetChanged = QtCore.pyqtSignal(QtGui.QWidget)
+    
     # The different hotspots of a QTabWidget.  An non-negative value is a tab
     # index and the hotspot is to the left of it.
     _HS_NONE = -1
@@ -234,7 +235,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
     def _current_tab_changed(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         
-        self.tabWindowChanged.emit(w)
+        self.currentWidgetChanged.emit(w)
         
     def setActiveIcon(self, w, icon):
         """ Set the active icon on a widget. """
@@ -293,7 +294,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         self._current_tab_w = tw
         widget = self._current_tab_w.widget(tidx)
         self._current_tab_idx = tidx if widget is not None else -1
-        self.tabWindowChanged.emit(widget)
+        self.currentWidgetChanged.emit(widget)
 
     def _set_focus(self):
         """ Set the focus to an appropriate widget in the current tab. """
@@ -336,17 +337,16 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         # slots are dispatched by the Qt event loop. This may be a bug in PyQt4.
         if sip.isdeleted(self):
             return
-
+        
         if self._repeat_focus_changes:
-            self.emit(QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'),
-                      old, new)
+            self.emit(QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'), old, new)
 
         if isinstance(new, _DragableTabBar):
             ntw = new.parent()
             ntidx = ntw.currentIndex()
         else:
             ntw, ntidx = self._tab_widget_of(new)
-
+        
         if ntw is not None:
             self._set_current_tab(ntw, ntidx)
 
@@ -461,7 +461,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
             # Disable tab tear-out for now. It works, but this is something that
             # should be turned on manually. We need an interface for this.
             #ticon, ttext, ttextcolor, twidg = self._remove_tab(stab_w, stab)
-            #self.newWindowRequest.emit(pos, twidg)
+            self.newWindowRequest.emit(pos, twidg)
             return
 
         # See if the tab is being moved to an existing tab widget.
@@ -529,7 +529,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
 
         # Signal that the tab's PMXSplitTabWidget has changed, if necessary.
         if dsplit_w != self:
-            self.tabWindowChanged.emit(twidg)
+            self.currentWidgetChanged.emit(twidg)
         
         QtGui.qApp.blockSignals(False)
 
@@ -757,7 +757,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         """
         Add an empty editor when the tab bar is double clicked
         """
-        self.mainWindow.addEmptyEditor()
+        self.tabCreateRequest.emit()
         
     def moveCurrentTabLeft(self):
         raise NotImplementedError("Not implemented yet")   
