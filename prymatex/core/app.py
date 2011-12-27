@@ -234,9 +234,9 @@ class PMXApplication(QtGui.QApplication):
         #Para cada mainwindow buscar el editor
         return self.mainWindow, self.mainWindow.findEditorForFile(filePath)
             
-    def getEditorInstance(self, filePath = None, parent = None):
+    def getEditorInstance(self, filePath = None, project = None):
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
-        return PMXCodeEditor.newInstance(self, filePath, parent)
+        return PMXCodeEditor.newInstance(filePath, project)
 
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         if self.fileManager.isOpen(filePath):
@@ -246,23 +246,20 @@ class PMXApplication(QtGui.QApplication):
                 editor.setCursorPosition(cursorPosition)
         else:
             self.mainWindow.tryCloseEmptyEditor()
-            editor = self.getEditorInstance(filePath, self)
+            project = self.projectManager.findProjectForPath(filePath)
+            editor = self.getEditorInstance(filePath, project)
             def appendChunksTask(editor, filePath):
                 content = self.fileManager.openFile(filePath)
                 editor.setReadOnly(True)
                 for line in content.splitlines():
                     editor.appendPlainText(line)
                     yield
-                editor.setModified(False)
                 editor.setReadOnly(False)
                 yield coroutines.Return(editor, filePath)
             def on_editorReady(result):
                 editor, filePath = result.value
-                editor.opened(filePath)
-                #Belongs to project?
-                project = self.projectManager.findProjectForPath(filePath)
-                if project is not None:
-                    editor.setProject(project)
+                editor.setModified(False)
+                editor.setCursorPosition(cursorPosition)
                 self.mainWindow.addEditor(editor, focus)
             task = self.scheduler.newTask( appendChunksTask(editor, filePath) )
             task.done.connect( on_editorReady  )

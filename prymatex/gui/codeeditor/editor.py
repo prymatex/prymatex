@@ -154,9 +154,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def tabKeyBehavior(self):
         return self.tabStopSoft and u' ' * self.tabStopSize or u'\t'
     
-    def __init__(self, syntax, project = None, parent = None):
-        QtGui.QPlainTextEdit.__init__(self, parent)
-        PMXBaseEditor.__init__(self)
+    def __init__(self, filePath = None, project = None):
+        QtGui.QPlainTextEdit.__init__(self)
+        PMXBaseEditor.__init__(self, filePath, project)
         PMXMessageOverlay.__init__(self)
         #Sidebar
         self.sidebar = PMXSidebar(self)
@@ -178,6 +178,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
         
+        #Load Syntax Highlighter
+        syntax = None
+        if self.filePath is not None:
+            extension = self.application.fileManager.fileExtension(self.filePath)
+            syntax = self.application.supportManager.findSyntaxByFileType(extension)
+        if self.filePath is None or syntax is None:
+            syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
         
         #Block Count
@@ -246,16 +253,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         return PMXBaseEditor.tabIcon(self)
     
     @classmethod
-    def newInstance(cls, application, filePath = None, parent = None):
-        syntax = None
-        if filePath is not None:
-            syntax = application.supportManager.findSyntaxByFileType(application.fileManager.fileExtension(filePath))
-            # TODO: This prevents unrecognised to be opened
-            #    raise exceptions.FileNotSupported()
-        if filePath is None or syntax is None:
-            #TODO: defaultSyntax va en el manager
-            syntax = application.supportManager.getBundleItem(cls.defaultSyntax)
-        editor = cls(syntax, parent)
+    def newInstance(cls, filePath = None, project = None):
+        editor = cls(filePath, project)
         return editor
 
     #=======================================================================
@@ -1073,9 +1072,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.setTextCursor(cursor)
     
     def dropEvent(self, event):
-        '''
+        """
         When a url or text is dropped
-        '''
+        """
         mimeData = event.mimeData()
         if event.mimeData().hasUrls():
             files = map(lambda url: url.toLocalFile(), event.mimeData().urls())

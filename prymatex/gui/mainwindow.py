@@ -152,7 +152,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     # Create and manage editors
     #============================================================
     def addEmptyEditor(self):
-        editor = self.application.getEditorInstance(parent = self)
+        editor = self.application.getEditorInstance()
         self.addEditor(editor)
         
     def addEditor(self, editor, focus = True):
@@ -160,9 +160,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.splitTabWidget.addTab(editor)
         if focus:
             self.setCurrentEditor(editor)
-        # Hack
-        self.splitTabWidget._forceTextFoucsChange(editor)
-        
+
     def removeEditor(self, editor):
         self.statusBar().removeEditor(editor)
         self.splitTabWidget.removeTab(editor)
@@ -195,7 +193,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         title = [ editor.tabTitle() ] if editor is not None else []
         title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
         self.setWindowTitle(" - ".join(title))
-    
+        if editor is not None:
+            editor.setFocus()
+        
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()
         if editor.isNew() or saveAs:
@@ -222,11 +222,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 defaultButton = QtGui.QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
                 self.saveEditor(editor = editor)
-                editor.closed()
             elif response == QtGui.QMessageBox.No:
                 break
             elif response == QtGui.QMessageBox.Cancel:
-                return
+                raise exceptions.UserCancelException()
+        editor.closed()
         self.removeEditor(editor)
     
     def tryCloseEmptyEditor(self, editor = None):
@@ -235,7 +235,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
             self.closeEditor(editor)
     
     def closeEvent(self, event):
-        self.debug("CloseEvent")
         try:
             for editor in self.splitTabWidget.getAllWidgets():
                 self.closeEditor(editor)
@@ -245,7 +244,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
     #===========================================================================
     # Drag and Drop
     #===========================================================================
-    
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()

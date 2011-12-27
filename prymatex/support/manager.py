@@ -38,8 +38,8 @@ def compare(object, attrs, tests):
 class PMXSupportBaseManager(object):
     ELEMENTS = ['Bundles', 'Support', 'Themes']
     VAR_PREFIX = 'PMX'
-    PROTECTEDNS = 0
-    DEFAULTNS = -1
+    PROTECTEDNS = 0         #El primero es el protected
+    DEFAULTNS = 1           #El segundo es el default
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     
     SETTINGS_CACHE = {}
@@ -110,6 +110,7 @@ class PMXSupportBaseManager(object):
     def showMessage(self, message):
         if self.messageHandler is not None:
             self.messageHandler(message)
+
     #---------------------------------------------------
     # LOAD ALL SUPPORT
     #---------------------------------------------------
@@ -159,7 +160,33 @@ class PMXSupportBaseManager(object):
                 for path in files:
                     klass.loadBundleItem(path, namespace, bundle, self)
         bundle.populated = True
-        
+
+    #---------------------------------------------------
+    # RELOAD SUPPORT
+    #---------------------------------------------------
+    def reloadSupport(self, callback = None):
+        # Install message handler
+        self.messageHandler = callback
+        for ns in self.nsorder[::-1]:
+            self.reloadThemes(ns)
+            self.reloadBundles(ns)
+        for bundle in self.getAllBundles():
+            if bundle.enabled:
+                self.populateBundle(bundle)
+        # Uninstall message handler
+        self.messageHandler = None
+    
+    #---------------------------------------------------
+    # RELOAD THEMES
+    #---------------------------------------------------
+    def reloadThemes(self, namespace):
+        #Remove
+        themes = filter(lambda theme: theme.hasNamespace(namespace) self.getAllThemes())
+        if 'Themes' in self.namespaces[namespace]:
+            paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
+            for path in paths:
+                PMXTheme.reloadTheme(path, namespace, self)
+
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
     #---------------------------------------------------

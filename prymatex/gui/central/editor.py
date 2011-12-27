@@ -14,12 +14,14 @@ class PMXBaseEditor(object):
     #tabStatusChanged
     
     creation_counter = 0
-    def __init__(self):
-        self.filePath = None
-        self.project = None
-        self.mtime = None
-        self.creation_counter = PMXBaseEditor.creation_counter
-        PMXBaseEditor.creation_counter += 1
+    def __init__(self, filePath = None, project = None):
+        self.filePath = filePath
+        self.project = project
+        if self.filePath is not None:
+            self.mtime = self.application.fileManager.lastModification(self.filePath)
+        else:
+            PMXBaseEditor.creation_counter += 1
+            self.creation_counter = PMXBaseEditor.creation_counter
     
     def saved(self, filePath):
         if filePath != self.filePath:
@@ -28,15 +30,10 @@ class PMXBaseEditor(object):
         self.setModified(False)
         self.showMessage("<i>%s</i> saved" % self.filePath)
     
-    def opened(self, filePath):
-        #TODO: Decrese creation counter
-        self.setFilePath(filePath)
-        self.mtime = self.application.fileManager.lastModification(filePath)
-
     def closed(self):
-        #TODO: Decrese creation counter
-        pass
-        
+        if self.filePath is None and self.creation_counter == PMXBaseEditor.creation_counter:
+            PMXBaseEditor.creation_counter -= 1
+
     def setFilePath(self, filePath):
         self.filePath = filePath
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))

@@ -50,7 +50,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     
     def execSnippet(self):
         return self.execEditor("snippet")
-        
+
     def configEditorWidgets(self):
         self.stackedWidget = QtGui.QStackedWidget()
         self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)

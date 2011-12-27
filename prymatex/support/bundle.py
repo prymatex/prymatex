@@ -32,6 +32,9 @@ class PMXManagedObject(object):
     def hash(self):
         return { 'uuid': unicode(self.uuid).upper() }
     
+    def hasNamespace(self, namespace):
+        return namespace in self.namespaces
+        
     def addNamespace(self, namespace):
         if namespace not in self.namespaces:
             index = self.manager.nsorder.index(namespace)

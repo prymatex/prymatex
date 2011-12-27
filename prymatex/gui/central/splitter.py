@@ -47,25 +47,13 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         self.connect(QtGui.qApp,
                      QtCore.SIGNAL('focusChanged(QWidget *,QWidget *)'),
                      self._focus_changed)
-        
-        # Hack for text focus when moving arround  
-        self.tabWindowChanged.connect(self._forceTextFoucsChange)
-        
+
     def __len__(self):
         count = 0
         for tw in self.findChildren(_TabWidget):
             count += tw.count()
         return count
     
-    def _forceTextFoucsChange(self, w):
-        """ 
-        Let all the focus thing go through in Qt land, hooking a 0 time timer that
-        regains focus on the text edit 
-        """
-        if w:
-            timer = QtCore.QTimer(self)
-            timer.singleShot(0, lambda widget=w: widget.setFocus())
-            
     def clear(self):
         """ Restore the widget to its pristine state. """
 
@@ -199,7 +187,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
         
         if ch is not self._current_tab_w:
             self._set_current_tab(ch, idx)
-            ch.tabBar().setFocus()
+            #ch.tabBar().setFocus()
     
     def removeTab(self, w):
         """ Remove tab to the tab widget."""
@@ -217,17 +205,15 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
                 self._set_current_tab(tw, tidx - 1)
             else:
                 self._set_current_tab(tw, tidx)
-            tw.tabBar().setFocus()
+            #tw.tabBar().setFocus()
 
-    def setCurrentWidget(self, w, focus = False):
+    def setCurrentWidget(self, w):
         """ Make the given widget current. """
 
         tw, tidx = self._tab_widget(w)
 
         if tw is not None:
             self._set_current_tab(tw, tidx)
-            if focus:
-                tw.setFocus()
 
     def currentWidget(self):
         """ Return current widget. """
@@ -259,7 +245,8 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
             tw.setTabIcon(tidx, icon)
     
     def setTabTextColor(self, w, color):
-        """ Set the tab text color on a particular widget w
+        """ 
+        Set the tab text color on a particular widget w
         """
         tw, tidx = self._tab_widget(w)
 
@@ -407,7 +394,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
             tidx = tw.count() - 1
 
         self._set_current_tab(tw, tidx)
-        tw.setFocus()
+        #tw.setFocus()
 
     def _move_right(self, tw, tidx):
         """ Move the current tab to the one logically to the right. """
@@ -429,7 +416,7 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
             tidx = 0
 
         self._set_current_tab(tw, tidx)
-        tw.setFocus()
+        #tw.setFocus()
 
     def _select(self, pos):
         tw, hs, hs_geom = self._hotspot(pos)
