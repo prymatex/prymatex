@@ -10,7 +10,6 @@ from PyQt4 import QtGui, QtCore
 
 import prymatex
 from prymatex.core import exceptions
-from prymatex import resources_rc
 
 from prymatex.utils import coroutines
 from prymatex.utils import decorator as deco
