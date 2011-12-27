@@ -193,7 +193,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         if event.type() == QtCore.QEvent.KeyPress:
             if event.key() == QtCore.Qt.Key_Escape:
                 self.close()
-                self.mainWindow.currentEditor.setFocus()
+                self.mainWindow.currentEditor().setFocus()
                 return True
             elif event.key() == QtCore.Qt.Key_L and event.modifiers() == QtCore.Qt.ControlModifier:
                 self.lineUrl.setFocus()
