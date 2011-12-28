@@ -53,7 +53,7 @@ class PMXProjectTreeModel(TreeModel):
         if node.isdir:
             self.beginRemoveRows(index, 0, node.childCount() - 1)
             for child in node.children:
-                node.removeChild(child)
+                node.removeAllChild()
             self.endRemoveRows()
             self._load_directory(node, index)
             

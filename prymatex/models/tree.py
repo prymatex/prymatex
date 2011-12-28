@@ -9,6 +9,9 @@ class TreeNode(object):
         self.parent = parent
         self.children = []
     
+    def isRootNode(self):
+        return self.parent == None
+    
     def appendChild(self, child):
         self.children.append(child)
         child.parent = self

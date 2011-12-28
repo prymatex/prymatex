@@ -170,7 +170,8 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         
         def conditionalEnabledTemplateFile():
             node = self.proxyTreeModel.node(self.treeView.currentIndex())
-            self.templateFileAction.setEnabled(node.TYPE == "template" or node.TYPE == "templatefile")
+            if not node.isRootNode():
+                self.templateFileAction.setEnabled(node.TYPE == "template" or node.TYPE == "templatefile")
         self.toolbarMenu.aboutToShow.connect(conditionalEnabledTemplateFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)
