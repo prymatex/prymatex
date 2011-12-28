@@ -181,7 +181,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     def reloadThemes(self, namespace):
         #Remove
-        themes = filter(lambda theme: theme.hasNamespace(namespace) self.getAllThemes())
+        themes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
         if 'Themes' in self.namespaces[namespace]:
             paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
