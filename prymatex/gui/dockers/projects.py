@@ -39,6 +39,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
                 "-",
                 self.actionDelete,
                 "-",
+                self.actionRefresh,
                 self.actionCloseProject,
                 self.actionOpenProject,
                 self.actionProperties
@@ -63,6 +64,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
                 },
                 "-",
                 self.actionDelete,
+                "-",
+                self.actionRefresh,
+                "-",
                 self.actionProperties
             ]
         }
@@ -78,6 +82,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
                 },
                 "-",
                 self.actionDelete,
+                "-",
+                self.actionRefresh,
+                "-",
                 self.actionProperties
             ]
         }
@@ -144,8 +151,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
     
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
+        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
     
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):

@@ -40,6 +40,10 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         sIndex = self.mapToSource(index)
         return self.sourceModel().node(sIndex)
     
+    def refresh(self, index):
+        sIndex = self.mapToSource(index)
+        return self.sourceModel().refresh(sIndex)
+    
     def filePath(self, index):
         sIndex = self.mapToSource(index)
         return self.sourceModel().filePath(sIndex)
