@@ -36,12 +36,18 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     #==========================================================
     # exec the dialog Show
     #==========================================================
-    def execEditor(self, filter = ""):
+    def exec_(self, filter = ""):
         index = self.comboBoxItemFilter.findData(filter)
         self.comboBoxItemFilter.setCurrentIndex(index)
         self.proxyTreeModel.setFilterRegExp(filter)
-        return self.exec_()
-    
+        self.proxyTreeModel.rowsInserted.connect(self.on_proxyTreeModel_rowsInserted)
+        value = QtGui.QDialog.exec_(self)
+        self.proxyTreeModel.rowsInserted.disconnect(self.on_proxyTreeModel_rowsInserted)
+        return value
+        
+    def execEditor(self, filter = ""):
+        self.exec_(filter)
+        
     def execCommand(self):
         return self.execEditor("command")
     
@@ -87,11 +93,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     def createBundleItem(self, itemName, itemType):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
-        treeItem = self.manager.createBundleItem(itemName, itemType, bundle)
-        index = self.proxyTreeModel.index(treeItem.row(), 0, self.proxyTreeModel.index(treeItem.bundle.row(), 0 ,QtCore.QModelIndex()))
-        self.treeView.setCurrentIndex(index)
-        self.treeView.edit(index)
-        self.editTreeItem(treeItem)
+        self.manager.createBundleItem(itemName, itemType, bundle)
         
     def on_actionCommand_triggered(self):
         self.createBundleItem(u"untitled", "command")
@@ -111,24 +113,17 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     def on_actionTemplateFile_triggered(self):
         index = self.treeView.currentIndex()
         if index.isValid():
-            template = self.proxyTreeModel.mapToSource(index).internalPointer()
+            template = self.proxyTreeModel.node(index)
             if template.TYPE == 'templatefile':
                 template = template.parent
-        print "New template file in ", template.name
-        treeItem = self.manager.createTemplateFile(u"untitled", template)
-        index = self.proxyTreeModel.index(treeItem.row(), 0, self.proxyTreeModel.index(treeItem.template.row(), 0 ,QtCore.QModelIndex()))
-        self.treeView.setCurrentIndex(index)
-        self.treeView.edit(index)
-        self.editTreeItem(treeItem)
-        
+        self.manager.createTemplateFile(u"untitled", template)
+
     def on_actionPreferences_triggered(self):
         self.createBundleItem(u"untitled", "preference")
 
     def on_actionBundle_triggered(self):
-        bundle = self.manager.createBundle("untitled")
-        index = self.proxyTreeModel.index(bundle.row(), 0, QtCore.QModelIndex())
-        self.treeView.setCurrentIndex(index)
-    
+        self.manager.createBundle("untitled")
+
     @QtCore.pyqtSignature('')
     def on_pushButtonRemove_pressed(self):
         index = self.treeView.currentIndex()
@@ -202,6 +197,14 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
             index = self.indexes[treeItem.TYPE]
             return self.editors[index]
 
+    def on_proxyTreeModel_rowsInserted(self, parent, start, end):
+        index = self.proxyTreeModel.index(start, 0, parent)
+        node = self.proxyTreeModel.node(index)
+        self.treeView.setCurrentIndex(index)
+        self.treeView.edit(index)
+        self.editTreeItem(node)
+        print index, start, end
+        
     def on_proxyTreeModel_dataChanged(self, sindex, eindex):
         current = self.stackedWidget.currentWidget()
         self.labelTitle.setText(current.title)
@@ -213,8 +216,8 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         
     def configTreeView(self, manager = None):
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
-        #self.proxyTreeModel.sort(0)
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
+        
         self.treeView.setModel(self.proxyTreeModel)
         self.treeView.setHeaderHidden(True)
         self.treeView.setAnimated(True)

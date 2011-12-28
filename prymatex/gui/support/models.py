@@ -102,6 +102,8 @@ class PMXBundleTreeModel(TreeModel):
                 pass
             else:
                 self.manager.updateBundleItem(node, name = value)
+            #Update de TreeNode name
+            node.name = value
             self.dataChanged.emit(index, index)
             return True
         elif role == QtCore.Qt.CheckStateRole:
@@ -146,18 +148,33 @@ class PMXBundleTreeModel(TreeModel):
         self.endRemoveRows()
     
     def appendBundleItem(self, bundleItem):
-        bnode = bundleItem.bundle
-        self.beginInsertRows(self.index(bnode.row(), 0, QtCore.QModelIndex()), bnode.childCount(), bnode.childCount())
+        bundle = bundleItem.bundle
+        pindex = self.createIndex(bundle.row(), 0, bundle)
+        self.beginInsertRows(pindex, bundle.childCount(), bundle.childCount())
         bundleItem.bundle.appendChild(bundleItem)
         self.endInsertRows()
     
     def removeBundleItem(self, bundleItem):
-        pindex = self.index(bundleItem.bundle.row(), 0, QtCore.QModelIndex())
-        index = self.index(bundleItem.row(), 0, pindex)
-        self.beginRemoveRows(pindex, index.row(), index.row())
-        bundleItem.bundle.removeChild(bundleItem)
+        bundle = bundleItem.bundle
+        pindex = self.createIndex(bundle.row(), 0, bundle)
+        self.beginRemoveRows(pindex, bundle.row(), bundle.row())
+        bundle.removeChild(bundleItem)
         self.endRemoveRows()
     
+    def appendTemplateFile(self, templateFile):
+        template = templateFile.template
+        pindex = self.createIndex(template.row(), 0, template)
+        self.beginInsertRows(pindex, template.childCount(), template.childCount())
+        template.appendChild(templateFile)
+        self.endInsertRows()
+
+    def removeTemplateFile(self, templateFile):
+        template = templateFile.template
+        pindex = self.createIndex(template.row(), 0, template)
+        self.beginRemoveRows(pindex, template.row(), template.row())
+        template.removeChild(templateFile)
+        self.endRemoveRows()
+        
 #====================================================
 # Themes Styles Row
 #====================================================
