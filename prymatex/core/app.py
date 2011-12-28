@@ -147,6 +147,8 @@ class PMXApplication(QtGui.QApplication):
     def setupFileManager(self):
         from prymatex.core.filemanager import PMXFileManager
         self.fileManager = PMXFileManager(self)
+        self.fileManager.fileChanged.connect(self.on_fileChanged)
+        self.fileManager.fileDeleted.connect(self.on_fileDeleted)
     
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
@@ -278,6 +280,15 @@ class PMXApplication(QtGui.QApplication):
             if column:
                 position = (position[0], int(column))
             editor = self.openFile(source.path(), position)
+    
+    def on_fileChanged(self, filePath):
+        message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?" % filePath
+        #Yes No
+        print message
+        
+    def on_fileDeleted(self, filePath):
+        message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?" % filePath
+        print message
     
     # FIXME: Refactor
     def openFilePaths(self, filePaths):

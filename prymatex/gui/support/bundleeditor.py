@@ -85,7 +85,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         if not index.isValid():
             bundle = self.manager.getDefaultBundle()
         else:
-            bundle = self.proxyTreeModel.mapToSource(index).internalPointer()
+            bundle = self.proxyTreeModel.node(index)
             while bundle.TYPE != 'bundle':
                 bundle = bundle.parent
         return bundle
@@ -128,7 +128,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     def on_pushButtonRemove_pressed(self):
         index = self.treeView.currentIndex()
         if index.isValid():
-            item = self.proxyTreeModel.mapToSource(index).internalPointer()
+            item = self.proxyTreeModel.node(index)
             if item.TYPE == 'bundle':
                 self.manager.deleteBundle(item)
             elif item.TYPE == 'templatefile':
@@ -159,7 +159,6 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.toolbarMenu.addAction(action)
         self.templateFileAction = QtGui.QAction("New Template File", self)
         self.templateFileAction.triggered.connect(self.on_actionTemplateFile_triggered)
-        self.templateFileAction.setDisabled(True)
         self.toolbarMenu.addAction(self.templateFileAction)
         action = QtGui.QAction("New Preferences", self)
         action.triggered.connect(self.on_actionPreferences_triggered)
@@ -168,6 +167,12 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         action = QtGui.QAction("New Bundle", self)
         action.triggered.connect(self.on_actionBundle_triggered)
         self.toolbarMenu.addAction(action)
+        
+        def conditionalEnabledTemplateFile():
+            node = self.proxyTreeModel.node(self.treeView.currentIndex())
+            self.templateFileAction.setEnabled(node.TYPE == "template" or node.TYPE == "templatefile")
+        self.toolbarMenu.aboutToShow.connect(conditionalEnabledTemplateFile)
+        
         self.pushButtonAdd.setMenu(self.toolbarMenu)
         self.bundleFilterDialog = PMXBundleFilter(self)
 
@@ -210,8 +215,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.labelTitle.setText(current.title)
         
     def on_treeView_Activated(self, index):
-        treeItem = self.proxyTreeModel.mapToSource(index).internalPointer()
-        self.templateFileAction.setEnabled(treeItem.TYPE == "template" or treeItem.TYPE == "templatefile")
+        treeItem = self.proxyTreeModel.node(index)
         self.editTreeItem(treeItem)
         
     def configTreeView(self, manager = None):

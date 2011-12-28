@@ -472,6 +472,9 @@ class PMXSupportBaseManager(object):
         template = templateFile.template
         if template.isProtected and not template.isSafe:
             self.updateBundleItem(template)
+        if "name" in attrs:
+            path = os.path.join(template.path, self.convertToValidPath(attrs["name"]))
+            templateFile.relocate(path)
         templateFile.update(attrs)
         return templateFile
 

@@ -99,7 +99,7 @@ class PMXBundleTreeModel(TreeModel):
             if node.TYPE == "bundle":
                 self.manager.updateBundle(node, name = value)
             elif node.TYPE == "templatefile":
-                pass
+                self.manager.updateTemplateFile(node, name = value)
             else:
                 self.manager.updateBundleItem(node, name = value)
             #Update de TreeNode name

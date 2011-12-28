@@ -14,23 +14,42 @@ class PMXFileManager(PMXObject):
     #=========================================================
     # Signals
     #=========================================================
-    fileOpened = QtCore.pyqtSignal()
+    fileCreated = QtCore.pyqtSignal(str)
+    fileDeleted = QtCore.pyqtSignal(str)
+    fileChanged = QtCore.pyqtSignal(str)
+    directoryCreated = QtCore.pyqtSignal(str)
+    directoryDeleted = QtCore.pyqtSignal(str)
+    directoryChanged = QtCore.pyqtSignal(str)
     
     #=========================================================
     # Settings
     #=========================================================
     SETTINGS_GROUP = 'FileManager'
 
-    fileHistory = pmxConfigPorperty(default=[])
-    fileHistoryLength = pmxConfigPorperty(default=10)
+    fileHistory = pmxConfigPorperty(default = [])
+    fileHistoryLength = pmxConfigPorperty(default = 10)
     
     def __init__(self, parent):
         super(PMXFileManager, self).__init__(parent)
 
         self.last_directory = self.application.settings.USER_HOME_PATH
-        self.open_files = []
+        self.fileWatcher = QtCore.QFileSystemWatcher()
+        self.fileWatcher.fileChanged.connect(self.on_fileChanged)
+        self.fileWatcher.directoryChanged.connect(self.on_directoryChanged)
         self.configure()
 
+    def on_fileChanged(self, filePath):
+        if not os.path.exists(filePath):
+            self.fileDeleted.emit(filePath)
+        else:
+            self.fileChanged.emit(filePath)
+    
+    def on_directoryChanged(self, directoryPath):
+        if not os.path.exists(directoryPath):
+            self.directoryDeleted.emit(directoryPath)
+        else:
+            self.directoryChanged.emit(directoryPath)
+    
     def add_file_history(self, filePath):
         if filePath in self.fileHistory:
             self.fileHistory.remove(filePath)
@@ -95,7 +114,7 @@ class PMXFileManager(PMXObject):
         return os.path.basename(filePath)
     
     def isOpen(self, filePath):
-        return filePath in self.open_files
+        return filePath in self.fileWatcher.files()
     
     def openFile(self, filePath):
         """
@@ -114,7 +133,7 @@ class PMXFileManager(PMXObject):
         #Update file history
         self.last_directory = os.path.dirname(filePath)
         self.add_file_history(filePath)
-        self.open_files.append(filePath)
+        self.fileWatcher.addPath(filePath)
         return content
     
     def saveFile(self, filePath, content):
@@ -133,6 +152,9 @@ class PMXFileManager(PMXObject):
         except:
             raise
     
+    def closeFile(self, filePath):
+        self.fileWatcher.removePath(filePath)
+        
     def getDirectory(self, filePath = None):
         """
         Obtiene un directorio para el fileInfo

@@ -52,7 +52,6 @@ class PMXManagedObject(object):
         self.manager = manager
 
     def relocate(self, path):
-        print "relocate", self.path, path
         if os.path.exists(self.path):
             shutil.move(self.path, path)
             self.sources[self.namespaces[-1]] = path

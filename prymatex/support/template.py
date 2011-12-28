@@ -38,6 +38,14 @@ class PMXTemplateFile(object):
             f.close()
     content = property(getFileContent, setFileContent)
 
+    def update(self, hash):
+        for key in hash.keys():
+            setattr(self, key, hash[key])
+    
+    def relocate(self, path):
+        if os.path.exists(self.path):
+            shutil.move(self.path, path)
+    
     def save(self, basePath = None):
         path = os.path.join(basePath, self.name) if basePath is not None else self.path
         f = codecs.open(path, 'w', 'utf-8')

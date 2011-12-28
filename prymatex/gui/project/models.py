@@ -13,8 +13,6 @@ class PMXProjectTreeModel(TreeModel):
     def __init__(self, manager, parent = None):
         self.manager = manager
         TreeModel.__init__(self, parent)
-        self.fileWatcher = QtCore.QFileSystemWatcher()
-        self.fileWatcher.directoryChanged.connect(self.refreshProjectByPath)
     
     def refreshProjectByPath(self, path):
         index = self.indexForPath(path)
@@ -45,35 +43,43 @@ class PMXProjectTreeModel(TreeModel):
             if child.isdir:
                 index = self.index(child.row(), 0, parentIndex)
                 self._load_directory(child, index)
-        self.fileWatcher.addPath(parentNode.path)
+        #self.fileWatcher.addPath(parentNode.path)
 
     def refresh(self, parentIndex):
         parentNode = self.node(parentIndex)
-        add = os.listdir(parentNode.path)
-        remove = []
-        for child in parentNode.children:
-            if child.name in add:
-                add.remove(child.name)
-            else:
-                remove.append(child)
-        for child in remove:
+        if os.path.exists(parentNode.path):
+            add = os.listdir(parentNode.path)
+            remove = []
+            for child in parentNode.children:
+                if child.name in add:
+                    add.remove(child.name)
+                else:
+                    remove.append(child)
+            for child in remove:
+                self.beginRemoveRows(parentIndex, child.row(), child.row())
+                parentNode.removeChild(child)
+                self.endRemoveRows()
+            newNodes = []
+            if add:
+                self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount() + len(add) - 1)
+                for name in add:
+                    node = FileSystemTreeNode(name, parentNode)
+                    parentNode.appendChild(node)
+                    newNodes.append(node)
+                self.endInsertRows()
+            for child in newNodes:
+                if child.isdir:
+                    index = self.index(child.row(), 0, parentIndex)
+                    self._load_directory(child, index)
+        else:
+            child = parentNode
+            parentIndex = self.parent(parentIndex)
+            parentNode = self.node(parentIndex)
             self.beginRemoveRows(parentIndex, child.row(), child.row())
             parentNode.removeChild(child)
             self.endRemoveRows()
-        newNodes = []
-        if add:
-            self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount() + len(add) - 1)
-            for name in add:
-                node = FileSystemTreeNode(name, parentNode)
-                parentNode.appendChild(node)
-                newNodes.append(node)
-            self.endInsertRows()
-        for child in newNodes:
-            if child.isdir:
-                index = self.index(child.row(), 0, parentIndex)
-                self._load_directory(child, index)
-        self.sort()
-        
+            #self.fileWatcher.removePath(child.path)
+            
     def nodeForPath(self, path):
         currentNode = self.rootNode
         while currentNode.children:
@@ -89,7 +95,7 @@ class PMXProjectTreeModel(TreeModel):
             if not goAhead:
                 break
         if currentNode != self.rootNode:
-            return currentNode 
+            return currentNode
 
     def projectForPath(self, path):
         for project in self.rootNode.children:

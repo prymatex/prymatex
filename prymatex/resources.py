@@ -7,6 +7,7 @@ from prymatex import resources_rc
 
 INTERNAL = {
     #Bundles
+    "bundle": ":/icons/bundles/bundle.png",
     "template": ":/icons/bundles/templates.png",
     "command": ":/icons/bundles/commands.png",
     "syntax": ":/icons/bundles/languages.png",
