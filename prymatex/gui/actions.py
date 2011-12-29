@@ -5,6 +5,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.gui import dialogs
+from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 
 class MainWindowActions(object):
     
@@ -64,7 +65,8 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionNewFileFromTemplate_triggered(self):
-        filePath = self.newFromTemplateDialog.getNewFileFromTemplate()
+        filePath = PMXNewFromTemplateDialog.newFileFromTemplate(parent = self)
+
         if filePath:
             self.application.openFile(filePath)
     

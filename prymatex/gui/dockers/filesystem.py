@@ -13,6 +13,7 @@ from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
 from prymatex.gui.dockers.base import PMXBaseDock
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
+from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBaseDock):
     #=======================================================================
@@ -198,7 +199,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
         
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
-        pass
+        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
+        fileDirectory = self.application.fileManager.getDirectory(path)
+        path = PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):

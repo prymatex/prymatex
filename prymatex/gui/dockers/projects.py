@@ -12,6 +12,7 @@ from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.dockers.base import PMXBaseDock
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
+from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
@@ -67,9 +68,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
         self.fileMenu = createQMenu(fileMenuSettings, self)
         
         directoryMenuSettings = { 
-            "title": "File",
+            "title": _("File"),
             "items": [
-                {   "title": "New",
+                {   "title": _("New"),
                     "items": [
                         self.actionNewProject, self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
                     ]
@@ -111,8 +112,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
+        fileDirectory = self.application.fileManager.getDirectory(path)
+        path = PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
         print path
-    
+        
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())

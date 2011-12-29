@@ -60,3 +60,15 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
         self.buttonCreate.setEnabled(False)
         if self.exec_() == self.Accepted:
             return self.fileCreated
+    @classmethod
+    def newFileFromTemplate(cls, fileDirectory = "", fileName = "", parent = None):
+        '''
+        @return: new file path or None
+        '''
+        dlg = cls(parent = parent)
+        dlg.lineFileName.setText(fileName)
+        dlg.lineLocation.setText(fileDirectory)
+        dlg.buttonCreate.setEnabled(False)
+        if dlg.exec_() == cls.Accepted:
+            return dlg.fileCreated
+    
