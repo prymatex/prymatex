@@ -171,18 +171,18 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
-        path = self.fileSystemProxyModel.filePath(index)
+        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
             self.application.openFile(path)
     
     @QtCore.pyqtSlot()
     def on_actionOpenSystemEditor_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
+        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
     
     @QtCore.pyqtSlot()
     def on_actionOpenDefaultEditor_triggered(self):
-        path = self.fileSystemProxyModel.filePath(index)
+        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
             self.application.openFile(path)
     

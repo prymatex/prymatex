@@ -181,11 +181,19 @@
    </property>
   </action>
   <action name="actionNewFromTemplate">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
+   </property>
    <property name="text">
     <string>From Template</string>
    </property>
   </action>
   <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
+   </property>
    <property name="text">
     <string>Delete</string>
    </property>
@@ -239,6 +247,10 @@
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/document-open.png</normaloff>:/icons/actions/document-open.png</iconset>
+   </property>
    <property name="text">
     <string>Open</string>
    </property>

@@ -36,12 +36,14 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
                 },
                 "-",
                 self.actionOpen,
+                self.actionOpenSystemEditor,
                 "-",
                 self.actionDelete,
                 "-",
                 self.actionRefresh,
                 self.actionCloseProject,
                 self.actionOpenProject,
+                "-",
                 self.actionProperties
             ]
         }
@@ -81,6 +83,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
                     ]
                 },
                 "-",
+                self.actionOpen,
+                self.actionOpenSystemEditor,
+                "-",
                 self.actionDelete,
                 "-",
                 self.actionRefresh,
@@ -98,7 +103,17 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
     # Tree View Project
     #================================================
     def showProjectTreeViewContextMenu(self, point):
-        self.projectsMenu.popup(self.treeViewProjects.mapToGlobal(point))
+        index = self.treeViewProjects.indexAt(point)
+        if not index.isValid():
+            index = self.treeViewProjects.currentIndex()
+        if index.isValid():
+            node = self.projectTreeProxyModel.node(index)
+            if node.isfile:
+                self.fileMenu.popup(self.treeViewProjects.mapToGlobal(point))
+            elif node.isproject:
+                self.projectsMenu.popup(self.treeViewProjects.mapToGlobal(point))
+            elif node.isdir:
+                self.directoryMenu.popup(self.treeViewProjects.mapToGlobal(point))
                 
     def on_treeViewProjects_doubleClicked(self, index):
         path = self.projectTreeProxyModel.filePath(index)

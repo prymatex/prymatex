@@ -34,6 +34,7 @@ class FileSystemTreeNode(TreeNode):
     def __init__(self, name, parent = None):
         TreeNode.__init__(self, name, parent)
         self.isdir = os.path.isdir(self.path)
+        self.isfile = os.path.isfile(self.path)
         self.ishidden = name.startswith('.')
 
     @property
@@ -50,6 +51,7 @@ class PMXProject(FileSystemTreeNode):
     def __init__(self, directory, hash):
         self.directory = directory
         FileSystemTreeNode.__init__(self, "Project Name")
+        self.isproject = True
         self.workingSet = None
         self.manager = None
         self.load(hash)

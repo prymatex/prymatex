@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Wed Dec 28 19:06:06 2011
+# Created: Wed Dec 28 21:37:12 2011
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -97,8 +97,12 @@ class Ui_FileSystemDock(object):
         self.actionNewFolder.setIcon(icon5)
         self.actionNewFolder.setObjectName(_fromUtf8("actionNewFolder"))
         self.actionNewFromTemplate = QtGui.QAction(FileSystemDock)
+        self.actionNewFromTemplate.setIcon(icon4)
         self.actionNewFromTemplate.setObjectName(_fromUtf8("actionNewFromTemplate"))
         self.actionDelete = QtGui.QAction(FileSystemDock)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-delete.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionDelete.setIcon(icon6)
         self.actionDelete.setObjectName(_fromUtf8("actionDelete"))
         self.actionOrderByName = QtGui.QAction(FileSystemDock)
         self.actionOrderByName.setCheckable(True)
@@ -119,6 +123,9 @@ class Ui_FileSystemDock(object):
         self.actionOrderFoldersFirst.setCheckable(True)
         self.actionOrderFoldersFirst.setObjectName(_fromUtf8("actionOrderFoldersFirst"))
         self.actionOpen = QtGui.QAction(FileSystemDock)
+        icon7 = QtGui.QIcon()
+        icon7.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionOpen.setIcon(icon7)
         self.actionOpen.setObjectName(_fromUtf8("actionOpen"))
         self.actionOpenSystemEditor = QtGui.QAction(FileSystemDock)
         self.actionOpenSystemEditor.setObjectName(_fromUtf8("actionOpenSystemEditor"))
