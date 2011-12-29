@@ -31,7 +31,11 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
             return rightData.name > leftData.name
         else:
             return self.bundleItemTypeOrder.index(rightData.TYPE) > self.bundleItemTypeOrder.index(leftData.TYPE)
-
+    
+    def node(self, index):
+        sIndex = self.mapToSource(index)
+        return self.sourceModel().node(sIndex)
+    
 class PMXBundleTypeFilterProxyModel(PMXFlatTreeProxyModel):
     def __init__(self, tipos, parent = None):
         super(PMXBundleTypeFilterProxyModel, self).__init__(parent)

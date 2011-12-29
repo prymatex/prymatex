@@ -6,20 +6,24 @@ from copy import copy
 
 from prymatex.utils import plist
 
-'''
-    Este es el unico camino -> http://manual.macromates.com/en/
-    http://manual.macromates.com/en/bundles
-    http://blog.macromates.com/2005/introduction-to-scopes/
-    http://manual.macromates.com/en/scope_selectors.html
-'''
+"""
+Este es el unico camino -> http://manual.macromates.com/en/
+http://manual.macromates.com/en/bundles
+http://blog.macromates.com/2005/introduction-to-scopes/
+http://manual.macromates.com/en/scope_selectors.html
+"""
 
 class PMXManagedObject(object):
     def __init__(self, uuid, namespace, path):
         self.uuid = uuid
         self.namespaces = [ namespace ]
-        self.path = path
+        self.sources = { namespace: path }
         self.manager = None
     
+    @property
+    def path(self):
+        return self.sources[self.namespaces[-1]]
+
     @property
     def isProtected(self):
         return self.manager.protectedNamespace in self.namespaces
@@ -34,22 +38,24 @@ class PMXManagedObject(object):
     
     def hasNamespace(self, namespace):
         return namespace in self.namespaces
-        
-    def addNamespace(self, namespace):
+    
+    def addSource(self, namespace, path):
         if namespace not in self.namespaces:
             index = self.manager.nsorder.index(namespace)
             if index < len(self.namespaces):
                 self.namespaces.insert(index, namespace)
             else:
                 self.namespaces.append(namespace)
+            self.sources[namespace] = path
     
     def setManager(self, manager):
         self.manager = manager
-        
+
     def relocate(self, path):
         if os.path.exists(self.path):
             shutil.move(self.path, path)
-    
+            self.sources[self.namespaces[-1]] = path
+
 class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
@@ -118,7 +124,7 @@ class PMXBundle(PMXManagedObject):
                 bundle = manager.addBundle(bundle)
                 manager.addManagedObject(bundle)
             elif bundle is not None:
-                bundle.addNamespace(namespace)
+                bundle.addSource(namespace, path)
         except Exception, e:
             print "Error in bundle %s (%s)" % (info_file, e)
 
@@ -195,7 +201,7 @@ class PMXBundleItem(PMXManagedObject):
                 item = manager.addBundleItem(item)
                 manager.addManagedObject(item)
             elif item is not None:
-                item.addNamespace(namespace)
+                item.addSource(namespace, path)
         except Exception, e:
             print "Error in bundle item %s (%s)" % (path, e)
     

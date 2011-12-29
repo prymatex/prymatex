@@ -41,7 +41,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
                 self.actionDelete,
                 "-",
                 self.actionCloseProject,
-                self.actionOpenProject
+                self.actionOpenProject,
+                self.actionProperties
             ]
         }
         self.projectsMenu = createQMenu(projectMenuSettings, self)
@@ -63,6 +64,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
                 },
                 "-",
                 self.actionDelete,
+                self.actionProperties
             ]
         }
         self.fileMenu = createQMenu(fileMenuSettings, self)
@@ -77,6 +79,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
                 },
                 "-",
                 self.actionDelete,
+                self.actionProperties
             ]
         }
         self.directoryMenu = createQMenu(directoryMenuSettings, self)
@@ -139,7 +142,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
+        print self.projectTreeProxyModel.sourceModel().fileWatcher.directories()
+        print self.projectTreeProxyModel.sourceModel().fileWatcher.files()
     
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):

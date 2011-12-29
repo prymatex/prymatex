@@ -223,7 +223,6 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     def addBundleItem(self, bundleItem):
         bundleItemNode = PMXBundleTreeNode(bundleItem)
         self.bundleTreeModel.appendBundleItem(bundleItemNode)
-        super(PMXSupportManager, self).addBundleItem(bundleItemNode)
         return bundleItemNode
     
     def removeBundleItem(self, bundleItem):
@@ -241,7 +240,7 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     #---------------------------------------------------
     def addTemplateFile(self, file):
         bundleTemplateFileNode = PMXBundleTreeNode(file)
-        file.template.appendChild(bundleTemplateFileNode)
+        self.bundleTreeModel.appendTemplateFile(bundleTemplateFileNode)
         return bundleTemplateFileNode
     
     #---------------------------------------------------

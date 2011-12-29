@@ -84,10 +84,9 @@ def sh(cmd):
     return result
 
 def ensurePath(path, name, suffix = 0):
-    '''
-        Return a safe path, ensure not exists
-    '''
-    print path, name
+    """
+    Return a safe path, ensure not exists
+    """
     if suffix == 0 and not os.path.exists(path % name):
         return path % name
     else:

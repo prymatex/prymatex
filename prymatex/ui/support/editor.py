@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
 #
-# Created: Tue Dec  6 17:39:08 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Wed Dec 28 19:06:06 2011
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,7 +20,6 @@ class Ui_BundleEditor(object):
         BundleEditor.setObjectName(_fromUtf8("BundleEditor"))
         BundleEditor.resize(700, 433)
         BundleEditor.setMinimumSize(QtCore.QSize(700, 433))
-        BundleEditor.setWindowTitle(_('Bundle Editor'))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         BundleEditor.setWindowIcon(icon)
@@ -46,17 +45,14 @@ class Ui_BundleEditor(object):
         self.toolbarLayout.setSpacing(2)
         self.toolbarLayout.setObjectName(_fromUtf8("toolbarLayout"))
         self.pushButtonAdd = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.pushButtonAdd.setText(_('+'))
         self.pushButtonAdd.setObjectName(_fromUtf8("pushButtonAdd"))
         self.toolbarLayout.addWidget(self.pushButtonAdd)
         self.pushButtonRemove = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.pushButtonRemove.setText(_('-'))
         self.pushButtonRemove.setObjectName(_fromUtf8("pushButtonRemove"))
         self.toolbarLayout.addWidget(self.pushButtonRemove)
         spacerItem = QtGui.QSpacerItem(98, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.toolbarLayout.addItem(spacerItem)
         self.pushButtonFilter = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.pushButtonFilter.setText(_('Filter List'))
         self.pushButtonFilter.setObjectName(_fromUtf8("pushButtonFilter"))
         self.toolbarLayout.addWidget(self.pushButtonFilter)
         self.treeLayout.addLayout(self.toolbarLayout)
@@ -66,7 +62,6 @@ class Ui_BundleEditor(object):
         self.editorsLayout.setMargin(0)
         self.editorsLayout.setObjectName(_fromUtf8("editorsLayout"))
         self.labelTitle = QtGui.QLabel(self.verticalLayoutWidget_2)
-        self.labelTitle.setText(_('No item selected'))
         self.labelTitle.setObjectName(_fromUtf8("labelTitle"))
         self.editorsLayout.addWidget(self.labelTitle)
         self.basicFormLayout = QtGui.QFormLayout()
@@ -75,7 +70,6 @@ class Ui_BundleEditor(object):
         self.basicFormLayout.setSpacing(2)
         self.basicFormLayout.setObjectName(_fromUtf8("basicFormLayout"))
         self.labelActivation = QtGui.QLabel(self.verticalLayoutWidget_2)
-        self.labelActivation.setText(_('Activation:'))
         self.labelActivation.setObjectName(_fromUtf8("labelActivation"))
         self.basicFormLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.labelActivation)
         self.activationLayout = QtGui.QHBoxLayout()
@@ -92,7 +86,6 @@ class Ui_BundleEditor(object):
         self.activationLayout.addWidget(self.lineKeyEquivalentActivation)
         self.basicFormLayout.setLayout(0, QtGui.QFormLayout.FieldRole, self.activationLayout)
         self.labelScopeSelector = QtGui.QLabel(self.verticalLayoutWidget_2)
-        self.labelScopeSelector.setText(_('Scope Selector:'))
         self.labelScopeSelector.setObjectName(_fromUtf8("labelScopeSelector"))
         self.basicFormLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.labelScopeSelector)
         self.lineEditScope = QtGui.QLineEdit(self.verticalLayoutWidget_2)
@@ -105,6 +98,12 @@ class Ui_BundleEditor(object):
         QtCore.QMetaObject.connectSlotsByName(BundleEditor)
 
     def retranslateUi(self, BundleEditor):
-        pass
+        BundleEditor.setWindowTitle(_('Bundle Editor'))
+        self.pushButtonAdd.setText(_('+'))
+        self.pushButtonRemove.setText(_('-'))
+        self.pushButtonFilter.setText(_('Filter List'))
+        self.labelTitle.setText(_('No item selected'))
+        self.labelActivation.setText(_('Activation:'))
+        self.labelScopeSelector.setText(_('Scope Selector:'))
 
 from prymatex import resources_rc

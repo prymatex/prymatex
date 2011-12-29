@@ -17,22 +17,21 @@ class PMXBaseEditor(object):
     def __init__(self, filePath = None, project = None):
         self.filePath = filePath
         self.project = project
-        if self.filePath is not None:
-            self.mtime = self.application.fileManager.lastModification(self.filePath)
-        else:
+        if self.filePath is None:
             PMXBaseEditor.creation_counter += 1
             self.creation_counter = PMXBaseEditor.creation_counter
     
     def saved(self, filePath):
         if filePath != self.filePath:
             self.setFilePath(filePath)
-        self.mtime = self.application.fileManager.lastModification(filePath)
         self.setModified(False)
         self.showMessage("<i>%s</i> saved" % self.filePath)
     
     def closed(self):
         if self.filePath is None and self.creation_counter == PMXBaseEditor.creation_counter:
             PMXBaseEditor.creation_counter -= 1
+        elif self.filePath is not None:
+            self.application.fileManager.closeFile(self.filePath)
 
     def setFilePath(self, filePath):
         self.filePath = filePath

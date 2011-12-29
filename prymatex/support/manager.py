@@ -278,9 +278,9 @@ class PMXSupportBaseManager(object):
         return bundle
     
     def readBundle(self, **attrs):
-        '''
-            Retorna un bundle por sus atributos
-        '''
+        """
+        Retorna un bundle por sus atributos
+        """
         bundles = self.findBundles(**attrs)
         if len(bundles) > 1:
             raise Exception("More than one bundle")
@@ -290,9 +290,9 @@ class PMXSupportBaseManager(object):
         return self.getManagedObject(uuid)
     
     def updateBundle(self, bundle, **attrs):
-        '''
-            Actualiza un bundle
-        '''
+        """
+        Actualiza un bundle
+        """
         if len(self.nsorder) < 2:
             return None
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == bundle.name:
@@ -301,12 +301,12 @@ class PMXSupportBaseManager(object):
         if bundle.isProtected:
             if not bundle.isSafe:
                 namespace = self.defaultNamespace
-                attrs["path"] = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path))
-                bundle.addNamespace(namespace)
+                path = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path))
+                bundle.addSource(namespace, path)
         else:
             if "name" in attrs:
-                attrs["path"] = ensurePath(os.path.join(os.path.dirname(bundle.path), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
-                bundle.relocate(attrs["path"])
+                path = ensurePath(os.path.join(os.path.dirname(bundle.path), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
+                bundle.relocate(path)
         bundle.update(attrs)
         bundle.save()
         self.modifyBundle(bundle)
@@ -419,13 +419,13 @@ class PMXSupportBaseManager(object):
         if item.isProtected:
             if not item.isSafe:
                 namespace = self.defaultNamespace
-                attrs["path"] = os.path.join(item.bundle.path, item.FOLDER, os.path.basename(item.path))
-                item.addNamespace(namespace)
+                path = os.path.join(item.bundle.path, item.FOLDER, os.path.basename(item.path))
+                item.addSource(namespace, path)
         else:
             if "name" in attrs:
                 namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
-                attrs["path"] = ensurePath(os.path.join(item.bundle.path, item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
-                item.relocate(attrs["path"])
+                path = ensurePath(os.path.join(item.bundle.path, item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
+                item.relocate(path)
         item.update(attrs)
         item.save()
         self.modifyBundleItem(item)
@@ -472,6 +472,9 @@ class PMXSupportBaseManager(object):
         template = templateFile.template
         if template.isProtected and not template.isSafe:
             self.updateBundleItem(template)
+        if "name" in attrs:
+            path = os.path.join(template.path, self.convertToValidPath(attrs["name"]))
+            templateFile.relocate(path)
         templateFile.update(attrs)
         return templateFile
 
@@ -540,12 +543,12 @@ class PMXSupportBaseManager(object):
         if theme.isProtected:
             if not theme.isSafe:
                 namespace = self.defaultNamespace
-                attrs["path"] = os.path.join(self.namespaces[namespace]['Themes'], os.path.basename(theme.path))
-                theme.addNamespace(namespace)
+                path = os.path.join(self.namespaces[namespace]['Themes'], os.path.basename(theme.path))
+                theme.addSource(namespace, path)
         else:
             if "name" in attrs:
-                attrs["path"] = ensurePath(os.path.join(os.path.dirname(theme.path), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
-                theme.relocate(attrs["path"])
+                path = ensurePath(os.path.join(os.path.dirname(theme.path), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
+                theme.relocate(path)
         theme.update(attrs)
         theme.save()
         self.modifyTheme(theme)
