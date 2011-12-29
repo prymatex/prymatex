@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Thu Dec 29 14:42:38 2011
+# Created: Thu Dec 29 14:59:35 2011
 #      by: PyQt4 UI code generator 4.9
 #
 # WARNING! All changes made in this file will be lost!
@@ -131,11 +131,11 @@ class Ui_FileSystemDock(object):
         self.actionOpenSystemEditor.setObjectName(_fromUtf8("actionOpenSystemEditor"))
         self.actionOpenDefaultEditor = QtGui.QAction(FileSystemDock)
         self.actionOpenDefaultEditor.setObjectName(_fromUtf8("actionOpenDefaultEditor"))
-        self.actionActionRename = QtGui.QAction(FileSystemDock)
+        self.actionRename = QtGui.QAction(FileSystemDock)
         icon8 = QtGui.QIcon()
         icon8.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-rename.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionActionRename.setIcon(icon8)
-        self.actionActionRename.setObjectName(_fromUtf8("actionActionRename"))
+        self.actionRename.setIcon(icon8)
+        self.actionRename.setObjectName(_fromUtf8("actionRename"))
 
         self.retranslateUi(FileSystemDock)
         QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
@@ -161,8 +161,8 @@ class Ui_FileSystemDock(object):
         self.actionOpen.setText(_('Open'))
         self.actionOpenSystemEditor.setText(_('System Editor'))
         self.actionOpenDefaultEditor.setText(_('Default Editor'))
-        self.actionActionRename.setText(_('actionRename'))
-        self.actionActionRename.setToolTip(_('Rename'))
-        self.actionActionRename.setShortcut(_('F2'))
+        self.actionRename.setText(_('Rename'))
+        self.actionRename.setToolTip(_('Rename'))
+        self.actionRename.setShortcut(_('F2'))
 
 from prymatex import resources_rc

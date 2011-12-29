@@ -132,13 +132,13 @@
     <string>Default Editor</string>
    </property>
   </action>
-  <action name="actionActionRename">
+  <action name="actionRename">
    <property name="icon">
     <iconset resource="../../resources.qrc">
      <normaloff>:/icons/actions/edit-rename.png</normaloff>:/icons/actions/edit-rename.png</iconset>
    </property>
    <property name="text">
-    <string>actionRename</string>
+    <string>Rename</string>
    </property>
    <property name="toolTip">
     <string>Rename</string>

@@ -33,7 +33,11 @@ class PMXFileSystemTasks(PMXBaseDock):
         fileDirectory = self.application.fileManager.getDirectory(path)
         path = PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
 
-    
+
+    @QtCore.pyqtSlot()
+    def on_actionRename_triggered(self, path = None):
+        self.renamePath(self.currentPath())
+        
     def createDirectory(self, basePath = None):
         
         basePath = basePath or self.currentPath()
@@ -99,3 +103,7 @@ class PMXFileSystemTasks(PMXBaseDock):
                                             defaultButton = QtGui.QMessageBox.Cancel)
         if result == QtGui.QMessageBox.Ok:
             self.application.fileManager.deletePath(path)
+            
+    def renamePath(self, path):
+        basePath, pathTail = os.path.split(path)
+        pass

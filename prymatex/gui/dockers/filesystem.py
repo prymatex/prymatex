@@ -95,6 +95,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
                         self.actionOpenDefaultEditor, self.actionOpenSystemEditor 
                     ]
                 },
+                self.actionRename,
                 "-",
                 self.actionDelete,
                 {   "title": "Order",

@@ -91,6 +91,11 @@ class PMXFileManager(PMXObject):
             return new
         return ''
     
+    def renamePath(self, old, new):
+        # According to http://docs.python.org/library/os.html
+        # os.rename works with both dirs and files
+        return os.rename(old, new)
+    
     def deletePath(self, path):
         if os.path.isfile(path):
             # Mandar señal para cerrar editores
