@@ -136,12 +136,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.dockers = [codeSymbols, codeBookmarks]
     
     def setupDialogs(self):
-        from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
         from prymatex.gui.dialogs.selector import PMXSelectorDialog
         from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
                 
         # Create dialogs
-        self.newFromTemplateDialog = PMXNewFromTemplateDialog(self)
         self.newProjectDialog = PMXNewProjectDialog(self)
         self.bundleSelectorDialog = PMXSelectorDialog(self, title = _("Select Bundle Item"))
         # TODO: Connect these selectors 

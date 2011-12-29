@@ -157,11 +157,13 @@ class PMXFileManager(PMXObject):
         
     def getDirectory(self, filePath = None):
         """
-        Obtiene un directorio para el fileInfo
+        Obtiene un directorio para el path
         """
         if filePath is None:
             #if fileInfo is None return the las directory or the home directory
             return self.last_directory
+        if os.path.isdir(filePath):
+            return filePath
         return os.path.dirname(filePath)
 
     def lastModification(self, filePath):

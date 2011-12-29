@@ -94,7 +94,12 @@ class PMXTemplate(PMXBundleItem):
 
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()
-        env['TM_NEW_FILE'] = os.path.join(directory, name + '.' + self.extension)
+        if self.extension:
+            name_with_ext = "{0}{1}{2}".format(name, os.path.extsep, self.extension)
+        else:
+            name_with_ext = name
+            
+        env['TM_NEW_FILE'] = os.path.join(directory, name_with_ext)
         env['TM_NEW_FILE_BASENAME'] = name
         env['TM_NEW_FILE_DIRECTORY'] = directory
         return env
