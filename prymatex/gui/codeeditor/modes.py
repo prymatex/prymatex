@@ -196,7 +196,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         if emit:
             #Arranco modo multicursor
             self.editor.modeChanged.emit()
-        self.editor.highlightCurrent()
         #Clean last acction
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
 
@@ -269,6 +268,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             self.editor.setTextCursor(cursor)
             position = bisect_key(self.cursors, cursor, lambda cursor: cursor.position())
             self.cursors.insert(position, cursor)
+        self.editor.highlightCurrent()
         self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         
     def canMoveRight(self):
