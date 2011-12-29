@@ -132,6 +132,21 @@
     <string>Default Editor</string>
    </property>
   </action>
+  <action name="actionActionRename">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/edit-rename.png</normaloff>:/icons/actions/edit-rename.png</iconset>
+   </property>
+   <property name="text">
+    <string>actionRename</string>
+   </property>
+   <property name="toolTip">
+    <string>Rename</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../../resources.qrc"/>

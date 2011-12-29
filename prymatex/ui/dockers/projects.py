@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/projects.ui'
 #
-# Created: Wed Dec 28 21:37:10 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Thu Dec 29 14:42:38 2011
+#      by: PyQt4 UI code generator 4.9
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -80,6 +80,11 @@ class Ui_ProjectsDock(object):
         self.actionOpenSystemEditor.setObjectName(_fromUtf8("actionOpenSystemEditor"))
         self.actionOpenDefaultEditor = QtGui.QAction(ProjectsDock)
         self.actionOpenDefaultEditor.setObjectName(_fromUtf8("actionOpenDefaultEditor"))
+        self.actionActionRename = QtGui.QAction(ProjectsDock)
+        icon8 = QtGui.QIcon()
+        icon8.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-rename.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionActionRename.setIcon(icon8)
+        self.actionActionRename.setObjectName(_fromUtf8("actionActionRename"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
@@ -99,5 +104,8 @@ class Ui_ProjectsDock(object):
         self.actionOpen.setText(_('Open'))
         self.actionOpenSystemEditor.setText(_('System Editor'))
         self.actionOpenDefaultEditor.setText(_('Default Editor'))
+        self.actionActionRename.setText(_('actionRename'))
+        self.actionActionRename.setToolTip(_('Rename'))
+        self.actionActionRename.setShortcut(_('F2'))
 
 from prymatex import resources_rc
