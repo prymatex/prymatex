@@ -14,8 +14,9 @@ from prymatex.gui.dockers.base import PMXBaseDock
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
+from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
-class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBaseDock):
+class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFileSystemTasks):
     #=======================================================================
     # Settings
     #=======================================================================
@@ -163,12 +164,15 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
             self.treeViewFileSystem.setRootIndex(index)
             self.comboBoxLocation.lineEdit().setText(path)
 
+    def currentPath(self):
+        return self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
+
     #======================================================
     # Tree View Context Menu Actions
     #======================================================
     def pathToClipboard(self, checked = False):
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
-        QApplication.clipboard().setText(path)
+        QtGui.QApplication.clipboard().setText(path)
     
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
@@ -189,8 +193,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXBase
     
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
-        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
-        dir = self.application.fileManager.createDirectory(path, parent = None)
+        self.createDirectory()
 
     @QtCore.pyqtSlot()
     def on_actionNewFile_triggered(self):

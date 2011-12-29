@@ -13,8 +13,9 @@ from prymatex.gui.dockers.base import PMXBaseDock
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
+from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 
-class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject):
+class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXObject):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
@@ -120,41 +121,42 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXBaseDock, PMXObject)
         path = self.projectTreeProxyModel.filePath(index)
         if os.path.isfile(path):
             self.application.openFile(path)
-            
+    
+    def currentPath(self):
+        return self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
+    
     #======================================================
     # Tree View Context Menu Actions
     #======================================================
     @QtCore.pyqtSlot()
     def on_actionNewFile_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
+        print(self.currentPath())
         
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
-    
+        self.createDirectory(self.currentPath())
+        
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
         fileDirectory = self.application.fileManager.getDirectory(path)
         path = PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
-        print path
+        print(path)
         
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
+        print(path)
     
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
+        print(path)
     
     @QtCore.pyqtSlot()
     def on_actionCloseProject_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
+        print(path)
     
     @QtCore.pyqtSlot()
     def on_actionOpenProject_triggered(self):
