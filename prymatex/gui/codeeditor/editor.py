@@ -702,10 +702,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.textCursor().endEditBlock() #Termino editBlock
         self.blockSignals(False) #Desblockeo señales
         self.cursorPositionChanged.emit()
-        self.lastBlockCount = self.document().blockCount()
+        if self.lastBlockCount != self.document().blockCount():
+            self.blockCountChanged.emit(self.document().blockCount())
         self.sidebar.update()
-        #self.blockCountChanged.emit(self.document().blockCount())
-        
+
     def insertBundleItem(self, item, **processorSettings):
         """
         Inserta un bundle item

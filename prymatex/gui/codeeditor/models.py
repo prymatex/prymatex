@@ -93,7 +93,6 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
 
     def _purge_blocks(self, startIndex = None, endIndex = None):
         remove = filter(lambda block: block.userData() is None, self.blocks[startIndex:endIndex])
-        print self.blocks, remove
         if remove:
             startIndex = self.blocks.index(remove[0])
             endIndex = self.blocks.index(remove[-1])
@@ -121,7 +120,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         
     def on_textBlocksRemoved(self, block, length):
         self._purge_blocks()
-            
+
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
             return self.createIndex(row, column, self.blocks[row])
