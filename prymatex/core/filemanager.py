@@ -67,26 +67,26 @@ class PMXFileManager(PMXObject):
         Create a new directory.
         """
         if os.path.exists(directory):
-            raise PrymatexIOException("The directory already exist") 
+            raise PrymatexFileExistsException("The directory already exist", directory) 
         os.mkdir(directory)
     
     def createDirectories(self, directory):
         """Create a group of directory, one inside the other."""
         if os.path.exists(directory):
-            raise PrymatexIOException("The folder already exist")
+            raise PrymatexFileExistsException("The folder already exist", directory)
         os.makedirs(directory)
     
-    def createFile(self, file):
+    def createFile(self, filePath):
         """Create a new file."""
-        if os.path.exists(file):
+        if os.path.exists(filePath):
             raise PrymatexIOException("The file already exist") 
-        open(path, 'w').close()
+        open(filePath, 'w').close()
     
-    def renameFile(old, new):
+    def renameFile(self, old, new):
         """Rename a file, changing its name from 'old' to 'new'."""
         if os.path.isfile(old):
             if os.path.exists(new):
-                raise NinjaFileExistsException(new)
+                raise PrymatexFileExistsException(new)
             os.rename(old, new)
             return new
         return ''
