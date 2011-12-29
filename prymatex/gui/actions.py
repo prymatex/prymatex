@@ -22,7 +22,11 @@ class MainWindowActions(object):
 
     def updateMenuForEditor(self, editor):
         #TODO: if editor is none set disabled accions
-        if editor is None: return
+        if editor is None: 
+            self.actionSelectBundleItem.setEnabled(False)
+            return
+        else:
+            self.actionSelectBundleItem.setEnabled(True)
         flags = editor.getFlags()
         #TODO: Desconectar señales para poder hacer el set, medio raro
         self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
