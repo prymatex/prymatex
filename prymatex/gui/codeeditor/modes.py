@@ -3,6 +3,9 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.utils.lists import bisect_key
+from prymatex.gui.codeeditor import helpers
+
 class PMXBaseEditorMode(object):
     def __init__(self, editor):
         self.editor = editor
@@ -111,6 +114,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
 class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
         PMXBaseEditorMode.__init__(self, editor)
+        self.helper = helpers.MultiCursorHelper()
         self.cursors = []
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
     
@@ -195,7 +199,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.editor.highlightCurrent()
         #Clean last acction
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
-        self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
 
     def getPoints(self, start, end):
         metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
@@ -256,15 +259,18 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 self.addMergeCursor(newCursor)
             else:
                 self.editor.setTextCursor(cursor)
-                self.cursors.append(cursor)
+                position = bisect_key(self.cursors, cursor, lambda cursor: cursor.position())
+                self.cursors.insert(position, cursor)
         else:
             for c in self.cursors:
                 begin, end = c.selectionStart(), c.selectionEnd()
                 if begin <= cursor.position() <= end:
                     return
             self.editor.setTextCursor(cursor)
-            self.cursors.append(cursor)
-
+            position = bisect_key(self.cursors, cursor, lambda cursor: cursor.position())
+            self.cursors.insert(position, cursor)
+        self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
+        
     def canMoveRight(self):
         return all(map(lambda c: not c.atEnd(), self.cursors))
     
@@ -272,7 +278,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return all(map(lambda c: not c.atStart(), self.cursors))
     
     def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Escape:
+        if self.helper.accept(self.editor, event):
+            cursor = self.cursors[0] if event.modifiers() & QtCore.Qt.ShiftModifier else self.cursors[-1]
+            self.helper.execute(self.editor, event, cursor)
+        elif event.key() == QtCore.Qt.Key_Escape:
             #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
             scursor = min(self.cursors, key = lambda cursor: cursor.position())
             ecursor = max(self.cursors, key = lambda cursor: cursor.position())

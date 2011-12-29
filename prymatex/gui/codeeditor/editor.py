@@ -147,7 +147,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         QtCore.Qt.Key_Backspace: [ helpers.BackspaceUnindentHelper() ],
         QtCore.Qt.Key_Home: [ helpers.MoveCursorToHomeHelper() ],
         QtCore.Qt.Key_Return: [ helpers.SmartIndentHelper() ],
-        QtCore.Qt.Key_Insert: [ helpers.OverwriteHelper() ]
+        QtCore.Qt.Key_Insert: [ helpers.OverwriteHelper() ],
+        QtCore.Qt.Key_M: [ helpers.MultiCursorHelper() ],
     }
     
     @property
@@ -682,7 +683,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                 #Buscar Entre los helpers
                 if helper.accept(self, event, cursor, scope):
                     #pasarle el evento
-                    return helper.execute(self, event)
+                    return helper.execute(self, event, cursor, scope)
         
         #No tengo helper paso el evento a la base
         QtGui.QPlainTextEdit.keyPressEvent(self, event)

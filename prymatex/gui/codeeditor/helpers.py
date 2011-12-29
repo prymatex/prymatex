@@ -6,20 +6,20 @@ from prymatex.support import PMXPreferenceSettings
 
 class PMXBaseEditorHelper(PMXObject):
     KEY = None
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         return event.key() == self.KEY
     
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         pass
 
 class KeyEquivalentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         keyseq = int(event.modifiers()) + event.key()
         self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, scope)
         return bool(self.items)
 
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         if len(self.items) == 1:
             editor.insertBundleItem(self.items[0])
         else:
@@ -27,12 +27,12 @@ class KeyEquivalentHelper(PMXBaseEditorHelper):
 
 class TabTriggerHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Tab
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
         self.items = self.application.supportManager.getTabTriggerItem(trigger, scope) if trigger is not None else []
         return bool(self.items)
 
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         #Inserto los items
         if len(self.items) == 1:
             editor.insertBundleItem(self.items[0], tabTriggered = True)
@@ -41,7 +41,7 @@ class TabTriggerHelper(PMXBaseEditorHelper):
 
 class CompleterHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Space
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         """accept the completer event"""
         if event.modifiers() == QtCore.Qt.ControlModifier:
             settings = self.application.supportManager.getPreferenceSettings(scope)
@@ -54,7 +54,7 @@ class CompleterHelper(PMXBaseEditorHelper):
             return bool(self.completions)
         return False
             
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         currentWord, start, end = editor.getCurrentWord()
         #alreadyTyped
         editor.showCompleter(self.completions, currentWord)
@@ -62,7 +62,7 @@ class CompleterHelper(PMXBaseEditorHelper):
 class SmartTypingPairsHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
     
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         settings = self.application.supportManager.getPreferenceSettings(scope)
         character = event.text()
         pairs = filter(lambda pair: character in pair, settings.smartTypingPairs)
@@ -132,7 +132,7 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
                 return bool(self.pair)
         return bool(self.pair)
 
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         cursor = editor.textCursor()
         cursor.beginEditBlock()
         if cursor.hasSelection():
@@ -158,13 +158,13 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
 
 class MoveCursorToHomeHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Home
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         #Solo si el cursor no esta al final de la indentacion
         block = cursor.block()
         self.newPosition = block.position() + len(block.userData().indent)
         return self.newPosition != cursor.position()
         
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         #Lo muevo al final de la indentacion
         cursor = editor.textCursor()
         cursor.setPosition(self.newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
@@ -172,13 +172,13 @@ class MoveCursorToHomeHelper(PMXBaseEditorHelper):
 
 class OverwriteHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Insert
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         editor.setOverwriteMode(not editor.overwriteMode())
         editor.modeChanged.emit()
         
 class TabIndentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Tab
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         start, end = editor.getSelectionBlockStartEnd()
         if start != end:
             editor.indentBlocks()
@@ -194,19 +194,19 @@ class TabIndentHelper(PMXBaseEditorHelper):
 
 class BackspaceUnindentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Backspace
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
         indent = len(cursor.block().userData().indent)
         return indent != 0 and indent == cursor.columnNumber()
         
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         cursor = editor.textCursor()
         for _ in range(len(editor.tabKeyBehavior)):
             cursor.deletePreviousChar()
 
 class BacktabUnindentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Backtab
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         start, end = editor.getSelectionBlockStartEnd()
         if start != end:
             editor.unindentBlocks()
@@ -220,7 +220,7 @@ class BacktabUnindentHelper(PMXBaseEditorHelper):
 
 class SmartUnindentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Any
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         if event.text():
             settings = self.application.supportManager.getPreferenceSettings(scope)
             block = cursor.block()
@@ -231,7 +231,7 @@ class SmartUnindentHelper(PMXBaseEditorHelper):
                 return previous.isValid() and block.userData().indent >= previous.userData().indent
         return False
         
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         QtGui.QPlainTextEdit.keyPressEvent(editor, event)
         cursor = editor.textCursor()
         cursor.setPosition(cursor.block().position())
@@ -240,11 +240,11 @@ class SmartUnindentHelper(PMXBaseEditorHelper):
 
 class SmartIndentHelper(PMXBaseEditorHelper):
     KEY = QtCore.Qt.Key_Return
-    def accept(self, editor, event, cursor, scope):
+    def accept(self, editor, event, cursor = None, scope = None):
         self.settings = self.application.supportManager.getPreferenceSettings(scope)
         return True
         
-    def execute(self, editor, event):
+    def execute(self, editor, event, cursor = None, scope = None):
         cursor = editor.textCursor()
         block = cursor.block()
         text = block.text()[:cursor.columnNumber()]
@@ -267,3 +267,26 @@ class SmartIndentHelper(PMXBaseEditorHelper):
         else:
             self.debug("Preserve indent")
             cursor.insertText(block.userData().indent)
+
+class MultiCursorHelper(PMXBaseEditorHelper):
+    KEY = QtCore.Qt.Key_M
+    def accept(self, editor, event, cursor = None, scope = None):
+        return event.key() == self.KEY and event.modifiers() & QtCore.Qt.ControlModifier and event.modifiers() & QtCore.Qt.MetaModifier
+
+    def execute(self, editor, event, cursor = None, scope = None):
+        cursor = cursor or editor.textCursor()
+        if not cursor.hasSelection():
+            text, start, end = editor.getCurrentWord()
+            newCursor = QtGui.QTextCursor(cursor)
+            newCursor.setPosition(start)
+            newCursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+            editor.multiCursorMode.addMergeCursor(newCursor)
+        else:
+            text = cursor.selectedText()
+            editor.multiCursorMode.addMergeCursor(cursor)
+            if event.modifiers() & QtCore.Qt.ShiftModifier:
+                newCursor = editor.document().find(text, cursor, QtGui.QTextDocument.FindBackward)
+            else:
+                newCursor = editor.document().find(text, cursor)
+            if not newCursor.isNull():
+                editor.multiCursorMode.addMergeCursor(newCursor)
