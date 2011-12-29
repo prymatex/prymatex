@@ -84,16 +84,12 @@ class PMXMacroProcessor(PMXMacroProcessor):
     def moveRightAndModifySelection(self):
         pass
     
+    def selectLine(self):
+        self.editor.select(self.editor.SelectLine)
+    
     def selectHardLine(self):
-        cursor = self.editor.textCursor()
-        block = cursor.block()
-        start = block.position()
-        next = block.next()
-        end = next.position() if next.isValid() else start + block.length() - 1
-        cursor.setPosition(start)
-        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-        self.editor.setTextCursor(cursor)
-        
+        self.editor.select(self.editor.SelectParagraph)
+
     def deleteBackward(self):
         self.editor.textCursor().deletePreviousChar()
 
