@@ -127,26 +127,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     #======================================================
     # Tree View Context Menu Actions
+    # Some of them are in fstask's PMXFileSystemTasks mixin
     #======================================================
-    @QtCore.pyqtSlot()
-    def on_actionNewFile_triggered(self):
-        print(self.currentPath())
-        
-    @QtCore.pyqtSlot()
-    def on_actionNewFolder_triggered(self):
-        self.createDirectory(self.currentPath())
-        
-    @QtCore.pyqtSlot()
-    def on_actionNewFromTemplate_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        fileDirectory = self.application.fileManager.getDirectory(path)
-        path = PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
-        print(path)
-        
-    @QtCore.pyqtSlot()
-    def on_actionDelete_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print(path)
+    
     
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
@@ -160,14 +143,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionOpenProject_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
+        print (self.currentPath())
     
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print self.projectTreeProxyModel.sourceModel().fileWatcher.directories()
-        print self.projectTreeProxyModel.sourceModel().fileWatcher.files()
+        print(self.projectTreeProxyModel.sourceModel().fileWatcher.directories())
+        print(self.projectTreeProxyModel.sourceModel().fileWatcher.files())
     
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):
@@ -175,9 +157,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
-    
+        print(self.currentPath())
+        
     @QtCore.pyqtSlot()
     def on_actionOpenSystemEditor_triggered(self):
         path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
@@ -185,5 +166,4 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionOpenDefaultEditor_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print path
+        print(self.currentPath())

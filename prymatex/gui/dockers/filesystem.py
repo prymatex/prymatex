@@ -169,9 +169,10 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
 
     #======================================================
     # Tree View Context Menu Actions
+    # Some of them are in fstask's PMXFileSystemTasks mixin
     #======================================================
     def pathToClipboard(self, checked = False):
-        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
+        path = self.currentPath()
         QtGui.QApplication.clipboard().setText(path)
     
     @QtCore.pyqtSlot()
@@ -190,26 +191,6 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
         path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
         if os.path.isfile(path):
             self.application.openFile(path)
-    
-    @QtCore.pyqtSlot()
-    def on_actionNewFolder_triggered(self):
-        self.createDirectory()
-
-    @QtCore.pyqtSlot()
-    def on_actionNewFile_triggered(self):
-        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
-        dir = self.application.fileManager.createFile(path, parent = None)
-        
-    @QtCore.pyqtSlot()
-    def on_actionNewFromTemplate_triggered(self):
-        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
-        fileDirectory = self.application.fileManager.getDirectory(path)
-        path = PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
-
-    @QtCore.pyqtSlot()
-    def on_actionDelete_triggered(self):
-        path = self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
-        ok = self.application.fileManager.deletePath(path, parent = self)
     
     @QtCore.pyqtSlot(str)
     def on_lineEditFilter_textChanged(self, text):
