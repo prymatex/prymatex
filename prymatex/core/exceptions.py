@@ -18,7 +18,9 @@ class PrymatexIOException(Exception):
     pass
     
 class PrymatexFileExistsException(Exception):
-    pass
+    def __init__(self, msg, filePath = None):
+        super(PrymatexFileExistsException, self).__init__(msg)
+        self.filePath = filePath
 
 class FileNotSupported(Exception):
     pass
