@@ -105,5 +105,31 @@ class PMXFileSystemTasks(PMXBaseDock):
             self.application.fileManager.deletePath(path)
             
     def renamePath(self, path):
+        ''' Renames files and folders '''
         basePath, pathTail = os.path.split(path)
-        pass
+        if os.path.isdir(path):
+            pathType = _('directory')
+        elif os.path.isfile(path):
+            pathType = _('file')
+        while True:
+            newName, accepted = QtGui.QInputDialog.getText(self, 
+                                                           _("Choose new name for %s") % pathTail, 
+                                                           _("Rename {0} {1}").format(pathType, pathTail),
+                                                           text = pathTail)
+            
+            if accepted:
+                if newName == pathTail:
+                    continue # Same name
+                newFullPath = os.path.join(basePath, newName)
+                if os.path.exists(newFullPath):
+                    rslt = QtGui.QMessageBox.warning(self, _("Destination already exists"), 
+                                              _("{0} already exists").format(newName), 
+                                                buttons=QtGui.QMessageBox.Retry | QtGui.QMessageBox.Cancel,
+                                                defaultButton=QtGui.QMessageBox.Retry)
+                    if rslt == QtGui.QMessageBox.Cancel:
+                        return
+                    continue
+                self.application.fileManager.renamePath(path, newFullPath)
+                return newFullPath
+            else:
+                return 
