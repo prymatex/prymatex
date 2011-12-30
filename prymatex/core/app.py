@@ -44,22 +44,26 @@ class PMXApplication(QtGui.QApplication):
     def exec_(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
         splash.show()
-
-        # Loads
-        self.setupSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
-        self.setupFileManager()      #File Manager
-        self.setupProjectManager()   #Project Manager
-        self.setupKernelManager()    #Console kernel Manager
-        self.setupCoroutines()
-        self.setupZeroMQContext()
-
-        # Setup Dialogs
-        self.setupDialogs()         #Config Dialog
-        
-        # Creates the GUI
-        self.createMainWindow()
-
-        splash.finish(self.mainWindow)
+        try:
+            # Loads
+            self.setupSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
+            self.setupFileManager()      #File Manager
+            self.setupProjectManager()   #Project Manager
+            self.setupKernelManager()    #Console kernel Manager
+            self.setupCoroutines()
+            self.setupZeroMQContext()
+    
+            # Setup Dialogs
+            self.setupDialogs()         #Config Dialog
+            # Creates the GUI
+            self.createMainWindow()
+    
+            splash.finish(self.mainWindow)
+            
+        except KeyboardInterrupt:
+            print("\nQuit signal catched during application startup. Quiting...")
+            self.quit()
+            return
         return super(PMXApplication, self).exec_()
 
     def resetSettings(self):
