@@ -40,7 +40,9 @@ class PMXFileSystemTasks(PMXBaseDock):
         
     def createDirectory(self, basePath = None):
         basePath = basePath or self.currentPath()
-        #basePath = os.path.dirname(basePath or self.currentPath())
+        if not os.path.isdir(basePath):
+            # If base is a file, we should take its parent dir
+            basePath = os.path.dirname(basePath)
         
         while True:
             newDirName, accepted = QtGui.QInputDialog.getText(self, _("Create Directory"), 

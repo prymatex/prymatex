@@ -15,6 +15,7 @@ from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
+from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFileSystemTasks):
     #=======================================================================
@@ -96,6 +97,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
                     ]
                 },
                 self.actionRename,
+                self.actionConvert_Into_Project,
                 "-",
                 self.actionDelete,
                 {   "title": "Order",
@@ -220,3 +222,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
     @QtCore.pyqtSlot()
     def on_actionOrderFoldersFirst_triggered(self):
         self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+        
+        
+    @QtCore.pyqtSlot()
+    def on_actionConvert_Into_Project_triggered(self):
+        _base, name = os.path.split(self.currentPath())
+        PMXNewProjectDialog.getNewProject(self, self.currentPath(), name)

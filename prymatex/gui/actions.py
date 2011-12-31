@@ -6,6 +6,7 @@ from PyQt4 import QtCore, QtGui
 from prymatex import resources
 from prymatex.gui import dialogs
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
+from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
 
 class MainWindowActions(object):
     
@@ -76,7 +77,8 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
-        self.newProjectDialog.getNewProject()
+        PMXNewProjectDialog.getNewProject(self)
+        
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):

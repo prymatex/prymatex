@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Thu Dec 29 14:59:35 2011
+# Created: Sat Dec 31 02:37:21 2011
 #      by: PyQt4 UI code generator 4.9
 #
 # WARNING! All changes made in this file will be lost!
@@ -136,6 +136,9 @@ class Ui_FileSystemDock(object):
         icon8.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-rename.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRename.setIcon(icon8)
         self.actionRename.setObjectName(_fromUtf8("actionRename"))
+        self.actionConvert_Into_Project = QtGui.QAction(FileSystemDock)
+        self.actionConvert_Into_Project.setIcon(icon4)
+        self.actionConvert_Into_Project.setObjectName(_fromUtf8("actionConvert_Into_Project"))
 
         self.retranslateUi(FileSystemDock)
         QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
@@ -164,5 +167,7 @@ class Ui_FileSystemDock(object):
         self.actionRename.setText(_('Rename'))
         self.actionRename.setToolTip(_('Rename'))
         self.actionRename.setShortcut(_('F2'))
+        self.actionConvert_Into_Project.setText(_('Convert Into Project'))
+        self.actionConvert_Into_Project.setToolTip(_('Convert current directory into project'))
 
 from prymatex import resources_rc

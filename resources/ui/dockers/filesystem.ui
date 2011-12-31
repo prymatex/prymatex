@@ -280,6 +280,18 @@
     <string>F2</string>
    </property>
   </action>
+  <action name="actionConvert_Into_Project">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
+   </property>
+   <property name="text">
+    <string>Convert Into Project</string>
+   </property>
+   <property name="toolTip">
+    <string>Convert current directory into project</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../../resources.qrc"/>
