@@ -17,9 +17,11 @@ class PMXFileManager(PMXObject):
     fileCreated = QtCore.pyqtSignal(str)
     fileDeleted = QtCore.pyqtSignal(str)
     fileChanged = QtCore.pyqtSignal(str)
+    fileRenamed = QtCore.pyqtSignal(str, str)
     directoryCreated = QtCore.pyqtSignal(str)
     directoryDeleted = QtCore.pyqtSignal(str)
     directoryChanged = QtCore.pyqtSignal(str)
+    directoryRenamed = QtCore.pyqtSignal(str, str)
     
     #=========================================================
     # Settings
@@ -94,8 +96,12 @@ class PMXFileManager(PMXObject):
     def renamePath(self, old, new):
         # According to http://docs.python.org/library/os.html
         # os.rename works with both dirs and files
-        return os.rename(old, new)
-    
+        
+        os.rename(old, new)
+        self.closeFile(old)
+        self.openFile(new)
+        self.fileRenamed.emit(old, new)
+        
     def deletePath(self, path):
         if os.path.isfile(path):
             # Mandar señal para cerrar editores

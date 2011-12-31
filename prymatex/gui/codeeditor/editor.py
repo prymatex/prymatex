@@ -194,6 +194,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.connectSignals()
         self.configure()
         
+        self.application.fileManager.fileRenamed.connect(self.on_fileRenamed)
+        
     #=======================================================================
     # Connect Signals
     #=======================================================================
@@ -1096,3 +1098,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                     self.insertBundleItem(item, environment = env)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
+            
+    def on_fileRenamed(self, oldPath, newPath):
+        if oldPath == self.filePath():
+            self.setFilePath(newPath)
+        
