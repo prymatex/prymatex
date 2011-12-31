@@ -40,6 +40,8 @@ class PMXApplication(QtGui.QApplication):
 
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
+        
+        self.initialArgs = args
     
     def exec_(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
@@ -59,6 +61,7 @@ class PMXApplication(QtGui.QApplication):
             self.createMainWindow()
     
             splash.finish(self.mainWindow)
+            self.openArgumentFiles()
             
         except KeyboardInterrupt:
             print("\nQuit signal catched during application startup. Quiting...")
@@ -66,6 +69,11 @@ class PMXApplication(QtGui.QApplication):
             return
         return super(PMXApplication, self).exec_()
 
+    def openArgumentFiles(self):
+        # Open Files
+        filesToOpen = self.initialArgs[1:]
+        map(self.openFile, filesToOpen)
+            
     def resetSettings(self):
         self.settings.clear()
         
