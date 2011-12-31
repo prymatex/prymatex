@@ -209,7 +209,7 @@ class PMXApplication(QtGui.QApplication):
         os.unlink(self.fileLock)
     
     def commitData(self):
-        print "Commit data"
+        print("Commit data")
         
     def saveState(self, session_manager):
         self.logger.debug( "Save state %s" % session_manager)
@@ -245,6 +245,9 @@ class PMXApplication(QtGui.QApplication):
         return PMXCodeEditor.newInstance(filePath, project)
 
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
+        '''
+        Opens a file in current window
+        '''
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:
@@ -288,11 +291,11 @@ class PMXApplication(QtGui.QApplication):
     def on_fileChanged(self, filePath):
         message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?" % filePath
         #Yes No
-        print message
+        print(message)
         
     def on_fileDeleted(self, filePath):
         message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?" % filePath
-        print message
+        print(message)
     
     # FIXME: Refactor
     def openFilePaths(self, filePaths):
