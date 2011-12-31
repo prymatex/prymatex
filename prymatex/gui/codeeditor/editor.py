@@ -1100,6 +1100,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             self.textCursor().insertText(event.mimeData().text())
             
     def on_fileRenamed(self, oldPath, newPath):
-        if oldPath == self.filePath():
+        if self.filePath is not None and oldPath == self.filePath:
+            print("Renaming editor {0}".format(self.filePath))
             self.setFilePath(newPath)
         

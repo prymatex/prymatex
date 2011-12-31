@@ -39,8 +39,9 @@ class PMXFileSystemTasks(PMXBaseDock):
         self.renamePath(self.currentPath())
         
     def createDirectory(self, basePath = None):
-        
         basePath = basePath or self.currentPath()
+        #basePath = os.path.dirname(basePath or self.currentPath())
+        
         while True:
             newDirName, accepted = QtGui.QInputDialog.getText(self, _("Create Directory"), 
                                                         _("Please specify the new directory name"), 
@@ -66,7 +67,7 @@ class PMXFileSystemTasks(PMXBaseDock):
                 return
     
     def createFile(self, basePath = None):
-        basePath = basePath or self.currentPath()
+        basePath = os.path.dirname(basePath or self.currentPath())
         while True:
             newFileName, accepted = QtGui.QInputDialog.getText(self, _("Create file"), 
                                                         _("Please specify the file name"), 
