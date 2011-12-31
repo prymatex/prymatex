@@ -1,29 +1,14 @@
-# Configuration
-
-* Inspired in config module (available at PyPi)
-* Events when config changes
-* Configuration hierachy
-
 
 # Text Editor
 
 * Support for spellcheck defined in each bundle for
      
      * Comments
-
-# Plugins
-
-* Lots of them!
-* Detonator (signal handling cross-OS)
-
-# Signals
-
-* Simple API when a file changes it would trigger something
-    * A plugin would be add 
-
-
+     
 ## Plugins
-
+	* (D)CVS
+	
+	
 ### Detonator
 
 * Allow the user and projects to subscribe to signals
@@ -35,12 +20,5 @@
 ### Spell check
 
 * Spellcheck comments
+* Check through pep8 
 
-#Install software
-
-* xmodmap for keyboard shortcuts
-* docutils for restructuredtext bundle
-* tidy for html bundle
-
-#Como armar el proyecto
-http://www.taniquetil.com.ar/plog/post/1/518
