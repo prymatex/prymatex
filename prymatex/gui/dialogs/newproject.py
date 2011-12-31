@@ -60,7 +60,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog, PMXObject):
     def getNewProject(cls, parent = None, directory = None, name = None):
         dlg = cls(parent)
         dlg.lineProjectName.setText(name or '')
-        dlg.buttonCreate.setEnabled(False)
+        dlg.buttonCreate.setEnabled(not directory is None and not name is None)
         dlg.lineLocation.setText(directory or dlg.application.projectManager.workspaceDirectory)
         if dlg.exec_() == dlg.Accepted:
             return dlg.projectCreated
