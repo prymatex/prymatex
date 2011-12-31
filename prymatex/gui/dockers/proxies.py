@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 import fnmatch
-
+import os
 from PyQt4 import QtCore, QtGui
 
 class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
