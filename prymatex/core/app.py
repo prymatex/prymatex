@@ -173,15 +173,20 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = QtKernelManager()
             self.kernelManager.start_kernel()
             self.kernelManager.start_channels()
-        except ImportError:
+        except ImportError as e:
+            print("Warning: %s" % e)
             self.kernelManager = None
 
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)
 
     def setupZeroMQContext(self):
-        from prymatex.utils import zeromqt
-        self.zmqContext = zeromqt.ZeroMQTContext(parent = self)
+        try:
+            from prymatex.utils import zeromqt
+            self.zmqContext = zeromqt.ZeroMQTContext(parent = self)
+        except ImportError as e:
+            print("Warning: %s" % e)
+            self.zmqContext = None
 
     #========================================================
     # Dialogs
@@ -206,8 +211,9 @@ class PMXApplication(QtGui.QApplication):
         #self.bundleEditor.setModal(True)
         
         #Dialog System
-        from prymatex.pmxdialog.base import PMXDialogSystem
-        self.dialogSystem = PMXDialogSystem(self)
+        if self.zmqContext:
+            from prymatex.pmxdialog.base import PMXDialogSystem
+            self.dialogSystem = PMXDialogSystem(self)
         
     def closePrymatex(self):
         self.logger.debug("Close")
