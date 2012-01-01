@@ -269,6 +269,18 @@ class PMXSplitTabWidget(QtGui.QSplitter, PMXObject):
                 widgets.append(tw.widget(index))
         return widgets
     
+    def closeAllExceptWidget(self, widget):
+        count = 0
+        for w in self.getAllWidgets():
+            if w is widget:
+                continue
+            self._close_tab_request(w)
+            count += 1
+        return count
+    
+    def closeAll(self):
+        return self.closeAllExceptWidget(None)
+    
     def _tab_widget(self, w):
         """ Return the tab widget and index containing the given widget. """
 

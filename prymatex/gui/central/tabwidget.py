@@ -13,6 +13,7 @@
 # Standard library imports.
 import sys
 from prymatex import resources
+from functools import partial
 # Major library imports.
 import sip
 from PyQt4 import QtCore, QtGui
@@ -69,7 +70,9 @@ class _TabWidget(QtGui.QTabWidget):
         """ Close the current tab. """
 
         self._root._close_tab_request(self.widget(index))
-
+    
+    def _close_widget(self, widget):
+        self._root._close_tab_request(widget)
 
 class _DragableTabBar(QtGui.QTabBar):
     """ The _DragableTabBar class is a QTabBar that can be dragged around. """
@@ -106,11 +109,18 @@ class _DragableTabBar(QtGui.QTabBar):
         """ Reimplemented to handle mouse press events. """
         if e.button() == QtCore.Qt.RightButton:
             widget = self.widgetAtPos(e.pos())
+            tabWidget = self.parent()
+            tabSplitter = tabWidget.parent()
             #show menu
             menu = QtGui.QMenu()
             actionClose = menu.addAction(resources.getIcon("close"), "Close")
             actionCloseAll = menu.addAction(resources.getIcon("closeall"), "Close All")
             actionCloseAllNotThis = menu.addAction("Close Other")
+            # Connect
+            actionClose.triggered.connect(partial(tabWidget._close_widget, widget))
+            actionCloseAll.triggered.connect(tabSplitter.closeAll)
+            actionCloseAllNotThis.triggered.connect(partial(tabSplitter.closeAllExceptWidget, widget))
+            
             if self.parent().count() > 1:
                 menu.addSeparator()
                 actionSplitH = menu.addAction("Split Horizontally")
