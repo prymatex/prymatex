@@ -28,7 +28,13 @@ INTERNAL = {
     "codefunction": ":/icons/actions/code-function.png",
     "projectnew": ":/icons/actions/project-development-new-template.png",
     "projectopen": ":/icons/actions/project-open.png",
-    "projectclose": ":/icons/actions/project-development-close.png"
+    "projectclose": ":/icons/actions/project-development-close.png",
+    
+    # For menus
+    "close":":/icons/actions/document-close.png", 
+    "closeall":":/icons/actions/project-development-close-all.png",
+    "copy":":/icons/actions/edit-copy.png",
+    
 }
 
 EXTERNAL = {}
