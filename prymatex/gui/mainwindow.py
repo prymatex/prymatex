@@ -265,7 +265,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                 self.debug("Skipping dropped element %s" % path)
                 continue
             self.debug("Opening dropped file %s" % path)
-            self.openFile(QtCore.QFileInfo(path), focus = False)
+            #self.openFile(QtCore.QFileInfo(path), focus = False)
+            self.application.openFile(path)
 
     FILE_SIZE_THERESHOLD = 1024 ** 2 # 1MB file is enough, ain't it?
     STARTSWITH_BLACKLIST = ['.', '#', ]

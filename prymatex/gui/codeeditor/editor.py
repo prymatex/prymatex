@@ -45,7 +45,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     #=======================================================================
     SETTINGS_GROUP = 'CodeEditor'
     
-    defaultSyntax = pmxConfigPorperty(default = u'3130E4FA-B10E-11D9-9F75-000D93589AF6', tm_name = u'OakDefaultLanguage')
+    defaultSyntax = pmxConfigPorperty(default = unicode("3130E4FA-B10E-11D9-9F75-000D93589AF6"), tm_name = unicode('OakDefaultLanguage'))
     tabStopSoft = pmxConfigPorperty(default = True)
     @pmxConfigPorperty(default = 4)
     def tabStopSize(self, size):
@@ -59,7 +59,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.document().setDefaultFont(font)
         self.setTabStopWidth(self.tabStopSize * 9)
     
-    @pmxConfigPorperty(default = u'766026CB-703D-4610-B070-8DE07D967C5F', tm_name = u'OakThemeManagerSelectedTheme')
+    @pmxConfigPorperty(default = unicode('766026CB-703D-4610-B070-8DE07D967C5F'), tm_name = unicode('OakThemeManagerSelectedTheme'))
     def theme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
 
@@ -153,7 +153,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     
     @property
     def tabKeyBehavior(self):
-        return self.tabStopSoft and u' ' * self.tabStopSize or u'\t'
+        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
     
     def __init__(self, filePath = None, project = None):
         QtGui.QPlainTextEdit.__init__(self)
@@ -771,7 +771,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                 'TM_COLUMN_NUMBER': cursor.columnNumber() + 1, 
                 'TM_SCOPE': scope,
                 'TM_MODE': self.getSyntax().name,
-                'TM_SOFT_TABS': self.tabStopSoft and u'YES' or u'NO',
+                'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
         })
@@ -1078,7 +1078,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         """
         When a url or text is dropped
         """
-        mimeData = event.mimeData()
+        #mimeData = event.mimeData()
         if event.mimeData().hasUrls():
             files = map(lambda url: url.toLocalFile(), event.mimeData().urls())
             scope = self.getCurrentScope()
@@ -1096,10 +1096,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
                             'TM_MODIFIER_FLAGS': file
                     }
                     self.insertBundleItem(item, environment = env)
+                else:
+                    self.application.openFile(file)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
-            
+        
     def on_fileRenamed(self, oldPath, newPath):
+        ''' When a file is renamed in the filesystem/project, the associated
+        esditor should change it's title '''
         if self.filePath is not None and oldPath == self.filePath:
             print("Renaming editor {0}".format(self.filePath))
             self.setFilePath(newPath)
