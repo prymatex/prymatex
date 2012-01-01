@@ -84,3 +84,8 @@ class PMXBaseEditor(object):
     
     def showMessage(self, message, timeout = None, icon = None):
         raise NotImplementedError("You need to extend PMXMessageOverlay")
+    
+    def contributeToTabMenu(self, menu):
+        ''' When an editor is right clicked on it's tab, the editor
+        can provide custom actions to the menu through this callback'''
+        pass
