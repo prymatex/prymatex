@@ -24,6 +24,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
     SETTINGS_GROUP = 'FileSystem'
     filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
     
+    _pushButtonHistoryBack = []
+    _pushButtonHistoryForward = []
+    
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, parent)
@@ -50,18 +53,30 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
         
         self.setupButtons()
         
+        
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
             #print "Key press", obj #
-            if obj in (self, self.treeViewFileSystem) and event.key() == QtCore.Qt.Key_Backspace:
-                self.pushButtonUp.click()
-                return True
+            if obj in (self, self.treeViewFileSystem):
+                if  event.key() == QtCore.Qt.Key_Backspace:
+                    self.pushButtonUp.click()
+                    return True
+                elif event.key() == QtCore.Qt.Key_Return:
+                    path = self.currentPath()
+                    if os.path.isdir(path):
+                        self.setPathAsRoot(path)
+                        return True
+                    elif os.path.isfile(path):
+                        self.application.openFile(path)
+                        return True
+                    
             if event.key() == QtCore.Qt.Key_F and event.modifiers() == QtCore.Qt.ControlModifier:
                 # FIXME: Get Ctrl + F before editor's find, all the foucs is belong to us right now :P
                 self.lineEditFilter.setFocus()
                 return True
         return QtGui.QDockWidget.eventFilter(self, obj, event)
-
+    
+    
     def setupComboBoxLocation(self):
         self.comboBoxLocation.setModel(self.dirModel)
         self.comboBoxLocation.lineEdit().setText(self.application.fileManager.getDirectory())
@@ -69,14 +84,14 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
     
     def on_lineEdit_returnPressed(self):
         path = self.comboBoxLocation.lineEdit().text()
-        print(path)
         dIndex = self.dirModel.index(path)
         if dIndex.isValid():
             self.on_comboBoxLocation_currentIndexChanged(path)
     
     def setupButtons(self):
         self.pushButtonSync.setCheckable(True)
-        
+        self.pushButtonBack.setEnabled(False)
+        self.pushButtonFoward.setEnabled(False)
     
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
@@ -125,16 +140,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
     
     @QtCore.pyqtSlot(str)
     def on_comboBoxLocation_currentIndexChanged(self, path):
-        sIndex = self.fileSystemModel.index(path)
-        self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(sIndex))
-    
-    @QtCore.pyqtSlot()
-    def on_pushButtonSync_pressed(self):
-        editor = self.application.currentEditor()
-        path = self.application.fileManager.getDirectory(editor.filePath)
-        sIndex = self.fileSystemModel.index(path)
-        self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(sIndex))
-        self.comboBoxLocation.lineEdit().setText(path)
+        self.setPathAsRoot(path)
 
     @QtCore.pyqtSlot()
     def on_pushButtonUp_pressed(self):
@@ -142,8 +148,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
         sIndex = self.fileSystemProxyModel.mapToSource(index)
         dir = QtCore.QDir(self.fileSystemModel.filePath(sIndex))
         if dir.cdUp():
-            index = self.fileSystemModel.index(dir.path())
-            self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
+            self.setPathAsRoot(dir.path())
             self.comboBoxLocation.lineEdit().setText(dir.path())
 
     def addPathToFavourites(self, path):
@@ -166,15 +171,60 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
         self.fileSystemMenu.popup(self.treeViewFileSystem.mapToGlobal(point))
                 
     def on_treeViewFileSystem_doubleClicked(self, index):
-        path = self.fileSystemProxyModel.filePath(index)
+        # History
+        
+        path = self.currentPath()
         if os.path.isfile(path):
             self.application.openFile(path)
-        if os.path.isdir(path):
-            self.treeViewFileSystem.setRootIndex(index)
+            
+        elif os.path.isdir(path):
+            self.setPathAsRoot(path)
             self.comboBoxLocation.lineEdit().setText(path)
-
+    
+    
+    #===========================================================================
+    # Insted of using indexes, it's easier for history handling
+    # to manage paths 
+    #===========================================================================
     def currentPath(self):
         return self.fileSystemProxyModel.filePath(self.treeViewFileSystem.currentIndex())
+
+    def currentRootPath(self):
+        ''' Returns current root path '''
+        proxyIndex = self.treeViewFileSystem.rootIndex()
+        return self.fileSystemModel.filePath(self.fileSystemProxyModel.mapToSource(proxyIndex))
+    
+    def setPathAsRoot(self, path, trackHistory = True):
+        assert os.path.isdir(path), _("{0} is not a valid directory!").format(path)
+        oldPath = self.currentRootPath()
+        sourceIndex = self.fileSystemModel.index(path)
+        proxyIndex = self.fileSystemProxyModel.mapFromSource(sourceIndex)
+        self.treeViewFileSystem.setRootIndex(proxyIndex)
+        self.comboBoxLocation.lineEdit().setText( path )
+        if trackHistory and os.path.isdir(oldPath):
+            self._pushButtonHistoryBack.append(oldPath)
+            self.pushButtonBack.setEnabled(True)
+            self._pushButtonHistoryForward = []
+            self.pushButtonFoward.setEnabled(False)
+        print ("Back history: %s" % self._pushButtonHistoryBack)
+        print ("Fwd  history: %s" % self._pushButtonHistoryForward)
+    
+    def on_pushButtonBack_pressed(self):
+        if os.path.exists(self.currentPath()):
+            self._pushButtonHistoryForward.append(self.currentPath())
+            self.pushButtonFoward.setEnabled(True)
+        destination = self._pushButtonHistoryBack.pop()
+        self.pushButtonBack.setEnabled(bool(self._pushButtonHistoryBack))
+        self.setPathAsRoot(destination, trackHistory = False)
+    
+    def on_pushButtonFoward_pressed(self):
+        self._pushButtonHistoryBack.append(self.currentRootPath())
+        self.pushButtonBack.setEnabled(True)
+        destination = self._pushButtonHistoryForward.pop()
+        self.setPathAsRoot(destination, trackHistory = False)
+        if not len(self._pushButtonHistoryForward):
+            self.pushButtonFoward.setEnabled(False)
+
 
     #======================================================
     # Tree View Context Menu Actions
