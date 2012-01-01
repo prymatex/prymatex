@@ -371,7 +371,7 @@ class MainWindowActions(object):
         index = self.tabSelectorDialog.select(tabsToDict(tabs))
         if index is not None:
             tab = tabs[index]
-            self.splitTabWidget.setCurrentWidget(tab, focus = True)
+            self.splitTabWidget.setCurrentWidget(tab)
         
     @QtCore.pyqtSlot()
     def on_actionGoToLine_triggered(self):
