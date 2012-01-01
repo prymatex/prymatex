@@ -48,6 +48,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
         
         self.installEventFilter(self)
         
+        self.setupButtons()
+        
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
             #print "Key press", obj #
@@ -67,11 +69,15 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
     
     def on_lineEdit_returnPressed(self):
         path = self.comboBoxLocation.lineEdit().text()
-        print path
+        print(path)
         dIndex = self.dirModel.index(path)
         if dIndex.isValid():
             self.on_comboBoxLocation_currentIndexChanged(path)
-                
+    
+    def setupButtons(self):
+        self.pushButtonSync.setCheckable(True)
+        
+    
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
         index = self.fileSystemModel.index(self.application.fileManager.getDirectory())
@@ -145,7 +151,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
         Adds an entry to the File Manager 
         @param path: Adds parameter to path
         """
-        if isdir(unicode(path)):
+        if os.path.isdir(unicode(path)):
             root, dirname_part = path.rsplit(os.sep, 1)
             self.comboFavourites.addItem(dirname_part, {
                                                     'path': path,
@@ -228,3 +234,14 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
     def on_actionConvert_Into_Project_triggered(self):
         _base, name = os.path.split(self.currentPath())
         PMXNewProjectDialog.getNewProject(self, self.currentPath(), name)
+        
+    def on_currentEditorChanged(self, editor):
+        available = editor is not None
+        self.pushButtonSync.setEnabled(available)
+        if available:
+            filePath = editor.filePath
+            index = self.fileSystemModel.index(filePath)
+            proxyIndex = self.fileSystemProxyModel.mapFromSource(index)
+            print("Setting path to ", filePath)
+            self.treeViewFileSystem.setCurrentIndex(proxyIndex)
+        
