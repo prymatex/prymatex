@@ -6,6 +6,7 @@ Application configuration based on Qt's QSettings module.
 '''
 import os, plistlib
 from PyQt4 import QtCore
+from PyQt4 import QtGui
 
 try:
     from win32com.shell import shellcon, shell
@@ -68,12 +69,19 @@ TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
 class TextMateSettings(object):
     def __init__(self, file):
         self.file = file
+
         if os.path.exists(self.file):
-            self.settings = plistlib.readPlist(self.file)
-        else:
-            self.settings = {}
-            self.sync()
+            try:
+                self.settings = plistlib.readPlist(self.file)
+            except Exception as e:
+                print("Exception raised while reading settings file: %s" % e)
+        
+        not hasattr(self, "settings") and self.initializeSettings()
     
+    def initializeSettings(self):
+        self.settings = {}
+        self.sync()
+
     def setValue(self, name, value):
         if name in self.settings and self.settings[name] == value:
             return
@@ -86,10 +94,8 @@ class TextMateSettings(object):
         except KeyError:
             return None
     
-    
     def clear(self):
-        self.settings = {}
-        self.sync()
+        self.initializeSettings()
         
     def sync(self):
         plistlib.writePlist(self.settings, self.file)
