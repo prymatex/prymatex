@@ -30,6 +30,7 @@ from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
 from prymatex.gui.widgets.overlay import PMXMessageOverlay
 from prymatex.utils.text import convert_functions
+from prymatex.utils.i18n import ugettext as _
 
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseEditor):
     #=======================================================================
@@ -190,7 +191,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
-        
+        self.setupActions()
         self.connectSignals()
         self.configure()
         
@@ -206,6 +207,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.cursorPositionChanged.connect(self.highlightCurrent)
         self.modificationChanged.connect(self.updateTabStatus)
         self.syntaxChanged.connect(self.showSyntaxMessage)
+        # 
+        self.actionCopyPath.triggered.connect(self.on_actionCopyPath_triggered)
+    
+    def setupActions(self):
+        # Some actions
+        self.actionCopyPath = QtGui.QAction(
+                                            resources.getIcon("copy"),
+                                            _("Copy path to clipboard"),
+                                            self
+                                            )
+        
         
     def showSyntaxMessage(self, syntax):
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
@@ -1107,4 +1119,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         if self.filePath is not None and oldPath == self.filePath:
             print("Renaming editor {0}".format(self.filePath))
             self.setFilePath(newPath)
+    
+    @QtCore.pyqtSlot()
+    def on_actionCopyPath_triggered(self):
+        QtGui.QApplication.clipboard().setText(self.filePath)
         
+    def contributeToTabMenu(self, menu):
+        if self.filePath:
+            menu.addAction(self.actionCopyPath)

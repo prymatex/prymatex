@@ -12,7 +12,7 @@
 
 # Standard library imports.
 import sys
-
+from prymatex import resources
 # Major library imports.
 import sip
 from PyQt4 import QtCore, QtGui
@@ -95,22 +95,30 @@ class _DragableTabBar(QtGui.QTabBar):
         else:
             e.ignore()
 
+    
+    def widgetAtPos(self, pos):
+        ''' Returns the widget at position (QPoint)'''
+        n = self._tab_at(pos)
+        return self.parent().widget(n)
+        
+
     def mousePressEvent(self, e):
         """ Reimplemented to handle mouse press events. """
         if e.button() == QtCore.Qt.RightButton:
-            widget = self._tab_at(e.pos())
-            
+            widget = self.widgetAtPos(e.pos())
             #show menu
             menu = QtGui.QMenu()
-            actionClose = menu.addAction("Close")
-            actionCloseAll = menu.addAction("Close All")
+            actionClose = menu.addAction(resources.getIcon("close"), "Close")
+            actionCloseAll = menu.addAction(resources.getIcon("closeall"), "Close All")
             actionCloseAllNotThis = menu.addAction("Close Other")
             if self.parent().count() > 1:
                 menu.addSeparator()
                 actionSplitH = menu.addAction("Split Horizontally")
                 actionSplitV = menu.addAction("Split Vertically")
             menu.addSeparator()
-            #Create custom menu
+            # Create custom menu (
+            widget.contributeToTabMenu(menu)
+            # Display menu
             menu.exec_(e.globalPos())
         elif e.button() == QtCore.Qt.LeftButton:
 
