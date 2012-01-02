@@ -40,6 +40,8 @@ def parseArguments(args):
 # TODO: Accept Qt Arguments to QtApplication
 def runPrymatexApplication(options, args):
     from prymatex.core import app, exceptions
+    
+    pmx = None
     try:
         pmx = app.PMXApplication(options.profile, args)
         pmx.replaceSysExceptHook()
@@ -49,7 +51,6 @@ def runPrymatexApplication(options, args):
     except exceptions.AlreadyRunningError as ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
-        return -1
     except:
         from traceback import format_exc
         traceback = format_exc()
@@ -57,8 +58,9 @@ def runPrymatexApplication(options, args):
         from prymatex.gui.emergency.crashdialog import PMXCrashDialog
         dlg = PMXCrashDialog(traceback)
         dlg.exec_()
-    return pmx.exec_()    
-    
+    finally:
+        return pmx and pmx.exec_() or -1
+            
 def main(args):
     options, args = parseArguments(args)
     
