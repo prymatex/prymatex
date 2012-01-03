@@ -8,17 +8,23 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
         super(PMXBundleTreeProxyModel, self).__init__(parent)
         self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax"]
-        self.setDynamicSortFilter(True)
+        self.namespacesFilter = [ "prymatex", "user" ]
+        self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        item = index.internalPointer()
-        if not item.enabled:
+        node = self.sourceModel().node(index)
+        if not node.enabled:
             return False
-        if item.TYPE != "bundle":
-            regexp = self.filterRegExp()
-            if not regexp.isEmpty():
-                return regexp.indexIn(item.TYPE) != -1
+        if self.namespacesFilter:
+            if not any(map(lambda ns: node.hasNamespace(ns), self.namespacesFilter)):
+                return False
+        if self.bundleItemTypesFilter:
+            if node.TYPE not in self.bundleItemTypesFilter:
+                return False
+        regexp = self.filterRegExp()
+        if not regexp.isEmpty():
+            return regexp.indexIn(node.name) != -1
         return True
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
@@ -36,6 +42,20 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         sIndex = self.mapToSource(index)
         return self.sourceModel().node(sIndex)
     
+    def setFilterNamespace(self, namespace):
+        if namespace is None:
+            self.namespacesFilter = [ "prymatex", "user" ]
+        else:
+            self.namespacesFilter = [ namespace ]
+        self.setFilterRegExp("")
+        
+    def setFilterBundleItemType(self, bundleItemType = ""):
+        if bundleItemType:
+            self.bundleItemTypesFilter = [ "bundle", bundleItemType ]
+        else:
+            self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
+        self.setFilterRegExp("")
+
 class PMXBundleTypeFilterProxyModel(PMXFlatTreeProxyModel):
     def __init__(self, tipos, parent = None):
         super(PMXBundleTypeFilterProxyModel, self).__init__(parent)

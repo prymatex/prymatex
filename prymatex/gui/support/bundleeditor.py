@@ -36,17 +36,19 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     #==========================================================
     # exec the dialog Show
     #==========================================================
-    def exec_(self, filter = ""):
-        index = self.comboBoxItemFilter.findData(filter)
-        self.comboBoxItemFilter.setCurrentIndex(index)
-        self.proxyTreeModel.setFilterRegExp(filter)
+    def exec_(self):
+        #TODO: Mejorar esto porque se dispara con los filtros del proxy, quiza pegandole al modelo real o al manager
         self.proxyTreeModel.rowsInserted.connect(self.on_proxyTreeModel_rowsInserted)
         value = QtGui.QDialog.exec_(self)
         self.proxyTreeModel.rowsInserted.disconnect(self.on_proxyTreeModel_rowsInserted)
         return value
         
-    def execEditor(self, filter = ""):
-        self.exec_(filter)
+    def execEditor(self, typeFilter = "", namespaceFilter = None):
+        self.proxyTreeModel.setFilterNamespace(namespaceFilter)
+        self.proxyTreeModel.setFilterBundleItemType(typeFilter)
+        index = self.comboBoxItemFilter.findData(typeFilter)
+        self.comboBoxItemFilter.setCurrentIndex(index)
+        self.exec_()
         
     def execCommand(self):
         return self.execEditor("command")
@@ -183,7 +185,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     @QtCore.pyqtSlot(int)
     def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
-        self.proxyTreeModel.setFilterRegExp(value)
+        self.proxyTreeModel.setFilterBundleItemType(value)
     
     def configSelectTop(self):
         self.comboBoxItemFilter.addItem("Show all", "")
