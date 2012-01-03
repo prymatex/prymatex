@@ -34,8 +34,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
         if index.isValid():
             template = index.internalPointer()
             environment = template.buildEnvironment(directory = self.lineLocation.text(), name = self.lineFileName.text())
-            template.resolve(environment)
-            self.fileCreated = environment['TM_NEW_FILE']
+            self.fileCreated = template.execute(environment)
             self.accept()
         else:
             #TODO: Mostrar error
@@ -55,11 +54,6 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
     def on_buttonClose_pressed(self):
         self.reject()
 
-    def getNewFileFromTemplate(self, fileDirectory = "", fileName = ""):
-        self.lineFileName.setText(fileName)
-        self.buttonCreate.setEnabled(False)
-        if self.exec_() == self.Accepted:
-            return self.fileCreated
     @classmethod
     def newFileFromTemplate(cls, fileDirectory = "", fileName = "", parent = None):
         '''

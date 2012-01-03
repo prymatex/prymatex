@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-    Template's module
-    http://manual.macromates.com/en/templates
-'''
+"""
+Template's module
+http://manual.macromates.com/en/templates
+"""
 
 import os, shutil, codecs
 from glob import glob
@@ -20,6 +20,9 @@ class PMXTemplateFile(object):
         self.name = os.path.basename(path)
         self.template = template
 
+    def hasNamespace(self, namespace):
+        return self.template.hasNamespace(namespace)
+        
     @property
     def enabled(self):
         return self.template.enabled
@@ -104,16 +107,18 @@ class PMXTemplate(PMXBundleItem):
         env['TM_NEW_FILE_DIRECTORY'] = directory
         return env
     
-    def resolve(self, environment = {}):
+    def execute(self, environment = {}):
         origWD = os.getcwd() # remember our original working directory
         os.chdir(self.path)
         
         command, env = prepareShellScript(self.command, environment)
-          
+
         process = Popen(command, env = env)
         process.wait()
         
         os.chdir(origWD) # get back to our original working directory
+        #TODO: Si todo esta bien retornar el new file, sino ver que hacer
+        return env['TM_NEW_FILE']
         
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
