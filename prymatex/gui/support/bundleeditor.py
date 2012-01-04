@@ -38,9 +38,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     #==========================================================
     def exec_(self):
         #TODO: Mejorar esto porque se dispara con los filtros del proxy, quiza pegandole al modelo real o al manager
-        self.proxyTreeModel.rowsInserted.connect(self.on_proxyTreeModel_rowsInserted)
+        self.manager.bundleTreeModel.rowsInserted.connect(self.on_bundleTreeModel_rowsInserted)
         value = QtGui.QDialog.exec_(self)
-        self.proxyTreeModel.rowsInserted.disconnect(self.on_proxyTreeModel_rowsInserted)
+        self.manager.bundleTreeModel.rowsInserted.disconnect(self.on_bundleTreeModel_rowsInserted)
         return value
         
     def execEditor(self, typeFilter = "", namespaceFilter = None):
@@ -205,8 +205,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
             index = self.indexes[treeItem.TYPE]
             return self.editors[index]
 
-    def on_proxyTreeModel_rowsInserted(self, parent, start, end):
-        index = self.proxyTreeModel.index(start, 0, parent)
+    def on_bundleTreeModel_rowsInserted(self, parent, start, end):
+        sIndex = self.manager.bundleTreeModel.index(start, 0, parent)
+        index = self.proxyTreeModel.mapFromSource(sIndex)
         node = self.proxyTreeModel.node(index)
         self.treeView.setCurrentIndex(index)
         self.treeView.edit(index)
