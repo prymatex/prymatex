@@ -14,9 +14,11 @@ from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
+from prymatex.gui.project.base import PMXProject
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXObject):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
+
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
@@ -25,7 +27,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.treeViewProjects.setModel(self.projectTreeProxyModel)
 
         self.setupTreeViewProjects()
-        
+
     def setupTreeViewProjects(self):
         #Setup Context Menu
         projectMenuSettings = { 
@@ -50,7 +52,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             ]
         }
         self.projectsMenu = createQMenu(projectMenuSettings, self)
-        
+
         fileMenuSettings = { 
             "title": "File",
             "items": [
@@ -110,10 +112,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             index = self.treeViewProjects.currentIndex()
         if index.isValid():
             node = self.projectTreeProxyModel.node(index)
-            if node.isfile:
-                self.fileMenu.popup(self.treeViewProjects.mapToGlobal(point))
-            elif node.isproject:
+            if isinstance(node, PMXProject):
                 self.projectsMenu.popup(self.treeViewProjects.mapToGlobal(point))
+            elif node.isfile:
+                self.fileMenu.popup(self.treeViewProjects.mapToGlobal(point))
             elif node.isdir:
                 self.directoryMenu.popup(self.treeViewProjects.mapToGlobal(point))
                 
@@ -130,15 +132,14 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     # Some of them are in fstask's PMXFileSystemTasks mixin
     #======================================================
     
-    
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
+        path = self.currentPath()
         print(path)
     
     @QtCore.pyqtSlot()
     def on_actionCloseProject_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
+        path = self.currentPath()
         print(path)
     
     @QtCore.pyqtSlot()
@@ -147,9 +148,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-        print(self.projectTreeProxyModel.sourceModel().fileWatcher.directories())
-        print(self.projectTreeProxyModel.sourceModel().fileWatcher.files())
+        path = self.currentPath()
     
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):
@@ -161,7 +160,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
     @QtCore.pyqtSlot()
     def on_actionOpenSystemEditor_triggered(self):
-        path = self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
+        path = self.currentPath()
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
     
     @QtCore.pyqtSlot()

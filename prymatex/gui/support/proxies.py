@@ -43,15 +43,15 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         return self.sourceModel().node(sIndex)
     
     def setFilterNamespace(self, namespace):
-        if namespace is None:
+        if namespace:
             self.namespacesFilter = [ "prymatex", "user" ]
         else:
-            self.namespacesFilter = [ namespace ]
+            self.namespacesFilter = namespace.split()
         self.setFilterRegExp("")
         
     def setFilterBundleItemType(self, bundleItemType = ""):
         if bundleItemType:
-            self.bundleItemTypesFilter = [ "bundle", bundleItemType ]
+            self.bundleItemTypesFilter = [ "bundle" ] + bundleItemType.split()
         else:
             self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
         self.setFilterRegExp("")

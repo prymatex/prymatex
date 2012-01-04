@@ -51,7 +51,6 @@ class PMXProject(FileSystemTreeNode):
     def __init__(self, directory, hash):
         self.directory = directory
         FileSystemTreeNode.__init__(self, "Project Name")
-        self.isproject = True
         self.workingSet = None
         self.manager = None
         self.load(hash)
