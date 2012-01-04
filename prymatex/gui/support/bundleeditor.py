@@ -20,6 +20,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.setupUi(self)
         self.manager = self.application.supportManager
         self.finished.connect(self.on_bundleEditor_finished)
+        
         #Cargar los widgets editores
         self.configEditorWidgets()
         
@@ -43,7 +44,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.proxyTreeModel.rowsInserted.disconnect(self.on_proxyTreeModel_rowsInserted)
         return value
         
-    def execEditor(self, typeFilter = "", namespaceFilter = None):
+    def execEditor(self, typeFilter = "", namespaceFilter = ""):
         self.proxyTreeModel.setFilterNamespace(namespaceFilter)
         self.proxyTreeModel.setFilterBundleItemType(typeFilter)
         index = self.comboBoxItemFilter.findData(typeFilter)
@@ -126,7 +127,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     def on_actionBundle_triggered(self):
         self.manager.createBundle("untitled")
 
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_pushButtonRemove_pressed(self):
         index = self.treeView.currentIndex()
         if index.isValid():
@@ -138,7 +139,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
             else:
                 self.manager.deleteBundleItem(item)
 
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_pushButtonFilter_pressed(self):
         self.bundleFilterDialog.show()
 
@@ -195,7 +196,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/commands.png"), "Commands", "command")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/drag-commands.png"), "DragCommands", "dragcommand")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/preferences.png"), "Preferences", "preference")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template*")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template templatefile")
     
     #==========================================================
     # Tree View
@@ -220,7 +221,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     def on_treeView_Activated(self, index):
         treeItem = self.proxyTreeModel.node(index)
         self.editTreeItem(treeItem)
-        
+
     def configTreeView(self, manager = None):
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
@@ -230,7 +231,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.treeView.setAnimated(True)
         self.treeView.activated.connect(self.on_treeView_Activated)
         self.treeView.pressed.connect(self.on_treeView_Activated)
-        
+
     #===========================================================
     # Activation
     #===========================================================
@@ -241,25 +242,24 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
             self.lineKeyEquivalentActivation.setText(QtGui.QKeySequence(keyseq).toString())
             return True
         return super(PMXBundleEditor, self).eventFilter(obj, event)
-        
-    def on_comboBoxActivation_changed(self, index):
+    
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxActivation_activated(self, index):
         self.lineKeyEquivalentActivation.setVisible(index == 0)
         self.lineTabTriggerActivation.setVisible(index == 1)
     
-    def on_lineEditScope_edited(self, text):
-        self.stackedWidget.currentWidget().setScope(unicode(text))
+    @QtCore.pyqtSlot(str)
+    def on_lineEditScope_textEdited(self, text):
+        self.stackedWidget.currentWidget().setScope(text)
     
-    def on_lineTabTriggerActivation_edited(self, text):
-        self.stackedWidget.currentWidget().setTabTrigger(unicode(text))
+    @QtCore.pyqtSlot(str)
+    def on_lineTabTriggerActivation_textEdited(self, text):
+        self.stackedWidget.currentWidget().setTabTrigger(text)
     
     def configActivation(self):
         self.comboBoxActivation.addItem("Key Equivalent")
         self.comboBoxActivation.addItem("Tab Trigger")
-        self.comboBoxActivation.currentIndexChanged[int].connect(self.on_comboBoxActivation_changed)
         self.lineKeyEquivalentActivation.installEventFilter(self)
-        #textEdited: solo cuando cambias el texto desde la gui
-        self.lineTabTriggerActivation.textEdited.connect(self.on_lineTabTriggerActivation_edited)
-        self.lineEditScope.textEdited.connect(self.on_lineEditScope_edited)
     
     def saveChanges(self):
         #TODO: ver si tengo que guardar el current editor
