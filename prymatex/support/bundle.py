@@ -38,7 +38,7 @@ class PMXManagedObject(object):
     
     def hasNamespace(self, namespace):
         return namespace in self.namespaces
-    
+
     def addSource(self, namespace, path):
         if namespace not in self.namespaces:
             index = self.manager.nsorder.index(namespace)
@@ -54,7 +54,7 @@ class PMXManagedObject(object):
     def relocate(self, path):
         if os.path.exists(self.path):
             shutil.move(self.path, path)
-            self.sources[self.namespaces[-1]] = path
+        self.sources[self.namespaces[-1]] = path
 
 class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
@@ -100,7 +100,7 @@ class PMXBundle(PMXManagedObject):
         try:
             #El ultimo apaga la luz, elimina el directorio base
             os.rmdir(self.path)
-        except os.OSError:
+        except:
             pass
             
     def buildEnvironment(self):

@@ -65,7 +65,7 @@ class TreeModel(QtCore.QAbstractItemModel):
     def parent(self, index):
         node = self.node(index)
         parentNode = node.parent
-        if parentNode == self.rootNode:
+        if parentNode is None or parentNode.isRootNode():
             return QtCore.QModelIndex()
         return self.createIndex(parentNode.row(), 0, parentNode)
     

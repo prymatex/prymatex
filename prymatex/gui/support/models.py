@@ -102,8 +102,8 @@ class PMXBundleTreeModel(TreeModel):
                 self.manager.updateTemplateFile(node, name = value)
             else:
                 self.manager.updateBundleItem(node, name = value)
-            #Update de TreeNode name
-            node.name = value
+            #TODO: Update de TreeNode name, mejorar esto que esta muy feo
+            node.name = node.item.name
             self.dataChanged.emit(index, index)
             return True
         elif role == QtCore.Qt.CheckStateRole:

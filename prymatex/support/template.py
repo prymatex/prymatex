@@ -48,6 +48,7 @@ class PMXTemplateFile(object):
     def relocate(self, path):
         if os.path.exists(self.path):
             shutil.move(self.path, path)
+        self.name = os.path.basename(path)
     
     def save(self, basePath = None):
         path = os.path.join(basePath, self.name) if basePath is not None else self.path
@@ -94,6 +95,18 @@ class PMXTemplate(PMXBundleItem):
         for file in self.files:
             if file.path != self.path:
                 file.save(self.path)
+
+    def delete(self):
+        for file in self.files:
+            os.unlink(file.path)
+        os.unlink(os.path.join(self.path, self.FILE))
+        os.rmdir(self.path)
+        dir = os.path.dirname(self.path)
+        try:
+            #El ultimo apaga la luz, elimina el directorio base
+            os.rmdir(dir)
+        except:
+            pass
 
     def buildEnvironment(self, directory = "", name = ""):
         env = super(PMXTemplate, self).buildEnvironment()

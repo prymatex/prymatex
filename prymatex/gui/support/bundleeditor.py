@@ -173,8 +173,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         
         def conditionalEnabledTemplateFile():
             node = self.proxyTreeModel.node(self.treeView.currentIndex())
-            if not node.isRootNode():
-                self.templateFileAction.setEnabled(node.TYPE == "template" or node.TYPE == "templatefile")
+            self.templateFileAction.setEnabled(not node.isRootNode() and (node.TYPE == "template" or node.TYPE == "templatefile"))
         self.toolbarMenu.aboutToShow.connect(conditionalEnabledTemplateFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)
@@ -211,10 +210,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         index = self.proxyTreeModel.mapFromSource(sIndex)
         node = self.proxyTreeModel.node(index)
         self.treeView.setCurrentIndex(index)
-        self.treeView.edit(index)
         self.editTreeItem(node)
-        print index, start, end
-        
+        self.treeView.edit(index)
+
     def on_proxyTreeModel_dataChanged(self, sindex, eindex):
         current = self.stackedWidget.currentWidget()
         self.labelTitle.setText(current.title)

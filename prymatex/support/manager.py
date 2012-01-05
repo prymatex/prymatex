@@ -76,6 +76,8 @@ class PMXSupportBaseManager(object):
         
     @property
     def defaultNamespace(self):
+        if len(self.nsorder) < 2:
+            raise Exception("No default namespace")
         return self.nsorder[self.DEFAULTNS]
 
     def updateEnvironment(self, env):
@@ -83,7 +85,13 @@ class PMXSupportBaseManager(object):
 
     def buildEnvironment(self):
         return self.environment.copy()
-        
+    
+    def basePath(self, element, namespace):
+        if namespace not in self.namespaces:
+            raise Exception("The %s namespace is not registered" % namespace)
+        if element in self.namespaces[namespace]:
+            return self.namespaces[namespace][element]
+    
     #---------------------------------------------------
     # Tools
     #---------------------------------------------------
@@ -268,10 +276,9 @@ class PMXSupportBaseManager(object):
             El nombre no este entre los nombres ya cargados.
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
         """
-        if len(self.nsorder) < 2:
-            return None
-        if namespace is None: namespace = self.defaultNamespace
-        path = os.path.join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
+        namespace = namespace or self.defaultNamespace
+        basePath = self.basePath("Bundles", namespace)
+        path = ensurePath(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
         bundle = PMXBundle(self.uuidgen(), namespace, { 'name': name }, path)
         bundle = self.addBundle(bundle)
         self.addManagedObject(bundle)
@@ -289,19 +296,18 @@ class PMXSupportBaseManager(object):
     def getBundle(self, uuid):
         return self.getManagedObject(uuid)
     
-    def updateBundle(self, bundle, **attrs):
+    def updateBundle(self, bundle, namespace = None, **attrs):
         """
         Actualiza un bundle
         """
-        if len(self.nsorder) < 2:
-            return None
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == bundle.name:
             #Updates que no son updates
             return bundle
         if bundle.isProtected:
             if not bundle.isSafe:
-                namespace = self.defaultNamespace
-                path = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path))
+                namespace = namespace or self.defaultNamespace
+                basePath = self.basePath("Bundles", namespace)
+                path = os.path.join(basePath, os.path.basename(bundle.path))
                 bundle.addSource(namespace, path)
         else:
             if "name" in attrs:
@@ -323,7 +329,7 @@ class PMXSupportBaseManager(object):
             self.deleteBundleItem(item)
         if bundle.isProtected:
             if bundle.isSafe:
-                pass #Eliminar la parte safe
+                bundle.delete()
             self.setDeleted(bundle.uuid)
         else:
             bundle.delete()
@@ -376,11 +382,9 @@ class PMXSupportBaseManager(object):
             El tipo tiene que ser uno de los conocidos
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
         """
-        if len(self.nsorder) < 2:
-            return None
+        namespace = namespace or self.defaultNamespace
         if bundle.isProtected and not bundle.isSafe:
-            self.updateBundle(bundle)
-        if namespace is None: namespace = self.defaultNamespace
+            self.updateBundle(bundle, namespace)
         klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
         if len(klass) != 1:
             raise Exception("No class type for %s" % tipo)
@@ -405,20 +409,18 @@ class PMXSupportBaseManager(object):
     def getBundleItem(self, uuid):
         return self.getManagedObject(uuid)
     
-    def updateBundleItem(self, item, **attrs):
+    def updateBundleItem(self, item, namespace = None, **attrs):
         """
         Actualiza un bundle item
         """
-        if len(self.nsorder) < 2:
-            return None
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
             #Updates que no son updates
             return item
+        namespace = namespace or self.defaultNamespace
         if item.bundle.isProtected and not item.bundle.isSafe:
-            self.updateBundle(item.bundle)
+            self.updateBundle(item.bundle, namespace)
         if item.isProtected:
             if not item.isSafe:
-                namespace = self.defaultNamespace
                 path = os.path.join(item.bundle.path, item.FOLDER, os.path.basename(item.path))
                 item.addSource(namespace, path)
         else:
@@ -439,7 +441,7 @@ class PMXSupportBaseManager(object):
         #Si el espacio de nombres es distinto al protegido lo elimino
         if item.isProtected:
             if item.isSafe:
-                pass #Borrar la parte safe del bundle item
+                item.delete()
             self.setDeleted(item.uuid)
         else:
             item.delete()
@@ -460,7 +462,7 @@ class PMXSupportBaseManager(object):
     def createTemplateFile(self, name, template):
         if template.isProtected and not template.isSafe:
             self.updateBundleItem(template)
-        path = os.path.join(template.path, "%s.%s" % (self.convertToValidPath(name), template.extension))
+        path = ensurePath(os.path.join(template.path, "%s"), self.convertToValidPath(name))
         file = PMXTemplateFile(path, template)
         #No es la mejor forma pero es la forma de guardar el archivo
         file = self.addTemplateFile(file)
@@ -473,8 +475,9 @@ class PMXSupportBaseManager(object):
         if template.isProtected and not template.isSafe:
             self.updateBundleItem(template)
         if "name" in attrs:
-            path = os.path.join(template.path, self.convertToValidPath(attrs["name"]))
+            path = ensurePath(os.path.join(template.path, "%s"), self.convertToValidPath(attrs["name"]))
             templateFile.relocate(path)
+            attrs.pop("name")
         templateFile.update(attrs)
         return templateFile
 
