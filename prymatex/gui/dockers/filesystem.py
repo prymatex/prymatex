@@ -292,6 +292,5 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
             filePath = editor.filePath
             index = self.fileSystemModel.index(filePath)
             proxyIndex = self.fileSystemProxyModel.mapFromSource(index)
-            print("Setting path to ", filePath)
             self.treeViewFileSystem.setCurrentIndex(proxyIndex)
         

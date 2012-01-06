@@ -6,6 +6,16 @@ from PyQt4 import QtCore, QtGui
 from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.exceptions import APIUsageError, PrymatexIOException, PrymatexFileExistsException
+from functools import partial
+
+class PMXFSConstants(object):
+    ''' Some constants '''
+    CREATED = 0
+    DELETED = 1
+    RENAMED = 2
+    MOVED   = 3
+    MODIFY  = 4
+    
 
 class PMXFileManager(PMXObject):
     """
@@ -22,6 +32,8 @@ class PMXFileManager(PMXObject):
     directoryDeleted = QtCore.pyqtSignal(str)
     directoryChanged = QtCore.pyqtSignal(str)
     directoryRenamed = QtCore.pyqtSignal(str, str)
+    # Generic Signal 
+    filesytemChange = QtCore.pyqtSignal(int, str)
     
     #=========================================================
     # Settings
@@ -38,13 +50,36 @@ class PMXFileManager(PMXObject):
         self.fileWatcher = QtCore.QFileSystemWatcher()
         self.fileWatcher.fileChanged.connect(self.on_fileChanged)
         self.fileWatcher.directoryChanged.connect(self.on_directoryChanged)
+        self.connectGenericSignal()
         self.configure()
 
+    
+    
+
+    def connectGenericSignal(self):
+        UNARY_SINGAL_CONSTANT_MAP = (
+            (self.fileCreated, PMXFSConstants.CREATED ),
+            (self.fileDeleted, PMXFSConstants.DELETED ),
+            (self.fileChanged, PMXFSConstants.MODIFY ),
+            (self.directoryCreated, PMXFSConstants.CREATED ),
+            (self.directoryDeleted, PMXFSConstants.DELETED ),
+            (self.directoryChanged, PMXFSConstants.MODIFY ),
+        )
+        BINARY_SINGAL_CONSTANT_MAP = (
+            (self.fileRenamed, PMXFSConstants.RENAMED ),
+            (self.directoryRenamed, PMXFSConstants.RENAMED ),                       
+        )
+        for signal, associatedConstant in UNARY_SINGAL_CONSTANT_MAP:
+            signal.connect(lambda path: self.filesytemChange.emit(associatedConstant, path))
+        for signal, associatedConstant in BINARY_SINGAL_CONSTANT_MAP:
+            signal.connect(lambda _x, path: self.filesytemChange.emit(associatedConstant, path))
+            
     def on_fileChanged(self, filePath):
         if not os.path.exists(filePath):
             self.fileDeleted.emit(filePath)
         else:
             self.fileChanged.emit(filePath)
+    
     
     def on_directoryChanged(self, directoryPath):
         if not os.path.exists(directoryPath):

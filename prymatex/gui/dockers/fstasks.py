@@ -5,6 +5,8 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.core.exceptions import PrymatexFileExistsException
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 
+
+
 class PMXFileSystemTasks(PMXBaseDock):
     '''
     Groups FileSystem and Project actions, it's a facade of the PMXFileManager
@@ -12,6 +14,14 @@ class PMXFileSystemTasks(PMXBaseDock):
     
     Slots Mixin
     '''
+    
+    #===========================================================================
+    # Singals
+    #===========================================================================
+    
+    
+    
+    filesystemChange = QtCore.pyqtSignal(int, str) 
     
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
@@ -32,7 +42,6 @@ class PMXFileSystemTasks(PMXBaseDock):
         path = self.currentPath()
         fileDirectory = self.application.fileManager.getDirectory(path)
         path = PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
-
 
     @QtCore.pyqtSlot()
     def on_actionRename_triggered(self, path = None):
@@ -136,3 +145,4 @@ class PMXFileSystemTasks(PMXBaseDock):
                 return newFullPath
             else:
                 return 
+            
