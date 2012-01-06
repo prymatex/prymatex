@@ -7,6 +7,7 @@ from prymatex.core.base import PMXObject
 from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
 from prymatex.ui.settings.themes import Ui_FontThemeConfig
 from prymatex.gui.support.qtadapter import QColor2RGBA
+from prymatex.utils.i18n import ugettext as _
 
 class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     '''
@@ -130,7 +131,7 @@ class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
     @QtCore.pyqtSignature('')
     def on_pushButtonChangeFont_pressed(self):
         font = self.settings.value('font')
-        font, ok = QtGui.QFontDialog.getFont(font, self, self.trUtf8("Select editor font"))
+        font, ok = QtGui.QFontDialog.getFont(font, self, _("Select editor font"))
         if ok:
             self.settings.setValue('font', font)
             self.lineFont.setFont(font)

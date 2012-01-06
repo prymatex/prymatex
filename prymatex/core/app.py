@@ -3,7 +3,6 @@
 
 #Cosas interesantes
 #http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
-#http://www.qtcentre.org/wiki/index.php?title=Extended_Main_Window
 import os, sys
 
 from PyQt4 import QtGui, QtCore
@@ -52,11 +51,13 @@ class PMXApplication(QtGui.QApplication):
             self.setupFileManager()      #File Manager
             self.setupProjectManager()   #Project Manager
             self.setupKernelManager()    #Console kernel Manager
+            self.setupPluginManager()
             self.setupCoroutines()
             self.setupZeroMQContext()
     
             # Setup Dialogs
             self.setupDialogs()         #Config Dialog
+            
             # Creates the GUI
             self.createMainWindow()
     
@@ -177,6 +178,12 @@ class PMXApplication(QtGui.QApplication):
             print("Warning: %s" % e)
             self.kernelManager = None
 
+    def setupPluginManager(self):
+        from prymatex.plugin.manager import PMXPluginManager
+        from prymatex.gui.codeeditor.editor import PMXCodeEditor
+        self.pluginManager = PMXPluginManager()
+        self.pluginManager.register("editor.default", PMXCodeEditor)
+        
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)
 
@@ -214,7 +221,7 @@ class PMXApplication(QtGui.QApplication):
         if self.zmqContext:
             from prymatex.pmxdialog.base import PMXDialogSystem
             self.dialogSystem = PMXDialogSystem(self)
-        
+    
     def closePrymatex(self):
         self.logger.debug("Close")
         self.settings.setValue("mainWindowGeometry", self.mainWindow.saveGeometry())
@@ -255,8 +262,7 @@ class PMXApplication(QtGui.QApplication):
         return self.mainWindow, self.mainWindow.findEditorForFile(filePath)
             
     def getEditorInstance(self, filePath = None, project = None):
-        from prymatex.gui.codeeditor.editor import PMXCodeEditor
-        return PMXCodeEditor.newInstance(filePath, project)
+        return self.pluginManager.createEditor("default", filePath, project)
 
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         '''
