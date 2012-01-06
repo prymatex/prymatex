@@ -594,16 +594,18 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         self.listExcludedModel.setMenuModel(self.treeMenuModel)
         self.treeMenuView.setModel(self.treeMenuModel)
         self.listExcludedView.setModel(self.listExcludedModel)
+        
+        self.treeMenuModel.layoutChanged.connect(self.on_layoutChanged)
 
+    def on_layoutChanged(self):
+        self.changes['mainMenu'] = self.treeMenuModel.getMainMenu()
+        self.changes['mainMenu']['excludedItems'] = self.listExcludedModel.getExcludedItems()
+        
     @property
     def title(self):
         if self.bundleItem != None:
             return 'Edit Menu: "%s"' % self.bundleItem.name
         return super(PMXBundleWidget, self).title()
-
-    @property
-    def isChanged(self):
-        return False
         
     def getScope(self):
         return None
@@ -619,7 +621,7 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         if bundleItem.mainMenu is not None:
             self.treeMenuModel.setMainMenu(bundleItem.mainMenu)
             if "setExcludedItems" in bundleItem.mainMenu:
-                self.listExcludedModel.setExcludedItems(bundleItem.mainMenu["setExcludedItems"])
+                self.listExcludedModel.setExcludedItems(bundleItem.mainMenu["excludedItems"])
             else:
                 self.listExcludedModel.clear()
             #Agregar items que no estan por aca

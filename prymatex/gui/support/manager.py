@@ -22,7 +22,8 @@ class PMXBundleMenuGroup(QtCore.QObject):
         #The qt menus where a bundle menu is added
         self.containers = []
         self.manager.bundlePopulated.connect(self.on_manager_bundlePopulated)
-        self.bundleTreeModel.dataChanged.connect(self.on_bundleTreeModel_dataChanged)
+        self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
+        self.manager.bundleChanged.connect(self.on_manager_bundleChanged)
     
     def appendMenu(self, menu):
         if menu not in self.containers:
@@ -64,38 +65,38 @@ class PMXBundleMenuGroup(QtCore.QObject):
         for containter in self.containers:
             containter.addMenu(menu)
 
-    def on_bundleTreeModel_dataChanged(self, topLeft, bottomRight):
-        #TODO: ver que pasa con el bottomRight
-        item = topLeft.internalPointer()
-        if item.TYPE == "bundle":
-            menu = self.menus.get(item, None)
-            if menu is not None:
-                title = item.buildBundleAccelerator()
-                if title != menu.title():
-                    menu.setTitle(title)
-                if item.enabled != menu.menuAction().isVisible():
-                    menu.menuAction().setVisible(item.enabled and item.mainMenu is not None)
-                if id(item.mainMenu) != menu.ID:
-                    menu.clear()
-                    submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
-                    items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
-                    self.buildMenu(items, menu, submenus, menu)
-                    menu.ID = id(item.mainMenu)
-        else:
-            action = item.triggerItemAction()
-            if action is not None:
-                text = item.buildMenuTextEntry()
-                if text != action.text():
-                    action.setText(text)
-
+    def on_manager_bundleItemChanged(self, item):
+        action = item.triggerItemAction()
+        if action is not None:
+            text = item.buildMenuTextEntry()
+            if text != action.text():
+                action.setText(text)
+                
+    def on_manager_bundleChanged(self, bundle):
+        menu = self.menus.get(bundle, None)
+        if menu is not None:
+            title = bundle.buildBundleAccelerator()
+            if title != menu.title():
+                menu.setTitle(title)
+            if bundle.enabled != menu.menuAction().isVisible():
+                menu.menuAction().setVisible(item.enabled and bundle.mainMenu is not None)
+            if id(bundle.mainMenu) != menu.ID:
+                menu.clear()
+                submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+                items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+                self.buildMenu(items, menu, submenus, menu)
+                menu.ID = id(bundle.mainMenu)
+                
     def on_manager_bundlePopulated(self, bundle):
         if bundle not in self.menus:
             self.addBundle(bundle)
 
 class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     #Signals
-    bundleItemTriggered = QtCore.pyqtSignal(object)
+    bundleChanged = QtCore.pyqtSignal(object)
     bundlePopulated = QtCore.pyqtSignal(object)
+    bundleItemTriggered = QtCore.pyqtSignal(object)
+    bundleItemChanged = QtCore.pyqtSignal(object)
     
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
@@ -208,6 +209,10 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         self.bundleTreeModel.appendBundle(bundleNode)
         return bundleNode
     
+    def modifyBundle(self, bundle):
+        print "modificado", bundle
+        self.bundleChanged.emit(bundle)
+    
     def removeBundle(self, bundle):
         self.bundleTreeModel.removeBundle(bundle)
     
@@ -225,6 +230,9 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         self.bundleTreeModel.appendBundleItem(bundleItemNode)
         return bundleItemNode
     
+    def modifyBundleItem(self, bundleItem):
+        self.bundleItemChanged.emit(bundleItem)
+        
     def removeBundleItem(self, bundleItem):
         self.bundleTreeModel.removeBundleItem(bundleItem)
         

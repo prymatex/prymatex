@@ -411,10 +411,10 @@ class PMXMenuTreeModel(TreeModel):
             if node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 items.append(str(node.item.uuid).upper())
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
-                self._add_submenu(node, submenus)
+                self.add_submenu(node, submenus)
             elif node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
                 items.append(node.item)
-        submenus[submenu["uuid"]] = { "items": items, "name": submenu["name"] }
+        submenus[str(submenu["uuid"]).upper()] = { "items": items, "name": submenu["name"] }
         
     def getMainMenu(self):
         items = []
@@ -423,7 +423,8 @@ class PMXMenuTreeModel(TreeModel):
             if node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 items.append(str(node.item.uuid).upper())
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
-                self._add_submenu(node, submenus)
+                items.append(str(node.item["uuid"]).upper())
+                self.add_submenu(node, submenus)
             elif node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
                 items.append(node.item)
         return {"items": items, "submenus": submenus }
@@ -479,7 +480,7 @@ class PMXMenuTreeModel(TreeModel):
         dragNode = mimedata.instance()
         
         parentNode = self.node(parentIndex)
-
+        
         if dragNode.parent == None:
             #The node belongs to a exludeList
             if dragNode.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
