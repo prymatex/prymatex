@@ -590,6 +590,8 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         self.manager = parent.manager
         self.treeMenuModel = PMXMenuTreeModel(self.manager)
         self.listExcludedModel = PMXExcludedListModel(self.manager)
+        self.treeMenuModel.setExcludedModel(self.listExcludedModel)
+        self.listExcludedModel.setMenuModel(self.treeMenuModel)
         self.treeMenuView.setModel(self.treeMenuModel)
         self.listExcludedView.setModel(self.listExcludedModel)
 
@@ -618,4 +620,8 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
             self.treeMenuModel.setMainMenu(bundleItem.mainMenu)
             if "setExcludedItems" in bundleItem.mainMenu:
                 self.listExcludedModel.setExcludedItems(bundleItem.mainMenu["setExcludedItems"])
-        #TODO: sino limpiar los modelos y agregar items para armar menu
+            else:
+                self.listExcludedModel.clear()
+            #Agregar items que no estan por aca
+        else:
+            self.treeMenuModel.clear()

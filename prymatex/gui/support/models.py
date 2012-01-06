@@ -379,6 +379,9 @@ class PMXMenuTreeModel(TreeModel):
         self.manager = manager
         TreeModel.__init__(self, parent)
 
+    def setExcludedModel(self, excludedModel):
+        self.excludedModel = excludedModel
+
     def _build_menu(self, items, parent, submenus = {}):
         for uuid in items:
             if uuid.startswith("-"):
@@ -394,10 +397,13 @@ class PMXMenuTreeModel(TreeModel):
 
     def setMainMenu(self, mainMenu):
         self.rootNode.removeAllChild()
-        if mainMenu is not None:
-            self._build_menu(mainMenu['items'], self.rootNode, mainMenu['submenus'])
+        self._build_menu(mainMenu['items'], self.rootNode, mainMenu['submenus'])
         self.layoutChanged.emit()
     
+    def clear(self):
+        self.rootNode.removeAllChild()
+        self.layoutChanged.emit()
+        
     def add_submenu(self, submenuNode, submenus):
         items = []
         submenu = submenuNode.item
@@ -435,7 +441,7 @@ class PMXMenuTreeModel(TreeModel):
         if role == QtCore.Qt.EditRole:  
             node = self.node(index)
             if node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
-                node.item['name'] = value
+                node.name = node.item['name'] = value
             elif node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 self.manager.updateBundleItem(node.item, name = value)
             self.dataChanged.emit(index, index)
@@ -490,7 +496,7 @@ class PMXMenuTreeModel(TreeModel):
                 self.layoutChanged.emit()
                 return False
             elif dragNode.nodeType == PMXBundleMenuTreeNode.ITEM:
-                #Insertar el Nodo aca, quitarlo de la otra lista
+                self.excludedModel.removeMenuItem(dragNode)
                 parentNode.insertChild(row, dragNode)
                 self.layoutChanged.emit()
                 return True
@@ -498,8 +504,8 @@ class PMXMenuTreeModel(TreeModel):
             #Reparent
             currentRow = dragNode.row()
             row = row if currentRow >= row else row - 1
-            dragNode.parent.removeChild(dragNode)
-            dragNode.parent.insertChild(row, dragNode)
+            parentNode.removeChild(dragNode)
+            parentNode.insertChild(row, dragNode)
             self.layoutChanged.emit()
             return False
         else:
@@ -509,11 +515,13 @@ class PMXMenuTreeModel(TreeModel):
             self.layoutChanged.emit()
             return False
 
-    def removeRows(self, row, count, parentIndex):
+    def removeMenuItem(self, item):
+        index = self.createIndex(item.row(), 0, item)
+        parentIndex = self.parent(index)
         parentNode = self.node(parentIndex)
-        childNode = parentNode.child(row)
-        parentNode.removeChild(childNode)
-        return True
+        self.beginRemoveRows(parentIndex, item.row(), item.row())
+        parentNode.removeChild(item)
+        self.endRemoveRows()
 
 #===============================================
 # Bundle Excluded Menu List Model
@@ -523,6 +531,9 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         QtCore.QAbstractListModel.__init__(self)
         self.manager = manager
         self.items = [   PMXBundleMenuTreeNode({ "uuid":"", "name": "New Group" }, PMXBundleMenuTreeNode.SUBMENU), PMXBundleMenuTreeNode("-", PMXBundleMenuTreeNode.SEPARATOR) ]
+    
+    def setMenuModel(self, menuModel):
+        self.menuModel = menuModel
                     
     def setExcludedItems(self, excludedItems):
         self.items = self.items[:2]
@@ -530,6 +541,10 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
             item = self.manager.getBundleItem(uuid)
             if item != None:
                 self.items.append(PMXBundleMenuTreeNode(item, PMXBundleMenuTreeNode.ITEM))
+        self.layoutChanged.emit()
+    
+    def clear(self):
+        self.items = self.items[:2]
         self.layoutChanged.emit()
     
     def getExcludedItems(self):
@@ -571,6 +586,17 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         mimeData = PyMimeData(node)
         return mimeData
 
+    def addMenuItem(self, item):
+        if item.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
+            self.menuModel.removeMenuItem(item)
+        elif item.nodeType == PMXBundleMenuTreeNode.SUBMENU:
+            for child in item.children[:]:
+                self.addMenuItem(child)
+            self.menuModel.removeMenuItem(item)
+        elif item.nodeType == PMXBundleMenuTreeNode.ITEM and item not in self.items:
+            self.menuModel.removeMenuItem(item)
+            self.items.append(item)
+        
     def dropMimeData(self, mimedata, action, row, column, parentIndex):
         if action == QtCore.Qt.IgnoreAction:
             return True
@@ -579,21 +605,14 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
             return False
         
         dragNode = mimedata.instance()
-        
-        if dragNode.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
-            return True
-        elif dragNode.nodeType == PMXBundleMenuTreeNode.SUBMENU:
-            #TODO: Tomar todos sus items y meterlos en el exclude
+        if dragNode not in self.items:
+            self.addMenuItem(dragNode)
             self.layoutChanged.emit()
             return True
-        elif dragNode.nodeType == PMXBundleMenuTreeNode.ITEM:
-            if dragNode not in self.items:
-                dragNode.parent = None
-                self.items.append(dragNode)
-                self.layoutChanged.emit()
-                return True
         return False
         
-    def removeRows(self, row, count, parentIndex):
-        print "quitar de la lista"
-        return True
+    def removeMenuItem(self, item):
+        index = self.items.index(item) - 1 
+        self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+        self.items.remove(item)
+        self.endRemoveRows()
