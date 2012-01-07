@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/SRr/bin/env python
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
@@ -68,10 +68,12 @@ class PMXBundleTreeNode(TreeNode):
         Build and return de QAction related to this bundle item.
         if bundle item haven't action is created whit the given parent, otherwise return None
         """
-        if not hasattr(self, "action") and parent is not None:
+        if parent is not None:
             receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
             self.action = self.buildTriggerItemAction(parent, receiver)
-        return getattr(self, "action", None)
+        elif not hasattr(self, "action"):
+            raise Exception("No action for item %s", self.name)
+        return self.action
     
     def buildTriggerItemAction(self, parent, receiver):
         action = QtGui.QAction(self.icon, self.buildMenuTextEntry(), parent)
