@@ -1,11 +1,11 @@
-from prymatex.gui.dockers.base import PMXBaseDock
-from PyQt4 import QtGui, QtCore
 import os
+
+from PyQt4 import QtGui, QtCore
+
+from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.exceptions import PrymatexFileExistsException
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
-
-
 
 class PMXFileSystemTasks(PMXBaseDock):
     '''

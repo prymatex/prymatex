@@ -8,11 +8,10 @@ from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRepl
 from PyQt4.QtNetwork import QNetworkProxy
 
 from prymatex.ui.dockers.browser import Ui_BrowserDock
-from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
 from subprocess import Popen, PIPE, STDOUT
-from prymatex.gui.dockers.base import PMXBaseDock
+from prymatex.core.plugin.dock import PMXBaseDock
 
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):
@@ -44,7 +43,7 @@ class TmFileReply(QNetworkReply):
             self.offset = end
             return data
 
-class NetworkAccessManager(QNetworkAccessManager, PMXObject):
+class NetworkAccessManager(QNetworkAccessManager):
     def __init__(self, parent, old_manager):
         super(NetworkAccessManager, self).__init__(parent)
         self.old_manager = old_manager
@@ -124,7 +123,7 @@ class TextMate(QtCore.QObject):
         return True
     isBusy = QtCore.pyqtProperty("bool", isBusy)
     
-class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
+class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     SETTINGS_GROUP = "Browser"
     
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")

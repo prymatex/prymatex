@@ -2,10 +2,11 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtGui
-from prymatex.core.base import PMXObject
+
+from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 
-class PMXConsoleDock(QtGui.QDockWidget, PMXObject):
+class PMXConsoleDock(QtGui.QDockWidget, PMXBaseDock):
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         self.setWindowTitle(_("Console"))

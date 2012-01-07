@@ -169,10 +169,12 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = None
 
     def setupPluginManager(self):
-        from prymatex.core.plugin import PMXPluginManager
+        from prymatex.plugin.manager import PMXPluginManager
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
-        self.pluginManager = PMXPluginManager()
-        self.pluginManager.register("editor.default", PMXCodeEditor)
+        self.pluginManager = PMXPluginManager(self)
+        self.pluginManager.load()
+        #self.pluginManager.register("editor.default", PMXCodeEditor)
+        #self.pluginManager.register("editor.graphicviz", PMXGraphicvizEditor)
         
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)

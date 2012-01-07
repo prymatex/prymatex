@@ -3,15 +3,17 @@
 
 import logging
 from logging.handlers import BufferingHandler
+
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
+from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.ui.others.logwidget import Ui_LogWidget
 
-class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXObject):
-    '''
+class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
+    """
     Logging widget
     
-    '''
+    """
     def __init__(self, parent = None):
         super(PMXLoggerDock, self).__init__(parent)
         self.setupUi(self)

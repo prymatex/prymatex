@@ -196,14 +196,6 @@ class pmxConfigPorperty(object):
             obj_type = type(self.fget(obj))
         return obj_type(obj)
 
-    def contributeToClass(self, cls, name):
-        self.name = name
-        self.fget = getattr(cls, name, None)
-        if self.fset == None:
-            self.fset = getattr(cls, "set" + name.title(), None)
-        cls.settings.addSetting(self)
-        setattr(cls, name, self)
-    
     def __call__(self, function):
         self.name = function.__name__
         self.fset = function

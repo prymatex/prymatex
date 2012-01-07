@@ -17,10 +17,9 @@ from PyQt4 import QtCore, QtGui
 #=======================================================================
 from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.base import PMXObject
+from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
-from prymatex.gui.central.editor import PMXBaseEditor
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor import helpers
@@ -32,7 +31,7 @@ from prymatex.gui.widgets.overlay import PMXMessageOverlay
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 
-class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseEditor):
+class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
     #=======================================================================
     # Signals
     #=======================================================================

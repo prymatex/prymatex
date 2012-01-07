@@ -10,11 +10,11 @@ from functools import partial
 
 class PMXFSConstants(object):
     ''' Some constants '''
-    CREATED = 0
-    DELETED = 1
-    RENAMED = 2
-    MOVED   = 3
-    MODIFY  = 4
+    CREATED = 1<<0
+    DELETED = 1<<1
+    RENAMED = 1<<2
+    MOVED   = 1<<3
+    MODIFY  = 1<<4
     
 
 class PMXFileManager(PMXObject):
