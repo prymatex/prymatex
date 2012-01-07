@@ -34,15 +34,14 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationName(prymatex.__author__)
 
         self.buildSettings(profile)
-        
         self.setupLogging()
 
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
         
         self.initialArgs = args
-    
-    def exec_(self):
+
+    def loadGraphicalUserInterface(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
         splash.show()
         try:
@@ -58,22 +57,13 @@ class PMXApplication(QtGui.QApplication):
             # Setup Dialogs
             self.setupDialogs()         #Config Dialog
             
-            # Creates the GUI
+            # Creates the Main Window
             self.createMainWindow()
-    
             splash.finish(self.mainWindow)
-            self.openArgumentFiles()
-            
+          
         except KeyboardInterrupt:
             print("\nQuit signal catched during application startup. Quiting...")
             self.quit()
-            return
-        return super(PMXApplication, self).exec_()
-
-    def openArgumentFiles(self):
-        # Open Files
-        filesToOpen = self.initialArgs[1:]
-        map(self.openFile, filesToOpen)
             
     def resetSettings(self):
         self.settings.clear()
@@ -179,7 +169,7 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = None
 
     def setupPluginManager(self):
-        from prymatex.plugin.manager import PMXPluginManager
+        from prymatex.core.plugin import PMXPluginManager
         from prymatex.gui.codeeditor.editor import PMXCodeEditor
         self.pluginManager = PMXPluginManager()
         self.pluginManager.register("editor.default", PMXCodeEditor)
@@ -274,7 +264,6 @@ class PMXApplication(QtGui.QApplication):
                 mainWindow.setCurrentEditor(editor)
                 editor.setCursorPosition(cursorPosition)
         else:
-            self.mainWindow.tryCloseEmptyEditor()
             project = self.projectManager.findProjectForPath(filePath)
             editor = self.getEditorInstance(filePath, project)
             def appendChunksTask(editor, filePath):
@@ -289,10 +278,15 @@ class PMXApplication(QtGui.QApplication):
                 editor, filePath = result.value
                 editor.setModified(False)
                 editor.setCursorPosition(cursorPosition)
+                self.mainWindow.tryCloseEmptyEditor()
                 self.mainWindow.addEditor(editor, focus)
             task = self.scheduler.newTask( appendChunksTask(editor, filePath) )
             task.done.connect( on_editorReady  )
+
+    def openDirectory(self, directoryPath):
+        raise NotImplementedError("Directory contents should be opened as files here")        
     
+
     def openUrl(self, url):
         if isinstance(url, (str, unicode)):
             url = QtCore.QUrl(url)
@@ -307,7 +301,14 @@ class PMXApplication(QtGui.QApplication):
             if column:
                 position = (position[0], int(column))
             editor = self.openFile(source.path(), position)
-    
+
+    def openArgumentFiles(self, args):
+        for filePath in filter(lambda f: os.path.exists(f), args):
+            if os.path.isfile(filePath):
+                self.openFile(filePath)
+            else:
+                self.openDirectory(filePath)
+
     def on_fileChanged(self, filePath):
         message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?" % filePath
         #Yes No
@@ -317,25 +318,6 @@ class PMXApplication(QtGui.QApplication):
         message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?" % filePath
         print(message)
     
-    # FIXME: Refactor
-    def openFilePaths(self, filePaths):
-        if not isinstance(filePaths, (list, tuple)):
-            filePaths = [filePaths, ]
-        from prymatex.gui.mainwindow import PMXMainWindow
-        mainwindows = filter(lambda w: isinstance(w, PMXMainWindow),  self.allWidgets())
-        if not mainwindows:
-            QtGui.QMessageBox.critical("No Main Window", "No window found while trying to open a file")
-            return
-        mw = mainwindows[0]
-        for filePath in filter(lambda f: os.path.exists(f), filePaths):
-            if os.path.isfile(filePath):
-                mw.openLocalPath(filePath)
-            else:
-                self.openAllSupportedFilesInDirectory(filePath)
-    
-    def openAllSupportedFilesInDirectory(self, filePaths):
-        raise NotImplementedError("Directory contents should be opened as files here")
-        
     #---------------------------------------------------
     # Exceptions, Print exceptions in a window
     #---------------------------------------------------

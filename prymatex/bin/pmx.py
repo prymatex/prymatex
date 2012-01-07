@@ -48,6 +48,8 @@ def runPrymatexApplication(options, args):
         pmx.checkSingleInstance()
         if options.reste_settings:
             pmx.resetSettings()
+        pmx.loadGraphicalUserInterface()
+        pmx.openArgumentFiles(args[1:])
     except exceptions.AlreadyRunningError as ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)

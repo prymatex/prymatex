@@ -266,6 +266,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             return resources.getIcon(self.filePath)
         return PMXBaseEditor.tabIcon(self)
     
+    def setCursorPosition(self, position):
+        cursor = self.textCursor()
+        blockPosition = self.document().findBlockByNumber(position[0]).position()
+        cursor.setPosition(blockPosition + position[1])
+        self.setTextCursor(cursor)
+        
     @classmethod
     def newInstance(cls, filePath = None, project = None):
         editor = cls(filePath, project)
