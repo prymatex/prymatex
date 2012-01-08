@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4.Qt import *
+from PyQt4 import QtCore
 from prymatex.ui.emergencycrash import Ui_CrashDialog
 import sys
 from beautify import beautifyTraceback
 
-class PMXCrashDialog(QDialog, Ui_CrashDialog):
+class PMXCrashDialog(QtCore.QDialog, Ui_CrashDialog):
     '''
     Show a nice traceback dialog
     '''
@@ -28,3 +28,6 @@ class PMXCrashDialog(QDialog, Ui_CrashDialog):
         res = QMessageBox.information(self, "Send traceback", "Send current traceback to "
                                 "Prymatex deevelopers?")
         print res
+        
+    def on_pushClose_pressed(self):
+        self.accept()
