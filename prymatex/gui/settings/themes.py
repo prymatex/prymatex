@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.settings.widgets import PMXConfigBaseWidget
-from prymatex.core.base import PMXObject
 from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
 from prymatex.ui.settings.themes import Ui_FontThemeConfig
 from prymatex.gui.support.qtadapter import QColor2RGBA
 from prymatex.utils.i18n import ugettext as _
 
-class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig, PMXObject):
+class PMXThemeConfigWidget(PMXConfigBaseWidget, Ui_FontThemeConfig):
     '''
     Changes font and theme
     '''

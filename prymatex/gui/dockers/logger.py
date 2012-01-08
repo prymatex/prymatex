@@ -40,7 +40,7 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
     
     def debug_level_change(self, action):
         new_level = action.data()
-        self.debug("Level changed to %s", new_level)
+        self.logger.debug("Level changed to %s", new_level)
 
 class QtLogHandler(BufferingHandler):
     '''

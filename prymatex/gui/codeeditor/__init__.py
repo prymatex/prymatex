@@ -6,11 +6,13 @@ from PyQt4 import QtCore
 from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbolsDock
 from prymatex.gui.codeeditor.editor import PMXCodeEditor
 from prymatex.gui.codeeditor import helpers
+from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
 
 def setup(manager):
     manager.registerEditor(PMXCodeEditor)
     manager.registerDocker(PMXCodeBookmarksDock)
     manager.registerDocker(PMXCodeSymbolsDock)
+    manager.registerStatusBar(PMXCodeEditorStatus)
     
     manager.registerKeyHelper(PMXCodeEditor, helpers.KeyEquivalentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartTypingPairsHelper)

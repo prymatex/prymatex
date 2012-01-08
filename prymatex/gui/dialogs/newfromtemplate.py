@@ -2,15 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
 from prymatex.ui.dialogs.newfromtemplate import Ui_NewFromTemplateDialog
 from prymatex.utils.i18n import ugettext as _
 
-class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObject):
+class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
     def __init__(self, parent = None):
-        super(PMXNewFromTemplateDialog, self).__init__(parent)
+        QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
+        self.application = QtGui.QApplication.instance()
+        
         model = QtGui.QFileSystemModel(self)
         model.setRootPath(QtCore.QDir.rootPath())
         model.setFilter(QtCore.QDir.Dirs)
@@ -24,7 +27,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog, PMXObjec
         self.fileCreated = None
     
     def on_buttonChoose_pressed(self):
-        directory = self.application.fileManager.getDirectory()
+        directory = self.lineLocation.text()
         path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Template"), directory)
         if path:
             self.lineLocation.setText(path)

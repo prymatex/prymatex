@@ -13,6 +13,7 @@ from prymatex.core import exceptions
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils
 from prymatex.gui import dialogs
+from prymatex.gui.statusbar import PMXStatusBar
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """ 
@@ -49,7 +50,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         self.setupDialogs()
         self.setupMenu()
-        self.setupStatusBar()
+        
+        self.setStatusBar(PMXStatusBar(self))
         
         # Connect Signals
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
@@ -65,13 +67,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #============================================================
     # Setups
     #============================================================
-    def setupStatusBar(self):
-        #TODO: este estado pertenece a un tipo de editor, ver como establecer la relacion
-        from prymatex.gui.statusbar import PMXStatusBar
-        from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
-        status = PMXStatusBar(self)
-        status.addPermanentWidget(PMXCodeEditorStatus(self))
-        self.setStatusBar(status)
+    def addStatusBar(self, statusBar):
+        self.statusBar().addPermanentWidget(statusBar)
         
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)
@@ -93,7 +90,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # Create and manage editors
     #============================================================
     def addEmptyEditor(self):
-        editor = self.application.getEditorInstance()
+        editor = self.application.getEditorInstance(parent = self)
         self.addEditor(editor)
         
     def addEditor(self, editor, focus = True):
@@ -124,7 +121,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         #Set editor to Dockers
         for docker in self.dockers:
             docker.setCurrentEditor(editor)
-
+            
         #Update Menu
         self.updateMenuForEditor(editor)        
 
@@ -204,9 +201,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         for path in collectFiles(urls):
             # TODO: Take this code somewhere else, this should change as more editor are added
             if not self.canBeOpened(path):
-                self.debug("Skipping dropped element %s" % path)
+                self.logger.debug("Skipping dropped element %s" % path)
                 continue
-            self.debug("Opening dropped file %s" % path)
+            self.logger.debug("Opening dropped file %s" % path)
             #self.openFile(QtCore.QFileInfo(path), focus = False)
             self.application.openFile(path)
 

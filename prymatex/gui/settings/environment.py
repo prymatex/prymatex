@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.settings.widgets import PMXConfigBaseWidget
-from prymatex.core.base import PMXObject
 from prymatex.ui.settings.environment import Ui_EnvVariables
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
@@ -11,7 +11,6 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         super(PMXEnvVariablesTableModel, self).__init__(parent)
         self.settingGroup = settingGroup
         self.variables = user + map(lambda (variable, value): {'variable': variable, 'value': value, 'system': True, 'enabled': True}, system.iteritems())
-        
         
     def setSettingValue(self):
         variables = filter(lambda item: 'system' not in item, self.variables)
@@ -93,14 +92,14 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         else:
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
 
-class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables, PMXObject):
+class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables):
     '''
     Variables
     '''
     def __init__(self, parent = None):
         super(PMXEnvVariablesWidgets, self).__init__(parent)
         self.setupUi(self)
-        self.configure()
+        
         self.model = PMXEnvVariablesTableModel(self.application.settings.getGroup('Manager'), self.application.supportManager.shellVariables, self.application.supportManager.environment, self)
         self.tableView.setModel(self.model)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)

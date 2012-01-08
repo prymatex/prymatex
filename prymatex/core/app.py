@@ -152,13 +152,21 @@ class PMXApplication(QtGui.QApplication):
 
     def setupFileManager(self):
         from prymatex.core.filemanager import PMXFileManager
+        
+        self.settings.registerConfigurable(PMXFileManager)
         self.fileManager = PMXFileManager(self)
+        self.settings.configure(self.fileManager)
+        
         self.fileManager.fileChanged.connect(self.on_fileChanged)
         self.fileManager.fileDeleted.connect(self.on_fileDeleted)
     
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
+        
+        self.settings.registerConfigurable(PMXProjectManager)
         self.projectManager = PMXProjectManager(self)
+        self.settings.configure(self.projectManager)
+        
         self.projectManager.loadProject()
     
     def setupKernelManager(self):
@@ -200,11 +208,11 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.settings.themes import PMXThemeConfigWidget
         from prymatex.gui.settings.widgets import PMXFileManagerSettings
         self.configDialog = PMXSettingsDialog(self)
-        self.configDialog.register(PMXGeneralWidget())
-        self.configDialog.register(PMXFileManagerSettings())
-        self.configDialog.register(PMXThemeConfigWidget())
-        self.configDialog.register(PMXEnvVariablesWidgets())
-        self.configDialog.register(PMXNetworkWidget())
+        self.configDialog.register(PMXGeneralWidget)
+        self.configDialog.register(PMXFileManagerSettings)
+        self.configDialog.register(PMXThemeConfigWidget)
+        self.configDialog.register(PMXEnvVariablesWidgets)
+        self.configDialog.register(PMXNetworkWidget)
         
         #Bundle Editor
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
@@ -243,8 +251,7 @@ class PMXApplication(QtGui.QApplication):
             self.mainWindow = PMXMainWindow(self)
                 
             #Configure and add dockers
-            self.mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
-            self.pluginManager.createDockers(self.mainWindow)
+            self.pluginManager.populateMainWindow(self.mainWindow)
             
             geometry = self.settings.value("mainWindowGeometry")
             state = self.settings.value("mainWindowState")

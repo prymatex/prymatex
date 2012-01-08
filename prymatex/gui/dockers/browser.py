@@ -125,7 +125,7 @@ class TextMate(QtCore.QObject):
     
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F12")
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F12")
     
     SETTINGS_GROUP = "Browser"
     
@@ -149,13 +149,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
             network_proxy = QNetworkProxy(protocol, proxy_url.host(), proxy_url.port(), proxy_url.userName(), proxy_url.password())
 
         QNetworkProxy.setApplicationProxy( network_proxy )
-
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F12")
     
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
-        self.setupUi(self)
+    def __init__(self, mainWindow):
+        QtGui.QDockWidget.__init__(self, mainWindow)
         PMXBaseDock.__init__(self)
+        self.setupUi(self)
         
         #Developers, developers, developers!!! Extras
         QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
@@ -186,7 +184,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.buttonStop.clicked.connect(self.stop_page)
         
         self.bundleItem = None
-
+    
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
+        mainWindow.browser = self
+        
     def showEvent(self, event):
         self.setFocus()
     
@@ -211,7 +213,6 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def setHtml(self, string, bundleItem):
         self.bundleItem = bundleItem
         url = QtCore.QUrl.fromUserInput("about:%s" % bundleItem.name)
-        print url.toString()
         self.lineUrl.setText(url.toString())
         self.webView.setHtml(string, url)
     

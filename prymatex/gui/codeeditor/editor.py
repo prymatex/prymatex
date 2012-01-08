@@ -181,6 +181,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
         
         self.application.fileManager.fileRenamed.connect(self.on_fileRenamed)
         
+        #Connect context menu
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showEditorContextMenu)
+        
     #=======================================================================
     # Connect Signals
     #=======================================================================
@@ -442,13 +446,20 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
             self.setTextCursor(cursor)
         
     #=======================================================================
-    # Context Menu
+    # Context Menus
     #=======================================================================
-    #def contextMenuEvent(self, event):
-    #    menu = self.createStandardContextMenu()
-    #    menu.popup(event.globalPos())
+    def showEditorContextMenu(self, point):
+        menu = self.createStandardContextMenu()
+        menu.setParent(self)
+        menu.popup(self.mapToGlobal(point))
         
-    
+    def contributeToTabMenu(self, menu):
+        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        if bundleMenu is not None:
+            menu.addMenu(bundleMenu)
+            menu.addSeparator()
+        if self.filePath:
+            menu.addAction(self.actionCopyPath)
     #=======================================================================
     # Espacio para la sidebar
     #=======================================================================
@@ -1105,6 +1116,3 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
     def on_actionCopyPath_triggered(self):
         QtGui.QApplication.clipboard().setText(self.filePath)
         
-    def contributeToTabMenu(self, menu):
-        if self.filePath:
-            menu.addAction(self.actionCopyPath)

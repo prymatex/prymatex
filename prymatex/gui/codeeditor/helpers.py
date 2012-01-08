@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.plugin.editor import PMXBaseKeyHelper
+from prymatex.core.plugin import PMXBaseKeyHelper
 from prymatex.support import PMXPreferenceSettings
 
 class KeyEquivalentHelper(PMXBaseKeyHelper):
@@ -245,16 +245,16 @@ class SmartIndentHelper(PMXBaseKeyHelper):
         QtGui.QPlainTextEdit.keyPressEvent(editor, event)
         print indentMarks
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
-            self.debug("Increase indent")
+            self.logger.debug("Increase indent")
             cursor.insertText(block.userData().indent + editor.tabKeyBehavior)
         elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
-            self.debug("Increase next line indent")
+            self.logger.debug("Increase next line indent")
         elif PMXPreferenceSettings.UNINDENT in indentMarks:
-            self.debug("Unindent")
+            self.logger.debug("Unindent")
         elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
             cursor.insertText(block.userData().indent[:len(editor.tabKeyBehavior)])
         else:
-            self.debug("Preserve indent")
+            self.logger.debug("Preserve indent")
             cursor.insertText(block.userData().indent)
 
 class MultiCursorHelper(PMXBaseKeyHelper):

@@ -159,7 +159,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                                                     'path': path,
                                                     'icon': QtGui.QIcon()})
         else:
-            self.debug("Not a directory %s" % path)
+            self.logger.debug("Not a directory %s" % path)
 
     #================================================
     # Tree View File System

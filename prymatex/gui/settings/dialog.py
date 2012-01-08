@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
 from prymatex.ui.settings.dialog import Ui_SettingsDialog
 
 class PMXSettingsItem(QtGui.QStandardItem):
@@ -12,14 +12,15 @@ class PMXSettingsItem(QtGui.QStandardItem):
         self.setEditable(False)
         self.stackIndex = index
 
-class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog, PMXObject):
+class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
     """
     Settings dialog, it's hold by the application under
     configdialog property
     """
-    def __init__(self, parent = None):
+    def __init__(self, application):
         QtGui.QDialog.__init__(self)
         self.setupUi(self)
+        self.application = application
         
         self.baseWindowTitle = self.windowTitle()
         
@@ -66,10 +67,11 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog, PMXObject):
             self.firstTitleTaken = True
         super(PMXSettingsDialog, self).showEvent(event)
     
-    def register(self, widget, parentNode = None):
+    def register(self, widgetClass, parentNode = None):
+        widgetClass.application = self.application
+        widget = widgetClass(self)
         index = self.stackLayout.addWidget(widget)
         item = PMXSettingsItem(widget.windowTitle(), index)
         item.setIcon(widget.windowIcon())
         self.model.appendRow(item)
         
-    

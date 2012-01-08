@@ -42,11 +42,12 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.currentEditor.goToBlock(block)
         self.currentEditor.setFocus()
         
-class PMXCodeBookmarksDock(QtGui.QDockWidget):
+class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
+    def __init__(self, mainWindow):
+        QtGui.QDockWidget.__init__(self, mainWindow)
+        PMXBaseDock.__init__(self)
         self.setWindowTitle(_("Bookmarks"))
         self.setObjectName(_("BookmarksDock"))
         self.tableViewBookmarks = QtGui.QTableView()

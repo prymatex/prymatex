@@ -1,8 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
+from prymatex.core.plugin.status import PMXBaseStatusBar
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
-class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
+class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     FIND_STYLE_NO_MATCH = 'background-color: red; color: #fff;'
     FIND_STYLE_MATCH = 'background-color: #dea;'
     FIND_STYLE_NORMAL = ''

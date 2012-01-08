@@ -3,21 +3,21 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
 
 
-class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
+class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
     #=========================================================
     # Settings
     #=========================================================
     SETTINGS_GROUP = 'BundleEditor'
         
-    def __init__(self, parent = None):
+    def __init__(self, application):
         super(PMXBundleEditor, self).__init__()
         self.setupUi(self)
+        self.application = application
         self.manager = self.application.supportManager
         self.finished.connect(self.on_bundleEditor_finished)
         
@@ -29,7 +29,6 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.configTreeView()
         self.configToolbar()
         self.configActivation()
-        self.configure()
 
     def on_bundleEditor_finished(self, code):
         self.saveChanges()
@@ -314,11 +313,11 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class PMXBundleFilter(QtGui.QDialog, PMXObject):
-    def __init__(self, parent = None):
-        super(PMXBundleFilter, self).__init__(parent)
+class PMXBundleFilter(QtGui.QDialog):
+    def __init__(self, bundleEditor):
+        super(PMXBundleFilter, self).__init__(bundleEditor)
         self.setupUi(self)
-        self.manager = self.application.supportManager
+        self.manager = bundleEditor.application.supportManager
         self.setWindowFlags(QtCore.Qt.Dialog)
         self.proxy = QtGui.QSortFilterProxyModel(self)
         self.proxy.setSourceModel(self.manager.bundleProxyModel)

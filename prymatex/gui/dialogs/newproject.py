@@ -2,15 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
 from prymatex.utils.i18n import ugettext as _
 from prymatex.ui.dialogs.newproject import Ui_NewProjectDialog
 
-class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog, PMXObject):
+class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
+        self.application = QtGui.QApplication.instance()
+        
         model = QtGui.QFileSystemModel(self)
         model.setRootPath(QtCore.QDir.rootPath())
         model.setFilter(QtCore.QDir.Dirs)

@@ -3,9 +3,9 @@
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.core.plugin import PMXBasePlugin
+from prymatex.core.plugin import PMXBaseWidgetPlugin
 
-class PMXBaseDock(PMXBasePlugin):
+class PMXBaseDock(PMXBaseWidgetPlugin):
     MENU_KEY_SEQUENCE = None
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
@@ -16,6 +16,3 @@ class PMXBaseDock(PMXBasePlugin):
     
     def setCurrentEditor(self, editor):
         pass
-    
-class PMXBaseDockAddon():
-    pass

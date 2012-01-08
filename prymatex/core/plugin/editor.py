@@ -5,15 +5,15 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.core.plugin import PMXBasePlugin
+from prymatex.core.plugin import PMXBaseWidgetPlugin, Key_Any
 from prymatex.core import exceptions
 
-class PMXBaseEditor(PMXBasePlugin):
+class PMXBaseEditor(PMXBaseWidgetPlugin):
     """
     Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     #tabStatusChanged
-    HELPERS = {}
+    KEY_HELPERS = {}
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
@@ -88,23 +88,11 @@ class PMXBaseEditor(PMXBasePlugin):
         can provide custom actions to the menu through this callback'''
         pass
     
-    #======================================
-    #Editor Helpers
-    #======================================
     @classmethod
     def addKeyHelper(cls, helper):
-        helpers = cls.HELPERS.setdefault(helper.KEY, [])
+        helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])
         helpers.append(helper)
         
     def findHelpers(self, key):
-        helpers = self.HELPERS[Key_Any][:]
-        return helpers + self.HELPERS.get(key, [])
-
-Key_Any = 0        
-class PMXBaseKeyHelper(PMXBasePlugin):
-    KEY = Key_Any
-    def accept(self, editor, event, cursor = None, scope = None):
-        return event.key() == self.KEY
-    
-    def execute(self, editor, event, cursor = None, scope = None):
-        pass
+        helpers = self.KEY_HELPERS[Key_Any][:]
+        return helpers + self.KEY_HELPERS.get(key, [])

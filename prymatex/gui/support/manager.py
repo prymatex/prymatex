@@ -61,6 +61,9 @@ class PMXBundleMenuGroup(QtCore.QObject):
         menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
         self.addToContainers(menu)
     
+    def menuForBundle(self, bundle):
+        return self.menus.get(bundle)
+        
     def addToContainers(self, menu):
         for containter in self.containers:
             containter.addMenu(menu)
@@ -161,6 +164,9 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def appendMenuToBundleMenuGroup(self, menu):
         self.bundleMenuGroup.appendMenu(menu)
 
+    def menuForBundle(self, bundle):
+        return self.bundleMenuGroup.menuForBundle(bundle)
+        
     def buildEnvironment(self):
         env = {}
         for var in self.shellVariables:

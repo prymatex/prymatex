@@ -103,7 +103,6 @@ class _DragableTabBar(QtGui.QTabBar):
         ''' Returns the widget at position (QPoint)'''
         n = self._tab_at(pos)
         return self.parent().widget(n)
-        
 
     def mousePressEvent(self, e):
         """ Reimplemented to handle mouse press events. """
