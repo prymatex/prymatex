@@ -10,6 +10,7 @@ class PMXBaseDock(PMXBaseWidgetPlugin):
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self):
+        PMXBaseWidgetPlugin.__init__(self)
         if self.MENU_KEY_SEQUENCE:
             keysequence = QtGui.QKeySequence(self.MENU_KEY_SEQUENCE)
             self.toggleViewAction().setShortcut(keysequence)

@@ -7,12 +7,15 @@ from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbols
 from prymatex.gui.codeeditor.editor import PMXCodeEditor
 from prymatex.gui.codeeditor import helpers
 from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
+from prymatex.gui.codeeditor.overlay import PMXEditorMessageOverlay
 
 def setup(manager):
     manager.registerEditor(PMXCodeEditor)
     manager.registerDocker(PMXCodeBookmarksDock)
     manager.registerDocker(PMXCodeSymbolsDock)
     manager.registerStatusBar(PMXCodeEditorStatus)
+    
+    manager.registerOverlay(PMXCodeEditor, PMXEditorMessageOverlay)
     
     manager.registerKeyHelper(PMXCodeEditor, helpers.KeyEquivalentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartTypingPairsHelper)

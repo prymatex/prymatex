@@ -185,9 +185,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
         self.bundleItem = None
     
-    def initialize(self, mainWindow):
-        PMXBaseDock.initialize(self, mainWindow)
-        mainWindow.browser = self
+    def initialize(self):
+        self.parent().browser = self
         
     def showEvent(self, event):
         self.setFocus()

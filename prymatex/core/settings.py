@@ -5,8 +5,8 @@ Application configuration based on Qt's QSettings module.
 
 '''
 import os, plistlib
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+
+from PyQt4 import QtCore, QtGui
 
 try:
     from win32com.shell import shellcon, shell

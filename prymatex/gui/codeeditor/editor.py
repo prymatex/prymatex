@@ -26,15 +26,16 @@ from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleter
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
-from prymatex.gui.widgets.overlay import PMXMessageOverlay
+
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 
-class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
+class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
+    themeChanged = QtCore.pyqtSignal()
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
@@ -74,11 +75,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
         palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.AlternateBase, self.colours['invisibles'])
         self.setPalette(palette)
         
-        # Update Message Colors
-        self.setMessageTextColor( self.colours['background'])
-        self.setMessageBackgroundColor( self.colours['foreground'] )
-        self.setMessageBorderColor(self.colours['selection'])
-        
         #Sidebar colours
         self.sidebar.foreground = self.colours['foreground']
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
@@ -91,7 +87,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
             if theme.author is not None:
                 message += "<i>(by %s)</i>" % theme.author
             self.showMessage(message)
-    
+        self.themeChanged.emit()
+        
     #================================================================
     # Regular expresions
     #================================================================
@@ -143,7 +140,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
     def __init__(self, filePath = None, project = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self, filePath, project)
-        PMXMessageOverlay.__init__(self)
+        #PMXMessageOverlay.__init__(self)
         
         #Sidebar
         self.sidebar = PMXSidebar(self)
@@ -588,7 +585,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
         self.sidebar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
-        self.updateMessagePosition()
+        self.updateOverlays()
     
     def paintEvent(self, event):
         #QtGui.QPlainTextEdit.paintEvent(self, event)

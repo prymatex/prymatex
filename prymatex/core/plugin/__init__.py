@@ -10,13 +10,39 @@ class PMXBasePlugin(object):
     
     def initialize(self):
         raise NotImplemented
-        
+    
     def finalize(self):
         pass
     
 class PMXBaseWidgetPlugin(PMXBasePlugin):
-    def initialize(self, mainWindow):
-        self.mainWindow = mainWindow
+    def __init__(self):
+        self.overlays = []
+            
+    def initialize(self):
+        pass
+
+    def updateOverlays(self):
+        _ = map(lambda overlay: overlay.updateOverlay(), self.overlays)
+    
+    def addOverlay(self, overlay):
+        self.overlays.append(overlay)
+    
+    def showMessage(self, *largs, **kwargs):
+        for overlay in self.overlays:
+            overlay.showMessage(*largs, **kwargs)
+
+class PMXBaseOverlay(PMXBasePlugin):
+    def initialize(self):
+        pass
+    
+    def updateOverlay(self):
+        pass
+    
+    def showMessage(self, *largs, **kwargs):
+        pass
+
+    def showWidget(self, *largs, **kwargs):
+        pass
     
 Key_Any = 0
 class PMXBaseKeyHelper(PMXBasePlugin):

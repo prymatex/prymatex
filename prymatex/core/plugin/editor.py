@@ -18,6 +18,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
     def __init__(self, filePath = None, project = None):
+        PMXBaseWidgetPlugin.__init__(self)
         self.filePath = filePath
         self.project = project
         if self.filePath is None:
@@ -79,9 +80,6 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         if self.isNew():
             return False
         return self.application.fileManager.checkExternalModification(self.filePath, self.mtime)
-    
-    def showMessage(self, message, timeout = None, icon = None):
-        raise NotImplementedError("You need to extend PMXMessageOverlay")
     
     def contributeToTabMenu(self, menu):
         ''' When an editor is right clicked on it's tab, the editor
