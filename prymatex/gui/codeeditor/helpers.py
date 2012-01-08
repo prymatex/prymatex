@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
+from prymatex.core.plugin.editor import PMXBaseKeyHelper
 from prymatex.support import PMXPreferenceSettings
 
-class PMXBaseEditorHelper(PMXObject):
-    KEY = None
-    def accept(self, editor, event, cursor = None, scope = None):
-        return event.key() == self.KEY
-    
-    def execute(self, editor, event, cursor = None, scope = None):
-        pass
-
-class KeyEquivalentHelper(PMXBaseEditorHelper):
-    KEY = QtCore.Qt.Key_Any
+class KeyEquivalentHelper(PMXBaseKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         keyseq = int(event.modifiers()) + event.key()
         self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, scope)
@@ -25,7 +17,7 @@ class KeyEquivalentHelper(PMXBaseEditorHelper):
         else:
             editor.selectBundleItem(self.items)
 
-class TabTriggerHelper(PMXBaseEditorHelper):
+class TabTriggerHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Tab
     def accept(self, editor, event, cursor = None, scope = None):
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
@@ -39,7 +31,7 @@ class TabTriggerHelper(PMXBaseEditorHelper):
         else:
             editor.selectBundleItem(self.items, tabTriggered = True)    
 
-class CompleterHelper(PMXBaseEditorHelper):
+class CompleterHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Space
     def accept(self, editor, event, cursor = None, scope = None):
         """accept the completer event"""
@@ -59,9 +51,7 @@ class CompleterHelper(PMXBaseEditorHelper):
         #alreadyTyped
         editor.showCompleter(self.completions, currentWord)
 
-class SmartTypingPairsHelper(PMXBaseEditorHelper):
-    KEY = QtCore.Qt.Key_Any
-    
+class SmartTypingPairsHelper(PMXBaseKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         settings = self.application.supportManager.getPreferenceSettings(scope)
         character = event.text()
@@ -156,7 +146,7 @@ class SmartTypingPairsHelper(PMXBaseEditorHelper):
             self.cursorClose.insertText(self.pair[1])
         cursor.endEditBlock()
 
-class MoveCursorToHomeHelper(PMXBaseEditorHelper):
+class MoveCursorToHomeHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Home
     def accept(self, editor, event, cursor = None, scope = None):
         #Solo si el cursor no esta al final de la indentacion
@@ -170,13 +160,13 @@ class MoveCursorToHomeHelper(PMXBaseEditorHelper):
         cursor.setPosition(self.newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
         editor.setTextCursor(cursor)
 
-class OverwriteHelper(PMXBaseEditorHelper):
+class OverwriteHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Insert
     def execute(self, editor, event, cursor = None, scope = None):
         editor.setOverwriteMode(not editor.overwriteMode())
         editor.modeChanged.emit()
         
-class TabIndentHelper(PMXBaseEditorHelper):
+class TabIndentHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Tab
     def execute(self, editor, event, cursor = None, scope = None):
         start, end = editor.getSelectionBlockStartEnd()
@@ -192,7 +182,7 @@ class TabIndentHelper(PMXBaseEditorHelper):
         else:
             editor.textCursor().insertText(editor.tabKeyBehavior)
 
-class BackspaceUnindentHelper(PMXBaseEditorHelper):
+class BackspaceUnindentHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
@@ -204,7 +194,7 @@ class BackspaceUnindentHelper(PMXBaseEditorHelper):
         for _ in range(len(editor.tabKeyBehavior)):
             cursor.deletePreviousChar()
 
-class BacktabUnindentHelper(PMXBaseEditorHelper):
+class BacktabUnindentHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Backtab
     def execute(self, editor, event, cursor = None, scope = None):
         start, end = editor.getSelectionBlockStartEnd()
@@ -218,8 +208,7 @@ class BacktabUnindentHelper(PMXBaseEditorHelper):
             for _ in range(counter):
                 cursor.deletePreviousChar()
 
-class SmartUnindentHelper(PMXBaseEditorHelper):
-    KEY = QtCore.Qt.Key_Any
+class SmartUnindentHelper(PMXBaseKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         if event.text():
             settings = self.application.supportManager.getPreferenceSettings(scope)
@@ -238,7 +227,7 @@ class SmartUnindentHelper(PMXBaseEditorHelper):
         for _ in range(len(editor.tabKeyBehavior)):
             cursor.deleteChar()
 
-class SmartIndentHelper(PMXBaseEditorHelper):
+class SmartIndentHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Return
     def accept(self, editor, event, cursor = None, scope = None):
         self.settings = self.application.supportManager.getPreferenceSettings(scope)
@@ -268,7 +257,7 @@ class SmartIndentHelper(PMXBaseEditorHelper):
             self.debug("Preserve indent")
             cursor.insertText(block.userData().indent)
 
-class MultiCursorHelper(PMXBaseEditorHelper):
+class MultiCursorHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_M
     def accept(self, editor, event, cursor = None, scope = None):
         return event.key() == self.KEY and event.modifiers() & QtCore.Qt.ControlModifier and event.modifiers() & QtCore.Qt.MetaModifier

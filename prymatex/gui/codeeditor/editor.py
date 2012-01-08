@@ -22,7 +22,6 @@ from prymatex.core import exceptions
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.codeeditor import helpers
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
@@ -136,19 +135,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
     ShowLineNumbers = 0x08
     ShowFolding = 0x10
     WordWrap = 0x20
-    
-    Key_Any = 0
-    editorHelpers = {
-        Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper(), helpers.SmartUnindentHelper() ],
-        QtCore.Qt.Key_Tab: [ helpers.TabTriggerHelper(), helpers.TabIndentHelper() ],
-        QtCore.Qt.Key_Backtab: [ helpers.BacktabUnindentHelper() ],
-        QtCore.Qt.Key_Space: [ helpers.CompleterHelper() ],
-        QtCore.Qt.Key_Backspace: [ helpers.BackspaceUnindentHelper() ],
-        QtCore.Qt.Key_Home: [ helpers.MoveCursorToHomeHelper() ],
-        QtCore.Qt.Key_Return: [ helpers.SmartIndentHelper() ],
-        QtCore.Qt.Key_Insert: [ helpers.OverwriteHelper() ],
-        QtCore.Qt.Key_M: [ helpers.MultiCursorHelper() ],
-    }
     
     @property
     def tabKeyBehavior(self):
@@ -270,11 +256,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
         blockPosition = self.document().findBlockByNumber(position[0]).position()
         cursor.setPosition(blockPosition + position[1])
         self.setTextCursor(cursor)
-        
-    @classmethod
-    def newInstance(cls, filePath = None, project = None, parent = None):
-        editor = cls(filePath, project, parent)
-        return editor
 
     #=======================================================================
     # Obteniendo datos del editor
@@ -692,16 +673,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
         #Obtener key, scope y cursor
         scope = self.getCurrentScope()
         cursor = self.textCursor()
-        #Preparar teclas
-        keys = [ self.Key_Any, event.key() ]
-        for key in keys:
-            #Obtener Helpers
-            helpers = self.editorHelpers.get(key, [])
-            for helper in helpers:
-                #Buscar Entre los helpers
-                if helper.accept(self, event, cursor, scope):
-                    #pasarle el evento
-                    return helper.execute(self, event, cursor, scope)
+        
+        for helper in self.findHelpers(event.key()):
+            #Buscar Entre los helpers
+            if helper.accept(self, event, cursor, scope):
+                #pasarle el evento
+                return helper.execute(self, event, cursor, scope)
         
         #No tengo helper paso el evento a la base
         QtGui.QPlainTextEdit.keyPressEvent(self, event)

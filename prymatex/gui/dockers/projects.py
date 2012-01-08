@@ -17,6 +17,7 @@ from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.project.base import PMXProject
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
+    PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
 
     def __init__(self, parent):

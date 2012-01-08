@@ -14,6 +14,9 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
     Logging widget
     
     """
+    PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F12")
+    
     def __init__(self, parent = None):
         super(PMXLoggerDock, self).__init__(parent)
         self.setupUi(self)

@@ -8,20 +8,21 @@ from PyQt4 import QtGui, QtCore
 from prymatex.core.plugin import PMXBasePlugin
 from prymatex.core import exceptions
 
-
 class PMXBaseEditor(PMXBasePlugin):
     """
     Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     #tabStatusChanged
+    HELPERS = {}
+    CREATION_COUNTER = 0
+    UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
-    creation_counter = 0
     def __init__(self, filePath = None, project = None):
         self.filePath = filePath
         self.project = project
         if self.filePath is None:
-            PMXBaseEditor.creation_counter += 1
-            self.creation_counter = PMXBaseEditor.creation_counter
+            PMXBaseEditor.CREATION_COUNTER += 1
+            self.creation_counter = PMXBaseEditor.CREATION_COUNTER
     
     def saved(self, filePath):
         if filePath != self.filePath:
@@ -30,8 +31,8 @@ class PMXBaseEditor(PMXBasePlugin):
         self.showMessage("<i>%s</i> saved" % self.filePath)
     
     def closed(self):
-        if self.filePath is None and self.creation_counter == PMXBaseEditor.creation_counter:
-            PMXBaseEditor.creation_counter -= 1
+        if self.filePath is None and self.creation_counter == PMXBaseEditor.CREATION_COUNTER:
+            PMXBaseEditor.CREATION_COUNTER -= 1
         elif self.filePath is not None:
             self.application.fileManager.closeFile(self.filePath)
 
@@ -45,11 +46,10 @@ class PMXBaseEditor(PMXBasePlugin):
     def tabIcon(self):
         return QtGui.QIcon()
     
-    UNTITLED_FILE_TEMPLATE = "Untitled {creation_counter}"
     def tabTitle(self):
         if self.filePath is not None:
             return os.path.basename(self.filePath)
-        return self.UNTITLED_FILE_TEMPLATE.format(creation_counter = self.creation_counter)
+        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creation_counter)
     
     def fileDirectory(self):
         return self.application.fileManager.getDirectory(self.filePath)
@@ -80,14 +80,31 @@ class PMXBaseEditor(PMXBasePlugin):
             return False
         return self.application.fileManager.checkExternalModification(self.filePath, self.mtime)
     
-    @classmethod
-    def newInstance(cls, filePath = None, project = None, parent = None):
-        return cls(filePath, parent)
-    
     def showMessage(self, message, timeout = None, icon = None):
         raise NotImplementedError("You need to extend PMXMessageOverlay")
     
     def contributeToTabMenu(self, menu):
         ''' When an editor is right clicked on it's tab, the editor
         can provide custom actions to the menu through this callback'''
+        pass
+    
+    #======================================
+    #Editor Helpers
+    #======================================
+    @classmethod
+    def addKeyHelper(cls, helper):
+        helpers = cls.HELPERS.setdefault(helper.KEY, [])
+        helpers.append(helper)
+        
+    def findHelpers(self, key):
+        helpers = self.HELPERS[Key_Any][:]
+        return helpers + self.HELPERS.get(key, [])
+
+Key_Any = 0        
+class PMXBaseKeyHelper(PMXBasePlugin):
+    KEY = Key_Any
+    def accept(self, editor, event, cursor = None, scope = None):
+        return event.key() == self.KEY
+    
+    def execute(self, editor, event, cursor = None, scope = None):
         pass

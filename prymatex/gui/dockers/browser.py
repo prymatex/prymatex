@@ -124,6 +124,9 @@ class TextMate(QtCore.QObject):
     isBusy = QtCore.pyqtProperty("bool", isBusy)
     
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
+    PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F12")
+    
     SETTINGS_GROUP = "Browser"
     
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")

@@ -10,8 +10,8 @@ from prymatex.gui.dockers.logger import PMXLoggerDock
 from prymatex.gui.dockers.projects import PMXProjectDock
 
 def setup(manager):
-    manager.registerDocker(PMXFileSystemDock, QtCore.Qt.LeftDockWidgetArea)
-    manager.registerDocker(PMXBrowserDock, QtCore.Qt.BottomDockWidgetArea)
-    manager.registerDocker(PMXConsoleDock, QtCore.Qt.BottomDockWidgetArea)
-    manager.registerDocker(PMXLoggerDock, QtCore.Qt.BottomDockWidgetArea)
-    manager.registerDocker(PMXProjectDock, QtCore.Qt.LeftDockWidgetArea)
+    manager.registerDocker(PMXFileSystemDock)
+    manager.registerDocker(PMXBrowserDock)
+    manager.registerDocker(PMXConsoleDock)
+    manager.registerDocker(PMXLoggerDock)
+    manager.registerDocker(PMXProjectDock)

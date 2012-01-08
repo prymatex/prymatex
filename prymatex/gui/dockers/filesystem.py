@@ -16,6 +16,8 @@ from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks):
+    PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
     #=======================================================================
     # Settings
     #=======================================================================
@@ -25,7 +27,6 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     _pushButtonHistoryBack = []
     _pushButtonHistoryForward = []
     
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, parent)
         PMXFileSystemTasks.__init__(self)     

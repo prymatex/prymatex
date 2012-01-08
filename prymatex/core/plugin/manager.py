@@ -14,13 +14,16 @@ class PMXPluginManager(object):
         self.application.settings.registerConfigurable(editorClass)
         self.editors.append(editorClass)
  
-    def registerDocker(self, dockClass, preferedArea = QtCore.Qt.RightDockWidgetArea):
+    def registerDocker(self, dockClass):
         self.application.settings.registerConfigurable(dockClass)
-        self.dockers.append((dockClass, preferedArea))
+        self.dockers.append(dockClass)
+    
+    def registerKeyHelper(self, editorClass, helperClass):
+        editorClass.addKeyHelper(helperClass())
         
     def createEditor(self, filePath, project, parent = None):
         editorClass = self.editors[0]
-        editor = editorClass.newInstance(filePath, project, parent)
+        editor = editorClass(filePath, project, parent)
         
         self.application.settings.configure(editor)
         
@@ -29,13 +32,13 @@ class PMXPluginManager(object):
         return editor
     
     def createDockers(self, mainWindow):
-        for dockClass, preferedArea in self.dockers:
+        for dockClass in self.dockers:
             dock = dockClass(mainWindow)
             self.application.settings.configure(dock)
             instances = self.instances.setdefault(dockClass, [])
             instances.append(dock)
-            mainWindow.addDock(dock, preferedArea)
-            
+            mainWindow.addDock(dock, dock.PREFERED_AREA)
+    
     def load(self):
         from prymatex.gui.codeeditor import setup
         setup(self)
