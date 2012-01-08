@@ -115,12 +115,14 @@ class PMXApplication(QtGui.QApplication):
     @deco.logtime
     def setupSupportManager(self, callbackSplashMessage = None):
         from prymatex.gui.support.manager import PMXSupportManager
-
-        sharePath = self.settings.value('PMX_SHARE_PATH')
-        homePath = self.settings.value('PMX_HOME_PATH')
-
-        #Prepare prymatex namespace
+        
+        self.settings.registerConfigurable(PMXSupportManager)
+        
         manager = PMXSupportManager(self)
+        self.settings.configure(manager)
+        
+        #Prepare prymatex namespace
+        sharePath = self.settings.value('PMX_SHARE_PATH')
         manager.addNamespace('prymatex', sharePath)
         manager.updateEnvironment({ #TextMate Compatible :P
                 'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
@@ -137,6 +139,7 @@ class PMXApplication(QtGui.QApplication):
         })
 
         #Prepare user namespace
+        homePath = self.settings.value('PMX_HOME_PATH')
         manager.addNamespace('user', homePath)
         manager.updateEnvironment({
                 'PMX_HOME_PATH': homePath,
@@ -169,8 +172,7 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = None
 
     def setupPluginManager(self):
-        from prymatex.plugin.manager import PMXPluginManager
-        from prymatex.gui.codeeditor.editor import PMXCodeEditor
+        from prymatex.core.plugin.manager import PMXPluginManager
         self.pluginManager = PMXPluginManager(self)
         self.pluginManager.load()
         #self.pluginManager.register("editor.default", PMXCodeEditor)
@@ -236,15 +238,23 @@ class PMXApplication(QtGui.QApplication):
         """
         #Por ahora solo una mainWindow
         from prymatex.gui.mainwindow import PMXMainWindow
-        geometry = self.settings.value("mainWindowGeometry")
-        state = self.settings.value("mainWindowState")
-        
-        self.mainWindow = PMXMainWindow(self)
-        if geometry:
-            self.mainWindow.restoreGeometry(geometry)
-        if state:
-            self.mainWindow.restoreState(state)
-        self.mainWindow.show()
+        #TODO: Testeame con mas de una
+        for _ in range(1):
+            self.mainWindow = PMXMainWindow(self)
+                
+            #Configure and add dockers
+            self.mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
+            self.pluginManager.createDockers(self.mainWindow)
+            
+            geometry = self.settings.value("mainWindowGeometry")
+            state = self.settings.value("mainWindowState")
+            if geometry:
+                self.mainWindow.restoreGeometry(geometry)
+            if state:
+                self.mainWindow.restoreState(state)
+                
+            self.mainWindow.addEmptyEditor()
+            self.mainWindow.show()
 
     def currentEditor(self):
         return self.mainWindow.currentEditor()
@@ -253,8 +263,8 @@ class PMXApplication(QtGui.QApplication):
         #Para cada mainwindow buscar el editor
         return self.mainWindow, self.mainWindow.findEditorForFile(filePath)
             
-    def getEditorInstance(self, filePath = None, project = None):
-        return self.pluginManager.createEditor("default", filePath, project)
+    def getEditorInstance(self, filePath = None, project = None, parent = None):
+        return self.pluginManager.createEditor(filePath, project, parent)
 
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         '''
@@ -267,7 +277,7 @@ class PMXApplication(QtGui.QApplication):
                 editor.setCursorPosition(cursorPosition)
         else:
             project = self.projectManager.findProjectForPath(filePath)
-            editor = self.getEditorInstance(filePath, project)
+            editor = self.getEditorInstance(filePath, project, self.mainWindow)
             def appendChunksTask(editor, filePath):
                 content = self.fileManager.openFile(filePath)
                 editor.setReadOnly(True)

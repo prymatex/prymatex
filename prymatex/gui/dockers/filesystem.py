@@ -28,8 +28,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, parent)
+        PMXFileSystemTasks.__init__(self)     
         self.setupUi(self)
-        PMXBaseDock.__init__(self)        
         
         #File System model
         self.fileSystemModel = QtGui.QFileSystemModel(self)
@@ -44,8 +44,6 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         
         self.setupComboBoxLocation()
         self.setupTreeViewFileSystem()
-        
-        self.configure()
         
         self.installEventFilter(self)
         

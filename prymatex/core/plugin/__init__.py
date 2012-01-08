@@ -3,11 +3,32 @@
 
 from PyQt4 import QtCore, QtGui
 
+#TODO: en inicialize deberia pasar un proveedro de servicios o otra forma menos directa de que un plguin hable con el core
 class PMXBasePlugin(object):
+    __app = QtGui.QApplication.instance()
+    __mainwindow = None
+    __logger = None
     
     def initialize(self):
         pass
     
+    #============================================================
+    # Shortcut
+    #============================================================
+    @property
+    def mainWindow(self):
+        if self.__class__.__mainwindow == None:
+            self.__class__.__mainwindow = self
+            while self.__class__.__mainwindow.parent() != None:
+                self.__class__.__mainwindow = self.__class__.__mainwindow.parent()
+        return self.__class__.__mainwindow
+    
+    @property
+    def application(self):
+        """
+        Shortcut property for PyQt4.QtGui.QApplication.instance().
+        """
+        return self.__app
     #============================================================
     # Logger
     #============================================================

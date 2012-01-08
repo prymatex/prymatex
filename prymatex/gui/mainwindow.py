@@ -9,14 +9,12 @@ from PyQt4 import QtCore, QtGui
 from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.gui.actions import MainWindowActions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.base import PMXObject
 from prymatex.core import exceptions
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils
 from prymatex.gui import dialogs
-from prymatex.utils import coroutines
 
-class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObject):
+class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """ 
     Prymatex main window
     """
@@ -38,7 +36,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.menuBar().setShown(value)
     
     # Constructor
-    def __init__(self, parent = None):
+    def __init__(self, application):
         """
         The main window
         @param parent: The QObject parent, in this case it should be the QApp
@@ -46,26 +44,23 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                               is shown in the screen.
         """
         QtGui.QMainWindow.__init__(self)
+        self.application = application
         self.setupUi(self)
         
-        self.setupDockers()
         self.setupDialogs()
         self.setupMenu()
         self.setupStatusBar()
         
         # Connect Signals
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
-        self.splitTabWidget.currentWidgetChanged.connect(self.paneFileSystem.on_currentEditorChanged)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
         self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor().insertBundleItem(item))
         
         utils.centerWidget(self, scale = (0.9, 0.8))
-        self.configure()
+        self.dockers = []
         
         self.setAcceptDrops(True)
-        
-        self.addEmptyEditor()
 
     #============================================================
     # Setups
@@ -78,59 +73,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         status.addPermanentWidget(PMXCodeEditorStatus(self))
         self.setStatusBar(status)
         
-    def setupDockers(self):
-        """
-        Basic panels, dock objects. More docks should be available via plugins
-        """
-        
-        from prymatex.gui.codeeditor.dockers import PMXCodeSymbolsDock, PMXCodeBookmarksDock
-        #from prymatex.gui.dockers.terminal import PMXTerminalWidget
-        
-        self.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
-        
-        self.paneFileSystem = PMXFileSystemDock(self)
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.paneFileSystem)
-        self.menuPanels.addAction(self.paneFileSystem.toggleViewAction())
-        self.paneFileSystem.hide()
-        
-        self.paneProject = PMXProjectDock(self)
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.paneProject)
-        self.menuPanels.addAction(self.paneProject.toggleViewAction())
-        self.paneProject.hide()
-        
-        self.paneBrowser = PMXBrowserDock(self)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneBrowser)
-        self.menuPanels.addAction(self.paneBrowser.toggleViewAction())
-        self.paneBrowser.hide()
-        
-        self.paneConsole = PMXConsoleDock(self)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneConsole)
-        self.menuPanels.addAction(self.paneConsole.toggleViewAction())
-        self.paneConsole.hide()
-        
-        self.paneLogging = PMXLoggerDock(self)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneLogging)
-        self.menuPanels.addAction(self.paneLogging.toggleViewAction())
-        self.paneLogging.hide()
-
-        codeBookmarks = PMXCodeBookmarksDock(self)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, codeBookmarks)
-        self.menuPanels.addAction(codeBookmarks.toggleViewAction())
-        codeBookmarks.hide()        
-
-        codeSymbols = PMXCodeSymbolsDock(self)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, codeSymbols)
-        self.menuPanels.addAction(codeSymbols.toggleViewAction())
-        codeSymbols.hide()
-        
-        #self.paneTerminal = PMXTerminalWidget(self)
-        #self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneTerminal)
-        #self.menuPanels.addAction(self.paneTerminal.toggleViewAction())
-        #self.paneTerminal.hide()
-        
-        self.tabifyDockWidget(codeSymbols, codeBookmarks)
-        
-        self.dockers = [codeSymbols, codeBookmarks]
+    def addDock(self, dock, area):
+        self.addDockWidget(area, dock)
+        self.menuPanels.addAction(dock.toggleViewAction())
+        dock.hide()
+        self.dockers.append(dock)
     
     def setupDialogs(self):
         from prymatex.gui.dialogs.selector import PMXSelectorDialog
@@ -150,13 +97,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.addEditor(editor)
         
     def addEditor(self, editor, focus = True):
-        self.statusBar().addEditor(editor)
         self.splitTabWidget.addTab(editor)
         if focus:
             self.setCurrentEditor(editor)
 
     def removeEditor(self, editor):
-        self.statusBar().removeEditor(editor)
         self.splitTabWidget.removeTab(editor)
         del editor
 

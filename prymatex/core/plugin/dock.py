@@ -7,10 +7,14 @@ from prymatex.core.plugin import PMXBasePlugin
 
 class PMXBaseDock(PMXBasePlugin):
     MENU_KEY_SEQUENCE = None
+    
     def __init__(self):
         if self.MENU_KEY_SEQUENCE:
             keysequence = QtGui.QKeySequence(self.MENU_KEY_SEQUENCE)
             self.toggleViewAction().setShortcut(keysequence)
-
+    
+    def setCurrentEditor(self, editor):
+        pass
+    
 class PMXBaseDockAddon():
     pass

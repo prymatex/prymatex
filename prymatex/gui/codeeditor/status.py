@@ -9,7 +9,6 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        self.editors = []
         self.currentEditor = None
         
         self.setupUi(self)
@@ -133,7 +132,9 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         editor.modeChanged.connect(self.on_modeChanged)
         
     def setCurrentEditor(self, editor):
-        assert editor in self.editors, "Editor not is in editors"
+        if self.currentEditor is not None:
+            self.disconnectEditor(self.currentEditor)
+        self.connectEditor(editor)
         self.currentEditor = editor
         self.comboBoxSymbols.setModel(editor.symbolListModel)
         self.on_cursorPositionChanged(editor)
@@ -141,16 +142,6 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.on_modeChanged(editor)
         self.setTabSizeLabel(editor)
         self.hideAllWidgets()
-
-    def addEditor(self, editor):
-        assert editor not in self.editors, "Editor is in editors"
-        self.editors.append(editor)
-        self.connectEditor(editor)
-    
-    def removeEditor(self, editor):
-        assert editor in self.editors, "Editor not is in editors"
-        self.disconnectEditor(editor)
-        self.editors.remove(editor)
         
     #============================================================
     # Status Widget

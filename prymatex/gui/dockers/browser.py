@@ -183,7 +183,6 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.buttonStop.clicked.connect(self.stop_page)
         
         self.bundleItem = None
-        self.configure()
 
     def showEvent(self, event):
         self.setFocus()

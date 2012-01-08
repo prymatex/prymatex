@@ -14,7 +14,7 @@ class PMXCrashDialog(QtCore.QDialog, Ui_CrashDialog):
     """
     
     def __init__(self, tracebackText, show_through_stderr = True):
-        super(PMXCrashDialog, self).__init__()
+        QtCore.QDialog.__init__(self)
         self.setupUi(self)
         self.pushSendTraceback.setEnabled(True) #Testing
         self.textEdit.setText(beautifyTraceback(tracebackText))

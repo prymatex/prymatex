@@ -154,10 +154,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
     def tabKeyBehavior(self):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
     
-    def __init__(self, filePath = None, project = None):
-        QtGui.QPlainTextEdit.__init__(self)
+    def __init__(self, filePath = None, project = None, parent = None):
+        QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self, filePath, project)
         PMXMessageOverlay.__init__(self)
+        
         #Sidebar
         self.sidebar = PMXSidebar(self)
 
@@ -191,7 +192,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
         self.lastBlockCount = self.document().blockCount()
         self.setupActions()
         self.connectSignals()
-        self.configure()
         
         self.application.fileManager.fileRenamed.connect(self.on_fileRenamed)
         
@@ -272,8 +272,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXMessageOverlay, PMXBaseEditor):
         self.setTextCursor(cursor)
         
     @classmethod
-    def newInstance(cls, filePath = None, project = None):
-        editor = cls(filePath, project)
+    def newInstance(cls, filePath = None, project = None, parent = None):
+        editor = cls(filePath, project, parent)
         return editor
 
     #=======================================================================

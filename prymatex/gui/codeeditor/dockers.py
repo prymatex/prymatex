@@ -3,7 +3,7 @@
 
 from PyQt4 import QtGui
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.dockers.base import PMXBaseDock
+from prymatex.core.plugin.dock import PMXBaseDock
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F7")

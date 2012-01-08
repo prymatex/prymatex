@@ -11,4 +11,4 @@ def setup(manager):
     manager.registerDocker(PMXCodeBookmarksDock, QtCore.Qt.RightDockWidgetArea)
     manager.registerDocker(PMXCodeSymbolsDock, QtCore.Qt.RightDockWidgetArea)
     #manager.registerAddon(KeyEquivalentHelper, PMXCodeEditor)
-    manager.loadResources(__file__)
+    #manager.loadResources(__file__)

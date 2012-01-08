@@ -197,7 +197,6 @@ class pmxConfigPorperty(object):
         return obj_type(obj)
 
     def __call__(self, function):
-        self.name = function.__name__
         self.fset = function
         return self
         
@@ -233,6 +232,20 @@ class PMXSettings(object):
             self.GROUPS[name] = SettingsGroup(name, self.qsettings, self.tmsettings)
         return self.GROUPS[name]
     
+    def registerConfigurable(self, configurableClass):
+        #Prepare class group
+        groupName = configurableClass.__dict__['SETTINGS_GROUP'] if 'SETTINGS_GROUP' in configurableClass.__dict__ else configurableClass.__name__
+        configurableClass.settings = self.getGroup(groupName)
+        #Prepare configurable attributes
+        for key, value in configurableClass.__dict__.iteritems():
+            if isinstance(value, pmxConfigPorperty):
+                value.name = key
+                configurableClass.settings.addSetting(value)
+        
+    def configure(self, configurableInstance):
+        configurableInstance.settings.addListener(configurableInstance)
+        configurableInstance.settings.configure(configurableInstance)
+        
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)
     

@@ -11,8 +11,7 @@ from prymatex.core import exceptions
 
 class PMXBaseEditor(PMXBasePlugin):
     """
-    Every editor should extend this class in order to guarantee it'll be able
-    to be place in tab.
+    Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     #tabStatusChanged
     
@@ -82,7 +81,7 @@ class PMXBaseEditor(PMXBasePlugin):
         return self.application.fileManager.checkExternalModification(self.filePath, self.mtime)
     
     @classmethod
-    def newInstance(cls, application, filePath = None, parent = None):
+    def newInstance(cls, filePath = None, project = None, parent = None):
         return cls(filePath, parent)
     
     def showMessage(self, message, timeout = None, icon = None):

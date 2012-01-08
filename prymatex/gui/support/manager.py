@@ -91,7 +91,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
         if bundle not in self.menus:
             self.addBundle(bundle)
 
-class PMXSupportManager(PMXSupportBaseManager):
+class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #Signals
     bundleChanged = QtCore.pyqtSignal(object)
     bundlePopulated = QtCore.pyqtSignal(object)
@@ -116,7 +116,7 @@ class PMXSupportManager(PMXSupportBaseManager):
     SETTINGS_GROUP = 'SupportManager'
     
     def __init__(self, application):
-        PMXObject.__init__(self)
+        QtCore.QObject.__init__(self)
         PMXSupportBaseManager.__init__(self)
         self.application = application
         self.bundleTreeModel = PMXBundleTreeModel(self)
@@ -157,9 +157,6 @@ class PMXSupportManager(PMXSupportBaseManager):
         
         #BUNDLEMENUGROUP
         self.bundleMenuGroup = PMXBundleMenuGroup(self)
-        self.settings = self.application.settings.getGroup(self.SETTINGS_GROUP)
-        self.settings.addListener(self)
-        self.settings.configure(self)
 
     def appendMenuToBundleMenuGroup(self, menu):
         self.bundleMenuGroup.appendMenu(menu)

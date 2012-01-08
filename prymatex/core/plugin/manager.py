@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from PyQt4 import QtCore
+
 class PMXPluginManager(object):
     def __init__(self, application):
         self.application = application
@@ -9,24 +11,31 @@ class PMXPluginManager(object):
         self.instances = {}
         
     def registerEditor(self, editorClass):
-        settingsGroup =  editorClass.pop('SETTINGS_GROUP', editorClass.__name__)
-        editorClass.settings = self.application.settings.getGroup(settingsGroup)
+        self.application.settings.registerConfigurable(editorClass)
         self.editors.append(editorClass)
  
-    def registerDocker(self, dockClass, preferedArea = None):
-        self.dockers.append(dockClass)
+    def registerDocker(self, dockClass, preferedArea = QtCore.Qt.RightDockWidgetArea):
+        self.application.settings.registerConfigurable(dockClass)
+        self.dockers.append((dockClass, preferedArea))
         
-    def createEditor(self, filePath, project):
+    def createEditor(self, filePath, project, parent = None):
         editorClass = self.editors[0]
-        editor = editorClass.newInstance(filePath, project)
+        editor = editorClass.newInstance(filePath, project, parent)
         
-        editorClass.settings.addListener(editor)
-        editorClass.settings.configure(editor)
+        self.application.settings.configure(editor)
         
-        self.instances.setdefault(editorClass, [])
-        self.instances[editorClass].append(editor)
+        instances = self.instances.setdefault(editorClass, [])
+        instances.append(editor)
         return editor
     
+    def createDockers(self, mainWindow):
+        for dockClass, preferedArea in self.dockers:
+            dock = dockClass(mainWindow)
+            self.application.settings.configure(dock)
+            instances = self.instances.setdefault(dockClass, [])
+            instances.append(dock)
+            mainWindow.addDock(dock, preferedArea)
+            
     def load(self):
         from prymatex.gui.codeeditor import setup
         setup(self)

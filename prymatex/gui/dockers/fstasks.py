@@ -18,9 +18,6 @@ class PMXFileSystemTasks(PMXBaseDock):
     #===========================================================================
     # Singals
     #===========================================================================
-    
-    
-    
     filesystemChange = QtCore.pyqtSignal(int, str) 
     
     @QtCore.pyqtSlot()
