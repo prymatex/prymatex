@@ -71,9 +71,9 @@ class PMXBundleTreeNode(TreeNode):
         if parent is not None:
             receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
             self.action = self.buildTriggerItemAction(parent, receiver)
-        elif not hasattr(self, "action"):
-            raise Exception("No action for item %s", self.name)
-        return self.action
+            return self.action
+        elif hasattr(self, "action"):
+            return self.action
     
     def buildTriggerItemAction(self, parent, receiver):
         action = QtGui.QAction(self.icon, self.buildMenuTextEntry(), parent)
@@ -90,8 +90,8 @@ class PMXBundleTreeNode(TreeNode):
 #====================================================
 class PMXBundleTreeModel(TreeModel):  
     def __init__(self, manager, parent = None):
-        self.manager = manager
         TreeModel.__init__(self, parent)
+        self.manager = manager
     
     def setData(self, index, value, role):  
         if not index.isValid():  
@@ -153,7 +153,7 @@ class PMXBundleTreeModel(TreeModel):
         bundle = bundleItem.bundle
         pindex = self.createIndex(bundle.row(), 0, bundle)
         self.beginInsertRows(pindex, bundle.childCount(), bundle.childCount())
-        bundleItem.bundle.appendChild(bundleItem)
+        bundle.appendChild(bundleItem)
         self.endInsertRows()
     
     def removeBundleItem(self, bundleItem):
@@ -412,10 +412,9 @@ class PMXMenuTreeModel(TreeModel):
                         if item in allActionItems:
                             allActionItems.remove(item)
                         self.excludedModel.appendExcludedItem(item)
-            # allActionItems tiene los items que no estan en el menu ni en la lista de excluidos
-            print allActionItems
-            for item in allActionItems:
-                self.excludedModel.appendExcludedItem(item)
+        # allActionItems tiene los items que no estan en el menu ni en la lista de excluidos
+        for item in allActionItems:
+            self.excludedModel.appendExcludedItem(item)
         self.layoutChanged.emit()
     
     def clear(self):
