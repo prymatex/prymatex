@@ -56,21 +56,23 @@ def runPrymatexApplication(options, args):
     except:
         from traceback import format_exc
         traceback = format_exc()
+        print traceback
+        return -1
         # Something went very bad tell the user something about the emergency
-        from prymatex.gui.emergency.crashdialog import PMXCrashDialog
-        dlg = PMXCrashDialog(traceback)
-        dlg.exec_()
+        #from prymatex.gui.emergency.crashdialog import PMXCrashDialog
+        #dlg = PMXCrashDialog(traceback)
+        #dlg.exec_()
     finally:
         return pmx and pmx.exec_() or -1
             
 def main(args):
     options, args = parseArguments(args)
-    
+
     if options.devel:
         from prymatex.utils import autoreload
         autoreload.main(runPrymatexApplication, (options, args))
     else:
-        runPrymatexApplication(options, args)
+        return runPrymatexApplication(options, args)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

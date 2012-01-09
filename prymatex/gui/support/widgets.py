@@ -586,27 +586,23 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def __init__(self, parent = None):
         super(PMXBundleWidget, self).__init__(parent)
         self.setupUi(self)
-        assert parent != None and hasattr(parent, 'manager'), "Set parent and manager"
-        self.manager = parent.manager
-        self.treeMenuModel = PMXMenuTreeModel(self.manager)
-        self.listExcludedModel = PMXExcludedListModel(self.manager)
-        self.treeMenuModel.setExcludedModel(self.listExcludedModel)
-        self.listExcludedModel.setMenuModel(self.treeMenuModel)
-        self.treeMenuView.setModel(self.treeMenuModel)
-        self.listExcludedView.setModel(self.listExcludedModel)
-        
-        self.treeMenuModel.layoutChanged.connect(self.on_layoutChanged)
+        manager = QtGui.QApplication.instance().supportManager
 
-    def on_layoutChanged(self):
+        self.treeMenuModel = PMXMenuTreeModel(manager)
+        self.treeMenuView.setModel(self.treeMenuModel)
+        self.listExcludedView.setModel(self.treeMenuModel.excludedListModel())
+
+        self.treeMenuModel.menuChanged.connect(self.on_menuChanged)
+
+    def on_menuChanged(self):
         self.changes['mainMenu'] = self.treeMenuModel.getMainMenu()
-        self.changes['mainMenu']['excludedItems'] = self.listExcludedModel.getExcludedItems()
-        
+
     @property
     def title(self):
         if self.bundleItem != None:
             return 'Edit Menu: "%s"' % self.bundleItem.name
         return super(PMXBundleWidget, self).title()
-        
+
     def getScope(self):
         return None
     
@@ -616,14 +612,6 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def getKeyEquivalent(self):
         return None
     
-    def edit(self, bundleItem):
-        super(PMXBundleWidget, self).edit(bundleItem)
-        if bundleItem.mainMenu is not None:
-            self.treeMenuModel.setMainMenu(bundleItem.mainMenu)
-            if "setExcludedItems" in bundleItem.mainMenu:
-                self.listExcludedModel.setExcludedItems(bundleItem.mainMenu["excludedItems"])
-            else:
-                self.listExcludedModel.clear()
-            #Agregar items que no estan por aca
-        else:
-            self.treeMenuModel.clear()
+    def edit(self, bundle):
+        super(PMXBundleWidget, self).edit(bundle)
+        self.treeMenuModel.setBundle(bundle)
