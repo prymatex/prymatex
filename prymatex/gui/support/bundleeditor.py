@@ -83,13 +83,11 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
     # Toolbar
     #==========================================================
     def getBundleForIndex(self, index):
-        bundle = None
         if not index.isValid():
-            bundle = self.manager.getDefaultBundle()
-        else:
-            bundle = self.proxyTreeModel.node(index)
-            while bundle.TYPE != 'bundle':
-                bundle = bundle.parent
+            return self.manager.getDefaultBundle()
+        bundle = self.proxyTreeModel.node(index)
+        while bundle.TYPE != 'bundle':
+            bundle = bundle.parent
         return bundle
     
     def createBundleItem(self, itemName, itemType):
