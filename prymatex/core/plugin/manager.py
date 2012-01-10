@@ -96,8 +96,8 @@ class PMXPluginManager(object):
                 sys.path.insert(1, directory)
             module = self._import_module(moduleName)
             module.registerPlugin(self)
-        except(ImportError, AttributeError), reason:
-            print reason
+        except (ImportError, AttributeError) as reason:
+            print(reason)
         finally:
             sys.path = old_syspath
         return None
@@ -106,6 +106,8 @@ class PMXPluginManager(object):
         self._load_plugin('prymatex.gui.codeeditor')
         self._load_plugin('prymatex.gui.dockers')
         for directory in self.directories:
+            if not os.path.isdir(directory):
+                continue # 
             moduleNames = os.listdir(directory)
             for name in moduleNames:
                 self._load_plugin(name, directory)
