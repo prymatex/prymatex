@@ -28,12 +28,10 @@ def get_prymatex_home_path():
     if not os.path.exists(path):
         os.makedirs(path)
     #Create extra paths
-    bundles = os.path.join(path, 'Bundles')
-    if not os.path.exists(bundles):
-        os.makedirs(bundles, 0700)
-    themes = os.path.join(path, 'Themes')
-    if not os.path.exists(themes):
-        os.makedirs(themes, 0700)
+    for extra in ['Bundles', 'Themes', 'Plugins']:
+        extraPath = os.path.join(path, extra)
+        if not os.path.exists(extraPath):
+            os.makedirs(extraPath, 0700)
     return path
 
 def get_textmate_preferences_user_path():
