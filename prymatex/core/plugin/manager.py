@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+import os, sys
 from logging import getLogger
 
 from PyQt4 import QtGui, QtCore
@@ -7,13 +9,21 @@ from PyQt4 import QtGui, QtCore
 class PMXPluginManager(object):
     def __init__(self, application):
         self.application = application
+        self.directories = []
+        
         self.editors = []
         self.dockers = []
         self.statusBars = []
         self.keyHelpers = {}
         self.overlays = {}
         self.instances = {}
-        
+    
+    def addPluginDirectory(self, directory):
+        self.directories.append(directory)
+
+    #==================================================
+    # Cargando clases
+    #==================================================
     def preparePlugin(self, pluginClass):
         pluginClass.application = self.application
         pluginClass.logger = getLogger('.'.join([pluginClass.__module__, pluginClass.__name__]))
@@ -74,9 +84,28 @@ class PMXPluginManager(object):
             status = self.createWidgetInstance(statusBarClass, mainWindow)
             status.initialize()
             mainWindow.addStatusBar(status)
-        
-    def load(self):
-        from prymatex.gui.codeeditor import setup
-        setup(self)
-        from prymatex.gui.dockers import setup
-        setup(self)
+    
+    def _import_module(self, name):
+        __import__(name)
+        return sys.modules[name]
+    
+    def _load_plugin(self, moduleName, directory = None):
+        old_syspath = sys.path[:]
+        try:
+            if directory is not None:
+                sys.path.insert(1, directory)
+            module = self._import_module(moduleName)
+            module.registerPlugin(self)
+        except(ImportError, AttributeError), reason:
+            print reason
+        finally:
+            sys.path = old_syspath
+        return None
+    
+    def loadPlugins(self):
+        self._load_plugin('prymatex.gui.codeeditor')
+        self._load_plugin('prymatex.gui.dockers')
+        for directory in self.directories:
+            moduleNames = os.listdir(directory)
+            for name in moduleNames:
+                self._load_plugin(name, directory)

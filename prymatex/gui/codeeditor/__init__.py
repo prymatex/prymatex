@@ -7,15 +7,16 @@ from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbols
 from prymatex.gui.codeeditor.editor import PMXCodeEditor
 from prymatex.gui.codeeditor import helpers
 from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
-from prymatex.gui.codeeditor.overlay import PMXEditorMessageOverlay
+from prymatex.gui.codeeditor.overlay import PMXEditorMessageOverlay, PMXMiniMapOverlay
 
-def setup(manager):
+def registerPlugin(manager):
     manager.registerEditor(PMXCodeEditor)
     manager.registerDocker(PMXCodeBookmarksDock)
     manager.registerDocker(PMXCodeSymbolsDock)
     manager.registerStatusBar(PMXCodeEditorStatus)
     
     manager.registerOverlay(PMXCodeEditor, PMXEditorMessageOverlay)
+    manager.registerOverlay(PMXCodeEditor, PMXMiniMapOverlay)
     
     manager.registerKeyHelper(PMXCodeEditor, helpers.KeyEquivalentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartTypingPairsHelper)
@@ -29,4 +30,3 @@ def setup(manager):
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartIndentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.OverwriteHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.MultiCursorHelper)
-    #manager.loadResources(__file__)

@@ -20,7 +20,7 @@ class PMXBaseWidgetPlugin(PMXBasePlugin):
             
     def initialize(self):
         for overlay in self.overlays:
-            overlay.initialize()
+            overlay.initialize(self)
 
     def updateOverlays(self):
         for overlay in self.overlays:
@@ -34,7 +34,7 @@ class PMXBaseWidgetPlugin(PMXBasePlugin):
             overlay.showMessage(*largs, **kwargs)
 
 class PMXBaseOverlay(PMXBasePlugin):
-    def initialize(self):
+    def initialize(self, widget):
         pass
     
     def updateOverlay(self):

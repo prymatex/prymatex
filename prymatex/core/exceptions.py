@@ -17,7 +17,7 @@ class APIUsageError(Exception):
 class PrymatexIOException(Exception):
     pass
     
-class PrymatexFileExistsException(Exception):
+class PrymatexFileExistsException(PrymatexIOException):
     def __init__(self, msg, filePath = None):
         super(PrymatexFileExistsException, self).__init__(msg)
         self.filePath = filePath
@@ -25,6 +25,9 @@ class PrymatexFileExistsException(Exception):
 class PrymatexFilePermissionException(PrymatexIOException):
     pass
 
+class PluginManagerException(Exception):
+    pass
+    
 class FileNotSupported(Exception):
     pass
     

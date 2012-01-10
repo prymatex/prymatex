@@ -182,7 +182,9 @@ class PMXApplication(QtGui.QApplication):
     def setupPluginManager(self):
         from prymatex.core.plugin.manager import PMXPluginManager
         self.pluginManager = PMXPluginManager(self)
-        self.pluginManager.load()
+        defaultDirectory = self.settings.value('PMX_PLUGINS_PATH')
+        self.pluginManager.addPluginDirectory(defaultDirectory)
+        self.pluginManager.loadPlugins()
         #self.pluginManager.register("editor.default", PMXCodeEditor)
         #self.pluginManager.register("editor.graphicviz", PMXGraphicvizEditor)
         
