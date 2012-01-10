@@ -18,7 +18,8 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F12")
     
     def __init__(self, parent = None):
-        super(PMXLoggerDock, self).__init__(parent)
+        QtGui.QDockWidget.__init__(self, parent)
+        PMXBaseDock.__init__(self)
         self.setupUi(self)
         self.handler = QtLogHandler(self)
         self.handler.setLevel(logging.DEBUG)

@@ -150,8 +150,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
 
         QNetworkProxy.setApplicationProxy( network_proxy )
     
-    def __init__(self, mainWindow):
-        QtGui.QDockWidget.__init__(self, mainWindow)
+    def __init__(self, parent):
+        QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
         self.setupUi(self)
         
@@ -185,8 +185,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
         self.bundleItem = None
     
-    def initialize(self):
-        self.parent().browser = self
+    def setMainWindow(self, mainWindow):
+        PMXBaseDock.setMainWindow(self, mainWindow)
+        mainWindow.browser = self
         
     def showEvent(self, event):
         self.setFocus()

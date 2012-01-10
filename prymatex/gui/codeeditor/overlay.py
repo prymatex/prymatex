@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from prymatex.gui.overlay import PMXMessageOverlay
+from prymatex.gui.overlays.message import PMXMessageOverlay
 
 class PMXEditorMessageOverlay(PMXMessageOverlay):      
     def __init__(self, editor):

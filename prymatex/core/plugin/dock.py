@@ -17,3 +17,6 @@ class PMXBaseDock(PMXBaseWidgetPlugin):
     
     def setCurrentEditor(self, editor):
         pass
+    
+    def setMainWindow(self, mainWindow):
+        self.mainWindow = mainWindow

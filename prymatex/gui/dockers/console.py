@@ -12,6 +12,7 @@ class PMXConsoleDock(QtGui.QDockWidget, PMXBaseDock):
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
+        PMXBaseDock.__init__(self)
         self.setWindowTitle(_("Console"))
         self.setObjectName(_("ConsoleDock"))
         self.setupConsole()

@@ -19,10 +19,12 @@ class PMXBaseWidgetPlugin(PMXBasePlugin):
         self.overlays = []
             
     def initialize(self):
-        pass
+        for overlay in self.overlays:
+            overlay.initialize()
 
     def updateOverlays(self):
-        _ = map(lambda overlay: overlay.updateOverlay(), self.overlays)
+        for overlay in self.overlays:
+            overlay.updateOverlay()
     
     def addOverlay(self, overlay):
         self.overlays.append(overlay)
@@ -41,9 +43,6 @@ class PMXBaseOverlay(PMXBasePlugin):
     def showMessage(self, *largs, **kwargs):
         pass
 
-    def showWidget(self, *largs, **kwargs):
-        pass
-    
 Key_Any = 0
 class PMXBaseKeyHelper(PMXBasePlugin):
     KEY = Key_Any

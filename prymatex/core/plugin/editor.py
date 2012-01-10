@@ -25,6 +25,9 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
             PMXBaseEditor.CREATION_COUNTER += 1
             self.creation_counter = PMXBaseEditor.CREATION_COUNTER
     
+    def setMainWindow(self, mainWindow):
+        self.mainWindow = mainWindow
+    
     def saved(self, filePath):
         if filePath != self.filePath:
             self.setFilePath(filePath)

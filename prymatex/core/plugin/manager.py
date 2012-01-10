@@ -45,11 +45,9 @@ class PMXPluginManager(object):
         
     def createWidgetInstance(self, widgetClass, *largs, **kwargs):
         instance = widgetClass(*largs, **kwargs)
-        instance.initialize()
         
         for overlayClass in self.overlays.get(widgetClass, []):
             overlay = overlayClass(instance)
-            overlay.initialize()
             instance.addOverlay(overlay)
         
         self.application.settings.configure(instance)
@@ -60,17 +58,21 @@ class PMXPluginManager(object):
     
     def createEditor(self, filePath, project, mainWindow):
         editorClass = self.editors[0]
-        return self.createWidgetInstance(editorClass, filePath, project, mainWindow)
+        editor = self.createWidgetInstance(editorClass, filePath, project, mainWindow)
+        editor.initialize()
+        return editor
     
     def populateMainWindow(self, mainWindow):
         mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
         
         for dockClass in self.dockers:
             dock = self.createWidgetInstance(dockClass, mainWindow)
+            dock.initialize()
             mainWindow.addDock(dock, dock.PREFERED_AREA)
             
         for statusBarClass in self.statusBars:
             status = self.createWidgetInstance(statusBarClass, mainWindow)
+            status.initialize()
             mainWindow.addStatusBar(status)
         
     def load(self):

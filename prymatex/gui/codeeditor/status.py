@@ -13,6 +13,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
+        PMXBaseStatusBar.__init__(self)
         self.currentEditor = None
         
         self.setupUi(self)

@@ -29,6 +29,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
         self.setupTreeViewProjects()
 
+    def setMainWindow(self, mainWindow):
+        PMXBaseDock.setMainWindow(self, mainWindow)
+        mainWindow.projects = self
+    
     def setupTreeViewProjects(self):
         #Setup Context Menu
         projectMenuSettings = { 

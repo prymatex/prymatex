@@ -67,15 +67,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #============================================================
     # Setups
     #============================================================
-    def addStatusBar(self, statusBar):
-        self.statusBar().addPermanentWidget(statusBar)
-        
-    def addDock(self, dock, area):
-        self.addDockWidget(area, dock)
-        self.menuPanels.addAction(dock.toggleViewAction())
-        dock.hide()
-        self.dockers.append(dock)
-    
     def setupDialogs(self):
         from prymatex.gui.dialogs.selector import PMXSelectorDialog
                 
@@ -85,6 +76,26 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.tabSelectorDialog = PMXSelectorDialog(self, title = _("Select tab"))
         self.symbolSelectorDialog = PMXSelectorDialog(self, title = _("Select Symbol"))
         self.bookmarkSelectorDialog = PMXSelectorDialog(self, title = _("Select Bookmark"))
+    
+    #============================================================
+    # Componer la mainWindow
+    #============================================================
+    def addStatusBar(self, statusBar):
+        self.statusBar().addPermanentWidget(statusBar)
+        statusBar.setMainWindow(self)
+        
+    def addDock(self, dock, area):
+        self.addDockWidget(area, dock)
+        dock.setMainWindow(self)
+        self.menuPanels.addAction(dock.toggleViewAction())
+        dock.hide()
+        self.dockers.append(dock)
+    
+    def addEditor(self, editor, focus = True):
+        self.splitTabWidget.addTab(editor)
+        editor.setMainWindow(self)
+        if focus:
+            self.setCurrentEditor(editor)
 
     #============================================================
     # Create and manage editors
@@ -93,11 +104,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         editor = self.application.getEditorInstance(parent = self)
         self.addEditor(editor)
         
-    def addEditor(self, editor, focus = True):
-        self.splitTabWidget.addTab(editor)
-        if focus:
-            self.setCurrentEditor(editor)
-
     def removeEditor(self, editor):
         self.splitTabWidget.removeTab(editor)
         del editor
