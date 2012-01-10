@@ -19,9 +19,7 @@ class PMXEditorMessageOverlay(PMXMessageOverlay):
 
 class PMXMiniMapOverlay(QtGui.QPlainTextEdit, PMXBaseOverlay):
     # Padding
-    paddingLeft = 5
-    # Padding
-    paddingTop = 5
+    padding = 5
     
     def __init__(self, parent):
         QtGui.QPlainTextEdit.__init__(self, parent)
@@ -41,9 +39,9 @@ class PMXMiniMapOverlay(QtGui.QPlainTextEdit, PMXBaseOverlay):
     def updateOverlay(self):
         parentRect = self.parent().viewport().rect()
         
-        x = self.parent().lineNumberAreaWidth() + parentRect.width() - 100 - self.paddingLeft
-        y = self.paddingTop
-        self.setGeometry(x, y, 100, 200)
+        x = self.parent().lineNumberAreaWidth() + parentRect.width() - 100 - self.padding
+        y = self.padding
+        self.setGeometry(x, y, 100, parentRect.height() - self.padding)
     
     def paintEvent(self, event):
         QtGui.QPlainTextEdit.paintEvent(self, event)

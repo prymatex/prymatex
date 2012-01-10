@@ -15,8 +15,8 @@ def registerPlugin(manager):
     manager.registerDocker(PMXCodeSymbolsDock)
     manager.registerStatusBar(PMXCodeEditorStatus)
     
-    manager.registerOverlay(PMXCodeEditor, PMXEditorMessageOverlay)
     manager.registerOverlay(PMXCodeEditor, PMXMiniMapOverlay)
+    manager.registerOverlay(PMXCodeEditor, PMXEditorMessageOverlay)
     
     manager.registerKeyHelper(PMXCodeEditor, helpers.KeyEquivalentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartTypingPairsHelper)
