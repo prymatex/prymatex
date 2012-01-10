@@ -17,36 +17,33 @@ class PMXEditorMessageOverlay(PMXMessageOverlay):
         self.setMessageBackgroundColor( self.parent().colours['foreground'] )
         self.setMessageBorderColor(self.parent().colours['selection'])
 
-class PMXMiniMapOverlay(QtGui.QWidget, PMXBaseOverlay):
+class PMXMiniMapOverlay(QtGui.QPlainTextEdit, PMXBaseOverlay):
     # Padding
     paddingLeft = 5
     # Padding
     paddingTop = 5
     
+    def __init__(self, parent):
+        QtGui.QPlainTextEdit.__init__(self, parent)
+        font = self.document().defaultFont()
+        font.setPixelSize(1)
+        self.document().setDefaultFont(font)
+        self.setReadOnly(True)
+        
+    def initialize(self, editor):
+        PMXBaseOverlay.initialize(self, editor)
+        editor.textChanged.connect(self.updateDocumentText)
+        
+    def updateDocumentText(self):
+        text = self.parent().toPlainText()
+        self.setPlainText(text)
+        
     def updateOverlay(self):
-        pass
-    
-    def boundingRect(self):
-        return QtCore.QRectF(0, 0, 100, 200)
-    
-    def updateOverlay(self):
-        if hasattr(self.parent(), 'viewport'):
-            parentRect = self.parent().viewport().rect()
-        else:
-            parentRect = self.parent().rect()
-
-        if not parentRect:
-            return
-
-        x = parentRect.width() - 100 - self.paddingLeft
+        parentRect = self.parent().viewport().rect()
+        
+        x = self.parent().lineNumberAreaWidth() + parentRect.width() - 100 - self.paddingLeft
         y = self.paddingTop
         self.setGeometry(x, y, 100, 200)
     
     def paintEvent(self, event):
-        QtGui.QWidget.paintEvent(self, event)
-        painter = QtGui.QPainter(self)
-        color = QtGui.QColor(self.parent().colours['foreground'])
-        color.setAlpha(200)
-        painter.setBrush(QtGui.QBrush(color))
-        painter.drawRect(self.boundingRect())
-        painter.end()
+        QtGui.QPlainTextEdit.paintEvent(self, event)

@@ -705,6 +705,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.textCursor().endEditBlock() #Termino editBlock
         self.blockSignals(False) #Desblockeo señales
         self.cursorPositionChanged.emit()
+        self.textChanged.emit()
         if self.lastBlockCount != self.document().blockCount():
             self.blockCountChanged.emit(self.document().blockCount())
         self.sidebar.update()
