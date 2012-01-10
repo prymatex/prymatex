@@ -6,7 +6,7 @@ from prymatex.models.proxies import PMXFlatTreeProxyModel
 
 class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
-        super(PMXBundleTreeProxyModel, self).__init__(parent)
+        QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax"]
         self.namespacesFilter = [ "prymatex", "user" ]
         self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]

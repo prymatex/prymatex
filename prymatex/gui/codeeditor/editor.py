@@ -17,26 +17,25 @@ from PyQt4 import QtCore, QtGui
 #=======================================================================
 from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.base import PMXObject
+from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
-from prymatex.gui.central.editor import PMXBaseEditor
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
-from prymatex.gui.codeeditor import helpers
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
-from prymatex.gui.widgets.overlay import PMXMessageOverlay
+
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 
-class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseEditor):
+class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
+    themeChanged = QtCore.pyqtSignal()
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
@@ -76,11 +75,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.AlternateBase, self.colours['invisibles'])
         self.setPalette(palette)
         
-        # Update Message Colors
-        self.setMessageTextColor( self.colours['background'])
-        self.setMessageBackgroundColor( self.colours['foreground'] )
-        self.setMessageBorderColor(self.colours['selection'])
-        
         #Sidebar colours
         self.sidebar.foreground = self.colours['foreground']
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
@@ -93,7 +87,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             if theme.author is not None:
                 message += "<i>(by %s)</i>" % theme.author
             self.showMessage(message)
-    
+        self.themeChanged.emit()
+        
     #================================================================
     # Regular expresions
     #================================================================
@@ -138,27 +133,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     ShowFolding = 0x10
     WordWrap = 0x20
     
-    Key_Any = 0
-    editorHelpers = {
-        Key_Any: [ helpers.KeyEquivalentHelper(), helpers.SmartTypingPairsHelper(), helpers.SmartUnindentHelper() ],
-        QtCore.Qt.Key_Tab: [ helpers.TabTriggerHelper(), helpers.TabIndentHelper() ],
-        QtCore.Qt.Key_Backtab: [ helpers.BacktabUnindentHelper() ],
-        QtCore.Qt.Key_Space: [ helpers.CompleterHelper() ],
-        QtCore.Qt.Key_Backspace: [ helpers.BackspaceUnindentHelper() ],
-        QtCore.Qt.Key_Home: [ helpers.MoveCursorToHomeHelper() ],
-        QtCore.Qt.Key_Return: [ helpers.SmartIndentHelper() ],
-        QtCore.Qt.Key_Insert: [ helpers.OverwriteHelper() ],
-        QtCore.Qt.Key_M: [ helpers.MultiCursorHelper() ],
-    }
-    
     @property
     def tabKeyBehavior(self):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
     
-    def __init__(self, filePath = None, project = None):
-        QtGui.QPlainTextEdit.__init__(self)
+    def __init__(self, filePath = None, project = None, parent = None):
+        QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self, filePath, project)
-        PMXMessageOverlay.__init__(self)
+        #PMXMessageOverlay.__init__(self)
+        
         #Sidebar
         self.sidebar = PMXSidebar(self)
 
@@ -192,9 +175,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         self.lastBlockCount = self.document().blockCount()
         self.setupActions()
         self.connectSignals()
-        self.configure()
         
         self.application.fileManager.fileRenamed.connect(self.on_fileRenamed)
+        
+        #Connect context menu
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showEditorContextMenu)
         
     #=======================================================================
     # Connect Signals
@@ -271,11 +257,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         blockPosition = self.document().findBlockByNumber(position[0]).position()
         cursor.setPosition(blockPosition + position[1])
         self.setTextCursor(cursor)
-        
-    @classmethod
-    def newInstance(cls, filePath = None, project = None):
-        editor = cls(filePath, project)
-        return editor
 
     #=======================================================================
     # Obteniendo datos del editor
@@ -462,13 +443,20 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
             self.setTextCursor(cursor)
         
     #=======================================================================
-    # Context Menu
+    # Context Menus
     #=======================================================================
-    #def contextMenuEvent(self, event):
-    #    menu = self.createStandardContextMenu()
-    #    menu.popup(event.globalPos())
+    def showEditorContextMenu(self, point):
+        menu = self.createStandardContextMenu()
+        menu.setParent(self)
+        menu.popup(self.mapToGlobal(point))
         
-    
+    def contributeToTabMenu(self, menu):
+        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        if bundleMenu is not None:
+            menu.addMenu(bundleMenu)
+            menu.addSeparator()
+        if self.filePath:
+            menu.addAction(self.actionCopyPath)
     #=======================================================================
     # Espacio para la sidebar
     #=======================================================================
@@ -597,7 +585,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
         self.sidebar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
-        self.updateMessagePosition()
+        self.updateOverlays()
     
     def paintEvent(self, event):
         #QtGui.QPlainTextEdit.paintEvent(self, event)
@@ -693,16 +681,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
         #Obtener key, scope y cursor
         scope = self.getCurrentScope()
         cursor = self.textCursor()
-        #Preparar teclas
-        keys = [ self.Key_Any, event.key() ]
-        for key in keys:
-            #Obtener Helpers
-            helpers = self.editorHelpers.get(key, [])
-            for helper in helpers:
-                #Buscar Entre los helpers
-                if helper.accept(self, event, cursor, scope):
-                    #pasarle el evento
-                    return helper.execute(self, event, cursor, scope)
+        
+        for helper in self.findHelpers(event.key()):
+            #Buscar Entre los helpers
+            if helper.accept(self, event, cursor, scope):
+                #pasarle el evento
+                return helper.execute(self, event, cursor, scope)
         
         #No tengo helper paso el evento a la base
         QtGui.QPlainTextEdit.keyPressEvent(self, event)
@@ -1129,6 +1113,3 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXObject, PMXMessageOverlay, PMXBaseE
     def on_actionCopyPath_triggered(self):
         QtGui.QApplication.clipboard().setText(self.filePath)
         
-    def contributeToTabMenu(self, menu):
-        if self.filePath:
-            menu.addAction(self.actionCopyPath)

@@ -22,18 +22,19 @@ from prymatex.utils.decorator.helpers import printtime
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
-def compare(object, attrs, tests):
-    if not attrs:
+def compare(obj, keys, tests):
+    if not len(keys):
         return True
-    attr = getattr(object, attrs[0], None)
-    if attr == None or attrs[0] not in tests:
-        return True and compare(object, attrs[1:], tests)
-    elif isinstance(attr, (str, unicode)):
-        return attr.find(tests[attrs[0]]) != -1 and compare(object, attrs[1:], tests)
-    elif isinstance(attr, (int)):
-        return attr == tests[attrs[0]] and compare(object, attrs[1:], tests)
+    key = keys[0]
+    value = getattr(obj, key, None)
+    if value == None or key not in tests:
+        return False
+    elif isinstance(value, (str, unicode)):
+        return value.find(tests[key]) != -1 and compare(obj, keys[1:], tests)
+    elif isinstance(value, (int)):
+        return value == tests[key] and compare(obj, keys[1:], tests)
     else:
-        return attr == tests[attrs[0]] and compare(object, attrs[1:], tests)
+        return value == tests[key] and compare(obj, keys[1:], tests)
 
 class PMXSupportBaseManager(object):
     ELEMENTS = ['Bundles', 'Support', 'Themes']
@@ -260,10 +261,8 @@ class PMXSupportBaseManager(object):
         Retorna todos los bundles que cumplan con attrs
         """
         bundles = []
-        keys = PMXBundle.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
         for bundle in self.getAllBundles():
-            if compare(bundle, keys, attrs):
+            if compare(bundle, attrs.keys(), attrs):
                 bundles.append(bundle)
         return bundles
     
@@ -367,10 +366,8 @@ class PMXSupportBaseManager(object):
         Retorna todos los items que complan las condiciones en attrs
         """
         items = []
-        keys = PMXBundleItem.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
         for item in self.getAllBundleItems():
-            if compare(item, keys, attrs):
+            if compare(item, attrs.keys(), attrs):
                 items.append(item)
         return items
 
@@ -510,10 +507,8 @@ class PMXSupportBaseManager(object):
         Retorna todos los themes que complan las condiciones en attrs
         """
         items = []
-        keys = PMXTheme.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
         for item in self.getAllThemes():
-            if compare(item, keys, attrs):
+            if compare(item, attrs.keys(), attrs):
                 items.append(item)
         return items
 

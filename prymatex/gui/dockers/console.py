@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtGui
-from prymatex.core.base import PMXObject
+from PyQt4 import QtGui, QtCore
+
+from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 
-class PMXConsoleDock(QtGui.QDockWidget, PMXObject):
+class PMXConsoleDock(QtGui.QDockWidget, PMXBaseDock):
+    PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F12")
+    
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
+        PMXBaseDock.__init__(self)
         self.setWindowTitle(_("Console"))
         self.setObjectName(_("ConsoleDock"))
         self.setupConsole()

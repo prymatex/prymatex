@@ -9,14 +9,13 @@ from PyQt4 import QtCore, QtGui
 from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.gui.actions import MainWindowActions
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.base import PMXObject
 from prymatex.core import exceptions
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils
 from prymatex.gui import dialogs
-from prymatex.utils import coroutines
+from prymatex.gui.statusbar import PMXStatusBar
 
-class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObject):
+class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """ 
     Prymatex main window
     """
@@ -38,7 +37,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.menuBar().setShown(value)
     
     # Constructor
-    def __init__(self, parent = None):
+    def __init__(self, application):
         """
         The main window
         @param parent: The QObject parent, in this case it should be the QApp
@@ -46,96 +45,28 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
                               is shown in the screen.
         """
         QtGui.QMainWindow.__init__(self)
+        self.application = application
         self.setupUi(self)
         
-        self.setupDockers()
         self.setupDialogs()
         self.setupMenu()
-        self.setupStatusBar()
+        
+        self.setStatusBar(PMXStatusBar(self))
         
         # Connect Signals
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
-        self.splitTabWidget.currentWidgetChanged.connect(self.paneFileSystem.on_currentEditorChanged)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
         self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor().insertBundleItem(item))
         
         utils.centerWidget(self, scale = (0.9, 0.8))
-        self.configure()
+        self.dockers = []
         
         self.setAcceptDrops(True)
-        
-        self.addEmptyEditor()
 
     #============================================================
     # Setups
     #============================================================
-    def setupStatusBar(self):
-        #TODO: este estado pertenece a un tipo de editor, ver como establecer la relacion
-        from prymatex.gui.statusbar import PMXStatusBar
-        from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
-        status = PMXStatusBar(self)
-        status.addPermanentWidget(PMXCodeEditorStatus(self))
-        self.setStatusBar(status)
-        
-    def setupDockers(self):
-        """
-        Basic panels, dock objects. More docks should be available via plugins
-        """
-        from prymatex.gui.dockers.filesystem import PMXFileSystemDock
-        from prymatex.gui.dockers.browser import PMXBrowserDock
-        from prymatex.gui.dockers.console import PMXConsoleDock
-        from prymatex.gui.dockers.logger import QtLogHandler, PMXLoggerDock
-        from prymatex.gui.dockers.projects import PMXProjectDock
-        from prymatex.gui.codeeditor.dockers import PMXCodeSymbolsDock, PMXCodeBookmarksDock
-        #from prymatex.gui.dockers.terminal import PMXTerminalWidget
-        
-        self.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
-        
-        self.paneFileSystem = PMXFileSystemDock(self)
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.paneFileSystem)
-        self.menuPanels.addAction(self.paneFileSystem.toggleViewAction())
-        self.paneFileSystem.hide()
-        
-        self.paneProject = PMXProjectDock(self)
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.paneProject)
-        self.menuPanels.addAction(self.paneProject.toggleViewAction())
-        self.paneProject.hide()
-        
-        self.paneBrowser = PMXBrowserDock(self)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneBrowser)
-        self.menuPanels.addAction(self.paneBrowser.toggleViewAction())
-        self.paneBrowser.hide()
-        
-        self.paneConsole = PMXConsoleDock(self)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneConsole)
-        self.menuPanels.addAction(self.paneConsole.toggleViewAction())
-        self.paneConsole.hide()
-        
-        self.paneLogging = PMXLoggerDock(self)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneLogging)
-        self.menuPanels.addAction(self.paneLogging.toggleViewAction())
-        self.paneLogging.hide()
-
-        codeBookmarks = PMXCodeBookmarksDock(self)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, codeBookmarks)
-        self.menuPanels.addAction(codeBookmarks.toggleViewAction())
-        codeBookmarks.hide()        
-
-        codeSymbols = PMXCodeSymbolsDock(self)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, codeSymbols)
-        self.menuPanels.addAction(codeSymbols.toggleViewAction())
-        codeSymbols.hide()
-        
-        #self.paneTerminal = PMXTerminalWidget(self)
-        #self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.paneTerminal)
-        #self.menuPanels.addAction(self.paneTerminal.toggleViewAction())
-        #self.paneTerminal.hide()
-        
-        self.tabifyDockWidget(codeSymbols, codeBookmarks)
-        
-        self.dockers = [codeSymbols, codeBookmarks]
-    
     def setupDialogs(self):
         from prymatex.gui.dialogs.selector import PMXSelectorDialog
                 
@@ -145,22 +76,35 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         self.tabSelectorDialog = PMXSelectorDialog(self, title = _("Select tab"))
         self.symbolSelectorDialog = PMXSelectorDialog(self, title = _("Select Symbol"))
         self.bookmarkSelectorDialog = PMXSelectorDialog(self, title = _("Select Bookmark"))
+    
+    #============================================================
+    # Componer la mainWindow
+    #============================================================
+    def addStatusBar(self, statusBar):
+        self.statusBar().addPermanentWidget(statusBar)
+        statusBar.setMainWindow(self)
+        
+    def addDock(self, dock, area):
+        self.addDockWidget(area, dock)
+        dock.setMainWindow(self)
+        self.menuPanels.addAction(dock.toggleViewAction())
+        dock.hide()
+        self.dockers.append(dock)
+    
+    def addEditor(self, editor, focus = True):
+        self.splitTabWidget.addTab(editor)
+        editor.setMainWindow(self)
+        if focus:
+            self.setCurrentEditor(editor)
 
     #============================================================
     # Create and manage editors
     #============================================================
     def addEmptyEditor(self):
-        editor = self.application.getEditorInstance()
+        editor = self.application.getEditorInstance(parent = self)
         self.addEditor(editor)
         
-    def addEditor(self, editor, focus = True):
-        self.statusBar().addEditor(editor)
-        self.splitTabWidget.addTab(editor)
-        if focus:
-            self.setCurrentEditor(editor)
-
     def removeEditor(self, editor):
-        self.statusBar().removeEditor(editor)
         self.splitTabWidget.removeTab(editor)
         del editor
 
@@ -183,7 +127,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         #Set editor to Dockers
         for docker in self.dockers:
             docker.setCurrentEditor(editor)
-
+            
         #Update Menu
         self.updateMenuForEditor(editor)        
 
@@ -263,9 +207,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions, PMXObje
         for path in collectFiles(urls):
             # TODO: Take this code somewhere else, this should change as more editor are added
             if not self.canBeOpened(path):
-                self.debug("Skipping dropped element %s" % path)
+                self.logger.debug("Skipping dropped element %s" % path)
                 continue
-            self.debug("Opening dropped file %s" % path)
+            self.logger.debug("Opening dropped file %s" % path)
             #self.openFile(QtCore.QFileInfo(path), focus = False)
             self.application.openFile(path)
 

@@ -7,17 +7,17 @@ import shutil
 from PyQt4 import QtGui, QtCore
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
-from prymatex.gui.dockers.base import PMXBaseDock
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
 
-class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFileSystemTasks):
+class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks):
+    PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
     #=======================================================================
     # Settings
     #=======================================================================
@@ -27,11 +27,10 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
     _pushButtonHistoryBack = []
     _pushButtonHistoryForward = []
     
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, parent)
+        PMXFileSystemTasks.__init__(self)     
         self.setupUi(self)
-        PMXBaseDock.__init__(self)        
         
         #File System model
         self.fileSystemModel = QtGui.QFileSystemModel(self)
@@ -46,8 +45,6 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
         
         self.setupComboBoxLocation()
         self.setupTreeViewFileSystem()
-        
-        self.configure()
         
         self.installEventFilter(self)
         
@@ -162,7 +159,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXObject, PMXFile
                                                     'path': path,
                                                     'icon': QtGui.QIcon()})
         else:
-            self.debug("Not a directory %s" % path)
+            self.logger.debug("Not a directory %s" % path)
 
     #================================================
     # Tree View File System

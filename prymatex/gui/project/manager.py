@@ -5,14 +5,14 @@ import os, string, unicodedata
 import fnmatch
 
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
 from prymatex.core.settings import USER_HOME_PATH
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.project.proxies import PMXProjectTreeProxyModel
 from prymatex.gui.project.base import PMXProject
 
-class PMXProjectManager(PMXObject):
+class PMXProjectManager(QtCore.QObject):
     #Signals
     projectClosed = QtCore.pyqtSignal(object)
     projectOpened = QtCore.pyqtSignal(object)
@@ -26,14 +26,12 @@ class PMXProjectManager(PMXObject):
     
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     
-    def __init__(self, parent = None):
-        PMXObject.__init__(self)
+    def __init__(self, application):
+        QtCore.QObject.__init__(self)
         self.projectTreeModel = PMXProjectTreeModel(self)
         
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
-        
-        self.configure()
     
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils

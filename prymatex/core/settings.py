@@ -5,8 +5,8 @@ Application configuration based on Qt's QSettings module.
 
 '''
 import os, plistlib
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+
+from PyQt4 import QtCore, QtGui
 
 try:
     from win32com.shell import shellcon, shell
@@ -196,16 +196,7 @@ class pmxConfigPorperty(object):
             obj_type = type(self.fget(obj))
         return obj_type(obj)
 
-    def contributeToClass(self, cls, name):
-        self.name = name
-        self.fget = getattr(cls, name, None)
-        if self.fset == None:
-            self.fset = getattr(cls, "set" + name.title(), None)
-        cls.settings.addSetting(self)
-        setattr(cls, name, self)
-    
     def __call__(self, function):
-        self.name = function.__name__
         self.fset = function
         return self
         
@@ -241,6 +232,20 @@ class PMXSettings(object):
             self.GROUPS[name] = SettingsGroup(name, self.qsettings, self.tmsettings)
         return self.GROUPS[name]
     
+    def registerConfigurable(self, configurableClass):
+        #Prepare class group
+        groupName = configurableClass.__dict__['SETTINGS_GROUP'] if 'SETTINGS_GROUP' in configurableClass.__dict__ else configurableClass.__name__
+        configurableClass.settings = self.getGroup(groupName)
+        #Prepare configurable attributes
+        for key, value in configurableClass.__dict__.iteritems():
+            if isinstance(value, pmxConfigPorperty):
+                value.name = key
+                configurableClass.settings.addSetting(value)
+        
+    def configure(self, configurableInstance):
+        configurableInstance.settings.addListener(configurableInstance)
+        configurableInstance.settings.configure(configurableInstance)
+        
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)
     

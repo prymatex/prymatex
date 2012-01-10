@@ -3,17 +3,23 @@
 
 import logging
 from logging.handlers import BufferingHandler
+
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
+from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.ui.others.logwidget import Ui_LogWidget
 
-class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXObject):
-    '''
+class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
+    """
     Logging widget
     
-    '''
+    """
+    PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F12")
+    
     def __init__(self, parent = None):
-        super(PMXLoggerDock, self).__init__(parent)
+        QtGui.QDockWidget.__init__(self, parent)
+        PMXBaseDock.__init__(self)
         self.setupUi(self)
         self.handler = QtLogHandler(self)
         self.handler.setLevel(logging.DEBUG)
@@ -35,7 +41,7 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXObject):
     
     def debug_level_change(self, action):
         new_level = action.data()
-        self.debug("Level changed to %s", new_level)
+        self.logger.debug("Level changed to %s", new_level)
 
 class QtLogHandler(BufferingHandler):
     '''

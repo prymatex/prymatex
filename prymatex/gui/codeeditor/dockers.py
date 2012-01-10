@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
+
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.dockers.base import PMXBaseDock
+from prymatex.core.plugin.dock import PMXBaseDock
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F7")
+    PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
@@ -40,9 +42,12 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.currentEditor.goToBlock(block)
         self.currentEditor.setFocus()
         
-class PMXCodeBookmarksDock(QtGui.QDockWidget):
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
+class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
+    PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
+    
+    def __init__(self, mainWindow):
+        QtGui.QDockWidget.__init__(self, mainWindow)
+        PMXBaseDock.__init__(self)
         self.setWindowTitle(_("Bookmarks"))
         self.setObjectName(_("BookmarksDock"))
         self.tableViewBookmarks = QtGui.QTableView()

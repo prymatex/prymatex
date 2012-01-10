@@ -3,21 +3,20 @@
 
 import os, codecs, shutil
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.exceptions import APIUsageError, PrymatexIOException, PrymatexFileExistsException
 from functools import partial
 
 class PMXFSConstants(object):
     ''' Some constants '''
-    CREATED = 0
-    DELETED = 1
-    RENAMED = 2
-    MOVED   = 3
-    MODIFY  = 4
+    CREATED = 1<<0
+    DELETED = 1<<1
+    RENAMED = 1<<2
+    MOVED   = 1<<3
+    MODIFY  = 1<<4
     
 
-class PMXFileManager(PMXObject):
+class PMXFileManager(QtCore.QObject):
     """
     A File Manager
     """
@@ -43,18 +42,14 @@ class PMXFileManager(PMXObject):
     fileHistory = pmxConfigPorperty(default = [])
     fileHistoryLength = pmxConfigPorperty(default = 10)
     
-    def __init__(self, parent):
-        super(PMXFileManager, self).__init__(parent)
-
-        self.last_directory = self.application.settings.USER_HOME_PATH
+    def __init__(self, application):
+        QtCore.QObject.__init__(self)
+        
+        self.last_directory = application.settings.USER_HOME_PATH
         self.fileWatcher = QtCore.QFileSystemWatcher()
         self.fileWatcher.fileChanged.connect(self.on_fileChanged)
         self.fileWatcher.directoryChanged.connect(self.on_directoryChanged)
         self.connectGenericSignal()
-        self.configure()
-
-    
-    
 
     def connectGenericSignal(self):
         UNARY_SINGAL_CONSTANT_MAP = (

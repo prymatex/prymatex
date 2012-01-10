@@ -5,7 +5,7 @@ import fnmatch
 import uuid as uuidmodule
 from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportBaseManager
-from prymatex.core.base import PMXObject
+
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
@@ -61,6 +61,9 @@ class PMXBundleMenuGroup(QtCore.QObject):
         menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
         self.addToContainers(menu)
     
+    def menuForBundle(self, bundle):
+        return self.menus.get(bundle)
+        
     def addToContainers(self, menu):
         for containter in self.containers:
             containter.addMenu(menu)
@@ -79,7 +82,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
             if title != menu.title():
                 menu.setTitle(title)
             if bundle.enabled != menu.menuAction().isVisible():
-                menu.menuAction().setVisible(item.enabled and bundle.mainMenu is not None)
+                menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
             if id(bundle.mainMenu) != menu.ID:
                 menu.clear()
                 submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
@@ -91,7 +94,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
         if bundle not in self.menus:
             self.addBundle(bundle)
 
-class PMXSupportManager(PMXSupportBaseManager, PMXObject):
+class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #Signals
     bundleChanged = QtCore.pyqtSignal(object)
     bundlePopulated = QtCore.pyqtSignal(object)
@@ -115,9 +118,10 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         
     SETTINGS_GROUP = 'SupportManager'
     
-    def __init__(self, parent = None):
-        PMXObject.__init__(self)
+    def __init__(self, application):
+        QtCore.QObject.__init__(self)
         PMXSupportBaseManager.__init__(self)
+        self.application = application
         self.bundleTreeModel = PMXBundleTreeModel(self)
         self.themeStylesTableModel = PMXThemeStylesTableModel(self)
         self.themeListModel = []
@@ -156,11 +160,13 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         
         #BUNDLEMENUGROUP
         self.bundleMenuGroup = PMXBundleMenuGroup(self)
-        self.configure()
 
     def appendMenuToBundleMenuGroup(self, menu):
         self.bundleMenuGroup.appendMenu(menu)
 
+    def menuForBundle(self, bundle):
+        return self.bundleMenuGroup.menuForBundle(bundle)
+        
     def buildEnvironment(self):
         env = {}
         for var in self.shellVariables:

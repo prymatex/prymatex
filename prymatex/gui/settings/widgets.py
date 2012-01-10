@@ -3,14 +3,13 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
 from PyQt4.QtNetwork import QNetworkProxy
-from prymatex.core.base import PMXObject
 
 #from prymatex.ui.configupdates import Ui_Updates
 #from prymatex.ui.configsave import Ui_Save
 from prymatex.ui.settings.network import Ui_Network
 from prymatex.ui.settings.general import Ui_General
 #from prymatex.ui.settings.bundles import Ui_Bundles
-import constants
+from prymatex.gui.settings import constants
 from prymatex.ui.settings.filemanager import Ui_FileManagerDialog
 from prymatex.core.settings import pmxConfigPorperty
 
@@ -42,7 +41,7 @@ CONFIG_WIDGETS = (QtGui.QLineEdit, QtGui.QSpinBox, QtGui.QCheckBox,)
 
 filter_config_widgets = lambda ws: filter(lambda w: isinstance(w, CONFIG_WIDGETS), ws)
 
-class PMXConfigBaseWidget(QtGui.QWidget, PMXObject):
+class PMXConfigBaseWidget(QtGui.QWidget):
     '''
     Base class for configuration widgets
     '''
@@ -71,7 +70,7 @@ class PMXConfigBaseWidget(QtGui.QWidget, PMXObject):
 class PMXConfigBaseWidget(QtGui.QWidget):
     pass
 
-class PMXGeneralWidget(QtGui.QWidget, Ui_General, PMXObject):
+class PMXGeneralWidget(QtGui.QWidget, Ui_General):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
@@ -122,10 +121,7 @@ class PMXGeneralWidget(QtGui.QWidget, Ui_General, PMXObject):
 #            name = "%s%s %s" % (code, alias and " (%s)" % alias or '', lang)
 #            self.comboEncodings.addItem(name, None)
 
-class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog, PMXObject):
-    SETTINGS_GROUP = 'FileSaveSettings'
-    #DEFAULTS = {}
-    
+class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog):
     @pmxConfigPorperty(default = "unix")
     def lineEndings(self, ending):
         self.comboBoxLineEnding.setCurrentIndex(self.comboBoxLineEnding.findData(ending))
@@ -140,7 +136,6 @@ class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog, PMXObject):
         self.setupUi(self)
         self.loadEncodings()
         self.setupLineEndings()
-        self.configure()
     
 
     def setupLineEndings(self):
@@ -152,7 +147,6 @@ class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog, PMXObject):
     def on_comboBoxLineEnding_currentIndexChanged(self, index):
         data = self.comboBoxLineEnding.itemData(index)
         self.lineEndings = data
-        self.settings.setValue('lineEndings', data)
     
     def loadEncodings(self):
         ''' Populate ComboBox from constants '''
@@ -170,12 +164,11 @@ class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog, PMXObject):
             self.comboBoxEncoding.addItem(title.strip().title(), userData.replace('_', '-'))
     
 
-class PMXNetworkWidget(QtGui.QWidget, Ui_Network, PMXObject):
+class PMXNetworkWidget(QtGui.QWidget, Ui_Network):
     '''
     Setup network connection
     '''
-    SETTINGS_GROUP = "Network"
-        
+    
     def __init__(self, parent = None):
         super(PMXNetworkWidget, self).__init__(parent)
         self.setupUi(self)
@@ -201,7 +194,6 @@ class PMXNetworkWidget(QtGui.QWidget, Ui_Network, PMXObject):
         
         self.comboProxyType.addItem(self.trUtf8("HTTP Proxy"), QNetworkProxy.HttpProxy)
         self.comboProxyType.addItem(self.trUtf8("Socks 5 Proxy"), QNetworkProxy.Socks5Proxy)
-        self.configure()
         
     
     def changeProxyMode(self, checked):

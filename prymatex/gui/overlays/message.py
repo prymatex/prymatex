@@ -1,10 +1,10 @@
-from PyQt4 import QtCore, QtGui
 import re
-from logging import getLogger
-logger = getLogger(__name__)
 
+from PyQt4 import QtCore, QtGui
 
-class PMXMessageOverlay(object):
+from prymatex.core.plugin import PMXBaseOverlay
+
+class PMXMessageOverlay(QtCore.QObject, PMXBaseOverlay):
     messageFadedOut = QtCore.pyqtSignal()
     messageFadedIn = QtCore.pyqtSignal()
     ''' 
@@ -13,9 +13,10 @@ class PMXMessageOverlay(object):
         * Use the mixin on toplevel elements (no QWidgets, but QPlainTextEdit, QWebView, etc.)
         * You should call updateMessagePosition at least in resizeEvent of your subclass 
     '''
-    def __init__(self):
+    def __init__(self, widget):
         # Signals
-        self.messageOverlay = self.buildLabel(self)
+        QtCore.QObject.__init__(self, widget)
+        self.messageOverlay = self.buildLabel(widget)
         
         self.fadeOutTimer = QtCore.QTimer(self)
         self.fadeOutTimer.timeout.connect(self.messageOverlay.fadeOut)
@@ -74,7 +75,7 @@ class PMXMessageOverlay(object):
         ''' Overrride '''
         self.clearMessage()       
         
-    def updateMessagePosition(self):
+    def updateOverlay(self):
         ''' Override '''
         self.messageOverlay.updatePosition()
 
@@ -89,7 +90,7 @@ class PMXMessageOverlay(object):
         
     def setMessageBorderColor(self, color):
         self.messageOverlay.borderColor = color
-        
+    
 class LabelOverlayWidget(QtGui.QLabel):
     ''' 
     Inner message QLabel.

@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore
-from prymatex.ui.emergencycrash import Ui_CrashDialog
 import sys
-from beautify import beautifyTraceback
+
+from PyQt4 import QtCore
+
+from prymatex.ui.emergencycrash import Ui_CrashDialog
+from prymatex.gui.emergency.beautify import beautifyTraceback
 
 class PMXCrashDialog(QtCore.QDialog, Ui_CrashDialog):
-    '''
+    """
     Show a nice traceback dialog
-    '''
-    #TODO: Impement send to in the crash dialog button
+    """
+    
     def __init__(self, tracebackText, show_through_stderr = True):
-        super(PMXCrashDialog, self).__init__()
+        QtCore.QDialog.__init__(self)
         self.setupUi(self)
         self.pushSendTraceback.setEnabled(True) #Testing
         self.textEdit.setText(beautifyTraceback(tracebackText))

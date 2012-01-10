@@ -60,8 +60,8 @@ def runPrymatexApplication(options, args):
         return -1
         # Something went very bad tell the user something about the emergency
         #from prymatex.gui.emergency.crashdialog import PMXCrashDialog
-        #dlg = PMXCrashDialog(traceback)
-        #dlg.exec_()
+        crashDialog = PMXCrashDialog(traceback)
+        return crashDialog.exec_()
     finally:
         return pmx and pmx.exec_() or -1
             

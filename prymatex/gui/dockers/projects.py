@@ -6,17 +6,18 @@ import codecs
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.base import PMXObject
+from prymatex.core.plugin.dock import PMXBaseDock
+
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.project.models import PMXProjectTreeModel
-from prymatex.gui.dockers.base import PMXBaseDock
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.project.base import PMXProject
 
-class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXObject):
+class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
+    PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
 
     def __init__(self, parent):
@@ -28,6 +29,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
         self.setupTreeViewProjects()
 
+    def setMainWindow(self, mainWindow):
+        PMXBaseDock.setMainWindow(self, mainWindow)
+        mainWindow.projects = self
+    
     def setupTreeViewProjects(self):
         #Setup Context Menu
         projectMenuSettings = { 

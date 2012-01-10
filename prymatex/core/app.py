@@ -115,12 +115,14 @@ class PMXApplication(QtGui.QApplication):
     @deco.logtime
     def setupSupportManager(self, callbackSplashMessage = None):
         from prymatex.gui.support.manager import PMXSupportManager
-
-        sharePath = self.settings.value('PMX_SHARE_PATH')
-        homePath = self.settings.value('PMX_HOME_PATH')
-
-        #Prepare prymatex namespace
+        
+        self.settings.registerConfigurable(PMXSupportManager)
+        
         manager = PMXSupportManager(self)
+        self.settings.configure(manager)
+        
+        #Prepare prymatex namespace
+        sharePath = self.settings.value('PMX_SHARE_PATH')
         manager.addNamespace('prymatex', sharePath)
         manager.updateEnvironment({ #TextMate Compatible :P
                 'TM_APP_PATH': self.settings.value('PMX_APP_PATH'),
@@ -137,6 +139,7 @@ class PMXApplication(QtGui.QApplication):
         })
 
         #Prepare user namespace
+        homePath = self.settings.value('PMX_HOME_PATH')
         manager.addNamespace('user', homePath)
         manager.updateEnvironment({
                 'PMX_HOME_PATH': homePath,
@@ -149,13 +152,21 @@ class PMXApplication(QtGui.QApplication):
 
     def setupFileManager(self):
         from prymatex.core.filemanager import PMXFileManager
+        
+        self.settings.registerConfigurable(PMXFileManager)
         self.fileManager = PMXFileManager(self)
+        self.settings.configure(self.fileManager)
+        
         self.fileManager.fileChanged.connect(self.on_fileChanged)
         self.fileManager.fileDeleted.connect(self.on_fileDeleted)
     
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
+        
+        self.settings.registerConfigurable(PMXProjectManager)
         self.projectManager = PMXProjectManager(self)
+        self.settings.configure(self.projectManager)
+        
         self.projectManager.loadProject()
     
     def setupKernelManager(self):
@@ -169,10 +180,11 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = None
 
     def setupPluginManager(self):
-        from prymatex.core.plugin import PMXPluginManager
-        from prymatex.gui.codeeditor.editor import PMXCodeEditor
-        self.pluginManager = PMXPluginManager()
-        self.pluginManager.register("editor.default", PMXCodeEditor)
+        from prymatex.core.plugin.manager import PMXPluginManager
+        self.pluginManager = PMXPluginManager(self)
+        self.pluginManager.load()
+        #self.pluginManager.register("editor.default", PMXCodeEditor)
+        #self.pluginManager.register("editor.graphicviz", PMXGraphicvizEditor)
         
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)
@@ -196,11 +208,11 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.settings.themes import PMXThemeConfigWidget
         from prymatex.gui.settings.widgets import PMXFileManagerSettings
         self.configDialog = PMXSettingsDialog(self)
-        self.configDialog.register(PMXGeneralWidget())
-        self.configDialog.register(PMXFileManagerSettings())
-        self.configDialog.register(PMXThemeConfigWidget())
-        self.configDialog.register(PMXEnvVariablesWidgets())
-        self.configDialog.register(PMXNetworkWidget())
+        self.configDialog.register(PMXGeneralWidget)
+        self.configDialog.register(PMXFileManagerSettings)
+        self.configDialog.register(PMXThemeConfigWidget)
+        self.configDialog.register(PMXEnvVariablesWidgets)
+        self.configDialog.register(PMXNetworkWidget)
         
         #Bundle Editor
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
@@ -234,15 +246,22 @@ class PMXApplication(QtGui.QApplication):
         """
         #Por ahora solo una mainWindow
         from prymatex.gui.mainwindow import PMXMainWindow
-        geometry = self.settings.value("mainWindowGeometry")
-        state = self.settings.value("mainWindowState")
-        
-        self.mainWindow = PMXMainWindow(self)
-        if geometry:
-            self.mainWindow.restoreGeometry(geometry)
-        if state:
-            self.mainWindow.restoreState(state)
-        self.mainWindow.show()
+        #TODO: Testeame con mas de una
+        for _ in range(1):
+            self.mainWindow = PMXMainWindow(self)
+                
+            #Configure and add dockers
+            self.pluginManager.populateMainWindow(self.mainWindow)
+            
+            geometry = self.settings.value("mainWindowGeometry")
+            state = self.settings.value("mainWindowState")
+            if geometry:
+                self.mainWindow.restoreGeometry(geometry)
+            if state:
+                self.mainWindow.restoreState(state)
+                
+            self.mainWindow.addEmptyEditor()
+            self.mainWindow.show()
 
     def currentEditor(self):
         return self.mainWindow.currentEditor()
@@ -251,8 +270,8 @@ class PMXApplication(QtGui.QApplication):
         #Para cada mainwindow buscar el editor
         return self.mainWindow, self.mainWindow.findEditorForFile(filePath)
             
-    def getEditorInstance(self, filePath = None, project = None):
-        return self.pluginManager.createEditor("default", filePath, project)
+    def getEditorInstance(self, filePath = None, project = None, parent = None):
+        return self.pluginManager.createEditor(filePath, project, parent)
 
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         '''
@@ -265,7 +284,7 @@ class PMXApplication(QtGui.QApplication):
                 editor.setCursorPosition(cursorPosition)
         else:
             project = self.projectManager.findProjectForPath(filePath)
-            editor = self.getEditorInstance(filePath, project)
+            editor = self.getEditorInstance(filePath, project, self.mainWindow)
             def appendChunksTask(editor, filePath):
                 content = self.fileManager.openFile(filePath)
                 editor.setReadOnly(True)

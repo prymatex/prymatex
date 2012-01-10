@@ -8,11 +8,10 @@ from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRepl
 from PyQt4.QtNetwork import QNetworkProxy
 
 from prymatex.ui.dockers.browser import Ui_BrowserDock
-from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
 from subprocess import Popen, PIPE, STDOUT
-from prymatex.gui.dockers.base import PMXBaseDock
+from prymatex.core.plugin.dock import PMXBaseDock
 
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):
@@ -44,7 +43,7 @@ class TmFileReply(QNetworkReply):
             self.offset = end
             return data
 
-class NetworkAccessManager(QNetworkAccessManager, PMXObject):
+class NetworkAccessManager(QNetworkAccessManager):
     def __init__(self, parent, old_manager):
         super(NetworkAccessManager, self).__init__(parent)
         self.old_manager = old_manager
@@ -124,7 +123,10 @@ class TextMate(QtCore.QObject):
         return True
     isBusy = QtCore.pyqtProperty("bool", isBusy)
     
-class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
+class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
+    PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F12")
+    
     SETTINGS_GROUP = "Browser"
     
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
@@ -147,13 +149,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
             network_proxy = QNetworkProxy(protocol, proxy_url.host(), proxy_url.port(), proxy_url.userName(), proxy_url.password())
 
         QNetworkProxy.setApplicationProxy( network_proxy )
-
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F12")
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
-        self.setupUi(self)
         PMXBaseDock.__init__(self)
+        self.setupUi(self)
         
         #Developers, developers, developers!!! Extras
         QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
@@ -184,8 +184,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         self.buttonStop.clicked.connect(self.stop_page)
         
         self.bundleItem = None
-        self.configure()
-
+    
+    def setMainWindow(self, mainWindow):
+        PMXBaseDock.setMainWindow(self, mainWindow)
+        mainWindow.browser = self
+        
     def showEvent(self, event):
         self.setFocus()
     
@@ -210,7 +213,6 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
     def setHtml(self, string, bundleItem):
         self.bundleItem = bundleItem
         url = QtCore.QUrl.fromUserInput("about:%s" % bundleItem.name)
-        print url.toString()
         self.lineUrl.setText(url.toString())
         self.webView.setHtml(string, url)
     

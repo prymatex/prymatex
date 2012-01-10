@@ -225,8 +225,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, context):
-        self.editor.mainWindow.paneBrowser.setHtml(context.outputValue, context.command)
-        self.editor.mainWindow.paneBrowser.show()
+        self.editor.mainWindow.browser.setHtml(context.outputValue, context.command)
+        self.editor.mainWindow.browser.show()
 
     timespanFactor = 1        
     def showAsTooltip(self, context):
