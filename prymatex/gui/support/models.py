@@ -382,7 +382,7 @@ class PMXMenuTreeModel(TreeModel):
     def _build_menu(self, items, parent, submenus = {}, allActionItems = []):
         for uuid in items:
             if uuid.startswith("-"):
-                separatorNode = PMXBundleMenuTreeNode(uuid * 32, PMXBundleMenuTreeNode.SEPARATOR, parent = parent)
+                separatorNode = PMXBundleMenuTreeNode(uuid, PMXBundleMenuTreeNode.SEPARATOR, parent = parent)
                 parent.appendChild(separatorNode)
             else:
                 item = self.manager.getBundleItem(uuid)
@@ -430,7 +430,7 @@ class PMXMenuTreeModel(TreeModel):
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
                 self.add_submenu(node, submenus)
             elif node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
-                items.append(node.data)
+                items.append(node.name)
         submenus[submenuNode.data] = { "items": items, "name": submenuNode.name }
         
     def getMainMenu(self):
@@ -443,7 +443,7 @@ class PMXMenuTreeModel(TreeModel):
                 items.append(node.data)
                 self.add_submenu(node, submenus)
             elif node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
-                items.append("-")
+                items.append(node.name)
         mainMenu = {"items": items, "submenus": submenus }
         excludedItems = self.excludedModel.getExcludedItems()
         if excludedItems:
@@ -508,7 +508,7 @@ class PMXMenuTreeModel(TreeModel):
             #The node belongs to a exludeListModel
             if dragNode.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
                 #Make a copy of separator
-                separatorNode = PMXBundleMenuTreeNode('-' * 32, PMXBundleMenuTreeNode.SEPARATOR)
+                separatorNode = PMXBundleMenuTreeNode(dragNode.name, PMXBundleMenuTreeNode.SEPARATOR)
                 parentNode.insertChild(row, separatorNode)
             elif dragNode.nodeType == PMXBundleMenuTreeNode.SUBMENU:
                 #Make a copy of submenu
@@ -550,7 +550,7 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         self.manager = manager
         self.menuModel = menuModel
         self.submenuNode = PMXBundleMenuTreeNode("New Group", PMXBundleMenuTreeNode.SUBMENU)
-        self.separatorNode = PMXBundleMenuTreeNode("-" * 32, PMXBundleMenuTreeNode.SEPARATOR)
+        self.separatorNode = PMXBundleMenuTreeNode("-" * 36, PMXBundleMenuTreeNode.SEPARATOR)
         self.nodes = [ self.submenuNode, self.separatorNode ]
     
     def appendExcludedItem(self, item):
