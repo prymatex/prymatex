@@ -171,6 +171,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
         
+        # Get Braces from base syntax
+        self.setBraces(syntax.scopeName)
+        
         #Block Count
         self.lastBlockCount = self.document().blockCount()
         self.setupActions()
@@ -361,7 +364,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.sidebar.showFolding = bool(flags & self.ShowFolding)
         self.updateLineNumberAreaWidth(0)
         self.viewport().repaint(self.viewport().visibleRegion())
-        
+    
+    def setBraces(self, scope):
+        settings = self.getPreference(scope)
+        self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
+    
     # Syntax
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
@@ -370,6 +377,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         if self.syntaxHighlighter.syntax != syntax:
             self.syntaxHighlighter.syntax = syntax
             self.folding.indentSensitive = syntax.indentSensitive
+            self.setBraces(syntax.scopeName)
             self.syntaxHighlighter.rehighlight()
             self.syntaxChanged.emit(syntax)
 
@@ -496,11 +504,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def highlightCurrentBrace(self, cursor = None):
         cursor = QtGui.QTextCursor(self.textCursor())
         cursor.clearSelection()
-        scope = cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
-        settings = self.application.supportManager.getPreferenceSettings(scope)
-        differentPairs = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
-        openBraces = map(lambda pair: pair[0], differentPairs)
-        closeBraces = map(lambda pair: pair[1], differentPairs)
+        openBraces = map(lambda pair: pair[0], self.braces)
+        closeBraces = map(lambda pair: pair[1], self.braces)
         
         closeCursor = openCursor = None
         leftChar = cursor.document().characterAt(cursor.position() - 1)
@@ -533,15 +538,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             extraSelections = self.extraSelections()
             if openCursor is not None:
                 selection = QtGui.QTextEdit.ExtraSelection()
-                selection.format.setForeground(QtGui.QBrush(self.colours['selection']))
-                #backgroundColor = self.colours['lineHighlight'] if cursor.block() == openCursor.block() else self.colours['background']
+                selection.format.setForeground(QtGui.QBrush(self.colours['caret']))
+                selection.format.setFontUnderline(True)
+                selection.format.setUnderlineColor(self.colours['foreground']) 
                 selection.format.setBackground(QtGui.QBrush(QtCore.Qt.transparent))
                 selection.cursor = closeCursor
                 extraSelections.append(selection)
             if closeCursor is not None:
                 selection = QtGui.QTextEdit.ExtraSelection()
-                selection.format.setForeground(QtGui.QBrush(self.colours['selection']))
-                #backgroundColor = self.colours['lineHighlight'] if cursor.block() == closeCursor.block() else self.colours['background']
+                selection.format.setForeground(QtGui.QBrush(self.colours['caret']))
+                selection.format.setFontUnderline(True)
+                selection.format.setUnderlineColor(self.colours['foreground'])
                 selection.format.setBackground(QtGui.QBrush(QtCore.Qt.transparent))
                 selection.cursor = openCursor
                 extraSelections.append(selection)
@@ -886,25 +893,35 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Find and Replace
     #==========================================================================    
     def findTypingPair(self, b1, b2, cursor, backward = False):
+        """
+        Busca b2 asumiendo que b1 es su antitesis de ese modo controla el balanceo.
+        b1 antitesis de b2
+        b2 texto a buscar
+        cursor representando la posicion a partir de la cual se busca
+        backward buscar para atras
+        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre 
+        """
         flags = QtGui.QTextDocument.FindFlags()
         if backward:
             flags |= QtGui.QTextDocument.FindBackward
         if cursor.hasSelection():
-            startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
+            startPosition = cursor.selectionEnd() if b1 == b2 or backward else cursor.selectionStart() 
         else:
             startPosition = cursor.position()
-        c1 = cursor.document().find(b1, startPosition, flags)
-        c2 = cursor.document().find(b2, startPosition, flags)
+        c1 = self.document().find(b1, startPosition, flags)
+        c2 = self.document().find(b2, startPosition, flags)
         if backward:
             while c1 > c2:
-                c1 = cursor.document().find(b1, c1.selectionStart(), flags)
+                c1 = self.document().find(b1, c1.selectionStart(), flags)
                 if c1 > c2:
-                    c2 = cursor.document().find(b2, c2.selectionStart(), flags)
+                    c2 = self.document().find(b2, c2.selectionStart(), flags)
         else:
-            while c1 < c2:
-                c1 = cursor.document().find(b1, c1.selectionEnd(), flags)
+            while not c1.isNull() and c1.position() != -1 and c1 < c2:
+                c1 = self.document().find(b1, c1.selectionEnd(), flags)
+                if c1.isNull():
+                    break
                 if c1 < c2:
-                    c2 = cursor.document().find(b2, c2.selectionEnd(), flags)
+                    c2 = self.document().find(b2, c2.selectionEnd(), flags)
         return c2
 
     def findMatch(self, match, flags, findNext = False):
