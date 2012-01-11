@@ -51,7 +51,21 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         sIndex = self.mapToSource(index)
         return self.sourceModel().filePath(sIndex)
     
-    
+#    
+#    def data(self, index, role):
+#        if role == QtCore.Qt.EditRole:
+#            return super(PMXFileSystemProxyModel, self).data(index, QtCore.Qt.DisplayRole)
+#        return super(PMXFileSystemProxyModel, self).data(index, role)
+#    
+    def setData(self, index, value, role):
+        # TODO: Rename using filemanager
+        if index.isInvalid():
+            return False
+        if role == QtCore.Qt.EditRole:
+            path = self.sourceModel().filePath(self.mapToSource(index))
+            # TODO: Has permission?
+            #self.application.fileManager.rename(src, value)
+        return QtGui.QSortFilterProxyModel.setData(self, index, value, role)
     
     def dropMimeData(self, mimeData, action, row, col, parentIndex):
         #print action
