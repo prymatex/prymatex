@@ -50,7 +50,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         
         self.setupButtons()
         
-        
+    
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
             #print "Key press", obj #
@@ -135,6 +135,19 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.treeViewFileSystem.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewFileSystem.customContextMenuRequested.connect(self.showTreeViewFileSystemContextMenu)
     
+        #=======================================================================
+        # Drag and Drop (see the proxy model)
+        #=======================================================================
+        self.treeViewFileSystem.setDragEnabled(True)
+        self.treeViewFileSystem.setAcceptDrops(True)
+        self.fileSystemModel.setReadOnly(False)
+        """
+        self.fileSystemProxyModel.setSupportedDragActions(QtCore.Qt.CopyAction | 
+                                                          QtCore.Qt.MoveAction | 
+                                                          QtCore.Qt.LinkAction)
+                                                          """
+        self.treeViewFileSystem.setDefaultDropAction(QtCore.Qt.MoveAction)
+        self.treeViewFileSystem.setDropIndicatorShown(True)
     @QtCore.pyqtSlot(str)
     def on_comboBoxLocation_currentIndexChanged(self, path):
         self.setPathAsRoot(path)
