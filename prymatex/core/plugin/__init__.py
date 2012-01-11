@@ -47,7 +47,7 @@ Key_Any = 0
 class PMXBaseKeyHelper(PMXBasePlugin):
     KEY = Key_Any
     def accept(self, editor, event, cursor = None, scope = None):
-        return self.KEY == event.key()
+        pass
     
     def execute(self, editor, event, cursor = None, scope = None):
         pass

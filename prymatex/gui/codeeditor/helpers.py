@@ -62,27 +62,27 @@ class SmartTypingPairsHelper(PMXBaseKeyHelper):
         if not bool(self.pair): return False
 
         #Vamos a intentar algo radical
-        openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
-        closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
+        openBraces = map(lambda pair: pair[0], settings.smartTypingPairs)
+        closeBraces = map(lambda pair: pair[1], settings.smartTypingPairs)
         self.cursorOpen = self.cursorClose = None
         if cursor.hasSelection():
             character = cursor.selectedText()
-            if character in openTyping:
+            if character in openBraces:
                 #Es un caracter especial de apertura
                 self.cursorOpen = cursor
-                index = openTyping.index(character)
-                self.cursorClose = editor.findTypingPair(character, closeTyping[index], cursor)
-            elif character in closeTyping:
+                index = openBraces.index(character)
+                self.cursorClose = editor.findTypingPair(character, closeBraces[index], cursor)
+            elif character in closeBraces:
                 #Es un caracter especial de cierre
                 self.cursorClose = cursor
-                index = closeTyping.index(character)
-                self.cursorOpen = editor.findTypingPair(character, openTyping[index], cursor, True)
+                index = closeBraces.index(character)
+                self.cursorOpen = editor.findTypingPair(character, openBraces[index], cursor, True)
             return True
-        elif character in openTyping:
+        elif character in openBraces:
             leftChar = cursor.document().characterAt(cursor.position() - 1)
             rightChar = cursor.document().characterAt(cursor.position())
             #Buscar de izquierda a derecha por dentro
-            pairs = filter(lambda pair: leftChar == pair[0] and rightChar != pair[1], editor.braces)
+            pairs = filter(lambda pair: leftChar == pair[0] and rightChar != pair[1], settings.smartTypingPairs)
             if pairs:
                 pair = pairs[0]
                 self.cursorOpen = cursor
@@ -92,18 +92,18 @@ class SmartTypingPairsHelper(PMXBaseKeyHelper):
                 self.cursorClose.setPosition(self.cursorClose.selectionStart())
                 return bool(self.pair)
             #Buscar de izquierda a derecha por fuera
-            pairs = filter(lambda pair: rightChar == pair[0], editor.braces)
+            pairs = filter(lambda pair: rightChar == pair[0], settings.smartTypingPairs)
             if pairs:
                 pair = pairs[0]
                 self.cursorOpen = cursor
                 self.cursorClose = editor.findTypingPair(pair[0], pair[1], self.cursorOpen)
                 self.cursorClose.setPosition(self.cursorClose.selectionEnd())
                 return bool(self.pair)
-        elif character in closeTyping and character not in openTyping:
+        elif character in closeBraces and character not in openBraces:
             rightChar = cursor.document().characterAt(cursor.position())
             leftChar = cursor.document().characterAt(cursor.position() - 1)
             #Buscar de derecha a izquierda por dentro
-            pairs = filter(lambda pair: rightChar == pair[1] and leftChar != pair[0], editor.braces)
+            pairs = filter(lambda pair: rightChar == pair[1] and leftChar != pair[0], settings.smartTypingPairs)
             if pairs:
                 pair = pairs[0]
                 self.cursorClose = cursor
@@ -113,7 +113,7 @@ class SmartTypingPairsHelper(PMXBaseKeyHelper):
                 self.cursorOpen.setPosition(self.cursorOpen.selectionEnd())
                 return bool(self.pair)
             #Buscar de derecha a izquierda por fuera
-            pairs = filter(lambda pair: leftChar == pair[1], editor.braces)
+            pairs = filter(lambda pair: leftChar == pair[1], settings.smartTypingPairs)
             if pairs:
                 pair = pairs[0]
                 self.cursorClose = cursor
