@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+from __future__ import print_function
 import fnmatch
 import os
 from PyQt4 import QtCore, QtGui
-
+import sys
+    
 class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
@@ -48,3 +50,66 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
     def filePath(self, index):
         sIndex = self.mapToSource(index)
         return self.sourceModel().filePath(sIndex)
+    
+#    
+#    def data(self, index, role):
+#        if role == QtCore.Qt.EditRole:
+#            return super(PMXFileSystemProxyModel, self).data(index, QtCore.Qt.DisplayRole)
+#        return super(PMXFileSystemProxyModel, self).data(index, role)
+#    
+    def setData(self, index, value, role):
+        # TODO: Rename using filemanager
+        if index.isInvalid():
+            return False
+        if role == QtCore.Qt.EditRole:
+            path = self.sourceModel().filePath(self.mapToSource(index))
+            # TODO: Has permission?
+            #self.application.fileManager.rename(src, value)
+        return QtGui.QSortFilterProxyModel.setData(self, index, value, role)
+    
+    def dropMimeData(self, mimeData, action, row, col, parentIndex):
+        #print action
+        if action == QtCore.Qt.IgnoreAction:
+            print ("Ignore")
+            return True
+        """
+        Qt::CopyAction
+        Qt::MoveAction
+        Qt::LinkAction
+        Qt::ActionMask
+        Qt::IgnoreAction
+        Qt::TargetMoveAction
+        """
+        index = self.index(row, col, parentIndex)
+        sourceIndex = self.mapToSource(parentIndex)
+        destPath = self.sourceModel().filePath(sourceIndex)
+        print("La ruta es:", destPath)
+        
+        if not os.path.isdir(destPath):
+            return False
+        # TODO: Simple selection restricts the number of urls to 1
+        url = mimeData.urls()[0]
+        fromPath = os.path.dirname(url.toLocalFile()) 
+        if fromPath == destPath: 
+            print("Origen", fromPath, "destino", destPath, sep = " ")
+            return False
+        
+        if not mimeData.hasUrls():
+            return False
+        if action is QtCore.Qt.CopyAction:
+            return True
+        elif action is QtCore.Qt.MoveAction:
+            return True
+        elif action is QtCore.Qt.LinkAction:
+            return True
+        return False
+    
+    def mimeTypes(self):
+        return ["text/uri-list"]
+    
+    def flags(self, index):
+        sourceIndex = self.mapToSource(index)
+        defaultFlags = super(PMXFileSystemProxyModel, self).flags(index)
+        if not self.sourceModel().isDir(self.mapToSource(index)):
+            return defaultFlags | QtCore.Qt.ItemIsDragEnabled 
+        return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled 
