@@ -40,7 +40,7 @@ def has_been_updated(source, dest):
 class QtBuild(build):
     """Build PyQt (.ui) files and resources."""
  
-    description = "build PyQt GUIs (.ui)."
+    description = "build PyQt GUIs (.ui) for prymatex directory schema"
     
     def _ui2py(self, ui_file, py_file):
         try:
@@ -48,7 +48,7 @@ class QtBuild(build):
             fp = open(py_file, 'w')
             uic.compileUi(ui_file, fp)
             fp.close()
-        except Exception, e:
+        except Exception as e:
             self.warn('Unable to compile user interface %s: %s', py_file, e)
             if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
@@ -75,7 +75,7 @@ class QtBuild(build):
         try:
             command = 'pyrcc4 %s -o %s'
             os.system(command % (rc_file, py_file))
-        except Exception, e:
+        except Exception as e:
             self.warn('Unable to compile resources %s: %s', py_file, e)
             if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
