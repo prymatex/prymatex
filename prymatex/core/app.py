@@ -223,7 +223,7 @@ class PMXApplication(QtGui.QApplication):
         
         #Dialog System
         if self.zmqContext:
-            from prymatex.pmxdialog.base import PMXDialogSystem
+            from prymatex.gui.dialogs.pmxdialog import PMXDialogSystem
             self.dialogSystem = PMXDialogSystem(self)
     
     def closePrymatex(self):
