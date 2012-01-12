@@ -249,9 +249,8 @@ class PMXSettings(object):
         self.qsettings.setValue(name, value)
     
     def value(self, name):
-        #FIXME keys for class values
-        if name in self.__class__.__dict__:
-            return self.__class__.__dict__[name]
+        if hasattr(self, name):
+            return getattr(self, name)
         value = self.qsettings.value(name)
         return value
 

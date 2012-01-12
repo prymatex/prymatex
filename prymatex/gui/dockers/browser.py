@@ -44,6 +44,8 @@ class TmFileReply(QNetworkReply):
             return data
 
 class NetworkAccessManager(QNetworkAccessManager):
+    commandUrlRequested = QtCore.pyqtSignal(QtCore.QUrl)
+    
     def __init__(self, parent, old_manager):
         super(NetworkAccessManager, self).__init__(parent)
         self.old_manager = old_manager
@@ -54,7 +56,7 @@ class NetworkAccessManager(QNetworkAccessManager):
     
     def createRequest(self, operation, request, data):
         if request.url().scheme() == "txmt":
-            self.application.openUrl(request.url())
+            self.commandUrlRequested.emit(request.url())
         elif request.url().scheme() == "tm-file" and operation == self.GetOperation:
             reply = TmFileReply(self, request.url(), self.GetOperation)
             return reply
@@ -76,12 +78,12 @@ class SystemWrapper(QtCore.QObject):
         self.process = process
         self.file = file
     
-    @QtCore.pyqtSignature("write(int)")
-    def write(self, flags):
-        self.process.stdin.write()
+    @QtCore.pyqtSlot(str)
+    def write(self, data):
+        self.process.stdin.write(data)
     
-    @QtCore.pyqtSignature("write(int)")
-    def read(self, flags):
+    @QtCore.pyqtSlot()
+    def read(self):
         self.process.stdin.close()
         text = self.process.stdout.read()
         self.process.stdout.close()
@@ -89,7 +91,7 @@ class SystemWrapper(QtCore.QObject):
         deleteFile(self.file)
         return text
         
-    @QtCore.pyqtSignature("close()")
+    @QtCore.pyqtSlot()
     def close(self):
         self.process.stdin.close()
         self.process.stdout.close()
@@ -159,9 +161,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
         
         #New manager
-        old_manager = self.webView.page().networkAccessManager()
-        new_manager = NetworkAccessManager(self, old_manager)
-        self.webView.page().setNetworkAccessManager(new_manager)
+        self.networkAccessManager = NetworkAccessManager(self, self.webView.page().networkAccessManager())
+        self.webView.page().setNetworkAccessManager(self.networkAccessManager)
+        self.networkAccessManager.commandUrlRequested.connect(self.on_manager_commandUrlRequested)
 
         # Set the default home page
         self.lineUrl.setText(self.homePage)
@@ -185,6 +187,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
         self.bundleItem = None
     
+    def on_manager_commandUrlRequested(self, url):
+        self.application.handleUrlCommand(url)
+        
     def setMainWindow(self, mainWindow):
         PMXBaseDock.setMainWindow(self, mainWindow)
         mainWindow.browser = self

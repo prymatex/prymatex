@@ -307,21 +307,23 @@ class PMXApplication(QtGui.QApplication):
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")        
     
-
-    def openUrl(self, url):
-        if isinstance(url, (str, unicode)):
+    def handleUrlCommand(self, url):
+        if isinstance(url, basestring):
             url = QtCore.QUrl(url)
-        source = url.queryItemValue('url')
-        if source:
-            source = QtCore.QUrl(source)
+        if url.scheme() == "txmt":
+            #TODO: Controlar que sea un open
+            sourceFile = url.queryItemValue('url')
             position = (0, 0)
             line = url.queryItemValue('line')
             if line:
-                position = (int(line), position[1])
+                position = (int(line) - 1, position[1])
             column = url.queryItemValue('column')
             if column:
-                position = (position[0], int(column))
-            editor = self.openFile(source.path(), position)
+                position = (position[0], int(column) - 1)
+            if sourceFile:
+                self.openFile(sourceFile, position)
+            else:
+                self.currentEditor().setCursorPosition(position)
 
     def openArgumentFiles(self, args):
         for filePath in filter(lambda f: os.path.exists(f), args):

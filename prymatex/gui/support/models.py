@@ -1,4 +1,4 @@
-#!/SRr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
@@ -88,7 +88,7 @@ class PMXBundleTreeNode(TreeNode):
 #====================================================
 # Bundle Tree Model
 #====================================================
-class PMXBundleTreeModel(TreeModel):  
+class PMXBundleTreeModel(TreeModel): 
     def __init__(self, manager, parent = None):
         TreeModel.__init__(self, parent)
         self.manager = manager
