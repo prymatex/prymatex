@@ -98,6 +98,7 @@ class PMXPluginManager(object):
             module.registerPlugin(self)
         except (ImportError, AttributeError) as reason:
             print(reason)
+            raise reason
         finally:
             sys.path = old_syspath
         return None

@@ -3,6 +3,7 @@
 
 from PyQt4 import QtGui, QtCore
 
+from prymatex import resources
 from prymatex.core.plugin import PMXBaseWidgetPlugin
 
 class PMXBaseDock(PMXBaseWidgetPlugin):
@@ -11,10 +12,10 @@ class PMXBaseDock(PMXBaseWidgetPlugin):
     
     def __init__(self):
         PMXBaseWidgetPlugin.__init__(self)
-        if self.MENU_KEY_SEQUENCE:
+        if self.MENU_KEY_SEQUENCE is not None:
             keysequence = QtGui.QKeySequence(self.MENU_KEY_SEQUENCE)
             self.toggleViewAction().setShortcut(keysequence)
-    
+
     def setCurrentEditor(self, editor):
         pass
     

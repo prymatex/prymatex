@@ -13,6 +13,7 @@ from prymatex.core import exceptions
 from prymatex.utils import coroutines
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
+from prymatex.gui.style import PrymatexStyle
 
 class PMXApplication(QtGui.QApplication):
     """
@@ -26,6 +27,7 @@ class PMXApplication(QtGui.QApplication):
         Inicialización de la aplicación.
         """
         QtGui.QApplication.__init__(self, args)
+        QtGui.QApplication.setStyle(PrymatexStyle())
         
         # Some init's
         self.setApplicationName(prymatex.__name__)
@@ -38,8 +40,6 @@ class PMXApplication(QtGui.QApplication):
 
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
-        
-        self.initialArgs = args
 
     def loadGraphicalUserInterface(self):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
