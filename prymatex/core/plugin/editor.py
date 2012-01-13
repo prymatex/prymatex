@@ -55,6 +55,11 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
             return os.path.basename(self.filePath)
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creation_counter)
     
+    def tabToolTip(self):
+        if self.filePath is not None:
+            return self.filePath
+        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creation_counter)
+    
     def fileDirectory(self):
         return self.application.fileManager.getDirectory(self.filePath)
     

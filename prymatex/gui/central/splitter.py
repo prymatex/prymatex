@@ -184,7 +184,8 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             self.addWidget(ch)
 
         idx = ch.addTab(w, w.tabTitle())
-        self.setActiveIcon(w, w.tabIcon())
+        self.setWidgetToolTip(w, w.tabToolTip())
+        self.setWidgetIcon(w, w.tabIcon())
         self.connect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
         
         if ch is not self._current_tab_w:
@@ -226,7 +227,7 @@ class PMXSplitTabWidget(QtGui.QSplitter):
     def _update_tab_status(self):
         sender = self.sender()
         self.setWidgetTitle(sender, sender.tabTitle())
-        self.setActiveIcon(sender, sender.tabIcon())
+        self.setWidgetIcon(sender, sender.tabIcon())
         
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
@@ -238,13 +239,29 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         
         self.currentWidgetChanged.emit(w)
         
-    def setActiveIcon(self, w, icon):
+    def setWidgetIcon(self, w, icon):
         """ Set the active icon on a widget. """
 
         tw, tidx = self._tab_widget(w)
 
         if tw is not None:
             tw.setTabIcon(tidx, icon)
+
+    def setWidgetTitle(self, w, title):
+        """ Set the title for the given widget. """
+
+        tw, idx = self._tab_widget(w)
+
+        if tw is not None:
+            tw.setTabText(idx, title)
+    
+    def setWidgetToolTip(self, w, toolTip):
+        """ Set the title for the given widget. """
+
+        tw, idx = self._tab_widget(w)
+
+        if tw is not None:
+            tw.setTabToolTip(idx, toolTip)
     
     def setTabTextColor(self, w, color):
         """ 
@@ -254,14 +271,6 @@ class PMXSplitTabWidget(QtGui.QSplitter):
 
         if tw is not None:
             tw.tabBar().setTabTextColor(tidx, color)
-
-    def setWidgetTitle(self, w, title):
-        """ Set the title for the given widget. """
-
-        tw, idx = self._tab_widget(w)
-
-        if tw is not None:
-            tw.setTabText(idx, title)
 
     def getAllWidgets(self):
         widgets = []
