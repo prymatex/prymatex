@@ -3,95 +3,8 @@ import re
 from PyQt4 import QtCore, QtGui
 
 from prymatex.core.plugin import PMXBaseOverlay
-
-class PMXMessageOverlay(QtCore.QObject, PMXBaseOverlay):
-    messageFadedOut = QtCore.pyqtSignal()
-    messageFadedIn = QtCore.pyqtSignal()
-    ''' 
-    Mixin for displaying overlayed messages in a QWidget instance.
-    Please note that you should:
-        * Use the mixin on toplevel elements (no QWidgets, but QPlainTextEdit, QWebView, etc.)
-        * You should call updateMessagePosition at least in resizeEvent of your subclass 
-    '''
-    def __init__(self, widget):
-        # Signals
-        QtCore.QObject.__init__(self, widget)
-        self.messageOverlay = self.buildLabel(widget)
-        
-        self.fadeOutTimer = QtCore.QTimer(self)
-        self.fadeOutTimer.timeout.connect(self.messageOverlay.fadeOut)
-        self.messageOverlay.mouseIn.connect(self.fadeOutTimer.stop)
     
-    def buildLabel(self, parent):
-        # TODO: Delegate responsability
-        messageOverlay = LabelOverlayWidget(text = "", parent = parent)
-        messageOverlay.fadedIn.connect(self.messageFadedIn)
-        messageOverlay.fadedOut.connect(self.messageFadedOut)
-        messageOverlay.messageClicked.connect(self.messageClicked)
-        #messageOverlay.linkActivated.connect(self.messageLinkActivated)
-        return messageOverlay
-        
-    
-    def messageFadedIn(self):
-        ''' Override '''
-        #print "Message appeared"
-        pass
-    
-    def messageFadedOut(self):
-        ''' Override '''
-        #print "Message disappeared"
-        pass
-    
-    def messageLinkActivated(self, link):
-        ''' Override '''
-        pass
-    
-    def showMessage(self, message, timeout = 2000, icon = None, pos = None, hrefCallbacks = {} ):
-        '''
-        @param message: Text message, can be HTML
-        @param timeout: Timeout before message fades
-        @param icon: A QIcon instance to show
-        @param pos: An x, y tuple with message position
-        @param link_map: 
-        '''
-        self.messageOverlay.setText(message)
-        self.messageOverlay.position = pos
-        self.messageOverlay.updatePosition()
-        self.messageOverlay.adjustSize()
-        self.messageOverlay.linkMap = hrefCallbacks
-        if unicode(message):
-            self.messageOverlay.fadeIn()
-            if timeout:
-                print "Launching fadeout timer"
-                self.fadeOutTimer.start(timeout)
-        else:
-            self.fadeOutTimer.stop()
-            self.messageOverlay.fadeOut()
-            
-    def clearMessage(self):
-        self.messageOverlay.fadeOut()
-    
-    def messageClicked(self):
-        ''' Overrride '''
-        self.clearMessage()       
-        
-    def updateOverlay(self):
-        ''' Override '''
-        self.messageOverlay.updatePosition()
-
-    #===========================================================================
-    # Label Colors
-    #===========================================================================
-    def setMessageTextColor(self, color):
-        self.messageOverlay.color = color
-    
-    def setMessageBackgroundColor(self, color):
-        self.messageOverlay.backgroundColor = color
-        
-    def setMessageBorderColor(self, color):
-        self.messageOverlay.borderColor = color
-    
-class LabelOverlayWidget(QtGui.QLabel):
+class PMXMessageOverlay(QtGui.QLabel, PMXBaseOverlay):
     ''' 
     Inner message QLabel.
     StyleSheet
@@ -137,12 +50,17 @@ class LabelOverlayWidget(QtGui.QLabel):
     
     _hovered = False
     
-    def __init__(self, text="", parent=None, ):
+    def __init__(self, parent):
         '''
         This label is managed from PMXMessageOverlay mixin, should not be
         used outside this module
         '''
-        super(LabelOverlayWidget, self).__init__(text, parent)
+        QtGui.QLabel.__init__(self, parent)
+        
+        self.fadeOutTimer = QtCore.QTimer(self)
+        self.fadeOutTimer.timeout.connect(self.fadeOut)
+        self.mouseIn.connect(self.fadeOutTimer.stop)
+        
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(32)
         self.timer.timeout.connect(self.updateOpacity)
@@ -150,22 +68,50 @@ class LabelOverlayWidget(QtGui.QLabel):
         self.setStyleSheet(self.STYLESHEET)
         self.opacity = 0
         self.linkActivated.connect(self.linkHandler)
-    
-    
-    def setParent(self, parent):
+
+    def showMessage(self, message, timeout = 2000, icon = None, pos = None, hrefCallbacks = {} ):
+        '''
+        @param message: Text message, can be HTML
+        @param timeout: Timeout before message fades
+        @param icon: A QIcon instance to show
+        @param pos: An x, y tuple with message position
+        @param link_map: 
+        '''
+        self.setText(message)
+        self.position = pos
         self.updatePosition()
-        return super(LabelOverlayWidget, self).setParent(parent)
-  
+        self.adjustSize()
+        self.linkMap = hrefCallbacks
+        if unicode(message):
+            self.fadeIn()
+            if timeout:
+                print "Launching fadeout timer"
+                self.fadeOutTimer.start(timeout)
+        else:
+            self.fadeOutTimer.stop()
+            self.fadeOut()
+
+    def clearMessage(self):
+        self.fadeOut()
+    
+    def messageClicked(self):
+        ''' Overrride '''
+        self.clearMessage()       
+        
+    def updateOverlay(self):
+        ''' Override '''
+        self.updatePosition()
+    
     def linkHandler(self, link):
         callback = self.linkMap.get(link, None)
         if callback is None:
-            logger.warn("No callback for %s" % link)
+            self.logger.warn("No callback for %s" % link)
             return
         if not callable(callback):
-            logger.warn("Callback for %s is not callable: %s" % (link, callback))
+            self.logger.warn("Callback for %s is not callable: %s" % (link, callback))
             return
         
-        logger.debug( "Running callback: %s %s" % (link, callback))
+        self.logger.debug( "Running callback: %s %s" % (link, callback))
         callback()
   
     def setText(self, text):
@@ -191,12 +137,12 @@ class LabelOverlayWidget(QtGui.QLabel):
         
     
     def resizeEvent(self, event):
-        super(LabelOverlayWidget, self).resizeEvent(event)
+        QtGui.QLabel.resizeEvent(self, event)
         self.updatePosition()
     
     def showEvent(self, event):
         self.updatePosition()
-        return super(LabelOverlayWidget, self).showEvent(event)
+        return QtGui.QLabel.showEvent(self, event)
   
     def enterEvent(self, event):
         """ Mouse hovered the messge """
@@ -211,7 +157,6 @@ class LabelOverlayWidget(QtGui.QLabel):
     
     def mousePressEvent(self, event):
         self.messageClicked.emit()
-    
     
     __linkMap = {}
     @property
@@ -233,7 +178,6 @@ class LabelOverlayWidget(QtGui.QLabel):
     FULL_THERSHOLD = 0.7
     # Transparency increment (linear transition)
     DEFAULT_FADE_SPEED = 0.15
-    
     
     def fadeIn(self, force = False):
         ''' Triggers transparency fade in transition '''
@@ -295,7 +239,6 @@ class LabelOverlayWidget(QtGui.QLabel):
     
     
     def updateOpacity(self):
-        
         if self.speed > 0:
             if self.isHidden():
                 self.show()
@@ -327,4 +270,16 @@ class LabelOverlayWidget(QtGui.QLabel):
             repl = '%s: rgba(%d, %d, %d, %d%%);' % (name, col.red(), col.green(), col.blue(), self.opacity * 100.0)
             styleSheet = regex.sub(repl, styleSheet)
         self.setStyleSheet(styleSheet)
+    
+    #===========================================================================
+    # Label Colors
+    #===========================================================================
+    def setMessageTextColor(self, color):
+        self.color = color
+    
+    def setMessageBackgroundColor(self, color):
+        self.backgroundColor = color
+        
+    def setMessageBorderColor(self, color):
+        self.borderColor = color
     

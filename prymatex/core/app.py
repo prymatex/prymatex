@@ -175,6 +175,7 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = QtKernelManager()
             self.kernelManager.start_kernel()
             self.kernelManager.start_channels()
+            print self.kernelManager.kernel.__class__
         except ImportError as e:
             print("Warning: %s" % e)
             self.kernelManager = None

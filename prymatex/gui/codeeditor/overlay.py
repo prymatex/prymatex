@@ -31,7 +31,17 @@ class PMXMiniMapOverlay(QtGui.QPlainTextEdit, PMXBaseOverlay):
     def initialize(self, editor):
         PMXBaseOverlay.initialize(self, editor)
         editor.textChanged.connect(self.updateDocumentText)
+        editor.themeChanged.connect(self.on_editor_themeChanged)
         
+    def on_editor_themeChanged(self):
+        #Editor colours
+        palette = self.palette()
+        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, self.parent().colours['background'])
+        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.parent().colours['foreground'])
+        palette.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Base, self.parent().colours['foreground'])
+        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Highlight, self.parent().colours['selection'])
+        self.setPalette(palette)
+
     def updateDocumentText(self):
         text = self.parent().toPlainText()
         self.setPlainText(text)
