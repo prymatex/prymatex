@@ -228,7 +228,8 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         sender = self.sender()
         self.setWidgetTitle(sender, sender.tabTitle())
         self.setWidgetIcon(sender, sender.tabIcon())
-        
+        self.setWidgetToolTip(sender, sender.tabToolTip())
+                
     def _close_tab_request(self, w):
         """ A close button was clicked in one of out _TabWidgets """
         
