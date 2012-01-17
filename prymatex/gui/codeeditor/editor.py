@@ -794,7 +794,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         if self.project is not None:
             env.update(self.project.buildEnvironment())
         if cursor.hasSelection():
-            env['TM_SELECTED_TEXT'] = cursor.selectedText()
+            env['TM_SELECTED_TEXT'] = cursor.selectedText().replace(u"\u2029", '\n')
             start, end = self.getSelectionBlockStartEnd()
             env['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             env['TM_INPUT_START_LINE'] = start.blockNumber() + 1

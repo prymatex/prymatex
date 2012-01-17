@@ -333,8 +333,7 @@ class CommandHandler(object):
         sys.stdout.write(value["result"])
     
     def tooltip(self, options, args):
-        options, args = tooltip_parse_args(args)
-        self.server.tooltip(str(options), str(args))
+        self.debug(options, args)
         
     def menu(self, options, args):
         if options.parameters == None:
@@ -382,10 +381,6 @@ class CommandHandler(object):
         self.server.alert(str(options), str(args))
         
     def debug(self, options, args):
-        if options.parameters == None:
-            options.parameters = sys.stdin.readlines()
-        args.append( "".join(options.parameters))
-        
         command = {"name": "debug", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
         value = self.socket.recv_pyobj()
