@@ -50,6 +50,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         
         self.setupButtons()
         
+        self.treeViewFileSystem.setEditTriggers( QtGui.QAbstractItemView.EditKeyPressed )
+        
     
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:

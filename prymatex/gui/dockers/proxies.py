@@ -11,6 +11,7 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.application = QtGui.QApplication.instance()
+        # TODO: Save defaults
         self.orderBy = "name"
         self.folderFirst = True
         self.descending = False
@@ -57,9 +58,9 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
 #            return super(PMXFileSystemProxyModel, self).data(index, QtCore.Qt.DisplayRole)
 #        return super(PMXFileSystemProxyModel, self).data(index, role)
 #    
-    def setData(self, index, value, role):
+    def _setData(self, index, value, role):
         # TODO: Rename using filemanager
-        if index.isInvalid():
+        if index.isValid():
             return False
         if role == QtCore.Qt.EditRole:
             path = self.sourceModel().filePath(self.mapToSource(index))
@@ -72,14 +73,6 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         if action == QtCore.Qt.IgnoreAction:
             print ("Ignore")
             return True
-        """
-        Qt::CopyAction
-        Qt::MoveAction
-        Qt::LinkAction
-        Qt::ActionMask
-        Qt::IgnoreAction
-        Qt::TargetMoveAction
-        """
         index = self.index(row, col, parentIndex)
         sourceIndex = self.mapToSource(parentIndex)
         destPath = self.sourceModel().filePath(sourceIndex)
@@ -95,12 +88,17 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
             return False
         
         if not mimeData.hasUrls():
+            print("No URLs")
             return False
+        
         if action is QtCore.Qt.CopyAction:
+            print("Copy action")
             return True
         elif action is QtCore.Qt.MoveAction:
+            print ("Move Action")
             return True
         elif action is QtCore.Qt.LinkAction:
+            print ("Link action")
             return True
         return False
     
