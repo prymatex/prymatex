@@ -1043,7 +1043,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             return block
     
     def findPreviousMoreIndentBlock(self, block, indent = None):
-        """ Return previous equal indent block """
+        """ Return previous more indent block """
         indent = indent if indent != None else block.userData().indent
         block = self.findPreviousNoBlankBlock(block)
         while block is not None and block.userData().indent <= indent:
@@ -1051,6 +1051,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         if block is not None:
             return block
     
+    def findPreviousLessIndentBlock(self, block, indent = None):
+        """ Return previous less indent block """
+        indent = indent if indent != None else block.userData().indent
+        block = self.findPreviousNoBlankBlock(block)
+        while block is not None and block.userData().indent >= indent:
+            block = self.findPreviousNoBlankBlock(block)
+        if block is not None:
+            return block
+
     def indentBlocks(self):
         """
         Indents text, block selections.

@@ -25,9 +25,12 @@ class PMXEditorFolding(object):
         self.updateFolding()
         
     def removeFoldingBlock(self, block):
-        index = self.blocks.index(block)
-        self._purge_blocks(startIndex = index)
-        self.blocks.remove(block)
+        try:
+            index = self.blocks.index(block)
+            self._purge_blocks(startIndex = index)
+            self.blocks.remove(block)
+        except ValueError:
+            self._purge_blocks()
         self.updateFolding()
 
     def on_textBlocksRemoved(self, block, length):
@@ -71,13 +74,26 @@ class PMXEditorFolding(object):
                     closeBlock = self.editor.findPreviousMoreIndentBlock(block)
                     if closeBlock is not None:
                         #TODO: Aca va un valor en funcion de que valor esta cerrando, cuidado con el -1 de error
-                        closeBlock.userData().foldingMark = -closeBlock.userData().indentLevel
+                        closeBlock.userData().foldingMark = -self.getNestedLevel(self.folding.index(openBlock))
                         self.folding.append(closeBlock)
                         nest += closeBlock.userData().foldingMark
             nest += userData.foldingMark
             if nest >= 0:
                 self.folding.append(block)
-
+        if nest != 0:
+            #Quedo abierto, tengo que buscar el que cierra o uso el ultimo
+            lastBlock = self.editor.document().lastBlock()
+            if lastBlock in self.folding: return
+            openBlock = self.editor.findPreviousLessIndentBlock(lastBlock)
+            if openBlock is None:
+                lastBlock.userData().foldingMark = -nest
+                self.folding.append(lastBlock)
+            else:
+                closeBlock = self.editor.findPreviousMoreIndentBlock(openBlock)
+                if closeBlock is not None:
+                    closeBlock.userData().foldingMark = -nest
+                    self.folding.append(closeBlock)
+            
     def getFoldingMark(self, block):
         if block in self.folding:
             userData = block.userData()
