@@ -58,7 +58,29 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         
         #1 Update Indent
         userData.indent = whiteSpace(text)
-        
+        userData.indentLength = len(userData.indent)
+        previousBlock = self.editor.findPreviousNoBlankBlock(self.currentBlock())
+        if previousBlock.isValid():
+            previousUserData = previousBlock.userData()
+            userData.indentLevel = previousUserData.indentLevel if text.strip() != "" else -1
+            #Update Indet Level
+            if userData.indentLevel != -1:
+                if previousUserData.indent < userData.indent:
+                    userData.indentLevel += 1
+                elif previousUserData.indent > userData.indent:
+                    #Ver en cuanto decrementamos, buscar un bloque de igual o menor indentacion
+                    previousBlock = self.editor.findPreviousEqualIndentBlock(self.currentBlock(), userData.indent)
+                    if previousBlock.isValid():
+                        if previousBlock.userData().indent == userData.indent:
+                            userData.indentLevel = previousBlock.userData().indentLevel
+                        else:
+                            #Error de indentacion
+                            userData.indentLevel = -1
+    
+        else:
+            userData.indent = ""
+            userData.indentLevel = 0
+            
         #2 Update Folding
         foldingMark = self.syntax.folding(text)
         if userData.foldingMark != foldingMark:

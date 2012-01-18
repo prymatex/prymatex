@@ -1025,28 +1025,20 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #===========================================================================
     # Text Indentation
     #===========================================================================
-    def findPreviousMoreIndentBlock(self, block):
-        """ Return previous more indent block """
-        indent = block.userData().indent
-        while True:
-            block = block.previous()    
-            if not block.isValid() or block.userData() is None:
-                return None
-            if indent < block.userData().indent:
-                break
+    def findPreviousNoBlankBlock(self, block):
+        """ Return previous no blank indent block """
+        block = block.previous()
+        while block.isValid() and block.text().strip() == "":
+            block = block.previous()
         return block
-    
-    def findPreviousLessIndentBlock(self, block):
-        """ Return previous more indent block """
-        indent = block.userData().indent
-        while True:
-            block = block.previous()    
-            if not block.isValid() or block.userData() is None:
-                return None
-            if indent > block.userData().indent:
-                break
+        
+    def findPreviousEqualIndentBlock(self, block, indent):
+        """ Return previous equal indent block """
+        block = self.findPreviousNoBlankBlock(block)
+        while block.isValid() and block.userData().indent != indent:
+            block = self.findPreviousNoBlankBlock(block)
         return block
-    
+
     def indentBlocks(self):
         """
         Indents text, block selections.
@@ -1119,7 +1111,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     self.application.openFile(file)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
-        
+
     def on_fileRenamed(self, oldPath, newPath):
         ''' When a file is renamed in the filesystem/project, the associated
         esditor should change it's title '''
