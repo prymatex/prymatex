@@ -37,8 +37,7 @@ class PMXEditorFolding(object):
     def updateFolding(self):
         self.folding = []
         if self.indentSensitive:
-            pass
-            #self.updateIndentFoldingBlocks()
+            self.updateIndentFoldingBlocks()
         else:
             self.updateFoldingBlocks()
         self.editor.sidebar.update()
@@ -47,47 +46,37 @@ class PMXEditorFolding(object):
         nest = 0
         for block in self.blocks:
             userData = block.userData()
-            if userData is None: break #FIXME: PARCHAZO PARA VER
             nest += userData.foldingMark
             if nest >= 0:
                 self.folding.append(block)
 
+    def findPreviousEqualIndentOpenBlock(self, block, indent):
+        block = self.editor.findPreviousEqualIndentBlock(block, indent)
+        while block is not None and not self.isStart(block.userData().foldingMark):
+            block = self.editor.findPreviousEqualIndentBlock(block, indent)
+        if block is not None:
+            return block
+            
     def updateIndentFoldingBlocks(self):
         nest = 0
-        lastOpenIndent = currentIndent = ""
         for block in self.blocks:
             userData = block.userData()
-            if userData.foldingMark <= PMXSyntax.FOLDING_STOP:
-                #Esta cerrando, si no puede cerrar nada continuo?
-                if nest <= 0:
-                    continue
-            elif userData.foldingMark >= PMXSyntax.FOLDING_START:
-                #Esta abriendo, esta menos indentado?
-                if userData.indent <= currentIndent and len(self.folding) > 0:
+            if self.isStop(userData.foldingMark) and userData.indentLength == -1:
+                continue
+            elif self.isStart(userData.foldingMark):
+                #Buscar si corresponde cerrar algo antes
+                openBlock = self.findPreviousEqualIndentOpenBlock(block, userData.indent)
+                if openBlock is not None:
                     #Hay que cerrar algo antes
                     closeBlock = self.editor.findPreviousMoreIndentBlock(block)
                     if closeBlock is not None:
-                        lenIndent = len(userData.indent)
-                        closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent) if lenIndent else -nest
+                        #TODO: Aca va un valor en funcion de que valor esta cerrando, cuidado con el -1 de error
+                        closeBlock.userData().foldingMark = -closeBlock.userData().indentLevel
                         self.folding.append(closeBlock)
                         nest += closeBlock.userData().foldingMark
-                else:
-                    #Store last valid indent
-                    lastOpenIndent = currentIndent
             nest += userData.foldingMark
-            currentIndent = userData.indent if userData.foldingMark >= PMXSyntax.FOLDING_START else lastOpenIndent
             if nest >= 0:
                 self.folding.append(block)
-        if nest > 0:
-            #Quedo abierto, tengo que buscar el que cierra o uso el ultimo
-            lastBlock = self.editor.document().lastBlock()
-            openBlock = self.editor.findPreviousLessIndentBlock(lastBlock)
-            if openBlock is None: return
-            closeBlock = self.editor.findPreviousMoreIndentBlock(openBlock)
-            if closeBlock is None: return
-            lenIndent = len(closeBlock.userData().indent)
-            closeBlock.userData().foldingMark = - (len(currentIndent) / lenIndent) if lenIndent else -nest
-            self.folding.append(closeBlock)
 
     def getFoldingMark(self, block):
         if block in self.folding:
