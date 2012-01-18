@@ -61,8 +61,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         if userData.indent != indent:
             userData.indent = indent
             userData.indentLength = len(userData.indent) if text.strip() != "" else -1
-            if self.editor.folding.indentSensitive:
-                self.editor.folding.updateFolding()
             
         #2 Update Folding
         foldingMark = self.syntax.folding(text)
