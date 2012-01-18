@@ -6,14 +6,10 @@ tm_helpers.py
 A collection of useful helper functions and classes for writing
 commands in Python for TextMate.
 """
-import sys
+
+import sys, os
 from re import sub, compile as compile_
 from os import popen, path, environ as env
-
-# fix up path
-# tm_support_path = path.join(env["TM_SUPPORT_PATH"], "lib")
-# if not tm_support_path in env:
-#     sys.path.insert(0, tm_support_path)
 
 from plistlib import writePlistToString, readPlistFromString
 
@@ -45,6 +41,15 @@ def current_word(pat, direction="both"):
         if m and direction in ("right", "both"):
             word += m.group(0)
     return word
+
+def selection_or_line():
+    """Return selected text, the current line or None if there's a problme"""
+
+    try:
+        text = os.environ['TM_SELECTED_TEXT']
+    except KeyError:
+        text = os.environ.get('TM_CURRENT_LINE')
+    return text
 
 def env_python():
     """ Return (python, version) from env.

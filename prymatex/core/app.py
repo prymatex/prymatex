@@ -175,7 +175,9 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = QtKernelManager()
             self.kernelManager.start_kernel()
             self.kernelManager.start_channels()
-            print self.kernelManager.kernel.__class__
+            self.supportManager.updateEnvironment({ 
+                    "PMX_IPYTHON_CONNECTION_FILE": self.kernelManager.connection_file 
+            })
         except ImportError as e:
             print("Warning: %s" % e)
             self.kernelManager = None

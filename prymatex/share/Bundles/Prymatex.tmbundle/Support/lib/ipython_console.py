@@ -4,20 +4,20 @@
 import sys
 import os
 
-pmx_encoding = os.environ['PMX_ENCODING'] if 'PMX_ENCODING' in os.environ and os.environ['PMX_ENCODING'] else 'utf-8'
+PMX_ENCODING = os.environ['PMX_ENCODING'] if 'PMX_ENCODING' in os.environ and os.environ['PMX_ENCODING'] else 'utf-8'
+PMX_IPYTHON_CONNECTION_FILE = os.environ['PMX_IPYTHON_CONNECTION_FILE'] if 'PMX_IPYTHON_CONNECTION_FILE' in os.environ else ''
 
 ip = '127.0.0.1'
 
-def km_from_string(s=''):
+def km_from_string(s = PMX_IPYTHON_CONNECTION_FILE):
     """create kernel manager from IPKernelApp string
     such as '--shell=47378 --iopub=39859 --stdin=36778 --hb=52668' for IPython 0.11
     or just 'kernel-12345.json' for IPython 0.12
     """
     from os.path import join as pjoin
-    from IPython.zmq.blockingkernelmanager import BlockingKernelManager, Empty
+    from IPython.zmq.blockingkernelmanager import BlockingKernelManager
     from IPython.config.loader import KeyValueConfigLoader
     from IPython.zmq.kernelapp import kernel_aliases
-    global km,send,Empty
     
     s = s.replace('--existing', '')
     if 'connection_file' in BlockingKernelManager.class_trait_names():
@@ -61,29 +61,27 @@ def km_from_string(s=''):
             echo("^-- failed --"+e.message.replace('_port','')+" not specified", "Error")
             return
     km.start_channels()
-    send = km.shell_channel.execute
     return km
+
+kernelManager = km_from_string(os.environ["PMX_IPYTHON_CONNECTION_FILE"])
 
 def get_child_msg(msg_id):
     # XXX: message handling should be split into its own process in the future
     while True:
         # get_msg will raise with Empty exception if no messages arrive in 1 second
-        m = km.shell_channel.get_msg(timeout = 1)
+        m = kernelManager.shell_channel.get_msg(timeout = 1)
         if m['parent_header']['msg_id'] == msg_id:
             break
         else:
             #got a message, but not the one we were looking for
             print 'skipping a message on shell_channel','WarningMsg'
     return m
-    
-if __name__ == "__main__":
-    from IPython.lib.kernel import find_connection_file
-    
-    from IPython.zmq.blockingkernelmanager import BlockingKernelManager
-    connection_file = os.environ["PMX_IPYTHON_CONNECTION_FILE"]
-    print connection_file
-    km = BlockingKernelManager(connection_file=connection_file)
-    km.load_connection_file()
-    km.start_channels()
-    msg_id = km.shell_channel.execute("""a = 10""")
-    print get_child_msg(msg_id)
+
+def execute(command):
+    msg_id = kernelManager.shell_channel.execute(command)
+    try:
+        child = get_child_msg(msg_id)
+        count = child['content']['execution_count']
+        return "In[%d]: %s" %(count, command)
+    except Empty:
+        return "In[]: %s (no reply from IPython kernel)" % prompt
