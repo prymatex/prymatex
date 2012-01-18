@@ -79,9 +79,14 @@ def get_child_msg(msg_id):
 
 def execute(command):
     msg_id = kernelManager.shell_channel.execute(command)
+    from pprint import pformat
     try:
         child = get_child_msg(msg_id)
         count = child['content']['execution_count']
-        return "In[%d]: %s" %(count, command)
-    except Empty:
-        return "In[]: %s (no reply from IPython kernel)" % prompt
+        message = "In[%d]: %s\n" % (count, command)
+        if child['content']['status'] == "ok":
+            if child['content']['payload']:
+                message += "\n".join(map(lambda payload: payload['text'], child['content']['payload']))    
+        return message
+    except Exception, e:
+        return "In[]: %s\n(no reply from IPython kernel)\n%s" % (command, e)

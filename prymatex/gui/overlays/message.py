@@ -82,10 +82,9 @@ class PMXMessageOverlay(QtGui.QLabel, PMXBaseOverlay):
         self.updatePosition()
         self.adjustSize()
         self.linkMap = hrefCallbacks
-        if unicode(message):
+        if message:
             self.fadeIn()
             if timeout:
-                print "Launching fadeout timer"
                 self.fadeOutTimer.start(timeout)
         else:
             self.fadeOutTimer.stop()

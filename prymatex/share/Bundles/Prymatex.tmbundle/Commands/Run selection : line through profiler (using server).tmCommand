@@ -14,26 +14,31 @@ sys.path.append(os.environ['TM_BUNDLE_SUPPORT'] + '/lib')
 import tm_helpers as helpers
 import ipython_console as console
 
+try:
+	prun_options = os.environ['TM_PRUN_OPTIONS'] + ' '
+except KeyError:
+	prun_options = ''
+
 # Get the current selection or line.
 text = helpers.selection_or_line()
 
 if not text:
-    print "&lt;p&gt;Couldn't get selection/line.&lt;/p&gt;"
-    sys.exit(1)
+    helpers.exit_show_tool_tip("&lt;p&gt;Couldn't get selection/line.&lt;/p&gt;")
+else:
+    text = '%prun ' + prun_options + text
 
-print console.execute(text)
-sys.exit(206)</string>
+helpers.exit_show_tool_tip(console.execute(text))</string>
 	<key>input</key>
 	<string>none</string>
 	<key>keyEquivalent</key>
 	<string>^I</string>
 	<key>name</key>
-	<string>Send to Console</string>
+	<string>Run selection / line through profiler</string>
 	<key>output</key>
 	<string>afterSelectedText</string>
 	<key>scope</key>
 	<string>source.python</string>
 	<key>uuid</key>
-	<string>F1780FD5-29EA-44FC-A8FA-95914849493E</string>
+	<string>C2D61E69-5FB8-484D-8594-FBB5FEDAC20B</string>
 </dict>
 </plist>

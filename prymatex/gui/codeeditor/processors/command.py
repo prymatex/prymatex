@@ -236,16 +236,17 @@ class PMXCommandProcessor(PMXCommandProcessor):
             timeout = 8000
         else:
             timeout = linesToRead * 700
-        
+            
+        #TODO: Una mejor forma de mostrar en html la salida 
         cursor = self.editor.textCursor()
         point = self.editor.cursorRect(cursor).bottomRight()
         html = """
             <span>%s</span><hr>
             <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
-            </div>""" % context.outputValue.strip().replace('\n', '<br/>')
+            </div>""" % context.outputValue.strip().replace('\n', '<br/>').replace(' ', '&nbsp;')
         timeout = timeout * self.timespanFactor
         callbacks = {
-                   'copy': lambda s=context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
+                   'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
         }
         pos = (point.x() + 30, point.y() + 5)
         timeout = timeout * self.timespanFactor

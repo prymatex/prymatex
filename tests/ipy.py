@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+print __name__
 import sys
 import os
 
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     from IPython.lib.kernel import find_connection_file
     
     from IPython.zmq.blockingkernelmanager import BlockingKernelManager
-    connection_file = os.environ["PMX_IPYTHON_CONNECTION_FILE"]
+    connection_file = os.environ["PMX_IPYTHON_CONNECTION"]
     print connection_file
     km = BlockingKernelManager(connection_file=connection_file)
     km.load_connection_file()
