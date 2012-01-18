@@ -94,11 +94,7 @@ class PMXMessageOverlay(QtGui.QLabel, PMXBaseOverlay):
     def clearMessage(self):
         self.fadeOut()
     
-    def messageClicked(self):
-        ''' Overrride '''
-        self.clearMessage()       
-        
-    def updateOverlay(self):
+     def updateOverlay(self):
         ''' Override '''
         self.updatePosition()
     

@@ -5,11 +5,11 @@ import sys
 import os
 
 PMX_ENCODING = os.environ['PMX_ENCODING'] if 'PMX_ENCODING' in os.environ and os.environ['PMX_ENCODING'] else 'utf-8'
-PMX_IPYTHON_CONNECTION_FILE = os.environ['PMX_IPYTHON_CONNECTION_FILE'] if 'PMX_IPYTHON_CONNECTION_FILE' in os.environ else ''
+PMX_IPYTHON_CONNECTION = os.environ['PMX_IPYTHON_CONNECTION'] if 'PMX_IPYTHON_CONNECTION' in os.environ else ''
 
 ip = '127.0.0.1'
 
-def km_from_string(s = PMX_IPYTHON_CONNECTION_FILE):
+def km_from_string(s = PMX_IPYTHON_CONNECTION):
     """create kernel manager from IPKernelApp string
     such as '--shell=47378 --iopub=39859 --stdin=36778 --hb=52668' for IPython 0.11
     or just 'kernel-12345.json' for IPython 0.12
@@ -39,14 +39,14 @@ def km_from_string(s = PMX_IPYTHON_CONNECTION_FILE):
             else:
                 fullpath = find_connection_file(s.lstrip().rstrip())
         except IOError,e:
-            echo(":IPython " + s + " failed", "Info")
-            echo("^-- failed '" + s + "' not found", "Error")
+            print ":IPython " + s + " failed", "Info"
+            print "^-- failed '" + s + "' not found", "Error"
             return
         km = BlockingKernelManager(connection_file = fullpath)
         km.load_connection_file()
     else:
         if s == '':
-            echo(":IPython 0.11 requires the full connection string")
+            print ":IPython 0.11 requires the full connection string"
             return
         loader = KeyValueConfigLoader(s.split(), aliases=kernel_aliases)
         cfg = loader.load_config()['KernelApp']
@@ -57,13 +57,13 @@ def km_from_string(s = PMX_IPYTHON_CONNECTION_FILE):
                 stdin_address=(ip, cfg['stdin_port']),
                 hb_address=(ip, cfg['hb_port']))
         except KeyError,e:
-            echo(":IPython " +s + " failed", "Info")
-            echo("^-- failed --"+e.message.replace('_port','')+" not specified", "Error")
+            print ":IPython " +s + " failed", "Info"
+            print "^-- failed --"+e.message.replace('_port','')+" not specified", "Error"
             return
     km.start_channels()
     return km
 
-kernelManager = km_from_string(os.environ["PMX_IPYTHON_CONNECTION_FILE"])
+kernelManager = km_from_string()
 
 def get_child_msg(msg_id):
     # XXX: message handling should be split into its own process in the future

@@ -175,8 +175,16 @@ class PMXApplication(QtGui.QApplication):
             self.kernelManager = QtKernelManager()
             self.kernelManager.start_kernel()
             self.kernelManager.start_channels()
+            if hasattr(self.kernelManager, "connection_file"):
+                ipconnection = self.kernelManager.connection_file
+            else:
+                shell_port = self.kernelManager.shell_address[1]
+                iopub_port = self.kernelManager.sub_address[1]
+                stdin_port = self.kernelManager.stdin_address[1]
+                hb_port = self.kernelManager.hb_address[1]
+                ipconnection = "--shell={0} --iopub={1} --stdin={2} --hb={3}".format(shell_port, iopub_port, stdin_port, hb_port)
             self.supportManager.updateEnvironment({ 
-                    "PMX_IPYTHON_CONNECTION_FILE": self.kernelManager.connection_file 
+                    "PMX_IPYTHON_CONNECTION": ipconnection
             })
         except ImportError as e:
             print("Warning: %s" % e)

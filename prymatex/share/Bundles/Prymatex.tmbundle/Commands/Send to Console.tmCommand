@@ -28,7 +28,7 @@ sys.exit(206)</string>
 	<key>keyEquivalent</key>
 	<string>^I</string>
 	<key>name</key>
-	<string>Run selection / line</string>
+	<string>Send to Console</string>
 	<key>output</key>
 	<string>afterSelectedText</string>
 	<key>scope</key>
