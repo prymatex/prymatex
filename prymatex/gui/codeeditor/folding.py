@@ -6,9 +6,14 @@ class PMXEditorFolding(object):
     def __init__(self, editor):
         self.editor = editor
         self.indentSensitive = False
-        self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
+        self.editor.blocksRemoved.connect(self.on_editor_textBlocksRemoved)
+        self.editor.foldingUpdateRequest.connect(self.on_editor_textBlocksRemoved)
         self.blocks = []
         self.folding = []
+
+    def on_editor_textBlocksRemoved(self, block = None, length = None):
+        self._purge_blocks()
+        self.updateFolding()
 
     def _purge_blocks(self, startIndex = None, endIndex = None):
         remove = filter(lambda block: block.userData() is None, self.blocks[startIndex:endIndex])
@@ -22,8 +27,7 @@ class PMXEditorFolding(object):
             indexes = map(lambda block: block.blockNumber(), self.blocks)
             index = bisect(indexes, block.blockNumber())
             self.blocks.insert(index, block)
-        self.updateFolding()
-        
+
     def removeFoldingBlock(self, block):
         try:
             index = self.blocks.index(block)
@@ -31,12 +35,7 @@ class PMXEditorFolding(object):
             self.blocks.remove(block)
         except ValueError:
             self._purge_blocks()
-        self.updateFolding()
 
-    def on_textBlocksRemoved(self, block, length):
-        self._purge_blocks()
-        self.updateFolding()
-    
     def updateFolding(self):
         self.folding = []
         if self.indentSensitive:
@@ -44,7 +43,7 @@ class PMXEditorFolding(object):
         else:
             self.updateFoldingBlocks()
         self.editor.sidebar.update()
-        
+
     def updateFoldingBlocks(self):
         nest = 0
         for block in self.blocks:
@@ -74,20 +73,26 @@ class PMXEditorFolding(object):
                     closeBlock = self.editor.findPreviousMoreIndentBlock(block)
                     if closeBlock is not None:
                         #TODO: Aca va un valor en funcion de que valor esta cerrando, cuidado con el -1 de error
-                        closeBlock.userData().foldingMark = -self.getNestedLevel(self.folding.index(openBlock))
+                        indentDiff = openBlock.userData().indentLength - block.userData().indentLength
+                        print openBlock.text()
+                        print indentDiff, self.editor.tabStopSize, indentDiff / self.editor.tabStopSize, self.getNestedLevel(self.folding.index(openBlock))
+                        closeBlock.userData().foldingMark = -(self.getNestedLevel(self.folding.index(openBlock)) - indentDiff / self.editor.tabStopSize)
                         self.folding.append(closeBlock)
                         nest += closeBlock.userData().foldingMark
             nest += userData.foldingMark
             if nest >= 0:
                 self.folding.append(block)
         if nest != 0:
+            print "quedo abierto"
             #Quedo abierto, tengo que buscar el que cierra o uso el ultimo
             lastBlock = self.editor.document().lastBlock()
             if lastBlock in self.folding: return
             openBlock = self.editor.findPreviousLessIndentBlock(lastBlock)
             if openBlock is None:
-                lastBlock.userData().foldingMark = -nest
-                self.folding.append(lastBlock)
+                closeBlock = self.editor.findPreviousMoreIndentBlock(lastBlock)
+                if closeBlock is not None:
+                    closeBlock.userData().foldingMark = -nest
+                    self.folding.append(closeBlock)
             else:
                 closeBlock = self.editor.findPreviousMoreIndentBlock(openBlock)
                 if closeBlock is not None:

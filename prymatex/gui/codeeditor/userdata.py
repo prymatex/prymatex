@@ -14,9 +14,8 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.foldedLevel = 0
         self.folded = False
         #Indent
-        self.indent = ""
-        self.indentLevel = 0
-        self.indentLength = 0
+        self.indent = None
+        self.indentLength = -1
         #Symbols
         self.symbol = None
         self.textHash = None

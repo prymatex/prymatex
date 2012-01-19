@@ -5,9 +5,9 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
 
-class PrymatexStyle(QtGui.QCommonStyle):
+class PrymatexStyle(QtGui.QStyle):
     def __init__(self):
-        QtGui.QCommonStyle.__init__(self)
+        QtGui.QStyle.__init__(self)
         self.icon = resources.getIcon("bundle")
         self.defaultStyle = QtGui.QStyleFactory.create(QtGui.QApplication.style().objectName())
     
