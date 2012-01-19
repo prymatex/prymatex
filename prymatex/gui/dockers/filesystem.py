@@ -110,6 +110,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         # Allow Rename
         self.treeViewFileSystem.setEditTriggers( QtGui.QAbstractItemView.EditKeyPressed )
         self.treeViewFileSystem.setItemDelegateForColumn(0, PMXFileSystemItemDelegate(self))
+        self.treeViewFileSystem.setAlternatingRowColors(True)
+        self.treeViewFileSystem.setAnimated(True)
     
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
