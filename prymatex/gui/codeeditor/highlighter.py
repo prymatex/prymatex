@@ -58,10 +58,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         
         #1 Update Indent
         indent = whiteSpace(text)
-        if userData.indent != indent:
+        if indent != userData.indent:
             userData.indent = indent
             userData.indentLength = len(userData.indent) if text.strip() != "" else -1
-            
+            if self.editor.folding.indentSensitive:
+                self.editor.foldingUpdateRequest.emit()
+
         #2 Update Folding
         foldingMark = self.syntax.folding(text)
         if userData.foldingMark != foldingMark:
@@ -70,7 +72,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.editor.folding.removeFoldingBlock(self.currentBlock())
             else:
                 self.editor.folding.addFoldingBlock(self.currentBlock())
-
+            self.editor.foldingUpdateRequest.emit()
+            
         #3 Update Symbols
         preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.getAllScopes())
         

@@ -39,6 +39,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
+    foldingUpdateRequest = QtCore.pyqtSignal()
     
     #=======================================================================
     # Settings
@@ -711,6 +712,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         """End an edition motivated from internal reasons, snippets, commands, macros, others"""
         self.textCursor().endEditBlock() #Termino editBlock
         self.blockSignals(False) #Desblockeo señales
+        self.foldingUpdateRequest.emit()
         self.cursorPositionChanged.emit()
         self.textChanged.emit()
         if self.lastBlockCount != self.document().blockCount():
