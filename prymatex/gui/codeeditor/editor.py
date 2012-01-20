@@ -1086,20 +1086,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             point = self.mainWindow.cursor().pos()
         menu.popup(point)
     
-    def testAction(self, *args):
-        print args
-        
-    # Contributes to Main Menu
-    @classmethod
-    def contributeToMainMenu(cls):
-        view = {
-            "items": [
-                ("Show Tabs And Spaces", ), 
-                ("Show Line And Paragraph", ), 
-                ("Word Wrap", ),
-            ]
-        }
-        return { "View": view }
+    # Default Context Menus
+    def showEditorContextMenu(self, point):
+        #TODO: Poneme aca tambien el menu por defecto de este bundle
+        menu = self.createStandardContextMenu()
+        menu.setParent(self)
+        menu.popup(self.mapToGlobal(point))
     
     # Contributes to Tab Menu
     def contributeToTabMenu(self, menu):
@@ -1109,13 +1101,51 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             menu.addSeparator()
         if self.filePath:
             menu.addAction(self.actionCopyPath)
-            
-    # Default Context Menus
-    def showEditorContextMenu(self, point):
-        #TODO: Poneme aca tambien el menu por defecto de este bundle
-        menu = self.createStandardContextMenu()
-        menu.setParent(self)
-        menu.popup(self.mapToGlobal(point))
+    
+    # Contributes to Main Menu
+    @classmethod
+    def contributeToMainMenu(cls):
+        view = {
+            "items": [
+                {'title': "Show Tabs And Spaces",
+                 'callback': cls.on_actionShowTabsAndSpaces_toggled,
+                 'checkable': True,
+                 'checked': lambda editor: bool(editor.getFlags() & editor.ShowTabsAndSpaces) },
+                {'title': "Show Line And Paragraph",
+                 'callback': cls.on_actionShowLineAndParagraphs_toggled,
+                 'checkable': True, 
+                 'checked': lambda editor: bool(editor.getFlags() & editor.ShowLineAndParagraphs) }, 
+                {'title': "Word Wrap",
+                 'callback': cls.on_actionWordWrap_toggled,
+                 'checkable': True,
+                 'checked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
+            ]
+        }
+        return { "View": view }
+    
+    #===========================================================================
+    # Menu Actions
+    #===========================================================================
+    def on_actionShowTabsAndSpaces_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.ShowTabsAndSpaces
+        else:
+            flags = self.getFlags() & ~self.ShowTabsAndSpaces
+        self.setFlags(flags)
+    
+    def on_actionShowLineAndParagraphs_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.ShowLineAndParagraphs
+        else:
+            flags = self.getFlags() & ~self.ShowLineAndParagraphs
+        self.setFlags(flags)
+        
+    def on_actionWordWrap_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.WordWrap
+        else:
+            flags = self.getFlags() & ~self.WordWrap
+        self.setFlags(flags)
     
     #===========================================================================
     # Drag and Drop

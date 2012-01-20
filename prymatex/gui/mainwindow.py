@@ -111,8 +111,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             menu = self.createCustomEditorMainMenu(name)
         if 'items' in settings:
             actions = extendQMenu(menu, settings['items'])
-            print actions
+            for action in actions:
+                if hasattr(action, 'callback'):
+                    receiver = lambda checked, action = action: self.currentEditorActionDispatcher(checked, action)
+                    self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
 
+    def currentEditorActionDispatcher(self, checked, action):
+        callbackArgs = [self.currentEditor()]
+        if action.isCheckable():
+            callbackArgs.append(checked)
+        action.callback(*callbackArgs)
+        
     #============================================================
     # Create and manage editors
     #============================================================

@@ -22,14 +22,13 @@ class MainWindowActions(object):
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
 
     def updateMenuForEditor(self, editor):
-        #TODO: if editor is none set disabled accions
         if editor is None: 
             self.actionSelectBundleItem.setEnabled(False)
             return
         else:
             self.actionSelectBundleItem.setEnabled(True)
         flags = editor.getFlags()
-        #TODO: Desconectar señales para poder hacer el set, medio raro
+        
         self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
         self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
         self.actionShowBookmarks.setChecked(bool(flags & editor.ShowBookmarks))
@@ -234,33 +233,6 @@ class MainWindowActions(object):
                 flags = self.currentEditor().getFlags() | self.currentEditor().ShowFolding
             else:
                 flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowFolding
-            self.currentEditor().setFlags(flags)
-    
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowTabsAndSpaces_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowTabsAndSpaces
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowTabsAndSpaces
-            self.currentEditor().setFlags(flags)
-    
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowLineAndParagraphs_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowLineAndParagraphs
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowLineAndParagraphs
-            self.currentEditor().setFlags(flags)
-            
-    @QtCore.pyqtSlot(bool)
-    def on_actionWordWrap_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().WordWrap
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().WordWrap
             self.currentEditor().setFlags(flags)
 
     #============================================================
