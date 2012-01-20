@@ -455,21 +455,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.setTextCursor(cursor)
         
     #=======================================================================
-    # Context Menus
-    #=======================================================================
-    def showEditorContextMenu(self, point):
-        menu = self.createStandardContextMenu()
-        menu.setParent(self)
-        menu.popup(self.mapToGlobal(point))
-        
-    def contributeToTabMenu(self, menu):
-        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
-        if bundleMenu is not None:
-            menu.addMenu(bundleMenu)
-            menu.addSeparator()
-        if self.filePath:
-            menu.addAction(self.actionCopyPath)
-    #=======================================================================
     # Espacio para la sidebar
     #=======================================================================
     def lineNumberAreaWidth(self):
@@ -810,24 +795,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return env
 
     #==========================================================================
-    # Popup Menu
-    #==========================================================================
-    def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
-        menu = QtGui.QMenu(self)
-        for index, item in enumerate(menuItems, 1):
-            action = QtGui.QAction("%s \t&%d" % (item["title"], index), menu)
-            if "image" in item:
-                action.setIcon(resources.getIcon(item["image"]))
-            receiver = lambda index = index: callback(index - 1)
-            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
-            menu.addAction(action)
-        if cursorPosition:
-            point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
-        else:
-            point = self.mainWindow.cursor().pos()
-        menu.popup(point)
-        
-    #==========================================================================
     # Completer
     #==========================================================================
     def showCompleter(self, suggestions, alreadyTyped = "", caseInsensitive = True):
@@ -1099,6 +1066,46 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 break
             start = start.next()
         cursor.endEditBlock()
+    
+    #===========================================================================
+    # Menus
+    #===========================================================================
+    # Flat Popup Menu
+    def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
+        menu = QtGui.QMenu(self)
+        for index, item in enumerate(menuItems, 1):
+            action = QtGui.QAction("%s \t&%d" % (item["title"], index), menu)
+            if "image" in item:
+                action.setIcon(resources.getIcon(item["image"]))
+            receiver = lambda index = index: callback(index - 1)
+            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
+            menu.addAction(action)
+        if cursorPosition:
+            point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
+        else:
+            point = self.mainWindow.cursor().pos()
+        menu.popup(point)
+        
+    # Contributes to Main Menu
+    @classmethod
+    def contributesToMainMenu(cls):
+        pass
+    
+    # Contributes to Tab Menu
+    def contributeToTabMenu(self, menu):
+        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        if bundleMenu is not None:
+            menu.addMenu(bundleMenu)
+            menu.addSeparator()
+        if self.filePath:
+            menu.addAction(self.actionCopyPath)
+            
+    # Default Context Menus
+    def showEditorContextMenu(self, point):
+        #TODO: Poneme aca tambien el menu por defecto de este bundle
+        menu = self.createStandardContextMenu()
+        menu.setParent(self)
+        menu.popup(self.mapToGlobal(point))
     
     #===========================================================================
     # Drag and Drop
