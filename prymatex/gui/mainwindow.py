@@ -97,13 +97,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         if focus:
             self.setCurrentEditor(editor)
             
-    def createCustomEditorMainMenu(name):
+    def createCustomEditorMainMenu(self, name):
         menu = QtGui.QMenu(self.menubar)
         object_name = textToObjectName(name, prefix = "menu")
         menu.setObjectName(object_name)
-        self.menubar.insertMenu(self.menuView, menu)
+        #TODO: Insertarlo en un lugar piola
+        self.menubar.addAction(menu.defaultAction())
         return menu
-        
+
     def contributeToMainMenu(self, name, settings):
         menu = getattr(self, "menu" + name, None)
         if menu is None:
