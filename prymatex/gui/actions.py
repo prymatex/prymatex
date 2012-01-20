@@ -158,36 +158,6 @@ class MainWindowActions(object):
             self.currentEditor().paste()
 
     @QtCore.pyqtSlot()
-    def on_actionSelectWord_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(0)
-    
-    @QtCore.pyqtSlot()
-    def on_actionSelectLine_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(1)
-    
-    @QtCore.pyqtSlot()
-    def on_actionSelectParagraph_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(2)
-    
-    @QtCore.pyqtSlot()
-    def on_actionSelectEnclosingBrackets_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(self.currentEditor().SelectEnclosingBrackets)
-        
-    @QtCore.pyqtSlot()
-    def on_actionSelectCurrentScope_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(self.currentEditor().SelectCurrentScope)
-        
-    @QtCore.pyqtSlot()
-    def on_actionSelectAll_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(3)
-
-    @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
         self.statusBar().showIFind()
 
@@ -234,70 +204,7 @@ class MainWindowActions(object):
             else:
                 flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowFolding
             self.currentEditor().setFlags(flags)
-
-    #============================================================
-    # Text Actions
-    #============================================================
-    @QtCore.pyqtSlot()
-    def on_actionConvertToUppercase_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertToUppercase)
     
-    @QtCore.pyqtSlot()
-    def on_actionConvertToLowercase_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertToLowercase)
-        
-    @QtCore.pyqtSlot()
-    def on_actionConvertToTitlecase_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertToTitlecase)
-        
-    @QtCore.pyqtSlot()
-    def on_actionConvertToOppositeCase_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertToOppositeCase)
-        
-    @QtCore.pyqtSlot()
-    def on_actionConvertSpacesToTabs_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertSpacesToTabs)
-        
-    @QtCore.pyqtSlot()
-    def on_actionConvertTabToSpaces_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertTabsToSpaces)
-
-    @QtCore.pyqtSlot()
-    def on_actionConvertTranspose_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertTranspose)
-
-    #Move Menu
-    @QtCore.pyqtSlot()
-    def on_actionMoveLineUp_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().moveText(self.currentEditor().MoveLineUp)
-    
-    @QtCore.pyqtSlot()
-    def on_actionMoveLineDown_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().moveText(self.currentEditor().MoveLineDown)
-            
-    @QtCore.pyqtSlot()
-    def on_actionMoveColumnLeft_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().moveText(self.currentEditor().MoveColumnLeft)
-            
-    @QtCore.pyqtSlot()
-    def on_actionMoveColumnRight_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().moveText(self.currentEditor().MoveColumnRight)
-    
-    @QtCore.pyqtSlot()
-    def on_actionExecute_triggered(self):
-        self.currentEditor().executeCommand()
-
     @QtCore.pyqtSlot()
     def on_actionFilterThroughCommand_triggered(self):
         self.statusBar().showCommand()

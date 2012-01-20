@@ -1106,7 +1106,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     @classmethod
     def contributeToMainMenu(cls):
         view = {
-            "items": [
+            'items': [
                 {'title': "Show Tabs And Spaces",
                  'callback': cls.on_actionShowTabsAndSpaces_toggled,
                  'checkable': True,
@@ -1119,9 +1119,86 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'callback': cls.on_actionWordWrap_toggled,
                  'checkable': True,
                  'checked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
-            ]
-        }
-        return { "View": view }
+            ]}
+        text = {
+            'items': [ 
+                {'title': 'Select',
+                 'items': [
+                    {'title': '&Word',
+                     'callback': lambda editor: editor.select(0)
+                     },
+                    {'title': '&Line',
+                     'callback': lambda editor: editor.select(1)
+                     },
+                    {'title': '&Paragraph',
+                     'callback': lambda editor: editor.select(2)
+                     },
+                    {'title': 'Enclosing &Brackets',
+                     'callback': lambda editor: editor.select(editor.SelectEnclosingBrackets)
+                     },
+                    {'title': 'Current &Scope',
+                     'callback': lambda editor: editor.select(editor.SelectCurrentScope)
+                     },
+                    {'title': '&All',
+                     'callback': lambda editor: editor.select(3)
+                     }    
+                ]},
+                {'title': 'Convert',
+                 'items': [
+                    {'title': 'To Uppercase',
+                     'shortcut': 'Ctrl+U',
+                     'callback': lambda editor: editor.convertText(editor.ConvertToUppercase),
+                     },
+                    {'title': 'To Lowercase',
+                     'shortcut': 'Ctrl+Shift+U',
+                     'callback': lambda editor: editor.convertText(editor.ConvertToLowercase),
+                     },
+                    {'title': 'To Titlecase',
+                     'shortcut': 'Ctrl+Alt+U',
+                     'callback': lambda editor: editor.convertText(editor.ConvertToTitlecase),
+                     },
+                    {'title': 'To Opposite Case',
+                     'shortcut': 'Ctrl+G',
+                     'callback': lambda editor: editor.convertText(editor.ConvertToOppositeCase),
+                     }, '-',
+                    {'title': 'Tab to Spaces',
+                     'callback': lambda editor: editor.convertText(editor.ConvertTabsToSpaces),
+                     },
+                    {'title': 'Spaces to Tabs',
+                     'callback': lambda editor: editor.convertText(editor.ConvertSpacesToTabs),
+                     }, '-',
+                    {'title': 'Transpose',
+                     'shortcut': 'Ctrl+T',
+                     'callback': lambda editor: editor.convertText(editor.ConvertTranspose),
+                     }
+                ]},
+                {'title': 'Move',
+                 'items': [
+                    {'title': 'Line Up',
+                     'shortcut': 'Meta+Ctrl+Up',
+                     'callback': lambda editor: editor.moveText(editor.MoveLineUp),
+                     },
+                    {'title': 'Line Down',
+                     'shortcut': 'Meta+Ctrl+Down',
+                     'callback': lambda editor: editor.moveText(editor.MoveLineDown),
+                     },
+                    {'title': 'Column Left',
+                     'shortcut': 'Meta+Ctrl+Left',
+                     'callback': lambda editor: editor.moveText(editor.MoveColumnLeft),
+                     },
+                    {'title': 'Column Right',
+                     'shortcut': 'Meta+Ctrl+Right',
+                     'callback': lambda editor: editor.moveText(editor.MoveColumnRight),
+                     }  
+                  ]},
+                '-',
+                {'title': 'Execute Line/Selection',
+                 'callback': lambda editor: editor.executeCommand(),
+                 },
+                {'title': 'Filter Through Command', #TODO: Pegarle a la status bar o que esta sea de la status bar
+                 }
+            ]}
+        return { "View": view , "Text": text}
     
     #===========================================================================
     # Menu Actions
@@ -1146,6 +1223,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
+    
+    #============================================================
+    # Text Menu Actions
+    #============================================================
+    def on_actionExecute_triggered(self):
+        self.currentEditor().executeCommand()
+
+    def on_actionFilterThroughCommand_triggered(self):
+        self.statusBar().showCommand()
     
     #===========================================================================
     # Drag and Drop

@@ -112,51 +112,6 @@
     <addaction name="actionShowLineAndParagraphs"/>
     <addaction name="actionWordWrap"/>
    </widget>
-   <widget class="QMenu" name="menuText">
-    <property name="title">
-     <string>&amp;Text</string>
-    </property>
-    <widget class="QMenu" name="menuConvert">
-     <property name="title">
-      <string>Convert</string>
-     </property>
-     <addaction name="actionConvertToUppercase"/>
-     <addaction name="actionConvertToLowercase"/>
-     <addaction name="actionConvertToTitlecase"/>
-     <addaction name="actionConvertToOppositeCase"/>
-     <addaction name="separator"/>
-     <addaction name="actionConvertSpacesToTabs"/>
-     <addaction name="actionConvertTabToSpaces"/>
-     <addaction name="separator"/>
-     <addaction name="actionConvertTranspose"/>
-    </widget>
-    <widget class="QMenu" name="menuMove">
-     <property name="title">
-      <string>Move</string>
-     </property>
-     <addaction name="actionMoveLineUp"/>
-     <addaction name="actionMoveLineDown"/>
-     <addaction name="actionMoveColumnLeft"/>
-     <addaction name="actionMoveColumnRight"/>
-    </widget>
-    <widget class="QMenu" name="menuSelect">
-     <property name="title">
-      <string>Select</string>
-     </property>
-     <addaction name="actionSelectWord"/>
-     <addaction name="actionSelectLine"/>
-     <addaction name="actionSelectParagraph"/>
-     <addaction name="actionSelectEnclosingBrackets"/>
-     <addaction name="actionSelectCurrentScope"/>
-     <addaction name="actionSelectAll"/>
-    </widget>
-    <addaction name="menuSelect"/>
-    <addaction name="menuConvert"/>
-    <addaction name="menuMove"/>
-    <addaction name="separator"/>
-    <addaction name="actionExecute"/>
-    <addaction name="actionFilterThroughCommand"/>
-   </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
      <string>&amp;Navigation</string>
@@ -235,7 +190,6 @@
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
-   <addaction name="menuText"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuBundles"/>
    <addaction name="menuPreferences"/>
@@ -496,73 +450,6 @@
     <string>Alt+F10</string>
    </property>
   </action>
-  <action name="actionConvertToUppercase">
-   <property name="text">
-    <string>To Uppercase</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+U</string>
-   </property>
-  </action>
-  <action name="actionConvertToLowercase">
-   <property name="text">
-    <string>To Lowercase</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+U</string>
-   </property>
-  </action>
-  <action name="actionConvertToTitlecase">
-   <property name="text">
-    <string>To Titlecase</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Alt+U</string>
-   </property>
-  </action>
-  <action name="actionConvertToOppositeCase">
-   <property name="text">
-    <string>To Opposite Case</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+G</string>
-   </property>
-  </action>
-  <action name="actionConvertTranspose">
-   <property name="text">
-    <string>Transpose</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+T</string>
-   </property>
-  </action>
-  <action name="actionConvertTabToSpaces">
-   <property name="text">
-    <string>Tab to Spaces</string>
-   </property>
-  </action>
-  <action name="actionConvertSpacesToTabs">
-   <property name="text">
-    <string>Spaces to Tabs</string>
-   </property>
-  </action>
-  <action name="actionFilterThroughCommand">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/resources/actions/view-filter.png</normaloff>:/resources/actions/view-filter.png</iconset>
-   </property>
-   <property name="text">
-    <string>Filter Through Command</string>
-   </property>
-   <property name="iconText">
-    <string>Filter Through Command</string>
-   </property>
-  </action>
-  <action name="actionExecute">
-   <property name="text">
-    <string>Execute Line/Selection</string>
-   </property>
-  </action>
   <action name="actionToggleBookmark">
    <property name="text">
     <string>&amp;Toggle Bookmark</string>
@@ -677,36 +564,6 @@
     <string>Read &amp;documentation</string>
    </property>
   </action>
-  <action name="actionSelectWord">
-   <property name="text">
-    <string>&amp;Word</string>
-   </property>
-  </action>
-  <action name="actionSelectLine">
-   <property name="text">
-    <string>&amp;Line</string>
-   </property>
-  </action>
-  <action name="actionSelectParagraph">
-   <property name="text">
-    <string>&amp;Paragraph</string>
-   </property>
-  </action>
-  <action name="actionSelectEnclosingBrackets">
-   <property name="text">
-    <string>Enclosing &amp;Brackets</string>
-   </property>
-  </action>
-  <action name="actionSelectCurrentScope">
-   <property name="text">
-    <string>Current &amp;Scope</string>
-   </property>
-  </action>
-  <action name="actionSelectAll">
-   <property name="text">
-    <string>&amp;All</string>
-   </property>
-  </action>
   <action name="actionCloseAll">
    <property name="text">
     <string>Close All</string>
@@ -805,38 +662,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
-   </property>
-  </action>
-  <action name="actionMoveLineUp">
-   <property name="text">
-    <string>Line Up</string>
-   </property>
-   <property name="shortcut">
-    <string>Meta+Ctrl+Up</string>
-   </property>
-  </action>
-  <action name="actionMoveLineDown">
-   <property name="text">
-    <string>Line Down</string>
-   </property>
-   <property name="shortcut">
-    <string>Meta+Ctrl+Down</string>
-   </property>
-  </action>
-  <action name="actionMoveColumnRight">
-   <property name="text">
-    <string>Column Right</string>
-   </property>
-   <property name="shortcut">
-    <string>Meta+Ctrl+Right</string>
-   </property>
-  </action>
-  <action name="actionMoveColumnLeft">
-   <property name="text">
-    <string>Column Left</string>
-   </property>
-   <property name="shortcut">
-    <string>Meta+Ctrl+Left</string>
    </property>
   </action>
   <action name="actionWordWrap">

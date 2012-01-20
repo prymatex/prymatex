@@ -98,15 +98,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             self.setCurrentEditor(editor)
             
     def createCustomEditorMainMenu(self, name):
-        menu = QtGui.QMenu(self.menubar)
+        menu = QtGui.QMenu(name, self.menubar)
         object_name = textToObjectName(name, prefix = "menu")
         menu.setObjectName(object_name)
-        #TODO: Insertarlo en un lugar piola
-        self.menubar.addAction(menu.defaultAction())
+        self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
         return menu
 
     def contributeToMainMenu(self, name, settings):
         menu = getattr(self, "menu" + name, None)
+        print menu
         if menu is None:
             menu = self.createCustomEditorMainMenu(name)
         if 'items' in settings:
@@ -115,7 +115,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                 if hasattr(action, 'callback'):
                     receiver = lambda checked, action = action: self.currentEditorActionDispatcher(checked, action)
                     self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-
+        
+        
     def currentEditorActionDispatcher(self, checked, action):
         callbackArgs = [self.currentEditor()]
         if action.isCheckable():

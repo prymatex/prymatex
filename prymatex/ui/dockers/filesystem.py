@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Sat Dec 31 02:37:21 2011
-#      by: PyQt4 UI code generator 4.9
+# Created: Fri Jan 20 18:19:12 2012
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
