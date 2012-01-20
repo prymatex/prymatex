@@ -194,7 +194,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrent)
-        self.modificationChanged.connect(self.updateTabStatus)
+        self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.showSyntaxMessage)
         # 
         self.actionCopyPath.triggered.connect(self.on_actionCopyPath_triggered)
@@ -211,8 +211,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def showSyntaxMessage(self, syntax):
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
 
-    def updateTabStatus(self):
+    def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
+        if self.folding.indentSensitive:
+            print "update folding"
+            self.foldingUpdateRequest.emit()
     
     def on_blockCountChanged(self, newBlockCount):
         block = self.textCursor().block()
@@ -770,7 +773,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def buildEnvironment(self, env = {}):
         """ http://manual.macromates.com/en/environment_variables.html """
         cursor = self.textCursor()
-        line = cursor.block().text()
+        block = cursor.block()
+        line = block.text()
         scope = self.getCurrentScope()
         preferences = self.getPreference(scope)
         current_word, start, end = self.getCurrentWord()
@@ -778,13 +782,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         env.update({
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.columnNumber(), 
-                'TM_LINE_NUMBER': cursor.block().blockNumber() + 1,
+                'TM_LINE_NUMBER': block.blockNumber() + 1,
                 'TM_COLUMN_NUMBER': cursor.columnNumber() + 1, 
                 'TM_SCOPE': scope,
                 'TM_MODE': self.getSyntax().name,
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,
-                'TM_NESTEDLEVEL': self.folding.getNestedLevel(cursor.block().blockNumber())
+                'TM_NESTEDLEVEL': self.folding.getNestedLevel(block)
         })
 
         if current_word:
