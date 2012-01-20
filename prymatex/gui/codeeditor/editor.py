@@ -1091,7 +1091,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
     # Contributes to Main Menu
     @classmethod
-    def contributesToMainMenu(cls):
+    def contributeToMainMenu(cls):
         view = {
             "items": [
                 ("Show Tabs And Spaces", ), 

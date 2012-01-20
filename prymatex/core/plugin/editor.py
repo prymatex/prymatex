@@ -95,7 +95,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         pass
     
     @classmethod
-    def contributesToMainMenu(cls):
+    def contributeToMainMenu(cls):
         pass
     
     @classmethod

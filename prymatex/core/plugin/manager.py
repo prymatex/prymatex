@@ -74,7 +74,7 @@ class PMXPluginManager(object):
     
     def populateMainWindow(self, mainWindow):
         for editorClass in self.editors:
-            menus = editorClass.contributesToMainMenu()
+            menus = editorClass.contributeToMainMenu()
             if menus is not None:
                 for name, settings in menus.iteritems():
                     actions = mainWindow.contributeToMainMenu(name, settings)
