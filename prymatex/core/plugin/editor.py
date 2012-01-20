@@ -96,7 +96,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     
     @classmethod
     def contributeToMainMenu(cls):
-        pass
+        return {}
     
     @classmethod
     def addKeyHelper(cls, helper):

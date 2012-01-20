@@ -63,7 +63,7 @@ class PMXEditorFolding(object):
         if block is not None:
             return block
     
-    def tryFixOpenBlock(self, block):
+    def tryCloseIndentBlock(self, block):
         #Buscar si corresponde cerrar algo antes
         openBlock = self.findPreviousEqualIndentOpenBlock(block)
         if openBlock is not None:
@@ -82,7 +82,7 @@ class PMXEditorFolding(object):
             if self.isStop(userData.foldingMark) and userData.indentLength == -1:
                 continue
             elif self.isStart(userData.foldingMark):
-                nest += self.tryFixOpenBlock(block)
+                nest += self.tryCloseIndentBlock(block)
             nest += userData.foldingMark
             if nest >= 0:
                 self.folding.append(block)
@@ -90,26 +90,12 @@ class PMXEditorFolding(object):
             #TODO: Arreglar esto que no depende de block
             lastBlock = self.editor.document().lastBlock()
             if lastBlock in self.folding: return
-            lastBlock = self.editor.findPreviousLessIndentBlock(lastBlock)
-            if lastBlock is not None:
-                openBlock = self.findPreviousEqualIndentOpenBlock(block)
-                if openBlock is not None:
-                    #Hay que cerrar algo antes
-                    closeBlock = self.editor.findPreviousMoreIndentBlock(block)
-                    if closeBlock is not None:
-                        closeBlock.userData().foldingMark = self.getNestedLevel(openBlock) - self.getNestedLevel(closeBlock)
-                        self.folding.append(closeBlock)
-                        nest += closeBlock.userData().foldingMark
+            lessIndentBlock = self.editor.findPreviousLessIndentBlock(lastBlock)
+            if lessIndentBlock is not None:
+                nest += self.tryCloseIndentBlock(lessIndentBlock)
             else:
-                openBlock = self.findPreviousEqualIndentOpenBlock(lastBlock)
-                if openBlock is not None:
-                    #Hay que cerrar algo antes
-                    closeBlock = self.editor.findPreviousMoreIndentBlock(block)
-                    if closeBlock is not None:
-                        closeBlock.userData().foldingMark = self.getNestedLevel(openBlock) - self.getNestedLevel(closeBlock)
-                        self.folding.append(closeBlock)
-                        nest += closeBlock.userData().foldingMark
-                        
+                nest += self.tryCloseIndentBlock(lastBlock)
+
     def getFoldingMark(self, block):
         if block in self.folding:
             userData = block.userData()
