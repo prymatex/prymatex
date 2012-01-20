@@ -77,9 +77,10 @@ def createQMenu(settings, parent):
     menu.setObjectName(object_name)
     if icon is not None:
         menu.setIcon(icon)
-    actions.append(menu.defaultAction())
+    #actions.append(menu.defaultAction())
     if items is not None:
-        actions.extend(extendQMenu(menu, items))
+        subactions = extendQMenu(menu, items)
+        actions.extend(subactions)
     return menu, actions
 
 def extendQMenu(menu, items):
@@ -87,11 +88,12 @@ def extendQMenu(menu, items):
     for item in items:
         if item == "-":
             action = menu.addSeparator()
-            actions.append(actions)
+            actions.append(action)
         elif isinstance(item, dict) and 'items' in item:
             submenu, subactions = createQMenu(item, menu)
+            subaction = menu.addMenu(submenu)
+            actions.append(subaction)
             actions.extend(subactions)
-            menu.addMenu(submenu)
         elif isinstance(item, dict):
             action = createQAction(item, menu)
             actions.append(action)

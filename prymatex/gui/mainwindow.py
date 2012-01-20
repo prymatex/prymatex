@@ -62,6 +62,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.dockers = []
         
+        self.customActions = {}
+        
         self.setAcceptDrops(True)
 
     #============================================================
@@ -101,28 +103,33 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         menu = QtGui.QMenu(name, self.menubar)
         object_name = textToObjectName(name, prefix = "menu")
         menu.setObjectName(object_name)
-        self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
-        return menu
+        action = self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
+        return menu, action
 
     def contributeToMainMenu(self, name, settings):
+        actions = []
         menu = getattr(self, "menu" + name, None)
-        print menu
         if menu is None:
-            menu = self.createCustomEditorMainMenu(name)
+            menu, action = self.createCustomEditorMainMenu(name)
+            actions.append(action)
         if 'items' in settings:
-            actions = extendQMenu(menu, settings['items'])
-            for action in actions:
-                if hasattr(action, 'callback'):
-                    receiver = lambda checked, action = action: self.currentEditorActionDispatcher(checked, action)
-                    self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        
+            actions.extend(extendQMenu(menu, settings['items']))
+        #Conect Actions
+        for action in actions:
+            if hasattr(action, 'callback'):
+                receiver = lambda checked, action = action: self.currentEditorActionDispatcher(checked, action)
+                self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
+        return actions
         
     def currentEditorActionDispatcher(self, checked, action):
         callbackArgs = [self.currentEditor()]
         if action.isCheckable():
             callbackArgs.append(checked)
         action.callback(*callbackArgs)
-        
+    
+    def registerEditorClassActions(self, editorClass, actions):
+        self.customActions[editorClass] = actions
+
     #============================================================
     # Create and manage editors
     #============================================================

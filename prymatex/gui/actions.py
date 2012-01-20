@@ -22,16 +22,21 @@ class MainWindowActions(object):
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
 
     def updateMenuForEditor(self, editor):
-        if editor is None: 
+        if editor is None:
+            
             self.actionSelectBundleItem.setEnabled(False)
-            return
         else:
             self.actionSelectBundleItem.setEnabled(True)
-        flags = editor.getFlags()
+            
+        currentClass = editor.__class__ if editor is not None else None 
         
-        self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
-        self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
-        self.actionShowBookmarks.setChecked(bool(flags & editor.ShowBookmarks))
+        for editorClass, actions in self.customActions.iteritems():
+            print actions
+            map(lambda action: action.setVisible(editorClass == currentClass), actions)
+        
+        #self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
+        #self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
+        #self.actionShowBookmarks.setChecked(bool(flags & editor.ShowBookmarks))
         #self.actionShowTabsAndSpaces.setChecked(bool(flags & editor.ShowTabsAndSpaces))
         #self.actionShowLineAndParagraphs.setChecked(bool(flags & editor.ShowLineAndParagraphs))
         #self.actionWordWrap.setChecked(bool(flags & editor.WordWrap))

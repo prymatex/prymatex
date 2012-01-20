@@ -76,8 +76,11 @@ class PMXPluginManager(object):
         for editorClass in self.editors:
             menus = editorClass.contributeToMainMenu()
             if menus is not None:
+                customEditorActions = []
                 for name, settings in menus.iteritems():
                     actions = mainWindow.contributeToMainMenu(name, settings)
+                    customEditorActions.extend(actions)
+            mainWindow.registerEditorClassActions(editorClass, customEditorActions)
 
         mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
         for dockClass in self.dockers:
