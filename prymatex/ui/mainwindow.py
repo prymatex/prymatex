@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Fri Jan 20 18:19:11 2012
+# Created: Fri Jan 20 18:24:01 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -195,12 +195,6 @@ class Ui_MainWindow(object):
         icon19.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/run-build-file.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionNewFileFromTemplate.setIcon(icon19)
         self.actionNewFileFromTemplate.setObjectName(_fromUtf8("actionNewFileFromTemplate"))
-        self.actionShowTabsAndSpaces = QtGui.QAction(MainWindow)
-        self.actionShowTabsAndSpaces.setCheckable(True)
-        self.actionShowTabsAndSpaces.setObjectName(_fromUtf8("actionShowTabsAndSpaces"))
-        self.actionShowLineAndParagraphs = QtGui.QAction(MainWindow)
-        self.actionShowLineAndParagraphs.setCheckable(True)
-        self.actionShowLineAndParagraphs.setObjectName(_fromUtf8("actionShowLineAndParagraphs"))
         self.actionRead_documentation = QtGui.QAction(MainWindow)
         self.actionRead_documentation.setObjectName(_fromUtf8("actionRead_documentation"))
         self.actionCloseAll = QtGui.QAction(MainWindow)
@@ -232,9 +226,6 @@ class Ui_MainWindow(object):
         self.actionGoToSymbol.setObjectName(_fromUtf8("actionGoToSymbol"))
         self.actionSelectTab = QtGui.QAction(MainWindow)
         self.actionSelectTab.setObjectName(_fromUtf8("actionSelectTab"))
-        self.actionWordWrap = QtGui.QAction(MainWindow)
-        self.actionWordWrap.setCheckable(True)
-        self.actionWordWrap.setObjectName(_fromUtf8("actionWordWrap"))
         self.actionNewProject = QtGui.QAction(MainWindow)
         icon20 = QtGui.QIcon()
         icon20.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/project-development-new-template.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -268,10 +259,6 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.menuPanels.menuAction())
         self.menuView.addAction(self.menuFont.menuAction())
         self.menuView.addAction(self.menuGutter.menuAction())
-        self.menuView.addSeparator()
-        self.menuView.addAction(self.actionShowTabsAndSpaces)
-        self.menuView.addAction(self.actionShowLineAndParagraphs)
-        self.menuView.addAction(self.actionWordWrap)
         self.menuNavigation.addAction(self.actionToggleBookmark)
         self.menuNavigation.addAction(self.actionNextBookmark)
         self.menuNavigation.addAction(self.actionPreviousBookmark)
@@ -407,8 +394,6 @@ class Ui_MainWindow(object):
         self.actionAboutQt.setText(_('About &Qt'))
         self.actionNewFileFromTemplate.setText(_('File From Template'))
         self.actionNewFileFromTemplate.setShortcut(_('Ctrl+Shift+N'))
-        self.actionShowTabsAndSpaces.setText(_('Show Tabs And Spaces'))
-        self.actionShowLineAndParagraphs.setText(_('Show Line And Paragraph'))
         self.actionRead_documentation.setText(_('Read &documentation'))
         self.actionCloseAll.setText(_('Close All'))
         self.actionShowStatus.setText(_('Show Status'))
@@ -433,7 +418,6 @@ class Ui_MainWindow(object):
         self.actionGoToSymbol.setShortcut(_('Ctrl+Shift+O'))
         self.actionSelectTab.setText(_('&Select Tab'))
         self.actionSelectTab.setShortcut(_('Ctrl+E'))
-        self.actionWordWrap.setText(_('Word Wrap'))
         self.actionNewProject.setText(_('Project'))
         self.actionNewProject.setShortcut(_('Ctrl+Alt+N'))
         self.actionGoToBookmark.setText(_('Go To Bookmark'))

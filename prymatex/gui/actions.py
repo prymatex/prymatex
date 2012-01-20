@@ -32,9 +32,9 @@ class MainWindowActions(object):
         self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
         self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
         self.actionShowBookmarks.setChecked(bool(flags & editor.ShowBookmarks))
-        self.actionShowTabsAndSpaces.setChecked(bool(flags & editor.ShowTabsAndSpaces))
-        self.actionShowLineAndParagraphs.setChecked(bool(flags & editor.ShowLineAndParagraphs))
-        self.actionWordWrap.setChecked(bool(flags & editor.WordWrap))
+        #self.actionShowTabsAndSpaces.setChecked(bool(flags & editor.ShowTabsAndSpaces))
+        #self.actionShowLineAndParagraphs.setChecked(bool(flags & editor.ShowLineAndParagraphs))
+        #self.actionWordWrap.setChecked(bool(flags & editor.WordWrap))
         
     #============================================================
     # About To Show Menus
