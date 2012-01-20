@@ -1085,11 +1085,21 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             point = self.mainWindow.cursor().pos()
         menu.popup(point)
+    
+    def testAction(self, *args):
+        print args
         
     # Contributes to Main Menu
     @classmethod
     def contributesToMainMenu(cls):
-        pass
+        view = {
+            "items": [
+                ("Show Tabs And Spaces", ), 
+                ("Show Line And Paragraph", ), 
+                ("Word Wrap", ),
+            ]
+        }
+        return { "View": view }
     
     # Contributes to Tab Menu
     def contributeToTabMenu(self, menu):

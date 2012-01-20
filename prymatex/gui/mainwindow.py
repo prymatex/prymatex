@@ -11,8 +11,8 @@ from prymatex.gui.actions import MainWindowActions
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui import utils
-from prymatex.gui import dialogs
+from prymatex.gui import utils, dialogs
+from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
@@ -96,6 +96,21 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         editor.setMainWindow(self)
         if focus:
             self.setCurrentEditor(editor)
+            
+    def createCustomEditorMainMenu(name):
+        menu = QtGui.QMenu(self.menubar)
+        object_name = textToObjectName(name, prefix = "menu")
+        menu.setObjectName(object_name)
+        self.menubar.insertMenu(self.menuView, menu)
+        return menu
+        
+    def contributeToMainMenu(self, name, settings):
+        menu = getattr(self, "menu" + name, None)
+        if menu is None:
+            menu = self.createCustomEditorMainMenu(name)
+        if 'items' in settings:
+            actions = extendQMenu(menu, settings['items'])
+            print actions
 
     #============================================================
     # Create and manage editors

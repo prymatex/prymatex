@@ -32,6 +32,20 @@ def textToObjectName(text, sufix = "", prefix = ""):
     name = ''.join(map(to_ascii_cap, words))
     return prefix + name + sufix
 
+def createQAction(settings, parent):
+    settingsLength = len(settings)
+    title = settings[0]
+    shortcut = settings[1] if settingsLength > 1 else None
+    icon = settings[2] if settingsLength > 2 else None
+    action = QtGui.QAction(title, parent)
+    object_name = textToObjectName(title, prefix = "action")
+    action.setObjectName(object_name)
+    if icon is not None:
+        action.setIcon(icon)
+    if shortcut is not None:
+        action.setShortcut(shortcut)
+    return action
+    
 def createQMenu(settings, parent):
     """
     settings = {
@@ -41,7 +55,8 @@ def createQMenu(settings, parent):
                 action1, action2, 
                 {"title": "SubMenu Title",
                  "items": [
-                    (gaction1, qaction2, qaction3),
+                    [gaction1, qaction2, qaction3],
+                    ("Action Title", "Sortcuts", QIcon, callback),
                     "-", action1, action2
                 ],
                  "exclusives": [ True ]}
@@ -49,29 +64,45 @@ def createQMenu(settings, parent):
             ]
         }
     """
+    actions = []
     title = settings.get("title", "Menu Title")
     icon = settings.get("icon")
     items = settings.get("items")
     menu = QtGui.QMenu(title, parent)
-    object_name = textToObjectName(title, sufix = "Menu")
+    object_name = textToObjectName(title, prefix = "menu")
     menu.setObjectName(object_name)
+    if icon is not None:
+        menu.setIcon(icon)
+    actions.append(menu.defaultAction())
+    if items is not None:
+        actions.extend(extendQMenu(menu, items))
+    return menu, actions
+
+def extendQMenu(menu, items):
+    actions = []
     for item in items:
         if item == "-":
             menu.addSeparator()
         elif isinstance(item, dict):
-            submenu = createQMenu(item, menu)
+            submenu, subactions = createQMenu(item, menu)
+            actions.extend(subactions)
             menu.addMenu(submenu)
         elif isinstance(item, QtGui.QAction):
             menu.addAction(item)
-        elif isinstance(item, tuple):
+        elif isinstance(item, list):
             actionGroup = QtGui.QActionGroup(menu)
+            actions.append(actionGroup)
             #TODO: optional exclusive
             actionGroup.setExclusive(True)
             map(menu.addAction, item)
             map(lambda action: action.setActionGroup(actionGroup), item)
+        elif isinstance(item, tuple):
+            action = createQAction(item, menu)
+            actions.append(action)
+            menu.addAction(action)
         else:
             raise Exception("%s" % item)
-    return menu
+    return actions
 
 # Key press debugging 
 KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) 

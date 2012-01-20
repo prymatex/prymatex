@@ -182,7 +182,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                 self.actionDelete,
                 {   "title": "Order",
                     "items": [
-                        (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
+                        [self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType],
                         "-", self.actionOrderDescending, self.actionOrderFoldersFirst
                     ]
                 }

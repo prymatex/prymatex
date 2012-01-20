@@ -31,7 +31,7 @@ class PMXPluginManager(object):
     def prepareWidgetPlugin(self, widgetClass):
         self.preparePlugin(widgetClass)
         self.application.settings.registerConfigurable(widgetClass)
-        
+
     def registerEditor(self, editorClass):
         self.prepareWidgetPlugin(editorClass)
         self.editors.append(editorClass)
@@ -73,13 +73,18 @@ class PMXPluginManager(object):
         return editor
     
     def populateMainWindow(self, mainWindow):
+        for editorClass in self.editors:
+            menus = editorClass.contributesToMainMenu()
+            if menus is not None:
+                for name, settings in menus.iteritems():
+                    actions = mainWindow.contributeToMainMenu(name, settings)
+
         mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
-        
         for dockClass in self.dockers:
             dock = self.createWidgetInstance(dockClass, mainWindow)
             dock.initialize()
             mainWindow.addDock(dock, dock.PREFERED_AREA)
-            
+
         for statusBarClass in self.statusBars:
             status = self.createWidgetInstance(statusBarClass, mainWindow)
             status.initialize()
