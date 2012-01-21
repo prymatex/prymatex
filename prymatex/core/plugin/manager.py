@@ -72,7 +72,7 @@ class PMXPluginManager(object):
         editor.initialize()
         return editor
     
-    def populateMainWindow(self, mainWindow):
+    def createCustomActions(self, mainWindow):
         for editorClass in self.editors:
             menus = editorClass.contributeToMainMenu()
             if menus is not None:
@@ -81,8 +81,30 @@ class PMXPluginManager(object):
                     actions = mainWindow.contributeToMainMenu(name, settings)
                     customEditorActions.extend(actions)
             mainWindow.registerEditorClassActions(editorClass, customEditorActions)
-
+        
+        for dockClass in self.dockers:
+            menus = dockClass.contributeToMainMenu()
+            if menus is not None:
+                customDockActions = []
+                for name, settings in menus.iteritems():
+                    actions = mainWindow.contributeToMainMenu(name, settings)
+                    customDockActions.extend(actions)
+            mainWindow.registerDockClassActions(dockClass, customDockActions)
+        
+        for statusClass in self.statusBars:
+            menus = statusClass.contributeToMainMenu()
+            if menus is not None:
+                customStatusActions = []
+                for name, settings in menus.iteritems():
+                    actions = mainWindow.contributeToMainMenu(name, settings)
+                    customStatusActions.extend(actions)
+            mainWindow.registerStatusClassActions(statusClass, customStatusActions)
+            
+    def populateMainWindow(self, mainWindow):
+        self.createCustomActions(mainWindow)
+            
         mainWindow.setDockOptions(QtGui.QMainWindow.AllowTabbedDocks | QtGui.QMainWindow.AllowNestedDocks | QtGui.QMainWindow.AnimatedDocks)
+        
         for dockClass in self.dockers:
             dock = self.createWidgetInstance(dockClass, mainWindow)
             dock.initialize()

@@ -20,19 +20,6 @@ class MainWindowActions(object):
         
         #Bundles Menu
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
-
-    def updateMenuForEditor(self, editor):
-        if editor is None:
-            
-            self.actionSelectBundleItem.setEnabled(False)
-        else:
-            self.actionSelectBundleItem.setEnabled(True)
-            
-        currentClass = editor.__class__ if editor is not None else None 
-        
-        for editorClass, actions in self.customActions.iteritems():
-            print actions
-            map(lambda action: action.setVisible(editorClass == currentClass), actions)
         
         #self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
         #self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
@@ -209,10 +196,6 @@ class MainWindowActions(object):
             else:
                 flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowFolding
             self.currentEditor().setFlags(flags)
-    
-    @QtCore.pyqtSlot()
-    def on_actionFilterThroughCommand_triggered(self):
-        self.statusBar().showCommand()
 
     #============================================================
     # Navigation Actions
@@ -256,10 +239,6 @@ class MainWindowActions(object):
         if index is not None:
             tab = tabs[index]
             self.splitTabWidget.setCurrentWidget(tab)
-        
-    @QtCore.pyqtSlot()
-    def on_actionGoToLine_triggered(self):
-        self.statusBar().showGoToLine()
         
     @QtCore.pyqtSlot()
     def on_actionGoToSymbol_triggered(self):

@@ -1110,15 +1110,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 {'title': "Show Tabs And Spaces",
                  'callback': cls.on_actionShowTabsAndSpaces_toggled,
                  'checkable': True,
-                 'checked': lambda editor: bool(editor.getFlags() & editor.ShowTabsAndSpaces) },
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowTabsAndSpaces) },
                 {'title': "Show Line And Paragraph",
                  'callback': cls.on_actionShowLineAndParagraphs_toggled,
                  'checkable': True, 
-                 'checked': lambda editor: bool(editor.getFlags() & editor.ShowLineAndParagraphs) }, 
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineAndParagraphs) }, 
                 {'title': "Word Wrap",
                  'callback': cls.on_actionWordWrap_toggled,
                  'checkable': True,
-                 'checked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
             ]}
         text = {
             'items': [ 
@@ -1194,8 +1194,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 '-',
                 {'title': 'Execute Line/Selection',
                  'callback': lambda editor: editor.executeCommand(),
-                 },
-                {'title': 'Filter Through Command', #TODO: Pegarle a la status bar o que esta sea de la status bar
                  }
             ]}
         return { "View": view , "Text": text}

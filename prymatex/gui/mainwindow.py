@@ -101,8 +101,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             
     def createCustomEditorMainMenu(self, name):
         menu = QtGui.QMenu(name, self.menubar)
-        object_name = textToObjectName(name, prefix = "menu")
-        menu.setObjectName(object_name)
+        objectName = textToObjectName(name, prefix = "menu")
+        menu.setObjectName(objectName)
+        setattr(self, objectName, menu)
         action = self.menubar.insertMenu(self.menuNavigation.children()[0], menu)
         return menu, action
 
@@ -114,22 +115,41 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             actions.append(action)
         if 'items' in settings:
             actions.extend(extendQMenu(menu, settings['items']))
+        return actions
+
+    def registerEditorClassActions(self, editorClass, actions):
         #Conect Actions
         for action in actions:
             if hasattr(action, 'callback'):
                 receiver = lambda checked, action = action: self.currentEditorActionDispatcher(checked, action)
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        return actions
+        self.customActions[editorClass] = actions
+    
+    def registerDockClassActions(self, dockClass, actions):
+        print dockClass, actions
         
+    def registerStatusClassActions(self, statusClass, actions):
+        self.statusBar().registerStatusClassActions(statusClass, actions)
+    
     def currentEditorActionDispatcher(self, checked, action):
         callbackArgs = [self.currentEditor()]
         if action.isCheckable():
             callbackArgs.append(checked)
         action.callback(*callbackArgs)
     
-    def registerEditorClassActions(self, editorClass, actions):
-        self.customActions[editorClass] = actions
-
+    def updateMenuForEditor(self, editor):
+        if editor is None:
+            for editorClass, actions in self.customActions.iteritems():
+                map(lambda action: action.setVisible(False), actions)
+        else:
+            currentEditorClass = editor.__class__ 
+            
+            for editorClass, actions in self.customActions.iteritems():
+                for action in actions:
+                    action.setVisible(editorClass == currentEditorClass)
+                    if action.isCheckable() and hasattr(action, 'testChecked'):
+                        action.setChecked(action.testChecked(editor))
+                        
     #============================================================
     # Create and manage editors
     #============================================================

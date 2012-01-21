@@ -11,24 +11,35 @@ from PyQt4.QtCore import SIGNAL
 from prymatex.utils.i18n import ugettext as _
 from prymatex import resources
             
-#TODO: Preparar la statusbar para que pueda mandar los eventos correctamente a cada widget
-# por ahora solo administra el widget status de PMXCodeEditor
 class PMXStatusBar(QtGui.QStatusBar):
     def __init__(self, parent):
         QtGui.QStatusBar.__init__(self, parent)
-        self.widgets = []
+        self.statusBars = []
+        self.activeBars = []
+        self.customActions = {}
         
-    def __getattr__(self, name):
-        #TODO: en funcion del current editor retornar el metodo del widget correspondiente
-        return getattr(self.widgets[0], name)
-    
     def addPermanentWidget(self, widget):
-        self.widgets.append(widget)
+        self.statusBars.append(widget)
         QtGui.QStatusBar.addPermanentWidget(self, widget, 1)
     
     def setCurrentEditor(self, editor):
-        if editor is not None:
-            self.widgets[0].setCurrentEditor(editor)
-            self.show()
-        else:
+        self.activeBars = []
+        for bar in self.statusBars:
+            if bar.acceptEditor(editor):
+                self.activeBars.append(bar)
+                bar.setVisible(True)
+        map(lambda bar: bar.setCurrentEditor(editor), self.activeBars)
+        if editor is None:
             self.hide()
+        else:
+            self.show()
+    
+    def actionDispatcher(self, checked, action):
+        print action, checked
+    
+    def registerStatusClassActions(self, statusClass, actions):
+        for action in actions:
+            if hasattr(action, 'callback'):
+                receiver = lambda checked, action = action: self.actionDispatcher(checked, action)
+                self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
+        self.customActions[statusClass] = actions

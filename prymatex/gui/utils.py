@@ -38,6 +38,7 @@ def createQAction(settings, parent):
     shortcut = settings.get("shortcut")
     checkable = settings.get("checkable", False)
     callback = settings.get("callback")
+    testChecked = settings.get("testChecked")
     action = QtGui.QAction(title, parent)
     object_name = textToObjectName(title, prefix = "action")
     action.setObjectName(object_name)
@@ -45,9 +46,9 @@ def createQAction(settings, parent):
         action.setIcon(icon)
     if shortcut is not None:
         action.setShortcut(shortcut)
-    if callback is not None:
-        action.callback = callback
     action.setCheckable(checkable)
+    action.testChecked = testChecked
+    action.callback = callback
     return action
     
 def createQMenu(settings, parent):

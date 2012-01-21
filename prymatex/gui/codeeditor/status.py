@@ -4,6 +4,7 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.core.plugin.status import PMXBaseStatusBar
+from prymatex.gui.codeeditor.editor import PMXCodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
 class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
@@ -126,6 +127,9 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     #============================================================
     # Handle editors
     #============================================================
+    def acceptEditor(self, editor):
+        return isinstance(editor, PMXCodeEditor)
+    
     def disconnectEditor(self, editor):
         editor.cursorPositionChanged.disconnect(self.on_cursorPositionChanged)
         editor.syntaxChanged.disconnect(self.on_syntaxChanged)
@@ -377,3 +381,23 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.widgetIFind.setVisible(True)
         self.lineEditIFind.selectAll()
         self.lineEditIFind.setFocus()
+    
+    #===========================================================================
+    # Menus
+    #===========================================================================
+    # Contributes to Main Menu
+    @classmethod
+    def contributeToMainMenu(cls):
+        text = {
+            'items': [
+                {'title': 'Filter Through Command',
+                 'callback': cls.showCommand
+                 }
+            ]}
+        navigation = {
+            'items': [
+                {'title': 'Go To &Line',
+                 'callback': cls.showGoToLine
+                 }
+            ]}
+        return { "Navigation": navigation, "Text": text }

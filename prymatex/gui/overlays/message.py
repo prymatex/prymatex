@@ -69,6 +69,10 @@ class PMXMessageOverlay(QtGui.QLabel, PMXBaseOverlay):
         self.opacity = 0
         self.linkActivated.connect(self.linkHandler)
 
+    def initialize(self, widget):
+        PMXBaseOverlay.initialize(self, widget)
+        setattr(widget, "showMessage", self.showMessage)
+        
     def showMessage(self, message, timeout = 2000, icon = None, pos = None, hrefCallbacks = {} ):
         '''
         @param message: Text message, can be HTML

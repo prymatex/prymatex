@@ -29,18 +29,15 @@ class PMXBaseWidgetPlugin(PMXBasePlugin):
     def addOverlay(self, overlay):
         self.overlays.append(overlay)
     
-    def showMessage(self, *largs, **kwargs):
-        for overlay in self.overlays:
-            overlay.showMessage(*largs, **kwargs)
+    @classmethod
+    def contributeToMainMenu(cls):
+        return {}
 
 class PMXBaseOverlay(PMXBasePlugin):
     def initialize(self, widget):
         pass
     
     def updateOverlay(self):
-        pass
-    
-    def showMessage(self, *largs, **kwargs):
         pass
 
 Key_Any = 0

@@ -95,10 +95,6 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         pass
     
     @classmethod
-    def contributeToMainMenu(cls):
-        return {}
-    
-    @classmethod
     def addKeyHelper(cls, helper):
         helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])
         helpers.append(helper)
