@@ -24,15 +24,29 @@ class PMXStatusBar(QtGui.QStatusBar):
     
     def setCurrentEditor(self, editor):
         self.activeBars = []
-        for bar in self.statusBars:
-            if bar.acceptEditor(editor):
-                self.activeBars.append(bar)
-                bar.setVisible(True)
-        map(lambda bar: bar.setCurrentEditor(editor), self.activeBars)
         if editor is None:
+            #Propagate and hide
+            map(lambda bar: bar.setCurrentEditor(editor), self.activeBars)
             self.hide()
         else:
+            for bar in self.statusBars:
+                if bar.acceptEditor(editor):
+                    self.activeBars.append(bar)
+                    bar.setCurrentEditor(editor)
+                    bar.setVisible(True)
+                else:
+                    bar.setVisible(False)
             self.show()
+        self.updateMenuForStatusBar()
+    
+    def updateMenuForStatusBar(self):
+        activeClasses = map(lambda bar: bar.__class__, self.activeBars)
+        
+        for statusClass, actions in self.customActions.iteritems():
+            for action in actions:
+                action.setVisible(statusClass in activeClasses)
+                if action.isCheckable() and hasattr(action, 'testChecked'):
+                    action.setChecked(action.testChecked(self.activeBars[activeClasses.index(statusClass)]))
     
     def actionDispatcher(self, checked, action):
         #Find class for action

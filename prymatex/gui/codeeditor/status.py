@@ -143,14 +143,16 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def setCurrentEditor(self, editor):
         if self.currentEditor is not None:
             self.disconnectEditor(self.currentEditor)
-        self.connectEditor(editor)
+        #Change currentEditor
         self.currentEditor = editor
-        self.comboBoxSymbols.setModel(editor.symbolListModel)
-        self.on_cursorPositionChanged(editor)
-        self.on_syntaxChanged(editor.getSyntax())
-        self.on_modeChanged(editor)
-        self.setTabSizeLabel(editor)
         self.hideAllWidgets()
+        if self.currentEditor is not None:
+            self.connectEditor(self.currentEditor)
+            self.comboBoxSymbols.setModel(self.currentEditor.symbolListModel)
+            self.on_cursorPositionChanged(self.currentEditor)
+            self.on_syntaxChanged(self.currentEditor.getSyntax())
+            self.on_modeChanged(self.currentEditor)
+            self.setTabSizeLabel(self.currentEditor)
         
     #============================================================
     # Status Widget
