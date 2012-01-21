@@ -397,7 +397,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         navigation = {
             'items': [
                 {'title': 'Go To &Line',
-                 'callback': cls.showGoToLine
+                 'callback': cls.showGoToLine,
+                 'shortcut': 'Ctrl+Shift+L',
                  }
             ]}
         return { "Navigation": navigation, "Text": text }

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Fri Jan 20 18:24:01 2012
+# Created: Sat Jan 21 14:20:28 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,8 +49,6 @@ class Ui_MainWindow(object):
         self.menuNew.setObjectName(_fromUtf8("menuNew"))
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setObjectName(_fromUtf8("menuView"))
-        self.menuGutter = QtGui.QMenu(self.menuView)
-        self.menuGutter.setObjectName(_fromUtf8("menuGutter"))
         self.menuFont = QtGui.QMenu(self.menuView)
         self.menuFont.setObjectName(_fromUtf8("menuFont"))
         self.menuPanels = QtGui.QMenu(self.menuView)
@@ -251,26 +249,18 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionCloseOthers)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
-        self.menuGutter.addAction(self.actionShowFolding)
-        self.menuGutter.addAction(self.actionShowBookmarks)
-        self.menuGutter.addAction(self.actionShowLineNumbers)
         self.menuFont.addAction(self.actionZoomIn)
         self.menuFont.addAction(self.actionZoomOut)
         self.menuView.addAction(self.menuPanels.menuAction())
         self.menuView.addAction(self.menuFont.menuAction())
-        self.menuView.addAction(self.menuGutter.menuAction())
-        self.menuNavigation.addAction(self.actionToggleBookmark)
-        self.menuNavigation.addAction(self.actionNextBookmark)
-        self.menuNavigation.addAction(self.actionPreviousBookmark)
-        self.menuNavigation.addAction(self.actionRemoveAllBookmarks)
-        self.menuNavigation.addSeparator()
         self.menuNavigation.addAction(self.actionNextTab)
         self.menuNavigation.addAction(self.actionPreviousTab)
         self.menuNavigation.addAction(self.actionSelectTab)
         self.menuNavigation.addSeparator()
-        self.menuNavigation.addAction(self.actionGoToLine)
-        self.menuNavigation.addAction(self.actionGoToSymbol)
-        self.menuNavigation.addAction(self.actionGoToBookmark)
+        self.menuNavigation.addAction(self.actionToggleBookmark)
+        self.menuNavigation.addAction(self.actionNextBookmark)
+        self.menuNavigation.addAction(self.actionPreviousBookmark)
+        self.menuNavigation.addAction(self.actionRemoveAllBookmarks)
         self.menuHelp.addAction(self.actionReport_Bug)
         self.menuHelp.addAction(self.actionTranslate_this_application)
         self.menuHelp.addAction(self.actionProjectHomepage)
@@ -321,7 +311,6 @@ class Ui_MainWindow(object):
         self.menuRecentFiles.setTitle(_('Recent Files'))
         self.menuNew.setTitle(_('New'))
         self.menuView.setTitle(_('&View'))
-        self.menuGutter.setTitle(_('Gutter'))
         self.menuFont.setTitle(_('Font'))
         self.menuPanels.setTitle(_('Panels'))
         self.menuNavigation.setTitle(_('&Navigation'))

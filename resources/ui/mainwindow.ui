@@ -84,14 +84,6 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <widget class="QMenu" name="menuGutter">
-     <property name="title">
-      <string>Gutter</string>
-     </property>
-     <addaction name="actionShowFolding"/>
-     <addaction name="actionShowBookmarks"/>
-     <addaction name="actionShowLineNumbers"/>
-    </widget>
     <widget class="QMenu" name="menuFont">
      <property name="title">
       <string>Font</string>
@@ -106,24 +98,19 @@
     </widget>
     <addaction name="menuPanels"/>
     <addaction name="menuFont"/>
-    <addaction name="menuGutter"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
      <string>&amp;Navigation</string>
     </property>
-    <addaction name="actionToggleBookmark"/>
-    <addaction name="actionNextBookmark"/>
-    <addaction name="actionPreviousBookmark"/>
-    <addaction name="actionRemoveAllBookmarks"/>
-    <addaction name="separator"/>
     <addaction name="actionNextTab"/>
     <addaction name="actionPreviousTab"/>
     <addaction name="actionSelectTab"/>
     <addaction name="separator"/>
-    <addaction name="actionGoToLine"/>
-    <addaction name="actionGoToSymbol"/>
-    <addaction name="actionGoToBookmark"/>
+    <addaction name="actionToggleBookmark"/>
+    <addaction name="actionNextBookmark"/>
+    <addaction name="actionPreviousBookmark"/>
+    <addaction name="actionRemoveAllBookmarks"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">

@@ -35,7 +35,19 @@ class PMXStatusBar(QtGui.QStatusBar):
             self.show()
     
     def actionDispatcher(self, checked, action):
-        print action, checked
+        #Find class for action
+        statusClasses = filter(lambda (cls, actions): action in actions, self.customActions.items())
+        assert len(statusClasses) == 1, "More than one class for action %s" % action
+        statusClass = statusClasses[0][0]
+        #Find instance
+        statusInstance = filter(lambda status: status.__class__ == statusClass, self.statusBars)
+        assert len(statusInstance) == 1, "More than one instance for class %s" % statusClass
+        statusInstance = statusInstance[0]
+        
+        callbackArgs = [statusInstance]
+        if action.isCheckable():
+            callbackArgs.append(checked)
+        action.callback(*callbackArgs)
     
     def registerStatusClassActions(self, statusClass, actions):
         for action in actions:

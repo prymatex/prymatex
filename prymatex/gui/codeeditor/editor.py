@@ -1107,6 +1107,25 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def contributeToMainMenu(cls):
         view = {
             'items': [
+                {'title': 'Gutter',
+                 'items': [
+                    {'title': "Foldings",
+                     'callback': cls.on_actionShowFoldings_toggled,
+                     'shortcut': 'Shift+F10',
+                     'checkable': True,
+                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowFolding) },
+                    {'title': "Bookmarks",
+                     'callback': cls.on_actionShowBookmarks_toggled,
+                     'shortcut': 'Alt+F10',
+                     'checkable': True,
+                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowBookmarks) },
+                    {'title': "Line Numbers",
+                     'callback': cls.on_actionShowLineNumbers_toggled,
+                     'shortcut': 'F10',
+                     'checkable': True,
+                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineNumbers) },
+                ]},
+                '-',
                 {'title': "Show Tabs And Spaces",
                  'callback': cls.on_actionShowTabsAndSpaces_toggled,
                  'checkable': True,
@@ -1196,7 +1215,19 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'callback': lambda editor: editor.executeCommand(),
                  }
             ]}
-        return { "View": view , "Text": text}
+        navigation = {
+            'items': [
+                "-",
+                {'title': 'Go To &Symbol',
+                 'callback': cls.on_actionGoToSymbol_triggered,
+                 'shortcut': 'Ctrl+Shift+O',
+                 },
+                {'title': 'Go To &Bookmark',
+                 'callback': cls.on_actionGoToBookmark_triggered,
+                 'shortcut': 'Ctrl+Shift+B',
+                 }
+            ]}
+        return { "View": view , "Text": text, "Navigation": navigation}
     
     #===========================================================================
     # Menu Actions
@@ -1221,6 +1252,46 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
+    
+    def on_actionShowBookmarks_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.ShowBookmarks
+        else:
+            flags = self.getFlags() & ~self.ShowBookmarks
+        self.setFlags(flags)
+    
+    def on_actionShowLineNumbers_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.ShowLineNumbers
+        else:
+            flags = self.getFlags() & ~self.ShowLineNumbers
+        self.setFlags(flags)
+        
+    def on_actionShowFoldings_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.ShowFolding
+        else:
+            flags = self.getFlags() & ~self.ShowFolding
+        self.setFlags(flags)
+    
+    def on_actionGoToSymbol_triggered(self):
+        blocks = self.symbolListModel.blocks
+        def symbolToDict(blocks):
+            for block in blocks:
+                userData = block.userData() 
+                yield [dict(title = userData.symbol, image = resources.getIcon('codefunction'))]
+        index = self.mainWindow.symbolSelectorDialog.select(symbolToDict(blocks))
+        if index is not None:
+            self.goToBlock(blocks[index])
+        
+    def on_actionGoToBookmark_triggered(self):
+        blocks = self.bookmarkListModel.blocks
+        def bookmarkToDict(blocks):
+            for block in blocks:
+                yield [dict(title = block.text(), image = resources.getIcon('bookmarkflag'))]
+        index = self.mainWindow.bookmarkSelectorDialog.select(bookmarkToDict(blocks))
+        if index is not None:
+            self.goToBlock(blocks[index])
     
     #============================================================
     # Text Menu Actions

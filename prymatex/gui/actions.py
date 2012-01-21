@@ -170,33 +170,6 @@ class MainWindowActions(object):
         if self.currentEditor() is not None:
             self.currentEditor().zoomOut()
 
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowBookmarks_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowBookmarks
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowBookmarks
-            self.currentEditor().setFlags(flags)
-    
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowLineNumbers_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowLineNumbers
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowLineNumbers
-            self.currentEditor().setFlags(flags)
-        
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowFolding_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowFolding
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowFolding
-            self.currentEditor().setFlags(flags)
-
     #============================================================
     # Navigation Actions
     #============================================================
@@ -239,29 +212,6 @@ class MainWindowActions(object):
         if index is not None:
             tab = tabs[index]
             self.splitTabWidget.setCurrentWidget(tab)
-        
-    @QtCore.pyqtSlot()
-    def on_actionGoToSymbol_triggered(self):
-        editor = self.currentEditor()
-        blocks = editor.symbolListModel.blocks
-        def symbolToDict(blocks):
-            for block in blocks:
-                userData = block.userData() 
-                yield [dict(title = userData.symbol, image = resources.getIcon('codefunction'))]
-        index = self.symbolSelectorDialog.select(symbolToDict(blocks))
-        if index is not None:
-            editor.goToBlock(blocks[index])
-        
-    @QtCore.pyqtSlot()
-    def on_actionGoToBookmark_triggered(self):
-        editor = self.currentEditor()
-        blocks = editor.bookmarkListModel.blocks
-        def bookmarkToDict(blocks):
-            for block in blocks:
-                yield [dict(title = block.text(), image = resources.getIcon('bookmarkflag'))]
-        index = self.bookmarkSelectorDialog.select(bookmarkToDict(blocks))
-        if index is not None:
-            editor.goToBlock(blocks[index])
             
     #============================================================
     # Bundles Actions
