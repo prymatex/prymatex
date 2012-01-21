@@ -183,7 +183,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                        'name': "Error" + context.command.name,
                       'input': 'none',
                      'output': 'showAsHTML' }
-        command = PMXCommand(context.command.manager.uuidgen(), "internal", hash = hash)
+        command = PMXCommand(self.editor.application.supportManager.uuidgen(), "internal", hash = hash)
         command.bundle = context.command.bundle
         self.editor.insertBundleItem(command)
             
