@@ -319,7 +319,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         elif mode == 2:
             pass
         elif mode == 3:
-            match = QtCore.QRegExp(QtCore.QRegExp.escape(match))
+            match = QtCore.QRegExp(match)
         return match, flags
     
     def showFindReplace(self):
@@ -390,6 +390,18 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     # Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls):
+        edit = {
+            'items': [
+                '-',
+                {'title': "Find",
+                 'shortcut': "Ctrl+F",
+                 'callback': cls.showIFind
+                },
+                {'title': "Replace",
+                 'shortcut': "Ctrl+R",
+                 'callback': cls.showFindReplace
+                }
+            ]}
         text = {
             'items': [
                 {'title': 'Filter Through Command',
@@ -403,4 +415,4 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
                  'shortcut': 'Ctrl+Shift+L',
                  }
             ]}
-        return { "Navigation": navigation, "Text": text }
+        return { "Edit": edit, "Navigation": navigation, "Text": text }

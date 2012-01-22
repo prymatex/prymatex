@@ -21,13 +21,6 @@ class MainWindowActions(object):
         #Bundles Menu
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
         
-        #self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
-        #self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
-        #self.actionShowBookmarks.setChecked(bool(flags & editor.ShowBookmarks))
-        #self.actionShowTabsAndSpaces.setChecked(bool(flags & editor.ShowTabsAndSpaces))
-        #self.actionShowLineAndParagraphs.setChecked(bool(flags & editor.ShowLineAndParagraphs))
-        #self.actionWordWrap.setChecked(bool(flags & editor.WordWrap))
-        
     #============================================================
     # About To Show Menus
     #============================================================
@@ -36,8 +29,8 @@ class MainWindowActions(object):
 
     def on_menuRecentFiles_aboutToShow(self):
         self.menuRecentFiles.clear()
-        for filePath in self.application.fileManager.fileHistory:
-            actionText = "%s (%s)"% (self.application.fileManager.fileName(filePath), filePath)
+        for index, filePath in enumerate(self.application.fileManager.fileHistory, 1):
+            actionText = "%s (%s)\t&%d" % (self.application.fileManager.fileName(filePath), filePath, index)
             action = QtGui.QAction(actionText, self)
             receiver = lambda file = filePath: self.application.openFile(file)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
