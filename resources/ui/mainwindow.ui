@@ -45,7 +45,7 @@
     </property>
     <widget class="QMenu" name="menuRecentFiles">
      <property name="title">
-      <string>Recent Files</string>
+      <string>&amp;Recent Files</string>
      </property>
      <property name="icon">
       <iconset resource="../resources.qrc">
@@ -84,20 +84,12 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <widget class="QMenu" name="menuFont">
-     <property name="title">
-      <string>Font</string>
-     </property>
-     <addaction name="actionZoomIn"/>
-     <addaction name="actionZoomOut"/>
-    </widget>
     <widget class="QMenu" name="menuPanels">
      <property name="title">
       <string>Panels</string>
      </property>
     </widget>
     <addaction name="menuPanels"/>
-    <addaction name="menuFont"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -132,12 +124,10 @@
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
-    <addaction name="actionCopy"/>
     <addaction name="actionCut"/>
+    <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
-    <addaction name="separator"/>
-    <addaction name="actionFind"/>
-    <addaction name="actionFindReplace"/>
+    <addaction name="actionDelete"/>
    </widget>
    <widget class="QMenu" name="menuBundles">
     <property name="title">
@@ -162,10 +152,11 @@
    </widget>
    <widget class="QMenu" name="menuPreferences">
     <property name="title">
-     <string>Preferences</string>
+     <string>&amp;Preferences</string>
     </property>
     <addaction name="actionShowMenus"/>
     <addaction name="actionShowStatus"/>
+    <addaction name="separator"/>
     <addaction name="actionFullscreen"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
@@ -276,7 +267,7 @@
      <normaloff>:/icons/actions/edit-undo.png</normaloff>:/icons/actions/edit-undo.png</iconset>
    </property>
    <property name="text">
-    <string>Undo</string>
+    <string>&amp;Undo</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
@@ -288,7 +279,7 @@
      <normaloff>:/icons/actions/edit-redo.png</normaloff>:/icons/actions/edit-redo.png</iconset>
    </property>
    <property name="text">
-    <string>Redo</string>
+    <string>&amp;Redo</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Z</string>
@@ -300,7 +291,7 @@
      <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
-    <string>Copy</string>
+    <string>&amp;Copy</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -312,7 +303,7 @@
      <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
-    <string>Cut</string>
+    <string>Cu&amp;t</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
@@ -324,22 +315,10 @@
      <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
-    <string>Paste</string>
+    <string>&amp;Paste</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
-   </property>
-  </action>
-  <action name="actionFind">
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/icons/actions/edit-find.png</normaloff>:/icons/actions/edit-find.png</iconset>
-   </property>
-   <property name="text">
-    <string>Find</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionSettings">
@@ -357,6 +336,10 @@
   <action name="actionFullscreen">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/view-fullscreen.png</normaloff>:/icons/actions/view-fullscreen.png</iconset>
    </property>
    <property name="text">
     <string>Fullscreen</string>
@@ -398,39 +381,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
-   </property>
-  </action>
-  <action name="actionShowLineNumbers">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Line Numbers</string>
-   </property>
-   <property name="shortcut">
-    <string>F10</string>
-   </property>
-  </action>
-  <action name="actionShowFolding">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Foldings</string>
-   </property>
-   <property name="shortcut">
-    <string>Shift+F10</string>
-   </property>
-  </action>
-  <action name="actionShowBookmarks">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Bookmarks</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+F10</string>
    </property>
   </action>
   <action name="actionToggleBookmark">
@@ -544,14 +494,6 @@
     <string>Show Status</string>
    </property>
   </action>
-  <action name="actionFindReplace">
-   <property name="text">
-    <string>Replace</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
   <action name="actionOpenAllRecentFiles">
    <property name="text">
     <string>Open All Recent Files</string>
@@ -607,22 +549,6 @@
     <string>Meta+Ctrl+T</string>
    </property>
   </action>
-  <action name="actionGoToLine">
-   <property name="text">
-    <string>Go To &amp;Line</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+G</string>
-   </property>
-  </action>
-  <action name="actionGoToSymbol">
-   <property name="text">
-    <string>&amp;Go To Symbol</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+O</string>
-   </property>
-  </action>
   <action name="actionSelectTab">
    <property name="text">
     <string>&amp;Select Tab</string>
@@ -643,12 +569,13 @@
     <string>Ctrl+Alt+N</string>
    </property>
   </action>
-  <action name="actionGoToBookmark">
-   <property name="text">
-    <string>Go To Bookmark</string>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+B</string>
+   <property name="text">
+    <string>Delete</string>
    </property>
   </action>
  </widget>

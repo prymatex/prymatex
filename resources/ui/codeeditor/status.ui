@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>629</width>
-    <height>240</height>
+    <height>249</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -226,6 +226,12 @@ p, li { white-space: pre-wrap; }
    <item>
     <widget class="QWidget" name="widgetFindReplace" native="true">
      <layout class="QGridLayout" name="gridLayout">
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <property name="spacing">
+       <number>2</number>
+      </property>
       <item row="0" column="0">
        <widget class="QPushButton" name="pushButtonFindReplaceClose">
         <property name="text">
@@ -266,7 +272,7 @@ p, li { white-space: pre-wrap; }
       <item row="1" column="2">
        <widget class="QLineEdit" name="lineEditReplace"/>
       </item>
-      <item row="1" column="4">
+      <item row="1" column="3">
        <widget class="QPushButton" name="pushButtonReplace">
         <property name="toolTip">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -280,14 +286,14 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="1" column="5">
+      <item row="1" column="4">
        <widget class="QPushButton" name="pushButtonReplaceAll">
         <property name="text">
          <string>Replace &amp;All</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
+      <item row="0" column="4">
        <widget class="QPushButton" name="pushButtonFindPrevious">
         <property name="text">
          <string>Previous</string>
@@ -298,7 +304,7 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
+      <item row="0" column="3">
        <widget class="QPushButton" name="pushButtonFindNext">
         <property name="toolTip">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -316,9 +322,18 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="5">
-       <widget class="QWidget" name="widgetFindReplaceOptions" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item row="2" column="0" colspan="5">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
          <item>
           <widget class="QLabel" name="labelFindMode">
            <property name="text">
@@ -350,9 +365,20 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="checkBox">
+           <property name="text">
+            <string>Selection Only</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="pushButtonFindAll">
            <property name="text">
             <string>Find All</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../resources.qrc">
+             <normaloff>:/icons/actions/edit-find.png</normaloff>:/icons/actions/edit-find.png</iconset>
            </property>
           </widget>
          </item>

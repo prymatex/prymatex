@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/view-fullscreen.png</file>
     <file>bundles/bundle.png</file>
     <file>mimetypes/text-plain.png</file>
     <file>actions/project-development-close.png</file>

@@ -922,7 +922,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             replace = self.findMatch(match, flags)
             if not replace: break
             cursor = self.textCursor()
-            cursor.insertText(text)
+            if isinstance(match, QtCore.QRegExp):
+                cursor.insertText(re.sub(match.pattern(), text, cursor.selectedText()))
+            else:
+                cursor.insertText(text)
             if not all: break
         cursor.endEditBlock()
         return replaced
@@ -1107,9 +1110,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def contributeToMainMenu(cls):
         view = {
             'items': [
+                {'title': 'Font',
+                 'items': [
+                     {'title': "Zoom In",
+                      'shortcut': "Ctrl++",
+                      'callback': cls.zoomIn},
+                     {'title': "Zoom Out",
+                      'shortcut': "Ctrl+-",
+                      'callback': cls.zoomOut}
+                ]},
                 {'title': 'Gutter',
                  'items': [
-                    {'title': "Foldings",
+                    {'title': 'Foldings',
                      'callback': cls.on_actionShowFoldings_toggled,
                      'shortcut': 'Shift+F10',
                      'checkable': True,
