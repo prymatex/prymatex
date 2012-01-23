@@ -100,7 +100,7 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables):
         super(PMXEnvVariablesWidgets, self).__init__(parent)
         self.setupUi(self)
         
-        self.model = PMXEnvVariablesTableModel(self.application.settings.getGroup('Manager'), self.application.supportManager.shellVariables, self.application.supportManager.environment, self)
+        self.model = PMXEnvVariablesTableModel(self.application.settings.getGroup('SupportManager'), self.application.supportManager.shellVariables, self.application.supportManager.environment, self)
         self.tableView.setModel(self.model)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
