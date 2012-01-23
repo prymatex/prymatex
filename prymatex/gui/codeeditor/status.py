@@ -308,6 +308,11 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         replace = self.lineEditReplace.text()
         self.currentEditor.replaceMatch(match, replace, flags, True)
     
+    @QtCore.pyqtSlot()
+    def on_pushButtonFindAll_pressed(self):
+        match, flags = self.getFindMatchAndFlags()
+        self.currentEditor.findAll(match, flags)
+        
     def getFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxFindCaseSensitively.isChecked():
@@ -361,7 +366,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     @QtCore.pyqtSlot(int)
     def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
         match, flags = self.getIFindMatchAndFlags()
-        if self.currentEditor.findMatch(text, flags):
+        if self.currentEditor.findMatch(match, flags):
             self.lineEditIFind.setStyleSheet(self.FIND_STYLE_MATCH)
         else:
             self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NO_MATCH)

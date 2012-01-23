@@ -83,7 +83,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     
     def setCursorPosition(self, cursorPosition):
         pass
-    
+
     def checkExternalModification(self):
         if self.isNew():
             return False

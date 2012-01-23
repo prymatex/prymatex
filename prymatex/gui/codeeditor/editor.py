@@ -163,6 +163,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
         
+        self.highlightWordTimer = QtCore.QTimer()
+        self.currentHighlightWord = None
+        self.extraCursorsSelections = []
+        
         #Load Syntax Highlighter
         syntax = None
         if self.filePath is not None:
@@ -489,7 +493,33 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             self.highlightCurrentLine()
             self.highlightCurrentBrace()
+            self.highlightCurrentSelections()
+            self.highlightCurrentWord()
 
+    def highlightCurrentWord(self):
+        #TODO: Mejorar esto porque sino cuando se carga un archivo le manda como loco
+        def highlightWord():
+            if self.currentHighlightWord == self.getWordUnderCursor()[0]:
+                self.findAll(self.currentHighlightWord, QtGui.QTextDocument.FindWholeWords | QtGui.QTextDocument.FindCaseSensitively)
+            self.highlightWordTimer.stop()
+        if self.currentHighlightWord != self.getWordUnderCursor()[0]:
+            if self.highlightWordTimer.isActive():
+                self.highlightWordTimer.stop()
+            self.currentHighlightWord = self.getWordUnderCursor()[0]
+            self.highlightWordTimer.timeout.connect(highlightWord)
+            self.highlightWordTimer.start(1000)
+        
+    def highlightCurrentSelections(self):
+        extraSelections = self.extraSelections()
+        for cursor in self.extraCursorsSelections:
+            selection = QtGui.QTextEdit.ExtraSelection()
+            color = QtGui.QColor(self.colours['selection'])
+            color.setAlpha(100)
+            selection.format.setBackground(color)
+            selection.cursor = cursor
+            extraSelections.append(selection)
+        self.setExtraSelections(extraSelections)
+        
     def highlightCurrentBrace(self, cursor = None):
         cursor = QtGui.QTextCursor(self.textCursor())
         cursor.clearSelection()
@@ -897,12 +927,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     c2 = self.document().find(b2, c2.selectionEnd(), flags)
         return c2
 
-    def findMatch(self, match, flags, findNext = False):
-        cursor = self.textCursor()
+    def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = True):
+        cursor = cursor or self.textCursor()
         if not findNext and cursor.hasSelection():
             cursor.setPosition(cursor.selectionStart())
         cursor = self.document().find(match, cursor, flags)
-        if cursor.isNull():
+        if cursor.isNull() and cyclicFind:
             cursor = self.textCursor()
             if flags & QtGui.QTextDocument.FindBackward:
                 cursor.movePosition(QtGui.QTextCursor.End)
@@ -910,26 +940,43 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 cursor.movePosition(QtGui.QTextCursor.Start)
             cursor = self.document().find(match, cursor, flags)
         if not cursor.isNull():
+            return cursor
+
+    def findMatch(self, match, flags, findNext = False):
+        cursor = self.findMatchCursor(match, flags, findNext)
+        if cursor is not None:
             self.setTextCursor(cursor)
             return True
         return False
-
+    
+    def findAll(self, match, flags):
+        self.extraCursorsSelections = []
+        cursor = self.textCursor()
+        cursor.movePosition(QtGui.QTextCursor.Start)
+        cursor = self.findMatchCursor(match, flags, cursor = cursor, cyclicFind = False)
+        while cursor is not None:
+            self.extraCursorsSelections.append(cursor)
+            cursor = QtGui.QTextCursor(cursor)
+            cursor.setPosition(cursor.selectionEnd())
+            cursor = self.findMatchCursor(match, flags, cursor = cursor, cyclicFind = False)
+        self.highlightCurrent()
+            
     def replaceMatch(self, match, text, flags, all = False):
         cursor = self.textCursor()
         cursor.beginEditBlock()
-        replaced = False
+        replaced = 0
         while True:
-            replace = self.findMatch(match, flags)
-            if not replace: break
-            cursor = self.textCursor()
+            findCursor = self.findMatchCursor(match, flags)
+            if not findCursor: break
             if isinstance(match, QtCore.QRegExp):
-                cursor.insertText(re.sub(match.pattern(), text, cursor.selectedText()))
+                findCursor.insertText(re.sub(match.pattern(), text, cursor.selectedText()))
             else:
-                cursor.insertText(text)
+                findCursor.insertText(text)
+            replaced += 1
             if not all: break
         cursor.endEditBlock()
         return replaced
-
+    
     def replaceTabsForSpaces(self):
         match = QtCore.QRegExp("\t")
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
