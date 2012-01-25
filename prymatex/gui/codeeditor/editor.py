@@ -743,31 +743,29 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         """
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
-            self.showMessage("Snippet <i>&laquo;%s&raquo;</i> activated" % item.name)
             self.beginAutomatedAction()
             item.execute(self.snippetProcessor)
             self.endAutomatedAction()
         elif item.TYPE == PMXCommand.TYPE or item.TYPE == PMXDragCommand.TYPE:
             self.commandProcessor.configure(processorSettings)
-            self.showMessage("Command <i>&laquo;%s&raquo;</i>" % item.name)
             self.beginAutomatedAction()
             item.execute(self.commandProcessor)
             self.endAutomatedAction()
-        elif item.TYPE == PMXSyntax.TYPE:
-            self.setSyntax(item)
         elif item.TYPE == PMXMacro.TYPE:
             self.macroProcessor.configure(processorSettings)
-            self.showMessage("Execute macro %s" % item.name)
             self.beginAutomatedAction()
             item.execute(self.macroProcessor)
             self.endAutomatedAction()
+        elif item.TYPE == PMXSyntax.TYPE:
+            self.setSyntax(item)
+
 
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
         options = []
         for index, item in enumerate(items):
-            options.append({ "title": item.buildMenuTextEntry(False), "image": item.TYPE})
+            options.append({ "title": item.buildMenuTextEntry(False), "image": item.TYPE })
             
         def insertBundleItem(index):
             self.insertBundleItem(items[index], tabTriggered = tabTriggered)

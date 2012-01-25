@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import uuid as uuidmodule
+
 from PyQt4 import QtGui, QtCore
 
 from subprocess import Popen, PIPE, STDOUT
@@ -19,6 +19,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return environment
 
     def configure(self, settings):
+        self.asynchronous = settings.get("asynchronous", True)
         self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
@@ -86,7 +87,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return word
     
     def runCommand(self, context, shellCommand, callback):
-        return self.runQProcessCommand(context, shellCommand, callback)
+        if self.asynchronous:
+            return self.runQProcessCommand(context, shellCommand, callback)
+        else:
+            return self.runPopenCommand(context, shellCommand, callback)
     
     def runPopenCommand(self, context, shellCommand, callback):
         process = Popen(shellCommand, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = context.environment)
@@ -95,9 +99,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
             process.stdin.write(unicode(context.inputValue).encode("utf-8"))
         process.stdin.close()
         try:
-            outputValue = process.stdout.read()
-        except IOError:
-            outputValue = ""
+            context.outputValue = process.stdout.read()
+        except IOError, e:
+            context.errorValue = str(e).decode("utf-8")
         process.stdout.close()
         context.outputType = process.wait()
         callback(self, context)
@@ -113,14 +117,12 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):
-                #context.outputValue = str(process.readAll()).decode("utf-8")
-                context.errorValue = str(process.readAllStandardError ()).decode("utf-8")
-                context.outputValue = str(process.readAllStandardOutput ()).decode("utf-8")
-                #context.outputValue = str(process.readAll()).decode("utf-8")
+                context.errorValue = str(process.readAllStandardError()).decode("utf-8")
+                context.outputValue = str(process.readAllStandardOutput()).decode("utf-8")
                 context.outputType = exitCode
                 callback(self, context)
             return runCallback
-        
+
         process.finished[int].connect(onQProcessFinished(process, context, callback))
 
         if context.inputType != None:
@@ -220,7 +222,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                        'name': context.command.name,
                  'tabTrigger': context.command.tabTrigger,
               'keyEquivalent': context.command.keyEquivalent }
-        snippet = PMXSnippet(context.command.manager.uuidgen(), "internal", hash = hash)
+        snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), "internal", hash = hash)
         snippet.bundle = context.command.bundle
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             

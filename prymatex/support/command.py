@@ -103,7 +103,6 @@ class PMXCommand(PMXBundleItem):
 
     def execute(self, processor):
         #if not self.beforeExecute(processor): return
-        print "corriendo"
         inputType, inputValue = self.getInputText(processor)
         shellCommand, environment = prepareShellScript(self.systemCommand(), processor.environment(self))
         
