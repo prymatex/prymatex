@@ -51,26 +51,26 @@ class PMXMacroProcessor(PMXMacroProcessor):
 
     def moveRight(self):
         #QTextCursor::Right 19 Move right one character. 
-        self.editor.textCursor().movePosition(QtGui.QTextCursor.Right)
+        self.editor.moveCursor(QtGui.QTextCursor.Right)
 
     def moveLeft(self):
         #QTextCursor::Left 9 Move left one character.
-        self.editor.textCursor().movePosition(QtGui.QTextCursor.Left)
+        self.editor.moveCursor(QtGui.QTextCursor.Left)
 
     def moveUp(self):
         #QTextCursor::Up 2 Move up one line.
-        self.editor.textCursor().movePosition(QtGui.QTextCursor.Up)
+        self.editor.moveCursor(QtGui.QTextCursor.Up)
     
     def moveDown(self):
         #QTextCursor::Down 12 Move down one line. 
-        self.editor.textCursor().movePosition(QtGui.QTextCursor.Down)
+        self.editor.moveCursor(QtGui.QTextCursor.Down)
     
     def moveToEndOfLine(self):
-        #QTextCursor::EndOfLine 13 Move to the end of the current line. 
-        self.editor.textCursor().movePosition(QtGui.QTextCursor.EndOfLine)
+        #QTextCursor::EndOfLine 13 Move to the end of the current line.
+        self.editor.moveCursor(QtGui.QTextCursor.EndOfLine)
         
     def moveToEndOfParagraph(self):
-        pass
+        self.editor.moveCursor(QtGui.QTextCursor.EndOfBlock)
         
     def moveToBeginningOfLine(self):
         pass
@@ -93,12 +93,14 @@ class PMXMacroProcessor(PMXMacroProcessor):
     def deleteBackward(self):
         self.editor.textCursor().deletePreviousChar()
 
+    def insertNewline(self):
+        self.editor.textCursor().insertText("\n")
+
     def insertText(self, text):
-        cursor = self.editor.textCursor()
-        cursor.insertText(text)
+        self.editor.textCursor().insertText(text)
 
     def executeCommandWithOptions(self, options):
         uuid = self.macro.manager.uuidgen(options.get('uuid', None))
         command = PMXCommand(uuid, "internal", hash = options)
         command.bundle = self.macro.bundle
-        self.editor.insertBundleItem(command)
+        self.editor.insertBundleItem(command, asynchronous = False)
