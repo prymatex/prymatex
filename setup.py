@@ -206,8 +206,7 @@ def fullsplit(path, result=None):
         return result
     return fullsplit(head, [tail] + result)
 
-# Compile the list of packages available, because distutils doesn't have
-# an easy way to do this.
+# Compile the list of packages available, because distutils doesn't have an easy way to do this.
 packages, package_data = [], {}
 root_dir = os.path.dirname(__file__)
 if root_dir != '':
