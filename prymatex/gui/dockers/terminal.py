@@ -1,11 +1,12 @@
 #-*- encoding: utf-8 -*-
-from PyQt4 import QtGui
+from PyQt4 import QtCore, QtGui
 
 from prymatex.core.plugin.dock import PMXBaseDock
+from prymatex.utils.i18n import ugettext as _
 
 PORT = 4613
 
-class PMXTerminalWidget(QtGui.QDockWidget, PMXBaseDock):
+class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F4")
     def __init__(self, parent):
@@ -42,7 +43,7 @@ class PMXTerminalWidget(QtGui.QDockWidget, PMXBaseDock):
         method = getattr(self, name)
         method(*args, **kwargs)
 
-     def sendResult(self, value = None):
+    def sendResult(self, value = None):
         value = str(value) if value is not None else "ok"
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
         self.socket.send_pyobj({ "result": value })

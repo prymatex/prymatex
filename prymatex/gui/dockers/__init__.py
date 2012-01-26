@@ -8,6 +8,7 @@ from prymatex.gui.dockers.browser import PMXBrowserDock
 from prymatex.gui.dockers.console import PMXConsoleDock
 from prymatex.gui.dockers.logger import PMXLoggerDock
 from prymatex.gui.dockers.projects import PMXProjectDock
+from prymatex.gui.dockers.terminal import PMXTerminalDock
 
 def registerPlugin(manager):
     manager.registerDocker(PMXFileSystemDock)
@@ -15,3 +16,4 @@ def registerPlugin(manager):
     manager.registerDocker(PMXConsoleDock)
     manager.registerDocker(PMXLoggerDock)
     manager.registerDocker(PMXProjectDock)
+    manager.registerDocker(PMXTerminalDock)
