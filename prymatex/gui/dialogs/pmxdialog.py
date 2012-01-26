@@ -13,8 +13,7 @@ PORT = 4612
 class PMXDialogSystem(QtCore.QObject):
     def __init__(self, parent = None):
         QtCore.QObject.__init__(self)
-        self.application = parent
-        self.socket = parent.zmqContext.socket(zmq.REP)
+        self.socket = self.application.zmqContext.socket(zmq.REP)
         self.socket.bind('tcp://127.0.0.1:%s' % PORT)
         self.socket.readyRead.connect(self.socketReadyRead)
     
