@@ -829,6 +829,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
         self.completerMode.setCaseSensitivity(case)
         
+        self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
         self.completerMode.setCompletionPrefix(alreadyTyped)
         self.completerMode.setModel(PMXCompleterListModel(suggestions, self))
         self.completerMode.complete(self.cursorRect())

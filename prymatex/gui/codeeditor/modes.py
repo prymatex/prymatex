@@ -330,7 +330,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             cursor.endEditBlock()
     
 class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
-    #TODO: Agregar al commpleter el control de la posicion del cursor
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)
         PMXBaseEditorMode.__init__(self, editor)
@@ -350,14 +349,23 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             event.ignore()
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-            #Luego de tratar el evento, solo si se inserto algo de texto
-            if event.text() != "":
-                currentWord, start, end = self.editor.getCurrentWord()
-                print currentWord
-                if currentWord != self.completionPrefix():
-                    self.setCompletionPrefix(currentWord)
+            
+            maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
+            cursor = self.editor.textCursor()
+            
+            #TODO: Se puede hacer mejor, para controlar que si esta en la mitad de la palabro o algo de eso
+            if self.startCursorPosition <= cursor.position() <= maxPosition:
+                cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
+                newPrefix = cursor.selectedText()
+                self.setCompletionPrefix(newPrefix)
                 self.complete(self.editor.cursorRect())
+            else:
+                self.popup().setVisible(False)
                 
+    
+    def setStartCursorPosition(self, position):
+        self.startCursorPosition = position
+        
     def insertCompletion(self, insert):
         self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])
 
