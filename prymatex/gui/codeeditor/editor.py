@@ -189,6 +189,23 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
+    
+    def updateIndent(self, block):
+        print "update indent"
+    
+    def updateFolding(self, block):
+        print "update folding"
+        if block.userData().foldingMark == None:
+            self.folding.removeFoldingBlock(block)
+        else:
+            self.folding.addFoldingBlock(block)
+        
+    def updateSymbol(self, block):
+        print "update symbol"
+        if block.userData().symbol == None:
+            self.symbolListModel.removeSymbolBlock(block)
+        else:
+            self.symbolListModel.addSymbolBlock(block)
         
     #=======================================================================
     # Connect Signals
@@ -200,16 +217,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.cursorPositionChanged.connect(self.highlightCurrent)
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.showSyntaxMessage)
-        # 
+        
+        self.textChanged.connect(self.textoCambia)
+         
         self.actionCopyPath.triggered.connect(self.on_actionCopyPath_triggered)
     
+    def textoCambia(self):
+        print "cambia texto"
+        
     def setupActions(self):
         # Some actions
-        self.actionCopyPath = QtGui.QAction(
-                                            resources.getIcon("copy"),
-                                            _("Copy path to clipboard"),
-                                            self
-                                            )
+        self.actionCopyPath = QtGui.QAction(resources.getIcon("copy"), _("Copy path to clipboard"), self)
         
         
     def showSyntaxMessage(self, syntax):
@@ -217,9 +235,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def on_modificationChanged(self, value):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
-        if self.folding.indentSensitive:
-            print "update folding"
-            self.foldingUpdateRequest.emit()
     
     def on_blockCountChanged(self, newBlockCount):
         block = self.textCursor().block()

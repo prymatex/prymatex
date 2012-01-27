@@ -50,6 +50,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.setFormat(start, end - start, format)
     
     def setupBlockUserData(self, text, userData, data):
+        print "primero setup block"
         state = self.SINGLE_LINE
         userData.setScopes(data[0])
         if data[1] is not None:
@@ -60,16 +61,13 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         indent = whiteSpace(text)
         if indent != userData.indent:
             userData.indent = indent
-            userData.indentLength = len(userData.indent) if text.strip() != "" else -1
+            self.editor.updateIndent(self.currentBlock())
 
         #2 Update Folding
         foldingMark = self.syntax.folding(text)
         if userData.foldingMark != foldingMark:
             userData.foldingMark = foldingMark
-            if userData.foldingMark == None:
-                self.editor.folding.removeFoldingBlock(self.currentBlock())
-            else:
-                self.editor.folding.addFoldingBlock(self.currentBlock())
+            self.editor.updateFolding(self.currentBlock())
             
         #3 Update Symbols
         preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.getAllScopes())
@@ -83,10 +81,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
         if userData.symbol != symbol:
             userData.symbol = symbol
-            if userData.symbol == None:
-                self.editor.symbolListModel.removeSymbolBlock(self.currentBlock())
-            else:
-                self.editor.symbolListModel.addSymbolBlock(self.currentBlock())
+            self.editor.updateSymbol(self.currentBlock())
 
         #4 Save the hash the text, scope and state
         userData.textHash = hash(text) + hash(self.syntax.scopeName) + state

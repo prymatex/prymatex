@@ -79,7 +79,7 @@ class PMXEditorFolding(object):
         nest = 0
         for block in self.blocks:
             userData = block.userData()
-            if self.isStop(userData.foldingMark) and userData.indentLength == -1:
+            if self.isStop(userData.foldingMark) and block.text().strip() == "":
                 continue
             elif self.isStart(userData.foldingMark):
                 nest += self.tryCloseIndentBlock(block)
