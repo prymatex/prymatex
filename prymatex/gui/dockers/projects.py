@@ -56,7 +56,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 self.actionProperties
             ]
         }
-        self.projectsMenu = createQMenu(projectMenuSettings, self)
+        self.projectsMenu, self.prejectMenuActions = createQMenu(projectMenuSettings, self)
 
         fileMenuSettings = { 
             "title": "File",
@@ -81,7 +81,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 self.actionProperties
             ]
         }
-        self.fileMenu = createQMenu(fileMenuSettings, self)
+        self.fileMenu, self.fileMenuActions = createQMenu(fileMenuSettings, self)
         
         directoryMenuSettings = { 
             "title": _("File"),
@@ -102,11 +102,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 self.actionProperties
             ]
         }
-        self.directoryMenu = createQMenu(directoryMenuSettings, self)
+        self.directoryMenu, self.directoryMenuActions = createQMenu(directoryMenuSettings, self)
         
         #Connect context menu
         self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewProjects.customContextMenuRequested.connect(self.showProjectTreeViewContextMenu)
+        self.treeViewProjects.setAlternatingRowColors(True)
+        self.treeViewProjects.setAnimated(True)
 
     #================================================
     # Tree View Project

@@ -60,9 +60,12 @@ def createQMenu(settings, parent):
                 action1, action2, 
                 {"title": "SubMenu Title",
                  "items": [
-                    (gaction1, qaction2, qaction3),
-                    [gaction1, qaction2, qaction3],
-                    ["Action Title", "Sortcuts", QIcon, callback],
+                    (gaction1, qaction2, qaction3), # Create Action Group, Exclusive = True
+                    [gaction1, qaction2, qaction3], # Create ACtion Group, Exclusive = False
+                    { 'title': "Action Title",      # Create action whit callback
+                      "sortcut": 'F20', 
+                      "icon": ...., 
+                      'callback': ....},  
                     "-", action1, action2
                 ]}
                 action3, "-", action4
@@ -104,13 +107,13 @@ def extendQMenu(menu, items):
         elif isinstance(item, list):
             actionGroup = QtGui.QActionGroup(menu)
             actions.append(actionGroup)
-            actionGroup.setExclusive(True)
+            actionGroup.setExclusive(False)
             map(menu.addAction, item)
             map(lambda action: action.setActionGroup(actionGroup), item)
         elif isinstance(item, tuple):
             actionGroup = QtGui.QActionGroup(menu)
             actions.append(actionGroup)
-            actionGroup.setExclusive(False)
+            actionGroup.setExclusive(True)
             map(menu.addAction, item)
             map(lambda action: action.setActionGroup(actionGroup), item)
         else:

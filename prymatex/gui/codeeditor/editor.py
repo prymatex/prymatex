@@ -500,14 +500,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #TODO: Mejorar esto porque sino cuando se carga un archivo le manda como loco
         def highlightWord():
             if self.currentHighlightWord == self.getWordUnderCursor()[0]:
-                self.findAll(self.currentHighlightWord, QtGui.QTextDocument.FindWholeWords | QtGui.QTextDocument.FindCaseSensitively)
+                self.extraCursorsSelections = self.findAll(self.currentHighlightWord, QtGui.QTextDocument.FindWholeWords | QtGui.QTextDocument.FindCaseSensitively)
+                self.highlightCurrentSelections()
             self.highlightWordTimer.stop()
         if self.currentHighlightWord != self.getWordUnderCursor()[0]:
             if self.highlightWordTimer.isActive():
                 self.highlightWordTimer.stop()
             self.currentHighlightWord = self.getWordUnderCursor()[0]
             self.highlightWordTimer.timeout.connect(highlightWord)
-            self.highlightWordTimer.start(1000)
+            self.highlightWordTimer.start(2000)
         
     def highlightCurrentSelections(self):
         extraSelections = self.extraSelections()
@@ -949,16 +950,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return False
     
     def findAll(self, match, flags):
-        self.extraCursorsSelections = []
+        cursors = []
         cursor = self.textCursor()
         cursor.movePosition(QtGui.QTextCursor.Start)
         cursor = self.findMatchCursor(match, flags, cursor = cursor, cyclicFind = False)
         while cursor is not None:
-            self.extraCursorsSelections.append(cursor)
+            cursors.append(cursor)
             cursor = QtGui.QTextCursor(cursor)
             cursor.setPosition(cursor.selectionEnd())
             cursor = self.findMatchCursor(match, flags, cursor = cursor, cyclicFind = False)
-        self.highlightCurrent()
+        return cursors
             
     def replaceMatch(self, match, text, flags, all = False):
         cursor = self.textCursor()
