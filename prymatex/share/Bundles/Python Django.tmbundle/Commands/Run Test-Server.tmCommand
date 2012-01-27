@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/bin/sh
+
+# This one does not work yet...
+
+export TM_RUBY=$(type -p "${TM_RUBY:-ruby}")
+
+"${TM_RUBY}" -KU -- "$TM_BUNDLE_SUPPORT/lib/run_server.rb" testserver "$TM_SELECTED_FILES"
+</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>@d</string>
+	<key>name</key>
+	<string>Run Test-Server</string>
+	<key>output</key>
+	<string>showAsHTML</string>
+	<key>scope</key>
+	<string>source.json</string>
+	<key>uuid</key>
+	<string>C8B16906-5A97-4AAA-9AAF-ED1DE479198A</string>
+</dict>
+</plist>

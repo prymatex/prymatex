@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string># just to remind you of some useful environment variables
+# see Help / Environment Variables for the full list
+#echo File: "$TM_FILEPATH"
+#echo Word: "$TM_CURRENT_WORD"
+#echo Selection: "$TM_SELECTED_TEXT"
+
+osascript &lt;&lt;- APPLESCRIPT
+	tell app "Terminal"
+	    launch
+	    activate
+	    do script "clear; cd \"${TM_PROJECT_DIRECTORY}\"; python manage.py dbshell"
+	    set position of first window to { 100, 100 }
+	end tell
+APPLESCRIPT</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>@d</string>
+	<key>name</key>
+	<string>Database Shell</string>
+	<key>output</key>
+	<string>discard</string>
+	<key>scope</key>
+	<string>source.python.django</string>
+	<key>uuid</key>
+	<string>4B3FDF3E-9EAF-4DB9-8BFA-1ED3C3B94453</string>
+</dict>
+</plist>

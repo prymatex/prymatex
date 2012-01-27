@@ -1,4 +1,6 @@
 #-*- encoding: utf-8 -*-
+import zmq
+
 from PyQt4 import QtCore, QtGui
 
 from prymatex.core.plugin.dock import PMXBaseDock
@@ -15,12 +17,13 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.setWindowTitle(_("Terminal"))
         self.setObjectName(_("TerminalDock"))
         self.setupTerminal()
+        self.setupSocket()
     
     def setupTerminal(self):
         try:
             from QTermWidget import QTermWidget
             self.terminal = QTermWidget()
-            self.terminal.setColorScheme("default")
+            self.terminal.setColorScheme("Linux")
         except ImportError:
             from traceback import format_exc
             self.terminal = QtGui.QPlainTextEdit()
@@ -36,14 +39,22 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     
     def socketReadyRead(self):
         command = self.socket.recv_pyobj()
+        print command
         name = command.get("name")
         args = command.get("args", [])
         kwargs = command.get("kwargs", {})
 
         method = getattr(self, name)
         method(*args, **kwargs)
-
+        self.sendResult()
+        
     def sendResult(self, value = None):
         value = str(value) if value is not None else "ok"
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
         self.socket.send_pyobj({ "result": value })
+
+    def run(self, command, **kwargs):
+        self.terminal.sendText(command)
+        
+    def setColorScheme(self, schema, **kwargs):
+        self.terminal.setColorScheme(schema)
