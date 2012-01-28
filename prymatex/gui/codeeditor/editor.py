@@ -39,7 +39,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
-    foldingUpdateRequest = QtCore.pyqtSignal()
     
     #=======================================================================
     # Settings
@@ -218,17 +217,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.showSyntaxMessage)
         
-        self.textChanged.connect(self.textoCambia)
-         
         self.actionCopyPath.triggered.connect(self.on_actionCopyPath_triggered)
-    
-    def textoCambia(self):
-        print "cambia texto"
         
     def setupActions(self):
         # Some actions
         self.actionCopyPath = QtGui.QAction(resources.getIcon("copy"), _("Copy path to clipboard"), self)
-        
         
     def showSyntaxMessage(self, syntax):
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
@@ -237,6 +230,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
     
     def on_blockCountChanged(self, newBlockCount):
+        print "block Count changed"
         block = self.textCursor().block()
         if self.lastBlockCount > self.document().blockCount():
             self.blocksRemoved.emit(block, self.lastBlockCount - newBlockCount)
@@ -746,13 +740,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         """End an edition motivated from internal reasons, snippets, commands, macros, others"""
         self.textCursor().endEditBlock() #Termino editBlock
         self.blockSignals(False) #Desblockeo señales
-        self.foldingUpdateRequest.emit()
         self.cursorPositionChanged.emit()
         self.textChanged.emit()
         if self.lastBlockCount != self.document().blockCount():
             self.blockCountChanged.emit(self.document().blockCount())
         self.sidebar.update()
-
+        
+    def isAutomatedAction(self):
+        return self.signalsBlocked()
+    
     def insertBundleItem(self, item, **processorSettings):
         """
         Inserta un bundle item

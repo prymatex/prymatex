@@ -2,13 +2,16 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QPixmap, QFontMetrics
 from PyQt4.Qt import QColor, QSize
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex import resources
 
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
 class PMXSidebar(QtGui.QWidget):
+    BOOKMARK_POSITION = 0
+    LINENUMBER_POSITION = 1
+    FOLDING_POSITION = 2
+    
     def __init__(self, editor):
         super(PMXSidebar, self).__init__(editor)
         self.editor = editor
@@ -22,6 +25,7 @@ class PMXSidebar(QtGui.QWidget):
         self.images = {}
         for key in ["bookmarkflag", "foldingcollapsed", "foldingtop", "foldingbottom"]:
             self.images[key] = resources.getImage(key)
+        self.setMouseTracking(True)
 
     @property
     def padding(self):
@@ -34,7 +38,7 @@ class PMXSidebar(QtGui.QWidget):
 
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
-        font_metrics = QFontMetrics(self.editor.document().defaultFont())
+        font_metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
         current_block = self.editor.document().findBlock(self.editor.textCursor().position())
 
         painter = QtGui.QPainter(self)
@@ -97,28 +101,45 @@ class PMXSidebar(QtGui.QWidget):
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
 
-    def mousePressEvent(self, event):
+    def mouseMoveEvent(self, event):
+        pass
+        #TODO: Un Tooltip con lo que esta foldeado
+        #position, block = self.translatePosition(event.pos())
+        #if position == self.FOLDING_POSITION and self.editor.folding.isFoldingMark(block) and self.editor.folding.isFolded(block):
+        #    print "poner timer sobre", block.blockNumber()
+    
+    def translatePosition(self, position):
         xofs = self.width() - self.foldArea
         xobs = self.bookmarkArea
-        font_metrics = QFontMetrics(self.editor.document().defaultFont())
+        font_metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
         fh = font_metrics.lineSpacing()
-        ys = event.posF().y()
+        ys = position.y()
         
-        if event.pos().x() > xofs or event.pos().x() < xobs:
+        if position.x() > xofs or position.x() < xobs:
             block = self.editor.firstVisibleBlock()
             viewport_offset = self.editor.contentOffset()
             page_bottom = self.editor.viewport().height()
             while block.isValid():
-                position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-                if position.y() > page_bottom:
+                blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+                if blockPosition.y() > page_bottom:
                     break
-                if position.y() < ys and (position.y() + fh) > ys:
+                if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:
                     break
                 block = block.next()
-            if event.pos().x() > xofs and self.editor.folding.isFoldingMark(block):
-                if block.userData().folded:
-                    self.editor.codeFoldingUnfold(block)
-                else:
-                    self.editor.codeFoldingFold(block)
+            if position.x() > xofs:
+                return (self.FOLDING_POSITION, block)
+            elif xobs < position.x() < xofs:
+                return (self.LINENUMBER_POSITION, block)
             else:
-                self.editor.toggleBookmark(block)
+                return (self.BOOKMARK_POSITION, block)
+        return (None, None)
+    
+    def mousePressEvent(self, event):
+        position, block = self.translatePosition(event.pos())
+        if position == self.FOLDING_POSITION and self.editor.folding.isFoldingMark(block):
+            if self.editor.folding.isFolded(block):
+                self.editor.codeFoldingUnfold(block)
+            else:
+                self.editor.codeFoldingFold(block)
+        elif position == self.BOOKMARK_POSITION:
+            self.editor.toggleBookmark(block)

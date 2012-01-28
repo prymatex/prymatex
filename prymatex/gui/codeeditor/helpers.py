@@ -31,15 +31,6 @@ class TabTriggerHelper(PMXBaseKeyHelper):
         else:
             editor.selectBundleItem(self.items, tabTriggered = True)
 
-class DebugHelper(PMXBaseKeyHelper):
-    KEY = QtCore.Qt.Key_B
-    def accept(self, editor, event, cursor = None, scope = None):
-        block = editor.document().firstBlock()
-        while block.isValid():
-            print block.userData().indentLength
-            block = block.next()
-        return False
-
 class CompleterHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Space
     def accept(self, editor, event, cursor = None, scope = None):
