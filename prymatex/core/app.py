@@ -27,7 +27,7 @@ class PMXApplication(QtGui.QApplication):
         Inicialización de la aplicación.
         """
         QtGui.QApplication.__init__(self, args)
-        QtGui.QApplication.setStyle(PrymatexStyle())
+        #QtGui.QApplication.setStyle(PrymatexStyle())
         
         # Some init's
         self.setApplicationName(prymatex.__name__)

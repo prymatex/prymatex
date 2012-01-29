@@ -1,5 +1,17 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/rating.png</file>
+    <file>actions/code-block.png</file>
+    <file>actions/code-class.png</file>
+    <file>actions/code-context.png</file>
+    <file>actions/code-function.png</file>
+    <file>actions/code-typedef.png</file>
+    <file>actions/code-variable.png</file>
+    <file>apps/internet-web-browser.png</file>
+    <file>apps/utilities-terminal.png</file>
+    <file>apps/yakuake.png</file>
+    <file>apps/utilities-file-archiver.png</file>
+    <file>apps/system-file-manager.png</file>
     <file>actions/view-fullscreen.png</file>
     <file>bundles/bundle.png</file>
     <file>mimetypes/text-plain.png</file>

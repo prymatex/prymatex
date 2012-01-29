@@ -62,6 +62,8 @@ class PMXPreferenceSettings(object):
                     value = dict(map(lambda d: (d['name'], d['value']), value))
                 elif key in [ 'symbolTransformation' ]:
                     value = map(lambda value: value.strip(), value.split(";"))
+                elif key in [ 'showInSymbolList' ]:
+                    value = bool(int(value))
             setattr(self, key, value)
     
     @property
@@ -76,6 +78,8 @@ class PMXPreferenceSettings(object):
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
                 elif key in [ 'symbolTransformation' ]:
                     value = ";".join(value) + ";"
+                elif key in [ showInSymbolList]:
+                    value = value and "1" or "0"
                 hash[key] = value
         return hash
     

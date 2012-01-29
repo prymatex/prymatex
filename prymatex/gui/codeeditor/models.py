@@ -127,10 +127,10 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         else:
             return QtCore.QModelIndex()
 
-    def rowCount (self, parent = None):
+    def rowCount(self, parent = None):
         return len(self.blocks)
 
-    def data (self, index, role = QtCore.Qt.DisplayRole):
+    def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         block = self.blocks[index.row()]
@@ -138,6 +138,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
         elif role == QtCore.Qt.DecorationRole:
+            #print userData.getAllScopes()
             return resources.getIcon('codefunction')
     
     def findBlockIndex(self, block):

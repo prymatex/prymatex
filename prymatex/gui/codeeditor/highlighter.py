@@ -72,7 +72,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         #3 Update Symbols
         preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.getAllScopes())
         
-        symbolRange = filter(lambda (preference, start, end): preference.showInSymbolList == 1, preferences)
+        symbolRange = filter(lambda (p, start, end): p.showInSymbolList, preferences)
         if symbolRange:
             symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
             symbol = symbolRange[0][0].transformSymbol(symbol)

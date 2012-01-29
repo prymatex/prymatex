@@ -3,11 +3,13 @@
 
 from PyQt4 import QtGui, QtCore
 
+from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.plugin.dock import PMXBaseDock
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F7")
+    MENU_ICON = resources.getIcon("bookmark")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, parent):
@@ -44,6 +46,7 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         
 class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
+    MENU_ICON = resources.getIcon("bookmark")
     
     def __init__(self, mainWindow):
         QtGui.QDockWidget.__init__(self, mainWindow)

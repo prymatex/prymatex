@@ -2,15 +2,16 @@
 #-*- encoding: utf-8 -*-
 import os
 import codecs
+from subprocess import Popen, PIPE, STDOUT
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
 
+from prymatex import resources
 from prymatex.ui.dockers.browser import Ui_BrowserDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
-from subprocess import Popen, PIPE, STDOUT
 from prymatex.core.plugin.dock import PMXBaseDock
 
 class TmFileReply(QNetworkReply):
@@ -127,6 +128,7 @@ class TextMate(QtCore.QObject):
     
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    MENU_ICON = resources.getIcon("browser")
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F12")
     
     SETTINGS_GROUP = "Browser"

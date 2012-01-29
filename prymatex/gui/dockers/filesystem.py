@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os
-import sys
-import shutil
+import os, sys, shutil
+
 from PyQt4 import QtGui, QtCore
 
+from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
@@ -74,6 +74,7 @@ class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
         
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks):
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
+    MENU_ICON = resources.getIcon("filemanager")
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
     #=======================================================================
     # Settings

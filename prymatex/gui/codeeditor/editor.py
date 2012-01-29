@@ -190,17 +190,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
     
     def updateIndent(self, block):
-        print "update indent"
+        self.logger.debug("Update Block Indent")
     
     def updateFolding(self, block):
-        print "update folding"
+        self.logger.debug("Update Block Folding")
         if block.userData().foldingMark == None:
             self.folding.removeFoldingBlock(block)
         else:
             self.folding.addFoldingBlock(block)
         
     def updateSymbol(self, block):
-        print "update symbol"
+        self.logger.debug("Update Block Symbol")
         if block.userData().symbol == None:
             self.symbolListModel.removeSymbolBlock(block)
         else:

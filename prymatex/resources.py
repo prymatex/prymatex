@@ -35,6 +35,14 @@ INTERNAL = {
     "closeall":":/icons/actions/project-development-close-all.png",
     "copy":":/icons/actions/edit-copy.png",
     
+    # For Dock
+    "terminal":":/icons/apps/utilities-terminal.png", 
+    "browser":":/icons/apps/internet-web-browser.png",
+    "filemanager":":/icons/apps/system-file-manager.png",
+    "project": ":/icons/actions/project-development.png",
+    "bookmark": ":/icons/actions/rating.png",
+    
+    
 }
 
 EXTERNAL = {}

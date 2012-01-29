@@ -3,6 +3,7 @@ import zmq
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 
@@ -10,6 +11,7 @@ PORT = 4613
 
 class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    MENU_ICON = resources.getIcon("terminal")
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F4")
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)

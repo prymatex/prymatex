@@ -6,8 +6,8 @@ import codecs
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
 from prymatex.core.plugin.dock import PMXBaseDock
-
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.utils import createQMenu
@@ -18,6 +18,7 @@ from prymatex.gui.project.base import PMXProject
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
+    MENU_ICON = resources.getIcon("project")
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
 
     def __init__(self, parent):
