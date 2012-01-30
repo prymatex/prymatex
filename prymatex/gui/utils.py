@@ -120,6 +120,23 @@ def extendQMenu(menu, items):
             raise Exception("%s" % item)
     return actions
 
+def combineIcons(icon1, icon2, scale = 1):
+    #TODO: All sizes
+    newIcon = QtGui.QIcon()
+    sizes = icon1.availableSizes()
+    for size in sizes:
+        pixmap1 = icon1.pixmap(size)
+        pixmap2 = icon2.pixmap(size)
+        pixmap2 = pixmap2.scaled(pixmap1.width() * scale, pixmap1.height() * scale)
+        result = QtGui.QPixmap(size)
+        result.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(result)
+        painter.drawPixmap(0, 0, pixmap1)
+        painter.drawPixmap(pixmap1.width() - (pixmap1.width() * scale), pixmap1.height() - (pixmap1.height() * scale), pixmap2)
+        painter.end()
+        newIcon.addPixmap(result)
+    return newIcon
+
 # Key press debugging 
 KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) 
                   if keyname.startswith('Key_')])

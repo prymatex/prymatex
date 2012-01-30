@@ -5,6 +5,7 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
+from prymatex import resources
 from prymatex.core.plugin import PMXBaseWidgetPlugin, Key_Any
 from prymatex.core import exceptions
 
@@ -48,6 +49,12 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         self.project = project
         
     def tabIcon(self):
+        #TODO: poner un poroto si se modifico externamente
+        #if not icon.isNull() and self.isModified():
+        #    saveIcon = resources.getIcon("save")
+        #    icon = utils.combineIcons(icon, saveIcon, 0.6)
+        if self.filePath is not None:
+            return resources.getIcon(self.filePath)
         return QtGui.QIcon()
     
     def tabTitle(self):

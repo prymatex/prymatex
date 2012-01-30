@@ -20,6 +20,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
+from prymatex.gui import utils
 from prymatex.gui.codeeditor.sidebar import PMXSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
@@ -268,8 +269,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def tabIcon(self):
         if self.isModified():
             return resources.getIcon("save")
-        elif self.filePath is not None:
-            return resources.getIcon(self.filePath)
         return PMXBaseEditor.tabIcon(self)
     
     def setCursorPosition(self, position):

@@ -88,20 +88,17 @@ class PMXApplication(QtGui.QApplication):
             f.close()
 
     def setupLogging(self):
-        """
-        @see PMXObject.debug, PMXObject.info, PMXObject.warn
-        """
         import logging
         from datetime import datetime
         
         # File name
         d = datetime.now().strftime('%d-%m-%Y-%H-%M-%S')
         filename = os.path.join(self.settings.PMX_LOG_PATH, 'messages-%s.log' % d)
-        logging.basicConfig(filename=filename, level=logging.DEBUG)
+        logging.basicConfig(filename = filename)
         
         # Console handler
         ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
+        ch.setLevel(logging.CRITICAL)
         
         logging.root.addHandler(ch)
         logging.root.info("Application startup")
