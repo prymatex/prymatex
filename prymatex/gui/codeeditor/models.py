@@ -13,7 +13,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         self.editor = editor
         self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
         self.blocks = []
-
+        
     def purgeBlocks(self):
         remove = filter(lambda block: block.userData() is None, self.blocks)
         if remove:
@@ -90,7 +90,15 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         self.editor = editor
         self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
         self.blocks = []
-
+        self.icons = {
+            "class": resources.getIcon("code-class"),
+            "block": resources.getIcon("code-block"),
+            "context": resources.getIcon("code-context"),
+            "function": resources.getIcon("code-function"),
+            "typedef": resources.getIcon("code-typedef"),
+            "variable": resources.getIcon("code-variable")
+        }
+        
     def _purge_blocks(self, startIndex = None, endIndex = None):
         remove = filter(lambda block: block.userData() is None, self.blocks[startIndex:endIndex])
         if remove:
@@ -138,8 +146,10 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
         elif role == QtCore.Qt.DecorationRole:
-            #print userData.getAllScopes()
-            return resources.getIcon('codefunction')
+            for name, icon in self.icons.iteritems():
+                if userData.isWordInScopes(name):
+                    return icon
+            return self.icons["typedef"]
     
     def findBlockIndex(self, block):
         indexes = map(lambda block: block.blockNumber(), self.blocks)

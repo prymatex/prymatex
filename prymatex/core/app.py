@@ -5,7 +5,7 @@
 #http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
 import os, sys
 
-from PyQt4 import QtGui, QtCoreddsd
+from PyQt4 import QtGui, QtCore
 
 import prymatex
 from prymatex.core import exceptions
@@ -94,7 +94,7 @@ class PMXApplication(QtGui.QApplication):
         # File name
         d = datetime.now().strftime('%d-%m-%Y-%H-%M-%S')
         filename = os.path.join(self.settings.PMX_LOG_PATH, 'messages-%s.log' % d)
-        logging.basicConfig(filename = filename)
+        logging.basicConfig(filename = filename, level=logging.CRITICAL)
         
         # Console handler
         ch = logging.StreamHandler()

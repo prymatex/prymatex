@@ -34,15 +34,23 @@ INTERNAL = {
     "close":":/icons/actions/document-close.png", 
     "closeall":":/icons/actions/project-development-close-all.png",
     "copy":":/icons/actions/edit-copy.png",
-    
+
+    # For Symbols
+    "code-class": ":/icons/actions/code-class.png",
+    "code-block": ":/icons/actions/code-block.png",
+    "code-context": ":/icons/actions/code-context.png",
+    "code-function": ":/icons/actions/code-function.png",
+    "code-typedef": ":/icons/actions/code-typedef.png",
+    "code-variable": ":/icons/actions/code-variable.png",
+
     # For Dock
     "terminal":":/icons/apps/utilities-terminal.png", 
     "browser":":/icons/apps/internet-web-browser.png",
     "filemanager":":/icons/apps/system-file-manager.png",
     "project": ":/icons/actions/project-development.png",
     "bookmark": ":/icons/actions/rating.png",
-    
-    
+    "symbols": ":/icons/actions/code-context.png",
+    "console": ":/icons/dockers/console.png"
 }
 
 EXTERNAL = {}

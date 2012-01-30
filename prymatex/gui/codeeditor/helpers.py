@@ -55,7 +55,7 @@ class SmartTypingPairsHelper(PMXBaseKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         settings = self.application.supportManager.getPreferenceSettings(scope)
         character = event.text()
-        pairs = filter(lambda pair: character in pair, settings.smartTypingPairs)
+        pairs = filter(lambda pair: character == pair[0], settings.smartTypingPairs)
         self.pair = pairs[0] if len(pairs) == 1 else []
         
         #Si no tengo nada termino

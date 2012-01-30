@@ -50,7 +50,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.setFormat(start, end - start, format)
     
     def setupBlockUserData(self, text, userData, data):
-        print "primero setup block"
         state = self.SINGLE_LINE
         userData.setScopes(data[0])
         if data[1] is not None:

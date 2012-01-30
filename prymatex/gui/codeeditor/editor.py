@@ -231,7 +231,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
     
     def on_blockCountChanged(self, newBlockCount):
-        print "block Count changed"
+        self.logger.debug("block Count changed")
         block = self.textCursor().block()
         if self.lastBlockCount > self.document().blockCount():
             self.blocksRemoved.emit(block, self.lastBlockCount - newBlockCount)
@@ -404,7 +404,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         if cursor.hasSelection():
             if (moveType == QtGui.QTextCursor.Left and cursor.selectionStart() == 0) or (moveType == QtGui.QTextCursor.Right and cursor.selectionEnd() == self.document().characterCount()):
                 return
-            cursor.beginEditBlock()
+            self.beginAutomatedAction()
             openRight = cursor.position() == cursor.selectionEnd()
             text = cursor.selectedText()
             cursor.removeSelectedText()
@@ -418,12 +418,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             else:
                 cursor.setPosition(end)
                 cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
-            cursor.endEditBlock()
+            self.endAutomatedAction()
             self.setTextCursor(cursor)
         elif moveType in [QtGui.QTextCursor.Up, QtGui.QTextCursor.Down]:
             if (moveType == QtGui.QTextCursor.Up and cursor.block() == cursor.document().firstBlock()) or (moveType == QtGui.QTextCursor.Down and cursor.block() == cursor.document().lastBlock()):
                 return
-            cursor.beginEditBlock()
+            self.beginAutomatedAction()
             column = cursor.columnNumber()
             cursor.select(QtGui.QTextCursor.LineUnderCursor)
             text1 = cursor.selectedText()
@@ -435,7 +435,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             cursor.insertText(text2)
             cursor2.insertText(text1)
             cursor.setPosition(otherBlock.position() + column)
-            cursor.endEditBlock()
+            self.endAutomatedAction()
             self.setTextCursor(cursor)
     
     # Convert Text
@@ -505,6 +505,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.highlightCurrentWord()
 
     def highlightCurrentWord(self):
+        return
         #TODO: Mejorar esto porque sino cuando se carga un archivo le manda como loco
         def highlightWord():
             if self.currentHighlightWord == self.getWordUnderCursor()[0]:
@@ -1414,7 +1415,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         ''' When a file is renamed in the filesystem/project, the associated
         esditor should change it's title '''
         if self.filePath is not None and oldPath == self.filePath:
-            print("Renaming editor {0}".format(self.filePath))
+            self.logger.debug("Renaming editor {0}".format(self.filePath))
             self.setFilePath(newPath)
     
     @QtCore.pyqtSlot()

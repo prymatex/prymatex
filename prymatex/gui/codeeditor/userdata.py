@@ -56,6 +56,9 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def getScopeRanges(self, start = 0, end = None):
         return self.getAllScopes(start, end)
     
+    def isWordInScopes(self, word):
+        return word in reduce(lambda scope, scope1: scope + " " + scope1[0], self.getAllScopes(), "")
+        
     #================================================
     # Cache Handle
     #================================================
