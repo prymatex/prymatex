@@ -132,7 +132,7 @@ def combineIcons(icon1, icon2, scale = 1):
         result.fill(QtCore.Qt.transparent)
         painter = QtGui.QPainter(result)
         painter.drawPixmap(0, 0, pixmap1)
-        painter.drawPixmap(pixmap1.width() - (pixmap1.width() * scale), pixmap1.height() - (pixmap1.height() * scale), pixmap2)
+        painter.drawPixmap(pixmap1.width() - pixmap2.width(), pixmap1.height() - pixmap2.height(), pixmap2)
         painter.end()
         newIcon.addPixmap(result)
     return newIcon

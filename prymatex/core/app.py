@@ -5,7 +5,7 @@
 #http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
 import os, sys
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCoreddsd
 
 import prymatex
 from prymatex.core import exceptions
