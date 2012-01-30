@@ -341,11 +341,13 @@ class PMXApplication(QtGui.QApplication):
                 self.openDirectory(filePath)
 
     def on_fileChanged(self, filePath):
+        mainWindow, editor = self.getEditorInstance(filePath)
         message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?" % filePath
         #Yes No
         print(message)
         
     def on_fileDeleted(self, filePath):
+        mainWindow, editor = self.getEditorInstance(filePath)
         message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?" % filePath
         print(message)
     

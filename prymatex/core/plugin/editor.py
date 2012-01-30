@@ -22,6 +22,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         PMXBaseWidgetPlugin.__init__(self)
         self.filePath = filePath
         self.project = project
+        self.externalAction = None
         if self.filePath is None:
             PMXBaseEditor.CREATION_COUNTER += 1
             self.creation_counter = PMXBaseEditor.CREATION_COUNTER
@@ -87,7 +88,10 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     
     def setModified(self, modified):
         pass
-    
+
+    def setExternalAction(self, action):
+        self.externalAction = action
+
     def setCursorPosition(self, cursorPosition):
         pass
 

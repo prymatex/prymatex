@@ -30,12 +30,9 @@ class PMXEditorFolding(object):
             self.blocks.insert(index, block)
 
     def removeFoldingBlock(self, block):
-        try:
-            index = self.blocks.index(block)
-            self._purge_blocks(startIndex = index)
-            self.blocks.remove(block)
-        except ValueError:
-            self._purge_blocks()
+        index = self.blocks.index(block)
+        #self._purge_blocks(startIndex = index)
+        self.blocks.remove(block)
 
     def updateFolding(self):
         self.folding = []

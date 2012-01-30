@@ -229,6 +229,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         if editor is not None and editor.isNew() and not editor.isModified():
             self.closeEditor(editor)
     
+    #===========================================================================
+    # MainWindow Events
+    #===========================================================================
     def closeEvent(self, event):
         try:
             for editor in self.splitTabWidget.getAllWidgets():
