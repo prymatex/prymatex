@@ -9,7 +9,7 @@ from prymatex.core.plugin.dock import PMXBaseDock
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F7")
-    MENU_ICON = resources.getIcon("bookmark")
+    MENU_ICON = resources.getIcon("symbols")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, parent):
@@ -28,8 +28,12 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewSymbols.activated.connect(self.on_tableViewSymbols_activated)
         self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
         self.setWidget(self.tableViewSymbols)
-        
-    def setCurrentEditor(self, editor):
+
+    def setMainWindow(self, mainWindow):
+        PMXBaseDock.setMainWindow(self, mainWindow)
+        mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+
+    def on_mainWindow_currentEditorChanged(self, editor):
         self.currentEditor = editor
         if editor is not None:
             self.tableViewSymbols.setModel(editor.symbolListModel)
@@ -65,7 +69,11 @@ class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewBookmarks.doubleClicked.connect(self.on_tableViewBookmarks_doubleClicked)
         self.setWidget(self.tableViewBookmarks)
         
-    def setCurrentEditor(self, editor):
+    def setMainWindow(self, mainWindow):
+        PMXBaseDock.setMainWindow(self, mainWindow)
+        mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+
+    def on_mainWindow_currentEditorChanged(self, editor):
         self.currentEditor = editor
         if editor is not None:
             self.tableViewBookmarks.setModel(editor.bookmarkListModel)

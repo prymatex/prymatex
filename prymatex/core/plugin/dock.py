@@ -19,8 +19,5 @@ class PMXBaseDock(PMXBaseWidgetPlugin):
         if self.MENU_ICON is not None:
             self.toggleViewAction().setIcon(self.MENU_ICON)
 
-    def setCurrentEditor(self, editor):
-        pass
-    
     def setMainWindow(self, mainWindow):
         self.mainWindow = mainWindow

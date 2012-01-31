@@ -121,9 +121,10 @@ def extendQMenu(menu, items):
     return actions
 
 def combineIcons(icon1, icon2, scale = 1):
-    #TODO: All sizes
     newIcon = QtGui.QIcon()
     sizes = icon1.availableSizes()
+    if not sizes:
+        sizes = [ QtCore.QSize(16, 16), QtCore.QSize(22, 22), QtCore.QSize(32, 32), QtCore.QSize(48, 48) ]
     for size in sizes:
         pixmap1 = icon1.pixmap(size)
         pixmap2 = icon2.pixmap(size)

@@ -54,8 +54,9 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         if self.filePath is not None:
             fileIcon = resources.getIcon(self.filePath)
             if self.externalAction != None:
-                saveIcon = resources.getIcon("save")
+                saveIcon = resources.getIcon("important")
                 fileIcon = utils.combineIcons(fileIcon, saveIcon, 0.6)
+                print fileIcon, fileIcon.isNull()
             return fileIcon
         else:
             return QtGui.QIcon()

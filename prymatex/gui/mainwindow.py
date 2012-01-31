@@ -22,8 +22,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #=========================================================
     # Signals
     #=========================================================
-    newFileCreated = QtCore.pyqtSignal(str)
-    
+    currentEditorChanged = QtCore.pyqtSignal(object)    
+
     #=========================================================
     # Settings
     #=========================================================
@@ -174,13 +174,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return self.splitTabWidget.currentWidget()
     
     def on_currentWidgetChanged(self, editor):
-        #Set editor to Statusbar
+        #TODO: que la statusbar se conecte como los dockers
         self.statusBar().setCurrentEditor(editor)
-        
-        #Set editor to Dockers
-        for docker in self.dockers:
-            docker.setCurrentEditor(editor)
-            
         #Update Menu
         self.updateMenuForEditor(editor)        
 
@@ -188,6 +183,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         title = [ editor.tabTitle() ] if editor is not None else []
         title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
         self.setWindowTitle(" - ".join(title))
+        
+        self.currentEditorChanged.emit(editor)
         if editor is not None:
             editor.setFocus()
             self.application.checkExternalAction(self, editor)

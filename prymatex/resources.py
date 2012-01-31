@@ -22,6 +22,7 @@ INTERNAL = {
     "foldingcollapsed": ":/editor/sidebar/folding-collapsed.png",
     "foldingellipsis": ":/editor/sidebar/folding-ellipsis.png",
     "bookmarkflag": ":/editor/sidebar/bookmark-flag.png",
+    
     #Icons
     "save": ":/icons/actions/document-save.png",
     "inserttext": ":/icons/actions/insert-text.png",
@@ -29,6 +30,7 @@ INTERNAL = {
     "projectnew": ":/icons/actions/project-development-new-template.png",
     "projectopen": ":/icons/actions/project-open.png",
     "projectclose": ":/icons/actions/project-development-close.png",
+    "important": ":/icons/emblems/emblem-important.png",
     
     # For menus
     "close":":/icons/actions/document-close.png", 
