@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
 #
-# Created: Sun Jan 22 10:47:54 2012
+# Created: Tue Jan 31 15:33:10 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!

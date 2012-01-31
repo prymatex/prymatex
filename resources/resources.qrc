@@ -1,5 +1,17 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/project-development-close-all.png</file>
+    <file>actions/project-development-close.png</file>
+    <file>actions/project-development-new-template.png</file>
+    <file>actions/project-development.png</file>
+    <file>actions/project-open.png</file>
+    <file>actions/view-list-details.png</file>
+    <file>actions/view-list-tree.png</file>
+    <file>actions/view-list-icons.png</file>
+    <file>actions/view-list-text.png</file>
+    <file>actions/zoom-in.png</file>
+    <file>actions/zoom-out.png</file>
+    <file>actions/configure.png</file>
     <file>emblems/emblem-important.png</file>
     <file>actions/rating.png</file>
     <file>actions/code-block.png</file>
@@ -14,6 +26,7 @@
     <file>dockers/console.png</file>
     <file>apps/system-file-manager.png</file>
     <file>actions/view-fullscreen.png</file>
+    <file>actions/view-restore.png</file>
     <file>bundles/bundle.png</file>
     <file>mimetypes/text-plain.png</file>
     <file>actions/project-development-close.png</file>
@@ -25,16 +38,11 @@
     <file>actions/run-build-install.png</file>
     <file>actions/run-build-prune.png</file>
     <file>actions/run-build.png</file>
-    <file>actions/project-development.png</file>
-    <file>actions/project-open.png</file>
-    <file>actions/project-development-close-all.png</file>
-    <file>actions/project-development-new-template.png</file>
     <file>actions/run-build.png</file>
     <file>actions/insert-text.png</file>
     <file>actions/folder-new.png</file>
     <file>actions/edit-undo.png</file>
     <file>actions/edit-redo.png</file>
-    <file>actions/view-fullscreen.png</file>
     <file>actions/document-open.png</file>
     <file>emblems/emblem-encrypted-locked.png</file>
     <file>actions/document-new.png</file>
@@ -67,7 +75,6 @@
     <file>actions/edit-select-all.png</file>
     <file>actions/edit-clear.png</file>
     <file>actions/go-next-view.png</file>
-    <file>actions/configure.png</file>
     <file>actions/document-close.png</file>
     <file>actions/document-edit.png</file>
     <file>actions/application-exit.png</file>
