@@ -310,7 +310,7 @@ class PMXApplication(QtGui.QApplication):
                 self.mainWindow.tryCloseEmptyEditor()
                 self.mainWindow.addEditor(editor, focus)
             task = self.scheduler.newTask( appendChunksTask(editor, filePath) )
-            task.done.connect( on_editorReady  )
+            task.done.connect( on_editorReady )
 
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")        
@@ -340,33 +340,39 @@ class PMXApplication(QtGui.QApplication):
             else:
                 self.openDirectory(filePath)
 
-    def checkExternalAction(self, editor):
+    def checkExternalAction(self, mainWindow, editor):
         if editor.isExternalChanged():
             message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?"
             result = QtGui.QMessageBox.question(editor, _("File changed"),
                 _(message) % editor.filePath,
-                buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-                defaultButton = QtGui.QMessageBox.Ok)
-            print(result)
+                buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                defaultButton = QtGui.QMessageBox.Yes)
+            if result == QtGui.QMessageBox.Yes:
+                print "replace"
+            elif result == QtGui.QMessageBox.No:
+                print "quda marcado para futuro, sera un guardar como"
         elif editor.isExternalDeleted():
             message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?"
             result = QtGui.QMessageBox.question(editor, _("File deleted"),
                 _(message) % editor.filePath,
-                buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-                defaultButton = QtGui.QMessageBox.Ok)
-            print(result)
-            
+                buttons = QtGui.QMessageBox.Save | QtGui.QMessageBox.Close,
+                defaultButton = QtGui.QMessageBox.Close)
+            if result == QtGui.QMessageBox.Close:
+                mainWindow.closeEditor(editor)
+            elif result == QtGui.QMessageBox.Save:
+                mainWindow.saveEditor(editor)
+                
     def on_fileChanged(self, filePath):
         mainWindow, editor = self.findEditorForFile(filePath)
         editor.setExternalAction(self.fileManager.CHANGED)
         if mainWindow.currentEditor() == editor:
-            self.checkExternalAction(editor)
+            self.checkExternalAction(mainWindow, editor)
         
     def on_fileDeleted(self, filePath):
         mainWindow, editor = self.findEditorForFile(filePath)
         editor.setExternalAction(self.fileManager.DELETED)
         if mainWindow.currentEditor() == editor:
-            self.checkExternalAction(editor)
+            self.checkExternalAction(mainWindow, editor)
     
     #---------------------------------------------------
     # Exceptions, Print exceptions in a window

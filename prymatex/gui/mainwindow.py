@@ -190,7 +190,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.setWindowTitle(" - ".join(title))
         if editor is not None:
             editor.setFocus()
-            self.application.checkExternalAction(editor)
+            self.application.checkExternalAction(self, editor)
                     
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()

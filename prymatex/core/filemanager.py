@@ -170,16 +170,19 @@ class PMXFileManager(QtCore.QObject):
         stream = QtCore.QTextStream(f)
         content = stream.readAll()
         f.close()
-        #Update file history
+        
         self.last_directory = os.path.dirname(filePath)
+        #Update file history
         self.add_file_history(filePath)
-        self.fileWatcher.addPath(filePath)
+        self.watchPath(filePath)
         return content
-    
+
     def saveFile(self, filePath, content):
         """
         Function that actually save the content of a file.
         """
+        if self.isWatched(filePath):
+            self.unwatchPath(filePath)
         try:
             f = QtCore.QFile(filePath)
             if not f.open(QtCore.QIODevice.WriteOnly | QtCore.QIODevice.Truncate):
@@ -189,11 +192,21 @@ class PMXFileManager(QtCore.QObject):
             f.write(encoded_stream)
             f.flush()
             f.close()
+            self.watchPath(filePath)
         except:
             raise
+
+    def isWatched(self, path):
+        return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
+        
+    def watchPath(self, path):
+        self.fileWatcher.addPath(path)
+    
+    def unwatchPath(self, path):
+        self.fileWatcher.removePath(path)
     
     def closeFile(self, filePath):
-        self.fileWatcher.removePath(filePath)
+        self.unwatchPath(filePath)
         
     def getDirectory(self, filePath = None):
         """
