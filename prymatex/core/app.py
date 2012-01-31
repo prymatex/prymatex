@@ -340,16 +340,33 @@ class PMXApplication(QtGui.QApplication):
             else:
                 self.openDirectory(filePath)
 
+    def checkExternalAction(self, editor):
+        if editor.isExternalChanged():
+            message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?"
+            result = QtGui.QMessageBox.question(editor, _("File changed"),
+                _(message) % editor.filePath,
+                buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
+                defaultButton = QtGui.QMessageBox.Ok)
+            print(result)
+        elif editor.isExternalDeleted():
+            message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?"
+            result = QtGui.QMessageBox.question(editor, _("File deleted"),
+                _(message) % editor.filePath,
+                buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
+                defaultButton = QtGui.QMessageBox.Ok)
+            print(result)
+            
     def on_fileChanged(self, filePath):
-        mainWindow, editor = self.getEditorInstance(filePath)
-        message = "The file '%s' has been changed on the file system, Do you want to replace the editor contents with these changes?" % filePath
-        #Yes No
-        print(message)
+        mainWindow, editor = self.findEditorForFile(filePath)
+        editor.setExternalAction(self.fileManager.CHANGED)
+        if mainWindow.currentEditor() == editor:
+            self.checkExternalAction(editor)
         
     def on_fileDeleted(self, filePath):
-        mainWindow, editor = self.getEditorInstance(filePath)
-        message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?" % filePath
-        print(message)
+        mainWindow, editor = self.findEditorForFile(filePath)
+        editor.setExternalAction(self.fileManager.DELETED)
+        if mainWindow.currentEditor() == editor:
+            self.checkExternalAction(editor)
     
     #---------------------------------------------------
     # Exceptions, Print exceptions in a window

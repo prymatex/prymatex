@@ -7,15 +7,6 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.exceptions import APIUsageError, PrymatexIOException, PrymatexFileExistsException
 from functools import partial
 
-class PMXFSConstants(object):
-    ''' Some constants '''
-    CREATED = 1<<0
-    DELETED = 1<<1
-    RENAMED = 1<<2
-    MOVED   = 1<<3
-    MODIFY  = 1<<4
-    
-
 class PMXFileManager(QtCore.QObject):
     """
     A File Manager
@@ -41,7 +32,16 @@ class PMXFileManager(QtCore.QObject):
 
     fileHistory = pmxConfigPorperty(default = [])
     fileHistoryLength = pmxConfigPorperty(default = 10)
-    
+
+    #=========================================================
+    # Constants
+    #=========================================================
+    CREATED = 1<<0
+    DELETED = 1<<1
+    RENAMED = 1<<2
+    MOVED   = 1<<3
+    CHANGED  = 1<<4    
+
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         
@@ -53,16 +53,16 @@ class PMXFileManager(QtCore.QObject):
 
     def connectGenericSignal(self):
         UNARY_SINGAL_CONSTANT_MAP = (
-            (self.fileCreated, PMXFSConstants.CREATED ),
-            (self.fileDeleted, PMXFSConstants.DELETED ),
-            (self.fileChanged, PMXFSConstants.MODIFY ),
-            (self.directoryCreated, PMXFSConstants.CREATED ),
-            (self.directoryDeleted, PMXFSConstants.DELETED ),
-            (self.directoryChanged, PMXFSConstants.MODIFY ),
+            (self.fileCreated, PMXFileManager.CREATED ),
+            (self.fileDeleted, PMXFileManager.DELETED ),
+            (self.fileChanged, PMXFileManager.CHANGED ),
+            (self.directoryCreated, PMXFileManager.CREATED ),
+            (self.directoryDeleted, PMXFileManager.DELETED ),
+            (self.directoryChanged, PMXFileManager.CHANGED ),
         )
         BINARY_SINGAL_CONSTANT_MAP = (
-            (self.fileRenamed, PMXFSConstants.RENAMED ),
-            (self.directoryRenamed, PMXFSConstants.RENAMED ),                       
+            (self.fileRenamed, PMXFileManager.RENAMED ),
+            (self.directoryRenamed, PMXFileManager.RENAMED ),                       
         )
         for signal, associatedConstant in UNARY_SINGAL_CONSTANT_MAP:
             signal.connect(lambda path: self.filesytemChange.emit(associatedConstant, path))
@@ -74,7 +74,6 @@ class PMXFileManager(QtCore.QObject):
             self.fileDeleted.emit(filePath)
         else:
             self.fileChanged.emit(filePath)
-    
     
     def on_directoryChanged(self, directoryPath):
         if not os.path.exists(directoryPath):

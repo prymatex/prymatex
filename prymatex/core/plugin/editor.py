@@ -6,6 +6,7 @@ import os
 from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
+from prymatex.gui import utils
 from prymatex.core.plugin import PMXBaseWidgetPlugin, Key_Any
 from prymatex.core import exceptions
 
@@ -50,13 +51,14 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         self.project = project
         
     def tabIcon(self):
-        #TODO: poner un poroto si se modifico externamente
-        #if not icon.isNull() and self.isModified():
-        #    saveIcon = resources.getIcon("save")
-        #    icon = utils.combineIcons(icon, saveIcon, 0.6)
         if self.filePath is not None:
-            return resources.getIcon(self.filePath)
-        return QtGui.QIcon()
+            fileIcon = resources.getIcon(self.filePath)
+            if self.externalAction != None:
+                saveIcon = resources.getIcon("save")
+                fileIcon = utils.combineIcons(fileIcon, saveIcon, 0.6)
+            return fileIcon
+        else:
+            return QtGui.QIcon()
     
     def tabTitle(self):
         if self.filePath is not None:
@@ -91,6 +93,13 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
 
     def setExternalAction(self, action):
         self.externalAction = action
+        self.emit(QtCore.SIGNAL("tabStatusChanged()"))
+
+    def isExternalChanged(self):
+        return self.externalAction == self.application.fileManager.CHANGED
+
+    def isExternalDeleted(self):
+        return self.externalAction == self.application.fileManager.DELETED    
 
     def setCursorPosition(self, cursorPosition):
         pass

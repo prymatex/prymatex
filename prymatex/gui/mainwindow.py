@@ -174,7 +174,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return self.splitTabWidget.currentWidget()
     
     def on_currentWidgetChanged(self, editor):
-        #Set editor to statusbar
+        #Set editor to Statusbar
         self.statusBar().setCurrentEditor(editor)
         
         #Set editor to Dockers
@@ -190,7 +190,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.setWindowTitle(" - ".join(title))
         if editor is not None:
             editor.setFocus()
-        
+            self.application.checkExternalAction(editor)
+                    
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()
         if editor.isNew() or saveAs:
