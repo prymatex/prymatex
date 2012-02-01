@@ -105,6 +105,25 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         }
         self.directoryMenu, self.directoryMenuActions = createQMenu(directoryMenuSettings, self)
         
+        #Setup Context Menu
+        optionsMenu = { 
+            "title": "Project Options",
+            "items": [
+                {   "title": "Order",
+                    "items": [
+                        (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
+                        "-", self.actionOrderDescending, self.actionOrderFoldersFirst
+                    ]
+                }
+            ]
+        }
+
+        self.actionOrderFoldersFirst.setChecked(True)
+        self.actionOrderByName.trigger()
+        
+        self.projectOptionsMenu, _ = createQMenu(optionsMenu, self)
+        self.pushButtonOptions.setMenu(self.projectOptionsMenu)
+        
         #Connect context menu
         self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewProjects.customContextMenuRequested.connect(self.showProjectTreeViewContextMenu)
@@ -174,3 +193,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot()
     def on_actionOpenDefaultEditor_triggered(self):
         print(self.currentPath())
+        
+    @QtCore.pyqtSlot()
+    def on_pushButtonCollapse_pressed(self):
+        self.treeViewProjects.collapseAll()

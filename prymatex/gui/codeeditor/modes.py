@@ -71,7 +71,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             charactersBefore = cursor.document().characterCount()
             
             #Insert Text
-            self.editor.beginAutomatedAction()
+            self.editor.textCursor().beginEditBlock()
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             positionAfter = cursor.position()
             charactersAfter = cursor.document().characterCount()
@@ -92,7 +92,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Insert snippet
             self.editor.snippetProcessor.render()
             self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
-            self.editor.endAutomatedAction()
+            self.editor.textCursor().endEditBlock()
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             

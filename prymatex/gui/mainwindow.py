@@ -202,8 +202,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             filePath = editor.filePath
 
         if filePath is not None:
-            self.application.fileManager.saveFile(filePath, editor.toPlainText())
-            editor.saved(filePath)
+            editor.save(filePath)
     
     def closeEditor(self, editor = None):
         editor = editor or self.currentEditor()
@@ -219,7 +218,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                 break
             elif response == QtGui.QMessageBox.Cancel:
                 raise exceptions.UserCancelException()
-        editor.closed()
+        editor.close()
         self.removeEditor(editor)
     
     def tryCloseEmptyEditor(self, editor = None):

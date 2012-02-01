@@ -156,7 +156,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.treeViewFileSystem.setUniformRowHeights(False)
         
         #Setup Context Menu
-        menuSettings = { 
+        contextMenu = { 
             "title": "File System",
             "items": [
                 {   "title": "New",
@@ -175,6 +175,14 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                 self.actionConvert_Into_Project,
                 "-",
                 self.actionDelete,
+            ]
+        }
+        self.fileSystemMenu, self.fileSystemMenuActions = createQMenu(contextMenu, self)
+
+        #Setup Context Menu
+        optionsMenu = { 
+            "title": "File System Options",
+            "items": [
                 {   "title": "Order",
                     "items": [
                         (self.actionOrderByName, self.actionOrderBySize, self.actionOrderByDate, self.actionOrderByType),
@@ -183,10 +191,12 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                 }
             ]
         }
-        self.fileSystemMenu, self.fileSystemMenuActions = createQMenu(menuSettings, self)
 
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
+        
+        self.fileSystemOptionsMenu, _ = createQMenu(optionsMenu, self)
+        self.pushButtonOptions.setMenu(self.fileSystemOptionsMenu)
         
         #Connect context menu
         self.treeViewFileSystem.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -348,11 +358,14 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     def on_actionOrderFoldersFirst_triggered(self):
         self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
         
-        
     @QtCore.pyqtSlot()
     def on_actionConvert_Into_Project_triggered(self):
         _base, name = os.path.split(self.currentPath())
         PMXNewProjectDialog.getNewProject(self, self.currentPath(), name)
+
+    @QtCore.pyqtSlot()
+    def on_pushButtonCollapse_pressed(self):
+        self.treeViewFileSystem.collapseAll()
         
     def on_currentEditorChanged(self, editor):
         available = editor is not None

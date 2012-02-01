@@ -34,13 +34,15 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     def open(self, filePath):
         return self.application.fileManager.openFile(filePath)
 
-    def saved(self, filePath):
+    def save(self, filePath):
+        self.application.fileManager.saveFile(filePath, self.toPlainText())
         if filePath != self.filePath:
             self.setFilePath(filePath)
         self.setModified(False)
+        self.externalAction = None
         self.showMessage("<i>%s</i> saved" % self.filePath)
     
-    def closed(self):
+    def close(self):
         if self.filePath is None and self.creation_counter == PMXBaseEditor.CREATION_COUNTER:
             PMXBaseEditor.CREATION_COUNTER -= 1
         elif self.filePath is not None:

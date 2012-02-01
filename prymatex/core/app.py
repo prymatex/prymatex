@@ -284,9 +284,9 @@ class PMXApplication(QtGui.QApplication):
         return self.pluginManager.createEditor(filePath, parent)
 
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
-        '''
-        Opens a file in current window
-        '''
+        """
+        Opens a editor in current window
+        """
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:
@@ -303,7 +303,7 @@ class PMXApplication(QtGui.QApplication):
                 currentIndex = 0
                 contentLength = len(content)
                 while currentIndex <= contentLength:
-                    editor.appendPlainText(content[currentIndex:currentIndex + chunksize])
+                    editor.insertPlainText(content[currentIndex:currentIndex + chunksize])
                     currentIndex += chunksize
                     yield
                 editor.setReadOnly(False)
