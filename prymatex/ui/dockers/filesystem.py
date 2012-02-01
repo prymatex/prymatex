@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Tue Jan 31 19:49:19 2012
+# Created: Wed Feb  1 15:49:06 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -68,17 +68,17 @@ class Ui_FileSystemDock(object):
         self.pushButtonSync.setFlat(True)
         self.pushButtonSync.setObjectName(_fromUtf8("pushButtonSync"))
         self.buttonsLayout.addWidget(self.pushButtonSync)
-        self.pushButtonCollapse = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonCollapse.setMaximumSize(QtCore.QSize(24, 24))
-        self.pushButtonCollapse.setText(_fromUtf8(""))
+        self.pushButtonCollapseAll = QtGui.QPushButton(self.dockWidgetContents)
+        self.pushButtonCollapseAll.setMaximumSize(QtCore.QSize(24, 24))
+        self.pushButtonCollapseAll.setText(_fromUtf8(""))
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-list-tree.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButtonCollapse.setIcon(icon4)
-        self.pushButtonCollapse.setFlat(True)
-        self.pushButtonCollapse.setObjectName(_fromUtf8("pushButtonCollapse"))
-        self.buttonsLayout.addWidget(self.pushButtonCollapse)
+        self.pushButtonCollapseAll.setIcon(icon4)
+        self.pushButtonCollapseAll.setFlat(True)
+        self.pushButtonCollapseAll.setObjectName(_fromUtf8("pushButtonCollapseAll"))
+        self.buttonsLayout.addWidget(self.pushButtonCollapseAll)
         self.pushButtonOptions = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonOptions.setMaximumSize(QtCore.QSize(24, 24))
+        self.pushButtonOptions.setMaximumSize(QtCore.QSize(40, 24))
         self.pushButtonOptions.setText(_fromUtf8(""))
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -159,9 +159,9 @@ class Ui_FileSystemDock(object):
         icon10.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-rename.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRename.setIcon(icon10)
         self.actionRename.setObjectName(_fromUtf8("actionRename"))
-        self.actionConvert_Into_Project = QtGui.QAction(FileSystemDock)
-        self.actionConvert_Into_Project.setIcon(icon6)
-        self.actionConvert_Into_Project.setObjectName(_fromUtf8("actionConvert_Into_Project"))
+        self.actionConvertIntoProject = QtGui.QAction(FileSystemDock)
+        self.actionConvertIntoProject.setIcon(icon6)
+        self.actionConvertIntoProject.setObjectName(_fromUtf8("actionConvertIntoProject"))
 
         self.retranslateUi(FileSystemDock)
         QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
@@ -190,7 +190,7 @@ class Ui_FileSystemDock(object):
         self.actionRename.setText(_('Rename'))
         self.actionRename.setToolTip(_('Rename'))
         self.actionRename.setShortcut(_('F2'))
-        self.actionConvert_Into_Project.setText(_('Convert Into Project'))
-        self.actionConvert_Into_Project.setToolTip(_('Convert current directory into project'))
+        self.actionConvertIntoProject.setText(_('Convert Into Project'))
+        self.actionConvertIntoProject.setToolTip(_('Convert current directory into project'))
 
 from prymatex import resources_rc

@@ -89,7 +89,7 @@
        <widget class="QPushButton" name="pushButtonOptions">
         <property name="maximumSize">
          <size>
-          <width>24</width>
+          <width>40</width>
           <height>24</height>
          </size>
         </property>
@@ -231,6 +231,54 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionOrderByName">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Name</string>
+   </property>
+  </action>
+  <action name="actionOrderBySize">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Size</string>
+   </property>
+  </action>
+  <action name="actionOrderByDate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Date</string>
+   </property>
+  </action>
+  <action name="actionOrderByType">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Type</string>
+   </property>
+  </action>
+  <action name="actionOrderDescending">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Descending</string>
+   </property>
+  </action>
+  <action name="actionOrderFoldersFirst">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Folders First</string>
    </property>
   </action>
  </widget>

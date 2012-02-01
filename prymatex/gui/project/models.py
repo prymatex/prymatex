@@ -82,6 +82,9 @@ class PMXProjectTreeModel(TreeModel):
     def filePath(self, index):
         return index.internalPointer().path
     
+    def isDir(self, index):
+        return index.internalPointer().isdir
+    
     def appendProject(self, project):
         self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
         self.rootNode.appendChild(project)

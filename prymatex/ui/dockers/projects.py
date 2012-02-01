@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/projects.ui'
 #
-# Created: Tue Jan 31 19:49:19 2012
+# Created: Wed Feb  1 15:49:06 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,17 +39,17 @@ class Ui_ProjectsDock(object):
         self.pushButtonSync.setFlat(True)
         self.pushButtonSync.setObjectName(_fromUtf8("pushButtonSync"))
         self.buttonsLayout.addWidget(self.pushButtonSync)
-        self.pushButtonCollapse = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonCollapse.setMaximumSize(QtCore.QSize(24, 24))
-        self.pushButtonCollapse.setText(_fromUtf8(""))
+        self.pushButtonCollapseAll = QtGui.QPushButton(self.dockWidgetContents)
+        self.pushButtonCollapseAll.setMaximumSize(QtCore.QSize(24, 24))
+        self.pushButtonCollapseAll.setText(_fromUtf8(""))
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/view-list-tree.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButtonCollapse.setIcon(icon1)
-        self.pushButtonCollapse.setFlat(True)
-        self.pushButtonCollapse.setObjectName(_fromUtf8("pushButtonCollapse"))
-        self.buttonsLayout.addWidget(self.pushButtonCollapse)
+        self.pushButtonCollapseAll.setIcon(icon1)
+        self.pushButtonCollapseAll.setFlat(True)
+        self.pushButtonCollapseAll.setObjectName(_fromUtf8("pushButtonCollapseAll"))
+        self.buttonsLayout.addWidget(self.pushButtonCollapseAll)
         self.pushButtonOptions = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonOptions.setMaximumSize(QtCore.QSize(24, 24))
+        self.pushButtonOptions.setMaximumSize(QtCore.QSize(40, 24))
         self.pushButtonOptions.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -118,6 +118,24 @@ class Ui_ProjectsDock(object):
         icon11.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-rename.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRename.setIcon(icon11)
         self.actionRename.setObjectName(_fromUtf8("actionRename"))
+        self.actionOrderByName = QtGui.QAction(ProjectsDock)
+        self.actionOrderByName.setCheckable(True)
+        self.actionOrderByName.setObjectName(_fromUtf8("actionOrderByName"))
+        self.actionOrderBySize = QtGui.QAction(ProjectsDock)
+        self.actionOrderBySize.setCheckable(True)
+        self.actionOrderBySize.setObjectName(_fromUtf8("actionOrderBySize"))
+        self.actionOrderByDate = QtGui.QAction(ProjectsDock)
+        self.actionOrderByDate.setCheckable(True)
+        self.actionOrderByDate.setObjectName(_fromUtf8("actionOrderByDate"))
+        self.actionOrderByType = QtGui.QAction(ProjectsDock)
+        self.actionOrderByType.setCheckable(True)
+        self.actionOrderByType.setObjectName(_fromUtf8("actionOrderByType"))
+        self.actionOrderDescending = QtGui.QAction(ProjectsDock)
+        self.actionOrderDescending.setCheckable(True)
+        self.actionOrderDescending.setObjectName(_fromUtf8("actionOrderDescending"))
+        self.actionOrderFoldersFirst = QtGui.QAction(ProjectsDock)
+        self.actionOrderFoldersFirst.setCheckable(True)
+        self.actionOrderFoldersFirst.setObjectName(_fromUtf8("actionOrderFoldersFirst"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
@@ -141,5 +159,11 @@ class Ui_ProjectsDock(object):
         self.actionRename.setText(_('Rename'))
         self.actionRename.setToolTip(_('Rename'))
         self.actionRename.setShortcut(_('F2'))
+        self.actionOrderByName.setText(_('By Name'))
+        self.actionOrderBySize.setText(_('By Size'))
+        self.actionOrderByDate.setText(_('By Date'))
+        self.actionOrderByType.setText(_('By Type'))
+        self.actionOrderDescending.setText(_('Descending'))
+        self.actionOrderFoldersFirst.setText(_('Folders First'))
 
 from prymatex import resources_rc

@@ -85,9 +85,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.fileMenu, self.fileMenuActions = createQMenu(fileMenuSettings, self)
         
         directoryMenuSettings = { 
-            "title": _("File"),
+            "title": "File",
             "items": [
-                {   "title": _("New"),
+                {   "title": "New",
                     "items": [
                         self.actionNewProject, self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
                     ]
@@ -195,5 +195,29 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         print(self.currentPath())
         
     @QtCore.pyqtSlot()
-    def on_pushButtonCollapse_pressed(self):
+    def on_pushButtonCollapseAll_pressed(self):
         self.treeViewProjects.collapseAll()
+        
+    @QtCore.pyqtSlot()
+    def on_actionOrderByName_triggered(self):
+        self.projectTreeProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderBySize_triggered(self):
+        self.projectTreeProxyModel.sortBy("size", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderByDate_triggered(self):
+        self.projectTreeProxyModel.sortBy("date", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderByType_triggered(self):
+        self.projectTreeProxyModel.sortBy("type", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderDescending_triggered(self):
+        self.projectTreeProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+    
+    @QtCore.pyqtSlot()
+    def on_actionOrderFoldersFirst_triggered(self):
+        self.projectTreeProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())

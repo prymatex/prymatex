@@ -172,7 +172,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                     ]
                 },
                 self.actionRename,
-                self.actionConvert_Into_Project,
+                self.actionConvertIntoProject,
                 "-",
                 self.actionDelete,
             ]
@@ -359,12 +359,12 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.fileSystemProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
         
     @QtCore.pyqtSlot()
-    def on_actionConvert_Into_Project_triggered(self):
+    def on_actionConvertIntoProject_triggered(self):
         _base, name = os.path.split(self.currentPath())
         PMXNewProjectDialog.getNewProject(self, self.currentPath(), name)
 
     @QtCore.pyqtSlot()
-    def on_pushButtonCollapse_pressed(self):
+    def on_pushButtonCollapseAll_pressed(self):
         self.treeViewFileSystem.collapseAll()
         
     def on_currentEditorChanged(self, editor):
