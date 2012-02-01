@@ -10,18 +10,15 @@ class PMXEditorFolding(object):
         self.blocks = []
         self.folding = []
 
-    def _purge_blocks(self, startIndex = None, endIndex = None):
-        remove = filter(lambda block: block.userData() is None, self.blocks[startIndex:endIndex])
-        if remove:
-            startIndex = self.blocks.index(remove[0])
-            endIndex = self.blocks.index(remove[-1])
-            self.blocks = self.blocks[:startIndex] + self.blocks[endIndex + 1:]
+    def _purge_blocks(self):
+        def validFoldingBlock(block):
+            return block.userData() is not None and block.userData().foldingMark != None
+        self.blocks = filter(validFoldingBlock, self.blocks)
 
     def on_editor_textChanged(self):
         #TODO: solo hacer las acciones si tengo nuevo estado de folding motivado por un remove o un add
-        if not self.editor.isAutomatedAction():
-            self._purge_blocks()
-            self.updateFolding()
+        self._purge_blocks()
+        self.updateFolding()
 
     def addFoldingBlock(self, block):
         if block not in self.blocks:
@@ -30,9 +27,9 @@ class PMXEditorFolding(object):
             self.blocks.insert(index, block)
 
     def removeFoldingBlock(self, block):
-        index = self.blocks.index(block)
-        #self._purge_blocks(startIndex = index)
-        self.blocks.remove(block)
+        if block in self.blocks:
+            index = self.blocks.index(block)
+            self.blocks.remove(block)
 
     def updateFolding(self):
         self.folding = []

@@ -11,23 +11,19 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
+        self.editor.textChanged.connect(self.on_editor_textChanged)
         self.blocks = []
         
-    def purgeBlocks(self):
-        remove = filter(lambda block: block.userData() is None, self.blocks)
-        if remove:
-            sIndex = self.blocks.index(remove[0])
-            eIndex = self.blocks.index(remove[-1])
-            self.beginRemoveRows(QtCore.QModelIndex(), sIndex, eIndex)
-            self.blocks = self.blocks[:sIndex] + self.blocks[eIndex + 1:]
-            self.endRemoveRows()
+    def _purge_blocks(self):
+        self.blocks = filter(lambda block: block.userData() is not None, self.blocks)
+        self.layoutChanged.emit()
 
     def __contains__(self, block):
         return block in self.blocks
         
-    def on_textBlocksRemoved(self, block, length):
-        self.purgeBlocks()
+    def on_editor_textChanged(self):
+        #TODO: solo hacer las acciones si tengo nuevo estado de folding motivado por un remove o un add
+        self._purge_blocks()
 
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
@@ -72,7 +68,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         if index == len(self.blocks):
             index = 0
         return self.blocks[index]
-    
+
     def previousBookmark(self, block):
         if not len(self.blocks): return None
         indexes = map(lambda block: block.blockNumber(), self.blocks)
@@ -88,7 +84,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        self.editor.blocksRemoved.connect(self.on_textBlocksRemoved)
+        self.editor.textChanged.connect(self.on_editor_textChanged)
         self.blocks = []
         self.icons = {
             "class": resources.getIcon("code-class"),
@@ -98,36 +94,27 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             "typedef": resources.getIcon("code-typedef"),
             "variable": resources.getIcon("code-variable")
         }
-        
+
+    def on_editor_textChanged(self):
+        #TODO: solo hacer las acciones si tengo nuevo estado de folding motivado por un remove o un add
+        self._purge_blocks()
+
     def _purge_blocks(self, startIndex = None, endIndex = None):
-        remove = filter(lambda block: block.userData() is None, self.blocks[startIndex:endIndex])
-        if remove:
-            startIndex = self.blocks.index(remove[0])
-            endIndex = self.blocks.index(remove[-1])
-            self.beginRemoveRows(QtCore.QModelIndex(), startIndex, endIndex)
-            self.blocks = self.blocks[:startIndex] + self.blocks[endIndex + 1:]
-            self.endRemoveRows()
+        def validSymbolBlock(block):
+            return block.userData() is not None and block.userData().symbol != None
+        self.blocks = filter(validSymbolBlock, self.blocks)
+        self.layoutChanged.emit()
 
     def addSymbolBlock(self, block):
-        if block in self.blocks:
-            index = self.blocks.index(block)
-            self.dataChanged.emit(self.index(index), self.index(index))
-        else:
+        if block not in self.blocks:
             indexes = map(lambda block: block.blockNumber(), self.blocks)
             index = bisect(indexes, block.blockNumber())
-            self.beginInsertRows(QtCore.QModelIndex(), index, index)
             self.blocks.insert(index, block)
-            self.endInsertRows()
-    
+
     def removeSymbolBlock(self, block):
-        index = self.blocks.index(block)
-        self._purge_blocks(startIndex = index)
-        self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-        self.blocks.remove(block)
-        self.endRemoveRows()
-        
-    def on_textBlocksRemoved(self, block, length):
-        self._purge_blocks()
+        if block in self.blocks:
+            index = self.blocks.index(block)
+            self.blocks.remove(block)
 
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):

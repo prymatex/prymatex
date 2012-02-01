@@ -401,10 +401,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def moveText(self, moveType):
         #Solo si tiene seleccion puede mover derecha y izquierda
         cursor = self.textCursor()
+        cursor.beginEditBlock()
         if cursor.hasSelection():
             if (moveType == QtGui.QTextCursor.Left and cursor.selectionStart() == 0) or (moveType == QtGui.QTextCursor.Right and cursor.selectionEnd() == self.document().characterCount()):
                 return
-            self.beginAutomatedAction()
             openRight = cursor.position() == cursor.selectionEnd()
             text = cursor.selectedText()
             cursor.removeSelectedText()
@@ -418,12 +418,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             else:
                 cursor.setPosition(end)
                 cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
-            self.endAutomatedAction()
-            self.setTextCursor(cursor)
         elif moveType in [QtGui.QTextCursor.Up, QtGui.QTextCursor.Down]:
             if (moveType == QtGui.QTextCursor.Up and cursor.block() == cursor.document().firstBlock()) or (moveType == QtGui.QTextCursor.Down and cursor.block() == cursor.document().lastBlock()):
                 return
-            self.beginAutomatedAction()
             column = cursor.columnNumber()
             cursor.select(QtGui.QTextCursor.LineUnderCursor)
             text1 = cursor.selectedText()
@@ -435,8 +432,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             cursor.insertText(text2)
             cursor2.insertText(text1)
             cursor.setPosition(otherBlock.position() + column)
-            self.endAutomatedAction()
-            self.setTextCursor(cursor)
+        cursor.endEditBlock()
+        self.setTextCursor(cursor)
     
     # Convert Text
     def convertText(self, convertType):
@@ -730,44 +727,25 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     # Bundle Items
     #==========================================================================
-    def beginAutomatedAction(self):
-        """Begin an edition motivated from internal reasons, snippets, commands, macros, others"""
-        #Esto es delicado
-        self.blockSignals(True) #Bloqueo señales
-        self.textCursor().beginEditBlock() #Inicio editBlock
-    
-    def endAutomatedAction(self):
-        """End an edition motivated from internal reasons, snippets, commands, macros, others"""
-        self.textCursor().endEditBlock() #Termino editBlock
-        self.blockSignals(False) #Desblockeo señales
-        self.cursorPositionChanged.emit()
-        self.textChanged.emit()
-        if self.lastBlockCount != self.document().blockCount():
-            self.blockCountChanged.emit(self.document().blockCount())
-        self.sidebar.update()
-        
-    def isAutomatedAction(self):
-        return self.signalsBlocked()
-    
     def insertBundleItem(self, item, **processorSettings):
         """
         Inserta un bundle item
         """
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
-            self.beginAutomatedAction()
+            self.textCursor().beginEditBlock()
             item.execute(self.snippetProcessor)
-            self.endAutomatedAction()
+            self.textCursor().endEditBlock()
         elif item.TYPE == PMXCommand.TYPE or item.TYPE == PMXDragCommand.TYPE:
             self.commandProcessor.configure(processorSettings)
-            self.beginAutomatedAction()
+            self.textCursor().beginEditBlock()
             item.execute(self.commandProcessor)
-            self.endAutomatedAction()
+            self.textCursor().endEditBlock()
         elif item.TYPE == PMXMacro.TYPE:
             self.macroProcessor.configure(processorSettings)
-            self.beginAutomatedAction()
+            self.textCursor().beginEditBlock()
             item.execute(self.macroProcessor)
-            self.endAutomatedAction()
+            self.textCursor().endEditBlock()
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
 

@@ -22,11 +22,12 @@ class PMXApplication(QtGui.QApplication):
     The application loads the PMX Support.
     """
     
-    def __init__(self, profile, args):
+    def __init__(self, profile):
         """
         Inicialización de la aplicación.
         """
-        QtGui.QApplication.__init__(self, args)
+        #TODO: Pasar los argumentos a la QApplication
+        QtGui.QApplication.__init__(self, [])
         #QtGui.QApplication.setStyle(PrymatexStyle())
         
         # Some init's
@@ -36,7 +37,6 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationName(prymatex.__author__)
 
         self.buildSettings(profile)
-        self.setupLogging()
 
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
@@ -87,23 +87,25 @@ class PMXApplication(QtGui.QApplication):
             f.write('%s' % self.applicationPid())
             f.close()
 
-    def setupLogging(self):
+    def setupLogging(self, verbose):
         import logging
         from datetime import datetime
+        
+        level = [ logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG ][verbose % 5]
         
         # File name
         d = datetime.now().strftime('%d-%m-%Y-%H-%M-%S')
         filename = os.path.join(self.settings.PMX_LOG_PATH, 'messages-%s.log' % d)
-        logging.basicConfig(filename = filename, level=logging.CRITICAL)
+        logging.basicConfig(filename = filename, level=level)
         
         # Console handler
         ch = logging.StreamHandler()
-        ch.setLevel(logging.CRITICAL)
-        
+        ch.setLevel(level)
+
         logging.root.addHandler(ch)
         logging.root.info("Application startup")
         logging.root.debug("Application startup debug")
-        
+
         self.logger = logging.root
 
     #========================================================
@@ -193,9 +195,7 @@ class PMXApplication(QtGui.QApplication):
         defaultDirectory = self.settings.value('PMX_PLUGINS_PATH')
         self.pluginManager.addPluginDirectory(defaultDirectory)
         self.pluginManager.loadPlugins()
-        #self.pluginManager.register("editor.default", PMXCodeEditor)
-        #self.pluginManager.register("editor.graphicviz", PMXGraphicvizEditor)
-        
+
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)
 
