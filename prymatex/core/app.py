@@ -280,8 +280,8 @@ class PMXApplication(QtGui.QApplication):
         #Para cada mainwindow buscar el editor
         return self.mainWindow, self.mainWindow.findEditorForFile(filePath)
             
-    def getEditorInstance(self, filePath = None, project = None, parent = None):
-        return self.pluginManager.createEditor(filePath, project, parent)
+    def getEditorInstance(self, filePath = None, parent = None):
+        return self.pluginManager.createEditor(filePath, parent)
 
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         '''
@@ -293,23 +293,28 @@ class PMXApplication(QtGui.QApplication):
                 mainWindow.setCurrentEditor(editor)
                 editor.setCursorPosition(cursorPosition)
         else:
+            editor = self.getEditorInstance(filePath, self.mainWindow)
             project = self.projectManager.findProjectForPath(filePath)
-            editor = self.getEditorInstance(filePath, project, self.mainWindow)
-            def appendChunksTask(editor, filePath):
-                content = self.fileManager.openFile(filePath)
+            if project != None:
+                editor.setProject(project)
+            content = editor.open(filePath)
+            def appendChunksTask(editor, content, chunksize = 1024):
                 editor.setReadOnly(True)
-                for line in content.splitlines():
-                    editor.appendPlainText(line)
+                currentIndex = 0
+                contentLength = len(content)
+                while currentIndex <= contentLength:
+                    editor.appendPlainText(content[currentIndex:currentIndex + chunksize])
+                    currentIndex += chunksize
                     yield
                 editor.setReadOnly(False)
-                yield coroutines.Return(editor, filePath)
+                yield coroutines.Return(editor)
             def on_editorReady(result):
-                editor, filePath = result.value
+                editor = result.value
                 editor.setModified(False)
                 editor.setCursorPosition(cursorPosition)
                 self.mainWindow.tryCloseEmptyEditor()
                 self.mainWindow.addEditor(editor, focus)
-            task = self.scheduler.newTask( appendChunksTask(editor, filePath) )
+            task = self.scheduler.newTask( appendChunksTask(editor, content) )
             task.done.connect( on_editorReady )
 
     def openDirectory(self, directoryPath):

@@ -66,9 +66,9 @@ class PMXPluginManager(object):
         instances.append(instance)
         return instance
     
-    def createEditor(self, filePath, project, mainWindow):
+    def createEditor(self, filePath, mainWindow):
         editorClass = self.editors[0]
-        editor = self.createWidgetInstance(editorClass, filePath, project, mainWindow)
+        editor = self.createWidgetInstance(editorClass, filePath, mainWindow)
         editor.initialize()
         return editor
     

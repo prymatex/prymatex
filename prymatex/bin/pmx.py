@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 import os
 import sys
-    
+
 # this will be replaced at install time
 INSTALLED_BASE_DIR = "@ INSTALLED_BASE_DIR @"
 

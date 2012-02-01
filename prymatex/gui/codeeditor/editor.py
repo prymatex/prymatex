@@ -138,11 +138,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def tabKeyBehavior(self):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
     
-    def __init__(self, filePath = None, project = None, parent = None):
+    def __init__(self, filePath = None, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
-        PMXBaseEditor.__init__(self, filePath, project)
-        #PMXMessageOverlay.__init__(self)
-        
+        PMXBaseEditor.__init__(self, filePath)
+
         #Sidebar
         self.sidebar = PMXSidebar(self)
 

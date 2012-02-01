@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
 
 import sys
 
@@ -126,5 +127,4 @@ def parse():
     except Exception, reason:
         print "Args couldn't be parsed."
         print reason
-    print opts
     return opts, filenames

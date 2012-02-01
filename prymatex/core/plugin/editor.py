@@ -19,10 +19,10 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
-    def __init__(self, filePath = None, project = None):
+    def __init__(self, filePath = None):
         PMXBaseWidgetPlugin.__init__(self)
         self.filePath = filePath
-        self.project = project
+        self.project = None
         self.externalAction = None
         if self.filePath is None:
             PMXBaseEditor.CREATION_COUNTER += 1
@@ -31,6 +31,9 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     def setMainWindow(self, mainWindow):
         self.mainWindow = mainWindow
     
+    def open(self, filePath):
+        return self.application.fileManager.openFile(filePath)
+
     def saved(self, filePath):
         if filePath != self.filePath:
             self.setFilePath(filePath)
