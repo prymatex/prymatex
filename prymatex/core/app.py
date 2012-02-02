@@ -3,7 +3,9 @@
 
 #Cosas interesantes
 #http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
-import os, sys
+import os
+import sys
+import logging
 
 from PyQt4 import QtGui, QtCore
 
@@ -87,8 +89,14 @@ class PMXApplication(QtGui.QApplication):
             f.write('%s' % self.applicationPid())
             f.close()
 
+    #========================================================
+    # Logging system and loggers
+    #========================================================
+    def getLogger(self, name):
+        """ return logger, for filter by name in future """
+        return logging.getLogger(name)
+        
     def setupLogging(self, verbose):
-        import logging
         from datetime import datetime
         
         level = [ logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG ][verbose % 5]
@@ -152,17 +160,22 @@ class PMXApplication(QtGui.QApplication):
     def setupFileManager(self):
         from prymatex.core.filemanager import PMXFileManager
         
+        #TODO: quiza algo para registrar logger igual que settings        
+        PMXFileManager.logger = self.getLogger('.'.join([PMXFileManager.__module__, PMXFileManager.__name__]))
         self.settings.registerConfigurable(PMXFileManager)
+        
         self.fileManager = PMXFileManager(self)
         self.settings.configure(self.fileManager)
         
-        self.fileManager.fileChanged.connect(self.on_fileChanged)
-        self.fileManager.fileDeleted.connect(self.on_fileDeleted)
+        self.fileManager.fileDeleted.connect(self.on_filesytemChange)
     
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
         
+        #TODO: quiza algo para registrar logger igual que settings        
+        PMXProjectManager.logger = self.getLogger('.'.join([PMXProjectManager.__module__, PMXProjectManager.__name__]))
         self.settings.registerConfigurable(PMXProjectManager)
+        
         self.projectManager = PMXProjectManager(self)
         self.settings.configure(self.projectManager)
         
@@ -367,15 +380,9 @@ class PMXApplication(QtGui.QApplication):
             elif result == QtGui.QMessageBox.Save:
                 mainWindow.saveEditor(editor)
                 
-    def on_fileChanged(self, filePath):
+    def on_filesytemChange(self, filePath, change):
         mainWindow, editor = self.findEditorForFile(filePath)
-        editor.setExternalAction(self.fileManager.CHANGED)
-        if mainWindow.currentEditor() == editor:
-            self.checkExternalAction(mainWindow, editor)
-        
-    def on_fileDeleted(self, filePath):
-        mainWindow, editor = self.findEditorForFile(filePath)
-        editor.setExternalAction(self.fileManager.DELETED)
+        editor.setExternalAction(change)
         if mainWindow.currentEditor() == editor:
             self.checkExternalAction(mainWindow, editor)
     

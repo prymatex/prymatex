@@ -23,7 +23,7 @@ class PMXFileManager(QtCore.QObject):
     directoryChanged = QtCore.pyqtSignal(str)
     directoryRenamed = QtCore.pyqtSignal(str, str)
     # Generic Signal 
-    filesytemChange = QtCore.pyqtSignal(int, str)
+    filesytemChange = QtCore.pyqtSignal(str, int)
     
     #=========================================================
     # Settings
@@ -40,7 +40,7 @@ class PMXFileManager(QtCore.QObject):
     DELETED = 1<<1
     RENAMED = 1<<2
     MOVED   = 1<<3
-    CHANGED  = 1<<4    
+    CHANGED = 1<<4    
 
     def __init__(self, application):
         QtCore.QObject.__init__(self)
@@ -65,9 +65,9 @@ class PMXFileManager(QtCore.QObject):
             (self.directoryRenamed, PMXFileManager.RENAMED ),                       
         )
         for signal, associatedConstant in UNARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda path: self.filesytemChange.emit(associatedConstant, path))
+            signal.connect(lambda path: self.filesytemChange.emit(path, associatedConstant))
         for signal, associatedConstant in BINARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda _x, path: self.filesytemChange.emit(associatedConstant, path))
+            signal.connect(lambda _x, path: self.filesytemChange.emit(path, associatedConstant))
             
     def on_fileChanged(self, filePath):
         if not os.path.exists(filePath):
@@ -200,9 +200,11 @@ class PMXFileManager(QtCore.QObject):
         return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
         
     def watchPath(self, path):
+        self.logger.debug("Watch path %s" % path)
         self.fileWatcher.addPath(path)
     
     def unwatchPath(self, path):
+        self.logger.debug("Unwatch path %s" % path)
         self.fileWatcher.removePath(path)
     
     def closeFile(self, filePath):
