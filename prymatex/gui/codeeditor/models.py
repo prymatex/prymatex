@@ -99,7 +99,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         #TODO: solo hacer las acciones si tengo nuevo estado de folding motivado por un remove o un add
         self._purge_blocks()
 
-    def _purge_blocks(self, startIndex = None, endIndex = None):
+    def _purge_blocks(self):
         def validSymbolBlock(block):
             return block.userData() is not None and block.userData().symbol != None
         self.blocks = filter(validSymbolBlock, self.blocks)
@@ -139,6 +139,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             return self.icons["typedef"]
     
     def findBlockIndex(self, block):
+        self._purge_blocks()
         indexes = map(lambda block: block.blockNumber(), self.blocks)
         return bisect(indexes, block.blockNumber()) - 1
     

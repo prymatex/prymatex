@@ -58,7 +58,6 @@ class PMXSafeFilesytemLineEdit(QtGui.QLineEdit):
 
     
 class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
-    ''' '''
     def createEditor(self, parent, option, index):
         ''' Create a new editor ''' 
         
@@ -342,10 +341,10 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     @QtCore.pyqtSlot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
-            #Conectar señal
+            #Conectar seÃ±al
             self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
         else:
-            #Desconectar señal
+            #Desconectar seÃ±al
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
         
     #================================================

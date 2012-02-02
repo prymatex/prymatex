@@ -97,4 +97,4 @@ class PMXProjectTreeModel(TreeModel):
         self.beginRemoveRows(QtCore.QModelIndex(), project.row(), project.row())
         self.rootNode.removeChild(project)
         self.endRemoveRows()
-        
+    

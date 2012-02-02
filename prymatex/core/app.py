@@ -329,6 +329,7 @@ class PMXApplication(QtGui.QApplication):
 
     def _populate_editor(self, editor, content, readyCallback = None):
         def appendChunksTask(editor, content, chunksize = 1024):
+            editor.textCursor().beginEditBlock()
             editor.setReadOnly(True)
             currentIndex = 0
             contentLength = len(content)
@@ -337,6 +338,8 @@ class PMXApplication(QtGui.QApplication):
                 currentIndex += chunksize
                 yield
             editor.setReadOnly(False)
+            editor.textCursor().endEditBlock()
+            #editor.setMaximumBlockCount(0)
             yield coroutines.Return(editor)
         task = self.scheduler.newTask( appendChunksTask(editor, content) )
         if readyCallback != None:

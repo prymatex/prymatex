@@ -124,6 +124,14 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.projectOptionsMenu, _ = createQMenu(optionsMenu, self)
         self.pushButtonOptions.setMenu(self.projectOptionsMenu)
         
+        #=======================================================================
+        # Drag and Drop (see the proxy model)
+        #=======================================================================
+        self.treeViewProjects.setDragEnabled(True)
+        self.treeViewProjects.setAcceptDrops(True)
+        self.treeViewProjects.setDefaultDropAction(QtCore.Qt.MoveAction)
+        self.treeViewProjects.setDropIndicatorShown(True)
+        
         #Connect context menu
         self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewProjects.customContextMenuRequested.connect(self.showProjectTreeViewContextMenu)
@@ -201,10 +209,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
-            #Conectar señal
+            #Conectar seï¿½al
             self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
         else:
-            #Desconectar señal
+            #Desconectar seï¿½al
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
     
     def on_mainWindow_currentEditorChanged(self, editor):

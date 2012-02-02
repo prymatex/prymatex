@@ -34,7 +34,6 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         else:
             leftPath = self.sourceModel().filePath(left)
             rightPath = self.sourceModel().filePath(right)
-            print leftPath, rightPath
             return self.application.fileManager.compareFiles(leftPath, rightPath, self.orderBy)
 
     def node(self, index):
@@ -61,3 +60,29 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         self.folderFirst = folderFirst
         self.descending = descending
         QtGui.QSortFilterProxyModel.sort(self, 0, order)
+        
+    def isDir(self, index):
+        sIndex = self.mapToSource(index)
+        return self.sourceModel().isDir(sIndex)
+
+    #=======================================================
+    # Drag and Drop support
+    #=======================================================
+    def flags(self, index):
+        defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
+        if not self.isDir(index):
+            return defaultFlags | QtCore.Qt.ItemIsDragEnabled 
+        return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
+            
+    def dropMimeData(self, mimeData, action, row, col, parentIndex):
+        return False
+    
+    def mimeTypes(self):
+        return ["text/uri-list"]
+        
+    def mimeData(self, indexes):
+        urls = map(lambda index: QtCore.QUrl.fromLocalFile(self.filePath(index)), indexes)
+        print urls
+        mimeData = QtCore.QMimeData()
+        mimeData.setUrls(urls)
+        return mimeData
