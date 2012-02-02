@@ -11,6 +11,14 @@ class PMXSupportCache(object):
             self.keyValues[key] = function(*args)
         return self.keyValues[key]
     
+    def deprecateAll(self):
+        pass
+        
+    def deprecateValues(self, *values):
+        for value in values:
+            if value in self.keyValues:
+                del self.keyValues[value]
+
     def setSettings(self, scope, settings):
         self.settings[scope] = settings
 

@@ -413,6 +413,15 @@ class PMXSupportBaseManager(object):
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
             #Updates que no son updates
             return item
+
+        #Deprecate keyEquivalent in cache
+        if 'keyEquivalent' in attrs and item.keyEquivalent != attrs['keyEquivalent']:
+            self.cache.deprecateValues(item.keyEquivalent, attrs['keyEquivalent'])
+
+        #Deprecate tabTrigger in cache
+        if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
+            self.cache.deprecateValues(item.tabTrigger, attrs['tabTrigger'])
+
         namespace = namespace or self.defaultNamespace
         if item.bundle.isProtected and not item.bundle.isSafe:
             self.updateBundle(item.bundle, namespace)
