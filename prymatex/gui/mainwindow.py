@@ -126,7 +126,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.customActions[editorClass] = actions
     
     def registerDockClassActions(self, dockClass, actions):
-        print dockClass, actions
+        self.logger.debug("%s, actions: %d" % (str(dockClass), len(actions)))
         
     def registerStatusClassActions(self, statusClass, actions):
         self.statusBar().registerStatusClassActions(statusClass, actions)

@@ -269,13 +269,17 @@ class PMXApplication(QtGui.QApplication):
         """
         #Por ahora solo una mainWindow
         from prymatex.gui.mainwindow import PMXMainWindow
+        PMXMainWindow.logger = self.getLogger('.'.join([PMXMainWindow.__module__, PMXMainWindow.__name__]))
+        self.settings.registerConfigurable(PMXMainWindow)
+
         #TODO: Testeame con mas de una
         for _ in range(1):
             self.mainWindow = PMXMainWindow(self)
-                
+
             #Configure and add dockers
             self.pluginManager.populateMainWindow(self.mainWindow)
-            
+            self.settings.configure(self.mainWindow)
+
             geometry = self.settings.value("mainWindowGeometry")
             state = self.settings.value("mainWindowState")
             if geometry:
