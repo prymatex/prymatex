@@ -6,6 +6,7 @@ from PyQt4 import QtGui, QtCore
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.plugin.dock import PMXBaseDock
+from prymatex.gui.codeeditor.editor import PMXCodeEditor
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F7")
@@ -34,19 +35,18 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     def on_mainWindow_currentEditorChanged(self, editor):
-        self.currentEditor = editor
-        if editor is not None:
+        if isinstance(editor, PMXCodeEditor):
             self.tableViewSymbols.setModel(editor.symbolListModel)
         
     def on_tableViewSymbols_activated(self, index):
         block = index.internalPointer()
-        self.currentEditor.goToBlock(block)
-        self.currentEditor.setFocus()
+        self.mainWindow.currentEditor().goToBlock(block)
+        self.mainWindow.currentEditor().setFocus()
     
     def on_tableViewSymbols_doubleClicked(self, index):
         block = index.internalPointer()
-        self.currentEditor.goToBlock(block)
-        self.currentEditor.setFocus()
+        self.mainWindow.currentEditor().goToBlock(block)
+        self.mainWindow.currentEditor().setFocus()
         
 class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
@@ -74,14 +74,13 @@ class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
         mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     def on_mainWindow_currentEditorChanged(self, editor):
-        self.currentEditor = editor
-        if editor is not None:
+        if isinstance(editor, PMXCodeEditor):
             self.tableViewBookmarks.setModel(editor.bookmarkListModel)
         
     def on_tableViewBookmarks_activated(self, index):
         block = index.internalPointer()
-        self.currentEditor.goToBlock(block)
+        self.mainWindow.currentEditor().goToBlock(block)
     
     def on_tableViewBookmarks_doubleClicked(self, index):
         block = index.internalPointer()
-        self.currentEditor.goToBlock(block)
+        self.mainWindow.currentEditor().goToBlock(block)

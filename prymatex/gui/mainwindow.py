@@ -147,7 +147,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             for editorClass, actions in self.customActions.iteritems():
                 for action in actions:
                     action.setVisible(editorClass == currentEditorClass)
-                    if action.isCheckable() and hasattr(action, 'testChecked'):
+                    if editorClass == currentEditorClass and action.isCheckable() and hasattr(action, 'testChecked'):
                         action.setChecked(action.testChecked(editor))
                         
     #============================================================

@@ -242,6 +242,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Base Editor Interface
     #=======================================================================
+    @classmethod
+    def acceptFile(cls, filePath):
+        #Si es un archivo de texto es mio, sino no se que hacer
+        return not filePath.endswith(".png")
+
     def open(self, filePath):
         return PMXBaseEditor.open(self, filePath)
         
@@ -1271,6 +1276,23 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         navigation = {
             'items': [
                 "-",
+                {'title': 'Toggle Bookmark',
+                 'callback': cls.toggleBookmark,
+                 'shortcut': 'Meta+F12',
+                 },
+                {'title': 'Next Bookmark',
+                 'callback': cls.bookmarkNext,
+                 'shortcut': 'Meta+Alt+F12',
+                 },
+                {'title': 'Previous Bookmark',
+                 'callback': cls.bookmarkPrevious,
+                 'shortcut': 'Meta+Shift+F12',
+                 },
+                {'title': 'Remove All Bookmarks',
+                 'callback': cls.removeAllBookmarks,
+                 'shortcut': 'Meta+Ctrl+F12',
+                 },
+                "-",
                 {'title': 'Go To &Symbol',
                  'callback': cls.on_actionGoToSymbol_triggered,
                  'shortcut': 'Ctrl+Shift+O',
@@ -1281,7 +1303,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  }
             ]}
         return { "View": view , "Text": text, "Navigation": navigation}
-    
+
     #===========================================================================
     # Menu Actions
     #===========================================================================

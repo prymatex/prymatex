@@ -158,22 +158,6 @@ class MainWindowActions(object):
     # Navigation Actions
     #============================================================
     @QtCore.pyqtSlot()
-    def on_actionToggleBookmark_triggered(self):
-        self.currentEditor().toggleBookmark()
-
-    @QtCore.pyqtSlot()
-    def on_actionNextBookmark_triggered(self):
-        self.currentEditor().bookmarkNext()
-
-    @QtCore.pyqtSlot()
-    def on_actionPreviousBookmark_triggered(self):
-        self.currentEditor().bookmarkPrevious()
-        
-    @QtCore.pyqtSlot()
-    def on_actionRemoveAllBookmarks_triggered(self):
-        self.currentEditor().removeAllBookmarks()
-
-    @QtCore.pyqtSlot()
     def on_actionNextTab_triggered(self):
         self.splitTabWidget.focusNextTab()
 
