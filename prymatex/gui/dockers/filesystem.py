@@ -133,7 +133,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     
     def setupComboBoxLocation(self):
         self.comboBoxLocation.setModel(self.dirModel)
-        self.comboBoxLocation.lineEdit().setText(self.application.fileManager.getDirectory())
+        pIndex = self.treeViewFileSystem.rootIndex()
+        self.comboBoxLocation.lineEdit().setText(self.fileSystemProxyModel.filePath(pIndex))
         self.comboBoxLocation.lineEdit().returnPressed.connect(self.on_lineEdit_returnPressed)
     
     def on_lineEdit_returnPressed(self):
@@ -149,8 +150,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
-        index = self.fileSystemModel.index(self.application.fileManager.getDirectory())
-        self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
+        #index = self.fileSystemModel.index(self.application.fileManager.getDirectory())
+        #self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
         
         self.treeViewFileSystem.setHeaderHidden(True)
         self.treeViewFileSystem.setUniformRowHeights(False)
@@ -333,7 +334,23 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     @QtCore.pyqtSlot(str)
     def on_lineEditFilter_textChanged(self, text):
         self.fileSystemProxyModel.setFilterRegExp(text)
-    
+
+    @QtCore.pyqtSlot()
+    def on_pushButtonCollapseAll_pressed(self):
+        self.treeViewFileSystem.collapseAll()
+        
+    @QtCore.pyqtSlot(bool)
+    def on_pushButtonSync_toggled(self, checked):
+        if checked:
+            #Conectar señal
+            self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+        else:
+            #Desconectar señal
+            self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
+        
+    #================================================
+    # Sort and order Actions
+    #================================================        
     @QtCore.pyqtSlot()
     def on_actionOrderByName_triggered(self):
         self.fileSystemProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
@@ -363,16 +380,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         _base, name = os.path.split(self.currentPath())
         PMXNewProjectDialog.getNewProject(self, self.currentPath(), name)
 
-    @QtCore.pyqtSlot()
-    def on_pushButtonCollapseAll_pressed(self):
-        self.treeViewFileSystem.collapseAll()
-        
-    def on_currentEditorChanged(self, editor):
-        available = editor is not None
-        self.pushButtonSync.setEnabled(available)
-        if available:
-            filePath = editor.filePath
-            index = self.fileSystemModel.index(filePath)
+    def on_mainWindow_currentEditorChanged(self, editor):
+        if editor is not None and not editor.isNew():
+            index = self.fileSystemModel.index(editor.filePath)
             proxyIndex = self.fileSystemProxyModel.mapFromSource(index)
             self.treeViewFileSystem.setCurrentIndex(proxyIndex)
-        

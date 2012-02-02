@@ -65,9 +65,9 @@ class PMXFileManager(QtCore.QObject):
             (self.directoryRenamed, PMXFileManager.RENAMED ),                       
         )
         for signal, associatedConstant in UNARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda path: self.filesytemChange.emit(path, associatedConstant))
+            signal.connect(lambda path, constant = associatedConstant: self.filesytemChange.emit(path, constant))
         for signal, associatedConstant in BINARY_SINGAL_CONSTANT_MAP:
-            signal.connect(lambda _x, path: self.filesytemChange.emit(path, associatedConstant))
+            signal.connect(lambda _x, path, constant = associatedConstant: self.filesytemChange.emit(path, constant))
             
     def on_fileChanged(self, filePath):
         if not os.path.exists(filePath):

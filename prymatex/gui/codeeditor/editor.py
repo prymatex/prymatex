@@ -275,11 +275,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             return [ "%s (%s)" % (self.getSyntax().bundle.name, " ".join(map(lambda ft: "*." + ft, self.getSyntax().fileTypes))) ]
         return PMXBaseEditor.fileFilters(self)
     
-    def tabIcon(self):
-        if self.isModified():
-            return resources.getIcon("save")
-        return PMXBaseEditor.tabIcon(self)
-    
     def setCursorPosition(self, position):
         cursor = self.textCursor()
         blockPosition = self.document().findBlockByNumber(position[0]).position()

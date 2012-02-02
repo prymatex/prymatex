@@ -41,7 +41,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         if filePath != self.filePath:
             self.setFilePath(filePath)
         self.setModified(False)
-        self.externalAction = None
+        self.setExternalAction(None)
         self.showMessage("<i>%s</i> saved" % self.filePath)
     
     def close(self):
@@ -59,15 +59,15 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         self.project = project
         
     def tabIcon(self):
+        baseIcon = QtGui.QIcon()
         if self.filePath is not None:
-            fileIcon = resources.getIcon(self.filePath)
-            if self.externalAction != None:
-                saveIcon = resources.getIcon("important")
-                fileIcon = utils.combineIcons(fileIcon, saveIcon, 0.6)
-                print fileIcon, fileIcon.isNull()
-            return fileIcon
-        else:
-            return QtGui.QIcon()
+            baseIcon = resources.getIcon(self.filePath)
+        if self.isModified():
+            baseIcon = resources.getIcon("save")
+        if self.externalAction != None:
+            importantIcon = resources.getIcon("important")
+            baseIcon = utils.combineIcons(baseIcon, importantIcon, 0.6)
+        return baseIcon
     
     def tabTitle(self):
         if self.filePath is not None:

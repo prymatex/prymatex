@@ -193,11 +193,28 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot()
     def on_actionOpenDefaultEditor_triggered(self):
         print(self.currentPath())
-        
+
     @QtCore.pyqtSlot()
     def on_pushButtonCollapseAll_pressed(self):
         self.treeViewProjects.collapseAll()
-        
+
+    @QtCore.pyqtSlot(bool)
+    def on_pushButtonSync_toggled(self, checked):
+        if checked:
+            #Conectar señal
+            self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+        else:
+            #Desconectar señal
+            self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
+    
+    def on_mainWindow_currentEditorChanged(self, editor):
+        if editor is not None and not editor.isNew():
+            index = self.projectTreeProxyModel.indexForPath(editor.filePath)
+            self.treeViewProjects.setCurrentIndex(index)
+            
+    #================================================
+    # Sort and order Actions
+    #================================================      
     @QtCore.pyqtSlot()
     def on_actionOrderByName_triggered(self):
         self.projectTreeProxyModel.sortBy("name", self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
@@ -216,8 +233,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionOrderDescending_triggered(self):
-        self.projectTreeProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+        self.projectTreeProxyModel.sortBy(self.projectTreeProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
     
     @QtCore.pyqtSlot()
     def on_actionOrderFoldersFirst_triggered(self):
-        self.projectTreeProxyModel.sortBy(self.fileSystemProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+        self.projectTreeProxyModel.sortBy(self.projectTreeProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())

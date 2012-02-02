@@ -191,6 +191,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                     
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()
+        if editor.isExternalChanged():
+            message = "The file '%s' has been changed on the file system, Do you want save the file with other name?"
+            result = QtGui.QMessageBox.question(editor, _("File changed"),
+                _(message) % editor.filePath,
+                buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                defaultButton = QtGui.QMessageBox.Yes)
+            if result == QtGui.QMessageBox.Yes:
+                saveAs = True
         if editor.isNew() or saveAs:
             fileDirectory = editor.fileDirectory()
             fileName = editor.fileName()

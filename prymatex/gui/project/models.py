@@ -27,7 +27,8 @@ class PMXProjectTreeModel(TreeModel):
 
     def indexForPath(self, path):
         node = self.nodeForPath(path)
-        return self.createIndex(node.row(), 0, node)
+        index = self.createIndex(node.row(), 0, node) if node != None else QtCore.QModelIndex()
+        return index
         
     #========================================================================
     # Custom methods

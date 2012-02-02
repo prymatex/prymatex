@@ -20,6 +20,9 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.completerFileSystem = QtGui.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
         
+        self.templateProxyModel = self.application.supportManager.templateProxyModel
+        self.comboBoxProjectTemplate.setModel(self.templateProxyModel)
+        self.comboBoxProjectTemplate.setModelColumn(0)
         self.buttonCreate.setDefault(True)
         self.projectCreated = None
     
@@ -33,11 +36,13 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         name = self.lineProjectName.text()
         location = self.lineLocation.text()
         self.projectCreated = self.application.projectManager.createProject(name, location)
+        if True: #Tengo template seleccionado, lo corro
+            self.runTemplateForProject(self.projectCreated)
         if self.checkBoxAddToWorkingSet.isChecked():
             workingSet = self.comboBoxWorkingSet.lineEdit().text()
             self.application.projectManager.setWorkingSet(self.projectCreated, workingSet)
         self.accept()
-
+    
     def on_lineProjectName_textChanged(self, text):
         if self.checkBoxUseDefaultLocation.isChecked():
             self.application.projectManager.workspaceDirectory
@@ -58,6 +63,13 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         
     def on_buttonClose_pressed(self):
         self.reject()
+
+    def runTemplateForProject(self, project):
+        index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboBoxProjectTemplate.currentIndex(), 0))
+        if index.isValid():
+            template = index.internalPointer()
+            environment = template.buildEnvironment(directory = project.path, name = project.name)
+            template.execute(environment)
     
     @classmethod
     def getNewProject(cls, parent = None, directory = None, name = None):

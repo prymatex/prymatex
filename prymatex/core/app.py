@@ -64,7 +64,7 @@ class PMXApplication(QtGui.QApplication):
             splash.finish(self.mainWindow)
           
         except KeyboardInterrupt:
-            print("\nQuit signal catched during application startup. Quiting...")
+            self.logger.critical("\nQuit signal catched during application startup. Quiting...")
             self.quit()
             
     def resetSettings(self):
@@ -167,7 +167,7 @@ class PMXApplication(QtGui.QApplication):
         self.fileManager = PMXFileManager(self)
         self.settings.configure(self.fileManager)
         
-        self.fileManager.fileDeleted.connect(self.on_filesytemChange)
+        self.fileManager.filesytemChange.connect(self.on_filesytemChange)
     
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
@@ -199,7 +199,7 @@ class PMXApplication(QtGui.QApplication):
                     "PMX_IPYTHON_CONNECTION": ipconnection
             })
         except ImportError as e:
-            print("Warning: %s" % e)
+            self.logger.warn("Warning: %s" % e)
             self.kernelManager = None
 
     def setupPluginManager(self):
@@ -217,7 +217,7 @@ class PMXApplication(QtGui.QApplication):
             from prymatex.utils import zeromqt
             self.zmqContext = zeromqt.ZeroMQTContext(parent = self)
         except ImportError as e:
-            print("Warning: %s" % e)
+            self.logger.warn("Warning: %s" % e)
             self.zmqContext = None
 
     #========================================================
@@ -255,7 +255,7 @@ class PMXApplication(QtGui.QApplication):
         os.unlink(self.fileLock)
     
     def commitData(self):
-        print("Commit data")
+        self.logger.debug("Commit data")
         
     def saveState(self, session_manager):
         self.logger.debug( "Save state %s" % session_manager)
@@ -311,24 +311,28 @@ class PMXApplication(QtGui.QApplication):
             if project != None:
                 editor.setProject(project)
             content = editor.open(filePath)
-            def appendChunksTask(editor, content, chunksize = 1024):
-                editor.setReadOnly(True)
-                currentIndex = 0
-                contentLength = len(content)
-                while currentIndex <= contentLength:
-                    editor.insertPlainText(content[currentIndex:currentIndex + chunksize])
-                    currentIndex += chunksize
-                    yield
-                editor.setReadOnly(False)
-                yield coroutines.Return(editor)
             def on_editorReady(result):
                 editor = result.value
                 editor.setModified(False)
                 editor.setCursorPosition(cursorPosition)
                 self.mainWindow.tryCloseEmptyEditor()
                 self.mainWindow.addEditor(editor, focus)
-            task = self.scheduler.newTask( appendChunksTask(editor, content) )
-            task.done.connect( on_editorReady )
+            self._populate_editor(editor, content, on_editorReady)
+
+    def _populate_editor(self, editor, content, readyCallback = None):
+        def appendChunksTask(editor, content, chunksize = 1024):
+            editor.setReadOnly(True)
+            currentIndex = 0
+            contentLength = len(content)
+            while currentIndex <= contentLength:
+                editor.insertPlainText(content[currentIndex:currentIndex + chunksize])
+                currentIndex += chunksize
+                yield
+            editor.setReadOnly(False)
+            yield coroutines.Return(editor)
+        task = self.scheduler.newTask( appendChunksTask(editor, content) )
+        if readyCallback != None:
+            task.done.connect( readyCallback )
 
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")        
@@ -366,9 +370,17 @@ class PMXApplication(QtGui.QApplication):
                 buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                 defaultButton = QtGui.QMessageBox.Yes)
             if result == QtGui.QMessageBox.Yes:
-                print "replace"
+                editor.clear()
+                content = editor.open(editor.filePath)
+                def on_editorReady(result):
+                    editor = result.value
+                    editor.setModified(False)
+                    editor.setExternalAction(None)
+                    #TODO: devolver el cursor a su pocicion
+                    #editor.setCursorPosition(cursorPosition)
+                self._populate_editor(editor, content, on_editorReady)
             elif result == QtGui.QMessageBox.No:
-                print "quda marcado para futuro, sera un guardar como"
+                pass
         elif editor.isExternalDeleted():
             message = "The file '%s' has been deleted or is not accessible. Do you want to save your changes or close the editor without saving?"
             result = QtGui.QMessageBox.question(editor, _("File deleted"),
