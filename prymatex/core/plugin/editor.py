@@ -123,6 +123,13 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         can provide custom actions to the menu through this callback'''
         pass
     
+    #======================================================================
+    # For Plugin Manager administrator
+    #======================================================================    
+    @classmethod
+    def acceptFile(cls, filePath):
+        return True
+        
     @classmethod
     def addKeyHelper(cls, helper):
         helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])

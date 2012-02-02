@@ -67,7 +67,13 @@ class PMXPluginManager(object):
         return instance
     
     def createEditor(self, filePath, mainWindow):
-        editorClass = self.editors[0]
+        #Find editor class for file
+        if filePath is not None:
+            for editorClass in self.editors:
+                if editorClass.acceptFile(filePath):
+                    break
+        else:
+            editorClass = self.editors[0]
         editor = self.createWidgetInstance(editorClass, filePath, mainWindow)
         editor.initialize()
         return editor

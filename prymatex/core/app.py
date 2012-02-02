@@ -311,13 +311,17 @@ class PMXApplication(QtGui.QApplication):
             if project != None:
                 editor.setProject(project)
             content = editor.open(filePath)
-            def on_editorReady(result):
-                editor = result.value
-                editor.setModified(False)
-                editor.setCursorPosition(cursorPosition)
+            if content:
+                def on_editorReady(result):
+                    editor = result.value
+                    editor.setModified(False)
+                    editor.setCursorPosition(cursorPosition)
+                    self.mainWindow.tryCloseEmptyEditor()
+                    self.mainWindow.addEditor(editor, focus)
+                self._populate_editor(editor, content, on_editorReady)
+            else:
                 self.mainWindow.tryCloseEmptyEditor()
                 self.mainWindow.addEditor(editor, focus)
-            self._populate_editor(editor, content, on_editorReady)
 
     def _populate_editor(self, editor, content, readyCallback = None):
         def appendChunksTask(editor, content, chunksize = 1024):
