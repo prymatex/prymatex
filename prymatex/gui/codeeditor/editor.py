@@ -127,12 +127,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #================================================================
     # Editor Flags
     #================================================================
-    ShowTabsAndSpaces = 0x01
-    ShowLineAndParagraphs = 0x02
-    ShowBookmarks = 0x04
-    ShowLineNumbers = 0x08
-    ShowFolding = 0x10
-    WordWrap = 0x20
+    ShowTabsAndSpaces     = 1<<0
+    ShowLineAndParagraphs = 1<<1
+    ShowBookmarks         = 1<<2
+    ShowLineNumbers       = 1<<3
+    ShowFolding           = 1<<4
+    WordWrap              = 1<<5
     
     @property
     def tabKeyBehavior(self):
@@ -188,7 +188,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
-    
+        self.setFlags(self.ShowLineNumbers | self.WordWrap)
+        
     def updateIndent(self, block):
         self.logger.debug("Update Block Indent")
     

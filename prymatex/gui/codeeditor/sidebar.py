@@ -17,7 +17,7 @@ class PMXSidebar(QtGui.QWidget):
         self.editor = editor
         self.showBookmarks = True
         self.showLineNumbers = True
-        self.showFolding = False
+        self.showFolding = True
         self.bookmarkArea = 12
         self.foldArea = 12
         self.foreground = None

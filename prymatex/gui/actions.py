@@ -24,9 +24,6 @@ class MainWindowActions(object):
     #============================================================
     # About To Show Menus
     #============================================================
-    def on_menuFile_aboutToShow(self):
-        pass
-
     def on_menuRecentFiles_aboutToShow(self):
         self.menuRecentFiles.clear()
         for index, filePath in enumerate(self.application.fileManager.fileHistory, 1):
@@ -38,12 +35,6 @@ class MainWindowActions(object):
         self.menuRecentFiles.addSeparator()
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
-
-    def on_menuEdit_aboutToShow(self):
-        pass
-    
-    def on_menuView_aboutToShow(self):
-        pass
 
     #============================================================
     # File Actions
