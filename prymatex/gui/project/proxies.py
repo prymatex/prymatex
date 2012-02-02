@@ -34,6 +34,7 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         else:
             leftPath = self.sourceModel().filePath(left)
             rightPath = self.sourceModel().filePath(right)
+            print leftPath, rightPath
             return self.application.fileManager.compareFiles(leftPath, rightPath, self.orderBy)
 
     def node(self, index):

@@ -478,7 +478,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButtonMenuBundle">
         <property name="maximumSize">
          <size>
-          <width>50</width>
+          <width>45</width>
           <height>16777215</height>
          </size>
         </property>

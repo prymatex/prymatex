@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
 #
-# Created: Tue Jan 31 15:33:10 2012
+# Created: Wed Feb  1 20:40:36 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -231,7 +231,7 @@ class Ui_CodeEditorStatus(object):
         self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
         self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
         self.pushButtonMenuBundle = QtGui.QPushButton(self.widgetStatus)
-        self.pushButtonMenuBundle.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.pushButtonMenuBundle.setMaximumSize(QtCore.QSize(45, 16777215))
         self.pushButtonMenuBundle.setText(_fromUtf8(""))
         icon7 = QtGui.QIcon()
         icon7.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/run-build.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Wed Feb  1 15:49:06 2012
+# Created: Wed Feb  1 20:40:37 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -65,6 +65,7 @@ class Ui_FileSystemDock(object):
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonSync.setIcon(icon3)
+        self.pushButtonSync.setCheckable(True)
         self.pushButtonSync.setFlat(True)
         self.pushButtonSync.setObjectName(_fromUtf8("pushButtonSync"))
         self.buttonsLayout.addWidget(self.pushButtonSync)
@@ -78,7 +79,7 @@ class Ui_FileSystemDock(object):
         self.pushButtonCollapseAll.setObjectName(_fromUtf8("pushButtonCollapseAll"))
         self.buttonsLayout.addWidget(self.pushButtonCollapseAll)
         self.pushButtonOptions = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonOptions.setMaximumSize(QtCore.QSize(40, 24))
+        self.pushButtonOptions.setMaximumSize(QtCore.QSize(45, 24))
         self.pushButtonOptions.setText(_fromUtf8(""))
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
