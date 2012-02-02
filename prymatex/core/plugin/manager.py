@@ -26,7 +26,7 @@ class PMXPluginManager(object):
     #==================================================
     def preparePlugin(self, pluginClass):
         pluginClass.application = self.application
-        pluginClass.logger = getLogger('.'.join([pluginClass.__module__, pluginClass.__name__]))
+        pluginClass.logger = self.application.getLogger('.'.join([pluginClass.__module__, pluginClass.__name__]))
         
     def prepareWidgetPlugin(self, widgetClass):
         self.preparePlugin(widgetClass)

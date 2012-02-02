@@ -14,6 +14,6 @@ def registerPlugin(manager):
     manager.registerDocker(PMXFileSystemDock)
     manager.registerDocker(PMXBrowserDock)
     manager.registerDocker(PMXConsoleDock)
-    manager.registerDocker(PMXLoggerDock)
+    #manager.registerDocker(PMXLoggerDock)
     manager.registerDocker(PMXProjectDock)
     manager.registerDocker(PMXTerminalDock)

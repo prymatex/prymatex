@@ -241,6 +241,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Base Editor Interface
     #=======================================================================
+    def open(self, filePath):
+        return PMXBaseEditor.open(self, filePath)
+        
+    def save(self, filePath):
+        return PMXBaseEditor.save(self, filePath)
+        
+    def close(self):
+        QtGui.QPlainTextEdit.close(self)
+        return PMXBaseEditor.close(self)
+
     def isModified(self):
         return self.document().isModified()
     

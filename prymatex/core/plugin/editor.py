@@ -32,9 +32,11 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         self.mainWindow = mainWindow
     
     def open(self, filePath):
+        """ Open file and return content """
         return self.application.fileManager.openFile(filePath)
 
     def save(self, filePath):
+        """ Save content of editor in a file """
         self.application.fileManager.saveFile(filePath, self.toPlainText())
         if filePath != self.filePath:
             self.setFilePath(filePath)
@@ -43,6 +45,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         self.showMessage("<i>%s</i> saved" % self.filePath)
     
     def close(self):
+        """ Close editor """
         if self.filePath is None and self.creation_counter == PMXBaseEditor.CREATION_COUNTER:
             PMXBaseEditor.CREATION_COUNTER -= 1
         elif self.filePath is not None:
