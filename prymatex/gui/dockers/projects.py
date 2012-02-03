@@ -185,7 +185,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
         treeNode = self.currentNode()
-        if not treeNode.ispoject:
+        if not treeNode.isproject:
             self.deletePath(treeNode.path)
         else:
             self.logger.debug("Delete Project")
