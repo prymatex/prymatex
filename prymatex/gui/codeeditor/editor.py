@@ -188,7 +188,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
-        self.setFlags(self.ShowLineNumbers | self.WordWrap)
+        self.setFlags(self.ShowLineNumbers)
         
     def updateIndent(self, block):
         self.logger.debug("Update Block Indent")
