@@ -36,7 +36,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboTemplates.currentIndex(), 0))
         if index.isValid():
             template = index.internalPointer()
-            environment = template.buildEnvironment(directory = self.lineLocation.text(), name = self.lineFileName.text())
+            environment = template.buildEnvironment(fileDirectory = self.lineLocation.text(), fileName = self.lineFileName.text())
             self.fileCreated = template.execute(environment)
             self.accept()
         else:

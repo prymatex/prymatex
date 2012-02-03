@@ -108,16 +108,19 @@ class PMXTemplate(PMXBundleItem):
         except:
             pass
 
-    def buildEnvironment(self, directory = "", name = ""):
+    def buildEnvironment(self, fileDirectory = "", fileName = "", projectLocation = "", projectName = ""):
         env = super(PMXTemplate, self).buildEnvironment()
         if self.extension:
-            name_with_ext = "{0}{1}{2}".format(name, os.path.extsep, self.extension)
+            name_with_ext = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension)
         else:
-            name_with_ext = name
+            name_with_ext = fileName
             
-        env['TM_NEW_FILE'] = os.path.join(directory, name_with_ext)
-        env['TM_NEW_FILE_BASENAME'] = name
-        env['TM_NEW_FILE_DIRECTORY'] = directory
+        env['TM_NEW_FILE'] = os.path.join(fileDirectory, name_with_ext)
+        env['TM_NEW_FILE_BASENAME'] = fileName
+        env['TM_NEW_FILE_DIRECTORY'] = fileDirectory
+        env['TM_NEW_PROJECT_LOCATION'] = projectLocation
+        env['TM_NEW_PROJECT_NAME'] = projectName
+        env['TM_NEW_PROJECT_DIRECTORY'] = os.path.dirname(projectLocation)
         return env
     
     def execute(self, environment = {}):

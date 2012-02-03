@@ -35,9 +35,10 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def on_buttonCreate_pressed(self):
         name = self.lineProjectName.text()
         location = self.lineLocation.text()
+        self.runTemplateForProject(location, name)
+        
         self.projectCreated = self.application.projectManager.createProject(name, location)
-        if True: #Tengo template seleccionado, lo corro
-            self.runTemplateForProject(self.projectCreated)
+        
         if self.checkBoxAddToWorkingSet.isChecked():
             workingSet = self.comboBoxWorkingSet.lineEdit().text()
             self.application.projectManager.setWorkingSet(self.projectCreated, workingSet)
@@ -64,12 +65,12 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def on_buttonClose_pressed(self):
         self.reject()
 
-    def runTemplateForProject(self, project):
+    def runTemplateForProject(self, location, name):
         index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboBoxProjectTemplate.currentIndex(), 0))
         if index.isValid():
             template = index.internalPointer()
-            environment = template.buildEnvironment(directory = project.path, name = project.name)
-            template.execute(environment)
+            environment = template.buildEnvironment(projectLocation = location, projectName = name)
+            return template.execute(environment)
     
     @classmethod
     def getNewProject(cls, parent = None, directory = None, name = None):
