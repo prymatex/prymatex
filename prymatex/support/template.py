@@ -108,19 +108,22 @@ class PMXTemplate(PMXBundleItem):
         except:
             pass
 
-    def buildEnvironment(self, fileDirectory = "", fileName = "", projectLocation = "", projectName = ""):
+    def buildEnvironment(self, **kwargs):
         env = super(PMXTemplate, self).buildEnvironment()
-        if self.extension:
-            name_with_ext = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension)
-        else:
-            name_with_ext = fileName
-            
-        env['TM_NEW_FILE'] = os.path.join(fileDirectory, name_with_ext)
-        env['TM_NEW_FILE_BASENAME'] = fileName
-        env['TM_NEW_FILE_DIRECTORY'] = fileDirectory
-        env['TM_NEW_PROJECT_LOCATION'] = projectLocation
-        env['TM_NEW_PROJECT_NAME'] = projectName
-        env['TM_NEW_PROJECT_DIRECTORY'] = os.path.dirname(projectLocation)
+        fileName = kwargs.get('fileName', '')
+        fileDirectory = kwargs.get('fileDirectory', '')
+        if fileName and fileDirectory and self.extension:
+            nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension)
+            env['TM_NEW_FILE'] = os.path.join(fileDirectory, nameWithExtension)
+            env['TM_NEW_FILE_BASENAME'] = fileName
+            env['TM_NEW_FILE_DIRECTORY'] = fileDirectory
+        projectName = kwargs.get('projectName', '')
+        projectLocation = kwargs.get('projectLocation', '')
+        if projectName and projectLocation:
+            env['TM_NEW_PROJECT_NAME'] = projectName
+            env['TM_NEW_PROJECT_LOCATION'] = projectLocation
+            env['TM_NEW_PROJECT_BASENAME'] = os.path.basename(projectLocation)
+            env['TM_NEW_PROJECT_DIRECTORY'] = os.path.dirname(projectLocation)
         return env
     
     def execute(self, environment = {}):
@@ -133,8 +136,8 @@ class PMXTemplate(PMXBundleItem):
         process.wait()
         
         os.chdir(origWD) # get back to our original working directory
-        #TODO: Si todo esta bien retornar el new file, sino ver que hacer
-        return env['TM_NEW_FILE']
+        #Si todo esta bien retornar el new file o el project location
+        return env.get('TM_NEW_FILE', env.get('TM_NEW_PROJECT_LOCATION', None))
         
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):

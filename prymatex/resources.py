@@ -5,6 +5,10 @@ import os
 from PyQt4 import QtGui, QtCore
 from prymatex import resources_rc
 
+#===============================================================
+# IMAGES AND ICONS
+#===============================================================
+
 INTERNAL = {
     #Bundles
     "bundle": ":/icons/bundles/bundle.png",
@@ -59,6 +63,26 @@ EXTERNAL = {}
 
 FileIconProvider = QtGui.QFileIconProvider()
 
+#===============================================================
+# PRYMATEX STYLES
+# http://developer.qt.nokia.com/doc/qt-4.8/stylesheet-reference.html
+#===============================================================
+
+APPLICATION_STYLE = """* {
+    font-family: monospace;
+}
+QTreeView {
+    font-size: 12px;
+}
+QTableView {
+    font-size: 12px;
+}
+"""
+
+#===============================================================
+# FUNCTIONS
+#===============================================================
+
 def getImagePath(index):
     return INTERNAL.get(index) or EXTERNAL.get(index)
 
@@ -73,10 +97,11 @@ def getIcon(index):
     Index can be a path, a Qt resource path, an integer.
     @return: QIcon instance or None if no icon could be retrieved
     '''
+    #Try icon in db
     path = getImagePath(index)
     if path is not None:
         return QtGui.QIcon(path)
-    elif isinstance(index, (str, unicode)):
+    elif isinstance(index, basestring):
         #Try file path
         if os.path.isfile(index):
             return FileIconProvider.icon(QtCore.QFileInfo(index))
@@ -84,12 +109,8 @@ def getIcon(index):
             return FileIconProvider.icon(QtGui.QFileIconProvider.Folder)
         return FileIconProvider.icon(QtGui.QFileIconProvider.File)
     elif isinstance(index, int):
+        #Try icon by int index in fileicon provider
         return FileIconProvider.icon(index)
-    
-    # Fallback 
-    #elif isinstance(index, QtGui.QIcon):
-    #    return index
-    #return QtGui.QIcon() # Empty Icon
 
 def getFileType(fileInfo):
     return FileIconProvider.type(fileInfo)
