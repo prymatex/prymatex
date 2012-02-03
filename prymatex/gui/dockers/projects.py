@@ -162,11 +162,39 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def currentPath(self):
         return self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
     
-    #======================================================
-    # Tree View Context Menu Actions
-    # Some of them are in fstask's PMXFileSystemTasks mixin
-    #======================================================
+    def currentNode(self):
+        return self.projectTreeProxyModel.node(self.treeViewProjects.currentIndex())
+    #================================================
+    # Actions Create, Delete, Rename objects
+    #================================================      
+    @QtCore.pyqtSlot()
+    def on_actionNewFile_triggered(self):
+        basePath = self.currentPath()
+        self.createFile(basePath)
     
+    @QtCore.pyqtSlot()
+    def on_actionNewFromTemplate_triggered(self):
+        basePath = self.currentPath()
+        self.createFileFromTemplate(basePath)
+    
+    @QtCore.pyqtSlot()
+    def on_actionNewFolder_triggered(self):
+        basePath = self.currentPath()
+        self.createDirectory(basePath)
+
+    @QtCore.pyqtSlot()
+    def on_actionDelete_triggered(self):
+        treeNode = self.currentNode()
+        if not treeNode.ispoject:
+            self.deletePath(treeNode.path)
+        else:
+            self.logger.debug("Delete Project")
+
+    @QtCore.pyqtSlot()
+    def on_actionRename_triggered(self):
+        basePath = self.currentPath()
+        self.renamePath(basePath)
+
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
         path = self.currentPath()

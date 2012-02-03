@@ -6,6 +6,7 @@ import os, sys, shutil
 from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
+from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.dockers.proxies import PMXFileSystemProxyModel
@@ -71,7 +72,7 @@ class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
     def setModelData(self, editor, model, index):
         return QtGui.QItemDelegate.setModelData(self, editor, model, index)
         
-class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks):
+class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
     MENU_ICON = resources.getIcon("filemanager")
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
@@ -86,7 +87,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, parent)
-        PMXFileSystemTasks.__init__(self)     
+        PMXBaseDock.__init__(self)
         self.setupUi(self)
         
         #File System model
@@ -106,6 +107,10 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.installEventFilter(self)
         
         self.setupButtons()
+        
+    def setMainWindow(self, mainWindow):
+        PMXBaseDock.setMainWindow(self, mainWindow)
+        mainWindow.fileSystem = self
         
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -304,14 +309,40 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         if not len(self._pushButtonHistoryForward):
             self.pushButtonFoward.setEnabled(False)
 
+    #================================================
+    # Actions Create and Delete objects
+    #================================================
+    @QtCore.pyqtSlot()
+    def on_actionNewFolder_triggered(self):
+        basePath = self.currentPath()
+        self.createDirectory(path)
+    
+    @QtCore.pyqtSlot()
+    def on_actionNewFile_triggered(self):
+        basePath = self.currentPath()
+        self.createFile(basePath)
 
+    @QtCore.pyqtSlot()
+    def on_actionNewFromTemplate_triggered(self):
+        basePath = self.currentPath()
+        self.createFileFromTemplate(basePath)    
+
+    @QtCore.pyqtSlot()
+    def on_actionDelete_triggered(self):
+        basePath = self.currentPath()
+        self.deletePath(basePath)
+
+    @QtCore.pyqtSlot()
+    def on_actionRename_triggered(self):
+        basePath = self.currentPath()
+        self.renamePath(basePath)
     #======================================================
     # Tree View Context Menu Actions
     # Some of them are in fstask's PMXFileSystemTasks mixin
     #======================================================
     def pathToClipboard(self, checked = False):
-        path = self.currentPath()
-        QtGui.QApplication.clipboard().setText(path)
+        basePath = self.currentPath()
+        QtGui.QApplication.clipboard().setText(basePath)
     
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):

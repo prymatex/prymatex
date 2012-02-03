@@ -2,12 +2,11 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.exceptions import PrymatexFileExistsException
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 
-class PMXFileSystemTasks(PMXBaseDock):
+class PMXFileSystemTasks(object):
     '''
     Groups FileSystem and Project actions, it's a facade of the PMXFileManager
     that displays dialogs and handle common exceptions.
@@ -15,41 +14,10 @@ class PMXFileSystemTasks(PMXBaseDock):
     Slots Mixin
     '''
     
-    #===========================================================================
-    # Singals
-    #===========================================================================
-    filesystemChange = QtCore.pyqtSignal(int, str) 
-    
-    @QtCore.pyqtSlot()
-    def on_actionNewFolder_triggered(self):
-        self.createDirectory()
-
-    @QtCore.pyqtSlot()
-    def on_actionNewFile_triggered(self):
-        self.createFile()
-
-    
-    @QtCore.pyqtSlot()
-    def on_actionDelete_triggered(self):
-        self.deletePath(self.currentPath())
-        
-    
-    @QtCore.pyqtSlot()
-    def on_actionNewFromTemplate_triggered(self):
-        path = self.currentPath()
-        fileDirectory = self.application.fileManager.getDirectory(path)
-        path = PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
-
-    @QtCore.pyqtSlot()
-    def on_actionRename_triggered(self, path = None):
-        self.renamePath(self.currentPath())
-        
-    def createDirectory(self, basePath = None):
-        basePath = basePath or self.currentPath()
+    def createDirectory(self, basePath):
         if not os.path.isdir(basePath):
             # If base is a file, we should take its parent dir
             basePath = os.path.dirname(basePath)
-        
         while True:
             newDirName, accepted = QtGui.QInputDialog.getText(self, _("Create Directory"), 
                                                         _("Please specify the new directory name"), 
@@ -69,13 +37,11 @@ class PMXFileSystemTasks(PMXBaseDock):
                                               _("An error occured while creating %s") % newDirName)
                     
                 else:
-                    print("Created", rslt)
                     break
             else:
                 return
     
-    def createFile(self, basePath = None):
-        basePath = os.path.dirname(basePath or self.currentPath())
+    def createFile(self, basePath):
         while True:
             newFileName, accepted = QtGui.QInputDialog.getText(self, _("Create file"), 
                                                         _("Please specify the file name"), 
@@ -100,8 +66,9 @@ class PMXFileSystemTasks(PMXBaseDock):
             else:
                 return
     
-    def createFileFromTemplate(self):
-        pass
+    def createFileFromTemplate(self, basePath):
+        fileDirectory = self.application.fileManager.getDirectory(basePath)
+        return PMXNewFromTemplateDialog.newFileFromTemplate(fileDirectory = fileDirectory,  parent = self)
     
     def deletePath(self, path):
         basePath, pathTail = os.path.split(path)

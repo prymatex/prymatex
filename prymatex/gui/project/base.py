@@ -36,6 +36,7 @@ class FileSystemTreeNode(TreeNode):
         self.isdir = os.path.isdir(self.path)
         self.isfile = os.path.isfile(self.path)
         self.ishidden = name.startswith('.')
+        self.isproject = isinstance(self, PMXProject)
 
     @property
     def path(self):

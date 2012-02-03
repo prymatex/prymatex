@@ -53,7 +53,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         """docstring for tabStopSize"""
         self.setTabStopWidth(size * 9)
     
-    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 10))
+    @pmxConfigPorperty(default = QtGui.QFont("monospace", 12))
     def font(self, font):
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.document().setDefaultFont(font)
@@ -1269,6 +1269,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                      }  
                   ]},
                 '-',
+                {'title': 'Select Bundle Item',
+                 'shortcut': 'Meta+Ctrl+T',
+                 'callback': cls.on_actionSelectBundleItem_triggered,
+                 },
                 {'title': 'Execute Line/Selection',
                  'callback': lambda editor: editor.executeCommand(),
                  }
@@ -1349,6 +1353,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             flags = self.getFlags() & ~self.ShowFolding
         self.setFlags(flags)
     
+    def on_actionSelectBundleItem_triggered(self):
+        scope = self.getCurrentScope()
+        items = self.application.supportManager.getActionItems(scope)
+        def itemsToDict(items):
+            for item in items:
+                yield [dict(title = item.name, image = item.TYPE), dict(title = item.bundle.name), dict(title = item.trigger)]
+        index = self.mainWindow.bundleSelectorDialog.select(itemsToDict(items))
+        if index is not None:
+            self.insertBundleItem(items[index])
+            
     def on_actionGoToSymbol_triggered(self):
         blocks = self.symbolListModel.blocks
         def symbolToDict(blocks):

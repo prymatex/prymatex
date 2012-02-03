@@ -35,7 +35,8 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def on_buttonCreate_pressed(self):
         name = self.lineProjectName.text()
         location = self.lineLocation.text()
-        self.runTemplateForProject(location, name)
+        
+        location = self.runTemplateForProject(name, location)
         
         self.projectCreated = self.application.projectManager.createProject(name, location)
         
@@ -65,11 +66,11 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def on_buttonClose_pressed(self):
         self.reject()
 
-    def runTemplateForProject(self, location, name):
+    def runTemplateForProject(self, name, location):
         index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboBoxProjectTemplate.currentIndex(), 0))
         if index.isValid():
             template = index.internalPointer()
-            environment = template.buildEnvironment(projectLocation = location, projectName = name)
+            environment = template.buildEnvironment(projectName = name, projectLocation = location)
             return template.execute(environment)
     
     @classmethod

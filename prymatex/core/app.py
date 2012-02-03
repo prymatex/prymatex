@@ -10,6 +10,7 @@ import logging
 from PyQt4 import QtGui, QtCore
 
 import prymatex
+from prymatex import resources
 from prymatex.core import exceptions
 
 from prymatex.utils import coroutines
@@ -30,7 +31,7 @@ class PMXApplication(QtGui.QApplication):
         """
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
-        #QtGui.QApplication.setStyle(PrymatexStyle())
+        self.setStyleSheet(resources.APPLICATION_STYLE)
         
         # Some init's
         self.setApplicationName(prymatex.__name__)
