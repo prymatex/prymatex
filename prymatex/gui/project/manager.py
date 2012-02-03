@@ -42,12 +42,16 @@ class PMXProjectManager(QtCore.QObject):
         return ''.join(validPath)
 
     def loadProject(self):
-        for path in self.knownProjects:
+        for path in self.knownProjects[:]:
             project = PMXProject.loadProject(path, self)
 
     def isOpen(self, project):
         return True
 
+    def removeFromKnowProjects(self, path):
+        self.knownProjects.remove(path)
+        self.settings.setValue('knownProjects', self.knownProjects)
+        
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------

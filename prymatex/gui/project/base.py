@@ -98,6 +98,7 @@ class PMXProject(FileSystemTreeNode):
             manager.addProject(project)
         except Exception, e:
             print "Error in project %s (%s)" % (filePath, e)
+            manager.removeFromKnowProjects(path)            
     
     def setManager(self, manager):
         self.manager = manager
