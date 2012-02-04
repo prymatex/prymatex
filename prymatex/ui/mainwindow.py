@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Thu Feb  2 15:38:48 2012
+# Created: Fri Feb  3 14:44:28 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,7 +33,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.splitTabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 18))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 20))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -183,8 +183,6 @@ class Ui_MainWindow(object):
         self.actionEditSnippets.setObjectName(_fromUtf8("actionEditSnippets"))
         self.actionReloadBundles = QtGui.QAction(MainWindow)
         self.actionReloadBundles.setObjectName(_fromUtf8("actionReloadBundles"))
-        self.actionSelectBundleItem = QtGui.QAction(MainWindow)
-        self.actionSelectBundleItem.setObjectName(_fromUtf8("actionSelectBundleItem"))
         self.actionSelectTab = QtGui.QAction(MainWindow)
         self.actionSelectTab.setObjectName(_fromUtf8("actionSelectTab"))
         self.actionNewProject = QtGui.QAction(MainWindow)
@@ -200,6 +198,7 @@ class Ui_MainWindow(object):
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuNew.addAction(self.actionNewEditor)
+        self.menuNew.addSeparator()
         self.menuNew.addAction(self.actionNewFileFromTemplate)
         self.menuNew.addAction(self.actionNewProject)
         self.menuFile.addAction(self.menuNew.menuAction())
@@ -241,8 +240,6 @@ class Ui_MainWindow(object):
         self.menuBundleEditor.addAction(self.actionEditSnippets)
         self.menuBundleEditor.addSeparator()
         self.menuBundleEditor.addAction(self.actionReloadBundles)
-        self.menuBundles.addAction(self.actionSelectBundleItem)
-        self.menuBundles.addSeparator()
         self.menuBundles.addAction(self.menuBundleEditor.menuAction())
         self.menuBundles.addSeparator()
         self.menuPreferences.addAction(self.actionShowMenus)
@@ -333,8 +330,6 @@ class Ui_MainWindow(object):
         self.actionEditSnippets.setText(_('Edit &Snippets'))
         self.actionEditSnippets.setShortcut(_('Meta+Ctrl+Alt+S'))
         self.actionReloadBundles.setText(_('Reload &Bundles'))
-        self.actionSelectBundleItem.setText(_('&Select Bundle Item'))
-        self.actionSelectBundleItem.setShortcut(_('Meta+Ctrl+T'))
         self.actionSelectTab.setText(_('&Select Tab'))
         self.actionSelectTab.setShortcut(_('Ctrl+E'))
         self.actionNewProject.setText(_('Project'))

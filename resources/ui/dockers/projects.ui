@@ -89,6 +89,26 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButtonCustomFilters">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/view-filter.png</normaloff>:/icons/actions/view-filter.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButtonOptions">
         <property name="maximumSize">
          <size>
@@ -143,10 +163,13 @@
   <action name="actionNewFromTemplate">
    <property name="icon">
     <iconset resource="../../resources.qrc">
-     <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
+     <normaloff>:/icons/actions/run-build-file.png</normaloff>:/icons/actions/run-build-file.png</iconset>
    </property>
    <property name="text">
-    <string>From Template</string>
+    <string>File From Template</string>
+   </property>
+   <property name="toolTip">
+    <string>File From Template</string>
    </property>
   </action>
   <action name="actionDelete">
@@ -282,6 +305,15 @@
    </property>
    <property name="text">
     <string>Folders First</string>
+   </property>
+  </action>
+  <action name="actionSetInTerminal">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/apps/utilities-terminal.png</normaloff>:/icons/apps/utilities-terminal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set In Terminal</string>
    </property>
   </action>
  </widget>

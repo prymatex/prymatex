@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/newproject.ui'
 #
-# Created: Thu Feb  2 20:18:12 2012
+# Created: Fri Feb  3 14:51:33 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -73,15 +73,19 @@ class Ui_NewProjectDialog(object):
         self.formLayout_2.setWidget(4, QtGui.QFormLayout.FieldRole, self.comboBoxWorkingSet)
         self.label_2 = QtGui.QLabel(NewProjectDialog)
         self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.formLayout_2.setWidget(5, QtGui.QFormLayout.LabelRole, self.label_2)
-        self.comboBoxProjectTemplate = QtGui.QComboBox(NewProjectDialog)
+        self.formLayout_2.setWidget(6, QtGui.QFormLayout.LabelRole, self.label_2)
+        self.comboBoxTemplate = QtGui.QComboBox(NewProjectDialog)
+        self.comboBoxTemplate.setEnabled(False)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.comboBoxProjectTemplate.sizePolicy().hasHeightForWidth())
-        self.comboBoxProjectTemplate.setSizePolicy(sizePolicy)
-        self.comboBoxProjectTemplate.setObjectName(_fromUtf8("comboBoxProjectTemplate"))
-        self.formLayout_2.setWidget(5, QtGui.QFormLayout.FieldRole, self.comboBoxProjectTemplate)
+        sizePolicy.setHeightForWidth(self.comboBoxTemplate.sizePolicy().hasHeightForWidth())
+        self.comboBoxTemplate.setSizePolicy(sizePolicy)
+        self.comboBoxTemplate.setObjectName(_fromUtf8("comboBoxTemplate"))
+        self.formLayout_2.setWidget(6, QtGui.QFormLayout.FieldRole, self.comboBoxTemplate)
+        self.checkBoxUseTemplate = QtGui.QCheckBox(NewProjectDialog)
+        self.checkBoxUseTemplate.setObjectName(_fromUtf8("checkBoxUseTemplate"))
+        self.formLayout_2.setWidget(5, QtGui.QFormLayout.FieldRole, self.checkBoxUseTemplate)
         self.verticalLayout.addLayout(self.formLayout_2)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
@@ -116,7 +120,8 @@ class Ui_NewProjectDialog(object):
         self.buttonChoose.setText(_('Ch&oose'))
         self.checkBoxAddToWorkingSet.setText(_('Add to working set'))
         self.label3.setText(_('Working Set'))
-        self.label_2.setText(_('Project Template'))
+        self.label_2.setText(_('Template'))
+        self.checkBoxUseTemplate.setText(_('Use template'))
         self.buttonCreate.setText(_('&Create'))
         self.buttonCancel.setText(_('C&ancel'))
 
