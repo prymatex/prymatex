@@ -11,6 +11,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.scopes = []
         #Folding
         self.foldingMark = None
+        self.foldedLevel = 0
         self.folded = False
         #Indent
         self.indent = ""

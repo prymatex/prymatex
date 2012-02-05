@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+import os
+import fnmatch
 
 from PyQt4 import QtCore, QtGui
 
@@ -16,10 +18,18 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)
-        if isinstance(node, PMXProject):
-            #Filtrar por sets
-            regexp = self.filterRegExp()
-        return not node.ishidden
+        if node.isproject: return True
+        #TODO: Esto depende de alguna configuracion tambien
+        if node.ishidden: return False
+        if node.isdir: return True
+        
+        regexp = self.filterRegExp()        
+        if not regexp.isEmpty():
+            pattern = regexp.pattern()
+            #TODO: Hacerlo en el fileManager
+            match = any(map(lambda p: fnmatch.fnmatch(node.path, p), map(lambda p: p.strip(), pattern.split(","))))
+            return not match
+        return True
 
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True

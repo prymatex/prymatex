@@ -7,8 +7,6 @@
 	<key>command</key>
 	<string>#!/bin/sh
 
-# This one does not work yet...
-
 export TM_RUBY=$(type -p "${TM_RUBY:-ruby}")
 
 "${TM_RUBY}" -KU -- "$TM_BUNDLE_SUPPORT/lib/run_server.rb" testserver "$TM_SELECTED_FILES"

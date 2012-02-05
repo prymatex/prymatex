@@ -240,7 +240,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         return super(PMXBundleEditor, self).eventFilter(obj, event)
     
     @QtCore.pyqtSlot(int)
-    def on_comboBoxActivation_activated(self, index):
+    def on_comboBoxActivation_currentIndexChanged(self, index):
         self.lineKeyEquivalentActivation.setVisible(index == 0)
         self.lineTabTriggerActivation.setVisible(index == 1)
     

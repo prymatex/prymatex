@@ -19,11 +19,13 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         path = self.sourceModel().filePath(sIndex)
+        if os.path.isdir(path): return True
+        
         regexp = self.filterRegExp()
         if not regexp.isEmpty():
             pattern = regexp.pattern()
-            accept = any(map(lambda p: fnmatch.fnmatch(path, p), map(lambda p: p.strip(), pattern.split(",")))) if not os.path.isdir(path) else True
-            return accept
+            match = any(map(lambda p: fnmatch.fnmatch(path, p), map(lambda p: p.strip(), pattern.split(","))))
+            return not match
         return True
     
     def columnCount(self, parent):

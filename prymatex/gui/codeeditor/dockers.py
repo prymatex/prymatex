@@ -49,6 +49,7 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.mainWindow.currentEditor().setFocus()
         
 class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F7")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     MENU_ICON = resources.getIcon("bookmark")
     

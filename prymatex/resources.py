@@ -20,6 +20,7 @@ INTERNAL = {
     "snippet": ":/icons/bundles/snippets.png",
     "macro": ":/icons/bundles/macros.png",
     "templatefile": ":/icons/bundles/template-files.png",
+    
     #Editor Sidebar
     "foldingtop": ":/editor/sidebar/folding-top.png",
     "foldingbottom": ":/editor/sidebar/folding-bottom.png",
@@ -69,13 +70,22 @@ FileIconProvider = QtGui.QFileIconProvider()
 #===============================================================
 
 APPLICATION_STYLE = """* {
-    font-family: monospace;
+    
 }
 QTreeView {
     font-size: 12px;
 }
+QTreeView::item {
+    padding: 4px;
+}
 QTableView {
     font-size: 12px;
+}
+QListView {
+     font-size: 12px;
+}
+QListView::item {
+    padding: 4px;    
 }
 """
 

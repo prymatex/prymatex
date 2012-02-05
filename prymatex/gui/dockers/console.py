@@ -9,7 +9,7 @@ from prymatex.utils.i18n import ugettext as _
 
 class PMXConsoleDock(QtGui.QDockWidget, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F12")
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F4")
     MENU_ICON = resources.getIcon("console")
     
     def __init__(self, parent):

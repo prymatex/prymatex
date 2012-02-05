@@ -129,7 +129,7 @@ class TextMate(QtCore.QObject):
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     MENU_ICON = resources.getIcon("browser")
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F12")
+    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F9")
     
     SETTINGS_GROUP = "Browser"
     
@@ -218,6 +218,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.webView.page().mainFrame().evaluateJavaScript(js)
     
     def setHtml(self, string, bundleItem):
+        if not self.isVisible():
+            self.show()
+        self.raise_()
         self.bundleItem = bundleItem
         url = QtCore.QUrl.fromUserInput("about:%s" % bundleItem.name)
         self.lineUrl.setText(url.toString())

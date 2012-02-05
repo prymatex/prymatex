@@ -24,7 +24,8 @@ def has_shebang(text):
 
 def is_bash_shebang(text):
     line = text.split()[0]
-    return line.startswith("#!/bin/bash")
+    #TODO: Regexp
+    return line.startswith("#!/bin/bash") or line.startswith("#!/bin/sh")
 
 def is_env_shebang(text):
     line = text.split()[0]
@@ -49,8 +50,8 @@ def ensureEnvironment(environment):
         codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
     return codingenv
 
-def makeExecutableTempFile(content):
-    descriptor, name = tempfile.mkstemp(prefix='pmx')
+def makeExecutableTempFile(content, directory):
+    descriptor, name = tempfile.mkstemp(prefix='pmx', dir = directory)
     file = os.fdopen(descriptor, 'w+')
     file.write(content.encode('utf-8'))
     file.close()
@@ -61,7 +62,7 @@ def prepareShellScript(script, environment):
     environment = ensureEnvironment(environment)
     assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
     script = ensureShellScript(script, environment['PMX_SUPPORT_PATH'])
-    file = makeExecutableTempFile(script)
+    file = makeExecutableTempFile(script, environment.get('PMX_LOG_PATH'))
     if sys.platform == "win32":
         #FIXME: re trucho pero por ahora funciona para mi :)
         command = "c:\\cygwin\\bin\\env %s" % file

@@ -11,7 +11,7 @@ from bisect import bisect
 # Related third party imports
 #=======================================================================
 from PyQt4 import QtCore, QtGui
-    
+
 #=======================================================================
 # Local application / Library specific imports
 #=======================================================================

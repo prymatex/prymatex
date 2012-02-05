@@ -80,7 +80,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     # Settings
     #=======================================================================
     SETTINGS_GROUP = 'FileSystem'
-    filters = pmxConfigPorperty(default = ['*~', '*.pyc'])
+    @pmxConfigPorperty(default = '')
+    def customFilters(self, filters):
+        self.fileSystemProxyModel.setFilterRegExp(filters)
     
     _pushButtonHistoryBack = []
     _pushButtonHistoryForward = []
@@ -130,7 +132,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                     
             if event.key() == QtCore.Qt.Key_F and event.modifiers() == QtCore.Qt.ControlModifier:
                 # FIXME: Get Ctrl + F before editor's find, all the foucs is belong to us right now :P
-                self.lineEditFilter.setFocus()
+                self.pushButtonCustomFilters.click()
                 return True
         return QtGui.QDockWidget.eventFilter(self, obj, event)
     
@@ -166,7 +168,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
             "items": [
                 {   "title": "New",
                     "items": [
-                        self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
+                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate
                     ]
                 },
                 "-",
@@ -176,9 +178,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                         self.actionOpenDefaultEditor, self.actionOpenSystemEditor 
                     ]
                 },
-                self.actionRename,
-                self.actionConvertIntoProject,
+                self.actionSetInTerminal,
                 "-",
+                self.actionRename,
                 self.actionDelete,
             ]
         }
@@ -336,6 +338,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     def on_actionRename_triggered(self):
         basePath = self.currentPath()
         self.renamePath(basePath)
+    
     #======================================================
     # Tree View Context Menu Actions
     # Some of them are in fstask's PMXFileSystemTasks mixin
@@ -361,9 +364,18 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         if os.path.isfile(path):
             self.application.openFile(path)
     
-    @QtCore.pyqtSlot(str)
-    def on_lineEditFilter_textChanged(self, text):
-        self.fileSystemProxyModel.setFilterRegExp(text)
+    #================================================
+    # Custom filters
+    #================================================      
+    @QtCore.pyqtSlot()
+    def on_pushButtonCustomFilters_pressed(self):
+        filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 
+                                                        _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
+                                                        text = self.customFilters)
+        if accepted:
+            #Save and set filters
+            self.settings.setValue('customFilters', filters)
+            self.fileSystemProxyModel.setFilterRegExp(filters)
 
     @QtCore.pyqtSlot()
     def on_pushButtonCollapseAll_pressed(self):
@@ -374,10 +386,17 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         if checked:
             #Conectar señal
             self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+            self.on_mainWindow_currentEditorChanged(self.mainWindow.currentEditor())
         else:
             #Desconectar señal
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
-        
+    
+    @QtCore.pyqtSlot()
+    def on_actionSetInTerminal_triggered(self):
+        path = self.currentPath()
+        directory = self.application.fileManager.getDirectory(path)
+        self.mainWindow.terminal.chdir(directory)
+            
     #================================================
     # Sort and order Actions
     #================================================        

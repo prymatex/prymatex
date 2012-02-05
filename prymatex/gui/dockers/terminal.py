@@ -21,6 +21,10 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.setupTerminal()
         self.setupSocket()
     
+    def setMainWindow(self, mainWindow):
+        PMXBaseDock.setMainWindow(self, mainWindow)
+        mainWindow.terminal = self
+        
     def setupTerminal(self):
         try:
             from QTermWidget import QTermWidget
@@ -34,6 +38,9 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
             self.terminal.appendPlainText("QTermWidget disabled because of\n%s\nPlese install QTermWidget" % tb)
         self.setWidget(self.terminal)
     
+    #====================================================
+    # ZMQ External actions
+    #====================================================
     def setupSocket(self):
         self.socket = self.application.zmqContext.socket(zmq.REP)
         self.socket.bind('tcp://127.0.0.1:%s' % PORT)
@@ -41,7 +48,6 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     
     def socketReadyRead(self):
         command = self.socket.recv_pyobj()
-        print command
         name = command.get("name")
         args = command.get("args", [])
         kwargs = command.get("kwargs", {})
@@ -55,8 +61,15 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
         self.socket.send_pyobj({ "result": value })
 
-    def run(self, command, **kwargs):
-        self.terminal.sendText(command)
+    #========================================================
+    # Commands
+    #========================================================
+    def runCommand(self, command):
+        if not self.isVisible():
+            self.show()
+        self.raise_()
+        self.terminal.sendText("%s\n" % command)
         
-    def setColorScheme(self, schema, **kwargs):
-        self.terminal.setColorScheme(schema)
+    def chdir(self, directory):
+        self.runCommand("cd %s" % directory)
+        

@@ -10,6 +10,7 @@ from prymatex import resources
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.project.models import PMXProjectTreeModel
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
@@ -21,6 +22,14 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     MENU_ICON = resources.getIcon("project")
     MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
 
+    #=======================================================================
+    # Settings
+    #=======================================================================
+    SETTINGS_GROUP = 'Projects'
+    @pmxConfigPorperty(default = '')
+    def customFilters(self, filters):
+        self.projectTreeProxyModel.setFilterRegExp(filters)
+    
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
@@ -41,12 +50,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             "items": [
                 {   "title": "New",
                     "items": [
-                        self.actionNewProject, self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
+                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
                     ]
                 },
                 "-",
                 self.actionOpen,
                 self.actionOpenSystemEditor,
+                self.actionSetInTerminal,
                 "-",
                 self.actionDelete,
                 "-",
@@ -64,7 +74,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             "items": [
                 {   "title": "New",
                     "items": [
-                        self.actionNewProject, self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
+                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
                     ]
                 },
                 "-",
@@ -74,6 +84,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                         self.actionOpenDefaultEditor, self.actionOpenSystemEditor 
                     ]
                 },
+                self.actionSetInTerminal,
                 "-",
                 self.actionDelete,
                 "-",
@@ -89,12 +100,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             "items": [
                 {   "title": "New",
                     "items": [
-                        self.actionNewProject, self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate
+                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
                     ]
                 },
                 "-",
                 self.actionOpen,
                 self.actionOpenSystemEditor,
+                self.actionSetInTerminal,
                 "-",
                 self.actionDelete,
                 "-",
@@ -164,6 +176,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     def currentNode(self):
         return self.projectTreeProxyModel.node(self.treeViewProjects.currentIndex())
+        
     #================================================
     # Actions Create, Delete, Rename objects
     #================================================      
@@ -171,16 +184,22 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def on_actionNewFile_triggered(self):
         basePath = self.currentPath()
         self.createFile(basePath)
+        #TODO: si esta en auto update ver como hacer los refresh
+        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
     
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
         basePath = self.currentPath()
         self.createFileFromTemplate(basePath)
+        #TODO: si esta en auto update ver como hacer los refresh
+        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
     
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
         basePath = self.currentPath()
         self.createDirectory(basePath)
+        #TODO: si esta en auto update ver como hacer los refresh
+        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
@@ -237,16 +256,36 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
-            #Conectar se�al
+            #Conectar señal
             self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+            self.on_mainWindow_currentEditorChanged(self.mainWindow.currentEditor())
         else:
-            #Desconectar se�al
+            #Desconectar señal
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
     
     def on_mainWindow_currentEditorChanged(self, editor):
         if editor is not None and not editor.isNew():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath)
             self.treeViewProjects.setCurrentIndex(index)
+    
+    @QtCore.pyqtSlot()
+    def on_actionSetInTerminal_triggered(self):
+        path = self.currentPath()
+        directory = self.application.fileManager.getDirectory(path)
+        self.mainWindow.terminal.chdir(directory)
+    
+    #================================================
+    # Custom filters
+    #================================================      
+    @QtCore.pyqtSlot()
+    def on_pushButtonCustomFilters_pressed(self):
+        filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 
+                                                        _("Enter the filters (separated by comma)\nOnly * and ? may be used for custom matching"), 
+                                                        text = self.customFilters)
+        if accepted:
+            #Save and set filters
+            self.settings.setValue('customFilters', filters)
+            self.projectTreeProxyModel.setFilterRegExp(filters)
             
     #================================================
     # Sort and order Actions

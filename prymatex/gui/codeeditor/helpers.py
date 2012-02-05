@@ -242,20 +242,20 @@ class SmartIndentHelper(PMXBaseKeyHelper):
             if syntax is not None:
                 editor.setSyntax(syntax)
         indentMarks = self.settings.indent(text)
-        QtGui.QPlainTextEdit.keyPressEvent(editor, event)
-        print indentMarks
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
-            cursor.insertText(block.userData().indent + editor.tabKeyBehavior)
+            indent = block.userData().indent + editor.tabKeyBehavior
         elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
             self.logger.debug("Increase next line indent")
         elif PMXPreferenceSettings.UNINDENT in indentMarks:
             self.logger.debug("Unindent")
+            indent = ""
         elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-            cursor.insertText(block.userData().indent[:len(editor.tabKeyBehavior)])
+            indent = block.userData().indent[:len(editor.tabKeyBehavior)]
         else:
             self.logger.debug("Preserve indent")
-            cursor.insertText(block.userData().indent)
+            indent = block.userData().indent
+        cursor.insertText("\n%s" % indent)
 
 class MultiCursorHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_M

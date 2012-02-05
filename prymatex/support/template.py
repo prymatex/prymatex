@@ -112,8 +112,8 @@ class PMXTemplate(PMXBundleItem):
         env = super(PMXTemplate, self).buildEnvironment()
         fileName = kwargs.get('fileName', '')
         fileDirectory = kwargs.get('fileDirectory', '')
-        if fileName and fileDirectory and self.extension:
-            nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension)
+        if fileName and fileDirectory:
+            nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension) if self.extension else fileName
             env['TM_NEW_FILE'] = os.path.join(fileDirectory, nameWithExtension)
             env['TM_NEW_FILE_BASENAME'] = fileName
             env['TM_NEW_FILE_DIRECTORY'] = fileDirectory

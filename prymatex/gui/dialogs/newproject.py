@@ -21,8 +21,8 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.lineLocation.setCompleter(self.completerFileSystem)
         
         self.templateProxyModel = self.application.supportManager.templateProxyModel
-        self.comboBoxProjectTemplate.setModel(self.templateProxyModel)
-        self.comboBoxProjectTemplate.setModelColumn(0)
+        self.comboBoxTemplate.setModel(self.templateProxyModel)
+        self.comboBoxTemplate.setModelColumn(0)
         self.buttonCreate.setDefault(True)
         self.projectCreated = None
     
@@ -36,7 +36,8 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         name = self.lineProjectName.text()
         location = self.lineLocation.text()
         
-        location = self.runTemplateForProject(name, location)
+        if self.checkBoxUseTemplate.isChecked():
+            location = self.runTemplateForProject(name, location)
         
         self.projectCreated = self.application.projectManager.createProject(name, location)
         
@@ -62,12 +63,15 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     
     def on_checkBoxAddToWorkingSet_toggled(self, checked):
         self.comboBoxWorkingSet.setEnabled(checked)
+    
+    def on_checkBoxUseTemplate_toggled(self, checked):
+        self.comboBoxTemplate.setEnabled(checked)
         
     def on_buttonClose_pressed(self):
         self.reject()
 
     def runTemplateForProject(self, name, location):
-        index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboBoxProjectTemplate.currentIndex(), 0))
+        index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0))
         if index.isValid():
             template = index.internalPointer()
             environment = template.buildEnvironment(projectName = name, projectLocation = location)
@@ -79,5 +83,6 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         dlg.lineProjectName.setText(name or '')
         dlg.buttonCreate.setEnabled(not directory is None and not name is None)
         dlg.lineLocation.setText(directory or dlg.application.projectManager.workspaceDirectory)
+        dlg.checkBoxUseTemplate.setChecked(False)
         if dlg.exec_() == dlg.Accepted:
             return dlg.projectCreated

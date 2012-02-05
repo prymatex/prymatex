@@ -59,6 +59,10 @@ class PMXEditorFolding(object):
         openBlock = self.findPreviousEqualIndentOpenBlock(block)
         if openBlock is not None:
             #Hay que cerrar algo antes
+            realBlock = self.editor.findPreviousEqualIndentBlock(block)
+            while realBlock != openBlock:
+                block = realBlock
+                realBlock = self.editor.findPreviousEqualIndentBlock(realBlock)
             closeBlock = self.editor.findPreviousMoreIndentBlock(block)
             if closeBlock is not None:
                 closeBlock.userData().foldingMark = self.getNestedLevel(openBlock) - self.getNestedLevel(closeBlock)
@@ -80,12 +84,17 @@ class PMXEditorFolding(object):
         if nest > 0:
             #TODO: Arreglar esto que no depende de block
             lastBlock = self.editor.document().lastBlock()
+            if lastBlock.text().strip() == "":
+                lastBlock = self.editor.findPreviousNoBlankBlock(lastBlock)
             if lastBlock in self.folding: return
             lessIndentBlock = self.editor.findPreviousLessIndentBlock(lastBlock)
             if lessIndentBlock is not None:
                 nest += self.tryCloseIndentBlock(lessIndentBlock)
             else:
                 nest += self.tryCloseIndentBlock(lastBlock)
+            if nest > 0:
+                lastBlock.userData().foldingMark = -nest
+                self.folding.append(lastBlock)
 
     def getFoldingMark(self, block):
         if block in self.folding:
