@@ -3,7 +3,7 @@
 
 from PyQt4 import QtGui, QtCore
 
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
 from prymatex.support.command import PMXCommand
@@ -93,16 +93,18 @@ class PMXCommandProcessor(PMXCommandProcessor):
             return self.runPopenCommand(context, shellCommand, callback)
     
     def runPopenCommand(self, context, shellCommand, callback):
-        process = Popen(shellCommand, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = context.environment)
+        process = Popen(shellCommand, stdin=PIPE, stdout=PIPE, stderr=PIPE, env = context.environment)
         
         if context.inputType != None:
             process.stdin.write(unicode(context.inputValue).encode("utf-8"))
         process.stdin.close()
         try:
             context.outputValue = process.stdout.read()
+            context.errorValue = process.stderr.read()
         except IOError, e:
             context.errorValue = str(e).decode("utf-8")
         process.stdout.close()
+        process.stderr.close()
         context.outputType = process.wait()
         callback(self, context)
     
@@ -188,7 +190,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         command = PMXCommand(self.editor.application.supportManager.uuidgen(), "internal", hash = hash)
         command.bundle = context.command.bundle
         self.editor.insertBundleItem(command)
-            
+        #FIXME: Esto no hace falta porque el que muestra el error por html es el insertBundleItem
         self.showAsHTML(context)
         
     def discard(self, context):

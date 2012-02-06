@@ -8,7 +8,7 @@ http://manual.macromates.com/en/templates
 
 import os, shutil, codecs
 from glob import glob
-from subprocess import Popen
+from subprocess import Popen, PIPE
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import prepareShellScript
 from prymatex.utils import plist
@@ -130,14 +130,24 @@ class PMXTemplate(PMXBundleItem):
         origWD = os.getcwd() # remember our original working directory
         os.chdir(self.path)
         
-        command, env = prepareShellScript(self.command, environment)
-
-        process = Popen(command, env = env)
-        process.wait()
+        shellCommand, environment = prepareShellScript(self.command, environment)
+        
+        process = Popen(shellCommand, stdout=PIPE, stderr=PIPE, env = environment)
+        
+        try:
+            outputValue = process.stdout.read()
+            errorValue = process.stderr.read()
+        except IOError, e:
+            errorValue = str(e).decode("utf-8")
+        process.stdout.close()
+        process.stderr.close()
+        outputType = process.wait()
+        #TODO: Tirar esto como un error para mostrarlo en el browser
+        print outputType, outputValue, errorValue
         
         os.chdir(origWD) # get back to our original working directory
         #Si todo esta bien retornar el new file o el project location
-        return env.get('TM_NEW_FILE', env.get('TM_NEW_PROJECT_LOCATION', None))
+        return environment.get('TM_NEW_FILE', environment.get('TM_NEW_PROJECT_LOCATION', None))
         
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
