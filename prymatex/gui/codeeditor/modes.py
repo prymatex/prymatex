@@ -120,7 +120,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
     
     def isActive(self):
-        return bool(self.cursors)
+        return bool(self.cursors) or self.startPoint != None
     
     def inactive(self):
         self.cursors = []
@@ -144,8 +144,8 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
 
     @property
     def isDragCursor(self):
-        return self.dragPoint != None
-    
+        return self.startPoint != None and self.dragPoint != None
+
     def getDragCursorRect(self):
         """Retorna un rectangulo que representa la zona del drag cursor"""
         return QtCore.QRect(self.startPoint, self.dragPoint)
@@ -158,7 +158,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         
     def mouseMovePoint(self, point):
         self.dragPoint = point
-        self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
 
     def mouseReleasePoint(self, endPoint):
         _, width, points = self.getPoints(self.startPoint, endPoint)
@@ -270,8 +269,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             position = bisect_key(self.cursors, cursor, lambda cursor: cursor.position())
             self.cursors.insert(position, cursor)
         self.editor.highlightCurrent()
-        self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
-        
+
     def canMoveRight(self):
         return all(map(lambda c: not c.atEnd(), self.cursors))
     

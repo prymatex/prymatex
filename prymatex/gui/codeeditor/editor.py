@@ -694,15 +694,17 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
-        if event.modifiers() == QtCore.Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.ControlModifier and self.multiCursorMode.isActive():
             self.multiCursorMode.mouseMovePoint(event.pos())
+            self.viewport().repaint(self.viewport().visibleRegion())
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
-        if event.modifiers() == QtCore.Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.ControlModifier and self.multiCursorMode.isActive():
             self.multiCursorMode.mouseReleasePoint(event.pos())
             self.application.restoreOverrideCursor()
+            self.viewport().repaint(self.viewport().visibleRegion())
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
