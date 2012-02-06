@@ -11,9 +11,9 @@ from prymatex.gui.dockers.projects import PMXProjectDock
 from prymatex.gui.dockers.terminal import PMXTerminalDock
 
 def registerPlugin(manager):
-    manager.registerDocker(PMXFileSystemDock)
-    manager.registerDocker(PMXBrowserDock)
-    manager.registerDocker(PMXConsoleDock)
-    #manager.registerDocker(PMXLoggerDock)
     manager.registerDocker(PMXProjectDock)
+    manager.registerDocker(PMXFileSystemDock)
     manager.registerDocker(PMXTerminalDock)
+    manager.registerDocker(PMXConsoleDock)
+    manager.registerDocker(PMXBrowserDock)
+    #manager.registerDocker(PMXLoggerDock)

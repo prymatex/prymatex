@@ -11,9 +11,9 @@ from prymatex.gui.codeeditor.overlay import PMXEditorMessageOverlay, PMXMiniMapO
 
 def registerPlugin(manager):
     manager.registerEditor(PMXCodeEditor)
-    manager.registerDocker(PMXCodeBookmarksDock)
-    manager.registerDocker(PMXCodeSymbolsDock)
     manager.registerStatusBar(PMXCodeEditorStatus)
+    manager.registerDocker(PMXCodeSymbolsDock)
+    manager.registerDocker(PMXCodeBookmarksDock)
     
     #manager.registerOverlay(PMXCodeEditor, PMXMiniMapOverlay)
     manager.registerOverlay(PMXCodeEditor, PMXEditorMessageOverlay)
