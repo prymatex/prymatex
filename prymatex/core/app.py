@@ -329,20 +329,25 @@ class PMXApplication(QtGui.QApplication):
                 self.mainWindow.addEditor(editor, focus)
 
     def _populate_editor(self, editor, content, readyCallback = None):
-        def appendChunksTask(editor, content, chunksize = 1024):
-            editor.textCursor().beginEditBlock()
-            currentIndex = 0
-            contentLength = len(content)
-            while currentIndex <= contentLength:
-                editor.insertPlainText(content[currentIndex:currentIndex + chunksize])
-                currentIndex += chunksize
-                yield
-            editor.textCursor().endEditBlock()
-            #editor.setMaximumBlockCount(0)
-            yield coroutines.Return(editor)
-        task = self.scheduler.newTask( appendChunksTask(editor, content) )
-        if readyCallback != None:
-            task.done.connect( readyCallback )
+        useCoroutines = False
+        if useCoroutines:
+            def appendChunksTask(editor, content, chunksize = 1024):
+                editor.textCursor().beginEditBlock()
+                currentIndex = 0
+                contentLength = len(content)
+                while currentIndex <= contentLength:
+                    editor.insertPlainText(content[currentIndex:currentIndex + chunksize])
+                    currentIndex += chunksize
+                    yield
+                editor.textCursor().endEditBlock()
+                yield coroutines.Return(editor)
+            task = self.scheduler.newTask( appendChunksTask(editor, content) )
+            if readyCallback != None:
+                task.done.connect( readyCallback )
+        else:
+            editor.setPlainText(content)
+            if readyCallback != None:
+                readyCallback(coroutines.Return(editor))
 
     def openDirectory(self, directoryPath):
         raise NotImplementedError("Directory contents should be opened as files here")        
