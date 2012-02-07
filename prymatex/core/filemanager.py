@@ -224,13 +224,6 @@ class PMXFileManager(QtCore.QObject):
     def lastModification(self, filePath):
         return QtCore.QFileInfo(filePath).lastModified()
 
-    def checkExternalModification(self, filePath, oldmtime):
-        """Check if the file was modified external."""
-        mtime = self.lastModification(filePath)
-        if mtime > oldmtime:
-            return True
-        return False
-    
     def compareFiles(self, filePath1, filePath2, compareBy = "name"):
         value1, value2 = filePath1, filePath2
         if compareBy == "size":

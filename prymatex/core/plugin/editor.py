@@ -113,11 +113,6 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     def setCursorPosition(self, cursorPosition):
         pass
 
-    def checkExternalModification(self):
-        if self.isNew():
-            return False
-        return self.application.fileManager.checkExternalModification(self.filePath, self.mtime)
-    
     def contributeToTabMenu(self, menu):
         ''' When an editor is right clicked on it's tab, the editor
         can provide custom actions to the menu through this callback'''
