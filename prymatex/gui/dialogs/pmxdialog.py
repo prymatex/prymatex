@@ -40,12 +40,11 @@ class PMXDialogSystem(QtCore.QObject):
         print "async_window: ", args, kwargs
         self.sendResult("1234")
     
-    def tooltip(self, args):
-        print "Tooltip: ", options, args
-        return True
+    def tooltip(self, content, format = "text", transparent = False):
+        self.application.currentEditor().showMessage(content)
+        self.sendResult()
     
     def menu(self, plist):
-        #TODO: Instanciar un completer y pasarle los valores
         data = plistlib.readPlistFromString(plist)
         def sendSelectedIndex(index):
             self.sendResult(plistlib.writePlistToString({"selectedIndex": index}))

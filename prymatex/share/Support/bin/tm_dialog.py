@@ -333,8 +333,15 @@ class CommandHandler(object):
         sys.stdout.write(value["result"])
     
     def tooltip(self, options, args):
-        self.debug(options, args)
-        
+        kwargs = {}
+        kwargs["format"] = "html" if options.html else "text"
+        kwargs["transparent"] = options.transparent
+ 
+        command = {"name": "tooltip", "args": args, "kwargs": kwargs}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
+
     def menu(self, options, args):
         if options.parameters == None:
             parameters = sys.stdin.readlines()
