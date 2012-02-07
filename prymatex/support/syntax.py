@@ -166,9 +166,6 @@ class PMXSyntax(PMXBundleItem):
     PATTERNS = ['*.tmLanguage', '*.plist']
     FOLDING_START = 1
     FOLDING_STOP = -1
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXSyntax, self).__init__(uuid, namespace, hash, path)
-
     def load(self, hash):
         super(PMXSyntax, self).load(hash)
         for key in PMXSyntax.KEYS:

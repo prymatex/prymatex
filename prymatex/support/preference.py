@@ -145,9 +145,6 @@ class PMXPreference(PMXBundleItem):
     EXTENSION = 'tmPreferences'
     PATTERNS = ['*.tmPreferences', '*.plist']
 
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXPreference, self).__init__(uuid, namespace, hash, path)
-
     def load(self, hash):
         super(PMXPreference, self).load(hash)
         for key in PMXPreference.KEYS:

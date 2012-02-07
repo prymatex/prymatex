@@ -42,9 +42,6 @@ class PMXCommand(PMXBundleItem):
                   206: 'showAsTooltip',
                   207: 'createNewDocument'
                   }
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXCommand, self).__init__(uuid, namespace, hash, path)
-
     def load(self, hash):
         super(PMXCommand, self).load(hash)
         for key in PMXCommand.KEYS:
@@ -125,8 +122,6 @@ class PMXDragCommand(PMXCommand):
     TYPE = 'dragcommand'
     FOLDER = 'DragCommands'
     FILES = ['*.tmCommand', '*.plist']
-    def __init__(self, uuid, namespace, hash = None, path = None):
-        super(PMXDragCommand, self).__init__(uuid, namespace, hash, path)
 
     def load(self, hash):
         super(PMXDragCommand, self).load(hash)

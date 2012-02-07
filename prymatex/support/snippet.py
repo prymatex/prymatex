@@ -617,11 +617,8 @@ class PMXSnippet(PMXBundleItem):
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
     PATTERNS = ['*.tmSnippet', '*.plist']
-    parser = PMXSyntax(uuidmodule.uuid1(), "internal", hash = SNIPPET_SYNTAX)
-    
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXSnippet, self).__init__(uuid, namespace, hash, path)
-        self.snippet = None
+    parser = PMXSyntax(uuidmodule.uuid1(), hash = SNIPPET_SYNTAX)
+    snippet = None                     #TODO: Poner un mejor nombre, este es el snippet compilado
     
     def load(self, hash):
         super(PMXSnippet, self).load(hash)

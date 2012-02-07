@@ -14,10 +14,10 @@ http://manual.macromates.com/en/scope_selectors.html
 """
 
 class PMXManagedObject(object):
-    def __init__(self, uuid, namespace, path):
+    def __init__(self, uuid):
         self.uuid = uuid
-        self.namespaces = [ namespace ]
-        self.sources = { namespace: path }
+        self.namespaces = []
+        self.sources = {}
         self.manager = None
     
     @property
@@ -60,8 +60,8 @@ class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXBundle, self).__init__(uuid, namespace, path)
+    def __init__(self, uuid, hash):
+        PMXManagedObject.__init__(self, uuid)
         self.enabled = True
         self.populated = False
         self.support = None    #supportPath
@@ -118,24 +118,35 @@ class PMXBundle(PMXManagedObject):
             uuid = manager.uuidgen(data.pop('uuid', None))
             bundle = manager.getManagedObject(uuid)
             if bundle is None and not manager.isDeleted(uuid):
-                bundle = cls(uuid, namespace, data, path)
+                bundle = cls(uuid, data)
                 #Add and promote, capture bundle
                 bundle.enabled = manager.isEnabled(bundle.uuid)
                 bundle = manager.addBundle(bundle)
                 manager.addManagedObject(bundle)
-            elif bundle is not None:
-                bundle.addSource(namespace, path)
+            bundle.addSource(namespace, path)
         except Exception, e:
-            print "Error in bundle %s (%s)" % (info_file, e)
+            print "Error in laod bundle %s (%s)" % (info_file, e)
 
+    @classmethod
+    def reloadBundle(cls, path, namespace, manager):
+        info_file = os.path.join(path, cls.FILE)
+        #TODO: Ver si se modifico el archivo para no cargar al pedo
+        try:
+            data = plist.readPlist(info_file)
+            uuid = manager.uuidgen(data.pop('uuid', None))
+            bundle = manager.getManagedObject(uuid)
+            #TODO: Hacer el reload
+        except Exception, e:
+            print "Error in reload bundle %s (%s)" % (info_file, e)
+            
 class PMXBundleItem(PMXManagedObject):
     KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
     TYPE = ''
     FOLDER = ''
     EXTENSION = ''
     PATTERNS = []
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXBundleItem, self).__init__(uuid, namespace, path)
+    def __init__(self, uuid, hash):
+        PMXManagedObject.__init__(self, uuid)
         self.bundle = None
         self.load(hash)
 
@@ -195,16 +206,26 @@ class PMXBundleItem(PMXManagedObject):
             uuid = manager.uuidgen(data.pop('uuid', None))
             item = manager.getManagedObject(uuid)
             if item is None and not manager.isDeleted(uuid):
-                item = cls(uuid, namespace, data, path)
+                item = cls(uuid, data)
                 #danger!!! add and populate
                 item.setBundle(bundle)
                 item = manager.addBundleItem(item)
                 manager.addManagedObject(item)
-            elif item is not None:
-                item.addSource(namespace, path)
+            item.addSource(namespace, path)
+        except Exception, e:
+            print "Error in bundle item"
+            #print "Error in bundle item %s (%s)" % (path, e)
+    
+    @classmethod
+    def reloadBundleItem(cls, path, namespace, bundle, manager):
+        try:
+            data = plist.readPlist(path)
+            uuid = manager.uuidgen(data.pop('uuid', None))
+            item = manager.getManagedObject(uuid)
+            #TODO: Hacer el reload
         except Exception, e:
             print "Error in bundle item %s (%s)" % (path, e)
-    
+
     def execute(self, processor):
         pass
         

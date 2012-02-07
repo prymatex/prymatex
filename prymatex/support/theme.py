@@ -41,8 +41,8 @@ class PMXThemeStyle(object):
 class PMXTheme(PMXManagedObject):
     KEYS = [    'name', 'comment', 'author', 'settings']
     
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXTheme, self).__init__(uuid, namespace, path)
+    def __init__(self, uuid, hash):
+        super(PMXTheme, self).__init__(uuid)
         self.styles = []
         self.load(hash)
 
@@ -87,7 +87,7 @@ class PMXTheme(PMXManagedObject):
             uuid = manager.uuidgen(data.pop('uuid', None))
             theme = manager.getManagedObject(uuid)
             if theme is None and not manager.isDeleted(uuid):
-                theme = PMXTheme(uuid, namespace, data, path)
+                theme = PMXTheme(uuid, data)
                 theme = manager.addTheme(theme)
                 settings = data.pop('settings', [])
                 if settings:
@@ -98,7 +98,6 @@ class PMXTheme(PMXManagedObject):
                     theme.styles.append(style)
                 manager.showMessage("Loading theme %s" % theme.name)
                 manager.addManagedObject(theme)
-            elif theme is not None:
-                theme.addSource(namespace, path)
+            theme.addSource(namespace, path)
         except Exception, e:
             print "Error en theme %s (%s)" % (path, e)

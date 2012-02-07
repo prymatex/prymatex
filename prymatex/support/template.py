@@ -63,10 +63,7 @@ class PMXTemplate(PMXBundleItem):
     TYPE = 'template'
     FOLDER = 'Templates'
     PATTERNS = [ '*' ]
-
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXTemplate, self).__init__(uuid, namespace, hash, path)
-        self.files = []
+    files = []                    #Estos son los template files
     
     def load(self, hash):
         super(PMXTemplate, self).load(hash)
@@ -159,7 +156,7 @@ class PMXTemplate(PMXBundleItem):
             uuid = manager.uuidgen(data.pop('uuid', None))
             template = manager.getManagedObject(uuid)
             if template is None and not manager.isDeleted(uuid):
-                template = cls(uuid, namespace, data, path)
+                template = cls(uuid,data)
                 template.setBundle(bundle)
                 template = manager.addBundleItem(template)
                 for path in paths:
@@ -167,8 +164,7 @@ class PMXTemplate(PMXBundleItem):
                     file = manager.addTemplateFile(file)
                     template.files.append(file)
                 manager.addManagedObject(template)
-            elif template is not None:
-                template.addNamespace(namespace)
+            template.addSource(namespace, path)
             return template
         except Exception, e:
             print "Error in bundle %s (%s)" % (info, e)

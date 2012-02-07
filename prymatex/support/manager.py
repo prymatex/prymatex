@@ -195,7 +195,16 @@ class PMXSupportBaseManager(object):
             paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
                 PMXTheme.reloadTheme(path, namespace, self)
-
+    
+    #---------------------------------------------------
+    # RELOAD BUNDLES
+    #---------------------------------------------------
+    def reloadBundles(self, namespace):
+        if 'Bundles' in self.namespaces[namespace]:
+            paths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
+            for path in paths:
+                PMXBundle.reloadBundle(path, namespace, self)
+                
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
     #---------------------------------------------------
