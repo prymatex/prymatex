@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-    Macro's module
-        content, name, scope, keyEquivalent, tabTrigger
-'''
+"""
+Macro's module
+"""
 from prymatex.support.bundle import PMXBundleItem
 
 class PMXMacro(PMXBundleItem):
@@ -13,9 +12,6 @@ class PMXMacro(PMXBundleItem):
     FOLDER = 'Macros'
     EXTENSION = 'tmMacro'
     PATTERNS = [ '*.tmMacro', '*.plist']
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXMacro, self).__init__(uuid, namespace, hash, path)
-
     def load(self, hash):
         super(PMXMacro, self).load(hash)
         for key in PMXMacro.KEYS:

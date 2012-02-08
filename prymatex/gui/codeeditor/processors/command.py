@@ -224,7 +224,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                        'name': context.command.name,
                  'tabTrigger': context.command.tabTrigger,
               'keyEquivalent': context.command.keyEquivalent }
-        snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), "internal", hash = hash)
+        snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), hash = hash)
         snippet.bundle = context.command.bundle
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             

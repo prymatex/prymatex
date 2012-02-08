@@ -3,18 +3,21 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.settings.widgets import PMXConfigBaseWidget
+from prymatex.gui.settings.model import PMXConfigTreeNode
 from prymatex.ui.settings.environment import Ui_EnvVariables
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
-    def __init__(self, settingGroup, user, system, parent = None):
+    def __init__(self, parent = None):
         super(PMXEnvVariablesTableModel, self).__init__(parent)
-        self.settingGroup = settingGroup
+        self.variables = {}
+        
+    def setVariables(self, user, system):
         self.variables = user + map(lambda (variable, value): {'variable': variable, 'value': value, 'system': True, 'enabled': True}, system.iteritems())
+        self.layoutChanged.emit()
         
     def setSettingValue(self):
         variables = filter(lambda item: 'system' not in item, self.variables)
-        self.settingGroup.setValue('shellVariables', variables)
+        self.parent().userVariablesChanged.emit(variables)
     
     def rowCount(self, parent = None):
         return len(self.variables)
@@ -92,15 +95,18 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         else:
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
 
-class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables):
+class PMXEnvVariablesWidget(QtGui.QWidget, PMXConfigTreeNode, Ui_EnvVariables):
     '''
     Variables
     '''
+    userVariablesChanged = QtCore.pyqtSignal(dict)
+    
     def __init__(self, parent = None):
-        super(PMXEnvVariablesWidgets, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
+        PMXConfigTreeNode.__init__(self, "Variables", None)
         self.setupUi(self)
         
-        self.model = PMXEnvVariablesTableModel(self.application.settings.getGroup('SupportManager'), self.application.supportManager.shellVariables, self.application.supportManager.environment, self)
+        self.model = PMXEnvVariablesTableModel(self)
         self.tableView.setModel(self.model)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
@@ -108,6 +114,10 @@ class PMXEnvVariablesWidgets(PMXConfigBaseWidget, Ui_EnvVariables):
         self.model.rowsInserted.connect(self.tableView.resizeRowsToContents)
         self.model.rowsRemoved.connect(self.tableView.resizeRowsToContents)
         self.tableView.resizeRowsToContents()
+        
+    def setVariables(self, user, system):
+        self.model.setVariables(user, system) 
+        #self.application.settings.getGroup('SupportManager'), ,
         
     def on_pushAdd_pressed(self):
         self.model.insertRows(0, 1)

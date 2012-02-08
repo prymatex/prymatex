@@ -28,7 +28,10 @@ class PMXBaseWidgetPlugin(PMXBasePlugin):
     
     def addOverlay(self, overlay):
         self.overlays.append(overlay)
-    
+
+    def contributeToSettings(self):
+        return []
+
     @classmethod
     def contributeToMainMenu(cls):
         return {}

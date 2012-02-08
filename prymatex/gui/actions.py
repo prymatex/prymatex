@@ -236,7 +236,7 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSettings_triggered(self):
-        self.application.configDialog.exec_()
+        self.application.settingsDialog.exec_()
             
     #============================================================
     # Help Actions

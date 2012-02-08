@@ -3,14 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.ui.settings.dialog import Ui_SettingsDialog
-
-class PMXSettingsItem(QtGui.QStandardItem):
-    def __init__(self, name, index, parent = None):
-        QtGui.QStandardItem.__init__(self, parent)    
-        self.setText(name)
-        self.setEditable(False)
-        self.stackIndex = index
+from prymatex.ui.dialogs.settings import Ui_SettingsDialog
 
 class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
     """
@@ -29,14 +22,12 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
         self.proxyModelSettings = QtGui.QSortFilterProxyModel(self)
         self.proxyModelSettings.setSourceModel(self.model)
         
-        self.treeViewSettings.setModel(self.proxyModelSettings)
-        self.treeViewSettings.setHeaderHidden(True)
-        self.treeViewSettings.setAnimated(True)
+        self.treeViewSetting.setModel(self.proxyModelSettings)
         
-        self.stackLayout = QtGui.QStackedLayout()
-        self.container.setLayout(self.stackLayout)
-        
-        #self.treeTextToSectionTitle( index = None) # Grab initial
+        self.stackedWidget = QtGui.QStackedWidget()
+        self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.stackedWidget.setFrameShadow(QtGui.QFrame.Sunken)
+        self.settingLayout.insertWidget(0, self.stackedWidget)
         
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
@@ -67,11 +58,9 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
             self.firstTitleTaken = True
         super(PMXSettingsDialog, self).showEvent(event)
     
-    def register(self, widgetClass, parentNode = None):
-        widgetClass.application = self.application
-        widget = widgetClass(self)
-        index = self.stackLayout.addWidget(widget)
-        item = PMXSettingsItem(widget.windowTitle(), index)
-        item.setIcon(widget.windowIcon())
-        self.model.appendRow(item)
+    def register(self, widget):
+        index = self.stackedWidget.addWidget(widget)
+        #item = PMXSettingsItem(widget.windowTitle(), index)
+        #item.setIcon(widget.windowIcon())
+        #self.model.appendRow(item)
         

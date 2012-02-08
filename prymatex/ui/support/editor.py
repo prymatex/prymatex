@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
 #
-# Created: Wed Dec 28 19:06:06 2011
+# Created: Tue Feb  7 16:05:51 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,6 +33,7 @@ class Ui_BundleEditor(object):
         self.verticalLayoutWidget = QtGui.QWidget(self.splitter)
         self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
         self.treeLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
+        self.treeLayout.setSpacing(2)
         self.treeLayout.setMargin(0)
         self.treeLayout.setObjectName(_fromUtf8("treeLayout"))
         self.comboBoxItemFilter = QtGui.QComboBox(self.verticalLayoutWidget)

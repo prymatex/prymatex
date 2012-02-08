@@ -213,8 +213,7 @@ class PMXBundleItem(PMXManagedObject):
                 manager.addManagedObject(item)
             item.addSource(namespace, path)
         except Exception, e:
-            print "Error in bundle item"
-            #print "Error in bundle item %s (%s)" % (path, e)
+            print "Error in bundle item %s (%s)" % (path, e)
     
     @classmethod
     def reloadBundleItem(cls, path, namespace, bundle, manager):

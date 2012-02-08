@@ -226,17 +226,18 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     def setupDialogs(self):
         #Settings
-        from prymatex.gui.settings.dialog import PMXSettingsDialog
-        from prymatex.gui.settings.widgets import PMXGeneralWidget, PMXNetworkWidget
-        from prymatex.gui.settings.environment import PMXEnvVariablesWidgets
-        from prymatex.gui.settings.themes import PMXThemeConfigWidget
-        from prymatex.gui.settings.widgets import PMXFileManagerSettings
-        self.configDialog = PMXSettingsDialog(self)
-        self.configDialog.register(PMXGeneralWidget)
-        self.configDialog.register(PMXFileManagerSettings)
-        self.configDialog.register(PMXThemeConfigWidget)
-        self.configDialog.register(PMXEnvVariablesWidgets)
-        self.configDialog.register(PMXNetworkWidget)
+        from prymatex.gui.dialogs.settings import PMXSettingsDialog
+        #from prymatex.gui.settings.widgets import PMXGeneralWidget, PMXNetworkWidget
+        #from prymatex.gui.settings.environment import PMXEnvVariablesWidget
+        #from prymatex.gui.settings.themes import PMXThemeConfigWidget
+        #from prymatex.gui.settings.widgets import PMXFileManagerSettings
+        self.settingsDialog = PMXSettingsDialog(self)
+        #self.configDialog.register(PMXGeneralWidget)
+        #self.configDialog.register(PMXFileManagerSettings)
+        #self.configDialog.register(PMXThemeConfigWidget)
+        for settings in self.supportManager.contributeToSettings():
+            self.settingsDialog.register(settings)
+        #self.configDialog.register(PMXNetworkWidget)
         
         #Bundle Editor
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
