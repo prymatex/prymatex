@@ -27,7 +27,7 @@ class PMXApplication(QtGui.QApplication):
     
     def __init__(self, profile):
         """
-        InicializaciÃ³n de la aplicaciÃ³n.
+        Inicialización de la aplicación.
         """
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
@@ -48,22 +48,25 @@ class PMXApplication(QtGui.QApplication):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
         splash.show()
         try:
+            self.setupPluginManager()     #Prepare plugin manager
+
             # Loads
             self.setupSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
             self.setupFileManager()      #File Manager
             self.setupProjectManager()   #Project Manager
             self.setupKernelManager()    #Console kernel Manager
-            self.setupPluginManager()
+
             self.setupCoroutines()
             self.setupZeroMQContext()
     
             # Setup Dialogs
-            self.setupDialogs()         #Config Dialog
+            self.setupDialogs()
             
             # Creates the Main Window
             self.createMainWindow()
+            self.settingsDialog.loadDefaultSettings()
             splash.finish(self.mainWindow)
-          
+
         except KeyboardInterrupt:
             self.logger.critical("\nQuit signal catched during application startup. Quiting...")
             self.quit()
@@ -126,8 +129,8 @@ class PMXApplication(QtGui.QApplication):
     def setupSupportManager(self, callbackSplashMessage = None):
         from prymatex.gui.support.manager import PMXSupportManager
         
-        self.settings.registerConfigurable(PMXSupportManager)
-        
+        self.pluginManager.prepareWidgetPlugin(PMXSupportManager)
+
         manager = PMXSupportManager(self)
         self.settings.configure(manager)
         
@@ -163,10 +166,8 @@ class PMXApplication(QtGui.QApplication):
     def setupFileManager(self):
         from prymatex.core.filemanager import PMXFileManager
         
-        #TODO: quiza algo para registrar logger igual que settings        
-        PMXFileManager.logger = self.getLogger('.'.join([PMXFileManager.__module__, PMXFileManager.__name__]))
-        self.settings.registerConfigurable(PMXFileManager)
-        
+        self.pluginManager.prepareWidgetPlugin(PMXFileManager)
+
         self.fileManager = PMXFileManager(self)
         self.settings.configure(self.fileManager)
         
@@ -175,10 +176,8 @@ class PMXApplication(QtGui.QApplication):
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
         
-        #TODO: quiza algo para registrar logger igual que settings        
-        PMXProjectManager.logger = self.getLogger('.'.join([PMXProjectManager.__module__, PMXProjectManager.__name__]))
-        self.settings.registerConfigurable(PMXProjectManager)
-        
+        self.pluginManager.prepareWidgetPlugin(PMXProjectManager)
+
         self.projectManager = PMXProjectManager(self)
         self.settings.configure(self.projectManager)
         
@@ -235,9 +234,6 @@ class PMXApplication(QtGui.QApplication):
         #self.configDialog.register(PMXGeneralWidget)
         #self.configDialog.register(PMXFileManagerSettings)
         #self.configDialog.register(PMXThemeConfigWidget)
-        for setting in self.supportManager.contributeToSettings():
-            setting.setInstance(self.supportManager)
-            self.settingsDialog.register(setting)
         #self.configDialog.register(PMXNetworkWidget)
         
         #Bundle Editor

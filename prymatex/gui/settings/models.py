@@ -10,8 +10,8 @@ class PMXSettingTreeNode(TreeNode):
         TreeNode.__init__(self, name, parent)
         self.settingGroup = settingGroup
 
-    def setInstance(self, instance):
-        self.instance = instance
+    def loadDefaultSettings(self):
+        pass
 
     @property
     def icon(self):

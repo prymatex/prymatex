@@ -40,7 +40,7 @@ class PMXProjectTreeModel(TreeModel):
             node = FileSystemTreeNode(name, parentNode)
             parentNode.appendChild(node)
         self.endInsertRows()
-        for child in parentNode.children:
+        for child in parentNode.childrenNodes:
             if child.isdir:
                 index = self.index(child.row(), 0, parentIndex)
                 self._load_directory(child, index)
@@ -53,16 +53,16 @@ class PMXProjectTreeModel(TreeModel):
         #TODO: Ver que pasa si llegamos al root, quiere decir que el project no esta mas
         if node.isdir:
             self.beginRemoveRows(index, 0, node.childCount() - 1)
-            for child in node.children:
+            for child in node.childrenNodes:
                 node.removeAllChild()
             self.endRemoveRows()
             self._load_directory(node, index)
             
     def nodeForPath(self, path):
         currentNode = self.rootNode
-        while currentNode.children:
+        while currentNode.childrenNodes:
             goAhead = False
-            for node in currentNode.children:
+            for node in currentNode.childrenNodes:
                 prefix = os.path.commonprefix([node.path, path])
                 if prefix == path:
                     return node
@@ -76,7 +76,7 @@ class PMXProjectTreeModel(TreeModel):
             return currentNode
 
     def projectForPath(self, path):
-        for project in self.rootNode.children:
+        for project in self.rootNode.childrenNodes:
             if os.path.commonprefix([project.path, path]) == project.path:
                 return project
         

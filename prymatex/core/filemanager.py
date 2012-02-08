@@ -32,6 +32,8 @@ class PMXFileManager(QtCore.QObject):
 
     fileHistory = pmxConfigPorperty(default = [])
     fileHistoryLength = pmxConfigPorperty(default = 10)
+    lineEnding = pmxConfigPorperty(default = 'unix')
+    encoding = pmxConfigPorperty(default = 'utf-8')
 
     #=========================================================
     # Constants
@@ -51,6 +53,11 @@ class PMXFileManager(QtCore.QObject):
         self.fileWatcher.directoryChanged.connect(self.on_directoryChanged)
         self.connectGenericSignal()
 
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.widgets.filemanager import PMXFileManagerWidget
+        return [ PMXFileManagerWidget(cls.settings) ]
+        
     def connectGenericSignal(self):
         UNARY_SINGAL_CONSTANT_MAP = (
             (self.fileCreated, PMXFileManager.CREATED ),

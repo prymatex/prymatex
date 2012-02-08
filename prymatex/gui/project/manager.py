@@ -33,6 +33,10 @@ class PMXProjectManager(QtCore.QObject):
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
     
+    @classmethod
+    def contributeToSettings(cls):
+        return []
+
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils
         validPath = []

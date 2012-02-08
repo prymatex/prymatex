@@ -7,9 +7,9 @@ from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.ui.settings.environment import Ui_EnvVariables
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
-    def __init__(self, envVariablesWidget):
-        super(PMXEnvVariablesTableModel, self).__init__(envVariablesWidget)
-        self.envVariablesWidget = envVariablesWidget
+    userVariablesChanged = QtCore.pyqtSignal(list)
+    def __init__(self, parent = None):
+        super(PMXEnvVariablesTableModel, self).__init__(parent)
         self.variables = []
         
     def setVariables(self, user, system):
@@ -19,7 +19,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
     def setSettingValue(self):
         variables = filter(lambda item: 'system' not in item, self.variables)
         if all(map(lambda variable: bool(variable['variable']), variables)):
-            self.envVariablesWidget.userVariablesChanged.emit(variables)
+            self.userVariablesChanged.emit(variables)
     
     def rowCount(self, parent = None):
         return len(self.variables)
@@ -101,30 +101,31 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EnvVariables):
     """
     Environment variables
     """
-    userVariablesChanged = QtCore.pyqtSignal(list)
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
         PMXSettingTreeNode.__init__(self, settingGroup, self.windowTitle())
+        self.setupVariablesTableModel()
+    
+    def loadDefaults(self):
+        self.model.setVariables(self.application.supportManager.shellVariables, self.application.supportManager.environment )
         
+    def setupVariablesTableModel(self):
         self.model = PMXEnvVariablesTableModel(self)
+        self.model.userVariablesChanged.connect(self.on_variablesModel_userVariablesChanged)
         self.tableView.setModel(self.model)
+        
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableView.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.model.rowsInserted.connect(self.tableView.resizeRowsToContents)
         self.model.rowsRemoved.connect(self.tableView.resizeRowsToContents)
         self.tableView.resizeRowsToContents()
-        
-    def setInstance(self, configurable):
-        PMXSettingTreeNode.setInstance(self, configurable)
-        self.userVariablesChanged.connect(configurable.on_settings_userVariablesChanged)
-        self.setVariables(configurable.shellVariables, configurable.environment)
 
-    def setVariables(self, user, system):
-        self.model.setVariables(user, system) 
-        
+    def on_variablesModel_userVariablesChanged(self, variables):
+        self.settingGroup.setValue('shellVariables', variables)
+
     def on_pushAdd_pressed(self):
         self.model.insertRows(0, 1)
         

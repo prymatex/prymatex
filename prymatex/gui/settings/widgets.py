@@ -136,7 +136,6 @@ class PMXFileManagerSettings(QtGui.QWidget, Ui_FileManagerDialog):
         self.setupUi(self)
         self.loadEncodings()
         self.setupLineEndings()
-    
 
     def setupLineEndings(self):
         ''' Populate line endings '''

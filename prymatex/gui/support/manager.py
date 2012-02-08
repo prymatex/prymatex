@@ -161,13 +161,10 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         #BUNDLEMENUGROUP
         self.bundleMenuGroup = PMXBundleMenuGroup(self)
 
-    def on_settings_userVariablesChanged(self, variables):
-        print variables
-        self.settings.setValue('shellVariables', variables)
-
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.environment import PMXEnvVariablesWidget
+        PMXEnvVariablesWidget.application = cls.application
         return [ PMXEnvVariablesWidget(cls.settings) ]
     
     def appendMenuToBundleMenuGroup(self, menu):
