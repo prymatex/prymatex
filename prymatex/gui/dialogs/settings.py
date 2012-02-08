@@ -4,6 +4,7 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.ui.dialogs.settings import Ui_SettingsDialog
+from prymatex.gui.settings.models import PMXSettingsModel, PMXSettingsProxyModel
 
 class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
     """
@@ -17,9 +18,9 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
         
         self.baseWindowTitle = self.windowTitle()
         
-        self.model = QtGui.QStandardItemModel(self)
+        self.model = PMXSettingsModel(self)
         
-        self.proxyModelSettings = QtGui.QSortFilterProxyModel(self)
+        self.proxyModelSettings = PMXSettingsProxyModel(self)
         self.proxyModelSettings.setSourceModel(self.model)
         
         self.treeViewSetting.setModel(self.proxyModelSettings)
@@ -32,35 +33,22 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
     
-    def on_treeViewSettings_activated(self, index):
-        self.treeTextToSectionTitle(index)
+    def on_treeViewSetting_pressed(self, index):
+        treeNode = self.proxyModelSettings.node(index)
+        self.setCurrentSettingWidget(treeNode)
+        
+    def on_treeViewSetting_activated(self, index):
+        treeNode = self.proxyModelSettings.node(index)
+        self.setCurrentSettingWidget(treeNode)
     
-    def treeTextToSectionTitle(self, index = None):
-        ''' Grab the index title taking into account inital settings '''
-        if index:
-            sIndex = self.proxyModelSettings.mapToSource(index)
-        else:
-            sIndex = self.proxyModelSettings.index(0, 0)
-        item = self.model.itemFromIndex(sIndex)
-        if index:
-            self.container.layout().setCurrentIndex(item.stackIndex)
-        title = self.container.layout().currentWidget().windowTitle()
-        #self.labelTitle.setText(title)
-        self.updateTitle(title)
+    def setCurrentSettingWidget(self, widget):
+        self.stackedWidget.setCurrentWidget(widget)
+        self.updateTitle(widget.windowTitle())
     
     def updateTitle(self, subTitle):
         self.setWindowTitle("%s - %s" % (self.baseWindowTitle, subTitle))
     
-    firstTitleTaken = False
-    def showEvent(self, event):
-        if not self.firstTitleTaken:
-            self.treeTextToSectionTitle(index = None)
-            self.firstTitleTaken = True
-        super(PMXSettingsDialog, self).showEvent(event)
-    
     def register(self, widget):
         index = self.stackedWidget.addWidget(widget)
-        #item = PMXSettingsItem(widget.windowTitle(), index)
-        #item.setIcon(widget.windowIcon())
-        #self.model.appendRow(item)
+        self.model.appendSetting(widget)
         

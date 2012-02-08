@@ -40,7 +40,7 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationName(prymatex.__author__)
 
         self.buildSettings(profile)
-
+        
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
 
@@ -72,8 +72,10 @@ class PMXApplication(QtGui.QApplication):
         self.settings.clear()
         
     def buildSettings(self, profile):
+        from prymatex.gui.dialogs.settings import PMXSettingsDialog
         from prymatex.core.settings import PMXSettings
         self.settings = PMXSettings(profile)
+        self.settingsDialog = PMXSettingsDialog(self)
 
     def checkSingleInstance(self):
         """
@@ -226,17 +228,16 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     def setupDialogs(self):
         #Settings
-        from prymatex.gui.dialogs.settings import PMXSettingsDialog
         #from prymatex.gui.settings.widgets import PMXGeneralWidget, PMXNetworkWidget
         #from prymatex.gui.settings.environment import PMXEnvVariablesWidget
         #from prymatex.gui.settings.themes import PMXThemeConfigWidget
         #from prymatex.gui.settings.widgets import PMXFileManagerSettings
-        self.settingsDialog = PMXSettingsDialog(self)
         #self.configDialog.register(PMXGeneralWidget)
         #self.configDialog.register(PMXFileManagerSettings)
         #self.configDialog.register(PMXThemeConfigWidget)
-        for settings in self.supportManager.contributeToSettings():
-            self.settingsDialog.register(settings)
+        for setting in self.supportManager.contributeToSettings():
+            setting.setInstance(self.supportManager)
+            self.settingsDialog.register(setting)
         #self.configDialog.register(PMXNetworkWidget)
         
         #Bundle Editor

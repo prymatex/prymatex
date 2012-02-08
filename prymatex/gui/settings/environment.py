@@ -3,13 +3,14 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.settings.model import PMXConfigTreeNode
+from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.ui.settings.environment import Ui_EnvVariables
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
-    def __init__(self, parent = None):
-        super(PMXEnvVariablesTableModel, self).__init__(parent)
-        self.variables = {}
+    def __init__(self, envVariablesWidget):
+        super(PMXEnvVariablesTableModel, self).__init__(envVariablesWidget)
+        self.envVariablesWidget = envVariablesWidget
+        self.variables = []
         
     def setVariables(self, user, system):
         self.variables = user + map(lambda (variable, value): {'variable': variable, 'value': value, 'system': True, 'enabled': True}, system.iteritems())
@@ -17,7 +18,8 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         
     def setSettingValue(self):
         variables = filter(lambda item: 'system' not in item, self.variables)
-        self.parent().userVariablesChanged.emit(variables)
+        if all(map(lambda variable: bool(variable['variable']), variables)):
+            self.envVariablesWidget.userVariablesChanged.emit(variables)
     
     def rowCount(self, parent = None):
         return len(self.variables)
@@ -80,7 +82,7 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         return True
 
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
-        if any(map(lambda value: 'system' in value, self.variables)):
+        if any(map(lambda value: 'system' in value, self.variables[position:position + 1])):
             return False
         self.beginRemoveRows(parent, position, position + rows - 1);
         for _ in range(rows):
@@ -95,16 +97,16 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         else:
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
 
-class PMXEnvVariablesWidget(QtGui.QWidget, PMXConfigTreeNode, Ui_EnvVariables):
-    '''
-    Variables
-    '''
-    userVariablesChanged = QtCore.pyqtSignal(dict)
+class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EnvVariables):
+    """
+    Environment variables
+    """
+    userVariablesChanged = QtCore.pyqtSignal(list)
     
-    def __init__(self, parent = None):
+    def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXConfigTreeNode.__init__(self, "Variables", None)
         self.setupUi(self)
+        PMXSettingTreeNode.__init__(self, settingGroup, self.windowTitle())
         
         self.model = PMXEnvVariablesTableModel(self)
         self.tableView.setModel(self.model)
@@ -115,9 +117,13 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXConfigTreeNode, Ui_EnvVariables):
         self.model.rowsRemoved.connect(self.tableView.resizeRowsToContents)
         self.tableView.resizeRowsToContents()
         
+    def setInstance(self, configurable):
+        PMXSettingTreeNode.setInstance(self, configurable)
+        self.userVariablesChanged.connect(configurable.on_settings_userVariablesChanged)
+        self.setVariables(configurable.shellVariables, configurable.environment)
+
     def setVariables(self, user, system):
         self.model.setVariables(user, system) 
-        #self.application.settings.getGroup('SupportManager'), ,
         
     def on_pushAdd_pressed(self):
         self.model.insertRows(0, 1)

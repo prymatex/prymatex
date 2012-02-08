@@ -31,6 +31,8 @@ class PMXPluginManager(object):
     def prepareWidgetPlugin(self, widgetClass):
         self.preparePlugin(widgetClass)
         self.application.settings.registerConfigurable(widgetClass)
+        for setting in widgetClass.contributeToSettings():
+            self.application.settingsDialog.register(setting)
 
     def registerEditor(self, editorClass):
         self.prepareWidgetPlugin(editorClass)

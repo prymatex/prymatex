@@ -29,7 +29,8 @@ class PMXBaseWidgetPlugin(PMXBasePlugin):
     def addOverlay(self, overlay):
         self.overlays.append(overlay)
 
-    def contributeToSettings(self):
+    @classmethod
+    def contributeToSettings(cls):
         return []
 
     @classmethod

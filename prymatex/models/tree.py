@@ -4,43 +4,43 @@
 from PyQt4 import QtCore
 
 class TreeNode(object):
-    def __init__(self, name, parent = None):
-        self.name = name
-        self.parent = parent
-        self.children = []
+    def __init__(self, nodeName, parentNode = None):
+        self.name = nodeName
+        self.parentNode = parentNode
+        self.childrenNodes = []
     
     def isRootNode(self):
-        return self.parent == None
+        return self.parentNode == None
     
     def appendChild(self, child):
-        self.children.append(child)
-        child.parent = self
+        self.childrenNodes.append(child)
+        child.parentNode = self
 
     def insertChild(self, index, child):
-        self.children.insert(index, child)
-        child.parent = self
+        self.childrenNodes.insert(index, child)
+        child.parentNode = self
 
     def removeChild(self, child):
-        self.children.remove(child)
-        child.parent = None
+        self.childrenNodes.remove(child)
+        child.parentNode = None
 
     def removeAllChild(self):
-        for child in self.children:
-            child.parent = None
-        self.children = []
+        for child in self.childrenNodes:
+            child.parentNode = None
+        self.childrenNodes = []
 
     def childIndex(self, child):
-        return self.children.index(child)
+        return self.childrenNodes.index(child)
         
     def childCount(self):
-        return len(self.children)
+        return len(self.childrenNodes)
 
     def child(self, row):
-        if row < len(self.children):
-            return self.children[row]
+        if row < len(self.childrenNodes):
+            return self.childrenNodes[row]
     
     def row(self):
-        return self.parent.childIndex(self)
+        return self.parentNode.childIndex(self)
         
 class TreeModel(QtCore.QAbstractItemModel):  
     def __init__(self, parent = None):
@@ -64,7 +64,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
     def parent(self, index):
         node = self.node(index)
-        parentNode = node.parent
+        parentNode = node.parentNode
         if parentNode is None or parentNode.isRootNode():
             return QtCore.QModelIndex()
         return self.createIndex(parentNode.row(), 0, parentNode)
