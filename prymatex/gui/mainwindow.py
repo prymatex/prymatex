@@ -16,8 +16,7 @@ from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
-    """ 
-    Prymatex main window
+    """Prymatex main window
     """
     #=========================================================
     # Signals
@@ -65,7 +64,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.customActions = {}
         
         self.setAcceptDrops(True)
-
+    
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.widgets.general import PMXGeneralWidget
+        return [ PMXGeneralWidget ]
+        
     #============================================================
     # Setups
     #============================================================

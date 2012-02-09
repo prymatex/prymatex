@@ -40,7 +40,7 @@ class FileSystemTreeNode(TreeNode):
 
     @property
     def path(self):
-        return os.path.join(self.parent.path, self.name)
+        return os.path.join(self.parentNode.path, self.name)
     
     @property
     def icon(self):

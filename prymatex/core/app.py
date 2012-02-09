@@ -48,6 +48,7 @@ class PMXApplication(QtGui.QApplication):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
         splash.show()
         try:
+            
             self.setupPluginManager()     #Prepare plugin manager
 
             # Loads
@@ -55,10 +56,10 @@ class PMXApplication(QtGui.QApplication):
             self.setupFileManager()      #File Manager
             self.setupProjectManager()   #Project Manager
             self.setupKernelManager()    #Console kernel Manager
-
             self.setupCoroutines()
             self.setupZeroMQContext()
-    
+            self.setupMainWindow()
+            
             # Setup Dialogs
             self.setupDialogs()
             
@@ -222,20 +223,14 @@ class PMXApplication(QtGui.QApplication):
             self.logger.warn("Warning: %s" % e)
             self.zmqContext = None
 
+    def setupMainWindow(self):
+        from prymatex.gui.mainwindow import PMXMainWindow
+        self.pluginManager.prepareWidgetPlugin(PMXMainWindow)
+        
     #========================================================
     # Dialogs
     #========================================================
     def setupDialogs(self):
-        #Settings
-        #from prymatex.gui.settings.widgets import PMXGeneralWidget, PMXNetworkWidget
-        #from prymatex.gui.settings.environment import PMXEnvVariablesWidget
-        #from prymatex.gui.settings.themes import PMXThemeConfigWidget
-        #from prymatex.gui.settings.widgets import PMXFileManagerSettings
-        #self.configDialog.register(PMXGeneralWidget)
-        #self.configDialog.register(PMXFileManagerSettings)
-        #self.configDialog.register(PMXThemeConfigWidget)
-        #self.configDialog.register(PMXNetworkWidget)
-        
         #Bundle Editor
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
         self.bundleEditor = PMXBundleEditor(self)
@@ -266,11 +261,10 @@ class PMXApplication(QtGui.QApplication):
         """
         Creates the windows
         """
-        #Por ahora solo una mainWindow
         from prymatex.gui.mainwindow import PMXMainWindow
-        PMXMainWindow.logger = self.getLogger('.'.join([PMXMainWindow.__module__, PMXMainWindow.__name__]))
-        self.settings.registerConfigurable(PMXMainWindow)
 
+        print PMXMainWindow.application
+        
         #TODO: Testeame con mas de una
         for _ in range(1):
             self.mainWindow = PMXMainWindow(self)
