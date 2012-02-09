@@ -166,15 +166,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.currentHighlightWord = None
         self.extraCursorsSelections = []
         
-        #Load Syntax Highlighter
-        syntax = None
-        if self.filePath is not None:
-            extension = self.application.fileManager.fileExtension(self.filePath)
-            syntax = self.application.supportManager.findSyntaxByFileType(extension)
-        if self.filePath is None or syntax is None:
-            syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
+        #Load Default Syntax Highlighter
+        syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
-        
         # Get Braces from base syntax
         self.setBraces(syntax.scopeName)
         
@@ -248,6 +242,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return not filePath.endswith(".png")
 
     def open(self, filePath):
+        #TODO: Este codigo esta duplicado de setFilePath
+        extension = self.application.fileManager.fileExtension(self.filePath)
+        syntax = self.application.supportManager.findSyntaxByFileType(extension)
+        if syntax is not None:
+            self.setSyntax(syntax)
         return PMXBaseEditor.open(self, filePath)
         
     def save(self, filePath):
@@ -267,7 +266,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.document().setModified(modified)
         
     def setFilePath(self, filePath):
-        syntax = self.application.supportManager.findSyntaxByFileType(self.application.fileManager.fileExtension(filePath))
+        extension = self.application.fileManager.fileExtension(self.filePath)
+        syntax = self.application.supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.setSyntax(syntax)
         PMXBaseEditor.setFilePath(self, filePath)
@@ -1034,7 +1034,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         font = self.font
         size = self.font.pointSize()
         if size < self.FONT_MAX_SIZE:
-            size += 2
+            size += 1
             font.setPointSize(size)
         self.font = font
 
@@ -1042,7 +1042,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         font = self.font
         size = font.pointSize()
         if size > self.FONT_MIN_SIZE:
-            size -= 2
+            size -= 1
             font.setPointSize(size)
         self.font = font
 
@@ -1085,8 +1085,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             return block
 
     def indentBlocks(self):
-        """
-        Indents text, block selections.
+        """Indents text, block selections.
         """
         cursor = self.textCursor()
         start, end = self.getSelectionBlockStartEnd()

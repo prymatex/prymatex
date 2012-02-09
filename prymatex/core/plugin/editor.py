@@ -11,8 +11,7 @@ from prymatex.core.plugin import PMXBaseWidgetPlugin, Key_Any
 from prymatex.core import exceptions
 
 class PMXBaseEditor(PMXBaseWidgetPlugin):
-    """
-    Every editor should extend this class in order to guarantee it'll be able to be place in tab.
+    """Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     #tabStatusChanged
     KEY_HELPERS = {}

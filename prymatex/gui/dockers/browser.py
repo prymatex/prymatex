@@ -136,8 +136,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
     def proxy(self, value):
-        '''
-        System wide proxy
+        '''System wide proxy
         '''
         print value
         proxy_url = QtCore.QUrl(value)    
@@ -154,6 +153,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
 
         QNetworkProxy.setApplicationProxy( network_proxy )
     
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.widgets.browser import PMXNetworkWidget
+        return [ PMXNetworkWidget ]
+        
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
