@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>433</height>
+    <width>800</width>
+    <height>533</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>2</number>
    </property>
@@ -51,9 +51,20 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="verticalLayoutWidget_2">
+      <layout class="QVBoxLayout" name="widgetsLayout">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
+  <zorder>splitter</zorder>
+  <zorder>verticalLayoutWidget_2</zorder>
+  <zorder>verticalLayoutWidget_2</zorder>
+  <zorder>splitter</zorder>
  </widget>
  <resources>
   <include location="../../resources.qrc"/>

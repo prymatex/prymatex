@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/settings.ui'
 #
-# Created: Wed Feb  8 16:00:05 2012
+# Created: Wed Feb  8 22:41:13 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,12 +18,12 @@ except AttributeError:
 class Ui_SettingsDialog(object):
     def setupUi(self, SettingsDialog):
         SettingsDialog.setObjectName(_fromUtf8("SettingsDialog"))
-        SettingsDialog.resize(700, 433)
+        SettingsDialog.resize(800, 533)
         SettingsDialog.setMinimumSize(QtCore.QSize(700, 433))
-        self.verticalLayout = QtGui.QVBoxLayout(SettingsDialog)
-        self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.horizontalLayout = QtGui.QHBoxLayout(SettingsDialog)
+        self.horizontalLayout.setSpacing(2)
+        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.splitter = QtGui.QSplitter(SettingsDialog)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(_fromUtf8("splitter"))
@@ -41,7 +41,13 @@ class Ui_SettingsDialog(object):
         self.treeViewSetting.setHeaderHidden(True)
         self.treeViewSetting.setObjectName(_fromUtf8("treeViewSetting"))
         self.treeLayout.addWidget(self.treeViewSetting)
-        self.verticalLayout.addWidget(self.splitter)
+        self.verticalLayoutWidget_2 = QtGui.QWidget(self.splitter)
+        self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
+        self.widgetsLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
+        self.widgetsLayout.setSpacing(2)
+        self.widgetsLayout.setMargin(0)
+        self.widgetsLayout.setObjectName(_fromUtf8("widgetsLayout"))
+        self.horizontalLayout.addWidget(self.splitter)
 
         self.retranslateUi(SettingsDialog)
         QtCore.QMetaObject.connectSlotsByName(SettingsDialog)
