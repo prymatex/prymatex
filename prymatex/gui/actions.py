@@ -205,17 +205,10 @@ class MainWindowActions(object):
         self.application.bundleEditor.execSnippet()
         
     @QtCore.pyqtSlot()
-    def on_actionSelectBundleItem_triggered(self):
+    def on_actionReloadBundles_triggered(self):
         editor = self.currentEditor()
-        scope = editor.getCurrentScope()
-        items = self.application.supportManager.getActionItems(scope)
-        def itemsToDict(items):
-            for item in items:
-                yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
-        index = self.bundleSelectorDialog.select(itemsToDict(items))
-        if index is not None:
-            self.currentEditor().insertBundleItem(items[index])
-    
+        self.application.supportManager.reloadSupport(editor.showMessage)
+
     #============================================================
     # Preferences Actions
     #============================================================

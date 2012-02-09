@@ -34,7 +34,6 @@ class PMXEditorFolding(object):
     def updateFolding(self):
         self.folding = []
         if self.indentSensitive:
-            print "update de indent"
             self.updateIndentFoldingBlocks()
         else:
             self.updateFoldingBlocks()

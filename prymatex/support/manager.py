@@ -181,7 +181,7 @@ class PMXSupportBaseManager(object):
             self.reloadBundles(ns)
         for bundle in self.getAllBundles():
             if bundle.enabled:
-                self.populateBundle(bundle)
+                self.repopulateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
     
@@ -189,12 +189,12 @@ class PMXSupportBaseManager(object):
     # RELOAD THEMES
     #---------------------------------------------------
     def reloadThemes(self, namespace):
-        #Remove
         themes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
         if 'Themes' in self.namespaces[namespace]:
             paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
-                PMXTheme.reloadTheme(path, namespace, self)
+                self.showMessage(path)
+                #PMXTheme.reloadTheme(path, namespace, self)
     
     #---------------------------------------------------
     # RELOAD BUNDLES
@@ -203,8 +203,27 @@ class PMXSupportBaseManager(object):
         if 'Bundles' in self.namespaces[namespace]:
             paths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for path in paths:
-                PMXBundle.reloadBundle(path, namespace, self)
-                
+                self.showMessage(path)
+                #PMXBundle.reloadBundle(path, namespace, self)
+    
+    #---------------------------------------------------
+    # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
+    #---------------------------------------------------
+    def repopulateBundle(self, bundle):
+        nss = bundle.namespaces[::-1]
+        for namespace in nss:
+            bpath = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path))
+            # Search for support
+            if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
+                bundle.setSupport(os.path.join(bpath, 'Support'))
+            self.showMessage("Loading bundle %s" % bundle.name)
+            for klass in BUNDLEITEM_CLASSES:
+                files = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
+                for path in files:
+                    self.showMessage(path)
+                    #klass.loadBundleItem(path, namespace, bundle, self)
+        bundle.populated = True
+        
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
     #---------------------------------------------------
