@@ -51,13 +51,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="verticalLayoutWidget_2">
-      <layout class="QVBoxLayout" name="settingLayout">
-       <property name="spacing">
-        <number>2</number>
-       </property>
-      </layout>
-     </widget>
     </widget>
    </item>
   </layout>

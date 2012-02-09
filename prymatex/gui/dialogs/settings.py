@@ -25,10 +25,9 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
         
         self.treeViewSetting.setModel(self.proxyModelSettings)
         
-        self.stackedWidget = QtGui.QStackedWidget()
+        self.stackedWidget = QtGui.QStackedWidget(self.splitter)
         self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)
         self.stackedWidget.setFrameShadow(QtGui.QFrame.Sunken)
-        self.settingLayout.insertWidget(0, self.stackedWidget)
         
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/settings.ui'
 #
-# Created: Tue Feb  7 16:05:51 2012
+# Created: Wed Feb  8 16:00:05 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -37,14 +37,10 @@ class Ui_SettingsDialog(object):
         self.lineEditFilter.setObjectName(_fromUtf8("lineEditFilter"))
         self.treeLayout.addWidget(self.lineEditFilter)
         self.treeViewSetting = QtGui.QTreeView(self.verticalLayoutWidget)
+        self.treeViewSetting.setAnimated(True)
+        self.treeViewSetting.setHeaderHidden(True)
         self.treeViewSetting.setObjectName(_fromUtf8("treeViewSetting"))
         self.treeLayout.addWidget(self.treeViewSetting)
-        self.verticalLayoutWidget_2 = QtGui.QWidget(self.splitter)
-        self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
-        self.settingLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
-        self.settingLayout.setSpacing(2)
-        self.settingLayout.setMargin(0)
-        self.settingLayout.setObjectName(_fromUtf8("settingLayout"))
         self.verticalLayout.addWidget(self.splitter)
 
         self.retranslateUi(SettingsDialog)
