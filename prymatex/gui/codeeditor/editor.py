@@ -1313,9 +1313,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.themes import PMXThemeWidget
-        PMXThemeWidget.application = cls.application
-        return []
-        return [ PMXThemeWidget(cls.settings) ]
+        return [ PMXThemeWidget ]
 
     #===========================================================================
     # Menu Actions

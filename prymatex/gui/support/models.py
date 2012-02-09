@@ -134,7 +134,7 @@ class PMXBundleTreeModel(TreeModel):
     def removeRows(self, position = 0, count = 1,  parent=QtCore.QModelIndex()):
         node = self.node(parent)
         self.beginRemoveRows(parent, position, position + count - 1)  
-        node.children.pop(position)  
+        node.childrenNodes.pop(position)  
         self.endRemoveRows()
     #========================================================================
     # Functions
@@ -424,7 +424,7 @@ class PMXMenuTreeModel(TreeModel):
 
     def add_submenu(self, submenuNode, submenus):
         items = []
-        for node in submenuNode.children:
+        for node in submenuNode.childrenNodes:
             if node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 items.append(str(node.data.uuid).upper())
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
@@ -436,7 +436,7 @@ class PMXMenuTreeModel(TreeModel):
     def getMainMenu(self):
         items = []
         submenus = {}
-        for node in self.rootNode.children:
+        for node in self.rootNode.childrenNodes:
             if node.nodeType == PMXBundleMenuTreeNode.ITEM:
                 items.append(str(node.data.uuid).upper())
             elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
@@ -504,7 +504,7 @@ class PMXMenuTreeModel(TreeModel):
         
         parentNode = self.node(parentIndex)
         
-        if dragNode.parent == None:
+        if dragNode.parentNode == None:
             #The node belongs to a exludeListModel
             if dragNode.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
                 #Make a copy of separator
@@ -518,7 +518,7 @@ class PMXMenuTreeModel(TreeModel):
             elif dragNode.nodeType == PMXBundleMenuTreeNode.ITEM:
                 self.excludedModel.removeMenuItem(dragNode)
                 parentNode.insertChild(row, dragNode)
-        elif dragNode.parent == parentNode:
+        elif dragNode.parentNode == parentNode:
             #Reparent
             currentRow = dragNode.row()
             row = row if currentRow >= row else row - 1
@@ -526,7 +526,7 @@ class PMXMenuTreeModel(TreeModel):
             parentNode.insertChild(row, dragNode)
         else:
             #Reparent
-            dragNode.parent.removeChild(dragNode)
+            dragNode.parentNode.removeChild(dragNode)
             parentNode.insertChild(row, dragNode)
         self.menuChanged.emit()
         self.layoutChanged.emit()
@@ -605,7 +605,7 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         if node.nodeType == PMXBundleMenuTreeNode.SEPARATOR:
             self.menuModel.removeMenuItem(node)
         elif node.nodeType == PMXBundleMenuTreeNode.SUBMENU:
-            for child in node.children[:]:
+            for child in node.childrenNodes[:]:
                 self.appendMenuNode(child)
             self.menuModel.removeMenuItem(node)
         elif node.nodeType == PMXBundleMenuTreeNode.ITEM and node not in self.nodes:

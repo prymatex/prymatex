@@ -45,9 +45,12 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
         QtGui.QWidget.__init__(self, parent)
         self.setupUi(self)
         PMXSettingTreeNode.__init__(self, settingGroup, self.windowTitle())
+        self.setupTableView()
+        self.setupPushButton()
+    
+    def loadSettings(self):
         self.configComboBoxThemes()
-        self.configTableView()
-        self.configPushButton()
+        self.tableView.setModel(self.application.supportManager.themeStyleProxyModel)
     
     #==========================================================
     # ComboBoxThemes
@@ -86,8 +89,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
             if string != style.scope:
                 self.application.supportManager.updateThemeStyle(style, scope = string)
     
-    def configTableView(self):
-        self.tableView.setModel(self.application.supportManager.themeStyleProxyModel)
+    def setupTableView(self):
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
         self.tableView.activated.connect(self.on_tableView_Activated)
         self.tableView.pressed.connect(self.on_tableView_Activated)
@@ -108,7 +110,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
     #==========================================================
     # Push Button
     #==========================================================
-    def configPushButton(self):
+    def setupPushButton(self):
         #Colors
         self.pushButtonForeground.pressed.connect(lambda element = 'foreground': self.on_pushButtonColor_pressed(element))
         self.pushButtonBackground.pressed.connect(lambda element = 'background': self.on_pushButtonColor_pressed(element))

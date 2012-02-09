@@ -108,7 +108,7 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EnvVariables):
         PMXSettingTreeNode.__init__(self, settingGroup, self.windowTitle())
         self.setupVariablesTableModel()
     
-    def loadDefaults(self):
+    def loadSettings(self):
         self.model.setVariables(self.application.supportManager.shellVariables, self.application.supportManager.environment )
         
     def setupVariablesTableModel(self):

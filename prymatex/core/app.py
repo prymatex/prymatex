@@ -64,7 +64,7 @@ class PMXApplication(QtGui.QApplication):
             
             # Creates the Main Window
             self.createMainWindow()
-            self.settingsDialog.loadDefaultSettings()
+            self.settingsDialog.loadSettings()
             splash.finish(self.mainWindow)
 
         except KeyboardInterrupt:

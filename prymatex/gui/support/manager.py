@@ -164,8 +164,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.environment import PMXEnvVariablesWidget
-        PMXEnvVariablesWidget.application = cls.application
-        return [ PMXEnvVariablesWidget(cls.settings) ]
+        return [ PMXEnvVariablesWidget ]
     
     def appendMenuToBundleMenuGroup(self, menu):
         self.bundleMenuGroup.appendMenu(menu)
@@ -251,7 +250,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def getAllBundleItems(self):
         items = []
         for bundle in self.getAllBundles():
-            for item in bundle.children:
+            for item in bundle.childrenNodes:
                 items.append(item)
         return items
         

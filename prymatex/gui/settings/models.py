@@ -10,7 +10,7 @@ class PMXSettingTreeNode(TreeNode):
         TreeNode.__init__(self, name, parent)
         self.settingGroup = settingGroup
 
-    def loadDefaultSettings(self):
+    def loadSettings(self):
         pass
 
     @property

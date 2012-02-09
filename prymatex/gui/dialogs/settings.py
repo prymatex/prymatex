@@ -53,7 +53,6 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
         index = self.stackedWidget.addWidget(widget)
         self.model.appendSetting(widget)
     
-    def loadDefaultSettings(self):
-        pass
-        #for widget in self.stackedWidget.widgets():
-            #widget.loadDefaultSettings()
+    def loadSettings(self):
+        for index in xrange(self.stackedWidget.count()):
+            self.stackedWidget.widget(index).loadSettings()
