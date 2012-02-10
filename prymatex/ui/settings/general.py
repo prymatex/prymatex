@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/general.ui'
 #
-# Created: Sun Nov 13 18:07:38 2011
+# Created: Thu Feb  9 14:57:25 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,11 +18,12 @@ except AttributeError:
 class Ui_General(object):
     def setupUi(self, General):
         General.setObjectName(_fromUtf8("General"))
-        General.resize(454, 300)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         General.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(General)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.checkBox = QtGui.QCheckBox(General)
         self.checkBox.setObjectName(_fromUtf8("checkBox"))

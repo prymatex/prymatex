@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/themes.ui'
 #
-# Created: Sun Nov 13 18:07:38 2011
+# Created: Thu Feb  9 14:57:25 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,11 +18,13 @@ except AttributeError:
 class Ui_FontThemeConfig(object):
     def setupUi(self, FontThemeConfig):
         FontThemeConfig.setObjectName(_fromUtf8("FontThemeConfig"))
-        FontThemeConfig.resize(518, 467)
+        FontThemeConfig.resize(315, 421)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/format-font-size-more.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         FontThemeConfig.setWindowIcon(icon)
         self.verticalLayout_2 = QtGui.QVBoxLayout(FontThemeConfig)
+        self.verticalLayout_2.setSpacing(2)
+        self.verticalLayout_2.setMargin(0)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))

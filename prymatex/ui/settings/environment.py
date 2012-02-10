@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/environment.ui'
 #
-# Created: Sun Nov 13 18:07:38 2011
+# Created: Thu Feb  9 14:57:25 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,15 +18,13 @@ except AttributeError:
 class Ui_EnvVariables(object):
     def setupUi(self, EnvVariables):
         EnvVariables.setObjectName(_fromUtf8("EnvVariables"))
-        EnvVariables.resize(400, 449)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         EnvVariables.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(EnvVariables)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.label = QtGui.QLabel(EnvVariables)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.verticalLayout.addWidget(self.label)
         self.tableView = QtGui.QTableView(EnvVariables)
         self.tableView.setShowGrid(False)
         self.tableView.setSortingEnabled(True)
@@ -49,7 +47,6 @@ class Ui_EnvVariables(object):
 
     def retranslateUi(self, EnvVariables):
         EnvVariables.setWindowTitle(_('Enviroment Variables'))
-        self.label.setText(_('Enviroment Variables'))
         self.pushAdd.setText(_('+'))
         self.pushRemove.setText(_('-'))
 

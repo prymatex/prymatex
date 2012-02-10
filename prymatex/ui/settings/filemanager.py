@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/filemanager.ui'
 #
-# Created: Wed Dec 28 19:06:06 2011
+# Created: Thu Feb  9 14:57:25 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,11 +18,12 @@ except AttributeError:
 class Ui_FileManagerDialog(object):
     def setupUi(self, FileManagerDialog):
         FileManagerDialog.setObjectName(_fromUtf8("FileManagerDialog"))
-        FileManagerDialog.resize(400, 300)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-save.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         FileManagerDialog.setWindowIcon(icon)
         self.formLayout = QtGui.QFormLayout(FileManagerDialog)
+        self.formLayout.setMargin(0)
+        self.formLayout.setSpacing(2)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.label = QtGui.QLabel(FileManagerDialog)
         self.label.setObjectName(_fromUtf8("label"))

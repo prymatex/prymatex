@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/network.ui'
 #
-# Created: Sun Nov 13 18:07:38 2011
+# Created: Thu Feb  9 14:57:25 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,11 +18,12 @@ except AttributeError:
 class Ui_Network(object):
     def setupUi(self, Network):
         Network.setObjectName(_fromUtf8("Network"))
-        Network.resize(460, 403)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-open-remote.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Network.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(Network)
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.formLayout = QtGui.QFormLayout()
         self.formLayout.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
