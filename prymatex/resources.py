@@ -69,9 +69,7 @@ FileIconProvider = QtGui.QFileIconProvider()
 # http://developer.qt.nokia.com/doc/qt-4.8/stylesheet-reference.html
 #===============================================================
 
-APPLICATION_STYLE = """* {
-    
-}
+APPLICATION_STYLE = """
 QTreeView {
     font-size: 12px;
 }
@@ -88,6 +86,9 @@ QListView::item {
     padding: 4px;    
 }
 """
+
+FIND_NO_MATCH_STYLE = 'background-color: red; color: #fff;'
+FIND_MATCH_STYLE = 'background-color: #dea;'
 
 #===============================================================
 # FUNCTIONS

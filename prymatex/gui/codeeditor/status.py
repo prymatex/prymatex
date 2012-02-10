@@ -3,15 +3,12 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
 from prymatex.core.plugin.status import PMXBaseStatusBar
 from prymatex.gui.codeeditor.editor import PMXCodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
 class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
-    FIND_STYLE_NO_MATCH = 'background-color: red; color: #fff;'
-    FIND_STYLE_MATCH = 'background-color: #dea;'
-    FIND_STYLE_NORMAL = ''
-    
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXBaseStatusBar.__init__(self)
@@ -343,12 +340,11 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def on_lineEditIFind_textChanged(self, text):
         if text:
             _, flags = self.getIFindMatchAndFlags()
-            if self.currentEditor.findMatch(text, flags):
-                self.lineEditIFind.setStyleSheet(self.FIND_STYLE_MATCH)
-            else:
-                self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NO_MATCH)
+            match = self.currentEditor.findMatch(text, flags)
+            self.lineEditIFind.setStyleSheet(match and resources.FIND_MATCH_STYLE or resources.FIND_NO_MATCH_STYLE)
         else:
-            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NORMAL)
+            #TODO: Buscar un clean style
+            self.lineEditIFind.setStyleSheet('')
     
     @QtCore.pyqtSlot()
     def on_pushButtonIFindNext_pressed(self):
