@@ -52,8 +52,12 @@ class PMXProjectManager(QtCore.QObject):
     def isOpen(self, project):
         return True
 
-    def removeFromKnowProjects(self, path):
-        self.knownProjects.remove(path)
+    def appendToKnowProjects(self, project):
+        self.knownProjects.append(project.path)
+        self.settings.setValue('knownProjects', self.knownProjects)
+        
+    def removeFromKnowProjects(self, project):
+        self.knownProjects.remove(project.path)
         self.settings.setValue('knownProjects', self.knownProjects)
         
     #---------------------------------------------------
@@ -71,10 +75,12 @@ class PMXProjectManager(QtCore.QObject):
         project = PMXProject(directory, { "name": name })
         project.save()
         self.addProject(project)
-        self.knownProjects.append(project.path)
-        self.settings.setValue('knownProjects', self.knownProjects)
+        self.appendToKnowProjects(project)
         return project
-
+    
+    def importProject(self, directory):
+        pass
+        
     def deleteProject(self, project, removeFiles = False):
         """
         Elimina un proyecto
@@ -82,24 +88,34 @@ class PMXProjectManager(QtCore.QObject):
         project.delete(removeFiles)
         self.removeProject(project)
 
+    #---------------------------------------------------
+    # PROJECT INTERFACE
+    #---------------------------------------------------
     def addProject(self, project):
         project.setManager(self)
         self.projectTreeModel.appendProject(project)
+        
+    def modifyProject(self, project):
+        pass
 
     def removeProject(self, project):
+        self.removeFromKnowProjects(project)
         self.projectTreeModel.removeProject(project)
+    
+    def getAllProjects(self):
+        return []
         
     def openProject(self):
         pass
-
-    def deleteProject(self):
+    
+    def closeProject(self):
         pass
 
     def setWorkingSet(self, project, workingSet):
         projects = self.workingSets.setdefault(workingSet)
         projects.append(project.filePath)
         project.setWorkingSet(workingSet)
-        #TODO: avisar que se movio el projecto al proxy
+        self.projectTreeModel.dataChanged.emit()
         
     def findProjectForPath(self, path):
         return self.projectTreeModel.projectForPath(path)

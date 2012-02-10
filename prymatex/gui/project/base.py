@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import os
+import os, shutil
 
 from prymatex.models.tree import TreeNode
 from prymatex.utils import plist
@@ -77,9 +77,9 @@ class PMXProject(FileSystemTreeNode):
     def delete(self, removeFiles = False):
         filePath = os.path.join(self.directory, self.FILE)
         os.unlink(os.path.join(filePath))
-        if hard:
+        if removeFiles:
             try:
-                os.rmdir(self.directory)
+                shutil.rmtree(self.directory)
             except os.OSError:
                 pass
 

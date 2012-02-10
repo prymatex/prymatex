@@ -207,7 +207,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         if not treeNode.isproject:
             self.deletePath(treeNode.path)
         else:
-            self.logger.debug("Delete Project")
+            #Test delete removeFiles
+            self.application.projectManager.deleteProject(treeNode, removeFiles = True)
+            #Test remove on delete
+            #self.application.projectManager.removeProject(treeNode)
 
     @QtCore.pyqtSlot()
     def on_actionRename_triggered(self):
