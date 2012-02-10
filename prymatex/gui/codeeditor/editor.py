@@ -46,7 +46,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     SETTINGS_GROUP = 'CodeEditor'
     
-    defaultSyntax = pmxConfigPorperty(default = unicode("3130E4FA-B10E-11D9-9F75-000D93589AF6"), tm_name = unicode('OakDefaultLanguage'))
+    defaultSyntax = pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
     tabStopSoft = pmxConfigPorperty(default = True)
     @pmxConfigPorperty(default = 4)
     def tabStopSize(self, size):
@@ -59,7 +59,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.document().setDefaultFont(font)
         self.setTabStopWidth(self.tabStopSize * 9)
     
-    @pmxConfigPorperty(default = unicode('766026CB-703D-4610-B070-8DE07D967C5F'), tm_name = unicode('OakThemeManagerSelectedTheme'))
+    @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
         theme = self.application.supportManager.getTheme(uuid)
 
@@ -68,13 +68,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.colours = theme.settings
         
         #Editor colours
-        palette = self.palette()
-        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, self.colours['foreground'])
-        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.colours['background'])
-        palette.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Base, self.colours['background'])
-        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Highlight, self.colours['selection'])
-        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.AlternateBase, self.colours['invisibles'])
-        self.setPalette(palette)
+        style = """background-color: %s;
+        color: %s;
+        selection-background-color: %s;
+        """ % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
+        self.setStyleSheet(style)
+        #palette = self.palette()
+        #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, self.colours['foreground'])
+        #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.colours['background'])
+        #palette.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Base, self.colours['background'])
+        #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Highlight, self.colours['selection'])
+        #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.AlternateBase, self.colours['invisibles'])
+        #self.setPalette(palette)
         
         #Sidebar colours
         self.sidebar.foreground = self.colours['foreground']
@@ -83,6 +88,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.syntaxHighlighter.rehighlight()
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrent()
+        self.viewport().repaint(self.viewport().visibleRegion())
         if not firstTime:
             message = "<b>%s</b> theme set " % theme.name
             if theme.author is not None:

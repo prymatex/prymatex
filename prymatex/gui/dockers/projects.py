@@ -256,11 +256,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
-            #Conectar seÃ±al
+            #Conectar señal
             self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
             self.on_mainWindow_currentEditorChanged(self.mainWindow.currentEditor())
         else:
-            #Desconectar seÃ±al
+            #Desconectar señal
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
     
     def on_mainWindow_currentEditorChanged(self, editor):

@@ -55,7 +55,7 @@ class PMXFileManager(QtCore.QObject):
 
     @classmethod
     def contributeToSettings(cls):
-        from prymatex.gui.settings.widgets.filemanager import PMXFileManagerWidget
+        from prymatex.gui.settings.filemanager import PMXFileManagerWidget
         return [ PMXFileManagerWidget ]
         
     def connectGenericSignal(self):
