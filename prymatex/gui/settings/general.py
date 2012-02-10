@@ -9,8 +9,8 @@ from prymatex.gui.settings.models import PMXSettingTreeNode
 class PMXGeneralWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_General):
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
+        PMXSettingTreeNode.__init__(self, "general", settingGroup)
         self.setupUi(self)
-        PMXSettingTreeNode.__init__(self, settingGroup, self.windowTitle())
 
         
         #self.comboTabVisibility.addItem("Always shown", PMXTabWidget.TABBAR_ALWAYS_SHOWN)

@@ -6,7 +6,8 @@ from PyQt4 import QtCore, QtGui
 from prymatex.models.tree import TreeNode, TreeModel
 
 class PMXSettingTreeNode(TreeNode):
-    def __init__(self, settingGroup, name, parent = None):
+    NAMESPACE = ""
+    def __init__(self, name, settingGroup = None, parent = None):
         TreeNode.__init__(self, name, parent)
         self.settingGroup = settingGroup
 
@@ -16,18 +17,33 @@ class PMXSettingTreeNode(TreeNode):
     @property
     def icon(self):
         return QtGui.QIcon()
-    
+
+class PMXProxySettingTreeNode(PMXSettingTreeNode):
+    @property
+    def icon(self):
+        return QtGui.QIcon()
+
 class PMXSettingsModel(TreeModel):  
     def __init__(self, parent = None):
         TreeModel.__init__(self, parent)
     
     def data(self, index, role):
         node = self.node(index)
+        #TODO: No usar los atributos del widget, poner los valores en el TreeNode
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             return node.windowTitle()
         elif role == QtCore.Qt.DecorationRole:
             return node.windowIcon()
 
+    def nodeForNamespace(self, namespace):
+        node = self.rootNode
+        names = namespace.split(".")
+        for name in names:
+            node = node.findChildByName(name)
+            if node == None:
+                break
+        return node
+        
     def appendSetting(self, setting):
         self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
         self.rootNode.appendChild(setting)

@@ -43,25 +43,13 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
 
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
+        PMXSettingTreeNode.__init__(self, "theme", settingGroup)
         self.setupUi(self)
-        PMXSettingTreeNode.__init__(self, settingGroup, self.windowTitle())
         self.setupTableView()
         self.setupPushButton()
     
     def loadSettings(self):
-        self.configComboBoxThemes()
-        self.tableView.setModel(self.application.supportManager.themeStyleProxyModel)
-    
-    #==========================================================
-    # ComboBoxThemes
-    #==========================================================
-    @QtCore.pyqtSlot(int)
-    def on_comboBoxThemes_activated(self, index):
-        uuid = self.comboBoxThemes.itemData(index)
-        theme = self.application.supportManager.getTheme(uuid)
-        self.setThemeSettings(theme)
-        
-    def configComboBoxThemes(self):
+        self.tableView.setModel(self.application.supportManager.themeStyleProxyModel)        
         #Combo Theme
         currentTheme = None
         currentThemeUUID = self.settingGroup.hasValue('theme') and self.settingGroup.value('theme').upper() or None 
@@ -72,8 +60,17 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
                 currentTheme = theme
         if currentTheme is not None:
             self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.findData(currentThemeUUID))
-            self.setThemeSettings(currentTheme)
+            self.setThemeSettings(currentTheme, False)
     
+    #==========================================================
+    # ComboBoxThemes
+    #==========================================================
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxThemes_activated(self, index):
+        uuid = self.comboBoxThemes.itemData(index)
+        theme = self.application.supportManager.getTheme(uuid)
+        self.setThemeSettings(theme)
+        
     #==========================================================
     # TableView
     #==========================================================
@@ -155,7 +152,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
             self.application.supportManager.updateTheme(theme, settings = { element: color })
             self.setThemeSettings(theme)
     
-    def setThemeSettings(self, theme):
+    def setThemeSettings(self, theme, changeSettings = True):
         settings = theme.settings
         self.pushButtonForeground.setStyleSheet("background-color: " + QColor2RGBA(settings['foreground'])[:7])
         self.pushButtonBackground.setStyleSheet("background-color: " + QColor2RGBA(settings['background'])[:7])
@@ -164,5 +161,6 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
         self.pushButtonLineHighlight.setStyleSheet("background-color: " + QColor2RGBA(settings['lineHighlight'])[:7])
         self.pushButtonCaret.setStyleSheet("background-color: " + QColor2RGBA(settings['caret'])[:7])
         self.application.supportManager.themeStyleProxyModel.setFilterRegExp(unicode(theme.uuid))
-        self.settingGroup.setValue('theme', unicode(theme.uuid))
+        if changeSettings:
+            self.settingGroup.setValue('theme', unicode(theme.uuid))
         

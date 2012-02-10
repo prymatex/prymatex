@@ -13,8 +13,8 @@ class PMXNetworkWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Network):
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
+        PMXSettingTreeNode.__init__(self, "network", settingGroup)
         self.setupUi(self)
-        PMXSettingTreeNode.__init__(self, settingGroup, self.windowTitle())
 
         self.radioAutomatically.setToolTip("Not implemented yet")
         self.radioAutomatically.setEnabled(False)

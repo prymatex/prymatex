@@ -9,8 +9,8 @@ from prymatex.gui.settings.models import PMXSettingTreeNode
 class PMXFileManagerWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FileManagerDialog):
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
+        PMXSettingTreeNode.__init__(self, "files", settingGroup)
         self.setupUi(self)
-        PMXSettingTreeNode.__init__(self, settingGroup, self.windowTitle())
         self.loadEncodings()
         self.setupLineEndings()
 

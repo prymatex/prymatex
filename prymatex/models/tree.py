@@ -23,6 +23,11 @@ class TreeNode(object):
     def removeChild(self, child):
         self.childrenNodes.remove(child)
         child.parentNode = None
+    
+    def findChildByName(self, name):
+        for child in self.childrenNodes:
+            if child.name == name:
+                return child
 
     def removeAllChild(self):
         for child in self.childrenNodes:
