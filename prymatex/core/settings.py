@@ -107,6 +107,7 @@ class SettingsGroup(object):
         self.tmsettings = tmsettings
             
     def setValue(self, name, value):
+        #TODO: Ver que pasa con las listas
         if name in self.settings:
             self.qsettings.beginGroup(self.name)
             self.qsettings.setValue(name, value)
