@@ -68,18 +68,26 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.colours = theme.settings
         
         #Editor colours
-        style = """background-color: %s;
+        editorStyle = """background-color: %s;
         color: %s;
         selection-background-color: %s;
         """ % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
-        self.setStyleSheet(style)
-        #palette = self.palette()
-        #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, self.colours['foreground'])
-        #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.colours['background'])
-        #palette.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Base, self.colours['background'])
+        appStyle = """* {background-color: %s;
+        color: %s;
+        selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
+        #self.setStyleSheet(editorStyle)
+        #self.application.setStyleSheet(appStyle)
+        palette = self.palette()
+        palette.setColor(QtGui.QPalette.Active, self.backgroundRole(), self.colours['background'])
+        palette.setColor(QtGui.QPalette.Inactive, self.backgroundRole(), self.colours['background'])
+        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.colours['background'])
+        palette.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Base, self.colours['background'])
+        #palette.setColor(QtGui.QPalette.Active, self.foregroundRole(), self.colours['foreground'])
+        #palette.setColor(QtGui.QPalette.Inactive, self.foregroundRole(), self.colours['foreground'])
         #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Highlight, self.colours['selection'])
         #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.AlternateBase, self.colours['invisibles'])
-        #self.setPalette(palette)
+        self.setPalette(palette)
+        #self.setBackgroundVisible(True)
         
         #Sidebar colours
         self.sidebar.foreground = self.colours['foreground']
