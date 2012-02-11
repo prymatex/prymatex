@@ -62,7 +62,7 @@ def prepareShellScript(script, environment):
     environment = ensureEnvironment(environment)
     assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
     script = ensureShellScript(script, environment['PMX_SUPPORT_PATH'])
-    file = makeExecutableTempFile(script, environment.get('PMX_LOG_PATH'))
+    file = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
     if sys.platform == "win32":
         #FIXME: re trucho pero por ahora funciona para mi :)
         command = "c:\\cygwin\\bin\\env %s" % file
