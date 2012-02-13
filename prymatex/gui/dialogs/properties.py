@@ -4,7 +4,7 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.ui.dialogs.settings import Ui_SettingsDialog
-from prymatex.gui.settings.models import PMXSettingsModel, PMXSettingsProxyModel
+from prymatex.gui.settings.models import PMXNamespacedModel, PMXPropertiesProxyModel
 
 class PMXPropertiesDialog(QtGui.QDialog, Ui_SettingsDialog):
     """Properties dialog, it's hold by the project docker
@@ -15,9 +15,9 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_SettingsDialog):
         
         self.baseWindowTitle = self.windowTitle()
         
-        self.model = PMXSettingsModel(self)
+        self.model = PMXNamespacedModel(self)
         
-        self.proxyModelProperties = PMXSettingsProxyModel(self)
+        self.proxyModelProperties = PMXPropertiesProxyModel(self)
         self.proxyModelProperties.setSourceModel(self.model)
         
         self.treeViewSetting.setModel(self.proxyModelProperties)
@@ -33,13 +33,13 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_SettingsDialog):
     
     def on_treeViewSetting_pressed(self, index):
         treeNode = self.proxyModelProperties.node(index)
-        self.setCurrentSettingWidget(treeNode)
+        self.setCurrentPropertyWidget(treeNode)
         
     def on_treeViewSetting_activated(self, index):
         treeNode = self.proxyModelProperties.node(index)
         self.setCurrentSettingWidget(treeNode)
     
-    def setCurrentSettingWidget(self, widget):
+    def setCurrentPropertyWidget(self, widget):
         self.stackedWidget.setCurrentWidget(widget)
         self.updateTitle(widget.windowTitle())
     
@@ -50,6 +50,7 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_SettingsDialog):
         index = self.stackedWidget.addWidget(widget)
         self.model.addSetting(widget)
     
-    def loadSettings(self):
-        for index in xrange(self.stackedWidget.count()):
-            self.stackedWidget.widget(index).loadSettings()
+    def exec_(self, fileSystemItem):
+        self.proxyModelProperties.setFilterFileSystem(fileSystemItem)
+        return QtGui.QDialog.exec_(self)
+        

@@ -36,13 +36,19 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.setupUi(self)
         self.projectTreeProxyModel = self.application.projectManager.projectTreeProxyModel
         self.treeViewProjects.setModel(self.projectTreeProxyModel)
-
+        self.setupPropertiesDialog()
         self.setupTreeViewProjects()
 
     def setMainWindow(self, mainWindow):
         PMXBaseDock.setMainWindow(self, mainWindow)
         mainWindow.projects = self
     
+
+    def setupPropertiesDialog(self):
+        from prymatex.gui.dialogs.properties import PMXPropertiesDialog
+        self.propertiesDialog = PMXPropertiesDialog(self)
+        #TODO: Para cada add-on registrar los correspondientes properties
+
     def setupTreeViewProjects(self):
         #Setup Context Menu
         projectMenuSettings = { 
@@ -233,8 +239,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
-        path = self.currentPath()
-    
+        treeNode = self.currentNode()
+        self.propertiesDialog.exec_(treeNode)
+
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):
         self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())

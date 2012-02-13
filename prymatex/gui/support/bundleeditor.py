@@ -3,17 +3,11 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.settings import pmxConfigPorperty
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
 
 
 class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
-    #=========================================================
-    # Settings
-    #=========================================================
-    SETTINGS_GROUP = 'BundleEditor'
-        
     def __init__(self, application):
         super(PMXBundleEditor, self).__init__()
         self.setupUi(self)
