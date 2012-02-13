@@ -43,10 +43,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         PMXBaseDock.setMainWindow(self, mainWindow)
         mainWindow.projects = self
     
-
     def setupPropertiesDialog(self):
         from prymatex.gui.dialogs.properties import PMXPropertiesDialog
+        from prymatex.gui.project.environment import PMXEnvironmentWidget
         self.propertiesDialog = PMXPropertiesDialog(self)
+        self.propertiesDialog.register(PMXEnvironmentWidget(self))
         #TODO: Para cada add-on registrar los correspondientes properties
 
     def setupTreeViewProjects(self):
@@ -214,9 +215,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             self.deletePath(treeNode.path)
         else:
             #Test delete removeFiles
-            self.application.projectManager.deleteProject(treeNode, removeFiles = True)
+            #self.application.projectManager.deleteProject(treeNode, removeFiles = True)
             #Test remove on delete
-            #self.application.projectManager.removeProject(treeNode)
+            self.application.projectManager.removeProject(treeNode)
 
     @QtCore.pyqtSlot()
     def on_actionRename_triggered(self):
@@ -266,11 +267,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
-            #Conectar señal
+            #Conectar seï¿½al
             self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
             self.on_mainWindow_currentEditorChanged(self.mainWindow.currentEditor())
         else:
-            #Desconectar señal
+            #Desconectar seï¿½al
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
     
     def on_mainWindow_currentEditorChanged(self, editor):

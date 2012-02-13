@@ -3,7 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.settings.models import PMXSettingTreeNode
+from prymatex.gui.settings.models import PMXPropertyTreeNode
 from prymatex.ui.settings.environment import Ui_Environment
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
@@ -97,19 +97,19 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         else:
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
 
-class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
+class PMXEnvironmentWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_Environment):
     """Environment variables
     """
-    NAMESPACE = "general"
+    NAMESPACE = ""
     TITLE = "Enviroment Variables"
-    def __init__(self, settingGroup, parent = None):
+    def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXSettingTreeNode.__init__(self, "environment", settingGroup)
+        PMXPropertyTreeNode.__init__(self, "environment")
         self.setupUi(self)
         self.setupVariablesTableModel()
-    
-    def loadSettings(self):
-        self.model.setVariables(self.application.supportManager.shellVariables, self.application.supportManager.environment )
+
+    def acceptFileSystemItem(self, fileSystemItem):
+        return fileSystemItem.isproject
         
     def setupVariablesTableModel(self):
         self.model = PMXEnvVariablesTableModel(self)
@@ -124,7 +124,7 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
         self.tableView.resizeRowsToContents()
 
     def on_variablesModel_userVariablesChanged(self, variables):
-        self.settingGroup.setValue('shellVariables', variables)
+        pass
 
     def on_pushAdd_pressed(self):
         self.model.insertRows(0, 1)

@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>EnvVariables</class>
- <widget class="QWidget" name="EnvVariables">
+ <class>Environment</class>
+ <widget class="QWidget" name="Environment">
   <property name="windowTitle">
-   <string>Enviroment Variables</string>
-  </property>
-  <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
-    <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
+   <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -59,8 +55,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

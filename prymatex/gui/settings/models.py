@@ -129,9 +129,11 @@ class PMXSettingsProxyModel(QtGui.QSortFilterProxyModel):
 class PMXPropertiesProxyModel(PMXSettingsProxyModel):
     def __init__(self, parent = None):
         PMXSettingsProxyModel.__init__(self, parent)
-        self.currentFileSystemItem = None
+        self.fileSystemItem = None
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
+        if self.fileSystemItem is None:
+            return False
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)
         if not node.acceptFileSystemItem(self.fileSystemItem):
@@ -142,6 +144,6 @@ class PMXPropertiesProxyModel(PMXSettingsProxyModel):
         return True
     
     def setFilterFileSystem(self, fileSystemItem):
-        self.currentFileSystemItem = fileSystemItem
+        self.fileSystemItem = fileSystemItem
         self.setFilterRegExp("")
         
