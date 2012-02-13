@@ -6,16 +6,16 @@ from logging.handlers import BufferingHandler
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.ui.others.logwidget import Ui_LogWidget
 
 class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
+    """Logging widget
     """
-    Logging widget
-    
-    """
+    SHORTCUT = "F12"
+    ICON = resources.getIcon("logger")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F12")
     
     def __init__(self, parent = None):
         QtGui.QDockWidget.__init__(self, parent)

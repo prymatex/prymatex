@@ -127,18 +127,17 @@ class TextMate(QtCore.QObject):
     isBusy = QtCore.pyqtProperty("bool", isBusy)
     
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
+    SHORTCUT = "F9"
+    ICON = resources.getIcon("browser")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
-    MENU_ICON = resources.getIcon("browser")
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F9")
     
     SETTINGS_GROUP = "Browser"
     
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
     def proxy(self, value):
-        '''System wide proxy
-        '''
-        print value
+        """System wide proxy
+        """
         proxy_url = QtCore.QUrl(value)    
         if not value:
             network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)

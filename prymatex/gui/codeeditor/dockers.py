@@ -9,8 +9,8 @@ from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.gui.codeeditor.editor import PMXCodeEditor
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F7")
-    MENU_ICON = resources.getIcon("symbols")
+    SHORTCUT = "F7"
+    ICON = resources.getIcon("symbols")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, parent):
@@ -37,7 +37,10 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     def on_mainWindow_currentEditorChanged(self, editor):
         if isinstance(editor, PMXCodeEditor):
             self.tableViewSymbols.setModel(editor.symbolListModel)
-        
+        elif editor is None:
+            #Clear
+            self.tableViewSymbols.setModel(None)
+
     def on_tableViewSymbols_activated(self, index):
         block = index.internalPointer()
         self.mainWindow.currentEditor().goToBlock(block)
@@ -49,9 +52,9 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.mainWindow.currentEditor().setFocus()
         
 class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F7")
+    SHORTCUT = "Shift+F7"
+    ICON = resources.getIcon("bookmark")
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
-    MENU_ICON = resources.getIcon("bookmark")
     
     def __init__(self, mainWindow):
         QtGui.QDockWidget.__init__(self, mainWindow)
@@ -77,6 +80,9 @@ class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
     def on_mainWindow_currentEditorChanged(self, editor):
         if isinstance(editor, PMXCodeEditor):
             self.tableViewBookmarks.setModel(editor.bookmarkListModel)
+        elif editor is None:
+            #Clear
+            self.tableViewBookmarks.setModel(None)
         
     def on_tableViewBookmarks_activated(self, index):
         block = index.internalPointer()

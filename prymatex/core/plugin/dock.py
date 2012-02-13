@@ -7,17 +7,14 @@ from prymatex import resources
 from prymatex.core.plugin import PMXBaseWidgetPlugin
 
 class PMXBaseDock(PMXBaseWidgetPlugin):
-    MENU_KEY_SEQUENCE = None
-    MENU_ICON = None
+    SHORTCUT = ""
+    ICON = QtGui.QIcon()
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self):
         PMXBaseWidgetPlugin.__init__(self)
-        if self.MENU_KEY_SEQUENCE is not None:
-            keysequence = QtGui.QKeySequence(self.MENU_KEY_SEQUENCE)
-            self.toggleViewAction().setShortcut(keysequence)
-        if self.MENU_ICON is not None:
-            self.toggleViewAction().setIcon(self.MENU_ICON)
+        self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
+        self.toggleViewAction().setIcon(self.ICON)
 
     def setMainWindow(self, mainWindow):
         self.mainWindow = mainWindow

@@ -18,9 +18,9 @@ from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.project.base import PMXProject
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
+    SHORTCUT = "F8"
+    ICON = resources.getIcon("project")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
-    MENU_ICON = resources.getIcon("project")
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F8")
 
     #=======================================================================
     # Settings

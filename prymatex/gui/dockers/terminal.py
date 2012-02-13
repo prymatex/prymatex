@@ -10,9 +10,10 @@ from prymatex.utils.i18n import ugettext as _
 PORT = 4613
 
 class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
+    SHORTCUT = "F4"
+    ICON = resources.getIcon("terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
-    MENU_ICON = resources.getIcon("terminal")
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F4")
+
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)

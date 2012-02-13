@@ -60,7 +60,8 @@ class PMXSafeFilesytemLineEdit(QtGui.QLineEdit):
     
 class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
     def createEditor(self, parent, option, index):
-        ''' Create a new editor ''' 
+        """Create a new editor
+        """
         
         editor = PMXSafeFilesytemLineEdit(parent)
         editor.setText(index.data())
@@ -73,9 +74,10 @@ class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
         return QtGui.QItemDelegate.setModelData(self, editor, model, index)
         
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks, PMXBaseDock):
+    SHORTCUT = "Shift+F8"
+    ICON = resources.getIcon("filemanager")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
-    MENU_ICON = resources.getIcon("filemanager")
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F8")
+    
     #=======================================================================
     # Settings
     #=======================================================================
