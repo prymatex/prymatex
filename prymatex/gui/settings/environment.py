@@ -101,7 +101,7 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EnvVariables):
     """
     Environment variables
     """
-    
+    NAMESPACE = "general"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "environment", settingGroup)

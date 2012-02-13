@@ -10,9 +10,8 @@ from prymatex.gui.support.qtadapter import QColor2RGBA
 from prymatex.utils.i18n import ugettext as _
 
 class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
-    '''
-    Changes font and theme
-    '''
+    """Changes font and theme
+    """
     DEFAULTS = {'settings': {'background': '#FFFFFF',
                              'caret': '#000000',
                              'foreground': '#000000',
@@ -41,6 +40,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
                             ('Invalid', 'invalid')]
                 }
 
+    NAMESPACE = "editor"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "theme", settingGroup)

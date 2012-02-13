@@ -12,7 +12,6 @@ class PMXGeneralWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_General):
         PMXSettingTreeNode.__init__(self, "general", settingGroup)
         self.setupUi(self)
 
-        
         #self.comboTabVisibility.addItem("Always shown", PMXTabWidget.TABBAR_ALWAYS_SHOWN)
         #self.comboTabVisibility.addItem("Show when more than one", PMXTabWidget.TABBAR_WHEN_MULTIPLE)
         #self.comboTabVisibility.addItem("Never show", PMXTabWidget.TABBAR_NEVER_SHOWN)

@@ -4,12 +4,10 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.ui.dialogs.settings import Ui_SettingsDialog
-from prymatex.gui.settings.models import PMXSettingsModel, PMXSettingsProxyModel
+from prymatex.gui.settings.models import PMXSettingsModel, PMXSettingsProxyModel, PMXProxySettingTreeNode
 
 class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
-    """
-    Settings dialog, it's hold by the application under
-    configdialog property
+    """Settings dialog, it's hold by the application under configdialog property
     """
     def __init__(self, application):
         QtGui.QDialog.__init__(self)
@@ -43,15 +41,19 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
         self.setCurrentSettingWidget(treeNode)
     
     def setCurrentSettingWidget(self, widget):
-        self.stackedWidget.setCurrentWidget(widget)
-        self.updateTitle(widget.windowTitle())
+        if not isinstance(widget, PMXProxySettingTreeNode):
+            self.stackedWidget.setCurrentWidget(widget)
+            self.updateTitle(widget.windowTitle())
+        else:
+            self.stackedWidget.setCurrentWidget(None)
+            self.updateTitle("")
     
     def updateTitle(self, subTitle):
         self.setWindowTitle("%s - %s" % (self.baseWindowTitle, subTitle))
     
     def register(self, widget):
         index = self.stackedWidget.addWidget(widget)
-        self.model.appendSetting(widget)
+        self.model.addSetting(widget)
     
     def loadSettings(self):
         for index in xrange(self.stackedWidget.count()):
