@@ -8,9 +8,9 @@ from prymatex.ui.settings.network import Ui_Network
 from prymatex.gui.settings.models import PMXSettingTreeNode
 
 class PMXNetworkWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Network):
-    '''Setup network connection
-    '''
-    
+    """Setup network connection
+    """
+    TITLE = "Network"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "network", settingGroup)
@@ -37,6 +37,9 @@ class PMXNetworkWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Network):
         
         self.comboProxyType.addItem("HTTP Proxy", QNetworkProxy.HttpProxy)
         self.comboProxyType.addItem("Socks 5 Proxy", QNetworkProxy.Socks5Proxy)
+    
+    def filterString(self):
+        return "proxyportnetwork" + PMXSettingTreeNode.filterString(self)
     
     def changeProxyMode(self, checked):
         if checked:

@@ -98,10 +98,10 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
 
 class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EnvVariables):
-    """
-    Environment variables
+    """Environment variables
     """
     NAMESPACE = "general"
+    TITLE = "Enviroment Variables"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "environment", settingGroup)

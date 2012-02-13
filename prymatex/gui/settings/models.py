@@ -8,24 +8,39 @@ from prymatex.models.tree import TreeNode, TreeModel
 class PMXSettingTreeNode(TreeNode):
     NAMESPACE = ""
     ICON = QtGui.QIcon()
+    TITLE = ""
     def __init__(self, name, settingGroup = None, parent = None):
         TreeNode.__init__(self, name, parent)
         self.settingGroup = settingGroup
+        self.__title = self.TITLE
+        self.__icon = self.ICON
+        
+    def filterString(self):
+        return self.name + self.title + reduce(lambda initial, child: initial + child.filterString(), self.childrenNodes, "")
 
     def loadSettings(self):
         pass
 
     @property
+    def title(self):
+        return self.__title
+    
+    @title.setter
+    def title(self, title):
+        self.__title = title
+    
+    @property
     def icon(self):
-        return self.ICON
+        return self.__icon
+    
+    @icon.setter
+    def icon(self, icon):
+        self.__icon = icon
 
 class PMXProxySettingTreeNode(PMXSettingTreeNode):
     def __init__(self, name, parent = None):
-        PMXSettingTreeNode.__init__(self, name, None, parent)
-        
-    @property
-    def icon(self):
-        return self.ICON
+        PMXSettingTreeNode.__init__(self, name, parent = parent)
+        self.title = self.name.title()
 
 class PMXSettingsModel(TreeModel):  
     def __init__(self, parent = None):
@@ -33,12 +48,10 @@ class PMXSettingsModel(TreeModel):
     
     def data(self, index, role):
         node = self.node(index)
-        #TODO: No usar los atributos del widget, poner los valores en el TreeNode
-        #TODO: Mejorar esto urgente
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return node.windowTitle() if not isinstance(node, PMXProxySettingTreeNode) else node.name.title()
+            return node.title
         elif role == QtCore.Qt.DecorationRole:
-            return node.windowIcon() if not isinstance(node, PMXProxySettingTreeNode) else node.icon
+            return node.icon
 
     def nodeForNamespace(self, namespace, createProxy = False):
         node = self.rootNode
@@ -46,11 +59,11 @@ class PMXSettingsModel(TreeModel):
         for name in names:
             if name != "":
                 nextNode = node.findChildByName(name)
-                if nextNode == None and createProxy:
+                if nextNode is None and createProxy:
                     nextNode = PMXProxySettingTreeNode(name, node)
                     node.appendChild(nextNode)
                     self.layoutChanged.emit()
-                else:
+                elif nextNode is None:
                     return None
                 node = nextNode
         return node
@@ -77,6 +90,9 @@ class PMXSettingsProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)
+        regexp = self.filterRegExp()
+        if not regexp.isEmpty():
+            return regexp.indexIn(node.filterString()) != -1
         return True
 
     def filterAcceptsColumn(self, sourceColumn, sourceParent):

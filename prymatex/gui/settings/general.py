@@ -7,6 +7,7 @@ from prymatex.ui.settings.general import Ui_General
 from prymatex.gui.settings.models import PMXSettingTreeNode
 
 class PMXGeneralWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_General):
+    TITLE = "General"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "general", settingGroup)

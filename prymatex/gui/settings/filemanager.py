@@ -7,6 +7,8 @@ from prymatex.ui.settings.filemanager import Ui_FileManagerDialog
 from prymatex.gui.settings.models import PMXSettingTreeNode
 
 class PMXFileManagerWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FileManagerDialog):
+    NAMESPACE = "general"
+    TITLE = "Files"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "files", settingGroup)
@@ -15,8 +17,7 @@ class PMXFileManagerWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FileManagerDial
         self.setupLineEndings()
 
     def setupLineEndings(self):
-        """
-        Populate line endings
+        """Populate line endings
         """
         self.comboBoxLineEnding.addItem(r"Unix (\n)", "unix")
         self.comboBoxLineEnding.addItem(r"Windows (\r\n)", "windows")

@@ -41,6 +41,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
                 }
 
     NAMESPACE = "editor"
+    TITLE = "Font and Themes"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "theme", settingGroup)
