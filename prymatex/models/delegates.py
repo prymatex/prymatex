@@ -33,9 +33,9 @@ class PMXColorDelegate(QtGui.QStyledItemDelegate):
             model.setData(index, color)
     
     def setEditorData(self, colorDialog, index):
-        variant = index.data()
-        if variant.canConvert(QtCore.QVariant.Color):
-            colorDialog.setCurrentColor(QtGui.QColor(variant))
+        color = index.data()
+        if color is not None:
+            colorDialog.setCurrentColor(color)
             
     def paint(self, painter, option, index):
         data = index.data()
