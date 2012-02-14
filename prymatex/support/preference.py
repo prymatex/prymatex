@@ -78,7 +78,7 @@ class PMXPreferenceSettings(object):
                     value = [ {'name': t[0], 'value': t[1] } for t in  value.iteritems() ]
                 elif key in [ 'symbolTransformation' ]:
                     value = ";".join(value) + ";"
-                elif key in [ showInSymbolList]:
+                elif key in [ 'showInSymbolList' ]:
                     value = value and "1" or "0"
                 hash[key] = value
         return hash

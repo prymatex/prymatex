@@ -57,6 +57,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def font(self, font):
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.document().setDefaultFont(font)
+        self.sidebar.font = font
         self.setTabStopWidth(self.tabStopSize * 9)
     
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
@@ -67,38 +68,23 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.syntaxHighlighter.setTheme(theme)
         self.colours = theme.settings
         
-        #Editor colours
-        editorStyle = """background-color: %s;
-        color: %s;
-        selection-background-color: %s;
-        """ % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
-        appStyle = """* {background-color: %s;
+        #Set color for all QPlainTextEdit
+        appStyle = """QPlainTextEdit {background-color: %s;
         color: %s;
         selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
-        #self.setStyleSheet(editorStyle)
-        #self.application.setStyleSheet(appStyle)
-        palette = self.palette()
-        #palette.setColor(QtGui.QPalette.Active, self.backgroundRole(), self.colours['background'])
-        #palette.setColor(QtGui.QPalette.Inactive, self.backgroundRole(), self.colours['background'])
-        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.colours['background'])
-        palette.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Base, self.colours['background'])
-        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.colours['background'])
-        palette.setColor(QtGui.QPalette.Inactive, QtGui.QPalette.Base, self.colours['background'])
-        #palette.setColor(QtGui.QPalette.Active, self.foregroundRole(), self.colours['foreground'])
-        #palette.setColor(QtGui.QPalette.Inactive, self.foregroundRole(), self.colours['foreground'])
-        #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Highlight, self.colours['selection'])
-        #palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.AlternateBase, self.colours['invisibles'])
-        self.setPalette(palette)
-        #self.setBackgroundVisible(True)
-        
+        #TODO: Esto da para explotarlo mucho mas
+        #print self.application.styleSheet()
+        #print self.styleSheet()
+        self.setStyleSheet(appStyle)
+
         #Sidebar colours
+        #TODO: que la sidebar lo tomo del editor
         self.sidebar.foreground = self.colours['foreground']
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
         self.syntaxHighlighter.rehighlight()
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrent()
-        self.viewport().repaint(self.viewport().visibleRegion())
         if not firstTime:
             message = "<b>%s</b> theme set " % theme.name
             if theme.author is not None:

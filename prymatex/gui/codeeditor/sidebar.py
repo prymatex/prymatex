@@ -42,12 +42,14 @@ class PMXSidebar(QtGui.QWidget):
         current_block = self.editor.document().findBlock(self.editor.textCursor().position())
 
         painter = QtGui.QPainter(self)
+        painter.setPen(self.foreground)
+        painter.setFont(self.editor.document().defaultFont())
         painter.fillRect(self.rect(), self.background)
 
         block = self.editor.firstVisibleBlock()
         viewport_offset = self.editor.contentOffset()
         line_count = block.blockNumber()
-        painter.setPen(self.foreground)
+        
         while block.isValid():
             line_count += 1
             # The top left position of the block in the document
