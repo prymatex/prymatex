@@ -34,7 +34,11 @@
         <widget class="QLineEdit" name="lineEditFilter"/>
        </item>
        <item>
-        <widget class="QTreeView" name="treeView"/>
+        <widget class="QTreeView" name="treeView">
+         <property name="headerHidden">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
