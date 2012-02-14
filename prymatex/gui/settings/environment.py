@@ -13,6 +13,8 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         self.variables = []
         
     def setVariables(self, user, system):
+        if user is None:
+            user = []
         self.variables = user + map(lambda (variable, value): {'variable': variable, 'value': value, 'system': True, 'enabled': True}, system.iteritems())
         self.layoutChanged.emit()
         
@@ -41,9 +43,9 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
                 return self.variables[index.row()]['value']
 
     def setData(self, index, value, role):
-        '''
-            Retornar verdadero si se puedo hacer el camio, falso en caso contratio
-        '''
+        """Retornar verdadero si se puedo hacer el camio, falso en caso contratio
+        """
+
         if not index.isValid(): return False
 
         if role == QtCore.Qt.EditRole:

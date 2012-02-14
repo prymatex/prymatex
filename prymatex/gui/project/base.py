@@ -47,7 +47,7 @@ class FileSystemTreeNode(TreeNode):
         return resources.getIcon(self.path)
 
 class PMXProject(FileSystemTreeNode):
-    KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame' ]
+    KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables' ]
     FILE = '.pmxproject'
     def __init__(self, directory, hash):
         self.directory = directory
@@ -55,6 +55,10 @@ class PMXProject(FileSystemTreeNode):
         self.workingSet = None
         self.manager = None
         self.load(hash)
+        
+    @property
+    def environment(self):
+        return {'TM_PROJECT_DIRECTORY': self.directory, 'TM_PROJECT_NAME': self.name }
         
     def load(self, hash):
         for key in PMXProject.KEYS:
@@ -69,6 +73,10 @@ class PMXProject(FileSystemTreeNode):
             if value != None:
                 hash[key] = value
         return hash
+        
+    def update(self, hash):
+        for key in hash.keys():
+            setattr(self, key, hash[key])
 
     def save(self):
         filePath = os.path.join(self.directory, self.FILE)
@@ -83,6 +91,16 @@ class PMXProject(FileSystemTreeNode):
             except os.OSError:
                 pass
 
+    def buildEnvironment(self):
+        env = {}
+        for var in self.shellVariables:
+            if var['enabled']:
+                env[var['variable']] = var['value']
+        env.update(self.environment)
+        env['TM_SELECTED_FILES'] = ""
+        env['TM_SELECTED_FILE'] = ""
+        return env
+        
     def buildEnvironment(self):
         env = {}
         env['TM_PROJECT_DIRECTORY'] = self.directory

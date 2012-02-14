@@ -78,6 +78,17 @@ class PMXProjectManager(QtCore.QObject):
         self.appendToKnowProjects(project)
         return project
     
+    def updateProject(self, project, **attrs):
+        """Actualiza un proyecto
+        """
+        if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
+            #Updates que no son updates
+            return item
+
+        project.update(attrs)
+        project.save()
+        return project
+
     def importProject(self, directory):
         pass
         

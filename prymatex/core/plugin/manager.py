@@ -24,6 +24,7 @@ class PMXPluginManager(object):
     #==================================================
     # Cargando clases
     #==================================================
+    #TODO: llevar esto al nivel de aplicacion y llamarlo populatedComponent o algo asi
     def preparePlugin(self, pluginClass):
         pluginClass.application = self.application
         pluginClass.logger = self.application.getLogger('.'.join([pluginClass.__module__, pluginClass.__name__]))

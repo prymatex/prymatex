@@ -114,7 +114,9 @@ class PMXPropertyTreeNode(PMXNamespacedTreeNode):
 
     def acceptFileSystemItem(self, fileSystemItem):
         return True
-
+        
+    def edit(self, fileSystemItem):
+        pass
 #=========================================
 # Proxy Models
 #=========================================

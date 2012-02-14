@@ -13,6 +13,8 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         self.variables = []
         
     def setVariables(self, user, system):
+        if user is None:
+            user = []
         self.variables = user + map(lambda (variable, value): {'variable': variable, 'value': value, 'system': True, 'enabled': True}, system.iteritems())
         self.layoutChanged.emit()
         
@@ -107,10 +109,15 @@ class PMXEnvironmentWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_Environment):
         PMXPropertyTreeNode.__init__(self, "environment")
         self.setupUi(self)
         self.setupVariablesTableModel()
+        self.project = None
 
     def acceptFileSystemItem(self, fileSystemItem):
         return fileSystemItem.isproject
-        
+    
+    def edit(self, project):
+        self.project = project
+        self.model.setVariables(self.project.shellVariables, self.project.environment )
+
     def setupVariablesTableModel(self):
         self.model = PMXEnvVariablesTableModel(self)
         self.model.userVariablesChanged.connect(self.on_variablesModel_userVariablesChanged)
@@ -124,7 +131,7 @@ class PMXEnvironmentWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_Environment):
         self.tableView.resizeRowsToContents()
 
     def on_variablesModel_userVariablesChanged(self, variables):
-        pass
+        self.application.projectManager.updateProject(self.project, shellVariables = variables)
 
     def on_pushAdd_pressed(self):
         self.model.insertRows(0, 1)

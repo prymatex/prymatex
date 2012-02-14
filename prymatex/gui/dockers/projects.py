@@ -47,6 +47,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         from prymatex.gui.dialogs.properties import PMXPropertiesDialog
         from prymatex.gui.project.environment import PMXEnvironmentWidget
         self.propertiesDialog = PMXPropertiesDialog(self)
+        self.application.pluginManager.preparePlugin(PMXEnvironmentWidget)
         self.propertiesDialog.register(PMXEnvironmentWidget(self))
         #TODO: Para cada add-on registrar los correspondientes properties
 
