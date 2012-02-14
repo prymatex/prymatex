@@ -44,7 +44,21 @@ class PMXProxyNamespacedTreeNode(PMXNamespacedTreeNode):
 class PMXNamespacedModel(TreeModel):  
     def __init__(self, parent = None):
         TreeModel.__init__(self, parent)
+        self.__proxyNodeFactory = None
     
+    @property
+    def proxyNodeFactory(self):
+        return self.__proxyNodeFactory
+        
+    @proxyNodeFactory.setter
+    def proxyNodeFactory(self, value):
+        self.__proxyNodeFactory = value
+
+    def createProxyNode(self, name, parent):
+        if self.proxyNodeFactory is not None:
+            return self.proxyNodeFactory(name, parent)
+        return PMXProxyNamespacedTreeNode(name, parent)
+        
     def data(self, index, role):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
@@ -59,7 +73,7 @@ class PMXNamespacedModel(TreeModel):
             if name != "":
                 nextNode = node.findChildByName(name)
                 if nextNode is None and createProxy:
-                    nextNode = PMXProxyNamespacedTreeNode(name, node)
+                    nextNode = self.createProxyNode(name, node)
                     node.appendChild(nextNode)
                     self.layoutChanged.emit()
                 elif nextNode is None:

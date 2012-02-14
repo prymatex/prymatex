@@ -4,7 +4,15 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
-from prymatex.gui.settings.models import PMXNamespacedModel, PMXSettingsProxyModel
+from prymatex.gui.settings.models import PMXNamespacedModel, PMXProxyNamespacedTreeNode, PMXSettingsProxyModel, PMXProxyNamespacedTreeNode
+
+class PMXProxySettingTreeNode(QtGui.QWidget, PMXProxyNamespacedTreeNode):
+    def __init__(self, name, parent):
+        QtGui.QWidget.__init__(self)
+        PMXProxyNamespacedTreeNode.__init__(self, name, parent)
+
+    def loadSettings(self):
+        pass
 
 class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     """Settings dialog, it's hold by the application under configdialog property
@@ -17,17 +25,18 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
         self.baseWindowTitle = self.windowTitle()
         
         self.model = PMXNamespacedModel(self)
+        self.model.proxyNodeFactory = self.proxyNodeFactory
         
         self.proxyModelSettings = PMXSettingsProxyModel(self)
         self.proxyModelSettings.setSourceModel(self.model)
         
         self.treeView.setModel(self.proxyModelSettings)
-        
+
         self.stackedWidget = QtGui.QStackedWidget(self.splitter)
-        #self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)
-        #self.stackedWidget.setFrameShadow(QtGui.QFrame.Sunken)
-        
         self.widgetsLayout.addWidget(self.stackedWidget)
+    
+    def proxyNodeFactory(self, name, parent):
+        return PMXProxySettingTreeNode(name, parent)
         
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
@@ -42,8 +51,7 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     
     def setCurrentSettingWidget(self, widget):
         self.stackedWidget.setCurrentWidget(widget)
-        self.textLabelTitle.setText(widget.titles)
-        #TODO: Si no es un proxy
+        self.textLabelTitle.setText(widget.title)
         self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title))
     
     def register(self, widget):
