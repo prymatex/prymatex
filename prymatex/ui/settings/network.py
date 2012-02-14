@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/network.ui'
 #
-# Created: Thu Feb  9 14:57:25 2012
+# Created: Mon Feb 13 20:51:43 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -119,8 +119,6 @@ class Ui_Network(object):
         self.pushTestSettings.setObjectName(_fromUtf8("pushTestSettings"))
         self.horizontalLayout.addWidget(self.pushTestSettings)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout.addItem(spacerItem1)
 
         self.retranslateUi(Network)
         QtCore.QObject.connect(self.radioBasedOnVariables, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.lineEdit_2.setEnabled)

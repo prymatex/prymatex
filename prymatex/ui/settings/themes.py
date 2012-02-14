@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/settings/themes.ui'
 #
-# Created: Thu Feb  9 14:57:25 2012
+# Created: Mon Feb 13 20:51:43 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,6 @@ except AttributeError:
 class Ui_FontThemeConfig(object):
     def setupUi(self, FontThemeConfig):
         FontThemeConfig.setObjectName(_fromUtf8("FontThemeConfig"))
-        FontThemeConfig.resize(315, 421)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/format-font-size-more.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         FontThemeConfig.setWindowIcon(icon)

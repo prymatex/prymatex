@@ -3,10 +3,10 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.ui.dialogs.settings import Ui_SettingsDialog
+from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
 from prymatex.gui.settings.models import PMXNamespacedModel, PMXSettingsProxyModel
 
-class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
+class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     """Settings dialog, it's hold by the application under configdialog property
     """
     def __init__(self, application):
@@ -21,31 +21,30 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_SettingsDialog):
         self.proxyModelSettings = PMXSettingsProxyModel(self)
         self.proxyModelSettings.setSourceModel(self.model)
         
-        self.treeViewSetting.setModel(self.proxyModelSettings)
+        self.treeView.setModel(self.proxyModelSettings)
         
         self.stackedWidget = QtGui.QStackedWidget(self.splitter)
-        self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)
-        self.stackedWidget.setFrameShadow(QtGui.QFrame.Sunken)
+        #self.stackedWidget.setFrameShape(QtGui.QFrame.StyledPanel)
+        #self.stackedWidget.setFrameShadow(QtGui.QFrame.Sunken)
         
         self.widgetsLayout.addWidget(self.stackedWidget)
         
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
     
-    def on_treeViewSetting_pressed(self, index):
+    def on_treeView_pressed(self, index):
         treeNode = self.proxyModelSettings.node(index)
         self.setCurrentSettingWidget(treeNode)
         
-    def on_treeViewSetting_activated(self, index):
+    def on_treeView_activated(self, index):
         treeNode = self.proxyModelSettings.node(index)
         self.setCurrentSettingWidget(treeNode)
     
     def setCurrentSettingWidget(self, widget):
         self.stackedWidget.setCurrentWidget(widget)
-        self.updateTitle(widget.title)
-    
-    def updateTitle(self, subTitle):
-        self.setWindowTitle("%s - %s" % (self.baseWindowTitle, subTitle))
+        self.textLabelTitle.setText(widget.titles)
+        #TODO: Si no es un proxy
+        self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title))
     
     def register(self, widget):
         index = self.stackedWidget.addWidget(widget)
