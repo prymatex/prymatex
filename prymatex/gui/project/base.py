@@ -3,9 +3,10 @@
 
 import os, shutil
 
+from prymatex import resources
+from prymatex.core import exceptions
 from prymatex.models.tree import TreeNode
 from prymatex.utils import plist
-from prymatex import resources
 
 """
 currentDocument: Documento actual en el editor
@@ -112,13 +113,15 @@ class PMXProject(FileSystemTreeNode):
     @classmethod
     def loadProject(cls, path, manager):
         filePath = os.path.join(path, cls.FILE)
+        if not os.path.isfile(filePath):
+            raise exceptions.PrymatexFileNotExistsException(filePath)
         try:
             data = plist.readPlist(filePath)
             project = cls(path, data)
             manager.addProject(project)
+            return project
         except Exception, e:
             print "Error in project %s (%s)" % (filePath, e)
-            manager.removeFromKnowProjects(path)            
     
     def setManager(self, manager):
         self.manager = manager

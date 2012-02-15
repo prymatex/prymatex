@@ -10,6 +10,7 @@ from collections import namedtuple
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp, prepareShellScript
 
+#TODO: Hacer un PMXRunningContext para todo lo que requiera de procesos template, commands, etc
 class PMXCommandContext(object):
     def __init__(self, command, environment, inputType, inputValue, outputType = None, outputValue = None):
         self.command = command

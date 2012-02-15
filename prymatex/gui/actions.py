@@ -73,6 +73,12 @@ class MainWindowActions(object):
         self.application.fileManager.clearFileHistory()
 
     @QtCore.pyqtSlot()
+    def on_actionImportProject_triggered(self):
+        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.getDirectory())
+        if directory:
+            self.application.projectManager.importProject(directory)
+        
+    @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
         self.saveEditor()
         

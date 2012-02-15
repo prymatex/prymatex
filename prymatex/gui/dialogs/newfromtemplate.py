@@ -28,7 +28,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
     
     def on_buttonChoose_pressed(self):
         directory = self.lineLocation.text()
-        path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Template"), directory)
+        path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose location for template"), directory)
         if path:
             self.lineLocation.setText(path)
         

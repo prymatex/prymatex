@@ -6,8 +6,8 @@ import fnmatch
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.settings import USER_HOME_PATH
-from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core import exceptions
+from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
 from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.project.proxies import PMXProjectTreeProxyModel
 from prymatex.gui.project.base import PMXProject
@@ -46,8 +46,13 @@ class PMXProjectManager(QtCore.QObject):
         return ''.join(validPath)
 
     def loadProject(self):
+        #TODO: load Known Projects
         for path in self.knownProjects[:]:
-            project = PMXProject.loadProject(path, self)
+            try:
+                PMXProject.loadProject(path, self)
+            except exceptions.PrymatexFileNotExistsException as e:
+                print e
+                self.removeFromKnowProjects(path)
 
     def isOpen(self, project):
         return True
@@ -90,8 +95,9 @@ class PMXProjectManager(QtCore.QObject):
         return project
 
     def importProject(self, directory):
-        pass
-        
+        project = PMXProject.loadProject(directory, self)
+        self.appendToKnowProjects(project)
+
     def deleteProject(self, project, removeFiles = False):
         """
         Elimina un proyecto

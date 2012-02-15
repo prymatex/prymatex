@@ -16,12 +16,17 @@ class APIUsageError(Exception):
 
 class PrymatexIOException(Exception):
     pass
-    
+
 class PrymatexFileExistsException(PrymatexIOException):
     def __init__(self, msg, filePath = None):
-        super(PrymatexFileExistsException, self).__init__(msg)
+        PrymatexIOException.__init__(self, msg)
         self.filePath = filePath
 
+class PrymatexFileNotExistsException(PrymatexIOException):
+    def __init__(self, msg, filePath = None):
+        PrymatexIOException.__init__(self, msg)
+        self.filePath = filePath
+        
 class PrymatexFilePermissionException(PrymatexIOException):
     pass
 
