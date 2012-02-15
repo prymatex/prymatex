@@ -138,18 +138,20 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def proxy(self, value):
         """System wide proxy
         """
-        proxy_url = QtCore.QUrl(value)    
+        proxy_url = QtCore.QUrl(value)
+        #TODO: Una regexp para filtar basura y quitar el try except
         if not value:
             network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
         else:
-            protocol = QNetworkProxy.NoProxy
-            if proxy_url.scheme().startswith('http'):
-                protocol = QNetworkProxy.HttpProxy
-            else:
-                protocol = QNetworkProxy.Socks5Proxy
-                
-            network_proxy = QNetworkProxy(protocol, proxy_url.host(), proxy_url.port(), proxy_url.userName(), proxy_url.password())
-
+            try:
+                protocol = QNetworkProxy.NoProxy
+                if proxy_url.scheme().startswith('http'):
+                    protocol = QNetworkProxy.HttpProxy
+                else:
+                    protocol = QNetworkProxy.Socks5Proxy
+                network_proxy = QNetworkProxy(protocol, proxy_url.host(), proxy_url.port(), proxy_url.userName(), proxy_url.password())
+            except:
+                network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
         QNetworkProxy.setApplicationProxy( network_proxy )
     
     @classmethod

@@ -46,9 +46,12 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def setupPropertiesDialog(self):
         from prymatex.gui.dialogs.properties import PMXPropertiesDialog
         from prymatex.gui.project.environment import PMXEnvironmentWidget
+        from prymatex.gui.project.resource import PMXResouceWidget
         self.propertiesDialog = PMXPropertiesDialog(self)
         self.application.pluginManager.preparePlugin(PMXEnvironmentWidget)
+        self.application.pluginManager.preparePlugin(PMXResouceWidget)
         self.propertiesDialog.register(PMXEnvironmentWidget(self))
+        self.propertiesDialog.register(PMXResouceWidget(self))
         #TODO: Para cada add-on registrar los correspondientes properties
 
     def setupTreeViewProjects(self):
