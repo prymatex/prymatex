@@ -101,14 +101,6 @@ class PMXProject(FileSystemTreeNode):
         env['TM_SELECTED_FILES'] = ""
         env['TM_SELECTED_FILE'] = ""
         return env
-        
-    def buildEnvironment(self):
-        env = {}
-        env['TM_PROJECT_DIRECTORY'] = self.directory
-        env['TM_PROJECT_NAME'] = self.name
-        env['TM_SELECTED_FILES'] = ""
-        env['TM_SELECTED_FILE'] = ""
-        return env
 
     @classmethod
     def loadProject(cls, path, manager):
