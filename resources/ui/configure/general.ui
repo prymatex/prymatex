@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>General</class>
- <widget class="QWidget" name="General">
+ <class>GeneralWidget</class>
+ <widget class="QWidget" name="GeneralWidget">
   <property name="windowTitle">
-   <string>General</string>
-  </property>
-  <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
-    <normaloff>:/icons/icons/Prymatex_Logo.png</normaloff>:/icons/icons/Prymatex_Logo.png</iconset>
+   <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -17,90 +13,116 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QCheckBox" name="checkBox">
-     <property name="text">
-      <string>Highlight curent line</string>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Main Window</string>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="checkBox_2">
-     <property name="text">
-      <string>Show right margin indicator</string>
-     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Title template:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="comboApplicationTitle_2">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="pushInsertAppName_2">
+          <property name="text">
+           <string>Application Name</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushInsertFile_2">
+          <property name="text">
+           <string>File Name</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushInsertProject_2">
+          <property name="text">
+           <string>Project Name</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="labelTabVisibility_2">
+        <property name="text">
+         <string>Tab visibilty:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QComboBox" name="comboTabVisibility_2"/>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Window Title</string>
+      <string>File Format</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelEncoding">
+        <property name="text">
+         <string>Encoding</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="comboBoxEncoding"/>
+      </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="labelLineEnding">
         <property name="text">
-         <string>Title template</string>
+         <string>Line Ending</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1" colspan="3">
-       <widget class="QComboBox" name="comboTabVisibility"/>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBoxLineEnding"/>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="labelTabVisibility">
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Save / Backup</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkBox">
         <property name="text">
-         <string>Tab visibilty</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="pushInsertAppName">
-        <property name="text">
-         <string>Application Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QPushButton" name="pushInsertProject">
-        <property name="text">
-         <string>Project Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QPushButton" name="pushInsertFile">
-        <property name="text">
-         <string>File Name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="3">
-       <widget class="QComboBox" name="comboApplicationTitle">
-        <property name="editable">
-         <bool>true</bool>
+         <string>Auto save on lost focus</string>
         </property>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

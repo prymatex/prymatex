@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Fri Feb  3 14:44:28 2012
+# Created: Tue Feb 14 20:01:10 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -195,6 +195,10 @@ class Ui_MainWindow(object):
         icon19.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-delete.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionDelete.setIcon(icon19)
         self.actionDelete.setObjectName(_fromUtf8("actionDelete"))
+        self.actionSwitchProfile = QtGui.QAction(MainWindow)
+        self.actionSwitchProfile.setObjectName(_fromUtf8("actionSwitchProfile"))
+        self.actionImportProject = QtGui.QAction(MainWindow)
+        self.actionImportProject.setObjectName(_fromUtf8("actionImportProject"))
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuNew.addAction(self.actionNewEditor)
@@ -204,6 +208,7 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.menuNew.menuAction())
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.menuRecentFiles.menuAction())
+        self.menuFile.addAction(self.actionImportProject)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSaveAs)
@@ -212,6 +217,8 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionClose)
         self.menuFile.addAction(self.actionCloseAll)
         self.menuFile.addAction(self.actionCloseOthers)
+        self.menuFile.addSeparator()
+        self.menuFile.addAction(self.actionSwitchProfile)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
         self.menuView.addAction(self.menuPanels.menuAction())
@@ -335,6 +342,8 @@ class Ui_MainWindow(object):
         self.actionNewProject.setText(_('Project'))
         self.actionNewProject.setShortcut(_('Ctrl+Alt+N'))
         self.actionDelete.setText(_('Delete'))
+        self.actionSwitchProfile.setText(_('Switch Profile'))
+        self.actionImportProject.setText(_('Import Project'))
 
 from prymatex.gui.central.splitter import PMXSplitTabWidget
 from prymatex import resources_rc

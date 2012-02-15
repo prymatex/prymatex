@@ -3,7 +3,7 @@
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.ui.settings.filemanager import Ui_FileManagerDialog
+from prymatex.ui.configure.filemanager import Ui_FileManagerDialog
 from prymatex.gui.settings.models import PMXSettingTreeNode
 
 class PMXFileManagerWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FileManagerDialog):

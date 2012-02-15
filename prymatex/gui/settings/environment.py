@@ -4,7 +4,7 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.settings.models import PMXSettingTreeNode
-from prymatex.ui.settings.environment import Ui_Environment
+from prymatex.ui.configure.environment import Ui_Environment
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
     userVariablesChanged = QtCore.pyqtSignal(list)

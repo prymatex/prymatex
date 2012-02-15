@@ -3,10 +3,10 @@
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.ui.settings.general import Ui_General
+from prymatex.ui.configure.general import Ui_GeneralWidget
 from prymatex.gui.settings.models import PMXSettingTreeNode
 
-class PMXGeneralWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_General):
+class PMXGeneralWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_GeneralWidget):
     TITLE = "General"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)

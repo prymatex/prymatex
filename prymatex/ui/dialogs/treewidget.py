@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/treewidget.ui'
 #
-# Created: Mon Feb 13 20:59:54 2012
+# Created: Tue Feb 14 15:51:25 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,6 +36,7 @@ class Ui_TreeWidgetDialog(object):
         self.lineEditFilter.setObjectName(_fromUtf8("lineEditFilter"))
         self.treeLayout.addWidget(self.lineEditFilter)
         self.treeView = QtGui.QTreeView(self.verticalLayoutWidget)
+        self.treeView.setHeaderHidden(True)
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.treeLayout.addWidget(self.treeView)
         self.verticalLayoutWidget_2 = QtGui.QWidget(self.splitter)

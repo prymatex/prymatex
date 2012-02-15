@@ -5,11 +5,11 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
-from prymatex.ui.settings.themes import Ui_FontThemeConfig
+from prymatex.ui.configure.theme import Ui_FontThemeWidget
 from prymatex.gui.support.qtadapter import QColor2RGBA
 from prymatex.utils.i18n import ugettext as _
 
-class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeConfig):
+class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
     """Changes font and theme
     """
     DEFAULTS = {'settings': {'background': '#FFFFFF',
