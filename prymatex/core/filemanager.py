@@ -183,6 +183,9 @@ class PMXFileManager(QtCore.QObject):
         self.watchPath(filePath)
         return content
 
+    def closeFile(self, filePath):
+        self.unwatchPath(filePath)
+        
     def saveFile(self, filePath, content):
         """
         Function that actually save the content of a file.
@@ -213,9 +216,6 @@ class PMXFileManager(QtCore.QObject):
         self.logger.debug("Unwatch path %s" % path)
         self.fileWatcher.removePath(path)
     
-    def closeFile(self, filePath):
-        self.unwatchPath(filePath)
-        
     def getDirectory(self, filePath = None):
         """
         Obtiene un directorio para el path

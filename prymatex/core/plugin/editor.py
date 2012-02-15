@@ -38,8 +38,8 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
         """ Save content of editor in a file """
         self.application.fileManager.saveFile(filePath, self.toPlainText())
         if filePath != self.filePath:
+            self.application.fileManager.closeFile(self.filePath)
             self.setFilePath(filePath)
-        #TODO: Remove current filePath from open files in fileManager
         self.setModified(False)
         self.setExternalAction(None)
         self.showMessage("<i>%s</i> saved" % self.filePath)
