@@ -43,7 +43,7 @@ class PMXBundleTreeNode(TreeNode):
         if self.tabTrigger != None:
             trigger.append(u"%s⇥" % (self.tabTrigger))
         if self.keyEquivalent != None:
-            trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent))
+            trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
         return ", ".join(trigger)
     
     def buildBundleAccelerator(self):

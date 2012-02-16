@@ -32,6 +32,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     
     def open(self, filePath):
         """ Open file and return content """
+        self.setFilePath(filePath)
         return self.application.fileManager.openFile(filePath)
 
     def save(self, filePath):
@@ -122,7 +123,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     # For Plugin Manager administrator
     #======================================================================    
     @classmethod
-    def acceptFile(cls, filePath):
+    def acceptFile(cls, filePath, mimetype):
         return True
         
     @classmethod

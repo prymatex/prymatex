@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-
-import os, codecs, shutil
+import os
+import codecs
+import shutil
+import mimetypes
 from PyQt4 import QtCore, QtGui
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.exceptions import APIUsageError, PrymatexIOException, PrymatexFileExistsException
@@ -159,6 +161,9 @@ class PMXFileManager(QtCore.QObject):
     def fileName(self, filePath):
         return os.path.basename(filePath)
     
+    def mimeType(self, filePath):
+        return mimetypes.guess_type(filePath)[0]
+        
     def isOpen(self, filePath):
         return filePath in self.fileWatcher.files()
     

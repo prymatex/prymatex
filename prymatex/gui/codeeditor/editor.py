@@ -239,9 +239,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Base Editor Interface
     #=======================================================================
     @classmethod
-    def acceptFile(cls, filePath):
-        #Si es un archivo de texto es mio, sino no se que hacer
-        return not filePath.endswith(".png")
+    def acceptFile(cls, filePath, mimetype):
+        return re.compile("text/.*").match(mimetype) is not None
 
     def open(self, filePath):
         #TODO: Este codigo esta duplicado de setFilePath
