@@ -10,6 +10,7 @@ class PMXProxySettingTreeNode(QtGui.QWidget, PMXProxyNamespacedTreeNode):
     def __init__(self, name, parent):
         QtGui.QWidget.__init__(self)
         PMXProxyNamespacedTreeNode.__init__(self, name, parent)
+        self.setObjectName(name.title() + "Widget")
 
     def loadSettings(self):
         pass
@@ -36,7 +37,9 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
         self.widgetsLayout.addWidget(self.stackedWidget)
     
     def proxyNodeFactory(self, name, parent):
-        return PMXProxySettingTreeNode(name, parent)
+        proxyWidget = PMXProxySettingTreeNode(name, parent)
+        self.stackedWidget.addWidget(proxyWidget)
+        return proxyWidget
         
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))

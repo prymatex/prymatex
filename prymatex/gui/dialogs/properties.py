@@ -38,7 +38,9 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
         self.widgetsLayout.addWidget(self.stackedWidget)
     
     def proxyNodeFactory(self, name, parent):
-        return PMXProxyPropertyTreeNode(name, parent)
+        proxyWidget = PMXProxyPropertyTreeNode(name, parent)
+        self.stackedWidget.addWidget(proxyWidget)
+        return proxyWidget
         
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelProperties.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
@@ -54,6 +56,7 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     def setCurrentPropertyWidget(self, widget):
         widget.edit(self.proxyModelProperties.fileSystemItem)
         self.stackedWidget.setCurrentWidget(widget)
+        self.textLabelTitle.setText(widget.title)
         self.setWindowTitle("%s - %s" % (self.baseWindowTitle, widget.title))
     
     def register(self, widget):
