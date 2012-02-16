@@ -43,7 +43,7 @@ class PMXBundleTreeNode(TreeNode):
         if self.tabTrigger != None:
             trigger.append(u"%s⇥" % (self.tabTrigger))
         if self.keyEquivalent != None:
-            trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent).toString())
+            trigger.append(u"%s" % QtGui.QKeySequence(self.keyEquivalent))
         return ", ".join(trigger)
     
     def buildBundleAccelerator(self):
@@ -311,7 +311,7 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
             column = index.column()
             style = self.styles[row]
             if column == 0:
-                self.manager.updateThemeStyle(style, name = unicode(value.toString()))
+                self.manager.updateThemeStyle(style, name = value)
             elif column == 1 and value.canConvert(QtCore.QVariant.Color):
                 self.manager.updateThemeStyle(style, settings = {'foreground' : QtGui.QColor(value) })
             elif column == 2 and value.canConvert(QtCore.QVariant.Color):

@@ -88,17 +88,15 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
                 self.application.supportManager.updateThemeStyle(style, scope = string)
     
     def setupTableView(self):
-        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
+        self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableView.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        
         self.tableView.activated.connect(self.on_tableView_Activated)
         self.tableView.pressed.connect(self.on_tableView_Activated)
         self.tableView.setItemDelegateForColumn(1, PMXColorDelegate(self))
         self.tableView.setItemDelegateForColumn(2, PMXColorDelegate(self))
         self.tableView.setItemDelegateForColumn(3, PMXFontStyleDelegate(self))
         self.tableView.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
-        self.tableView.resizeColumnToContents(3)
-        self.tableView.setColumnWidth(0, 437)
-        self.tableView.setColumnWidth(1, 25)
-        self.tableView.setColumnWidth(2, 25)
         #Conectar
         for _, scope in self.DEFAULTS['styles']:
             self.comboBoxScope.addItem(scope)
