@@ -1,18 +1,25 @@
 unset BASH_ENV # avoid recursively running this script
 export LC_CTYPE="en_US.UTF-8"
 
+# First read the system-wide profile
+[ -f /etc/profile ] && . /etc/profile               &>/dev/null
+
+# Now find the first local profile, just like a normal login shell
+if   [ -f ~/.bash_profile ]; then . ~/.bash_profile &>/dev/null
+elif [ -f ~/.bash_login ];   then . ~/.bash_login   &>/dev/null
+elif [ -f ~/.profile ];      then . ~/.profile      &>/dev/null
+fi
+
+#For TextMate bash_init.sh
 : ${TM_BASH_INIT:=$HOME/Library/Application Support/TextMate/bash_init.sh}
-if [ ! -f "$TM_BASH_INIT" ]; then
+if [[ -f "$TM_BASH_INIT" ]]; then
+	. "$TM_BASH_INIT"
+fi
 
-	# First read the system-wide profile
-	[ -f /etc/profile ] && . /etc/profile               &>/dev/null
-
-	# Now find the first local profile, just like a normal login shell
-	if   [ -f ~/.bash_profile ]; then . ~/.bash_profile &>/dev/null
-	elif [ -f ~/.bash_login ];   then . ~/.bash_login   &>/dev/null
-	elif [ -f ~/.profile ];      then . ~/.profile      &>/dev/null
-	fi
-
+#For Project bash_init.sh
+: ${TM_PROJECT_INIT:="$TM_PROJECT_SUPPORT/lib/bash_init.sh"}
+if [[ -f "$TM_PROJECT_INIT" ]]; then
+	. "$TM_PROJECT_INIT"
 fi
 
 set +u # avoid warning when we use unset variables (if user had ‘set -u’ in his profile)
@@ -24,15 +31,15 @@ if [[ -d "$TM_SUPPORT_PATH/bin" ]]; then
 	fi
 fi
 
+if [[ -d "$TM_PROJECT_SUPPORT" && -d "$TM_PROJECT_SUPPORT/bin" ]]; then
+   PATH="$TM_PROJECT_SUPPORT/bin:$PATH"
+fi
+
 if [[ -d "$TM_BUNDLE_SUPPORT" && -d "$TM_BUNDLE_SUPPORT/bin" ]]; then
    PATH="$TM_BUNDLE_SUPPORT/bin:$PATH"
 fi
 
 export PATH
-
-if [[ -f "$TM_BASH_INIT" ]]; then
-	. "$TM_BASH_INIT"
-fi
 
 #Now export
 export DIALOG="$PMX_SUPPORT_PATH/bin/tm_dialog.py"

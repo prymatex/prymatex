@@ -162,7 +162,7 @@ class PMXFileManager(QtCore.QObject):
         return os.path.basename(filePath)
     
     def mimeType(self, filePath):
-        return mimetypes.guess_type(filePath)[0]
+        return mimetypes.guess_type(filePath)[0] or ""
         
     def isOpen(self, filePath):
         return filePath in self.fileWatcher.files()

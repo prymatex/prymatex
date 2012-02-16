@@ -3,29 +3,14 @@
  <class>EditorWidget</class>
  <widget class="QWidget" name="EditorWidget">
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Editor</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>2</number>
-   </property>
-   <property name="margin">
-    <number>0</number>
-   </property>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>General</string>
+    <widget class="QCheckBox" name="checkBox_4">
+     <property name="text">
+      <string>Highlight current line</string>
      </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="checkBox_4">
-        <property name="text">
-         <string>Highlight current line</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </item>
    <item>
@@ -57,6 +42,19 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

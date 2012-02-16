@@ -71,13 +71,13 @@ class PMXPluginManager(object):
         return instance
     
     def createEditor(self, filePath, mainWindow):
+        editorClass = self.editors[0]
         if filePath is not None:
             mimetype = self.application.fileManager.mimeType(filePath)
-            for editorClass in self.editors:
-                if editorClass.acceptFile(filePath, mimetype):
+            for Klass in self.editors:
+                if Klass.acceptFile(filePath, mimetype):
+                    editorClass = Klass
                     break
-        else:
-            editorClass = self.editors[0]
         editor = self.createWidgetInstance(editorClass, filePath, mainWindow)
         editor.initialize()
         return editor

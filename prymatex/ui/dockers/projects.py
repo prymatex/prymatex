@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/projects.ui'
 #
-# Created: Fri Feb  3 17:34:27 2012
+# Created: Thu Feb 16 14:56:59 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -153,6 +153,8 @@ class Ui_ProjectsDock(object):
         icon14.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/apps/utilities-terminal.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSetInTerminal.setIcon(icon14)
         self.actionSetInTerminal.setObjectName(_fromUtf8("actionSetInTerminal"))
+        self.actionRemove = QtGui.QAction(ProjectsDock)
+        self.actionRemove.setObjectName(_fromUtf8("actionRemove"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
@@ -184,5 +186,6 @@ class Ui_ProjectsDock(object):
         self.actionOrderDescending.setText(_('Descending'))
         self.actionOrderFoldersFirst.setText(_('Folders First'))
         self.actionSetInTerminal.setText(_('Set In Terminal'))
+        self.actionRemove.setText(_('Remove'))
 
 from prymatex import resources_rc

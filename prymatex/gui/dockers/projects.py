@@ -69,6 +69,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 self.actionOpenSystemEditor,
                 self.actionSetInTerminal,
                 "-",
+                self.actionRemove,
                 self.actionDelete,
                 "-",
                 self.actionRefresh,
@@ -219,8 +220,12 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             self.deletePath(treeNode.path)
         else:
             #Test delete removeFiles
-            #self.application.projectManager.deleteProject(treeNode, removeFiles = True)
-            #Test remove on delete
+            self.application.projectManager.deleteProject(treeNode, removeFiles = False)
+    
+    @QtCore.pyqtSlot()
+    def on_actionRemove_triggered(self):
+        treeNode = self.currentNode()
+        if treeNode.isproject:
             self.application.projectManager.removeProject(treeNode)
 
     @QtCore.pyqtSlot()
@@ -271,11 +276,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot(bool)
     def on_pushButtonSync_toggled(self, checked):
         if checked:
-            #Conectar se�al
+            #Conectar señal
             self.mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
             self.on_mainWindow_currentEditorChanged(self.mainWindow.currentEditor())
         else:
-            #Desconectar se�al
+            #Desconectar señal
             self.mainWindow.currentEditorChanged.disconnect(self.on_mainWindow_currentEditorChanged)
     
     def on_mainWindow_currentEditorChanged(self, editor):
@@ -288,6 +293,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         path = self.currentPath()
         directory = self.application.fileManager.getDirectory(path)
         self.mainWindow.terminal.chdir(directory)
+        project = self.application.projectManager.findProjectForPath(path)
+        if project.support is not None:
+            bash_init = os.path.join(project.support, 'lib', 'bash_init.sh')
+            if os.path.isfile(bash_init):
+                self.mainWindow.terminal.runCommand("source %s" % bash_init)
     
     #================================================
     # Custom filters

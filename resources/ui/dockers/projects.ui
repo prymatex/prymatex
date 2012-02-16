@@ -316,6 +316,11 @@
     <string>Set In Terminal</string>
    </property>
   </action>
+  <action name="actionRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../../resources.qrc"/>

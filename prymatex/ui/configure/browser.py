@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/browser.ui'
 #
-# Created: Tue Feb 14 20:01:10 2012
+# Created: Thu Feb 16 14:56:58 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,9 +19,10 @@ class Ui_BrowserWidget(object):
     def setupUi(self, BrowserWidget):
         BrowserWidget.setObjectName(_fromUtf8("BrowserWidget"))
         self.verticalLayout = QtGui.QVBoxLayout(BrowserWidget)
-        self.verticalLayout.setSpacing(2)
-        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.checkBoxDeveloperExtras = QtGui.QCheckBox(BrowserWidget)
+        self.checkBoxDeveloperExtras.setObjectName(_fromUtf8("checkBoxDeveloperExtras"))
+        self.verticalLayout.addWidget(self.checkBoxDeveloperExtras)
         self.groupBox = QtGui.QGroupBox(BrowserWidget)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.groupBox)
@@ -45,12 +46,15 @@ class Ui_BrowserWidget(object):
         self.horizontalLayout.addWidget(self.lineEditProxy)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.verticalLayout.addWidget(self.groupBox)
+        spacerItem = QtGui.QSpacerItem(20, 15, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
 
         self.retranslateUi(BrowserWidget)
         QtCore.QMetaObject.connectSlotsByName(BrowserWidget)
 
     def retranslateUi(self, BrowserWidget):
-        BrowserWidget.setWindowTitle(_('Form'))
+        BrowserWidget.setWindowTitle(_('Browser'))
+        self.checkBoxDeveloperExtras.setText(_('Enable developer extras'))
         self.groupBox.setTitle(_('Connection'))
         self.radioButtonNoProxy.setText(_('No proxy'))
         self.radioButtonSystemProxy.setText(_('Use system proxy settings'))

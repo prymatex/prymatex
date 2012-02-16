@@ -49,17 +49,28 @@ class FileSystemTreeNode(TreeNode):
 
 class PMXProject(FileSystemTreeNode):
     KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables' ]
-    FILE = '.pmxproject'
+    FILE = 'info.plist'
+    FOLDER = '.pmxproject'
     def __init__(self, directory, hash):
         self.directory = directory
         FileSystemTreeNode.__init__(self, "Project Name")
         self.workingSet = None
         self.manager = None
+        self.support = None
         self.load(hash)
+    
+    def setSupport(self, support):
+        self.support = support
         
     @property
     def environment(self):
-        return {'TM_PROJECT_DIRECTORY': self.directory, 'TM_PROJECT_NAME': self.name }
+        env = {
+            'TM_PROJECT_DIRECTORY': self.directory,
+            'TM_PROJECT_NAME': self.name,
+            'TM_PROJECT_PATH': os.path.join(self.path, self.FOLDER) }
+        if self.support != None:
+            env['TM_PROJECT_SUPPORT'] = self.support
+        return env
         
     def load(self, hash):
         for key in PMXProject.KEYS:
@@ -80,12 +91,15 @@ class PMXProject(FileSystemTreeNode):
             setattr(self, key, hash[key])
 
     def save(self):
-        filePath = os.path.join(self.directory, self.FILE)
+        projectPath = os.path.join(self.directory, self.FOLDER)
+        if not os.path.exists(projectPath):
+            os.makedirs(projectPath)
+        filePath = os.path.join(projectPath, self.FILE)
         plist.writePlist(self.hash, filePath)
 
     def delete(self, removeFiles = False):
-        filePath = os.path.join(self.directory, self.FILE)
-        os.unlink(os.path.join(filePath))
+        projectPath = os.path.join(self.directory, self.FOLDER)
+        shutil.rmtree(projectPath)
         if removeFiles:
             try:
                 shutil.rmtree(self.directory)
@@ -94,9 +108,10 @@ class PMXProject(FileSystemTreeNode):
 
     def buildEnvironment(self):
         env = {}
-        for var in self.shellVariables:
-            if var['enabled']:
-                env[var['variable']] = var['value']
+        if isinstance(self.shellVariables, list):
+            for var in self.shellVariables:
+                if var['enabled']:
+                    env[var['variable']] = var['value']
         env.update(self.environment)
         env['TM_SELECTED_FILES'] = ""
         env['TM_SELECTED_FILE'] = ""
@@ -104,12 +119,15 @@ class PMXProject(FileSystemTreeNode):
 
     @classmethod
     def loadProject(cls, path, manager):
-        filePath = os.path.join(path, cls.FILE)
-        if not os.path.isfile(filePath):
-            raise exceptions.PrymatexFileNotExistsException(filePath)
+        projectPath = os.path.join(path, cls.FOLDER)
+        fileInfo = os.path.join(projectPath, cls.FILE)
+        if not os.path.isfile(fileInfo):
+            raise exceptions.PrymatexFileNotExistsException(fileInfo)
         try:
-            data = plist.readPlist(filePath)
+            data = plist.readPlist(fileInfo)
             project = cls(path, data)
+            if os.path.exists(os.path.join(projectPath, 'Support')):
+                project.setSupport(os.path.join(projectPath, 'Support'))
             manager.addProject(project)
             return project
         except Exception, e:

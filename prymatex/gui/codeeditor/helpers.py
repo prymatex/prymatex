@@ -246,7 +246,9 @@ class SmartIndentHelper(PMXBaseKeyHelper):
             self.logger.debug("Increase indent")
             indent = block.userData().indent + editor.tabKeyBehavior
         elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
+            #TODO: Creo que este no es el correcto
             self.logger.debug("Increase next line indent")
+            indent = block.userData().indent + editor.tabKeyBehavior
         elif PMXPreferenceSettings.UNINDENT in indentMarks:
             self.logger.debug("Unindent")
             indent = ""

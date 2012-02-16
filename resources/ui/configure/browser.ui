@@ -3,15 +3,16 @@
  <class>BrowserWidget</class>
  <widget class="QWidget" name="BrowserWidget">
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Browser</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>2</number>
-   </property>
-   <property name="margin">
-    <number>0</number>
-   </property>
+   <item>
+    <widget class="QCheckBox" name="checkBoxDeveloperExtras">
+     <property name="text">
+      <string>Enable developer extras</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
@@ -55,6 +56,19 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>15</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
