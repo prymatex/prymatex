@@ -57,15 +57,16 @@ class PMXPluginManager(object):
         overlayClasses = self.overlays.setdefault(widgetClass, [])
         overlayClasses.append(overlayClass)
         
-    def createWidgetInstance(self, widgetClass, *largs, **kwargs):
-        instance = widgetClass(*largs, **kwargs)
+    def createWidgetInstance(self, widgetClass, mainWindow):
+        instance = widgetClass(mainWindow)
         
         for overlayClass in self.overlays.get(widgetClass, []):
             overlay = overlayClass(instance)
             instance.addOverlay(overlay)
-        
-        self.application.settings.configure(instance)
 
+        self.application.settings.configure(instance)
+        instance.initialize(mainWindow)
+        
         instances = self.instances.setdefault(widgetClass, [])
         instances.append(instance)
         return instance
@@ -78,8 +79,7 @@ class PMXPluginManager(object):
                 if Klass.acceptFile(filePath, mimetype):
                     editorClass = Klass
                     break
-        editor = self.createWidgetInstance(editorClass, filePath, mainWindow)
-        editor.initialize()
+        editor = self.createWidgetInstance(editorClass, mainWindow)
         return editor
     
     def createCustomActions(self, mainWindow):
@@ -117,12 +117,10 @@ class PMXPluginManager(object):
         
         for dockClass in self.dockers:
             dock = self.createWidgetInstance(dockClass, mainWindow)
-            dock.initialize()
             mainWindow.addDock(dock, dock.PREFERED_AREA)
 
         for statusBarClass in self.statusBars:
             status = self.createWidgetInstance(statusBarClass, mainWindow)
-            status.initialize()
             mainWindow.addStatusBar(status)
     
     def _import_module(self, name):

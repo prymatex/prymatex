@@ -18,7 +18,7 @@ class PMXBaseWidgetPlugin(PMXBasePlugin):
     def __init__(self):
         self.overlays = []
             
-    def initialize(self):
+    def initialize(self, mainWindow):
         for overlay in self.overlays:
             overlay.initialize(self)
 

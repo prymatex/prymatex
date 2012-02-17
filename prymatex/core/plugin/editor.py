@@ -18,28 +18,34 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
-    def __init__(self, filePath = None):
+    def __init__(self):
         PMXBaseWidgetPlugin.__init__(self)
-        self.filePath = filePath
+        self.filePath = None
         self.project = None
         self.externalAction = None
-        if self.filePath is None:
+    
+    @property
+    def creationCounter(self):
+        if not hasattr(self, "_creationCounter"):
             PMXBaseEditor.CREATION_COUNTER += 1
-            self.creation_counter = PMXBaseEditor.CREATION_COUNTER
+            setattr(self, "_creationCounter", PMXBaseEditor.CREATION_COUNTER)
+        return self._creationCounter
     
     def setMainWindow(self, mainWindow):
         self.mainWindow = mainWindow
     
     def open(self, filePath):
-        """ Open file and return content """
+        """ Open file """
+        content = self.application.fileManager.openFile(filePath)
+        self.setPlainText(content)
         self.setFilePath(filePath)
-        return self.application.fileManager.openFile(filePath)
 
     def save(self, filePath):
         """ Save content of editor in a file """
         self.application.fileManager.saveFile(filePath, self.toPlainText())
         if filePath != self.filePath:
-            self.application.fileManager.closeFile(self.filePath)
+            if self.filePath is not None:
+                self.application.fileManager.closeFile(self.filePath)
             self.setFilePath(filePath)
         self.setModified(False)
         self.setExternalAction(None)
@@ -47,7 +53,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     
     def close(self):
         """ Close editor """
-        if self.filePath is None and self.creation_counter == PMXBaseEditor.CREATION_COUNTER:
+        if self.filePath is None and self.creationCounter == PMXBaseEditor.CREATION_COUNTER:
             PMXBaseEditor.CREATION_COUNTER -= 1
         elif self.filePath is not None:
             self.application.fileManager.closeFile(self.filePath)
@@ -73,12 +79,12 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     def tabTitle(self):
         if self.filePath is not None:
             return os.path.basename(self.filePath)
-        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creation_counter)
+        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
     
     def tabToolTip(self):
         if self.filePath is not None:
             return self.filePath
-        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creation_counter)
+        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
     
     def fileDirectory(self):
         return self.application.fileManager.getDirectory(self.filePath)

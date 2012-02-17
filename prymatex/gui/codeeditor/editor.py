@@ -140,9 +140,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def tabKeyBehavior(self):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
     
-    def __init__(self, filePath = None, parent = None):
+    def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
-        PMXBaseEditor.__init__(self, filePath)
+        PMXBaseEditor.__init__(self)
 
         #Sidebar
         self.sidebar = PMXSidebar(self)
@@ -242,17 +242,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def acceptFile(cls, filePath, mimetype):
         return re.compile("text/.*").match(mimetype) is not None
 
-    def open(self, filePath):
-        #TODO: Este codigo esta duplicado de setFilePath
-        extension = self.application.fileManager.fileExtension(self.filePath)
-        syntax = self.application.supportManager.findSyntaxByFileType(extension)
-        if syntax is not None:
-            self.setSyntax(syntax)
-        return PMXBaseEditor.open(self, filePath)
-        
-    def save(self, filePath):
-        return PMXBaseEditor.save(self, filePath)
-        
     def close(self):
         QtGui.QPlainTextEdit.close(self)
         return PMXBaseEditor.close(self)
@@ -267,7 +256,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.document().setModified(modified)
         
     def setFilePath(self, filePath):
-        extension = self.application.fileManager.fileExtension(self.filePath)
+        extension = self.application.fileManager.fileExtension(filePath)
         syntax = self.application.supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.setSyntax(syntax)

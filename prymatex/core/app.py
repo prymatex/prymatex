@@ -6,6 +6,7 @@
 import os
 import sys
 import logging
+import inspect
 
 from PyQt4 import QtGui, QtCore
 
@@ -307,18 +308,17 @@ class PMXApplication(QtGui.QApplication):
             project = self.projectManager.findProjectForPath(filePath)
             if project != None:
                 editor.setProject(project)
-            content = editor.open(filePath)
-            if content:
-                def on_editorReady(result):
-                    editor = result.value
-                    editor.setModified(False)
+            def on_editorReady(editor, focus):
+                def editorReady(openResult):
                     editor.setCursorPosition(cursorPosition)
                     self.mainWindow.tryCloseEmptyEditor()
                     self.mainWindow.addEditor(editor, focus)
-                self._populate_editor(editor, content, on_editorReady)
+                return editorReady
+            if inspect.isgeneratorfunction(editor.open):
+                task = self.scheduler.newTask( editor.open(filePath) )
+                task.done.connect( on_editorReady(editor, focus) )
             else:
-                self.mainWindow.tryCloseEmptyEditor()
-                self.mainWindow.addEditor(editor, focus)
+                on_editorReady(editor, focus)(editor.open(filePath))
 
     def _populate_editor(self, editor, content, readyCallback = None):
         useCoroutines = False
