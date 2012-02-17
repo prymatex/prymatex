@@ -52,7 +52,8 @@ class PMXProjectManager(QtCore.QObject):
                 PMXProject.loadProject(path, self)
             except exceptions.PrymatexFileNotExistsException as e:
                 print e
-                self.removeFromKnowProjects(path)
+                self.knownProjects.remove(path)
+                self.settings.setValue('knownProjects', self.knownProjects)
 
     def isOpen(self, project):
         return True
@@ -60,11 +61,11 @@ class PMXProjectManager(QtCore.QObject):
     def appendToKnowProjects(self, project):
         self.knownProjects.append(project.path)
         self.settings.setValue('knownProjects', self.knownProjects)
-        
+
     def removeFromKnowProjects(self, project):
         self.knownProjects.remove(project.path)
         self.settings.setValue('knownProjects', self.knownProjects)
-        
+
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------
