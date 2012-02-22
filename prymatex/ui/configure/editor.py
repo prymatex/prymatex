@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/editor.ui'
 #
-# Created: Thu Feb 16 14:56:59 2012
+# Created: Wed Feb 22 15:51:11 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,22 +20,36 @@ class Ui_EditorWidget(object):
         EditorWidget.setObjectName(_fromUtf8("EditorWidget"))
         self.verticalLayout = QtGui.QVBoxLayout(EditorWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.checkBox_4 = QtGui.QCheckBox(EditorWidget)
-        self.checkBox_4.setObjectName(_fromUtf8("checkBox_4"))
-        self.verticalLayout.addWidget(self.checkBox_4)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.labelDefaultSyntax = QtGui.QLabel(EditorWidget)
+        self.labelDefaultSyntax.setObjectName(_fromUtf8("labelDefaultSyntax"))
+        self.horizontalLayout.addWidget(self.labelDefaultSyntax)
+        self.comboBoxDefaultSyntax = QtGui.QComboBox(EditorWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.comboBoxDefaultSyntax.sizePolicy().hasHeightForWidth())
+        self.comboBoxDefaultSyntax.setSizePolicy(sizePolicy)
+        self.comboBoxDefaultSyntax.setObjectName(_fromUtf8("comboBoxDefaultSyntax"))
+        self.horizontalLayout.addWidget(self.comboBoxDefaultSyntax)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.checkBoxHighlight = QtGui.QCheckBox(EditorWidget)
+        self.checkBoxHighlight.setObjectName(_fromUtf8("checkBoxHighlight"))
+        self.verticalLayout.addWidget(self.checkBoxHighlight)
         self.groupBox = QtGui.QGroupBox(EditorWidget)
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.formLayout = QtGui.QFormLayout(self.groupBox)
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
-        self.checkBox = QtGui.QCheckBox(self.groupBox)
-        self.checkBox.setObjectName(_fromUtf8("checkBox"))
-        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.checkBox)
-        self.checkBox_2 = QtGui.QCheckBox(self.groupBox)
-        self.checkBox_2.setObjectName(_fromUtf8("checkBox_2"))
-        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.checkBox_2)
-        self.checkBox_3 = QtGui.QCheckBox(self.groupBox)
-        self.checkBox_3.setObjectName(_fromUtf8("checkBox_3"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.checkBox_3)
+        self.checkBoxLineNumbers = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxLineNumbers.setObjectName(_fromUtf8("checkBoxLineNumbers"))
+        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.checkBoxLineNumbers)
+        self.checkBoxBookmarks = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxBookmarks.setObjectName(_fromUtf8("checkBoxBookmarks"))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.checkBoxBookmarks)
+        self.checkBoxFolding = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxFolding.setObjectName(_fromUtf8("checkBoxFolding"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.checkBoxFolding)
         self.verticalLayout.addWidget(self.groupBox)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
@@ -45,9 +59,10 @@ class Ui_EditorWidget(object):
 
     def retranslateUi(self, EditorWidget):
         EditorWidget.setWindowTitle(_('Editor'))
-        self.checkBox_4.setText(_('Highlight current line'))
+        self.labelDefaultSyntax.setText(_('Default Syntax'))
+        self.checkBoxHighlight.setText(_('Highlight current line'))
         self.groupBox.setTitle(_('Gutter'))
-        self.checkBox.setText(_('Show Line Numbers'))
-        self.checkBox_2.setText(_('Show Bookmarks'))
-        self.checkBox_3.setText(_('Show Folding'))
+        self.checkBoxLineNumbers.setText(_('Show Line Numbers'))
+        self.checkBoxBookmarks.setText(_('Show Bookmarks'))
+        self.checkBoxFolding.setText(_('Show Folding'))
 
