@@ -14,22 +14,19 @@ import prymatex
 from prymatex import resources
 from prymatex.core import exceptions
 
+from prymatex.utils.decorator import deprecated
 from prymatex.utils import coroutines
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.style import PrymatexStyle
 
 class PMXApplication(QtGui.QApplication):
-    """
-    The application instance.
+    """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
-    The application loads the PMX Support.
-    """
+    The application loads the PMX Support."""
     
     def __init__(self, profile):
-        """
-        Inicialización de la aplicación.
-        """
+        """Inicialización de la aplicación."""
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
         self.setStyleSheet(resources.APPLICATION_STYLE)
@@ -308,7 +305,7 @@ class PMXApplication(QtGui.QApplication):
             project = self.projectManager.findProjectForPath(filePath)
             if project != None:
                 editor.setProject(project)
-            def on_editorReady(editor, focus):
+            def on_editorReady(editor, cursorPosition, focus):
                 def editorReady(openResult):
                     editor.setCursorPosition(cursorPosition)
                     self.mainWindow.tryCloseEmptyEditor()
@@ -316,10 +313,11 @@ class PMXApplication(QtGui.QApplication):
                 return editorReady
             if inspect.isgeneratorfunction(editor.open):
                 task = self.scheduler.newTask( editor.open(filePath) )
-                task.done.connect( on_editorReady(editor, focus) )
+                task.done.connect( on_editorReady(editor, cursorPosition, focus) )
             else:
-                on_editorReady(editor, focus)(editor.open(filePath))
+                on_editorReady(editor, cursorPosition, focus)(editor.open(filePath))
 
+    @deprecated
     def _populate_editor(self, editor, content, readyCallback = None):
         useCoroutines = False
         if useCoroutines:
@@ -377,15 +375,16 @@ class PMXApplication(QtGui.QApplication):
                 buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                 defaultButton = QtGui.QMessageBox.Yes)
             if result == QtGui.QMessageBox.Yes:
-                editor.clear()
-                content = editor.open(editor.filePath)
-                def on_editorReady(result):
-                    editor = result.value
-                    editor.setModified(False)
-                    editor.setExternalAction(None)
-                    #TODO: devolver el cursor a su pocicion
-                    #editor.setCursorPosition(cursorPosition)
-                self._populate_editor(editor, content, on_editorReady)
+                cursorPosition = editor.cursorPosition()
+                def on_editorReady(editor, cursorPosition):
+                    def editorReady(openResult):
+                        editor.setCursorPosition(cursorPosition)
+                    return editorReady
+                if inspect.isgeneratorfunction(editor.reload):
+                    task = self.scheduler.newTask( editor.reload() )
+                    task.done.connect( on_editorReady(editor, cursorPosition) )
+                else:
+                    on_editorReady(editor, cursorPosition)(editor.reload())
             elif result == QtGui.QMessageBox.No:
                 pass
         elif editor.isExternalDeleted():

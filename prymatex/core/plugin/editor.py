@@ -57,7 +57,13 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
             PMXBaseEditor.CREATION_COUNTER -= 1
         elif self.filePath is not None:
             self.application.fileManager.closeFile(self.filePath)
-
+            
+    def reload(self):
+        """ Reload current file """
+        content = self.application.fileManager.openFile(self.filePath)
+        self.setPlainText(content)
+        self.setExternalAction(None)
+        
     def setFilePath(self, filePath):
         self.filePath = filePath
         self.emit(QtCore.SIGNAL("tabStatusChanged()"))
@@ -120,6 +126,9 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     def setCursorPosition(self, cursorPosition):
         pass
 
+    def cursorPosition(self):
+        return (0, 0)
+        
     def contributeToTabMenu(self, menu):
         ''' When an editor is right clicked on it's tab, the editor
         can provide custom actions to the menu through this callback'''
