@@ -29,9 +29,11 @@ class PMXSidebar(QtGui.QWidget):
 
     @property
     def padding(self):
-        if self.showLineNumbers or self.showFolding or self.showBookmarks:
-            return 5
-        return 0
+        padding = 0
+        for addPadding in [self.showLineNumbers or self.showFolding or self.showBookmarks]:
+            if addPadding:
+                padding += 2
+        return padding
         
     def sizeHint(self):
         return QtGui.QSize(self.editor.lineNumberAreaWidth(), 0)
@@ -66,7 +68,7 @@ class PMXSidebar(QtGui.QWidget):
             if block.isVisible():
                 #Line Numbers
                 if self.showLineNumbers:
-                    leftPosition = self.width() - font_metrics.width(str(line_count))
+                    leftPosition = self.width() - font_metrics.width(str(line_count)) - 1
                     if self.showFolding:
                         leftPosition -= self.foldArea
                     painter.drawText(leftPosition,

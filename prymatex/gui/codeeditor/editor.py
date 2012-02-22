@@ -467,9 +467,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Espacio para la sidebar
     #=======================================================================
     def lineNumberAreaWidth(self):
+        font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
         area = self.sidebar.padding
         if self.sidebar.showLineNumbers:
-            area += self.fontMetrics().width('0') * len(str(self.blockCount()))
+            area += font_metrics.width(str(self.blockCount()))
         if self.sidebar.showBookmarks:
             area += self.sidebar.bookmarkArea
         if self.sidebar.showFolding:
