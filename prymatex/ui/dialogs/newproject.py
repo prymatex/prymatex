@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/newproject.ui'
 #
-# Created: Fri Feb  3 14:51:33 2012
+# Created: Wed Feb 22 17:19:30 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,7 @@ class Ui_NewProjectDialog(object):
     def setupUi(self, NewProjectDialog):
         NewProjectDialog.setObjectName(_fromUtf8("NewProjectDialog"))
         NewProjectDialog.setWindowModality(QtCore.Qt.WindowModal)
-        NewProjectDialog.resize(450, 189)
+        NewProjectDialog.resize(450, 210)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         NewProjectDialog.setWindowIcon(icon)
@@ -119,7 +119,7 @@ class Ui_NewProjectDialog(object):
         self.label2.setText(_('Location:'))
         self.buttonChoose.setText(_('Ch&oose'))
         self.checkBoxAddToWorkingSet.setText(_('Add to working set'))
-        self.label3.setText(_('Working Set'))
+        self.label3.setText(_('Working set'))
         self.label_2.setText(_('Template'))
         self.checkBoxUseTemplate.setText(_('Use template'))
         self.buttonCreate.setText(_('&Create'))

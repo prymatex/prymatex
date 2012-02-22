@@ -4,7 +4,7 @@
 import Queue
 
 from PyQt4 import QtCore, QtGui
-from prymatex.ui.dialogs.search import Ui_Dialog
+from prymatex.ui.dialogs.search import Ui_SearchDialog
 
 class FileFindThread(QtCore.QThread):
     foundPattern = QtCore.pyqtSignal(str, int)
@@ -80,7 +80,7 @@ class FileFindThread(QtCore.QThread):
     def cancel(self):
         self._cancel = True
 
-class PMXFileFindDialog(QtGui.QDialog, Ui_Dialog):
+class PMXFileFindDialog(QtGui.QDialog, Ui_SearchDialog):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
