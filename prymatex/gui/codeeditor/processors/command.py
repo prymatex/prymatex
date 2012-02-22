@@ -172,6 +172,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     # Outpus function
     def error(self, context):
+        #TODO: Mover esto a un lugar donde no dependa del processor mostrar un error en el borwser, quiza a la mainWindow
+        #para poder llamarlos como showErrorInBrowser o algo asi :)
         from prymatex.support.utils import makeHyperlinks
         command = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
@@ -183,15 +185,13 @@ class PMXCommandProcessor(PMXCommandProcessor):
         ''' % {'output': context.errorValue, 
                'name': context.command.name,
                'exitcode': context.outputType}
-        hash = {    'command': command, 
-                       'name': "Error" + context.command.name,
-                      'input': 'none',
-                     'output': 'showAsHTML' }
-        command = PMXCommand(self.editor.application.supportManager.uuidgen(), hash = hash)
+        commandHash = { 'command': command, 
+                           'name': "Error" + context.command.name,
+                          'input': 'none',
+                         'output': 'showAsHTML' }
+        command = PMXCommand(self.editor.application.supportManager.uuidgen(), hash = commandHash)
         command.bundle = context.command.bundle
         self.editor.insertBundleItem(command)
-        #FIXME: Esto no hace falta porque el que muestra el error por html es el insertBundleItem
-        self.showAsHTML(context)
         
     def discard(self, context):
         pass
@@ -230,7 +230,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
             
     def showAsHTML(self, context):
         self.editor.mainWindow.browser.setHtml(context.outputValue, context.command)
-        self.editor.mainWindow.browser.show()
 
     timespanFactor = 1        
     def showAsTooltip(self, context):

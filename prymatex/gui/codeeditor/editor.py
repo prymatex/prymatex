@@ -50,7 +50,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     tabStopSoft = pmxConfigPorperty(default = True)
     @pmxConfigPorperty(default = 4)
     def tabStopSize(self, size):
-        """docstring for tabStopSize"""
         self.setTabStopWidth(size * 9)
     
     @pmxConfigPorperty(default = QtGui.QFont("monospace", 12))
@@ -136,6 +135,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     ShowFolding           = 1<<4
     WordWrap              = 1<<5
     
+    defaultFlags = pmxConfigPorperty(default = ShowLineNumbers + ShowFolding + ShowBookmarks)
+
     @property
     def tabKeyBehavior(self):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
@@ -768,11 +769,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def executeCommand(self, command = None, input = "none", output = "insertText"):
         if command is None:
             command = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
-        hash = {    'command': command, 
+        commandHash = {    'command': command, 
                        'name': command,
                       'input': input,
                      'output': output }
-        command = PMXCommand(self.application.supportManager.uuidgen(), "internal", hash = hash)
+        command = PMXCommand(self.application.supportManager.uuidgen(), hash = commandHash)
         command.bundle = self.application.supportManager.getDefaultBundle()
         self.insertBundleItem(command)
     
@@ -1303,7 +1304,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.themes import PMXThemeWidget
-        return [ PMXThemeWidget ]
+        from prymatex.gui.settings.editor import PMXEditorWidget
+        return [ PMXEditorWidget, PMXThemeWidget ]
 
     #===========================================================================
     # Menu Actions
