@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/search.ui'
 #
-# Created: Thu Feb 23 07:22:40 2012
+# Created: Thu Feb 23 07:24:31 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_SearchDialog(object):
     def setupUi(self, SearchDialog):
         SearchDialog.setObjectName(_fromUtf8("SearchDialog"))
+        SearchDialog.resize(229, 204)
         self.verticalLayout = QtGui.QVBoxLayout(SearchDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -90,12 +91,12 @@ class Ui_SearchDialog(object):
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
-        self.buttonCreate = QtGui.QPushButton(SearchDialog)
+        self.buttonSearch = QtGui.QPushButton(SearchDialog)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-find.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonCreate.setIcon(icon)
-        self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
-        self.horizontalLayout_2.addWidget(self.buttonCreate)
+        self.buttonSearch.setIcon(icon)
+        self.buttonSearch.setObjectName(_fromUtf8("buttonSearch"))
+        self.horizontalLayout_2.addWidget(self.buttonSearch)
         self.buttonCancel = QtGui.QPushButton(SearchDialog)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -115,7 +116,7 @@ class Ui_SearchDialog(object):
         self.groupBox_2.setTitle(_('Scope'))
         self.radioButtonWorkspace.setText(_('Workspace'))
         self.radioButtonWorkingSet.setText(_('Working set'))
-        self.buttonCreate.setText(_('&Search'))
+        self.buttonSearch.setText(_('&Search'))
         self.buttonCancel.setText(_('C&ancel'))
 
 from prymatex import resources_rc

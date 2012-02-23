@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>SearchDialog</class>
  <widget class="QDialog" name="SearchDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>229</width>
+    <height>204</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Search</string>
   </property>
@@ -135,7 +143,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonCreate">
+      <widget class="QPushButton" name="buttonSearch">
        <property name="text">
         <string>&amp;Search</string>
        </property>
