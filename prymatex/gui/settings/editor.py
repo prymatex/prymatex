@@ -25,8 +25,12 @@ class PMXEditorWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EditorWidget):
         self.checkBoxLineNumbers.setChecked(flags & PMXCodeEditor.ShowLineNumbers)
         self.comboBoxDefaultSyntax.setModel(self.application.supportManager.syntaxProxyModel);
         self.comboBoxDefaultSyntax.setModelColumn(0)
-        print self.settingGroup.value('defaultSyntax')
-
+        uuid = self.settingGroup.value('defaultSyntax')
+        syntax = self.application.supportManager.getBundleItem(uuid)
+        model = self.comboBoxDefaultSyntax.model()
+        index = model.findItemIndex(syntax)
+        self.comboBoxDefaultSyntax.setCurrentIndex(index)
+        
     def on_gutterOption_toggled(self, checked):
         flags = 0
         if self.checkBoxFolding.isChecked():
@@ -36,4 +40,10 @@ class PMXEditorWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EditorWidget):
         if self.checkBoxLineNumbers.isChecked():
             flags |= PMXCodeEditor.ShowLineNumbers
         self.settingGroup.setValue('defaultFlags', flags)
+        
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxDefaultSyntax_activated(self, index):
+        model = self.comboBoxDefaultSyntax.model()
+        node = model.mapToSource(model.createIndex(index, 0))
+        self.settingGroup.setValue('defaultSyntax', str(node.internalPointer().uuid).upper())
     

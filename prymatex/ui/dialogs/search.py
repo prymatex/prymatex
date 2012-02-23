@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/search.ui'
 #
-# Created: Thu Feb 23 07:24:31 2012
+# Created: Thu Feb 23 19:29:40 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,6 @@ except AttributeError:
 class Ui_SearchDialog(object):
     def setupUi(self, SearchDialog):
         SearchDialog.setObjectName(_fromUtf8("SearchDialog"))
-        SearchDialog.resize(229, 204)
         self.verticalLayout = QtGui.QVBoxLayout(SearchDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -68,6 +67,7 @@ class Ui_SearchDialog(object):
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.groupBox_2)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.radioButtonWorkspace = QtGui.QRadioButton(self.groupBox_2)
+        self.radioButtonWorkspace.setChecked(True)
         self.radioButtonWorkspace.setObjectName(_fromUtf8("radioButtonWorkspace"))
         self.verticalLayout_2.addWidget(self.radioButtonWorkspace)
         self.horizontalLayout = QtGui.QHBoxLayout()
