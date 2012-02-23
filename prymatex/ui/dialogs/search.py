@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/search.ui'
 #
-# Created: Wed Feb 22 17:19:31 2012
+# Created: Thu Feb 23 07:22:40 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -86,8 +86,23 @@ class Ui_SearchDialog(object):
         self.horizontalLayout.addWidget(self.comboBoxWorkingSet)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.verticalLayout.addWidget(self.groupBox_2)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout.addItem(spacerItem)
+        self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem)
+        self.buttonCreate = QtGui.QPushButton(SearchDialog)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-find.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonCreate.setIcon(icon)
+        self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
+        self.horizontalLayout_2.addWidget(self.buttonCreate)
+        self.buttonCancel = QtGui.QPushButton(SearchDialog)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonCancel.setIcon(icon1)
+        self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
+        self.horizontalLayout_2.addWidget(self.buttonCancel)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.retranslateUi(SearchDialog)
         QtCore.QMetaObject.connectSlotsByName(SearchDialog)
@@ -100,4 +115,7 @@ class Ui_SearchDialog(object):
         self.groupBox_2.setTitle(_('Scope'))
         self.radioButtonWorkspace.setText(_('Workspace'))
         self.radioButtonWorkingSet.setText(_('Working set'))
+        self.buttonCreate.setText(_('&Search'))
+        self.buttonCancel.setText(_('C&ancel'))
 
+from prymatex import resources_rc
