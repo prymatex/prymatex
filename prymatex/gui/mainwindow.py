@@ -61,7 +61,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.dockers = []
         
-        self.customActions = {}
+        self.customEditorActions = {}
+        self.customDockActions = {}
         
         self.setAcceptDrops(True)
     
@@ -122,19 +123,41 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return actions
 
     def registerEditorClassActions(self, editorClass, actions):
+        self.logger.debug("%s, actions: %d" % (str(editorClass), len(actions)))
         #Conect Actions
         for action in actions:
             if hasattr(action, 'callback'):
                 receiver = lambda checked, action = action: self.currentEditorActionDispatcher(checked, action)
                 self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
-        self.customActions[editorClass] = actions
+        self.customEditorActions[editorClass] = actions
     
     def registerDockClassActions(self, dockClass, actions):
         self.logger.debug("%s, actions: %d" % (str(dockClass), len(actions)))
+        #Conect Actions
+        for action in actions:
+            if hasattr(action, 'callback'):
+                receiver = lambda checked, action = action: self.dockActionDispatcher(checked, action)
+                self.connect(action, QtCore.SIGNAL('triggered(bool)'), receiver)
+        self.customDockActions[dockClass] = actions
         
     def registerStatusClassActions(self, statusClass, actions):
         self.statusBar().registerStatusClassActions(statusClass, actions)
     
+    def dockActionDispatcher(self, checked, action):
+        #Find class for action
+        dockClasses = filter(lambda (cls, actions): action in actions, self.customDockActions.items())
+        assert len(dockClasses) == 1, "More than one dock class for action %s" % action
+        dockClass = dockClasses[0][0]
+        #Find instance
+        dockInstance = filter(lambda status: status.__class__ == dockClass, self.dockers)
+        assert len(dockInstance) == 1, "More than one instance for class %s" % dockClass
+        dockInstance = dockInstance[0]
+        
+        callbackArgs = [ dockInstance ]
+        if action.isCheckable():
+            callbackArgs.append(checked)
+        action.callback(*callbackArgs)
+        
     def currentEditorActionDispatcher(self, checked, action):
         callbackArgs = [self.currentEditor()]
         if action.isCheckable():
@@ -143,12 +166,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     
     def updateMenuForEditor(self, editor):
         if editor is None:
-            for editorClass, actions in self.customActions.iteritems():
+            for editorClass, actions in self.customEditorActions.iteritems():
                 map(lambda action: action.setVisible(False), actions)
         else:
             currentEditorClass = editor.__class__ 
             
-            for editorClass, actions in self.customActions.iteritems():
+            for editorClass, actions in self.customEditorActions.iteritems():
                 for action in actions:
                     action.setVisible(editorClass == currentEditorClass)
                     if editorClass == currentEditorClass and action.isCheckable() and hasattr(action, 'testChecked'):

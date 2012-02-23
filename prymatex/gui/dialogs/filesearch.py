@@ -6,7 +6,7 @@ import Queue
 from PyQt4 import QtCore, QtGui
 from prymatex.ui.dialogs.search import Ui_SearchDialog
 
-class FileFindThread(QtCore.QThread):
+class FileSearchThread(QtCore.QThread):
     foundPattern = QtCore.pyqtSignal(str, int)
     
     def findInFiles(self, dir_name, filters, reg_exp, recursive, by_phrase):
@@ -80,8 +80,8 @@ class FileFindThread(QtCore.QThread):
     def cancel(self):
         self._cancel = True
 
-class PMXFileFindDialog(QtGui.QDialog, Ui_SearchDialog):
+class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
-        self.fileFindThread = FileFindThread()
+        self.fileSearchThread = FileSearchThread()
