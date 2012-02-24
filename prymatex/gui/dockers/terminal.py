@@ -9,6 +9,12 @@ from prymatex.utils.i18n import ugettext as _
 
 PORT = 4613
 
+QTERMWIDGET_IMPORT_SUGGESTOIN = '''
+QTermWidget disabled because of:
+{}
+Please install QTermWidget. Please note QTermWidget consists in a C++ with Python binding.
+'''
+
 class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
     ICON = resources.getIcon("terminal")
@@ -36,7 +42,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
             self.terminal = QtGui.QPlainTextEdit()
             self.terminal.setReadOnly(True)
             tb = format_exc()
-            self.terminal.appendPlainText("QTermWidget disabled because of\n%s\nPlese install QTermWidget" % tb)
+            self.terminal.appendPlainText(_().format(tb))
         self.setWidget(self.terminal)
     
     #====================================================
