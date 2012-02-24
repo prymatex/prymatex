@@ -31,9 +31,6 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
             setattr(self, "_creationCounter", PMXBaseEditor.CREATION_COUNTER)
         return self._creationCounter
     
-    def setMainWindow(self, mainWindow):
-        self.mainWindow = mainWindow
-    
     def open(self, filePath):
         """ Open file """
         content = self.application.fileManager.openFile(filePath)

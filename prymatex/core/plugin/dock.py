@@ -15,6 +15,3 @@ class PMXBaseDock(PMXBaseWidgetPlugin):
         PMXBaseWidgetPlugin.__init__(self)
         self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
         self.toggleViewAction().setIcon(self.ICON)
-
-    def setMainWindow(self, mainWindow):
-        self.mainWindow = mainWindow

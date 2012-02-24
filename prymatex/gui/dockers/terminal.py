@@ -22,8 +22,8 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.setupTerminal()
         self.setupSocket()
     
-    def setMainWindow(self, mainWindow):
-        PMXBaseDock.setMainWindow(self, mainWindow)
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
         
     def setupTerminal(self):

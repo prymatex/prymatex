@@ -89,18 +89,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #============================================================
     def addStatusBar(self, statusBar):
         self.statusBar().addPermanentWidget(statusBar)
-        statusBar.setMainWindow(self)
         
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)
-        dock.setMainWindow(self)
         self.menuPanels.addAction(dock.toggleViewAction())
         dock.hide()
         self.dockers.append(dock)
     
     def addEditor(self, editor, focus = True):
         self.splitTabWidget.addTab(editor)
-        editor.setMainWindow(self)
         if focus:
             self.setCurrentEditor(editor)
             

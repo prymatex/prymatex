@@ -5,9 +5,6 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex.core.plugin import PMXBaseWidgetPlugin
 
-class PMXBaseStatusBar(PMXBaseWidgetPlugin):
-    def setMainWindow(self, mainWindow):
-        self.mainWindow = mainWindow
-        
+class PMXBaseStatusBar(PMXBaseWidgetPlugin):    
     def acceptEditor(self, editor):
         return False
