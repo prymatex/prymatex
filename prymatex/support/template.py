@@ -125,6 +125,7 @@ class PMXTemplate(PMXBundleItem):
     
     def execute(self, environment = {}):
         origWD = os.getcwd() # remember our original working directory
+        print self.sources
         os.chdir(self.path)
         
         shellCommand, environment = prepareShellScript(self.command, environment)
@@ -156,15 +157,16 @@ class PMXTemplate(PMXBundleItem):
             uuid = manager.uuidgen(data.pop('uuid', None))
             template = manager.getManagedObject(uuid)
             if template is None and not manager.isDeleted(uuid):
-                template = cls(uuid,data)
+                template = cls(uuid, data)
                 template.setBundle(bundle)
                 template = manager.addBundleItem(template)
+                manager.addManagedObject(template)
+                template.addSource(namespace, path)
+                #Add files
                 for path in paths:
                     file = PMXTemplateFile(path, template)
                     file = manager.addTemplateFile(file)
                     template.files.append(file)
-                manager.addManagedObject(template)
-            template.addSource(namespace, path)
             return template
         except Exception, e:
-            print "Error in bundle %s (%s)" % (info, e)
+            print "Error in template %s (%s)" % (info, e)

@@ -40,10 +40,18 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
         proxyWidget = PMXProxySettingTreeNode(name, parent)
         self.stackedWidget.addWidget(proxyWidget)
         return proxyWidget
-        
+
+    def selectFirstIndex(self):
+        firstIndex = self.proxyModelSettings.index(0, 0)
+        rect = self.treeView.visualRect(firstIndex)
+        self.treeView.setSelection(rect, QtGui.QItemSelectionModel.ClearAndSelect)
+        treeNode = self.proxyModelSettings.node(firstIndex)
+        self.setCurrentSettingWidget(treeNode)
+
     def on_lineEditFilter_textChanged(self, text):
         self.proxyModelSettings.setFilterRegExp(QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive))
-    
+        self.selectFirstIndex()
+        
     def on_treeView_pressed(self, index):
         treeNode = self.proxyModelSettings.node(index)
         self.setCurrentSettingWidget(treeNode)
@@ -64,3 +72,4 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     def loadSettings(self):
         for index in xrange(self.stackedWidget.count()):
             self.stackedWidget.widget(index).loadSettings()
+        self.selectFirstIndex()

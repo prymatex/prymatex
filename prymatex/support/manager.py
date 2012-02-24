@@ -416,10 +416,11 @@ class PMXSupportBaseManager(object):
         klass = klass.pop()
         path = os.path.join(bundle.path, klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
 
-        item = klass(self.uuidgen(), namespace, { 'name': name }, path)
+        item = klass(self.uuidgen(), { 'name': name })
         item.setBundle(bundle)
         item = self.addBundleItem(item)
         self.addManagedObject(item)
+        item.addSource(namespace, path)
         return item
     
     def readBundleItem(self, **attrs):
