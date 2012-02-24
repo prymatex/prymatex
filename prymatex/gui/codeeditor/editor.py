@@ -81,7 +81,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.sidebar.foreground = self.colours['foreground']
         self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
         
-        self.syntaxHighlighter.rehighlight()
         self.updateLineNumberAreaWidth(0)
         self.highlightCurrent()
         if not firstTime:
@@ -162,6 +161,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.macroProcessor = PMXMacroProcessor(self)
         self.snippetProcessor = PMXSnippetProcessor(self)
 
+        #Highlighter
+        self.syntaxHighlighter = PMXSyntaxHighlighter(self)
+        
         #Modes
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
         self.completerMode = PMXCompleterEditorMode(self)
@@ -170,12 +172,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.highlightWordTimer = QtCore.QTimer()
         self.currentHighlightWord = None
         self.extraCursorsSelections = []
-        
-        #Load Default Syntax Highlighter
-        syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
-        self.syntaxHighlighter = PMXSyntaxHighlighter(self, syntax)
-        # Get Braces from base syntax
-        self.setBraces(syntax.scopeName)
+        self.braces = []
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
@@ -187,6 +184,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
+            
+    def initialize(self, mainWindow):
+        PMXBaseEditor.initialize(self, mainWindow)
+        #Load Default Syntax
+        syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
+        self.setSyntax(syntax)
         
     def updateIndent(self, block):
         self.logger.debug("Update Block Indent")
@@ -393,10 +396,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
     def setSyntax(self, syntax):
         if self.syntaxHighlighter.syntax != syntax:
-            self.syntaxHighlighter.syntax = syntax
+            self.syntaxHighlighter.setSyntax(syntax)
             self.folding.indentSensitive = syntax.indentSensitive
             self.setBraces(syntax.scopeName)
-            self.syntaxHighlighter.rehighlight()
             self.syntaxChanged.emit(syntax)
 
     # Move text

@@ -44,9 +44,8 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
         self.logger.debug("Level changed to %s", new_level)
 
 class QtLogHandler(BufferingHandler):
-    '''
-    A handler to store logging ouput to be shown at a QTextEdit defined in LogDockWidget
-    '''
+    """A handler to store logging ouput to be shown at a 
+    QTextEdit defined in LogDockWidget"""
     def __init__(self, widget):
         BufferingHandler.__init__(self, 100)
         self.widget = widget

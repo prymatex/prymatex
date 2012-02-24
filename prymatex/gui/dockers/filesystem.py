@@ -112,8 +112,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         
         self.setupButtons()
         
-    def setMainWindow(self, mainWindow):
-        PMXBaseDock.setMainWindow(self, mainWindow)
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
         mainWindow.fileSystem = self
         
     def eventFilter(self, obj, event):

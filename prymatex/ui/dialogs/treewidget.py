@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/treewidget.ui'
 #
-# Created: Tue Feb 14 15:51:25 2012
+# Created: Thu Feb 23 19:35:57 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,8 @@ except AttributeError:
 class Ui_TreeWidgetDialog(object):
     def setupUi(self, TreeWidgetDialog):
         TreeWidgetDialog.setObjectName(_fromUtf8("TreeWidgetDialog"))
-        TreeWidgetDialog.resize(317, 218)
+        TreeWidgetDialog.resize(700, 433)
+        TreeWidgetDialog.setMinimumSize(QtCore.QSize(700, 433))
         self.verticalLayout_3 = QtGui.QVBoxLayout(TreeWidgetDialog)
         self.verticalLayout_3.setSpacing(2)
         self.verticalLayout_3.setMargin(0)

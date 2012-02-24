@@ -197,8 +197,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def on_manager_commandUrlRequested(self, url):
         self.application.handleUrlCommand(url)
         
-    def setMainWindow(self, mainWindow):
-        PMXBaseDock.setMainWindow(self, mainWindow)
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
         mainWindow.browser = self
         
     def showEvent(self, event):

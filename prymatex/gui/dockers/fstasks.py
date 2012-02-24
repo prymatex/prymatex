@@ -7,12 +7,11 @@ from prymatex.core.exceptions import PrymatexFileExistsException
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 
 class PMXFileSystemTasks(object):
-    '''
-    Groups FileSystem and Project actions, it's a facade of the PMXFileManager
+    """Groups FileSystem and Project actions, it's a facade of the PMXFileManager
     that displays dialogs and handle common exceptions.
     
     Slots Mixin
-    '''
+    """
     
     def createDirectory(self, basePath):
         if not os.path.isdir(basePath):

@@ -20,21 +20,34 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     MULTI_LINE = 1
     FORMAT_CACHE = {}
     
-    def __init__(self, editor, syntax, theme = None):
-        super(PMXSyntaxHighlighter, self).__init__(editor.document())
-        assert syntax is not None, "Syntax cannot be None"
+    def __init__(self, editor, syntax = None, theme = None):
+        QtGui.QSyntaxHighlighter.__init__(self, editor)
         self.editor = editor
         self.processor = PMXSyntaxProcessor()
         self.syntax = syntax
         self.theme = theme
-
+    
+    @property
+    def ready(self):
+        if self.theme and self.syntax:
+            self.setDocument(self.editor.document())
+            return True
+        return False
+    
+    def setSyntax(self, syntax):
+        self.syntax = syntax
+        if self.ready:
+            self.rehighlight()
+        
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
         self.theme = theme
+        if self.ready:
+            self.rehighlight()
     
     def hasTheme(self):  
         return self.theme is not None
-    
+            
     def _analyze_all_text(self, text):
         self.syntax.parse(text, self.processor)
         for index, data in enumerate(self.processor.lines):
