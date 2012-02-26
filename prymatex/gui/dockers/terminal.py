@@ -8,6 +8,7 @@ from PyQt4 import QtCore, QtGui
 from prymatex import resources
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
+from prymatex.resources import getIcon
 
 PORT = 4613
 
@@ -38,24 +39,47 @@ class PMXTabTerminals(QtGui.QTabWidget):
         widget = QtGui.QWidget()
         layout = QtGui.QHBoxLayout()
         # Add
-        self.addNewTerminal = QtGui.QPushButton("+")
-        self.addNewTerminal.setObjectName("addNewTerminal")
-        self.addNewTerminal.setToolTip(_("Add new terminal"))
-        self.addNewTerminal.setFlat(True)
-        layout.addWidget(self.addNewTerminal)
+        self.pushAddNewTerminal = QtGui.QPushButton()
+        self.pushAddNewTerminal.setIcon(getIcon('terminal'))
+        self.pushAddNewTerminal.setObjectName("pushAddNewTerminal")
+        self.pushAddNewTerminal.setToolTip(_("Add new terminal"))
+        self.pushAddNewTerminal.setFlat(True)
+        self.pushAddNewTerminal.pressed.connect(self.addTerminal)
+        layout.addWidget(self.pushAddNewTerminal)
+        
+        # Copy
+        self.pushCopyTerminalText = QtGui.QPushButton()
+        self.pushCopyTerminalText.setIcon(getIcon("copy"))
+        self.pushCopyTerminalText.setObjectName("pushCopyTerminalText")
+        self.pushCopyTerminalText.setToolTip("Copy terminal selection")
+        self.pushCopyTerminalText.setFlat(True)
+        layout.addWidget(self.pushCopyTerminalText)
+        
+        # Paste
+        self.pushPasteIntoTerminal = QtGui.QPushButton()
+        self.pushPasteIntoTerminal.setIcon(getIcon('paste'))
+        self.pushPasteIntoTerminal.setObjectName('pushPasteIntoTerminal')
+        self.pushPasteIntoTerminal.setToolTip('Paste text into terminal')
+        self.pushPasteIntoTerminal.setFlat(True)
+        layout.addWidget(self.pushPasteIntoTerminal)
         
         # Close
-        self.closeTabButton = QtGui.QPushButton("X")
-        self.closeTabButton.setObjectName("closeTabButton")
-        self.closeTabButton.setToolTip(_("Close current tab"))
-        self.closeTabButton.setFlat(True)
-        layout.addWidget(self.closeTabButton)
+        self.pushCloseTerminal = QtGui.QPushButton()
+        self.pushCloseTerminal.setIcon(getIcon("close"))
+        self.pushCloseTerminal.setObjectName("pushCloseTerminal")
+        self.pushCloseTerminal.setToolTip(_("Close terminal"))
+        self.pushCloseTerminal.setFlat(True)
+        
+        self.pushCloseTerminal.pressed.connect(lambda s=self: s.quitTab(s.currentIndex()))
+        layout.addWidget(self.pushCloseTerminal)
         
         widget.setLayout(layout)
-        self.setStyleSheet('''
+        
+        # Save some space
+        widget.setStyleSheet('''
         QPushButton {
             margin: 0px;
-            padding: 0 2px 0 2px;
+            padding: 0 0px 0 2px;
         }
         ''')
         self.setCornerWidget(widget)
