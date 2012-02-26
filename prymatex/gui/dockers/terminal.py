@@ -1,14 +1,18 @@
 #-*- encoding: utf-8 -*-
 import zmq
+import random
+import signal
+import os
 
 from PyQt4 import QtCore, QtGui
-
 from prymatex import resources
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
-import random
 
 PORT = 4613
+
+# TODO: Movetab
+
 
 QTERMWIDGET_IMPORT_SUGGESTOIN = '''
 QTermWidget disabled because of:
@@ -21,8 +25,11 @@ class PMXTabTerminals(QtGui.QTabWidget):
     
     def __init__(self, parent = None):
         super(PMXTabTerminals, self).__init__(parent)
-        self.addTerminal()
+        self.setTabsClosable(True)
         
+        self.tabCloseRequested.connect(lambda index, s = self: s.removeTab(index))
+        self.addTerminal()
+        self.setMinimumHeight(200)
     
     def setupUi(self):
         self.pushButtonAddNew = QtGui.QPushButton("+")
@@ -34,31 +41,66 @@ class PMXTabTerminals(QtGui.QTabWidget):
         ''' Factory '''
         # TODO: Get some initial config?
         from QTermWidget import QTermWidget
-        
-        return QTermWidget()
+        term = QTermWidget()
+        term.finished.connect(self.on_terminal_finished)
+        color = random.choice(term.availableColorSchemes())
+        term.setColorScheme(color)
+        return term
     
     def addTerminal(self):
+        widget, title = None, "Terminal"
         try:
-            term = self.getTerminal()
-            term.finished.connect(self.on_terminal_finished)
-        #    print(term.availableColorSchemes())
-            color = random.choice(term.availableColorSchemes())
-            term.setColorScheme(color)
-            self.addTab(term, "Shell (color: %s)" % color)
-            
+            widget = self.getTerminal()
+            title = "Terminal (PID: %d)" % widget.getShellPID()
         except (ImportError, AttributeError) as exc:
             from traceback import format_exc
             tb = format_exc()
-            explainatoryMessage = QtGui.QTextEdit()
-            explainatoryMessage.setReadOnly(True)
-            explainatoryMessage.setText(_(QTERMWIDGET_IMPORT_SUGGESTOIN).format(tb))
-            self.addTab(explainatoryMessage, _("Import Error"))
-        
+            widget = QtGui.QTextEdit()
+            widget.setReadOnly(True)
+            widget.setText(_(QTERMWIDGET_IMPORT_SUGGESTOIN).format(tb))
+            title = _("Import Error")
+        self.addTab(widget, title)
+    
+
+    #===========================================================================
+    # Mouse events
+    #===========================================================================
+    def mouseDoubleClickEvent(self, event):
+        self.addTerminal()
+    
+    def clickedItem(self, pos):
+        for i in range(self.tabBar().count()):
+            if self.tabBar().tabRect(i).contains(pos):
+                return self.widget(i)
+    
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.RightButton:
+            widget = self.clickedItem(event.pos())
+            index = self.indexOf(widget)
+            pid = widget.getShellPID()
+            menu = QtGui.QMenu()
+            closeAction = menu.addAction(_("Close"))
+            closeAction.triggered.connect(lambda index, s=self: s.removeTab(index))
+            signalSubMenu = menu.addMenu(_("&Send signal"))
+            for name, number in SIGNALS:
+                signal = signalSubMenu.addAction("Send %s (%d)" % (name, number))
+                signal.triggered.connect(lambda pid = pid, number = number: os.kill(pid, number))
+
+            menu.exec_(event.globalPos())
+            return
+        super(PMXTabTerminals, self).mousePressEvent(event)
+    
+    def quitTab(self, index):
+        terminal = self.widget(index)
+        self.removeTab(terminal)
     
     def on_terminal_finished(self):
         terminal = self.sender()
         index = self.indexOf(terminal)
         self.removeTab(index)
+        
+    def tabRemoved(self, index):
+        # Do not allow the tab widget be empty
         if not self.count():
             self.addTerminal()
     
@@ -122,4 +164,6 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     @property
     def terminal(self):
         return self.widget().currentWidget()
-        
+
+
+SIGNALS = [ ("%s" % x, getattr(signal, x)) for x in dir(signal) if x.startswith('SIG')]
