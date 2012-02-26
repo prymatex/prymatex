@@ -13,7 +13,6 @@ PORT = 4613
 
 # TODO: Movetab
 
-
 QTERMWIDGET_IMPORT_SUGGESTOIN = '''
 QTermWidget disabled because of:
 {}
@@ -25,17 +24,41 @@ class PMXTabTerminals(QtGui.QTabWidget):
     
     def __init__(self, parent = None):
         super(PMXTabTerminals, self).__init__(parent)
+        self.setupCornerWidget()
+        self.setupSignals()
         self.setTabsClosable(True)
-        
-        self.tabCloseRequested.connect(lambda index, s = self: s.removeTab(index))
-        self.addTerminal()
         self.setMinimumHeight(200)
+        self.addTerminal()
     
-    def setupUi(self):
-        self.pushButtonAddNew = QtGui.QPushButton("+")
-        self.pushButtonAddNew.setObjectName("pushButtonAddNew")
-        self.setCornerWidget(self.pushButtonAddNew)
+    def setupSignals(self):    
+        self.tabCloseRequested.connect(lambda index, s = self: s.removeTab(index))
         QtCore.QMetaObject.connectSlotsByName(self)
+        
+    def setupCornerWidget(self):
+        widget = QtGui.QWidget()
+        layout = QtGui.QHBoxLayout()
+        # Add
+        self.addNewTerminal = QtGui.QPushButton("+")
+        self.addNewTerminal.setObjectName("addNewTerminal")
+        self.addNewTerminal.setToolTip(_("Add new terminal"))
+        self.addNewTerminal.setFlat(True)
+        layout.addWidget(self.addNewTerminal)
+        
+        # Close
+        self.closeTabButton = QtGui.QPushButton("X")
+        self.closeTabButton.setObjectName("closeTabButton")
+        self.closeTabButton.setToolTip(_("Close current tab"))
+        self.closeTabButton.setFlat(True)
+        layout.addWidget(self.closeTabButton)
+        
+        widget.setLayout(layout)
+        self.setStyleSheet('''
+        QPushButton {
+            margin: 0px;
+            padding: 0 2px 0 2px;
+        }
+        ''')
+        self.setCornerWidget(widget)
         
     def getTerminal(self):
         ''' Factory '''
@@ -72,20 +95,28 @@ class PMXTabTerminals(QtGui.QTabWidget):
         for i in range(self.tabBar().count()):
             if self.tabBar().tabRect(i).contains(pos):
                 return self.widget(i)
-    
+    #===========================================================================
+    # Context menu stuff
+    #===========================================================================
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.RightButton:
-            widget = self.clickedItem(event.pos())
-            index = self.indexOf(widget)
-            pid = widget.getShellPID()
             menu = QtGui.QMenu()
-            closeAction = menu.addAction(_("Close"))
-            closeAction.triggered.connect(lambda index, s=self: s.removeTab(index))
-            signalSubMenu = menu.addMenu(_("&Send signal"))
-            for name, number in SIGNALS:
-                signal = signalSubMenu.addAction("Send %s (%d)" % (name, number))
-                signal.triggered.connect(lambda pid = pid, number = number: os.kill(pid, number))
-
+            widget = self.clickedItem(event.pos())
+            if not widget:
+                actionAddTerm = menu.addAction(_('Add terminal'))
+                actionAddTerm.triggered.connect(self.addTerminal)
+                
+            else:
+                pid = widget.getShellPID()
+                # Close
+                closeAction = menu.addAction(_("Close"))
+                closeAction.triggered.connect(lambda index, s=self: s.removeTab(index))
+                # Signals
+                signalSubMenu = menu.addMenu(_("&Send signal"))
+                for name, number in SIGNALS:
+                    signal = signalSubMenu.addAction("Send %s (%d)" % (name, number))
+                    signal.triggered.connect(lambda pid = pid, number = number: os.kill(pid, number))
+    
             menu.exec_(event.globalPos())
             return
         super(PMXTabTerminals, self).mousePressEvent(event)
@@ -165,5 +196,18 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     def terminal(self):
         return self.widget().currentWidget()
 
-
+#===============================================================================
+# Signals
+#===============================================================================
 SIGNALS = [ ("%s" % x, getattr(signal, x)) for x in dir(signal) if x.startswith('SIG')]
+def signame_by_id(n):
+    try:
+        return [ name for name, number in SIGNALS if number == n ][0]
+    except:
+        return _("Uknown signal")
+    
+def sendSignalToProcess(pid, sig):
+    print("Sending %s to %s" % (signame_by_id(sig), pid))
+    os.kill(pid, sig)
+    
+    
