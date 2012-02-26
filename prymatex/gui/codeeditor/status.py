@@ -331,6 +331,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     # IFind widget
     #============================================================
     # AutoConnect Signals ---------------------------------------
+    FIND_MATCH_STYLE = ''
+    FIND_NO_MATCH_STYLE = ''
     @QtCore.pyqtSlot()
     def on_pushButtonIFindClose_pressed(self):
         self.widgetIFind.setVisible(False)
