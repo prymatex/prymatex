@@ -84,7 +84,12 @@ class PMXProjectTreeModel(TreeModel):
         return index.internalPointer().path
     
     def isDir(self, index):
-        return index.internalPointer().isdir
+        try:
+            return index.internalPointer().isdir
+        except AttributeError as _exc:
+            # Not in tree, should check through python 
+            print index.data()
+            return False
     
     def appendProject(self, project):
         self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
