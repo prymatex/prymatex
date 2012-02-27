@@ -40,14 +40,15 @@ class PMXTabTerminals(QtGui.QTabWidget):
         # Add
         self.pushAddNewTerminal = QtGui.QPushButton()
         self.pushAddNewTerminal.setIcon(resources.getIcon('terminal'))
-        self.pushAddNewTerminal.setObjectName("pushAddNewTerminal")
         self.pushAddNewTerminal.setToolTip(_("Add new terminal"))
         self.pushAddNewTerminal.setFlat(True)
+
         menuAddNew = QtGui.QMenu()
-        menuAddNew.addAction("Terminal")
-        menuAddNew.addAction("Run in terminal...")
+        actionNew = menuAddNew.addAction("Terminal")
+        actionNew.triggered.connect(self.addTerminal)
+        actionCustom = menuAddNew.addAction("Run in terminal...")
+        actionCustom.triggered.connect(self.launchCustomCommandInTerminal)
         self.pushAddNewTerminal.setMenu(menuAddNew)
-        self.pushAddNewTerminal.pressed.connect(self.addTerminal)
         layout.addWidget(self.pushAddNewTerminal)
         
         
@@ -102,11 +103,17 @@ class PMXTabTerminals(QtGui.QTabWidget):
         ''')
         self.setCornerWidget(widget)
         
-    def getTerminal(self):
+    def getTerminal(self, cmd = None):
         ''' Factory '''
         # TODO: Get some initial config?
         from QTermWidget import QTermWidget
-        term = QTermWidget()
+        if not cmd:
+            term = QTermWidget(1)
+        else:
+            term = QTermWidget(0)
+            term.setShellProgram(cmd)
+            term.startShellProgram()
+        
         term.setScrollBarPosition(QTermWidget.ScrollBarRight)
         term.finished.connect(self.on_terminal_finished)
         
@@ -114,11 +121,21 @@ class PMXTabTerminals(QtGui.QTabWidget):
         term.setColorScheme(color)
         return term
     
-    def addTerminal(self):
+    def launchCustomCommandInTerminal(self):
+        cmd, ok = QtGui.QInputDialog.getText(self, _("Command to run"), _("Command to run"))
+        if ok:
+            self.addTerminal(cmd)
+        
+    
+    def addTerminal(self, cmd = None, autoFocus = True):
         widget, title = None, "Terminal"
         try:
-            widget = self.getTerminal()
-            title = "Terminal (PID: %d)" % widget.getShellPID()
+            widget = self.getTerminal(cmd)
+            if not cmd:
+                title = "Terminal (PID: %d)" % widget.getShellPID()
+            else:
+                title = cmd
+            
         except (ImportError, AttributeError) as exc:
             from traceback import format_exc
             tb = format_exc()
@@ -127,7 +144,10 @@ class PMXTabTerminals(QtGui.QTabWidget):
             widget.setText(_(QTERMWIDGET_IMPORT_SUGGESTOIN).format(tb))
             title = _("Import Error")
         self.addTab(widget, title)
-    
+        if autoFocus:
+            self.setCurrentWidget(widget)
+            widget.setFocus()
+        
 
     #===========================================================================
     # Mouse events
@@ -255,6 +275,12 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     @property
     def terminal(self):
         return self.widget().currentWidget()
+    
+    
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.terminal import PMXTerminalSettings
+        return [ PMXTerminalSettings ]
 
 #===============================================================================
 # Signals
