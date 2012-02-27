@@ -8,7 +8,6 @@ from PyQt4 import QtCore, QtGui
 from prymatex import resources
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
-from prymatex.resources import getIcon
 
 PORT = 4613
 
@@ -40,37 +39,56 @@ class PMXTabTerminals(QtGui.QTabWidget):
         layout = QtGui.QHBoxLayout()
         # Add
         self.pushAddNewTerminal = QtGui.QPushButton()
-        self.pushAddNewTerminal.setIcon(getIcon('terminal'))
+        self.pushAddNewTerminal.setIcon(resources.getIcon('terminal'))
         self.pushAddNewTerminal.setObjectName("pushAddNewTerminal")
         self.pushAddNewTerminal.setToolTip(_("Add new terminal"))
         self.pushAddNewTerminal.setFlat(True)
+        menuAddNew = QtGui.QMenu()
+        menuAddNew.addAction("Terminal")
+        menuAddNew.addAction("Run in terminal...")
+        self.pushAddNewTerminal.setMenu(menuAddNew)
         self.pushAddNewTerminal.pressed.connect(self.addTerminal)
         layout.addWidget(self.pushAddNewTerminal)
         
+        
+        
         # Copy
         self.pushCopyTerminalText = QtGui.QPushButton()
-        self.pushCopyTerminalText.setIcon(getIcon("copy"))
+        self.pushCopyTerminalText.setIcon(resources.getIcon("copy"))
         self.pushCopyTerminalText.setObjectName("pushCopyTerminalText")
         self.pushCopyTerminalText.setToolTip("Copy terminal selection")
         self.pushCopyTerminalText.setFlat(True)
+        self.pushCopyTerminalText.pressed.connect(lambda s=self: s.currentWidget().copyClipboard())
         layout.addWidget(self.pushCopyTerminalText)
         
         # Paste
         self.pushPasteIntoTerminal = QtGui.QPushButton()
-        self.pushPasteIntoTerminal.setIcon(getIcon('paste'))
+        self.pushPasteIntoTerminal.setIcon(resources.getIcon('paste'))
         self.pushPasteIntoTerminal.setObjectName('pushPasteIntoTerminal')
         self.pushPasteIntoTerminal.setToolTip('Paste text into terminal')
         self.pushPasteIntoTerminal.setFlat(True)
+        self.pushPasteIntoTerminal.pressed.connect(lambda s=self: s.currentWidget().pasteClipboard())
         layout.addWidget(self.pushPasteIntoTerminal)
+        
+        # Config
+        self.pushConfigTerminal = QtGui.QPushButton("C")
+        
+        #self.pushConfigTerminal.setIcon(getIcon('preference'))
+        self.pushConfigTerminal.setObjectName('pushConfigTerminal')
+        self.pushConfigTerminal.setToolTip('Configure terminal')
+        self.pushConfigTerminal.setFlat(True)
+        layout.addWidget(self.pushConfigTerminal)
+        
+        
         
         # Close
         self.pushCloseTerminal = QtGui.QPushButton()
-        self.pushCloseTerminal.setIcon(getIcon("close"))
+        self.pushCloseTerminal.setIcon(resources.getIcon("close"))
         self.pushCloseTerminal.setObjectName("pushCloseTerminal")
         self.pushCloseTerminal.setToolTip(_("Close terminal"))
         self.pushCloseTerminal.setFlat(True)
         
-        self.pushCloseTerminal.pressed.connect(lambda s=self: s.quitTab(s.currentIndex()))
+        self.pushCloseTerminal.pressed.connect(lambda s=self: s.removeTab(s.currentIndex()))
         layout.addWidget(self.pushCloseTerminal)
         
         widget.setLayout(layout)
@@ -89,7 +107,9 @@ class PMXTabTerminals(QtGui.QTabWidget):
         # TODO: Get some initial config?
         from QTermWidget import QTermWidget
         term = QTermWidget()
+        term.setScrollBarPosition(QTermWidget.ScrollBarRight)
         term.finished.connect(self.on_terminal_finished)
+        
         color = random.choice(term.availableColorSchemes())
         term.setColorScheme(color)
         return term
@@ -123,6 +143,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
     # Context menu stuff
     #===========================================================================
     def mousePressEvent(self, event):
+        from QTermWidget import QTermWidget
         if event.button() == QtCore.Qt.RightButton:
             menu = QtGui.QMenu()
             widget = self.clickedItem(event.pos())
@@ -135,17 +156,36 @@ class PMXTabTerminals(QtGui.QTabWidget):
                 # Close
                 closeAction = menu.addAction(_("Close"))
                 closeAction.triggered.connect(lambda index, s=self: s.removeTab(index))
+                menu.addSeparator()
                 # Signals
                 signalSubMenu = menu.addMenu(_("&Send signal"))
                 for name, number in SIGNALS:
                     signal = signalSubMenu.addAction("Send %s (%d)" % (name, number))
                     signal.triggered.connect(lambda pid = pid, number = number: os.kill(pid, number))
-    
+                # Scrollbar
+                scrollBarMenu = QtGui.QMenu("Scrollbar")
+                for name, enumVal in (("No Scrollbar", QTermWidget.NoScrollBar),
+                                      ("Left Scrollbar",QTermWidget.ScrollBarLeft),
+                                      ("Right Scrollbar", QTermWidget.ScrollBarRight)):
+                    action = scrollBarMenu.addAction(name)
+                    action.triggered.connect(lambda w=widget, n=enumVal: widget.setScrollBarPosition(n))
+                menu.addMenu(scrollBarMenu)
+                
+                # Colors
+                menuColors = QtGui.QMenu("Color Scheme")
+                for name in widget.availableColorSchemes():
+                    action = menuColors.addAction(name)
+                    action.triggered.connect(lambda w=widget, n=name: widget.setColorScheme(n))
+                
+                menu.addMenu(menuColors)
+                
             menu.exec_(event.globalPos())
             return
         super(PMXTabTerminals, self).mousePressEvent(event)
     
-    def quitTab(self, index):
+    def quitTab(self, index = None):
+        if index is None:
+            index = self.currentIndex()
         terminal = self.widget(index)
         self.removeTab(terminal)
     
@@ -159,10 +199,6 @@ class PMXTabTerminals(QtGui.QTabWidget):
         if not self.count():
             self.addTerminal()
     
-    @QtCore.pyqtSignature('')
-    def on_pushButtonAddNew_pressed(self):
-        self.addTerminal()
-        
 class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
     ICON = resources.getIcon("terminal")
