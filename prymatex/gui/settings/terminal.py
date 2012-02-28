@@ -10,10 +10,8 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex import resources
 class PMXTerminalSettings(QtGui.QWidget, PMXSettingTreeNode, Ui_Terminal):
     
-    #NAMESPACE = "Dockers.Dockeantes"
     TITLE = "Terminal"
-    ICON = resources.getIcon('terminal') 
-    
+    ICON = resources 
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "terminal", settingGroup)
