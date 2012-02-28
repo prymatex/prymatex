@@ -56,6 +56,7 @@ class PMXProject(FileSystemTreeNode):
     BASH_INIT = os.path.join(SUPPORT, 'lib', 'bash_init.sh')
     def __init__(self, directory, hash):
         self.directory = directory
+        self.projectPath = os.path.join(self.path, self.FOLDER)
         FileSystemTreeNode.__init__(self, "Project Name")
         self.workingSet = None
         self.manager = None
@@ -73,7 +74,7 @@ class PMXProject(FileSystemTreeNode):
         env = {
             'TM_PROJECT_DIRECTORY': self.directory,
             'TM_PROJECT_NAME': self.name,
-            'TM_PROJECT_PATH': os.path.join(self.path, self.FOLDER) }
+            'TM_PROJECT_PATH': self.projectPath }
         if self.support != None:
             env['TM_PROJECT_SUPPORT'] = self.support
         return env
@@ -97,15 +98,13 @@ class PMXProject(FileSystemTreeNode):
             setattr(self, key, hash[key])
 
     def save(self):
-        projectPath = os.path.join(self.directory, self.FOLDER)
-        if not os.path.exists(projectPath):
-            os.makedirs(projectPath)
-        filePath = os.path.join(projectPath, self.FILE)
+        if not os.path.exists(self.projectPath):
+            os.makedirs(self.projectPath)
+        filePath = os.path.join(self.projectPath, self.FILE)
         plist.writePlist(self.hash, filePath)
 
     def delete(self, removeFiles = False):
-        projectPath = os.path.join(self.directory, self.FOLDER)
-        shutil.rmtree(projectPath)
+        shutil.rmtree(self.projectPath)
         if removeFiles:
             try:
                 shutil.rmtree(self.directory)
@@ -133,7 +132,7 @@ class PMXProject(FileSystemTreeNode):
             data = plist.readPlist(fileInfo)
             project = cls(path, data)
             if os.path.exists(os.path.join(projectPath, cls.SUPPORT)):
-                project.createSupport()
+                project.ensureSupportPaths()
             manager.addProject(project)
             return project
         except Exception, e:
@@ -157,15 +156,22 @@ class PMXProject(FileSystemTreeNode):
             return resources.getIcon("projectclose")
     
     def bashInit(self):
-        bashInitPath = os.path.join(self.path, self.FOLDER, self.BASH_INIT)
+        bashInitPath = os.path.join(self.projectPath, self.BASH_INIT)
         if not os.path.exists(bashInitPath):
-            self.createSupport()
+            self.ensureSupportPaths()
             open(bashInitPath, 'w').close()
         return bashInitPath
 
-    #TODO: Un mejor nombre porque crea el soporte y la estructura del mismo, esta bueno para salvar errores de metida de mano
-    def createSupport(self):
-        supportPath = os.path.join(self.directory, self.FOLDER, self.SUPPORT)
+    def namespace(self):
+        bundlePath = os.path.join(self.projectPath, self.BUNDLES)
+        if not os.path.exists(bundlePath):
+            self.ensureSupportPaths()
+            os.makedirs(bundlePath)
+        #TODO: retornar el namespace y el path
+        return self.name, self.projectPath
+    
+    def ensureSupportPaths(self):
+        supportPath = os.path.join(self.projectPath, self.SUPPORT)
         if not os.path.exists(supportPath):
             os.makedirs(supportPath)
         self.setSupport(supportPath)

@@ -298,6 +298,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         project = self.currentNode()
         self.application.openFile(project.bashInit())
 
+    @QtCore.pyqtSlot()
+    def on_actionBundleEditor_triggered(self):
+        project = self.currentNode()
+        print project.namespace()
+        
     #================================================
     # Custom filters
     #================================================      
