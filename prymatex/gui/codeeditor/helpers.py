@@ -34,15 +34,22 @@ class TabTriggerHelper(PMXBaseKeyHelper):
 class CompleterHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Space
     def accept(self, editor, event, cursor = None, scope = None):
-        """accept the completer event"""
+        """Accept the completer event"""
         if event.modifiers() == QtCore.Qt.ControlModifier:
             settings = self.application.supportManager.getPreferenceSettings(scope)
-            #an array of additional candidates when cycling through completion candidates from the current document.
-            self.completions = settings.completions
-            #a shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
-            self.completionCommand = settings.completionCommand
             self.disableDefaultCompletion = settings.disableDefaultCompletion
-            print self.completions, self.completionCommand, self.disableDefaultCompletion
+            
+            #An array of additional candidates when cycling through completion candidates from the current document.
+            self.completions = settings.completions[:]
+
+            #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
+            self.completionCommand = settings.completionCommand
+            
+            #A tab tigger completion
+            self.completionTabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
+            
+            #print self.completions, self.completionCommand, self.disableDefaultCompletion, self.completionTabTriggers
+            self.completions += self.completionTabTriggers
             return bool(self.completions)
         return False
             

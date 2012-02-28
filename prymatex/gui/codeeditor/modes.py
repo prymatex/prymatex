@@ -338,7 +338,8 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.popupView.setWordWrap(False)
         self.setPopup(self.popupView)
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
-        self.activated[str].connect(self.insertCompletion)
+        #self.connect(self, QtCore.SIGNAL("activated(PyObject)"), self.insertCompletion)
+        self.activated.connect(self.insertCompletion)
 
     def isActive(self):
         return self.popup().isVisible()
@@ -361,12 +362,21 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             else:
                 self.popup().setVisible(False)
                 
-    
     def setStartCursorPosition(self, position):
         self.startCursorPosition = position
         
-    def insertCompletion(self, insert):
-        self.editor.textCursor().insertText(insert[len(self.completionPrefix()):])
+    def insertCompletion(self, index):
+        sIndex = self.completionModel().mapToSource(index)
+        suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
+        if isinstance(suggestion, dict):
+            if 'display' in suggestion:
+                self.editor.textCursor().insertText(suggestion['display'][len(self.completionPrefix()):])
+            elif 'title' in suggestion:
+                self.editor.textCursor().insertText(suggestion['title'][len(self.completionPrefix()):])
+        elif isinstance(suggestion, PMXBundleTreeNode):
+            self.editor.insertBundleItem(suggestion)
+        else:
+            self.editor.textCursor().insertText(suggestion[len(self.completionPrefix()):])
 
     def complete(self, rect):
         self.popup().setCurrentIndex(self.completionModel().index(0, 0))

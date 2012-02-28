@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from bisect import bisect
+
 from PyQt4 import QtCore, QtGui
+
 from prymatex import resources
+from prymatex.gui.support.models import PMXBundleTreeNode
 
 #=========================================================
 # Bookmark
@@ -188,7 +191,7 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
             return self.createIndex(row, column, parent)
         else:
             return QtCore.QModelIndex()
-
+    
     def rowCount (self, parent = None):
         return len(self.suggestions)
 
@@ -202,12 +205,19 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
                     return suggestion['display']
                 elif 'title' in suggestion:
                     return suggestion['title']
+            elif isinstance(suggestion, PMXBundleTreeNode):
+                return '%s (%s)' % (suggestion.tabTrigger, suggestion.name)
             else:
                 return suggestion
         elif role == QtCore.Qt.DecorationRole:
             if isinstance(suggestion, dict) and 'image' in suggestion:
                 return resources.getIcon(suggestion['image'])
+            elif isinstance(suggestion, PMXBundleTreeNode):
+                return suggestion.icon
             else:
                 return resources.getIcon('inserttext')
         elif role == QtCore.Qt.ToolTipRole:
             return "tooltip help"
+            
+    def getSuggestion(self, index):
+        return self.suggestions[index]

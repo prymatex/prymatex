@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import inspect
+
 class PMXSupportCache(object):
     def __init__(self):
         self.keyValues = {}
@@ -8,7 +10,10 @@ class PMXSupportCache(object):
 
     def setcallable(self, key, function, *args):
         if key not in self.keyValues:
-            self.keyValues[key] = function(*args)
+            if inspect.isgeneratorfunction(function):
+                self.keyValues[key] = list(function(*args))
+            else:
+                self.keyValues[key] = function(*args)
         return self.keyValues[key]
     
     def deprecateAll(self):

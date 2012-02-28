@@ -680,7 +680,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # TABTRIGGERS INTERFACE
     #---------------------------------------------------
-    def getAllTabTriggersMnemonics(self):
+    def getAllTabTriggerItems(self):
         """
         Return a list of all tab triggers
         ['class', 'def', ...]
@@ -699,8 +699,8 @@ class PMXSupportBaseManager(object):
     @printtime
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
-        triggers = self.cache.setcallable("tabtriggers", self.getAllTabTriggersMnemonics)
-        search = map(lambda trigger: (trigger, line.find(trigger[::-1]), len(trigger)), triggers)
+        tabTriggerItems = self.cache.setcallable("tabtriggers", self.getAllTabTriggerItems)
+        search = map(lambda item: (item.tabTrigger, line.find(item.tabTrigger[::-1]), len(item.tabTrigger)), tabTriggerItems)
         search = filter(lambda (trigger, value, length): value == 0, search)
         if search:
             best = ("", 0)
@@ -709,7 +709,22 @@ class PMXSupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    @printtime    
+    @printtime
+    def getAllTabTiggerItemsByScope(self, scope):
+        with_scope = []
+        without_scope = []
+        for item in self.cache.setcallable("tabtriggers", self.getAllTabTriggerItems):
+            if item.scope == None:
+                without_scope.append(item)
+            else:
+                score = self.scores.score(item.scope, scope)
+                if score != 0:
+                    with_scope.append((score, item))
+        with_scope.sort(key = lambda t: t[0], reverse = True)
+        with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope + without_scope
+
+    @printtime
     def getTabTriggerItem(self, keyword, scope):
         with_scope = []
         without_scope = []

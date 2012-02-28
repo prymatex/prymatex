@@ -291,11 +291,11 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
-    def getAllTabTriggersMnemonics(self):
+    def getAllTabTriggerItems(self):
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
-                tabTriggers.append(item.tabTrigger)
+                tabTriggers.append(item)
         return tabTriggers
             
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
@@ -304,7 +304,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
             if item.tabTrigger == tabTrigger:
                 items.append(item)
         return items
-            
+
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
