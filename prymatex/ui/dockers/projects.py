@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/projects.ui'
 #
-# Created: Thu Feb 16 14:56:59 2012
+# Created: Mon Feb 27 20:53:32 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -123,8 +123,6 @@ class Ui_ProjectsDock(object):
         self.actionOpen.setObjectName(_fromUtf8("actionOpen"))
         self.actionOpenSystemEditor = QtGui.QAction(ProjectsDock)
         self.actionOpenSystemEditor.setObjectName(_fromUtf8("actionOpenSystemEditor"))
-        self.actionOpenDefaultEditor = QtGui.QAction(ProjectsDock)
-        self.actionOpenDefaultEditor.setObjectName(_fromUtf8("actionOpenDefaultEditor"))
         self.actionRename = QtGui.QAction(ProjectsDock)
         icon13 = QtGui.QIcon()
         icon13.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-rename.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -155,6 +153,13 @@ class Ui_ProjectsDock(object):
         self.actionSetInTerminal.setObjectName(_fromUtf8("actionSetInTerminal"))
         self.actionRemove = QtGui.QAction(ProjectsDock)
         self.actionRemove.setObjectName(_fromUtf8("actionRemove"))
+        self.actionBundleEditor = QtGui.QAction(ProjectsDock)
+        icon15 = QtGui.QIcon()
+        icon15.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/bundles/bundle.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionBundleEditor.setIcon(icon15)
+        self.actionBundleEditor.setObjectName(_fromUtf8("actionBundleEditor"))
+        self.actionBashInit = QtGui.QAction(ProjectsDock)
+        self.actionBashInit.setObjectName(_fromUtf8("actionBashInit"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
@@ -175,7 +180,6 @@ class Ui_ProjectsDock(object):
         self.actionRefresh.setShortcut(_('F5'))
         self.actionOpen.setText(_('Open'))
         self.actionOpenSystemEditor.setText(_('System Editor'))
-        self.actionOpenDefaultEditor.setText(_('Default Editor'))
         self.actionRename.setText(_('Rename'))
         self.actionRename.setToolTip(_('Rename'))
         self.actionRename.setShortcut(_('F2'))
@@ -187,5 +191,7 @@ class Ui_ProjectsDock(object):
         self.actionOrderFoldersFirst.setText(_('Folders First'))
         self.actionSetInTerminal.setText(_('Set In Terminal'))
         self.actionRemove.setText(_('Remove'))
+        self.actionBundleEditor.setText(_('Bundle Editor'))
+        self.actionBashInit.setText(_('Bash Init'))
 
 from prymatex import resources_rc

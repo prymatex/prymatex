@@ -239,11 +239,6 @@
     <string>System Editor</string>
    </property>
   </action>
-  <action name="actionOpenDefaultEditor">
-   <property name="text">
-    <string>Default Editor</string>
-   </property>
-  </action>
   <action name="actionRename">
    <property name="icon">
     <iconset resource="../../resources.qrc">
@@ -319,6 +314,20 @@
   <action name="actionRemove">
    <property name="text">
     <string>Remove</string>
+   </property>
+  </action>
+  <action name="actionBundleEditor">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/bundles/bundle.png</normaloff>:/icons/bundles/bundle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bundle Editor</string>
+   </property>
+  </action>
+  <action name="actionBashInit">
+   <property name="text">
+    <string>Bash Init</string>
    </property>
   </action>
  </widget>

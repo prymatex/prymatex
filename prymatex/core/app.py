@@ -26,7 +26,7 @@ class PMXApplication(QtGui.QApplication):
     The application loads the PMX Support."""
     
     def __init__(self, profile):
-        """Inicialización de la aplicación."""
+        """Inicializaciï¿½n de la aplicaciï¿½n."""
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
         self.setStyleSheet(resources.APPLICATION_STYLE)
@@ -49,11 +49,12 @@ class PMXApplication(QtGui.QApplication):
             
             self.setupPluginManager()     #Prepare plugin manager
 
+            #TODO: Cambiar los setup por build, que retornen los manager
             # Loads
-            self.setupSupportManager(callbackSplashMessage = splash.showMessage)   #Support Manager
-            self.setupFileManager()      #File Manager
-            self.setupProjectManager()   #Project Manager
-            self.setupKernelManager()    #Console kernel Manager
+            self.supportManager = self.setupSupportManager()    #Support Manager
+            self.fileManager = self.setupFileManager()          #File Manager
+            self.projectManager = self.setupProjectManager()                                              #Project Manager
+            self.setupKernelManager()                           #Console kernel Manager
             self.setupCoroutines()
             self.setupZeroMQContext()
             self.setupMainWindow()
@@ -61,9 +62,14 @@ class PMXApplication(QtGui.QApplication):
             # Setup Dialogs
             self.setupDialogs()
             
+            #Connect all loads
+            self.projectManager.loadProject()
+            self.supportManager.loadSupport(splash.showMessage)
+            self.settingsDialog.loadSettings()
+            
             # Creates the Main Window
             self.createMainWindow()
-            self.settingsDialog.loadSettings()
+            
             splash.finish(self.mainWindow)
 
         except KeyboardInterrupt:
@@ -125,7 +131,7 @@ class PMXApplication(QtGui.QApplication):
     # Managers
     #========================================================
     @deco.logtime
-    def setupSupportManager(self, callbackSplashMessage = None):
+    def setupSupportManager(self):
         from prymatex.gui.support.manager import PMXSupportManager
         
         self.pluginManager.prepareWidgetPlugin(PMXSupportManager)
@@ -159,28 +165,27 @@ class PMXApplication(QtGui.QApplication):
                 'PMX_TMP_PATH': self.settings.value('PMX_TMP_PATH'),
                 'PMX_LOG_PATH': self.settings.value('PMX_LOG_PATH')
         })
-        manager.loadSupport(callbackSplashMessage)
-        self.supportManager = manager
+        return manager
 
     def setupFileManager(self):
         from prymatex.core.filemanager import PMXFileManager
         
         self.pluginManager.prepareWidgetPlugin(PMXFileManager)
 
-        self.fileManager = PMXFileManager(self)
-        self.settings.configure(self.fileManager)
+        manager = PMXFileManager(self)
+        self.settings.configure(manager)
         
-        self.fileManager.filesytemChange.connect(self.on_filesytemChange)
+        manager.filesytemChange.connect(self.on_filesytemChange)
+        return manager
     
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
         
         self.pluginManager.prepareWidgetPlugin(PMXProjectManager)
 
-        self.projectManager = PMXProjectManager(self)
-        self.settings.configure(self.projectManager)
-        
-        self.projectManager.loadProject()
+        manager = PMXProjectManager(self)
+        self.settings.configure(manager)
+        return manager
     
     def setupKernelManager(self):
         try:

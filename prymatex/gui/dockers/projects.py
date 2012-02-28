@@ -66,9 +66,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                     ]
                 },
                 "-",
-                self.actionOpen,
                 self.actionOpenSystemEditor,
-                self.actionSetInTerminal,
                 "-",
                 self.actionRemove,
                 self.actionDelete,
@@ -76,6 +74,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 self.actionRefresh,
                 self.actionCloseProject,
                 self.actionOpenProject,
+                "-",
+                self.actionSetInTerminal,
+                self.actionBashInit,
+                self.actionBundleEditor,
                 "-",
                 self.actionProperties
             ]
@@ -92,16 +94,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 },
                 "-",
                 self.actionOpen,
-                {   "title": "Open With",
-                    "items": [
-                        self.actionOpenDefaultEditor, self.actionOpenSystemEditor 
-                    ]
-                },
-                self.actionSetInTerminal,
+                self.actionOpenSystemEditor,
                 "-",
                 self.actionDelete,
                 "-",
                 self.actionRefresh,
+                "-",
+                self.actionSetInTerminal,
                 "-",
                 self.actionProperties
             ]
@@ -117,13 +116,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                     ]
                 },
                 "-",
-                self.actionOpen,
                 self.actionOpenSystemEditor,
-                self.actionSetInTerminal,
                 "-",
                 self.actionDelete,
                 "-",
                 self.actionRefresh,
+                "-",
+                self.actionSetInTerminal,
                 "-",
                 self.actionProperties
             ]
@@ -180,9 +179,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 self.directoryMenu.popup(self.treeViewProjects.mapToGlobal(point))
                 
     def on_treeViewProjects_doubleClicked(self, index):
-        path = self.projectTreeProxyModel.filePath(index)
-        if os.path.isfile(path):
-            self.application.openFile(path)
+        self.on_actionOpen_triggered()
     
     def currentPath(self):
         return self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
@@ -259,17 +256,15 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
-        print(self.currentPath())
+        node = self.currentNode()
+        if node.isfile:
+            self.application.openFile(node.path)
         
     @QtCore.pyqtSlot()
     def on_actionOpenSystemEditor_triggered(self):
         path = self.currentPath()
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
     
-    @QtCore.pyqtSlot()
-    def on_actionOpenDefaultEditor_triggered(self):
-        print(self.currentPath())
-
     @QtCore.pyqtSlot()
     def on_pushButtonCollapseAll_pressed(self):
         self.treeViewProjects.collapseAll()
@@ -295,11 +290,19 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         directory = self.application.fileManager.getDirectory(path)
         self.mainWindow.terminal.chdir(directory)
         project = self.application.projectManager.findProjectForPath(path)
-        if project.support is not None:
-            bash_init = os.path.join(project.support, 'lib', 'bash_init.sh')
-            if os.path.isfile(bash_init):
-                self.mainWindow.terminal.runCommand("source %s" % bash_init)
+        if project.hasSupport():
+            self.mainWindow.terminal.runCommand("source %s" % project.bashInit())
     
+    @QtCore.pyqtSlot()
+    def on_actionBashInit_triggered(self):
+        project = self.currentNode()
+        self.application.openFile(project.bashInit())
+
+    @QtCore.pyqtSlot()
+    def on_actionBundleEditor_triggered(self):
+        project = self.currentNode()
+        print project.namespace()
+        
     #================================================
     # Custom filters
     #================================================      

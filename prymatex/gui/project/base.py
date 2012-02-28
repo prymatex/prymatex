@@ -51,13 +51,20 @@ class PMXProject(FileSystemTreeNode):
     KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables' ]
     FILE = 'info.plist'
     FOLDER = '.pmxproject'
+    SUPPORT = 'Support'
+    BUNDLES = 'Bundles'
+    BASH_INIT = os.path.join(SUPPORT, 'lib', 'bash_init.sh')
     def __init__(self, directory, hash):
         self.directory = directory
+        self.projectPath = os.path.join(self.path, self.FOLDER)
         FileSystemTreeNode.__init__(self, "Project Name")
         self.workingSet = None
         self.manager = None
         self.support = None
         self.load(hash)
+    
+    def hasSupport(self):
+        return self.support is not None
     
     def setSupport(self, support):
         self.support = support
@@ -67,7 +74,7 @@ class PMXProject(FileSystemTreeNode):
         env = {
             'TM_PROJECT_DIRECTORY': self.directory,
             'TM_PROJECT_NAME': self.name,
-            'TM_PROJECT_PATH': os.path.join(self.path, self.FOLDER) }
+            'TM_PROJECT_PATH': self.projectPath }
         if self.support != None:
             env['TM_PROJECT_SUPPORT'] = self.support
         return env
@@ -91,21 +98,19 @@ class PMXProject(FileSystemTreeNode):
             setattr(self, key, hash[key])
 
     def save(self):
-        projectPath = os.path.join(self.directory, self.FOLDER)
-        if not os.path.exists(projectPath):
-            os.makedirs(projectPath)
-        filePath = os.path.join(projectPath, self.FILE)
+        if not os.path.exists(self.projectPath):
+            os.makedirs(self.projectPath)
+        filePath = os.path.join(self.projectPath, self.FILE)
         plist.writePlist(self.hash, filePath)
 
     def delete(self, removeFiles = False):
-        projectPath = os.path.join(self.directory, self.FOLDER)
-        shutil.rmtree(projectPath)
+        shutil.rmtree(self.projectPath)
         if removeFiles:
             try:
                 shutil.rmtree(self.directory)
             except os.OSError:
                 pass
-
+    
     def buildEnvironment(self):
         env = {}
         if isinstance(self.shellVariables, list):
@@ -126,8 +131,8 @@ class PMXProject(FileSystemTreeNode):
         try:
             data = plist.readPlist(fileInfo)
             project = cls(path, data)
-            if os.path.exists(os.path.join(projectPath, 'Support')):
-                project.setSupport(os.path.join(projectPath, 'Support'))
+            if os.path.exists(os.path.join(projectPath, cls.SUPPORT)):
+                project.ensureSupportPaths()
             manager.addProject(project)
             return project
         except Exception, e:
@@ -150,3 +155,27 @@ class PMXProject(FileSystemTreeNode):
         else:
             return resources.getIcon("projectclose")
     
+    def bashInit(self):
+        bashInitPath = os.path.join(self.projectPath, self.BASH_INIT)
+        if not os.path.exists(bashInitPath):
+            self.ensureSupportPaths()
+            open(bashInitPath, 'w').close()
+        return bashInitPath
+
+    def namespace(self):
+        bundlePath = os.path.join(self.projectPath, self.BUNDLES)
+        if not os.path.exists(bundlePath):
+            self.ensureSupportPaths()
+            os.makedirs(bundlePath)
+        #TODO: retornar el namespace y el path
+        return self.name, self.projectPath
+    
+    def ensureSupportPaths(self):
+        supportPath = os.path.join(self.projectPath, self.SUPPORT)
+        if not os.path.exists(supportPath):
+            os.makedirs(supportPath)
+        self.setSupport(supportPath)
+        for subNames in ['lib', 'bin']:
+            subPath = os.path.join(supportPath, subNames)
+            if not os.path.exists(subPath):
+                os.makedirs(subPath)
