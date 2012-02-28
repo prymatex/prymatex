@@ -51,6 +51,9 @@ class PMXProject(FileSystemTreeNode):
     KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables' ]
     FILE = 'info.plist'
     FOLDER = '.pmxproject'
+    SUPPORT = 'Support'
+    BUNDLES = 'Bundles'
+    BASH_INIT = os.path.join(SUPPORT, 'lib', 'bash_init.sh')
     def __init__(self, directory, hash):
         self.directory = directory
         FileSystemTreeNode.__init__(self, "Project Name")
@@ -58,6 +61,9 @@ class PMXProject(FileSystemTreeNode):
         self.manager = None
         self.support = None
         self.load(hash)
+    
+    def hasSupport(self):
+        return self.support is not None
     
     def setSupport(self, support):
         self.support = support
@@ -105,7 +111,7 @@ class PMXProject(FileSystemTreeNode):
                 shutil.rmtree(self.directory)
             except os.OSError:
                 pass
-
+    
     def buildEnvironment(self):
         env = {}
         if isinstance(self.shellVariables, list):
@@ -126,8 +132,8 @@ class PMXProject(FileSystemTreeNode):
         try:
             data = plist.readPlist(fileInfo)
             project = cls(path, data)
-            if os.path.exists(os.path.join(projectPath, 'Support')):
-                project.setSupport(os.path.join(projectPath, 'Support'))
+            if os.path.exists(os.path.join(projectPath, cls.SUPPORT)):
+                project.createSupport()
             manager.addProject(project)
             return project
         except Exception, e:
@@ -150,3 +156,20 @@ class PMXProject(FileSystemTreeNode):
         else:
             return resources.getIcon("projectclose")
     
+    def bashInit(self):
+        bashInitPath = os.path.join(self.path, self.FOLDER, self.BASH_INIT)
+        if not os.path.exists(bashInitPath):
+            self.createSupport()
+            open(bashInitPath, 'w').close()
+        return bashInitPath
+
+    #TODO: Un mejor nombre porque crea el soporte y la estructura del mismo, esta bueno para salvar errores de metida de mano
+    def createSupport(self):
+        supportPath = os.path.join(self.directory, self.FOLDER, self.SUPPORT)
+        if not os.path.exists(supportPath):
+            os.makedirs(supportPath)
+        self.setSupport(supportPath)
+        for subNames in ['lib', 'bin']:
+            subPath = os.path.join(supportPath, subNames)
+            if not os.path.exists(subPath):
+                os.makedirs(subPath)
