@@ -38,11 +38,11 @@ class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
         self.widgetsLayout.addWidget(self.stackedWidget)
     
     def selectFirstIndex(self):
-        firstIndex = self.proxyModelSettings.index(0, 0)
+        firstIndex = self.proxyModelProperties.index(0, 0)
         rect = self.treeView.visualRect(firstIndex)
         self.treeView.setSelection(rect, QtGui.QItemSelectionModel.ClearAndSelect)
-        treeNode = self.proxyModelSettings.node(firstIndex)
-        self.setCurrentSettingWidget(treeNode)
+        treeNode = self.proxyModelProperties.node(firstIndex)
+        self.setCurrentPropertyWidget(treeNode)
 
     def proxyNodeFactory(self, name, parent):
         proxyWidget = PMXProxyPropertyTreeNode(name, parent)
