@@ -70,6 +70,7 @@ class PMXSupportBaseManager(object):
             else:
                 var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
             self.namespaces[name][element] = self.environment[var] = epath
+        return name
 
     @property
     def protectedNamespace(self):
