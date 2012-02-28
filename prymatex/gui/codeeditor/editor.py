@@ -52,7 +52,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def tabStopSize(self, size):
         self.setTabStopWidth(size * 9)
     
-    @pmxConfigPorperty(default = QtGui.QFont("monospace", 12))
+    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
     def font(self, font):
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.document().setDefaultFont(font)

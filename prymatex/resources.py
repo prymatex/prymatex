@@ -41,6 +41,7 @@ INTERNAL = {
     "close":":/icons/actions/document-close.png", 
     "closeall":":/icons/actions/project-development-close-all.png",
     "copy":":/icons/actions/edit-copy.png",
+    "find":":/icons/actions/edit-find.png",
 
     # For Symbols
     "code-class": ":/icons/actions/code-class.png",
