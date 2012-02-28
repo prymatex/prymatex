@@ -206,7 +206,7 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
                 elif 'title' in suggestion:
                     return suggestion['title']
             elif isinstance(suggestion, PMXBundleTreeNode):
-                return '%s (%s)' % (suggestion.tabTrigger, suggestion.name)
+                return suggestion.tabTrigger
             else:
                 return suggestion
         elif role == QtCore.Qt.DecorationRole:
@@ -217,7 +217,10 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
             else:
                 return resources.getIcon('inserttext')
         elif role == QtCore.Qt.ToolTipRole:
-            return "tooltip help"
+            if isinstance(suggestion, dict) and 'tooltip' in suggestion:
+                return suggestion['tooltip']
+            elif isinstance(suggestion, PMXBundleTreeNode):
+                return suggestion.name
             
     def getSuggestion(self, index):
-        return self.suggestions[index]
+        return self.suggestions[index.row()]

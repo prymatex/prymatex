@@ -5,6 +5,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.utils.lists import bisect_key
 from prymatex.gui.codeeditor import helpers
+from prymatex.gui.support.models import PMXBundleTreeNode
 
 class PMXBaseEditorMode(object):
     def __init__(self, editor):
@@ -338,8 +339,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.popupView.setWordWrap(False)
         self.setPopup(self.popupView)
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
-        #self.connect(self, QtCore.SIGNAL("activated(PyObject)"), self.insertCompletion)
-        self.activated.connect(self.insertCompletion)
+        self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
 
     def isActive(self):
         return self.popup().isVisible()
@@ -374,6 +374,11 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             elif 'title' in suggestion:
                 self.editor.textCursor().insertText(suggestion['title'][len(self.completionPrefix()):])
         elif isinstance(suggestion, PMXBundleTreeNode):
+            cursor = self.editor.textCursor()
+            cursor.beginEditBlock()
+            for _ in xrange(len(self.completionPrefix())):
+                self.editor.textCursor().deletePreviousChar()
+            cursor.endEditBlock()
             self.editor.insertBundleItem(suggestion)
         else:
             self.editor.textCursor().insertText(suggestion[len(self.completionPrefix()):])
