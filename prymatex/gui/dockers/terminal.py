@@ -119,6 +119,8 @@ class PMXTabTerminals(QtGui.QTabWidget):
         
         color = random.choice(term.availableColorSchemes())
         term.setColorScheme(color)
+        #TODO: Configuracion
+        term.setTerminalFont(QtGui.QFont("Monospace", 9))
         return term
     
     def launchCustomCommandInTerminal(self):
