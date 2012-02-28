@@ -146,6 +146,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self)
 
+        #Basic Config
+        #self.setMouseTracking(True)
+        
         #Sidebar
         self.sidebar = PMXSidebar(self)
 
@@ -384,7 +387,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
         self.sidebar.showFolding = bool(flags & self.ShowFolding)
         self.updateLineNumberAreaWidth(0)
-        self.viewport().repaint(self.viewport().visibleRegion())
+        #self.setCenterOnScroll(True)
+        #self.viewport().repaint(self.viewport().visibleRegion())
     
     def setBraces(self, scope):
         settings = self.getPreference(scope)
@@ -690,9 +694,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def mouseMoveEvent(self, event):
         if event.modifiers() == QtCore.Qt.ControlModifier and self.multiCursorMode.isActive():
+            #En este modo no hago el cursor visible
             self.multiCursorMode.mouseMovePoint(event.pos())
             self.viewport().repaint(self.viewport().visibleRegion())
         else:
+            self.ensureCursorVisible()
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
