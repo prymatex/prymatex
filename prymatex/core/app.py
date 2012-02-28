@@ -420,3 +420,8 @@ class PMXApplication(QtGui.QApplication):
             PMXTraceBackDialog.fromSysExceptHook(exctype, value, traceback).exec_()
 
         sys.excepthook = displayExceptionDialog
+    
+    def __str__(self):
+        return '<PMXApplication at {} PID: {}>'.format(hash(self), os.getpid())
+    
+    __unicode__ = __repr__ = __str__
