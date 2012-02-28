@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/emergencytrace.ui'
 #
-# Created: Tue Nov 15 16:17:55 2011
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Sun Feb 26 21:05:16 2012
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -32,19 +32,22 @@ class Ui_TracebackDialog(object):
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.pushButton = QtGui.QPushButton(TracebackDialog)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.horizontalLayout.addWidget(self.pushButton)
-        self.pushCopy = QtGui.QPushButton(TracebackDialog)
+        self.pushButtonKillApp = QtGui.QPushButton(TracebackDialog)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushCopy.setIcon(icon)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/emblems/emblem-important.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButtonKillApp.setIcon(icon)
+        self.pushButtonKillApp.setObjectName(_fromUtf8("pushButtonKillApp"))
+        self.horizontalLayout.addWidget(self.pushButtonKillApp)
+        self.pushCopy = QtGui.QPushButton(TracebackDialog)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushCopy.setIcon(icon1)
         self.pushCopy.setObjectName(_fromUtf8("pushCopy"))
         self.horizontalLayout.addWidget(self.pushCopy)
         self.pushClose = QtGui.QPushButton(TracebackDialog)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushClose.setIcon(icon1)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushClose.setIcon(icon2)
         self.pushClose.setObjectName(_fromUtf8("pushClose"))
         self.horizontalLayout.addWidget(self.pushClose)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -56,7 +59,7 @@ class Ui_TracebackDialog(object):
     def retranslateUi(self, TracebackDialog):
         TracebackDialog.setWindowTitle(_('Traceback'))
         self.labelTitle.setText(_('Exception Text'))
-        self.pushButton.setText(_('&View exception'))
+        self.pushButtonKillApp.setText(_('Terminate'))
         self.pushCopy.setText(_('&Copy'))
         self.pushClose.setText(_('&Close'))
 

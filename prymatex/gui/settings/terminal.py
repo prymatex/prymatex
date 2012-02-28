@@ -2,12 +2,11 @@
 import os
 
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtNetwork import QNetworkProxy
-
 from prymatex.ui.configure.terminal import Ui_Terminal
 from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.utils.i18n import ugettext as _
 from prymatex import resources
+
 class PMXTerminalSettings(QtGui.QWidget, PMXSettingTreeNode, Ui_Terminal):
     
     TITLE = "Terminal"
