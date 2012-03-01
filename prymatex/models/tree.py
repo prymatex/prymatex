@@ -80,3 +80,53 @@ class TreeModel(QtCore.QAbstractItemModel):
             if node:
                 return node
         return self.rootNode
+
+class NamespacedTreeModel(TreeModel):  
+    def __init__(self, separator = ".", parent = None):
+        TreeModel.__init__(self, parent)
+        self.separator = separator
+        self.__proxyNodeFactory = None
+        
+    @property
+    def proxyNodeFactory(self):
+        return self.__proxyNodeFactory
+        
+    @proxyNodeFactory.setter
+    def proxyNodeFactory(self, value):
+        self.__proxyNodeFactory = value
+
+    def createProxyNode(self, name, parent):
+        if self.proxyNodeFactory is not None:
+            return self.proxyNodeFactory(name, parent)
+        return TreeNode(name, parent)
+        
+    def nodeForNamespace(self, namespace, createProxy = False):
+        node = self.rootNode
+        names = namespace.split(self.separator)
+        for name in names:
+            if name != "":
+                nextNode = node.findChildByName(name)
+                if nextNode is None and createProxy:
+                    nextNode = self.createProxyNode(name, node)
+                    node.appendChild(nextNode)
+                    self.layoutChanged.emit()
+                elif nextNode is None:
+                    return None
+                node = nextNode
+        return node
+    
+    #TODO: Cambiar esto por algo mas general
+    def addNamespaceNode(self, namespace, node):
+        parentNode = self.nodeForNamespace(namespace, True)
+        parentIndex = self.createIndex(parentNode.row(), 0, parentNode) if not parentNode.isRootNode() else QtCore.QModelIndex()
+        #Check if exit proxy for setting
+        proxy = parentNode.findChildByName(node.name)
+        if proxy != None:
+            #Reparent
+            for child in proxy.childrenNodes:
+                node.appendChild(child)
+            parentNode.removeChild(proxy)
+            self.layoutChanged.emit()
+        self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
+        parentNode.appendChild(node)
+        self.endInsertRows()
