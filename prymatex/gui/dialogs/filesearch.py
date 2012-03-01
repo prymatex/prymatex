@@ -4,12 +4,14 @@
 import Queue
 
 from PyQt4 import QtCore, QtGui
+
 from prymatex.ui.dialogs.search import Ui_SearchDialog
+from prymatex.models.tree import TreeNode, TreeModel
 
 class FileSearchThread(QtCore.QThread):
     foundPattern = QtCore.pyqtSignal(str, int)
     
-    def findInFiles(self, dir_name, filters, reg_exp, recursive, by_phrase):
+    def searchInFiles(self, dir_name, filters, reg_exp, recursive, by_phrase):
         self._cancel = False
         self.recursive = recursive
         self.search_pattern = reg_exp
@@ -81,7 +83,25 @@ class FileSearchThread(QtCore.QThread):
         self._cancel = True
 
 class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
-    def __init__(self, parent = None):
+    def __init__(self, model, parent = None):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
+        self.application = QtGui.QApplication.instance()
+        self.model = model
         self.fileSearchThread = FileSearchThread()
+    
+    def on_buttonCancel_pressed(self):
+        #FIXME: solo si esta corriendo
+        self.fileSearchThread.cancel()
+        
+    def on_buttonSearch_pressed(self):
+        self.comboBoxContainingText
+        self.comboBoxFilePatterns
+        self.comboBoxWorkingSet
+        self.radioButtonWorkspace
+        self.searchInFiles
+        
+    @classmethod
+    def search(cls, model, parent = None):
+        dlg = cls(model, parent)
+        dlg.exec_()
