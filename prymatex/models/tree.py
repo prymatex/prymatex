@@ -125,14 +125,15 @@ class NamespaceTreeModel(TreeModel):
         parentIndex = self.createIndex(parentNode.row(), 0, parentNode) if not parentNode.isRootNode() else QtCore.QModelIndex()
         #Check if exit proxy for setting
         proxy = parentNode.findChildByName(node.name)
-        if proxy != None and proxy._isproxy:
-            #Reparent
-            for child in proxy.childrenNodes:
-                node.appendChild(child)
-            parentNode.removeChild(proxy)
-            self.layoutChanged.emit()
-        elif not proxy._isproxy:
-            raise NodeAlreadyExistsException()
+        if proxy != None:
+            if proxy._isproxy:
+                #Reparent
+                for child in proxy.childrenNodes:
+                    node.appendChild(child)
+                parentNode.removeChild(proxy)
+                self.layoutChanged.emit()
+            else:
+                raise NodeAlreadyExistsException()
         self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
         parentNode.appendChild(node)
         self.endInsertRows()
