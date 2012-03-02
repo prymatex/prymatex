@@ -4,12 +4,14 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
-from prymatex.gui.settings.models import PMXNamespacedModel, PMXProxyNamespacedTreeNode, PMXSettingsProxyModel, PMXProxyNamespacedTreeNode
+from prymatex.gui.settings.models import PMXSettingTreeNode
+from prymatex.gui.configure.models import PMXConfigureTreeModel
+from prymatex.gui.configure.proxies import PMXConfigureProxyModel
 
-class PMXProxySettingTreeNode(QtGui.QWidget, PMXProxyNamespacedTreeNode):
+class PMXProxySettingTreeNode(QtGui.QWidget, PMXSettingTreeNode):
     def __init__(self, name, parent):
         QtGui.QWidget.__init__(self)
-        PMXProxyNamespacedTreeNode.__init__(self, name, parent)
+        PMXSettingTreeNode.__init__(self, name, parent)
         self.setObjectName(name.title() + "Widget")
 
     def loadSettings(self):
@@ -25,10 +27,10 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
         
         self.baseWindowTitle = self.windowTitle()
         
-        self.model = PMXNamespacedModel(self)
+        self.model = PMXConfigureTreeModel(self)
         self.model.proxyNodeFactory = self.proxyNodeFactory
         
-        self.proxyModelSettings = PMXSettingsProxyModel(self)
+        self.proxyModelSettings = PMXConfigureProxyModel(self)
         self.proxyModelSettings.setSourceModel(self.model)
         
         self.treeView.setModel(self.proxyModelSettings)
