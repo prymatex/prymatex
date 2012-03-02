@@ -131,7 +131,7 @@ class NamespaceTreeModel(TreeModel):
                 node.appendChild(child)
             parentNode.removeChild(proxy)
             self.layoutChanged.emit()
-        else if not proxy._isproxy:
+        elif not proxy._isproxy:
             raise NodeAlreadyExistsException()
         self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
         parentNode.appendChild(node)
