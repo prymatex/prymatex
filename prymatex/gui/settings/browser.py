@@ -9,8 +9,7 @@ from prymatex.ui.configure.browser import Ui_BrowserWidget
 from prymatex.gui.settings.models import PMXSettingTreeNode
 
 class PMXNetworkWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_BrowserWidget):
-    """Setup browser
-    """
+    """Setup browser"""
     TITLE = "Browser"
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)

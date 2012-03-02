@@ -8,6 +8,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.models.tree import TreeModel
 from prymatex.gui.project.base import FileSystemTreeNode
+from prymatex.gui.configure.models import PMXConfigureTreeNode
 
 #TODO: Ver si esto no puede ser un NamespaceTreeModel
 class PMXProjectTreeModel(TreeModel):  
@@ -107,9 +108,9 @@ class PMXProjectTreeModel(TreeModel):
 #=========================================
 # Properties Tree Model
 #=========================================
-class PMXPropertyTreeNode(PMXConfigureTreeModel):
+class PMXPropertyTreeNode(PMXConfigureTreeNode):
     def __init__(self, name, parent = None):
-        PMXNamespacedTreeNode.__init__(self, name, parent)
+        PMXConfigureTreeNode.__init__(self, name, parent)
 
     def acceptFileSystemItem(self, fileSystemItem):
         return True

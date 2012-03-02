@@ -69,7 +69,7 @@ class PMXSettingsDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
     
     def register(self, widget):
         index = self.stackedWidget.addWidget(widget)
-        self.model.addSetting(widget)
+        self.model.addConfigNode(widget)
     
     def loadSettings(self):
         for index in xrange(self.stackedWidget.count()):

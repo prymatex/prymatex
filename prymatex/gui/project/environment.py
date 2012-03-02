@@ -3,7 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.settings.models import PMXPropertyTreeNode
+from prymatex.gui.project.models import PMXPropertyTreeNode
 from prymatex.ui.configure.environment import Ui_Environment
 
 class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):

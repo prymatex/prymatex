@@ -3,7 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.configure.models import PMXConfigureTreeNode, PMXConfigureTreeModel
+from prymatex.gui.configure.models import PMXConfigureTreeNode
 
 class PMXSettingTreeNode(PMXConfigureTreeNode):
     def __init__(self, name, settingGroup = None, parent = None):

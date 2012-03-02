@@ -36,7 +36,10 @@ class PMXConfigureTreeNode(TreeNode):
     def icon(self, icon):
         self.__icon = icon
 
-class PMXConfigureTreeModel(NamespaceTreeModel):  
+class PMXConfigureTreeModel(NamespaceTreeModel):
+    def __init__(self, parent = None):
+        NamespaceTreeModel.__init__(self, separator = ".", parent = parent)
+
     def data(self, index, role):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
@@ -44,5 +47,5 @@ class PMXConfigureTreeModel(NamespaceTreeModel):
         elif role == QtCore.Qt.DecorationRole:
             return node.icon
 
-    def addConfigureNode(self, node):
-        NamespaceTreeModel.addNamespaceNode(node.NAMESPACE, node)
+    def addConfigNode(self, node):
+        self.addNamespaceNode(node.NAMESPACE, node)

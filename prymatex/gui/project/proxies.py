@@ -6,6 +6,7 @@ import fnmatch
 from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.project.base import PMXProject
+from prymatex.gui.configure.proxies import PMXConfigureProxyModel
 
 class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
@@ -96,3 +97,24 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         mimeData = QtCore.QMimeData()
         mimeData.setUrls(urls)
         return mimeData
+        
+class PMXPropertiesProxyModel(PMXConfigureProxyModel):
+    def __init__(self, parent = None):
+        PMXConfigureProxyModel.__init__(self, parent)
+        self.fileSystemItem = None
+    
+    def filterAcceptsRow(self, sourceRow, sourceParent):
+        if self.fileSystemItem is None:
+            return False
+        sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
+        node = self.sourceModel().node(sIndex)
+        if not node.acceptFileSystemItem(self.fileSystemItem):
+            return False
+        regexp = self.filterRegExp()
+        if not regexp.isEmpty():
+            return regexp.indexIn(node.filterString()) != -1
+        return True
+    
+    def setFilterFileSystem(self, fileSystemItem):
+        self.fileSystemItem = fileSystemItem
+        self.setFilterRegExp("")

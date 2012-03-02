@@ -3,9 +3,9 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.ui.configure.theme import Ui_FontThemeWidget
 from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
-from prymatex.ui.configure.theme import Ui_FontThemeWidget
 from prymatex.gui.support.qtadapter import QColor2RGBA
 from prymatex.utils.i18n import ugettext as _
 
