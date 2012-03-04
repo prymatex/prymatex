@@ -175,7 +175,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.highlightWordTimer = QtCore.QTimer()
         self.currentHighlightWord = None
         self.extraCursorsSelections = []
+        
         self.braces = []
+        #Current Braces for cursors open and close corresponding to found braces
+        self._currentBraces = (None, None)
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
@@ -218,7 +221,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateLineNumberArea)
-        self.cursorPositionChanged.connect(self.highlightCurrent)
+        self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.showSyntaxMessage)
         
@@ -242,7 +245,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             self.blocksAdded.emit(block, newBlockCount - self.lastBlockCount)
         self.lastBlockCount = self.document().blockCount()
-        
+    
+    def on_cursorPositionChanged(self):
+        #El cursor se movio es hora de:
+        self.setCurrentBraces()
+        self.highlightCurrent()
+
     #=======================================================================
     # Base Editor Interface
     #=======================================================================
@@ -390,10 +398,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #self.setCenterOnScroll(True)
         #self.viewport().repaint(self.viewport().visibleRegion())
     
-    def setBraces(self, scope):
-        settings = self.getPreference(scope)
-        self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
-    
     # Syntax
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
@@ -495,7 +499,42 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.sidebar.update(0, rect.y(), self.sidebar.width(), rect.height())
         if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
-    
+        
+    #=======================================================================
+    # Braces
+    #=======================================================================
+    def setBraces(self, scope):
+        settings = self.getPreference(scope)
+        self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
+        
+    def setCurrentBraces(self, cursor = None):
+        cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
+        cursor.clearSelection()
+        openBraces = map(lambda pair: pair[0], self.braces)
+        closeBraces = map(lambda pair: pair[1], self.braces)
+        
+        leftChar = cursor.document().characterAt(cursor.position() - 1)
+        rightChar = cursor.document().characterAt(cursor.position())
+
+        if leftChar in openBraces or rightChar in openBraces:
+            if leftChar in openBraces:
+                cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+                index = openBraces.index(leftChar)
+                self._currentBraces = (cursor, self.findTypingPair(leftChar, closeBraces[index], cursor))
+            else:
+                cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+                index = openBraces.index(rightChar)
+                self._currentBraces = (cursor, self.findTypingPair(rightChar, closeBraces[index], cursor))
+        elif leftChar in closeBraces or rightChar in closeBraces:
+            if leftChar in closeBraces:
+                cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+                self._currentBraces = (self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], cursor, True), cursor)
+            else:
+                cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+                self._currentBraces = (self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], cursor, True), cursor)
+        else:
+            self._currentBraces = (None, None)
+        
     #=======================================================================
     # Highlight Editor
     #=======================================================================
@@ -536,39 +575,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
         
-    def highlightCurrentBrace(self, cursor = None):
-        cursor = QtGui.QTextCursor(self.textCursor())
-        cursor.clearSelection()
-        openBraces = map(lambda pair: pair[0], self.braces)
-        closeBraces = map(lambda pair: pair[1], self.braces)
-        
-        closeCursor = openCursor = None
-        leftChar = cursor.document().characterAt(cursor.position() - 1)
-        rightChar = cursor.document().characterAt(cursor.position())
-
-        if leftChar in openBraces or rightChar in openBraces:
-            if leftChar in openBraces:
-                cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                index = openBraces.index(leftChar)
-                openCursor = cursor
-                closeCursor = self.findTypingPair(leftChar, closeBraces[index], openCursor)
-            else:
-                cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                index = openBraces.index(rightChar)
-                openCursor = cursor
-                closeCursor = self.findTypingPair(rightChar, closeBraces[index], openCursor)
-        elif leftChar in closeBraces or rightChar in closeBraces:
-            if leftChar in closeBraces:
-                cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                closeCursor = cursor
-                index = closeBraces.index(leftChar)
-                openCursor = self.findTypingPair(leftChar, openBraces[index], closeCursor, True)
-            else:
-                cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                closeCursor = cursor
-                index = closeBraces.index(rightChar)
-                openCursor = self.findTypingPair(rightChar, openBraces[index], closeCursor, True)
-
+    def highlightCurrentBrace(self):
+        closeCursor, openCursor = self._currentBraces
         if closeCursor is not None or openCursor is not None:
             extraSelections = self.extraSelections()
             if openCursor is not None:
@@ -761,7 +769,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.textCursor().endEditBlock()
         elif item.TYPE == PMXSyntax.TYPE:
             self.setSyntax(item)
-
 
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
