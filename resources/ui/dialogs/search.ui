@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>SearchDialog</class>
  <widget class="QDialog" name="SearchDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>229</width>
+    <height>204</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Search</string>
   </property>
@@ -65,6 +73,11 @@
         <property name="editable">
          <bool>true</bool>
         </property>
+        <item>
+         <property name="text">
+          <string>*.*</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

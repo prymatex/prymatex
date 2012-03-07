@@ -120,6 +120,9 @@ class NamespaceTreeModel(TreeModel):
                 node = nextNode
         return node
     
+    def addNode(self, node):
+        return self.addNamespaceNode("", node)
+
     def addNamespaceNode(self, namespace, node):
         parentNode = self.nodeForNamespace(namespace, True)
         parentIndex = self.createIndex(parentNode.row(), 0, parentNode) if not parentNode.isRootNode() else QtCore.QModelIndex()
@@ -136,4 +139,5 @@ class NamespaceTreeModel(TreeModel):
                 raise NodeAlreadyExistsException()
         self.beginInsertRows(parentIndex, node.childCount(), node.childCount())
         parentNode.appendChild(node)
+        node._isproxy = False
         self.endInsertRows()

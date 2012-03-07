@@ -9,7 +9,7 @@ from prymatex import resources
 from prymatex.ui.dockers.search import Ui_SearchDock
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
-from prymatex.models.tree import NamespaceTreeModel
+from prymatex.models.tree import NamespaceTreeModel, TreeNode
 
 from prymatex.gui.dialogs.filesearch import PMXFileSearchDialog
 
@@ -21,13 +21,28 @@ class PMXSearchTreeModel(NamespaceTreeModel):
     def data(self, index, role):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return node.title
+            return node.name
         elif role == QtCore.Qt.DecorationRole:
-            return node.icon
+            return None
 
+    def addGroup(self, name, directory):
+        #Estos son los roots
+        groupNode = TreeNode(name)
+        groupNode.directory = directory
+        self.addNode(groupNode)
+        
     def addFileFound(self, filePath, lines):
-        print filePath, lines
-        #self.addNamespaceNode(node.NAMESPACE, node)
+        #Buscar coincidencia con grupo para manejar el nombre
+        for group in self.rootNode.childrenNodes:
+            if os.path.commonprefix([group.directory, filePath]) == group.directory:
+                dirName, fileName = os.path.dirname(filePath), os.path.basename(filePath)
+                namespace = group.name + dirName[len(group.directory):]
+                foundNode = TreeNode(fileName)
+                for line in lines:
+                    lineNode = TreeNode(line)
+                    foundNode.appendChild(lineNode)
+                self.addNamespaceNode(namespace, foundNode)
+                
 
 class PMXSearchDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
     SHORTCUT = "Shift+F4"

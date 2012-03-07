@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>SearchDock</class>
  <widget class="QDockWidget" name="SearchDock">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>262</width>
+    <height>220</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Search</string>
   </property>
@@ -14,7 +22,11 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QTreeView" name="treeView"/>
+     <widget class="QTreeView" name="treeView">
+      <property name="headerHidden">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

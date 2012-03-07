@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/search.ui'
 #
-# Created: Wed Feb 22 17:19:32 2012
+# Created: Wed Mar  7 15:22:52 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_SearchDock(object):
     def setupUi(self, SearchDock):
         SearchDock.setObjectName(_fromUtf8("SearchDock"))
+        SearchDock.resize(262, 220)
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.verticalLayout = QtGui.QVBoxLayout(self.dockWidgetContents)
@@ -25,6 +26,7 @@ class Ui_SearchDock(object):
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.treeView = QtGui.QTreeView(self.dockWidgetContents)
+        self.treeView.setHeaderHidden(True)
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.verticalLayout.addWidget(self.treeView)
         SearchDock.setWidget(self.dockWidgetContents)

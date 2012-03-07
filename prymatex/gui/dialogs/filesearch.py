@@ -93,8 +93,8 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         self.fileSearchThread.foundPattern.connect(self.on_fileSearchThread_foundPattern)
         
     def on_fileSearchThread_foundPattern(self, filePath, lines):
-        print filePath, len(lines)
-        #self.model.addFileFound(filePath, lines)
+        if lines:
+            self.model.addFileFound(filePath, lines)
         
     def on_buttonCancel_pressed(self):
         #FIXME: solo si esta corriendo
@@ -111,6 +111,7 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         directories = []
         if self.radioButtonWorkspace.isChecked():
             for project in self.application.projectManager.getAllProjects():
+                self.model.addGroup(project.name, project.directory)
                 directories.append(project.directory)
         self.fileSearchThread.searchInFiles(directories, filters, searchPattern, recursive, byPhrase)
         

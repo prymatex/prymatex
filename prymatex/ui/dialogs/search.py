@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/search.ui'
 #
-# Created: Thu Feb 23 19:29:40 2012
+# Created: Wed Mar  7 15:22:51 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_SearchDialog(object):
     def setupUi(self, SearchDialog):
         SearchDialog.setObjectName(_fromUtf8("SearchDialog"))
+        SearchDialog.resize(229, 204)
         self.verticalLayout = QtGui.QVBoxLayout(SearchDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -55,6 +56,7 @@ class Ui_SearchDialog(object):
         self.comboBoxFilePatterns.setSizePolicy(sizePolicy)
         self.comboBoxFilePatterns.setEditable(True)
         self.comboBoxFilePatterns.setObjectName(_fromUtf8("comboBoxFilePatterns"))
+        self.comboBoxFilePatterns.addItem(_fromUtf8(""))
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxFilePatterns)
         self.verticalLayout.addWidget(self.groupBox)
         self.groupBox_2 = QtGui.QGroupBox(SearchDialog)
@@ -113,6 +115,7 @@ class Ui_SearchDialog(object):
         self.groupBox.setTitle(_('Search'))
         self.label.setText(_('Containing text'))
         self.label_3.setText(_('File name patterns'))
+        self.comboBoxFilePatterns.setItemText(0, _('*.*'))
         self.groupBox_2.setTitle(_('Scope'))
         self.radioButtonWorkspace.setText(_('Workspace'))
         self.radioButtonWorkingSet.setText(_('Working set'))
