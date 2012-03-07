@@ -121,7 +121,8 @@ class PMXProjectManager(QtCore.QObject):
         self.projectTreeModel.removeProject(project)
     
     def getAllProjects(self):
-        return []
+        #TODO: devolver un copia o no hace falta?
+        return self.projectTreeModel.rootNode.childrenNodes
         
     def openProject(self):
         pass

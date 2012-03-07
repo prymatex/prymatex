@@ -107,10 +107,11 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         recursive = True
         byPhrase = True
         #self.comboBoxWorkingSet
-        #self.radioButtonWorkspace
         #self.searchInFiles
-        print self.application.fileManager.getDirectory()
-        self.fileSearchThread.searchInFiles(self.application.fileManager.getDirectory(), filters, searchPattern, recursive, byPhrase)
+        if self.radioButtonWorkspace.isChecked():
+            for project in self.application.projectManager.getAllProjects():
+                print project.directory
+        #self.fileSearchThread.searchInFiles(self.application.fileManager.getDirectory(), filters, searchPattern, recursive, byPhrase)
         
     @classmethod
     def search(cls, model, parent = None):

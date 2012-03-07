@@ -11,7 +11,7 @@ from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui.utils import createQMenu
+from prymatex.gui import utils
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
@@ -57,79 +57,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     def setupTreeViewProjects(self):
         #Setup Context Menu
-        projectMenuSettings = { 
-            "title": "Project",
-            "items": [
-                {   "title": "New",
-                    "items": [
-                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
-                    ]
-                },
-                "-",
-                self.actionOpenSystemEditor,
-                "-",
-                self.actionRemove,
-                self.actionDelete,
-                "-",
-                self.actionRefresh,
-                self.actionCloseProject,
-                self.actionOpenProject,
-                "-",
-                self.actionSetInTerminal,
-                self.actionBashInit,
-                self.actionBundleEditor,
-                "-",
-                self.actionProperties
-            ]
-        }
-        self.projectsMenu, self.prejectMenuActions = createQMenu(projectMenuSettings, self)
-
-        fileMenuSettings = { 
-            "title": "File",
-            "items": [
-                {   "title": "New",
-                    "items": [
-                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
-                    ]
-                },
-                "-",
-                self.actionOpen,
-                self.actionOpenSystemEditor,
-                "-",
-                self.actionDelete,
-                "-",
-                self.actionRefresh,
-                "-",
-                self.actionSetInTerminal,
-                "-",
-                self.actionProperties
-            ]
-        }
-        self.fileMenu, self.fileMenuActions = createQMenu(fileMenuSettings, self)
-        
-        directoryMenuSettings = { 
-            "title": "File",
-            "items": [
-                {   "title": "New",
-                    "items": [
-                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
-                    ]
-                },
-                "-",
-                self.actionOpenSystemEditor,
-                "-",
-                self.actionDelete,
-                "-",
-                self.actionRefresh,
-                "-",
-                self.actionSetInTerminal,
-                "-",
-                self.actionProperties
-            ]
-        }
-        self.directoryMenu, self.directoryMenuActions = createQMenu(directoryMenuSettings, self)
-        
-        #Setup Context Menu
         optionsMenu = { 
             "title": "Project Options",
             "items": [
@@ -145,9 +72,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.actionOrderFoldersFirst.setChecked(True)
         self.actionOrderByName.trigger()
         
-        self.projectOptionsMenu, _ = createQMenu(optionsMenu, self)
+        self.projectOptionsMenu, _ = utils.createQMenu(optionsMenu, self)
         self.pushButtonOptions.setMenu(self.projectOptionsMenu)
-        
+
         #=======================================================================
         # Drag and Drop (see the proxy model)
         #=======================================================================
@@ -155,12 +82,58 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.treeViewProjects.setAcceptDrops(True)
         self.treeViewProjects.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.treeViewProjects.setDropIndicatorShown(True)
-        
+
         #Connect context menu
         self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeViewProjects.customContextMenuRequested.connect(self.showProjectTreeViewContextMenu)
         self.treeViewProjects.setAlternatingRowColors(True)
         self.treeViewProjects.setAnimated(True)
+
+    #================================================
+    # Build Menus
+    #================================================
+    def defaultMenuItems(self):
+        items = [
+                {   "title": "New",
+                    "items": [
+                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
+                    ]
+                },
+                "--refresh",
+                self.actionRefresh,
+        ]
+        return items
+
+    def buildContextMenu(self, index):    
+        contextMenu = { 
+            "title": "Context",
+            "items": [
+                {   "title": "New",
+                    "items": [
+                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
+                    ]
+                },
+                "--refresh",
+                self.actionRefresh,
+            ]
+        }
+        if index.isValid():
+            node = self.projectTreeProxyModel.node(index)
+            self.extendFileSystemItemMenu(contextMenu, node)
+        contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self)
+        return contextMenu
+
+    def extendFileSystemItemMenu(self, menu, node):
+        utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--delete", self.actionDelete])
+        utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal, "--properties", self.actionProperties], section = -1)
+        if isinstance(node, PMXProject):
+            utils.extendMenuSection(menu, self.actionRemove, section = "delete", position = 0)
+            utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
+            utils.extendMenuSection(menu, [self.actionBashInit, self.actionBundleEditor], section = "interact")
+        elif node.isfile:
+            utils.extendMenuSection(menu, self.actionOpen, section = "open", position = 0)
+        elif node.isdir:
+            pass
 
     #================================================
     # Tree View Project
@@ -169,21 +142,14 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         index = self.treeViewProjects.indexAt(point)
         if not index.isValid():
             index = self.treeViewProjects.currentIndex()
-        if index.isValid():
-            node = self.projectTreeProxyModel.node(index)
-            if isinstance(node, PMXProject):
-                self.projectsMenu.popup(self.treeViewProjects.mapToGlobal(point))
-            elif node.isfile:
-                self.fileMenu.popup(self.treeViewProjects.mapToGlobal(point))
-            elif node.isdir:
-                self.directoryMenu.popup(self.treeViewProjects.mapToGlobal(point))
-                
+        self.buildContextMenu(index).popup(self.treeViewProjects.mapToGlobal(point))
+    
     def on_treeViewProjects_doubleClicked(self, index):
         self.on_actionOpen_triggered()
-    
+
     def currentPath(self):
         return self.projectTreeProxyModel.filePath(self.treeViewProjects.currentIndex())
-    
+
     def currentNode(self):
         return self.projectTreeProxyModel.node(self.treeViewProjects.currentIndex())
         

@@ -93,6 +93,10 @@ def extendQMenu(menu, items):
         if item == "-":
             action = menu.addSeparator()
             actions.append(action)
+        elif isinstance(item, basestring) and item.startswith("--"):
+            action = menu.addSeparator()
+            action.setText(item[2:])
+            actions.append(action)
         elif isinstance(item, dict) and 'items' in item:
             submenu, subactions = createQMenu(item, menu)
             subaction = menu.addMenu(submenu)
@@ -119,6 +123,57 @@ def extendQMenu(menu, items):
         else:
             raise Exception("%s" % item)
     return actions
+
+def sectionNameRange(items, name):
+    begin, end = None, None
+    for item in items:
+        if isinstance(item, basestring):
+            if begin is None and item == '--' + name:
+                begin = item
+            elif begin is not None and item.startswith('--'):
+                end = item
+                break
+    if begin is None:
+        raise Exception("Section %s not exists" % name)
+    begin = items.index(begin)
+    end = items.index(end) if end is not None else -1
+    return begin, end
+
+def chunkSections(items):
+    sections = []
+    start = 0
+    for i in xrange(0, len(items)):
+        if isinstance(items[i], basestring) and items[i].startswith('-'):
+            sections.append(items[start:i])
+            start = i
+    sections.append(items[start:len(items)])
+    return sections
+    
+def sectionNumberRange(items, index):
+    sections = chunkSections(items)
+    section = sections[index]
+    begin = items.index(section[0])
+    end = items.index(section[-1]) + 1
+    return begin, end
+
+def extendMenuSection(menu, newItems, section = 0, position = None):
+    if not isinstance(newItems, list):
+        newItems = [ newItems ]
+    menuItems = menu.setdefault('items', [])
+    #Ver si es un QMenu o una lista de items
+    if isinstance(section, basestring):
+        #Buscar en la lista la seccion correspondiente
+        begin, end = sectionNameRange(menuItems, section)
+    elif isinstance(section, int):
+        begin, end = sectionNumberRange(menuItems, section)
+    newSection = menuItems[begin:end]
+    if position is None:
+        newSection += newItems
+    else:
+        if newSection and isinstance(newSection[0], basestring) and newSection[0].startswith("-"):
+            position += 1
+        newSection = newSection[:position] + newItems + newSection[position:]
+    menu["items"] = menuItems[:begin] + newSection + menuItems[end:]
 
 def combineIcons(icon1, icon2, scale = 1):
     newIcon = QtGui.QIcon()
