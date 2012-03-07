@@ -16,6 +16,7 @@ from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.project.base import PMXProject
+from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"
@@ -92,18 +93,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     #================================================
     # Build Menus
     #================================================
-    def defaultMenuItems(self):
-        items = [
-                {   "title": "New",
-                    "items": [
-                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
-                    ]
-                },
-                "--refresh",
-                self.actionRefresh,
-        ]
-        return items
-
     def buildContextMenu(self, index):    
         contextMenu = { 
             "title": "Context",
@@ -178,6 +167,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
 
     @QtCore.pyqtSlot()
+    def on_actionNewProject_triggered(self):
+        PMXNewProjectDialog.getNewProject(self)
+        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
+
+    @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
         treeNode = self.currentNode()
         if not treeNode.isproject:
@@ -197,11 +191,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         basePath = self.currentPath()
         self.renamePath(basePath)
 
-    @QtCore.pyqtSlot()
-    def on_actionNewProject_triggered(self):
-        path = self.currentPath()
-        print(path)
-    
     @QtCore.pyqtSlot()
     def on_actionCloseProject_triggered(self):
         path = self.currentPath()

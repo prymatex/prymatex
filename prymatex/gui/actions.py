@@ -53,7 +53,6 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
         PMXNewProjectDialog.getNewProject(self)
-        
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):

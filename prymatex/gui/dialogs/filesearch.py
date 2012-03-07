@@ -10,17 +10,17 @@ from prymatex.ui.dialogs.search import Ui_SearchDialog
 from prymatex.models.tree import TreeNode, TreeModel
 
 class FileSearchThread(QtCore.QThread):
-    foundPattern = QtCore.pyqtSignal(str, int)
+    foundPattern = QtCore.pyqtSignal(str, list)
     
-    def searchInFiles(self, directory, filePattern, searchPattern, recursive, by_phrase):
+    def searchInFiles(self, directories, filePattern, searchPattern, recursive, by_phrase):
         self._cancel = False
         self.recursive = recursive
         self.searchPattern = searchPattern
         self.filePatterns = filePattern.split(";")
         self.by_phrase = by_phrase
         self.queue = Queue.Queue()
-        self.queue.put(directory)
-        self.root_dir = directory
+        for directory in directories:
+            self.queue.put(directory)
         #Start!
         self.start()
 
@@ -36,7 +36,6 @@ class FileSearchThread(QtCore.QThread):
             #Collect all sub dirs!
             if self.recursive:
                 current_sub_dirs = current_dir.entryInfoList(dir_filter)
-                print current_sub_dirs
                 for one_dir in current_sub_dirs:
                     self.queue.put(one_dir.absoluteFilePath())
             
@@ -59,6 +58,7 @@ class FileSearchThread(QtCore.QThread):
                 return result and content.find(word) != -1
             if not reduce(check_whole_words, words):
                 return
+
         file_object = QtCore.QFile(file_path)
         if not file_object.open(QtCore.QFile.ReadOnly):
             return
@@ -70,15 +70,14 @@ class FileSearchThread(QtCore.QThread):
         while not self._cancel:
             column = line.find(self.searchPattern)
             if column != -1:
+                print self.searchPattern
                 lines.append((line_index, line))
             #take the next line!
             line = stream.readLine()
-            print line
-            if line is None:
+            if stream.atEnd():
                 break
             line_index += 1
         #emit a signal!
-        #relative_file_name = file_manager.convert_to_relative(self.root_dir, file_path)
         self.foundPattern.emit(file_path, lines)
 
     def cancel(self):
@@ -94,7 +93,8 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         self.fileSearchThread.foundPattern.connect(self.on_fileSearchThread_foundPattern)
         
     def on_fileSearchThread_foundPattern(self, filePath, lines):
-        self.model.addFileFound(filePath, lines)
+        print filePath, len(lines)
+        #self.model.addFileFound(filePath, lines)
         
     def on_buttonCancel_pressed(self):
         #FIXME: solo si esta corriendo
@@ -108,10 +108,11 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         byPhrase = True
         #self.comboBoxWorkingSet
         #self.searchInFiles
+        directories = []
         if self.radioButtonWorkspace.isChecked():
             for project in self.application.projectManager.getAllProjects():
-                print project.directory
-        #self.fileSearchThread.searchInFiles(self.application.fileManager.getDirectory(), filters, searchPattern, recursive, byPhrase)
+                directories.append(project.directory)
+        self.fileSearchThread.searchInFiles(directories, filters, searchPattern, recursive, byPhrase)
         
     @classmethod
     def search(cls, model, parent = None):
