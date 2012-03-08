@@ -13,6 +13,56 @@ from prymatex.models.tree import NamespaceTreeModel, TreeNode
 
 from prymatex.gui.dialogs.filesearch import PMXFileSearchDialog
 
+class GroupTreeNode(TreeNode):
+    def __init__(self, name, directory, parent = None):
+        self.title = name
+        self.directory = directory
+        self.identifier = unicode(hash(self.title))
+        TreeNode.__init__(self, self.identifier, parent)
+
+    def acceptPath(self, path):
+        return os.path.commonprefix([self.directory, path]) == self.directory
+
+    def splitToNamespace(self, path):
+        dirName, fileName = os.path.dirname(path), os.path.basename(path)
+        return self.identifier + dirName[len(self.directory):], fileName
+
+    @property
+    def path(self):
+        return os.path.join(self.directory)
+    
+    @property
+    def icon(self):
+        return resources.getIcon(self.path)
+
+class FileFoundTreeNode(TreeNode):
+    def __init__(self, name, path, parent = None):
+        self.title = name
+        self.__path = path
+        TreeNode.__init__(self, name, parent)
+        
+    @property
+    def path(self):
+        return os.path.join(self.__path)
+    
+    @property
+    def icon(self):
+        return resources.getIcon(self.path)
+
+class LineTreeNode(TreeNode):
+    def __init__(self, line, parent = None):
+        self.title = "%s (%s)" % line
+        self.identifier = unicode(hash(self.title))
+        TreeNode.__init__(self, self.identifier, parent)
+        
+    @property
+    def path(self):
+        return os.path.join(self.parentNode.path)
+    
+    @property
+    def icon(self):
+        return resources.getIcon(self.path)
+
 #TODO: Poner modelo y proxy en otro lado
 class PMXSearchTreeModel(NamespaceTreeModel):
     def __init__(self, parent = None):
@@ -21,25 +71,23 @@ class PMXSearchTreeModel(NamespaceTreeModel):
     def data(self, index, role):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return node.name
+            return node.title
         elif role == QtCore.Qt.DecorationRole:
-            return None
+            return node.icon
 
     def addGroup(self, name, directory):
-        #Estos son los roots
-        groupNode = TreeNode(name)
-        groupNode.directory = directory
+        #Estos son los roots, agregar un default group para cuando se busque en otros lugares o el por defecto
+        groupNode = GroupTreeNode(name, directory)
         self.addNode(groupNode)
         
     def addFileFound(self, filePath, lines):
         #Buscar coincidencia con grupo para manejar el nombre
         for group in self.rootNode.childrenNodes:
-            if os.path.commonprefix([group.directory, filePath]) == group.directory:
-                dirName, fileName = os.path.dirname(filePath), os.path.basename(filePath)
-                namespace = group.name + dirName[len(group.directory):]
-                foundNode = TreeNode(fileName)
+            if group.acceptPath(filePath):
+                namespace, fileName = group.splitToNamespace(filePath)
+                foundNode = FileFoundTreeNode(fileName, filePath)
                 for line in lines:
-                    lineNode = TreeNode(line)
+                    lineNode = LineTreeNode(line)
                     foundNode.appendChild(lineNode)
                 self.addNamespaceNode(namespace, foundNode)
                 
