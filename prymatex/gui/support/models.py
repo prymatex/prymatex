@@ -418,9 +418,8 @@ class PMXMenuTreeModel(TreeModel):
         self.layoutChanged.emit()
     
     def clear(self):
-        self.rootNode.removeAllChild()
         self.excludedModel.clear()
-        self.layoutChanged.emit()
+        TreeModel.clear(self)
 
     def add_submenu(self, submenuNode, submenus):
         items = []

@@ -51,7 +51,7 @@ class TreeModel(QtCore.QAbstractItemModel):
     def __init__(self, parent = None):
         QtCore.QAbstractItemModel.__init__(self, parent)
         self.rootNode = TreeNode("Root")
-    
+
     def rowCount(self, parent):
         parentNode = self.node(parent)
         return parentNode.childCount()
@@ -80,7 +80,11 @@ class TreeModel(QtCore.QAbstractItemModel):
             if node:
                 return node
         return self.rootNode
-
+    
+    def clear(self):
+        self.rootNode.removeAllChild()
+        self.layoutChanged.emit()
+        
 class NodeAlreadyExistsException(Exception):
     pass
 

@@ -70,7 +70,6 @@ class FileSearchThread(QtCore.QThread):
         while not self._cancel:
             column = line.find(self.searchPattern)
             if column != -1:
-                print self.searchPattern
                 lines.append((line_index, line))
             #take the next line!
             line = stream.readLine()
