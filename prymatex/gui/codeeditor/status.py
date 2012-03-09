@@ -331,8 +331,6 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     # IFind widget
     #============================================================
     # AutoConnect Signals ---------------------------------------
-    FIND_MATCH_STYLE = ''
-    FIND_NO_MATCH_STYLE = ''
     @QtCore.pyqtSlot()
     def on_pushButtonIFindClose_pressed(self):
         self.widgetIFind.setVisible(False)
@@ -363,9 +361,9 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
         match, flags = self.getIFindMatchAndFlags()
         if self.currentEditor.findMatch(match, flags):
-            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_MATCH)
+            self.lineEditIFind.setStyleSheet(resources.FIND_STYLE_MATCH)
         else:
-            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NO_MATCH)
+            self.lineEditIFind.setStyleSheet(resources.FIND_STYLE_NO_MATCH)
     
     def getIFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
