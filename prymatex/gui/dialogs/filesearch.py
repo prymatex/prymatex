@@ -12,6 +12,10 @@ from prymatex.models.tree import TreeNode, TreeModel
 class FileSearchThread(QtCore.QThread):
     foundPattern = QtCore.pyqtSignal(str, list)
     
+    def __init__(self, application, parent = None):
+        QtCore.QThread.__init__(self, parent)
+        self.application = application
+        
     def searchInFiles(self, directories, filePattern, searchPattern, recursive, by_phrase):
         self._cancel = False
         self.recursive = recursive
@@ -25,28 +29,23 @@ class FileSearchThread(QtCore.QThread):
         self.start()
 
     def run(self):
-        file_filter = QtCore.QDir.Files | QtCore.QDir.NoDotAndDotDot | QtCore.QDir.Readable
-        dir_filter = QtCore.QDir.Dirs | QtCore.QDir.NoDotAndDotDot | QtCore.QDir.Readable
         while not self._cancel and not self.queue.empty():
-            current_dir = QtCore.QDir(self.queue.get())
-            #Skip not readable dirs!
-            if not current_dir.isReadable():
-                continue
-
-            #Collect all sub dirs!
-            if self.recursive:
-                current_sub_dirs = current_dir.entryInfoList(dir_filter)
-                for one_dir in current_sub_dirs:
-                    self.queue.put(one_dir.absoluteFilePath())
+            currentDirectory = self.queue.get()
             
-            #QDir.entryInfoList (self, QStringList nameFilters, Filters filters = QDir.NoFilter, SortFlags sort = QDir.NoSort)
-            current_files = current_dir.entryInfoList(self.filePatterns, file_filter)
+            #Collect all sub dirs!
+            currentFiles = []
+            entries = self.application.fileManager.listDirectory(currentDirectory, absolute = True, filePatterns = self.filePatterns)
+            for enrty in entries:
+                if os.path.isfile(enrty):
+                    currentFiles.append(enrty)
+                elif os.path.isdir(enrty) and self.recursive:
+                    self.queue.put(enrty)
             
             #process all files in current dir!
-            for one_file in current_files:
-                self._grep_file(one_file.absoluteFilePath(), one_file.fileName())
+            for one_file in currentFiles:
+                self._grep_file(one_file)
 
-    def _grep_file(self, file_path, file_name):
+    def _grep_file(self, file_path):
         if not self.by_phrase:
             with open(file_path, 'r') as f:
                 #TODO: Ver mejor el tema de unicode 
@@ -88,7 +87,7 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         self.setupUi(self)
         self.application = QtGui.QApplication.instance()
         self.model = model
-        self.fileSearchThread = FileSearchThread()
+        self.fileSearchThread = FileSearchThread(self.application, self)
         self.fileSearchThread.foundPattern.connect(self.on_fileSearchThread_foundPattern)
         
     def on_fileSearchThread_foundPattern(self, filePath, lines):
@@ -97,10 +96,10 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         
     def on_buttonCancel_pressed(self):
         #FIXME: solo si esta corriendo
-        print "cancelar"
         self.fileSearchThread.cancel()
         
     def on_buttonSearch_pressed(self):
+        self.model.clear()
         searchPattern = self.comboBoxContainingText.lineEdit().text()
         filters = self.comboBoxFilePatterns.lineEdit().text()
         recursive = True

@@ -16,7 +16,6 @@ class GroupTreeNode(TreeNode):
         TreeNode.__init__(self, self.identifier, parent)
 
     def acceptPath(self, path):
-        print os.path.commonprefix([self.directory, path]), self.directory
         return os.path.commonprefix([self.directory, path]) == self.directory
 
     def splitToNamespace(self, path):
@@ -59,8 +58,9 @@ class DirectoryTreeNode(TreeNode):
         return resources.getIcon(self.path)
 
 class LineTreeNode(TreeNode):
-    def __init__(self, line, parent = None):
-        self.title = "%s (%s)" % line
+    def __init__(self, lineNumber, lineContent, parent = None):
+        self.title = "%s - %s" % (lineNumber, lineContent.strip())
+        self.lineNumber = lineNumber
         self.identifier = unicode(hash(self.title))
         TreeNode.__init__(self, self.identifier, parent)
         
@@ -99,6 +99,6 @@ class PMXSearchTreeModel(NamespaceTreeModel):
                 namespace, fileName = group.splitToNamespace(filePath)
                 foundNode = FileFoundTreeNode(fileName, filePath)
                 for line in lines:
-                    lineNode = LineTreeNode(line)
+                    lineNode = LineTreeNode(*line)
                     foundNode.appendChild(lineNode)
                 self.addNamespaceNode(namespace, foundNode)

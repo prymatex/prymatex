@@ -4,9 +4,10 @@ import os
 import codecs
 import shutil
 import mimetypes
+import fnmatch
 from PyQt4 import QtCore, QtGui
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core.exceptions import APIUsageError, PrymatexIOException, PrymatexFileExistsException
+from prymatex.core import exceptions
 from functools import partial
 
 class PMXFileManager(QtCore.QObject):
@@ -106,26 +107,26 @@ class PMXFileManager(QtCore.QObject):
         Create a new directory.
         """
         if os.path.exists(directory):
-            raise PrymatexFileExistsException("The directory already exist", directory) 
+            raise exceptions.FileExistsException("The directory already exist", directory) 
         os.mkdir(directory)
     
     def createDirectories(self, directory):
         """Create a group of directory, one inside the other."""
         if os.path.exists(directory):
-            raise PrymatexFileExistsException("The folder already exist", directory)
+            raise exceptions.FileExistsException("The folder already exist", directory)
         os.makedirs(directory)
     
     def createFile(self, filePath):
         """Create a new file."""
         if os.path.exists(filePath):
-            raise PrymatexIOException("The file already exist") 
+            raise exceptions.IOException("The file already exist") 
         open(filePath, 'w').close()
     
     def renameFile(self, old, new):
         """Rename a file, changing its name from 'old' to 'new'."""
         if os.path.isfile(old):
             if os.path.exists(new):
-                raise PrymatexFileExistsException(new)
+                raise exceptions.FileExistsException(new)
             os.rename(old, new)
             return new
         return ''
@@ -172,12 +173,12 @@ class PMXFileManager(QtCore.QObject):
         Open and read a file, return the content.
         """
         if not os.path.exists(filePath):
-            raise PrymatexIOException("The file does not exist")
+            raise exceptions.IOException("The file does not exist")
         if not os.path.isfile(filePath):
-            raise PrymatexIOException("%s is not a file" % filePath)
+            raise exceptions.IOException("%s is not a file" % filePath)
         f = QtCore.QFile(filePath)
         if not f.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text):
-            raise PrymatexIOException("%s" % f.errorString())
+            raise exceptions.IOException("%s" % f.errorString())
         stream = QtCore.QTextStream(f)
         content = stream.readAll()
         f.close()
@@ -200,7 +201,7 @@ class PMXFileManager(QtCore.QObject):
         try:
             f = QtCore.QFile(filePath)
             if not f.open(QtCore.QIODevice.WriteOnly | QtCore.QIODevice.Truncate):
-                raise PrymatexIOException(f.errorString())
+                raise exceptions.IOException(f.errorString())
             stream = QtCore.QTextStream(f)
             encoded_stream = stream.codec().fromUnicode(content)
             f.write(encoded_stream)
@@ -231,6 +232,16 @@ class PMXFileManager(QtCore.QObject):
         if os.path.isdir(filePath):
             return filePath
         return os.path.dirname(filePath)
+
+    def listDirectory(self, directory, absolute = False, filePatterns = []):
+        if not os.path.isdir(directory):
+            raise exceptions.DirectoryException("%s not exists" % directory)
+        names = os.listdir(directory)
+        if filePatterns:
+            names = filter(lambda name: any(map(lambda pattern: os.path.isdir(os.path.join(directory, name)) or fnmatch.fnmatch(name, pattern), filePatterns)), names)
+        if absolute:
+            return map(lambda name: os.path.join(directory, name), names)
+        return names
 
     def lastModification(self, filePath):
         return QtCore.QFileInfo(filePath).lastModified()

@@ -28,7 +28,6 @@ class PMXSearchDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
         if not self.isVisible():
             self.show()
         self.raise_()
-        self.searchTreeModel.clear()
         fileSearch = PMXFileSearchDialog.search(self.searchTreeModel, self)
         #TODO: Si no se encontro nada o se cancelo cerrarlo
     

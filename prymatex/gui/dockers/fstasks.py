@@ -3,7 +3,7 @@ import os
 from PyQt4 import QtGui, QtCore
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.core.exceptions import PrymatexFileExistsException
+from prymatex.core import exceptions
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 
 class PMXFileSystemTasks(object):
@@ -25,7 +25,7 @@ class PMXFileSystemTasks(object):
                 absNewDirName = os.path.join(basePath, newDirName)
                 try:
                     rslt = self.application.fileManager.createDirectory(absNewDirName)
-                except PrymatexFileExistsException as e:
+                except exceptions.PrymatexFileExistsException as e:
                     QtGui.QMessageBox.warning(self, _("Error creating directory"), 
                                               _("%s already exists") % newDirName)
                     continue

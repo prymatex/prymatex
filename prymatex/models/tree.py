@@ -105,7 +105,8 @@ class NamespaceTreeModel(TreeModel):
     def createProxyNode(self, name, parent):
         if self.proxyNodeFactory is not None:
             proxy = self.proxyNodeFactory(name, parent)
-        proxy = TreeNode(name, parent)
+        else:
+            proxy = TreeNode(name, parent)
         proxy._isproxy = True
         return proxy
         
