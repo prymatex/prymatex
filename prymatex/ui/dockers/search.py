@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/search.ui'
 #
-# Created: Wed Mar  7 15:22:52 2012
+# Created: Fri Mar  9 20:07:12 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,6 +26,7 @@ class Ui_SearchDock(object):
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.treeView = QtGui.QTreeView(self.dockWidgetContents)
+        self.treeView.setAlternatingRowColors(True)
         self.treeView.setHeaderHidden(True)
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.verticalLayout.addWidget(self.treeView)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/search.ui'
 #
-# Created: Wed Mar  7 15:22:51 2012
+# Created: Fri Mar  9 20:07:09 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,6 @@ except AttributeError:
 class Ui_SearchDialog(object):
     def setupUi(self, SearchDialog):
         SearchDialog.setObjectName(_fromUtf8("SearchDialog"))
-        SearchDialog.resize(229, 204)
         self.verticalLayout = QtGui.QVBoxLayout(SearchDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -58,6 +57,19 @@ class Ui_SearchDialog(object):
         self.comboBoxFilePatterns.setObjectName(_fromUtf8("comboBoxFilePatterns"))
         self.comboBoxFilePatterns.addItem(_fromUtf8(""))
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.comboBoxFilePatterns)
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
+        self.horizontalLayout_4.setSpacing(2)
+        self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.checkBoxRecursive = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxRecursive.setObjectName(_fromUtf8("checkBoxRecursive"))
+        self.horizontalLayout_4.addWidget(self.checkBoxRecursive)
+        self.checkBoxHidden = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxHidden.setObjectName(_fromUtf8("checkBoxHidden"))
+        self.horizontalLayout_4.addWidget(self.checkBoxHidden)
+        self.checkBoxFollowLinks = QtGui.QCheckBox(self.groupBox)
+        self.checkBoxFollowLinks.setObjectName(_fromUtf8("checkBoxFollowLinks"))
+        self.horizontalLayout_4.addWidget(self.checkBoxFollowLinks)
+        self.formLayout.setLayout(3, QtGui.QFormLayout.FieldRole, self.horizontalLayout_4)
         self.verticalLayout.addWidget(self.groupBox)
         self.groupBox_2 = QtGui.QGroupBox(SearchDialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
@@ -88,6 +100,20 @@ class Ui_SearchDialog(object):
         self.comboBoxWorkingSet.setObjectName(_fromUtf8("comboBoxWorkingSet"))
         self.horizontalLayout.addWidget(self.comboBoxWorkingSet)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
+        self.radioButton = QtGui.QRadioButton(self.groupBox_2)
+        self.radioButton.setObjectName(_fromUtf8("radioButton"))
+        self.horizontalLayout_3.addWidget(self.radioButton)
+        self.lineLocation = QtGui.QLineEdit(self.groupBox_2)
+        self.lineLocation.setEnabled(False)
+        self.lineLocation.setObjectName(_fromUtf8("lineLocation"))
+        self.horizontalLayout_3.addWidget(self.lineLocation)
+        self.buttonChoose = QtGui.QPushButton(self.groupBox_2)
+        self.buttonChoose.setEnabled(False)
+        self.buttonChoose.setObjectName(_fromUtf8("buttonChoose"))
+        self.horizontalLayout_3.addWidget(self.buttonChoose)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         self.verticalLayout.addWidget(self.groupBox_2)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
@@ -116,9 +142,14 @@ class Ui_SearchDialog(object):
         self.label.setText(_('Containing text'))
         self.label_3.setText(_('File name patterns'))
         self.comboBoxFilePatterns.setItemText(0, _('*.*'))
+        self.checkBoxRecursive.setText(_('Recursive'))
+        self.checkBoxHidden.setText(_('Hidden'))
+        self.checkBoxFollowLinks.setText(_('Follow links'))
         self.groupBox_2.setTitle(_('Scope'))
         self.radioButtonWorkspace.setText(_('Workspace'))
         self.radioButtonWorkingSet.setText(_('Working set'))
+        self.radioButton.setText(_('Location'))
+        self.buttonChoose.setText(_('Ch&oose'))
         self.buttonSearch.setText(_('&Search'))
         self.buttonCancel.setText(_('C&ancel'))
 

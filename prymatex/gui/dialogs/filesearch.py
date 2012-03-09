@@ -10,7 +10,7 @@ from prymatex.ui.dialogs.search import Ui_SearchDialog
 from prymatex.models.tree import TreeNode, TreeModel
 
 class FileSearchThread(QtCore.QThread):
-    foundPattern = QtCore.pyqtSignal(str, tuple)
+    foundPattern = QtCore.pyqtSignal(str, list)
     
     def __init__(self, application, parent = None):
         QtCore.QThread.__init__(self, parent)
