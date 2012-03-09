@@ -61,11 +61,19 @@ class PMXProject(FileSystemTreeNode):
         self.workingSet = None
         self.manager = None
         self.support = None
+        self.bundles = None
+        self.namespace = None
         self.load(hash)
     
     def hasSupport(self):
         return self.support is not None
     
+    def hasBundles(self):
+        return self.bundles is not None
+
+    def setBundles(self, bundles):
+        self.bundles = bundles
+        
     def setSupport(self, support):
         self.support = support
         
@@ -127,12 +135,14 @@ class PMXProject(FileSystemTreeNode):
         projectPath = os.path.join(path, cls.FOLDER)
         fileInfo = os.path.join(projectPath, cls.FILE)
         if not os.path.isfile(fileInfo):
-            raise exceptions.PrymatexFileNotExistsException(fileInfo)
+            raise exceptions.FileNotExistsException(fileInfo)
         try:
             data = plist.readPlist(fileInfo)
             project = cls(path, data)
             if os.path.exists(os.path.join(projectPath, cls.SUPPORT)):
-                project.ensureSupportPaths()
+                project.ensureSupport()
+            if os.path.exists(os.path.join(projectPath, cls.BUNDLES)):
+                project.ensureBundles()
             manager.addProject(project)
             return project
         except Exception, e:
@@ -154,23 +164,15 @@ class PMXProject(FileSystemTreeNode):
             return resources.getIcon("projectopen")
         else:
             return resources.getIcon("projectclose")
-    
+
     def bashInit(self):
         bashInitPath = os.path.join(self.projectPath, self.BASH_INIT)
         if not os.path.exists(bashInitPath):
-            self.ensureSupportPaths()
+            self.ensureSupport()
             open(bashInitPath, 'w').close()
         return bashInitPath
-
-    def namespace(self):
-        bundlePath = os.path.join(self.projectPath, self.BUNDLES)
-        if not os.path.exists(bundlePath):
-            self.ensureSupportPaths()
-            os.makedirs(bundlePath)
-        #TODO: retornar el namespace y el path
-        return self.name, self.projectPath
     
-    def ensureSupportPaths(self):
+    def ensureSupport(self):
         supportPath = os.path.join(self.projectPath, self.SUPPORT)
         if not os.path.exists(supportPath):
             os.makedirs(supportPath)
@@ -179,3 +181,8 @@ class PMXProject(FileSystemTreeNode):
             subPath = os.path.join(supportPath, subNames)
             if not os.path.exists(subPath):
                 os.makedirs(subPath)
+
+    def ensureBundles(self):
+        bundlePath = os.path.join(self.projectPath, self.BUNDLES)
+        if not os.path.exists(bundlePath):
+            os.makedirs(bundlePath)

@@ -256,7 +256,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot()
     def on_actionBundleEditor_triggered(self):
         project = self.currentNode()
-        print project.namespace()
+        if (project.namespace is None):
+            project.ensureBundles()
+            project.namespace = self.application.supportManager.addNamespace(project.name, project.projectPath)
+        print project.namespace
         
     #================================================
     # Custom filters

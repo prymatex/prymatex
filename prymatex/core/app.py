@@ -53,7 +53,7 @@ class PMXApplication(QtGui.QApplication):
             # Loads
             self.supportManager = self.setupSupportManager()    #Support Manager
             self.fileManager = self.setupFileManager()          #File Manager
-            self.projectManager = self.setupProjectManager()                                              #Project Manager
+            self.projectManager = self.setupProjectManager()    #Project Manager
             self.setupKernelManager()                           #Console kernel Manager
             self.setupCoroutines()
             self.setupZeroMQContext()
@@ -64,6 +64,12 @@ class PMXApplication(QtGui.QApplication):
             
             #Connect all loads
             self.projectManager.loadProject()
+            
+            #Antes de cargar el support cargo posibles espacios de nombres
+            for project in self.projectManager.getAllProjects():
+                if project.hasBundles():
+                    project.namespace = self.supportManager.addNamespace(project.name, project.projectPath)
+
             self.supportManager.loadSupport(splash.showMessage)
             self.settingsDialog.loadSettings()
             
