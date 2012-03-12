@@ -30,8 +30,8 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
         self.setWidget(self.tableViewSymbols)
 
-    def setMainWindow(self, mainWindow):
-        PMXBaseDock.setMainWindow(self, mainWindow)
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
         mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     def on_mainWindow_currentEditorChanged(self, editor):
@@ -73,8 +73,8 @@ class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewBookmarks.doubleClicked.connect(self.on_tableViewBookmarks_doubleClicked)
         self.setWidget(self.tableViewBookmarks)
         
-    def setMainWindow(self, mainWindow):
-        PMXBaseDock.setMainWindow(self, mainWindow)
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
         mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     def on_mainWindow_currentEditorChanged(self, editor):
