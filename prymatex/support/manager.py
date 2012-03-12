@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, os, string, unicodedata
+import re
+import os
+import string
+import unicodedata
+import hashlib
 import uuid as uuidmodule
 
 from glob import glob
@@ -81,6 +85,13 @@ class PMXSupportBaseManager(object):
         if len(self.nsorder) < 2:
             raise Exception("No default namespace")
         return self.nsorder[self.DEFAULTNS]
+
+    def addProjectNamespace(self, project):
+        #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
+        project.ensureBundles()
+        path = project.projectPath
+        project.namespace = project.name + hashlib.md5(path).hexdigest()
+        self.addNamespace(project.namespace, path)
 
     def updateEnvironment(self, env):
         self.environment.update(env)
@@ -307,11 +318,13 @@ class PMXSupportBaseManager(object):
         namespace = namespace or self.defaultNamespace
         basePath = self.basePath("Bundles", namespace)
         path = ensurePath(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
-        bundle = PMXBundle(self.uuidgen(), namespace, { 'name': name }, path)
+        bundle = PMXBundle(self.uuidgen(), { 'name': name })
         bundle = self.addBundle(bundle)
+        print type(bundle)
         self.addManagedObject(bundle)
+        bundle.addSource(namespace, path)
         return bundle
-    
+        
     def readBundle(self, **attrs):
         """
         Retorna un bundle por sus atributos

@@ -14,6 +14,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         self.application = application
         self.manager = self.application.supportManager
         self.finished.connect(self.on_bundleEditor_finished)
+        self.namespace = None
         
         #Cargar los widgets editores
         self.configEditorWidgets()
@@ -37,7 +38,8 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         self.manager.bundleTreeModel.rowsInserted.disconnect(self.on_bundleTreeModel_rowsInserted)
         return value
         
-    def execEditor(self, typeFilter = "", namespaceFilter = ""):
+    def execEditor(self, typeFilter = None, namespaceFilter = None):
+        self.namespace = namespaceFilter
         self.proxyTreeModel.setFilterNamespace(namespaceFilter)
         self.proxyTreeModel.setFilterBundleItemType(typeFilter)
         index = self.comboBoxItemFilter.findData(typeFilter)
@@ -81,13 +83,13 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
             return self.manager.getDefaultBundle()
         bundle = self.proxyTreeModel.node(index)
         while bundle.TYPE != 'bundle':
-            bundle = bundle.parent
+            bundle = bundle.parentNode
         return bundle
     
     def createBundleItem(self, itemName, itemType):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
-        self.manager.createBundleItem(itemName, itemType, bundle)
+        self.manager.createBundleItem(itemName, itemType, bundle, self.namespace)
         
     def on_actionCommand_triggered(self):
         self.createBundleItem(u"untitled", "command")
@@ -109,14 +111,14 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         if index.isValid():
             template = self.proxyTreeModel.node(index)
             if template.TYPE == 'templatefile':
-                template = template.parent
+                template = template.parentNode
         self.manager.createTemplateFile(u"untitled", template)
 
     def on_actionPreferences_triggered(self):
         self.createBundleItem(u"untitled", "preference")
 
     def on_actionBundle_triggered(self):
-        self.manager.createBundle("untitled")
+        self.manager.createBundle("untitled", self.namespace)
 
     @QtCore.pyqtSlot()
     def on_pushButtonRemove_pressed(self):
@@ -192,7 +194,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
     # Tree View
     #==========================================================
     def getEditorForTreeItem(self, treeItem):
-        if treeItem.TYPE in self.indexes:
+        if not treeItem.isRootNode() and treeItem.TYPE in self.indexes:
             index = self.indexes[treeItem.TYPE]
             return self.editors[index]
 

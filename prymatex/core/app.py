@@ -66,9 +66,9 @@ class PMXApplication(QtGui.QApplication):
             self.projectManager.loadProject()
             
             #Antes de cargar el support cargo posibles espacios de nombres
-            #for project in self.projectManager.getAllProjects():
-            #    if project.hasBundles():
-            #        project.namespace = self.supportManager.addNamespace(project.name, project.projectPath)
+            for project in self.projectManager.getAllProjects():
+                if project.hasBundles():
+                    self.supportManager.addProjectNamespace(project)
 
             self.supportManager.loadSupport(splash.showMessage)
             self.settingsDialog.loadSettings()
