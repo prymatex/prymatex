@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, os, string, unicodedata
+import re
+import os
+import string
+import unicodedata
+import hashlib
 import uuid as uuidmodule
 
 from glob import glob
@@ -81,6 +85,13 @@ class PMXSupportBaseManager(object):
         if len(self.nsorder) < 2:
             raise Exception("No default namespace")
         return self.nsorder[self.DEFAULTNS]
+
+    def addProjectNamespace(self, project):
+        #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
+        project.ensureBundles()
+        path = project.projectPath
+        project.namespace = project.name + hashlib.md5(path).hexdigest()
+        self.addNamespace(project.namespace, path)
 
     def updateEnvironment(self, env):
         self.environment.update(env)

@@ -43,7 +43,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         return self.sourceModel().node(sIndex)
     
     def setFilterNamespace(self, namespace):
-        if namespace:
+        if not namespace:
             self.namespacesFilter = [ "prymatex", "user" ]
         else:
             self.namespacesFilter = namespace.split()
