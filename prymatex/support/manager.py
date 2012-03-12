@@ -318,11 +318,12 @@ class PMXSupportBaseManager(object):
         namespace = namespace or self.defaultNamespace
         basePath = self.basePath("Bundles", namespace)
         path = ensurePath(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
-        bundle = PMXBundle(self.uuidgen(), namespace, { 'name': name }, path)
+        bundle = PMXBundle(self.uuidgen(), { 'name': name })
         bundle = self.addBundle(bundle)
         self.addManagedObject(bundle)
+        bundle.addSource(namespace, path)
         return bundle
-    
+        
     def readBundle(self, **attrs):
         """
         Retorna un bundle por sus atributos

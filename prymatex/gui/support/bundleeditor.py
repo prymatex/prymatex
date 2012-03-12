@@ -14,6 +14,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         self.application = application
         self.manager = self.application.supportManager
         self.finished.connect(self.on_bundleEditor_finished)
+        self.namespace = None
         
         #Cargar los widgets editores
         self.configEditorWidgets()
@@ -37,7 +38,8 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         self.manager.bundleTreeModel.rowsInserted.disconnect(self.on_bundleTreeModel_rowsInserted)
         return value
         
-    def execEditor(self, typeFilter = "", namespaceFilter = ""):
+    def execEditor(self, typeFilter = None, namespaceFilter = None):
+        self.namespace = namespaceFilter
         self.proxyTreeModel.setFilterNamespace(namespaceFilter)
         self.proxyTreeModel.setFilterBundleItemType(typeFilter)
         index = self.comboBoxItemFilter.findData(typeFilter)
@@ -87,7 +89,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
     def createBundleItem(self, itemName, itemType):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
-        self.manager.createBundleItem(itemName, itemType, bundle)
+        self.manager.createBundleItem(itemName, itemType, bundle, self.namespace)
         
     def on_actionCommand_triggered(self):
         self.createBundleItem(u"untitled", "command")
@@ -116,7 +118,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         self.createBundleItem(u"untitled", "preference")
 
     def on_actionBundle_triggered(self):
-        self.manager.createBundle("untitled")
+        self.manager.createBundle("untitled", self.namespace)
 
     @QtCore.pyqtSlot()
     def on_pushButtonRemove_pressed(self):
