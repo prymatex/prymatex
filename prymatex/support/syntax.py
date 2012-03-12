@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-    Syntax's module
-    http://manual.macromates.com/en/language_grammars.html
-    http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
-'''
+"""Syntax's module
+http://manual.macromates.com/en/language_grammars.html
+http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
+"""
+
 import re
+
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp
     
@@ -203,11 +204,26 @@ class PMXSyntax(PMXBundleItem):
     def grammar(self):
         if not hasattr(self, '_grammar'):
             hash = {}
-            hash['repository'] = self.repository if self.repository != None else {}
+            hash['repository'] = self.buildRepository()
             hash['patterns'] = self.patterns if self.patterns != None else []
             setattr(self, '_grammar', PMXSyntaxNode(hash , self ))
         return self._grammar
-        
+
+    def buildRepository(self):
+        repository = {}
+        if self.scopeName is not None:
+            syntaxes = self.syntaxes
+            index = self.scopeName.find(".")
+            while index != -1:
+                parentScopeName = self.scopeName[0:index]
+                parentSyntax = syntaxes.get(parentScopeName)
+                if parentSyntax is not None and parentSyntax.repository is not None:
+                    repository.update(parentSyntax.repository)
+                index = self.scopeName.find(".", index + 1)
+        if self.repository is not None:
+            repository.update(self.repository)
+        return repository
+
     def parse(self, string, processor = None):
         if processor:
             processor.startParsing(self.scopeName)
@@ -286,4 +302,3 @@ class PMXSyntax(PMXBundleItem):
                 
     def __str__(self):
         return u"<PMXSyntax %s>" % self.name
-        

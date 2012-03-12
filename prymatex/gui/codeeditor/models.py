@@ -129,7 +129,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         return len(self.blocks)
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
-        if not index.isValid():
+        if not index.isValid() or not self.blocks:
             return None
         block = self.blocks[index.row()]
         userData = block.userData()
