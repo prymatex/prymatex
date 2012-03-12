@@ -83,7 +83,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
             return self.manager.getDefaultBundle()
         bundle = self.proxyTreeModel.node(index)
         while bundle.TYPE != 'bundle':
-            bundle = bundle.parent
+            bundle = bundle.parentNode
         return bundle
     
     def createBundleItem(self, itemName, itemType):
@@ -111,7 +111,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         if index.isValid():
             template = self.proxyTreeModel.node(index)
             if template.TYPE == 'templatefile':
-                template = template.parent
+                template = template.parentNode
         self.manager.createTemplateFile(u"untitled", template)
 
     def on_actionPreferences_triggered(self):
@@ -194,7 +194,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
     # Tree View
     #==========================================================
     def getEditorForTreeItem(self, treeItem):
-        if treeItem.TYPE in self.indexes:
+        if not treeItem.isRootNode() and treeItem.TYPE in self.indexes:
             index = self.indexes[treeItem.TYPE]
             return self.editors[index]
 

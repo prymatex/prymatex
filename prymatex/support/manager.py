@@ -320,6 +320,7 @@ class PMXSupportBaseManager(object):
         path = ensurePath(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
         bundle = PMXBundle(self.uuidgen(), { 'name': name })
         bundle = self.addBundle(bundle)
+        print type(bundle)
         self.addManagedObject(bundle)
         bundle.addSource(namespace, path)
         return bundle
