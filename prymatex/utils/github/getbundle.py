@@ -1,12 +1,20 @@
-
-from PyQt4 import QtGui, QtCore
-import sys
-from ui_githubclient import Ui_GithubClient
-import requests
-import json
+# Stdlib
+import os
 from operator import itemgetter
+import json
+import sys
+from urlparse import urlsplit
+
+# Third parties
+from PyQt4 import QtGui, QtCore
+import httplib2
+
+# UI
+from ui_githubclient import Ui_GithubClient
+from M2Crypto import urllib2
 
 _ = lambda s:s
+
 
 class PMXGitHubRepoModel(QtGui.QStandardItemModel):
     ROWS = (
@@ -24,13 +32,40 @@ class PMXGitHubRepoModel(QtGui.QStandardItemModel):
 
 class PMXGHSearchBundleThread(QtCore.QThread):
     recordsFound = QtCore.pyqtSignal(object)
+    requestError = QtCore.pyqtSignal(str)
+    
     term = None
     REQUEST_URL = 'http://github.com/api/v2/json/repos/search/%s+tmbundle'
+    
+    def __init__(self, parent = None):
+        QtCore.QThread.__init__(self, parent)
+        self.http = self.buildHttp()
+    
+    def buildHttp(self):
+        ''' Build HTTP instance taking proxy information '''
+        # TODO: Use prymatex configuration as first option
+        http_proxy = os.environ.get('http_proxy', os.environ.get('HTTP_PROXY', ''))
+        if http_proxy:
+            data = urlsplit(http_proxy)
+            proxy = httplib2.ProxyInfo(proxy_type=httplib2.socks.PROXY_TYPE_HTTP,
+                                       proxy_host = data.hostname,
+                                       proxy_port = data.port,
+                                       proxy_user = data.username,
+                                       proxy_pass = data.password)
+        # TODO: Socks
+        
+        http = httplib2.Http(proxy_info = proxy)
+        
+        return http
+    
     def run(self):
         if self.term:
-            r = requests.request('GET', self.REQUEST_URL % self.term)
-            data = json.loads(r.text)
-            self.recordsFound.emit(data) # Thread safety
+            try:
+                headers, response = self.http.request(self.REQUEST_URL % self.term)
+                data = json.loads(response)
+                self.recordsFound.emit(data) # Thread safety
+            except Exception as e:
+                self.requestError.emit(str(e))
     
 
 class PMXGithubBundlesWidget(QtGui.QWidget, Ui_GithubClient):
@@ -71,6 +106,13 @@ class PMXGithubBundlesWidget(QtGui.QWidget, Ui_GithubClient):
         self.tableViewResults.resizeColumnsToContents()
         self.tableViewResults.resizeRowsToContents()
         self.tableViewResults.setEnabled(True)
+    
+    def retrivalError(self, reason):
+        self.tableViewResults.setEnabled(True)
+        QtGui.QMessageBox.critical(self, _("Query Error"), "An error occurred<br><pre>%s</pre>" % reason)
+    
+    
+        
 if __name__ == '__main__':
     app = QtGui.QApplication([])
     win = PMXGithubBundlesWidget()
