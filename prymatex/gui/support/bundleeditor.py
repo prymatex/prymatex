@@ -34,6 +34,12 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
     def exec_(self):
         #TODO: Mejorar esto porque se dispara con los filtros del proxy, quiza pegandole al modelo real o al manager
         self.manager.bundleTreeModel.rowsInserted.connect(self.on_bundleTreeModel_rowsInserted)
+        #Limiar el editor
+        self.setCurrentEditor(self.editors[-1])
+        #Quitar seleccion
+        firstIndex = self.proxyTreeModel.index(0, 0)
+        self.treeView.setSelection(self.treeView.visualRect(firstIndex), QtGui.QItemSelectionModel.Clear)
+        
         value = QtGui.QDialog.exec_(self)
         self.manager.bundleTreeModel.rowsInserted.disconnect(self.on_bundleTreeModel_rowsInserted)
         return value
@@ -73,7 +79,6 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
                          widgets.PMXEditorBaseWidget(self) ]
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackedWidget.addWidget(editor)
-        self.setCurrentEditor(self.editors[-1])
         
     #==========================================================
     # Toolbar
@@ -118,7 +123,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
         self.createBundleItem(u"untitled", "preference")
 
     def on_actionBundle_triggered(self):
-        self.manager.createBundle("untitled", self.namespace)
+        bundle = self.manager.createBundle("untitled", self.namespace)
 
     @QtCore.pyqtSlot()
     def on_pushButtonRemove_pressed(self):
