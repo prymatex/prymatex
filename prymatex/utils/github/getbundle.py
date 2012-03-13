@@ -44,6 +44,7 @@ class PMXGHSearchBundleThread(QtCore.QThread):
     def buildHttp(self):
         ''' Build HTTP instance taking proxy information '''
         # TODO: Use prymatex configuration as first option
+        proxy = None
         http_proxy = os.environ.get('http_proxy', os.environ.get('HTTP_PROXY', ''))
         if http_proxy:
             data = urlsplit(http_proxy)
