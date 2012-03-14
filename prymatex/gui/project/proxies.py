@@ -7,6 +7,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.project.base import PMXProject
 from prymatex.gui.configure.proxies import PMXConfigureProxyModel
+from prymatex.models.proxies import PMXFlatTreeProxyModel
 
 class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
@@ -97,7 +98,36 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         mimeData = QtCore.QMimeData()
         mimeData.setUrls(urls)
         return mimeData
+
+class PMXFileSystemProxyModel(PMXFlatTreeProxyModel):
+    def __init__(self, parent = None):
+        PMXFlatTreeProxyModel.__init__(self, parent)
+
+    def filterAcceptsRow(self, sourceRow, sourceParent):
+        sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
+        node = self.sourceModel().node(sIndex)
+        return node.isfile and not node.ishidden
         
+    def comparableValue(self, index):
+        node = self.sourceModel().node(index)
+        return node.name.lower()
+    
+    def compareIndex(self, xindex, yindex):
+        xnode = self.sourceModel().node(xindex)
+        ynode = self.sourceModel().node(yindex)
+        return cmp(xnode.name, ynode.name)
+    
+    def findItemIndex(self, item):
+        for num, index in enumerate(self.indexMap()):
+            if self.sourceModel().node(index) == item:
+                return num
+    
+    def getAllItems(self):
+        items = []
+        for index in self.indexMap():
+            items.append(self.sourceModel().node(index))
+        return items
+
 class PMXPropertiesProxyModel(PMXConfigureProxyModel):
     def __init__(self, parent = None):
         PMXConfigureProxyModel.__init__(self, parent)
