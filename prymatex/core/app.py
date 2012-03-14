@@ -140,7 +140,7 @@ class PMXApplication(QtGui.QApplication):
     def setupSupportManager(self):
         from prymatex.gui.support.manager import PMXSupportManager
         
-        self.pluginManager.prepareWidgetPlugin(PMXSupportManager)
+        self.populateComponent(PMXSupportManager)
 
         manager = PMXSupportManager(self)
         self.settings.configure(manager)
@@ -176,7 +176,7 @@ class PMXApplication(QtGui.QApplication):
     def setupFileManager(self):
         from prymatex.core.filemanager import PMXFileManager
         
-        self.pluginManager.prepareWidgetPlugin(PMXFileManager)
+        self.populateComponent(PMXFileManager)
 
         manager = PMXFileManager(self)
         self.settings.configure(manager)
@@ -187,7 +187,7 @@ class PMXApplication(QtGui.QApplication):
     def setupProjectManager(self):
         from prymatex.gui.project.manager import PMXProjectManager
         
-        self.pluginManager.prepareWidgetPlugin(PMXProjectManager)
+        self.populateComponent(PMXProjectManager)
 
         manager = PMXProjectManager(self)
         self.settings.configure(manager)
@@ -216,6 +216,9 @@ class PMXApplication(QtGui.QApplication):
 
     def setupPluginManager(self):
         from prymatex.core.plugin.manager import PMXPluginManager
+        
+        self.populateComponent(PMXPluginManager)
+        
         self.pluginManager = PMXPluginManager(self)
         defaultDirectory = self.settings.value('PMX_PLUGINS_PATH')
         self.pluginManager.addPluginDirectory(defaultDirectory)
@@ -234,7 +237,7 @@ class PMXApplication(QtGui.QApplication):
 
     def setupMainWindow(self):
         from prymatex.gui.mainwindow import PMXMainWindow
-        self.pluginManager.prepareWidgetPlugin(PMXMainWindow)
+        self.populateComponent(PMXMainWindow)
         
     #========================================================
     # Dialogs
@@ -242,6 +245,8 @@ class PMXApplication(QtGui.QApplication):
     def setupDialogs(self):
         #Bundle Editor
         from prymatex.gui.support.bundleeditor import PMXBundleEditor
+        self.populateComponent(PMXBundleEditor)
+        
         self.bundleEditor = PMXBundleEditor(self)
         #self.bundleEditor.setModal(True)
         
@@ -263,13 +268,25 @@ class PMXApplication(QtGui.QApplication):
     def saveState(self, session_manager):
         self.logger.debug( "Save state %s" % session_manager)
     
+    #========================================================
+    # Components
+    #========================================================
+    def extendComponent(self, componentClass):
+        componentClass.application = self
+        componentClass.logger = self.getLogger('.'.join([componentClass.__module__, componentClass.__name__]))
+    
+    def populateComponent(self, componentClass):
+        self.extendComponent(componentClass)
+        self.settings.registerConfigurable(componentClass)
+        for settingClass in componentClass.contributeToSettings():
+            self.extendComponent(settingClass)
+            self.settingsDialog.register(settingClass(componentClass.settings))
+
     #---------------------------------------------------
     # Editors and mainWindow handle
     #---------------------------------------------------
     def createMainWindow(self):
-        """
-        Creates the windows
-        """
+        """Creates the windows"""
         from prymatex.gui.mainwindow import PMXMainWindow
 
         print PMXMainWindow.application
@@ -303,9 +320,7 @@ class PMXApplication(QtGui.QApplication):
         return self.pluginManager.createEditor(filePath, parent)
 
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
-        """
-        Opens a editor in current window
-        """
+        """Open a editor in current window"""
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:

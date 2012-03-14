@@ -5,11 +5,12 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
+from prymatex.core.plugin import PMXBaseWidgetComponent
 
-
-class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor):
+class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     def __init__(self, application):
-        super(PMXBundleEditor, self).__init__()
+        QtGui.QDialog.__init__(self)
+        PMXBaseWidgetComponent.__init__(self)
         self.setupUi(self)
         self.application = application
         self.manager = self.application.supportManager

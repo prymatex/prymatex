@@ -4,14 +4,14 @@
 from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
-from prymatex.core.plugin import PMXBaseWidgetPlugin
+from prymatex.core.plugin import PMXBaseWidgetComponent
 
-class PMXBaseDock(PMXBaseWidgetPlugin):
+class PMXBaseDock(PMXBaseWidgetComponent):
     SHORTCUT = ""
     ICON = QtGui.QIcon()
     PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self):
-        PMXBaseWidgetPlugin.__init__(self)
+        PMXBaseWidgetComponent.__init__(self)
         self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
         self.toggleViewAction().setIcon(self.ICON)

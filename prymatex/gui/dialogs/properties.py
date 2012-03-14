@@ -3,6 +3,8 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.core.plugin import PMXBaseWidgetComponent
+
 from prymatex.ui.dialogs.treewidget import Ui_TreeWidgetDialog
 from prymatex.gui.project.models import PMXPropertyTreeNode
 from prymatex.gui.configure.models import PMXConfigureTreeModel
@@ -19,11 +21,11 @@ class PMXProxyPropertyTreeNode(QtGui.QWidget, PMXPropertyTreeNode):
     def edit(self, fileSystemItem):
         pass
 
-class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog):
-    """Properties dialog, it's hold by the project docker
-    """
+class PMXPropertiesDialog(QtGui.QDialog, Ui_TreeWidgetDialog, PMXBaseWidgetComponent):
+    """Properties dialog, it's hold by the project docker"""
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
+        PMXBaseWidgetComponent.__init__(self)
         self.setupUi(self)
         
         self.baseWindowTitle = self.windowTitle()

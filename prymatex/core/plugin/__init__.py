@@ -5,16 +5,22 @@ import sys
 
 from PyQt4 import QtCore, QtGui
 
-#TODO: en inicialize deberia pasar un proveedro de servicios o otra forma menos directa de que un plguin hable con el core
-class PMXBasePlugin(object):
-    
+class PMXBaseComponent(object):
     def initialize(self):
         raise NotImplemented
     
     def finalize(self):
         pass
-    
-class PMXBaseWidgetPlugin(PMXBasePlugin):
+
+    @classmethod
+    def contributeToSettings(cls):
+        return []
+
+    @classmethod
+    def contributeToMainMenu(cls):
+        return {}
+
+class PMXBaseWidgetComponent(PMXBaseComponent):
     def __init__(self):
         self.overlays = []
             
@@ -30,29 +36,34 @@ class PMXBaseWidgetPlugin(PMXBasePlugin):
     def addOverlay(self, overlay):
         self.overlays.append(overlay)
 
-    @classmethod
-    def contributeToSettings(cls):
-        return []
-
-    @classmethod
-    def contributeToMainMenu(cls):
-        return {}
-
-class PMXBaseOverlay(PMXBasePlugin):
+class PMXBaseOverlay(object):
     def initialize(self, widget):
+        pass
+    
+    def finalize(self):
         pass
     
     def updateOverlay(self):
         pass
 
 Key_Any = 0
-class PMXBaseKeyHelper(PMXBasePlugin):
+class PMXBaseKeyHelper(object):
     KEY = Key_Any
+    def initialize(self, widget):
+        pass
+    
+    def finalize(self):
+        pass
+        
     def accept(self, editor, event, cursor = None, scope = None):
         return self.KEY == event.key()
     
     def execute(self, editor, event, cursor = None, scope = None):
         pass
     
-class PMXBaseAddon(PMXBasePlugin):
-    pass
+class PMXBaseAddon(object):
+    def initialize(self, widget):
+        pass
+    
+    def finalize(self):
+        pass
