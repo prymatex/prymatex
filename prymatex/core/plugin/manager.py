@@ -6,7 +6,9 @@ from logging import getLogger
 
 from PyQt4 import QtGui, QtCore
 
-class PMXPluginManager(object):
+from prymatex.core.plugin import PMXBaseComponent
+
+class PMXPluginManager(PMXBaseComponent):
     def __init__(self, application):
         self.application = application
         self.directories = []
@@ -24,36 +26,24 @@ class PMXPluginManager(object):
     #==================================================
     # Cargando clases
     #==================================================
-    #TODO: llevar esto al nivel de aplicacion y llamarlo populatedComponent o algo asi
-    def preparePlugin(self, pluginClass):
-        pluginClass.application = self.application
-        pluginClass.logger = self.application.getLogger('.'.join([pluginClass.__module__, pluginClass.__name__]))
-        
-    def prepareWidgetPlugin(self, widgetClass):
-        self.preparePlugin(widgetClass)
-        self.application.settings.registerConfigurable(widgetClass)
-        for settingClass in widgetClass.contributeToSettings():
-            self.preparePlugin(settingClass)
-            self.application.settingsDialog.register(settingClass(widgetClass.settings))
-
     def registerEditor(self, editorClass):
-        self.prepareWidgetPlugin(editorClass)
+        self.application.populateComponent(editorClass)
         self.editors.append(editorClass)
  
     def registerDocker(self, dockerClass):
-        self.prepareWidgetPlugin(dockerClass)
+        self.application.populateComponent(dockerClass)
         self.dockers.append(dockerClass)
         
     def registerStatusBar(self, statusBarClass):
-        self.prepareWidgetPlugin(statusBarClass)
+        self.application.populateComponent(statusBarClass)
         self.statusBars.append(statusBarClass)
     
     def registerKeyHelper(self, editorClass, helperClass):
-        self.preparePlugin(helperClass)
+        self.application.extendComponent(helperClass)
         editorClass.addKeyHelper(helperClass())
         
     def registerOverlay(self, widgetClass, overlayClass):
-        self.preparePlugin(overlayClass)
+        self.application.extendComponent(overlayClass)
         overlayClasses = self.overlays.setdefault(widgetClass, [])
         overlayClasses.append(overlayClass)
         

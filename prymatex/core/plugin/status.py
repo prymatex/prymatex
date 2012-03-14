@@ -3,8 +3,8 @@
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.core.plugin import PMXBaseWidgetPlugin
+from prymatex.core.plugin import PMXBaseWidgetComponent
 
-class PMXBaseStatusBar(PMXBaseWidgetPlugin):    
+class PMXBaseStatusBar(PMXBaseWidgetComponent):    
     def acceptEditor(self, editor):
         return False

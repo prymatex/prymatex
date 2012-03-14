@@ -7,10 +7,10 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.gui import utils
-from prymatex.core.plugin import PMXBaseWidgetPlugin, Key_Any
+from prymatex.core.plugin import PMXBaseWidgetComponent, Key_Any
 from prymatex.core import exceptions
 
-class PMXBaseEditor(PMXBaseWidgetPlugin):
+class PMXBaseEditor(PMXBaseWidgetComponent):
     """Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     #tabStatusChanged
@@ -19,7 +19,7 @@ class PMXBaseEditor(PMXBaseWidgetPlugin):
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
     def __init__(self):
-        PMXBaseWidgetPlugin.__init__(self)
+        PMXBaseWidgetComponent.__init__(self)
         self.filePath = None
         self.project = None
         self.externalAction = None
