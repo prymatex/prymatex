@@ -26,7 +26,7 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="PMXSplitTabWidget" name="splitTabWidget"/>
+     <widget class="SplitTabWidget" name="splitTabWidget"/>
     </item>
    </layout>
   </widget>
@@ -524,9 +524,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PMXSplitTabWidget</class>
+   <class>SplitTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>prymatex.gui.central.splitter</header>
+   <header>prymatex.widgets.splitter</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

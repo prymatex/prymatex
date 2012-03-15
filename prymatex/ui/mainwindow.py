@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Tue Feb 14 20:01:10 2012
+# Created: Thu Mar 15 18:10:40 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.splitTabWidget = PMXSplitTabWidget(self.centralwidget)
+        self.splitTabWidget = SplitTabWidget(self.centralwidget)
         self.splitTabWidget.setObjectName(_fromUtf8("splitTabWidget"))
         self.verticalLayout.addWidget(self.splitTabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -345,5 +345,5 @@ class Ui_MainWindow(object):
         self.actionSwitchProfile.setText(_('Switch Profile'))
         self.actionImportProject.setText(_('Import Project'))
 
-from prymatex.gui.central.splitter import PMXSplitTabWidget
+from prymatex.widgets.splitter import SplitTabWidget
 from prymatex import resources_rc

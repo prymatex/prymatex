@@ -15,10 +15,10 @@ import sip
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.gui.central.tabwidget import _TabWidget, _DragableTabBar
+from prymatex.widgets.tabwidget import _TabWidget, _DragableTabBar
 
-class PMXSplitTabWidget(QtGui.QSplitter):
-    """ The PMXSplitTabWidget class is a hierarchy of QSplitters the leaves of
+class SplitTabWidget(QtGui.QSplitter):
+    """ The SplitTabWidget class is a hierarchy of QSplitters the leaves of
     which are QTabWidgets.  Any tab may be moved around with the hierarchy
     automatically extended and reduced as required.
     """
@@ -473,7 +473,7 @@ class PMXSplitTabWidget(QtGui.QSplitter):
             return
         elif dhs != self._HS_OUTSIDE:
             dsplit_w = dtab_w.parent()
-            while not isinstance(dsplit_w, PMXSplitTabWidget):
+            while not isinstance(dsplit_w, SplitTabWidget):
                 dsplit_w = dsplit_w.parent()
 
         self._selected_tab_widget = None
@@ -550,7 +550,7 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         
         dsplit_w._set_focus()
 
-        # Signal that the tab's PMXSplitTabWidget has changed, if necessary.
+        # Signal that the tab's SplitTabWidget has changed, if necessary.
         if dsplit_w != self:
             self.currentWidgetChanged.emit(twidg)
         
@@ -641,11 +641,11 @@ class PMXSplitTabWidget(QtGui.QSplitter):
         else:
             cloned_rect = None
         
-        # Determine which visible PMXSplitTabWidget, if any, is under the cursor
+        # Determine which visible SplitTabWidget, if any, is under the cursor
         # (compensating for the cloned QTabBar that may be rendered over it).
         split_widget = None
         for top_widget in QtGui.qApp.topLevelWidgets():
-            for split_widget in top_widget.findChildren(PMXSplitTabWidget):
+            for split_widget in top_widget.findChildren(SplitTabWidget):
                 visible_region = split_widget.visibleRegion()
                 widget_pos = split_widget.mapFromGlobal(global_pos)
                 if cloned_rect and split_widget.geometry().contains(widget_pos):

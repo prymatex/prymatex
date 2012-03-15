@@ -15,6 +15,7 @@ from prymatex.gui import utils, dialogs
 from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.settings.support import PMXSupportSettings
+from prymatex.widgets.docker import DockWidgetTitleBar
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """Prymatex main window
@@ -66,7 +67,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.customDockActions = {}
         
         self.setAcceptDrops(True)
-    
+        
+        #self.dockWidgetToolBar = QAutoHideDockWidgets(QtCore.Qt.RightDockWidgetArea, self)
+        #self.bottomDockers = QAutoHideDockWidgets(QtCore.Qt.BottomDockWidgetArea, self)
+      
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import PMXGeneralWidget
@@ -94,6 +98,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)
         self.menuPanels.addAction(dock.toggleViewAction())
+        dock.setTitleBarWidget(DockWidgetTitleBar(dock))
         dock.hide()
         self.dockers.append(dock)
     
