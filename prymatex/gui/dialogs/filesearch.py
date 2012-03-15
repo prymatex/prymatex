@@ -90,6 +90,8 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
         self.fileSearchThread = FileSearchThread(self.application, self)
         self.fileSearchThread.foundPattern.connect(self.on_fileSearchThread_foundPattern)
         
+        self.comboBoxContainingText.lineEdit().returnPressed.connect(self.buttonSearch.click)
+        
     def on_fileSearchThread_foundPattern(self, filePath, lines):
         if lines:
             self.model.addFileFound(filePath, lines)
@@ -97,6 +99,7 @@ class PMXFileSearchDialog(QtGui.QDialog, Ui_SearchDialog):
     def on_buttonCancel_pressed(self):
         #FIXME: solo si esta corriendo
         self.fileSearchThread.cancel()
+        self.reject()
         
     def on_buttonSearch_pressed(self):
         self.model.clear()
