@@ -4,9 +4,12 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
+#TODO: Mover a prymatex.widgets
+from prymatex.gui import utils
 
 class DockWidgetToolBar(QtGui.QToolBar):
     """QMainWindow "mixin" which provides auto-hiding support for dock widgets (not toolbars)."""
+
     DOCK_AREA_TO_TB = {
         QtCore.Qt.LeftDockWidgetArea: QtCore.Qt.LeftToolBarArea,
         QtCore.Qt.RightDockWidgetArea: QtCore.Qt.RightToolBarArea,
@@ -14,59 +17,44 @@ class DockWidgetToolBar(QtGui.QToolBar):
         QtCore.Qt.BottomDockWidgetArea: QtCore.Qt.BottomToolBarArea,
     }
 
-    def __init__(self, area, parent, name="AUTO_HIDE"):
+    def __init__(self, name, area, parent):
         QtGui.QToolBar.__init__(self, parent)
         assert isinstance(parent, QtGui.QMainWindow)
         assert area in self.DOCK_AREA_TO_TB
         self._area = area
-        self.setObjectName(name)
+        self.setObjectName(utils.textToObjectName(name, prefix="ToolBar"))
         self.setWindowTitle(name)
         
         self.setFloatable(False)
         self.setMovable(False)
-        self.setVisible(False)
         self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.MinimumExpanding))
-        self.setIconSize(QtCore.QSize(16,16));
+        self.setIconSize(QtCore.QSize(12,12));
         
-        #Restore action 
+        #Restore action
         restoreAction = QtGui.QAction(self)
         restoreAction.setIcon(resources.getIcon("important"))
-        restoreAction.triggered.connect(self.on_restoreAction_triggered)
+        restoreAction.triggered.connect(self.hide)
         self.addAction(restoreAction)
-
-        self.setAllowedAreas(self.DOCK_AREA_TO_TB[self._area])
-        self.parent().addToolBar(self.DOCK_AREA_TO_TB[self._area], self)
-        self.parent().centralWidget().installEventFilter(self)
         
-        self.hideDockWidgets()
+        self.visibilityChanged.connect(self.on_visibilityChanged)
 
-    def on_restoreAction_triggered(self):
-        print "restore"
-        
+    def on_visibilityChanged(self, visible):
+        if visible:
+            self.parent().centralWidget().installEventFilter(self)
+            self.hideDockWidgets()
+        else:
+            self.parent().centralWidget().removeEventFilter(self)
+            self.removeDockers()
+
     def _dockWidgets(self):
         mainWindow = self.parent()
         for dockWidget in mainWindow.findChildren(QtGui.QDockWidget):
-            
             if mainWindow.dockWidgetArea(dockWidget) == self._area and dockWidget.isVisible() and not dockWidget.isFloating():
                 if dockWidget.toggleViewAction() not in self.actions():
                     self.addAction(dockWidget.toggleViewAction())
                 yield dockWidget
             elif (dockWidget.toggleViewAction() in self.actions() and dockWidget.isVisible()) or mainWindow.dockWidgetArea(dockWidget) != self._area:
                 self.removeAction(dockWidget.toggleViewAction())
-
-    def _multiSetVisible(self, widgets, state):
-        if state:
-            self.setVisible(False)
-
-        for w in widgets:
-            w.setUpdatesEnabled(False)
-        for w in widgets:
-            w.setVisible(state)
-        for w in widgets:
-            w.setUpdatesEnabled(True)
-
-        if not state and widgets:
-            self.setVisible(True)
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.Enter:
@@ -75,7 +63,19 @@ class DockWidgetToolBar(QtGui.QToolBar):
         return False
 
     def setDockWidgetsVisible(self, state):
-        self._multiSetVisible(list(self._dockWidgets()), state)
+        if not self.isHidden():
+            self._multiSetVisible(list(self._dockWidgets()), state)
 
-    def showDockWidgets(self): self.setDockWidgetsVisible(True)
-    def hideDockWidgets(self): self.setDockWidgetsVisible(False)
+    def removeDockers(self):
+        actions = self.actions()[1:]
+        for action in actions:
+            self.removeAction(action)
+            action.trigger()
+            
+    def showDockWidgets(self): 
+        for dockWidget in self._dockWidgets():
+            dockWidget.show()
+            
+    def hideDockWidgets(self):
+        for dockWidget in self._dockWidgets():
+            dockWidget.hide()

@@ -50,6 +50,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.setupUi(self)
         
         self.setupDialogs()
+        self.setupDockToolBars()
         self.setupMenu()
         
         self.setStatusBar(PMXStatusBar(self))
@@ -62,15 +63,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.dockers = []
-        
         self.customEditorActions = {}
         self.customDockActions = {}
-        
+
         self.setAcceptDrops(True)
         
-        #self.dockWidgetToolBar = QAutoHideDockWidgets(QtCore.Qt.RightDockWidgetArea, self)
-        #self.bottomDockers = QAutoHideDockWidgets(QtCore.Qt.BottomDockWidgetArea, self)
-      
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import PMXGeneralWidget
@@ -89,6 +86,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.symbolSelectorDialog = PMXSelectorDialog(self, title = _("Select Symbol"))
         self.bookmarkSelectorDialog = PMXSelectorDialog(self, title = _("Select Bookmark"))
     
+    def setupDockToolBars(self):
+        self.dockToolBars = {
+            QtCore.Qt.LeftDockWidgetArea: DockWidgetToolBar("Left Dockers", QtCore.Qt.LeftDockWidgetArea, self),
+            QtCore.Qt.RightDockWidgetArea: DockWidgetToolBar("Right Dockers", QtCore.Qt.RightDockWidgetArea, self),
+            QtCore.Qt.TopDockWidgetArea: DockWidgetToolBar("Top Dockers", QtCore.Qt.TopDockWidgetArea, self),
+            QtCore.Qt.BottomDockWidgetArea: DockWidgetToolBar("Bottom Dockers", QtCore.Qt.BottomDockWidgetArea, self),
+        }
+        for dockArea, toolBar in self.dockToolBars.iteritems():
+            self.addToolBar(DockWidgetToolBar.DOCK_AREA_TO_TB[dockArea], toolBar)
+            toolBar.hide()
+
     #============================================================
     # Componer la mainWindow
     #============================================================
@@ -107,7 +115,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     
     def on_dockWidgetTitleBar_collpaseAreaRequest(self, dock):
         area = self.dockWidgetArea(dock)
-        toolbar = DockWidgetToolBar(area, self)
+        self.dockToolBars[area].show()
         
     def addEditor(self, editor, focus = True):
         self.splitTabWidget.addTab(editor)
