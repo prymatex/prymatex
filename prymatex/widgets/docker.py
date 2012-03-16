@@ -55,6 +55,8 @@ class DockWidgetTitleBarButton(QtGui.QAbstractButton):
         self.style().drawComplexControl(QtGui.QStyle.CC_ToolButton, opt, p, self)
 
 class DockWidgetTitleBar(QtGui.QWidget):
+    collpaseAreaRequest = QtCore.pyqtSignal(QtGui.QDockWidget)
+    
     def __init__(self, dockWidget):
         QtGui.QWidget.__init__(self, dockWidget)
         self.floatButton = DockWidgetTitleBarButton(self)
@@ -67,11 +69,14 @@ class DockWidgetTitleBar(QtGui.QWidget):
         self.closeButton.setVisible(True)
         self.collapseButton = DockWidgetTitleBarButton(self)
         self.collapseButton.setIcon(dockWidget.style().standardIcon(QtGui.QStyle.SP_TitleBarMinButton, None, dockWidget))
-        #self.connect(self.collapseButton, SIGNAL("clicked()"), self.toggleCollapsed)
+        self.collapseButton.clicked.connect(self._collapse_area_request)
         self.collapseButton.setVisible(True)
         dockWidget.featuresChanged.connect(self.featuresChanged)
         self.featuresChanged(0)
 
+    def _collapse_area_request(self):
+        self.collpaseAreaRequest.emit(self.parentWidget())
+        
     def minimumSizeHint(self):
         return self.sizeHint()
 
@@ -88,8 +93,7 @@ class DockWidgetTitleBar(QtGui.QWidget):
         hideSize = QtCore.QSize(0, 0)
         if self.collapseButton:
             hideSize = self.collapseButton.sizeHint()
-        buttonHeight = max(max(closeSize.height(), floatSize.height()),
-                            hideSize.height()) + 2
+        buttonHeight = max(max(closeSize.height(), floatSize.height()), hideSize.height()) + 2
         buttonWidth = closeSize.width() + floatSize.width() + hideSize.width()
         titleFontMetrics = q.fontMetrics()
         fontHeight = titleFontMetrics.lineSpacing() + 2 * mw

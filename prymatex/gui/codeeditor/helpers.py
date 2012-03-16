@@ -68,18 +68,22 @@ class SmartTypingPairsHelper(PMXBaseKeyHelper):
         #Si no tengo nada termino
         if not bool(self.pair): return False
 
-        #Vamos a intentar algo radical
+        #Vamos a intentar inferir donde esta el cierre o la apertura del brace
         openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
         closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
         self.cursorOpen = self.cursorClose = None
         if cursor.hasSelection():
-            character = cursor.selectedText()
-            if character in openTyping:
+            selectedCharacter = cursor.selectedText()
+            print cursor in editor._currentBraces, map(lambda c: c is not None and c.hasSelection() or "None", editor._currentBraces)
+            print cursor.selectionStart(), cursor.selectionEnd(), map(lambda c: c is not None and "%s, %s" % (c.selectionStart(), c.selectionEnd()) or "None", editor._currentBraces)
+            if selectedCharacter in openTyping:
+                print editor.getBracesPairs(cursor)
                 #Es un caracter especial de apertura
                 self.cursorOpen = cursor
                 index = openTyping.index(character)
                 self.cursorClose = editor.findTypingPair(character, closeTyping[index], cursor)
-            elif character in closeTyping:
+            elif selectedCharacter in closeTyping:
+                print editor.getBracesPairs(cursor)
                 #Es un caracter especial de cierre
                 self.cursorClose = cursor
                 index = closeTyping.index(character)
@@ -288,3 +292,17 @@ class MultiCursorHelper(PMXBaseKeyHelper):
                 newCursor = editor.document().find(text, cursor)
             if not newCursor.isNull():
                 editor.multiCursorMode.addMergeCursor(newCursor)
+
+class DeleteBracesHelper(PMXBaseKeyHelper):
+    KEY = QtCore.Qt.Key_Delete
+    def accept(self, editor, event, cursor = None, scope = None):
+        #Solo si el cursor no esta al final de la indentacion
+        block = cursor.block()
+        self.newPosition = block.position() + len(block.userData().indent)
+        return self.newPosition != cursor.position()
+        
+    def execute(self, editor, event, cursor = None, scope = None):
+        #Lo muevo al final de la indentacion
+        cursor = editor.textCursor()
+        cursor.setPosition(self.newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
+        editor.setTextCursor(cursor)

@@ -3,11 +3,10 @@
 
 from PyQt4 import QtCore, QtGui
 
-class QAutoHideDockWidgets(QtGui.QToolBar):
-    """
-    QMainWindow "mixin" which provides auto-hiding support for dock widgets
-    (not toolbars).
-    """
+from prymatex import resources
+
+class DockWidgetToolBar(QtGui.QToolBar):
+    """QMainWindow "mixin" which provides auto-hiding support for dock widgets (not toolbars)."""
     DOCK_AREA_TO_TB = {
         QtCore.Qt.LeftDockWidgetArea: QtCore.Qt.LeftToolBarArea,
         QtCore.Qt.RightDockWidgetArea: QtCore.Qt.RightToolBarArea,
@@ -24,23 +23,36 @@ class QAutoHideDockWidgets(QtGui.QToolBar):
         self.setWindowTitle(name)
         
         self.setFloatable(False)
-        w = QtGui.QWidget(None)
-        w.resize(10, 100)
+        self.setMovable(False)
+        self.setVisible(False)
         self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.MinimumExpanding))
-        self.addWidget(w)
+        self.setIconSize(QtCore.QSize(16,16));
+        
+        #Restore action 
+        restoreAction = QtGui.QAction(self)
+        restoreAction.setIcon(resources.getIcon("important"))
+        restoreAction.triggered.connect(self.on_restoreAction_triggered)
+        self.addAction(restoreAction)
 
         self.setAllowedAreas(self.DOCK_AREA_TO_TB[self._area])
         self.parent().addToolBar(self.DOCK_AREA_TO_TB[self._area], self)
         self.parent().centralWidget().installEventFilter(self)
         
-        self.setVisible(False)
         self.hideDockWidgets()
 
+    def on_restoreAction_triggered(self):
+        print "restore"
+        
     def _dockWidgets(self):
-        mw = self.parent()
-        for w in mw.findChildren(QtGui.QDockWidget):
-            if mw.dockWidgetArea(w) == self._area and not w.isFloating():
-                yield w
+        mainWindow = self.parent()
+        for dockWidget in mainWindow.findChildren(QtGui.QDockWidget):
+            
+            if mainWindow.dockWidgetArea(dockWidget) == self._area and dockWidget.isVisible() and not dockWidget.isFloating():
+                if dockWidget.toggleViewAction() not in self.actions():
+                    self.addAction(dockWidget.toggleViewAction())
+                yield dockWidget
+            elif (dockWidget.toggleViewAction() in self.actions() and dockWidget.isVisible()) or mainWindow.dockWidgetArea(dockWidget) != self._area:
+                self.removeAction(dockWidget.toggleViewAction())
 
     def _multiSetVisible(self, widgets, state):
         if state:

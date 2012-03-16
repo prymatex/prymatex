@@ -535,7 +535,20 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 rightCursor = QtGui.QTextCursor(cursor)
                 rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
                 self._currentBraces = (self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True), self._currentBraces[1], self._currentBraces[2], rightCursor)
-
+        
+    def getBracesPairs(self, cursor = None, backward = True):
+        cursor = cursor if cursor is not None else self.textCursor()
+        if cursor.hasSelection():
+            #Find selected
+            braces = filter(lambda c: c is not None and cursor.selectionStart() == c.selectionStart() and cursor.selectionEnd() == c.selectionEnd(), self._currentBraces)
+            if len(braces) == 1:
+                brace = braces[0]
+                index = self._currentBraces.index(brace)
+                if index > 1:
+                    return self._currentBraces[:2][::-1][index % 2], self._currentBraces[index]
+                else:
+                    return self._currentBraces[index], self._currentBraces[2:][::-1][index]
+        
     #=======================================================================
     # Highlight Editor
     #=======================================================================
@@ -927,7 +940,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     break
                 if c1 < c2:
                     c2 = self.document().find(b2, c2.selectionEnd(), flags)
-        return c2
+        if not c2.isNull():
+            return c2
 
     def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = True):
         cursor = cursor or self.textCursor()

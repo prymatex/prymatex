@@ -16,10 +16,10 @@ from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.gui.settings.support import PMXSupportSettings
 from prymatex.widgets.docker import DockWidgetTitleBar
+from prymatex.widgets.toolbar import DockWidgetToolBar
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
-    """Prymatex main window
-    """
+    """Prymatex main window"""
     #=========================================================
     # Signals
     #=========================================================
@@ -94,14 +94,21 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #============================================================
     def addStatusBar(self, statusBar):
         self.statusBar().addPermanentWidget(statusBar)
-        
+    
+    # Dockers    
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)
         self.menuPanels.addAction(dock.toggleViewAction())
-        dock.setTitleBarWidget(DockWidgetTitleBar(dock))
+        titleBar = DockWidgetTitleBar(dock)
+        titleBar.collpaseAreaRequest.connect(self.on_dockWidgetTitleBar_collpaseAreaRequest)
+        dock.setTitleBarWidget(titleBar)
         dock.hide()
         self.dockers.append(dock)
     
+    def on_dockWidgetTitleBar_collpaseAreaRequest(self, dock):
+        area = self.dockWidgetArea(dock)
+        toolbar = DockWidgetToolBar(area, self)
+        
     def addEditor(self, editor, focus = True):
         self.splitTabWidget.addTab(editor)
         if focus:
