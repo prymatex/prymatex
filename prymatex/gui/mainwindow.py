@@ -114,8 +114,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.dockers.append(dock)
     
     def on_dockWidgetTitleBar_collpaseAreaRequest(self, dock):
-        area = self.dockWidgetArea(dock)
-        self.dockToolBars[area].show()
+        if not dock.isFloating():
+            area = self.dockWidgetArea(dock)
+            self.dockToolBars[area].show()
         
     def addEditor(self, editor, focus = True):
         self.splitTabWidget.addTab(editor)

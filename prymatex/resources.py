@@ -36,7 +36,9 @@ INTERNAL = {
     "projectopen": ":/icons/actions/project-open.png",
     "projectclose": ":/icons/actions/project-development-close.png",
     "important": ":/icons/emblems/emblem-important.png",
-    
+    "stack-open": ":/icons/emblems/image-stack-open.png",
+    "stack": ":/icons/emblems/image-stack.png",    
+
     # For menus
     "close":":/icons/actions/document-close.png", 
     "closeall":":/icons/actions/project-development-close-all.png",

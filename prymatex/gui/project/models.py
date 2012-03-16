@@ -10,16 +10,17 @@ from prymatex.models.tree import TreeModel
 from prymatex.gui.project.base import FileSystemTreeNode
 from prymatex.gui.configure.models import PMXConfigureTreeNode
 
-#TODO: Ver si esto no puede ser un NamespaceTreeModel
 class PMXProjectTreeModel(TreeModel):  
     def __init__(self, manager, parent = None):
-        self.manager = manager
         TreeModel.__init__(self, parent)
-    
-    def refreshProjectByPath(self, path):
-        index = self.indexForPath(path)
-        self.refresh(index)
-    
+        self.manager = manager
+        
+    def rowCount(self, parent):
+        parentNode = self.node(parent)
+        if not parentNode.isRootNode() and parentNode.isdir and not parentNode._populated:
+            self._load_directory(parentNode, parent)
+        return parentNode.childCount()
+
     def data(self, index, role):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
@@ -27,6 +28,10 @@ class PMXProjectTreeModel(TreeModel):
         elif role == QtCore.Qt.DecorationRole:
             return node.icon
 
+    def refreshProjectByPath(self, path):
+        index = self.indexForPath(path)
+        self.refresh(index)
+    
     def indexForPath(self, path):
         node = self.nodeForPath(path)
         index = self.createIndex(node.row(), 0, node) if node != None else QtCore.QModelIndex()
@@ -35,18 +40,22 @@ class PMXProjectTreeModel(TreeModel):
     #========================================================================
     # Custom methods
     #========================================================================
-    def _load_directory(self, parentNode, parentIndex):
+    def _load_directory(self, parentNode, parentIndex, notify = False):
         names = os.listdir(parentNode.path)
-        self.beginInsertRows(parentIndex, 0, len(names) - 1)
+        if notify: 
+            self.beginInsertRows(parentIndex, 0, len(names) - 1)
         for name in names:
             node = FileSystemTreeNode(name, parentNode)
             parentNode.appendChild(node)
-        self.endInsertRows()
+        if notify: 
+            self.endInsertRows()
         for child in parentNode.childrenNodes:
-            if child.isdir:
-                index = self.index(child.row(), 0, parentIndex)
-                self._load_directory(child, index)
-
+            child._populated = False
+            #if child.isdir:
+            #    index = self.index(child.row(), 0, parentIndex)
+            #    self._load_directory(child, index)
+	parentNode._populated = True
+	
     def refresh(self, index):
         node = self.node(index)
         while not os.path.exists(node.path):
@@ -58,7 +67,7 @@ class PMXProjectTreeModel(TreeModel):
             for child in node.childrenNodes:
                 node.removeAllChild()
             self.endRemoveRows()
-            self._load_directory(node, index)
+            self._load_directory(node, index, True)
             
     def nodeForPath(self, path):
         currentNode = self.rootNode
@@ -94,11 +103,12 @@ class PMXProjectTreeModel(TreeModel):
             return False
     
     def appendProject(self, project):
+        project._populated = False
         self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
         self.rootNode.appendChild(project)
         self.endInsertRows()
-        index = self.index(project.row(), 0, QtCore.QModelIndex())
-        self._load_directory(project, index)
+        #index = self.index(project.row(), 0, QtCore.QModelIndex())
+        #self._load_directory(project, index)
     
     def removeProject(self, project):
         self.beginRemoveRows(QtCore.QModelIndex(), project.row(), project.row())

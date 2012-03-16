@@ -1,6 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>emblems/image-stack.png</file>
     <file>actions/project-development-close-all.png</file>
+    <file>emblems/image-stack-open.png</file>
     <file>actions/project-development-close.png</file>
     <file>actions/project-development-new-template.png</file>
     <file>actions/project-development.png</file>

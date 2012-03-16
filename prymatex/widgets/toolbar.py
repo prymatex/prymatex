@@ -28,11 +28,11 @@ class DockWidgetToolBar(QtGui.QToolBar):
         self.setFloatable(False)
         self.setMovable(False)
         self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.MinimumExpanding))
-        self.setIconSize(QtCore.QSize(12,12));
+        self.setIconSize(QtCore.QSize(16,16));
         
         #Restore action
         restoreAction = QtGui.QAction(self)
-        restoreAction.setIcon(resources.getIcon("important"))
+        restoreAction.setIcon(resources.getIcon("stack-open"))
         restoreAction.triggered.connect(self.hide)
         self.addAction(restoreAction)
         

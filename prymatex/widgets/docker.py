@@ -3,6 +3,8 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
+
 def hasFeature(dockwidget, feature):
     return dockwidget.features() & feature == feature
 
@@ -68,7 +70,7 @@ class DockWidgetTitleBar(QtGui.QWidget):
         self.closeButton.clicked.connect(dockWidget.close)
         self.closeButton.setVisible(True)
         self.collapseButton = DockWidgetTitleBarButton(self)
-        self.collapseButton.setIcon(dockWidget.style().standardIcon(QtGui.QStyle.SP_TitleBarMinButton, None, dockWidget))
+        self.collapseButton.setIcon(resources.getIcon("stack"))
         self.collapseButton.clicked.connect(self._collapse_area_request)
         self.collapseButton.setVisible(True)
         dockWidget.featuresChanged.connect(self.featuresChanged)
