@@ -5,15 +5,14 @@ import codecs
 import shutil
 import mimetypes
 import fnmatch
+
 from PyQt4 import QtCore, QtGui
+
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
-from functools import partial
 
 class PMXFileManager(QtCore.QObject):
-    """
-    A File Manager
-    """
+    """A File Manager"""
     #=========================================================
     # Signals
     #=========================================================

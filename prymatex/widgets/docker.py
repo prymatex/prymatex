@@ -70,7 +70,7 @@ class DockWidgetTitleBar(QtGui.QWidget):
         self.closeButton.clicked.connect(dockWidget.close)
         self.closeButton.setVisible(True)
         self.collapseButton = DockWidgetTitleBarButton(self)
-        self.collapseButton.setIcon(resources.getIcon("stack"))
+        self.collapseButton.setIcon(dockWidget.style().standardIcon(QtGui.QStyle.SP_TitleBarShadeButton, None, dockWidget))
         self.collapseButton.clicked.connect(self._collapse_area_request)
         self.collapseButton.setVisible(True)
         dockWidget.featuresChanged.connect(self.featuresChanged)

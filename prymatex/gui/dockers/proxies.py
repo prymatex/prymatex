@@ -41,7 +41,7 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         else:
             leftPath = self.sourceModel().filePath(left)
             rightPath = self.sourceModel().filePath(right)
-            return self.application.fileManager.compareFiles(leftPath, rightPath, self.orderBy)
+            return self.application.fileManager.compareFiles(leftPath, rightPath, self.orderBy) < 0
 
     def sortBy(self, orderBy, folderFirst = True, descending = False):
         order = QtCore.Qt.AscendingOrder if not descending else QtCore.Qt.DescendingOrder

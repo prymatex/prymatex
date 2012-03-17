@@ -177,6 +177,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         treeNode = self.currentNode()
         if not treeNode.isproject:
             self.deletePath(treeNode.path)
+            #TODO: si esta en auto update ver como hacer los refresh
+            self.projectTreeProxyModel.refresh(self.projectTreeProxyModel.indexForPath(treeNode.parentNode.path))
         else:
             #Test delete removeFiles
             self.application.projectManager.deleteProject(treeNode, removeFiles = False)

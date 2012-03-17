@@ -37,16 +37,16 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         return True
 
     def lessThan(self, left, right):
-        isleftdir = self.sourceModel().isDir(left)
-        isrightdir = self.sourceModel().isDir(right)
-        if self.folderFirst and isleftdir and not isrightdir:
+        leftNode = self.sourceModel().node(left)
+        rightNode = self.sourceModel().node(right)
+        if self.folderFirst and leftNode.isdir and not rightNode.isdir:
             return not self.descending
-        elif self.folderFirst and not isleftdir and isrightdir:
+        elif self.folderFirst and not leftNode.isdir and rightNode.isdir:
             return self.descending
+        elif self.orderBy == "name" and rightNode.isproject and leftNode.isproject:
+            return cmp(leftNode.name, rightNode.name) < 0
         else:
-            leftPath = self.sourceModel().filePath(left)
-            rightPath = self.sourceModel().filePath(right)
-            return self.application.fileManager.compareFiles(leftPath, rightPath, self.orderBy)
+            return self.application.fileManager.compareFiles(leftNode.path, rightNode.path, self.orderBy) < 0
 
     def node(self, index):
         sIndex = self.mapToSource(index)
