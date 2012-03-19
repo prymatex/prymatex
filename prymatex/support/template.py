@@ -66,13 +66,9 @@ class PMXTemplate(PMXBundleItem):
     files = []                    #Estos son los template files
     
     def load(self, hash):
-        super(PMXTemplate, self).load(hash)
+        PMXBundleItem.load(self, hash)
         for key in PMXTemplate.KEYS:
             setattr(self, key, hash.get(key, None))
-    
-    def update(self, hash):
-        for key in hash.keys():
-            setattr(self, key, hash[key])
     
     @property
     def hash(self):
@@ -159,14 +155,16 @@ class PMXTemplate(PMXBundleItem):
             if template is None and not manager.isDeleted(uuid):
                 template = cls(uuid, data)
                 template.setBundle(bundle)
+                template.setManager(manager)
+                template.addSource(namespace, path)
                 template = manager.addBundleItem(template)
                 manager.addManagedObject(template)
-                template.addSource(namespace, path)
                 #Add files
                 for path in paths:
                     file = PMXTemplateFile(path, template)
                     file = manager.addTemplateFile(file)
                     template.files.append(file)
-            return template
+            elif template is not None:
+                template.addSource(namespace, path)
         except Exception, e:
             print "Error in template %s (%s)" % (info, e)

@@ -621,7 +621,7 @@ class PMXSnippet(PMXBundleItem):
     snippet = None                     #TODO: Poner un mejor nombre, este es el snippet compilado
     
     def load(self, hash):
-        super(PMXSnippet, self).load(hash)
+        PMXBundleItem.load(self, hash)
         for key in PMXSnippet.KEYS:
             setattr(self, key, hash.get(key, None))
     
@@ -636,7 +636,7 @@ class PMXSnippet(PMXBundleItem):
     
     #override save for deprecate compiled snippet
     def save(self):
-        super(PMXSnippet, self).save()
+        PMXBundleItem.save(self, hash)
         self.snippet = None
     
     @property

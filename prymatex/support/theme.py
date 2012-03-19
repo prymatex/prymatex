@@ -88,6 +88,8 @@ class PMXTheme(PMXManagedObject):
             theme = manager.getManagedObject(uuid)
             if theme is None and not manager.isDeleted(uuid):
                 theme = PMXTheme(uuid, data)
+                theme.setManager(manager)
+                theme.addSource(namespace, path)
                 theme = manager.addTheme(theme)
                 settings = data.pop('settings', [])
                 if settings:
@@ -98,6 +100,7 @@ class PMXTheme(PMXManagedObject):
                     theme.styles.append(style)
                 manager.showMessage("Loading theme %s" % theme.name)
                 manager.addManagedObject(theme)
-            theme.addSource(namespace, path)
+            elif theme is not None:
+                theme.addSource(namespace, path)
         except Exception, e:
             print "Error en theme %s (%s)" % (path, e)
