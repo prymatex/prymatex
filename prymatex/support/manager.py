@@ -278,15 +278,11 @@ class PMXSupportBaseManager(object):
         return bundle
         
     def modifyBundle(self, bundle):
-        """
-        Llamado luego de modificar un bundle
-        """
+        """Llamado luego de modificar un bundle"""
         pass
 
     def removeBundle(self, bundle):
-        """
-        Llamado luego de eliminar un bundle
-        """
+        """Llamado luego de eliminar un bundle"""
         pass
 
     def getAllBundles(self):
@@ -343,9 +339,10 @@ class PMXSupportBaseManager(object):
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == bundle.name:
             #Updates que no son updates
             return bundle
+        namespace = namespace or self.defaultNamespace
+        
         if bundle.isProtected:
             if not bundle.isSafe:
-                namespace = namespace or self.defaultNamespace
                 basePath = self.basePath("Bundles", namespace)
                 path = os.path.join(basePath, os.path.basename(bundle.path(namespace)))
                 bundle.addSource(namespace, path)
@@ -517,7 +514,7 @@ class PMXSupportBaseManager(object):
         #No es la mejor forma pero es la forma de guardar el archivo
         file = self.addTemplateFile(file)
         template.files.append(file)
-        file.save(namespace)
+        file.save()
         return file
 
     def updateTemplateFile(self, templateFile, namespace = None, **attrs):

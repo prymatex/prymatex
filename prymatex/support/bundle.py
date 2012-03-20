@@ -22,14 +22,14 @@ class PMXManagedObject(object):
         self.sources = {}
         self.manager = None
 
-    def load(self, hash):
+    def load(self, dataHash):
         raise NotImplemented
 
-    def update(self, hash):
+    def update(self, dataHash):
         raise NotImplemented
     
     def save(self, namespace):
-        self.updateMtime(namespace)
+        raise NotImplemented
 
     @property
     def enabled(self):
@@ -65,10 +65,13 @@ class PMXManagedObject(object):
     def relocateSource(self, namespace, path):
         if os.path.exists(self.path(namespace)):
             shutil.move(self.path(namespace), path)
-        self.sources[namespace] = (path, os.path.getmtime(path))
+            self.sources[namespace] = (path, os.path.getmtime(path))
+        else:
+            self.sources[namespace] = (path, 0)
     
     def updateMtime(self, namespace):
-        self.sources[namespace] = (path, os.path.getmtime(self.sources[namespace][self._MTIME]))
+        path = self.sources[namespace][self._PATH]
+        self.sources[namespace] = (path, os.path.getmtime(path))
 
     def setManager(self, manager):
         self.manager = manager
@@ -77,37 +80,38 @@ class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
-    def __init__(self, uuid, hash):
+    def __init__(self, uuid, dataHash):
         PMXManagedObject.__init__(self, uuid)
         self.populated = False
         self.support = None    #supportPath
-        self.load(hash)
+        self.load(dataHash)
 
     def setSupport(self, support):
         self.support = support
         
-    def load(self, hash):
+    def load(self, dataHash):
         for key in PMXBundle.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
 
-    def update(self, hash):
-        for key in hash.keys():
-            setattr(self, key, hash[key])
+    def update(self, dataHash):
+        for key in dataHash.keys():
+            setattr(self, key, dataHash[key])
     
     @property
     def hash(self):
-        hash = super(PMXBundle, self).hash
+        dataHash = super(PMXBundle, self).hash
         for key in PMXBundle.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
     def save(self, namespace):
         if not os.path.exists(self.path(namespace)):
             os.makedirs(self.path(namespace))
         file = os.path.join(self.path(namespace), self.FILE)
         plist.writePlist(self.hash, file)
+        self.updateMtime(namespace)
 
     def delete(self):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
@@ -161,10 +165,10 @@ class PMXBundleItem(PMXManagedObject):
     FOLDER = ''
     EXTENSION = ''
     PATTERNS = []
-    def __init__(self, uuid, hash):
+    def __init__(self, uuid, dataHash):
         PMXManagedObject.__init__(self, uuid)
         self.bundle = None
-        self.load(hash)
+        self.load(dataHash)
 
     def setBundle(self, bundle):
         self.bundle = bundle
@@ -173,34 +177,36 @@ class PMXBundleItem(PMXManagedObject):
     def enabled(self):
         return self.bundle.enabled
     
-    def load(self, hash):
+    def load(self, dataHash):
         for key in PMXBundleItem.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
     
-    def update(self, hash):
-        for key in hash.keys():
-            setattr(self, key, hash[key])
+    def update(self, dataHash):
+        for key in dataHash.keys():
+            setattr(self, key, dataHash[key])
     
-    def isChanged(self, hash):
-        for key in hash.keys():
-            if getattr(self, key) != hash[key]:
+    def isChanged(self, dataHash):
+        for key in dataHash.keys():
+            if getattr(self, key) != dataHash[key]:
                 return True
         return False
     
     @property
     def hash(self):
-        hash = super(PMXBundleItem, self).hash
+        dataHash = super(PMXBundleItem, self).hash
         for key in PMXBundleItem.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
     def save(self, namespace):
+        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
         dir = os.path.dirname(self.path(namespace))
         if not os.path.exists(dir):
             os.makedirs(dir)
         plist.writePlist(self.hash, self.path(namespace))
+        self.updateMtime(namespace)
     
     def delete(self):
         os.unlink(self.path)

@@ -5,8 +5,9 @@ from PyQt4 import QtCore, QtGui
 from prymatex.models.proxies import PMXFlatTreeProxyModel
 
 class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
-    def __init__(self, parent = None):
+    def __init__(self, manager, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
+        self.manager = manager
         self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax"]
         self.namespacesFilter = [ "prymatex", "user" ]
         self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
@@ -38,6 +39,18 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         else:
             return self.bundleItemTypeOrder.index(rightData.TYPE) > self.bundleItemTypeOrder.index(leftData.TYPE)
     
+    def setData(self, index, value, role):
+        if role == QtCore.Qt.EditRole:  
+            node = self.node(index)
+            if node.TYPE == "bundle":
+                self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
+            elif node.TYPE == "templatefile":
+                self.manager.updateTemplateFile(node, self.namespacesFilter[-1], name = value)
+            else:
+                self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
+            return True
+        return False
+        
     def node(self, index):
         sIndex = self.mapToSource(index)
         return self.sourceModel().node(sIndex)

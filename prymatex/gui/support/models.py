@@ -12,9 +12,7 @@ from prymatex.gui.support import qtadapter
 # Bundle Tree Node
 #====================================================
 class PMXBundleTreeNode(TreeNode):
-    """
-    Bundle and bundle item decorator
-    """
+    """Bundle and bundle item decorator"""
     USED = []
     BANNED_ACCEL = ' \t'
     
@@ -92,22 +90,17 @@ class PMXBundleTreeModel(TreeModel):
     def __init__(self, manager, parent = None):
         TreeModel.__init__(self, parent)
         self.manager = manager
+        self.manager.bundleChanged.connect(self.on_manager_bundleItemChanged)
+        self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
+    
+    def on_manager_bundleItemChanged(self, treeNode):
+        treeNode.name = treeNode.item.name
+        index = self.createIndex(treeNode.row(), 0, treeNode)
+        self.dataChanged.emit(index, index)
     
     def setData(self, index, value, role):  
         if not index.isValid():  
             return False
-        elif role == QtCore.Qt.EditRole:  
-            node = self.node(index)
-            if node.TYPE == "bundle":
-                self.manager.updateBundle(node, name = value)
-            elif node.TYPE == "templatefile":
-                self.manager.updateTemplateFile(node, name = value)
-            else:
-                self.manager.updateBundleItem(node, name = value)
-            #TODO: Update de TreeNode name, mejorar esto que esta muy feo
-            node.name = node.item.name
-            self.dataChanged.emit(index, index)
-            return True
         elif role == QtCore.Qt.CheckStateRole:
             node = self.node(index)
             if node.TYPE == "bundle":
@@ -115,7 +108,7 @@ class PMXBundleTreeModel(TreeModel):
             self.dataChanged.emit(index, index)
             return True
         return False
-     
+    
     def data(self, index, role):  
         if not index.isValid():  
             return None
@@ -136,6 +129,7 @@ class PMXBundleTreeModel(TreeModel):
         self.beginRemoveRows(parent, position, position + count - 1)  
         node.childrenNodes.pop(position)  
         self.endRemoveRows()
+
     #========================================================================
     # Functions
     #========================================================================
@@ -181,9 +175,7 @@ class PMXBundleTreeModel(TreeModel):
 # Themes Styles Row
 #====================================================
 class PMXThemeStyleRow(object):
-    """
-    Theme and Style decorator
-    """
+    """Theme and Style decorator"""
     def __init__(self, item, scores = None):
         self.item = item
         self.scores = scores

@@ -118,7 +118,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
             template = self.proxyTreeModel.node(index)
             if template.TYPE == 'templatefile':
                 template = template.parentNode
-        self.manager.createTemplateFile(u"untitled", template)
+        self.manager.createTemplateFile(u"untitled", template, self.namespace)
 
     def on_actionPreferences_triggered(self):
         self.createBundleItem(u"untitled", "preference")
@@ -134,7 +134,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
             if item.TYPE == 'bundle':
                 self.manager.deleteBundle(item)
             elif item.TYPE == 'templatefile':
-                self.manager.deleteBundle(u"untitled", template)
+                self.manager.deleteTemplateFile(item)
             else:
                 self.manager.deleteBundleItem(item)
 
@@ -265,11 +265,11 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         if current.isChanged:
             if current.TYPE != "":
                 if current.TYPE == "bundle":
-                    self.manager.updateBundle(current.bundleItem, **current.changes)
+                    self.manager.updateBundle(current.bundleItem, self.namespace, **current.changes)
                 elif current.TYPE == "templatefile":
-                    self.manager.updateTemplateFile(current.bundleItem, **current.changes)
+                    self.manager.updateTemplateFile(current.bundleItem, self.namespace, **current.changes)
                 else:
-                    self.manager.updateBundleItem(current.bundleItem, **current.changes)
+                    self.manager.updateBundleItem(current.bundleItem, self.namespace, **current.changes)
 
     def editTreeItem(self, treeItem):
         self.saveChanges()

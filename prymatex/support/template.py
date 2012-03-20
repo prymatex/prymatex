@@ -41,9 +41,9 @@ class PMXTemplateFile(object):
             f.close()
     content = property(getFileContent, setFileContent)
 
-    def update(self, hash):
-        for key in hash.keys():
-            setattr(self, key, hash[key])
+    def update(self, dataHash):
+        for key in dataHash.keys():
+            setattr(self, key, dataHash[key])
     
     def relocate(self, path):
         if os.path.exists(self.path):
@@ -63,32 +63,39 @@ class PMXTemplate(PMXBundleItem):
     TYPE = 'template'
     FOLDER = 'Templates'
     PATTERNS = [ '*' ]
-    files = []                    #Estos son los template files
     
-    def load(self, hash):
-        PMXBundleItem.load(self, hash)
+    def __init__(self, uuid, dataHash):
+        PMXBundleItem.__init__(self, uuid, dataHash)
+        self.files = []                    #Estos son los template files
+    
+    def load(self, dataHash):
+        PMXBundleItem.load(self, dataHash)
         for key in PMXTemplate.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
     
     @property
     def hash(self):
-        hash = super(PMXTemplate, self).hash
+        dataHash = super(PMXTemplate, self).hash
         for key in PMXTemplate.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
     
-    def save(self):
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
-        file = os.path.join(self.path , self.FILE)
+    def save(self, namespace):
+        if not os.path.exists(self.path(namespace)):
+            os.makedirs(self.path(namespace))
+        file = os.path.join(self.path(namespace), self.FILE)
         plist.writePlist(self.hash, file)
+        
         #Hora los archivos del template
         for file in self.files:
-            if file.path != self.path:
-                file.save(self.path)
-
+            if file.path != self.path(namespace):
+                file.save(self.path(namespace))
+                
+        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
+        self.updateMtime(namespace)
+        
     def delete(self):
         for file in self.files:
             os.unlink(file.path)
@@ -146,8 +153,8 @@ class PMXTemplate(PMXBundleItem):
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
         info = os.path.join(path, cls.FILE)
-        paths = glob(os.path.join(path, '*'))
-        paths.remove(info)
+        templateFilePaths = glob(os.path.join(path, '*'))
+        templateFilePaths.remove(info)
         try:
             data = plist.readPlist(info)
             uuid = manager.uuidgen(data.pop('uuid', None))
@@ -160,10 +167,10 @@ class PMXTemplate(PMXBundleItem):
                 template = manager.addBundleItem(template)
                 manager.addManagedObject(template)
                 #Add files
-                for path in paths:
-                    file = PMXTemplateFile(path, template)
-                    file = manager.addTemplateFile(file)
-                    template.files.append(file)
+                for templateFilePath in templateFilePaths:
+                    templateFile = PMXTemplateFile(templateFilePath, template)
+                    templateFile = manager.addTemplateFile(templateFile)
+                    template.files.append(templateFile)
             elif template is not None:
                 template.addSource(namespace, path)
         except Exception, e:

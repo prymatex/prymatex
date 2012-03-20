@@ -617,26 +617,28 @@ class PMXSnippet(PMXBundleItem):
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
     PATTERNS = ['*.tmSnippet', '*.plist']
-    parser = PMXSyntax(uuidmodule.uuid1(), hash = SNIPPET_SYNTAX)
-    snippet = None                     #TODO: Poner un mejor nombre, este es el snippet compilado
+    parser = PMXSyntax(uuidmodule.uuid1(), dataHash = SNIPPET_SYNTAX)
     
-    def load(self, hash):
-        PMXBundleItem.load(self, hash)
+    def __init__(self, uuid, dataHash):
+        PMXBundleItem.__init__(self, uuid, dataHash)
+        self.snippet = None                     #TODO: Poner un mejor nombre, este es el snippet compilado
+    
+    def load(self, dataHash):
+        PMXBundleItem.load(self, dataHash)
         for key in PMXSnippet.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
     
     @property
     def hash(self):
-        hash = super(PMXSnippet, self).hash
+        dataHash = super(PMXSnippet, self).hash
         for key in PMXSnippet.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
     
-    #override save for deprecate compiled snippet
-    def save(self):
-        PMXBundleItem.save(self, hash)
+    def save(self, namespace):
+        PMXBundleItem.save(self, namespace)
         self.snippet = None
     
     @property

@@ -14,12 +14,12 @@ from prymatex.support.utils import compileRegexp
 SPLITLINES = re.compile('\n')
 
 class PMXSyntaxNode(object):
-    def __init__(self, hash, syntax):
+    def __init__(self, dataHash, syntax):
         for k in [  'syntax', 'match', 'begin', 'content', 'name', 'contentName', 'end',
                     'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
             setattr(self, k, None)
         self.syntax = syntax
-        for key, value in hash.iteritems():
+        for key, value in dataHash.iteritems():
             try:
                 if key in ['match', 'begin']:
                     setattr(self, key, compileRegexp( value ))
@@ -133,9 +133,9 @@ class PMXSyntaxNode(object):
         return match
 
 class PMXSyntaxProxy(object):
-    def __init__(self, hash, syntax):
+    def __init__(self, dataHash, syntax):
         self.syntax = syntax
-        self.proxy = hash['include']
+        self.proxy = dataHash['include']
     
     def __getattr__(self, name):
         if self.proxy:
@@ -167,10 +167,10 @@ class PMXSyntax(PMXBundleItem):
     PATTERNS = ['*.tmLanguage', '*.plist']
     FOLDING_START = 1
     FOLDING_STOP = -1
-    def load(self, hash):
-        super(PMXSyntax, self).load(hash)
+    def load(self, dataHash):
+        super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:
-            value = hash.get(key, None)
+            value = dataHash.get(key, None)
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                 try:
                     value = compileRegexp( value )
@@ -181,14 +181,14 @@ class PMXSyntax(PMXBundleItem):
     
     @property
     def hash(self):
-        hash = super(PMXSyntax, self).hash
+        dataHash = super(PMXSyntax, self).hash
         for key in PMXSyntax.KEYS:
             value = getattr(self, key)
             if value != None:
                 if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                     value = value.pattern
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
     @property
     def indentSensitive(self):
@@ -203,10 +203,10 @@ class PMXSyntax(PMXBundleItem):
     @property
     def grammar(self):
         if not hasattr(self, '_grammar'):
-            hash = {}
-            hash['repository'] = self.buildRepository()
-            hash['patterns'] = self.patterns if self.patterns != None else []
-            setattr(self, '_grammar', PMXSyntaxNode(hash , self ))
+            dataHash = {}
+            dataHash['repository'] = self.buildRepository()
+            dataHash['patterns'] = self.patterns if self.patterns != None else []
+            setattr(self, '_grammar', PMXSyntaxNode(dataHash , self ))
         return self._grammar
 
     def buildRepository(self):
