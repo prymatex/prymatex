@@ -12,19 +12,19 @@ class PMXMacro(PMXBundleItem):
     FOLDER = 'Macros'
     EXTENSION = 'tmMacro'
     PATTERNS = [ '*.tmMacro', '*.plist']
-    def load(self, hash):
-        super(PMXMacro, self).load(hash)
+    def load(self, dataHash):
+        PMXBundleItem.load(self, dataHash)
         for key in PMXMacro.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
     
     @property
     def hash(self):
-        hash = super(PMXMacro, self).hash
+        dataHash = super(PMXMacro, self).hash
         for key in PMXMacro.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
             
     def execute(self, processor):
         processor.startMacro(self)

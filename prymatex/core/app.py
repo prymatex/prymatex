@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/SRr/bin/env python
 # -*- coding: utf-8 -*-
 
 #Cosas interesantes
@@ -11,8 +11,10 @@ import inspect
 from PyQt4 import QtGui, QtCore
 
 import prymatex
+
 from prymatex import resources
 from prymatex.core import exceptions
+from prymatex.core.logger import NameFilter
 
 from prymatex.utils.decorator import deprecated
 from prymatex.utils import coroutines
@@ -26,7 +28,7 @@ class PMXApplication(QtGui.QApplication):
     The application loads the PMX Support."""
     
     def __init__(self, profile):
-        """Inicializaciï¿½n de la aplicaciï¿½n."""
+        """Inicialización de la aplicación."""
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
         self.setStyleSheet(resources.APPLICATION_STYLE)
@@ -113,7 +115,7 @@ class PMXApplication(QtGui.QApplication):
         """ return logger, for filter by name in future """
         return logging.getLogger(name)
         
-    def setupLogging(self, verbose):
+    def setupLogging(self, verbose, namePattern):
         from datetime import datetime
         
         level = [ logging.CRITICAL, logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG ][verbose % 5]
@@ -125,7 +127,13 @@ class PMXApplication(QtGui.QApplication):
         
         # Console handler
         ch = logging.StreamHandler()
+        formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
         ch.setLevel(level)
+        
+        if namePattern:
+            #Solo al de consola
+            ch.addFilter(NameFilter(namePattern))
 
         logging.root.addHandler(ch)
         logging.root.info("Application startup")

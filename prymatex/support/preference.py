@@ -52,9 +52,9 @@ class PMXPreferenceSettings(object):
     INDENT_DECREASE = 1
     INDENT_NEXTLINE = 2
     UNINDENT = 3
-    def __init__(self, hash):
+    def __init__(self, dataHash):
         for key in self.KEYS:
-            value = hash.get(key, None)
+            value = dataHash.get(key, None)
             if value != None:
                 if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]:
                     value = compileRegexp( value )
@@ -68,7 +68,7 @@ class PMXPreferenceSettings(object):
     
     @property
     def hash(self):
-        hash = {}
+        dataHash = {}
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(self, key)
             if value != None:
@@ -80,8 +80,8 @@ class PMXPreferenceSettings(object):
                     value = ";".join(value) + ";"
                 elif key in [ 'showInSymbolList' ]:
                     value = value and "1" or "0"
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
     
     def combine(self, other):
         for key in PMXPreferenceSettings.KEYS:
@@ -120,9 +120,9 @@ class PMXPreferenceSettings(object):
         self.snippetsTransformation = []
         for symbol in self.symbolTransformation:
             symbol = "${SYMBOL" + symbol[1:] + "}"
-            hash = {    'content': symbol, 
+            dataHash = {    'content': symbol, 
                            'name': symbol }
-            snippet = PMXSnippet(uuidmodule.uuid1(), "internal", hash = hash)
+            snippet = PMXSnippet(uuidmodule.uuid1(), "internal", dataHash = dataHash)
             self.snippetsTransformation.append(snippet)
     
     def transformSymbol(self, text):
@@ -145,22 +145,22 @@ class PMXPreference(PMXBundleItem):
     EXTENSION = 'tmPreferences'
     PATTERNS = ['*.tmPreferences', '*.plist']
 
-    def load(self, hash):
-        super(PMXPreference, self).load(hash)
+    def load(self, dataHash):
+        super(PMXPreference, self).load(dataHash)
         for key in PMXPreference.KEYS:
             if key == 'settings':
-                setattr(self, key, PMXPreferenceSettings(hash.get(key, {})))
+                setattr(self, key, PMXPreferenceSettings(dataHash.get(key, {})))
             else:
-                setattr(self, key, hash.get(key, None))
+                setattr(self, key, dataHash.get(key, None))
     
     @property
     def hash(self):
-        hash = super(PMXPreference, self).hash
+        dataHash = super(PMXPreference, self).hash
         for key in PMXPreference.KEYS:
             value = self.settings.hash
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
     @staticmethod
     def buildSettings(preferences):

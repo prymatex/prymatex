@@ -43,24 +43,24 @@ class PMXCommand(PMXBundleItem):
                   206: 'showAsTooltip',
                   207: 'createNewDocument'
                   }
-    def load(self, hash):
-        super(PMXCommand, self).load(hash)
+    def load(self, dataHash):
+        PMXBundleItem.load(self, dataHash)
         for key in PMXCommand.KEYS:
-            value = hash.get(key, None)
+            value = dataHash.get(key, None)
             if value != None and key in [    'capturePattern' ]:
                 value = compileRegexp( value )
             setattr(self, key, value)
     
     @property
     def hash(self):
-        hash = super(PMXCommand, self).hash
+        dataHash = super(PMXCommand, self).hash
         for key in PMXCommand.KEYS:
             value = getattr(self, key)
             if value != None:
                 if key in ['capturePattern']:
                     value = unicode(value)
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
     def getInputText(self, processor):
         def getInputTypeAndValue(input, format):
@@ -124,17 +124,17 @@ class PMXDragCommand(PMXCommand):
     FOLDER = 'DragCommands'
     FILES = ['*.tmCommand', '*.plist']
 
-    def load(self, hash):
-        super(PMXDragCommand, self).load(hash)
+    def load(self, dataHash):
+        PMXCommand.load(self, dataHash)
         for key in PMXDragCommand.KEYS:
-            value = hash.get(key, None)
+            value = dataHash.get(key, None)
             setattr(self, key, value)
     
     @property
     def hash(self):
-        hash = super(PMXDragCommand, self).hash
+        dataHash = super(PMXDragCommand, self).hash
         for key in PMXDragCommand.KEYS:
             value = getattr(self, key)
-            hash[key] = value
-        return hash
+            dataHash[key] = value
+        return dataHash
         

@@ -14,15 +14,33 @@ http://manual.macromates.com/en/scope_selectors.html
 """
 
 class PMXManagedObject(object):
+    _PATH = 0
+    _MTIME = 1
     def __init__(self, uuid):
         self.uuid = uuid
         self.namespaces = []
         self.sources = {}
         self.manager = None
+
+    def load(self, dataHash):
+        raise NotImplemented
+
+    def update(self, dataHash):
+        raise NotImplemented
     
+    def save(self, namespace):
+        raise NotImplemented
+
     @property
-    def path(self):
-        return self.sources[self.namespaces[-1]]
+    def enabled(self):
+        return self.manager.isEnabled(self.uuid)
+                
+    @property
+    def hash(self):
+        return { 'uuid': unicode(self.uuid).upper() }
+
+    def path(self, namespace):
+        return self.sources[namespace][self._PATH]
 
     @property
     def isProtected(self):
@@ -31,10 +49,6 @@ class PMXManagedObject(object):
     @property
     def isSafe(self):
         return len(self.namespaces) > 1
-        
-    @property
-    def hash(self):
-        return { 'uuid': unicode(self.uuid).upper() }
     
     def hasNamespace(self, namespace):
         return namespace in self.namespaces
@@ -46,53 +60,58 @@ class PMXManagedObject(object):
                 self.namespaces.insert(index, namespace)
             else:
                 self.namespaces.append(namespace)
-            self.sources[namespace] = path
+            self.sources[namespace] = (path, os.path.exists(path) and os.path.getmtime(path) or 0)
+
+    def relocateSource(self, namespace, path):
+        if os.path.exists(self.path(namespace)):
+            shutil.move(self.path(namespace), path)
+            self.sources[namespace] = (path, os.path.getmtime(path))
+        else:
+            self.sources[namespace] = (path, 0)
     
+    def updateMtime(self, namespace):
+        path = self.sources[namespace][self._PATH]
+        self.sources[namespace] = (path, os.path.getmtime(path))
+
     def setManager(self, manager):
         self.manager = manager
-
-    def relocate(self, path):
-        if os.path.exists(self.path):
-            shutil.move(self.path, path)
-        self.sources[self.namespaces[-1]] = path
-
+    
 class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'
     TYPE = 'bundle'
-    def __init__(self, uuid, hash):
+    def __init__(self, uuid, dataHash):
         PMXManagedObject.__init__(self, uuid)
-        self.enabled = True
         self.populated = False
         self.support = None    #supportPath
-        self.load(hash)
+        self.load(dataHash)
 
     def setSupport(self, support):
         self.support = support
         
-    def load(self, hash):
+    def load(self, dataHash):
         for key in PMXBundle.KEYS:
-            value = hash.get(key, None)
-            setattr(self, key, value)
+            setattr(self, key, dataHash.get(key, None))
 
-    def update(self, hash):
-        for key in hash.keys():
-            setattr(self, key, hash[key])
+    def update(self, dataHash):
+        for key in dataHash.keys():
+            setattr(self, key, dataHash[key])
     
     @property
     def hash(self):
-        hash = super(PMXBundle, self).hash
+        dataHash = super(PMXBundle, self).hash
         for key in PMXBundle.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
-    def save(self):
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
-        file = os.path.join(self.path, self.FILE)
+    def save(self, namespace):
+        if not os.path.exists(self.path(namespace)):
+            os.makedirs(self.path(namespace))
+        file = os.path.join(self.path(namespace), self.FILE)
         plist.writePlist(self.hash, file)
+        self.updateMtime(namespace)
 
     def delete(self):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
@@ -119,11 +138,12 @@ class PMXBundle(PMXManagedObject):
             bundle = manager.getManagedObject(uuid)
             if bundle is None and not manager.isDeleted(uuid):
                 bundle = cls(uuid, data)
-                #Add and promote, capture bundle
-                bundle.enabled = manager.isEnabled(bundle.uuid)
+                bundle.setManager(manager)
+                bundle.addSource(namespace, path)
                 bundle = manager.addBundle(bundle)
                 manager.addManagedObject(bundle)
-            bundle.addSource(namespace, path)
+            elif bundle is not None:
+                bundle.addSource(namespace, path)
         except Exception, e:
             print "Error in laod bundle %s (%s)" % (info_file, e)
 
@@ -145,10 +165,10 @@ class PMXBundleItem(PMXManagedObject):
     FOLDER = ''
     EXTENSION = ''
     PATTERNS = []
-    def __init__(self, uuid, hash):
+    def __init__(self, uuid, dataHash):
         PMXManagedObject.__init__(self, uuid)
         self.bundle = None
-        self.load(hash)
+        self.load(dataHash)
 
     def setBundle(self, bundle):
         self.bundle = bundle
@@ -157,34 +177,36 @@ class PMXBundleItem(PMXManagedObject):
     def enabled(self):
         return self.bundle.enabled
     
-    def load(self, hash):
+    def load(self, dataHash):
         for key in PMXBundleItem.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
     
-    def update(self, hash):
-        for key in hash.keys():
-            setattr(self, key, hash[key])
+    def update(self, dataHash):
+        for key in dataHash.keys():
+            setattr(self, key, dataHash[key])
     
-    def isChanged(self, hash):
-        for key in hash.keys():
-            if getattr(self, key) != hash[key]:
+    def isChanged(self, dataHash):
+        for key in dataHash.keys():
+            if getattr(self, key) != dataHash[key]:
                 return True
         return False
     
     @property
     def hash(self):
-        hash = super(PMXBundleItem, self).hash
+        dataHash = super(PMXBundleItem, self).hash
         for key in PMXBundleItem.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
-    def save(self):
-        dir = os.path.dirname(self.path)
+    def save(self, namespace):
+        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
+        dir = os.path.dirname(self.path(namespace))
         if not os.path.exists(dir):
             os.makedirs(dir)
-        plist.writePlist(self.hash, self.path)
+        plist.writePlist(self.hash, self.path(namespace))
+        self.updateMtime(namespace)
     
     def delete(self):
         os.unlink(self.path)
@@ -207,11 +229,13 @@ class PMXBundleItem(PMXManagedObject):
             item = manager.getManagedObject(uuid)
             if item is None and not manager.isDeleted(uuid):
                 item = cls(uuid, data)
-                #danger!!! add and populate
                 item.setBundle(bundle)
+                item.setManager(manager)
+                item.addSource(namespace, path)
                 item = manager.addBundleItem(item)
                 manager.addManagedObject(item)
-            item.addSource(namespace, path)
+            elif item is not None:
+                item.addSource(namespace, path)
         except Exception, e:
             print "Error in bundle item %s (%s)" % (path, e)
     

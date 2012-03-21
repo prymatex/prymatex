@@ -221,7 +221,6 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         return bundleNode
     
     def modifyBundle(self, bundle):
-        print "modificado", bundle
         self.bundleChanged.emit(bundle)
     
     def removeBundle(self, bundle):

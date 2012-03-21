@@ -11,68 +11,68 @@ from prymatex.utils import plist
 
 class PMXThemeStyle(object):
     KEYS = [ 'scope', 'name', 'settings' ]
-    def __init__(self, hash, theme):
+    def __init__(self, dataHash, theme):
         self.theme = theme
-        self.load(hash)
+        self.load(dataHash)
 
-    def load(self, hash):
+    def load(self, dataHash):
         for key in PMXThemeStyle.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
 
     @property
     def hash(self):
-        hash = {'name': self.name}
+        dataHash = {'name': self.name}
         if self.scope is not None:
-            hash['scope'] = self.scope
-        hash['settings'] = {}
+            dataHash['scope'] = self.scope
+        dataHash['settings'] = {}
         for name, setting in self.settings.iteritems():
             if setting != None:
-                hash['settings'][name] = setting
-        return hash
+                dataHash['settings'][name] = setting
+        return dataHash
         
-    def update(self, hash):
-        for key in hash.keys():
+    def update(self, dataHash):
+        for key in dataHash.keys():
             if key == 'settings':
-                self.settings.update(hash[key])
+                self.settings.update(dataHash[key])
                 self.settings = dict(filter(lambda tupla: tupla[1] != None, self.settings.iteritems()))
             else:
-                setattr(self, key, hash[key])
+                setattr(self, key, dataHash[key])
     
 class PMXTheme(PMXManagedObject):
     KEYS = [    'name', 'comment', 'author', 'settings']
     
-    def __init__(self, uuid, hash):
+    def __init__(self, uuid, dataHash):
         super(PMXTheme, self).__init__(uuid)
         self.styles = []
-        self.load(hash)
+        self.load(dataHash)
 
-    def load(self, hash):
+    def load(self, dataHash):
         for key in PMXTheme.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
 
     def setSettings(self, settings):
         self.settings = settings
         
-    def update(self, hash):
-        for key in hash.keys():
+    def update(self, dataHash):
+        for key in dataHash.keys():
             if key == 'settings':
-                self.settings.update(hash[key])
+                self.settings.update(dataHash[key])
                 self.settings = dict(filter(lambda tupla: tupla[1] != None, self.settings.iteritems()))
                 print self.settings
             else:
-                setattr(self, key, hash[key])
+                setattr(self, key, dataHash[key])
     
     @property
     def hash(self):
-        hash = super(PMXTheme, self).hash
+        dataHash = super(PMXTheme, self).hash
         for key in PMXTheme.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        hash['settings'] = [ { 'settings': self.settings } ]
+                dataHash[key] = value
+        dataHash['settings'] = [ { 'settings': self.settings } ]
         for style in self.styles:
-            hash['settings'].append(style.hash)
-        return hash
+            dataHash['settings'].append(style.hash)
+        return dataHash
         
     def save(self):
         dir = os.path.dirname(self.path)
@@ -88,6 +88,8 @@ class PMXTheme(PMXManagedObject):
             theme = manager.getManagedObject(uuid)
             if theme is None and not manager.isDeleted(uuid):
                 theme = PMXTheme(uuid, data)
+                theme.setManager(manager)
+                theme.addSource(namespace, path)
                 theme = manager.addTheme(theme)
                 settings = data.pop('settings', [])
                 if settings:
@@ -98,6 +100,7 @@ class PMXTheme(PMXManagedObject):
                     theme.styles.append(style)
                 manager.showMessage("Loading theme %s" % theme.name)
                 manager.addManagedObject(theme)
-            theme.addSource(namespace, path)
+            elif theme is not None:
+                theme.addSource(namespace, path)
         except Exception, e:
             print "Error en theme %s (%s)" % (path, e)

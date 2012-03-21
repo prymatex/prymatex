@@ -100,8 +100,9 @@ SNIPPET_SYNTAX = {
 #Snippet Node Bases
 class Node(object):
     def __init__(self, scope, parent = None):
-        self.parent = parent
         self.scope = scope
+        self.parent = parent
+        self.disable = False
 
     def open(self, scope, text):
         return self
@@ -125,26 +126,23 @@ class Node(object):
     def render(self, processor):
         pass
     
-class TextNode(Node):
-    def __init__(self, text, parent = None):
-        super(TextNode, self).__init__("string", parent)
-        self.text = text.replace('\\n', '\n').replace('\\t', '\t')
-
-    def __len__(self):
-        return len(self.text)
-    
-    def __unicode__(self):
-        return self.text
-    
-    def render(self, processor):
-        processor.insertText(self.text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement))
-
 class NodeList(list):
     def __init__(self, scope, parent = None):
         super(NodeList, self).__init__()
-        self.parent = parent
         self.scope = scope
+        self.parent = parent
+        self.__disable = False
 
+    @property
+    def disable(self):
+        return self.__disable
+        
+    @disable.setter
+    def disable(self, value):
+        self.__disable = value
+        for child in self:
+            child.disable = value
+        
     def open(self, scope, text):
         node = self
         if scope == 'constant.character.escape.snippet':
@@ -220,6 +218,21 @@ class NodeList(list):
         if isinstance(element, (str, unicode)):
             element = TextNode(element, self)
         super(NodeList, self).append(element)
+
+#Basic TextNode
+class TextNode(Node):
+    def __init__(self, text, parent = None):
+        super(TextNode, self).__init__("string", parent)
+        self.text = text.replace('\\n', '\n').replace('\\t', '\t')
+
+    def __len__(self):
+        return len(self.text)
+    
+    def __unicode__(self):
+        return self.text
+    
+    def render(self, processor):
+        processor.insertText(self.text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement))
     
 #Snippet root
 class Snippet(NodeList):
@@ -301,7 +314,9 @@ class StructurePlaceholder(NodeList):
         return self
 
     def setContent(self, content):
+        #Pongo un contenido y se corto el arbol
         self.content = content
+        self.disable = True
         
 class StructureTransformation(Node):
     def __init__(self, scope, parent = None):
@@ -617,26 +632,28 @@ class PMXSnippet(PMXBundleItem):
     FOLDER = 'Snippets'
     EXTENSION = 'tmSnippet'
     PATTERNS = ['*.tmSnippet', '*.plist']
-    parser = PMXSyntax(uuidmodule.uuid1(), hash = SNIPPET_SYNTAX)
-    snippet = None                     #TODO: Poner un mejor nombre, este es el snippet compilado
+    parser = PMXSyntax(uuidmodule.uuid1(), dataHash = SNIPPET_SYNTAX)
     
-    def load(self, hash):
-        super(PMXSnippet, self).load(hash)
+    def __init__(self, uuid, dataHash):
+        PMXBundleItem.__init__(self, uuid, dataHash)
+        self.snippet = None                     #TODO: Poner un mejor nombre, este es el snippet compilado
+    
+    def load(self, dataHash):
+        PMXBundleItem.load(self, dataHash)
         for key in PMXSnippet.KEYS:
-            setattr(self, key, hash.get(key, None))
+            setattr(self, key, dataHash.get(key, None))
     
     @property
     def hash(self):
-        hash = super(PMXSnippet, self).hash
+        dataHash = super(PMXSnippet, self).hash
         for key in PMXSnippet.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
     
-    #override save for deprecate compiled snippet
-    def save(self):
-        super(PMXSnippet, self).save()
+    def save(self, namespace):
+        PMXBundleItem.save(self, namespace)
         self.snippet = None
     
     @property
@@ -675,6 +692,7 @@ class PMXSnippet(PMXBundleItem):
     
     def reset(self):
         self.index = -1
+        self.snippet.disable = False
         self.snippet.reset()
     
     def render(self, processor):
@@ -726,15 +744,15 @@ class PMXSnippet(PMXBundleItem):
     def next(self):
         if self.index < len(self.taborder) - 1:
             self.index += 1
-        while self.taborder[self.index] != None and self.taborder[self.index] not in self.snippet:
-            self.taborder.pop(self.index)
+        while self.index < len(self.taborder) and self.taborder[self.index] != None and self.taborder[self.index].disable:
+            self.index += 1
         return self.taborder[self.index]
 
     def previous(self):
         if self.index > 0:
             self.index -= 1
-        while self.taborder[self.index] not in self.snippet:
-            self.taborder.pop(self.index)
+        while self.index != 0 and self.taborder[self.index].disable:
+            self.index -= 1
         return self.taborder[self.index]
     
     def write(self, index, text):

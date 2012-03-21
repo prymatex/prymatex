@@ -16,16 +16,17 @@ class PMXBaseEditorMode(object):
     
     def isActive(self):
         return False
-        
+
     def inactive(self):
         pass
-               
+
     def keyPressEvent(self, event):
         pass
-        
+
 class PMXSnippetEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
         PMXBaseEditorMode.__init__(self, editor)
+        self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
 
     def isActive(self):
         return self.editor.snippetProcessor.snippet is not None
@@ -36,8 +37,10 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
     def keyPressEvent(self, event):
         cursor = self.editor.textCursor()
         if event.key() == QtCore.Qt.Key_Escape:
+            self.logger.debug("Se termina el modo snippet")
             return self.endSnippet(event)
         elif event.key() in [ QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab ]:
+            self.logger.debug("Camino entre los holders")
             holder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if holder is None:
                 return self.endSnippet(event)
@@ -55,6 +58,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index, len(snippet) -1))
                 self.editor.snippetProcessor.selectHolder(holder)
         elif event.text():
+            self.logger.debug("Con texto %s" % event.text())
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if currentHolder is None or currentHolder.last:
                 return self.endSnippet(event)
@@ -95,6 +99,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
             self.editor.textCursor().endEditBlock()
         else:
+            self.logger.debug("Con cualquier tecla")
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             
     def endSnippet(self, event = None):
