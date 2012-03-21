@@ -57,8 +57,8 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 snippet = self.editor.snippetProcessor.snippet 
                 self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index, len(snippet) -1))
                 self.editor.snippetProcessor.selectHolder(holder)
-        else:
-            self.logger.debug("Con cualquier otra tecla")
+        elif event.text():
+            self.logger.debug("Con texto %s" % event.text())
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if currentHolder is None or currentHolder.last:
                 return self.endSnippet(event)
@@ -98,8 +98,9 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             self.editor.snippetProcessor.render()
             self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
             self.editor.textCursor().endEditBlock()
-        #else:
-            #QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+        else:
+            self.logger.debug("Con cualquier tecla")
+            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             
     def endSnippet(self, event = None):
         self.editor.snippetProcessor.endSnippet()
