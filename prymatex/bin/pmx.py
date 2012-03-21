@@ -21,7 +21,7 @@ def runPrymatexApplication(options, files):
     pmx = None
     try:
         pmx = app.PMXApplication(options.profile)
-        pmx.setupLogging(options.verbose)
+        pmx.setupLogging(options.verbose, options.log_pattern)
         
         pmx.replaceSysExceptHook()
         pmx.checkSingleInstance()
@@ -29,6 +29,7 @@ def runPrymatexApplication(options, files):
             pmx.resetSettings()
         pmx.loadGraphicalUserInterface()
         pmx.openArgumentFiles(files)
+        return pmx.exec_()
     except exceptions.AlreadyRunningError as ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
@@ -36,14 +37,12 @@ def runPrymatexApplication(options, files):
         from traceback import format_exc
         traceback = format_exc()
         print traceback
-        return -1
         # Something went very bad tell the user something about the emergency
         #from prymatex.gui.emergency.crashdialog import PMXCrashDialog
-        crashDialog = PMXCrashDialog(traceback)
-        return crashDialog.exec_()
-    finally:
-        return pmx and pmx.exec_() or -1
-            
+        #crashDialog = PMXCrashDialog(traceback)
+        #return crashDialog.exec_()
+    return -1
+
 def main(args):
     from prymatex.core import cliparser
     options, files = cliparser.parse()

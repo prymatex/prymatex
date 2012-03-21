@@ -44,12 +44,14 @@ try:
                         help = "Change profile")
 
         # Maybe useful for some debugging information
-        parser.add_argument('--devel', metavar='devel', default=False,
+        parser.add_argument('--devel', default=False,
                         help = 'Enable developer mode. Useful for plugin developers.')
 
-        parser.add_argument('--verbose', metavar='verbose', default=0, type=int,
+        parser.add_argument('--verbose', default=0, type=int,
                         help = 'Set verbose level from 0 to 4.')
-
+        
+        parser.add_argument('--log-pattern', default='', type=str,
+                        help = 'Set filter pattern for logging')
         return parser
 
 except:
@@ -106,6 +108,9 @@ except:
         parser.add_option('-v', '--verbose', dest='verbose', default=0,
                         help = 'Set verbose level from 0 to 4.')
         
+        parser.add_option('--log-pattern', dest='log_pattern', default='',
+                        help = 'Set filter pattern for logging')
+
         return parser
 
 def parse():
