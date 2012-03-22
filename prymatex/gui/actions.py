@@ -9,6 +9,7 @@ from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
 from prymatex.gui.about import PMXAboutDialog
 
+
 class MainWindowActions(object):
     
     splitTabWidget = None #Overriden in GUI Setup
@@ -241,7 +242,7 @@ class MainWindowActions(object):
     # Help Actions
     #============================================================
     @QtCore.pyqtSlot()
-    def on_actionAbout_Qt_triggered(self):
+    def on_actionAboutQt_triggered(self):
         QtGui.qApp.aboutQt()
 
     aboutDialog = None
@@ -283,4 +284,18 @@ class MainWindowActions(object):
                 continue
             #print "Making %s available when menubar is hidden %s" % (obj.objectName(), obj.text())
             self.addAction(obj)
-            
+    
+    def setupHelpMenuMiscConnections(self):
+        #self.actoin
+        from webbrowser import open
+        from functools import partial # Less code in simple callbacks :)
+        import prymatex
+        
+        ACTION_MAPPING = {
+                          self.actionReadDocumentation: prymatex.__source__ + '/wiki',
+                          self.actionReport_Bug: 'https://github.com/prymatex/prymatex/issues?utf8=%E2%9C%93',
+                          self.actionTranslatePrymatex: 'https://prymatex.com/translate',
+                          self.actionProjectHomepage: prymatex.__url__
+        }
+        for action, url in ACTION_MAPPING.iteritems():
+            action.triggered.connect(partial(open, url))

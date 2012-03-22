@@ -69,6 +69,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.setAcceptDrops(True)
         
         self.setMainWindowAsActionParent()
+        self.setupHelpMenuMiscConnections()
         
     @classmethod
     def contributeToSettings(cls):
@@ -293,7 +294,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                 self.closeEditor(editor)
         except exceptions.UserCancelException:
             event.ignore()
-
+        
+        
+        
     #===========================================================================
     # Drag and Drop
     #===========================================================================
