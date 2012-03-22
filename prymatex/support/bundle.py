@@ -31,6 +31,9 @@ class PMXManagedObject(object):
     def save(self, namespace):
         raise NotImplemented
 
+    def delete(self, namespace):
+        raise NotImplemented
+        
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
@@ -113,12 +116,12 @@ class PMXBundle(PMXManagedObject):
         plist.writePlist(self.hash, file)
         self.updateMtime(namespace)
 
-    def delete(self):
+    def delete(self, namespace):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
-        os.unlink(os.path.join(self.path, self.FILE))
+        os.unlink(os.path.join(self.path(namespace), self.FILE))
         try:
             #El ultimo apaga la luz, elimina el directorio base
-            os.rmdir(self.path)
+            os.rmdir(self.path(namespace))
         except:
             pass
             
@@ -208,12 +211,12 @@ class PMXBundleItem(PMXManagedObject):
         plist.writePlist(self.hash, self.path(namespace))
         self.updateMtime(namespace)
     
-    def delete(self):
-        os.unlink(self.path)
-        dir = os.path.dirname(self.path)
+    def delete(self, namespace):
+        os.unlink(self.path(namespace))
+        folder = os.path.dirname(self.path(namespace))
         try:
             #El ultimo apaga la luz, elimina el directorio base
-            os.rmdir(dir)
+            os.rmdir(folder)
         except:
             pass
     

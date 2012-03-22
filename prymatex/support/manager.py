@@ -51,9 +51,9 @@ class PMXSupportBaseManager(object):
     
     def __init__(self):
         self.namespaces = {}
+        self.nsorder = []
         
         self.ready = False
-        self.nsorder = []
         self.environment = {}
         self.managedObjects = {}
         self.cache = PMXSupportCache()
@@ -333,48 +333,46 @@ class PMXSupportBaseManager(object):
         return self.getManagedObject(uuid)
     
     def updateBundle(self, bundle, namespace = None, **attrs):
-        """
-        Actualiza un bundle
-        """
+        """Actualiza un bundle"""
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == bundle.name:
             #Updates que no son updates
             return bundle
+
         namespace = namespace or self.defaultNamespace
         
-        if bundle.isProtected:
-            if not bundle.isSafe:
-                basePath = self.basePath("Bundles", namespace)
-                path = os.path.join(basePath, os.path.basename(bundle.path(namespace)))
-                bundle.addSource(namespace, path)
-        else:
-            if "name" in attrs:
-                path = ensurePath(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
-                bundle.relocateSource(namespace, path)
+        if bundle.isProtected and not bundle.isSafe:
+            #Safe bundle
+            basePath = self.basePath("Bundles", namespace)
+            path = os.path.join(basePath, os.path.basename(bundle.path(self.protectedNamespace)))
+            bundle.addSource(namespace, path)
+            self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace, path))
+        elif not bundle.isProtected and "name" in attrs:
+            #Move bundle
+            path = ensurePath(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
+            bundle.relocateSource(namespace, path)
         bundle.update(attrs)
         bundle.save(namespace)
         self.modifyBundle(bundle)
         return bundle
         
     def deleteBundle(self, bundle):
-        """
-        Elimina un bundle, si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
-        """
-        items = self.findBundleItems(bundle = bundle)
-
+        """Elimina un bundle, si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado"""
         #Primero los items
+        items = self.findBundleItems(bundle = bundle)
+        
         for item in items:
             self.deleteBundleItem(item)
-        if bundle.isProtected:
-            if bundle.isSafe:
-                bundle.delete()
-            self.setDeleted(bundle.uuid)
-        else:
-            bundle.delete()
+        
+        for namespace in bundle.namespaces:
+            #Si el espacio de nombres es distinto al protegido lo elimino
+            if namespace != self.protectedNamespace:
+                bundle.delete(namespace)
+            else:
+                self.setDeleted(bundle.uuid)
         self.removeBundle(bundle)
     
     def disableBundle(self, bundle, disabled):
-        bundle.enabled = not bool(disabled)
-        if not bundle.enabled:
+        if disabled:
             self.setDisabled(bundle.uuid)
         else:
             self.setEnabled(bundle.uuid)
@@ -462,35 +460,37 @@ class PMXSupportBaseManager(object):
         if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
             self.cache.deprecateValues(item.tabTrigger, attrs['tabTrigger'])
 
+        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco más
         namespace = namespace or self.defaultNamespace
+        
         if item.bundle.isProtected and not item.bundle.isSafe:
             self.updateBundle(item.bundle, namespace)
-        if item.isProtected:
-            if not item.isSafe:
-                path = os.path.join(item.bundle.path(namespace), item.FOLDER, os.path.basename(item.path(namespace)))
-                item.addSource(namespace, path)
-        else:
-            if "name" in attrs:
-                namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
-                path = ensurePath(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
-                item.relocateSource(namespace, path)
+
+        if item.isProtected and not item.isSafe:
+            #Safe Bundle Item
+            path = os.path.join(item.bundle.path(namespace), item.FOLDER, os.path.basename(item.path(self.protectedNamespace)))
+            item.addSource(namespace, path)
+            self.logger.debug("Add namespace '%s' in source %s for bundle item." % (namespace, path))
+        elif not item.isProtected and "name" in attrs:
+            #Move Bundle Item
+            namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
+            path = ensurePath(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
+            item.relocateSource(namespace, path)
         item.update(attrs)
         item.save(namespace)
         self.modifyBundleItem(item)
         return item
     
     def deleteBundleItem(self, item):
-        """
-        Elimina un bundle por su uuid,
+        """Elimina un bundle por su uuid,
         si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
         """
-        #Si el espacio de nombres es distinto al protegido lo elimino
-        if item.isProtected:
-            if item.isSafe:
-                item.delete()
-            self.setDeleted(item.uuid)
-        else:
-            item.delete()
+        for namespace in item.namespaces:
+            #Si el espacio de nombres es distinto al protegido lo elimino
+            if namespace != self.protectedNamespace:
+                item.delete(namespace)
+            else:
+                self.setDeleted(item.uuid)
         self.removeBundleItem(item)
         
     #---------------------------------------------------
@@ -525,8 +525,8 @@ class PMXSupportBaseManager(object):
         if "name" in attrs:
             path = ensurePath(os.path.join(template.path(namespace), "%s"), self.convertToValidPath(attrs["name"]))
             templateFile.relocate(path)
-            attrs.pop("name")
         templateFile.update(attrs)
+        self.modifyBundleItem(templateFile)
         return templateFile
 
     def deleteTemplateFile(self, templateFile):
@@ -590,14 +590,12 @@ class PMXSupportBaseManager(object):
         Actualiza un themes
         """
         namespace = namespace or self.defaultNamespace
-        if theme.isProtected:
-            if not theme.isSafe:
-                path = os.path.join(self.namespaces[namespace]['Themes'], os.path.basename(theme.path(namespace)))
-                theme.addSource(namespace, path)
-        else:
-            if "name" in attrs:
-                path = ensurePath(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
-                theme.relocateSource(namespace, path)
+        if theme.isProtected and not theme.isSafe:
+            path = os.path.join(self.namespaces[namespace]['Themes'], os.path.basename(theme.path(self.protectedNamespace)))
+            theme.addSource(namespace, path)
+        elif not theme.isProtected and "name" in attrs:
+            path = ensurePath(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
+            theme.relocateSource(namespace, path)
         theme.update(attrs)
         theme.save(namespace)
         self.modifyTheme(theme)
@@ -607,14 +605,13 @@ class PMXSupportBaseManager(object):
         """
         Elimina un theme por su uuid
         """
+        for namespace in theme.namespaces:
+            #Si el espacio de nombres es distinto al protegido lo elimino
+            if namespace != self.protectedNamespace:
+                theme.delete(namespace)
+            else:
+                self.setDeleted(theme.uuid)
         self.removeTheme(theme)
-        #Si el espacio de nombres es distinto al protegido lo elimino
-        if theme.isProtected:
-            if theme.isSafe:
-                pass #TODO: Borrar archivos en safe zones
-            self.setDeleted(theme.uuid)
-        else:
-            theme.delete()
     
     #---------------------------------------------------
     # THEMESTYLE INTERFACE
@@ -700,9 +697,7 @@ class PMXSupportBaseManager(object):
         raise NotImplementedError
     
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
-        """
-        Return a list of tab triggers bundle items
-        """
+        """Return a list of tab triggers bundle items"""
         raise NotImplementedError
     
     #---------------------------------------------------------------
@@ -755,9 +750,7 @@ class PMXSupportBaseManager(object):
     # KEYEQUIVALENT INTERFACE
     #---------------------------------------------------
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
-        """
-        Return a list of key equivalent bundle items
-        """
+        """Return a list of key equivalent bundle items"""
         raise NotImplementedError
         
     #---------------------------------------------------------------

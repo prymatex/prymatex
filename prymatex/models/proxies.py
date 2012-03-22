@@ -93,7 +93,8 @@ class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
     # source model handler
     #=========================================
     def on_sourceModel_dataChanged(self, topLeft, bottomRight):
-        print "cambiaron los datos", topLeft, bottomRight
+        #TODO: Cabmiaron los datos tengo que hacer update
+        pass
     
     def on_sourceModel_rowsInserted(self, parent, start, end):
         for i in xrange(start, end + 1):
@@ -107,5 +108,4 @@ class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
         self.__indexMap = filter(lambda index: index.parent() != parent or index.row() not in range(start, end + 1), self.__indexMap)
 
     def on_sourceModel_layoutChanged(self):
-        print "cambio el layout"
-    
+        pass

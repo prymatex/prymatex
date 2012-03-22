@@ -74,10 +74,10 @@ class PMXTheme(PMXManagedObject):
             dataHash['settings'].append(style.hash)
         return dataHash
         
-    def save(self):
-        dir = os.path.dirname(self.path)
-        if not os.path.exists(dir):
-            os.makedirs(dir)
+    def save(self, namespace):
+        folder = os.path.dirname(self.path(namespace))
+        if not os.path.exists(folder):
+            os.makedirs(folder)
         plist.writePlist(self.hash, self.path)
 
     @classmethod

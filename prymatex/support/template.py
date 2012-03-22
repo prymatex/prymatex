@@ -96,15 +96,15 @@ class PMXTemplate(PMXBundleItem):
         #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
         self.updateMtime(namespace)
         
-    def delete(self):
+    def delete(self, namespace):
         for file in self.files:
             os.unlink(file.path)
-        os.unlink(os.path.join(self.path, self.FILE))
-        os.rmdir(self.path)
-        dir = os.path.dirname(self.path)
+        os.unlink(os.path.join(self.path(namespace), self.FILE))
+        os.rmdir(self.path(namespace))
+        folder = os.path.dirname(self.path(namespace))
         try:
             #El ultimo apaga la luz, elimina el directorio base
-            os.rmdir(dir)
+            os.rmdir(folder)
         except:
             pass
 
