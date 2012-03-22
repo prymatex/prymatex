@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>prymatex/Prymatex_Logo.png</file>
     <file>emblems/image-stack.png</file>
     <file>actions/project-development-close-all.png</file>
     <file>emblems/image-stack-open.png</file>
