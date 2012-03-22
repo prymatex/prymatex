@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>AboutDialog</class>
+ <widget class="QDialog" name="AboutDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,11 +11,15 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>About Prymatex</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/prymatex/Prymatex_Logo.png</normaloff>:/icons/prymatex/Prymatex_Logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="labelLogo">
      <property name="text">
       <string/>
      </property>
@@ -28,14 +32,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="labelTitle">
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:11pt; font-weight:600;&quot;&gt;Prymatex&lt;/span&gt;&lt;/p&gt;&lt;hr/&gt;&lt;p align=&quot;center&quot;&gt;Oprn Source Text Editor&lt;br/&gt;&lt;br/&gt;© Prymatex Team 2009-2012&lt;br/&gt;van Haaster Diego&lt;br/&gt;Defossé Nahuel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="textEdit"/>
+    <widget class="QTextEdit" name="textInformation"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -59,7 +63,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>AboutDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -75,7 +79,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>AboutDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

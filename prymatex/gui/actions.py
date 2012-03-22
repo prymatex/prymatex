@@ -7,6 +7,7 @@ from prymatex import resources
 from prymatex.gui import dialogs
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
+from prymatex.gui.about import PMXAboutDialog
 
 class MainWindowActions(object):
     
@@ -242,13 +243,15 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionAbout_Qt_triggered(self):
         QtGui.qApp.aboutQt()
-        
+
+    aboutDialog = None
+            
     @QtCore.pyqtSlot()
-    def on_actionAbout_this_application_triggered(self):
-        QtGui.QMessageBox.information(self, self.trUtf8("About Prymatex"), 
-                                self.trUtf8("<h3>Prymatex</h3>"
-                                "<p>A general purpouse Text Editor</p>")
-                                )
+    def on_actionAbout_triggered(self):
+        # Lazy 
+        if not self.aboutDialog:
+            self.aboutDialog = PMXAboutDialog(self) 
+        self.aboutDialog.exec_()
         
     @QtCore.pyqtSlot()
     def on_actionProjectHomepage_triggered(self):
@@ -256,12 +259,20 @@ class MainWindowActions(object):
         import prymatex
         url = getattr(prymatex, '__url__', "https://github.com/D3f0/prymatex")
         webbrowser.open(url)
-
+    
+    SCREENSHOT_FORMAT = 'png'
+    
     @QtCore.pyqtSlot()
     def on_actionTakeScreenshot_triggered(self):
         pxm = QtGui.QPixmap.grabWindow(self.winId())
         from datetime import datetime
         now = datetime.now()
-        name = "%s.%s" % (now.strftime('sshot-%Y-%m-%d-%H_%M_%S'), 'png')
-        pxm.save(name, format)
+        fileName = now.strftime("sshot-%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
+        pxm.save(fileName, self.SCREENSHOT_FORMAT)
+        try:
+            self.currentEditor().showMessage("%s saved" % fileName)
+        except AttributeError as e:
+            QtGui.QMessageBox.information(self, "Screenshoot", 
+                "%s saved" % fileName)
+            
         
