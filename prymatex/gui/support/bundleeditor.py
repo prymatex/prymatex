@@ -12,10 +12,11 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         QtGui.QDialog.__init__(self)
         PMXBaseWidgetComponent.__init__(self)
         self.setupUi(self)
+        self.namespace = None
         self.application = application
         self.manager = self.application.supportManager
+        
         self.finished.connect(self.on_bundleEditor_finished)
-        self.namespace = None
         
         #Cargar los widgets editores
         self.configEditorWidgets()
@@ -187,7 +188,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.proxyTreeModel.setFilterBundleItemType(value)
     
     def configSelectTop(self):
-        self.comboBoxItemFilter.addItem("Show all", "")
+        self.comboBoxItemFilter.addItem("Show all")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/languages.png"), "Languages", "syntax")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/snippets.png"), "Snippets", "snippet")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/macros.png"), "Macros", "macro")
