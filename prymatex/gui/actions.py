@@ -275,4 +275,12 @@ class MainWindowActions(object):
             QtGui.QMessageBox.information(self, "Screenshoot", 
                 "%s saved" % fileName)
             
-        
+    def setMainWindowAsActionParent(self):
+        # Don't know if this brings side effects
+        for name in (name for name in dir(self) if name.startswith('action')):
+            obj = getattr(self, name)
+            if not isinstance(obj, QtGui.QAction):
+                continue
+            #print "Making %s available when menubar is hidden %s" % (obj.objectName(), obj.text())
+            self.addAction(obj)
+            

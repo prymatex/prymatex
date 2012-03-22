@@ -68,6 +68,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
 
         self.setAcceptDrops(True)
         
+        self.setMainWindowAsActionParent()
+        
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import PMXGeneralWidget
@@ -106,7 +108,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # Dockers    
     def addDock(self, dock, area):
         self.addDockWidget(area, dock)
-        self.menuPanels.addAction(dock.toggleViewAction())
+        toggleAction = dock.toggleViewAction()
+        self.menuPanels.addAction(toggleAction)
+        self.addAction(toggleAction)
         titleBar = DockWidgetTitleBar(dock)
         titleBar.collpaseAreaRequest.connect(self.on_dockWidgetTitleBar_collpaseAreaRequest)
         dock.setTitleBarWidget(titleBar)
