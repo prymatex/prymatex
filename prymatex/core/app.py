@@ -8,7 +8,7 @@ import sys
 import logging
 import inspect
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore, Qt
 
 import prymatex
 
@@ -28,7 +28,7 @@ class PMXApplication(QtGui.QApplication):
     The application loads the PMX Support."""
     
     def __init__(self, profile):
-        """Inicialización de la aplicación."""
+        """Inicializaciï¿½n de la aplicaciï¿½n."""
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
         self.setStyleSheet(resources.APPLICATION_STYLE)
@@ -140,6 +140,22 @@ class PMXApplication(QtGui.QApplication):
         logging.root.debug("Application startup debug")
 
         self.logger = logging.root
+        
+        # Route Qt output
+        Qt.qInstallMsgHandler(self.qtMessageHandler)
+        
+    def qtMessageHandler(self, msgType, msgString):
+        ''' Route Qt messaging system into Prymatex/Python one'''
+        if msgType == Qt.QtDebugMsg:
+            self.logger.debug(msgString)
+        elif msgType == Qt.QtWarningMsg:
+            self.logger.warn(msgString)
+        elif msgType == Qt.QtCriticalMsg:
+            self.logger.critical(msgString)
+        elif msgType ==  Qt.QtFatalMsg:
+            self.logger.fatal(msgString)
+        elif msgType == Qt.QtSystemMsg:
+            self.logger.debug("System: %s" % msgString)
 
     #========================================================
     # Managers
