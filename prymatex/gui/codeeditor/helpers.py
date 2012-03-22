@@ -228,15 +228,12 @@ class SmartUnindentHelper(PMXBaseKeyHelper):
             indentMarks = settings.indent(text)
             if PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
                 previous = block.previous()
-                return previous.isValid() and block.userData().indent >= previous.userData().indent
+                return previous.isValid() and block.userData().indent == previous.userData().indent
         return False
         
     def execute(self, editor, event, cursor = None, scope = None):
         QtGui.QPlainTextEdit.keyPressEvent(editor, event)
-        cursor = editor.textCursor()
-        cursor.setPosition(cursor.block().position())
-        for _ in range(len(editor.tabKeyBehavior)):
-            cursor.deleteChar()
+        editor.unindentBlocks(cursor)
 
 class SmartIndentHelper(PMXBaseKeyHelper):
     KEY = QtCore.Qt.Key_Return

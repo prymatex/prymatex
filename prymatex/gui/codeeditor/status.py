@@ -361,9 +361,9 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
         match, flags = self.getIFindMatchAndFlags()
         if self.currentEditor.findMatch(match, flags):
-            self.lineEditIFind.setStyleSheet(resources.FIND_STYLE_MATCH)
+            self.lineEditIFind.setStyleSheet(resources.FIND_MATCH_STYLE)
         else:
-            self.lineEditIFind.setStyleSheet(resources.FIND_STYLE_NO_MATCH)
+            self.lineEditIFind.setStyleSheet(resources.FIND_NO_MATCH_STYLE)
     
     def getIFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()

@@ -345,8 +345,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         rword = rword.rstrip()
         return lword + rword, position - len(lword), position + len(rword)
     
-    def getSelectionBlockStartEnd(self):
-        cursor = self.textCursor()
+    def getSelectionBlockStartEnd(self, cursor = None):
+        cursor = cursor or self.textCursor()
         start, end = cursor.selectionStart(), cursor.selectionEnd()
         if start > end:
             return self.document().findBlock(end), self.document().findBlock(start)
@@ -1099,11 +1099,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         if block is not None:
             return block
 
-    def indentBlocks(self):
+    def indentBlocks(self, cursor = None):
         """Indents text, block selections.
         """
-        cursor = self.textCursor()
-        start, end = self.getSelectionBlockStartEnd()
+        cursor = QtGui.QTextCursor(cursor or self.textCursor())
+        start, end = self.getSelectionBlockStartEnd(cursor)
         cursor.beginEditBlock()
         new_cursor = QtGui.QTextCursor(cursor)
         while True:
@@ -1115,10 +1115,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         del new_cursor
         cursor.endEditBlock()        
 
-    def unindentBlocks(self):
-        cursor = self.textCursor()
-        start, end = self.getSelectionBlockStartEnd()
-        cursor = QtGui.QTextCursor(cursor)
+    def unindentBlocks(self, cursor = None):
+        cursor = QtGui.QTextCursor(cursor or self.textCursor())
+        start, end = self.getSelectionBlockStartEnd(cursor)
         cursor.beginEditBlock()
         while True:
             data = start.userData()

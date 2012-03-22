@@ -189,7 +189,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                            'name': "Error" + context.command.name,
                           'input': 'none',
                          'output': 'showAsHTML' }
-        command = PMXCommand(self.editor.application.supportManager.uuidgen(), hash = commandHash)
+        command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
         command.bundle = context.command.bundle
         self.editor.insertBundleItem(command)
         
@@ -220,11 +220,11 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(context.outputValue)
         
     def insertAsSnippet(self, context):
-        hash = {    'content': context.outputValue, 
+        snippetHash = {    'content': context.outputValue, 
                        'name': context.command.name,
                  'tabTrigger': context.command.tabTrigger,
               'keyEquivalent': context.command.keyEquivalent }
-        snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), hash = hash)
+        snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), dataHash = snippetHash)
         snippet.bundle = context.command.bundle
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
