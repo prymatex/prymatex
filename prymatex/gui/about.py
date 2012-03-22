@@ -9,11 +9,11 @@ class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         self.textInformation.setReadOnly(True)
-        self.labelTitle.append('<br>')
         self.fillVersionInfo()
         
     def fillVersionInfo(self):
-        
+        pmx_url = prymatex.__url__
+        pmx_source = prymatex.__source__
         commandline = ' '.join(sys.argv) 
         pmx_version = "%s (%s)" % ('.'.join(map(str, prymatex.VERSION)), self.getGitVersion())
         zmq_version = self.getZMQVersion()
@@ -25,6 +25,8 @@ class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
                 
             </style>
             <dl>
+                <dt>Home Page</dt><dd><a href="{pmx_url}">{pmx_url}</a></dd>
+                <dt>Source</dt><dd><a href="{pmx_url}">{pmx_source}</a></dd>
                 <dt>Version</dt><dd>{pmx_version}</dd>
                 <dt>Command Line</dt><dd>{commandline}</dd>
                 <dt>Ponyguruma Regex Library</dt><dd>{pony_version}</dd>
