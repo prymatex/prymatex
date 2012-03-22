@@ -86,7 +86,9 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             cursor.setPosition(currentHolder.start)
             cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
             #TODO: estos replace tienen que tener una forma mas "interesante"
-            currentHolder.setContent(cursor.selectedText().replace(u"\u2029", '\n'))
+            selectedText = cursor.selectedText().replace(u"\u2029", '\n')
+            selectedText = selectedText.replace(u"\u2028", '\n')
+            currentHolder.setContent(selectedText)
             
             #Remove text
             self.selectSlice(self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length)
