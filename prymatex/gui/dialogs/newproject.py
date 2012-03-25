@@ -56,6 +56,10 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def on_lineLocation_textChanged(self, text):
         if not text:
             self.lineLocation.setText(self.application.projectManager.workspaceDirectory)
+        # TODO: In need of better logic for when to replace project name with path
+        if True or not self.lineProjectName.text():
+            proposedName = text.strip('/').rsplit('/', 1)[-1]
+            self.lineProjectName.setText(proposedName)
 
     def on_checkBoxUseDefaultLocation_toggled(self, checked):
         self.lineLocation.setEnabled(not checked)
