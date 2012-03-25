@@ -128,8 +128,7 @@ class PMXTemplate(PMXBundleItem):
     
     def execute(self, environment = {}):
         origWD = os.getcwd() # remember our original working directory
-        print self.sources
-        os.chdir(self.path)
+        os.chdir(self.path('prymatex'))
         
         shellCommand, environment = prepareShellScript(self.command, environment)
         
