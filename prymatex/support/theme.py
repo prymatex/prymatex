@@ -106,6 +106,8 @@ class PMXTheme(PMXManagedObject):
             print "Error en theme %s (%s)" % (path, e)
 
     def reload(self, namespace):
+        #Remove all styles
+        map(lambda style: self.manager.removeThemeStyle(style), self.styles)
         data = plist.readPlist(self.path(namespace))
         self.load(data)
         settings = data.pop('settings', [])
@@ -115,4 +117,4 @@ class PMXTheme(PMXManagedObject):
             style = PMXThemeStyle(setting, self)
             style = self.manager.addThemeStyle(style)
             self.styles.append(style)
-        self.updateMtime(namespace)
+        self.manager.modifyTheme(self)

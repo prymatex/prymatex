@@ -189,7 +189,7 @@ class PMXSupportBaseManager(object):
     def populateBundle(self, bundle):
         nss = bundle.namespaces[::-1]
         for namespace in nss:
-            bpath = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path(namespace)))
+            bpath = bundle.path(namespace)
             # Search for support
             if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
                 bundle.setSupport(os.path.join(bpath, 'Support'))
@@ -207,69 +207,90 @@ class PMXSupportBaseManager(object):
         #Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
         self.messageHandler = callback
-        for ns in self.nsorder[::-1]:
-            self.reloadThemes(ns)
-            self.reloadBundles(ns)
-        #for bundle in self.getAllBundles():
-        #    if bundle.enabled:
-        #        self.repopulateBundle(bundle)
+        self.logger.debug("Begin reload support.")
+        for namespace in self.nsorder[::-1]:
+            self.logger.debug("Search in %s, %s." % (namespace, self.namespaces[namespace]))
+            self.reloadThemes(namespace)
+            self.reloadBundles(namespace)
+        for bundle in self.getAllBundles():
+            if bundle.enabled:
+                pass
+                #self.repopulateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
+        self.logger.debug("End reload support.")
     
     #---------------------------------------------------
     # RELOAD THEMES
     #---------------------------------------------------
     def reloadThemes(self, namespace):
-        installedThemes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
-        if installedThemes and 'Themes' in self.namespaces[namespace]:
+        if 'Themes' in self.namespaces[namespace]:
+            installedThemes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
             themePaths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for theme in installedThemes:
                 themePath = theme.path(namespace)
                 if themePath in themePaths:
                     if namespace == theme.currentNamespace and theme.sourceChanged(namespace):
+                        self.logger.debug("Theme %s changed, reload from %s." % (theme.name, themePath))
                         theme.reload(namespace)
+                        theme.updateMtime(namespace)
+                        self.modifyTheme(theme)
                     themePaths.remove(themePath)
                 else:
                     theme.removeSource(namespace)
                     if not theme.hasSources():
+                        self.logger.debug("Theme %s removed." % theme.name)
+                        self.removeManagedObject(theme)
                         self.removeTheme(theme)
-                    elif namespace == theme.currentNamespace:
+                    else:
                         theme.setDirty()
             for path in themePaths:
+                self.logger.debug("New theme %s." % path)
                 PMXTheme.loadTheme(path, namespace, self)
     
     #---------------------------------------------------
     # RELOAD BUNDLES
     #---------------------------------------------------
     def reloadBundles(self, namespace):
-        installedBundles = filter(lambda theme: theme.hasNamespace(namespace), self.getAllBundles())
-        if installedBundles and 'Bundles' in self.namespaces[namespace]:
+        if 'Bundles' in self.namespaces[namespace]:
+            installedBundles = filter(lambda theme: theme.hasNamespace(namespace), self.getAllBundles())
             bundlePaths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for bundle in installedBundles:
                 bundlePath = bundle.path(namespace)
+                bundleItems = self.findBundleItems(bundle = bundle)
                 if bundlePath in bundlePaths:
-                    if bundle.sourceChanged(namespace):
+                    if namespace == bundle.currentNamespace and bundle.sourceChanged(namespace):
+                        self.logger.debug("Bundle %s changed, reload from %s." % (bundle.name, bundlePath))
                         bundle.reload(namespace)
+                        bundle.updateMtime(namespace)
+                        self.modifyBundle(bundle)
                     bundlePaths.remove(bundlePath)
                 else:
+                    map(lambda item: item.removeSource(namespace), bundleItems)
                     bundle.removeSource(namespace)
                     if not bundle.hasSources():
+                        self.logger.debug("Bundle %s removed." % bundle.name)
+                        map(lambda item: self.removeManagedObject(item), bundleItems)
+                        map(lambda item: self.removeBundleItem(item), bundleItems)
+                        self.removeManagedObject(bundle)
                         self.removeBundle(bundle)
                     else:
+                        map(lambda item: item.setDirty(), bundleItems)
                         bundle.setDirty()
             for path in bundlePaths:
+                self.logger.debug("New bundle %s." % path)
                 PMXBundle.loadBundle(path, namespace, self)
     
     #---------------------------------------------------
-    # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
+    # REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     #---------------------------------------------------
     def repopulateBundle(self, bundle):
         nss = bundle.namespaces[::-1]
         for namespace in nss:
-            bpath = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path(namespace)))
+            bpath = bundle.path(namespace)
             # Search for support
-            if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
-                bundle.setSupport(os.path.join(bpath, 'Support'))
+            #if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
+            #    bundle.setSupport(os.path.join(bpath, 'Support'))
             self.showMessage("Loading bundle %s" % bundle.name)
             for klass in BUNDLEITEM_CLASSES:
                 files = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
@@ -307,6 +328,9 @@ class PMXSupportBaseManager(object):
     
     def addManagedObject(self, obj):
         self.managedObjects[obj.uuid] = obj
+        
+    def removeManagedObject(self, obj):
+        self.managedObjects.pop(obj.uuid)
         
     def getManagedObject(self, uuid):
         if not isinstance(uuid, uuidmodule.UUID):
@@ -394,6 +418,7 @@ class PMXSupportBaseManager(object):
             bundle.relocateSource(namespace, path)
         bundle.update(attrs)
         bundle.save(namespace)
+        bundle.updateMtime(namespace)
         self.modifyBundle(bundle)
         return bundle
         
@@ -411,6 +436,7 @@ class PMXSupportBaseManager(object):
                 bundle.delete(namespace)
             else:
                 self.setDeleted(bundle.uuid)
+        self.removeManagedObject(bundle)
         self.removeBundle(bundle)
     
     def disableBundle(self, bundle, disabled):
@@ -520,6 +546,7 @@ class PMXSupportBaseManager(object):
             item.relocateSource(namespace, path)
         item.update(attrs)
         item.save(namespace)
+        item.updateMtime(namespace)
         self.modifyBundleItem(item)
         return item
     
@@ -533,6 +560,7 @@ class PMXSupportBaseManager(object):
                 item.delete(namespace)
             else:
                 self.setDeleted(item.uuid)
+        self.removeManagedObject(item)
         self.removeBundleItem(item)
         
     #---------------------------------------------------
@@ -640,6 +668,7 @@ class PMXSupportBaseManager(object):
             theme.relocateSource(namespace, path)
         theme.update(attrs)
         theme.save(namespace)
+        theme.updateMtime(namespace)
         self.modifyTheme(theme)
         return theme
         
@@ -653,6 +682,7 @@ class PMXSupportBaseManager(object):
                 theme.delete(namespace)
             else:
                 self.setDeleted(theme.uuid)
+        self.removeManagedObject(theme)
         self.removeTheme(theme)
     
     #---------------------------------------------------
@@ -674,6 +704,7 @@ class PMXSupportBaseManager(object):
         style = PMXThemeStyle({'name': name, 'scope': scope, 'settings': {}}, theme)
         theme.styles.append(style)
         theme.save(namespace)
+        theme.updateMtime(namespace)
         style = self.addThemeStyle(style)
         return style
 
@@ -684,6 +715,7 @@ class PMXSupportBaseManager(object):
             self.updateTheme(theme, namespace)
         style.update(attrs)
         theme.save(namespace)
+        theme.updateMtime(namespace)
         self.modifyTheme(theme)
         return style
 
@@ -694,6 +726,7 @@ class PMXSupportBaseManager(object):
             self.updateTheme(theme, namespace)
         theme.styles.remove(style)
         theme.save(namespace)
+        theme.updateMtime(namespace)
         self.removeThemeStyle(style)
         
     #---------------------------------------------------

@@ -174,3 +174,16 @@ class PMXTemplate(PMXBundleItem):
                 template.addSource(namespace, path)
         except Exception, e:
             print "Error in template %s (%s)" % (info, e)
+
+    def reload(self, namespace):
+        #TODO: Remove all templatefiles
+        info = os.path.join(self.path(namespace), self.FILE)
+        templateFilePaths = glob(os.path.join(self.path(namespace), '*'))
+        templateFilePaths.remove(info)
+        data = plist.readPlist(info)
+        self.load(data)
+        #Add files
+        for templateFilePath in templateFilePaths:
+            templateFile = PMXTemplateFile(templateFilePath, template)
+            templateFile = self.manager.addTemplateFile(templateFile)
+            template.files.append(templateFile)

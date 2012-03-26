@@ -35,7 +35,7 @@ class PMXManagedObject(object):
         raise NotImplemented
 
     def reload(self, namespace):
-        raise NotImplemented    
+        raise NotImplemented
 
     @property
     def enabled(self):
@@ -71,8 +71,9 @@ class PMXManagedObject(object):
         return self.sources[namespace][self._MTIME] != os.path.getmtime(self.sources[namespace][self._PATH])
 
     def removeSource(self, namespace):
-        self.namespaces.remove(namespace)
-        self.sources.pop(namespace)
+        if namespace in self.namespaces:
+            self.namespaces.remove(namespace)
+            self.sources.pop(namespace)
 
     def addSource(self, namespace, path):
         if namespace not in self.namespaces:
@@ -175,17 +176,10 @@ class PMXBundle(PMXManagedObject):
         except Exception, e:
             print "Error in laod bundle %s (%s)" % (info_file, e)
 
-    @classmethod
-    def reloadBundle(cls, path, namespace, manager):
-        info_file = os.path.join(path, cls.FILE)
-        #TODO: Ver si se modifico el archivo para no cargar al pedo
-        try:
-            data = plist.readPlist(info_file)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            bundle = manager.getManagedObject(uuid)
-            #TODO: Hacer el reload
-        except Exception, e:
-            print "Error in reload bundle %s (%s)" % (info_file, e)
+    def reload(self, namespace):
+        info_file = os.path.join(self.path(namespace), self.FILE)
+        data = plist.readPlist(info_file)
+        self.load(data)
             
 class PMXBundleItem(PMXManagedObject):
     KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
@@ -267,15 +261,9 @@ class PMXBundleItem(PMXManagedObject):
         except Exception, e:
             print "Error in bundle item %s (%s)" % (path, e)
     
-    @classmethod
-    def reloadBundleItem(cls, path, namespace, bundle, manager):
-        try:
-            data = plist.readPlist(path)
-            uuid = manager.uuidgen(data.pop('uuid', None))
-            item = manager.getManagedObject(uuid)
-            #TODO: Hacer el reload
-        except Exception, e:
-            print "Error in bundle item %s (%s)" % (path, e)
+    def reload(self, namespace):
+        data = plist.readPlist(self.path(namespace))
+        self.load(data)
 
     def execute(self, processor):
         pass

@@ -100,6 +100,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     bundlePopulated = QtCore.pyqtSignal(object)
     bundleItemTriggered = QtCore.pyqtSignal(object)
     bundleItemChanged = QtCore.pyqtSignal(object)
+    themeChanged = QtCore.pyqtSignal(object)
     
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
@@ -124,6 +125,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         self.application = application
         self.bundleTreeModel = PMXBundleTreeModel(self)
         self.themeStylesTableModel = PMXThemeStylesTableModel(self)
+        #TODO Pasar esto a un ListModel
         self.themeListModel = []
         
         #STYLE PROXY
@@ -304,9 +306,18 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         self.themeListModel.insert(index, themeRow)
         return themeRow
     
+    def modifyTheme(self, theme):
+        self.themeChanged.emit(theme)
+        
+    def removeTheme(self, theme):
+        self.themeListModel.remove(theme)
+            
     def getAllThemes(self):
         return self.themeListModel
     
+    #---------------------------------------------------
+    # THEME STYLE OVERRIDE INTERFACE
+    #---------------------------------------------------
     def addThemeStyle(self, style):
         themeStyle = PMXThemeStyleRow(style)
         self.themeStylesTableModel.appendStyle(themeStyle)
