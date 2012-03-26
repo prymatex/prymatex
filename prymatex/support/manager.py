@@ -7,7 +7,7 @@ import string
 import unicodedata
 import hashlib
 import uuid as uuidmodule
-
+import subprocess
 from glob import glob
 
 from prymatex.support.bundle import PMXBundle, PMXBundleItem
@@ -125,6 +125,23 @@ class PMXSupportBaseManager(object):
             char = char if char in self.VALID_PATH_CARACTERS else '-'
             validPath.append(char)
         return ''.join(validPath)
+
+    def runProcess(self, context, callback):
+        """ Synchronous run process"""
+        process = subprocess.Popen(context.shellCommand, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env = context.environment)
+        
+        if context.inputType != None:
+            process.stdin.write(unicode(context.inputValue).encode("utf-8"))
+        process.stdin.close()
+        try:
+            context.outputValue = process.stdout.read()
+            context.errorValue = process.stderr.read()
+        except IOError, e:
+            context.errorValue = str(e).decode("utf-8")
+        process.stdout.close()
+        process.stderr.close()
+        context.outputType = process.wait()
+        callback(context)
 
     #---------------------------------------------------
     # Message Handler

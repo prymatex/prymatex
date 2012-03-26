@@ -46,6 +46,10 @@ class PMXManagedObject(object):
         return self.sources[namespace][self._PATH]
 
     @property
+    def currentPath(self):
+        return self.sources[self.namespaces[-1]][self._PATH]
+
+    @property
     def isProtected(self):
         return self.manager.protectedNamespace in self.namespaces
         

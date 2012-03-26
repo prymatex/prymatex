@@ -1,25 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-    Command's module    
-'''
+"""Command's module"""
+
 import os
+import functools
 from collections import namedtuple
 
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp, prepareShellScript
 
 #TODO: Hacer un PMXRunningContext para todo lo que requiera de procesos template, commands, etc
-class PMXCommandContext(object):
-    def __init__(self, command, environment, inputType, inputValue, outputType = None, outputValue = None):
+class PMXRunningContext(object):
+    def __init__(self, command):
         self.command = command
-        self.environment = environment
-        self.inputType = inputType
-        self.inputValue = inputValue
-        self.outputType = outputType
-        self.outputValue = outputValue
-
+        self.inputType, self.inputValue = "", ""
+        self.shellCommand, self.environment = "", {}
+        self.asynchronous = False
+        self.outputValue = self.outputType = None
+        
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
                 'command', 'winCommand', 'linuxCommand',                                #System based Command
@@ -101,12 +100,14 @@ class PMXCommand(PMXBundleItem):
 
     def execute(self, processor):
         #if not self.beforeExecute(processor): return
-        inputType, inputValue = self.getInputText(processor)
-        shellCommand, environment = prepareShellScript(self.systemCommand(), processor.environment(self))
         
-        context = PMXCommandContext(self, environment, inputType, inputValue)
+        context = PMXRunningContext(self)
         
-        processor.runCommand(context, shellCommand, self.afterExecute)
+        context.asynchronous = processor.asynchronous
+        context.inputType, context.inputValue = self.getInputText(processor)
+        context.shellCommand, context.environment = prepareShellScript(self.systemCommand(), processor.environment(self))
+
+        self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
     
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
