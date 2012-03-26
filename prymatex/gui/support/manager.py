@@ -185,6 +185,40 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         PMXSupportBaseManager.populateBundle(self, bundle)
         self.bundlePopulated.emit(bundle)
     
+    def runProcess(self, context, callback):
+        if context.asynchronous:
+            return self.runQProcess(context, callback)
+        else:
+            return PMXSupportBaseManager.runProcess(self, context, callback)
+            
+    #Interface
+    def runQProcess(self, context, callback):
+        process = QtCore.QProcess(self)
+        #TODO: context.environment ya tiene las variables de system ver que hacer
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        for key, value in context.environment.iteritems():
+            env.insert(key, value)
+        process.setProcessEnvironment(env)
+
+        def onQProcessFinished(process, context, callback):
+            def runCallback(exitCode):
+                context.errorValue = str(process.readAllStandardError()).decode("utf-8")
+                context.outputValue = str(process.readAllStandardOutput()).decode("utf-8")
+                context.outputType = exitCode
+                callback(context)
+            return runCallback
+
+        process.finished[int].connect(onQProcessFinished(process, context, callback))
+
+        if context.inputType != None:
+            process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
+            if not process.waitForStarted():
+                raise Exception("No puedo correr")
+            process.write(unicode(context.inputValue).encode("utf-8"))
+            process.closeWriteChannel()
+        else:
+            process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
+
     #---------------------------------------------------
     # MANAGED OBJECTS OVERRIDE INTERFACE
     #---------------------------------------------------

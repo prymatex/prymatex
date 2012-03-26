@@ -3,7 +3,6 @@
 
 from PyQt4 import QtGui, QtCore
 
-from subprocess import Popen, PIPE
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
 from prymatex.support.command import PMXCommand
@@ -86,56 +85,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         word, start, end = self.editor.getCurrentWord()
         return word
     
-    def runCommand(self, context, shellCommand, callback):
-        if self.asynchronous:
-            return self.runQProcessCommand(context, shellCommand, callback)
-        else:
-            return self.runPopenCommand(context, shellCommand, callback)
-    
-    def runPopenCommand(self, context, shellCommand, callback):
-        process = Popen(shellCommand, stdin=PIPE, stdout=PIPE, stderr=PIPE, env = context.environment)
-        
-        if context.inputType != None:
-            process.stdin.write(unicode(context.inputValue).encode("utf-8"))
-        process.stdin.close()
-        try:
-            context.outputValue = process.stdout.read()
-            context.errorValue = process.stderr.read()
-        except IOError, e:
-            context.errorValue = str(e).decode("utf-8")
-        process.stdout.close()
-        process.stderr.close()
-        context.outputType = process.wait()
-        callback(self, context)
-    
-    #Interface
-    def runQProcessCommand(self, context, shellCommand, callback):
-        process = QtCore.QProcess(self.editor)
-        #TODO: context.environment ya tiene las variables de system ver que hacer
-        env = QtCore.QProcessEnvironment.systemEnvironment()
-        for key, value in context.environment.iteritems():
-            env.insert(key, value)
-        process.setProcessEnvironment(env)
-
-        def onQProcessFinished(process, context, callback):
-            def runCallback(exitCode):
-                context.errorValue = str(process.readAllStandardError()).decode("utf-8")
-                context.outputValue = str(process.readAllStandardOutput()).decode("utf-8")
-                context.outputType = exitCode
-                callback(self, context)
-            return runCallback
-
-        process.finished[int].connect(onQProcessFinished(process, context, callback))
-
-        if context.inputType != None:
-            process.start(shellCommand, QtCore.QIODevice.ReadWrite)
-            if not process.waitForStarted():
-                raise Exception("No puedo correr")
-            process.write(unicode(context.inputValue).encode("utf-8"))
-            process.closeWriteChannel()
-        else:
-            process.start(shellCommand, QtCore.QIODevice.ReadOnly)
-
     #beforeRunningCommand
     def saveModifiedFiles(self):
         self.editor.mainWindow.actionSaveAll.trigger()
@@ -190,7 +139,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
                           'input': 'none',
                          'output': 'showAsHTML' }
         command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.bundle = context.command.bundle
+        command.setBundle(context.command.bundle)
+        command.setManager(context.command.manager)
         self.editor.insertBundleItem(command)
         
     def discard(self, context):
@@ -225,13 +175,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
                  'tabTrigger': context.command.tabTrigger,
               'keyEquivalent': context.command.keyEquivalent }
         snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), dataHash = snippetHash)
-        snippet.bundle = context.command.bundle
+        snippet.setBundle(context.command.bundle)
+        snippet.setManager(context.command.manager)
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, context):
         self.editor.mainWindow.browser.setHtml(context.outputValue, context.command)
 
-    timespanFactor = 1        
+    timespanFactor = 1
     def showAsTooltip(self, context):
         # Chicho's sense of statistics
         linesToRead = context.outputValue.count('\n') or context.outputValue.count('<br')

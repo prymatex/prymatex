@@ -33,7 +33,10 @@ class PMXManagedObject(object):
 
     def delete(self, namespace):
         raise NotImplemented
-        
+
+    def reload(self, namespace):
+        raise NotImplemented    
+
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
@@ -46,6 +49,10 @@ class PMXManagedObject(object):
         return self.sources[namespace][self._PATH]
 
     @property
+    def currentPath(self):
+        return self.sources[self.currentNamespace][self._PATH]
+
+    @property
     def isProtected(self):
         return self.manager.protectedNamespace in self.namespaces
         
@@ -56,6 +63,17 @@ class PMXManagedObject(object):
     def hasNamespace(self, namespace):
         return namespace in self.namespaces
 
+    @property
+    def currentNamespace(self):
+        return self.namespaces[-1]
+
+    def sourceChanged(self, namespace):
+        return self.sources[namespace][self._MTIME] != os.path.getmtime(self.sources[namespace][self._PATH])
+
+    def removeSource(self, namespace):
+        self.namespaces.remove(namespace)
+        self.sources.pop(namespace)
+
     def addSource(self, namespace, path):
         if namespace not in self.namespaces:
             index = self.manager.nsorder.index(namespace)
@@ -65,6 +83,9 @@ class PMXManagedObject(object):
                 self.namespaces.append(namespace)
             self.sources[namespace] = (path, os.path.exists(path) and os.path.getmtime(path) or 0)
 
+    def hasSources(self):
+        return bool(self.sources)
+        
     def relocateSource(self, namespace, path):
         if os.path.exists(self.path(namespace)):
             shutil.move(self.path(namespace), path)
@@ -76,9 +97,13 @@ class PMXManagedObject(object):
         path = self.sources[namespace][self._PATH]
         self.sources[namespace] = (path, os.path.getmtime(path))
 
+    def setDirty(self):
+        for namespace in self.namespaces:
+            self.sources[namespace] = (self.sources[namespace][self._PATH], 0)
+
     def setManager(self, manager):
         self.manager = manager
-    
+
 class PMXBundle(PMXManagedObject):
     KEYS = [    'name', 'deleted', 'ordering', 'mainMenu', 'contactEmailRot13', 'description', 'contactName' ]
     FILE = 'info.plist'

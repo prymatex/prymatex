@@ -7,7 +7,7 @@ import string
 import unicodedata
 import hashlib
 import uuid as uuidmodule
-
+import subprocess
 from glob import glob
 
 from prymatex.support.bundle import PMXBundle, PMXBundleItem
@@ -126,6 +126,23 @@ class PMXSupportBaseManager(object):
             validPath.append(char)
         return ''.join(validPath)
 
+    def runProcess(self, context, callback):
+        """ Synchronous run process"""
+        process = subprocess.Popen(context.shellCommand, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env = context.environment)
+        
+        if context.inputType != None:
+            process.stdin.write(unicode(context.inputValue).encode("utf-8"))
+        process.stdin.close()
+        try:
+            context.outputValue = process.stdout.read()
+            context.errorValue = process.stderr.read()
+        except IOError, e:
+            context.errorValue = str(e).decode("utf-8")
+        process.stdout.close()
+        process.stderr.close()
+        context.outputType = process.wait()
+        callback(context)
+
     #---------------------------------------------------
     # Message Handler
     #---------------------------------------------------
@@ -187,14 +204,15 @@ class PMXSupportBaseManager(object):
     # RELOAD SUPPORT
     #---------------------------------------------------
     def reloadSupport(self, callback = None):
+        #Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
         self.messageHandler = callback
         for ns in self.nsorder[::-1]:
             self.reloadThemes(ns)
             self.reloadBundles(ns)
-        for bundle in self.getAllBundles():
-            if bundle.enabled:
-                self.repopulateBundle(bundle)
+        #for bundle in self.getAllBundles():
+        #    if bundle.enabled:
+        #        self.repopulateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
     
@@ -202,21 +220,45 @@ class PMXSupportBaseManager(object):
     # RELOAD THEMES
     #---------------------------------------------------
     def reloadThemes(self, namespace):
-        themes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
-        if 'Themes' in self.namespaces[namespace]:
-            paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
-            for path in paths:
-                self.showMessage(path)
-                PMXTheme.reloadTheme(path, namespace, self)
+        installedThemes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
+        if installedThemes and 'Themes' in self.namespaces[namespace]:
+            themePaths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
+            for theme in installedThemes:
+                themePath = theme.path(namespace)
+                if themePath in themePaths:
+                    if namespace == theme.currentNamespace and theme.sourceChanged(namespace):
+                        theme.reload(namespace)
+                    themePaths.remove(themePath)
+                else:
+                    theme.removeSource(namespace)
+                    if not theme.hasSources():
+                        self.removeTheme(theme)
+                    elif namespace == theme.currentNamespace:
+                        theme.setDirty()
+            for path in themePaths:
+                PMXTheme.loadTheme(path, namespace, self)
     
     #---------------------------------------------------
     # RELOAD BUNDLES
     #---------------------------------------------------
     def reloadBundles(self, namespace):
-        if 'Bundles' in self.namespaces[namespace]:
-            paths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
-            for path in paths:
-                PMXBundle.reloadBundle(path, namespace, self)
+        installedBundles = filter(lambda theme: theme.hasNamespace(namespace), self.getAllBundles())
+        if installedBundles and 'Bundles' in self.namespaces[namespace]:
+            bundlePaths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
+            for bundle in installedBundles:
+                bundlePath = bundle.path(namespace)
+                if bundlePath in bundlePaths:
+                    if bundle.sourceChanged(namespace):
+                        bundle.reload(namespace)
+                    bundlePaths.remove(bundlePath)
+                else:
+                    bundle.removeSource(namespace)
+                    if not bundle.hasSources():
+                        self.removeBundle(bundle)
+                    else:
+                        bundle.setDirty()
+            for path in bundlePaths:
+                PMXBundle.loadBundle(path, namespace, self)
     
     #---------------------------------------------------
     # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
