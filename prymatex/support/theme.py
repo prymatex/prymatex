@@ -78,7 +78,7 @@ class PMXTheme(PMXManagedObject):
         folder = os.path.dirname(self.path(namespace))
         if not os.path.exists(folder):
             os.makedirs(folder)
-        plist.writePlist(self.hash, self.path)
+        plist.writePlist(self.hash, self.path(namespace))
 
     @classmethod
     def loadTheme(cls, path, namespace, manager):

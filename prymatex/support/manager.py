@@ -460,7 +460,7 @@ class PMXSupportBaseManager(object):
         if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
             self.cache.deprecateValues(item.tabTrigger, attrs['tabTrigger'])
 
-        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco más
+        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco mï¿½s
         namespace = namespace or self.defaultNamespace
         
         if item.bundle.isProtected and not item.bundle.isSafe:
@@ -625,30 +625,33 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # THEMESTYLE CRUD
     #---------------------------------------------------
-    def createThemeStyle(self, name, scope, theme):
+    def createThemeStyle(self, name, scope, theme, namespace = None):
+        namespace = namespace or self.defaultNamespace
         if theme.isProtected and not theme.isSafe:
-            self.updateTheme(theme)
+            self.updateTheme(theme, namespace)
         style = PMXThemeStyle({'name': name, 'scope': scope, 'settings': {}}, theme)
-        style = self.addThemeStyle(style)
         theme.styles.append(style)
-        theme.save()
+        theme.save(namespace)
+        style = self.addThemeStyle(style)
         return style
 
-    def updateThemeStyle(self, style, **attrs):
+    def updateThemeStyle(self, style, namespace = None, **attrs):
+        namespace = namespace or self.defaultNamespace
         theme = style.theme
         if theme.isProtected and not theme.isSafe:
-            self.updateTheme(theme)
+            self.updateTheme(theme, namespace)
         style.update(attrs)
-        theme.save()
+        theme.save(namespace)
         self.modifyTheme(theme)
         return style
 
-    def deleteThemeStyle(self, style):
+    def deleteThemeStyle(self, style, namespace = None):
+        namespace = namespace or self.defaultNamespace
         theme = style.theme
         if theme.isProtected and not theme.isSafe:
-            self.updateTheme(theme)
+            self.updateTheme(theme, namespace)
         theme.styles.remove(style)
-        theme.save()
+        theme.save(namespace)
         self.removeThemeStyle(style)
         
     #---------------------------------------------------

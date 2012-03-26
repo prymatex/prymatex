@@ -36,7 +36,7 @@ def runPrymatexApplication(options, files):
     except:
         from traceback import format_exc
         traceback = format_exc()
-        print traceback
+        print(traceback)
         # Something went very bad tell the user something about the emergency
         #from prymatex.gui.emergency.crashdialog import PMXCrashDialog
         #crashDialog = PMXCrashDialog(traceback)
