@@ -105,16 +105,16 @@ class PMXTheme(PMXManagedObject):
         except Exception, e:
             print "Error en theme %s (%s)" % (path, e)
 
-    def reload(self, namespace):
+    @classmethod
+    def reloadTheme(cls, theme, path, namespace, manager):
         #Remove all styles
-        map(lambda style: self.manager.removeThemeStyle(style), self.styles)
-        data = plist.readPlist(self.path(namespace))
-        self.load(data)
+        map(lambda style: manager.removeThemeStyle(style), theme.styles)
+        data = plist.readPlist(path)
+        theme.load(data)
         settings = data.pop('settings', [])
         if settings:
             self.setSettings(settings[0].settings)
         for setting in settings[1:]:
-            style = PMXThemeStyle(setting, self)
-            style = self.manager.addThemeStyle(style)
+            style = PMXThemeStyle(setting, theme)
+            style = manager.addThemeStyle(style)
             self.styles.append(style)
-        self.manager.modifyTheme(self)

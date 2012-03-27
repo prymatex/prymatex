@@ -175,15 +175,16 @@ class PMXTemplate(PMXBundleItem):
         except Exception, e:
             print "Error in template %s (%s)" % (info, e)
 
-    def reload(self, namespace):
-        #TODO: Remove all templatefiles
-        info = os.path.join(self.path(namespace), self.FILE)
-        templateFilePaths = glob(os.path.join(self.path(namespace), '*'))
+    @classmethod
+    def reloadBundleItem(cls, bundleItem, path, namespace, manager):
+        map(lambda style: manager.removeTemplateFile(style), bundleItem.files)
+        info = os.path.join(path, cls.FILE)
+        templateFilePaths = glob(os.path.join(path, '*'))
         templateFilePaths.remove(info)
         data = plist.readPlist(info)
-        self.load(data)
+        bundleItem.load(data)
         #Add files
         for templateFilePath in templateFilePaths:
-            templateFile = PMXTemplateFile(templateFilePath, template)
-            templateFile = self.manager.addTemplateFile(templateFile)
+            templateFile = PMXTemplateFile(templateFilePath, bundleItem)
+            templateFile = manager.addTemplateFile(templateFile)
             template.files.append(templateFile)

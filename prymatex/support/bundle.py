@@ -34,9 +34,6 @@ class PMXManagedObject(object):
     def delete(self, namespace):
         raise NotImplemented
 
-    def reload(self, namespace):
-        raise NotImplemented
-
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
@@ -176,10 +173,11 @@ class PMXBundle(PMXManagedObject):
         except Exception, e:
             print "Error in laod bundle %s (%s)" % (info_file, e)
 
-    def reload(self, namespace):
-        info_file = os.path.join(self.path(namespace), self.FILE)
+    @classmethod
+    def reloadBundle(cls, bundle, path, namespace, manager):
+        info_file = os.path.join(path, cls.FILE)
         data = plist.readPlist(info_file)
-        self.load(data)
+        bundle.load(data)
             
 class PMXBundleItem(PMXManagedObject):
     KEYS = [ 'name', 'tabTrigger', 'keyEquivalent', 'scope' ]
@@ -261,9 +259,10 @@ class PMXBundleItem(PMXManagedObject):
         except Exception, e:
             print "Error in bundle item %s (%s)" % (path, e)
     
-    def reload(self, namespace):
-        data = plist.readPlist(self.path(namespace))
-        self.load(data)
+    @classmethod
+    def reloadBundleItem(cls, bundleItem, path, namespace, manager):
+        data = plist.readPlist(path)
+        bundleItem.load(data)
 
     def execute(self, processor):
         pass

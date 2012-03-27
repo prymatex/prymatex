@@ -214,8 +214,7 @@ class PMXSupportBaseManager(object):
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled:
-                pass
-                #self.repopulateBundle(bundle)
+                self.repopulateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
         self.logger.debug("End reload support.")
@@ -232,7 +231,7 @@ class PMXSupportBaseManager(object):
                 if themePath in themePaths:
                     if namespace == theme.currentNamespace and theme.sourceChanged(namespace):
                         self.logger.debug("Theme %s changed, reload from %s." % (theme.name, themePath))
-                        theme.reload(namespace)
+                        theme.reloadTheme(theme, themePath, namespace, self)
                         theme.updateMtime(namespace)
                         self.modifyTheme(theme)
                     themePaths.remove(themePath)
@@ -257,15 +256,15 @@ class PMXSupportBaseManager(object):
             bundlePaths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for bundle in installedBundles:
                 bundlePath = bundle.path(namespace)
-                bundleItems = self.findBundleItems(bundle = bundle)
                 if bundlePath in bundlePaths:
                     if namespace == bundle.currentNamespace and bundle.sourceChanged(namespace):
                         self.logger.debug("Bundle %s changed, reload from %s." % (bundle.name, bundlePath))
-                        bundle.reload(namespace)
+                        bundle.reloadBundle(bundle, bundlePath, namespace, self)
                         bundle.updateMtime(namespace)
                         self.modifyBundle(bundle)
                     bundlePaths.remove(bundlePath)
                 else:
+                    bundleItems = self.findBundleItems(bundle = bundle)
                     map(lambda item: item.removeSource(namespace), bundleItems)
                     bundle.removeSource(namespace)
                     if not bundle.hasSources():
@@ -276,6 +275,7 @@ class PMXSupportBaseManager(object):
                         self.removeBundle(bundle)
                     else:
                         map(lambda item: item.setDirty(), bundleItems)
+                        bundle.support = None
                         bundle.setDirty()
             for path in bundlePaths:
                 self.logger.debug("New bundle %s." % path)
@@ -285,20 +285,40 @@ class PMXSupportBaseManager(object):
     # REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
     #---------------------------------------------------
     def repopulateBundle(self, bundle):
-        nss = bundle.namespaces[::-1]
-        for namespace in nss:
+        namespaces = bundle.namespaces[::-1]
+        bundleItems = self.findBundleItems(bundle = bundle)
+        for namespace in namespaces:
             bpath = bundle.path(namespace)
             # Search for support
-            #if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
-            #    bundle.setSupport(os.path.join(bpath, 'Support'))
-            self.showMessage("Loading bundle %s" % bundle.name)
+            if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
+                bundle.setSupport(os.path.join(bpath, 'Support'))
+            bundleItemPaths = {}
             for klass in BUNDLEITEM_CLASSES:
-                files = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
-                for path in files:
-                    self.showMessage(path)
-                    #klass.loadBundleItem(path, namespace, bundle, self)
-        bundle.populated = True
-        
+                klassPaths = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
+                bundleItemPaths.update(dict(map(lambda path: (path, klass), klassPaths)))
+            for bundleItem in bundleItems:
+                if not bundleItem.hasNamespace(namespace):
+                    continue
+                bundleItemPath = bundleItem.path(namespace)
+                if bundleItemPath in bundleItemPaths:
+                    if namespace == bundleItem.currentNamespace and bundleItem.sourceChanged(namespace):
+                        self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
+                        bundleItem.reloadBundle(bundleItem, bundleItemPath, namespace, self)
+                        bundleItem.updateMtime(namespace)
+                        self.modifyBundleItem(bundleItem)
+                    bundleItemPaths.pop(bundleItemPath)
+                else:
+                    bundleItem.removeSource(namespace)
+                    if not bundleItem.hasSources():
+                        self.logger.debug("Bundle Item %s removed." % bundleItem.name)
+                        self.removeManagedObject(bundleItem)
+                        self.removeBundleItem(bundleItem)
+                    else:
+                        bundleItem.setDirty()    
+            for path, klass in bundleItemPaths.iteritems():
+                self.logger.debug("New bundle item %s." % path)
+                klass.loadBundleItem(path, namespace, bundle, self)
+
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
     #---------------------------------------------------

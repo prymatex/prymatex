@@ -143,7 +143,7 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
     def title(self):
         if self.bundleItem != None:
             return 'Edit Snippet: "%s"' % self.bundleItem.name
-        return super(PMXSnippetWidget, self).title()
+        return super(PMXSnippetWidget, self).title
     
     def getScope(self):
         scope = super(PMXSnippetWidget, self).getScope()
@@ -286,7 +286,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
     def title(self):
         if self.bundleItem != None:
             return 'Edit Command: "%s"' % self.bundleItem.name
-        return super(PMXCommandWidget, self).title()
+        return super(PMXCommandWidget, self).title
     
     def getScope(self):
         scope = super(PMXCommandWidget, self).getScope()
@@ -363,7 +363,7 @@ fi"'''}
     def title(self):
         if self.bundleItem != None:
             return 'Edit Template: "%s"' % self.bundleItem.name
-        return super(PMXTemplateWidget, self).title()
+        return super(PMXTemplateWidget, self).title
 
     def edit(self, bundleItem):
         super(PMXTemplateWidget, self).edit(bundleItem)
@@ -401,7 +401,7 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
     def title(self):
         if self.bundleItem != None:
             return 'Edit Template File: "%s"' % self.bundleItem.name
-        return super(PMXTemplateFileWidget, self).title()
+        return super(PMXTemplateFileWidget, self).title
 
     def getScope(self):
         return None
@@ -449,7 +449,7 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
     def title(self):
         if self.bundleItem != None:
             return 'Edit Drag Command: "%s"' % self.bundleItem.name
-        return super(PMXDragCommandWidget, self).title()
+        return super(PMXDragCommandWidget, self).title
         
     def getScope(self):
         scope = super(PMXDragCommandWidget, self).getScope()
