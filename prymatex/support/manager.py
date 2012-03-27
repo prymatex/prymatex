@@ -303,7 +303,7 @@ class PMXSupportBaseManager(object):
                 if bundleItemPath in bundleItemPaths:
                     if namespace == bundleItem.currentNamespace and bundleItem.sourceChanged(namespace):
                         self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
-                        bundleItem.reloadBundle(bundleItem, bundleItemPath, namespace, self)
+                        bundleItem.reloadBundleItem(bundleItem, bundleItemPath, namespace, self)
                         bundleItem.updateMtime(namespace)
                         self.modifyBundleItem(bundleItem)
                     bundleItemPaths.pop(bundleItemPath)

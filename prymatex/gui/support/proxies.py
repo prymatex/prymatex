@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.models.proxies import PMXFlatTreeProxyModel
+from prymatex.models.proxies import FlatTreeProxyModel
 
 class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, manager, parent = None):
@@ -15,7 +15,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(index)
-        if not node.enabled:
+        if node.isRootNode() or not node.enabled:
             return False
         if self.namespacesFilter:
             if not any(map(lambda ns: node.hasNamespace(ns), self.namespacesFilter)):
@@ -69,9 +69,9 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
             self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
         self.setFilterRegExp("")
 
-class PMXBundleTypeFilterProxyModel(PMXFlatTreeProxyModel):
+class PMXBundleTypeFilterProxyModel(FlatTreeProxyModel):
     def __init__(self, tipos, parent = None):
-        super(PMXBundleTypeFilterProxyModel, self).__init__(parent)
+        FlatTreeProxyModel.__init__(self, parent)
         self.tipos = tipos if isinstance(tipos, list) else [ tipos ]
         
     def filterAcceptsRow(self, sourceRow, sourceParent):
@@ -80,7 +80,7 @@ class PMXBundleTypeFilterProxyModel(PMXFlatTreeProxyModel):
         return item.TYPE in self.tipos
         
     def comparableValue(self, index):
-        node = index.internalPointer()
+        node = self.sourceModel().node(index)
         return node.name.lower()
     
     def compareIndex(self, xindex, yindex):

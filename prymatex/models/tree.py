@@ -5,7 +5,8 @@ from PyQt4 import QtCore
 
 class TreeNode(object):
     def __init__(self, nodeName, parentNode = None):
-        self.name = nodeName
+        #TODO: Migrar a nodeName y proximamente a atributos ocultos __nodeName, __parentNode y __childrenNodes
+        self.name = self.nodeName = nodeName
         self.parentNode = parentNode
         self.childrenNodes = []
     
@@ -26,7 +27,7 @@ class TreeNode(object):
     
     def findChildByName(self, name):
         for child in self.childrenNodes:
-            if child.name == name:
+            if child.nodeName == name:
                 return child
 
     def removeAllChild(self):

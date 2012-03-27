@@ -153,7 +153,7 @@ class PMXBundleTreeModel(TreeModel):
     def removeBundleItem(self, bundleItem):
         bundle = bundleItem.bundle
         pindex = self.createIndex(bundle.row(), 0, bundle)
-        self.beginRemoveRows(pindex, bundle.row(), bundle.row())
+        self.beginRemoveRows(pindex, bundleItem.row(), bundleItem.row())
         bundle.removeChild(bundleItem)
         self.endRemoveRows()
     
@@ -167,7 +167,7 @@ class PMXBundleTreeModel(TreeModel):
     def removeTemplateFile(self, templateFile):
         template = templateFile.template
         pindex = self.createIndex(template.row(), 0, template)
-        self.beginRemoveRows(pindex, template.row(), template.row())
+        self.beginRemoveRows(pindex, templateFile.row(), templateFile.row())
         template.removeChild(templateFile)
         self.endRemoveRows()
         

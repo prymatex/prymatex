@@ -7,7 +7,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.gui.project.base import PMXProject
 from prymatex.gui.configure.proxies import PMXConfigureProxyModel
-from prymatex.models.proxies import PMXFlatTreeProxyModel
+from prymatex.models.proxies import FlatTreeProxyModel
 
 class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, parent = None):
@@ -99,9 +99,9 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         mimeData.setUrls(urls)
         return mimeData
 
-class PMXFileSystemProxyModel(PMXFlatTreeProxyModel):
+class PMXFileSystemProxyModel(FlatTreeProxyModel):
     def __init__(self, parent = None):
-        PMXFlatTreeProxyModel.__init__(self, parent)
+        FlatTreeProxyModel.__init__(self, parent)
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
