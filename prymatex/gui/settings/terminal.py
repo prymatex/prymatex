@@ -22,7 +22,6 @@ class PMXTerminalSettings(QtGui.QWidget, PMXSettingTreeNode, Ui_Terminal):
         
         t = QTermWidget()
         
-        
         self.comboScrollBar.addItem(_("No scrollbar"), t.NoScrollBar)
         self.comboScrollBar.addItem(_("Left scrollbar"), t.ScrollBarLeft)
         self.comboScrollBar.addItem(_("Right scrollbar"), t.ScrollBarRight)
@@ -32,7 +31,10 @@ class PMXTerminalSettings(QtGui.QWidget, PMXSettingTreeNode, Ui_Terminal):
         
         del t
         
+    def loadSettings(self):
+        print "cargando defaults"
         
-    
-    
-    
+    @QtCore.pyqtSlot(int)
+    def on_comboColorScheme_activated(self, index):
+        scheme = self.comboColorScheme.itemData(index)
+        self.settingGroup.setValue('colorScheme', scheme)

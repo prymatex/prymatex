@@ -74,19 +74,19 @@ FileIconProvider = QtGui.QFileIconProvider()
 
 APPLICATION_STYLE = """
 QTreeView {
-    font-size: 12px;
+    font-size: 11px;
 }
 QTreeView::item {
-    padding: 4px;
+    padding: 2px;
 }
 QTableView {
-    font-size: 12px;
+    font-size: 11px;
 }
 QListView {
-     font-size: 12px;
+     font-size: 11px;
 }
 QListView::item {
-    padding: 4px;    
+    padding: 2px;    
 }
 """
 

@@ -6,6 +6,7 @@ import os
 
 from PyQt4 import QtCore, QtGui
 from prymatex import resources
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
 
@@ -225,6 +226,15 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
     ICON = resources.getIcon("terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    
+    #=======================================================================
+    # Settings
+    #=======================================================================
+    SETTINGS_GROUP = 'Terminal'
+
+    @pmxConfigPorperty(default = "linux")
+    def colorScheme(self, scheme):
+        print scheme
     
     terminalAvailable = True
     def __init__(self, parent):

@@ -251,7 +251,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             if result == QtGui.QMessageBox.Yes:
                 saveAs = True
         if editor.isNew() or saveAs:
-            fileDirectory = editor.fileDirectory()
+            fileDirectory = self.application.fileManager.getDirectory(self.projects.currentPath()) if editor.isNew() else editor.fileDirectory()
             fileName = editor.fileName()
             fileFilters = editor.fileFilters()
             filePath = dialogs.getSaveFile( fileDirectory, title = "Save file as" if saveAs else "Save file", 
