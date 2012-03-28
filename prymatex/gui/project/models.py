@@ -92,7 +92,9 @@ class PMXProjectTreeModel(TreeModel):
                 return project
         
     def filePath(self, index):
-        return index.internalPointer().path
+        node = self.node(index)
+        if not node.isRootNode():
+            return node.path
     
     def isDir(self, index):
         try:
