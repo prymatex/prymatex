@@ -26,6 +26,16 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         self.buttonCreate.setDefault(True)
         self.fileCreated = None
     
+    def getNewLocation(self):
+        application = QtGui.QApplication.instance()
+        projectDock = self.parent().projects
+        from prymatex.gui.dockers.projects import PMXProjectDock
+        assert isinstance(projectDock, PMXProjectDock), "Error de proyecto %s" % type(projectDock)
+        path = application.fileManager.getDirectory(projectDock.currentPath()) 
+        print path
+        return path
+        
+    
     def on_buttonChoose_pressed(self):
         directory = self.lineLocation.text()
         path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose location for template"), directory)
@@ -64,7 +74,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         '''
         dlg = cls(parent = parent)
         dlg.lineFileName.setText(fileName)
-        dlg.lineLocation.setText(fileDirectory)
+        dlg.lineLocation.setText(dlg.getNewLocation())
         dlg.buttonCreate.setEnabled(False)
         if dlg.exec_() == cls.Accepted:
             return dlg.fileCreated
