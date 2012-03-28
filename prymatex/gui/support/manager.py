@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import fnmatch
+from bisect import bisect
+
 import uuid as uuidmodule
 from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportBaseManager
@@ -15,8 +17,6 @@ class PMXBundleMenuGroup(QtCore.QObject):
     def __init__(self, manager):
         QtCore.QObject.__init__(self, manager)
         self.manager = manager
-        #TODO: No conectar al modelo preferir manager sobre modelo
-        self.bundleTreeModel = self.manager.bundleTreeModel
         #The bundle menues
         self.menus = {}
         #The qt menus where a bundle menu is added
@@ -28,9 +28,9 @@ class PMXBundleMenuGroup(QtCore.QObject):
     def appendMenu(self, menu):
         if menu not in self.containers:
             self.containers.append(menu)
-        #Append all bundle menus
-        for m in self.menus.values():
-            menu.addMenu(m)
+        #Append all bundle menus in order
+        for bundle, bundleMenu in iter(sorted(self.menus.iteritems(), key=lambda (bundle, bundleMenu): bundleMenu.title())):
+            menu.addMenu(bundleMenu)
         
     def buildMenu(self, items, menu, submenus, parent = None):
         for uuid in items:
@@ -65,9 +65,15 @@ class PMXBundleMenuGroup(QtCore.QObject):
         return self.menus.get(bundle)
         
     def addToContainers(self, menu):
-        for containter in self.containers:
-            containter.addMenu(menu)
-
+        currentTitles = map(lambda menu: menu.title(), self.menus.values())
+        index = bisect(currentTitles, menu.title())
+        for container in self.containers:
+            currentActions = container.actions()
+            if index < len(currentActions):
+                container.insertMenu(currentActions[index], menu)
+            else:
+                containter.addMenu(menu)
+            
     def on_manager_bundleItemChanged(self, item):
         action = item.triggerItemAction()
         if action is not None:
@@ -182,6 +188,11 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         env.update(self.environment)
         return env
     
+    # Override loadSupport for emit signals
+    def loadSupport(self, *largs, **kwargs):
+        PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
+        self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
+
     # Override populate bundle for emit signal
     def populateBundle(self, bundle):
         PMXSupportBaseManager.populateBundle(self, bundle)

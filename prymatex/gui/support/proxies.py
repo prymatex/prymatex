@@ -32,12 +32,12 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
         return True
         
     def lessThan(self, left, right):
-        leftData = left.internalPointer()
-        rightData = right.internalPointer()
-        if leftData.TYPE == rightData.TYPE:
-            return rightData.name > leftData.name
+        leftNode = self.sourceModel().node(left)
+        rightNode = self.sourceModel().node(right)
+        if leftNode.TYPE == rightNode.TYPE:
+            return rightNode.name > leftNode.name
         else:
-            return self.bundleItemTypeOrder.index(rightData.TYPE) > self.bundleItemTypeOrder.index(leftData.TYPE)
+            return self.bundleItemTypeOrder.index(rightNode.TYPE) > self.bundleItemTypeOrder.index(leftNode.TYPE)
     
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:  
