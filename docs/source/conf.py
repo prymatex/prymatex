@@ -20,7 +20,7 @@ import sys, os
 
 from os.path import *
 pth = abspath(dirname(__file__))
-pth = abspath(join(pth, '..', '..', 'src'))
+pth = abspath(join(pth, '..', '..', ))
 sys.path.append(pth)
 sys.stdout.write("%s\n" % pth)
 import prymatex
