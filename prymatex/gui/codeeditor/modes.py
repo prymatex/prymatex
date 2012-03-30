@@ -341,12 +341,40 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         QtGui.QCompleter.__init__(self, editor)
         PMXBaseEditorMode.__init__(self, editor)
         self.setWidget(self.editor)
-        self.popupView = QtGui.QListView()
+        self.currentContentWidth = 0
+
+        #Table view
+        self.popupView = QtGui.QTableView()
         self.popupView.setAlternatingRowColors(True)
         self.popupView.setWordWrap(False)
+        self.popupView.verticalHeader().setVisible(False)
+        self.popupView.horizontalHeader().setVisible(False)
+        self.popupView.setShowGrid(False)
+        self.popupView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.popupView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.popupView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        #Table view size
+        spacing = self.popupView.verticalHeader().fontMetrics().lineSpacing()
+        self.popupView.verticalHeader().setDefaultSectionSize(spacing + 3);
+        self.popupView.horizontalHeader().setStretchLastSection(True)
+        self.popupView.setMinimumWidth(spacing * 18)
+        self.popupView.setMinimumHeight(spacing * 12)
+        
         self.setPopup(self.popupView)
+        
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
+
+    def setModel(self, completerTableModel):
+        QtGui.QCompleter.setModel(self, completerTableModel)
+        #Tenemos Modelo
+        #Acomodamos al contenido
+        self.popupView.resizeColumnsToContents()
+        #self.popupView.resizeRowsToContents()
+        #Tomamos ancho de los datos del modelo
+        self.currentContentWidth = self.popup().verticalScrollBar().sizeHint().width()
+        for columnIndex in range(self.completionModel().sourceModel().columnCount()):
+            self.currentContentWidth += self.popup().sizeHintForColumn(columnIndex)
 
     def isActive(self):
         return self.popup().isVisible()
@@ -392,5 +420,6 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
 
     def complete(self, rect):
         self.popup().setCurrentIndex(self.completionModel().index(0, 0))
-        rect.setWidth(self.popup().sizeHintForColumn(0) + self.popup().verticalScrollBar().sizeHint().width() + 30)
+        rect.setWidth(self.currentContentWidth)
+        #TODO: height
         QtGui.QCompleter.complete(self, rect)

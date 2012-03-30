@@ -26,7 +26,7 @@ from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetPr
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
-from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterListModel
+from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterTableModel
 
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
@@ -302,6 +302,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
 
     def getCurrentScope(self):
+        """Deprecated"""
+        cursor = self.textCursor()
+        return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
+
+    def currentScope(self):
         cursor = self.textCursor()
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
 
@@ -750,6 +755,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #No tengo helper paso el evento a la base
         QtGui.QPlainTextEdit.keyPressEvent(self, event)
+        
+        self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
+
     
     #==========================================================================
     # Bundle Items
@@ -847,7 +855,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
         self.completerMode.setCompletionPrefix(alreadyTyped)
-        self.completerMode.setModel(PMXCompleterListModel(suggestions, self))
+        self.completerMode.setModel(PMXCompleterTableModel(suggestions, self))
         self.completerMode.complete(self.cursorRect())
     
     #==========================================================================

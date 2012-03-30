@@ -45,6 +45,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
         mainWindow.projects = self
     
+    def keyPressEvent(self, event):
+        print event
+        return QtGui.QDockWidget.keyPressEvent(self, event) 
+        
     def setupPropertiesDialog(self):
         from prymatex.gui.dialogs.properties import PMXPropertiesDialog
         from prymatex.gui.project.environment import PMXEnvironmentWidget
