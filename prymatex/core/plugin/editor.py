@@ -7,14 +7,13 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.gui import utils
-from prymatex.core.plugin import PMXBaseWidgetComponent, Key_Any
+from prymatex.core.plugin import PMXBaseWidgetComponent
 from prymatex.core import exceptions
 
 class PMXBaseEditor(PMXBaseWidgetComponent):
     """Every editor should extend this class in order to guarantee it'll be able to be place in tab.
     """
     #tabStatusChanged
-    KEY_HELPERS = {}
     CREATION_COUNTER = 0
     UNTITLED_FILE_TEMPLATE = "Untitled {CREATION_COUNTER}"
     
@@ -138,11 +137,3 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def acceptFile(cls, filePath, mimetype):
         return True
         
-    @classmethod
-    def addKeyHelper(cls, helper):
-        helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])
-        helpers.append(helper)
-        
-    def findHelpers(self, key):
-        helpers = self.KEY_HELPERS[Key_Any][:]
-        return helpers + self.KEY_HELPERS.get(key, [])

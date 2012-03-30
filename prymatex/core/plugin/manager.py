@@ -18,6 +18,7 @@ class PMXPluginManager(PMXBaseComponent):
         self.statusBars = []
         self.keyHelpers = {}
         self.overlays = {}
+        self.addons = {}
         self.instances = {}
     
     def addPluginDirectory(self, directory):
@@ -46,7 +47,12 @@ class PMXPluginManager(PMXBaseComponent):
         self.application.extendComponent(overlayClass)
         overlayClasses = self.overlays.setdefault(widgetClass, [])
         overlayClasses.append(overlayClass)
-        
+
+    def registerAddon(self, widgetClass, addonClass):
+        self.application.extendComponent(addonClass)
+        addonClasses = self.addons.setdefault(widgetClass, [])
+        addonClasses.append(addonClass)
+                
     def createWidgetInstance(self, widgetClass, mainWindow):
         instance = widgetClass(mainWindow)
         
@@ -54,6 +60,10 @@ class PMXPluginManager(PMXBaseComponent):
             overlay = overlayClass(instance)
             instance.addOverlay(overlay)
 
+        for addonClass in self.addons.get(widgetClass, []):
+            addon = addonClass(instance)
+            instance.addAddon(addon)
+            
         self.application.settings.configure(instance)
         instance.initialize(mainWindow)
         

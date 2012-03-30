@@ -181,19 +181,22 @@ class PMXProcessListModel(QtCore.QAbstractListModel):
 #=========================================================
 # Completer
 #=========================================================
-class PMXCompleterListModel(QtCore.QAbstractListModel): 
+class PMXCompleterTableModel(QtCore.QAbstractTableModel): 
     def __init__(self, suggestions, editor): 
         QtCore.QAbstractListModel.__init__(self, editor) 
         self.suggestions = suggestions
 
-    def index (self, row, column = 0, parent = None):
+    def index (self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):
             return self.createIndex(row, column, parent)
         else:
             return QtCore.QModelIndex()
     
-    def rowCount (self, parent = None):
+    def rowCount(self, parent = None):
         return len(self.suggestions)
+
+    def columnCount(self, parent = None):
+        return 2
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
@@ -206,16 +209,21 @@ class PMXCompleterListModel(QtCore.QAbstractListModel):
                 elif 'title' in suggestion:
                     return suggestion['title']
             elif isinstance(suggestion, PMXBundleTreeNode):
-                return suggestion.tabTrigger
+                #Es un bundle item
+                if index.column() == 0:
+                    return suggestion.tabTrigger
+                elif index.column() == 1:
+                    return suggestion.name
             else:
                 return suggestion
         elif role == QtCore.Qt.DecorationRole:
-            if isinstance(suggestion, dict) and 'image' in suggestion:
-                return resources.getIcon(suggestion['image'])
-            elif isinstance(suggestion, PMXBundleTreeNode):
-                return suggestion.icon
-            else:
-                return resources.getIcon('inserttext')
+            if index.column() == 0:
+                if isinstance(suggestion, dict) and 'image' in suggestion:
+                    return resources.getIcon(suggestion['image'])
+                elif isinstance(suggestion, PMXBundleTreeNode):
+                    return suggestion.icon
+                else:
+                    return resources.getIcon('inserttext')
         elif role == QtCore.Qt.ToolTipRole:
             if isinstance(suggestion, dict) and 'tooltip' in suggestion:
                 return suggestion['tooltip']
