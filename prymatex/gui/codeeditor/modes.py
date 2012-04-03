@@ -358,7 +358,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.popupView.verticalHeader().setDefaultSectionSize(spacing + 3);
         self.popupView.horizontalHeader().setStretchLastSection(True)
         self.popupView.setMinimumWidth(spacing * 18)
-        self.popupView.setMinimumHeight(spacing * 12)
+        #self.popupView.setMinimumHeight(spacing * 12)
         
         self.setPopup(self.popupView)
         
