@@ -75,70 +75,28 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         #Si no tengo nada termino
         if not bool(self.pair): return False
 
-        #Vamos a intentar inferir donde esta el cierre o la apertura del brace
+        #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
         openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
         closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
         self.cursorOpen = self.cursorClose = None
         if cursor.hasSelection():
-            selectedCharacter = cursor.selectedText()
-            print cursor in editor._currentBraces, map(lambda c: c is not None and c.hasSelection() or "None", editor._currentBraces)
-            print cursor.selectionStart(), cursor.selectionEnd(), map(lambda c: c is not None and "%s, %s" % (c.selectionStart(), c.selectionEnd()) or "None", editor._currentBraces)
-            if selectedCharacter in openTyping:
-                print editor.getBracesPairs(cursor)
-                #Es un caracter especial de apertura
-                self.cursorOpen = cursor
-                index = openTyping.index(character)
-                self.cursorClose = editor.findTypingPair(character, closeTyping[index], cursor)
-            elif selectedCharacter in closeTyping:
-                print editor.getBracesPairs(cursor)
-                #Es un caracter especial de cierre
-                self.cursorClose = cursor
-                index = closeTyping.index(character)
-                self.cursorOpen = editor.findTypingPair(character, openTyping[index], cursor, True)
-            return True
+            self.cursorOpen = cursor
+            self.cursorClose = editor.getBracesPairs(cursor)
         elif character in openTyping:
-            leftChar = cursor.document().characterAt(cursor.position() - 1)
-            rightChar = cursor.document().characterAt(cursor.position())
-            #Buscar de izquierda a derecha por dentro
-            pairs = filter(lambda pair: leftChar == pair[0] and rightChar != pair[1], editor.braces)
-            if pairs:
-                pair = pairs[0]
-                self.cursorOpen = cursor
-                cursor = QtGui.QTextCursor(self.cursorOpen)
-                cursor.setPosition(cursor.position() - 1)
-                self.cursorClose = editor.findTypingPair(pair[0], pair[1], cursor)
+            # Busco hacia la izquierda del cursor
+            self.cursorOpen = cursor
+            self.cursorClose = editor.getBracesPairs(self.cursorOpen)
+            if self.cursorClose is not None:
+                #TODO: ver si selection start o selection end en funcion de que tipo de brace es el que entro buscando
                 self.cursorClose.setPosition(self.cursorClose.selectionStart())
-                return bool(self.pair)
-            #Buscar de izquierda a derecha por fuera
-            pairs = filter(lambda pair: rightChar == pair[0], editor.braces)
-            if pairs:
-                pair = pairs[0]
-                self.cursorOpen = cursor
-                self.cursorClose = editor.findTypingPair(pair[0], pair[1], self.cursorOpen)
-                self.cursorClose.setPosition(self.cursorClose.selectionEnd())
-                return bool(self.pair)
         elif character in closeTyping and character not in openTyping:
-            rightChar = cursor.document().characterAt(cursor.position())
-            leftChar = cursor.document().characterAt(cursor.position() - 1)
-            #Buscar de derecha a izquierda por dentro
-            pairs = filter(lambda pair: rightChar == pair[1] and leftChar != pair[0], editor.braces)
-            if pairs:
-                pair = pairs[0]
-                self.cursorClose = cursor
-                cursor = QtGui.QTextCursor(self.cursorClose)
-                cursor.setPosition(cursor.position() + 1)
-                self.cursorOpen = editor.findTypingPair(pair[1], pair[0], cursor, True)
-                self.cursorOpen.setPosition(self.cursorOpen.selectionEnd())
-                return bool(self.pair)
-            #Buscar de derecha a izquierda por fuera
-            pairs = filter(lambda pair: leftChar == pair[1], editor.braces)
-            if pairs:
-                pair = pairs[0]
-                self.cursorClose = cursor
-                self.cursorOpen = editor.findTypingPair(pair[1], pair[0], cursor, True)
+            # Busco hacia la izquierda del cursor
+            self.cursorClose = cursor
+            self.cursorOpen = editor.getBracesPairs(self.cursorClose)
+            if self.cursorOpen is not None:
+                #TODO: ver si selection start o selection end en funcion de que tipo de brace es el que entro buscando
                 self.cursorOpen.setPosition(self.cursorOpen.selectionStart())
-                return bool(self.pair)
-        return bool(self.pair)
+        return True
 
     def execute(self, editor, event, cursor = None, scope = None):
         cursor = editor.textCursor()
@@ -154,14 +112,14 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
                 cursor.setPosition(position)
                 cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
                 editor.setTextCursor(cursor)
-        elif self.cursorOpen is None:
+        elif self.cursorOpen is not None and self.cursorClose is not None:
+            self.cursorOpen.insertText(self.pair[0])
+            self.cursorClose.insertText(self.pair[1])
+        else:
             position = cursor.position()
             cursor.insertText("%s%s" % (self.pair[0], self.pair[1]))
             cursor.setPosition(position + 1)
             editor.setTextCursor(cursor)
-        else:
-            self.cursorOpen.insertText(self.pair[0])
-            self.cursorClose.insertText(self.pair[1])
         cursor.endEditBlock()
 
 class MoveCursorToHomeHelper(PMXCodeEditorKeyHelper):

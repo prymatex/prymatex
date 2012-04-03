@@ -174,7 +174,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.extraCursorsSelections = []
         
         self.braces = []
-        #Current braces for cursor position (leftOpen, rightOpen, leftClose, rightClose)
+        #Current braces for cursor position (leftBrace * rightBrace, oppositeLeftBrace, oppositeRightBrace) 
+        # * the cursor is allways here>
         self._currentBraces = (None, None, None, None)
         
         #Block Count
@@ -525,35 +526,34 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 leftCursor = QtGui.QTextCursor(cursor)
                 leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
                 index = openBraces.index(leftChar)
-                self._currentBraces = (leftCursor, None, None, self.findTypingPair(leftChar, closeBraces[index], leftCursor))
+                self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, closeBraces[index], leftCursor), None)
             if rightChar in openBraces:
                 rightCursor = QtGui.QTextCursor(cursor)
                 rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
                 index = openBraces.index(rightChar)
-                self._currentBraces = (self._currentBraces[0], rightCursor, self.findTypingPair(rightChar, closeBraces[index], rightCursor), self._currentBraces[3])
+                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, closeBraces[index], rightCursor))
         elif leftChar in closeBraces or rightChar in closeBraces:
             if leftChar in closeBraces:
                 leftCursor = QtGui.QTextCursor(cursor)
                 leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                self._currentBraces = (None, self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True), leftCursor, None)
+                self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True), None)
             if rightChar in closeBraces:
                 rightCursor = QtGui.QTextCursor(cursor)
                 rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                self._currentBraces = (self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True), self._currentBraces[1], self._currentBraces[2], rightCursor)
+                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
         
-    def getBracesPairs(self, cursor = None, backward = True):
-        cursor = cursor if cursor is not None else self.textCursor()
-        if cursor.hasSelection():
-            #Find selected
-            braces = filter(lambda c: c is not None and cursor.selectionStart() == c.selectionStart() and cursor.selectionEnd() == c.selectionEnd(), self._currentBraces)
-            if len(braces) == 1:
-                brace = braces[0]
-                index = self._currentBraces.index(brace)
-                if index > 1:
-                    return self._currentBraces[:2][::-1][index % 2], self._currentBraces[index]
-                else:
-                    return self._currentBraces[index], self._currentBraces[2:][::-1][index]
-        
+    def getBracesPairs(self, cursor = None, forward = False):
+        """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
+        cursor = QtGui.QTextCursor(cursor or self.textCursor())
+        if not cursor.hasSelection():
+            #poner seleccion en funcion del backward
+            cursor.movePosition(forward and QtGui.QTextCursor.NextCharacter or QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+        #Find selected
+        for index in [0, 1]:
+            if self._currentBraces[index] is not None and cursor.selectionStart() == self._currentBraces[index].selectionStart() and cursor.selectionEnd() == self._currentBraces[index].selectionEnd():
+                opposite = QtGui.QTextCursor(self._currentBraces[index + 2]) if self._currentBraces[index + 2] is not None else None
+                return opposite
+
     #=======================================================================
     # Highlight Editor
     #=======================================================================

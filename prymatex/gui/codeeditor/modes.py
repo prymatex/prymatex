@@ -361,7 +361,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         #self.popupView.setMinimumHeight(spacing * 12)
         
         self.setPopup(self.popupView)
-        
+
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
 
