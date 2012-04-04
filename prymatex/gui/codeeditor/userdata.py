@@ -34,15 +34,14 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         scope = self.scopes[pos] if pos < len(self.scopes) else self.scopes[-1]
         return scope
     
-    def getScopeRange(self, pos):
-        ranges = self.getScopeRanges()
+    def scopeRange(self, pos):
+        ranges = self.scopeRanges()
         range = filter(lambda (scope, start, end): start <= pos <= end, ranges)
         assert len(range) >= 1, "More than one range"
         range = range[0] if len(range) == 1 else None
         return range
     
-    #Deprecated name, use getScopeRanges
-    def getAllScopes(self, start = 0, end = None):
+    def scopeRanges(self, start = 0, end = None):
         current = ( self.scopes[start], start ) if start < len(self.scopes) else ("", 0)
         end = end or len(self.scopes)
         scopes = []
@@ -53,12 +52,25 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         scopes.append(( current[0], current[1], end ))
         return scopes
     
-    def getScopeRanges(self, start = 0, end = None):
-        return self.getAllScopes(start, end)
-    
     def isWordInScopes(self, word):
-        return word in reduce(lambda scope, scope1: scope + " " + scope1[0], self.getAllScopes(), "")
-        
+        return word in reduce(lambda scope, scope1: scope + " " + scope1[0], self.scopeRanges(), "")
+
+    #http://manual.macromates.com/en/language_grammars
+    def entities(self):
+        """entity — an entity refers to a larger part of the document, for example a chapter, class, function, or tag.
+        We do not scope the entire entity as entity.* (we use meta.* for that). But we do use entity.* for the “placeholders”
+        in the larger entity, e.g. if the entity is a chapter, we would use entity.name.section for the chapter title.
+            name — we are naming the larger entity.
+                function — the name of a function.
+                type — the name of a type declaration or class.
+                tag — a tag name.
+                section — the name is the name of a section/heading.
+            other — other entities.
+                inherited-class — the superclass/baseclass name.
+                attribute-name — the name of an attribute (mainly in tags).
+        """
+        return filter(lambda scope: 'entity' in scope[0], self.scopeRanges())
+
     #================================================
     # Cache Handle
     #================================================

@@ -5,6 +5,8 @@ from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex.support.syntax import PMXSyntax
 
+from prymatex.utils.decorator.helpers import printtime
+
 WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 def whiteSpace(text):
     match = WHITESPACE.match(text)
@@ -57,11 +59,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.setUserState(state)
     
     def applyFormat(self, userData):
-        for scope, start, end in userData.getAllScopes():
+        for scope, start, end in userData.scopeRanges():
             format = self.getFormat(scope)
             if format is not None:
                 self.setFormat(start, end - start, format)
-    
+
+    #@printtime
     def setupBlockUserData(self, text, userData, data):
         state = self.SINGLE_LINE
         userData.setScopes(data[0])
@@ -82,7 +85,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.editor.updateFolding(self.currentBlock())
             
         #3 Update Symbols
-        preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.getAllScopes())
+        preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.scopeRanges())
         
         symbolRange = filter(lambda (p, start, end): p.showInSymbolList, preferences)
         if symbolRange:
@@ -100,6 +103,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
         return state
 
+    #@printtime
     def highlightBlock(self, text):
         userData = self.currentBlock().userData()
         if userData is not None and userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():

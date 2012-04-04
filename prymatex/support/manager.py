@@ -801,7 +801,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # TABTRIGGERS
     #---------------------------------------------------------------
-    @printtime
+    #@printtime
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
         tabTriggerItems = self.cache.setcallable("tabtriggers", self.getAllTabTriggerItems)
@@ -814,7 +814,7 @@ class PMXSupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    @printtime
+    #@printtime
     def getAllTabTiggerItemsByScope(self, scope):
         with_scope = []
         without_scope = []
@@ -829,7 +829,7 @@ class PMXSupportBaseManager(object):
         with_scope = map(lambda (score, item): item, with_scope)
         return with_scope + without_scope
 
-    @printtime
+    #@printtime
     def getTabTriggerItem(self, keyword, scope):
         with_scope = []
         without_scope = []
@@ -854,7 +854,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # KEYEQUIVALENT
     #---------------------------------------------------------------
-    @printtime
+    #@printtime
     def getKeyEquivalentItem(self, code, scope):
         with_scope = []
         without_scope = []
@@ -881,7 +881,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # FILE EXTENSION, for drag commands
     #---------------------------------------------------------------
-    @printtime
+    #@printtime
     def getFileExtensionItem(self, path, scope):
         with_scope = []
         without_scope = []
@@ -908,7 +908,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # ACTION ITEMS FOR SCOPE
     #---------------------------------------------------------------
-    @printtime
+    #@printtime
     def getActionItems(self, scope):
         """
         Return a list of actions items for scope and without scope

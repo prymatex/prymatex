@@ -632,7 +632,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         elif selection == self.SelectCurrentScope:
             block = cursor.block()
             beginPosition = block.position()
-            range = block.userData().getScopeRange(cursor.columnNumber())
+            range = block.userData().scopeRange(cursor.columnNumber())
             if range is not None:
                 scope, start, end = range
                 cursor.setPosition(beginPosition + start)
