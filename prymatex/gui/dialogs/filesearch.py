@@ -64,7 +64,7 @@ class FileSearchThread(QtCore.QThread):
 
         stream = QtCore.QTextStream(file_object)
         lines = []
-        line_index = 0
+        line_index = 1
         line = stream.readLine()
         while not self._cancel:
             column = line.find(self.searchPattern)

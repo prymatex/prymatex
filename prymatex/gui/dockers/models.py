@@ -66,7 +66,7 @@ class LineTreeNode(TreeNode):
         
     @property
     def path(self):
-        return os.path.join(self.parentNode.path)
+        return self.parentNode.path
     
     @property
     def icon(self):
