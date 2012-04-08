@@ -3,6 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.gui import utils
 from prymatex.utils.lists import bisect_key
 from prymatex.gui.codeeditor import helpers
 from prymatex.gui.support.models import PMXBundleTreeNode
@@ -85,9 +86,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Capture Text
             cursor.setPosition(currentHolder.start)
             cursor.setPosition(currentHolder.end - length, QtGui.QTextCursor.KeepAnchor)
-            #TODO: estos replace tienen que tener una forma mas "interesante"
-            selectedText = cursor.selectedText().replace(u"\u2029", '\n')
-            selectedText = selectedText.replace(u"\u2028", '\n')
+            selectedText = utils.replaceLineBreaks(cursor.selectedText())
             currentHolder.setContent(selectedText)
             
             #Remove text

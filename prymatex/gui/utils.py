@@ -24,6 +24,10 @@ def centerWidget(widget, scale = None):
         widget.resize(screen.width() * scale[0], screen.height() * scale[1])
     widget.move((screen.width() - widget.size().width()) / 2, (screen.height() - widget.size().height()) / 2)
     
+def replaceLineBreaks(text):
+    """docstring for replaceLineBreaks"""
+    return text.replace(u"\u2029", '\n').replace(u"\u2028", '\n')
+
 def textToObjectName(text, sufix = "", prefix = ""):
     """
     &Text Button name -> %{prefix}TextButtonName%{sufix}
