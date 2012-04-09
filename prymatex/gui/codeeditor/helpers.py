@@ -167,23 +167,13 @@ class BackspaceUnindentHelper(PMXCodeEditorKeyHelper):
         return indent != 0 and indent == cursor.columnNumber()
         
     def execute(self, editor, event, cursor = None, scope = None):
-        cursor = editor.textCursor()
-        for _ in range(len(editor.tabKeyBehavior)):
-            cursor.deletePreviousChar()
+        editor.unindentBlocks()
 
 class BacktabUnindentHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backtab
+    #Siempre se come esta pulsacion solo que no unindenta si la linea ya esta al borde
     def execute(self, editor, event, cursor = None, scope = None):
-        start, end = editor.getSelectionBlockStartEnd()
-        if start != end:
-            editor.unindentBlocks()
-        else:
-            cursor = editor.textCursor()
-            block = cursor.block()
-            userData = cursor.block().userData()
-            counter = editor.tabStopSize if len(userData.indent) > editor.tabStopSize else len(userData.indent)
-            for _ in range(counter):
-                cursor.deletePreviousChar()
+        editor.unindentBlocks()
 
 class SmartUnindentHelper(PMXCodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):

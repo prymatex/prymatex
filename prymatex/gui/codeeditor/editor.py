@@ -1141,7 +1141,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
             if counter > 0:
                 cursor.setPosition(start.position())
-                for _ in range(self.tabStopSize):
+                for _ in range(counter):
                     cursor.deleteChar()
             if start == end:
                 break
