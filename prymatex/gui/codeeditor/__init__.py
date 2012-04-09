@@ -20,7 +20,7 @@ def registerPlugin(manager):
     
     manager.registerKeyHelper(PMXCodeEditor, helpers.KeyEquivalentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartTypingPairsHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.SmartUnindentHelper)
+    #manager.registerKeyHelper(PMXCodeEditor, helpers.SmartUnindentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.TabTriggerHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.TabIndentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.CompleterHelper)
@@ -32,3 +32,4 @@ def registerPlugin(manager):
     manager.registerKeyHelper(PMXCodeEditor, helpers.MultiCursorHelper)
 
     manager.registerAddon(PMXCodeEditor, addons.CompleterAddon)
+    manager.registerAddon(PMXCodeEditor, addons.SmartUnindentAddon)

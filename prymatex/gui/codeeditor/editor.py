@@ -298,6 +298,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
         
     def getPreference(self, scope):
+        """Deprecated"""
         return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
 
     def getWordUnderCursor(self):
@@ -1117,8 +1118,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             return block
 
     def indentBlocks(self, cursor = None):
-        """Indents text, block selections.
-        """
+        """Indents text, block selections."""
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
         start, end = self.getSelectionBlockStartEnd(cursor)
         cursor.beginEditBlock()

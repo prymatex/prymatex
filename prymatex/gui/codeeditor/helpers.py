@@ -210,7 +210,6 @@ class SmartIndentHelper(PMXCodeEditorKeyHelper):
     def execute(self, editor, event, cursor = None, scope = None):
         cursor = editor.textCursor()
         block = cursor.block()
-        print block.userData().entities()
         text = block.text()[:cursor.columnNumber()]
         if editor.document().blockCount() == 1:
             syntax = self.application.supportManager.findSyntaxByFirstLine(text)

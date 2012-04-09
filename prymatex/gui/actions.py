@@ -112,6 +112,10 @@ class MainWindowActions(object):
     def on_actionQuit_triggered(self):
         QtGui.QApplication.quit()
     
+    @QtCore.pyqtSlot()
+    def on_actionRestart_triggered(self):
+        QtGui.QApplication.exit(3)
+
     #============================================================
     # Edit Actions
     #============================================================
