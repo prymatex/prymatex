@@ -67,7 +67,7 @@ class CompleterHelper(PMXCodeEditorKeyHelper):
 
 class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
-        settings = self.application.supportManager.getPreferenceSettings(scope)
+        settings = editor.preferenceSettings(scope)
         character = event.text()
         pairs = filter(lambda pair: character == pair[0], settings.smartTypingPairs)
         self.pair = pairs[0] if len(pairs) == 1 else []
@@ -80,22 +80,23 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
         self.cursorOpen = self.cursorClose = None
         if cursor.hasSelection():
-            self.cursorOpen = cursor
-            self.cursorClose = editor.getBracesPairs(cursor)
-        elif character in openTyping:
-            # Busco hacia la izquierda del cursor
+            selectedText = cursor.selectedText()
+            if selectedText in openTyping + closeTyping:
+                self.cursorOpen = cursor
+                self.cursorClose = editor.getBracesPairs(cursor)
+            return True
+        elif editor.besideBrace(cursor) and character in openTyping or character in closeTyping:
             self.cursorOpen = cursor
             self.cursorClose = editor.getBracesPairs(self.cursorOpen)
             if self.cursorClose is not None:
                 #TODO: ver si selection start o selection end en funcion de que tipo de brace es el que entro buscando
                 self.cursorClose.setPosition(self.cursorClose.selectionStart())
-        elif character in closeTyping and character not in openTyping:
-            # Busco hacia la izquierda del cursor
-            self.cursorClose = cursor
-            self.cursorOpen = editor.getBracesPairs(self.cursorClose)
-            if self.cursorOpen is not None:
-                #TODO: ver si selection start o selection end en funcion de que tipo de brace es el que entro buscando
-                self.cursorOpen.setPosition(self.cursorOpen.selectionStart())
+                if self.cursorOpen.position() >= self.cursorClose.position():
+                    self.cursorOpen = self.cursorClose = None
+        else:
+            currentWord, currentWordStart, currentWordEnd = editor.currentWord()
+            if currentWord and currentWordEnd != cursor.position():
+                return False
         return True
 
     def execute(self, editor, event, cursor = None, scope = None):

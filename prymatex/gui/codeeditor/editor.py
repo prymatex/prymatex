@@ -294,6 +294,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Obteniendo datos del editor
     #=======================================================================
+    def preferenceSettings(self, scope):
+        return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
+        
     def getPreference(self, scope):
         return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
 
@@ -311,6 +314,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor = self.textCursor()
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
 
+    def currentWord(self, *largs, **kwargs):
+        return self.getCurrentWord(*largs, **kwargs)
+        
     def getCurrentWord(self, pat = RE_WORD, direction = "both"):
         cursor = self.textCursor()
         line = cursor.block().text()
@@ -507,7 +513,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Braces
     #=======================================================================
     def setBraces(self, scope):
-        settings = self.getPreference(scope)
+        settings = self.preferenceSettings(scope)
         self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
         
     def setCurrentBraces(self, cursor = None):
@@ -553,6 +559,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             if self._currentBraces[index] is not None and cursor.selectionStart() == self._currentBraces[index].selectionStart() and cursor.selectionEnd() == self._currentBraces[index].selectionEnd():
                 opposite = QtGui.QTextCursor(self._currentBraces[index + 2]) if self._currentBraces[index + 2] is not None else None
                 return opposite
+
+    def besideBrace(self, cursor):
+        return (self._currentBraces[0] is not None and self._currentBraces[0].position() + 1 == cursor.position()) or (self._currentBraces[1] is not None and self._currentBraces[1].position() - 1 == cursor.position())
 
     #=======================================================================
     # Highlight Editor
