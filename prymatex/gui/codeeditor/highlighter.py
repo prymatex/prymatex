@@ -7,9 +7,12 @@ from prymatex.support.syntax import PMXSyntax
 
 from prymatex.utils.decorator.helpers import printtime
 
-WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
+#TODO: Usar mas el modulo de string en general, string.punctuation
+
+RE_WORD = re.compile(r"[A-Za-z_]+", re.UNICODE)
+RE_WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 def whiteSpace(text):
-    match = WHITESPACE.match(text)
+    match = RE_WHITESPACE.match(text)
     try:
         ws = match.group('whitespace')
         return ws
@@ -98,7 +101,13 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData.symbol = symbol
             self.editor.updateSymbol(self.currentBlock())
 
-        #4 Save the hash the text, scope and state
+        #4 Split words
+        words = RE_WORD.findall(text)
+        if userData.words != words:
+            userData.words = words
+            self.editor.updateWords(self.currentBlock())
+
+        #5 Save the hash the text, scope and state
         userData.textHash = hash(text) + hash(self.syntax.scopeName) + state
 
         return state

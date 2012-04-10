@@ -17,6 +17,9 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.indent = ""
         #Symbols
         self.symbol = None
+        #Words
+        self.words = []
+
         self.textHash = None
         self.cache = None
 

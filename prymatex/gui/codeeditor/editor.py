@@ -93,6 +93,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #================================================================
     # Regular expresions
     #================================================================
+    #TODO: Ver que pasa con [A-Za-z_]+ en lugar de [A-Za-z_]*
     RE_WORD = re.compile(r"[A-Za-z_]*")
     
     #================================================================
@@ -212,6 +213,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             self.symbolListModel.addSymbolBlock(block)
         
+    def updateWords(self, block):
+        self.logger.debug("Update Words")
+        if block.userData().words:
+            pass
+            #self.symbolListModel.removeSymbolBlock(block)
+        else:
+            pass
+            #self.symbolListModel.addSymbolBlock(block)
+            
     #=======================================================================
     # Connect Signals
     #=======================================================================
