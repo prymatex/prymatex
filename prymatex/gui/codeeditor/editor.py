@@ -570,6 +570,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def besideBrace(self, cursor):
         return self.beforeBrace(cursor) or self.afterBrace(cursor)
 
+    def surroundBraces(self, cursor):
+        #TODO: Esto esta mal
+        return self.beforeBrace(cursor) and self.afterBrace(cursor)
+        
     #=======================================================================
     # Highlight Editor
     #=======================================================================

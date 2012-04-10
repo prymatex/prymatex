@@ -180,34 +180,18 @@ class BackspaceUnindentHelper(PMXCodeEditorKeyHelper):
 class BackspaceRemoveBracesHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
     def accept(self, editor, event, cursor = None, scope = None):
-        self.openCursor = self.closeCursor = None
-        if editor.afterBrace(cursor):
-            self.openCursor = QtGui.QTextCursor(cursor)
-            self.openCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-            self.closeCursor = editor.getBracesPairs(self.openCursor)
-        return self.openCursor is not None and self.closeCursor is not None
+        if cursor.hasSelection(): return False
+        self.cursor1 = self.cursor2 = None
+        self.cursor1 = QtGui.QTextCursor(cursor)
+        self.cursor1.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+        self.cursor2 = editor.getBracesPairs(self.cursor1)
+        return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
         
     def execute(self, editor, event, cursor = None, scope = None):
         cursor.beginEditBlock()
-        self.openCursor.removeSelectedText()
-        self.closeCursor.removeSelectedText()
+        self.cursor1.removeSelectedText()
+        self.cursor2.removeSelectedText()
         cursor.endEditBlock()
-
-class SmartUnindentHelper(PMXCodeEditorKeyHelper):
-    def accept(self, editor, event, cursor = None, scope = None):
-        if event.text():
-            settings = self.application.supportManager.getPreferenceSettings(scope)
-            block = cursor.block()
-            text = block.text()[:cursor.columnNumber()] + event.text()
-            indentMarks = settings.indent(text)
-            if PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-                previous = block.previous()
-                return previous.isValid() and block.userData().indent == previous.userData().indent
-        return False
-        
-    def execute(self, editor, event, cursor = None, scope = None):
-        QtGui.QPlainTextEdit.keyPressEvent(editor, event)
-        editor.unindentBlocks(cursor)
 
 class SmartIndentHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Return
@@ -264,16 +248,18 @@ class MultiCursorHelper(PMXCodeEditorKeyHelper):
             if not newCursor.isNull():
                 editor.multiCursorMode.addMergeCursor(newCursor)
 
-class DeleteBracesHelper(PMXCodeEditorKeyHelper):
+class DeleteRemoveBracesHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Delete
     def accept(self, editor, event, cursor = None, scope = None):
-        #Solo si el cursor no esta al final de la indentacion
-        block = cursor.block()
-        self.newPosition = block.position() + len(block.userData().indent)
-        return self.newPosition != cursor.position()
+        if cursor.hasSelection(): return False
+        self.cursor1 = self.cursor2 = None
+        self.cursor1 = QtGui.QTextCursor(cursor)
+        self.cursor1.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+        self.cursor2 = editor.getBracesPairs(self.cursor1)
+        return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
         
     def execute(self, editor, event, cursor = None, scope = None):
-        #Lo muevo al final de la indentacion
-        cursor = editor.textCursor()
-        cursor.setPosition(self.newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
-        editor.setTextCursor(cursor)
+        cursor.beginEditBlock()
+        self.cursor1.removeSelectedText()
+        self.cursor2.removeSelectedText()
+        cursor.endEditBlock()

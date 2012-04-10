@@ -30,6 +30,7 @@ def registerPlugin(manager):
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartIndentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.OverwriteHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.MultiCursorHelper)
+    manager.registerKeyHelper(PMXCodeEditor, helpers.DeleteRemoveBracesHelper)
 
     manager.registerAddon(PMXCodeEditor, addons.CompleterAddon)
     manager.registerAddon(PMXCodeEditor, addons.SmartUnindentAddon)
