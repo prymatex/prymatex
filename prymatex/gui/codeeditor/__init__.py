@@ -20,12 +20,12 @@ def registerPlugin(manager):
     
     manager.registerKeyHelper(PMXCodeEditor, helpers.KeyEquivalentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartTypingPairsHelper)
-    #manager.registerKeyHelper(PMXCodeEditor, helpers.SmartUnindentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.TabTriggerHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.TabIndentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.CompleterHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.BacktabUnindentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.BackspaceUnindentHelper)
+    manager.registerKeyHelper(PMXCodeEditor, helpers.BackspaceRemoveBracesHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.MoveCursorToHomeHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.SmartIndentHelper)
     manager.registerKeyHelper(PMXCodeEditor, helpers.OverwriteHelper)

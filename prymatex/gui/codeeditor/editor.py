@@ -561,8 +561,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 opposite = QtGui.QTextCursor(self._currentBraces[index + 2]) if self._currentBraces[index + 2] is not None else None
                 return opposite
 
+    def beforeBrace(self, cursor):
+        return self._currentBraces[1] is not None and self._currentBraces[1].position() - 1 == cursor.position()
+    
+    def afterBrace(self, cursor):
+        return self._currentBraces[0] is not None and self._currentBraces[0].position() + 1 == cursor.position()
+        
     def besideBrace(self, cursor):
-        return (self._currentBraces[0] is not None and self._currentBraces[0].position() + 1 == cursor.position()) or (self._currentBraces[1] is not None and self._currentBraces[1].position() - 1 == cursor.position())
+        return self.beforeBrace(cursor) or self.afterBrace(cursor)
 
     #=======================================================================
     # Highlight Editor
@@ -1122,14 +1128,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
         start, end = self.getSelectionBlockStartEnd(cursor)
         cursor.beginEditBlock()
-        new_cursor = QtGui.QTextCursor(cursor)
         while True:
-            new_cursor.setPosition(start.position())
-            new_cursor.insertText(self.tabKeyBehavior)
+            cursor.setPosition(start.position())
+            cursor.insertText(self.tabKeyBehavior)
             if start == end:
                 break
             start = start.next()
-        del new_cursor
         cursor.endEditBlock()        
 
     def unindentBlocks(self, cursor = None):
@@ -1138,7 +1142,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor.beginEditBlock()
         while True:
             data = start.userData()
-            counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
+            if self.tabStopSoft:
+                counter = self.tabStopSize if len(data.indent) > self.tabStopSize else len(data.indent)
+            else:
+                counter = 1 if len(data.indent) else 0
             if counter > 0:
                 cursor.setPosition(start.position())
                 for _ in range(counter):

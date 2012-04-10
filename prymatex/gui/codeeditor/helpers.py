@@ -145,35 +145,53 @@ class OverwriteHelper(PMXCodeEditorKeyHelper):
         
 class TabIndentHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Tab
+    def accept(self, editor, event, cursor = None, scope = None):
+        #Solo si el cursor tiene seleccion o usa soft Tab
+        return cursor.hasSelection() or editor.tabStopSoft
+        
     def execute(self, editor, event, cursor = None, scope = None):
         start, end = editor.getSelectionBlockStartEnd()
         if start != end:
+            #Tiene seleccion en distintos bloques, es un indentar
             editor.indentBlocks()
-        elif editor.getSyntax().indentSensitive:
-            #Smart indent
-            cursor = editor.textCursor()
-            position = cursor.position()
-            blockPosition = cursor.block().position()
-            indent = cursor.block().userData().indent
-            editor.textCursor().insertText(editor.tabKeyBehavior)
         else:
-            editor.textCursor().insertText(editor.tabKeyBehavior)
-
-class BackspaceUnindentHelper(PMXCodeEditorKeyHelper):
-    KEY = QtCore.Qt.Key_Backspace
-    def accept(self, editor, event, cursor = None, scope = None):
-        if cursor.hasSelection(): return False
-        indent = len(cursor.block().userData().indent)
-        return indent != 0 and indent == cursor.columnNumber()
-        
-    def execute(self, editor, event, cursor = None, scope = None):
-        editor.unindentBlocks()
+            #Insertar un numero multiplo de espacios a la posicion del cursor
+            spaces = editor.tabStopSize - (cursor.columnNumber() % editor.tabStopSize)
+            cursor.insertText(spaces * ' ')
 
 class BacktabUnindentHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backtab
     #Siempre se come esta pulsacion solo que no unindenta si la linea ya esta al borde
     def execute(self, editor, event, cursor = None, scope = None):
         editor.unindentBlocks()
+
+class BackspaceUnindentHelper(PMXCodeEditorKeyHelper):
+    KEY = QtCore.Qt.Key_Backspace
+    def accept(self, editor, event, cursor = None, scope = None):
+        if cursor.hasSelection(): return False
+        indent = len(cursor.block().userData().indent)
+        return indent != 0 and indent >= cursor.columnNumber() and editor.tabStopSoft
+        
+    def execute(self, editor, event, cursor = None, scope = None):
+        counter = cursor.columnNumber() % editor.tabStopSize or editor.tabStopSize
+        for _ in range(counter):
+            cursor.deletePreviousChar()
+
+class BackspaceRemoveBracesHelper(PMXCodeEditorKeyHelper):
+    KEY = QtCore.Qt.Key_Backspace
+    def accept(self, editor, event, cursor = None, scope = None):
+        self.openCursor = self.closeCursor = None
+        if editor.afterBrace(cursor):
+            self.openCursor = QtGui.QTextCursor(cursor)
+            self.openCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+            self.closeCursor = editor.getBracesPairs(self.openCursor)
+        return self.openCursor is not None and self.closeCursor is not None
+        
+    def execute(self, editor, event, cursor = None, scope = None):
+        cursor.beginEditBlock()
+        self.openCursor.removeSelectedText()
+        self.closeCursor.removeSelectedText()
+        cursor.endEditBlock()
 
 class SmartUnindentHelper(PMXCodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
