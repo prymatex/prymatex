@@ -43,7 +43,7 @@ class CompleterHelper(PMXCodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         """Accept the completer event"""
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            settings = self.application.supportManager.getPreferenceSettings(scope)
+            settings = editor.preferenceSettings(scope)
             self.disableDefaultCompletion = settings.disableDefaultCompletion
             
             #An array of additional candidates when cycling through completion candidates from the current document.
@@ -74,7 +74,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         
         #Si no tengo nada termino
         if not bool(self.pair): return False
-
+        
         #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
         openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
         closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
@@ -84,6 +84,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
             if selectedText in openTyping + closeTyping:
                 self.cursorOpen = cursor
                 self.cursorClose = editor.getBracesPairs(cursor)
+                print self.cursorOpen, self.cursorClose
             return True
         elif editor.besideBrace(cursor) and character in openTyping or character in closeTyping:
             self.cursorOpen = cursor
@@ -95,6 +96,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
                     self.cursorOpen = self.cursorClose = None
         else:
             currentWord, currentWordStart, currentWordEnd = editor.currentWord()
+            print self.pair, currentWord
             if currentWord and currentWordEnd != cursor.position():
                 return False
         return True
