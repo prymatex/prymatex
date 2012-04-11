@@ -958,12 +958,10 @@ class PMXSupportBaseManager(object):
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                 return syntax
     
-    def findSyntaxByFileType(self, path):
+    def findSyntaxByFileType(self, fileType):
         for syntax in self.getAllSyntaxes():
-            if type(syntax.fileTypes) == list:
-                for t in syntax.fileTypes:
-                    if path.endswith(t):
-                        return syntax
+            if syntax.fileTypes is not None and any(map(lambda ft: fileType == "%s" % ft, syntax.fileTypes)):
+                return syntax
 
 #===================================================
 # PYTHON MANAGER
@@ -1109,10 +1107,3 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         for syntax in self.SYNTAXES.values():
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                 return syntax
-
-    def findSyntaxByFileType(self, suffix):
-        for syntax in self.SYNTAXES.values():
-            if type(syntax.fileTypes) == list:
-                for t in syntax.fileTypes:
-                    if suffix.endswith(t):
-                        return syntax
