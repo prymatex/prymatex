@@ -68,12 +68,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.setFormat(start, end - start, format)
 
     #@printtime
-    def setupBlockUserData(self, text, userData, data):
+    def setupBlockUserData(self, text, userData, scopes, stackAndScopes):
         state = self.SINGLE_LINE
-        userData.setScopes(data[0])
-        if data[1] is not None:
+        userData.setScopes(scopes)
+        if stackAndScopes is not None:
             state = self.MULTI_LINE
-            userData.setStackAndScopes(*data[1])
+            userData.setStackAndScopes(*stackAndScopes)
         
         #1 Update Indent
         indent = whiteSpace(text)
@@ -101,8 +101,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData.symbol = symbol
             self.editor.updateSymbol(self.currentBlock())
 
-        #4 Split words
-        words = RE_WORD.findall(text)
+        #4 Split words [( scope, word)...]
+        words = map(lambda match: (scopes[match.start()], match.string[slice(*match.span())]), RE_WORD.finditer(text))
         if userData.words != words:
             userData.words = words
             self.editor.updateWords(self.currentBlock())
@@ -135,7 +135,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
-            state = self.setupBlockUserData(text, userData, data)
+            state = self.setupBlockUserData(text, userData, data[0], data[1])
             self.setCurrentBlockState(state)
 
             self.applyFormat(userData)
