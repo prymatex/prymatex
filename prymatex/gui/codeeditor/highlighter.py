@@ -1,10 +1,10 @@
 import re
+
 from PyQt4 import QtGui
 
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex.support.syntax import PMXSyntax
-
 from prymatex.utils.decorator.helpers import printtime
 
 #TODO: Usar mas el modulo de string en general, string.punctuation
@@ -68,12 +68,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.setFormat(start, end - start, format)
 
     #@printtime
-    def setupBlockUserData(self, text, userData, scopes, stackAndScopes):
-        state = self.SINGLE_LINE
+    def setupBlockUserData(self, text, userData, scopes, processorState):
+        blockState = self.SINGLE_LINE
         userData.setScopes(scopes)
-        if stackAndScopes is not None:
-            state = self.MULTI_LINE
-            userData.setStackAndScopes(*stackAndScopes)
+        if processorState is not None:
+            blockState = self.MULTI_LINE
+            userData.setProcessorState(processorState)
         
         #1 Update Indent
         indent = whiteSpace(text)
@@ -101,16 +101,16 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData.symbol = symbol
             self.editor.updateSymbol(self.currentBlock())
 
-        #4 Split words [( scope, word)...]
-        words = map(lambda match: (scopes[match.start()], match.string[slice(*match.span())]), RE_WORD.finditer(text))
+        #4 Split words [( scope, word )...]
+        words = map(lambda match: match.span(), RE_WORD.finditer(text))
         if userData.words != words:
             userData.words = words
             self.editor.updateWords(self.currentBlock())
 
         #5 Save the hash the text, scope and state
-        userData.textHash = hash(text) + hash(self.syntax.scopeName) + state
+        userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
 
-        return state
+        return blockState
 
     #@printtime
     def highlightBlock(self, text):
@@ -121,8 +121,10 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.processor.startParsing(self.syntax.scopeName)
             if self.previousBlockState() == self.MULTI_LINE:
                 #Recupero una copia del stack y los scopes del user data
-                stack, scopes = self.currentBlock().previous().userData().getStackAndScopes()
-                self.processor.setScopes(scopes)
+                stack, scopes = self.currentBlock().previous().userData().processorState()
+                #Set copy, not original
+                stack = stack[:]
+                self.processor.setScopes(scopes[:])
             else:
                 #Creo un stack y scopes nuevos
                 stack = [[self.syntax.grammar, None]]
@@ -130,13 +132,13 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             # A parserar mi amor, vamos a parsear mi amor
             self.syntax.parseLine(stack, text, self.processor)
             
-            data = self.processor.lines[-1]
+            scopes, processorState = self.processor.lines[-1]
             if userData is None:
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
-            state = self.setupBlockUserData(text, userData, data[0], data[1])
-            self.setCurrentBlockState(state)
+            blockState = self.setupBlockUserData(text, userData, scopes, processorState)
+            self.setCurrentBlockState(blockState)
 
             self.applyFormat(userData)
 

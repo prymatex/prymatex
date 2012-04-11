@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from copy import copy
 from PyQt4 import QtGui
 from prymatex.support.syntax import PMXSyntax
 
@@ -21,7 +20,8 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.words = []
 
         self.textHash = None
-        self.cache = None
+        
+        self.__cache = {}
 
     def __nonzero__(self):
         return bool(self.scopes)
@@ -45,6 +45,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         return range
     
     def scopeRanges(self, start = 0, end = None):
+        #TODO: Cache para scopeRanges, si el hash no cambio retornar lo cacheado sino regenerar
         current = ( self.scopes[start], start ) if start < len(self.scopes) else ("", 0)
         end = end or len(self.scopes)
         scopes = []
@@ -58,27 +59,20 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def isWordInScopes(self, word):
         return word in reduce(lambda scope, scope1: scope + " " + scope1[0], self.scopeRanges(), "")
 
-    #http://manual.macromates.com/en/language_grammars
-    def entities(self):
-        """entity — an entity refers to a larger part of the document, for example a chapter, class, function, or tag.
-        We do not scope the entire entity as entity.* (we use meta.* for that). But we do use entity.* for the “placeholders”
-        in the larger entity, e.g. if the entity is a chapter, we would use entity.name.section for the chapter title.
-            name — we are naming the larger entity.
-                function — the name of a function.
-                type — the name of a type declaration or class.
-                tag — a tag name.
-                section — the name is the name of a section/heading.
-            other — other entities.
-                inherited-class — the superclass/baseclass name.
-                attribute-name — the name of an attribute (mainly in tags).
-        """
-        return filter(lambda scope: 'entity' in scope[0], self.scopeRanges())
+    def groups(self, name = ""):
+        #http://manual.macromates.com/en/language_grammars
+        # 11 root groups: comment, constant, entity, invalid, keyword, markup, meta, storage, string, support, variable
+        return map(lambda scopeRange: (scopeRange[1], scopeRange[2]), filter(lambda scopeRange: any(map(lambda s: s.startswith(name), scopeRange[0].split())), self.scopeRanges()))
+
+    def wordsByGroup(self, name = ""):
+        groups = self.groups(name)
+        return filter(lambda word: any(map(lambda group: group[0] <= word[0] and group[1] >= word[1], groups)), self.words)
 
     #================================================
     # Cache Handle
     #================================================
-    def getStackAndScopes(self):
-        return copy(self.cache[0]), copy(self.cache[1])
+    def processorState(self):
+        return self.__cache["processor_state"]
     
-    def setStackAndScopes(self, stack, scopes):
-        self.cache = (stack, scopes)
+    def setProcessorState(self, processorState):
+        self.__cache["processor_state"] = processorState
