@@ -97,6 +97,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         self.tableView.setItemDelegateForColumn(2, PMXColorDelegate(self))
         self.tableView.setItemDelegateForColumn(3, PMXFontStyleDelegate(self))
         self.tableView.setEditTriggers(QtGui.QAbstractItemView.AllEditTriggers)
+        
         #Conectar
         for _, scope in self.DEFAULTS['styles']:
             self.comboBoxScope.addItem(scope)
@@ -160,6 +161,13 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         self.pushButtonLineHighlight.setStyleSheet("background-color: " + QColor2RGBA(settings['lineHighlight'])[:7])
         self.pushButtonCaret.setStyleSheet("background-color: " + QColor2RGBA(settings['caret'])[:7])
         self.application.supportManager.themeStyleProxyModel.setFilterRegExp(unicode(theme.uuid))
+        
+        #Set color for table view
+        tableStyle = """QTableView {background-color: %s;
+        color: %s;
+        selection-background-color: %s; }""" % (settings['background'].name(), settings['foreground'].name(), settings['selection'].name())
+        self.tableView.setStyleSheet(tableStyle)
+        
         if changeSettings:
             self.settingGroup.setValue('theme', unicode(theme.uuid))
         
