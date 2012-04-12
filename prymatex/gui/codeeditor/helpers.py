@@ -3,7 +3,6 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex.core.plugin import PMXBaseKeyHelper
-from prymatex.support import PMXPreferenceSettings
 
 class PMXCodeEditorKeyHelper(PMXBaseKeyHelper):
     def accept(self, editor, event, cursor, scope):
@@ -197,39 +196,12 @@ class BackspaceRemoveBracesHelper(PMXCodeEditorKeyHelper):
 
 class SmartIndentHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Return
-    def accept(self, editor, event, cursor = None, scope = None):
-        self.settings = self.application.supportManager.getPreferenceSettings(scope)
-        return True
-        
     def execute(self, editor, event, cursor = None, scope = None):
-        cursor = editor.textCursor()
-        block = cursor.block()
-        lineText = block.text()
-        strings = block.userData().wordsByGroup('string')
-        storages = block.userData().wordsByGroup('storage')
-        print map(lambda ran: lineText[slice(*ran)], strings), map(lambda ran: lineText[slice(*ran)], storages)
-        text = block.text()[:cursor.columnNumber()]
         if editor.document().blockCount() == 1:
-            syntax = self.application.supportManager.findSyntaxByFirstLine(text)
+            syntax = self.application.supportManager.findSyntaxByFirstLine(cursor.block().text()[:cursor.columnNumber()])
             if syntax is not None:
                 editor.setSyntax(syntax)
-        indentMarks = self.settings.indent(text)
-        if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
-            self.logger.debug("Increase indent")
-            indent = block.userData().indent + editor.tabKeyBehavior
-        elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
-            #TODO: Creo que este no es el correcto
-            self.logger.debug("Increase next line indent")
-            indent = block.userData().indent + editor.tabKeyBehavior
-        elif PMXPreferenceSettings.UNINDENT in indentMarks:
-            self.logger.debug("Unindent")
-            indent = ""
-        elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-            indent = block.userData().indent[:len(editor.tabKeyBehavior)]
-        else:
-            self.logger.debug("Preserve indent")
-            indent = block.userData().indent
-        cursor.insertText("\n%s" % indent)
+        editor.insertNewLine(cursor)
 
 class MultiCursorHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_M

@@ -96,13 +96,13 @@ class PMXMacroProcessor(PMXMacroProcessor):
         self.editor.textCursor().deletePreviousChar()
 
     def insertNewline(self):
-        self.editor.textCursor().insertText("\n")
+        self.editor.insertNewLine()
 
     def insertText(self, text):
-        self.editor.textCursor().insertText(text)
+        self.editor.insertPlainText(text)
 
-    def executeCommandWithOptions(self, options):
-        uuid = self.macro.manager.uuidgen(options.get('uuid', None))
-        command = PMXCommand(uuid, "internal", hash = options)
-        command.bundle = self.macro.bundle
+    def executeCommandWithOptions(self, commandHash):
+        command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
+        command.setBundle(self.macro.bundle)
+        command.setManager(self.macro.manager)
         self.editor.insertBundleItem(command, asynchronous = False)

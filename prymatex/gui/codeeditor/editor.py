@@ -321,9 +321,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor = self.textCursor()
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
 
-    def currentScope(self):
-        cursor = self.textCursor()
+    def scope(self, cursor):
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
+
+    def currentScope(self):
+        return self.scope(self.textCursor())
 
     def currentWord(self, *largs, **kwargs):
         return self.getCurrentWord(*largs, **kwargs)
@@ -788,14 +790,36 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
 
-    
+    #==========================================================================
+    # Insert API
+    #==========================================================================
+    def insertNewLine(self, cursor = None):
+        cursor = cursor or self.textCursor()
+        block = cursor.block()
+        settings = self.preferenceSettings(self.scope(cursor))
+        indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
+        if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
+            self.logger.debug("Increase indent")
+            indent = block.userData().indent + self.tabKeyBehavior
+        elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
+            #TODO: Creo que este no es el correcto
+            self.logger.debug("Increase next line indent")
+            indent = block.userData().indent + self.tabKeyBehavior
+        elif PMXPreferenceSettings.UNINDENT in indentMarks:
+            self.logger.debug("Unindent")
+            indent = ""
+        elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
+            indent = block.userData().indent[:len(self.tabKeyBehavior)]
+        else:
+            self.logger.debug("Preserve indent")
+            indent = block.userData().indent
+        cursor.insertText("\n%s" % indent)
+        
     #==========================================================================
     # Bundle Items
     #==========================================================================
     def insertBundleItem(self, item, **processorSettings):
-        """
-        Inserta un bundle item
-        """
+        """Inserta un bundle item"""
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
             self.textCursor().beginEditBlock()
