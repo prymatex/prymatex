@@ -55,9 +55,8 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 self.setCursorPosition(self.editor.snippetProcessor.endPosition())
                 self.endSnippet()
             else:
-                #(self.editor.snippetProcessor.snippet.index + 1, len(self.editor.snippetProcessor.snippet.taborder))
                 snippet = self.editor.snippetProcessor.snippet 
-                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index, len(snippet) -1))
+                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index + 1, len(snippet) -1))
                 self.editor.snippetProcessor.selectHolder(holder)
         elif event.text():
             self.logger.debug("Con texto %s" % event.text())
@@ -101,7 +100,6 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
             self.editor.textCursor().endEditBlock()
         else:
-            print "apreto enter"
             self.logger.debug("Con cualquier otra tecla sin texto")
             holder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if holder is None or holder.last:

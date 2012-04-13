@@ -700,9 +700,10 @@ class PMXSnippet(PMXBundleItem):
         
     def addTaborder(self, taborder):
         self.taborder = []
-        last = taborder.pop(0, None)
-        if type(last) == list:
-            last = last.pop()
+        lastHolder = taborder.pop(0, None)
+        #TODO: ver si se puede sacar este "if pop" porque tendria que venir bien
+        if type(lastHolder) == list:
+            lastHolder = lastHolder.pop()
         keys = taborder.keys()
         keys.sort()
         for key in keys:
@@ -717,20 +718,24 @@ class PMXSnippet(PMXBundleItem):
                     for transformation in transformations:
                         transformation.placeholder = tabstop
                     holder = tabstop
+            holder.last = False
             self.taborder.append(holder)
-        self.taborder.append(last)
+        if lastHolder is not None:
+            lastHolder.last = True
+        else:
+            self.taborder[-1].last = True
+        self.taborder.append(lastHolder)
+            
 
     def getHolder(self, start, end = None):
-        ''' Return the placeholder for position, where starts > position > ends'''
+        ''' Return the placeholder for position, where starts > positión > ends'''
         end = end != None and end or start
         found = None
         for holder in self.taborder:
             # if holder == None then is the end of taborders
-            if holder == None: break
+            if holder is None: break
             if holder.start <= start <= holder.end and holder.start <= end <= holder.end and (found == None or len(holder) < len(found)):
                 found = holder
-        if found != None:
-            setattr(found, 'last', self.taborder[-1] is not None and found == self.taborder[-1] or found == self.taborder[-2])
         return found
     
     def setCurrentHolder(self, holder):
