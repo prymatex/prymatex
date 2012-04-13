@@ -722,7 +722,7 @@ class PMXSnippet(PMXBundleItem):
             self.taborder.append(holder)
         if lastHolder is not None:
             lastHolder.last = True
-        else:
+        elif self.taborder:
             self.taborder[-1].last = True
         self.taborder.append(lastHolder)
             
