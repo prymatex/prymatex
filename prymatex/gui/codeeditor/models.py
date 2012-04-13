@@ -232,3 +232,44 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
             
     def getSuggestion(self, index):
         return self.suggestions[index.row()]
+
+#=========================================================
+# Word Struct for Completer
+#=========================================================
+class PMXAlreadyTypedWords(object):
+    def __init__(self, editor):
+        self.editor = editor
+        self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.words = {}
+
+    def _purge_words(self):
+        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
+
+    def _purge_blocks(self):
+        def validWordBlock(block):
+            return block.userData() is not None and bool(block.userData().words)
+        words = {}
+        for word, blocks in self.words.iteritems():
+            words[word] = filter(validWordBlock, blocks)
+        self.words = dict(filter(lambda (word, blocks): bool(blocks), words.iteritems()))
+
+    def on_editor_textChanged(self):
+        self._purge_blocks()
+
+    def addWordsBlock(self, block):
+        textLine = block.text()
+        for wordIndex in block.userData().words:
+            word = textLine[slice(*wordIndex)]
+            blocks = self.words.setdefault(word, [])
+            indexes = map(lambda block: block.blockNumber(), blocks)
+            index = bisect(indexes, block.blockNumber())
+            blocks.insert(index, block)
+        
+    def removeWordsBlock(self, block):
+        wordBlocks = filter(lambda blocks: block in blocks, self.words.values())
+        for blocks in wordBlocks:
+            blocks.remove(block)
+        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
+        
+    def typedWords(self, block = None):
+        return self.words.keys()

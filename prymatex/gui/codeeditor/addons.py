@@ -33,6 +33,8 @@ class CompleterAddon(QtCore.QObject, PMXBaseAddon):
             #A tab tigger completion
             completionTabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
             
+            typedWords = self.editor.alreadyTypedWords.typedWords()
+            print typedWords
             #print completions, completionCommand, disableDefaultCompletion, completionTabTriggers
             completions += completionTabTriggers
             if bool(completions):

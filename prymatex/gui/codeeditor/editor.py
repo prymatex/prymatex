@@ -26,7 +26,7 @@ from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetPr
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
-from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterTableModel
+from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterTableModel, PMXAlreadyTypedWords
 
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
@@ -153,6 +153,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Models
         self.bookmarkListModel = PMXBookmarkListModel(self)
         self.symbolListModel = PMXSymbolListModel(self)
+        self.alreadyTypedWords = PMXAlreadyTypedWords(self)
         
         #Folding
         self.folding = PMXEditorFolding(self)
@@ -216,11 +217,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def updateWords(self, block):
         self.logger.debug("Update Words")
         if block.userData().words:
-            pass
-            #self.symbolListModel.removeSymbolBlock(block)
+            self.alreadyTypedWords.addWordsBlock(block)
         else:
-            pass
-            #self.symbolListModel.addSymbolBlock(block)
+            self.alreadyTypedWords.removeWordsBlock(block)
             
     #=======================================================================
     # Connect Signals
