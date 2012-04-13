@@ -730,7 +730,7 @@ class PMXSnippet(PMXBundleItem):
             if holder.start <= start <= holder.end and holder.start <= end <= holder.end and (found == None or len(holder) < len(found)):
                 found = holder
         if found != None:
-            setattr(found, 'last', found == self.taborder[-1])
+            setattr(found, 'last', self.taborder[-1] is not None and found == self.taborder[-1] or found == self.taborder[-2])
         return found
     
     def setCurrentHolder(self, holder):

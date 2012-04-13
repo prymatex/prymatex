@@ -45,6 +45,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             holder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
             if holder is None:
                 return self.endSnippet(event)
+
             if event.key() == QtCore.Qt.Key_Tab:
                 holder = self.editor.snippetProcessor.nextHolder(holder)
             else:
@@ -100,8 +101,13 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             self.setCursorPosition(currentHolder.start + holderPosition + (positionAfter - positionBefore))
             self.editor.textCursor().endEditBlock()
         else:
-            self.logger.debug("Con cualquier tecla")
-            QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+            print "apreto enter"
+            self.logger.debug("Con cualquier otra tecla sin texto")
+            holder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
+            if holder is None or holder.last:
+                return self.endSnippet(event)
+            else:
+                return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             
     def endSnippet(self, event = None):
         self.editor.snippetProcessor.endSnippet()
