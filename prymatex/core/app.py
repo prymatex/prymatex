@@ -1,4 +1,4 @@
-#!/SRr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #Cosas interesantes
@@ -21,6 +21,7 @@ from prymatex.utils import coroutines
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.style import PrymatexStyle
+from prymatex.utils.decorator.helpers import printtime
 
 class PMXApplication(QtGui.QApplication):
     """The application instance.
@@ -342,7 +343,8 @@ class PMXApplication(QtGui.QApplication):
             
     def getEditorInstance(self, filePath = None, parent = None):
         return self.pluginManager.createEditor(filePath, parent)
-
+    
+    @printtime
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         """Open a editor in current window"""
         if self.fileManager.isOpen(filePath):

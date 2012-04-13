@@ -54,11 +54,11 @@ class PMXScoreManager(object):
                 scopes = [ search_scope ]
             self.scores[reference_scope][search_scope] = 0
             for scope in scopes:
-                self.scores[reference_scope][search_scope] = comparation([self.scores[reference_scope][search_scope], self.score_array( scope.split(' '), reference_scope.split(' ') )])
+                self.scores[reference_scope][search_scope] = comparation([self.scores[reference_scope][search_scope], self.score_array_startswith( scope.split(' '), reference_scope.split(' ') )])
         return self.scores[reference_scope][search_scope]
     
     @classmethod  
-    def score_array(cls, search_array, reference_array):
+    def score_array_regexp(cls, search_array, reference_array):
         pending = search_array
         current = reference_array[-1]
         reg = re.compile( "^%s" % re.escape( pending[-1] ))
@@ -79,3 +79,25 @@ class PMXScoreManager(object):
             result = 0
         return result
         
+    @classmethod  
+    def score_array_startswith(cls, search_array, reference_array):
+        """ Esta funcion pretende apurar el trabajo de obtener el score trabajando con cadenas en lugar de usar regexp """
+        pending = search_array
+        currentReference = reference_array[-1]
+        currentPending = pending[-1]
+        multiplier = cls.START_VALUE
+        result = 0
+        while pending and currentReference and currentPending:
+            if currentReference.startswith(currentPending):
+                point_score = (2 ** cls.POINT_DEPTH) - currentReference.count( '.' ) + currentPending.count( '.' )
+                result += point_score * multiplier
+                #TODO: Sospecho que quitando los pop se puede hacer mas rapido
+                pending.pop()
+                currentPending = pending[-1] if pending else None
+            multiplier = multiplier / cls.BASE
+            #TODO: Sospecho que quitando los pop se puede hacer mas rapido
+            reference_array.pop()
+            currentReference = reference_array[-1] if reference_array else None
+        if pending:
+            result = 0
+        return result
