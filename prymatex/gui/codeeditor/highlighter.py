@@ -12,7 +12,7 @@ from prymatex.utils.decorator.helpers import printtime
 
 #TODO: Usar mas el modulo de string en general, string.punctuation
 
-RE_WORD = re.compile(r"[A-Za-z_]+", re.UNICODE)
+RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
 RE_WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 def whiteSpace(text):
     match = RE_WHITESPACE.match(text)
@@ -82,13 +82,13 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         indent = whiteSpace(text)
         if indent != userData.indent:
             userData.indent = indent
-            self.editor.updateIndent(self.currentBlock())
+            self.editor.updateIndent(self.currentBlock(), userData, indent)
 
         #2 Update Folding
         foldingMark = self.syntax.folding(text)
         if userData.foldingMark != foldingMark:
             userData.foldingMark = foldingMark
-            self.editor.updateFolding(self.currentBlock())
+            self.editor.updateFolding(self.currentBlock(), userData, foldingMark)
             
         #3 Update Symbols
         preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.scopeRanges())
@@ -102,13 +102,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
         if userData.symbol != symbol:
             userData.symbol = symbol
-            self.editor.updateSymbol(self.currentBlock())
+            self.editor.updateSymbol(self.currentBlock(), userData, symbol)
 
         #4 Split words [( wordStart, wordEnd )...]
-        words = map(lambda match: match.span(), RE_WORD.finditer(text))
+        words = map(lambda match: (match.span(), match.group()), RE_WORD.finditer(text))
         if userData.words != words:
-            userData.words = words
-            self.editor.updateWords(self.currentBlock())
+            self.editor.updateWords(self.currentBlock(), userData, words)
 
         #5 Save the hash the text, scope and state
         userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState

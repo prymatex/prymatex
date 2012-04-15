@@ -197,29 +197,32 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.setSyntax(syntax)
         
-    def updateIndent(self, block):
+    def updateIndent(self, block, userData, indent):
         self.logger.debug("Update Block Indent")
     
-    def updateFolding(self, block):
+    def updateFolding(self, block, userData, foldingMark):
         self.logger.debug("Update Block Folding")
         if block.userData().foldingMark == None:
             self.folding.removeFoldingBlock(block)
         else:
             self.folding.addFoldingBlock(block)
         
-    def updateSymbol(self, block):
+    def updateSymbol(self, block, userData, symbol):
         self.logger.debug("Update Block Symbol")
         if block.userData().symbol == None:
             self.symbolListModel.removeSymbolBlock(block)
         else:
             self.symbolListModel.addSymbolBlock(block)
         
-    def updateWords(self, block):
+    def updateWords(self, block, userData, words):
         self.logger.debug("Update Words")
-        if block.userData().words:
-            self.alreadyTypedWords.addWordsBlock(block)
-        else:
-            self.alreadyTypedWords.removeWordsBlock(block)
+        oldWords = set(map(lambda (index, word): word, userData.words))
+        newWords = set(map(lambda (index, word): word, words))
+        #Quitar el blocke de las palabras anteriores
+        self.alreadyTypedWords.removeWordsBlock(block, oldWords.difference(newWords))
+        #Agregar las palabras nuevas
+        self.alreadyTypedWords.addWordsBlock(block, newWords.difference(oldWords))
+        userData.words = words
             
     #=======================================================================
     # Connect Signals
@@ -911,6 +914,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerMode.setModel(PMXCompleterTableModel(suggestions, self))
         self.completerMode.complete(self.cursorRect())
     
+    
+
     #==========================================================================
     # Folding
     #==========================================================================

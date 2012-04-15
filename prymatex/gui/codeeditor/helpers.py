@@ -55,10 +55,11 @@ class CompleterHelper(PMXCodeEditorKeyHelper):
             self.completionTabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
             
             #print self.completions, self.completionCommand, self.disableDefaultCompletion, self.completionTabTriggers
-            self.completions += self.completionTabTriggers + editor.alreadyTypedWords.typedWords()
+            #self.completions += self.completionTabTriggers + editor.alreadyTypedWords.typedWords()
+            self.completions += self.completionTabTriggers
             return bool(self.completions)
         return False
-            
+
     def execute(self, editor, event, cursor = None, scope = None):
         currentWord, start, end = editor.getCurrentWord()
         #alreadyTyped

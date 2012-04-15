@@ -19,9 +19,9 @@ class CompleterAddon(QtCore.QObject, PMXBaseAddon):
         
     def on_editor_keyPressEvent(self, event):
         currentWord, start, end = self.editor.getCurrentWord()
-        if event.text() and end - start >= 2:
+        if not event.modifiers() and event.text() and end - start >= 3:
             scope = self.editor.currentScope()
-            settings = self.application.supportManager.getPreferenceSettings(scope)
+            settings = self.editor.preferenceSettings(scope)
             disableDefaultCompletion = settings.disableDefaultCompletion
             
             #An array of additional candidates when cycling through completion candidates from the current document.
@@ -34,7 +34,8 @@ class CompleterAddon(QtCore.QObject, PMXBaseAddon):
             completionTabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
             
             #print completions, completionCommand, disableDefaultCompletion, completionTabTriggers
-            completions += completionTabTriggers + self.editor.alreadyTypedWords.typedWords()
+            #completions += completionTabTriggers + self.editor.alreadyTypedWords.typedWords()
+            completions += completionTabTriggers
             if bool(completions):
                 self.editor.showCompleter(completions, currentWord)
                 

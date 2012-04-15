@@ -251,25 +251,23 @@ class PMXAlreadyTypedWords(object):
         words = {}
         for word, blocks in self.words.iteritems():
             words[word] = filter(validWordBlock, blocks)
-        self.words = dict(filter(lambda (word, blocks): bool(blocks), words.iteritems()))
 
     def on_editor_textChanged(self):
+        print "purgar"
         self._purge_blocks()
 
-    def addWordsBlock(self, block):
-        textLine = block.text()
-        for wordIndex in block.userData().words:
-            word = textLine[slice(*wordIndex)]
+    def addWordsBlock(self, block, words):
+        for word in words:
             blocks = self.words.setdefault(word, [])
             indexes = map(lambda block: block.blockNumber(), blocks)
             index = bisect(indexes, block.blockNumber())
             blocks.insert(index, block)
         
-    def removeWordsBlock(self, block):
-        wordBlocks = filter(lambda blocks: block in blocks, self.words.values())
-        for blocks in wordBlocks:
-            blocks.remove(block)
-        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
+    def removeWordsBlock(self, block, words):
+        for word in words:
+            self.words[word].remove(block)
         
     def typedWords(self, block = None):
+        #Purge words
+        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
         return self.words.keys()
