@@ -31,6 +31,8 @@ from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListMo
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 
+from prymatex.utils.decorator.helpers import printtime
+
 class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Signals
@@ -765,6 +767,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
+    @printtime
     def keyPressEvent(self, event):
         """
         This method is called whenever a key is pressed. The key code is stored in event.key()

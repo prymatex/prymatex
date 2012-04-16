@@ -165,6 +165,7 @@ class PMXSyntax(PMXBundleItem):
     FOLDER = 'Syntaxes'
     EXTENSION = 'tmLanguage'
     PATTERNS = ['*.tmLanguage', '*.plist']
+    FOLDING_NONE = 0
     FOLDING_START = 1
     FOLDING_STOP = -1
     def load(self, dataHash):
@@ -299,6 +300,7 @@ class PMXSyntax(PMXBundleItem):
             return self.FOLDING_START
         elif stop_match != None and start_match == None:
             return self.FOLDING_STOP
-                
+        return self.FOLDING_NONE
+
     def __str__(self):
         return u"<PMXSyntax %s>" % self.name

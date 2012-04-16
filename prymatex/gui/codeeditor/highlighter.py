@@ -95,8 +95,10 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         
         symbolRange = filter(lambda (p, start, end): p.showInSymbolList, preferences)
         if symbolRange:
-            symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
-            symbol = symbolRange[0][0].transformSymbol(symbol)
+            #TODO: Hacer la transformacion de los symbolos
+            #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
+            #symbol = symbolRange[0][0].transformSymbol(symbol)
+            symbol = text
         else:
             symbol = None
 

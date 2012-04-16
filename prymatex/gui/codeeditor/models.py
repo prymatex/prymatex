@@ -14,7 +14,8 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
-        self.editor.textChanged.connect(self.on_editor_textChanged)
+        #self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.blocks = []
         
     def _purge_blocks(self):
@@ -23,6 +24,9 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
 
     def __contains__(self, block):
         return block in self.blocks
+        
+    def on_editor_blocksRemoved(self):
+        self._purge_blocks()
         
     def on_editor_textChanged(self):
         #TODO: solo hacer las acciones si tengo nuevo estado de folding motivado por un remove o un add
@@ -41,8 +45,8 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         if not index.isValid():
             return None
         block = self.blocks[index.row()]
-        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
-            return block.text()
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
+            return "%d - %s" % (block.blockNumber() + 1, block.text().strip())
         elif role == QtCore.Qt.DecorationRole:
             return resources.getIcon('bookmarkflag')
 
@@ -87,6 +91,8 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
     def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor)
         self.editor = editor
+        self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
+        self.symbolChanged = False
         self.editor.textChanged.connect(self.on_editor_textChanged)
         self.blocks = []
         self.icons = {
@@ -97,27 +103,31 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             "typedef": resources.getIcon("code-typedef"),
             "variable": resources.getIcon("code-variable")
         }
-
-    def on_editor_textChanged(self):
-        #TODO: solo hacer las acciones si tengo nuevo estado de folding motivado por un remove o un add
-        self._purge_blocks()
-
+        
     def _purge_blocks(self):
         def validSymbolBlock(block):
             return block.userData() is not None and block.userData().symbol != None
         self.blocks = filter(validSymbolBlock, self.blocks)
-        self.layoutChanged.emit()
+        
+    def on_editor_textChanged(self):
+        if self.symbolChanged:
+            self.logger.debug("Purgar y actualizar symbols")
+            self._purge_blocks()
+            self.layoutChanged.emit()
+            self.symbolChanged = False
 
     def addSymbolBlock(self, block):
         if block not in self.blocks:
             indexes = map(lambda block: block.blockNumber(), self.blocks)
             index = bisect(indexes, block.blockNumber())
             self.blocks.insert(index, block)
+            self.symbolChanged = True
 
     def removeSymbolBlock(self, block):
         if block in self.blocks:
             index = self.blocks.index(block)
             self.blocks.remove(block)
+            self.symbolChanged = True
 
     def index(self, row, column = 0, parent = None):
         if 0 <= row < len(self.blocks):
@@ -239,7 +249,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
 class PMXAlreadyTypedWords(object):
     def __init__(self, editor):
         self.editor = editor
-        self.editor.textChanged.connect(self.on_editor_textChanged)
+        self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.words = {}
 
     def _purge_words(self):
@@ -252,10 +262,9 @@ class PMXAlreadyTypedWords(object):
         for word, blocks in self.words.iteritems():
             words[word] = filter(validWordBlock, blocks)
 
-    def on_editor_textChanged(self):
-        print "purgar"
+    def on_editor_blocksRemoved(self):
         self._purge_blocks()
-
+        
     def addWordsBlock(self, block, words):
         for word in words:
             blocks = self.words.setdefault(word, [])

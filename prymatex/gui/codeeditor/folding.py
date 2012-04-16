@@ -8,7 +8,9 @@ from prymatex.support import PMXSyntax
 class PMXEditorFolding(object):
     def __init__(self, editor):
         self.editor = editor
+        self.logger = editor.application.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
         self.indentSensitive = False
+        self.foldingUpdated = True
         self.editor.textChanged.connect(self.on_editor_textChanged)
         self.blocks = []
         self.folding = []
@@ -19,21 +21,25 @@ class PMXEditorFolding(object):
         self.blocks = filter(validFoldingBlock, self.blocks)
 
     def on_editor_textChanged(self):
-        #TODO: solo hacer las acciones si tengo nuevo estado de folding motivado por un remove o un add
-        self._purge_blocks()
-        self.updateFolding()
+        if not self.foldingUpdated:
+            self.logger.debug("Purgar y actualizar folding")
+            self._purge_blocks()
+            self.updateFolding()
+            self.foldingUpdated = True
 
     def addFoldingBlock(self, block):
         if block not in self.blocks:
             indexes = map(lambda block: block.blockNumber(), self.blocks)
             index = bisect(indexes, block.blockNumber())
             self.blocks.insert(index, block)
-
+            self.foldingUpdated = False
+        
     def removeFoldingBlock(self, block):
         if block in self.blocks:
             index = self.blocks.index(block)
             self.blocks.remove(block)
-
+            self.foldingUpdated = False
+        
     def updateFolding(self):
         self.folding = []
         if self.indentSensitive:
