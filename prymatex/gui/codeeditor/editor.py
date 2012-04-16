@@ -270,6 +270,19 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def acceptFile(cls, filePath, mimetype):
         return re.compile("text/.*").match(mimetype) is not None
 
+    def open(self, filePath):
+        """ Custom open for large files, use coroutines """
+        content = self.application.fileManager.openFile(filePath)
+        chunksize = 1024
+        currentIndex = 0
+        contentLength = len(content)
+        while currentIndex <= contentLength:
+            self.insertPlainText(content[currentIndex:currentIndex + chunksize])
+            currentIndex += chunksize
+            yield
+        self.document().clearUndoRedoStacks()
+        self.setFilePath(filePath)
+        
     def close(self):
         QtGui.QPlainTextEdit.close(self)
         return PMXBaseEditor.close(self)

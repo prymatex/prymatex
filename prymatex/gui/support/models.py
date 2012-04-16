@@ -7,6 +7,7 @@ from prymatex import resources
 from prymatex.models.tree import TreeNode, TreeModel
 from prymatex.models.mimes import PyMimeData
 from prymatex.gui.support import qtadapter
+from prymatex.models.proxies import bisect_key
 
 #====================================================
 # Bundle Tree Node
@@ -170,6 +171,52 @@ class PMXBundleTreeModel(TreeModel):
         self.beginRemoveRows(pindex, templateFile.row(), templateFile.row())
         template.removeChild(templateFile)
         self.endRemoveRows()
+
+#====================================================
+# Themes Table Model
+#====================================================
+class PMXThemeTableModel(QtCore.QAbstractTableModel):
+    def __init__(self, manager, parent = None):
+        QtCore.QAbstractTableModel.__init__(self, parent)
+        self.manager = manager
+        self.themes = []
+        
+    def rowCount(self, parent):
+        return len(self.themes)
+        
+    def columnCount(self, parent):
+        return 2
+        
+    def data(self, index, role):
+        if not index.isValid():
+            return None
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
+            theme = self.themes[index.row()]
+            if index.column() == 0:
+                return theme.name
+            elif index.column() == 1:
+                return theme.author
+
+    def index(self, row, column, parent = QtCore.QModelIndex()):
+        return self.createIndex(row, column, self.themes[row])
+
+    #========================================================================
+    # Functions
+    #========================================================================
+    def addTheme(self, theme):
+        index = bisect_key(self.themes, theme, lambda t: t.name)
+        self.beginInsertRows(QtCore.QModelIndex(), index, index)
+        self.themes.insert(index, theme)
+        self.endInsertRows()
+
+    def removeTheme(self, theme):
+        index = self.themes.index(theme)
+        self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+        self.themes.remove(style)
+        self.endRemoveRows()
+        
+    def getAllItems(self):
+        return self.themes
         
 #====================================================
 # Themes Styles Row
@@ -273,14 +320,14 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
                 if 'italic' in settings['fontStyle']:
                     font.setItalic(True)
                 return font
-        elif role == QtCore.Qt.ForegroundRole:
+        elif role is QtCore.Qt.ForegroundRole:
             row = index.row()
             column = index.column()
             style = self.styles[row]
             settings = self.styles[row].settings
             if column == 0 and 'foreground' in settings:
                 return settings['foreground']
-        elif role == QtCore.Qt.BackgroundColorRole:
+        elif role is QtCore.Qt.BackgroundColorRole:
             row = index.row()
             column = index.column()
             style = self.styles[row]

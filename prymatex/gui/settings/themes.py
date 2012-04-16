@@ -46,22 +46,22 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "theme", settingGroup)
         self.setupUi(self)
+        self.setupComboThemes()
         self.setupTableView()
         self.setupPushButton()
     
     def loadSettings(self):
-        self.tableView.setModel(self.application.supportManager.themeStyleProxyModel)        
-        #Combo Theme
-        currentTheme = None
         currentThemeUUID = self.settingGroup.hasValue('theme') and self.settingGroup.value('theme').upper() or None 
-        for theme in self.application.supportManager.getAllThemes():
-            uuid = unicode(theme.uuid).upper()
-            self.comboBoxThemes.addItem(theme.name, uuid)
-            if uuid == currentThemeUUID:
-                currentTheme = theme
+        currentTheme = self.application.supportManager.getTheme(currentThemeUUID)
+        self.tableView.setModel(self.application.supportManager.themeStyleProxyModel)
+        self.comboBoxThemes.setModel(self.application.supportManager.themeTableModel)
+        self.comboThemesView.setModel(self.application.supportManager.themeTableModel)
+        self.comboThemesView.resizeColumnsToContents()
+        self.comboThemesView.resizeRowsToContents()
         if currentTheme is not None:
-            self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.findData(currentThemeUUID))
-            self.setThemeSettings(currentTheme, False)
+            print "poner indice para", currentTheme.name
+            #self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.sourceModel().findData(currentThemeUUID))
+            #self.setThemeSettings(currentTheme, False)
     
     #==========================================================
     # ComboBoxThemes
@@ -87,6 +87,19 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
             if string != style.scope:
                 self.application.supportManager.updateThemeStyle(style, scope = string)
     
+    def setupComboThemes(self):
+        self.comboThemesView = QtGui.QTableView(self)
+        self.comboThemesView.verticalHeader().setVisible(False)
+        self.comboThemesView.horizontalHeader().setVisible(False)
+        self.comboThemesView.setShowGrid(False)
+        self.comboThemesView.setMinimumWidth(self.comboThemesView.horizontalHeader().length() + 25)
+        self.comboThemesView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.comboThemesView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.comboThemesView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.comboThemesView.setAutoScroll(False)
+        self.comboBoxThemes.setView(self.comboThemesView)
+        self.comboBoxThemes.setModelColumn(0)
+
     def setupTableView(self):
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableView.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)

@@ -9,9 +9,8 @@ from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportBaseManager
 
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
+from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeTableModel, PMXThemeStylesTableModel, PMXThemeStyleRow
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
-from prymatex.models.proxies import bisect_key
 
 class PMXBundleMenuGroup(QtCore.QObject):
     def __init__(self, manager):
@@ -130,9 +129,8 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         PMXSupportBaseManager.__init__(self)
         self.application = application
         self.bundleTreeModel = PMXBundleTreeModel(self)
+        self.themeTableModel = PMXThemeTableModel(self)
         self.themeStylesTableModel = PMXThemeStylesTableModel(self)
-        #TODO Pasar esto a un ListModel
-        self.themeListModel = []
         
         #STYLE PROXY
         self.themeStyleProxyModel = PMXThemeStyleTableProxyModel(self)
@@ -313,18 +311,17 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     def addTheme(self, theme):
         themeRow = PMXThemeStyleRow(theme, self.scores)
-        index = bisect_key(self.themeListModel, themeRow, lambda t: t.name)
-        self.themeListModel.insert(index, themeRow)
+        self.themeTableModel.addTheme(themeRow)
         return themeRow
     
     def modifyTheme(self, theme):
         self.themeChanged.emit(theme)
         
     def removeTheme(self, theme):
-        self.themeListModel.remove(theme)
+        self.themeTableModel.removeTheme(theme)
             
     def getAllThemes(self):
-        return self.themeListModel
+        return self.themeTableModel.getAllItems()
     
     #---------------------------------------------------
     # THEME STYLE OVERRIDE INTERFACE

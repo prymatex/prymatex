@@ -87,8 +87,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         tableView.setAutoScroll(False)
         self.comboBoxSyntaxes.setModel(self.application.supportManager.syntaxProxyModel);
-        self.comboBoxSyntaxes.setModelColumn(0)
         self.comboBoxSyntaxes.setView(tableView)
+        self.comboBoxSyntaxes.setModelColumn(0)
         
         #Connect tab size context menu
         self.labelTabSize.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
