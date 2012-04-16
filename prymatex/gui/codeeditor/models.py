@@ -195,6 +195,7 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
     def __init__(self, suggestions, editor): 
         QtCore.QAbstractListModel.__init__(self, editor) 
         self.suggestions = suggestions
+        self.editor = editor
 
     def index (self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):
@@ -224,7 +225,9 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
                     return suggestion.tabTrigger
                 elif index.column() == 1:
                     return suggestion.name
-            else:
+            elif isinstance(suggestion, tuple):
+                return suggestion[index.column()]
+            elif index.column() == 0:
                 return suggestion
         elif role == QtCore.Qt.DecorationRole:
             if index.column() == 0:
@@ -239,7 +242,9 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
                 return suggestion['tooltip']
             elif isinstance(suggestion, PMXBundleTreeNode):
                 return suggestion.name
-            
+        elif role == QtCore.Qt.ForegroundRole:
+            return QtCore.Qt.lightGray
+
     def getSuggestion(self, index):
         return self.suggestions[index.row()]
 

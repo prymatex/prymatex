@@ -9,6 +9,7 @@ from prymatex.support import PMXPreferenceSettings
 class CompleterAddon(QtCore.QObject, PMXBaseAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
+        self.charCounter = 0
 
     def initialize(self, editor):
         self.editor = editor
@@ -18,26 +19,14 @@ class CompleterAddon(QtCore.QObject, PMXBaseAddon):
         pass
         
     def on_editor_keyPressEvent(self, event):
-        currentWord, start, end = self.editor.getCurrentWord()
-        if not event.modifiers() and event.text() and end - start >= 3:
-            scope = self.editor.currentScope()
-            settings = self.editor.preferenceSettings(scope)
-            disableDefaultCompletion = settings.disableDefaultCompletion
-            
-            #An array of additional candidates when cycling through completion candidates from the current document.
-            completions = settings.completions[:]
-    
-            #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
-            completionCommand = settings.completionCommand
-            
-            #A tab tigger completion
-            completionTabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
-            
-            #print completions, completionCommand, disableDefaultCompletion, completionTabTriggers
-            #completions += completionTabTriggers + self.editor.alreadyTypedWords.typedWords()
-            completions += completionTabTriggers
+        if not event.modifiers() and event.text() and event.key() not in [ QtCore.Qt.Key_Space, QtCore.Qt.Key_Backspace ]:
+            self.charCounter += 1
+        else:
+            self.charCounter = 0
+        if self.charCounter == 3:
+            completions, alreadyTyped = self.editor.completionSuggestions()
             if bool(completions):
-                self.editor.showCompleter(completions, currentWord)
+                self.editor.showCompleter(completions, alreadyTyped)
                 
 class SmartUnindentAddon(QtCore.QObject, PMXBaseAddon):
     def __init__(self, parent):

@@ -42,7 +42,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
-    
+
     #=======================================================================
     # Settings
     #=======================================================================
@@ -315,7 +315,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         """Deprecated"""
         return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
 
-    def getWordUnderCursor(self):
+    def wordUnderCursor(self):
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
@@ -767,7 +767,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
-    @printtime
+    #@printtime
     def keyPressEvent(self, event):
         """
         This method is called whenever a key is pressed. The key code is stored in event.key()
@@ -819,7 +819,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.logger.debug("Preserve indent")
             indent = block.userData().indent
         cursor.insertText("\n%s" % indent)
-        
+
     #==========================================================================
     # Bundle Items
     #==========================================================================
@@ -917,7 +917,34 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerMode.setModel(PMXCompleterTableModel(suggestions, self))
         self.completerMode.complete(self.cursorRect())
     
-    
+    def completionSuggestions(self, cursor = None, scope = None):
+        cursor = cursor or self.textCursor()
+        scope = scope or self.scope(cursor)
+        currentWord, start, end = self.currentWord()
+        alreadyTyped = currentWord[:cursor.position() - start]
+
+        settings = self.preferenceSettings(scope)
+        disableDefaultCompletion = settings.disableDefaultCompletion
+        if disableDefaultCompletion:
+            print "no autocompletar"
+        
+        #An array of additional candidates when cycling through completion candidates from the current document.
+        completions = settings.completions[:]
+
+        #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
+        completionCommand = settings.completionCommand
+        if completionCommand:
+            print "comando", completionCommand
+
+        #A tab tigger completion
+        completions += self.application.supportManager.getAllTabTiggerItemsByScope(scope)
+        typedWords = self.alreadyTypedWords.typedWords()
+        if alreadyTyped in typedWords:
+            typedWords.remove(alreadyTyped)
+
+        completions += typedWords
+        
+        return completions, alreadyTyped
 
     #==========================================================================
     # Folding
@@ -1530,4 +1557,3 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     @QtCore.pyqtSlot()
     def on_actionCopyPath_triggered(self):
         QtGui.QApplication.clipboard().setText(self.filePath)
-        

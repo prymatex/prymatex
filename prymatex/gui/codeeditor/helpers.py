@@ -42,28 +42,12 @@ class CompleterHelper(PMXCodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         """Accept the completer event"""
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            settings = editor.preferenceSettings(scope)
-            self.disableDefaultCompletion = settings.disableDefaultCompletion
-            
-            #An array of additional candidates when cycling through completion candidates from the current document.
-            self.completions = settings.completions[:]
-
-            #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
-            self.completionCommand = settings.completionCommand
-            
-            #A tab tigger completion
-            self.completionTabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
-            
-            #print self.completions, self.completionCommand, self.disableDefaultCompletion, self.completionTabTriggers
-            #self.completions += self.completionTabTriggers + editor.alreadyTypedWords.typedWords()
-            self.completions += self.completionTabTriggers
+            self.completions, self.alreadyTyped = editor.completionSuggestions(cursor, scope)
             return bool(self.completions)
         return False
 
     def execute(self, editor, event, cursor = None, scope = None):
-        currentWord, start, end = editor.getCurrentWord()
-        #alreadyTyped
-        editor.showCompleter(self.completions, currentWord)
+        editor.showCompleter(self.completions, self.alreadyTyped)
 
 class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
