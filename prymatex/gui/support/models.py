@@ -177,7 +177,7 @@ class PMXBundleTreeModel(TreeModel):
 #====================================================
 class PMXThemeListModel(QtCore.QAbstractListModel):
     def __init__(self, manager, parent = None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
+        QtCore.QAbstractListModel.__init__(self, parent)
         self.manager = manager
         self.themes = []
         
@@ -669,3 +669,48 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
         self.beginRemoveRows(QtCore.QModelIndex(), index, index)
         self.nodes.remove(node)
         self.endRemoveRows()
+        
+#=========================================================
+# Process
+#=========================================================
+class PMXProcessListModel(QtCore.QAbstractTableModel): 
+    def __init__(self, manager, parent = None): 
+        QtCore.QAbstractTableModel.__init__(self, parent)
+        self.manager = manager
+        self.process = []
+
+    def index(self, row, column = 0, parent = None):
+        return self.createIndex(row, column, self.process[row])
+    
+    def rowCount (self, parent = None):
+        return len(self.process)
+        
+    def columnCount(self, parent):
+        return 1
+
+    def data (self, index, role = QtCore.Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        proc = self.process[index.row()]
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
+            return proc.pid()
+
+    def findIndex(self, proc):
+        return self.process.index(proc)
+        
+    def procForIndex(self, index):
+        return self.themes[index]
+    
+    def appendProcess(self, proc):
+        self.beginInsertRows(QtCore.QModelIndex(), len(self.process), len(self.process))
+        self.process.append(proc)
+        self.endInsertRows()
+
+    def removeProcess(self, proc):
+        index = self.process.index(proc)
+        self.beginRemoveRows(QtCore.QModelIndex(), index, index)
+        self.process.remove(proc)
+        self.endRemoveRows()
+        
+    def getAllItems(self):
+        return self.themes

@@ -157,38 +157,6 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         return bisect(indexes, block.blockNumber()) - 1
 
 #=========================================================
-# Process
-#=========================================================
-class PMXProcessListModel(QtCore.QAbstractListModel): 
-    def __init__(self, editor): 
-        QtCore.QAbstractListModel.__init__(self, editor)
-        self.editor = editor
-        self.process = []
-
-    def appendProcess(self, process):
-        if process not in self.process:
-            self.process.append(process)
-
-    def removeProcess(self, process):
-        if process in self.process:
-            self.process.remove(process)
-
-    def rowCount(self, parent = None):
-        return len(self.process)
-
-    def data(self, index, role = QtCore.Qt.DisplayRole):
-        if not index.isValid():
-            return None
-        proc = self.process[index.row()]
-        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
-            return userData.symbol
-        elif role == QtCore.Qt.DecorationRole:
-            for name, icon in self.icons.iteritems():
-                if userData.isWordInScopes(name):
-                    return icon
-            return self.icons["typedef"]
-
-#=========================================================
 # Completer
 #=========================================================
 class PMXCompleterTableModel(QtCore.QAbstractTableModel): 
