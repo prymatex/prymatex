@@ -145,7 +145,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         userData = block.userData()
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
-        elif role == QtCore.Qt.DecorationRole:
+        elif role is QtCore.Qt.DecorationRole:
             for name, icon in self.icons.iteritems():
                 if userData.isWordInScopes(name):
                     return icon

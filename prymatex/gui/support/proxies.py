@@ -131,7 +131,7 @@ class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
     
 class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
     def __init__(self, parent = None):
-        super(PMXSyntaxProxyModel, self).__init__('syntax', parent)
+        PMXBundleTypeFilterProxyModel.__init__(self, 'syntax', parent)
     
     def data(self, index, role):
         if self.sourceModel() is None:
@@ -143,7 +143,7 @@ class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
         sIndex = self.mapToSource(index)
         
         if role == QtCore.Qt.DisplayRole and index.column() == 1:
-            syntax = sIndex.internalPointer()
+            syntax = self.sourceModel().node(sIndex)
             return syntax.trigger
         elif index.column() == 0:
             return self.sourceModel().data(sIndex, role)
@@ -151,6 +151,28 @@ class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
     def columnCount(self, parent):
         return 2
     
+class PMXTemplateProxyModel(PMXBundleTypeFilterProxyModel):
+    def __init__(self, parent = None):
+        PMXBundleTypeFilterProxyModel.__init__(self, 'template', parent)
+    
+    def data(self, index, role):
+        if self.sourceModel() is None:
+            return None
+        
+        if not index.isValid():
+            return None
+        
+        sIndex = self.mapToSource(index)
+        
+        if role == QtCore.Qt.DisplayRole and index.column() == 1:
+            template = self.sourceModel().node(sIndex)
+            return template.bundle.name
+        elif index.column() == 0:
+            return self.sourceModel().data(sIndex, role)
+
+    def columnCount(self, parent):
+        return 2
+
 class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()

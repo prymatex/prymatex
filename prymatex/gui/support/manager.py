@@ -9,8 +9,8 @@ from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportBaseManager
 
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeTableModel, PMXThemeStylesTableModel, PMXThemeStyleRow
-from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
+from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeListModel, PMXThemeStylesTableModel, PMXThemeStyleRow
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel
 
 class PMXBundleMenuGroup(QtCore.QObject):
     def __init__(self, manager):
@@ -129,7 +129,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         PMXSupportBaseManager.__init__(self)
         self.application = application
         self.bundleTreeModel = PMXBundleTreeModel(self)
-        self.themeTableModel = PMXThemeTableModel(self)
+        self.themeListModel = PMXThemeListModel(self)
         self.themeStylesTableModel = PMXThemeStylesTableModel(self)
         
         #STYLE PROXY
@@ -145,7 +145,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         self.bundleProxyModel.setSourceModel(self.bundleTreeModel)
         
         #TEMPLATES
-        self.templateProxyModel = PMXBundleTypeFilterProxyModel("template", self)
+        self.templateProxyModel = PMXTemplateProxyModel(self)
         self.templateProxyModel.setSourceModel(self.bundleTreeModel)
         
         #SYNTAX
@@ -311,17 +311,17 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     def addTheme(self, theme):
         themeRow = PMXThemeStyleRow(theme, self.scores)
-        self.themeTableModel.addTheme(themeRow)
+        self.themeListModel.addTheme(themeRow)
         return themeRow
     
     def modifyTheme(self, theme):
         self.themeChanged.emit(theme)
         
     def removeTheme(self, theme):
-        self.themeTableModel.removeTheme(theme)
+        self.themeListModel.removeTheme(theme)
             
     def getAllThemes(self):
-        return self.themeTableModel.getAllItems()
+        return self.themeListModel.getAllItems()
     
     #---------------------------------------------------
     # THEME STYLE OVERRIDE INTERFACE

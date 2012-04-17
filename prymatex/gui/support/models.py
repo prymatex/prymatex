@@ -175,31 +175,31 @@ class PMXBundleTreeModel(TreeModel):
 #====================================================
 # Themes Table Model
 #====================================================
-class PMXThemeTableModel(QtCore.QAbstractTableModel):
+class PMXThemeListModel(QtCore.QAbstractListModel):
     def __init__(self, manager, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.manager = manager
         self.themes = []
         
-    def rowCount(self, parent):
+    def index(self, row, column = 0, parent = None):
+        return self.createIndex(row, column, self.themes[row])
+    
+    def rowCount (self, parent = None):
         return len(self.themes)
-        
-    def columnCount(self, parent):
-        return 2
-        
-    def data(self, index, role):
+
+    def data (self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
-        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
-            theme = self.themes[index.row()]
-            if index.column() == 0:
-                return theme.name
-            elif index.column() == 1:
-                return theme.author
+        theme = self.themes[index.row()]
+        if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
+            return theme.name
 
-    def index(self, row, column, parent = QtCore.QModelIndex()):
-        return self.createIndex(row, column, self.themes[row])
-
+    def findIndex(self, theme):
+        return self.themes.index(theme)
+        
+    def themeForIndex(self, index):
+        return self.themes[index]
+        
     #========================================================================
     # Functions
     #========================================================================
