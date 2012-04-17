@@ -568,7 +568,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
                 index = openBraces.index(rightChar)
                 self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, closeBraces[index], rightCursor))
-        elif leftChar in closeBraces or rightChar in closeBraces:
+        if leftChar in closeBraces or rightChar in closeBraces:
             if leftChar in closeBraces:
                 leftCursor = QtGui.QTextCursor(cursor)
                 leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
