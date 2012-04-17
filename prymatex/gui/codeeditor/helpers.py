@@ -66,17 +66,14 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         if cursor.hasSelection():
             selectedText = cursor.selectedText()
             if selectedText in openTyping + closeTyping:
-                self.cursorOpen = cursor
-                self.cursorClose = editor.getBracesPairs(cursor)
+                self.cursorOpen, self.cursorClose = editor.getBracesPairs(cursor)
                 print self.cursorOpen, self.cursorClose
             return True
         elif editor.besideBrace(cursor) and character in openTyping or character in closeTyping:
-            self.cursorOpen = cursor
-            self.cursorClose = editor.getBracesPairs(self.cursorOpen)
+            self.cursorOpen, self.cursorClose = editor.getBracesPairs(cursor)
             if self.cursorClose is not None:
-                #TODO: ver si selection start o selection end en funcion de que tipo de brace es el que entro buscando
-                self.cursorClose.setPosition(self.cursorClose.selectionStart())
-                if self.cursorOpen.position() >= self.cursorClose.position():
+                #Estan pegados?
+                if self.cursorOpen.selectionEnd() == self.cursorClose.selectionStart() or self.cursorOpen.selectionStart() == self.cursorClose.selectionEnd():
                     self.cursorOpen = self.cursorClose = None
         else:
             currentWord, currentWordStart, currentWordEnd = editor.currentWord()
@@ -167,10 +164,7 @@ class BackspaceRemoveBracesHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
-        self.cursor1 = self.cursor2 = None
-        self.cursor1 = QtGui.QTextCursor(cursor)
-        self.cursor1.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-        self.cursor2 = editor.getBracesPairs(self.cursor1)
+        self.cursor1, self.cursor2 = editor.getBracesPairs(cursor)
         return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
         
     def execute(self, editor, event, cursor = None, scope = None):
@@ -215,10 +209,8 @@ class DeleteRemoveBracesHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Delete
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
-        self.cursor1 = self.cursor2 = None
-        self.cursor1 = QtGui.QTextCursor(cursor)
-        self.cursor1.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-        self.cursor2 = editor.getBracesPairs(self.cursor1)
+        self.cursor1, self.cursor2 = editor.getBracesPairs(cursor, forward = True)
+        print "otro cursor es", self.cursor2
         return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
         
     def execute(self, editor, event, cursor = None, scope = None):

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*CODINGng: utf-8 -*-
 #!/usr/bin/env python
 
 #=======================================================================
@@ -577,7 +577,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 rightCursor = QtGui.QTextCursor(cursor)
                 rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
                 self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
-        
+        print map(lambda c: c is not None and c.selectedText() or "None", self._currentBraces)
+
     def getBracesPairs(self, cursor = None, forward = False):
         """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
@@ -588,7 +589,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         for index in [0, 1]:
             if self._currentBraces[index] is not None and cursor.selectionStart() == self._currentBraces[index].selectionStart() and cursor.selectionEnd() == self._currentBraces[index].selectionEnd():
                 opposite = QtGui.QTextCursor(self._currentBraces[index + 2]) if self._currentBraces[index + 2] is not None else None
-                return opposite
+                return (cursor, opposite)
+        return (None, None)
 
     def beforeBrace(self, cursor):
         return self._currentBraces[1] is not None and self._currentBraces[1].position() - 1 == cursor.position()
