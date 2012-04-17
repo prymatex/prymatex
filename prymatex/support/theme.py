@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 from prymatex.support.bundle import PMXManagedObject
 from prymatex.utils import plist
 
-'''
-    foreground, background, selection, invisibles, lineHighlight, caret, gutter
-'''
+"""foreground, background, selection, invisibles, lineHighlight, caret, gutter"""
 
 class PMXThemeStyle(object):
     KEYS = [ 'scope', 'name', 'settings' ]

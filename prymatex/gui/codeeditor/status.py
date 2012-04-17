@@ -157,10 +157,10 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     # AutoConnect signals----------------------------------------
     @QtCore.pyqtSlot(int)
     def on_comboBoxSyntaxes_activated(self, index):
-        model = self.comboBoxSyntaxes.model()
-        node = model.mapToSource(model.createIndex(index, 0))
         if self.currentEditor is not None:
-            self.currentEditor.setSyntax(node.internalPointer())
+            model = self.comboBoxSyntaxes.model()
+            node = model.node(model.createIndex(index, 0))
+            self.currentEditor.setSyntax(node)
 
     @QtCore.pyqtSlot(int)
     def on_comboBoxTabSize_activated(self, index):

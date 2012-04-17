@@ -32,7 +32,10 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     
     def node(self, index):
         sIndex = self.mapToSource(index)
-        return self.sourceModel().node(sIndex)
+        node = self.sourceModel().node(sIndex)
+        #El root node no puede estar en un flat proxy porque sino no es flat
+        if not node.isRootNode():
+            return node
         
     def filterAcceptsRow(self, sourceRow, sourceParent):
         return True

@@ -13,28 +13,42 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         self.application = QtGui.QApplication.instance()
+        self.setupComboTemplates()
         
+        #Completer para los paths
         model = QtGui.QFileSystemModel(self)
         model.setRootPath(QtCore.QDir.rootPath())
         model.setFilter(QtCore.QDir.Dirs)
         self.completerFileSystem = QtGui.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
         
-        self.templateProxyModel = self.application.supportManager.templateProxyModel
-        self.comboTemplates.setModel(self.templateProxyModel)
-        self.comboTemplates.setModelColumn(0)
         self.buttonCreate.setDefault(True)
         self.fileCreated = None
     
+    def setupComboTemplates(self):
+        tableView = QtGui.QTableView(self)
+        tableView.setModel(self.application.supportManager.templateProxyModel)
+        tableView.resizeColumnsToContents()
+        tableView.resizeRowsToContents()
+        tableView.verticalHeader().setVisible(False)
+        tableView.horizontalHeader().setVisible(False)
+        tableView.setShowGrid(False)
+        tableView.setMinimumWidth(tableView.horizontalHeader().length() + 25)
+        tableView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        tableView.setAutoScroll(False)
+        self.comboTemplates.setModel(self.application.supportManager.templateProxyModel);
+        self.comboTemplates.setView(tableView)
+        self.comboTemplates.setModelColumn(0)
+        
     def getNewLocation(self):
         application = QtGui.QApplication.instance()
         projectDock = self.parent().projects
         from prymatex.gui.dockers.projects import PMXProjectDock
         assert isinstance(projectDock, PMXProjectDock), "Error de proyecto %s" % type(projectDock)
         path = application.fileManager.getDirectory(projectDock.currentPath()) 
-        print path
         return path
-        
     
     def on_buttonChoose_pressed(self):
         directory = self.lineLocation.text()
@@ -43,9 +57,10 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
             self.lineLocation.setText(path)
         
     def on_buttonCreate_pressed(self):
-        index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboTemplates.currentIndex(), 0))
-        if index.isValid():
-            template = index.internalPointer()
+        templateModel = self.comboTemplates.model()
+        template = templateModel.node(templateModel.createIndex(self.comboTemplates.currentIndex(), 0))
+        if template is not None:
+            print template
             environment = template.buildEnvironment(fileDirectory = self.lineLocation.text(), fileName = self.lineFileName.text())
             self.fileCreated = template.execute(environment)
             self.accept()
