@@ -267,3 +267,11 @@ class PMXBundleItem(PMXManagedObject):
     def execute(self, processor):
         pass
         
+class PMXRunningContext(object):
+    def __init__(self, bundleItem):
+        self.bundleItem = bundleItem
+        self.inputType, self.inputValue = None, None
+        self.shellCommand, self.environment = "", {}
+        self.asynchronous = False
+        self.outputValue = self.outputType = None
+        self.workingDirectory = None

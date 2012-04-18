@@ -7,9 +7,10 @@ http://manual.macromates.com/en/templates
 """
 
 import os, shutil, codecs
+import functools
 from glob import glob
-from subprocess import Popen, PIPE
-from prymatex.support.bundle import PMXBundleItem
+
+from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.utils import prepareShellScript
 from prymatex.utils import plist
 
@@ -126,29 +127,20 @@ class PMXTemplate(PMXBundleItem):
             env['TM_NEW_PROJECT_DIRECTORY'] = os.path.dirname(projectLocation)
         return env
     
-    def execute(self, environment = {}):
-        origWD = os.getcwd() # remember our original working directory
-        os.chdir(self.path('prymatex'))
+    def execute(self, environment = {}, callback = lambda x: x):
+        context = PMXRunningContext(self)
         
-        shellCommand, environment = prepareShellScript(self.command, environment)
-        
-        process = Popen(shellCommand, stdout=PIPE, stderr=PIPE, env = environment)
-        
-        try:
-            outputValue = process.stdout.read()
-            errorValue = process.stderr.read()
-        except IOError, e:
-            errorValue = str(e).decode("utf-8")
-        process.stdout.close()
-        process.stderr.close()
-        outputType = process.wait()
-        #TODO: Tirar esto como un error para mostrarlo en el browser
-        print outputType, outputValue, errorValue
-        
-        os.chdir(origWD) # get back to our original working directory
-        #Si todo esta bien retornar el new file o el project location
-        return environment.get('TM_NEW_FILE', environment.get('TM_NEW_PROJECT_LOCATION', None))
-        
+        context.asynchronous = False
+        context.workingDirectory = self.path('prymatex')
+        context.shellCommand, context.environment = prepareShellScript(self.command, environment)
+
+        self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
+    
+    def afterExecute(self, callback, context):
+        #TODO: Ver los errores
+        newFileOrPath = context.environment.get('TM_NEW_FILE', context.environment.get('TM_NEW_PROJECT_LOCATION', None))
+        callback(newFileOrPath)
+
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
         info = os.path.join(path, cls.FILE)

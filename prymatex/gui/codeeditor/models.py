@@ -143,6 +143,9 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             return None
         block = self.blocks[index.row()]
         userData = block.userData()
+        #TODO: Ver donde es que pasa esto de que el userData sea None
+        if userData is None:
+            return None
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
         elif role is QtCore.Qt.DecorationRole:

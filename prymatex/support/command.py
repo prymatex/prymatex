@@ -7,18 +7,9 @@ import os
 import functools
 from collections import namedtuple
 
-from prymatex.support.bundle import PMXBundleItem
+from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.utils import compileRegexp, prepareShellScript
 
-#TODO: Hacer un PMXRunningContext para todo lo que requiera de procesos template, commands, etc
-class PMXRunningContext(object):
-    def __init__(self, command):
-        self.command = command
-        self.inputType, self.inputValue = "", ""
-        self.shellCommand, self.environment = "", {}
-        self.asynchronous = False
-        self.outputValue = self.outputType = None
-        
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
                 'command', 'winCommand', 'linuxCommand',                                #System based Command
@@ -99,6 +90,7 @@ class PMXCommand(PMXBundleItem):
         return getattr(processor, self.beforeRunningCommand)()
 
     def execute(self, processor):
+        #TODO: Evaluar y activar esto del before
         #if not self.beforeExecute(processor): return
         
         context = PMXRunningContext(self)

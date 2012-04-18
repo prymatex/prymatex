@@ -128,9 +128,13 @@ class PMXSupportBaseManager(object):
 
     def runProcess(self, context, callback):
         """ Synchronous run process"""
+        origWD = os.getcwd() # remember our original working directory
+        if context.workingDirectory is not None:
+            os.chdir(context.workingDirectory)
+
         process = subprocess.Popen(context.shellCommand, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env = context.environment)
         
-        if context.inputType != None:
+        if context.inputType is not None:
             process.stdin.write(unicode(context.inputValue).encode("utf-8"))
         process.stdin.close()
         try:
@@ -141,6 +145,10 @@ class PMXSupportBaseManager(object):
         process.stdout.close()
         process.stderr.close()
         context.outputType = process.wait()
+        
+        if context.workingDirectory is not None:
+            os.chdir(origWD)
+        
         callback(context)
 
     #---------------------------------------------------

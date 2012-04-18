@@ -9,7 +9,7 @@ from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportBaseManager
 
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeListModel, PMXThemeStylesTableModel, PMXThemeStyleRow, PMXProcessListModel
+from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeListModel, PMXThemeStylesTableModel, PMXThemeStyleRow, PMXProcessTableModel
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel
 
 class PMXBundleMenuGroup(QtCore.QObject):
@@ -131,7 +131,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         self.bundleTreeModel = PMXBundleTreeModel(self)
         self.themeListModel = PMXThemeListModel(self)
         self.themeStylesTableModel = PMXThemeStylesTableModel(self)
-        self.processListModel = PMXProcessListModel(self)
+        self.processTableModel = PMXProcessTableModel(self)
         
         #STYLE PROXY
         self.themeStyleProxyModel = PMXThemeStyleTableProxyModel(self)
@@ -206,7 +206,10 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #Interface
     def runQProcess(self, context, callback):
         process = QtCore.QProcess(self)
-        self.processListModel.appendProcess(process, description = context.command.name)
+        if context.workingDirectory is not None:
+            process.setWorkingDirectory(context.workingDirectory)
+            
+        self.processTableModel.appendProcess(process, description = context.command.name)
         
         #TODO: context.environment ya tiene las variables de system ver que hacer
         env = QtCore.QProcessEnvironment.systemEnvironment()
@@ -216,7 +219,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
 
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):
-                self.processListModel.removeProcess(process)
+                self.processTableModel.removeProcess(process)
                 context.errorValue = str(process.readAllStandardError()).decode("utf-8")
                 context.outputValue = str(process.readAllStandardOutput()).decode("utf-8")
                 context.outputType = exitCode
@@ -225,7 +228,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
 
         process.finished[int].connect(onQProcessFinished(process, context, callback))
 
-        if context.inputType != None:
+        if context.inputType is not None:
             process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
             if not process.waitForStarted():
                 raise Exception("No puedo correr")
