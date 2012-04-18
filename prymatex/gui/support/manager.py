@@ -206,7 +206,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #Interface
     def runQProcess(self, context, callback):
         process = QtCore.QProcess(self)
-        self.processListModel.appendProcess(process)
+        self.processListModel.appendProcess(process, description = context.command.name)
         
         #TODO: context.environment ya tiene las variables de system ver que hacer
         env = QtCore.QProcessEnvironment.systemEnvironment()

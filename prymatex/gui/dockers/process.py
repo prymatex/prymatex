@@ -5,6 +5,7 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
+from prymatex.gui import utils
 from prymatex.core.plugin.dock import PMXBaseDock
 
 class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
@@ -17,21 +18,43 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
         self.setWindowTitle(_("Process"))
         self.setObjectName(_("ProcessDock"))
         PMXBaseDock.__init__(self)
-        self.tableViewSymbols = QtGui.QTableView()
-        self.tableViewSymbols.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.tableViewSymbols.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.tableViewSymbols.setShowGrid(False)
-        self.tableViewSymbols.horizontalHeader().setVisible(False)
-        self.tableViewSymbols.verticalHeader().setVisible(False)
-        self.tableViewSymbols.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableViewSymbols.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableViewSymbols.activated.connect(self.on_tableViewSymbols_activated)
-        self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
-        self.tableViewSymbols.setModel(self.application.supportManager.processListModel)
-        self.setWidget(self.tableViewSymbols)
+        self.tableViewProcess = QtGui.QTableView()
+        self.tableViewProcess.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.tableViewProcess.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableViewProcess.setShowGrid(False)
+        self.tableViewProcess.horizontalHeader().setVisible(False)
+        self.tableViewProcess.verticalHeader().setVisible(False)
+        self.tableViewProcess.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewProcess.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.tableViewProcess.activated.connect(self.on_tableViewProcess_activated)
+        self.tableViewProcess.doubleClicked.connect(self.on_tableViewProcess_doubleClicked)
+        self.tableViewProcess.setModel(self.application.supportManager.processListModel)
+        self.setWidget(self.tableViewProcess)
 
-    def on_tableViewSymbols_activated(self, index):
+        #Setup Context Menu
+        contextMenu = { 
+            "title": "Process",
+            "items": [ { "title": "Kill"}, {"title": "Terminate"} ]
+        }
+        self.processMenu, self.processMenuActions = utils.createQMenu(contextMenu, self)
+
+        self.processMenuActions[0].triggered.connect(self.on_actionKill_triggered)
+        self.processMenuActions[1].triggered.connect(self.on_actionTerminate_triggered)
+                
+        self.tableViewProcess.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tableViewProcess.customContextMenuRequested.connect(self.showtableViewProcessContextMenu)
+        
+    def showtableViewProcessContextMenu(self, point):
+        self.processMenu.popup(self.tableViewProcess.mapToGlobal(point))
+        
+    def on_actionKill_triggered(self):
+        print "kill"
+        
+    def on_actionTerminate_triggered(self):
+        print "Terminate"
+        
+    def on_tableViewProcess_activated(self, index):
         print index
     
-    def on_tableViewSymbols_doubleClicked(self, index):
+    def on_tableViewProcess_doubleClicked(self, index):
         print index

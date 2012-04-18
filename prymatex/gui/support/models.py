@@ -677,40 +677,50 @@ class PMXProcessListModel(QtCore.QAbstractTableModel):
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.manager = manager
-        self.process = []
+        self.processItems = []
 
     def index(self, row, column = 0, parent = None):
-        return self.createIndex(row, column, self.process[row])
+        return self.createIndex(row, column, self.processItems[row])
     
     def rowCount (self, parent = None):
-        return len(self.process)
+        return len(self.processItems)
         
     def columnCount(self, parent):
-        return 1
+        return 3
 
     def data (self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
-        proc = self.process[index.row()]
+        item = self.processItems[index.row()]
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
-            return proc.pid()
+            if index.column() == 0:
+                return item["pid"]
+            elif index.column() == 1:
+                return item["description"]
+            elif index.column() == 2:
+                states = {  0: "NotRunning",
+                            1: "Starting"	,
+                            2: "Running" }
+                return states[item["process"].state()]
 
-    def findIndex(self, proc):
-        return self.process.index(proc)
+    def findIndex(self, process):
+        items = filter(lambda item: item["process"] == process, self.processItems)
+        assert len(items) == 1, "No puede tener mas de uno"
+        return self.processItems.index(items[0])
         
-    def procForIndex(self, index):
-        return self.themes[index]
+    def processForIndex(self, index):
+        return self.processItems[index]["process"]
     
-    def appendProcess(self, proc):
-        self.beginInsertRows(QtCore.QModelIndex(), len(self.process), len(self.process))
-        self.process.append(proc)
+    def appendProcess(self, process, description = ""):
+        self.beginInsertRows(QtCore.QModelIndex(), len(self.processItems), len(self.processItems))
+        self.processItems.append({ "pid": process.pid(), "process":  process, "description": description })
         self.endInsertRows()
 
-    def removeProcess(self, proc):
-        index = self.process.index(proc)
+    def removeProcess(self, process):
+        index = self.findIndex(process)
         self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-        self.process.remove(proc)
+        self.processItems.pop( index )
         self.endRemoveRows()
         
     def getAllItems(self):
-        return self.themes
+        return map(lambda item: item["process"], self.processItems)
