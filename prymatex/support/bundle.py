@@ -275,3 +275,6 @@ class PMXRunningContext(object):
         self.asynchronous = False
         self.outputValue = self.outputType = None
         self.workingDirectory = None
+        
+    def description(self):
+        return self.bundleItem.name

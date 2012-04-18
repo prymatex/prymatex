@@ -35,12 +35,13 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
         #Setup Context Menu
         contextMenu = { 
             "title": "Process",
-            "items": [ { "title": "Kill"}, {"title": "Terminate"} ]
+            "items": [ { "title": "Close"}, { "title": "Kill"}, {"title": "Terminate"} ]
         }
         self.processMenu, self.processMenuActions = utils.createQMenu(contextMenu, self)
 
-        self.processMenuActions[0].triggered.connect(self.on_actionKill_triggered)
-        self.processMenuActions[1].triggered.connect(self.on_actionTerminate_triggered)
+        self.processMenuActions[0].triggered.connect(self.on_actionCloseProcess_triggered)
+        self.processMenuActions[1].triggered.connect(self.on_actionKill_triggered)
+        self.processMenuActions[2].triggered.connect(self.on_actionTerminate_triggered)
                 
         self.tableViewProcess.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tableViewProcess.customContextMenuRequested.connect(self.showtableViewProcessContextMenu)
@@ -54,6 +55,10 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
         index = self.tableViewProcess.currentIndex()
         return self.processTableModel.processForIndex(index)
 
+    def on_actionCloseProcess_triggered(self):
+        """docstring for on_actionCloseProcess_triggered"""
+        self.currentProcess().close()
+    
     def on_actionKill_triggered(self):
         self.currentProcess().kill()
         

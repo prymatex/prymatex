@@ -133,15 +133,15 @@ class PMXCommandProcessor(PMXCommandProcessor):
             echo -e "<p>Exit code was: %(exitcode)d</p>"
             html_footer
         ''' % {'output': context.errorValue, 
-               'name': context.command.name,
+               'name': context.description(),
                'exitcode': context.outputType}
         commandHash = { 'command': command, 
-                           'name': "Error" + context.command.name,
+                           'name': "Error" + context.bundleItem.name,
                           'input': 'none',
                          'output': 'showAsHTML' }
         command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.setBundle(context.command.bundle)
-        command.setManager(context.command.manager)
+        command.setBundle(context.bundleItem.bundle)
+        command.setManager(context.bundelItem.manager)
         self.editor.insertBundleItem(command)
         
     def discard(self, context):
@@ -172,16 +172,16 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def insertAsSnippet(self, context):
         snippetHash = {    'content': context.outputValue, 
-                       'name': context.command.name,
-                 'tabTrigger': context.command.tabTrigger,
-              'keyEquivalent': context.command.keyEquivalent }
+                       'name': context.bundleItem.name,
+                 'tabTrigger': context.bundleItem.tabTrigger,
+              'keyEquivalent': context.bundleItem.keyEquivalent }
         snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), dataHash = snippetHash)
-        snippet.setBundle(context.command.bundle)
-        snippet.setManager(context.command.manager)
+        snippet.setBundle(context.bundleItem.bundle)
+        snippet.setManager(context.bundleItem.manager)
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, context):
-        self.editor.mainWindow.browser.setHtml(context.outputValue, context.command)
+        self.editor.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
 
     timespanFactor = 1
     def showAsTooltip(self, context):

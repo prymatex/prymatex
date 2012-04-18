@@ -209,7 +209,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         if context.workingDirectory is not None:
             process.setWorkingDirectory(context.workingDirectory)
             
-        self.processTableModel.appendProcess(process, description = context.command.name)
+        self.processTableModel.appendProcess(process, description = context.description())
         
         #TODO: context.environment ya tiene las variables de system ver que hacer
         env = QtCore.QProcessEnvironment.systemEnvironment()
