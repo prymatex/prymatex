@@ -18,6 +18,7 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
         self.setWindowTitle(_("Process"))
         self.setObjectName(_("ProcessDock"))
         PMXBaseDock.__init__(self)
+        self.processTableModel = self.application.supportManager.processTableModel
         self.tableViewProcess = QtGui.QTableView()
         self.tableViewProcess.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.tableViewProcess.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -28,7 +29,7 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewProcess.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableViewProcess.activated.connect(self.on_tableViewProcess_activated)
         self.tableViewProcess.doubleClicked.connect(self.on_tableViewProcess_doubleClicked)
-        self.tableViewProcess.setModel(self.application.supportManager.processListModel)
+        self.tableViewProcess.setModel(self.processTableModel)
         self.setWidget(self.tableViewProcess)
 
         #Setup Context Menu
@@ -45,16 +46,22 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewProcess.customContextMenuRequested.connect(self.showtableViewProcessContextMenu)
         
     def showtableViewProcessContextMenu(self, point):
-        self.processMenu.popup(self.tableViewProcess.mapToGlobal(point))
+        index = self.tableViewProcess.indexAt(point)
+        if index.isValid():
+            self.processMenu.popup(self.tableViewProcess.mapToGlobal(point))
         
+    def currentProcess(self):
+        index = self.tableViewProcess.currentIndex()
+        return self.processTableModel.processForIndex(index)
+
     def on_actionKill_triggered(self):
-        print "kill"
+        self.currentProcess().kill()
         
     def on_actionTerminate_triggered(self):
-        print "Terminate"
+        self.currentProcess().terminate()
         
     def on_tableViewProcess_activated(self, index):
-        print index
+        self.currentProcess().terminate()
     
     def on_tableViewProcess_doubleClicked(self, index):
-        print index
+        self.currentProcess().terminate()

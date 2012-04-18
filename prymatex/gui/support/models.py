@@ -673,13 +673,13 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
 #=========================================================
 # Process
 #=========================================================
-class PMXProcessListModel(QtCore.QAbstractTableModel): 
+class PMXProcessTableModel(QtCore.QAbstractTableModel): 
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.manager = manager
         self.processItems = []
 
-    def index(self, row, column = 0, parent = None):
+    def index(self, row, column, parent = None):
         return self.createIndex(row, column, self.processItems[row])
     
     def rowCount (self, parent = None):
@@ -688,7 +688,7 @@ class PMXProcessListModel(QtCore.QAbstractTableModel):
     def columnCount(self, parent):
         return 3
 
-    def data (self, index, role = QtCore.Qt.DisplayRole):
+    def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         item = self.processItems[index.row()]
@@ -703,13 +703,13 @@ class PMXProcessListModel(QtCore.QAbstractTableModel):
                             2: "Running" }
                 return states[item["process"].state()]
 
-    def findIndex(self, process):
+    def findRowIndex(self, process):
         items = filter(lambda item: item["process"] == process, self.processItems)
         assert len(items) == 1, "No puede tener mas de uno"
         return self.processItems.index(items[0])
         
     def processForIndex(self, index):
-        return self.processItems[index]["process"]
+        return self.processItems[index.row()]["process"]
     
     def appendProcess(self, process, description = ""):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.processItems), len(self.processItems))
@@ -717,7 +717,7 @@ class PMXProcessListModel(QtCore.QAbstractTableModel):
         self.endInsertRows()
 
     def removeProcess(self, process):
-        index = self.findIndex(process)
+        index = self.findRowIndex(process)
         self.beginRemoveRows(QtCore.QModelIndex(), index, index)
         self.processItems.pop( index )
         self.endRemoveRows()
