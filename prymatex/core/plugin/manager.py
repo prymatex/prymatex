@@ -149,4 +149,6 @@ class PMXPluginManager(PMXBaseComponent):
                 continue # 
             moduleNames = os.listdir(directory)
             for name in moduleNames:
+                if not os.path.isdir(os.path.join(directory, name)) or name.startswith("."):
+                    continue 
                 self._load_plugin(name, directory)
