@@ -579,7 +579,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 rightCursor = QtGui.QTextCursor(cursor)
                 rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
                 self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
-        print map(lambda c: c is not None and c.selectedText() or "None", self._currentBraces)
 
     def getBracesPairs(self, cursor = None, forward = False):
         """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
@@ -681,7 +680,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             cursor.setPosition(start)
             cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         elif selection == self.SelectEnclosingBrackets:
-            pass
+            flags = QtGui.QTextDocument.FindFlags()
+            flags |= QtGui.QTextDocument.FindBackward
+            foundCursors = map(lambda (openBrace, closeBrace): (self.document().find(openBrace, cursor.selectionStart(), flags), closeBrace), self.braces)
+            openCursor = reduce(lambda c1, c2: (not c1[0].isNull() and c1[0].selectionEnd() > c2[0].selectionEnd()) and c1 or c2, foundCursors)
+            if not openCursor[0].isNull():
+                closeCursor = self.findTypingPair(openCursor[0].selectedText(), openCursor[1], openCursor[0])
+                if openCursor[0].selectionEnd() <= cursor.selectionStart() <= closeCursor.selectionStart():
+                    cursor.setPosition(openCursor[0].selectionEnd())
+                    cursor.setPosition(closeCursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
         elif selection == self.SelectCurrentScope:
             block = cursor.block()
             beginPosition = block.position()
@@ -1330,6 +1337,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 {'title': 'Select',
                  'items': [
                     {'title': '&Word',
+                     'shortcut': 'Ctrl+A',
                      'callback': lambda editor: editor.select(0)
                      },
                     {'title': '&Line',
@@ -1345,6 +1353,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                      'callback': lambda editor: editor.select(editor.SelectCurrentScope)
                      },
                     {'title': '&All',
+                     'shortcut': 'Ctrl+A',
                      'callback': lambda editor: editor.select(3)
                      }    
                 ]},

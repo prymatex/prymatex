@@ -29,7 +29,7 @@ class PMXApplication(QtGui.QApplication):
     The application loads the PMX Support."""
     
     def __init__(self, profile):
-        """Inicializaci�n de la aplicaci�n."""
+        """Inicialización de la aplicación."""
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
         self.setStyleSheet(resources.APPLICATION_STYLE)

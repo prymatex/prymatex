@@ -181,9 +181,7 @@ class PMXFileManager(QtCore.QObject):
         self.watchPath(filePath)
 
     def readFile(self, filePath):
-        """
-        Read from file
-        """
+        """Read from file"""
         #TODO: Que se pueda hacer una rutina usando yield
         fileRead = codecs.open(filePath, "r", encoding = self.encoding)
         content = fileRead.read()
@@ -191,13 +189,13 @@ class PMXFileManager(QtCore.QObject):
         return content
 
     def writeFile(self, filePath, content):
-        """
-        Function that actually save the content of a file.
-        """
+        """Function that actually save the content of a file."""
+        self.unwatchPath(filePath)
         fileWrite = codecs.open(filePath, "w", encoding = self.encoding)
-        fileWrite.write(encoded_stream)
+        fileWrite.write(content)
         fileWrite.flush()
         fileWrite.close()
+        self.watchPath(filePath)
 
     def closeFile(self, filePath):
         if self.isWatched(filePath):
