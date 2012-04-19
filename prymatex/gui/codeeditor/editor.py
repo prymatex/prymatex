@@ -1,4 +1,4 @@
-# -*CODINGng: utf-8 -*-
+# -*- encoding: utf-8 -*-
 #!/usr/bin/env python
 
 #=======================================================================
@@ -273,7 +273,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def open(self, filePath):
         """ Custom open for large files, use coroutines """
         content = self.application.fileManager.openFile(filePath)
-        chunksize = 1024
+        self.setFilePath(filePath)
+        chunksize = 512
         currentIndex = 0
         contentLength = len(content)
         while currentIndex <= contentLength:
@@ -281,7 +282,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             currentIndex += chunksize
             yield
         self.document().clearUndoRedoStacks()
-        self.setFilePath(filePath)
+        self.setModified(False)
         
     def close(self):
         QtGui.QPlainTextEdit.close(self)
