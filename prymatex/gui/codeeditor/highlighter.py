@@ -106,7 +106,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData.symbol = symbol
             self.editor.updateSymbol(self.currentBlock(), userData, symbol)
 
-        #4 Split words [( wordStart, wordEnd )...]
+        #4 Split words [ (( wordStart, wordEnd ), word )...]
         words = map(lambda match: (match.span(), match.group()), RE_WORD.finditer(text))
         if userData.words != words:
             self.editor.updateWords(self.currentBlock(), userData, words)
