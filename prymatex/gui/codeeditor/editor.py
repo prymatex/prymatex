@@ -272,7 +272,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def open(self, filePath):
         """ Custom open for large files, use coroutines """
-        content = self.application.fileManager.openFile(filePath)
+        self.application.fileManager.openFile(filePath)
+        content = self.application.fileManager.readFile(filePath)
         self.setFilePath(filePath)
         chunksize = 512
         currentIndex = 0

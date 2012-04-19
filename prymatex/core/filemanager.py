@@ -175,41 +175,34 @@ class PMXFileManager(QtCore.QObject):
             raise exceptions.IOException("The file does not exist")
         if not os.path.isfile(filePath):
             raise exceptions.IOException("%s is not a file" % filePath)
-        f = QtCore.QFile(filePath)
-        if not f.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text):
-            raise exceptions.IOException("%s" % f.errorString())
-        stream = QtCore.QTextStream(f)
-        content = stream.readAll()
-        f.close()
-        
         self.last_directory = os.path.dirname(filePath)
         #Update file history
         self.add_file_history(filePath)
         self.watchPath(filePath)
+
+    def readFile(self, filePath):
+        """
+        Read from file
+        """
+        #TODO: Que se pueda hacer una rutina usando yield
+        fileRead = codecs.open(filePath, "r", encoding = self.encoding)
+        content = fileRead.read()
+        fileRead.close()
         return content
 
-    def closeFile(self, filePath):
-        self.unwatchPath(filePath)
-        
-    def saveFile(self, filePath, content):
+    def writeFile(self, filePath, content):
         """
         Function that actually save the content of a file.
         """
+        fileWrite = codecs.open(filePath, "w", encoding = self.encoding)
+        fileWrite.write(encoded_stream)
+        fileWrite.flush()
+        fileWrite.close()
+
+    def closeFile(self, filePath):
         if self.isWatched(filePath):
             self.unwatchPath(filePath)
-        try:
-            f = QtCore.QFile(filePath)
-            if not f.open(QtCore.QIODevice.WriteOnly | QtCore.QIODevice.Truncate):
-                raise exceptions.IOException(f.errorString())
-            stream = QtCore.QTextStream(f)
-            encoded_stream = stream.codec().fromUnicode(content)
-            f.write(encoded_stream)
-            f.flush()
-            f.close()
-            self.watchPath(filePath)
-        except:
-            raise
-
+        
     def isWatched(self, path):
         return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
         
