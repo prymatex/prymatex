@@ -69,13 +69,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.syntaxHighlighter.setTheme(theme)
         self.colours = theme.settings
         
-        #Set color for all QPlainTextEdit
+        #Set color for QPlainTextEdit
         appStyle = """QPlainTextEdit {background-color: %s;
         color: %s;
         selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
-        #TODO: Esto da para explotarlo mucho mas
-        #print self.application.styleSheet()
-        #print self.styleSheet()
         self.setStyleSheet(appStyle)
 
         #Sidebar colours

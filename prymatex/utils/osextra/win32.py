@@ -1,8 +1,10 @@
-# coding: utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Windows Instrumentation Interfase
 # http://coding.derkeiler.com/Archive/Python/comp.lang.python/2008-07/msg00947.html
 # http://timgolden.me.uk/python/wmi/index.html
+
 import wmi
 import os
 instrumentation = wmi.WMI()

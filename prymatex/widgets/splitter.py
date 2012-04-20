@@ -17,6 +17,16 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.widgets.tabwidget import _TabWidget, _DragableTabBar
 
+def createDisambiguatedTitle(addedTitles, newTitles):
+    assert addedTitles[0] == newTitles[0], "No tiene ambigûedad"
+    title = addedTitles[0] + " (%s)"
+    titlesLen = min(len(addedTitles), len(newTitles))
+    for index in xrange(titlesLen):
+        if addedTitles[index] != newTitles[index]:
+            return (title % addedTitles[index], title % newTitles[index])
+
+    raise Exception("No puede llegar aca, porque sino son el mismo")
+
 class SplitTabWidget(QtGui.QSplitter):
     """ The SplitTabWidget class is a hierarchy of QSplitters the leaves of
     which are QTabWidgets.  Any tab may be moved around with the hierarchy
@@ -183,7 +193,7 @@ class SplitTabWidget(QtGui.QSplitter):
             ch = _TabWidget(self)
             self.addWidget(ch)
 
-        idx = ch.addTab(w, w.tabTitle())
+        idx = ch.addTab(w, self.disambiguatedWidgetTitle(w))
         self.setWidgetToolTip(w, w.tabToolTip())
         self.setWidgetIcon(w, w.tabIcon())
         self.connect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
@@ -247,6 +257,22 @@ class SplitTabWidget(QtGui.QSplitter):
 
         if tw is not None:
             tw.setTabIcon(tidx, icon)
+
+    def disambiguatedWidgetTitle(self, widget):  
+        #Buscar tabs con el mismo nombre
+        newWidgetTitle = widget.tabTitle()
+        addedWidget = self.widgetByTitle(newWidgetTitle)
+        if addedWidget is not None:
+            addedTitle, newWidgetTitle = createDisambiguatedTitle(addedWidget.tabTitles(), widget.tabTitles())
+            self.setWidgetTitle(addedWidget, addedTitle)
+        return newWidgetTitle
+
+    def widgetByTitle(self, title):
+        for tw in self.findChildren(_TabWidget):
+            for index in xrange(tw.count()):
+                widget = tw.widget(index)
+                if widget.tabTitle() == title:
+                    return widget
 
     def setWidgetTitle(self, w, title):
         """ Set the title for the given widget. """

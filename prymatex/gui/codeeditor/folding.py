@@ -135,7 +135,7 @@ class PMXEditorFolding(object):
                 return block
     
     def getNestedLevel(self, block):
-        blocks = filter(lambda fblock: fblock.blockNumber() < block.blockNumber(), self.folding)
+        blocks = filter(lambda fblock: fblock.userData() is not None and fblock.blockNumber() < block.blockNumber(), self.folding)
         return reduce(lambda x, y: x + y, map(lambda block: block.userData().foldingMark, blocks), 0)
         
     def isStart(self, mark):

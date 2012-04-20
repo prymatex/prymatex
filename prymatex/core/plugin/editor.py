@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from prymatex.utils import osextra
 
 from PyQt4 import QtGui, QtCore
 
@@ -80,11 +81,21 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
             baseIcon = utils.combineIcons(baseIcon, importantIcon, 0.6)
         return baseIcon
     
+    def tabTitles(self):
+        if self.filePath is not None:
+            return osextra.path.fullsplit(self.filePath)[::-1]
+        return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter).split()
+
+    def setTabTitle(self, title):
+        self._tabTitle = title
+
     def tabTitle(self):
+        if hasattr(self, "_tabTitle"):
+            return self._tabTitle
         if self.filePath is not None:
             return os.path.basename(self.filePath)
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
-    
+
     def tabToolTip(self):
         if self.filePath is not None:
             return self.filePath

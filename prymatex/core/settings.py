@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-'''
-Application configuration based on Qt's QSettings module.
 
-'''
+"""
+Application configuration based on Qt's QSettings module.
+"""
 import os, plistlib
 
 from PyQt4 import QtCore, QtGui

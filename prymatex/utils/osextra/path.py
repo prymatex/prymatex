@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import re, os
 from functools import partial
 
-shell_var = re.compile('(\$[\w\d]+)')
+RE_SHELL_VAR = re.compile('(\$[\w\d]+)')
 
 def callback(match, context = None, sensitive = True, default = ''):
     key = match.group().replace('$', '')
@@ -17,8 +20,20 @@ environ_repl_callback = partial(callback, sensitive = False, context = os.enviro
 #===============================================================================
 # Expand $exp taking os.environ as context
 #===============================================================================
-expand_shell_var = lambda path: shell_var.sub(path, environ_repl_callback)
+expand_shell_var = lambda path: RE_SHELL_VAR.sub(path, environ_repl_callback)
 
+def fullsplit(path, result=None):
+    """
+    Split a pathname into components (the opposite of os.path.join) in a platform-neutral way.
+    """
+    if result is None:
+        result = []
+    head, tail = os.path.split(path)
+    if head == '':
+        return [tail] + result
+    if head == path:
+        return result
+    return fullsplit(head, [tail] + result)
 
 if __name__ == "__main__":
     print expand_shell_var('$home/alfa')

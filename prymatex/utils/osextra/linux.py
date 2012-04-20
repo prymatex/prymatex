@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-#-*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Created: 04/02/2010 by defo
 
 import os
 from subprocess import PIPE, Popen
 import re
 import user
-
-# PLATOFRM DEPENDENT CODE
 
 ps_output = re.compile('''
       #PID TTY          TIME CMD      
@@ -31,6 +29,7 @@ def pid_proc_dict():
         pid = int(proc.pop('pid'))
         d[pid] = proc
     return d
+
 def get_homedir():
     return user.home
     

@@ -1,7 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from prymatex.core.exceptions import UnsupportedPlatformError
 
 import sys
+from prymatex.utils.osextra import path
+
 if sys.platform.count('linux') or sys.platform.count('darwin'):
     from linux import *
 elif sys.platform.count('win'):
