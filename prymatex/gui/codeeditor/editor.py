@@ -189,6 +189,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
+        
+        #Basic setup
+        #self.setCenterOnScroll(True)
             
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
@@ -1146,11 +1149,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor = self.textCursor()
         cursor.setPosition(block.position())
         self.setTextCursor(cursor)    
+        self.centerCursor()
 
     def goToLine(self, lineNumber):
         cursor = self.textCursor()
         cursor.setPosition(self.document().findBlockByNumber(lineNumber - 1).position())
         self.setTextCursor(cursor)
+        self.centerCursor()
     
     def goToColumn(self, columnNumber):
         cursor = self.textCursor()
@@ -1542,7 +1547,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def dragMoveEvent(self, event):
         cursor = self.cursorForPosition(event.pos())
         self.setTextCursor(cursor)
-    
+     
     def dropEvent(self, event):
         """
         When a url or text is dropped
