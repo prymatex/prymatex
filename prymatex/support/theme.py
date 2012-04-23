@@ -101,6 +101,7 @@ class PMXTheme(PMXManagedObject):
                 manager.addManagedObject(theme)
             elif theme is not None:
                 theme.addSource(namespace, path)
+            return theme
         except Exception, e:
             print "Error en theme %s (%s)" % (path, e)
 

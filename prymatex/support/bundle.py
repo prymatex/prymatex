@@ -170,6 +170,7 @@ class PMXBundle(PMXManagedObject):
                 manager.addManagedObject(bundle)
             elif bundle is not None:
                 bundle.addSource(namespace, path)
+            return bundle
         except Exception, e:
             print "Error in laod bundle %s (%s)" % (info_file, e)
 
@@ -256,6 +257,7 @@ class PMXBundleItem(PMXManagedObject):
                 manager.addManagedObject(item)
             elif item is not None:
                 item.addSource(namespace, path)
+            return item
         except Exception, e:
             print "Error in bundle item %s (%s)" % (path, e)
     

@@ -31,6 +31,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
         if path:
             self.lineLocation.setText(path)
+            self.lineProjectName.setText(os.path.basename(path))
 
     def on_buttonCreate_pressed(self):
         name = self.lineProjectName.text()
@@ -48,7 +49,6 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     
     def on_lineProjectName_textChanged(self, text):
         if self.checkBoxUseDefaultLocation.isChecked():
-            self.application.projectManager.workspaceDirectory
             projectPath = os.path.join(self.application.projectManager.workspaceDirectory, text)
             self.lineLocation.setText(projectPath)
         self.buttonCreate.setEnabled(bool(text))
@@ -56,14 +56,13 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def on_lineLocation_textChanged(self, text):
         if not text:
             self.lineLocation.setText(self.application.projectManager.workspaceDirectory)
-        # TODO: In need of better logic for when to replace project name with path
-        if True or not self.lineProjectName.text():
-            proposedName = text.strip('/').rsplit('/', 1)[-1]
-            self.lineProjectName.setText(proposedName)
 
     def on_checkBoxUseDefaultLocation_toggled(self, checked):
         self.lineLocation.setEnabled(not checked)
         self.buttonChoose.setEnabled(not checked)
+        if checked:
+            projectPath = os.path.join(self.application.projectManager.workspaceDirectory, self.lineProjectName.text())
+            self.lineLocation.setText(projectPath)
     
     def on_checkBoxAddToWorkingSet_toggled(self, checked):
         self.comboBoxWorkingSet.setEnabled(checked)

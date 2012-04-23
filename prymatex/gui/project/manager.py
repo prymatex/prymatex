@@ -45,8 +45,7 @@ class PMXProjectManager(QtCore.QObject):
             validPath.append(char)
         return ''.join(validPath)
 
-    def loadProject(self):
-        #TODO: load Known Projects
+    def loadProjects(self):
         for path in self.knownProjects[:]:
             try:
                 PMXProject.loadProject(path, self)
@@ -111,6 +110,8 @@ class PMXProjectManager(QtCore.QObject):
     #---------------------------------------------------
     def addProject(self, project):
         project.setManager(self)
+        if project.hasBundles() or project.hasThemes():
+            self.application.supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
         
     def modifyProject(self, project):
@@ -124,11 +125,13 @@ class PMXProjectManager(QtCore.QObject):
         #TODO: devolver un copia o no hace falta?
         return self.projectTreeModel.rootNode.childrenNodes
         
-    def openProject(self):
-        pass
+    def openProject(self, project):
+        # Cuando abro un proyecto agrego su namespace al support para aportar bundles y themes
+        print project.directory
     
-    def closeProject(self):
-        pass
+    def closeProject(self, project):
+        # Cuando cierro un proyecto quito su namespace al support
+        print project.directory
 
     def setWorkingSet(self, project, workingSet):
         projects = self.workingSets.setdefault(workingSet)

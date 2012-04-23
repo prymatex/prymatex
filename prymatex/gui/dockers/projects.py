@@ -200,12 +200,15 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     @QtCore.pyqtSlot()
     def on_actionCloseProject_triggered(self):
-        path = self.currentPath()
-        print(path)
+        treeNode = self.currentNode()
+        if treeNode.isproject:
+            self.application.projectManager.closeProject(treeNode)
     
     @QtCore.pyqtSlot()
     def on_actionOpenProject_triggered(self):
-        print (self.currentPath())
+        treeNode = self.currentNode()
+        if treeNode.isproject:
+            self.application.projectManager.openProject(treeNode)
     
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
@@ -269,7 +272,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
     #================================================
     # Custom filters
-    #================================================      
+    #================================================
     @QtCore.pyqtSlot()
     def on_pushButtonCustomFilters_pressed(self):
         filters, accepted = QtGui.QInputDialog.getText(self, _("Custom Filter"), 

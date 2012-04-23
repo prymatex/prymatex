@@ -164,6 +164,7 @@ class PMXTemplate(PMXBundleItem):
                     template.files.append(templateFile)
             elif template is not None:
                 template.addSource(namespace, path)
+            return template
         except Exception, e:
             print "Error in template %s (%s)" % (info, e)
 

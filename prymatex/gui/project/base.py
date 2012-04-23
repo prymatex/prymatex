@@ -53,7 +53,9 @@ class PMXProject(FileSystemTreeNode):
     FOLDER = '.pmxproject'
     SUPPORT = 'Support'
     BUNDLES = 'Bundles'
+    THEMES = 'Themes'
     BASH_INIT = os.path.join(SUPPORT, 'lib', 'bash_init.sh')
+    
     def __init__(self, directory, hash):
         self.directory = directory
         self.projectPath = os.path.join(self.path, self.FOLDER)
@@ -62,6 +64,7 @@ class PMXProject(FileSystemTreeNode):
         self.manager = None
         self.support = None
         self.bundles = None
+        self.themes = None
         self.namespace = None
         self.load(hash)
     
@@ -70,6 +73,12 @@ class PMXProject(FileSystemTreeNode):
     
     def hasBundles(self):
         return self.bundles is not None
+
+    def hasThemes(self):
+        return self.themes is not None
+
+    def setThemes(self, themes):
+        self.themes = themes
 
     def setBundles(self, bundles):
         self.bundles = bundles
@@ -143,6 +152,8 @@ class PMXProject(FileSystemTreeNode):
                 project.ensureSupport()
             if os.path.exists(os.path.join(projectPath, cls.BUNDLES)):
                 project.ensureBundles()
+            if os.path.exists(os.path.join(projectPath, cls.THEMES)):
+                project.ensureThemes()
             manager.addProject(project)
             return project
         except Exception, e:
@@ -183,6 +194,13 @@ class PMXProject(FileSystemTreeNode):
                 os.makedirs(subPath)
 
     def ensureBundles(self):
-        bundlePath = os.path.join(self.projectPath, self.BUNDLES)
-        if not os.path.exists(bundlePath):
-            os.makedirs(bundlePath)
+        bundlesPath = os.path.join(self.projectPath, self.BUNDLES)
+        if not os.path.exists(bundlesPath):
+            os.makedirs(bundlesPath)
+        self.setBundles(bundlesPath)
+            
+    def ensureThemes(self):
+        themesPath = os.path.join(self.projectPath, self.THEMES)
+        if not os.path.exists(themesPath):
+            os.makedirs(themesPath)
+        self.setThemes(themesPath)

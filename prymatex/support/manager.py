@@ -77,6 +77,9 @@ class PMXSupportBaseManager(object):
             self.namespaces[name][element] = self.environment[var] = epath
         return name
 
+    def hasNamespace(self, name):
+        return name in self.namespaces
+
     @property
     def protectedNamespace(self):
         return self.nsorder[self.PROTECTEDNS]
@@ -172,6 +175,7 @@ class PMXSupportBaseManager(object):
                 self.populateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
+        self.ready = True
 
     #---------------------------------------------------
     # LOAD THEMES
