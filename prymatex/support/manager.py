@@ -96,6 +96,12 @@ class PMXSupportBaseManager(object):
         path = project.projectPath
         project.namespace = project.name + hashlib.md5(path).hexdigest()
         self.addNamespace(project.namespace, path)
+        #Ya esta listo tengo que cargar este namespace
+        if self.ready:
+            self.loadThemes(project.namespace)
+            for bundle in self.loadBundles(project.namespace):
+                if bundle.enabled:
+                    self.populateBundle(bundle)
 
     def updateEnvironment(self, env):
         self.environment.update(env)
@@ -181,20 +187,28 @@ class PMXSupportBaseManager(object):
     # LOAD THEMES
     #---------------------------------------------------
     def loadThemes(self, namespace):
+        loadedThemes = set()
         if 'Themes' in self.namespaces[namespace]:
             paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
-                PMXTheme.loadTheme(path, namespace, self)
-
+                theme = PMXTheme.loadTheme(path, namespace, self)
+                if theme is not None:
+                    loadedThemes.add(theme)
+        return loadedThemes
+        
     #---------------------------------------------------
     # LOAD BUNDLES
     #---------------------------------------------------
     def loadBundles(self, namespace):
+        loadedBundles = set()
         if 'Bundles' in self.namespaces[namespace]:
             paths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for path in paths:
-                PMXBundle.loadBundle(path, namespace, self)
-
+                bundle = PMXBundle.loadBundle(path, namespace, self)
+                if bundle is not None:
+                    loadedBundles.add(bundle)
+        return loadedBundles
+        
     #---------------------------------------------------
     # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     #---------------------------------------------------

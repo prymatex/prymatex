@@ -85,22 +85,28 @@ class PMXProject(FileSystemTreeNode):
         
     def setSupport(self, support):
         self.support = support
-        
+
     @property
     def environment(self):
         env = {
             'TM_PROJECT_DIRECTORY': self.directory,
             'TM_PROJECT_NAME': self.name,
             'TM_PROJECT_PATH': self.projectPath }
-        if self.support != None:
+        if self.namespace is not None:
+            env['TM_PROJECT_NAMESPACE'] = self.namespace
+        if self.support is not None:
             env['TM_PROJECT_SUPPORT'] = self.support
+        if self.bundles is not None:
+            env['TM_PROJECT_BUNDLES'] = self.bundles
+        if self.themes is not None:
+            env['TM_PROJECT_THEMES'] = self.themes
         return env
-        
+
     def load(self, hash):
         for key in PMXProject.KEYS:
             value = hash.get(key, None)
             setattr(self, key, value)
-    
+
     @property
     def hash(self):
         hash = {}
