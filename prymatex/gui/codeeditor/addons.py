@@ -47,3 +47,22 @@ class SmartUnindentAddon(QtCore.QObject, PMXBaseAddon):
         indentMarks = settings.indent(currentBlock.text())
         if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
             self.editor.unindentBlocks(cursor)
+            
+class SpellCheckerAddon(QtCore.QObject, PMXBaseAddon):
+    def __init__(self, parent):
+        QtCore.QObject.__init__(self, parent)
+
+    def initialize(self, editor):
+        self.editor = editor
+        self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
+    
+    def finalize(self):
+        pass
+        
+    def on_editor_keyPressEvent(self, event):
+        if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ]:
+            cursor = self.editor.textCursor()
+            currentBlock = cursor.block()
+            spellRange = filter(lambda ((start, end), p): p.spellChecking,  currentBlock.userData().preferences)
+            print spellRange
+        

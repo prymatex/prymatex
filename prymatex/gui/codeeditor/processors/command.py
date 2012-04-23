@@ -141,7 +141,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                          'output': 'showAsHTML' }
         command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
         command.setBundle(context.bundleItem.bundle)
-        command.setManager(context.bundelItem.manager)
+        command.setManager(context.bundleItem.manager)
         self.editor.insertBundleItem(command)
         
     def discard(self, context):
