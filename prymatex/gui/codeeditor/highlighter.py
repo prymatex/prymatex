@@ -31,7 +31,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, editor, syntax = None, theme = None):
         QtGui.QSyntaxHighlighter.__init__(self, editor)
         self.editor = editor
-        self.processor = PMXSyntaxProcessor()
+        self.processor = PMXSyntaxProcessor(editor)
         self.syntax = syntax
         self.theme = theme
     
@@ -65,18 +65,21 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.setUserState(state)
     
     def applyFormat(self, userData):
-        for scope, start, end in userData.scopeRanges():
+        for (start, end), scope in userData.ranges:
             format = self.getFormat(scope)
             if format is not None:
                 self.setFormat(start, end - start, format)
 
     #@printtime
-    def setupBlockUserData(self, text, userData, scopes, processorState):
+    def setupBlockUserData(self, text, userData):
         blockState = self.SINGLE_LINE
-        userData.setScopes(scopes)
-        if processorState is not None:
+        userData.setScopes(self.processor.scopes)
+        userData.setRanges(self.processor.scopeRanges)
+        userData.setPreferences(self.processor.preferences)
+        userData.setChunks(self.processor.lineChunks)
+        if self.processor.state is not None:
             blockState = self.MULTI_LINE
-            userData.setProcessorState(processorState)
+            userData.setProcessorState(self.processor.state)
         
         #1 Update Indent
         indent = whiteSpace(text)
@@ -91,9 +94,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.editor.updateFolding(self.currentBlock(), userData, foldingMark)
             
         #3 Update Symbols
-        preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.scopeRanges())
-        
-        symbolRange = filter(lambda (p, start, end): p.showInSymbolList, preferences)
+        symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, userData.preferences)
         if symbolRange:
             #TODO: Hacer la transformacion de los symbolos
             #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
@@ -136,12 +137,11 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             # A parserar mi amor, vamos a parsear mi amor
             self.syntax.parseLine(stack, text, self.processor)
             
-            scopes, processorState = self.processor.lines[-1]
             if userData is None:
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
-            blockState = self.setupBlockUserData(text, userData, scopes, processorState)
+            blockState = self.setupBlockUserData(text, userData)
             self.setCurrentBlockState(blockState)
 
             self.applyFormat(userData)

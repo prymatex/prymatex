@@ -31,7 +31,16 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     
     def setScopes(self, scopes):
         self.scopes = scopes
+
+    def setRanges(self, ranges):
+        self.ranges = ranges
+
+    def setPreferences(self, preferences):
+        self.preferences = preferences
         
+    def setChunks(self, chunks):
+        self.chunks = chunks
+
     def getScopeAtPosition(self, pos):
         #FIXME: Voy a poner algo mentiroso si pos no esta en self.scopes
         scope = self.scopes[pos] if pos < len(self.scopes) else self.scopes[-1]
@@ -39,30 +48,22 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     
     def scopeRange(self, pos):
         ranges = self.scopeRanges()
-        range = filter(lambda (scope, start, end): start <= pos <= end, ranges)
-        assert len(range) >= 1, "More than one range"
-        range = range[0] if len(range) == 1 else None
-        return range
+        sr = filter(lambda ((start, end), scope): start <= pos <= end, self.ranges)
+        assert len(sr) >= 1, "More than one range"
+        sr = sr[0] if len(sr) == 1 else None
+        return sr
     
     def scopeRanges(self, start = 0, end = None):
-        #TODO: Cache para scopeRanges, si el hash no cambio retornar lo cacheado sino regenerar
-        current = ( self.scopes[start], start ) if start < len(self.scopes) else ("", 0)
-        end = end or len(self.scopes)
-        scopes = []
-        for index, scope in enumerate(self.scopes[start:], start):
-            if scope != current[0]:
-                scopes.append(( current[0], current[1], index ))
-                current = ( scope, index )
-        scopes.append(( current[0], current[1], end ))
-        return scopes
+        #TODO: start y end
+        return self.ranges
     
     def isWordInScopes(self, word):
-        return word in reduce(lambda scope, scope1: scope + " " + scope1[0], self.scopeRanges(), "")
+        return word in reduce(lambda scope, scope1: scope + " " + scope1[1], self.scopeRanges(), "")
 
     def groups(self, name = ""):
         #http://manual.macromates.com/en/language_grammars
         # 11 root groups: comment, constant, entity, invalid, keyword, markup, meta, storage, string, support, variable
-        return map(lambda scopeRange: (scopeRange[1], scopeRange[2]), filter(lambda scopeRange: any(map(lambda s: s.startswith(name), scopeRange[0].split())), self.scopeRanges()))
+        return map(lambda scopeRange: scopeRange[0], filter(lambda scopeRange: any(map(lambda s: s.startswith(name), scopeRange[1].split())), self.scopeRanges()))
 
     def wordsByGroup(self, name = ""):
         groups = self.groups(name)

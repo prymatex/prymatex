@@ -208,7 +208,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
     def updateSymbol(self, block, userData, symbol):
         self.logger.debug("Update Block Symbol")
-        if block.userData().symbol == None:
+        if block.userData().symbol is None:
             self.symbolListModel.removeSymbolBlock(block)
         else:
             self.symbolListModel.addSymbolBlock(block)
