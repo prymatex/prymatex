@@ -158,8 +158,6 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     
     def setupTreeViewFileSystem(self):
         self.treeViewFileSystem.setModel(self.fileSystemProxyModel)
-        #index = self.fileSystemModel.index(self.application.fileManager.getDirectory())
-        #self.treeViewFileSystem.setRootIndex(self.fileSystemProxyModel.mapFromSource(index))
         
         self.treeViewFileSystem.setHeaderHidden(True)
         self.treeViewFileSystem.setUniformRowHeights(False)
@@ -221,8 +219,8 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.treeViewFileSystem.setDropIndicatorShown(True)
 
         # Allow Rename
-        self.treeViewFileSystem.setEditTriggers( QtGui.QAbstractItemView.EditKeyPressed )
-        self.treeViewFileSystem.setItemDelegateForColumn(0, PMXFileSystemItemDelegate(self))
+        #self.treeViewFileSystem.setEditTriggers( QtGui.QAbstractItemView.EditKeyPressed )
+        #self.treeViewFileSystem.setItemDelegateForColumn(0, PMXFileSystemItemDelegate(self))
         self.treeViewFileSystem.setAlternatingRowColors(True)
         self.treeViewFileSystem.setAnimated(True)
 
@@ -319,7 +317,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
         basePath = self.currentPath()
-        self.createDirectory(path)
+        self.createDirectory(basePath)
     
     @QtCore.pyqtSlot()
     def on_actionNewFile_triggered(self):

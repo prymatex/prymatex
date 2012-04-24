@@ -83,18 +83,42 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     def flags(self, index):
         defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
         if not self.isDir(index):
-            return defaultFlags | QtCore.Qt.ItemIsDragEnabled 
-        return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
-            
+            return defaultFlags | QtCore.Qt.ItemIsDragEnabled
+        return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled 
+
     def dropMimeData(self, mimeData, action, row, col, parentIndex):
-        return False
+        if action == QtCore.Qt.IgnoreAction:
+            return True
+
+        parentPath = self.filePath(parentIndex)
+
+        if not os.path.isdir(parentPath):
+            return False
+
+        if not mimeData.hasUrls():
+            return False
+
+        for url in mimeData.urls():
+            srcPath = url.toLocalFile()
+            print action, srcPath, QtCore.Qt.MoveAction
+            dstPath = os.path.join(parentPath, self.application.fileManager.basename(srcPath))
+            if action == QtCore.Qt.CopyAction:
+                if os.path.isdir(srcPath):
+                    self.application.fileManager.copytree(srcPath, dstPath)
+                else:
+                    self.application.fileManager.copy(srcPath, dstPath)
+            elif action == QtCore.Qt.MoveAction:
+                self.application.fileManager.move(srcPath, dstPath)
+            elif action == QtCore.Qt.LinkAction:
+                self.application.fileManager.link(srcPath, dstPath)
+        self.refresh(parentIndex)
+        return True
     
     def mimeTypes(self):
         return ["text/uri-list"]
         
     def mimeData(self, indexes):
         urls = map(lambda index: QtCore.QUrl.fromLocalFile(self.filePath(index)), indexes)
-        print urls
         mimeData = QtCore.QMimeData()
         mimeData.setUrls(urls)
         return mimeData

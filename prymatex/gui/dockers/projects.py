@@ -36,7 +36,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         PMXBaseDock.__init__(self)
         self.setupUi(self)
         self.projectTreeProxyModel = self.application.projectManager.projectTreeProxyModel
-        self.treeViewProjects.setModel(self.projectTreeProxyModel)
+
         self.setupPropertiesDialog()
         self.setupTreeViewProjects()
 
@@ -62,6 +62,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         #TODO: Para cada add-on registrar los correspondientes properties
 
     def setupTreeViewProjects(self):
+        self.treeViewProjects.setModel(self.projectTreeProxyModel)
+        
+        self.treeViewProjects.setHeaderHidden(True)
+        self.treeViewProjects.setUniformRowHeights(False)
+        
         #Setup Context Menu
         optionsMenu = { 
             "title": "Project Options",
@@ -81,6 +86,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.projectOptionsMenu, _ = utils.createQMenu(optionsMenu, self)
         self.pushButtonOptions.setMenu(self.projectOptionsMenu)
 
+        #Connect context menu
+        self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.treeViewProjects.customContextMenuRequested.connect(self.showProjectTreeViewContextMenu)
+        
         #=======================================================================
         # Drag and Drop (see the proxy model)
         #=======================================================================
@@ -89,9 +98,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.treeViewProjects.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.treeViewProjects.setDropIndicatorShown(True)
 
-        #Connect context menu
-        self.treeViewProjects.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.treeViewProjects.customContextMenuRequested.connect(self.showProjectTreeViewContextMenu)
         self.treeViewProjects.setAlternatingRowColors(True)
         self.treeViewProjects.setAnimated(True)
 

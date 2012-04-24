@@ -111,6 +111,15 @@ class PMXFileManager(QtCore.QObject):
     #========================================================
     # Path handling, create, move, copy, link, delete
     #========================================================
+    def _onerror(func, path, exc_info):
+        import stat
+        if not os.access(path, os.W_OK):
+            # Is the error an access error ?
+            os.chmod(path, stat.S_IWUSR)
+            func(path)
+        else:
+            raise
+        
     def createDirectory(self, directory):
         """
         Create a new directory.
@@ -127,13 +136,15 @@ class PMXFileManager(QtCore.QObject):
     
     move = lambda self, src, dst: shutil.move(src, dst)
     copytree = lambda self, src, dst: shutil.copytree(src, dst)
+    copy = lambda self, src, dst: shutil.copy2(src, dst)
+    link = lambda self, src, dst: dst
 
     def deletePath(self, path):
         if os.path.isfile(path):
             # Mandar señal para cerrar editores
             os.unlink(path)
         else:
-            shutil.rmtree(path)
+            shutil.rmtree(path, onerror = self._onerror)
     
     #==================================================================
     # Path data

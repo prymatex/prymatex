@@ -69,8 +69,6 @@ class Ui_ProjectsDock(object):
         self.buttonsLayout.addWidget(self.pushButtonOptions)
         self.verticalLayout.addLayout(self.buttonsLayout)
         self.treeViewProjects = QtGui.QTreeView(self.dockWidgetContents)
-        self.treeViewProjects.setUniformRowHeights(True)
-        self.treeViewProjects.setHeaderHidden(True)
         self.treeViewProjects.setObjectName(_fromUtf8("treeViewProjects"))
         self.verticalLayout.addWidget(self.treeViewProjects)
         ProjectsDock.setWidget(self.dockWidgetContents)

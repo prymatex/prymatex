@@ -184,8 +184,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setupActions()
         self.connectSignals()
         
-        self.application.fileManager.fileRenamed.connect(self.on_fileRenamed)
-        
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
@@ -299,7 +297,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.document().setModified(modified)
         
     def setFilePath(self, filePath):
-        extension = self.application.fileManager.fileExtension(filePath)
+        extension = self.application.fileManager.extension(filePath)
         syntax = self.application.supportManager.findSyntaxByFileType(extension)
         if syntax is not None:
             self.setSyntax(syntax)
@@ -915,8 +913,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             env['TM_CURRENT_WORD'] = current_word
         if self.filePath is not None:
             env['TM_FILEPATH'] = self.filePath
-            env['TM_FILENAME'] = self.application.fileManager.fileName(self.filePath)
-            env['TM_DIRECTORY'] = self.application.fileManager.fileDirectory(self.filePath)
+            env['TM_FILENAME'] = self.application.fileManager.basename(self.filePath)
+            env['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath)
         if self.project is not None:
             env.update(self.project.buildEnvironment())
         if cursor.hasSelection():
@@ -1575,13 +1573,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
 
-    def on_fileRenamed(self, oldPath, newPath):
-        ''' When a file is renamed in the filesystem/project, the associated
-        esditor should change it's title '''
-        if self.filePath is not None and oldPath == self.filePath:
-            self.logger.debug("Renaming editor {0}".format(self.filePath))
-            self.setFilePath(newPath)
-    
     @QtCore.pyqtSlot()
     def on_actionCopyPath_triggered(self):
         QtGui.QApplication.clipboard().setText(self.filePath)
