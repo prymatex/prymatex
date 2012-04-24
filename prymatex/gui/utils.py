@@ -55,7 +55,7 @@ def createQAction(settings, parent):
     action.callback = callback
     return action
     
-def createQMenu(settings, parent):
+def createQMenu(settings, parent, useSeparatorName = False):
     """
     settings = {
             "title": "Menu Title",
@@ -87,11 +87,11 @@ def createQMenu(settings, parent):
         menu.setIcon(icon)
     #actions.append(menu.defaultAction())
     if items is not None:
-        subactions = extendQMenu(menu, items)
+        subactions = extendQMenu(menu, items, useSeparatorName)
         actions.extend(subactions)
     return menu, actions
 
-def extendQMenu(menu, items):
+def extendQMenu(menu, items, useSeparatorName = False):
     actions = []
     for item in items:
         if item == "-":
@@ -99,7 +99,8 @@ def extendQMenu(menu, items):
             actions.append(action)
         elif isinstance(item, basestring) and item.startswith("--"):
             action = menu.addSeparator()
-            action.setText(item[2:])
+            if useSeparatorName:
+                action.setText(item[2:])
             actions.append(action)
         elif isinstance(item, dict) and 'items' in item:
             submenu, subactions = createQMenu(item, menu)
@@ -147,7 +148,7 @@ def chunkSections(items):
     sections = []
     start = 0
     for i in xrange(0, len(items)):
-        if isinstance(items[i], basestring) and items[i].startswith('-'):
+        if isinstance(items[i], basestring) and items[i].startswith('--'):
             sections.append(items[start:i])
             start = i
     sections.append(items[start:len(items)])

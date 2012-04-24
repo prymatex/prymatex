@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/search.ui'
 #
-# Created: Fri Mar  9 20:07:09 2012
+# Created: Tue Apr 24 15:08:03 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,8 @@ except AttributeError:
 class Ui_SearchDialog(object):
     def setupUi(self, SearchDialog):
         SearchDialog.setObjectName(_fromUtf8("SearchDialog"))
+        SearchDialog.resize(482, 260)
+        SearchDialog.setMinimumSize(QtCore.QSize(482, 0))
         self.verticalLayout = QtGui.QVBoxLayout(SearchDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -69,7 +71,9 @@ class Ui_SearchDialog(object):
         self.checkBoxFollowLinks = QtGui.QCheckBox(self.groupBox)
         self.checkBoxFollowLinks.setObjectName(_fromUtf8("checkBoxFollowLinks"))
         self.horizontalLayout_4.addWidget(self.checkBoxFollowLinks)
-        self.formLayout.setLayout(3, QtGui.QFormLayout.FieldRole, self.horizontalLayout_4)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem)
+        self.formLayout.setLayout(3, QtGui.QFormLayout.SpanningRole, self.horizontalLayout_4)
         self.verticalLayout.addWidget(self.groupBox)
         self.groupBox_2 = QtGui.QGroupBox(SearchDialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
@@ -117,8 +121,8 @@ class Ui_SearchDialog(object):
         self.verticalLayout.addWidget(self.groupBox_2)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem1)
         self.buttonSearch = QtGui.QPushButton(SearchDialog)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-find.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)

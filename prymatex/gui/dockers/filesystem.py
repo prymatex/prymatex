@@ -17,6 +17,9 @@ from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
 
 
+#==============================================================
+# TODO: Migrar esta validacion para el rename al filemanager
+#==============================================================
 class PMXSafeFilesytemLineEdit(QtGui.QLineEdit):
     def __init__(self, parent):
         QtGui.QLineEdit.__init__(self, parent)
@@ -181,6 +184,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                 self.actionSetInTerminal,
                 "-",
                 self.actionRename,
+                self.actionCut,
+                self.actionCopy,
+                self.actionPaste,
                 self.actionDelete,
             ]
         }
@@ -214,13 +220,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         #=======================================================================
         self.treeViewFileSystem.setDragEnabled(True)
         self.treeViewFileSystem.setAcceptDrops(True)
-        #self.fileSystemModel.setReadOnly(False)
         self.treeViewFileSystem.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.treeViewFileSystem.setDropIndicatorShown(True)
 
-        # Allow Rename
-        #self.treeViewFileSystem.setEditTriggers( QtGui.QAbstractItemView.EditKeyPressed )
-        #self.treeViewFileSystem.setItemDelegateForColumn(0, PMXFileSystemItemDelegate(self))
         self.treeViewFileSystem.setAlternatingRowColors(True)
         self.treeViewFileSystem.setAnimated(True)
 
@@ -310,6 +312,28 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.setPathAsRoot(destination, trackHistory = False)
         if not len(self._pushButtonHistoryForward):
             self.pushButtonFoward.setEnabled(False)
+
+    #================================================
+    # Actions cut, copy, paste
+    #================================================
+    def on_actionCut_triggered(self):
+        pass
+        
+    def on_actionCopy_triggered(self):
+        mimeData = self.fileSystemProxyModel.mimeData( [ self.treeViewFileSystem.currentIndex() ] )
+        self.application.clipboard().setMimeData(mimeData)
+        
+    def on_actionPaste_triggered(self):
+        parentPath = self.currentPath()
+        mimeData = self.application.clipboard().mimeData()
+        if mimeData.hasUrls() and os.path.isdir(parentPath):
+            for url in mimeData.urls():
+                srcPath = url.toLocalFile()
+                dstPath = os.path.join(parentPath, self.application.fileManager.basename(srcPath))
+                if os.path.isdir(srcPath):
+                    self.application.fileManager.copytree(srcPath, dstPath)
+                else:
+                    self.application.fileManager.copy(srcPath, dstPath)
 
     #================================================
     # Actions Create and Delete objects

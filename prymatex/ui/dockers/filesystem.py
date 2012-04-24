@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Fri Feb  3 17:34:27 2012
+# Created: Tue Apr 24 15:08:03 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -170,6 +170,21 @@ class Ui_FileSystemDock(object):
         icon13.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/apps/utilities-terminal.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSetInTerminal.setIcon(icon13)
         self.actionSetInTerminal.setObjectName(_fromUtf8("actionSetInTerminal"))
+        self.actionCut = QtGui.QAction(FileSystemDock)
+        icon14 = QtGui.QIcon()
+        icon14.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-cut.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionCut.setIcon(icon14)
+        self.actionCut.setObjectName(_fromUtf8("actionCut"))
+        self.actionCopy = QtGui.QAction(FileSystemDock)
+        icon15 = QtGui.QIcon()
+        icon15.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionCopy.setIcon(icon15)
+        self.actionCopy.setObjectName(_fromUtf8("actionCopy"))
+        self.actionPaste = QtGui.QAction(FileSystemDock)
+        icon16 = QtGui.QIcon()
+        icon16.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-paste.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionPaste.setIcon(icon16)
+        self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
 
         self.retranslateUi(FileSystemDock)
         QtCore.QMetaObject.connectSlotsByName(FileSystemDock)
@@ -201,5 +216,11 @@ class Ui_FileSystemDock(object):
         self.actionConvertIntoProject.setText(_('Convert Into Project'))
         self.actionConvertIntoProject.setToolTip(_('Convert current directory into project'))
         self.actionSetInTerminal.setText(_('Set In Terminal'))
+        self.actionCut.setText(_('Cu&t'))
+        self.actionCut.setShortcut(_('Ctrl+X'))
+        self.actionCopy.setText(_('&Copy'))
+        self.actionCopy.setShortcut(_('Ctrl+C'))
+        self.actionPaste.setText(_('&Paste'))
+        self.actionPaste.setShortcut(_('Ctrl+V'))
 
 from prymatex import resources_rc

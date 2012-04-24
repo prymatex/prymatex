@@ -120,20 +120,21 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         if index.isValid():
             node = self.projectTreeProxyModel.node(index)
             self.extendFileSystemItemMenu(contextMenu, node)
+        # contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self, useSeparatorName = True)
         contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self)
         return contextMenu
 
     def extendFileSystemItemMenu(self, menu, node):
-        utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--delete", self.actionDelete])
+        utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete])
         utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal, "--properties", self.actionProperties], section = -1)
         if isinstance(node, PMXProject):
-            utils.extendMenuSection(menu, self.actionRemove, section = "delete", position = 0)
+            utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
             utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
             utils.extendMenuSection(menu, [self.actionBashInit, self.actionBundleEditor], section = "interact")
-        elif node.isfile:
+        else:
+            utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
+        if node.isfile:
             utils.extendMenuSection(menu, self.actionOpen, section = "open", position = 0)
-        elif node.isdir:
-            pass
 
     #================================================
     # Tree View Project
@@ -275,7 +276,24 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         if project.namespace is None:
             self.application.supportManager.addProjectNamespace(project)
         self.application.bundleEditor.execEditor(namespaceFilter = project.namespace)
-        
+    
+    def on_actionCopy_triggered(self):
+        mimeData = self.projectTreeProxyModel.mimeData( [ self.treeViewProjects.currentIndex() ] )
+        self.application.clipboard().setMimeData(mimeData)
+    
+    def on_actionPaste_triggered(self):
+        parentPath = self.currentPath()
+        mimeData = self.application.clipboard().mimeData()
+        if mimeData.hasUrls() and os.path.isdir(parentPath):
+            for url in mimeData.urls():
+                srcPath = url.toLocalFile()
+                dstPath = os.path.join(parentPath, self.application.fileManager.basename(srcPath))
+                if os.path.isdir(srcPath):
+                    self.application.fileManager.copytree(srcPath, dstPath)
+                else:
+                    self.application.fileManager.copy(srcPath, dstPath)
+            self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
+
     #================================================
     # Custom filters
     #================================================
