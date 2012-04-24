@@ -218,6 +218,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
+        mimeData = self.projectTreeProxyModel.mimeData( [ self.treeViewProjects.currentIndex() ])
+        self.application.clipboard().setMimeData(mimeData)
         treeNode = self.currentNode()
         self.propertiesDialog.exec_(treeNode)
 
