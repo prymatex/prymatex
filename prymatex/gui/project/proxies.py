@@ -81,7 +81,7 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
     # Drag and Drop support
     #=======================================================
     def flags(self, index):
-        defaultFlags = QtCore.QAbstractItemModel.flags(self, index)
+        defaultFlags = QtGui.QSortFilterProxyModel.flags(self, index)
         if not self.isDir(index):
             return defaultFlags | QtCore.Qt.ItemIsDragEnabled
         return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled 

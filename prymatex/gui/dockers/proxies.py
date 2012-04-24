@@ -53,6 +53,10 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         sIndex = self.mapToSource(index)
         return self.sourceModel().filePath(sIndex)
 
+    def isDir(self, index):
+        sIndex = self.mapToSource(index)
+        return self.sourceModel().isDir(sIndex)
+        
     def dropMimeData(self, mimeData, action, row, col, parentIndex):
         if action == QtCore.Qt.IgnoreAction:
             return True
@@ -84,8 +88,7 @@ class PMXFileSystemProxyModel(QtGui.QSortFilterProxyModel):
         return ["text/uri-list"]
     
     def flags(self, index):
-        sourceIndex = self.mapToSource(index)
-        defaultFlags = super(PMXFileSystemProxyModel, self).flags(index)
-        if not self.sourceModel().isDir(self.mapToSource(index)):
+        defaultFlags = QtGui.QSortFilterProxyModel.flags(self, index)
+        if not self.isDir(index):
             return defaultFlags | QtCore.Qt.ItemIsDragEnabled
         return defaultFlags | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled 
