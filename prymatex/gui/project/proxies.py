@@ -98,9 +98,13 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         if not mimeData.hasUrls():
             return False
 
+        updateIndexes = [ parentIndex ]
+            
         for url in mimeData.urls():
             srcPath = url.toLocalFile()
-            print action, srcPath, QtCore.Qt.MoveAction
+            pIndex = self.indexForPath(self.application.fileManager.dirname(srcPath))
+            if pIndex not in updateIndexes:
+                updateIndexes.append(pIndex)
             dstPath = os.path.join(parentPath, self.application.fileManager.basename(srcPath))
             if action == QtCore.Qt.CopyAction:
                 if os.path.isdir(srcPath):
@@ -111,7 +115,8 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
                 self.application.fileManager.move(srcPath, dstPath)
             elif action == QtCore.Qt.LinkAction:
                 self.application.fileManager.link(srcPath, dstPath)
-        self.refresh(parentIndex)
+
+        map(lambda index: self.refresh(index), updateIndexes)
         return True
     
     def mimeTypes(self):
@@ -122,6 +127,9 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         mimeData = QtCore.QMimeData()
         mimeData.setUrls(urls)
         return mimeData
+        
+    def supportedDropActions(self):
+        return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction | QtCore.Qt.LinkAction
 
 class PMXFileSystemProxyModel(FlatTreeProxyModel):
     def __init__(self, parent = None):
