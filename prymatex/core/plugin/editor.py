@@ -102,7 +102,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
     
     def fileDirectory(self):
-        return self.application.fileManager.getDirectory(self.filePath)
+        return self.application.fileManager.dirname(self.filePath)
     
     def fileName(self):
         return self.tabTitle()

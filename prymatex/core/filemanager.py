@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+
 import os
 import codecs
 import shutil
@@ -58,7 +59,10 @@ class PMXFileManager(QtCore.QObject):
     @classmethod
     def contributeToSettings(cls):
         return [ ]
-        
+    
+    #========================================================
+    # Signals
+    #========================================================
     def connectGenericSignal(self):
         UNARY_SINGAL_CONSTANT_MAP = (
             (self.fileCreated, PMXFileManager.CREATED ),
@@ -76,7 +80,7 @@ class PMXFileManager(QtCore.QObject):
             signal.connect(lambda path, constant = associatedConstant: self.filesytemChange.emit(path, constant))
         for signal, associatedConstant in BINARY_SINGAL_CONSTANT_MAP:
             signal.connect(lambda _x, path, constant = associatedConstant: self.filesytemChange.emit(path, constant))
-            
+
     def on_fileChanged(self, filePath):
         if not os.path.exists(filePath):
             self.fileDeleted.emit(filePath)
@@ -89,6 +93,9 @@ class PMXFileManager(QtCore.QObject):
         else:
             self.directoryChanged.emit(directoryPath)
     
+    #========================================================
+    # History
+    #========================================================
     def add_file_history(self, filePath):
         if filePath in self.fileHistory:
             self.fileHistory.remove(filePath)
@@ -101,44 +108,26 @@ class PMXFileManager(QtCore.QObject):
         self.fileHistory = []
         self.settings.setValue("fileHistory", self.fileHistory)
     
+    #========================================================
+    # Path handling, create, move, copy, link, delete
+    #========================================================
     def createDirectory(self, directory):
         """
         Create a new directory.
         """
         if os.path.exists(directory):
             raise exceptions.FileExistsException("The directory already exist", directory) 
-        os.mkdir(directory)
-    
-    def createDirectories(self, directory):
-        """Create a group of directory, one inside the other."""
-        if os.path.exists(directory):
-            raise exceptions.FileExistsException("The folder already exist", directory)
         os.makedirs(directory)
-    
+
     def createFile(self, filePath):
         """Create a new file."""
         if os.path.exists(filePath):
             raise exceptions.IOException("The file already exist") 
         open(filePath, 'w').close()
     
-    def renameFile(self, old, new):
-        """Rename a file, changing its name from 'old' to 'new'."""
-        if os.path.isfile(old):
-            if os.path.exists(new):
-                raise exceptions.FileExistsException(new)
-            os.rename(old, new)
-            return new
-        return ''
-    
-    def renamePath(self, old, new):
-        # According to http://docs.python.org/library/os.html
-        # os.rename works with both dirs and files
-        
-        os.rename(old, new)
-        self.closeFile(old)
-        self.openFile(new)
-        self.fileRenamed.emit(old, new)
-        
+    move = lambda self, src, dst: shutil.move(src, dst)
+    copytree = lambda self, src, dst: shutil.copytree(src, dst)
+
     def deletePath(self, path):
         if os.path.isfile(path):
             # Mandar señal para cerrar editores
@@ -146,24 +135,18 @@ class PMXFileManager(QtCore.QObject):
         else:
             shutil.rmtree(path)
     
-    def fileExtension(self, filePath):
-        """
-        Get the file extension in the form of: 'py'
-        """
-        return os.path.splitext(filePath.lower())[-1][1:]
-    
-    def fileDirectory(self, filePath):
-        """
-        Get the file extension in the form of: 'py'
-        """
-        return os.path.dirname(filePath)
-    
-    def fileName(self, filePath):
-        return os.path.basename(filePath)
-    
-    def mimeType(self, filePath):
-        return mimetypes.guess_type(filePath)[0] or ""
-        
+    #==================================================================
+    # Path data
+    #==================================================================
+    extension = lambda self, path: os.path.splitext(path.lower())[-1][1:]
+    splitext = lambda self, path: os.path.splitext(path)
+    dirname = lambda self, path: os.path.dirname(path)
+    basename = lambda self, path: os.path.basename(path)
+    mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
+
+    #==================================================================
+    # Handling files for retrieving data. open, read, write, close
+    #==================================================================
     def isOpen(self, filePath):
         return filePath in self.fileWatcher.files()
     
@@ -200,7 +183,7 @@ class PMXFileManager(QtCore.QObject):
     def closeFile(self, filePath):
         if self.isWatched(filePath):
             self.unwatchPath(filePath)
-        
+
     def isWatched(self, path):
         return path in self.fileWatcher.files() or path in self.fileWatcher.directories()
         

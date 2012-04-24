@@ -29,7 +29,7 @@ class MainWindowActions(object):
     def on_menuRecentFiles_aboutToShow(self):
         self.menuRecentFiles.clear()
         for index, filePath in enumerate(self.application.fileManager.fileHistory, 1):
-            actionText = "%s (%s)\t&%d" % (self.application.fileManager.fileName(filePath), filePath, index)
+            actionText = "%s (%s)\t&%d" % (self.application.fileManager.basename(filePath), filePath, index)
             action = QtGui.QAction(actionText, self)
             receiver = lambda file = filePath: self.application.openFile(file)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)

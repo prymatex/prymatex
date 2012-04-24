@@ -216,7 +216,7 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         #=======================================================================
         self.treeViewFileSystem.setDragEnabled(True)
         self.treeViewFileSystem.setAcceptDrops(True)
-        self.fileSystemModel.setReadOnly(False)
+        #self.fileSystemModel.setReadOnly(False)
         self.treeViewFileSystem.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.treeViewFileSystem.setDropIndicatorShown(True)
 
