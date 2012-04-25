@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/projects.ui'
 #
-# Created: Mon Feb 27 20:53:32 2012
+# Created: Tue Apr 24 15:08:03 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -69,6 +69,8 @@ class Ui_ProjectsDock(object):
         self.buttonsLayout.addWidget(self.pushButtonOptions)
         self.verticalLayout.addLayout(self.buttonsLayout)
         self.treeViewProjects = QtGui.QTreeView(self.dockWidgetContents)
+        self.treeViewProjects.setUniformRowHeights(True)
+        self.treeViewProjects.setHeaderHidden(True)
         self.treeViewProjects.setObjectName(_fromUtf8("treeViewProjects"))
         self.verticalLayout.addWidget(self.treeViewProjects)
         ProjectsDock.setWidget(self.dockWidgetContents)
@@ -158,6 +160,21 @@ class Ui_ProjectsDock(object):
         self.actionBundleEditor.setObjectName(_fromUtf8("actionBundleEditor"))
         self.actionBashInit = QtGui.QAction(ProjectsDock)
         self.actionBashInit.setObjectName(_fromUtf8("actionBashInit"))
+        self.actionCopy = QtGui.QAction(ProjectsDock)
+        icon16 = QtGui.QIcon()
+        icon16.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-copy.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionCopy.setIcon(icon16)
+        self.actionCopy.setObjectName(_fromUtf8("actionCopy"))
+        self.actionCut = QtGui.QAction(ProjectsDock)
+        icon17 = QtGui.QIcon()
+        icon17.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-cut.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionCut.setIcon(icon17)
+        self.actionCut.setObjectName(_fromUtf8("actionCut"))
+        self.actionPaste = QtGui.QAction(ProjectsDock)
+        icon18 = QtGui.QIcon()
+        icon18.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-paste.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionPaste.setIcon(icon18)
+        self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
 
         self.retranslateUi(ProjectsDock)
         QtCore.QMetaObject.connectSlotsByName(ProjectsDock)
@@ -191,5 +208,11 @@ class Ui_ProjectsDock(object):
         self.actionRemove.setText(_('Remove'))
         self.actionBundleEditor.setText(_('Bundle Editor'))
         self.actionBashInit.setText(_('Bash Init'))
+        self.actionCopy.setText(_('&Copy'))
+        self.actionCopy.setShortcut(_('Ctrl+C'))
+        self.actionCut.setText(_('Cu&t'))
+        self.actionCut.setShortcut(_('Ctrl+X'))
+        self.actionPaste.setText(_('&Paste'))
+        self.actionPaste.setShortcut(_('Ctrl+V'))
 
 from prymatex import resources_rc

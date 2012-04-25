@@ -15,7 +15,65 @@ from prymatex.ui.dockers.filesystem import Ui_FileSystemDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
+
+#==============================================================
+# TODO: Migrar esta validacion para el rename al filemanager
+#==============================================================
+class PMXSafeFilesytemLineEdit(QtGui.QLineEdit):
+    def __init__(self, parent):
+        QtGui.QLineEdit.__init__(self, parent)
         
+    def event(self, event):
+        if isinstance(event, QtGui.QKeyEvent):
+            key = event.key()
+            if not self.isValidPlatformPathKey(key):
+                return False
+            elif key == QtCore.Qt.Key_Return:
+                if not self.currentTextIsValidPath():
+                    return False
+        return super(PMXSafeFilesytemLineEdit, self).event(event)
+    
+    
+    def isValidPlatformPathKey(self, key):
+        k = QtCore.Qt
+        if key in [k.Key_Asterisk,
+                   k.Key_Backslash,
+                   k.Key_Less,
+                   k.Key_Greater,
+                   k.Key_Question,
+                   k.Key_Colon,
+                   ]:
+            return False
+        return True
+
+    DOS_NAMES = 'CON PRN AUX NUL COM1 COM2 COM3 COM4 COM5 COM6 COM7 COM8 COM9 LPT1 LPT2 LPT3 LPT4 LPT5 LPT6 LPT7 LPT8 LPT9'.split()
+    
+    def currentTextIsValidPath(self):
+        ''' Check if name is valid '''
+        text = self.text()
+        if not text:
+            return False
+        if sys.platform.count('win'):
+            if text.upper() in self.DOS_NAMES:
+                return False
+        
+        return False
+    
+class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
+    def createEditor(self, parent, option, index):
+        """Create a new editor
+        """
+        
+        editor = PMXSafeFilesytemLineEdit(parent)
+        editor.setText(index.data())
+        return editor
+    
+    def setEditorData(self, editor, index):
+        return QtGui.QItemDelegate.setEditorData(self, editor, index)
+    
+    def setModelData(self, editor, model, index):
+        return QtGui.QItemDelegate.setModelData(self, editor, model, index)
+
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "Shift+F8"
     ICON = resources.getIcon("filemanager")
@@ -124,6 +182,9 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
                 self.actionSetInTerminal,
                 "-",
                 self.actionRename,
+                self.actionCut,
+                self.actionCopy,
+                self.actionPaste,
                 self.actionDelete,
             ]
         }
@@ -160,7 +221,6 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.treeViewFileSystem.setDefaultDropAction(QtCore.Qt.MoveAction)
         self.treeViewFileSystem.setDropIndicatorShown(True)
 
-        # Allow Rename
         self.treeViewFileSystem.setAlternatingRowColors(True)
         self.treeViewFileSystem.setAnimated(True)
 
@@ -250,6 +310,28 @@ class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks
         self.setPathAsRoot(destination, trackHistory = False)
         if not len(self._pushButtonHistoryForward):
             self.pushButtonFoward.setEnabled(False)
+
+    #================================================
+    # Actions cut, copy, paste
+    #================================================
+    def on_actionCut_triggered(self):
+        pass
+        
+    def on_actionCopy_triggered(self):
+        mimeData = self.fileSystemProxyModel.mimeData( [ self.treeViewFileSystem.currentIndex() ] )
+        self.application.clipboard().setMimeData(mimeData)
+        
+    def on_actionPaste_triggered(self):
+        parentPath = self.currentPath()
+        mimeData = self.application.clipboard().mimeData()
+        if mimeData.hasUrls() and os.path.isdir(parentPath):
+            for url in mimeData.urls():
+                srcPath = url.toLocalFile()
+                dstPath = os.path.join(parentPath, self.application.fileManager.basename(srcPath))
+                if os.path.isdir(srcPath):
+                    self.application.fileManager.copytree(srcPath, dstPath)
+                else:
+                    self.application.fileManager.copy(srcPath, dstPath)
 
     #================================================
     # Actions Create and Delete objects
