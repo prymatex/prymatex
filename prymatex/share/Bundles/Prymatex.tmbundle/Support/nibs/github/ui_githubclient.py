@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'githubclient.ui'
 #
-# Created: Tue Mar 13 00:30:54 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed Apr 25 20:36:21 2012
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -14,69 +14,57 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_GithubClient(object):
-    def setupUi(self, GithubClient):
-        GithubClient.setObjectName(_fromUtf8("GithubClient"))
-        GithubClient.resize(400, 300)
-        self.verticalLayout = QtGui.QVBoxLayout(GithubClient)
+class Ui_GitHubClientDialog(object):
+    def setupUi(self, GitHubClientDialog):
+        GitHubClientDialog.setObjectName(_fromUtf8("GitHubClientDialog"))
+        GitHubClientDialog.resize(400, 300)
+        self.verticalLayout = QtGui.QVBoxLayout(GitHubClientDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.label = QtGui.QLabel(GithubClient)
+        self.label = QtGui.QLabel(GitHubClientDialog)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        self.label_2 = QtGui.QLabel(GithubClient)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.horizontalLayout_2.addWidget(self.label_2)
-        self.lineEditQuery = QtGui.QLineEdit(GithubClient)
+        self.labelSearch = QtGui.QLabel(GitHubClientDialog)
+        self.labelSearch.setObjectName(_fromUtf8("labelSearch"))
+        self.horizontalLayout_2.addWidget(self.labelSearch)
+        self.lineEditQuery = QtGui.QLineEdit(GitHubClientDialog)
         self.lineEditQuery.setObjectName(_fromUtf8("lineEditQuery"))
         self.horizontalLayout_2.addWidget(self.lineEditQuery)
-        self.pushButtonSearch = QtGui.QPushButton(GithubClient)
+        self.buttonSearch = QtGui.QPushButton(GitHubClientDialog)
         font = QtGui.QFont()
-        font.setBold(True)
         font.setWeight(75)
-        self.pushButtonSearch.setFont(font)
-        self.pushButtonSearch.setObjectName(_fromUtf8("pushButtonSearch"))
-        self.horizontalLayout_2.addWidget(self.pushButtonSearch)
+        font.setBold(True)
+        self.buttonSearch.setFont(font)
+        self.buttonSearch.setObjectName(_fromUtf8("buttonSearch"))
+        self.horizontalLayout_2.addWidget(self.buttonSearch)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-        self.tableViewResults = QtGui.QTableView(GithubClient)
+        self.tableViewResults = QtGui.QTableView(GitHubClientDialog)
         self.tableViewResults.setObjectName(_fromUtf8("tableViewResults"))
         self.verticalLayout.addWidget(self.tableViewResults)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.pushButton_5 = QtGui.QPushButton(GithubClient)
-        self.pushButton_5.setObjectName(_fromUtf8("pushButton_5"))
-        self.horizontalLayout.addWidget(self.pushButton_5)
-        self.pushButton_2 = QtGui.QPushButton(GithubClient)
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.horizontalLayout.addWidget(self.pushButton_2)
-        self.pushClose = QtGui.QPushButton(GithubClient)
-        self.pushClose.setObjectName(_fromUtf8("pushClose"))
-        self.horizontalLayout.addWidget(self.pushClose)
+        self.labelBundle = QtGui.QLabel(GitHubClientDialog)
+        self.labelBundle.setObjectName(_fromUtf8("labelBundle"))
+        self.horizontalLayout.addWidget(self.labelBundle)
+        self.lineEditBundle = QtGui.QLineEdit(GitHubClientDialog)
+        self.lineEditBundle.setObjectName(_fromUtf8("lineEditBundle"))
+        self.horizontalLayout.addWidget(self.lineEditBundle)
+        self.buttonClone = QtGui.QPushButton(GitHubClientDialog)
+        self.buttonClone.setObjectName(_fromUtf8("buttonClone"))
+        self.horizontalLayout.addWidget(self.buttonClone)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.retranslateUi(GithubClient)
-        QtCore.QObject.connect(self.pushClose, QtCore.SIGNAL(_fromUtf8("clicked()")), GithubClient.close)
-        QtCore.QMetaObject.connectSlotsByName(GithubClient)
+        self.retranslateUi(GitHubClientDialog)
+        QtCore.QMetaObject.connectSlotsByName(GitHubClientDialog)
 
-    def retranslateUi(self, GithubClient):
-        GithubClient.setWindowTitle(QtGui.QApplication.translate("GithubClient", "GitHub Client", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("GithubClient", "<html><head/><body><p>This tool allows you to get TextMate bundles from <br/>GitHub and install them in your current profile.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("GithubClient", "Search:", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButtonSearch.setText(QtGui.QApplication.translate("GithubClient", "Search Github", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_5.setText(QtGui.QApplication.translate("GithubClient", "Info", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_2.setText(QtGui.QApplication.translate("GithubClient", "Actions", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushClose.setText(QtGui.QApplication.translate("GithubClient", "Close", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    GithubClient = QtGui.QWidget()
-    ui = Ui_GithubClient()
-    ui.setupUi(GithubClient)
-    GithubClient.show()
-    sys.exit(app.exec_())
+    def retranslateUi(self, GitHubClientDialog):
+        GitHubClientDialog.setWindowTitle(QtGui.QApplication.translate("GitHubClientDialog", "GitHub Client", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("GitHubClientDialog", "<html><head/><body><p>This tool allows you to get TextMate bundles from <br/>GitHub and install them in your current profile.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelSearch.setText(QtGui.QApplication.translate("GitHubClientDialog", "Search:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSearch.setText(QtGui.QApplication.translate("GitHubClientDialog", "Search Github", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelBundle.setText(QtGui.QApplication.translate("GitHubClientDialog", "Bundle:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonClone.setText(QtGui.QApplication.translate("GitHubClientDialog", "Clone", None, QtGui.QApplication.UnicodeUTF8))
 

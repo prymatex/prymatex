@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>GithubClient</class>
- <widget class="QWidget" name="GithubClient">
+ <class>GitHubClientDialog</class>
+ <widget class="QDialog" name="GitHubClientDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -24,7 +24,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="labelSearch">
        <property name="text">
         <string>Search:</string>
        </property>
@@ -34,7 +34,7 @@
       <widget class="QLineEdit" name="lineEditQuery"/>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonSearch">
+      <widget class="QPushButton" name="buttonSearch">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -67,23 +67,19 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_5">
+      <widget class="QLabel" name="labelBundle">
        <property name="text">
-        <string>Info</string>
+        <string>Bundle:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="text">
-        <string>Actions</string>
-       </property>
-      </widget>
+      <widget class="QLineEdit" name="lineEditBundle"/>
      </item>
      <item>
-      <widget class="QPushButton" name="pushClose">
+      <widget class="QPushButton" name="buttonClone">
        <property name="text">
-        <string>Close</string>
+        <string>Clone</string>
        </property>
       </widget>
      </item>
@@ -92,22 +88,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>pushClose</sender>
-   <signal>clicked()</signal>
-   <receiver>GithubClient</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>350</x>
-     <y>281</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>397</x>
-     <y>30</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

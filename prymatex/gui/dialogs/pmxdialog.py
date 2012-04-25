@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import os
 import sys
 import plistlib
 import zmq
@@ -43,23 +44,22 @@ class PMXDialogSystem(QtCore.QObject):
             if directory is not None:
                 sys.path.insert(1, directory)
             module = self._import_module(moduleName)
-            module.load(self)
-        except (ImportError, AttributeError) as reason:
+            module.load(self.application)
+        except Exception as reason:
             print(reason)
-            raise reason
         finally:
             sys.path = old_syspath
-        return None
 
     def sendResult(self, value = None):
         value = str(value) if value is not None else "ok"
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
+        print "retorno", value        
         self.socket.send_pyobj({ "result": value })
         
-    def async_window(self, *args, **kwargs):
-        print "async_window: ", args, kwargs
-        directory = os.path.dirname(path)
-        name = os.path.basename(path)
+    def async_window(self, nibPath, **kwargs):
+        print "async_window: ", nibPath, kwargs
+        directory = os.path.dirname(nibPath)
+        name = os.path.basename(nibPath)
         self._load_window(name, directory)
         self.sendResult("1234")
     

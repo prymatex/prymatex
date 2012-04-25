@@ -335,7 +335,7 @@ class CommandHandler(object):
     def tooltip(self, options, args):
         kwargs = {}
         kwargs["format"] = "html" if options.html else "text"
-        kwargs["transparent"] = options.transpare
+        kwargs["transparent"] = options.transparent
         #if not args:
         #    args = [ sys.stdin.readlines() ] 
         command = {"name": "tooltip", "args": args, "kwargs": kwargs}

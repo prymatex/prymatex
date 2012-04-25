@@ -1,17 +1,18 @@
 # Stdlib
+
 import os
 from operator import itemgetter
 import json
 import sys
 from urlparse import urlsplit
+import urllib2
 
 # Third parties
 from PyQt4 import QtGui, QtCore
 import httplib2
 
 # UI
-from ui_githubclient import Ui_GithubClient
-from M2Crypto import urllib2
+from ui_githubclient import Ui_GitHubClientDialog
 
 _ = lambda s:s
 
@@ -69,25 +70,23 @@ class PMXGHSearchBundleThread(QtCore.QThread):
                 self.requestError.emit(str(e))
     
 
-class PMXGithubBundlesWidget(QtGui.QWidget, Ui_GithubClient):
+class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog):
     
     MINIMUM_QUERY_LENGTH = 1
     
     def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
+        QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         self.workerThread = PMXGHSearchBundleThread(self)
         self.workerThread.recordsFound.connect(self.updateRecords)
-        self.pushButtonSearch.pressed.connect(self.search)
-        self.pushButtonSearch.setEnabled(False)
-        self.lineEditQuery.textChanged.connect(self.checkText)
-        self.lineEditQuery.returnPressed.connect(self.search)
+        self.buttonSearch.setEnabled(False)
+        self.buttonClone.setEnabled(False)
         self.model = PMXGitHubRepoModel(self)
         self.tableViewResults.setModel(self.model)
         self.tableViewResults.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tableViewResults.verticalHeader().hide()
         
-    def search(self):
+    def on_buttonSearch_pressed(self):
         text = self.lineEditQuery.text()
         if len(text) < self.MINIMUM_QUERY_LENGTH or self.workerThread.isRunning():
             return
@@ -95,9 +94,25 @@ class PMXGithubBundlesWidget(QtGui.QWidget, Ui_GithubClient):
         self.workerThread.term = text
         self.workerThread.start()
         
-    def checkText(self):    
-        self.pushButtonSearch.setEnabled(len(self.lineEditQuery.text()) >= self.MINIMUM_QUERY_LENGTH)
+    def on_lineEditQuery_returnPressed(self):
+        self.on_buttonSearch_pressed()
+        
+    def on_lineEditQuery_textChanged(self):    
+        self.buttonSearch.setEnabled(len(self.lineEditQuery.text()) >= self.MINIMUM_QUERY_LENGTH)
     
+    def on_lineEditBundle_textChanged(self):    
+        self.buttonClone.setEnabled(len(self.lineEditQuery.text()) >= self.MINIMUM_QUERY_LENGTH)
+        
+    def on_tableViewResults_activated(self):
+        index = self.tableViewResults.currentIndex()
+        repoName = self.model.item(index.row(), 0).text()
+        self.lineEditBundle.setText(repoName)
+        
+    def on_tableViewResults_clicked(self):
+        index = self.tableViewResults.currentIndex()
+        repoName = self.model.item(index.row(), 0).text()
+        self.lineEditBundle.setText(repoName)
+
     def updateRecords(self, data):
         item_names = map(itemgetter(0), self.model.ROWS)
         self.model.removeRows(0, self.model.rowCount())
@@ -112,7 +127,21 @@ class PMXGithubBundlesWidget(QtGui.QWidget, Ui_GithubClient):
         self.tableViewResults.setEnabled(True)
         QtGui.QMessageBox.critical(self, _("Query Error"), "An error occurred<br><pre>%s</pre>" % reason)
     
-    
+    def on_buttonClone_pressed(self):
+        index = self.tableViewResults.currentIndex()
+        if index.isValid():
+            dstPath = self.application.supportManager.basePath("Bundles", "user")
+            repoUrl = self.model.item(index.row(), 3).text()
+            bundleName = self.lineEditBundle.text()
+            process = QtCore.QProcess(self)
+            process.setWorkingDirectory(dstPath)
+            process.finished[int].connect(self.on_processClone_finished)
+            process.start("git clone %s %s.tmbundle" % (repoUrl, bundleName), QtCore.QIODevice.ReadOnly)
+
+    def on_processClone_finished(self, value):
+        def showMessages(text):
+            print text
+        self.application.supportManager.reloadSupport(showMessages)
         
 if __name__ == '__main__':
     app = QtGui.QApplication([])
