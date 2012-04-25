@@ -372,9 +372,11 @@ class CommandHandler(object):
         sys.stdout.write(value["result"])
         
     def defaults(self, options, args):
-        options, args = defaults_parse_args(args)
-        self.server.defaults(str(options), str(args))
-        
+        command = {"name": "defaults", "args": args, "kwargs": {}}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
+
     def images(self, options, args):
         if options.plist == None:
             options.plist = sys.stdin.readlines()
@@ -385,9 +387,11 @@ class CommandHandler(object):
         sys.stdout.write(value["result"])
         
     def alert(self, options, args):
-        options, args = alert_parse_args(args)
-        self.server.alert(str(options), str(args))
-        
+        command = {"name": "alert", "args": args, "kwargs": {}}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
+
     def debug(self, options, args):
         command = {"name": "debug", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)

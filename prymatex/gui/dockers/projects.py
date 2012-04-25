@@ -226,7 +226,12 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):
-        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
+        index = self.treeViewProjects.currentIndex()
+        if index.isValid():
+            self.projectTreeProxyModel.refresh(index)
+        else:
+            pass
+            #
     
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):

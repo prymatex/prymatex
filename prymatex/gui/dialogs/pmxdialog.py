@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import sys
 import plistlib
 import zmq
 
@@ -32,6 +33,24 @@ class PMXDialogSystem(QtCore.QObject):
         method = getattr(self, name)
         method(*args, **kwargs)
 
+    def _import_module(self, name):
+        __import__(name)
+        return sys.modules[name]
+    
+    def _load_window(self, moduleName, directory):
+        old_syspath = sys.path[:]
+        try:
+            if directory is not None:
+                sys.path.insert(1, directory)
+            module = self._import_module(moduleName)
+            module.load(self)
+        except (ImportError, AttributeError) as reason:
+            print(reason)
+            raise reason
+        finally:
+            sys.path = old_syspath
+        return None
+
     def sendResult(self, value = None):
         value = str(value) if value is not None else "ok"
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
@@ -39,6 +58,9 @@ class PMXDialogSystem(QtCore.QObject):
         
     def async_window(self, *args, **kwargs):
         print "async_window: ", args, kwargs
+        directory = os.path.dirname(path)
+        name = os.path.basename(path)
+        self._load_window(name, directory)
         self.sendResult("1234")
     
     def tooltip(self, content, format = "text", transparent = False):
@@ -57,7 +79,7 @@ class PMXDialogSystem(QtCore.QObject):
         self.sendResult()
     
     def defaults(self, args):
-        print "defaults: ", options, args
+        print "defaults: ", args
         return True
     
     def images(self, plist):
@@ -67,7 +89,7 @@ class PMXDialogSystem(QtCore.QObject):
         self.sendResult()
     
     def alert(self, args):
-        print "alert: ", options, args
+        print "alert: ", args
         return True
     
     def debug(self, *args, **kwargs):
