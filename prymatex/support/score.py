@@ -28,9 +28,6 @@ class PMXScoreManager(object):
             elif len(arrays) > 1:
                 excluded = False
                 for a in arrays[1:]:
-                    #Probando forma pedorra de quitar parentesis, a este nivel hay que resolver los parentesis
-                    if a[0] == '(' and a[-1] == ')':
-                        a = a[1:-1]
                     if self.score_term( a, reference_scope ) > 0:
                         excluded = True
                         break
@@ -41,6 +38,7 @@ class PMXScoreManager(object):
         return maxi
     
     def score_term(self, search_scope, reference_scope):
+        #TODO: Resolver referencias con parentesis y otras cosas
         if reference_scope not in self.scores or search_scope not in self.scores[reference_scope]:
             self.scores.setdefault(reference_scope, {})
             if search_scope.find(self.OR):
@@ -88,7 +86,7 @@ class PMXScoreManager(object):
         multiplier = cls.START_VALUE
         result = 0
         while pending and currentReference and currentPending:
-            if currentReference.startswith(currentPending):
+            if currentReference == currentPending or currentReference.startswith("%s." % currentPending):
                 point_score = (2 ** cls.POINT_DEPTH) - currentReference.count( '.' ) + currentPending.count( '.' )
                 result += point_score * multiplier
                 #TODO: Sospecho que quitando los pop se puede hacer mas rapido

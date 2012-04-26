@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'githubclient.ui'
 #
-# Created: Wed Apr 25 20:36:21 2012
+# Created: Thu Apr 26 15:28:46 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,8 @@ except AttributeError:
 class Ui_GitHubClientDialog(object):
     def setupUi(self, GitHubClientDialog):
         GitHubClientDialog.setObjectName(_fromUtf8("GitHubClientDialog"))
-        GitHubClientDialog.resize(400, 300)
+        GitHubClientDialog.resize(500, 300)
+        GitHubClientDialog.setMinimumSize(QtCore.QSize(500, 0))
         self.verticalLayout = QtGui.QVBoxLayout(GitHubClientDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label = QtGui.QLabel(GitHubClientDialog)

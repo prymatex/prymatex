@@ -411,7 +411,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
             'items': [
                 {'title': 'Go To &Line',
                  'callback': cls.showGoToLine,
-                 'shortcut': 'Ctrl+Shift+L',
+                 'shortcut': 'Meta+Ctrl+Shift+L',
                  }
             ]}
         return { "Edit": edit, "Navigation": navigation, "Text": text }

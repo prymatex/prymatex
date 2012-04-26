@@ -61,7 +61,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
         elif event.text():
             self.logger.debug("Con texto %s" % event.text())
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-            if currentHolder is None or currentHolder.last:
+            if currentHolder is None:
                 return self.endSnippet(event)
             
             #Cuidado con los extremos del holder

@@ -24,6 +24,7 @@ def createDisambiguatedTitles(addedTitles, newTitle):
         for index in xrange(1, len(addedTitle)):
             if addedTitle[index] not in usedSubtitles:
                 usedSubtitles.append(addedTitle[index])
+                break
     return (map(lambda subTitle: titleFormat % subTitle, usedSubtitles[1:]), titleFormat % usedSubtitles[0])
 
 class SplitTabWidget(QtGui.QSplitter):

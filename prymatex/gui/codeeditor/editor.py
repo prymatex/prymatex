@@ -1,5 +1,5 @@
-# -*- encoding: utf-8 -*-
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 
 #=======================================================================
 # Standard library imports
@@ -1436,11 +1436,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 "-",
                 {'title': 'Go To &Symbol',
                  'callback': cls.on_actionGoToSymbol_triggered,
-                 'shortcut': 'Ctrl+Shift+O',
+                 'shortcut': 'Meta+Ctrl+Shift+O',
                  },
                 {'title': 'Go To &Bookmark',
                  'callback': cls.on_actionGoToBookmark_triggered,
-                 'shortcut': 'Ctrl+Shift+B',
+                 'shortcut': 'Meta+Ctrl+Shift+B',
                  }
             ]}
         return { "View": view , "Text": text, "Navigation": navigation}

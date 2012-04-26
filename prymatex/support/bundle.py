@@ -143,8 +143,8 @@ class PMXBundle(PMXManagedObject):
         #No se puede borrar si tiene items, sub archivos o subdirectorios
         os.unlink(os.path.join(self.path(namespace), self.FILE))
         try:
-            #El ultimo apaga la luz, elimina el directorio base
-            os.rmdir(self.path(namespace))
+            #Este a diferencia de los items borra todo el directorio
+            shutil.rmtree(self.path(namespace))
         except:
             pass
             
