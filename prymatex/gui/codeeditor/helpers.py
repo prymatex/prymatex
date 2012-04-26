@@ -62,33 +62,41 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
         openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
         closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
-        self.cursorOpen = self.cursorClose = None
+        self.cursor1 = self.cursor2 = None
         if cursor.hasSelection():
             selectedText = cursor.selectedText()
             if selectedText in openTyping + closeTyping:
-                self.cursorOpen, self.cursorClose = editor.getBracesPairs(cursor)
-                print self.cursorOpen, self.cursorClose
+                self.cursor1, self.cursor2 = editor.getBracesPairs(cursor)
             return True
         elif editor.besideBrace(cursor) and character in openTyping or character in closeTyping:
-            self.cursorOpen, self.cursorClose = editor.getBracesPairs(cursor)
-            if self.cursorClose is not None:
-                #Estan pegados?
-                if self.cursorOpen.selectionEnd() == self.cursorClose.selectionStart() or self.cursorOpen.selectionStart() == self.cursorClose.selectionEnd():
-                    self.cursorOpen = self.cursorClose = None
+            self.cursor1, self.cursor2 = editor.getBracesPairs(cursor)
+            if self.cursor2 is not None and self.cursor1 is not None and \
+            (self.cursor1.selectionEnd() == self.cursor2.selectionStart() or self.cursor1.selectionStart() == self.cursor2.selectionEnd()):
+                #Estan pegados
+                self.cursor1 = self.cursor2 = None
+            elif self.cursor2 is not None and self.cursor1 is not None:
+                if cursor.position() == self.cursor1.selectionEnd():
+                    self.cursor1.setPosition(self.cursor1.selectionEnd())
+                    self.cursor2.setPosition(self.cursor2.selectionStart())
+                else:
+                    self.cursor1.setPosition(self.cursor1.selectionStart())
+                    self.cursor2.setPosition(self.cursor2.selectionEnd())
         else:
             currentWord, currentWordStart, currentWordEnd = editor.currentWord()
-            print self.pair, currentWord
             if currentWord and currentWordEnd != cursor.position():
                 return False
         return True
 
     def execute(self, editor, event, cursor = None, scope = None):
-        cursor = editor.textCursor()
         cursor.beginEditBlock()
         if cursor.hasSelection():
-            if self.cursorClose is not None and self.cursorOpen is not None:
-                self.cursorOpen.insertText(self.pair[0])
-                self.cursorClose.insertText(self.pair[1])
+            if self.cursor2 is not None and self.cursor1 is not None:
+                if self.cursor1.selectionStart() < self.cursor2.selectionStart():
+                    self.cursor1.insertText(self.pair[0])
+                    self.cursor2.insertText(self.pair[1])
+                else:
+                    self.cursor1.insertText(self.pair[1])
+                    self.cursor2.insertText(self.pair[0])
             else:
                 position = cursor.selectionStart()
                 text = self.pair[0] + cursor.selectedText() + self.pair[1]
@@ -96,9 +104,13 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
                 cursor.setPosition(position)
                 cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
                 editor.setTextCursor(cursor)
-        elif self.cursorOpen is not None and self.cursorClose is not None:
-            self.cursorOpen.insertText(self.pair[0])
-            self.cursorClose.insertText(self.pair[1])
+        elif self.cursor1 is not None and self.cursor2 is not None:
+            if self.cursor1.position() < self.cursor2.position():
+                self.cursor1.insertText(self.pair[0])
+                self.cursor2.insertText(self.pair[1])
+            else:
+                self.cursor1.insertText(self.pair[1])
+                self.cursor2.insertText(self.pair[0])
         else:
             position = cursor.position()
             cursor.insertText("%s%s" % (self.pair[0], self.pair[1]))

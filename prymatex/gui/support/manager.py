@@ -25,11 +25,11 @@ class PMXBundleMenuGroup(QtCore.QObject):
         self.manager.bundleChanged.connect(self.on_manager_bundleChanged)
         self.manager.bundleRemoved.connect(self.on_manager_bundleRemoved)
         
-    def appendMenu(self, menu):
-        if menu not in self.containers:
-            self.containers.append(menu)
+    def appendMenu(self, menu, offset = None):
+        if menu not in map(lambda (menu, offset): menu, self.containers):
+            self.containers.append((menu, offset is not None and offset or len(menu.actions())))
         #Append all bundle menus in order
-        for bundle, bundleMenu in iter(sorted(self.menus.iteritems(), key=lambda (bundle, bundleMenu): bundleMenu.title())):
+        for bundle, bundleMenu in iter(sorted(self.menus.iteritems(), key=lambda (bundle, bundleMenu): bundleMenu.title().replace("&","").lower())):
             menu.addMenu(bundleMenu)
         
     def buildMenu(self, items, menu, submenus, parent = None):
@@ -57,25 +57,26 @@ class PMXBundleMenuGroup(QtCore.QObject):
 
     def addBundle(self, bundle):
         menu = self.buildBundleMenu(bundle)
-        self.menus[bundle] = menu
         menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
+        # Primero agregarlo a los containers porque estos usan self.menus para ordenar
         self.addToContainers(menu)
+        self.menus[bundle] = menu
     
     def menuForBundle(self, bundle):
         return self.menus.get(bundle)
         
     def addToContainers(self, menu):
-        currentTitles = map(lambda menu: menu.title(), self.menus.values())
-        index = bisect(currentTitles, menu.title())
-        for container in self.containers:
+        currentTitles = sorted(map(lambda menu: menu.title().replace("&","").lower(), self.menus.values()))
+        index = bisect(currentTitles, menu.title().replace("&","").lower())
+        for container, offset in self.containers:
             currentActions = container.actions()
-            if index < len(currentActions):
-                container.insertMenu(currentActions[index], menu)
+            if index < len(currentActions) - offset:
+                container.insertMenu(currentActions[offset + index], menu)
             else:
                 containter.addMenu(menu)
     
     def removeFromContainers(self, menu):
-        for container in self.containers:
+        for container, offset in self.containers:
             container.removeAction(menu.menuAction())
 
     def on_manager_bundleItemChanged(self, item):
@@ -191,8 +192,8 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         from prymatex.gui.settings.environment import PMXEnvVariablesWidget
         return [ PMXEnvVariablesWidget ]
     
-    def appendMenuToBundleMenuGroup(self, menu):
-        self.bundleMenuGroup.appendMenu(menu)
+    def appendMenuToBundleMenuGroup(self, menu, offset = None):
+        self.bundleMenuGroup.appendMenu(menu, offset)
 
     def menuForBundle(self, bundle):
         return self.bundleMenuGroup.menuForBundle(bundle)
