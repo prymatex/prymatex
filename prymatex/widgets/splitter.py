@@ -17,15 +17,14 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.widgets.tabwidget import _TabWidget, _DragableTabBar
 
-def createDisambiguatedTitle(addedTitles, newTitles):
-    assert addedTitles[0] == newTitles[0], "No tiene ambigûedad"
-    title = addedTitles[0] + " (%s)"
-    titlesLen = min(len(addedTitles), len(newTitles))
-    for index in xrange(titlesLen):
-        if addedTitles[index] != newTitles[index]:
-            return (title % addedTitles[index], title % newTitles[index])
-
-    raise Exception("No puede llegar aca, porque sino son el mismo")
+def createDisambiguatedTitles(addedTitles, newTitle):
+    titleFormat = newTitle[0] + " (%s)"
+    usedSubtitles = [ newTitle[1] ]
+    for addedTitle in addedTitles:
+        for index in xrange(1, len(addedTitle)):
+            if addedTitle[index] not in usedSubtitles:
+                usedSubtitles.append(addedTitle[index])
+    return (map(lambda subTitle: titleFormat % subTitle, usedSubtitles[1:]), titleFormat % usedSubtitles[0])
 
 class SplitTabWidget(QtGui.QSplitter):
     """ The SplitTabWidget class is a hierarchy of QSplitters the leaves of
@@ -259,20 +258,23 @@ class SplitTabWidget(QtGui.QSplitter):
             tw.setTabIcon(tidx, icon)
 
     def disambiguatedWidgetTitle(self, widget):  
-        #Buscar tabs con el mismo nombre
+        #Buscar todas las tabs con el mismo nombre
         newWidgetTitle = widget.tabTitle()
-        addedWidget = self.widgetByTitle(newWidgetTitle)
-        if addedWidget is not None:
-            addedTitle, newWidgetTitle = createDisambiguatedTitle(addedWidget.tabTitles(), widget.tabTitles())
-            self.setWidgetTitle(addedWidget, addedTitle)
+        addedWidgets = self.widgetsByTitle(newWidgetTitle)
+        if addedWidgets:
+            addedTitles, newWidgetTitle = createDisambiguatedTitles(map(lambda widget: widget.tabTitles(), addedWidgets), widget.tabTitles())
+            for widget, title in zip(addedWidgets, addedTitles):
+                self.setWidgetTitle(widget, title)
         return newWidgetTitle
 
-    def widgetByTitle(self, title):
+    def widgetsByTitle(self, title):
+        widgets = []
         for tw in self.findChildren(_TabWidget):
             for index in xrange(tw.count()):
                 widget = tw.widget(index)
                 if widget.tabTitle() == title:
-                    return widget
+                    widgets.append(widget)
+        return widgets
 
     def setWidgetTitle(self, w, title):
         """ Set the title for the given widget. """

@@ -225,6 +225,7 @@ class PMXSupportBaseManager(object):
                 for path in files:
                     klass.loadBundleItem(path, namespace, bundle, self)
         bundle.populated = True
+        self.populatedBundle(bundle)
 
     #---------------------------------------------------
     # RELOAD SUPPORT
@@ -344,6 +345,7 @@ class PMXSupportBaseManager(object):
             for path, klass in bundleItemPaths.iteritems():
                 self.logger.debug("New bundle item %s." % path)
                 klass.loadBundleItem(path, namespace, bundle, self)
+        self.populatedBundle(bundle)
 
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
@@ -397,6 +399,10 @@ class PMXSupportBaseManager(object):
         """Llamado luego de eliminar un bundle"""
         pass
 
+    def populatedBundle(self, bundle):
+        """Llamado luego de popular un bundle"""
+        pass
+        
     def getAllBundles(self):
         return []
     

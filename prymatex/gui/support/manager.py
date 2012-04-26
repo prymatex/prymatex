@@ -23,7 +23,8 @@ class PMXBundleMenuGroup(QtCore.QObject):
         self.manager.bundlePopulated.connect(self.on_manager_bundlePopulated)
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
         self.manager.bundleChanged.connect(self.on_manager_bundleChanged)
-    
+        self.manager.bundleRemoved.connect(self.on_manager_bundleRemoved)
+        
     def appendMenu(self, menu):
         if menu not in self.containers:
             self.containers.append(menu)
@@ -72,7 +73,11 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 container.insertMenu(currentActions[index], menu)
             else:
                 containter.addMenu(menu)
-            
+    
+    def removeFromContainers(self, menu):
+        for container in self.containers:
+            container.removeAction(menu.menuAction())
+
     def on_manager_bundleItemChanged(self, item):
         action = item.triggerItemAction()
         if action is not None:
@@ -99,12 +104,25 @@ class PMXBundleMenuGroup(QtCore.QObject):
         if bundle not in self.menus:
             self.addBundle(bundle)
 
+    def on_manager_bundleRemoved(self, bundle):
+        self.removeFromContainers(self.menus[bundle])
+
 class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
-    #Signals
+    #Signals for bundle
+    bundleAdded = QtCore.pyqtSignal(object)
+    bundleRemoved = QtCore.pyqtSignal(object)
     bundleChanged = QtCore.pyqtSignal(object)
     bundlePopulated = QtCore.pyqtSignal(object)
-    bundleItemTriggered = QtCore.pyqtSignal(object)
+
+    #Signals for bundle items
+    bundleItemAdded = QtCore.pyqtSignal(object)
+    bundleItemRemoved = QtCore.pyqtSignal(object)
     bundleItemChanged = QtCore.pyqtSignal(object)
+    bundleItemTriggered = QtCore.pyqtSignal(object)
+    
+    #Signals for themes
+    themeAdded = QtCore.pyqtSignal(object)
+    themeRemoved = QtCore.pyqtSignal(object)
     themeChanged = QtCore.pyqtSignal(object)
     
     #Settings
@@ -192,11 +210,6 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
         self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
 
-    # Override populate bundle for emit signal
-    def populateBundle(self, bundle):
-        PMXSupportBaseManager.populateBundle(self, bundle)
-        self.bundlePopulated.emit(bundle)
-    
     def runProcess(self, context, callback):
         if context.asynchronous:
             return self.runQProcess(context, callback)
@@ -270,6 +283,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def addBundle(self, bundle):
         bundleNode = PMXBundleTreeNode(bundle)
         self.bundleTreeModel.appendBundle(bundleNode)
+        self.bundleAdded.emit(bundleNode)
         return bundleNode
     
     def modifyBundle(self, bundle):
@@ -277,6 +291,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     
     def removeBundle(self, bundle):
         self.bundleTreeModel.removeBundle(bundle)
+        self.bundleRemoved.emit(bundle)
     
     def getAllBundles(self):
         return self.bundleProxyModel.getAllItems()
@@ -284,19 +299,24 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def getDefaultBundle(self):
         return self.getBundle(self.defaultBundleForNewBundleItems)
     
+    def populatedBundle(self, bundle):
+        self.bundlePopulated.emit(bundle)
+        
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
     #---------------------------------------------------
     def addBundleItem(self, bundleItem):
         bundleItemNode = PMXBundleTreeNode(bundleItem)
         self.bundleTreeModel.appendBundleItem(bundleItemNode)
+        self.bundleItemAdded.emit(bundleItemNode)
         return bundleItemNode
-    
+
     def modifyBundleItem(self, bundleItem):
         self.bundleItemChanged.emit(bundleItem)
         
     def removeBundleItem(self, bundleItem):
         self.bundleTreeModel.removeBundleItem(bundleItem)
+        self.bundleItemRemoved.emit(bundleItem)
         
     def getAllBundleItems(self):
         items = []
@@ -319,6 +339,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def addTheme(self, theme):
         themeRow = PMXThemeStyleRow(theme, self.scores)
         self.themeListModel.addTheme(themeRow)
+        self.themeAdded.emit(themeRow)
         return themeRow
     
     def modifyTheme(self, theme):
@@ -326,6 +347,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         
     def removeTheme(self, theme):
         self.themeListModel.removeTheme(theme)
+        self.themeRemoved.emit(theme)
             
     def getAllThemes(self):
         return self.themeListModel.getAllItems()
