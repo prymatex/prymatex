@@ -1,1 +1,0 @@
-"$DIALOG" -q -d"{'SQL Connections' = ( { title = untitled; serverType = MySQL; hostName = localhost; userName = '$LOGNAME'; } ); }" -n"{ SQL_New_Connection = { title = untitled; serverType = MySQL; hostName = localhost; userName = '$LOGNAME'; }; }" -p'{}' "${TM_BUNDLE_SUPPORT}/nibs/github" >/dev/null 2>/dev/console &
