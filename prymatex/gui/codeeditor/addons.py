@@ -40,13 +40,15 @@ class SmartUnindentAddon(QtCore.QObject, PMXBaseAddon):
         pass
         
     def on_editor_keyPressEvent(self, event):
-        cursor = self.editor.textCursor()
-        currentBlock = cursor.block()
-        previousBlock = currentBlock.previous()
-        settings = self.editor.preferenceSettings(self.editor.currentScope())
-        indentMarks = settings.indent(currentBlock.text())
-        if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
-            self.editor.unindentBlocks(cursor)
+        #Solo si metio texto, sino lo hace cuando me muevo entre caracteres
+        if event.text():
+            cursor = self.editor.textCursor()
+            currentBlock = cursor.block()
+            previousBlock = currentBlock.previous()
+            settings = self.editor.preferenceSettings(self.editor.currentScope())
+            indentMarks = settings.indent(currentBlock.text())
+            if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
+                self.editor.unindentBlocks(cursor)
             
 class SpellCheckerAddon(QtCore.QObject, PMXBaseAddon):
     def __init__(self, parent):

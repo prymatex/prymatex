@@ -6,9 +6,10 @@ import sys
 import plistlib
 import zmq
 
-from prymatex import resources
-
 from PyQt4 import QtCore, QtGui
+
+from prymatex import resources
+from prymatex.utils.importlib import import_module, import_from_directory
 
 PORT = 4612
 
@@ -34,21 +35,14 @@ class PMXDialogSystem(QtCore.QObject):
         method = getattr(self, name)
         method(*args, **kwargs)
 
-    def _import_module(self, name):
-        __import__(name)
-        return sys.modules[name]
-    
     def _load_window(self, moduleName, directory):
-        old_syspath = sys.path[:]
         try:
-            if directory is not None:
-                sys.path.insert(1, directory)
-            module = self._import_module(moduleName)
-            module.load(self.application)
-        except Exception as reason:
-            print(reason)
-        finally:
-            sys.path = old_syspath
+            module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
+            loadFunction = getattr(module, 'load')
+            loadFunction(self.application)
+        except (ImportError, AttributeError), reason:
+            #TODO: Manejar estos errores
+            raise reason
 
     def sendResult(self, value = None):
         value = str(value) if value is not None else "ok"

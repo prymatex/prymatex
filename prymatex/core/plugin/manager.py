@@ -7,6 +7,7 @@ from logging import getLogger
 from PyQt4 import QtGui, QtCore
 
 from prymatex.core.plugin import PMXBaseComponent
+from prymatex.utils.importlib import import_module, import_from_directory
 
 class PMXPluginManager(PMXBaseComponent):
     def __init__(self, application):
@@ -123,30 +124,22 @@ class PMXPluginManager(PMXBaseComponent):
             status = self.createWidgetInstance(statusBarClass, mainWindow)
             mainWindow.addStatusBar(status)
     
-    def _import_module(self, name):
-        __import__(name)
-        return sys.modules[name]
-    
     def _load_plugin(self, moduleName, directory = None):
-        old_syspath = sys.path[:]
         try:
-            if directory is not None:
-                sys.path.insert(1, directory)
-            module = self._import_module(moduleName)
-            module.registerPlugin(self)
-        except (ImportError, AttributeError) as reason:
-            print(reason)
+            module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
+            registerPluginFunction = getattr(module, 'registerPlugin')
+            registerPluginFunction(self)
+        except (ImportError, AttributeError), reason:
+            #TODO: Manejar estos errores
             raise reason
-        finally:
-            sys.path = old_syspath
-        return None
     
     def loadPlugins(self):
         self._load_plugin('prymatex.gui.codeeditor')
         self._load_plugin('prymatex.gui.dockers')
         for directory in self.directories:
             if not os.path.isdir(directory):
-                continue # 
+                continue 
+            #TODO: Ver si no es mejor usar glob y filtrar por algo en particular en los directorios con plugins
             moduleNames = os.listdir(directory)
             for name in moduleNames:
                 if not os.path.isdir(os.path.join(directory, name)) or name.startswith("."):
