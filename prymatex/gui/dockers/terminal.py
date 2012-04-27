@@ -5,14 +5,11 @@ import signal
 import os
 
 from PyQt4 import QtCore, QtGui
+
 from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.plugin.dock import PMXBaseDock
 from prymatex.utils.i18n import ugettext as _
-
-PORT = 4613
-
-# TODO: Movetab
 
 QTERMWIDGET_IMPORT_SUGGESTOIN = '''
 QTermWidget disabled because of:
@@ -51,8 +48,6 @@ class PMXTabTerminals(QtGui.QTabWidget):
         actionCustom.triggered.connect(self.launchCustomCommandInTerminal)
         self.pushAddNewTerminal.setMenu(menuAddNew)
         layout.addWidget(self.pushAddNewTerminal)
-        
-        
         
         # Copy
         self.pushCopyTerminalText = QtGui.QPushButton()
@@ -253,8 +248,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     # ZMQ External actions
     #====================================================
     def setupSocket(self):
-        self.socket = self.application.zmqContext.socket(zmq.REP)
-        self.socket.bind('tcp://127.0.0.1:%s' % PORT)
+        self.socket = self.application.zmqSocket(zmq.REP, "Terminal")
         self.socket.readyRead.connect(self.socketReadyRead)
     
     def socketReadyRead(self):

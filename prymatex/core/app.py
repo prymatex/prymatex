@@ -173,7 +173,6 @@ class PMXApplication(QtGui.QApplication):
                 'TM_SUPPORT_PATH': manager.environment['PMX_SUPPORT_PATH'],
                 'TM_BUNDLES_PATH': manager.environment['PMX_BUNDLES_PATH'],
                 'TM_THEMES_PATH': manager.environment['PMX_THEMES_PATH'],
-                'TM_PID': os.getpid(),
                 #Prymatex 
                 'PMX_APP_NAME': self.applicationName().title(),
                 'PMX_APP_PATH': self.settings.value('PMX_APP_PATH'),
@@ -302,9 +301,18 @@ class PMXApplication(QtGui.QApplication):
             self.extendComponent(settingClass)
             self.settingsDialog.register(settingClass(componentClass.settings))
 
-    #---------------------------------------------------
+    #========================================================
+    # Create Zmq Sockets
+    #========================================================
+    def zmqSocket(self, type, name, interface='tcp://127.0.0.1'):
+        socket = self.zmqContext.socket(type)
+        port = socket.bind_to_random_port(interface)
+        self.supportManager.addToEnvironment("PMX_" + name.upper() + "_PORT", port)
+        return socket
+
+    #========================================================
     # Editors and mainWindow handle
-    #---------------------------------------------------
+    #========================================================
     def createMainWindow(self):
         """Creates the windows"""
         from prymatex.gui.mainwindow import PMXMainWindow

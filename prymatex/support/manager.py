@@ -103,6 +103,9 @@ class PMXSupportBaseManager(object):
                 if bundle.enabled:
                     self.populateBundle(bundle)
 
+    def addToEnvironment(self, name, value):
+        self.environment[name] = value
+
     def updateEnvironment(self, env):
         self.environment.update(env)
 

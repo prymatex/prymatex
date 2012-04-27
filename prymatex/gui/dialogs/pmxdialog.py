@@ -11,14 +11,11 @@ from PyQt4 import QtCore, QtGui
 from prymatex import resources
 from prymatex.utils.importlib import import_module, import_from_directory
 
-PORT = 4612
-
 class PMXDialogSystem(QtCore.QObject):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         self.application = application
-        self.socket = self.application.zmqContext.socket(zmq.REP)
-        self.socket.bind('tcp://127.0.0.1:%s' % PORT)
+        self.socket = self.application.zmqSocket(zmq.REP, "PMXDialog")
         self.socket.readyRead.connect(self.socketReadyRead)
     
     def socketReadyRead(self):
