@@ -102,7 +102,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
         else:
             self.logger.debug("Con cualquier otra tecla sin texto")
             holder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-            if holder is None or holder.last:
+            if (holder is None or holder.last) and event.key() in [ QtCore.Qt.Key_Return ]:
                 return self.endSnippet(event)
             else:
                 return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)

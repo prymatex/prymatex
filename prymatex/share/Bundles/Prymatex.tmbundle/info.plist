@@ -10,22 +10,29 @@
 	<string>Prymatex Core Bundle</string>
 	<key>mainMenu</key>
 	<dict>
+		<key>excludedItems</key>
+		<array>
+			<string>F1780FD5-29EA-44FC-A8FA-95914849493E</string>
+			<string>C2D61E69-5FB8-484D-8594-FBB5FEDAC20B</string>
+			<string>C9C0BB08-AA1B-49FC-99DD-00B7DC2ACA7C</string>
+			<string>842C84A4-49F2-4114-BAFF-D1D128F3AC9B</string>
+		</array>
 		<key>items</key>
 		<array>
-			<string>46cec7c4-9194-49e4-a931-2a80ec4a453b</string>
-			<string>15fa1c31-af98-44f2-998c-38f41f82029e</string>
+			<string>23054700-8EEC-11E1-857A-78E7D1558DC8</string>
 		</array>
 		<key>submenus</key>
-		<dict/>
+		<dict>
+		</dict>
 	</dict>
 	<key>name</key>
 	<string>Prymatex</string>
 	<key>ordering</key>
 	<array>
-                <string>46cec7c4-9194-49e4-a931-2a80ec4a453b</string>
-                <string>15fa1c31-af98-44f2-998c-38f41f82029e</string>
+		<string>46cec7c4-9194-49e4-a931-2a80ec4a453b</string>
+		<string>15fa1c31-af98-44f2-998c-38f41f82029e</string>
 	</array>
 	<key>uuid</key>
-	<string>bffbf71b-5285-4e72-af15-5613323034d1</string>
+	<string>BFFBF71B-5285-4E72-AF15-5613323034D1</string>
 </dict>
 </plist>

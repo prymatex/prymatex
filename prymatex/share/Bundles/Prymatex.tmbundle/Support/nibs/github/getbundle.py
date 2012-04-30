@@ -20,10 +20,11 @@ _ = lambda s:s
 class PMXGitHubRepoModel(QtGui.QStandardItemModel):
     ROWS = (
             ('name', _('Repo')),
-            ('username', _('Username')),
             ('description', _('Description')),
             ('url', _('URL')),
-            ('forks', 'Fork Count'),
+            ('username', _('Username')),
+            ('watchers', _('Watchers')),
+            ('forks', _('Forks')),
             )
     def __init__(self, parent = None):
         QtGui.QStandardItemModel.__init__(self, 0,len(self.ROWS))
@@ -117,7 +118,7 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog):
         item_names = map(itemgetter(0), self.model.ROWS)
         self.model.removeRows(0, self.model.rowCount())
         for repo_entry in data.get('repositories', []):
-            row = map(lambda name: QtGui.QStandardItem(repo_entry.get(name, '')), item_names)
+            row = map(lambda name: QtGui.QStandardItem(str(repo_entry.get(name, ''))), item_names)
             self.model.appendRow(row)
         self.tableViewResults.resizeColumnsToContents()
         self.tableViewResults.resizeRowsToContents()
@@ -131,7 +132,7 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog):
         index = self.tableViewResults.currentIndex()
         if index.isValid():
             dstPath = self.application.supportManager.basePath("Bundles", "user")
-            repoUrl = self.model.item(index.row(), 3).text()
+            repoUrl = self.model.item(index.row(), 2).text()
             bundleName = self.lineEditBundle.text()
             process = QtCore.QProcess(self)
             process.setWorkingDirectory(dstPath)

@@ -15,7 +15,7 @@ class PMXDialogSystem(QtCore.QObject):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         self.application = application
-        self.socket = self.application.zmqSocket(zmq.REP, "PMXDialog")
+        self.socket = self.application.zmqSocket(zmq.REP, "Dialog")
         self.socket.readyRead.connect(self.socketReadyRead)
     
     def socketReadyRead(self):

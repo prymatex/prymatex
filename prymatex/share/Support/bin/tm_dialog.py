@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import os
 import zmq
 import sys, tempfile
 
 from optparse import OptionParser, OptionGroup
-# sum(map(lambda c: ord(c), 'Prymatex is an open source textmate replacement'))
 
-PORT = 4612
+if 'PMX_DIALOG_PORT' in os.environ:
+    PMX_DIALOG_PORT = os.environ['PMX_DIALOG_PORT']
+else:
+    raise Exception("PMX_DIALOG_PORT is not in environ")
 
 '''
 # create and show the dialog
@@ -308,7 +311,7 @@ class CommandHandler(object):
     def __init__(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect('tcp://127.0.0.1:%d' % PORT)
+        self.socket.connect('tcp://127.0.0.1:%s' % PMX_DIALOG_PORT)
         
     def async_window(self, options, args):
         if options.parameters == None:

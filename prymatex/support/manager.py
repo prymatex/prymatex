@@ -94,7 +94,10 @@ class PMXSupportBaseManager(object):
         #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
         project.ensureBundles()
         path = project.projectPath
-        project.namespace = project.name + hashlib.md5(path).hexdigest()
+        project.namespace = project.name
+        while project.namespace in self.namespaces:
+            #Crear valores random
+            project.namespace = project.namespace + hashlib.md5(project.namespace + path).hexdigest()[:7]
         self.addNamespace(project.namespace, path)
         #Ya esta listo tengo que cargar este namespace
         if self.ready:
