@@ -113,7 +113,7 @@ class PMXBundleTreeModel(TreeModel):
     def data(self, index, role):  
         if not index.isValid():  
             return None
-        elif role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+        elif role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
             node = self.node(index)
             return node.name
         elif role == QtCore.Qt.DecorationRole:
