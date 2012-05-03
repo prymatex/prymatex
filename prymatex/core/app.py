@@ -61,7 +61,8 @@ class PMXApplication(QtGui.QApplication):
             self.setupCoroutines()
             self.setupZeroMQContext()
             self.setupMainWindow()
-            
+            self.setupServer()
+
             # Setup Dialogs
             self.setupDialogs()
             
@@ -258,6 +259,12 @@ class PMXApplication(QtGui.QApplication):
         from prymatex.gui.mainwindow import PMXMainWindow
         self.populateComponent(PMXMainWindow)
         
+    def setupServer(self):
+        #Seria mejor que esto no falle pero bueno tengo que preguntar por none
+        if self.zmqContext is not None:
+            from prymatex.core.server import PrymatexServer
+            self.server = PrymatexServer(self)
+
     #========================================================
     # Dialogs
     #========================================================
@@ -268,11 +275,6 @@ class PMXApplication(QtGui.QApplication):
         
         self.bundleEditor = PMXBundleEditor(self)
         #self.bundleEditor.setModal(True)
-        
-        #Dialog System
-        if self.zmqContext:
-            from prymatex.gui.dialogs.pmxdialog import PMXDialogSystem
-            self.dialogSystem = PMXDialogSystem(self)
     
     def closePrymatex(self):
         self.logger.debug("Close")
@@ -389,7 +391,8 @@ class PMXApplication(QtGui.QApplication):
             if column:
                 position = (position[0], int(column) - 1)
             if sourceFile:
-                self.openFile(sourceFile, position)
+                filePath = QtCore.QUrl(sourceFile, QtCore.QUrl.TolerantMode).toLocalFile()
+                self.openFile(filePath, position)
             else:
                 self.currentEditor().setCursorPosition(position)
 

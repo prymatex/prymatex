@@ -1,3 +1,11 @@
 #!/bin/bash
 
-xdg-open "$@"
+exec $DIALOG open $@
+
+#Crear un commando para instalar los protocolos en cada sistema
+#if [ "$@" == "txmt*" ]; then
+#    echo -n "$@"; exit 206;
+#else
+#    xdg-open "$@";
+#fi
+
