@@ -7,7 +7,7 @@ import sys, tempfile
 try:
     import zmq
 except ImportError, reason:
-    raise Exception("In order to use pmxctl you must install zmq in your python path\n" + "\n".join(sys.path))
+    raise Exception("In order to use pmxctl you must install zmq in your python path\nor if you are runining inside virtualenv please activate the global site-package with toggleglobalsitepackages")
     #raise reason
 
 from optparse import OptionParser, OptionGroup
