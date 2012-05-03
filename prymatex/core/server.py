@@ -55,7 +55,13 @@ class PrymatexServer(QtCore.QObject):
         self.sendResult("1234")
     
     def tooltip(self, content, format = "text", transparent = False):
-        self.application.currentEditor().showMessage(content)
+        message = ""
+        try:
+            data = plistlib.readPlistFromString(content)
+            message = data[format]
+        except ExpatError, reason:
+            message = content
+        self.application.currentEditor().showMessage(message)
         self.sendResult()
     
     def menu(self, plist):
@@ -81,11 +87,11 @@ class PrymatexServer(QtCore.QObject):
     
     def alert(self, args):
         print "alert: ", args
-        return True
+        self.sendResult()
     
     def open(self, url):
         self.application.handleUrlCommand(url)
-        return True
+        self.sendResult()
 
     def debug(self, *args, **kwargs):
         print args, kwargs

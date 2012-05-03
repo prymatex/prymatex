@@ -694,7 +694,7 @@ class PMXProcessTableModel(QtCore.QAbstractTableModel):
         item = self.processItems[index.row()]
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole ]:
             if index.column() == 0:
-                return item["pid"]
+                return item["process"].pid()
             elif index.column() == 1:
                 return item["description"]
             elif index.column() == 2:
@@ -713,7 +713,7 @@ class PMXProcessTableModel(QtCore.QAbstractTableModel):
     
     def appendProcess(self, process, description = ""):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.processItems), len(self.processItems))
-        self.processItems.append({ "pid": process.pid(), "process":  process, "description": description })
+        self.processItems.append({ "process":  process, "description": description })
         self.endInsertRows()
 
     def removeProcess(self, process):

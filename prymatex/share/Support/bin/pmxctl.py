@@ -358,8 +358,8 @@ class CommandHandler(object):
         kwargs = {}
         kwargs["format"] = "html" if options.html else "text"
         kwargs["transparent"] = options.transparent
-        #if not args:
-        #    args = [ sys.stdin.readlines() ] 
+        if not args:
+            args = [ "".join(sys.stdin.readlines()) ]
         command = {"name": "tooltip", "args": args, "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv_pyobj()

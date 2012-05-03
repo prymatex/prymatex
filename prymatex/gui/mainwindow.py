@@ -263,13 +263,16 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         if filePath is not None:
             editor.save(filePath)
     
-    def closeEditor(self, editor = None):
+    def closeEditor(self, editor = None, cancel = False):
         editor = editor or self.currentEditor()
+        buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No
+        if cancel:
+            buttons |= QtGui.QMessageBox.Cancel
         if editor is None: return
         while editor and editor.isModified():
             response = QtGui.QMessageBox.question(self, "Save", 
                 "Save %s" % editor.tabTitle(), 
-                buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
+                buttons = buttons, 
                 defaultButton = QtGui.QMessageBox.Ok)
             if response == QtGui.QMessageBox.Ok:
                 self.saveEditor(editor = editor)
@@ -291,11 +294,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     def closeEvent(self, event):
         try:
             for editor in self.splitTabWidget.getAllWidgets():
-                self.closeEditor(editor)
+                self.closeEditor(editor, cancel = True)
         except exceptions.UserCancelException:
             event.ignore()
-        
-        
         
     #===========================================================================
     # Drag and Drop
