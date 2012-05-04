@@ -585,6 +585,8 @@ class PMXSupportBaseManager(object):
         #Deprecate tabTrigger in cache
         if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
             self.cache.deprecateValues(item.tabTrigger, attrs['tabTrigger'])
+            #Deprecated list of all tabTrigers
+            self.cache.deprecateValues('tabTriggers')
 
         #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco m�s
         namespace = namespace or self.defaultNamespace
@@ -843,7 +845,7 @@ class PMXSupportBaseManager(object):
     #@printtime
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
-        tabTriggerItems = self.cache.setcallable("tabtriggers", self.getAllTabTriggerItems)
+        tabTriggerItems = self.cache.setcallable("tabTriggers", self.getAllTabTriggerItems)
         search = map(lambda item: (item.tabTrigger, line.find(item.tabTrigger[::-1]), len(item.tabTrigger)), tabTriggerItems)
         search = filter(lambda (trigger, value, length): value == 0, search)
         if search:
@@ -857,7 +859,7 @@ class PMXSupportBaseManager(object):
     def getAllTabTiggerItemsByScope(self, scope):
         with_scope = []
         without_scope = []
-        for item in self.cache.setcallable("tabtriggers", self.getAllTabTriggerItems):
+        for item in self.cache.setcallable("tabTriggers", self.getAllTabTriggerItems):
             if item.scope == None:
                 without_scope.append(item)
             else:

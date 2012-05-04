@@ -81,7 +81,11 @@ class PMXBundleTypeFilterProxyModel(FlatTreeProxyModel):
         
     def comparableValue(self, index):
         node = self.sourceModel().node(index)
-        return node.name.lower()
+        #Esto es para rastrear un error
+        try:
+            return node.name.lower()
+        except Exception, e:
+            print node, self.sourceModel(), index
     
     def compareIndex(self, xindex, yindex):
         xnode = xindex.internalPointer()
