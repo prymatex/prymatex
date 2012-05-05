@@ -4,6 +4,9 @@
 def nop(self, *args):
     pass
 
+def return_true(self, *args):
+    return True
+    
 ######################### SyntaxProcessor #########################
 
 PMXSyntaxProcessor = type("PMXSyntaxProcessor", (object, ), {
@@ -28,8 +31,8 @@ PMXCommandProcessor = type("PMXCommandProcessor", (object, ), {
     "selectedText": nop,
     "word": nop,
     # beforeRunningCommand
-    "saveActiveFile": nop,
-    "saveModifiedFiles": nop,
+    "saveActiveFile": return_true,
+    "saveModifiedFiles": return_true,
     "nop": nop,
     # deleteFromEditor
     "deleteWord": nop,

@@ -89,7 +89,7 @@ class MainWindowActions(object):
         
     @QtCore.pyqtSlot()
     def on_actionSaveAll_triggered(self):
-        for w in self.splitTabWidget.getAllWidgets():
+        for w in self.editors():
             self.saveEditor(editor = w)
 
     @QtCore.pyqtSlot()

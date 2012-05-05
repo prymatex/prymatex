@@ -2,6 +2,7 @@
 *~
 dict.*
 *.swp
+.ropeproject
 .pydevproject
 .settings
 .directory

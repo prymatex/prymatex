@@ -218,6 +218,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             if editor.filePath == filePath:
                 return editor
 
+    def editors(self):
+        return self.splitTabWidget.getAllWidgets()
+        
     def setCurrentEditor(self, editor):
         self.splitTabWidget.setCurrentWidget(editor)
     

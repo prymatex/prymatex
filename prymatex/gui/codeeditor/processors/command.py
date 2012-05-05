@@ -88,12 +88,18 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     #beforeRunningCommand
     def saveModifiedFiles(self):
-        self.editor.mainWindow.actionSaveAll.trigger()
-        return True
+        ret = True
+        for editor in self.editor.mainWindow.editors():
+            if editor.isModified():
+                self.editor.mainWindow.saveEditor(editor = editor)
+                ret = ret and not editor.isModified()
+            if ret == False:
+                break
+        return ret
     
     def saveActiveFile(self):
-        self.editor.mainWindow.actionSave.trigger()
-        return True
+        self.editor.mainWindow.saveEditor(editor = self.editor)
+        return not self.editor.isModified()
     
     # deleteFromEditor
     def deleteWord(self):

@@ -86,20 +86,20 @@ class PMXCommand(PMXBundleItem):
             return self.output
     
     def beforeExecute(self, processor):
-        if not hasattr(self, 'beforeRunningCommand') or self.beforeRunningCommand == None: return True
-        return getattr(processor, self.beforeRunningCommand)()
+        beforeMethod = getattr(processor, self.beforeRunningCommand) if hasattr(self, 'beforeRunningCommand') else None
+        if beforeMethod in [None, 'nop']: return True
+        return beforeMethod()
 
     def execute(self, processor):
-        #TODO: Evaluar y activar esto del before
-        #if not self.beforeExecute(processor): return
-        
-        context = PMXRunningContext(self)
-        
-        context.asynchronous = processor.asynchronous
-        context.inputType, context.inputValue = self.getInputText(processor)
-        context.shellCommand, context.environment = prepareShellScript(self.systemCommand(), processor.environment(self))
-
-        self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
+        if self.beforeExecute(processor): 
+    
+            context = PMXRunningContext(self)
+            
+            context.asynchronous = processor.asynchronous
+            context.inputType, context.inputValue = self.getInputText(processor)
+            context.shellCommand, context.environment = prepareShellScript(self.systemCommand(), processor.environment(self))
+    
+            self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
     
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
