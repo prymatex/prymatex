@@ -85,9 +85,13 @@ class PMXApplication(QtGui.QApplication):
         
     def switchProfile(self):
         from prymatex.gui.dialogs.profile import PMXProfileDialog
-        return PMXProfileDialog.switchProfile(PMXSettings.PMX_PROFILES_PATH)
+        return PMXProfileDialog.switchProfile(PMXSettings.PMX_PROFILES_FILE)
         
     def buildSettings(self, profile):
+        if profile is None:
+            #Select profile
+            from prymatex.gui.dialogs.profile import PMXProfileDialog
+            profile = PMXProfileDialog.selectProfile(PMXSettings.PMX_PROFILES_FILE)
         from prymatex.gui.dialogs.settings import PMXSettingsDialog
         self.settings = PMXSettings(profile)
         self.settingsDialog = PMXSettingsDialog(self)
@@ -286,10 +290,10 @@ class PMXApplication(QtGui.QApplication):
         os.unlink(self.fileLock)
     
     def commitData(self):
-        self.logger.debug("Commit data")
+        print "Commit data"
         
     def saveState(self, session_manager):
-        self.logger.debug( "Save state %s" % session_manager)
+        print "Save state %s" % session_manager
     
     #========================================================
     # Components

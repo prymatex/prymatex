@@ -44,7 +44,7 @@ def get_textmate_preferences_user_path():
     if not os.path.exists(webpreview):
         plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
     return path
-    
+
 def build_prymatex_profile(path):
     '''
     @see: PMXObject.pmxApp.getProfilePath(what, file)
@@ -53,17 +53,21 @@ def build_prymatex_profile(path):
     os.makedirs(os.path.join(path, 'tmp'), 0700)
     os.makedirs(os.path.join(path, 'log'), 0700)
     os.makedirs(os.path.join(path, 'var'), 0700)
+
+def get_prymatex_profiles_file(path):
+    filePath = os.path.join(path, PRYMATEX_PROFILES_NAME)
+    if not os.path.exists(filePath):
+        pf = open(filePath, 'w')
+        pf.write("\n".join(["[General]", "dontask=2", "", "[Profile0]", "name=default", "path=" + os.path.join(path, "default"), "default=1"]))
+        pf.flush()
+        pf.close()
+    return filePath
     
 def get_prymatex_profile_path(name, base):
     path = os.path.abspath(os.path.join(base, name.lower()))
     if not os.path.exists(path):
         build_prymatex_profile(path)
     return path
-
-#Cuidado esta la necesita el paquete support en el modulo utils, ver como quitarla igualmente
-#PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
-
-TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
 
 class TextMateSettings(object):
     def __init__(self, file):
@@ -214,9 +218,9 @@ class PMXSettings(object):
     PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
     PMX_HOME_PATH = get_prymatex_home_path()
     PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, 'Plugins')
-    PMX_PROFILES_PATH = os.path.join(PMX_HOME_PATH, PRYMATEX_PROFILES_NAME)
+    PMX_PROFILES_FILE = get_prymatex_profiles_file(PMX_HOME_PATH)
     USER_HOME_PATH = USER_HOME_PATH
-    PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
+    PMX_PREFERENCES_PATH = get_textmate_preferences_user_path()
 
     def __init__(self, profile):
         self.PMX_PROFILE_NAME = profile
@@ -227,7 +231,7 @@ class PMXSettings(object):
         self.GROUPS = {}
         #TODO Defaults settings
         self.qsettings = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, PRYMATEX_SETTING_NAME), QtCore.QSettings.IniFormat)
-        self.tmsettings = TextMateSettings(os.path.join(TM_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
+        self.tmsettings = TextMateSettings(os.path.join(self.PMX_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
 
     def getGroup(self, name):
         if name not in self.GROUPS:

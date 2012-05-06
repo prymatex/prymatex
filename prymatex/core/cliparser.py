@@ -31,7 +31,7 @@ try:
             description = description,
             version = version,
             epilog = epilog)
-        
+
         parser.add_argument('file', metavar='file', type=unicode,
             nargs='*', help='A file/s to edit', default=[])
         parser.add_argument('-f', '--files', metavar='file', type=unicode,
@@ -40,7 +40,8 @@ try:
         # Reverts custom options
         parser.add_argument('--reset-settings', metavar='reste_settings', default = False, 
                             help = 'Restore default settings for selected profile')
-        parser.add_argument('-p', '--profile', metavar='profile', default = 'default',
+
+        parser.add_argument('-p', '--profile', metavar='profile', nargs="?", default="default",
                         help = "Change profile")
 
         # Maybe useful for some debugging information
