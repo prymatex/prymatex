@@ -20,7 +20,9 @@ def runPrymatexApplication(options, files):
     
     pmx = None
     try:
-        pmx = app.PMXApplication(options.profile)
+        pmx = app.PMXApplication()
+        
+        pmx.buildSettings(options.profile)
         pmx.setupLogging(options.verbose, options.log_pattern)
         
         pmx.replaceSysExceptHook()

@@ -15,6 +15,7 @@ import prymatex
 from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.core.logger import NameFilter
+from prymatex.core.settings import PMXSettings
 
 from prymatex.utils.decorator import deprecated
 from prymatex.utils import coroutines
@@ -28,7 +29,7 @@ class PMXApplication(QtGui.QApplication):
     There can't be two apps running simultaneously, since configuration issues may occur.
     The application loads the PMX Support."""
     
-    def __init__(self, profile):
+    def __init__(self):
         """Inicialización de la aplicación."""
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
@@ -40,8 +41,6 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)
 
-        self.buildSettings(profile)
-        
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
 
@@ -84,9 +83,12 @@ class PMXApplication(QtGui.QApplication):
     def resetSettings(self):
         self.settings.clear()
         
+    def switchProfile(self):
+        from prymatex.gui.dialogs.profile import PMXProfileDialog
+        return PMXProfileDialog.switchProfile(PMXSettings.PMX_PROFILES_PATH)
+        
     def buildSettings(self, profile):
         from prymatex.gui.dialogs.settings import PMXSettingsDialog
-        from prymatex.core.settings import PMXSettings
         self.settings = PMXSettings(profile)
         self.settingsDialog = PMXSettingsDialog(self)
 

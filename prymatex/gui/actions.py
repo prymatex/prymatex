@@ -113,8 +113,8 @@ class MainWindowActions(object):
         QtGui.QApplication.quit()
     
     @QtCore.pyqtSlot()
-    def on_actionRestart_triggered(self):
-        QtGui.QApplication.exit(3)
+    def on_actionSwitchProfile_triggered(self):
+        self.application.switchProfile()
 
     #============================================================
     # Edit Actions
