@@ -582,7 +582,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
         if not cursor.hasSelection():
-            #poner seleccion en funcion del backward
+            #poner seleccion en funcion del forward
             cursor.movePosition(forward and QtGui.QTextCursor.NextCharacter or QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
         #Find selected
         for index in [0, 1]:
