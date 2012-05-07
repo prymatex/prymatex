@@ -5,6 +5,7 @@
 Application configuration based on Qt's QSettings module.
 """
 import os, plistlib
+from ConfigParser import ConfigParser
 
 from PyQt4 import QtCore, QtGui
 
@@ -58,7 +59,7 @@ def get_prymatex_profiles_file(path):
     filePath = os.path.join(path, PRYMATEX_PROFILES_NAME)
     if not os.path.exists(filePath):
         pf = open(filePath, 'w')
-        pf.write("\n".join(["[General]", "dontask=2", "", "[Profile0]", "name=default", "path=" + os.path.join(path, "default"), "default=1"]))
+        pf.write("\n".join(["[General]", "dontask=True", "", "[Profile0]", "name=default", "path=" + os.path.join(path, "default"), "default=True"]))
         pf.flush()
         pf.close()
     return filePath
@@ -222,6 +223,22 @@ class PMXSettings(object):
         if not os.path.exists(path):
             build_prymatex_profile(path)
         return path
+    
+    @classmethod
+    def defaultProfile(cls):
+        config = ConfigParser()
+        config.read(cls.PMX_PROFILES_FILE)
+        for section in config.sections():
+            if section.startswith("Profile"):
+                if config.getboolean(section, "default"):
+                    return config.get(section, "name")
+        return "default"
+    
+    @classmethod
+    def askForProfile(cls):
+        config = ConfigParser()
+        config.read(cls.PMX_PROFILES_FILE)
+        return not config.getboolean("General", "dontask")
 
     def __init__(self, profile):
         self.PMX_PROFILE_NAME = profile

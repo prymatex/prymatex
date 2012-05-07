@@ -37,16 +37,16 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
             if section.startswith("Profile"):
                 profile = { "name": self.config.get(section, "name"),
                             "path": self.config.get(section, "path"),
-                            "default": self.config.getint(section, "default")}
-                if profile["default"] == 1:
+                            "default": self.config.getboolean(section, "default")}
+                if profile["default"]:
                     defaultProfile = profile
                 self.listProfiles.addItem(QtGui.QListWidgetItem(profile["name"]))
                 self.profiles.append(profile)
-        self.checkDontAsk.setCheckState(self.config.getint("General", "dontask"))
+        self.checkDontAsk.setChecked(self.config.getboolean("General", "dontask"))
         self.listProfiles.setCurrentRow(defaultProfile is not None and self.profiles.index(defaultProfile) or 0)
         
-    def on_checkDontAsk_clicked(self, state):
-        self.config.set("General", "dontask", state)
+    def on_checkDontAsk_clicked(self):
+        self.config.set("General", "dontask", str(self.checkDontAsk.isChecked()))
         self.saveProfiles()
 
     def on_buttonExit_pressed(self):
@@ -54,9 +54,9 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
         
     def on_buttonStartPrymatex_pressed(self):
         index = self.listProfiles.currentRow()
+        defaultProfile = self.profiles[index]
         for profile in self.profiles:
-            profile["default"] = 0
-        self.profiles[index]["default"] = 1
+            profile["default"] = defaultProfile == profile
         self.saveProfiles()
         self.accept()
     

@@ -88,10 +88,13 @@ class PMXApplication(QtGui.QApplication):
         return PMXProfileDialog.switchProfile(PMXSettings.PMX_PROFILES_FILE)
         
     def buildSettings(self, profile):
-        if profile is None:
+        if profile is None or (profile == "" and PMXSettings.askForProfile()):
             #Select profile
             from prymatex.gui.dialogs.profile import PMXProfileDialog
             profile = PMXProfileDialog.selectProfile(PMXSettings.PMX_PROFILES_FILE)
+        elif profile == "":
+            #Find default profile in config
+            profile = PMXSettings.defaultProfile()
         from prymatex.gui.dialogs.settings import PMXSettingsDialog
         self.settings = PMXSettings(profile)
         self.settingsDialog = PMXSettingsDialog(self)

@@ -41,7 +41,7 @@ try:
         parser.add_argument('--reset-settings', metavar='reste_settings', default = False, 
                             help = 'Restore default settings for selected profile')
 
-        parser.add_argument('-p', '--profile', metavar='profile', nargs="?", default="default",
+        parser.add_argument('-p', '--profile', metavar='profile', nargs="?", default="",
                         help = "Change profile")
 
         # Maybe useful for some debugging information
