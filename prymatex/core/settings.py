@@ -63,12 +63,6 @@ def get_prymatex_profiles_file(path):
         pf.close()
     return filePath
     
-def get_prymatex_profile_path(name, base):
-    path = os.path.abspath(os.path.join(base, name.lower()))
-    if not os.path.exists(path):
-        build_prymatex_profile(path)
-    return path
-
 class TextMateSettings(object):
     def __init__(self, file):
         self.file = file
@@ -222,9 +216,16 @@ class PMXSettings(object):
     USER_HOME_PATH = USER_HOME_PATH
     PMX_PREFERENCES_PATH = get_textmate_preferences_user_path()
 
+    @classmethod
+    def get_prymatex_profile_path(cls, name):
+        path = os.path.abspath(os.path.join(cls.PMX_HOME_PATH, name.lower()))
+        if not os.path.exists(path):
+            build_prymatex_profile(path)
+        return path
+
     def __init__(self, profile):
         self.PMX_PROFILE_NAME = profile
-        self.PMX_PROFILE_PATH = get_prymatex_profile_path(profile, self.PMX_HOME_PATH)
+        self.PMX_PROFILE_PATH = self.get_prymatex_profile_path(profile)
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
         self.PMX_VAR_PATH = os.path.join(self.PMX_PROFILE_PATH, 'var')
