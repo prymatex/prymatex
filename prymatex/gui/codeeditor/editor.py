@@ -881,11 +881,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         if command is None:
             command = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
         commandHash = {    'command': command, 
-                              'name': command,
-                             'input': input,
-                            'output': output }
+                                           'name': command,
+                                           'input': input,
+                                        'output': output }
         command = PMXCommand(self.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.bundle = self.application.supportManager.getDefaultBundle()
+        command.setBundle(self.getSyntax().bundle)
+        command.setManager(self.getSyntax().manager)
         self.insertBundleItem(command)
     
     def buildEnvironment(self, env = {}):
