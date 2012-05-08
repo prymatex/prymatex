@@ -210,6 +210,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def loadSupport(self, *largs, **kwargs):
         PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
         self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
+        self.bundleProxyTreeModel.setDynamicSortFilter(True)
 
     def runProcess(self, context, callback):
         if context.asynchronous:

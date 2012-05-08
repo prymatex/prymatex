@@ -504,6 +504,7 @@ class PMXSupportBaseManager(object):
             self.setEnabled(bundle.uuid)
             if not bundle.populated:
                 self.populateBundle(bundle)
+        self.modifyBundle(bundle)
     
     #---------------------------------------------------
     # BUNDLEITEM INTERFACE

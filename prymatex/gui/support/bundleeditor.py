@@ -34,17 +34,13 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     # exec the dialog Show
     #==========================================================
     def exec_(self):
-        #TODO: Mejorar esto porque se dispara con los filtros del proxy, quiza pegandole al modelo real o al manager
-        self.manager.bundleTreeModel.rowsInserted.connect(self.on_bundleTreeModel_rowsInserted)
         #Limiar el editor
         self.setCurrentEditor(self.editors[-1])
         #Quitar seleccion
         firstIndex = self.proxyTreeModel.index(0, 0)
         self.treeView.setSelection(self.treeView.visualRect(firstIndex), QtGui.QItemSelectionModel.Clear)
         
-        value = QtGui.QDialog.exec_(self)
-        self.manager.bundleTreeModel.rowsInserted.disconnect(self.on_bundleTreeModel_rowsInserted)
-        return value
+        return QtGui.QDialog.exec_(self)
         
     def execEditor(self, typeFilter = None, namespaceFilter = None):
         self.namespace = namespaceFilter
@@ -96,7 +92,12 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     def createBundleItem(self, itemName, itemType):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
-        self.manager.createBundleItem(itemName, itemType, bundle, self.namespace)
+        bundleItemNode = self.manager.createBundleItem(itemName, itemType, bundle, self.namespace)
+        sIndex = self.manager.bundleTreeModel.createIndex(bundleItemNode.row(), 0, bundleItemNode)
+        index = self.proxyTreeModel.mapFromSource(sIndex)
+        self.treeView.setCurrentIndex(index)
+        self.editTreeItem(bundleItemNode)
+        self.treeView.edit(index)
         
     def on_actionCommand_triggered(self):
         self.createBundleItem(u"untitled", "command")
@@ -125,7 +126,12 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.createBundleItem(u"untitled", "preference")
 
     def on_actionBundle_triggered(self):
-        bundle = self.manager.createBundle("untitled", self.namespace)
+        bundleNode = self.manager.createBundle("untitled", self.namespace)
+        sIndex = self.manager.bundleTreeModel.createIndex(bundleNode.row(), 0, bundleNode)
+        index = self.proxyTreeModel.mapFromSource(sIndex)
+        self.treeView.setCurrentIndex(index)
+        self.editTreeItem(bundleNode)
+        self.treeView.edit(index)
 
     @QtCore.pyqtSlot()
     def on_pushButtonRemove_pressed(self):
@@ -323,8 +329,6 @@ class PMXBundleFilter(QtGui.QDialog):
         self.proxy = QtGui.QSortFilterProxyModel(self)
         self.proxy.setSourceModel(self.manager.bundleProxyModel)
         self.tableBundleItems.setModel(self.proxy)
-        self.tableBundleItems.resizeColumnsToContents()
-        self.tableBundleItems.resizeRowsToContents()
         
     def setupUi(self, BundleFilter):
         BundleFilter.setObjectName(_fromUtf8("BundleFilter"))
@@ -351,3 +355,8 @@ class PMXBundleFilter(QtGui.QDialog):
     def retranslateUi(self, BundleFilter):
         BundleFilter.setWindowTitle(_('Enable/Disable Bundles'))
         self.labelHelp.setText(_('You should keep the Source, Text and TextMate bundles enabled, as these provide base functionality relied upon by other bundles.'))
+        
+    def show(self):
+        self.tableBundleItems.resizeColumnsToContents()
+        self.tableBundleItems.resizeRowsToContents()
+        QtGui.QDialog.show(self)
