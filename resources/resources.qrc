@@ -1,6 +1,5 @@
 <RCC>
   <qresource prefix="icons">
-    <file>prymatex/Prymatex_Logo.png</file>
     <file>emblems/image-stack.png</file>
     <file>actions/project-development-close-all.png</file>
     <file>emblems/image-stack-open.png</file>
@@ -94,7 +93,6 @@
     <file>actions/document-save-as.png</file>
     <file>actions/document-save.png</file>
     <file>bundles/commands.png</file>
-    <file>icons/Prymatex_Logo.png</file>
     <file>bundles/drag-commands.png</file>
     <file>bundles/languages.png</file>
     <file>bundles/macros.png</file>
@@ -102,11 +100,6 @@
     <file>bundles/snippets.png</file>
     <file>bundles/template-files.png</file>
     <file>bundles/templates.png</file>
-  </qresource>
-  <qresource prefix="modes">
-    <file>modes/overwrite.png</file>
-    <file>modes/snippet.png</file>
-    <file>modes/multicursor.png</file>
   </qresource>
   <qresource prefix="editor">
     <file>sidebar/bookmark-flag.png</file>
@@ -116,6 +109,8 @@
     <file>sidebar/folding-top.png</file>
   </qresource>
   <qresource prefix="images">
+    <file>prymatex/logo.png</file>
+    <file>prymatex/splash.svg</file>
     <file>prymatex/Prymatex_Splash.svg</file>
   </qresource>
 </RCC>

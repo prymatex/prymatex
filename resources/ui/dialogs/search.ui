@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>482</width>
-    <height>260</height>
+    <height>263</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -18,6 +18,10 @@
   </property>
   <property name="windowTitle">
    <string>Search</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../resources.qrc">
+    <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">

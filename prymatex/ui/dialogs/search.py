@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/search.ui'
 #
-# Created: Tue Apr 24 15:08:03 2012
+# Created: Tue May  8 16:27:38 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,6 +20,9 @@ class Ui_SearchDialog(object):
         SearchDialog.setObjectName(_fromUtf8("SearchDialog"))
         SearchDialog.resize(482, 260)
         SearchDialog.setMinimumSize(QtCore.QSize(482, 0))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        SearchDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(SearchDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -124,15 +127,15 @@ class Ui_SearchDialog(object):
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)
         self.buttonSearch = QtGui.QPushButton(SearchDialog)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-find.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonSearch.setIcon(icon)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-find.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonSearch.setIcon(icon1)
         self.buttonSearch.setObjectName(_fromUtf8("buttonSearch"))
         self.horizontalLayout_2.addWidget(self.buttonSearch)
         self.buttonCancel = QtGui.QPushButton(SearchDialog)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonCancel.setIcon(icon1)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonCancel.setIcon(icon2)
         self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
         self.horizontalLayout_2.addWidget(self.buttonCancel)
         self.verticalLayout.addLayout(self.horizontalLayout_2)

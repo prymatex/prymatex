@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/treewidget.ui'
 #
-# Created: Thu Feb 23 19:35:57 2012
+# Created: Tue May  8 16:27:38 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,6 +20,9 @@ class Ui_TreeWidgetDialog(object):
         TreeWidgetDialog.setObjectName(_fromUtf8("TreeWidgetDialog"))
         TreeWidgetDialog.resize(700, 433)
         TreeWidgetDialog.setMinimumSize(QtCore.QSize(700, 433))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        TreeWidgetDialog.setWindowIcon(icon)
         self.verticalLayout_3 = QtGui.QVBoxLayout(TreeWidgetDialog)
         self.verticalLayout_3.setSpacing(2)
         self.verticalLayout_3.setMargin(0)
@@ -68,3 +71,4 @@ class Ui_TreeWidgetDialog(object):
         TreeWidgetDialog.setWindowTitle(_('Dialog'))
         self.textLabelTitle.setText(_('TextLabel'))
 
+from prymatex import resources_rc

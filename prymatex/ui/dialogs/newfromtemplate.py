@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/newfromtemplate.ui'
 #
-# Created: Wed Dec 28 19:06:06 2011
+# Created: Tue May  8 16:27:38 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,6 +20,9 @@ class Ui_NewFromTemplateDialog(object):
         NewFromTemplateDialog.setObjectName(_fromUtf8("NewFromTemplateDialog"))
         NewFromTemplateDialog.setWindowModality(QtCore.Qt.WindowModal)
         NewFromTemplateDialog.resize(450, 115)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        NewFromTemplateDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(NewFromTemplateDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -56,15 +59,15 @@ class Ui_NewFromTemplateDialog(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.buttonCreate = QtGui.QPushButton(NewFromTemplateDialog)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonCreate.setIcon(icon)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonCreate.setIcon(icon1)
         self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
         self.horizontalLayout.addWidget(self.buttonCreate)
         self.buttonCancel = QtGui.QPushButton(NewFromTemplateDialog)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonCancel.setIcon(icon1)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.buttonCancel.setIcon(icon2)
         self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
         self.horizontalLayout.addWidget(self.buttonCancel)
         self.verticalLayout.addLayout(self.horizontalLayout)

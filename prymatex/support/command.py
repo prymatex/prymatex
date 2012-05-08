@@ -86,9 +86,11 @@ class PMXCommand(PMXBundleItem):
             return self.output
     
     def beforeExecute(self, processor):
-        beforeMethod = getattr(processor, self.beforeRunningCommand) if hasattr(self, 'beforeRunningCommand') and self.beforeRunningCommand is not None else None
-        if beforeMethod in [None, 'nop']: return True
-        return beforeMethod()
+        beforeMethod = None
+        if self.beforeRunningCommand is not None:
+            beforeMethod  = getattr(processor, self.beforeRunningCommand)
+            return beforeMethod()
+        return True
 
     def execute(self, processor):
         if self.beforeExecute(processor): 

@@ -45,7 +45,7 @@ class PMXApplication(QtGui.QApplication):
         self.aboutToQuit.connect(self.closePrymatex)
 
     def loadGraphicalUserInterface(self):
-        splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/Prymatex_Splash.svg"))
+        splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/splash.svg"))
         splash.show()
         try:
             
