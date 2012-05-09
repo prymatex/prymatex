@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/newfromtemplate.ui'
+# Form implementation generated from reading ui file 'resources\ui\dialogs\newfromtemplate.ui'
 #
-# Created: Tue May  8 16:27:38 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed May 09 07:32:31 2012
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -21,7 +21,7 @@ class Ui_NewFromTemplateDialog(object):
         NewFromTemplateDialog.setWindowModality(QtCore.Qt.WindowModal)
         NewFromTemplateDialog.resize(450, 115)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         NewFromTemplateDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(NewFromTemplateDialog)
         self.verticalLayout.setSpacing(2)

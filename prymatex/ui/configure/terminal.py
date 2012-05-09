@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/configure/terminal.ui'
+# Form implementation generated from reading ui file 'resources\ui\configure\terminal.ui'
 #
-# Created: Sun Feb 26 21:17:27 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed May 09 07:32:31 2012
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 

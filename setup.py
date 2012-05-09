@@ -49,7 +49,7 @@ class QtBuild(build):
             uic.compileUi(ui_file, fp)
             fp.close()
         except Exception as e:
-            self.warn('Unable to compile user interface %s: %s', py_file, e)
+            self.warn('Unable to compile user interface %s: %s' % (py_file, e))
             if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
             return

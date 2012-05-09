@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
+# Form implementation generated from reading ui file 'resources\ui\dockers\filesystem.ui'
 #
-# Created: Tue Apr 24 15:08:03 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed May 09 07:32:31 2012
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/newproject.ui'
+# Form implementation generated from reading ui file 'resources\ui\dialogs\newproject.ui'
 #
-# Created: Tue May  8 16:27:38 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed May 09 07:32:31 2012
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -19,9 +19,9 @@ class Ui_NewProjectDialog(object):
     def setupUi(self, NewProjectDialog):
         NewProjectDialog.setObjectName(_fromUtf8("NewProjectDialog"))
         NewProjectDialog.setWindowModality(QtCore.Qt.WindowModal)
-        NewProjectDialog.resize(450, 210)
+        NewProjectDialog.resize(450, 211)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         NewProjectDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(NewProjectDialog)
         self.verticalLayout.setSpacing(2)

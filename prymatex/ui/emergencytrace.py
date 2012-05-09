@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/emergencytrace.ui'
+# Form implementation generated from reading ui file 'resources\ui\emergencytrace.ui'
 #
-# Created: Sun Feb 26 21:05:16 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed May 09 07:32:31 2012
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 

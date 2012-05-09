@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources/ui/dialogs/selector.ui'
+# Form implementation generated from reading ui file 'resources\ui\dialogs\selector.ui'
 #
-# Created: Tue May  8 16:27:38 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Wed May 09 07:32:31 2012
+#      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -21,7 +21,7 @@ class Ui_SelectorDialog(object):
         SelectorDialog.resize(600, 371)
         SelectorDialog.setMinimumSize(QtCore.QSize(600, 371))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         SelectorDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(SelectorDialog)
         self.verticalLayout.setSpacing(2)
