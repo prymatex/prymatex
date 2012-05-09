@@ -53,7 +53,7 @@ class QtBuild(build):
             if not os.path.exists(py_file) or not file(py_file).read():
                 raise SystemExit(1)
             return
-        
+
     def compile_ui(self, ui_file, py_file = None):
         """Compile the .ui files to python modules."""
         # Search for pyuic4 in python bin dir, then in the $Path.

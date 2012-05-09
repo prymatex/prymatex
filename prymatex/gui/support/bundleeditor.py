@@ -8,6 +8,8 @@ from prymatex.gui.support import widgets
 from prymatex.core.plugin import PMXBaseWidgetComponent
 
 class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
+    BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada
+    
     def __init__(self, application):
         QtGui.QDialog.__init__(self)
         PMXBaseWidgetComponent.__init__(self)
@@ -206,6 +208,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     #==========================================================
     # Tree View
     #==========================================================
+    def getEditorBase(self):
+        return self.editors[self.BASE_EDITOR]
+
     def getEditorForTreeItem(self, treeItem):
         if not treeItem.isRootNode() and treeItem.TYPE in self.indexes:
             index = self.indexes[treeItem.TYPE]
@@ -223,10 +228,14 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         current = self.stackedWidget.currentWidget()
         self.labelTitle.setText(current.title)
         
-    def on_treeView_Activated(self, index):
-        treeItem = self.proxyTreeModel.node(index)
-        self.editTreeItem(treeItem)
-
+    def on_treeView_selectionChanged(self, selected, deselected):
+        indexes = selected.indexes()
+        if indexes:
+            treeItem = self.proxyTreeModel.node(indexes[0])
+            self.editTreeItem(treeItem)
+        else:
+            self.editTreeItem(None)
+            
     def configTreeView(self, manager = None):
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
@@ -234,8 +243,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.treeView.setModel(self.proxyTreeModel)
         self.treeView.setHeaderHidden(True)
         self.treeView.setAnimated(True)
-        self.treeView.activated.connect(self.on_treeView_Activated)
-        self.treeView.pressed.connect(self.on_treeView_Activated)
+        self.treeView.selectionModel().selectionChanged.connect(self.on_treeView_selectionChanged)
 
     #===========================================================
     # Activation
@@ -280,7 +288,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
 
     def editTreeItem(self, treeItem):
         self.saveChanges()
-        editor = self.getEditorForTreeItem(treeItem)
+        editor = self.getEditorForTreeItem(treeItem) if treeItem is not None else self.getEditorBase()
         if editor != None:
             editor.edit(treeItem)
             self.setCurrentEditor(editor)

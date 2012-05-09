@@ -52,63 +52,16 @@ from PyQt4.QtCore import QSocketNotifier
 
 import select
 
-#select.POLLIN = 1
-#select.POLLPRI = 2
-#select.POLLOUT = 4
-#select.POLLERR = 8
-#select.POLLHUP = 16
-#select.POLLNVAL = 32
+select.POLLIN = 1
+select.POLLPRI = 2
+select.POLLOUT = 4
+select.POLLERR = 8
+select.POLLHUP = 16
+select.POLLNVAL = 32
 
 __version__ = ".2"
 
-try:
-    #Python 2.4 has a deque
-    from collections import deque
-except:
-    #Python 2.3 and earlier don't
-    #
-    #limited deque, trimmed version of Raymond Hettinger's recipe:
-    #http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/259179
-    class deque(object):
-        def __init__(self, iterable=()):
-            self.left = self.right = 0
-            self.data = {}
-            self.extend(iterable)         
-        
-        def append(self, x):
-            self.data[self.right] = x
-            self.right += 1
-        
-        def appendleft(self, x):
-            self.left -= 1        
-            self.data[self.left] = x
-        
-        def pop(self):
-            if self.left == self.right:
-                raise IndexError('cannot pop from empty deque')
-            self.right -= 1
-            elem = self.data[self.right]
-            del self.data[self.right]         
-            return elem
-        
-        def popleft(self):
-            if self.left == self.right:
-                raise IndexError('cannot pop from empty deque')
-            elem = self.data[self.left]
-            del self.data[self.left]
-            self.left += 1
-            return elem
-        
-        def clear(self):
-            self.data.clear()
-            self.left = self.right = 0
-        
-        def extend(self, iterable):
-            for elem in iterable:
-                self.append(elem)
-        
-        def __len__(self):
-            return self.right - self.left
+from collections import deque
 
 reserved_names = dict.fromkeys(('com1 com2 com3 com4 com5 com6 com7 com8 com9 '
                                 'lpt1 lpt2 lpt3 lpt4 lpt5 lpt6 lpt7 lpt8 lpt9 '
@@ -157,7 +110,6 @@ class ParseHeaders(dict):
     
     def get(self,key,default=""):
         return self._ci_dict.get(key.lower(),default)
-#
 class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHandler):
     if 1:
         server_version = "SimpleAsyncHTTPServer/"+__version__
@@ -170,9 +122,9 @@ class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHand
         #sent.
         use_buffer = False
         use_favicon = True
-
+    
     def __init__(self, conn, addr, server):
-        asynchat.async_chat.__init__(self,conn)
+        asynchat.async_chat.__init__(self, conn)
         self.client_address = addr
         self.connection = conn
         self.server = server
@@ -188,8 +140,13 @@ class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHand
         self.request_version = "HTTP/1.1"
         self.code = None
         # buffer the response and headers to avoid several calls to select()
+
+    def update_b(self, fsize):
+        if fsize > 1048576:
+            self.use_buffer = True
+            self.blocksize = 131072
     
-    def collect_incoming_data(self,data):
+    def collect_incoming_data(self, data):
         """Collect the data arriving on the connexion"""
         if not data:
             self.ac_in_buffer = ""
@@ -255,7 +212,12 @@ class RequestHandler(asynchat.async_chat, SimpleHTTPServer.SimpleHTTPRequestHand
             # to read them all into memory at the same time...may leave a
             # file handle open for longer than is really desired, but it does
             # make it able to handle files of unlimited size.
-            self.log_request(self.code, os.fstat(f.fileno())[6])
+            try:
+                size = os.fstat(f.fileno())[6]
+            except AttributeError:
+                size = len(f.getvalue())
+            self.update_b(size)
+            self.log_request(self.code, size)
             self.outgoing.append(f)
         else:
             self.log_request(self.code)
@@ -449,7 +411,7 @@ def make_handler(flag):
         if obj is None:
             print "asyncore handler called for unknown socket", fd
             return
- 
+        
         asyncore.readwrite(obj, flag)
  
     return handler
@@ -462,8 +424,8 @@ class Server(asyncore.dispatcher):
         self.port = port
         self.handler = handler
 
-        asyncore.dispatcher.__init__(self, map=my_socket_map)
-        self.create_socket (socket.AF_INET, socket.SOCK_STREAM)
+        asyncore.dispatcher.__init__(self, map = my_socket_map)
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.set_reuse_addr()
         self.bind ((ip, port))
@@ -474,9 +436,9 @@ class Server(asyncore.dispatcher):
         #     specifies the maximum number of queued connections and should
         #     be at least 1; the maximum value is system-dependent (usually
         #     5).
-        self.listen (5)
+        self.listen(5)
 
-    def handle_accept (self):
+    def handle_accept(self):
         try:
             conn, addr = self.accept()
         except socket.error:
@@ -487,7 +449,7 @@ class Server(asyncore.dispatcher):
             return
         # creates an instance of the handler class to handle the request/response
         # on the incoming connexion
-        self.handler(conn,addr,self)
+        self.handler(conn, addr, self)
 
 favicon = zlib.decompress(
 'x\x9c\xb5\x93\xcdN\xdb@\x14\x85\x07\x95\x07\xc8\x8amYv\xc9#\xe4\x11x\x04\x96}'

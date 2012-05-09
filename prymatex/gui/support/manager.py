@@ -21,6 +21,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
         #The qt menus where a bundle menu is added
         self.containers = []
         self.manager.bundlePopulated.connect(self.on_manager_bundlePopulated)
+        self.manager.bundleAdded.connect(self.on_manager_bundlePopulated)
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
         self.manager.bundleChanged.connect(self.on_manager_bundleChanged)
         self.manager.bundleRemoved.connect(self.on_manager_bundleRemoved)
@@ -73,7 +74,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
             if index < len(currentActions) - offset:
                 container.insertMenu(currentActions[offset + index], menu)
             else:
-                containter.addMenu(menu)
+                container.addMenu(menu)
     
     def removeFromContainers(self, menu):
         for container, offset in self.containers:
@@ -88,10 +89,13 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 
     def on_manager_bundleChanged(self, bundle):
         menu = self.menus.get(bundle, None)
+        #ACA un assert no puede ser que no tenga menu el bundle
         if menu is not None:
             title = bundle.buildBundleAccelerator()
             if title != menu.title():
+                self.removeFromContainers(menu)
                 menu.setTitle(title)
+                self.addToContainers(menu)
             if bundle.enabled != menu.menuAction().isVisible():
                 menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
             if id(bundle.mainMenu) != menu.ID:
@@ -106,7 +110,8 @@ class PMXBundleMenuGroup(QtCore.QObject):
             self.addBundle(bundle)
 
     def on_manager_bundleRemoved(self, bundle):
-        self.removeFromContainers(self.menus[bundle])
+        if bundle in self.menus:
+            self.removeFromContainers(self.menus[bundle])
 
 class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #Signals for bundle
