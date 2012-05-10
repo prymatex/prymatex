@@ -117,6 +117,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         #Remove indexes
         for i in xrange(start, end + 1):
             sIndex = self.sourceModel().index(i, 0, parent)
+            print "Se va a quitar %s" % (self.sourceModel().node(sIndex).nodeName )
             if sIndex in self.__indexMap:
                 self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(sIndex), self.__indexMap.index(sIndex))
                 self.__indexMap.remove(sIndex)

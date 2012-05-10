@@ -21,7 +21,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
         #The qt menus where a bundle menu is added
         self.containers = []
         self.manager.bundlePopulated.connect(self.on_manager_bundlePopulated)
-        self.manager.bundleAdded.connect(self.on_manager_bundlePopulated)
+        self.manager.bundleAdded.connect(self.on_manager_bundleAdded)
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
         self.manager.bundleChanged.connect(self.on_manager_bundleChanged)
         self.manager.bundleRemoved.connect(self.on_manager_bundleRemoved)
@@ -50,10 +50,6 @@ class PMXBundleMenuGroup(QtCore.QObject):
     def buildBundleMenu(self, bundle):
         menu = QtGui.QMenu(bundle.buildBundleAccelerator())
         menu.ID = id(bundle.mainMenu)
-        if bundle.mainMenu is not None:
-            submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
-            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
-            self.buildMenu(items, menu, submenus, menu)
         return menu
 
     def addBundle(self, bundle):
@@ -104,10 +100,17 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
                 self.buildMenu(items, menu, submenus, menu)
                 menu.ID = id(bundle.mainMenu)
-                
+
+    def on_manager_bundleAdded(self, bundle):
+        assert bundle not in self.menus, "The bundle is in menus"
+        self.addBundle(bundle)
+
     def on_manager_bundlePopulated(self, bundle):
-        if bundle not in self.menus:
-            self.addBundle(bundle)
+        menu = self.menus.get(bundle)
+        if bundle.mainMenu is not None:
+            submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+            self.buildMenu(items, menu, submenus, menu)
 
     def on_manager_bundleRemoved(self, bundle):
         if bundle in self.menus:
