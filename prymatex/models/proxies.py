@@ -100,9 +100,16 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     # source model handler
     #=========================================
     def on_sourceModel_dataChanged(self, topLeft, bottomRight):
-        #Remove indexes
+        #Cambiaron los datos tengo que ponerlos en funcion del comparableValue
         if topLeft in self.__indexMap:
-            self.dataChanged.emit(self.mapFromSource(topLeft), self.mapFromSource(topLeft))
+            self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(topLeft), self.__indexMap.index(topLeft))
+            self.__indexMap.remove(topLeft)
+            self.endRemoveRows()
+            position = bisect_key(self.__indexMap, topLeft, lambda index: self.comparableValue(index))
+            self.beginInsertRows(QtCore.QModelIndex(), position, position)
+            self.__indexMap.insert(position, topLeft)
+            self.endInsertRows()
+            #self.dataChanged.emit(self.mapFromSource(topLeft), self.mapFromSource(topLeft))
     
     def on_sourceModel_rowsInserted(self, parent, start, end):
         for i in xrange(start, end + 1):
@@ -117,7 +124,6 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         #Remove indexes
         for i in xrange(start, end + 1):
             sIndex = self.sourceModel().index(i, 0, parent)
-            print "Se va a quitar %s" % (self.sourceModel().node(sIndex).nodeName )
             if sIndex in self.__indexMap:
                 self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(sIndex), self.__indexMap.index(sIndex))
                 self.__indexMap.remove(sIndex)
