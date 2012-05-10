@@ -77,7 +77,7 @@ class QtBuild(build):
             os.system(command % (rc_file, py_file))
         except Exception as e:
             self.warn('Unable to compile resources %s: %s', py_file, e)
-            if not os.path.exists(py_file) or not file(py_file).read():
+            if not os.path.exists(py_file) or not open(py_file).read():
                 raise SystemExit(1)
             return    
         

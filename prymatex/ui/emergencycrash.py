@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources\ui\emergencycrash.ui'
+# Form implementation generated from reading ui file 'resources/ui/emergencycrash.ui'
 #
-# Created: Wed May 09 07:32:31 2012
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Thu May 10 16:16:04 2012
+#      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
 
