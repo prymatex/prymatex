@@ -10,6 +10,7 @@ from prymatex import resources
 class PMXTerminalSettings(QtGui.QWidget, PMXSettingTreeNode, Ui_Terminal):
     TITLE = "Terminal"
     ICON = resources.getIcon("terminal")
+    
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "terminal", settingGroup)
@@ -32,7 +33,11 @@ class PMXTerminalSettings(QtGui.QWidget, PMXSettingTreeNode, Ui_Terminal):
         del t
         
     def loadSettings(self):
-        print "cargando defaults"
+        colorScheme = self.settingGroup.value('colorScheme')
+        self.comboColorScheme.setCurrentIndex(self.comboColorScheme.findData(colorScheme))    
+        font = self.settingGroup.value('font')
+        self.lineFont.setFont(font)
+        self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
         
     @QtCore.pyqtSlot(int)
     def on_comboColorScheme_activated(self, index):

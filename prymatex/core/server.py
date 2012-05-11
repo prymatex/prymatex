@@ -24,7 +24,6 @@ class PrymatexServer(QtCore.QObject):
         args = command.get("args", [])
         kwargs = command.get("kwargs", {})
         
-        print args, kwargs
         #TODO: Filtro todo lo que sea None asumo que las signaturas de los metodos ponene los valores por defecto
         # esto tendria que ser controlado de una mejor forma
         kwargs = dict(filter(lambda (key, value): value != None, kwargs.iteritems()))

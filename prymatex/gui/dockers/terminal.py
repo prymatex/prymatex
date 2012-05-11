@@ -26,7 +26,6 @@ class PMXTabTerminals(QtGui.QTabWidget):
         self.setupSignals()
         self.setTabsClosable(True)
         self.setMinimumHeight(200)
-        self.addTerminal()
     
     def setupSignals(self):    
         self.tabCloseRequested.connect(lambda index, s = self: s.removeTab(index))
@@ -113,10 +112,8 @@ class PMXTabTerminals(QtGui.QTabWidget):
         term.setScrollBarPosition(QTermWidget.ScrollBarRight)
         term.finished.connect(self.on_terminal_finished)
         
-        color = random.choice(term.availableColorSchemes())
-        term.setColorScheme(color)
-        #TODO: Configuracion
-        term.setTerminalFont(QtGui.QFont("Monospace", 9))
+        term.setColorScheme(self.parent().colorScheme)
+        term.setTerminalFont(self.parent().font)
         return term
     
     def launchCustomCommandInTerminal(self):
@@ -231,6 +228,10 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     def colorScheme(self, scheme):
         print scheme
     
+    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
+    def font(self, font):
+        print font
+
     terminalAvailable = True
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
@@ -243,6 +244,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
+        self.widget().addTerminal()
     
     #====================================================
     # ZMQ External actions
@@ -281,7 +283,6 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     @property
     def terminal(self):
         return self.widget().currentWidget()
-    
     
     @classmethod
     def contributeToSettings(cls):
