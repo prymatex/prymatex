@@ -578,18 +578,27 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
                 self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
 
-    def getBracesPairs(self, cursor = None, forward = False):
+    def currentBracesPairs(self, cursor = None, direction = "both"):
         """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
-        cursor = QtGui.QTextCursor(cursor or self.textCursor())
-        if not cursor.hasSelection():
-            #poner seleccion en funcion del forward
-            cursor.movePosition(forward and QtGui.QTextCursor.NextCharacter or QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-        #Find selected
-        for index in [0, 1]:
-            if self._currentBraces[index] is not None and cursor.selectionStart() == self._currentBraces[index].selectionStart() and cursor.selectionEnd() == self._currentBraces[index].selectionEnd():
-                opposite = QtGui.QTextCursor(self._currentBraces[index + 2]) if self._currentBraces[index + 2] is not None else None
-                return (cursor, opposite)
-        return (None, None)
+        cursor = cursor or self.textCursor()
+        brace1, brace2 = (None, None)
+        if cursor.hasSelection():
+            for index in [0, 1]:
+                if self._currentBraces[index] is not None and cursor.selectedText() == self._currentBraces[index].selectedText():
+                    brace1 = QtGui.QTextCursor(self._currentBraces[index + 2]) if self._currentBraces[index + 2] is not None else None
+                    brace2 = cursor
+                    break
+        else:
+            #print map(lambda c: c is not None and c.selectedText() or "None", self._currentBraces)
+            if direction in ("left", "both"):
+                brace1 = self._currentBraces[0]
+                brace2 = self._currentBraces[2]
+            if (brace1 is None or brace2 is None) and direction in ("right", "both"):
+                brace1 = self._currentBraces[1]
+                brace2 = self._currentBraces[3]
+        if (brace1 is not None and brace2 is not None) and brace1.selectionStart() > brace2.selectionStart():
+            return (brace2, brace1)
+        return (brace1, brace2)
 
     def beforeBrace(self, cursor):
         return self._currentBraces[1] is not None and self._currentBraces[1].position() - 1 == cursor.position()

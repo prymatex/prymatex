@@ -125,7 +125,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         return contextMenu
 
     def extendFileSystemItemMenu(self, menu, node):
-        utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete])
+        utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
         utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal, "--properties", self.actionProperties], section = -1)
         if isinstance(node, PMXProject):
             utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
