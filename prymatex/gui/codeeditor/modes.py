@@ -92,8 +92,10 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             #Remove text
             self.selectSlice(self.editor.snippetProcessor.startPosition(), self.editor.snippetProcessor.endPosition() - length)
             self.editor.textCursor().removeSelectedText()
+            #TODO: Hacer esto de purgar de una mejor forma
             self.editor.symbolListModel._purge_blocks()
             self.editor.folding._purge_blocks()
+            self.editor.alreadyTypedWords._purge_blocks()
             
             #Insert snippet
             self.editor.snippetProcessor.render()
@@ -395,6 +397,14 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
                 newPrefix = cursor.selectedText()
+                if not self.completionModel().hasIndex(1, 0):
+                    #Me queda solo una sugerencia, veamos si no es lo que ya esta tipeado y en modo texto :)
+                    sIndex = self.completionModel().mapToSource(self.completionModel().index(0, 0))
+                    suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
+                    if isinstance(suggestion, basestring) and suggestion == newPrefix:
+                        #Se termino
+                        self.popup().setVisible(False)
+                        return
                 self.setCompletionPrefix(newPrefix)
                 self.complete(self.editor.cursorRect())
             else:
