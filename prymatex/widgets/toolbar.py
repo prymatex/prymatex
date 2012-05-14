@@ -66,6 +66,9 @@ class DockWidgetToolBar(QtGui.QToolBar):
         if not self.isHidden():
             self._multiSetVisible(list(self._dockWidgets()), state)
 
+    def hasDockers(self):
+        return self.actions() > 1
+        
     def removeDockers(self):
         actions = self.actions()[1:]
         for action in actions:

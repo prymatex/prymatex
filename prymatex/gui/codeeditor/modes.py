@@ -416,20 +416,18 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
+        cursor = self.editor.textCursor()
+        cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
         if isinstance(suggestion, dict):
             if 'display' in suggestion:
-                self.editor.textCursor().insertText(suggestion['display'][len(self.completionPrefix()):])
+                cursor.insertText(suggestion['display'])
             elif 'title' in suggestion:
-                self.editor.textCursor().insertText(suggestion['title'][len(self.completionPrefix()):])
+                cursor.insertText(suggestion['title'])
         elif isinstance(suggestion, PMXBundleTreeNode):
-            cursor = self.editor.textCursor()
-            cursor.beginEditBlock()
-            for _ in xrange(len(self.completionPrefix())):
-                self.editor.textCursor().deletePreviousChar()
-            cursor.endEditBlock()
+            cursor.removeSelectedText()
             self.editor.insertBundleItem(suggestion)
         else:
-            self.editor.textCursor().insertText(suggestion[len(self.completionPrefix()):])
+            cursor.insertText(suggestion)
 
     def complete(self, rect):
         self.popup().setCurrentIndex(self.completionModel().index(0, 0))

@@ -233,6 +233,7 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot(bool)
     def on_actionFullscreen_toggled(self, checked):
+        self.toggleDockToolBarVisibility()
         if checked:
             self.showFullScreen()
         else:

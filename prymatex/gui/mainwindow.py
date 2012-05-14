@@ -100,6 +100,13 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             self.addToolBar(DockWidgetToolBar.DOCK_AREA_TO_TB[dockArea], toolBar)
             toolBar.hide()
 
+    def toggleDockToolBarVisibility(self):
+        for toolBar in self.dockToolBars.values():
+            if toolBar.isVisible():
+                toolBar.hide()
+            else:
+                toolBar.show()
+
     #============================================================
     # Componer la mainWindow
     #============================================================
