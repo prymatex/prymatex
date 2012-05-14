@@ -23,7 +23,7 @@ class PMXCommand(PMXBundleItem):
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'
     PATTERNS = ['*.tmCommand', '*.plist']
-    exit_codes = {
+    EXIT_CODES = {
                   200: 'discard',
                   201: 'replaceSelectedText',
                   202: 'replaceDocument',
@@ -78,8 +78,8 @@ class PMXCommand(PMXBundleItem):
             return self.command
     
     def getOutputHandler(self, code):
-        if self.output != 'showAsHTML' and code in self.exit_codes:
-            return self.exit_codes[code]
+        if self.output != 'showAsHTML' and code in self.EXIT_CODES:
+            return self.EXIT_CODES[code]
         elif code != 0:
             return "error"
         else:
