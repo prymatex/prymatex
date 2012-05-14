@@ -218,7 +218,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.logger.debug("Update Words")
         oldWords = set(map(lambda (index, word): word, userData.words))
         newWords = set(map(lambda (index, word): word, words))
-        #Quitar el blocke de las palabras anteriores
+        #Quitar el block de las palabras anteriores
         self.alreadyTypedWords.removeWordsBlock(block, oldWords.difference(newWords))
         #Agregar las palabras nuevas
         self.alreadyTypedWords.addWordsBlock(block, newWords.difference(oldWords))
