@@ -237,6 +237,7 @@ class PMXAlreadyTypedWords(object):
         words = {}
         for word, blocks in self.words.iteritems():
             words[word] = filter(validWordBlock, blocks)
+        self.words = words
 
     def on_editor_blocksRemoved(self):
         self._purge_blocks()
