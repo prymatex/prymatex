@@ -1275,14 +1275,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 title = "%s \t&%d" % (item, index)
                 icon = QtGui.QIcon()
             menu.addAction(icon, title)
-        if cursorPosition:
-            point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
-        else:
-            point = self.mainWindow.cursor().pos()
+
         def menu_aboutToHide():
             activeActionIndex = menu.actions().index(menu.activeAction()) if menu.activeAction() else -1
-            print activeActionIndex
+            callback(activeActionIndex)
         menu.aboutToHide.connect(menu_aboutToHide)
+        
+        point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight()) if cursorPosition else self.mainWindow.cursor().pos()
         menu.popup(point)
     
     # Default Context Menus
