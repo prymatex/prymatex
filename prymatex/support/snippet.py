@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-    Snippte's module
-'''
+"""Snippte's module
+"""
 import re, logging
 import uuid as uuidmodule
 
@@ -749,7 +748,8 @@ class PMXSnippet(PMXBundleItem):
     def next(self):
         if self.index < len(self.taborder) - 1:
             self.index += 1
-        while self.index < len(self.taborder) and self.taborder[self.index] != None and self.taborder[self.index].disable:
+        #Fix disabled holders and None (last position in snippet)
+        while self.index < len(self.taborder) - 1 and self.taborder[self.index] is not None and self.taborder[self.index].disable:
             self.index += 1
         return self.taborder[self.index]
 
@@ -761,7 +761,7 @@ class PMXSnippet(PMXBundleItem):
         return self.taborder[self.index]
     
     def write(self, index, text):
-        if index < len(self.taborder) and self.taborder[index] != None and hasattr(self.taborder[index], "insert"):
+        if index < len(self.taborder) and self.taborder[index] is not None and hasattr(self.taborder[index], "insert"):
             self.taborder[index].clear()
             self.taborder[index].insert(text, 0)
     
