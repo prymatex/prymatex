@@ -8,14 +8,8 @@ Getting the code
 Grab the code from github typing the following line in
 you terminal::
 
-	git clone https://github.com/D3f0/prymatex
+	git clone https://github.com/prymatex/prymatex
 	
-This is the original repository, but you can check
-bleeding edge features, checking out diego's repo
-placed at::
-
-	https://github.com/diegomvh/prymatex
-
 Prymatex comes with a set of bundles taken from TextMate's
 repo::
 	
@@ -36,6 +30,8 @@ In order to install Prymatex you need to make sure you have:
 	
 	* sip 4.12.4
 	
+         * qtermwidget (https://github.com/prymatex/qtermwidget prymatex fork of https://gitorious.org/qtermwidget)
+
 Additionally you should install pip requirements::
 
 	pip install -r requirements.txt 
