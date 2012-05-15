@@ -19,6 +19,7 @@ class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
         zmq_version = self.getZMQVersion()
         pony_version = self.getPonygurumaVersion()
         pyqt_version = Qt.qVersion()
+        ipython_version = self.getIPythonVersion()
         self.textInformation.setHtml('''
             <style>
                 dt {{ font-weight: bold; }}
@@ -29,9 +30,10 @@ class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
                 <dt>Source</dt><dd><a href="{pmx_url}">{pmx_source}</a></dd>
                 <dt>Version</dt><dd>{pmx_version}</dd>
                 <dt>Command Line</dt><dd>{commandline}</dd>
-                <dt>Ponyguruma Regex Library</dt><dd>{pony_version}</dd>
-                <dt>ZMQ Version</dt><dd>{zmq_version}</dd>
                 <dt>PyQt4</dt><dd>{pyqt_version}</dd>
+                <dt>Ponyguruma Regex Library</dt><dd>{pony_version}</dd>
+                <dt>IPython</dt><dd>{ipython_version}</dd>
+                <dt>ZMQ Version</dt><dd>{zmq_version}</dd>
            </dl>
         '''.format(**locals()))
     
@@ -57,3 +59,10 @@ class PMXAboutDialog(Ui_AboutDialog, QtGui.QDialog):
             return "Not installed."
         return "Error"
             
+    def getIPythonVersion(self):
+        try:
+            import IPython
+            return IPython.__version__
+        except ImportError:
+            return "Not installed."
+        return "Error"

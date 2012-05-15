@@ -50,7 +50,7 @@ class QtBuild(build):
             fp.close()
         except Exception as e:
             self.warn('Unable to compile user interface %s: %s' % (py_file, e))
-            if not os.path.exists(py_file) or not file(py_file).read():
+            if not os.path.exists(py_file) or not open(py_file).read():
                 raise SystemExit(1)
             return
 
