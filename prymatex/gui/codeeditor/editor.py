@@ -1268,19 +1268,21 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
         menu = QtGui.QMenu(self)
         for index, item in enumerate(menuItems, 1):
-            action = QtGui.QAction("%s \t&%d" % (item["title"], index), menu)
-            if "image" in item:
-                action.setIcon(resources.getIcon(item["image"]))
-            receiver = lambda index = index: callback(index - 1)
-            self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
-            menu.addAction(action)
+            if isinstance(item, dict):
+                title = "%s \t&%d" % (item["title"], index)
+                icon = resources.getIcon(item["image"]) if "image" in item else QtGui.QIcon()
+            elif isinstance(item,  basestring):
+                title = "%s \t&%d" % (item, index)
+                icon = QtGui.QIcon()
+            menu.addAction(icon, title)
         if cursorPosition:
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         else:
             point = self.mainWindow.cursor().pos()
-        def menu_activated(index):
-            print index
-        menu.activated.connect(menu_activated)
+        def menu_aboutToHide():
+            activeActionIndex = menu.actions().index(menu.activeAction()) if menu.activeAction() else -1
+            print activeActionIndex
+        menu.aboutToHide.connect(menu_aboutToHide)
         menu.popup(point)
     
     # Default Context Menus

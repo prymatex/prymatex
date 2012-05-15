@@ -284,7 +284,7 @@ class MainWindowActions(object):
         except AttributeError as e:
             QtGui.QMessageBox.information(self, "Screenshoot", 
                 "%s saved" % fileName)
-            
+        
     def setMainWindowAsActionParent(self):
         # Don't know if this brings side effects
         for name in (name for name in dir(self) if name.startswith('action')):
