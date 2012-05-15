@@ -1278,6 +1278,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             point = self.viewport().mapToGlobal(self.cursorRect(self.textCursor()).bottomRight())
         else:
             point = self.mainWindow.cursor().pos()
+        def menu_activated(index):
+            print index
+        menu.activated.connect(menu_activated)
         menu.popup(point)
     
     # Default Context Menus

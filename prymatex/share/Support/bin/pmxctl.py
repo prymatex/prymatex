@@ -339,8 +339,8 @@ class CommandHandler(object):
         
         command = {"name": "async_window", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
         
     def update_window(self, options, args):
         """docstring for update_window"""
@@ -349,11 +349,24 @@ class CommandHandler(object):
             parameters = sys.stdin.readlines()
             args.append( "".join(parameters))
         
-        command = {"name": "debug", "args": args, "kwargs": {}}
+        command = {"name": "update_window", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
     
+    def modal_window(self, options, args):
+        """docstring for modal_window"""
+        if options.parameters == None:
+            parameters = sys.stdin.readlines()
+            args.append( "".join(parameters))
+        kwargs = {
+            "center": options.center
+        }
+        command = {"name": "modal_window", "args": args, "kwargs": kwargs}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv()
+        sys.stdout.write(value)
+
     def tooltip(self, options, args):
         kwargs = {}
         kwargs["format"] = "html" if options.html else "text"
@@ -362,8 +375,8 @@ class CommandHandler(object):
             args = [ "".join(sys.stdin.readlines()) ]
         command = {"name": "tooltip", "args": args, "kwargs": kwargs}
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
 
     def menu(self, options, args):
         if options.parameters == None:
@@ -372,11 +385,11 @@ class CommandHandler(object):
 
         command = {"name": "menu", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
         
     def popup(self, options, args):
-        if options.suggestions == None:
+        if options.suggestions is None:
             options.suggestions = sys.stdin.readlines()
         
         kwargs = {
@@ -390,14 +403,14 @@ class CommandHandler(object):
         command = {"name": "popup", "args": [ "".join(options.suggestions) ], "kwargs": kwargs}
         
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
         
     def defaults(self, options, args):
         command = {"name": "defaults", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
 
     def images(self, options, args):
         if options.plist == None:
@@ -405,30 +418,33 @@ class CommandHandler(object):
 
         command = {"name": "images", "args": [ "".join(options.plist) ], "kwargs": {}}
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
         
     def alert(self, options, args):
         command = {"name": "alert", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
 
     def open(self, options, urls):
         for url in urls:
             if url.startswith("txmt"):
                 command = {"name": "open", "args": [ url ], "kwargs": {}}
                 self.socket.send_pyobj(command)
-                value = self.socket.recv_pyobj()
-                sys.stdout.write(value["result"])
+                value = self.socket.recv()
+                sys.stdout.write(value)
             else:
                 os.popen("xdg-open %s" % url)
                 
     def debug(self, options, args):
+        if options.parameters == None:
+            parameters = sys.stdin.readlines()
+            args.append( "".join(parameters))
         command = {"name": "debug", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
-        value = self.socket.recv_pyobj()
-        sys.stdout.write(value["result"])
+        value = self.socket.recv()
+        sys.stdout.write(value)
     
 def main(args):
     handler = CommandHandler()
@@ -447,6 +463,8 @@ def main(args):
             handler.async_window(options, args)
         elif options.token:
             handler.update_window(options, args)
+        elif options.modal:
+            handler.modal_window(options, args)
         else:
             handler.debug(options, args)
 

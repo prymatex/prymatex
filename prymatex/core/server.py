@@ -35,24 +35,44 @@ class PrymatexServer(QtCore.QObject):
         try:
             module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
             loadFunction = getattr(module, 'load')
-            loadFunction(self.application)
+            return loadFunction
         except (ImportError, AttributeError), reason:
             #TODO: Manejar estos errores
             raise reason
 
     def sendResult(self, value = None):
-        value = str(value) if value is not None else "ok"
-        #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
-        print "retorno", value        
-        self.socket.send_pyobj({ "result": value })
+        if value is None:
+            value = "ok"
+        if isinstance(value, basestring):
+            value = { "result": value }
+        if isinstance(value, dict):
+            value = plistlib.writePlistToString(value)
+        #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
+        self.socket.send(value)
         
     def async_window(self, nibPath, **kwargs):
         print "async_window: ", nibPath, kwargs
         directory = os.path.dirname(nibPath)
         name = os.path.basename(nibPath)
-        self._load_window(name, directory)
+        window = self._load_window(name, directory)
+        window(self.application)
         self.sendResult("1234")
     
+    def update_window(self, nibPath, **kwargs):
+        print "update_window: ", nibPath, kwargs
+        directory = os.path.dirname(nibPath)
+        name = os.path.basename(nibPath)
+        window = self._load_window(name, directory)
+        self.sendResult("1234")
+
+    def modal_window(self, nibPath, plist, **kwargs):
+        settings = plistlib.readPlistFromString(plist)
+        directory = os.path.dirname(nibPath)
+        name = os.path.basename(nibPath)
+        window = self._load_window(name, directory)
+        result = window(self.application, settings)
+        self.sendResult(result)
+
     def tooltip(self, content, format = "text", transparent = False):
         message = ""
         try:
@@ -66,7 +86,7 @@ class PrymatexServer(QtCore.QObject):
     def menu(self, plist):
         data = plistlib.readPlistFromString(plist)
         def sendSelectedIndex(index):
-            self.sendResult(plistlib.writePlistToString({"selectedIndex": index}))
+            self.sendResult({"selectedIndex": index})
         self.application.currentEditor().showFlatPopupMenu(data["menuItems"], sendSelectedIndex)
 
     def popup(self, suggestions, returnChoice = False, caseInsensitive = True, alreadyTyped = "", staticPrefix = "", additionalWordCharacters = ""):
