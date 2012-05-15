@@ -47,3 +47,6 @@ class FileNotSupported(Exception):
     
 class UserCancelException(Exception):
     pass
+
+class LocationIsNotProject(Exception):
+    pass

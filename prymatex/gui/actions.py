@@ -4,6 +4,7 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
+from prymatex.core import exceptions
 from prymatex.gui import dialogs
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
@@ -77,8 +78,11 @@ class MainWindowActions(object):
     def on_actionImportProject_triggered(self):
         directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.getDirectory())
         if directory:
-            self.application.projectManager.importProject(directory)
-        
+            try:
+                self.application.projectManager.importProject(directory)
+            except exceptions.LocationIsNotProject:
+                QtGui.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
+
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
         self.saveEditor()

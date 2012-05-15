@@ -95,7 +95,10 @@ class PMXProjectManager(QtCore.QObject):
         return project
 
     def importProject(self, directory):
-        project = PMXProject.loadProject(directory, self)
+        try:
+            project = PMXProject.loadProject(directory, self)
+        except exceptions.FileNotExistsException:
+            raise exceptions.LocationIsNotProject()
         self.appendToKnowProjects(project)
 
     def deleteProject(self, project, removeFiles = False):
