@@ -26,21 +26,21 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def __nonzero__(self):
         return bool(self.scopes)
     
-    def getLastScope(self):
-        return self.scopes[-1]
-    
     def setScopes(self, scopes):
         self.scopes = scopes
-
+        
     def setRanges(self, ranges):
         self.ranges = ranges
-
+        
     def setPreferences(self, preferences):
         self.preferences = preferences
-        
+    
     def setChunks(self, chunks):
         self.chunks = chunks
-
+        
+    def getLastScope(self):
+        return self.scopes[-1]
+        
     def getScopeAtPosition(self, pos):
         #FIXME: Voy a poner algo mentiroso si pos no esta en self.scopes
         scope = self.scopes[pos] if pos < len(self.scopes) else self.scopes[-1]
@@ -53,9 +53,13 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         sr = sr[0] if len(sr) == 1 else None
         return sr
     
-    def scopeRanges(self, start = 0, end = None):
-        #TODO: start y end
-        return self.ranges
+    def scopeRanges(self, start = None, end = None):
+        ranges = self.ranges[:]
+        if start is not None:
+            ranges = filter(lambda range: range[0][0] >= start, ranges)
+        if end is not None:
+            ranges = filter(lambda range: range[0][1] <= end, ranges)
+        return ranges
     
     def isWordInScopes(self, word):
         return word in reduce(lambda scope, scope1: scope + " " + scope1[1], self.scopeRanges(), "")

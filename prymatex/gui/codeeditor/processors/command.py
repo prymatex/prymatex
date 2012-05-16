@@ -29,14 +29,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
         block = firstBlock
         for line in text.splitlines():
             if block == firstBlock and block == lastBlock:
-                scopes = block.userData().getAllScopes(start = startIndex, end = endIndex)
+                scopes = block.userData().scopeRanges(start = startIndex, end = endIndex)
             elif block == firstBlock:
-                scopes = block.userData().getAllScopes(start = startIndex)
+                scopes = block.userData().scopeRanges(start = startIndex)
             elif block == lastBlock:
-                scopes = block.userData().getAllScopes(end = endIndex)
+                scopes = block.userData().scopeRanges(end = endIndex)
             else:
-                scopes = block.userData().getAllScopes()
-            for scope, start, end in scopes:
+                scopes = block.userData().scopeRanges()
+            for (start, end), scope in scopes:
                 ss = scope.split()
                 token = "".join(map(lambda scope: "<" + scope + ">", ss))
                 token += line[start:end]
@@ -99,7 +99,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     def saveActiveFile(self):
         self.editor.mainWindow.saveEditor(editor = self.editor)
-        return not self.editor.isModified()
+        return not (self.editor.isModified() or self.editor.isNew())
     
     # deleteFromEditor
     def deleteWord(self):
@@ -164,7 +164,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.setTextCursor(cursor)
         
     def replaceDocument(self, context):
+        #1 Recuperar la posicion actual del cursor
+        cursor = self.editor.textCursor()
         self.editor.document().setPlainText(context.outputValue)
+        self.editor.setTextCursor(cursor)
         
     def insertText(self, context):
         cursor = self.editor.textCursor()
@@ -215,7 +218,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
         
     def createNewDocument(self, context):
-        print "Nuevo documento", context.outputValue
+        editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
+        editor_widget.codeEdit.setPlainText(context.outputValue)
         
     def openAsNewDocument(self, context):
         editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()

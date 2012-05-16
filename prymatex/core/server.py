@@ -5,6 +5,7 @@ import os
 import sys
 import plistlib
 import zmq
+from xml.parsers.expat import ExpatError
 
 from PyQt4 import QtCore, QtGui
 
@@ -27,7 +28,7 @@ class PrymatexServer(QtCore.QObject):
         #TODO: Filtro todo lo que sea None asumo que las signaturas de los metodos ponene los valores por defecto
         # esto tendria que ser controlado de una mejor forma
         kwargs = dict(filter(lambda (key, value): value != None, kwargs.iteritems()))
-        
+        print args, kwargs
         method = getattr(self, name)
         method(*args, **kwargs)
 
@@ -50,12 +51,15 @@ class PrymatexServer(QtCore.QObject):
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
         self.socket.send(value)
         
-    def async_window(self, nibPath, **kwargs):
-        print "async_window: ", nibPath, kwargs
+    def async_window(self, nibPath, plist, **kwargs):
+        try:
+            settings = plistlib.readPlistFromString(plist)
+        except ExpatError:
+            settings = {}
         directory = os.path.dirname(nibPath)
         name = os.path.basename(nibPath)
         window = self._load_window(name, directory)
-        window(self.application)
+        window(self.application, settings)
         self.sendResult("1234")
     
     def update_window(self, nibPath, **kwargs):
@@ -67,6 +71,7 @@ class PrymatexServer(QtCore.QObject):
 
     def modal_window(self, nibPath, plist, **kwargs):
         settings = plistlib.readPlistFromString(plist)
+        print "modal_window: ", nibPath, settings, kwargs
         directory = os.path.dirname(nibPath)
         name = os.path.basename(nibPath)
         window = self._load_window(name, directory)
