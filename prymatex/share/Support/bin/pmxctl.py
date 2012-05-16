@@ -300,11 +300,11 @@ Note:
                           help = 'Displays the window and returns a reference token for it in the output property list.')
     group.add_option('-l', '--list_windows', action = 'store_true', default = False,
                           help = 'List async window tokens.')
-    group.add_option('-t', '--update_window', action = 'store', dest="token",
+    group.add_option('-t', '--update-window', action = 'store',
                           help = 'Update an async window with new parameter values. Use the --parameters argument (or stdin) to specify the updated parameters.')
-    group.add_option('-x', '--close_window', action = 'store', dest="token",
+    group.add_option('-x', '--close-window', action = 'store',
                           help = 'Close and release an async window.')
-    group.add_option('-w', '--wait_for_input', action = 'store', dest="token",
+    group.add_option('-w', '--wait-for-input', action = 'store',
                           help = 'Wait for user input from the given async window.')
     parser.add_option_group(group)
     
