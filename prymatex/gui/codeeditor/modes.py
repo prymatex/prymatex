@@ -172,15 +172,15 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def mouseMovePoint(self, point):
         self.dragPoint = point
 
-    def mouseReleasePoint(self, endPoint):
+    def mouseReleasePoint(self, endPoint, remove = False):
         _, width, points = self.getPoints(self.startPoint, endPoint)
         
+        multicursorAction = self.addMergeCursor if not remove else self.removeBreakCursor
         emit = points and not self.isActive()
         for tupla in points:
             if tupla[0] == tupla[1]:
                 cursor = self.editor.cursorForPosition(QtCore.QPoint(*tupla[0]))
-                cursor = self.addMergeCursor(cursor)
-                #self.editor.document().markContentsDirty(cursor.position(), cursor.position())
+                multicursorAction(cursor)
                 continue
             #Sentido en el que queda el cursor
             if self.startPoint.x() < endPoint.x():  #izquierda a derecha
@@ -192,8 +192,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     rect = self.editor.cursorRect(ecursor)
                     if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
                         cursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
-                        cursor = self.addMergeCursor(cursor)
-                    #self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
+                        multicursorAction(cursor)
             else: # Derecha a izquierda
                 start, end = tupla
                 cursor = self.editor.cursorForPosition(QtCore.QPoint(*start))
@@ -203,8 +202,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     rect = self.editor.cursorRect(ecursor)
                     if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
                         ecursor.setPosition(cursor.position(), QtGui.QTextCursor.KeepAnchor)
-                        ecursor = self.addMergeCursor(ecursor)
-                    #self.editor.document().markContentsDirty(cursor.position(), ecursor.position())
+                        multicursorAction(ecursor)
         
         if emit:
             #Arranco modo multicursor
@@ -270,7 +268,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 self.cursors.remove(removeCursor)
                 self.addMergeCursor(newCursor)
             else:
-                self.editor.setTextCursor(cursor)
                 position = bisect_key(self.cursors, cursor, lambda cursor: cursor.position())
                 self.cursors.insert(position, cursor)
         else:
@@ -278,9 +275,57 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 begin, end = c.selectionStart(), c.selectionEnd()
                 if begin <= cursor.position() <= end:
                     return
-            self.editor.setTextCursor(cursor)
             position = bisect_key(self.cursors, cursor, lambda cursor: cursor.position())
             self.cursors.insert(position, cursor)
+        self.editor.highlightCurrent()
+
+    def removeBreakCursor(self, cursor):
+        #TODO: Hay cosas que se pueden simplificar pero hoy no me da el cerebro
+        if cursor.hasSelection():
+            newCursors = []
+            removeCursor = None
+            new_begin, new_end = cursor.selectionStart(), cursor.selectionEnd()
+            for c in self.cursors:
+                c_begin, c_end = c.selectionStart(), c.selectionEnd()
+                if new_begin <= c_begin <= c_end <= new_end:
+                    #Contiene al cursor, hay que quitarlo
+                    removeCursor = c
+                    break
+                elif (c_begin <= new_begin <= c_end) or (c_begin <= new_end <= c_end):
+                    #Recortar
+                    if c_begin <= new_begin <= c_end:
+                        #Recorta por detras, quitar el actual y agregar uno con la seleccion mas chica
+                        newCursor = QtGui.QTextCursor(self.editor.document())
+                        if c.position() > new_begin:
+                            newCursor.setPosition(c_begin)
+                            newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
+                        else:
+                            newCursor.setPosition(new_begin)
+                            newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                        newCursors.append(newCursor)
+                    if c_begin <= new_end <= c_end:
+                        #Recorta por el frente, quitra el actual y agregar uno con la seleccion mas chica
+                        newCursor = QtGui.QTextCursor(self.editor.document())
+                        if c.position() < new_end:
+                            newCursor.setPosition(c_end)
+                            newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
+                        else:
+                            newCursor.setPosition(new_end)
+                            newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                        newCursors.append(newCursor)
+                    removeCursor = c
+                    break
+            if removeCursor is not None:
+                self.cursors.remove(removeCursor)
+            for newCursor in newCursors:
+                self.addMergeCursor(newCursor)
+        else:
+            #Solo puedo quitar cursores que no tengan seleccion osea que sean un clic :)
+            for c in self.cursors:
+                begin, end = c.selectionStart(), c.selectionEnd()
+                if not c.hasSelection() and c.position() == cursor.position():
+                    self.cursors.remove(c)
+                    break
         self.editor.highlightCurrent()
 
     def canMoveRight(self):
@@ -316,7 +361,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     for cursor in self.cursors:
                         self.editor.document().markContentsDirty(cursor.position(), cursor.position() + 1)
                         cursor.setPosition(cursor.position() + 1)
-                self.editor.setTextCursor(cursor)
         elif event.key() == QtCore.Qt.Key_Left:
             if self.canMoveLeft():
                 if event.modifiers() & QtCore.Qt.ShiftModifier:
@@ -327,7 +371,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     for cursor in self.cursors:
                         self.editor.document().markContentsDirty(cursor.position(), cursor.position() - 1)
                         cursor.setPosition(cursor.position() - 1)
-                self.editor.setTextCursor(cursor)
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
             pass

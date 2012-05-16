@@ -772,14 +772,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.wheelEvent(self, event)
 
     def mousePressEvent(self, event):
-        if event.modifiers() == QtCore.Qt.ControlModifier:
+        if event.modifiers() & (QtCore.Qt.ControlModifier | QtCore.Qt.MetaModifier):
             self.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
             self.multiCursorMode.mousePressPoint(event.pos())
         else:
             QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
-        if event.modifiers() == QtCore.Qt.ControlModifier and self.multiCursorMode.isActive():
+        if event.modifiers() & (QtCore.Qt.ControlModifier | QtCore.Qt.MetaModifier) and self.multiCursorMode.isActive():
             #En este modo no hago el cursor visible
             self.multiCursorMode.mouseMovePoint(event.pos())
             self.viewport().repaint(self.viewport().visibleRegion())
@@ -788,8 +788,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
-        if event.modifiers() == QtCore.Qt.ControlModifier and self.multiCursorMode.isActive():
-            self.multiCursorMode.mouseReleasePoint(event.pos())
+        if event.modifiers() & (QtCore.Qt.ControlModifier | QtCore.Qt.MetaModifier) and self.multiCursorMode.isActive():
+            self.multiCursorMode.mouseReleasePoint(event.pos(), bool(event.modifiers() & QtCore.Qt.MetaModifier))
             self.application.restoreOverrideCursor()
             self.viewport().repaint(self.viewport().visibleRegion())
         else:

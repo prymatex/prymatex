@@ -201,7 +201,7 @@ class SmartIndentHelper(PMXCodeEditorKeyHelper):
 class MultiCursorHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_M
     def accept(self, editor, event, cursor = None, scope = None):
-        return event.key() == self.KEY and event.modifiers() & QtCore.Qt.ControlModifier and event.modifiers() & QtCore.Qt.MetaModifier
+        return event.key() == self.KEY and event.modifiers() & (QtCore.Qt.ControlModifier | QtCore.Qt.MetaModifier)
 
     def execute(self, editor, event, cursor = None, scope = None):
         cursor = cursor or editor.textCursor()
