@@ -201,10 +201,13 @@ class SmartIndentHelper(PMXCodeEditorKeyHelper):
 class MultiCursorHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_M
     def accept(self, editor, event, cursor = None, scope = None):
-        return event.key() == self.KEY and event.modifiers() & (QtCore.Qt.ControlModifier | QtCore.Qt.MetaModifier)
+        control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
+        meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
+        return event.key() == self.KEY and control_down and meta_down
 
     def execute(self, editor, event, cursor = None, scope = None):
         cursor = cursor or editor.textCursor()
+        flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
         if not cursor.hasSelection():
             text, start, end = editor.getCurrentWord()
             newCursor = QtGui.QTextCursor(cursor)
@@ -215,11 +218,12 @@ class MultiCursorHelper(PMXCodeEditorKeyHelper):
             text = cursor.selectedText()
             editor.multiCursorMode.addMergeCursor(cursor)
             if event.modifiers() & QtCore.Qt.ShiftModifier:
-                newCursor = editor.document().find(text, cursor, QtGui.QTextDocument.FindBackward)
-            else:
-                newCursor = editor.document().find(text, cursor)
+                flags |= QtGui.QTextDocument.FindBackward
+            newCursor = editor.document().find(text, cursor, flags)
             if not newCursor.isNull():
                 editor.multiCursorMode.addMergeCursor(newCursor)
+                #Scroll to the newCursor block number
+                editor.verticalScrollBar().setValue(newCursor.block().blockNumber())
 
 class DeleteRemoveBracesHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Delete
