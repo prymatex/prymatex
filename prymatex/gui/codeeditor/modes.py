@@ -22,7 +22,10 @@ class PMXBaseEditorMode(object):
         pass
 
     def keyPressEvent(self, event):
-        pass
+        QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+        
+    def keyReleaseEvent(self, event):
+        QtGui.QPlainTextEdit.keyReleaseEvent(self.editor, event)
 
 class PMXSnippetEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
@@ -130,6 +133,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         PMXBaseEditorMode.__init__(self, editor)
         self.helper = helpers.MultiCursorHelper()
         self.cursors = []
+        self.selectedCursors = []
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
     
     def isActive(self):
@@ -137,6 +141,8 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     
     def inactive(self):
         self.cursors = []
+        self.selectedCursors = []
+        self.editor.application.restoreOverrideCursor()
         self.editor.modeChanged.emit()
 
     def highlightCurrentLines(self):
@@ -159,6 +165,14 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def isDragCursor(self):
         return self.startPoint != None and self.dragPoint != None
 
+    def isSelected(self, cursor):
+        return cursor in self.selectedCursors
+
+    def activeCursors(self):
+        if self.selectedCursors:
+            return self.selectedCursors
+        return self.cursors
+        
     def getDragCursorRect(self):
         """Retorna un rectangulo que representa la zona del drag cursor"""
         return QtCore.QRect(self.startPoint, self.dragPoint)
@@ -176,7 +190,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         _, width, points = self.getPoints(self.startPoint, endPoint)
         
         multicursorAction = self.addMergeCursor if not remove else self.removeBreakCursor
-        emit = points and not self.isActive()
         lastCursor = None
         for tupla in points:
             if tupla[0] == tupla[1]:
@@ -209,9 +222,6 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                             multicursorAction(ecursor)
                             lastCursor = ecursor
         
-        if emit:
-            #Arranco modo multicursor
-            self.editor.modeChanged.emit()
         #Clean last acction
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
 
@@ -235,6 +245,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         """
         Only can add new cursors, if the cursor has selection then try to merge with others
         """
+        firstCursor = not bool(self.cursors)
         if cursor.hasSelection():
             newCursor = None
             removeCursor = None
@@ -267,7 +278,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     break
                 elif new_begin <= c_begin <= c_end <= new_end:
                     #Contiene al cursor
-                    newCursor = QtGui.QTextCursor(self.editor.document())
+                    newCursor = cursor
                     removeCursor = c
                     break
             if newCursor is not None:
@@ -283,6 +294,9 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     return
             position = bisect_key(self.cursors, cursor, lambda cursor: cursor.position())
             self.cursors.insert(position, cursor)
+        if firstCursor:
+            self.editor.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+            self.editor.modeChanged.emit()
         self.editor.highlightCurrent()
 
     def removeBreakCursor(self, cursor):
@@ -363,6 +377,9 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return all(map(lambda c: not c.atStart(), self.cursors))
     
     def keyPressEvent(self, event):
+        if event.modifiers() ^ QtCore.Qt.ControlModifier == QtCore.Qt.NoModifier:
+            print "control"
+            self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         if self.helper.accept(self.editor, event):
             cursor = self.cursors[0] if event.modifiers() & QtCore.Qt.ShiftModifier else self.cursors[-1]
             self.helper.execute(self.editor, event, cursor)
@@ -377,28 +394,39 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             self.inactive()
             self.editor.highlightCurrent()
             #Se termino la joda
-        elif event.modifiers() & QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
+        elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+        elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() in utils.KEY_NUMBERS:
+            #Seleccionamos cursores de la multiseleccion
+            index = utils.KEY_NUMBERS.index(event.key())
+            if index == 0:
+                self.selectedCursors = []
+            elif index <= len(self.cursors):
+                index = index - 1
+                cursor = self.cursors[index]
+                if cursor in self.selectedCursors:
+                    self.selectedCursors.remove(cursor)
+                else:
+                    self.selectedCursors.append(cursor)
+            self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         elif event.key() == QtCore.Qt.Key_Right:
             if self.canMoveRight():
-                if event.modifiers() & QtCore.Qt.ShiftModifier:
-                    for cursor in self.cursors:
-                        self.editor.document().markContentsDirty(cursor.position(), cursor.position() + 1)
+                for cursor in self.activeCursors():
+                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + 1)
+                    if event.modifiers() & QtCore.Qt.ShiftModifier:
                         cursor.setPosition(cursor.position() + 1, QtGui.QTextCursor.KeepAnchor)
-                else:
-                    for cursor in self.cursors:
-                        self.editor.document().markContentsDirty(cursor.position(), cursor.position() + 1)
+                    else:
                         cursor.setPosition(cursor.position() + 1)
+                self.editor.highlightCurrent()
         elif event.key() == QtCore.Qt.Key_Left:
             if self.canMoveLeft():
-                if event.modifiers() & QtCore.Qt.ShiftModifier:
-                    for cursor in self.cursors:
-                        self.editor.document().markContentsDirty(cursor.position(), cursor.position() - 1)
+                for cursor in self.activeCursors():
+                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() - 1)
+                    if event.modifiers() & QtCore.Qt.ShiftModifier:
                         cursor.setPosition(cursor.position() - 1, QtGui.QTextCursor.KeepAnchor)
-                else:
-                    for cursor in self.cursors:
-                        self.editor.document().markContentsDirty(cursor.position(), cursor.position() - 1)
+                    else:
                         cursor.setPosition(cursor.position() - 1)
+                self.editor.highlightCurrent()
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
             pass
@@ -407,11 +435,15 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         elif event.text():
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
-            for cursor in self.cursors:
+            for cursor in self.activeCursors():
                 self.editor.setTextCursor(cursor)
                 QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             cursor.endEditBlock()
     
+    def keyReleaseEvent(self, event):
+        self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
+        QtGui.QPlainTextEdit.keyReleaseEvent(self.editor, event)
+
 class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def __init__(self, editor):
         QtGui.QCompleter.__init__(self, editor)

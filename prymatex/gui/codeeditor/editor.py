@@ -722,7 +722,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
 
         painter = QtGui.QPainter(self.viewport())
-        
+        font = painter.font()
+        font.setBold(True)
+        painter.setFont(font)
+            
         block = self.firstVisibleBlock()
         viewport_offset = self.contentOffset()
         line_count = block.blockNumber()
@@ -742,11 +745,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             
             block = block.next()
         if self.multiCursorMode.isActive():
-            for cursor in self.multiCursorMode.cursors:
+            ctrl_down = self.application.keyboardModifiers() == QtCore.Qt.ControlModifier
+            for index, cursor in enumerate(self.multiCursorMode.cursors, 1):
                 rec = self.cursorRect(cursor)
-                cursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
-                painter.setPen(QtGui.QPen(self.colours['caret']))
-                painter.drawLine(cursor)
+                fakeCursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
+                colour = self.colours['selection'] if self.multiCursorMode.isSelected(cursor) else self.colours['caret'] 
+                painter.setPen(QtGui.QPen(colour))
+                painter.drawLine(fakeCursor)
+                if ctrl_down:
+                    painter.drawText(rec.x() + 2, rec.y() + font_metrics.ascent(), str(index))
         if self.multiCursorMode.isDragCursor:
             pen = QtGui.QPen(self.colours['caret'])
             pen.setWidth(2)
@@ -772,14 +779,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.wheelEvent(self, event)
 
     def mousePressEvent(self, event):
-        if event.modifiers() & (QtCore.Qt.ControlModifier | QtCore.Qt.MetaModifier):
-            self.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
             self.multiCursorMode.mousePressPoint(event.pos())
         else:
             QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
-        if event.modifiers() & (QtCore.Qt.ControlModifier | QtCore.Qt.MetaModifier) and self.multiCursorMode.isActive():
+        if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
             #En este modo no hago el cursor visible
             self.multiCursorMode.mouseMovePoint(event.pos())
             self.viewport().repaint(self.viewport().visibleRegion())
@@ -788,9 +794,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
-        if event.modifiers() & (QtCore.Qt.ControlModifier | QtCore.Qt.MetaModifier) and self.multiCursorMode.isActive():
+        if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
             self.multiCursorMode.mouseReleasePoint(event.pos(), bool(event.modifiers() & QtCore.Qt.MetaModifier))
-            self.application.restoreOverrideCursor()
             self.viewport().repaint(self.viewport().visibleRegion())
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
@@ -825,6 +830,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         QtGui.QPlainTextEdit.keyPressEvent(self, event)
         
         self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
+    
+    def keyReleaseEvent(self, event):
+        #Primero ver si tengo un modo activo,
+        for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
+            if mode.isActive():
+                return mode.keyReleaseEvent(event)
+        QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
 
     #==========================================================================
     # Insert API

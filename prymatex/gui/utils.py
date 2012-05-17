@@ -199,8 +199,9 @@ def combineIcons(icon1, icon2, scale = 1):
     return newIcon
 
 # Key press debugging 
-KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) 
-                  if keyname.startswith('Key_')])
+
+KEY_NUMBERS = map(lambda keyname: getattr(QtCore.Qt, keyname), [ "Key_%d" % index for index in range(10)])
+KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) if keyname.startswith('Key_')])
 
 ANYKEY = -1
 
