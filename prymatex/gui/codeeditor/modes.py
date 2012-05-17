@@ -177,6 +177,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         
         multicursorAction = self.addMergeCursor if not remove else self.removeBreakCursor
         emit = points and not self.isActive()
+        lastCursor = None
         for tupla in points:
             if tupla[0] == tupla[1]:
                 cursor = self.editor.cursorForPosition(QtCore.QPoint(*tupla[0]))
@@ -192,7 +193,9 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     rect = self.editor.cursorRect(ecursor)
                     if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
                         cursor.setPosition(ecursor.position(), QtGui.QTextCursor.KeepAnchor)
-                        multicursorAction(cursor)
+                        if lastCursor is None or (lastCursor.position() != cursor.position()):
+                            multicursorAction(cursor)
+                            lastCursor = cursor
             else: # Derecha a izquierda
                 start, end = tupla
                 cursor = self.editor.cursorForPosition(QtCore.QPoint(*start))
@@ -202,7 +205,9 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     rect = self.editor.cursorRect(ecursor)
                     if (rect.right() <= end[0] or rect.right() - width / 2 <= end[0] <= rect.right() + width / 2) and rect.top() <= end[1] <= rect.bottom():
                         ecursor.setPosition(cursor.position(), QtGui.QTextCursor.KeepAnchor)
-                        multicursorAction(ecursor)
+                        if lastCursor is None or (lastCursor.position() != ecursor.position()):
+                            multicursorAction(ecursor)
+                            lastCursor = ecursor
         
         if emit:
             #Arranco modo multicursor
@@ -211,6 +216,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
 
     def getPoints(self, start, end):
+        #TODO: Ver de mejorar las medidas porque esta salteando lineas de seleccion
         metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
         hight = metrics.lineSpacing()
         width = metrics.width("x")
@@ -291,34 +297,56 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                     #Contiene al cursor, hay que quitarlo
                     removeCursor = c
                     break
-                elif (c_begin <= new_begin <= c_end) or (c_begin <= new_end <= c_end):
+                elif (c_begin < new_begin < new_end < c_end):
                     #Recortar
-                    if c_begin <= new_begin <= c_end:
-                        #Recorta por detras, quitar el actual y agregar uno con la seleccion mas chica
-                        newCursor = QtGui.QTextCursor(self.editor.document())
-                        if c.position() > new_begin:
-                            newCursor.setPosition(c_begin)
-                            newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
-                        else:
-                            newCursor.setPosition(new_begin)
-                            newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                    newCursor = QtGui.QTextCursor(self.editor.document())
+                    if c.position() < new_begin:
+                        newCursor.setPosition(new_begin)
+                        newCursor.setPosition(c_begin, QtGui.QTextCursor.KeepAnchor)
                         newCursors.append(newCursor)
-                    if c_begin <= new_end <= c_end:
-                        #Recorta por el frente, quitra el actual y agregar uno con la seleccion mas chica
                         newCursor = QtGui.QTextCursor(self.editor.document())
-                        if c.position() < new_end:
-                            newCursor.setPosition(c_end)
-                            newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
-                        else:
-                            newCursor.setPosition(new_end)
-                            newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                        newCursor.setPosition(c_end)
+                        newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
                         newCursors.append(newCursor)
+                    else:
+                        newCursor.setPosition(c_begin)
+                        newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
+                        newCursors.append(newCursor)
+                        newCursor = QtGui.QTextCursor(self.editor.document())
+                        newCursor.setPosition(new_end)
+                        newCursor.setPosition(c_end, QtGui.QTextCursor.KeepAnchor)
+                        newCursors.append(newCursor)
+                    removeCursor = c
+                    break
+                elif c_begin <= new_begin <= c_end:
+                    #Recorta por detras, quitar el actual y agregar uno con la seleccion mas chica
+                    newCursor = QtGui.QTextCursor(self.editor.document())
+                    if c.position() > new_begin:
+                        newCursor.setPosition(c_begin)
+                        newCursor.setPosition(new_begin, QtGui.QTextCursor.KeepAnchor)
+                    else:
+                        newCursor.setPosition(new_begin)
+                        newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                    newCursors.append(newCursor)
+                    removeCursor = c
+                    break
+                elif c_begin <= new_end <= c_end:
+                    #Recorta por el frente, quitra el actual y agregar uno con la seleccion mas chica
+                    newCursor = QtGui.QTextCursor(self.editor.document())
+                    if c.position() < new_end:
+                        newCursor.setPosition(c_end)
+                        newCursor.setPosition(new_end, QtGui.QTextCursor.KeepAnchor)
+                    else:
+                        newCursor.setPosition(new_end)
+                        newCursor.setPosition(c.position(), QtGui.QTextCursor.KeepAnchor)
+                    newCursors.append(newCursor)
                     removeCursor = c
                     break
             if removeCursor is not None:
                 self.cursors.remove(removeCursor)
-            for newCursor in newCursors:
-                self.addMergeCursor(newCursor)
+            for cursors in newCursors:
+                position = bisect_key(self.cursors, cursors, lambda cursor: cursor.position())
+                self.cursors.insert(position, cursors)
         else:
             #Solo puedo quitar cursores que no tengan seleccion osea que sean un clic :)
             for c in self.cursors:
