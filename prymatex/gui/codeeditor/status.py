@@ -182,11 +182,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         column = cursor.columnNumber() + 1
         selection = cursor.selectionEnd() - cursor.selectionStart()
         self.labelLineColumn.setText("Line: %5d Column: %5d Selection: %5d" % (line, column, selection))
-        #TODO: Fixme quiza en el textChanged del editor Symbols
-        #model = self.comboBoxSymbols.model()
-        #index = model.findBlockIndex(cursor.block())
-        #if index >= 0:
-        #    self.comboBoxSymbols.setCurrentIndex(index)
+        #Set index of current symbol
+        self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findBlockIndex(cursor.block()))
         
     def on_syntaxChanged(self, syntax):
         model = self.comboBoxSyntaxes.model()

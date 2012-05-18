@@ -64,14 +64,24 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def isWordInScopes(self, word):
         return word in reduce(lambda scope, scope1: scope + " " + scope1[1], self.scopeRanges(), "")
 
-    def groups(self, name = ""):
+    def groups(self, nameFilter):
         #http://manual.macromates.com/en/language_grammars
         # 11 root groups: comment, constant, entity, invalid, keyword, markup, meta, storage, string, support, variable
-        return map(lambda scopeRange: scopeRange[0], filter(lambda scopeRange: any(map(lambda s: s.startswith(name), scopeRange[1].split())), self.scopeRanges()))
+        def groupFilter(scope):
+            names = nameFilter.split()
+            accepted = True
+            for name in names:
+                if name[0] == "-":
+                    name = name[1:]
+                    accepted = accepted and all(map(lambda s: not s.startswith(name), scope.split()))
+                else:
+                    accepted = accepted and any(map(lambda s: s.startswith(name), scope.split()))
+            return accepted
+        return map(lambda scopeRange: scopeRange[0], filter(lambda scopeRange: groupFilter(scopeRange[1]), self.ranges))
 
-    def wordsByGroup(self, name = ""):
-        groups = self.groups(name)
-        return filter(lambda word: any(map(lambda group: group[0] <= word[0] and group[1] >= word[1], groups)), self.words)
+    def wordsByGroup(self, nameFilter):
+        groups = self.groups(nameFilter)
+        return filter(lambda word: any(map(lambda group: group[0] <= word[0][0] and group[1] >= word[0][1], groups)), self.words)
 
     #================================================
     # Cache Handle

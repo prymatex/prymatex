@@ -239,3 +239,16 @@ class DeleteRemoveBracesHelper(PMXCodeEditorKeyHelper):
         self.cursor1.removeSelectedText()
         self.cursor2.removeSelectedText()
         cursor.endEditBlock()
+
+class PrintEditorStatusHelper(PMXCodeEditorKeyHelper):
+    KEY = QtCore.Qt.Key_P
+    def accept(self, editor, event, cursor = None, scope = None):
+        control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
+        meta_down = bool(event.modifiers() & QtCore.Qt.MetaModifier)
+        return control_down and control_down
+        
+    def execute(self, editor, event, cursor = None, scope = None):
+        #Aca lo que queramos hacer
+        for group in [ "comment", "constant", "entity", "invalid", "keyword", "markup", "meta", "storage", "string", "support", "variable" ]:
+            print "%s: %s" % (group, cursor.block().userData().wordsByGroup(group))
+        print "sin comentarios, sin cadenas", cursor.block().userData().wordsByGroup("-string -comment")
