@@ -749,11 +749,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             for index, cursor in enumerate(self.multiCursorMode.cursors, 1):
                 rec = self.cursorRect(cursor)
                 fakeCursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
-                colour = self.colours['selection'] if self.multiCursorMode.isSelected(cursor) else self.colours['caret'] 
+                colour = self.colours['caret']
                 painter.setPen(QtGui.QPen(colour))
-                painter.drawLine(fakeCursor)
                 if ctrl_down:
                     painter.drawText(rec.x() + 2, rec.y() + font_metrics.ascent(), str(index))
+                if (self.multiCursorMode.hasSelection() and not self.multiCursorMode.isSelected(cursor)) or \
+                (ctrl_down and not self.multiCursorMode.hasSelection()):
+                     colour = self.colours['selection']
+                painter.setPen(QtGui.QPen(colour))
+                painter.drawLine(fakeCursor)
         if self.multiCursorMode.isDragCursor:
             pen = QtGui.QPen(self.colours['caret'])
             pen.setWidth(2)

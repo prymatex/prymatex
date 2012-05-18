@@ -167,7 +167,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
 
     def isSelected(self, cursor):
         return cursor in self.selectedCursors
-
+    
+    def hasSelection(self):
+        return bool(self.selectedCursors)
+        
     def activeCursors(self):
         if self.selectedCursors:
             return self.selectedCursors
