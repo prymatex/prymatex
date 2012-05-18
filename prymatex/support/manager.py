@@ -807,7 +807,7 @@ class PMXSupportBaseManager(object):
         with_scope = []
         without_scope = []
         for preference in self.cache.setcallable("preferences", self.getAllPreferences):
-            if preference.scope == None:
+            if not preference.scope:
                 without_scope.append(preference)
             else:
                 score = self.scores.score(preference.scope, scope)
@@ -861,7 +861,7 @@ class PMXSupportBaseManager(object):
         with_scope = []
         without_scope = []
         for item in self.cache.setcallable("tabTriggers", self.getAllTabTriggerItems):
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)
@@ -876,7 +876,7 @@ class PMXSupportBaseManager(object):
         with_scope = []
         without_scope = []
         for item in self.cache.setcallable(keyword, self.getAllBundleItemsByTabTrigger, keyword):
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)
@@ -901,7 +901,7 @@ class PMXSupportBaseManager(object):
         with_scope = []
         without_scope = []
         for item in self.cache.setcallable(code, self.getAllBundleItemsByKeyEquivalent, code):
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)
@@ -928,7 +928,7 @@ class PMXSupportBaseManager(object):
         with_scope = []
         without_scope = []
         for item in self.getAllBundleItemsByFileExtension(path):
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)
@@ -958,7 +958,7 @@ class PMXSupportBaseManager(object):
         with_scope = []
         without_scope = []
         for item in self.getAllActionItems():
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)

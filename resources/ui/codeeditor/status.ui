@@ -405,30 +405,10 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonOverwrite">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/modes/modes/overwrite.png</normaloff>:/modes/modes/overwrite.png</iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="pushButtonMultiCursor">
         <property name="maximumSize">
          <size>
-          <width>30</width>
+          <width>20</width>
           <height>16777215</height>
          </size>
         </property>
@@ -437,7 +417,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="icon">
          <iconset resource="../../resources.qrc">
-          <normaloff>:/modes/modes/multicursor.png</normaloff>:/modes/modes/multicursor.png</iconset>
+          <normaloff>:/icons/icons/bullet-red.png</normaloff>:/icons/icons/bullet-red.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -448,7 +428,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButtonSnippet">
         <property name="maximumSize">
          <size>
-          <width>30</width>
+          <width>20</width>
           <height>16777215</height>
          </size>
         </property>
@@ -457,7 +437,27 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="icon">
          <iconset resource="../../resources.qrc">
-          <normaloff>:/modes/modes/snippet.png</normaloff>:/modes/modes/snippet.png</iconset>
+          <normaloff>:/icons/icons/bullet-blue.png</normaloff>:/icons/icons/bullet-blue.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonOverwrite">
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/icons/bullet-green.png</normaloff>:/icons/icons/bullet-green.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>

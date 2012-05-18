@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/bullet-yellow.png</file>
+    <file>icons/bullet-pink.png</file>
+    <file>icons/bullet-green.png</file>
+    <file>icons/bullet-blue.png</file>
+    <file>icons/bullet-red.png</file>
     <file>emblems/image-stack.png</file>
     <file>actions/project-development-close-all.png</file>
     <file>emblems/image-stack-open.png</file>

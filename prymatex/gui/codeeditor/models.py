@@ -96,12 +96,12 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         self.editor.textChanged.connect(self.on_editor_textChanged)
         self.blocks = []
         self.icons = {
-            "class": resources.getIcon("code-class"),
-            "block": resources.getIcon("code-block"),
-            "context": resources.getIcon("code-context"),
-            "function": resources.getIcon("code-function"),
-            "typedef": resources.getIcon("code-typedef"),
-            "variable": resources.getIcon("code-variable")
+            "class": resources.getIcon("bulletred"),
+            "block": resources.getIcon("bulletblue"),
+            "context": resources.getIcon("bulletpink"),
+            "function": resources.getIcon("bulletblue"),
+            "typedef": resources.getIcon("bulletyellow"),
+            "variable": resources.getIcon("bulletgreen")
         }
         
     def _purge_blocks(self):
@@ -148,7 +148,7 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
             return None
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
-        elif role is QtCore.Qt.DecorationRole:
+        elif role == QtCore.Qt.DecorationRole:
             for name, icon in self.icons.iteritems():
                 if userData.isWordInScopes(name):
                     return icon

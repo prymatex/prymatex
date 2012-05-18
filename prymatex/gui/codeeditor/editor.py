@@ -745,7 +745,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             
             block = block.next()
         if self.multiCursorMode.isActive():
-            ctrl_down = self.application.keyboardModifiers() == QtCore.Qt.ControlModifier
+            ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
             for index, cursor in enumerate(self.multiCursorMode.cursors, 1):
                 rec = self.cursorRect(cursor)
                 fakeCursor = QtCore.QLine(rec.x(), rec.y(), rec.x(), rec.y() + font_metrics.ascent() + font_metrics.descent())
@@ -1533,11 +1533,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.insertBundleItem(items[index])
             
     def on_actionGoToSymbol_triggered(self):
+        #TODO: Usar el modelo
         blocks = self.symbolListModel.blocks
         def symbolToDict(blocks):
             for block in blocks:
                 userData = block.userData() 
-                yield [dict(title = userData.symbol, image = resources.getIcon('codefunction'))]
+                yield [dict(title = userData.symbol, image = resources.getIcon('bulletblue'))]
         index = self.mainWindow.symbolSelectorDialog.select(symbolToDict(blocks))
         if index is not None:
             self.goToBlock(blocks[index])

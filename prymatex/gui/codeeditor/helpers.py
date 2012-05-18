@@ -60,35 +60,36 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         #Si no tengo nada termino
         if not bool(self.pair): return False
         
-        #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
-        openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
-        closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
         self.cursor1 = self.cursor2 = None
-        if cursor.hasSelection():
-            selectedText = cursor.selectedText()
-            if selectedText in openTyping + closeTyping:
+        if bool(event.modifiers() & QtCore.Qt.ControlModifier):
+            #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
+            openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
+            closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
+            if cursor.hasSelection():
+                selectedText = cursor.selectedText()
+                if selectedText in openTyping + closeTyping:
+                    self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor)
+                return True
+            elif editor.besideBrace(cursor) and character in openTyping + closeTyping:
                 self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor)
-            return True
-        elif editor.besideBrace(cursor) and character in openTyping + closeTyping:
-            self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor)
-            if self.cursor2 is not None and self.cursor1 is not None and \
-            (self.cursor1.selectionEnd() == self.cursor2.selectionStart()):
-                #Estan pegados
-                self.cursor1 = self.cursor2 = None
-            elif self.cursor2 is not None and self.cursor1 is not None:
-                if (cursor.position() == self.cursor1.selectionEnd() and character in openTyping) or \
-                (cursor.position() == self.cursor2.selectionStart() and character in closeTyping):
-                    self.cursor1.setPosition(self.cursor1.selectionEnd())
-                    self.cursor2.setPosition(self.cursor2.selectionStart())
-                #elif (cursor.position() == self.cursor2.selectionStart() and character in closeTyping):
-                #    self.cursor1.setPosition(self.cursor1.position() < self.cursor2.position() and self.cursor1.selectionEnd() or self.cursor1.selectionStart())
-                #    self.cursor2.setPosition(self.cursor1.position() < self.cursor2.position() and self.cursor2.selectionStart() or self.cursor2.selectionEnd())
-                else:
+                if self.cursor2 is not None and self.cursor1 is not None and \
+                (self.cursor1.selectionEnd() == self.cursor2.selectionStart()):
+                    #Estan pegados
                     self.cursor1 = self.cursor2 = None
-        else:
-            currentWord, currentWordStart, currentWordEnd = editor.currentWord()
-            if currentWord and currentWordEnd != cursor.position():
-                return False
+                elif self.cursor2 is not None and self.cursor1 is not None:
+                    if (cursor.position() == self.cursor1.selectionEnd() and character in openTyping) or \
+                    (cursor.position() == self.cursor2.selectionStart() and character in closeTyping):
+                        self.cursor1.setPosition(self.cursor1.selectionEnd())
+                        self.cursor2.setPosition(self.cursor2.selectionStart())
+                    #elif (cursor.position() == self.cursor2.selectionStart() and character in closeTyping):
+                    #    self.cursor1.setPosition(self.cursor1.position() < self.cursor2.position() and self.cursor1.selectionEnd() or self.cursor1.selectionStart())
+                    #    self.cursor2.setPosition(self.cursor1.position() < self.cursor2.position() and self.cursor2.selectionStart() or self.cursor2.selectionEnd())
+                    else:
+                        self.cursor1 = self.cursor2 = None
+            else:
+                currentWord, currentWordStart, currentWordEnd = editor.currentWord()
+                if currentWord and currentWordEnd != cursor.position():
+                    return False
         return True
 
     def execute(self, editor, event, cursor = None, scope = None):

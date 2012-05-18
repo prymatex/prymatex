@@ -295,6 +295,10 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             position = bisect_key(self.cursors, cursor, lambda cursor: cursor.position())
             self.cursors.insert(position, cursor)
         if firstCursor:
+            #Ponemos el ultimo cursor agregado sin seleccion para que no moleste
+            lastCursor = QtGui.QTextCursor(self.cursors[-1])
+            lastCursor.clearSelection()
+            self.editor.setTextCursor(lastCursor)
             self.editor.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
             self.editor.modeChanged.emit()
         self.editor.highlightCurrent()
@@ -377,8 +381,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         return all(map(lambda c: not c.atStart(), self.cursors))
     
     def keyPressEvent(self, event):
-        if event.modifiers() ^ QtCore.Qt.ControlModifier == QtCore.Qt.NoModifier:
-            print "control"
+        if bool(event.modifiers() & QtCore.Qt.ControlModifier):
             self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         if self.helper.accept(self.editor, event):
             cursor = self.cursors[0] if event.modifiers() & QtCore.Qt.ShiftModifier else self.cursors[-1]
@@ -396,15 +399,22 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             #Se termino la joda
         elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-        elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() in utils.KEY_NUMBERS:
+        elif bool(event.modifiers() & QtCore.Qt.ControlModifier) and event.key() in utils.KEY_NUMBERS:
             #Seleccionamos cursores de la multiseleccion
             index = utils.KEY_NUMBERS.index(event.key())
             if index == 0:
-                self.selectedCursors = []
+                if bool(event.modifiers() & QtCore.Qt.MetaModifier) and self.selectedCursors:
+                    #Toggle
+                    self.selectedCursors = list(set(self.cursors).difference(self.selectedCursors))
+                else:
+                    #Remove
+                    self.selectedCursors = []
             elif index <= len(self.cursors):
                 index = index - 1
                 cursor = self.cursors[index]
-                if cursor in self.selectedCursors:
+                if bool(event.modifiers() & QtCore.Qt.MetaModifier):
+                    self.selectedCursors = [cursor]
+                elif cursor in self.selectedCursors:
                     self.selectedCursors.remove(cursor)
                 else:
                     self.selectedCursors.append(cursor)

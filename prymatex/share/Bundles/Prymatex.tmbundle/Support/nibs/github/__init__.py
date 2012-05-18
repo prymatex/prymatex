@@ -3,7 +3,7 @@
 
 from github.getbundle import GitHubBundlesDialog
 
-def load(application):
+def load(application, settings):
     GitHubBundlesDialog.application = application
     dialog = GitHubBundlesDialog(application.mainWindow)
     dialog.show()

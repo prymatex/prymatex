@@ -45,13 +45,12 @@ INTERNAL = {
     "copy":":/icons/actions/edit-copy.png",
     "find":":/icons/actions/edit-find.png",
 
-    # For Symbols
-    "code-class": ":/icons/actions/code-class.png",
-    "code-block": ":/icons/actions/code-block.png",
-    "code-context": ":/icons/actions/code-context.png",
-    "code-function": ":/icons/actions/code-function.png",
-    "code-typedef": ":/icons/actions/code-typedef.png",
-    "code-variable": ":/icons/actions/code-variable.png",
+    # Bullets
+    "bulletred": ":/icons/icons/bullet-red.png",
+    "bulletblue": ":/icons/icons/bullet-blue.png",
+    "bulletgreen": ":/icons/icons/bullet-green.png",
+    "bulletpink": ":/icons/icons/bullet-pink.png",
+    "bulletyellow": ":/icons/icons/bullet-yellow.png",
 
     # For Dock
     "terminal":":/icons/apps/utilities-terminal.png", 
