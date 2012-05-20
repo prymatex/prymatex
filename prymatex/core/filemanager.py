@@ -45,7 +45,9 @@ class PMXFileManager(QtCore.QObject):
     DELETED = 1<<1
     RENAMED = 1<<2
     MOVED   = 1<<3
-    CHANGED = 1<<4    
+    CHANGED = 1<<4
+    
+    ENCODINGS = ['windows-1253', 'iso-8859-7', 'macgreek']
 
     def __init__(self, application):
         QtCore.QObject.__init__(self)
@@ -177,8 +179,13 @@ class PMXFileManager(QtCore.QObject):
     def readFile(self, filePath):
         """Read from file"""
         #TODO: Que se pueda hacer una rutina usando yield
-        fileRead = codecs.open(filePath, "r", encoding = self.encoding)
-        content = fileRead.read()
+        for enc in [ self.encoding ] + self.ENCODINGS:
+            try:
+                fileRead = codecs.open(filePath, "r", encoding = enc)
+                content = fileRead.read()
+                break
+            except Exception, e:
+                print "File: %s, %s" % (filePath, e)
         fileRead.close()
         return content
 

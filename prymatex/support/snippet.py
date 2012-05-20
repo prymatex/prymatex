@@ -6,6 +6,10 @@
 import re, logging
 import uuid as uuidmodule
 
+if __name__ == '__main__':
+    import os, sys
+    sys.path.append(os.path.abspath("."))
+    
 #TODO: Ver de usar compileRegexp de prymatex.support.utils
 try:
     from ponyguruma import sre
@@ -27,7 +31,8 @@ SNIPPET_SYNTAX = {
                'name': 'constant.character.escape.snippet'},
               #Structures
               #TabStop
-              {'captures': {'1': {'name': 'keyword.tabstop.snippet'}},
+              {'captures': {'1': {'name': 'keyword.tabstop.snippet'},
+                            '2': {'name': 'keyword.tabstop.snippet'}},
                'match': '\\$(\\d+)|\\${(\\d+)}',
                'name': 'structure.tabstop.snippet'},
               #Placeholder
@@ -727,7 +732,7 @@ class PMXSnippet(PMXBundleItem):
             
 
     def getHolder(self, start, end = None):
-        ''' Return the placeholder for position, where starts > positión > ends'''
+        ''' Return the placeholder for position, where starts > positiÏƒn > ends'''
         end = end != None and end or start
         found = None
         for holder in self.taborder:
@@ -767,3 +772,19 @@ class PMXSnippet(PMXBundleItem):
     
     def __len__(self):
         return len(self.taborder)
+        
+if __name__ == '__main__':
+    content = """<div><ul>
+    <li><a href="${1001}">${1002}</a></li>
+    <li><a href="${1003}">${1004}</a></li>
+    <li><a href="${1005}">${1006}</a></li>
+    <li><a href="$1007">$1008</a></li>
+    <li><a href="$1009">$1010</a></li>
+    </ul></div>"""
+    snippetHash = {    'content': content, 
+                       'name': "MySnippet",
+                 'tabTrigger': "MyTrigger",
+              'keyEquivalent': None }
+    snippet = PMXSnippet(uuidmodule.uuid1(), dataHash = snippetHash)
+    snippet.compile()
+    print snippet.snippet
