@@ -182,18 +182,17 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.buttonNext.setEnabled(False)
         
         #Connects
-        self.buttonBack.clicked.connect(self.back)
-        self.buttonNext.clicked.connect(self.forward)
-        self.lineUrl.returnPressed.connect(self.url_changed)
         self.webView.linkClicked.connect(self.link_clicked)
         self.webView.urlChanged.connect(self.link_clicked)
         self.webView.loadProgress[int].connect(self.load_progress)
         self.webView.loadFinished[bool].connect(self.prepare_JavaScript)
         self.webView.titleChanged[str].connect(self.title_changed)
-        self.buttonReload.clicked.connect(self.reload_page)
-        self.buttonStop.clicked.connect(self.stop_page)
         
         self.bundleItem = None
+        
+        #Sync Timer
+        self.syncTimer = QtCore.QTimer()
+        self.syncTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
     
     def on_manager_commandUrlRequested(self, url):
         self.application.handleUrlCommand(url)
@@ -232,7 +231,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.lineUrl.setText(url.toString())
         self.webView.setHtml(string, url)
     
-    def url_changed(self):
+    def on_lineUrl_returnPressed(self):
         """Url have been changed by user"""
 
         page = self.webView.page()
@@ -243,7 +242,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
         self.webView.setUrl(url)
 
-    def stop_page(self):
+    def on_buttonStop_clicked(self):
         """Stop loading the page"""
         self.webView.stop()
 
@@ -252,7 +251,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         #self.setWindowTitle(title)
         pass
     
-    def reload_page(self):
+    def on_buttonReload_clicked(self):
         """Reload the web page"""
         url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
         self.webView.setUrl(url)
@@ -270,16 +269,28 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         """Page load progress"""
         self.buttonStop.setEnabled(load != 100)
         
-    def back(self):
+    def on_buttonBack_clicked(self):
         """Back button clicked, go one page back"""
         page = self.webView.page()
         history = page.history()
         history.back()
         self.buttonBack.setEnabled(history.canGoBack())
     
-    def forward(self):
+    def on_buttonNext_clicked(self):
         """Next button clicked, go to next page"""
         page = self.webView.page()
         history = page.history()
         history.forward()
         self.buttonNext.setEnabled(history.canGoForward())
+        
+    def updateHtmlCurrentEditorContent(self):
+        self.webView.setHtml(self.mainWindow.currentEditor().toPlainText())
+        
+    @QtCore.pyqtSlot(bool)
+    def on_pushButtonSync_toggled(self, checked):
+        if checked:
+            #Poner un timer a correr y cada x tiempo hacer un setHtml
+            self.syncTimer.start(1000)
+        else:
+            #Desactivar el timer
+            self.syncTimer.stop()
