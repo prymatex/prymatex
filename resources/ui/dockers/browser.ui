@@ -135,33 +135,10 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonSync">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Sync folder with current editor file path</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="pushButtonOptions">
         <property name="maximumSize">
          <size>
-          <width>24</width>
+          <width>45</width>
           <height>24</height>
          </size>
         </property>
@@ -190,6 +167,36 @@
     </item>
    </layout>
   </widget>
+  <action name="actionSyncEditor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
+   </property>
+   <property name="text">
+    <string>Sync Editor</string>
+   </property>
+   <property name="toolTip">
+    <string>Sync browser with current editor content</string>
+   </property>
+  </action>
+  <action name="actionConnectEditor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/network-connect.png</normaloff>:/icons/actions/network-connect.png</iconset>
+   </property>
+   <property name="text">
+    <string>Connect Editor</string>
+   </property>
+   <property name="toolTip">
+    <string>Connect browser with current editor</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

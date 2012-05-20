@@ -9,6 +9,7 @@ from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRepl
 from PyQt4.QtNetwork import QNetworkProxy
 
 from prymatex import resources
+from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.browser import Ui_BrowserDock
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
@@ -133,6 +134,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     
     SETTINGS_GROUP = "Browser"
     
+    updateInterval = pmxConfigPorperty(default = 3000)
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
     def proxy(self, value):
@@ -163,7 +165,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
         self.setupUi(self)
-        
+        self.setupToolBar()
+
         #Developers, developers, developers!!! Extras
         QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
         QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
@@ -194,6 +197,16 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.syncTimer = QtCore.QTimer()
         self.syncTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
     
+    def setupToolBar(self):
+        #Setup Context Menu
+        optionsMenu = { 
+            "title": "Browser Options",
+            "items": [ self.actionSyncEditor, self.actionConnectEditor ]
+        }
+
+        self.browserOptionsMenu, _ = createQMenu(optionsMenu, self)
+        self.pushButtonOptions.setMenu(self.browserOptionsMenu)
+
     def on_manager_commandUrlRequested(self, url):
         self.application.handleUrlCommand(url)
         
@@ -284,13 +297,24 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.buttonNext.setEnabled(history.canGoForward())
         
     def updateHtmlCurrentEditorContent(self):
+        # TODO Resolver url, asegurar que sea html para no hacer cochinadas
         self.webView.setHtml(self.mainWindow.currentEditor().toPlainText())
         
     @QtCore.pyqtSlot(bool)
-    def on_pushButtonSync_toggled(self, checked):
+    def on_actionSyncEditor_toggled(self, checked):
         if checked:
             #Poner un timer a correr y cada x tiempo hacer un setHtml
-            self.syncTimer.start(1000)
+            self.syncTimer.start(self.updateInterval)
+        else:
+            #Desactivar el timer
+            self.syncTimer.stop()
+            
+    @QtCore.pyqtSlot(bool)
+    def on_actionConnectEditor_toggled(self, checked):
+        # TODO Capturar el current editor y usarlo para el update
+        if checked:
+            #Poner un timer a correr y cada x tiempo hacer un setHtml
+            self.syncTimer.start(self.updateInterval)
         else:
             #Desactivar el timer
             self.syncTimer.stop()

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/network-connect.png</file>
     <file>icons/bullet-yellow.png</file>
     <file>icons/bullet-pink.png</file>
     <file>icons/bullet-green.png</file>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/browser.ui'
 #
-# Created: Sun May 20 12:36:36 2012
+# Created: Sun May 20 14:25:47 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -74,21 +74,12 @@ class Ui_BrowserDock(object):
         self.line.setFrameShadow(QtGui.QFrame.Sunken)
         self.line.setObjectName(_fromUtf8("line"))
         self.horizontalLayout.addWidget(self.line)
-        self.pushButtonSync = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonSync.setMaximumSize(QtCore.QSize(24, 24))
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButtonSync.setIcon(icon4)
-        self.pushButtonSync.setCheckable(True)
-        self.pushButtonSync.setFlat(True)
-        self.pushButtonSync.setObjectName(_fromUtf8("pushButtonSync"))
-        self.horizontalLayout.addWidget(self.pushButtonSync)
         self.pushButtonOptions = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonOptions.setMaximumSize(QtCore.QSize(24, 24))
+        self.pushButtonOptions.setMaximumSize(QtCore.QSize(45, 24))
         self.pushButtonOptions.setText(_fromUtf8(""))
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButtonOptions.setIcon(icon5)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/configure.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushButtonOptions.setIcon(icon4)
         self.pushButtonOptions.setFlat(True)
         self.pushButtonOptions.setObjectName(_fromUtf8("pushButtonOptions"))
         self.horizontalLayout.addWidget(self.pushButtonOptions)
@@ -98,6 +89,18 @@ class Ui_BrowserDock(object):
         self.webView.setObjectName(_fromUtf8("webView"))
         self.verticalLayout.addWidget(self.webView)
         BrowserDock.setWidget(self.dockWidgetContents)
+        self.actionSyncEditor = QtGui.QAction(BrowserDock)
+        self.actionSyncEditor.setCheckable(True)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/system-switch-user.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionSyncEditor.setIcon(icon5)
+        self.actionSyncEditor.setObjectName(_fromUtf8("actionSyncEditor"))
+        self.actionConnectEditor = QtGui.QAction(BrowserDock)
+        self.actionConnectEditor.setCheckable(True)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/network-connect.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionConnectEditor.setIcon(icon6)
+        self.actionConnectEditor.setObjectName(_fromUtf8("actionConnectEditor"))
 
         self.retranslateUi(BrowserDock)
         QtCore.QMetaObject.connectSlotsByName(BrowserDock)
@@ -108,7 +111,10 @@ class Ui_BrowserDock(object):
         self.buttonNext.setToolTip(_('Next'))
         self.buttonReload.setToolTip(_('Reload'))
         self.buttonStop.setToolTip(_('Stop'))
-        self.pushButtonSync.setToolTip(_('Sync folder with current editor file path'))
+        self.actionSyncEditor.setText(_('Sync Editor'))
+        self.actionSyncEditor.setToolTip(_('Sync browser with current editor content'))
+        self.actionConnectEditor.setText(_('Connect Editor'))
+        self.actionConnectEditor.setToolTip(_('Connect browser with current editor'))
 
 from PyQt4 import QtWebKit
 from prymatex import resources_rc
