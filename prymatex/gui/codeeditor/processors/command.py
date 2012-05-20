@@ -180,7 +180,6 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(context.outputValue)
         
     def insertAsSnippet(self, context):
-        print context.outputValue
         snippetHash = {    'content': context.outputValue, 
                        'name': context.bundleItem.name,
                  'tabTrigger': context.bundleItem.tabTrigger,
