@@ -275,12 +275,14 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionTakeScreenshot_triggered(self):
         pxm = QtGui.QPixmap.grabWindow(self.winId())
+        import os
         from datetime import datetime
         now = datetime.now()
-        fileName = now.strftime("sshot-%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
-        pxm.save(fileName, self.SCREENSHOT_FORMAT)
+        baseName = now.strftime("%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
+        path = os.path.join(self.application.settings.PMX_SCREENSHOT_PATH, baseName)
+        pxm.save(path, self.SCREENSHOT_FORMAT)
         try:
-            self.currentEditor().showMessage("%s saved" % fileName)
+            self.currentEditor().showMessage("%s saved" % baseName)
         except AttributeError as e:
             QtGui.QMessageBox.information(self, "Screenshoot", 
                 "%s saved" % fileName)

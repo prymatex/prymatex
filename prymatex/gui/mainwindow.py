@@ -302,9 +302,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # MainWindow Events
     #===========================================================================
     def closeEvent(self, event):
+        self.openDocumentsOnClose = []
         try:
-            for editor in self.splitTabWidget.getAllWidgets():
+            for editor in self.editors():
                 self.closeEditor(editor, cancel = True)
+                if not editor.isNew():
+                    self.openDocumentsOnClose.append((editor.filePath, editor.cursorPosition()))
         except exceptions.UserCancelException:
             event.ignore()
         

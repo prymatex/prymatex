@@ -53,7 +53,8 @@ def build_prymatex_profile(path):
     os.makedirs(path)
     os.makedirs(os.path.join(path, 'tmp'), 0700)
     os.makedirs(os.path.join(path, 'log'), 0700)
-    os.makedirs(os.path.join(path, 'var'), 0700)
+    os.makedirs(os.path.join(path, 'cache'), 0700)
+    os.makedirs(os.path.join(path, 'screenshot'), 0700)
 
 def get_prymatex_profiles_file(path):
     filePath = os.path.join(path, PRYMATEX_PROFILES_NAME)
@@ -245,7 +246,8 @@ class PMXSettings(object):
         self.PMX_PROFILE_PATH = self.get_prymatex_profile_path(profile)
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
-        self.PMX_VAR_PATH = os.path.join(self.PMX_PROFILE_PATH, 'var')
+        self.PMX_CACHE_PATH = os.path.join(self.PMX_PROFILE_PATH, 'cache')
+        self.PMX_SCREENSHOT_PATH = os.path.join(self.PMX_PROFILE_PATH, 'screenshot')
         self.GROUPS = {}
         #TODO Defaults settings
         self.qsettings = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, PRYMATEX_SETTING_NAME), QtCore.QSettings.IniFormat)

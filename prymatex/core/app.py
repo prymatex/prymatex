@@ -103,7 +103,7 @@ class PMXApplication(QtGui.QApplication):
         """
         Checks if there's another instance using current profile
         """
-        self.fileLock = os.path.join(self.settings.PMX_VAR_PATH, 'prymatex.pid')
+        self.fileLock = os.path.join(self.settings.PMX_PROFILE_PATH, 'prymatex.pid')
 
         if os.path.exists(self.fileLock):
             #Mejorar esto
@@ -287,8 +287,15 @@ class PMXApplication(QtGui.QApplication):
     
     def closePrymatex(self):
         self.logger.debug("Close")
+        
+        #Guardar documentos abiertos
+        if self.mainWindow.openDocumentsOnClose:
+            self.settings.setValue("openDocuments", self.mainWindow.openDocumentsOnClose)
+
+        #Guardar geometria de la mainWindow
         self.settings.setValue("mainWindowGeometry", self.mainWindow.saveGeometry())
         self.settings.setValue("mainWindowState", self.mainWindow.saveState())
+        
         self.settings.sync()
         os.unlink(self.fileLock)
     
@@ -340,12 +347,18 @@ class PMXApplication(QtGui.QApplication):
 
             geometry = self.settings.value("mainWindowGeometry")
             state = self.settings.value("mainWindowState")
+            openDocuments = self.settings.value("openDocuments")
+
+            for doc in openDocuments:
+                self.openFile(*doc)
+            else:
+                self.mainWindow.addEmptyEditor()
+
             if geometry:
                 self.mainWindow.restoreGeometry(geometry)
             if state:
                 self.mainWindow.restoreState(state)
-                
-            self.mainWindow.addEmptyEditor()
+
             self.mainWindow.show()
 
     def currentEditor(self):

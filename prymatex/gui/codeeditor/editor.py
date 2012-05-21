@@ -318,6 +318,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor.setPosition(blockPosition + position[1])
         self.setTextCursor(cursor)
 
+    def cursorPosition(self):
+        cursor = self.textCursor()
+        return (cursor.block().blockNumber(), cursor.columnNumber())
+
     #=======================================================================
     # Obteniendo datos del editor
     #=======================================================================
