@@ -19,7 +19,7 @@ class CompleterAddon(QtCore.QObject, PMXBaseAddon):
         pass
         
     def on_editor_keyPressEvent(self, event):
-        if not event.modifiers() and event.text() and event.key() not in [ QtCore.Qt.Key_Space, QtCore.Qt.Key_Backspace ]:
+        if event.text() and event.key() not in [ QtCore.Qt.Key_Space, QtCore.Qt.Key_Backspace ]:
             self.charCounter += 1
         else:
             self.charCounter = 0

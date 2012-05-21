@@ -51,17 +51,28 @@ class CompleterHelper(PMXCodeEditorKeyHelper):
         editor.showCompleter(self.completions, self.alreadyTyped)
 
 class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
+    #TODO: Mas amor para la inteligencia de los cursores balanceados
     def accept(self, editor, event, cursor = None, scope = None):
         settings = editor.preferenceSettings(scope)
         character = event.text()
-        pairs = filter(lambda pair: character == pair[0], settings.smartTypingPairs)
+        #Me fijo si es de apertura o cierre
+        pairs = filter(lambda pair: character == pair[0] or character == pair[1], settings.smartTypingPairs)
         self.pair = pairs[0] if len(pairs) == 1 else []
         
         #Si no tengo nada termino
         if not bool(self.pair): return False
         
-        self.cursor1 = self.cursor2 = None
-        if bool(event.modifiers() & QtCore.Qt.ControlModifier):
+        self.skip = False
+        self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor)
+        nearBalancedCursors = self.cursor1 is not None and self.cursor2 is not None
+        ctrl_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
+
+        if not ctrl_down and nearBalancedCursors and \
+        (self.pair[0], self.pair[1]) == (self.cursor1.selectedText(), character) and \
+        (cursor.position() == self.cursor2.selectionStart()) and not cursor.hasSelection():
+            self.skip = True
+            self.cursor1 = self.cursor2 = None
+        elif ctrl_down:
             #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
             openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
             closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
@@ -76,7 +87,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
                 (self.cursor1.selectionEnd() == self.cursor2.selectionStart()):
                     #Estan pegados
                     self.cursor1 = self.cursor2 = None
-                elif self.cursor2 is not None and self.cursor1 is not None:
+                elif nearBalancedCursors:
                     if (cursor.position() == self.cursor1.selectionEnd() and character in openTyping) or \
                     (cursor.position() == self.cursor2.selectionStart() and character in closeTyping):
                         self.cursor1.setPosition(self.cursor1.selectionEnd())
@@ -90,11 +101,16 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
                 currentWord, currentWordStart, currentWordEnd = editor.currentWord()
                 if currentWord and currentWordEnd != cursor.position():
                     return False
+        else:
+            self.cursor1 = self.cursor2 = None
         return True
 
     def execute(self, editor, event, cursor = None, scope = None):
         cursor.beginEditBlock()
-        if cursor.hasSelection():
+        if self.skip:
+            cursor.setPosition(cursor.position() + 1)
+            editor.setTextCursor(cursor)
+        elif cursor.hasSelection():
             if self.cursor2 is not None and self.cursor1 is not None:
                 if self.cursor1.selectionStart() < self.cursor2.selectionStart():
                     self.cursor1.insertText(self.pair[0])
