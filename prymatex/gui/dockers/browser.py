@@ -194,14 +194,14 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.bundleItem = None
         
         #Sync Timer
-        self.syncTimer = QtCore.QTimer()
-        self.syncTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
+        self.updateTimer = QtCore.QTimer()
+        self.updateTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
     
     def setupToolBar(self):
         #Setup Context Menu
         optionsMenu = { 
             "title": "Browser Options",
-            "items": [ self.actionSyncEditor, self.actionConnectEditor ]
+            "items": [ (self.actionSyncEditor, self.actionConnectEditor) ]
         }
 
         self.browserOptionsMenu, _ = createQMenu(optionsMenu, self)
@@ -235,7 +235,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame(), self.bundleItem))
         self.webView.page().mainFrame().evaluateJavaScript(js)
     
-    def setHtml(self, string, bundleItem):
+    def setHtml(self, string, bundleItem = None):
         if not self.isVisible():
             self.show()
         self.raise_()
@@ -298,23 +298,28 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
     def updateHtmlCurrentEditorContent(self):
         # TODO Resolver url, asegurar que sea html para no hacer cochinadas
-        self.webView.setHtml(self.mainWindow.currentEditor().toPlainText())
-        
+        content = self.mainWindow.currentEditor().toPlainText()
+        url = QtCore.QUrl.fromUserInput(self.mainWindow.currentEditor().filePath)
+        self.webView.setHtml(content, url)
+    
+    def stopTimer(self):
+        self.updateTimer.stop()
+        map(lambda action: action.setChecked(False), [self.actionConnectEditor, self.actionSyncEditor])
+
+    def startTimer(self):
+        self.updateTimer.start(self.updateInterval)
+
     @QtCore.pyqtSlot(bool)
     def on_actionSyncEditor_toggled(self, checked):
         if checked:
-            #Poner un timer a correr y cada x tiempo hacer un setHtml
-            self.syncTimer.start(self.updateInterval)
+            self.startTimer()
         else:
-            #Desactivar el timer
-            self.syncTimer.stop()
+            self.stopTimer()
             
     @QtCore.pyqtSlot(bool)
     def on_actionConnectEditor_toggled(self, checked):
         # TODO Capturar el current editor y usarlo para el update
         if checked:
-            #Poner un timer a correr y cada x tiempo hacer un setHtml
-            self.syncTimer.start(self.updateInterval)
+            self.startTimer()
         else:
-            #Desactivar el timer
-            self.syncTimer.stop()
+            self.stopTimer()

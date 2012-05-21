@@ -347,7 +347,7 @@ class PMXApplication(QtGui.QApplication):
 
             geometry = self.settings.value("mainWindowGeometry")
             state = self.settings.value("mainWindowState")
-            openDocuments = self.settings.value("openDocuments")
+            openDocuments = self.settings.value("openDocuments") or []
 
             for doc in openDocuments:
                 self.openFile(*doc)
