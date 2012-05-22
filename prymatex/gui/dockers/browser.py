@@ -271,8 +271,6 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     
     def link_clicked(self, url):
         """Update the URL if a link on a web page is clicked"""
-        if self.updateTimer.isActive():
-            self.upsateTimer.stop()
         page = self.webView.page()
         history = page.history()
         self.buttonBack.setEnabled(history.canGoBack())
