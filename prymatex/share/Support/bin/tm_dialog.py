@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import os
 import zmq
 import sys, tempfile
 
 from optparse import OptionParser, OptionGroup
-# sum(map(lambda c: ord(c), 'Prymatex is an open source textmate replacement'))
 
-PORT = 4612
+if 'PMX_DIALOG_PORT' in os.environ:
+    PMX_DIALOG_PORT = os.environ['PMX_DIALOG_PORT']
+else:
+    raise Exception("PMX_DIALOG_PORT is not in environ")
 
 '''
 # create and show the dialog
@@ -308,7 +311,7 @@ class CommandHandler(object):
     def __init__(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect('tcp://127.0.0.1:%d' % PORT)
+        self.socket.connect('tcp://127.0.0.1:%s' % PMX_DIALOG_PORT)
         
     def async_window(self, options, args):
         if options.parameters == None:
@@ -333,9 +336,16 @@ class CommandHandler(object):
         sys.stdout.write(value["result"])
     
     def tooltip(self, options, args):
-        options, args = tooltip_parse_args(args)
-        self.server.tooltip(str(options), str(args))
-        
+        kwargs = {}
+        kwargs["format"] = "html" if options.html else "text"
+        kwargs["transparent"] = options.transparent
+        #if not args:
+        #    args = [ sys.stdin.readlines() ] 
+        command = {"name": "tooltip", "args": args, "kwargs": kwargs}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
+
     def menu(self, options, args):
         if options.parameters == None:
             parameters = sys.stdin.readlines()
@@ -365,9 +375,11 @@ class CommandHandler(object):
         sys.stdout.write(value["result"])
         
     def defaults(self, options, args):
-        options, args = defaults_parse_args(args)
-        self.server.defaults(str(options), str(args))
-        
+        command = {"name": "defaults", "args": args, "kwargs": {}}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
+
     def images(self, options, args):
         if options.plist == None:
             options.plist = sys.stdin.readlines()
@@ -378,14 +390,12 @@ class CommandHandler(object):
         sys.stdout.write(value["result"])
         
     def alert(self, options, args):
-        options, args = alert_parse_args(args)
-        self.server.alert(str(options), str(args))
-        
+        command = {"name": "alert", "args": args, "kwargs": {}}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv_pyobj()
+        sys.stdout.write(value["result"])
+
     def debug(self, options, args):
-        if options.parameters == None:
-            options.parameters = sys.stdin.readlines()
-        args.append( "".join(options.parameters))
-        
         command = {"name": "debug", "args": args, "kwargs": {}}
         self.socket.send_pyobj(command)
         value = self.socket.recv_pyobj()

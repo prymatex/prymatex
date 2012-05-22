@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
+
+from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.dockers.base import PMXBaseDock
+from prymatex.core.plugin.dock import PMXBaseDock
+from prymatex.gui.codeeditor.editor import PMXCodeEditor
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("F7")
+    SHORTCUT = "F7"
+    ICON = resources.getIcon("symbols")
+    PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
@@ -24,25 +29,36 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         self.tableViewSymbols.activated.connect(self.on_tableViewSymbols_activated)
         self.tableViewSymbols.doubleClicked.connect(self.on_tableViewSymbols_doubleClicked)
         self.setWidget(self.tableViewSymbols)
-        
-    def setCurrentEditor(self, editor):
-        self.currentEditor = editor
-        if editor is not None:
+
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
+        mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+
+    def on_mainWindow_currentEditorChanged(self, editor):
+        if isinstance(editor, PMXCodeEditor):
             self.tableViewSymbols.setModel(editor.symbolListModel)
-        
+        elif editor is None:
+            #Clear
+            self.tableViewSymbols.setModel(None)
+
     def on_tableViewSymbols_activated(self, index):
         block = index.internalPointer()
-        self.currentEditor.goToBlock(block)
-        self.currentEditor.setFocus()
+        self.mainWindow.currentEditor().goToBlock(block)
+        self.mainWindow.currentEditor().setFocus()
     
     def on_tableViewSymbols_doubleClicked(self, index):
         block = index.internalPointer()
-        self.currentEditor.goToBlock(block)
-        self.currentEditor.setFocus()
+        self.mainWindow.currentEditor().goToBlock(block)
+        self.mainWindow.currentEditor().setFocus()
         
-class PMXCodeBookmarksDock(QtGui.QDockWidget):
-    def __init__(self, parent):
-        QtGui.QDockWidget.__init__(self, parent)
+class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
+    SHORTCUT = "Shift+F7"
+    ICON = resources.getIcon("bookmark")
+    PREFERED_AREA = QtCore.Qt.RightDockWidgetArea
+    
+    def __init__(self, mainWindow):
+        QtGui.QDockWidget.__init__(self, mainWindow)
+        PMXBaseDock.__init__(self)
         self.setWindowTitle(_("Bookmarks"))
         self.setObjectName(_("BookmarksDock"))
         self.tableViewBookmarks = QtGui.QTableView()
@@ -57,15 +73,21 @@ class PMXCodeBookmarksDock(QtGui.QDockWidget):
         self.tableViewBookmarks.doubleClicked.connect(self.on_tableViewBookmarks_doubleClicked)
         self.setWidget(self.tableViewBookmarks)
         
-    def setCurrentEditor(self, editor):
-        self.currentEditor = editor
-        if editor is not None:
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
+        mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
+
+    def on_mainWindow_currentEditorChanged(self, editor):
+        if isinstance(editor, PMXCodeEditor):
             self.tableViewBookmarks.setModel(editor.bookmarkListModel)
+        elif editor is None:
+            #Clear
+            self.tableViewBookmarks.setModel(None)
         
     def on_tableViewBookmarks_activated(self, index):
         block = index.internalPointer()
-        self.currentEditor.goToBlock(block)
+        self.mainWindow.currentEditor().goToBlock(block)
     
     def on_tableViewBookmarks_doubleClicked(self, index):
         block = index.internalPointer()
-        self.currentEditor.goToBlock(block)
+        self.mainWindow.currentEditor().goToBlock(block)

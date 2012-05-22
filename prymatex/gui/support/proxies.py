@@ -2,43 +2,76 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtCore, QtGui
-from prymatex.models.proxies import PMXFlatTreeProxyModel
+from prymatex.models.proxies import FlatTreeProxyModel
 
 class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
-    def __init__(self, parent = None):
-        super(PMXBundleTreeProxyModel, self).__init__(parent)
+    def __init__(self, manager, parent = None):
+        QtGui.QSortFilterProxyModel.__init__(self, parent)
+        self.manager = manager
         self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax"]
-        self.setDynamicSortFilter(True)
+        self.namespacesFilter = [ "prymatex", "user" ]
+        self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
     
     def filterAcceptsRow(self, sourceRow, sourceParent):
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        item = index.internalPointer()
-        if not item.enabled:
+        node = self.sourceModel().node(index)
+        if node.isRootNode() or not node.enabled:
             return False
-        if item.TYPE != "bundle":
-            regexp = self.filterRegExp()
-            if not regexp.isEmpty():
-                return regexp.indexIn(item.TYPE) != -1
+        if self.namespacesFilter:
+            if not any(map(lambda ns: node.hasNamespace(ns), self.namespacesFilter)):
+                return False
+        if self.bundleItemTypesFilter:
+            if node.TYPE not in self.bundleItemTypesFilter:
+                return False
+        regexp = self.filterRegExp()
+        if not regexp.isEmpty():
+            return regexp.indexIn(node.name) != -1
         return True
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True
         
     def lessThan(self, left, right):
-        leftData = left.internalPointer()
-        rightData = right.internalPointer()
-        if leftData.TYPE == rightData.TYPE:
-            return rightData.name > leftData.name
+        leftNode = self.sourceModel().node(left)
+        rightNode = self.sourceModel().node(right)
+        if leftNode.TYPE == rightNode.TYPE:
+            return rightNode.name > leftNode.name
         else:
-            return self.bundleItemTypeOrder.index(rightData.TYPE) > self.bundleItemTypeOrder.index(leftData.TYPE)
+            return self.bundleItemTypeOrder.index(rightNode.TYPE) > self.bundleItemTypeOrder.index(leftNode.TYPE)
     
+    def setData(self, index, value, role):
+        if role == QtCore.Qt.EditRole:  
+            node = self.node(index)
+            if node.TYPE == "bundle":
+                self.manager.updateBundle(node, self.namespacesFilter[-1], name = value)
+            elif node.TYPE == "templatefile":
+                self.manager.updateTemplateFile(node, self.namespacesFilter[-1], name = value)
+            else:
+                self.manager.updateBundleItem(node, self.namespacesFilter[-1], name = value)
+            return True
+        return False
+        
     def node(self, index):
         sIndex = self.mapToSource(index)
         return self.sourceModel().node(sIndex)
     
-class PMXBundleTypeFilterProxyModel(PMXFlatTreeProxyModel):
+    def setFilterNamespace(self, namespace):
+        if namespace:
+            self.namespacesFilter = [ namespace ]
+        else:
+            self.namespacesFilter = [ "prymatex", "user" ]
+        self.setFilterRegExp("")
+        
+    def setFilterBundleItemType(self, bundleItemType):
+        if bundleItemType:
+            self.bundleItemTypesFilter = [ "bundle" ] + bundleItemType.split()
+        else:
+            self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
+        self.setFilterRegExp("")
+
+class PMXBundleTypeFilterProxyModel(FlatTreeProxyModel):
     def __init__(self, tipos, parent = None):
-        super(PMXBundleTypeFilterProxyModel, self).__init__(parent)
+        FlatTreeProxyModel.__init__(self, parent)
         self.tipos = tipos if isinstance(tipos, list) else [ tipos ]
         
     def filterAcceptsRow(self, sourceRow, sourceParent):
@@ -47,8 +80,12 @@ class PMXBundleTypeFilterProxyModel(PMXFlatTreeProxyModel):
         return item.TYPE in self.tipos
         
     def comparableValue(self, index):
-        node = index.internalPointer()
-        return node.name.lower()
+        node = self.sourceModel().node(index)
+        #Esto es para rastrear un error
+        try:
+            return node.name.lower()
+        except Exception, e:
+            print node, self.sourceModel(), index
     
     def compareIndex(self, xindex, yindex):
         xnode = xindex.internalPointer()
@@ -98,7 +135,7 @@ class PMXBundleProxyModel(PMXBundleTypeFilterProxyModel):
     
 class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
     def __init__(self, parent = None):
-        super(PMXSyntaxProxyModel, self).__init__('syntax', parent)
+        PMXBundleTypeFilterProxyModel.__init__(self, 'syntax', parent)
     
     def data(self, index, role):
         if self.sourceModel() is None:
@@ -110,7 +147,7 @@ class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
         sIndex = self.mapToSource(index)
         
         if role == QtCore.Qt.DisplayRole and index.column() == 1:
-            syntax = sIndex.internalPointer()
+            syntax = self.sourceModel().node(sIndex)
             return syntax.trigger
         elif index.column() == 0:
             return self.sourceModel().data(sIndex, role)
@@ -118,6 +155,28 @@ class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
     def columnCount(self, parent):
         return 2
     
+class PMXTemplateProxyModel(PMXBundleTypeFilterProxyModel):
+    def __init__(self, parent = None):
+        PMXBundleTypeFilterProxyModel.__init__(self, 'template', parent)
+    
+    def data(self, index, role):
+        if self.sourceModel() is None:
+            return None
+        
+        if not index.isValid():
+            return None
+        
+        sIndex = self.mapToSource(index)
+        
+        if role == QtCore.Qt.DisplayRole and index.column() == 1:
+            template = self.sourceModel().node(sIndex)
+            return template.bundle.name
+        elif index.column() == 0:
+            return self.sourceModel().data(sIndex, role)
+
+    def columnCount(self, parent):
+        return 2
+
 class PMXThemeStyleTableProxyModel(QtGui.QSortFilterProxyModel):
     def filterAcceptsRow(self, sourceRow, sourceParent):
         regexp = self.filterRegExp()

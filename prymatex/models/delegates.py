@@ -33,9 +33,9 @@ class PMXColorDelegate(QtGui.QStyledItemDelegate):
             model.setData(index, color)
     
     def setEditorData(self, colorDialog, index):
-        variant = index.data()
-        if variant.canConvert(QtCore.QVariant.Color):
-            colorDialog.setCurrentColor(QtGui.QColor(variant))
+        color = index.data()
+        if color is not None:
+            colorDialog.setCurrentColor(color)
             
     def paint(self, painter, option, index):
         data = index.data()
@@ -62,21 +62,28 @@ class PMXFontStyleWidget(QtGui.QWidget):
         layout = QtGui.QHBoxLayout()
         layout.setSpacing(0)
         layout.setMargin(0)
+        
         self.buttonBold = QtGui.QPushButton("B")
         self.buttonBold.setCheckable(True)
         font = QtGui.QFont()
         font.setWeight(QtGui.QFont.Bold)
         self.buttonBold.setFont(font)
-        font = QtGui.QFont()
-        font.setItalic(True)
+        self.buttonBold.setMaximumWidth(30)
+        
         self.buttonItalic = QtGui.QPushButton("I")
         self.buttonItalic.setCheckable(True)
-        self.buttonItalic.setFont(font)
         font = QtGui.QFont()
-        font.setUnderline(True)
+        font.setItalic(True)
+        self.buttonItalic.setFont(font)
+        self.buttonItalic.setMaximumWidth(30)
+        
         self.buttonUnderline = QtGui.QPushButton("U")
         self.buttonUnderline.setCheckable(True)
+        font = QtGui.QFont()
+        font.setUnderline(True)
         self.buttonUnderline.setFont(font)
+        self.buttonUnderline.setMaximumWidth(30)
+        
         layout.addWidget(self.buttonBold)
         layout.addWidget(self.buttonItalic)
         layout.addWidget(self.buttonUnderline)
@@ -87,16 +94,9 @@ class PMXFontStyleDelegate(QtGui.QStyledItemDelegate):
     def __init__(self, parent):
         # Store the widget and update it acordigly
         super(PMXFontStyleDelegate, self).__init__(parent)
-        self.widgetDict = {}
         
-    def createWidget(self):
-        widget = PMXFontStyleWidget()
-        return widget
-    
     def createEditor(self, parent, option, index):
-        widget = self.createWidget()
-        widget.setParent(parent)
-        return widget
+        return PMXFontStyleWidget(parent)
         
     def setModelData(self, editedWidget, model, index):
         flags = set()
@@ -123,22 +123,13 @@ class PMXFontStyleDelegate(QtGui.QStyledItemDelegate):
     
     def getWidgetForIndex(self, index):
         indexTuple = index.column(), index.row()
-        
-        if not indexTuple in self.widgetDict:
-            widget = self.createWidget()
-            self.setEditorData(widget, index)
-            self.widgetDict[indexTuple] = widget
-            
-        return self.widgetDict[indexTuple]
+        widget = PMXFontStyleWidget()
+        self.setEditorData(widget, index)
+        return widget
     
     def paint(self, painter, option, index):
         widget = self.getWidgetForIndex(index)
-        widget.resize(option.rect.size())
-        #
-        #       Here update the witem with some method with the real item data
-        #       Update labels, icons, and so on
-        #       */
-                
+        #widget.resize(option.rect.size())
         painter.save()
         painter.translate(option.rect.topLeft())
         widget.render(painter)

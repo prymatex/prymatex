@@ -18,6 +18,10 @@ class PMXTraceBackDialog(QtGui.QDialog, Ui_TracebackDialog):
         super(PMXTraceBackDialog, self).__init__(parent)
         self.setupUi(self)
         
+        self.connectSignals()
+    
+    def connectSignals(self):
+        self.pushButtonKillApp.pressed.connect(QtGui.QApplication.quit)
         
     def on_pushCopy_pressed(self):
         '''
@@ -46,3 +50,5 @@ class PMXTraceBackDialog(QtGui.QDialog, Ui_TracebackDialog):
         tracebackText = ''.join(format_exception(type, value, traceback))
         inst.textStackTrace.setHtml(beautifyTraceback(tracebackText))
         return inst
+    
+    

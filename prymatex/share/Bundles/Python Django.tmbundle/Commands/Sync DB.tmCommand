@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/bin/sh
+
+export TM_RUBY=$(type -p "${TM_RUBY:-ruby}")
+
+"${TM_RUBY}" -KU -- "$TM_BUNDLE_SUPPORT/lib/generic_command.rb" "syncdb"</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>@d</string>
+	<key>name</key>
+	<string>Sync DB</string>
+	<key>output</key>
+	<string>showAsHTML</string>
+	<key>scope</key>
+	<string>source.python.django</string>
+	<key>uuid</key>
+	<string>DBF28DAA-17B1-4C92-82EE-5F31133E280E</string>
+</dict>
+</plist>

@@ -22,6 +22,115 @@
      <number>0</number>
     </property>
     <item>
+     <layout class="QHBoxLayout" name="buttonsLayout">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonSync">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Sync folder with current editor file path</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonCollapseAll">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/view-list-tree.png</normaloff>:/icons/actions/view-list-tree.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonCustomFilters">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/view-filter.png</normaloff>:/icons/actions/view-filter.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonOptions">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QTreeView" name="treeViewProjects">
       <property name="uniformRowHeights">
        <bool>true</bool>
@@ -54,10 +163,13 @@
   <action name="actionNewFromTemplate">
    <property name="icon">
     <iconset resource="../../resources.qrc">
-     <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
+     <normaloff>:/icons/actions/run-build-file.png</normaloff>:/icons/actions/run-build-file.png</iconset>
    </property>
    <property name="text">
-    <string>From Template</string>
+    <string>File From Template</string>
+   </property>
+   <property name="toolTip">
+    <string>File From Template</string>
    </property>
   </action>
   <action name="actionDelete">
@@ -127,11 +239,6 @@
     <string>System Editor</string>
    </property>
   </action>
-  <action name="actionOpenDefaultEditor">
-   <property name="text">
-    <string>Default Editor</string>
-   </property>
-  </action>
   <action name="actionRename">
    <property name="icon">
     <iconset resource="../../resources.qrc">
@@ -145,6 +252,118 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionOrderByName">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Name</string>
+   </property>
+  </action>
+  <action name="actionOrderBySize">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Size</string>
+   </property>
+  </action>
+  <action name="actionOrderByDate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Date</string>
+   </property>
+  </action>
+  <action name="actionOrderByType">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>By Type</string>
+   </property>
+  </action>
+  <action name="actionOrderDescending">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Descending</string>
+   </property>
+  </action>
+  <action name="actionOrderFoldersFirst">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Folders First</string>
+   </property>
+  </action>
+  <action name="actionSetInTerminal">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/apps/utilities-terminal.png</normaloff>:/icons/apps/utilities-terminal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set In Terminal</string>
+   </property>
+  </action>
+  <action name="actionRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+  </action>
+  <action name="actionBundleEditor">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/bundles/bundle.png</normaloff>:/icons/bundles/bundle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bundle Editor</string>
+   </property>
+  </action>
+  <action name="actionBashInit">
+   <property name="text">
+    <string>Bash Init</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cu&amp;t</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>

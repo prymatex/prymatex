@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>520</width>
-    <height>298</height>
+    <height>301</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,12 @@
       </property>
       <item>
        <widget class="QPushButton" name="buttonBack">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Back</string>
         </property>
@@ -35,7 +41,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset resource="../../resources.qrc">
           <normaloff>:/icons/actions/go-previous.png</normaloff>:/icons/actions/go-previous.png</iconset>
         </property>
         <property name="flat">
@@ -48,6 +54,12 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Next</string>
         </property>
@@ -58,7 +70,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset resource="../../resources.qrc">
           <normaloff>:/icons/actions/go-next.png</normaloff>:/icons/actions/go-next.png</iconset>
         </property>
         <property name="flat">
@@ -68,6 +80,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="buttonReload">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Reload</string>
         </property>
@@ -75,7 +93,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset resource="../../resources.qrc">
           <normaloff>:/icons/actions/view-refresh.png</normaloff>:/icons/actions/view-refresh.png</iconset>
         </property>
         <property name="flat">
@@ -88,6 +106,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="buttonStop">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Stop</string>
         </property>
@@ -95,8 +119,35 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../resources.qrc">
+         <iconset resource="../../resources.qrc">
           <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonOptions">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -116,6 +167,36 @@
     </item>
    </layout>
   </widget>
+  <action name="actionSyncEditor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
+   </property>
+   <property name="text">
+    <string>Sync Editor</string>
+   </property>
+   <property name="toolTip">
+    <string>Sync browser with current editor content</string>
+   </property>
+  </action>
+  <action name="actionConnectEditor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/network-connect.png</normaloff>:/icons/actions/network-connect.png</iconset>
+   </property>
+   <property name="text">
+    <string>Connect Editor</string>
+   </property>
+   <property name="toolTip">
+    <string>Connect browser with current editor</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -125,7 +206,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../resources.qrc"/>
+  <include location="../../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

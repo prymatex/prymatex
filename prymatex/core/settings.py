@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
-'''
-Application configuration based on Qt's QSettings module.
 
-'''
+"""
+Application configuration based on Qt's QSettings module.
+"""
 import os, plistlib
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from ConfigParser import ConfigParser
+
+from PyQt4 import QtCore, QtGui
 
 try:
     from win32com.shell import shellcon, shell
@@ -16,6 +17,7 @@ except ImportError:
 
 PRYMATEX_HOME_NAME = ".prymatex"
 PRYMATEX_SETTING_NAME = "settings.ini"
+PRYMATEX_PROFILES_NAME = "profiles.ini"
 TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
 TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
 TEXTMATE_PREFERENCE_NAMES = ["Library", "Preferences"]
@@ -28,12 +30,10 @@ def get_prymatex_home_path():
     if not os.path.exists(path):
         os.makedirs(path)
     #Create extra paths
-    bundles = os.path.join(path, 'Bundles')
-    if not os.path.exists(bundles):
-        os.makedirs(bundles, 0700)
-    themes = os.path.join(path, 'Themes')
-    if not os.path.exists(themes):
-        os.makedirs(themes, 0700)
+    for extra in ['Bundles', 'Themes', 'Plugins']:
+        extraPath = os.path.join(path, extra)
+        if not os.path.exists(extraPath):
+            os.makedirs(extraPath, 0700)
     return path
 
 def get_textmate_preferences_user_path():
@@ -45,7 +45,7 @@ def get_textmate_preferences_user_path():
     if not os.path.exists(webpreview):
         plistlib.writePlist({"SelectedTheme": "bright"}, webpreview)
     return path
-    
+
 def build_prymatex_profile(path):
     '''
     @see: PMXObject.pmxApp.getProfilePath(what, file)
@@ -53,19 +53,18 @@ def build_prymatex_profile(path):
     os.makedirs(path)
     os.makedirs(os.path.join(path, 'tmp'), 0700)
     os.makedirs(os.path.join(path, 'log'), 0700)
-    os.makedirs(os.path.join(path, 'var'), 0700)
+    os.makedirs(os.path.join(path, 'cache'), 0700)
+    os.makedirs(os.path.join(path, 'screenshot'), 0700)
+
+def get_prymatex_profiles_file(path):
+    filePath = os.path.join(path, PRYMATEX_PROFILES_NAME)
+    if not os.path.exists(filePath):
+        pf = open(filePath, 'w')
+        pf.write("\n".join(["[General]", "dontask=True", "", "[Profile0]", "name=default", "path=" + os.path.join(path, "default"), "default=True"]))
+        pf.flush()
+        pf.close()
+    return filePath
     
-def get_prymatex_profile_path(name, base):
-    path = os.path.abspath(os.path.join(base, name.lower()))
-    if not os.path.exists(path):
-        build_prymatex_profile(path)
-    return path
-
-#Cuidado esta la necesita el paquete support en el modulo utils, ver como quitarla igualmente
-#PMX_SUPPORT_PATH = os.path.join(PMX_BASE_PATH, 'share', 'Support')
-
-TM_PREFERENCES_PATH = get_textmate_preferences_user_path()
-
 class TextMateSettings(object):
     def __init__(self, file):
         self.file = file
@@ -109,6 +108,7 @@ class SettingsGroup(object):
         self.tmsettings = tmsettings
             
     def setValue(self, name, value):
+        #TODO: Ver que pasa con las listas
         if name in self.settings:
             self.qsettings.beginGroup(self.name)
             self.qsettings.setValue(name, value)
@@ -196,16 +196,7 @@ class pmxConfigPorperty(object):
             obj_type = type(self.fget(obj))
         return obj_type(obj)
 
-    def contributeToClass(self, cls, name):
-        self.name = name
-        self.fget = getattr(cls, name, None)
-        if self.fset == None:
-            self.fset = getattr(cls, "set" + name.title(), None)
-        cls.settings.addSetting(self)
-        setattr(cls, name, self)
-    
     def __call__(self, function):
-        self.name = function.__name__
         self.fset = function
         return self
         
@@ -222,32 +213,71 @@ class PMXSettings(object):
     PMX_APP_PATH = get_prymatex_app_path()
     PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
     PMX_HOME_PATH = get_prymatex_home_path()
+    PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, 'Plugins')
+    PMX_PROFILES_FILE = get_prymatex_profiles_file(PMX_HOME_PATH)
     USER_HOME_PATH = USER_HOME_PATH
-    PMX_PREFERENCES_PATH = TM_PREFERENCES_PATH
+    PMX_PREFERENCES_PATH = get_textmate_preferences_user_path()
+
+    @classmethod
+    def get_prymatex_profile_path(cls, name):
+        path = os.path.abspath(os.path.join(cls.PMX_HOME_PATH, name.lower()))
+        if not os.path.exists(path):
+            build_prymatex_profile(path)
+        return path
+    
+    @classmethod
+    def defaultProfile(cls):
+        config = ConfigParser()
+        config.read(cls.PMX_PROFILES_FILE)
+        for section in config.sections():
+            if section.startswith("Profile"):
+                if config.getboolean(section, "default"):
+                    return config.get(section, "name")
+        return "default"
+    
+    @classmethod
+    def askForProfile(cls):
+        config = ConfigParser()
+        config.read(cls.PMX_PROFILES_FILE)
+        return not config.getboolean("General", "dontask")
 
     def __init__(self, profile):
         self.PMX_PROFILE_NAME = profile
-        self.PMX_PROFILE_PATH = get_prymatex_profile_path(profile, self.PMX_HOME_PATH)
+        self.PMX_PROFILE_PATH = self.get_prymatex_profile_path(profile)
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
-        self.PMX_VAR_PATH = os.path.join(self.PMX_PROFILE_PATH, 'var')
+        self.PMX_CACHE_PATH = os.path.join(self.PMX_PROFILE_PATH, 'cache')
+        self.PMX_SCREENSHOT_PATH = os.path.join(self.PMX_PROFILE_PATH, 'screenshot')
         self.GROUPS = {}
         #TODO Defaults settings
         self.qsettings = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, PRYMATEX_SETTING_NAME), QtCore.QSettings.IniFormat)
-        self.tmsettings = TextMateSettings(os.path.join(TM_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
+        self.tmsettings = TextMateSettings(os.path.join(self.PMX_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
 
     def getGroup(self, name):
         if name not in self.GROUPS:
             self.GROUPS[name] = SettingsGroup(name, self.qsettings, self.tmsettings)
         return self.GROUPS[name]
     
+    def registerConfigurable(self, configurableClass):
+        #Prepare class group
+        groupName = configurableClass.__dict__['SETTINGS_GROUP'] if 'SETTINGS_GROUP' in configurableClass.__dict__ else configurableClass.__name__
+        configurableClass.settings = self.getGroup(groupName)
+        #Prepare configurable attributes
+        for key, value in configurableClass.__dict__.iteritems():
+            if isinstance(value, pmxConfigPorperty):
+                value.name = key
+                configurableClass.settings.addSetting(value)
+        
+    def configure(self, configurableInstance):
+        configurableInstance.settings.addListener(configurableInstance)
+        configurableInstance.settings.configure(configurableInstance)
+        
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)
     
     def value(self, name):
-        #FIXME keys for class values
-        if name in self.__class__.__dict__:
-            return self.__class__.__dict__[name]
+        if hasattr(self, name):
+            return getattr(self, name)
         value = self.qsettings.value(name)
         return value
 

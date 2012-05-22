@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import uuid as uuidmodule
+
 from PyQt4 import QtGui, QtCore
 
-from subprocess import Popen, PIPE, STDOUT
+from prymatex.gui import utils
 from prymatex.support.processor import PMXCommandProcessor
 from prymatex.support.snippet import PMXSnippet
 from prymatex.support.command import PMXCommand
@@ -19,6 +19,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return environment
 
     def configure(self, settings):
+        self.asynchronous = settings.get("asynchronous", True)
         self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
@@ -28,14 +29,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
         block = firstBlock
         for line in text.splitlines():
             if block == firstBlock and block == lastBlock:
-                scopes = block.userData().getAllScopes(start = startIndex, end = endIndex)
+                scopes = block.userData().scopeRanges(start = startIndex, end = endIndex)
             elif block == firstBlock:
-                scopes = block.userData().getAllScopes(start = startIndex)
+                scopes = block.userData().scopeRanges(start = startIndex)
             elif block == lastBlock:
-                scopes = block.userData().getAllScopes(end = endIndex)
+                scopes = block.userData().scopeRanges(end = endIndex)
             else:
-                scopes = block.userData().getAllScopes()
-            for scope, start, end in scopes:
+                scopes = block.userData().scopeRanges()
+            for (start, end), scope in scopes:
                 ss = scope.split()
                 token = "".join(map(lambda scope: "<" + scope + ">", ss))
                 token += line[start:end]
@@ -69,10 +70,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return self.editor.getCurrentScope()
     
     def selection(self, format = None):
-        if self.editor.textCursor().hasSelection():
-            text = self.editor.textCursor().selectedText()
+        cursor = self.editor.textCursor()
+        if cursor.hasSelection():
+            text = utils.replaceLineBreaks(cursor.selectedText())
             if format == "xml":
-                cursor = self.editor.textCursor()
                 firstBlock, lastBlock = self.editor.getSelectionBlockStartEnd()
                 return self.formatAsXml(text, firstBlock, lastBlock, cursor.selectionStart() - firstBlock.position(), cursor.selectionEnd() - lastBlock.position())
             else:
@@ -85,61 +86,20 @@ class PMXCommandProcessor(PMXCommandProcessor):
         word, start, end = self.editor.getCurrentWord()
         return word
     
-    def runCommand(self, context, shellCommand, callback):
-        return self.runQProcessCommand(context, shellCommand, callback)
-    
-    def runPopenCommand(self, context, shellCommand, callback):
-        process = Popen(shellCommand, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env = context.environment)
-        
-        if context.inputType != None:
-            process.stdin.write(unicode(context.inputValue).encode("utf-8"))
-        process.stdin.close()
-        try:
-            outputValue = process.stdout.read()
-        except IOError:
-            outputValue = ""
-        process.stdout.close()
-        context.outputType = process.wait()
-        callback(self, context)
-    
-    #Interface
-    def runQProcessCommand(self, context, shellCommand, callback):
-        process = QtCore.QProcess(self.editor)
-        #TODO: context.environment ya tiene las variables de system ver que hacer
-        env = QtCore.QProcessEnvironment.systemEnvironment()
-        for key, value in context.environment.iteritems():
-            env.insert(key, value)
-        process.setProcessEnvironment(env)
-
-        def onQProcessFinished(process, context, callback):
-            def runCallback(exitCode):
-                #context.outputValue = str(process.readAll()).decode("utf-8")
-                context.errorValue = str(process.readAllStandardError ()).decode("utf-8")
-                context.outputValue = str(process.readAllStandardOutput ()).decode("utf-8")
-                #context.outputValue = str(process.readAll()).decode("utf-8")
-                context.outputType = exitCode
-                callback(self, context)
-            return runCallback
-        
-        process.finished[int].connect(onQProcessFinished(process, context, callback))
-
-        if context.inputType != None:
-            process.start(shellCommand, QtCore.QIODevice.ReadWrite)
-            if not process.waitForStarted():
-                raise Exception("No puedo correr")
-            process.write(unicode(context.inputValue).encode("utf-8"))
-            process.closeWriteChannel()
-        else:
-            process.start(shellCommand, QtCore.QIODevice.ReadOnly)
-
     #beforeRunningCommand
     def saveModifiedFiles(self):
-        self.editor.mainWindow.actionSaveAll.trigger()
-        return True
+        ret = True
+        for editor in self.editor.mainWindow.editors():
+            if editor.isModified():
+                self.editor.mainWindow.saveEditor(editor = editor)
+                ret = ret and not editor.isModified()
+            if ret == False:
+                break
+        return ret
     
     def saveActiveFile(self):
-        self.editor.mainWindow.actionSave.trigger()
-        return True
+        self.editor.mainWindow.saveEditor(editor = self.editor)
+        return not (self.editor.isModified() or self.editor.isNew())
     
     # deleteFromEditor
     def deleteWord(self):
@@ -168,6 +128,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     # Outpus function
     def error(self, context):
+        #TODO: Mover esto a un lugar donde no dependa del processor mostrar un error en el borwser, quiza a la mainWindow
+        #para poder llamarlos como showErrorInBrowser o algo asi :)
         from prymatex.support.utils import makeHyperlinks
         command = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
@@ -177,17 +139,16 @@ class PMXCommandProcessor(PMXCommandProcessor):
             echo -e "<p>Exit code was: %(exitcode)d</p>"
             html_footer
         ''' % {'output': context.errorValue, 
-               'name': context.command.name,
+               'name': context.description(),
                'exitcode': context.outputType}
-        hash = {    'command': command, 
-                       'name': "Error" + context.command.name,
-                      'input': 'none',
-                     'output': 'showAsHTML' }
-        command = PMXCommand(context.command.manager.uuidgen(), "internal", hash = hash)
-        command.bundle = context.command.bundle
+        commandHash = { 'command': command, 
+                           'name': "Error" + context.bundleItem.name,
+                          'input': 'none',
+                         'output': 'showAsHTML' }
+        command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
+        command.setBundle(context.bundleItem.bundle)
+        command.setManager(context.bundleItem.manager)
         self.editor.insertBundleItem(command)
-            
-        self.showAsHTML(context)
         
     def discard(self, context):
         pass
@@ -203,7 +164,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.setTextCursor(cursor)
         
     def replaceDocument(self, context):
+        #1 Recuperar la posicion actual del cursor
+        cursor = self.editor.textCursor()
         self.editor.document().setPlainText(context.outputValue)
+        self.editor.setTextCursor(cursor)
         
     def insertText(self, context):
         cursor = self.editor.textCursor()
@@ -216,19 +180,19 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(context.outputValue)
         
     def insertAsSnippet(self, context):
-        hash = {    'content': context.outputValue, 
-                       'name': context.command.name,
-                 'tabTrigger': context.command.tabTrigger,
-              'keyEquivalent': context.command.keyEquivalent }
-        snippet = PMXSnippet(context.command.manager.uuidgen(), "internal", hash = hash)
-        snippet.bundle = context.command.bundle
+        snippetHash = {    'content': context.outputValue, 
+                       'name': context.bundleItem.name,
+                 'tabTrigger': context.bundleItem.tabTrigger,
+              'keyEquivalent': context.bundleItem.keyEquivalent }
+        snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), dataHash = snippetHash)
+        snippet.setBundle(context.bundleItem.bundle)
+        snippet.setManager(context.bundleItem.manager)
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, context):
-        self.editor.mainWindow.paneBrowser.setHtml(context.outputValue, context.command)
-        self.editor.mainWindow.paneBrowser.show()
+        self.editor.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
 
-    timespanFactor = 1        
+    timespanFactor = 1
     def showAsTooltip(self, context):
         # Chicho's sense of statistics
         linesToRead = context.outputValue.count('\n') or context.outputValue.count('<br')
@@ -236,16 +200,17 @@ class PMXCommandProcessor(PMXCommandProcessor):
             timeout = 8000
         else:
             timeout = linesToRead * 700
-        
+            
+        #TODO: Una mejor forma de mostrar en html la salida 
         cursor = self.editor.textCursor()
         point = self.editor.cursorRect(cursor).bottomRight()
         html = """
             <span>%s</span><hr>
             <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
-            </div>""" % context.outputValue.strip().replace('\n', '<br/>')
+            </div>""" % context.outputValue.strip().replace('\n', '<br/>').replace(' ', '&nbsp;')
         timeout = timeout * self.timespanFactor
         callbacks = {
-                   'copy': lambda s=context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
+                   'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
         }
         pos = (point.x() + 30, point.y() + 5)
         timeout = timeout * self.timespanFactor
@@ -253,7 +218,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
         
     def createNewDocument(self, context):
-        print "Nuevo documento", context.outputValue
+        editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
+        editor_widget.codeEdit.setPlainText(context.outputValue)
         
     def openAsNewDocument(self, context):
         editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()

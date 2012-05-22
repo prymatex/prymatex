@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-    Template's module
-    http://manual.macromates.com/en/templates
-'''
+"""
+Template's module
+http://manual.macromates.com/en/templates
+"""
 
 import os, shutil, codecs
+import functools
 from glob import glob
-from subprocess import Popen
-from prymatex.support.bundle import PMXBundleItem
+
+from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.utils import prepareShellScript
 from prymatex.utils import plist
 
@@ -20,6 +21,9 @@ class PMXTemplateFile(object):
         self.name = os.path.basename(path)
         self.template = template
 
+    def hasNamespace(self, namespace):
+        return self.template.hasNamespace(namespace)
+        
     @property
     def enabled(self):
         return self.template.enabled
@@ -38,13 +42,14 @@ class PMXTemplateFile(object):
             f.close()
     content = property(getFileContent, setFileContent)
 
-    def update(self, hash):
-        for key in hash.keys():
-            setattr(self, key, hash[key])
+    def update(self, dataHash):
+        for key in dataHash.keys():
+            setattr(self, key, dataHash[key])
     
     def relocate(self, path):
         if os.path.exists(self.path):
             shutil.move(self.path, path)
+        self.name = os.path.basename(path)
     
     def save(self, basePath = None):
         path = os.path.join(basePath, self.name) if basePath is not None else self.path
@@ -59,82 +64,120 @@ class PMXTemplate(PMXBundleItem):
     TYPE = 'template'
     FOLDER = 'Templates'
     PATTERNS = [ '*' ]
-
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXTemplate, self).__init__(uuid, namespace, hash, path)
-        self.files = []
     
-    def load(self, hash):
-        super(PMXTemplate, self).load(hash)
+    def __init__(self, uuid, dataHash):
+        PMXBundleItem.__init__(self, uuid, dataHash)
+        self.files = []                    #Estos son los template files
+    
+    def load(self, dataHash):
+        PMXBundleItem.load(self, dataHash)
         for key in PMXTemplate.KEYS:
-            setattr(self, key, hash.get(key, None))
-    
-    def update(self, hash):
-        for key in hash.keys():
-            setattr(self, key, hash[key])
+            setattr(self, key, dataHash.get(key, None))
     
     @property
     def hash(self):
-        hash = super(PMXTemplate, self).hash
+        dataHash = super(PMXTemplate, self).hash
         for key in PMXTemplate.KEYS:
             value = getattr(self, key)
             if value != None:
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
     
-    def save(self):
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
-        file = os.path.join(self.path , self.FILE)
+    def save(self, namespace):
+        if not os.path.exists(self.path(namespace)):
+            os.makedirs(self.path(namespace))
+        file = os.path.join(self.path(namespace), self.FILE)
         plist.writePlist(self.hash, file)
+        
         #Hora los archivos del template
         for file in self.files:
-            if file.path != self.path:
-                file.save(self.path)
+            if file.path != self.path(namespace):
+                file.save(self.path(namespace))
+                
+        #TODO: Si puedo garantizar el guardado con el manager puedo controlar los mtime en ese punto
+        self.updateMtime(namespace)
+        
+    def delete(self, namespace):
+        for file in self.files:
+            os.unlink(file.path)
+        os.unlink(os.path.join(self.path(namespace), self.FILE))
+        os.rmdir(self.path(namespace))
+        folder = os.path.dirname(self.path(namespace))
+        try:
+            #El ultimo apaga la luz, elimina el directorio base
+            os.rmdir(folder)
+        except:
+            pass
 
-    def buildEnvironment(self, directory = "", name = ""):
+    def buildEnvironment(self, **kwargs):
         env = super(PMXTemplate, self).buildEnvironment()
-        if self.extension:
-            name_with_ext = "{0}{1}{2}".format(name, os.path.extsep, self.extension)
-        else:
-            name_with_ext = name
-            
-        env['TM_NEW_FILE'] = os.path.join(directory, name_with_ext)
-        env['TM_NEW_FILE_BASENAME'] = name
-        env['TM_NEW_FILE_DIRECTORY'] = directory
+        fileName = kwargs.get('fileName', '')
+        fileDirectory = kwargs.get('fileDirectory', '')
+        if fileName and fileDirectory:
+            nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension) if self.extension else fileName
+            env['TM_NEW_FILE'] = os.path.join(fileDirectory, nameWithExtension)
+            env['TM_NEW_FILE_BASENAME'] = fileName
+            env['TM_NEW_FILE_DIRECTORY'] = fileDirectory
+        projectName = kwargs.get('projectName', '')
+        projectLocation = kwargs.get('projectLocation', '')
+        if projectName and projectLocation:
+            env['TM_NEW_PROJECT_NAME'] = projectName
+            env['TM_NEW_PROJECT_LOCATION'] = projectLocation
+            env['TM_NEW_PROJECT_BASENAME'] = os.path.basename(projectLocation)
+            env['TM_NEW_PROJECT_DIRECTORY'] = os.path.dirname(projectLocation)
         return env
     
-    def resolve(self, environment = {}):
-        origWD = os.getcwd() # remember our original working directory
-        os.chdir(self.path)
+    def execute(self, environment = {}, callback = lambda x: x):
+        context = PMXRunningContext(self)
         
-        command, env = prepareShellScript(self.command, environment)
-          
-        process = Popen(command, env = env)
-        process.wait()
-        
-        os.chdir(origWD) # get back to our original working directory
-        
+        context.asynchronous = False
+        context.workingDirectory = self.path('prymatex')
+        context.shellCommand, context.environment = prepareShellScript(self.command, environment)
+
+        self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
+    
+    def afterExecute(self, callback, context):
+        #TODO: Ver los errores
+        newFileOrPath = context.environment.get('TM_NEW_FILE', context.environment.get('TM_NEW_PROJECT_LOCATION', None))
+        callback(newFileOrPath)
+
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):
         info = os.path.join(path, cls.FILE)
-        paths = glob(os.path.join(path, '*'))
-        paths.remove(info)
+        templateFilePaths = glob(os.path.join(path, '*'))
+        templateFilePaths.remove(info)
         try:
             data = plist.readPlist(info)
             uuid = manager.uuidgen(data.pop('uuid', None))
             template = manager.getManagedObject(uuid)
             if template is None and not manager.isDeleted(uuid):
-                template = cls(uuid, namespace, data, path)
+                template = cls(uuid, data)
                 template.setBundle(bundle)
+                template.setManager(manager)
+                template.addSource(namespace, path)
                 template = manager.addBundleItem(template)
-                for path in paths:
-                    file = PMXTemplateFile(path, template)
-                    file = manager.addTemplateFile(file)
-                    template.files.append(file)
                 manager.addManagedObject(template)
+                #Add files
+                for templateFilePath in templateFilePaths:
+                    templateFile = PMXTemplateFile(templateFilePath, template)
+                    templateFile = manager.addTemplateFile(templateFile)
+                    template.files.append(templateFile)
             elif template is not None:
-                template.addNamespace(namespace)
+                template.addSource(namespace, path)
             return template
         except Exception, e:
-            print "Error in bundle %s (%s)" % (info, e)
+            print "Error in template %s (%s)" % (info, e)
+
+    @classmethod
+    def reloadBundleItem(cls, bundleItem, path, namespace, manager):
+        map(lambda style: manager.removeTemplateFile(style), bundleItem.files)
+        info = os.path.join(path, cls.FILE)
+        templateFilePaths = glob(os.path.join(path, '*'))
+        templateFilePaths.remove(info)
+        data = plist.readPlist(info)
+        bundleItem.load(data)
+        #Add files
+        for templateFilePath in templateFilePaths:
+            templateFile = PMXTemplateFile(templateFilePath, bundleItem)
+            templateFile = manager.addTemplateFile(templateFile)
+            template.files.append(templateFile)

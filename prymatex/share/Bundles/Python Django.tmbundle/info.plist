@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>contactEmailRot13</key>
@@ -40,36 +40,61 @@
 	<dict>
 		<key>items</key>
 		<array>
-			<string>311C17C5-A556-48D4-B91F-DD28BB0CF4E7</string>
+			<string>9391A5C1-B1CF-4A56-AC63-CDBB1DB8F55B</string>
 			<string>------------------------------------</string>
-			<string>5D4F70FB-4A51-41D4-B729-920F827E70D2</string>
-			<string>27531D3B-899B-4872-A16D-7275E4E91B02</string>
-			<string>97FCBFBC-BBEE-408B-BF5D-203D895FCFBA</string>
-			<string>8FA6C6F3-4F38-4560-A565-39FB0C498B74</string>
-			<string>25D5C228-A652-421D-ACC1-924FC5FEBEBE</string>
-			<string>2F382BC6-3AD6-4012-9663-DF2FD744B591</string>
-			<string>23AA908D-8DC6-4657-89A4-83214B85497D</string>
-			<string>CD1F651A-9D70-460B-A1AA-92E77908BA6A</string>
-			<string>D9BD861A-B03E-4765-92B2-55AE10067066</string>
-			<string>B2BDB25E-E626-443B-8B6D-2E09FD75876A</string>
-			<string>F497C0D3-812E-4339-8260-8D906337023B</string>
-			<string>1E41208D-8E7E-42ED-A23C-376075EC6ADB</string>
-			<string>636921D5-6D30-44DC-B49A-4188DF6A8477</string>
-			<string>6C53B5EA-B8CD-4FC8-903B-1967FD9E421F</string>
-			<string>449AB31C-BAB7-4D30-AF04-6A070CBE4EF4</string>
-			<string>21013818-A691-4E96-A889-70A0F2F28557</string>
-			<string>611E7330-56E2-4B20-A364-265666458121</string>
-			<string>4EFDEB25-E308-4708-9F2F-594582B5CCE0</string>
-			<string>9F2FB381-651B-420F-9835-0CADEA5DF7EF</string>
-			<string>E9B61D15-B2CC-4202-9F2D-9AE2C09219BF</string>
-			<string>8F14D580-0910-40DE-95B4-10825F3CD656</string>
-			<string>A15C10E8-4DC9-4C9B-A47E-A47F14663AFE</string>
-			<string>343CDE2F-C489-4437-B316-2881C5F1C854</string>
-			<string>4D06CE4E-A856-4607-8D58-A03ED5EB90B1</string>
-			<string>2F2B9569-8D5D-423E-8B36-75C59BAE9FE4</string>
+			<string>DBF28DAA-17B1-4C92-82EE-5F31133E280E</string>
+			<string>A0A254BA-B206-4634-AE0C-B583F53229E1</string>
+			<string>C8B16906-5A97-4AAA-9AAF-ED1DE479198A</string>
+			<string>4EABADD3-9D3B-439F-95F2-CFABCD7A3E43</string>
+			<string>4B3FDF3E-9EAF-4DB9-8BFA-1ED3C3B94453</string>
+			<string>E65D7908-312A-40DC-ABC0-C26D79E88FAF</string>
+			<string>3C8BDFD3-F37F-41B8-93BA-07A7560C0F34</string>
+			<string>99D4014F-88DB-473A-9274-7F4A26BB1723</string>
+			<string>------------------------------------</string>
+			<string>311C17C5-A556-48D4-B91F-DD28BB0CF4E7</string>
+			<string>E39746B0-4EAC-11E1-8240-C37F67332D78</string>
+			<string>97AF7101-45AD-4286-8AA2-4F43E63EB452</string>
+			<string>------------------------------------</string>
+			<string>5F79A28E-E2FA-4266-A069-2983B8828C04</string>
 		</array>
 		<key>submenus</key>
-		<dict/>
+		<dict>
+			<key>E39746B0-4EAC-11E1-8240-C37F67332D78</key>
+			<dict>
+				<key>items</key>
+				<array>
+					<string>27531D3B-899B-4872-A16D-7275E4E91B02</string>
+					<string>97FCBFBC-BBEE-408B-BF5D-203D895FCFBA</string>
+					<string>8FA6C6F3-4F38-4560-A565-39FB0C498B74</string>
+					<string>25D5C228-A652-421D-ACC1-924FC5FEBEBE</string>
+					<string>2F382BC6-3AD6-4012-9663-DF2FD744B591</string>
+					<string>23AA908D-8DC6-4657-89A4-83214B85497D</string>
+					<string>CD1F651A-9D70-460B-A1AA-92E77908BA6A</string>
+					<string>D9BD861A-B03E-4765-92B2-55AE10067066</string>
+					<string>B2BDB25E-E626-443B-8B6D-2E09FD75876A</string>
+					<string>F497C0D3-812E-4339-8260-8D906337023B</string>
+					<string>1E41208D-8E7E-42ED-A23C-376075EC6ADB</string>
+					<string>636921D5-6D30-44DC-B49A-4188DF6A8477</string>
+					<string>6C53B5EA-B8CD-4FC8-903B-1967FD9E421F</string>
+					<string>449AB31C-BAB7-4D30-AF04-6A070CBE4EF4</string>
+					<string>21013818-A691-4E96-A889-70A0F2F28557</string>
+					<string>611E7330-56E2-4B20-A364-265666458121</string>
+					<string>4EFDEB25-E308-4708-9F2F-594582B5CCE0</string>
+					<string>9F2FB381-651B-420F-9835-0CADEA5DF7EF</string>
+					<string>E9B61D15-B2CC-4202-9F2D-9AE2C09219BF</string>
+					<string>8F14D580-0910-40DE-95B4-10825F3CD656</string>
+					<string>A15C10E8-4DC9-4C9B-A47E-A47F14663AFE</string>
+					<string>343CDE2F-C489-4437-B316-2881C5F1C854</string>
+					<string>4D06CE4E-A856-4607-8D58-A03ED5EB90B1</string>
+					<string>2F2B9569-8D5D-423E-8B36-75C59BAE9FE4</string>
+					<string>0C28D967-6886-42A9-B74F-6E47C649962E</string>
+					<string>0B31BBE8-B195-4164-B4F6-245803D21C30</string>
+					<string>5D4F70FB-4A51-41D4-B729-920F827E70D2</string>
+				</array>
+				<key>name</key>
+				<string>Fields</string>
+			</dict>
+		</dict>
 	</dict>
 	<key>name</key>
 	<string>Python Django</string>

@@ -1,15 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
+
+from prymatex import resources
+from prymatex.core.plugin.status import PMXBaseStatusBar
+from prymatex.gui.codeeditor.editor import PMXCodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
-class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
-    FIND_STYLE_NO_MATCH = 'background-color: red; color: #fff;'
-    FIND_STYLE_MATCH = 'background-color: #dea;'
-    FIND_STYLE_NORMAL = ''
-    
+class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        self.editors = []
+        PMXBaseStatusBar.__init__(self)
         self.currentEditor = None
         
         self.setupUi(self)
@@ -85,8 +87,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         tableView.setAutoScroll(False)
         self.comboBoxSyntaxes.setModel(self.application.supportManager.syntaxProxyModel);
-        self.comboBoxSyntaxes.setModelColumn(0)
         self.comboBoxSyntaxes.setView(tableView)
+        self.comboBoxSyntaxes.setModelColumn(0)
         
         #Connect tab size context menu
         self.labelTabSize.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -122,6 +124,9 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     #============================================================
     # Handle editors
     #============================================================
+    def acceptEditor(self, editor):
+        return isinstance(editor, PMXCodeEditor)
+    
     def disconnectEditor(self, editor):
         editor.cursorPositionChanged.disconnect(self.on_cursorPositionChanged)
         editor.syntaxChanged.disconnect(self.on_syntaxChanged)
@@ -133,24 +138,18 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         editor.modeChanged.connect(self.on_modeChanged)
         
     def setCurrentEditor(self, editor):
-        assert editor in self.editors, "Editor not is in editors"
+        if self.currentEditor is not None:
+            self.disconnectEditor(self.currentEditor)
+        #Change currentEditor
         self.currentEditor = editor
-        self.comboBoxSymbols.setModel(editor.symbolListModel)
-        self.on_cursorPositionChanged(editor)
-        self.on_syntaxChanged(editor.getSyntax())
-        self.on_modeChanged(editor)
-        self.setTabSizeLabel(editor)
         self.hideAllWidgets()
-
-    def addEditor(self, editor):
-        assert editor not in self.editors, "Editor is in editors"
-        self.editors.append(editor)
-        self.connectEditor(editor)
-    
-    def removeEditor(self, editor):
-        assert editor in self.editors, "Editor not is in editors"
-        self.disconnectEditor(editor)
-        self.editors.remove(editor)
+        if self.currentEditor is not None:
+            self.connectEditor(self.currentEditor)
+            self.comboBoxSymbols.setModel(self.currentEditor.symbolListModel)
+            self.on_cursorPositionChanged(self.currentEditor)
+            self.on_syntaxChanged(self.currentEditor.getSyntax())
+            self.on_modeChanged(self.currentEditor)
+            self.setTabSizeLabel(self.currentEditor)
         
     #============================================================
     # Status Widget
@@ -158,10 +157,10 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     # AutoConnect signals----------------------------------------
     @QtCore.pyqtSlot(int)
     def on_comboBoxSyntaxes_activated(self, index):
-        model = self.comboBoxSyntaxes.model()
-        node = model.mapToSource(model.createIndex(index, 0))
         if self.currentEditor is not None:
-            self.currentEditor.setSyntax(node.internalPointer())
+            model = self.comboBoxSyntaxes.model()
+            node = model.node(model.createIndex(index, 0))
+            self.currentEditor.setSyntax(node)
 
     @QtCore.pyqtSlot(int)
     def on_comboBoxTabSize_activated(self, index):
@@ -183,13 +182,8 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         column = cursor.columnNumber() + 1
         selection = cursor.selectionEnd() - cursor.selectionStart()
         self.labelLineColumn.setText("Line: %5d Column: %5d Selection: %5d" % (line, column, selection))
-        #Symbols
-        model = self.comboBoxSymbols.model()
-        index = model.findBlockIndex(cursor.block())
-        if index >= 0:
-            self.comboBoxSymbols.blockSignals(True)
-            self.comboBoxSymbols.setCurrentIndex(index)
-            self.comboBoxSymbols.blockSignals(False)
+        #Set index of current symbol
+        self.comboBoxSymbols.setCurrentIndex(self.comboBoxSymbols.model().findBlockIndex(cursor.block()))
         
     def on_syntaxChanged(self, syntax):
         model = self.comboBoxSyntaxes.model()
@@ -306,6 +300,11 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         replace = self.lineEditReplace.text()
         self.currentEditor.replaceMatch(match, replace, flags, True)
     
+    @QtCore.pyqtSlot()
+    def on_pushButtonFindAll_pressed(self):
+        match, flags = self.getFindMatchAndFlags()
+        self.currentEditor.findAll(match, flags)
+        
     def getFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
         if self.checkBoxFindCaseSensitively.isChecked():
@@ -317,7 +316,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         elif mode == 2:
             pass
         elif mode == 3:
-            match = QtCore.QRegExp(QtCore.QRegExp.escape(match))
+            match = QtCore.QRegExp(match)
         return match, flags
     
     def showFindReplace(self):
@@ -338,12 +337,11 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     def on_lineEditIFind_textChanged(self, text):
         if text:
             _, flags = self.getIFindMatchAndFlags()
-            if self.currentEditor.findMatch(text, flags):
-                self.lineEditIFind.setStyleSheet(self.FIND_STYLE_MATCH)
-            else:
-                self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NO_MATCH)
+            match = self.currentEditor.findMatch(text, flags)
+            self.lineEditIFind.setStyleSheet(match and resources.FIND_MATCH_STYLE or resources.FIND_NO_MATCH_STYLE)
         else:
-            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NORMAL)
+            #TODO: Buscar un clean style
+            self.lineEditIFind.setStyleSheet('')
     
     @QtCore.pyqtSlot()
     def on_pushButtonIFindNext_pressed(self):
@@ -359,10 +357,10 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
     @QtCore.pyqtSlot(int)
     def on_checkBoxIFindCaseSensitively_stateChanged(self, value):
         match, flags = self.getIFindMatchAndFlags()
-        if self.currentEditor.findMatch(text, flags):
-            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_MATCH)
+        if self.currentEditor.findMatch(match, flags):
+            self.lineEditIFind.setStyleSheet(resources.FIND_MATCH_STYLE)
         else:
-            self.lineEditIFind.setStyleSheet(self.FIND_STYLE_NO_MATCH)
+            self.lineEditIFind.setStyleSheet(resources.FIND_NO_MATCH_STYLE)
     
     def getIFindMatchAndFlags(self):
         flags = QtGui.QTextDocument.FindFlags()
@@ -381,3 +379,36 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXObject):
         self.widgetIFind.setVisible(True)
         self.lineEditIFind.selectAll()
         self.lineEditIFind.setFocus()
+    
+    #===========================================================================
+    # Menus
+    #===========================================================================
+    # Contributes to Main Menu
+    @classmethod
+    def contributeToMainMenu(cls):
+        edit = {
+            'items': [
+                '-',
+                {'title': "Find",
+                 'shortcut': "Ctrl+F",
+                 'callback': cls.showIFind
+                },
+                {'title': "Replace",
+                 'shortcut': "Ctrl+R",
+                 'callback': cls.showFindReplace
+                }
+            ]}
+        text = {
+            'items': [
+                {'title': 'Filter Through Command',
+                 'callback': cls.showCommand
+                 }
+            ]}
+        navigation = {
+            'items': [
+                {'title': 'Go To &Line',
+                 'callback': cls.showGoToLine,
+                 'shortcut': 'Meta+Ctrl+Shift+L',
+                 }
+            ]}
+        return { "Edit": edit, "Navigation": navigation, "Text": text }

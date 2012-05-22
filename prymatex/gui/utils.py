@@ -24,6 +24,10 @@ def centerWidget(widget, scale = None):
         widget.resize(screen.width() * scale[0], screen.height() * scale[1])
     widget.move((screen.width() - widget.size().width()) / 2, (screen.height() - widget.size().height()) / 2)
     
+def replaceLineBreaks(text):
+    """docstring for replaceLineBreaks"""
+    return text.replace(u"\u2029", '\n').replace(u"\u2028", '\n')
+
 def textToObjectName(text, sufix = "", prefix = ""):
     """
     &Text Button name -> %{prefix}TextButtonName%{sufix}
@@ -32,7 +36,26 @@ def textToObjectName(text, sufix = "", prefix = ""):
     name = ''.join(map(to_ascii_cap, words))
     return prefix + name + sufix
 
-def createQMenu(settings, parent):
+def createQAction(settings, parent):
+    title = settings.get("title", "Action Title")
+    icon = settings.get("icon")
+    shortcut = settings.get("shortcut")
+    checkable = settings.get("checkable", False)
+    callback = settings.get("callback")
+    testChecked = settings.get("testChecked")
+    action = QtGui.QAction(title, parent)
+    object_name = textToObjectName(title, prefix = "action")
+    action.setObjectName(object_name)
+    if icon is not None:
+        action.setIcon(icon)
+    if shortcut is not None:
+        action.setShortcut(shortcut)
+    action.setCheckable(checkable)
+    action.testChecked = testChecked
+    action.callback = callback
+    return action
+    
+def createQMenu(settings, parent, useSeparatorName = False):
     """
     settings = {
             "title": "Menu Title",
@@ -41,41 +64,144 @@ def createQMenu(settings, parent):
                 action1, action2, 
                 {"title": "SubMenu Title",
                  "items": [
-                    (gaction1, qaction2, qaction3),
+                    (gaction1, qaction2, qaction3), # Create Action Group, Exclusive = True
+                    [gaction1, qaction2, qaction3], # Create ACtion Group, Exclusive = False
+                    { 'title': "Action Title",      # Create action whit callback
+                      "sortcut": 'F20', 
+                      "icon": ...., 
+                      'callback': ....},  
                     "-", action1, action2
-                ],
-                 "exclusives": [ True ]}
+                ]}
                 action3, "-", action4
             ]
         }
     """
+    actions = []
     title = settings.get("title", "Menu Title")
     icon = settings.get("icon")
     items = settings.get("items")
     menu = QtGui.QMenu(title, parent)
-    object_name = textToObjectName(title, sufix = "Menu")
+    object_name = textToObjectName(title, prefix = "menu")
     menu.setObjectName(object_name)
+    if icon is not None:
+        menu.setIcon(icon)
+    #actions.append(menu.defaultAction())
+    if items is not None:
+        subactions = extendQMenu(menu, items, useSeparatorName)
+        actions.extend(subactions)
+    return menu, actions
+
+def extendQMenu(menu, items, useSeparatorName = False):
+    actions = []
     for item in items:
         if item == "-":
-            menu.addSeparator()
+            action = menu.addSeparator()
+            actions.append(action)
+        elif isinstance(item, basestring) and item.startswith("--"):
+            action = menu.addSeparator()
+            if useSeparatorName:
+                action.setText(item[2:])
+            actions.append(action)
+        elif isinstance(item, dict) and 'items' in item:
+            submenu, subactions = createQMenu(item, menu)
+            subaction = menu.addMenu(submenu)
+            actions.append(subaction)
+            actions.extend(subactions)
         elif isinstance(item, dict):
-            submenu = createQMenu(item, menu)
-            menu.addMenu(submenu)
+            action = createQAction(item, menu)
+            actions.append(action)
+            menu.addAction(action)
         elif isinstance(item, QtGui.QAction):
             menu.addAction(item)
+        elif isinstance(item, list):
+            actionGroup = QtGui.QActionGroup(menu)
+            actions.append(actionGroup)
+            actionGroup.setExclusive(False)
+            map(menu.addAction, item)
+            map(lambda action: action.setActionGroup(actionGroup), item)
         elif isinstance(item, tuple):
             actionGroup = QtGui.QActionGroup(menu)
-            #TODO: optional exclusive
+            actions.append(actionGroup)
             actionGroup.setExclusive(True)
             map(menu.addAction, item)
             map(lambda action: action.setActionGroup(actionGroup), item)
         else:
             raise Exception("%s" % item)
-    return menu
+    return actions
+
+def sectionNameRange(items, name):
+    begin, end = None, None
+    for item in items:
+        if isinstance(item, basestring):
+            if begin is None and item == '--' + name:
+                begin = item
+            elif begin is not None and item.startswith('--'):
+                end = item
+                break
+    if begin is None:
+        raise Exception("Section %s not exists" % name)
+    begin = items.index(begin)
+    end = items.index(end) if end is not None else -1
+    return begin, end
+
+def chunkSections(items):
+    sections = []
+    start = 0
+    for i in xrange(0, len(items)):
+        if isinstance(items[i], basestring) and items[i].startswith('--'):
+            sections.append(items[start:i])
+            start = i
+    sections.append(items[start:len(items)])
+    return sections
+    
+def sectionNumberRange(items, index):
+    sections = chunkSections(items)
+    section = sections[index]
+    begin = items.index(section[0])
+    end = items.index(section[-1]) + 1
+    return begin, end
+
+def extendMenuSection(menu, newItems, section = 0, position = None):
+    if not isinstance(newItems, list):
+        newItems = [ newItems ]
+    menuItems = menu.setdefault('items', [])
+    #Ver si es un QMenu o una lista de items
+    if isinstance(section, basestring):
+        #Buscar en la lista la seccion correspondiente
+        begin, end = sectionNameRange(menuItems, section)
+    elif isinstance(section, int):
+        begin, end = sectionNumberRange(menuItems, section)
+    newSection = menuItems[begin:end]
+    if position is None:
+        newSection += newItems
+    else:
+        if newSection and isinstance(newSection[0], basestring) and newSection[0].startswith("-"):
+            position += 1
+        newSection = newSection[:position] + newItems + newSection[position:]
+    menu["items"] = menuItems[:begin] + newSection + menuItems[end:]
+
+def combineIcons(icon1, icon2, scale = 1):
+    newIcon = QtGui.QIcon()
+    sizes = icon1.availableSizes()
+    if not sizes:
+        sizes = [ QtCore.QSize(16, 16), QtCore.QSize(22, 22), QtCore.QSize(32, 32), QtCore.QSize(48, 48) ]
+    for size in sizes:
+        pixmap1 = icon1.pixmap(size)
+        pixmap2 = icon2.pixmap(size)
+        pixmap2 = pixmap2.scaled(pixmap1.width() * scale, pixmap1.height() * scale)
+        result = QtGui.QPixmap(size)
+        result.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(result)
+        painter.drawPixmap(0, 0, pixmap1)
+        painter.drawPixmap(pixmap1.width() - pixmap2.width(), pixmap1.height() - pixmap2.height(), pixmap2)
+        painter.end()
+        newIcon.addPixmap(result)
+    return newIcon
 
 # Key press debugging 
-KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) 
-                  if keyname.startswith('Key_')])
+
+KEY_NUMBERS = map(lambda keyname: getattr(QtCore.Qt, keyname), [ "Key_%d" % index for index in range(10)])
+KEY_NAMES = dict([(getattr(QtCore.Qt, keyname), keyname) for keyname in dir(QtCore.Qt) if keyname.startswith('Key_')])
 
 ANYKEY = -1
 

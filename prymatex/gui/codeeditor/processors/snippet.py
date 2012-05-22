@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
+
 from prymatex.support.processor import PMXSnippetProcessor
 
 class PMXSnippetProcessor(PMXSnippetProcessor):

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/emergencycrash.ui'
 #
-# Created: Mon Nov 14 16:19:57 2011
+# Created: Thu May 10 16:16:04 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,7 +20,7 @@ class Ui_CrashDialog(object):
         CrashDialog.setObjectName(_fromUtf8("CrashDialog"))
         CrashDialog.resize(579, 411)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/Prymatex_Logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         CrashDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(CrashDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))

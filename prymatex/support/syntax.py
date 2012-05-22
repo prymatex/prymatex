@@ -1,24 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-    Syntax's module
-    http://manual.macromates.com/en/language_grammars.html
-    http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
-'''
+"""Syntax's module
+http://manual.macromates.com/en/language_grammars.html
+http://manual.macromates.com/en/navigation_overview#customizing_foldings.html
+"""
+
 import re
+
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp
     
 SPLITLINES = re.compile('\n')
 
 class PMXSyntaxNode(object):
-    def __init__(self, hash, syntax):
+    def __init__(self, dataHash, syntax):
         for k in [  'syntax', 'match', 'begin', 'content', 'name', 'contentName', 'end',
                     'captures', 'beginCaptures', 'endCaptures', 'repository', 'patterns']:
             setattr(self, k, None)
         self.syntax = syntax
-        for key, value in hash.iteritems():
+        for key, value in dataHash.iteritems():
             try:
                 if key in ['match', 'begin']:
                     setattr(self, key, compileRegexp( value ))
@@ -132,9 +133,9 @@ class PMXSyntaxNode(object):
         return match
 
 class PMXSyntaxProxy(object):
-    def __init__(self, hash, syntax):
+    def __init__(self, dataHash, syntax):
         self.syntax = syntax
-        self.proxy = hash['include']
+        self.proxy = dataHash['include']
     
     def __getattr__(self, name):
         if self.proxy:
@@ -164,15 +165,13 @@ class PMXSyntax(PMXBundleItem):
     FOLDER = 'Syntaxes'
     EXTENSION = 'tmLanguage'
     PATTERNS = ['*.tmLanguage', '*.plist']
+    FOLDING_NONE = 0
     FOLDING_START = 1
     FOLDING_STOP = -1
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXSyntax, self).__init__(uuid, namespace, hash, path)
-
-    def load(self, hash):
-        super(PMXSyntax, self).load(hash)
+    def load(self, dataHash):
+        super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:
-            value = hash.get(key, None)
+            value = dataHash.get(key, None)
             if value != None and key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                 try:
                     value = compileRegexp( value )
@@ -183,14 +182,14 @@ class PMXSyntax(PMXBundleItem):
     
     @property
     def hash(self):
-        hash = super(PMXSyntax, self).hash
+        dataHash = super(PMXSyntax, self).hash
         for key in PMXSyntax.KEYS:
             value = getattr(self, key)
             if value != None:
                 if key in ['firstLineMatch', 'foldingStartMarker', 'foldingStopMarker']:
                     value = value.pattern
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
     @property
     def indentSensitive(self):
@@ -205,14 +204,27 @@ class PMXSyntax(PMXBundleItem):
     @property
     def grammar(self):
         if not hasattr(self, '_grammar'):
-            hash = {}
-            if self.repository != None:
-                hash['repository'] = self.repository
-            if self.patterns != None:
-                hash['patterns'] = self.patterns
-            setattr(self, '_grammar', PMXSyntaxNode(hash , self ))
+            dataHash = {}
+            dataHash['repository'] = self.buildRepository()
+            dataHash['patterns'] = self.patterns if self.patterns != None else []
+            setattr(self, '_grammar', PMXSyntaxNode(dataHash , self ))
         return self._grammar
-        
+
+    def buildRepository(self):
+        repository = {}
+        if self.scopeName is not None:
+            syntaxes = self.syntaxes
+            index = self.scopeName.find(".")
+            while index != -1:
+                parentScopeName = self.scopeName[0:index]
+                parentSyntax = syntaxes.get(parentScopeName)
+                if parentSyntax is not None and parentSyntax.repository is not None:
+                    repository.update(parentSyntax.repository)
+                index = self.scopeName.find(".", index + 1)
+        if self.repository is not None:
+            repository.update(self.repository)
+        return repository
+
     def parse(self, string, processor = None):
         if processor:
             processor.startParsing(self.scopeName)
@@ -288,7 +300,7 @@ class PMXSyntax(PMXBundleItem):
             return self.FOLDING_START
         elif stop_match != None and start_match == None:
             return self.FOLDING_STOP
-                
+        return self.FOLDING_NONE
+
     def __str__(self):
         return u"<PMXSyntax %s>" % self.name
-        

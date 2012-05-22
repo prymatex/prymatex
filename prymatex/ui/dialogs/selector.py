@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/selector.ui'
 #
-# Created: Wed Dec 28 19:06:06 2011
+# Created: Thu May 10 16:19:51 2012
 #      by: PyQt4 UI code generator 4.8.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -20,6 +20,9 @@ class Ui_SelectorDialog(object):
         SelectorDialog.setObjectName(_fromUtf8("SelectorDialog"))
         SelectorDialog.resize(600, 371)
         SelectorDialog.setMinimumSize(QtCore.QSize(600, 371))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        SelectorDialog.setWindowIcon(icon)
         self.verticalLayout = QtGui.QVBoxLayout(SelectorDialog)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -42,3 +45,4 @@ class Ui_SelectorDialog(object):
     def retranslateUi(self, SelectorDialog):
         pass
 
+from prymatex import resources_rc

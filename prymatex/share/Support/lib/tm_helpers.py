@@ -6,14 +6,10 @@ tm_helpers.py
 A collection of useful helper functions and classes for writing
 commands in Python for TextMate.
 """
-import sys
+
+import sys, os
 from re import sub, compile as compile_
 from os import popen, path, environ as env
-
-# fix up path
-# tm_support_path = path.join(env["TM_SUPPORT_PATH"], "lib")
-# if not tm_support_path in env:
-#     sys.path.insert(0, tm_support_path)
 
 from plistlib import writePlistToString, readPlistFromString
 
@@ -45,6 +41,15 @@ def current_word(pat, direction="both"):
         if m and direction in ("right", "both"):
             word += m.group(0)
     return word
+
+def selection_or_line():
+    """Return selected text, the current line or None if there's a problme"""
+
+    try:
+        text = os.environ['TM_SELECTED_TEXT']
+    except KeyError:
+        text = os.environ.get('TM_CURRENT_LINE')
+    return text
 
 def env_python():
     """ Return (python, version) from env.
@@ -86,3 +91,34 @@ def sh(cmd):
 def sh_escape(s):
     """ Escape `s` for the shell. """
     return sub(r"(?=[^a-zA-Z0-9_.\/\-\x7F-\xFF\n])", r'\\', s).replace("\n", "'\n'")
+
+def exit_discard():
+    sys.exit(200)
+
+def exit_replace_text(out = None):
+  if out: print out
+  sys.exit(201)
+  
+def exit_replace_document(out = None):
+  if out: print out
+  sys.exit(202)
+
+def exit_insert_text(out = None):
+  if out: print out
+  sys.exit(203)
+
+def exit_insert_snippet(out = None):
+  if out: print out
+  sys.exit(204)
+
+def exit_show_html(out = None):
+  if out: print out
+  sys.exit(205)
+
+def exit_show_tool_tip(out = None):
+  if out: print out
+  sys.exit(206)
+
+def exit_create_new_document(out = None):
+  if out: print out
+  sys.exit(207)

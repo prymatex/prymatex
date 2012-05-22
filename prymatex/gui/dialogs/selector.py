@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import collections
+
 from PyQt4 import QtCore, QtGui
+
+from prymatex import resources
 from prymatex.ui.dialogs.selector import Ui_SelectorDialog
 
 class PMXSelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
@@ -17,32 +21,51 @@ class PMXSelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.tableItems.installEventFilter(self)
         
         self.setWindowFlags(QtCore.Qt.Dialog)
-        self.model = QtGui.QStandardItemModel(self)
         self.proxy = QtGui.QSortFilterProxyModel(self)
         self.tableItems.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.proxy.setSourceModel(self.model)
         self.tableItems.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableItems.verticalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self.tableItems.setModel(self.proxy)
         self.setWindowTitle(title)
-        
-    def select(self, items):
-        ''' 
-            @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
-            @return: The selected index
-        '''
-        self.index = None
-        self.model.clear()
-        self.lineFilter.clear()
-        self.lineFilter.setFocus()
+    
+    def createStandardItemModel(self, items):
+        def dictToStandardItem(a_dict):
+            item = QtGui.QStandardItem()
+            item.setText(a_dict.get('title', ''))
+            image = a_dict.get('image')
+            if image is not None:
+                if isinstance(image, QtGui.QIcon):
+                    item.setIcon(image)
+                else:
+                    image = resources.getIcon(image) or QtGui.QIcon()
+                item.setIcon(image)
+            return item
+        model = QtGui.QStandardItemModel(self)
         for row in items:
             items = map(dictToStandardItem, row)
-            self.model.appendRow(items)
-            
-            #self.model.appendRow([ QtGui.QStandardItem(QtGui.QIcon(item.icon), item.name), QtGui.QStandardItem(item.trigger) ])
+            model.appendRow(items)
+        return model
+        
+    def select(self, data):
+        """
+            @param items: List of rows, each row has a list of columns, and each column is a dict with "title", "image", "tooltip"
+            @return: The selected index
+        """
+        self.index = None
+        self.lineFilter.clear()
+        self.lineFilter.setFocus()
+        
+        model = None
+        if isinstance(data, collections.Iterable):
+            model = self.createStandardItemModel(data)
+        elif isinstance(data, QtCore.QAbstractItemModel):
+            model = data
+        else:
+            raise Exception("No Data")
+        self.proxy.setSourceModel(model)
+        
         self.tableItems.selectRow(0)
         if self.exec_() == self.Accepted:
-            print "Selecciono", self.index
             return self.index
     
     def eventFilter(self, obj, event):
@@ -82,26 +105,9 @@ class PMXSelectorDialog(QtGui.QDialog, Ui_SelectorDialog):
         self.index = sIndex.row()
         self.accept()
     
-    
-        
     def on_lineFilter_returnPressed(self):
         indexes = self.tableItems.selectedIndexes()
         if indexes:
             sIndex = self.proxy.mapToSource(indexes[0])
             self.index = sIndex.row()
             self.accept()
-
-# TODO: Move to proper place
-from prymatex import resources
-def dictToStandardItem(a_dict):
-    item = QtGui.QStandardItem()
-    item.setText(a_dict.get('title', ''))
-    image = a_dict.get('image')
-    if image is not None:
-        if isinstance(image, QtGui.QIcon):
-            item.setIcon(image)
-        else:
-            image = resources.getIcon(image) or QtGui.QIcon()
-        item.setIcon(image)
-    return item
-        

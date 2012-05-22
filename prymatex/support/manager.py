@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re, os, string, unicodedata
+import re
+import os
+import string
+import unicodedata
+import hashlib
 import uuid as uuidmodule
-
+import subprocess
 from glob import glob
 
 from prymatex.support.bundle import PMXBundle, PMXBundleItem
@@ -22,18 +26,19 @@ from prymatex.utils.decorator.helpers import printtime
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand ]
 
-def compare(object, attrs, tests):
-    if not attrs:
+def compare(obj, keys, tests):
+    if not len(keys):
         return True
-    attr = getattr(object, attrs[0], None)
-    if attr == None or attrs[0] not in tests:
-        return True and compare(object, attrs[1:], tests)
-    elif isinstance(attr, (str, unicode)):
-        return attr.find(tests[attrs[0]]) != -1 and compare(object, attrs[1:], tests)
-    elif isinstance(attr, (int)):
-        return attr == tests[attrs[0]] and compare(object, attrs[1:], tests)
+    key = keys[0]
+    value = getattr(obj, key, None)
+    if value == None or key not in tests:
+        return False
+    elif isinstance(value, (str, unicode)):
+        return value.find(tests[key]) != -1 and compare(obj, keys[1:], tests)
+    elif isinstance(value, (int)):
+        return value == tests[key] and compare(obj, keys[1:], tests)
     else:
-        return attr == tests[attrs[0]] and compare(object, attrs[1:], tests)
+        return value == tests[key] and compare(obj, keys[1:], tests)
 
 class PMXSupportBaseManager(object):
     ELEMENTS = ['Bundles', 'Support', 'Themes']
@@ -46,8 +51,9 @@ class PMXSupportBaseManager(object):
     
     def __init__(self):
         self.namespaces = {}
-        # Te first is the name space base, and the last is de default for new bundles and items */
         self.nsorder = []
+        
+        self.ready = False
         self.environment = {}
         self.managedObjects = {}
         self.cache = PMXSupportCache()
@@ -69,6 +75,10 @@ class PMXSupportBaseManager(object):
             else:
                 var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
             self.namespaces[name][element] = self.environment[var] = epath
+        return name
+
+    def hasNamespace(self, name):
+        return name in self.namespaces
 
     @property
     def protectedNamespace(self):
@@ -76,14 +86,41 @@ class PMXSupportBaseManager(object):
         
     @property
     def defaultNamespace(self):
+        if len(self.nsorder) < 2:
+            raise Exception("No default namespace")
         return self.nsorder[self.DEFAULTNS]
+
+    def addProjectNamespace(self, project):
+        #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
+        project.ensureBundles()
+        path = project.projectPath
+        project.namespace = project.name
+        while project.namespace in self.namespaces:
+            #Crear valores random
+            project.namespace = project.namespace + hashlib.md5(project.namespace + path).hexdigest()[:7]
+        self.addNamespace(project.namespace, path)
+        #Ya esta listo tengo que cargar este namespace
+        if self.ready:
+            self.loadThemes(project.namespace)
+            for bundle in self.loadBundles(project.namespace):
+                if bundle.enabled:
+                    self.populateBundle(bundle)
+
+    def addToEnvironment(self, name, value):
+        self.environment[name] = value
 
     def updateEnvironment(self, env):
         self.environment.update(env)
 
     def buildEnvironment(self):
         return self.environment.copy()
-        
+    
+    def basePath(self, element, namespace):
+        if namespace not in self.namespaces:
+            raise Exception("The %s namespace is not registered" % namespace)
+        if element in self.namespaces[namespace]:
+            return self.namespaces[namespace][element]
+    
     #---------------------------------------------------
     # Tools
     #---------------------------------------------------
@@ -103,6 +140,31 @@ class PMXSupportBaseManager(object):
             char = char if char in self.VALID_PATH_CARACTERS else '-'
             validPath.append(char)
         return ''.join(validPath)
+
+    def runProcess(self, context, callback):
+        """ Synchronous run process"""
+        origWD = os.getcwd() # remember our original working directory
+        if context.workingDirectory is not None:
+            os.chdir(context.workingDirectory)
+
+        process = subprocess.Popen(context.shellCommand, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env = context.environment)
+        
+        if context.inputType is not None:
+            process.stdin.write(unicode(context.inputValue).encode("utf-8"))
+        process.stdin.close()
+        try:
+            context.outputValue = process.stdout.read()
+            context.errorValue = process.stderr.read()
+        except IOError, e:
+            context.errorValue = str(e).decode("utf-8")
+        process.stdout.close()
+        process.stderr.close()
+        context.outputType = process.wait()
+        
+        if context.workingDirectory is not None:
+            os.chdir(origWD)
+        
+        callback(context)
 
     #---------------------------------------------------
     # Message Handler
@@ -125,32 +187,41 @@ class PMXSupportBaseManager(object):
                 self.populateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
+        self.ready = True
 
     #---------------------------------------------------
     # LOAD THEMES
     #---------------------------------------------------
     def loadThemes(self, namespace):
+        loadedThemes = set()
         if 'Themes' in self.namespaces[namespace]:
             paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
             for path in paths:
-                PMXTheme.loadTheme(path, namespace, self)
-
+                theme = PMXTheme.loadTheme(path, namespace, self)
+                if theme is not None:
+                    loadedThemes.add(theme)
+        return loadedThemes
+        
     #---------------------------------------------------
     # LOAD BUNDLES
     #---------------------------------------------------
     def loadBundles(self, namespace):
+        loadedBundles = set()
         if 'Bundles' in self.namespaces[namespace]:
             paths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
             for path in paths:
-                PMXBundle.loadBundle(path, namespace, self)
-
+                bundle = PMXBundle.loadBundle(path, namespace, self)
+                if bundle is not None:
+                    loadedBundles.add(bundle)
+        return loadedBundles
+        
     #---------------------------------------------------
     # POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     #---------------------------------------------------
     def populateBundle(self, bundle):
         nss = bundle.namespaces[::-1]
         for namespace in nss:
-            bpath = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path))
+            bpath = bundle.path(namespace)
             # Search for support
             if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
                 bundle.setSupport(os.path.join(bpath, 'Support'))
@@ -160,32 +231,127 @@ class PMXSupportBaseManager(object):
                 for path in files:
                     klass.loadBundleItem(path, namespace, bundle, self)
         bundle.populated = True
+        self.populatedBundle(bundle)
 
     #---------------------------------------------------
     # RELOAD SUPPORT
     #---------------------------------------------------
     def reloadSupport(self, callback = None):
+        #Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
         self.messageHandler = callback
-        for ns in self.nsorder[::-1]:
-            self.reloadThemes(ns)
-            self.reloadBundles(ns)
+        self.logger.debug("Begin reload support.")
+        for namespace in self.nsorder[::-1]:
+            self.logger.debug("Search in %s, %s." % (namespace, self.namespaces[namespace]))
+            self.reloadThemes(namespace)
+            self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled:
-                self.populateBundle(bundle)
+                self.repopulateBundle(bundle)
         # Uninstall message handler
         self.messageHandler = None
+        self.logger.debug("End reload support.")
     
     #---------------------------------------------------
     # RELOAD THEMES
     #---------------------------------------------------
     def reloadThemes(self, namespace):
-        #Remove
-        themes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
         if 'Themes' in self.namespaces[namespace]:
-            paths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
-            for path in paths:
-                PMXTheme.reloadTheme(path, namespace, self)
+            installedThemes = filter(lambda theme: theme.hasNamespace(namespace), self.getAllThemes())
+            themePaths = glob(os.path.join(self.namespaces[namespace]['Themes'], '*.tmTheme'))
+            for theme in installedThemes:
+                themePath = theme.path(namespace)
+                if themePath in themePaths:
+                    if namespace == theme.currentNamespace and theme.sourceChanged(namespace):
+                        self.logger.debug("Theme %s changed, reload from %s." % (theme.name, themePath))
+                        theme.reloadTheme(theme, themePath, namespace, self)
+                        theme.updateMtime(namespace)
+                        self.modifyTheme(theme)
+                    themePaths.remove(themePath)
+                else:
+                    theme.removeSource(namespace)
+                    if not theme.hasSources():
+                        self.logger.debug("Theme %s removed." % theme.name)
+                        self.removeManagedObject(theme)
+                        self.removeTheme(theme)
+                    else:
+                        theme.setDirty()
+            for path in themePaths:
+                self.logger.debug("New theme %s." % path)
+                PMXTheme.loadTheme(path, namespace, self)
+    
+    #---------------------------------------------------
+    # RELOAD BUNDLES
+    #---------------------------------------------------
+    def reloadBundles(self, namespace):
+        if 'Bundles' in self.namespaces[namespace]:
+            installedBundles = filter(lambda theme: theme.hasNamespace(namespace), self.getAllBundles())
+            bundlePaths = glob(os.path.join(self.namespaces[namespace]['Bundles'], '*.tmbundle'))
+            for bundle in installedBundles:
+                bundlePath = bundle.path(namespace)
+                if bundlePath in bundlePaths:
+                    if namespace == bundle.currentNamespace and bundle.sourceChanged(namespace):
+                        self.logger.debug("Bundle %s changed, reload from %s." % (bundle.name, bundlePath))
+                        bundle.reloadBundle(bundle, bundlePath, namespace, self)
+                        bundle.updateMtime(namespace)
+                        self.modifyBundle(bundle)
+                    bundlePaths.remove(bundlePath)
+                else:
+                    bundleItems = self.findBundleItems(bundle = bundle)
+                    map(lambda item: item.removeSource(namespace), bundleItems)
+                    bundle.removeSource(namespace)
+                    if not bundle.hasSources():
+                        self.logger.debug("Bundle %s removed." % bundle.name)
+                        map(lambda item: self.removeManagedObject(item), bundleItems)
+                        map(lambda item: self.removeBundleItem(item), bundleItems)
+                        self.removeManagedObject(bundle)
+                        self.removeBundle(bundle)
+                    else:
+                        map(lambda item: item.setDirty(), bundleItems)
+                        bundle.support = None
+                        bundle.setDirty()
+            for path in bundlePaths:
+                self.logger.debug("New bundle %s." % path)
+                PMXBundle.loadBundle(path, namespace, self)
+    
+    #---------------------------------------------------
+    # REPOPULATED BUNDLE AND RELOAD BUNDLE ITEMS
+    #---------------------------------------------------
+    def repopulateBundle(self, bundle):
+        namespaces = bundle.namespaces[::-1]
+        bundleItems = self.findBundleItems(bundle = bundle)
+        for namespace in namespaces:
+            bpath = bundle.path(namespace)
+            # Search for support
+            if bundle.support == None and os.path.exists(os.path.join(bpath, 'Support')):
+                bundle.setSupport(os.path.join(bpath, 'Support'))
+            bundleItemPaths = {}
+            for klass in BUNDLEITEM_CLASSES:
+                klassPaths = reduce(lambda x, y: x + glob(y), [ os.path.join(bpath, klass.FOLDER, file) for file in klass.PATTERNS ], [])
+                bundleItemPaths.update(dict(map(lambda path: (path, klass), klassPaths)))
+            for bundleItem in bundleItems:
+                if not bundleItem.hasNamespace(namespace):
+                    continue
+                bundleItemPath = bundleItem.path(namespace)
+                if bundleItemPath in bundleItemPaths:
+                    if namespace == bundleItem.currentNamespace and bundleItem.sourceChanged(namespace):
+                        self.logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, bundleItemPath))
+                        bundleItem.reloadBundleItem(bundleItem, bundleItemPath, namespace, self)
+                        bundleItem.updateMtime(namespace)
+                        self.modifyBundleItem(bundleItem)
+                    bundleItemPaths.pop(bundleItemPath)
+                else:
+                    bundleItem.removeSource(namespace)
+                    if not bundleItem.hasSources():
+                        self.logger.debug("Bundle Item %s removed." % bundleItem.name)
+                        self.removeManagedObject(bundleItem)
+                        self.removeBundleItem(bundleItem)
+                    else:
+                        bundleItem.setDirty()    
+            for path, klass in bundleItemPaths.iteritems():
+                self.logger.debug("New bundle item %s." % path)
+                klass.loadBundleItem(path, namespace, bundle, self)
+        self.populatedBundle(bundle)
 
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
@@ -215,8 +381,10 @@ class PMXSupportBaseManager(object):
         pass
     
     def addManagedObject(self, obj):
-        obj.setManager(self)
         self.managedObjects[obj.uuid] = obj
+        
+    def removeManagedObject(self, obj):
+        self.managedObjects.pop(obj.uuid)
         
     def getManagedObject(self, uuid):
         if not isinstance(uuid, uuidmodule.UUID):
@@ -230,17 +398,17 @@ class PMXSupportBaseManager(object):
         return bundle
         
     def modifyBundle(self, bundle):
-        """
-        Llamado luego de modificar un bundle
-        """
+        """Llamado luego de modificar un bundle"""
         pass
 
     def removeBundle(self, bundle):
-        """
-        Llamado luego de eliminar un bundle
-        """
+        """Llamado luego de eliminar un bundle"""
         pass
 
+    def populatedBundle(self, bundle):
+        """Llamado luego de popular un bundle"""
+        pass
+        
     def getAllBundles(self):
         return []
     
@@ -252,10 +420,8 @@ class PMXSupportBaseManager(object):
         Retorna todos los bundles que cumplan con attrs
         """
         bundles = []
-        keys = PMXBundle.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
         for bundle in self.getAllBundles():
-            if compare(bundle, keys, attrs):
+            if compare(bundle, attrs.keys(), attrs):
                 bundles.append(bundle)
         return bundles
     
@@ -268,15 +434,16 @@ class PMXSupportBaseManager(object):
             El nombre no este entre los nombres ya cargados.
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle nuevo.
         """
-        if len(self.nsorder) < 2:
-            return None
-        if namespace is None: namespace = self.defaultNamespace
-        path = os.path.join(self.namespaces[namespace]['Bundles'], "%s.tmbundle" % self.convertToValidPath(name))
-        bundle = PMXBundle(self.uuidgen(), namespace, { 'name': name }, path)
+        namespace = namespace or self.defaultNamespace
+        basePath = self.basePath("Bundles", namespace)
+        path = ensurePath(os.path.join(basePath, "%s.tmbundle"), self.convertToValidPath(name))
+        bundle = PMXBundle(self.uuidgen(), { 'name': name })
+        bundle.setManager(self)
+        bundle.addSource(namespace, path)
         bundle = self.addBundle(bundle)
         self.addManagedObject(bundle)
         return bundle
-    
+        
     def readBundle(self, **attrs):
         """
         Retorna un bundle por sus atributos
@@ -289,54 +456,55 @@ class PMXSupportBaseManager(object):
     def getBundle(self, uuid):
         return self.getManagedObject(uuid)
     
-    def updateBundle(self, bundle, **attrs):
-        """
-        Actualiza un bundle
-        """
-        if len(self.nsorder) < 2:
-            return None
+    def updateBundle(self, bundle, namespace = None, **attrs):
+        """Actualiza un bundle"""
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == bundle.name:
             #Updates que no son updates
             return bundle
-        if bundle.isProtected:
-            if not bundle.isSafe:
-                namespace = self.defaultNamespace
-                path = os.path.join(self.namespaces[namespace]['Bundles'], os.path.basename(bundle.path))
-                bundle.addSource(namespace, path)
-        else:
-            if "name" in attrs:
-                path = ensurePath(os.path.join(os.path.dirname(bundle.path), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
-                bundle.relocate(path)
+
+        namespace = namespace or self.defaultNamespace
+        
+        if bundle.isProtected and not bundle.isSafe:
+            #Safe bundle
+            basePath = self.basePath("Bundles", namespace)
+            path = os.path.join(basePath, os.path.basename(bundle.path(self.protectedNamespace)))
+            bundle.addSource(namespace, path)
+            self.logger.debug("Add namespace '%s' in source %s for bundle." % (namespace, path))
+        elif not bundle.isProtected and "name" in attrs:
+            #Move bundle
+            path = ensurePath(os.path.join(os.path.dirname(bundle.path(namespace)), "%s.tmbundle"), self.convertToValidPath(attrs["name"]))
+            bundle.relocateSource(namespace, path)
         bundle.update(attrs)
-        bundle.save()
+        bundle.save(namespace)
+        bundle.updateMtime(namespace)
         self.modifyBundle(bundle)
         return bundle
         
     def deleteBundle(self, bundle):
-        """
-        Elimina un bundle, si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
-        """
-        items = self.findBundleItems(bundle = bundle)
-
+        """Elimina un bundle, si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado"""
         #Primero los items
+        items = self.findBundleItems(bundle = bundle)
+        
         for item in items:
             self.deleteBundleItem(item)
-        if bundle.isProtected:
-            if bundle.isSafe:
-                pass #Eliminar la parte safe
-            self.setDeleted(bundle.uuid)
-        else:
-            bundle.delete()
+        
+        for namespace in bundle.namespaces:
+            #Si el espacio de nombres es distinto al protegido lo elimino
+            if namespace != self.protectedNamespace:
+                bundle.delete(namespace)
+            else:
+                self.setDeleted(bundle.uuid)
+        self.removeManagedObject(bundle)
         self.removeBundle(bundle)
     
     def disableBundle(self, bundle, disabled):
-        bundle.enabled = not bool(disabled)
-        if not bundle.enabled:
+        if disabled:
             self.setDisabled(bundle.uuid)
         else:
             self.setEnabled(bundle.uuid)
             if not bundle.populated:
                 self.populateBundle(bundle)
+        self.modifyBundle(bundle)
     
     #---------------------------------------------------
     # BUNDLEITEM INTERFACE
@@ -361,10 +529,8 @@ class PMXSupportBaseManager(object):
         Retorna todos los items que complan las condiciones en attrs
         """
         items = []
-        keys = PMXBundleItem.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
         for item in self.getAllBundleItems():
-            if compare(item, keys, attrs):
+            if compare(item, attrs.keys(), attrs):
                 items.append(item)
         return items
 
@@ -376,19 +542,19 @@ class PMXSupportBaseManager(object):
             El tipo tiene que ser uno de los conocidos
         Toma el ultimo espacio de nombres creado como espacio de nombre por defecto para el bundle item nuevo.
         """
-        if len(self.nsorder) < 2:
-            return None
+        namespace = namespace or self.defaultNamespace
         if bundle.isProtected and not bundle.isSafe:
-            self.updateBundle(bundle)
-        if namespace is None: namespace = self.defaultNamespace
+            self.updateBundle(bundle, namespace)
         klass = filter(lambda c: c.TYPE == tipo, BUNDLEITEM_CLASSES)
         if len(klass) != 1:
             raise Exception("No class type for %s" % tipo)
         klass = klass.pop()
-        path = os.path.join(bundle.path, klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
+        path = os.path.join(bundle.path(namespace), klass.FOLDER, "%s.%s" % (self.convertToValidPath(name), klass.EXTENSION))
 
-        item = klass(self.uuidgen(), namespace, { 'name': name }, path)
+        item = klass(self.uuidgen(), { 'name': name })
         item.setBundle(bundle)
+        item.setManager(self)
+        item.addSource(namespace, path)
         item = self.addBundleItem(item)
         self.addManagedObject(item)
         return item
@@ -405,44 +571,57 @@ class PMXSupportBaseManager(object):
     def getBundleItem(self, uuid):
         return self.getManagedObject(uuid)
     
-    def updateBundleItem(self, item, **attrs):
+    def updateBundleItem(self, item, namespace = None, **attrs):
         """
         Actualiza un bundle item
         """
-        if len(self.nsorder) < 2:
-            return None
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
             #Updates que no son updates
             return item
+
+        #Deprecate keyEquivalent in cache
+        if 'keyEquivalent' in attrs and item.keyEquivalent != attrs['keyEquivalent']:
+            self.cache.deprecateValues(item.keyEquivalent, attrs['keyEquivalent'])
+
+        #Deprecate tabTrigger in cache
+        if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
+            self.cache.deprecateValues(item.tabTrigger, attrs['tabTrigger'])
+            #Deprecated list of all tabTrigers
+            self.cache.deprecateValues('tabTriggers')
+
+        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco m�s
+        namespace = namespace or self.defaultNamespace
+        
         if item.bundle.isProtected and not item.bundle.isSafe:
-            self.updateBundle(item.bundle)
-        if item.isProtected:
-            if not item.isSafe:
-                namespace = self.defaultNamespace
-                path = os.path.join(item.bundle.path, item.FOLDER, os.path.basename(item.path))
-                item.addSource(namespace, path)
-        else:
-            if "name" in attrs:
-                namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
-                path = ensurePath(os.path.join(item.bundle.path, item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
-                item.relocate(path)
+            self.updateBundle(item.bundle, namespace)
+
+        if item.isProtected and not item.isSafe:
+            #Safe Bundle Item
+            path = os.path.join(item.bundle.path(namespace), item.FOLDER, os.path.basename(item.path(self.protectedNamespace)))
+            item.addSource(namespace, path)
+            self.logger.debug("Add namespace '%s' in source %s for bundle item." % (namespace, path))
+        elif not item.isProtected and "name" in attrs:
+            #Move Bundle Item
+            namePattern = "%%s.%s" % item.EXTENSION if item.EXTENSION else "%s"
+            path = ensurePath(os.path.join(item.bundle.path(namespace), item.FOLDER, namePattern), self.convertToValidPath(attrs["name"]))
+            item.relocateSource(namespace, path)
         item.update(attrs)
-        item.save()
+        item.save(namespace)
+        item.updateMtime(namespace)
         self.modifyBundleItem(item)
         return item
     
     def deleteBundleItem(self, item):
-        """
-        Elimina un bundle por su uuid,
+        """Elimina un bundle por su uuid,
         si el bundle es del namespace proteguido no lo elimina sino que lo marca como eliminado
         """
-        #Si el espacio de nombres es distinto al protegido lo elimino
-        if item.isProtected:
-            if item.isSafe:
-                pass #Borrar la parte safe del bundle item
-            self.setDeleted(item.uuid)
-        else:
-            item.delete()
+        for namespace in item.namespaces:
+            #Si el espacio de nombres es distinto al protegido lo elimino
+            if namespace != self.protectedNamespace:
+                item.delete(namespace)
+            else:
+                self.setDeleted(item.uuid)
+        self.removeManagedObject(item)
         self.removeBundleItem(item)
         
     #---------------------------------------------------
@@ -457,10 +636,11 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # TEMPLATEFILE CRUD
     #---------------------------------------------------
-    def createTemplateFile(self, name, template):
+    def createTemplateFile(self, name, template, namespace = None):
+        namespace = namespace or self.defaultNamespace
         if template.isProtected and not template.isSafe:
-            self.updateBundleItem(template)
-        path = os.path.join(template.path, "%s.%s" % (self.convertToValidPath(name), template.extension))
+            self.updateBundleItem(template, namespace)
+        path = ensurePath(os.path.join(template.path(namespace), "%s"), self.convertToValidPath(name))
         file = PMXTemplateFile(path, template)
         #No es la mejor forma pero es la forma de guardar el archivo
         file = self.addTemplateFile(file)
@@ -468,14 +648,16 @@ class PMXSupportBaseManager(object):
         file.save()
         return file
 
-    def updateTemplateFile(self, templateFile, **attrs):
+    def updateTemplateFile(self, templateFile, namespace = None, **attrs):
+        namespace = namespace or self.defaultNamespace
         template = templateFile.template
         if template.isProtected and not template.isSafe:
-            self.updateBundleItem(template)
+            self.updateBundleItem(template, namespace)
         if "name" in attrs:
-            path = os.path.join(template.path, self.convertToValidPath(attrs["name"]))
+            path = ensurePath(os.path.join(template.path(namespace), "%s"), self.convertToValidPath(attrs["name"]))
             templateFile.relocate(path)
         templateFile.update(attrs)
+        self.modifyBundleItem(templateFile)
         return templateFile
 
     def deleteTemplateFile(self, templateFile):
@@ -507,10 +689,8 @@ class PMXSupportBaseManager(object):
         Retorna todos los themes que complan las condiciones en attrs
         """
         items = []
-        keys = PMXTheme.KEYS
-        keys.extend([key for key in attrs.keys() if key not in keys])
         for item in self.getAllThemes():
-            if compare(item, keys, attrs):
+            if compare(item, attrs.keys(), attrs):
                 items.append(item)
         return items
 
@@ -536,21 +716,20 @@ class PMXSupportBaseManager(object):
     def getTheme(self, uuid):
         return self.getManagedObject(uuid)
     
-    def updateTheme(self, theme, **attrs):
+    def updateTheme(self, theme, namespace = None, **attrs):
         """
         Actualiza un themes
         """
-        if theme.isProtected:
-            if not theme.isSafe:
-                namespace = self.defaultNamespace
-                path = os.path.join(self.namespaces[namespace]['Themes'], os.path.basename(theme.path))
-                theme.addSource(namespace, path)
-        else:
-            if "name" in attrs:
-                path = ensurePath(os.path.join(os.path.dirname(theme.path), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
-                theme.relocate(path)
+        namespace = namespace or self.defaultNamespace
+        if theme.isProtected and not theme.isSafe:
+            path = os.path.join(self.namespaces[namespace]['Themes'], os.path.basename(theme.path(self.protectedNamespace)))
+            theme.addSource(namespace, path)
+        elif not theme.isProtected and "name" in attrs:
+            path = ensurePath(os.path.join(os.path.dirname(theme.path(namespace)), "%s.tmTheme"), self.convertToValidPath(attrs["name"]))
+            theme.relocateSource(namespace, path)
         theme.update(attrs)
-        theme.save()
+        theme.save(namespace)
+        theme.updateMtime(namespace)
         self.modifyTheme(theme)
         return theme
         
@@ -558,14 +737,14 @@ class PMXSupportBaseManager(object):
         """
         Elimina un theme por su uuid
         """
+        for namespace in theme.namespaces:
+            #Si el espacio de nombres es distinto al protegido lo elimino
+            if namespace != self.protectedNamespace:
+                theme.delete(namespace)
+            else:
+                self.setDeleted(theme.uuid)
+        self.removeManagedObject(theme)
         self.removeTheme(theme)
-        #Si el espacio de nombres es distinto al protegido lo elimino
-        if theme.isProtected:
-            if theme.isSafe:
-                pass #TODO: Borrar archivos en safe zones
-            self.setDeleted(theme.uuid)
-        else:
-            theme.delete()
     
     #---------------------------------------------------
     # THEMESTYLE INTERFACE
@@ -579,30 +758,36 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # THEMESTYLE CRUD
     #---------------------------------------------------
-    def createThemeStyle(self, name, scope, theme):
+    def createThemeStyle(self, name, scope, theme, namespace = None):
+        namespace = namespace or self.defaultNamespace
         if theme.isProtected and not theme.isSafe:
-            self.updateTheme(theme)
+            self.updateTheme(theme, namespace)
         style = PMXThemeStyle({'name': name, 'scope': scope, 'settings': {}}, theme)
-        style = self.addThemeStyle(style)
         theme.styles.append(style)
-        theme.save()
+        theme.save(namespace)
+        theme.updateMtime(namespace)
+        style = self.addThemeStyle(style)
         return style
 
-    def updateThemeStyle(self, style, **attrs):
+    def updateThemeStyle(self, style, namespace = None, **attrs):
+        namespace = namespace or self.defaultNamespace
         theme = style.theme
         if theme.isProtected and not theme.isSafe:
-            self.updateTheme(theme)
+            self.updateTheme(theme, namespace)
         style.update(attrs)
-        theme.save()
+        theme.save(namespace)
+        theme.updateMtime(namespace)
         self.modifyTheme(theme)
         return style
 
-    def deleteThemeStyle(self, style):
+    def deleteThemeStyle(self, style, namespace = None):
+        namespace = namespace or self.defaultNamespace
         theme = style.theme
         if theme.isProtected and not theme.isSafe:
-            self.updateTheme(theme)
+            self.updateTheme(theme, namespace)
         theme.styles.remove(style)
-        theme.save()
+        theme.save(namespace)
+        theme.updateMtime(namespace)
         self.removeThemeStyle(style)
         
     #---------------------------------------------------
@@ -617,33 +802,34 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # PREFERENCES
     #---------------------------------------------------------------
-    def getPreferences(self, scope):
+    def getPreferences(self, scope, baseBundle = None):
+        with_bundle = []
         with_scope = []
         without_scope = []
         for preference in self.cache.setcallable("preferences", self.getAllPreferences):
-            if preference.scope == None:
+            if not preference.scope:
                 without_scope.append(preference)
             else:
                 score = self.scores.score(preference.scope, scope)
                 if score != 0:
-                    with_scope.append((score, preference))
+                    if preference.bundle == baseBundle:
+                        with_bundle.append((score, preference))
+                    else:
+                        with_scope.append((score, preference))
+        with_bundle.sort(key = lambda t: t[0], reverse = True)
         with_scope.sort(key = lambda t: t[0], reverse = True)
-        preferences = map(lambda (score, item): item, with_scope)
-        with_scope = []
-        for p in preferences:
-            with_scope.append(p)
-        return with_scope + without_scope
+        return map(lambda item: item[1], with_bundle + with_scope) + without_scope
 
-    def getPreferenceSettings(self, scope):
+    def getPreferenceSettings(self, scope, baseBundle = None):
         if not self.cache.hasSettings(scope):
-            preferences = self.getPreferences(scope)
+            preferences = self.getPreferences(scope, baseBundle)
             self.cache.setSettings(scope, PMXPreference.buildSettings(preferences))
         return self.cache.getSettings(scope)
     
     #---------------------------------------------------
     # TABTRIGGERS INTERFACE
     #---------------------------------------------------
-    def getAllTabTriggersMnemonics(self):
+    def getAllTabTriggerItems(self):
         """
         Return a list of all tab triggers
         ['class', 'def', ...]
@@ -651,19 +837,17 @@ class PMXSupportBaseManager(object):
         raise NotImplementedError
     
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
-        """
-        Return a list of tab triggers bundle items
-        """
+        """Return a list of tab triggers bundle items"""
         raise NotImplementedError
     
     #---------------------------------------------------------------
     # TABTRIGGERS
     #---------------------------------------------------------------
-    @printtime
+    #@printtime
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
-        triggers = self.cache.setcallable("tabtriggers", self.getAllTabTriggersMnemonics)
-        search = map(lambda trigger: (trigger, line.find(trigger[::-1]), len(trigger)), triggers)
+        tabTriggerItems = self.cache.setcallable("tabTriggers", self.getAllTabTriggerItems)
+        search = map(lambda item: (item.tabTrigger, line.find(item.tabTrigger[::-1]), len(item.tabTrigger)), tabTriggerItems)
         search = filter(lambda (trigger, value, length): value == 0, search)
         if search:
             best = ("", 0)
@@ -672,12 +856,27 @@ class PMXSupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    @printtime    
+    #@printtime
+    def getAllTabTiggerItemsByScope(self, scope):
+        with_scope = []
+        without_scope = []
+        for item in self.cache.setcallable("tabTriggers", self.getAllTabTriggerItems):
+            if not item.scope:
+                without_scope.append(item)
+            else:
+                score = self.scores.score(item.scope, scope)
+                if score != 0:
+                    with_scope.append((score, item))
+        with_scope.sort(key = lambda t: t[0], reverse = True)
+        with_scope = map(lambda (score, item): item, with_scope)
+        return with_scope + without_scope
+
+    #@printtime
     def getTabTriggerItem(self, keyword, scope):
         with_scope = []
         without_scope = []
         for item in self.cache.setcallable(keyword, self.getAllBundleItemsByTabTrigger, keyword):
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)
@@ -691,20 +890,18 @@ class PMXSupportBaseManager(object):
     # KEYEQUIVALENT INTERFACE
     #---------------------------------------------------
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
-        """
-        Return a list of key equivalent bundle items
-        """
+        """Return a list of key equivalent bundle items"""
         raise NotImplementedError
         
     #---------------------------------------------------------------
     # KEYEQUIVALENT
     #---------------------------------------------------------------
-    @printtime
+    #@printtime
     def getKeyEquivalentItem(self, code, scope):
         with_scope = []
         without_scope = []
         for item in self.cache.setcallable(code, self.getAllBundleItemsByKeyEquivalent, code):
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)
@@ -726,12 +923,12 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # FILE EXTENSION, for drag commands
     #---------------------------------------------------------------
-    @printtime
+    #@printtime
     def getFileExtensionItem(self, path, scope):
         with_scope = []
         without_scope = []
         for item in self.getAllBundleItemsByFileExtension(path):
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)
@@ -753,7 +950,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # ACTION ITEMS FOR SCOPE
     #---------------------------------------------------------------
-    @printtime
+    #@printtime
     def getActionItems(self, scope):
         """
         Return a list of actions items for scope and without scope
@@ -761,7 +958,7 @@ class PMXSupportBaseManager(object):
         with_scope = []
         without_scope = []
         for item in self.getAllActionItems():
-            if item.scope == None:
+            if not item.scope:
                 without_scope.append(item)
             else:
                 score = self.scores.score(item.scope, scope)
@@ -802,12 +999,10 @@ class PMXSupportBaseManager(object):
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                 return syntax
     
-    def findSyntaxByFileType(self, path):
+    def findSyntaxByFileType(self, fileType):
         for syntax in self.getAllSyntaxes():
-            if type(syntax.fileTypes) == list:
-                for t in syntax.fileTypes:
-                    if path.endswith(t):
-                        return syntax
+            if syntax.fileTypes is not None and any(map(lambda ft: fileType == "%s" % ft, syntax.fileTypes)):
+                return syntax
 
 #===================================================
 # PYTHON MANAGER
@@ -953,10 +1148,3 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         for syntax in self.SYNTAXES.values():
             if syntax.firstLineMatch != None and syntax.firstLineMatch.search(line):
                 return syntax
-
-    def findSyntaxByFileType(self, suffix):
-        for syntax in self.SYNTAXES.values():
-            if type(syntax.fileTypes) == list:
-                for t in syntax.fileTypes:
-                    if suffix.endswith(t):
-                        return syntax

@@ -5,14 +5,14 @@ import os, string, unicodedata
 import fnmatch
 
 from PyQt4 import QtCore, QtGui
-from prymatex.core.base import PMXObject
-from prymatex.core.settings import USER_HOME_PATH
-from prymatex.core.settings import pmxConfigPorperty
+
+from prymatex.core import exceptions
+from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
 from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.project.proxies import PMXProjectTreeProxyModel
 from prymatex.gui.project.base import PMXProject
 
-class PMXProjectManager(PMXObject):
+class PMXProjectManager(QtCore.QObject):
     #Signals
     projectClosed = QtCore.pyqtSignal(object)
     projectOpened = QtCore.pyqtSignal(object)
@@ -26,15 +26,17 @@ class PMXProjectManager(PMXObject):
     
     VALID_PATH_CARACTERS = "-_.() %s%s" % (string.ascii_letters, string.digits)
     
-    def __init__(self, parent = None):
-        PMXObject.__init__(self)
+    def __init__(self, application):
+        QtCore.QObject.__init__(self)
         self.projectTreeModel = PMXProjectTreeModel(self)
         
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
-        
-        self.configure()
     
+    @classmethod
+    def contributeToSettings(cls):
+        return []
+
     def convertToValidPath(self, name):
         #TODO: este y el del manager de bundles pasarlos a utils
         validPath = []
@@ -43,12 +45,25 @@ class PMXProjectManager(PMXObject):
             validPath.append(char)
         return ''.join(validPath)
 
-    def loadProject(self):
-        for path in self.knownProjects:
-            project = PMXProject.loadProject(path, self)
+    def loadProjects(self):
+        for path in self.knownProjects[:]:
+            try:
+                PMXProject.loadProject(path, self)
+            except exceptions.PrymatexFileNotExistsException as e:
+                print e
+                self.knownProjects.remove(path)
+                self.settings.setValue('knownProjects', self.knownProjects)
 
     def isOpen(self, project):
         return True
+
+    def appendToKnowProjects(self, project):
+        self.knownProjects.append(project.path)
+        self.settings.setValue('knownProjects', self.knownProjects)
+
+    def removeFromKnowProjects(self, project):
+        self.knownProjects.remove(project.path)
+        self.settings.setValue('knownProjects', self.knownProjects)
 
     #---------------------------------------------------
     # PROJECT CRUD
@@ -65,9 +80,26 @@ class PMXProjectManager(PMXObject):
         project = PMXProject(directory, { "name": name })
         project.save()
         self.addProject(project)
-        self.knownProjects.append(project.path)
-        self.settings.setValue('knownProjects', self.knownProjects)
+        self.appendToKnowProjects(project)
         return project
+    
+    def updateProject(self, project, **attrs):
+        """Actualiza un proyecto
+        """
+        if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
+            #Updates que no son updates
+            return item
+
+        project.update(attrs)
+        project.save()
+        return project
+
+    def importProject(self, directory):
+        try:
+            project = PMXProject.loadProject(directory, self)
+        except exceptions.FileNotExistsException:
+            raise exceptions.LocationIsNotProject()
+        self.appendToKnowProjects(project)
 
     def deleteProject(self, project, removeFiles = False):
         """
@@ -76,24 +108,39 @@ class PMXProjectManager(PMXObject):
         project.delete(removeFiles)
         self.removeProject(project)
 
+    #---------------------------------------------------
+    # PROJECT INTERFACE
+    #---------------------------------------------------
     def addProject(self, project):
         project.setManager(self)
+        if project.hasBundles() or project.hasThemes():
+            self.application.supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
+        
+    def modifyProject(self, project):
+        pass
 
     def removeProject(self, project):
+        self.removeFromKnowProjects(project)
         self.projectTreeModel.removeProject(project)
+    
+    def getAllProjects(self):
+        #TODO: devolver un copia o no hace falta?
+        return self.projectTreeModel.rootNode.childrenNodes
         
-    def openProject(self):
-        pass
-
-    def deleteProject(self):
-        pass
+    def openProject(self, project):
+        # Cuando abro un proyecto agrego su namespace al support para aportar bundles y themes
+        print project.directory
+    
+    def closeProject(self, project):
+        # Cuando cierro un proyecto quito su namespace al support
+        print project.directory
 
     def setWorkingSet(self, project, workingSet):
         projects = self.workingSets.setdefault(workingSet)
         projects.append(project.filePath)
         project.setWorkingSet(workingSet)
-        #TODO: avisar que se movio el projecto al proxy
+        self.projectTreeModel.dataChanged.emit()
         
     def findProjectForPath(self, path):
         return self.projectTreeModel.projectForPath(path)

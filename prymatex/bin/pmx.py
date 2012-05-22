@@ -3,7 +3,6 @@
 import os
 import sys
 
-    
 # this will be replaced at install time
 INSTALLED_BASE_DIR = "@ INSTALLED_BASE_DIR @"
 
@@ -15,60 +14,46 @@ else:
 if project_basedir not in sys.path:
     sys.path.insert(0, project_basedir)
 
-def parseArguments(args):
-    import prymatex
-    from optparse import OptionParser
-    #usage, option_list, option_class, version, conflict_handler, description, formatter, add_help_option, prog, epilog)
-    parser = OptionParser(usage="%prog [options] [files]", description = prymatex.__doc__, version = prymatex.get_version(),
-                          epilog = "Check project page at %s" % prymatex.__url__)
-
-    # Reverts custom options
-    parser.add_option('--reset-settings', dest='reste_settings', action = 'store_true', default = False, 
-                        help = 'Restore default settings for selected profile')
-    parser.add_option('-p', '--profile', dest='profile', default = 'default',
-                      help = "Change profile")
-
-    # Maybe useful for some debugging information
-    parser.add_option('--devel', dest='devel', action='store_true', default=False,
-                      help = 'Enable developer mode. Useful for plugin developers.')
-
-    options, args = parser.parse_args(args)
-    #parser.error("options --alert and --menu are mutually exclusive")
-    return options, args
-
-
 # TODO: Accept Qt Arguments to QtApplication
-def runPrymatexApplication(options, args):
+def runPrymatexApplication(options, files):
     from prymatex.core import app, exceptions
     
     pmx = None
     try:
-        pmx = app.PMXApplication(options.profile, args)
+        pmx = app.PMXApplication()
+        
+        pmx.buildSettings(options.profile)
+        pmx.setupLogging(options.verbose, options.log_pattern)
+        
         pmx.replaceSysExceptHook()
         pmx.checkSingleInstance()
-        if options.reste_settings:
+        if options.reset_settings:
             pmx.resetSettings()
+        pmx.loadGraphicalUserInterface()
+        pmx.openArgumentFiles(files)
+        return pmx.exec_()
     except exceptions.AlreadyRunningError as ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
     except:
         from traceback import format_exc
         traceback = format_exc()
+        print(traceback)
         # Something went very bad tell the user something about the emergency
-        from prymatex.gui.emergency.crashdialog import PMXCrashDialog
-        dlg = PMXCrashDialog(traceback)
-        dlg.exec_()
-    finally:
-        return pmx and pmx.exec_() or -1
-            
+        #from prymatex.gui.emergency.crashdialog import PMXCrashDialog
+        #crashDialog = PMXCrashDialog(traceback)
+        #return crashDialog.exec_()
+    return -1
+
 def main(args):
-    options, args = parseArguments(args)
+    from prymatex.core import cliparser
+    options, files = cliparser.parse()
     
     if options.devel:
         from prymatex.utils import autoreload
-        autoreload.main(runPrymatexApplication, (options, args))
+        autoreload.main(runPrymatexApplication, (options, files))
     else:
-        runPrymatexApplication(options, args)
+        return runPrymatexApplication(options, files)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

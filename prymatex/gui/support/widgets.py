@@ -143,7 +143,7 @@ class PMXSnippetWidget(PMXEditorBaseWidget, Ui_Snippet):
     def title(self):
         if self.bundleItem != None:
             return 'Edit Snippet: "%s"' % self.bundleItem.name
-        return super(PMXSnippetWidget, self).title()
+        return super(PMXSnippetWidget, self).title
     
     def getScope(self):
         scope = super(PMXSnippetWidget, self).getScope()
@@ -286,7 +286,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
     def title(self):
         if self.bundleItem != None:
             return 'Edit Command: "%s"' % self.bundleItem.name
-        return super(PMXCommandWidget, self).title()
+        return super(PMXCommandWidget, self).title
     
     def getScope(self):
         scope = super(PMXCommandWidget, self).getScope()
@@ -363,7 +363,7 @@ fi"'''}
     def title(self):
         if self.bundleItem != None:
             return 'Edit Template: "%s"' % self.bundleItem.name
-        return super(PMXTemplateWidget, self).title()
+        return super(PMXTemplateWidget, self).title
 
     def edit(self, bundleItem):
         super(PMXTemplateWidget, self).edit(bundleItem)
@@ -401,7 +401,7 @@ class PMXTemplateFileWidget(PMXEditorBaseWidget, Ui_TemplateFile):
     def title(self):
         if self.bundleItem != None:
             return 'Edit Template File: "%s"' % self.bundleItem.name
-        return super(PMXTemplateFileWidget, self).title()
+        return super(PMXTemplateFileWidget, self).title
 
     def getScope(self):
         return None
@@ -449,7 +449,7 @@ class PMXDragCommandWidget(PMXEditorBaseWidget, Ui_DragCommand):
     def title(self):
         if self.bundleItem != None:
             return 'Edit Drag Command: "%s"' % self.bundleItem.name
-        return super(PMXDragCommandWidget, self).title()
+        return super(PMXDragCommandWidget, self).title
         
     def getScope(self):
         scope = super(PMXDragCommandWidget, self).getScope()
@@ -586,12 +586,16 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def __init__(self, parent = None):
         super(PMXBundleWidget, self).__init__(parent)
         self.setupUi(self)
-        assert parent != None and hasattr(parent, 'manager'), "Set parent and manager"
-        self.manager = parent.manager
-        self.treeMenuModel = PMXMenuTreeModel(self.manager)
-        self.listExcludedModel = PMXExcludedListModel(self.manager)
+        manager = QtGui.QApplication.instance().supportManager
+
+        self.treeMenuModel = PMXMenuTreeModel(manager)
         self.treeMenuView.setModel(self.treeMenuModel)
-        self.listExcludedView.setModel(self.listExcludedModel)
+        self.listExcludedView.setModel(self.treeMenuModel.excludedListModel())
+
+        self.treeMenuModel.menuChanged.connect(self.on_menuChanged)
+
+    def on_menuChanged(self):
+        self.changes['mainMenu'] = self.treeMenuModel.getMainMenu()
 
     @property
     def title(self):
@@ -599,10 +603,6 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
             return 'Edit Menu: "%s"' % self.bundleItem.name
         return super(PMXBundleWidget, self).title()
 
-    @property
-    def isChanged(self):
-        return False
-        
     def getScope(self):
         return None
     
@@ -612,10 +612,6 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def getKeyEquivalent(self):
         return None
     
-    def edit(self, bundleItem):
-        super(PMXBundleWidget, self).edit(bundleItem)
-        if bundleItem.mainMenu is not None:
-            self.treeMenuModel.setMainMenu(bundleItem.mainMenu)
-            if "setExcludedItems" in bundleItem.mainMenu:
-                self.listExcludedModel.setExcludedItems(bundleItem.mainMenu["setExcludedItems"])
-        #TODO: sino limpiar los modelos y agregar items para armar menu
+    def edit(self, bundle):
+        super(PMXBundleWidget, self).edit(bundle)
+        self.treeMenuModel.setBundle(bundle)

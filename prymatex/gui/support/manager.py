@@ -2,34 +2,36 @@
 # -*- coding: utf-8 -*-
 
 import fnmatch
+from bisect import bisect
+
 import uuid as uuidmodule
 from PyQt4 import QtCore, QtGui
 from prymatex.support.manager import PMXSupportBaseManager
-from prymatex.core.base import PMXObject
+
 from prymatex.core.settings import pmxConfigPorperty
-from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeStylesTableModel, PMXThemeStyleRow
-from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel
-from prymatex.models.proxies import bisect_key
+from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeListModel, PMXThemeStylesTableModel, PMXThemeStyleRow, PMXProcessTableModel
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel
 
 class PMXBundleMenuGroup(QtCore.QObject):
     def __init__(self, manager):
         QtCore.QObject.__init__(self, manager)
         self.manager = manager
-        #TODO: No conectar al modelo preferir manager sobre modelo
-        self.bundleTreeModel = self.manager.bundleTreeModel
         #The bundle menues
         self.menus = {}
         #The qt menus where a bundle menu is added
         self.containers = []
         self.manager.bundlePopulated.connect(self.on_manager_bundlePopulated)
-        self.bundleTreeModel.dataChanged.connect(self.on_bundleTreeModel_dataChanged)
-    
-    def appendMenu(self, menu):
-        if menu not in self.containers:
-            self.containers.append(menu)
-        #Append all bundle menus
-        for m in self.menus.values():
-            menu.addMenu(m)
+        self.manager.bundleAdded.connect(self.on_manager_bundleAdded)
+        self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
+        self.manager.bundleChanged.connect(self.on_manager_bundleChanged)
+        self.manager.bundleRemoved.connect(self.on_manager_bundleRemoved)
+        
+    def appendMenu(self, menu, offset = None):
+        if menu not in map(lambda (menu, offset): menu, self.containers):
+            self.containers.append((menu, offset is not None and offset or len(menu.actions())))
+        #Append all bundle menus in order
+        for bundle, bundleMenu in iter(sorted(self.menus.iteritems(), key=lambda (bundle, bundleMenu): bundleMenu.title().replace("&","").lower())):
+            menu.addMenu(bundleMenu)
         
     def buildMenu(self, items, menu, submenus, parent = None):
         for uuid in items:
@@ -48,54 +50,89 @@ class PMXBundleMenuGroup(QtCore.QObject):
     def buildBundleMenu(self, bundle):
         menu = QtGui.QMenu(bundle.buildBundleAccelerator())
         menu.ID = id(bundle.mainMenu)
-        if bundle.mainMenu is not None:
-            submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
-            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
-            self.buildMenu(items, menu, submenus, menu)
         return menu
 
     def addBundle(self, bundle):
         menu = self.buildBundleMenu(bundle)
-        self.menus[bundle] = menu
         menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
+        # Primero agregarlo a los containers porque estos usan self.menus para ordenar
         self.addToContainers(menu)
+        self.menus[bundle] = menu
     
+    def menuForBundle(self, bundle):
+        return self.menus.get(bundle)
+        
     def addToContainers(self, menu):
-        for containter in self.containers:
-            containter.addMenu(menu)
+        currentTitles = sorted(map(lambda menu: menu.title().replace("&","").lower(), self.menus.values()))
+        index = bisect(currentTitles, menu.title().replace("&","").lower())
+        for container, offset in self.containers:
+            currentActions = container.actions()
+            if index < len(currentActions) - offset:
+                container.insertMenu(currentActions[offset + index], menu)
+            else:
+                container.addMenu(menu)
+    
+    def removeFromContainers(self, menu):
+        for container, offset in self.containers:
+            container.removeAction(menu.menuAction())
 
-    def on_bundleTreeModel_dataChanged(self, topLeft, bottomRight):
-        #TODO: ver que pasa con el bottomRight
-        item = topLeft.internalPointer()
-        if item.TYPE == "bundle":
-            menu = self.menus.get(item, None)
-            if menu is not None:
-                title = item.buildBundleAccelerator()
-                if title != menu.title():
-                    menu.setTitle(title)
-                if item.enabled != menu.menuAction().isVisible():
-                    menu.menuAction().setVisible(item.enabled and item.mainMenu is not None)
-                if id(item.mainMenu) != menu.ID:
-                    menu.clear()
-                    submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
-                    items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
-                    self.buildMenu(items, menu, submenus, menu)
-                    menu.ID = id(item.mainMenu)
-        else:
-            action = item.triggerItemAction()
-            if action is not None:
-                text = item.buildMenuTextEntry()
-                if text != action.text():
-                    action.setText(text)
+    def on_manager_bundleItemChanged(self, item):
+        action = item.triggerItemAction()
+        if action is not None:
+            text = item.buildMenuTextEntry()
+            if text != action.text():
+                action.setText(text)
+                
+    def on_manager_bundleChanged(self, bundle):
+        menu = self.menus.get(bundle, None)
+        #ACA un assert no puede ser que no tenga menu el bundle
+        if menu is not None:
+            title = bundle.buildBundleAccelerator()
+            if title != menu.title():
+                self.removeFromContainers(menu)
+                menu.setTitle(title)
+                self.addToContainers(menu)
+            if bundle.enabled != menu.menuAction().isVisible():
+                menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
+            if id(bundle.mainMenu) != menu.ID:
+                menu.clear()
+                submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+                items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+                self.buildMenu(items, menu, submenus, menu)
+                menu.ID = id(bundle.mainMenu)
+
+    def on_manager_bundleAdded(self, bundle):
+        assert bundle not in self.menus, "The bundle is in menus"
+        self.addBundle(bundle)
 
     def on_manager_bundlePopulated(self, bundle):
-        if bundle not in self.menus:
-            self.addBundle(bundle)
+        menu = self.menus.get(bundle)
+        if bundle.mainMenu is not None:
+            submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+            items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
+            self.buildMenu(items, menu, submenus, menu)
 
-class PMXSupportManager(PMXSupportBaseManager, PMXObject):
-    #Signals
-    bundleItemTriggered = QtCore.pyqtSignal(object)
+    def on_manager_bundleRemoved(self, bundle):
+        if bundle in self.menus:
+            self.removeFromContainers(self.menus[bundle])
+
+class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
+    #Signals for bundle
+    bundleAdded = QtCore.pyqtSignal(object)
+    bundleRemoved = QtCore.pyqtSignal(object)
+    bundleChanged = QtCore.pyqtSignal(object)
     bundlePopulated = QtCore.pyqtSignal(object)
+
+    #Signals for bundle items
+    bundleItemAdded = QtCore.pyqtSignal(object)
+    bundleItemRemoved = QtCore.pyqtSignal(object)
+    bundleItemChanged = QtCore.pyqtSignal(object)
+    bundleItemTriggered = QtCore.pyqtSignal(object)
+    
+    #Signals for themes
+    themeAdded = QtCore.pyqtSignal(object)
+    themeRemoved = QtCore.pyqtSignal(object)
+    themeChanged = QtCore.pyqtSignal(object)
     
     #Settings
     shellVariables = pmxConfigPorperty(default = [], tm_name = u'OakShelVariables')
@@ -114,12 +151,14 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         
     SETTINGS_GROUP = 'SupportManager'
     
-    def __init__(self, parent = None):
-        PMXObject.__init__(self)
+    def __init__(self, application):
+        QtCore.QObject.__init__(self)
         PMXSupportBaseManager.__init__(self)
+        self.application = application
         self.bundleTreeModel = PMXBundleTreeModel(self)
+        self.themeListModel = PMXThemeListModel(self)
         self.themeStylesTableModel = PMXThemeStylesTableModel(self)
-        self.themeListModel = []
+        self.processTableModel = PMXProcessTableModel(self)
         
         #STYLE PROXY
         self.themeStyleProxyModel = PMXThemeStyleTableProxyModel(self)
@@ -134,7 +173,7 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         self.bundleProxyModel.setSourceModel(self.bundleTreeModel)
         
         #TEMPLATES
-        self.templateProxyModel = PMXBundleTypeFilterProxyModel("template", self)
+        self.templateProxyModel = PMXTemplateProxyModel(self)
         self.templateProxyModel.setSourceModel(self.bundleTreeModel)
         
         #SYNTAX
@@ -155,11 +194,18 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         
         #BUNDLEMENUGROUP
         self.bundleMenuGroup = PMXBundleMenuGroup(self)
-        self.configure()
 
-    def appendMenuToBundleMenuGroup(self, menu):
-        self.bundleMenuGroup.appendMenu(menu)
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.environment import PMXEnvVariablesWidget
+        return [ PMXEnvVariablesWidget ]
+    
+    def appendMenuToBundleMenuGroup(self, menu, offset = None):
+        self.bundleMenuGroup.appendMenu(menu, offset)
 
+    def menuForBundle(self, bundle):
+        return self.bundleMenuGroup.menuForBundle(bundle)
+        
     def buildEnvironment(self):
         env = {}
         for var in self.shellVariables:
@@ -168,11 +214,52 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
         env.update(self.environment)
         return env
     
-    # Override populate bundle for emit signal
-    def populateBundle(self, bundle):
-        PMXSupportBaseManager.populateBundle(self, bundle)
-        self.bundlePopulated.emit(bundle)
-    
+    # Override loadSupport for emit signals
+    def loadSupport(self, *largs, **kwargs):
+        PMXSupportBaseManager.loadSupport(self, *largs, **kwargs)
+        self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
+        self.bundleProxyTreeModel.setDynamicSortFilter(True)
+
+    def runProcess(self, context, callback):
+        if context.asynchronous:
+            return self.runQProcess(context, callback)
+        else:
+            return PMXSupportBaseManager.runProcess(self, context, callback)
+            
+    #Interface
+    def runQProcess(self, context, callback):
+        process = QtCore.QProcess(self)
+        if context.workingDirectory is not None:
+            process.setWorkingDirectory(context.workingDirectory)
+            
+        self.processTableModel.appendProcess(process, description = context.description())
+        
+        #TODO: context.environment ya tiene las variables de system ver que hacer
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        for key, value in context.environment.iteritems():
+            env.insert(key, value)
+        process.setProcessEnvironment(env)
+
+        def onQProcessFinished(process, context, callback):
+            def runCallback(exitCode):
+                self.processTableModel.removeProcess(process)
+                context.errorValue = str(process.readAllStandardError()).decode("utf-8")
+                context.outputValue = str(process.readAllStandardOutput()).decode("utf-8")
+                context.outputType = exitCode
+                callback(context)
+            return runCallback
+
+        process.finished[int].connect(onQProcessFinished(process, context, callback))
+
+        if context.inputType is not None:
+            process.start(context.shellCommand, QtCore.QIODevice.ReadWrite)
+            if not process.waitForStarted():
+                raise Exception("No puedo correr")
+            process.write(unicode(context.inputValue).encode("utf-8"))
+            process.closeWriteChannel()
+        else:
+            process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
+
     #---------------------------------------------------
     # MANAGED OBJECTS OVERRIDE INTERFACE
     #---------------------------------------------------
@@ -206,10 +293,15 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     def addBundle(self, bundle):
         bundleNode = PMXBundleTreeNode(bundle)
         self.bundleTreeModel.appendBundle(bundleNode)
+        self.bundleAdded.emit(bundleNode)
         return bundleNode
+    
+    def modifyBundle(self, bundle):
+        self.bundleChanged.emit(bundle)
     
     def removeBundle(self, bundle):
         self.bundleTreeModel.removeBundle(bundle)
+        self.bundleRemoved.emit(bundle)
     
     def getAllBundles(self):
         return self.bundleProxyModel.getAllItems()
@@ -217,21 +309,29 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     def getDefaultBundle(self):
         return self.getBundle(self.defaultBundleForNewBundleItems)
     
+    def populatedBundle(self, bundle):
+        self.bundlePopulated.emit(bundle)
+        
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
     #---------------------------------------------------
     def addBundleItem(self, bundleItem):
         bundleItemNode = PMXBundleTreeNode(bundleItem)
         self.bundleTreeModel.appendBundleItem(bundleItemNode)
+        self.bundleItemAdded.emit(bundleItemNode)
         return bundleItemNode
-    
+
+    def modifyBundleItem(self, bundleItem):
+        self.bundleItemChanged.emit(bundleItem)
+        
     def removeBundleItem(self, bundleItem):
         self.bundleTreeModel.removeBundleItem(bundleItem)
+        self.bundleItemRemoved.emit(bundleItem)
         
     def getAllBundleItems(self):
         items = []
         for bundle in self.getAllBundles():
-            for item in bundle.children:
+            for item in bundle.childrenNodes:
                 items.append(item)
         return items
         
@@ -248,13 +348,23 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     #---------------------------------------------------
     def addTheme(self, theme):
         themeRow = PMXThemeStyleRow(theme, self.scores)
-        index = bisect_key(self.themeListModel, themeRow, lambda t: t.name)
-        self.themeListModel.insert(index, themeRow)
+        self.themeListModel.addTheme(themeRow)
+        self.themeAdded.emit(themeRow)
         return themeRow
     
+    def modifyTheme(self, theme):
+        self.themeChanged.emit(theme)
+        
+    def removeTheme(self, theme):
+        self.themeListModel.removeTheme(theme)
+        self.themeRemoved.emit(theme)
+            
     def getAllThemes(self):
-        return self.themeListModel
+        return self.themeListModel.getAllItems()
     
+    #---------------------------------------------------
+    # THEME STYLE OVERRIDE INTERFACE
+    #---------------------------------------------------
     def addThemeStyle(self, style):
         themeStyle = PMXThemeStyleRow(style)
         self.themeStylesTableModel.appendStyle(themeStyle)
@@ -272,11 +382,11 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
-    def getAllTabTriggersMnemonics(self):
+    def getAllTabTriggerItems(self):
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
-                tabTriggers.append(item.tabTrigger)
+                tabTriggers.append(item)
         return tabTriggers
             
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
@@ -285,7 +395,7 @@ class PMXSupportManager(PMXSupportBaseManager, PMXObject):
             if item.tabTrigger == tabTrigger:
                 items.append(item)
         return items
-            
+
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------

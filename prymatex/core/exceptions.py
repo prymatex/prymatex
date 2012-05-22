@@ -1,4 +1,7 @@
-# coding: utf-8
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
+
+#TODO: MEJORAR LAS EXCEPTIONS
 
 from prymatex.utils.i18n import ugettext as _
 
@@ -14,19 +17,36 @@ class APIUsageError(Exception):
     """
     pass
 
-class PrymatexIOException(Exception):
+class IOException(Exception):
     pass
-    
-class PrymatexFileExistsException(Exception):
+
+class FileException(IOException):
     def __init__(self, msg, filePath = None):
-        super(PrymatexFileExistsException, self).__init__(msg)
+        IOException.__init__(self, msg)
         self.filePath = filePath
 
-class PrymatexFilePermissionException(PrymatexIOException):
+class FileExistsException(FileException):
     pass
 
+class FileNotExistsException(FileException):
+    pass
+        
+class FilePermissionException(IOException):
+    pass
+
+class DirectoryException(IOException):
+    def __init__(self, msg, directory = None):
+        IOException.__init__(self, msg)
+        self.directory = directory
+
+class PluginManagerException(Exception):
+    pass
+    
 class FileNotSupported(Exception):
     pass
     
 class UserCancelException(Exception):
+    pass
+
+class LocationIsNotProject(Exception):
     pass

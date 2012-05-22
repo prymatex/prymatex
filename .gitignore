@@ -2,6 +2,7 @@
 *~
 dict.*
 *.swp
+.ropeproject
 .pydevproject
 .settings
 .directory
@@ -14,3 +15,5 @@ build/
 dist/
 src/
 .pmxproject
+*.png
+fab*

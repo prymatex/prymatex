@@ -1,18 +1,25 @@
 unset BASH_ENV # avoid recursively running this script
 export LC_CTYPE="en_US.UTF-8"
 
+# First read the system-wide profile
+[ -f /etc/profile ] && . /etc/profile               &>/dev/null
+
+# Now find the first local profile, just like a normal login shell
+if   [ -f ~/.bash_profile ]; then . ~/.bash_profile &>/dev/null
+elif [ -f ~/.bash_login ];   then . ~/.bash_login   &>/dev/null
+elif [ -f ~/.profile ];      then . ~/.profile      &>/dev/null
+fi
+
+#For TextMate bash_init.sh
 : ${TM_BASH_INIT:=$HOME/Library/Application Support/TextMate/bash_init.sh}
-if [ ! -f "$TM_BASH_INIT" ]; then
+if [[ -f "$TM_BASH_INIT" ]]; then
+	. "$TM_BASH_INIT"
+fi
 
-	# First read the system-wide profile
-	[ -f /etc/profile ] && . /etc/profile               &>/dev/null
-
-	# Now find the first local profile, just like a normal login shell
-	if   [ -f ~/.bash_profile ]; then . ~/.bash_profile &>/dev/null
-	elif [ -f ~/.bash_login ];   then . ~/.bash_login   &>/dev/null
-	elif [ -f ~/.profile ];      then . ~/.profile      &>/dev/null
-	fi
-
+#For Project bash_init.sh
+: ${TM_PROJECT_INIT:="$TM_PROJECT_SUPPORT/lib/bash_init.sh"}
+if [[ -f "$TM_PROJECT_INIT" ]]; then
+	. "$TM_PROJECT_INIT"
 fi
 
 set +u # avoid warning when we use unset variables (if user had ‘set -u’ in his profile)
@@ -24,19 +31,19 @@ if [[ -d "$TM_SUPPORT_PATH/bin" ]]; then
 	fi
 fi
 
+if [[ -d "$TM_PROJECT_SUPPORT" && -d "$TM_PROJECT_SUPPORT/bin" ]]; then
+   PATH="$TM_PROJECT_SUPPORT/bin:$PATH"
+fi
+
 if [[ -d "$TM_BUNDLE_SUPPORT" && -d "$TM_BUNDLE_SUPPORT/bin" ]]; then
    PATH="$TM_BUNDLE_SUPPORT/bin:$PATH"
 fi
 
 export PATH
 
-if [[ -f "$TM_BASH_INIT" ]]; then
-	. "$TM_BASH_INIT"
-fi
-
 #Now export
-export DIALOG="$PMX_SUPPORT_PATH/bin/tm_dialog.py"
-export DIALOG_1="$PMX_SUPPORT_PATH/bin/tm_dialog.py"
+export DIALOG="$PMX_SUPPORT_PATH/bin/pmxctl.py"
+export DIALOG_1="$PMX_SUPPORT_PATH/bin/pmxctl.py"
 export TMPDIR=$PMX_TMP_PATH
 export TEMP=$PMX_TMP_PATH
 export TMP=$PMX_TMP_PATH
@@ -54,12 +61,12 @@ export RUBYLIB="${RUBYLIB:+$RUBYLIB:}$TM_SUPPORT_PATH/lib"
 # an abstract way to change the output option of the running command
 exit_discard ()					{ echo -n "$1"; exit 200; }
 exit_replace_text ()				{ echo -n "$1"; exit 201; }
-exit_replace_document ()                            { echo -n "$1"; exit 202; }
+exit_replace_document ()            { echo -n "$1"; exit 202; }
 exit_insert_text ()				{ echo -n "$1"; exit 203; }
 exit_insert_snippet ()			{ echo -n "$1"; exit 204; }
-exit_show_html ()					{ echo -n "$1"; exit 205; }
+exit_show_html ()				{ echo -n "$1"; exit 205; }
 exit_show_tool_tip ()			{ echo -n "$1"; exit 206; }
-exit_create_new_document ()	{ echo -n "$1"; exit 207; }
+exit_create_new_document ()	     { echo -n "$1"; exit 207; }
 
 # force TM to refresh current file and project drawer
 rescan_project () {

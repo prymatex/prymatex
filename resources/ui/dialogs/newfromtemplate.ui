@@ -16,6 +16,10 @@
   <property name="windowTitle">
    <string>New File From Template</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../resources.qrc">
+    <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>2</number>

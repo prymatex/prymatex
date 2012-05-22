@@ -2,17 +2,18 @@
 #-*- encoding: utf-8 -*-
 import os
 import codecs
+from subprocess import Popen, PIPE, STDOUT
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 from PyQt4.QtNetwork import QNetworkProxy
 
+from prymatex import resources
+from prymatex.gui.utils import createQMenu
 from prymatex.ui.dockers.browser import Ui_BrowserDock
-from prymatex.core.base import PMXObject
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.support.utils import prepareShellScript, deleteFile
-from subprocess import Popen, PIPE, STDOUT
-from prymatex.gui.dockers.base import PMXBaseDock
+from prymatex.core.plugin.dock import PMXBaseDock
 
 class TmFileReply(QNetworkReply):
     def __init__(self, parent, url, operation):
@@ -44,7 +45,9 @@ class TmFileReply(QNetworkReply):
             self.offset = end
             return data
 
-class NetworkAccessManager(QNetworkAccessManager, PMXObject):
+class NetworkAccessManager(QNetworkAccessManager):
+    commandUrlRequested = QtCore.pyqtSignal(QtCore.QUrl)
+    
     def __init__(self, parent, old_manager):
         super(NetworkAccessManager, self).__init__(parent)
         self.old_manager = old_manager
@@ -55,7 +58,7 @@ class NetworkAccessManager(QNetworkAccessManager, PMXObject):
     
     def createRequest(self, operation, request, data):
         if request.url().scheme() == "txmt":
-            self.application.openUrl(request.url())
+            self.commandUrlRequested.emit(request.url())
         elif request.url().scheme() == "tm-file" and operation == self.GetOperation:
             reply = TmFileReply(self, request.url(), self.GetOperation)
             return reply
@@ -77,12 +80,12 @@ class SystemWrapper(QtCore.QObject):
         self.process = process
         self.file = file
     
-    @QtCore.pyqtSignature("write(int)")
-    def write(self, flags):
-        self.process.stdin.write()
+    @QtCore.pyqtSlot(str)
+    def write(self, data):
+        self.process.stdin.write(data)
     
-    @QtCore.pyqtSignature("write(int)")
-    def read(self, flags):
+    @QtCore.pyqtSlot()
+    def read(self):
         self.process.stdin.close()
         text = self.process.stdout.read()
         self.process.stdout.close()
@@ -90,7 +93,7 @@ class SystemWrapper(QtCore.QObject):
         deleteFile(self.file)
         return text
         
-    @QtCore.pyqtSignature("close()")
+    @QtCore.pyqtSlot()
     def close(self):
         self.process.stdin.close()
         self.process.stdout.close()
@@ -124,44 +127,54 @@ class TextMate(QtCore.QObject):
         return True
     isBusy = QtCore.pyqtProperty("bool", isBusy)
     
-class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
+class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
+    SHORTCUT = "F9"
+    ICON = resources.getIcon("browser")
+    PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
+    
     SETTINGS_GROUP = "Browser"
     
+    updateInterval = pmxConfigPorperty(default = 3000)
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
     def proxy(self, value):
-        '''
-        System wide proxy
-        '''
-        print value
-        proxy_url = QtCore.QUrl(value)    
+        """System wide proxy
+        """
+        proxy_url = QtCore.QUrl(value)
+        #TODO: Una regexp para filtar basura y quitar el try except
         if not value:
             network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
         else:
-            protocol = QNetworkProxy.NoProxy
-            if proxy_url.scheme().startswith('http'):
-                protocol = QNetworkProxy.HttpProxy
-            else:
-                protocol = QNetworkProxy.Socks5Proxy
-                
-            network_proxy = QNetworkProxy(protocol, proxy_url.host(), proxy_url.port(), proxy_url.userName(), proxy_url.password())
-
+            try:
+                protocol = QNetworkProxy.NoProxy
+                if proxy_url.scheme().startswith('http'):
+                    protocol = QNetworkProxy.HttpProxy
+                else:
+                    protocol = QNetworkProxy.Socks5Proxy
+                network_proxy = QNetworkProxy(protocol, proxy_url.host(), proxy_url.port(), proxy_url.userName(), proxy_url.password())
+            except:
+                network_proxy = QNetworkProxy(QNetworkProxy.NoProxy)
         QNetworkProxy.setApplicationProxy( network_proxy )
-
-    MENU_KEY_SEQUENCE = QtGui.QKeySequence("Shift+F12")
     
+    @classmethod
+    def contributeToSettings(cls):
+        from prymatex.gui.settings.browser import PMXNetworkWidget
+        return [ PMXNetworkWidget ]
+        
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
-        self.setupUi(self)
         PMXBaseDock.__init__(self)
-        
+        self.setupUi(self)
+        self.setupToolBar()
+
         #Developers, developers, developers!!! Extras
         QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
+        QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
         
         #New manager
-        old_manager = self.webView.page().networkAccessManager()
-        new_manager = NetworkAccessManager(self, old_manager)
-        self.webView.page().setNetworkAccessManager(new_manager)
+        self.networkAccessManager = NetworkAccessManager(self, self.webView.page().networkAccessManager())
+        self.webView.page().setNetworkAccessManager(self.networkAccessManager)
+        self.networkAccessManager.commandUrlRequested.connect(self.on_manager_commandUrlRequested)
 
         # Set the default home page
         self.lineUrl.setText(self.homePage)
@@ -172,20 +185,35 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         self.buttonNext.setEnabled(False)
         
         #Connects
-        self.buttonBack.clicked.connect(self.back)
-        self.buttonNext.clicked.connect(self.forward)
-        self.lineUrl.returnPressed.connect(self.url_changed)
         self.webView.linkClicked.connect(self.link_clicked)
         self.webView.urlChanged.connect(self.link_clicked)
         self.webView.loadProgress[int].connect(self.load_progress)
         self.webView.loadFinished[bool].connect(self.prepare_JavaScript)
         self.webView.titleChanged[str].connect(self.title_changed)
-        self.buttonReload.clicked.connect(self.reload_page)
-        self.buttonStop.clicked.connect(self.stop_page)
         
         self.bundleItem = None
-        self.configure()
+        
+        #Sync Timer
+        self.updateTimer = QtCore.QTimer()
+        self.updateTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
+    
+    def setupToolBar(self):
+        #Setup Context Menu
+        optionsMenu = { 
+            "title": "Browser Options",
+            "items": [ self.actionSyncEditor, self.actionConnectEditor ]
+        }
 
+        self.browserOptionsMenu, _ = createQMenu(optionsMenu, self)
+        self.pushButtonOptions.setMenu(self.browserOptionsMenu)
+
+    def on_manager_commandUrlRequested(self, url):
+        self.application.handleUrlCommand(url)
+        
+    def initialize(self, mainWindow):
+        PMXBaseDock.initialize(self, mainWindow)
+        mainWindow.browser = self
+        
     def showEvent(self, event):
         self.setFocus()
     
@@ -207,14 +235,16 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame(), self.bundleItem))
         self.webView.page().mainFrame().evaluateJavaScript(js)
     
-    def setHtml(self, string, bundleItem):
+    def setHtml(self, string, bundleItem = None):
+        if not self.isVisible():
+            self.show()
+        self.raise_()
         self.bundleItem = bundleItem
         url = QtCore.QUrl.fromUserInput("about:%s" % bundleItem.name)
-        print url.toString()
         self.lineUrl.setText(url.toString())
         self.webView.setHtml(string, url)
     
-    def url_changed(self):
+    def on_lineUrl_returnPressed(self):
         """Url have been changed by user"""
 
         page = self.webView.page()
@@ -225,7 +255,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
         self.webView.setUrl(url)
 
-    def stop_page(self):
+    def on_buttonStop_clicked(self):
         """Stop loading the page"""
         self.webView.stop()
 
@@ -234,7 +264,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         #self.setWindowTitle(title)
         pass
     
-    def reload_page(self):
+    def on_buttonReload_clicked(self):
         """Reload the web page"""
         url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
         self.webView.setUrl(url)
@@ -252,16 +282,46 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXObject, PMXBaseDock):
         """Page load progress"""
         self.buttonStop.setEnabled(load != 100)
         
-    def back(self):
+    def on_buttonBack_clicked(self):
         """Back button clicked, go one page back"""
         page = self.webView.page()
         history = page.history()
         history.back()
         self.buttonBack.setEnabled(history.canGoBack())
     
-    def forward(self):
+    def on_buttonNext_clicked(self):
         """Next button clicked, go to next page"""
         page = self.webView.page()
         history = page.history()
         history.forward()
         self.buttonNext.setEnabled(history.canGoForward())
+        
+    def updateHtmlCurrentEditorContent(self):
+        # TODO Resolver url, asegurar que sea html para no hacer cochinadas
+        content = self.mainWindow.currentEditor().toPlainText()
+        url = QtCore.QUrl.fromUserInput(self.mainWindow.currentEditor().filePath)
+        self.webView.setHtml(content, url)
+    
+    def stopTimer(self):
+        self.updateTimer.stop()
+        map(lambda action: action.setChecked(False), [self.actionConnectEditor, self.actionSyncEditor])
+
+    def startTimer(self):
+        self.updateTimer.start(self.updateInterval)
+
+    @QtCore.pyqtSlot(bool)
+    def on_actionSyncEditor_toggled(self, checked):
+        if checked:
+            self.actionConnectEditor.setChecked(False)
+            self.startTimer()
+        else:
+            self.updateTimer.stop()
+            
+    @QtCore.pyqtSlot(bool)
+    def on_actionConnectEditor_toggled(self, checked):
+        # TODO Capturar el current editor y usarlo para el update
+        if checked:
+            self.actionSyncEditor.setChecked(False)
+            self.startTimer()
+        else:
+            self.updateTimer.stop()

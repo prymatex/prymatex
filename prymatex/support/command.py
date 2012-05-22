@@ -1,23 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-    Command's module    
-'''
+"""Command's module"""
+
 import os
+import functools
 from collections import namedtuple
 
-from prymatex.support.bundle import PMXBundleItem
+from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
 from prymatex.support.utils import compileRegexp, prepareShellScript
-
-class PMXCommandContext(object):
-    def __init__(self, command, environment, inputType, inputValue, outputType = None, outputValue = None):
-        self.command = command
-        self.environment = environment
-        self.inputType = inputType
-        self.inputValue = inputValue
-        self.outputType = outputType
-        self.outputValue = outputValue
 
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
@@ -32,7 +23,7 @@ class PMXCommand(PMXBundleItem):
     FOLDER = 'Commands'
     EXTENSION = 'tmCommand'
     PATTERNS = ['*.tmCommand', '*.plist']
-    exit_codes = {
+    EXIT_CODES = {
                   200: 'discard',
                   201: 'replaceSelectedText',
                   202: 'replaceDocument',
@@ -42,27 +33,24 @@ class PMXCommand(PMXBundleItem):
                   206: 'showAsTooltip',
                   207: 'createNewDocument'
                   }
-    def __init__(self, uuid, namespace, hash, path = None):
-        super(PMXCommand, self).__init__(uuid, namespace, hash, path)
-
-    def load(self, hash):
-        super(PMXCommand, self).load(hash)
+    def load(self, dataHash):
+        PMXBundleItem.load(self, dataHash)
         for key in PMXCommand.KEYS:
-            value = hash.get(key, None)
+            value = dataHash.get(key, None)
             if value != None and key in [    'capturePattern' ]:
                 value = compileRegexp( value )
             setattr(self, key, value)
     
     @property
     def hash(self):
-        hash = super(PMXCommand, self).hash
+        dataHash = super(PMXCommand, self).hash
         for key in PMXCommand.KEYS:
             value = getattr(self, key)
             if value != None:
                 if key in ['capturePattern']:
                     value = unicode(value)
-                hash[key] = value
-        return hash
+                dataHash[key] = value
+        return dataHash
 
     def getInputText(self, processor):
         def getInputTypeAndValue(input, format):
@@ -90,26 +78,30 @@ class PMXCommand(PMXBundleItem):
             return self.command
     
     def getOutputHandler(self, code):
-        if self.output != 'showAsHTML' and code in self.exit_codes:
-            return self.exit_codes[code]
+        if self.output != 'showAsHTML' and code in self.EXIT_CODES:
+            return self.EXIT_CODES[code]
         elif code != 0:
             return "error"
         else:
             return self.output
     
     def beforeExecute(self, processor):
-        if not hasattr(self, 'beforeRunningCommand') or self.beforeRunningCommand == None: return True
-        return getattr(processor, self.beforeRunningCommand)()
+        beforeMethod = None
+        if self.beforeRunningCommand is not None:
+            beforeMethod  = getattr(processor, self.beforeRunningCommand)
+            return beforeMethod()
+        return True
 
     def execute(self, processor):
-        #if not self.beforeExecute(processor): return
-        print "corriendo"
-        inputType, inputValue = self.getInputText(processor)
-        shellCommand, environment = prepareShellScript(self.systemCommand(), processor.environment(self))
-        
-        context = PMXCommandContext(self, environment, inputType, inputValue)
-        
-        processor.runCommand(context, shellCommand, self.afterExecute)
+        if self.beforeExecute(processor): 
+    
+            context = PMXRunningContext(self)
+            
+            context.asynchronous = processor.asynchronous
+            context.inputType, context.inputValue = self.getInputText(processor)
+            context.shellCommand, context.environment = prepareShellScript(self.systemCommand(), processor.environment(self))
+    
+            self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
     
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
@@ -126,20 +118,18 @@ class PMXDragCommand(PMXCommand):
     TYPE = 'dragcommand'
     FOLDER = 'DragCommands'
     FILES = ['*.tmCommand', '*.plist']
-    def __init__(self, uuid, namespace, hash = None, path = None):
-        super(PMXDragCommand, self).__init__(uuid, namespace, hash, path)
 
-    def load(self, hash):
-        super(PMXDragCommand, self).load(hash)
+    def load(self, dataHash):
+        PMXCommand.load(self, dataHash)
         for key in PMXDragCommand.KEYS:
-            value = hash.get(key, None)
+            value = dataHash.get(key, None)
             setattr(self, key, value)
     
     @property
     def hash(self):
-        hash = super(PMXDragCommand, self).hash
+        dataHash = super(PMXDragCommand, self).hash
         for key in PMXDragCommand.KEYS:
             value = getattr(self, key)
-            hash[key] = value
-        return hash
+            dataHash[key] = value
+        return dataHash
         

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>saveActiveFile</string>
+	<key>command</key>
+	<string>#!/usr/bin/env python
+
+import sys, os
+sys.path.append(os.environ['TM_SUPPORT_PATH'] + '/lib')
+sys.path.append(os.environ['TM_BUNDLE_SUPPORT'] + '/lib')
+
+import tm_helpers as helpers
+import ipython_console as console
+
+try:
+	prun_options = os.environ['TM_PRUN_OPTIONS'] + ' '
+except KeyError:
+	prun_options = ''
+
+try:
+	run_options = os.environ['TM_RUN_OPTIONS'] + ' '
+except KeyError:
+	run_options = '-e -i -n '
+
+text='%run ' + run_options + '-p ' + prun_options + '  ' + os.environ.get('TM_FILEPATH')
+
+helpers.exit_show_tool_tip(console.execute(text))</string>
+	<key>input</key>
+	<string>none</string>
+	<key>keyEquivalent</key>
+	<string>^I</string>
+	<key>name</key>
+	<string>Run file through profiler</string>
+	<key>output</key>
+	<string>afterSelectedText</string>
+	<key>scope</key>
+	<string>source.python</string>
+	<key>uuid</key>
+	<string>C9C0BB08-AA1B-49FC-99DD-00B7DC2ACA7C</string>
+</dict>
+</plist>

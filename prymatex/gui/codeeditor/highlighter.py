@@ -1,13 +1,21 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import re
+
 from PyQt4 import QtGui
 
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex.support.syntax import PMXSyntax
+from prymatex.utils.decorator.helpers import printtime
 
-WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
+#TODO: Usar mas el modulo de string en general, string.punctuation
+
+RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
+RE_WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 def whiteSpace(text):
-    match = WHITESPACE.match(text)
+    match = RE_WHITESPACE.match(text)
     try:
         ws = match.group('whitespace')
         return ws
@@ -20,21 +28,34 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     MULTI_LINE = 1
     FORMAT_CACHE = {}
     
-    def __init__(self, editor, syntax, theme = None):
-        super(PMXSyntaxHighlighter, self).__init__(editor.document())
-        assert syntax is not None, "Syntax cannot be None"
+    def __init__(self, editor, syntax = None, theme = None):
+        QtGui.QSyntaxHighlighter.__init__(self, editor)
         self.editor = editor
-        self.processor = PMXSyntaxProcessor()
+        self.processor = PMXSyntaxProcessor(editor)
         self.syntax = syntax
         self.theme = theme
-
+    
+    @property
+    def ready(self):
+        if self.theme and self.syntax:
+            self.setDocument(self.editor.document())
+            return True
+        return False
+    
+    def setSyntax(self, syntax):
+        self.syntax = syntax
+        if self.ready:
+            self.rehighlight()
+        
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
         self.theme = theme
+        if self.ready:
+            self.rehighlight()
     
     def hasTheme(self):  
         return self.theme is not None
-    
+            
     def _analyze_all_text(self, text):
         self.syntax.parse(text, self.processor)
         for index, data in enumerate(self.processor.lines):
@@ -44,52 +65,59 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.setUserState(state)
     
     def applyFormat(self, userData):
-        for scope, start, end in userData.getAllScopes():
+        for (start, end), scope in userData.ranges:
             format = self.getFormat(scope)
             if format is not None:
                 self.setFormat(start, end - start, format)
-    
-    def setupBlockUserData(self, text, userData, data):
-        state = self.SINGLE_LINE
-        userData.setScopes(data[0])
-        if data[1] is not None:
-            state = self.MULTI_LINE
-            userData.setStackAndScopes(*data[1])
+
+    #@printtime
+    def setupBlockUserData(self, text, userData):
+        blockState = self.SINGLE_LINE
+        userData.setScopes(self.processor.scopes)
+        userData.setRanges(self.processor.scopeRanges)
+        userData.setPreferences(self.processor.preferences)
+        userData.setChunks(self.processor.lineChunks)
+        if self.processor.state is not None:
+            blockState = self.MULTI_LINE
+            userData.setProcessorState(self.processor.state)
         
         #1 Update Indent
-        userData.indent = whiteSpace(text)
-        
+        indent = whiteSpace(text)
+        if indent != userData.indent:
+            userData.indent = indent
+            self.editor.updateIndent(self.currentBlock(), userData, indent)
+
         #2 Update Folding
         foldingMark = self.syntax.folding(text)
         if userData.foldingMark != foldingMark:
             userData.foldingMark = foldingMark
-            if userData.foldingMark == None:
-                self.editor.folding.removeFoldingBlock(self.currentBlock())
-            else:
-                self.editor.folding.addFoldingBlock(self.currentBlock())
-
+            self.editor.updateFolding(self.currentBlock(), userData, foldingMark)
+            
         #3 Update Symbols
-        preferences = map(lambda (scope, start, end): (self.editor.getPreference(scope), start, end), userData.getAllScopes())
-        
-        symbolRange = filter(lambda (preference, start, end): preference.showInSymbolList == 1, preferences)
+        symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, userData.preferences)
         if symbolRange:
-            symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
-            symbol = symbolRange[0][0].transformSymbol(symbol)
+            #TODO: Hacer la transformacion de los symbolos
+            #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
+            #symbol = symbolRange[0][0].transformSymbol(symbol)
+            symbol = text
         else:
             symbol = None
 
         if userData.symbol != symbol:
             userData.symbol = symbol
-            if userData.symbol == None:
-                self.editor.symbolListModel.removeSymbolBlock(self.currentBlock())
-            else:
-                self.editor.symbolListModel.addSymbolBlock(self.currentBlock())
+            self.editor.updateSymbol(self.currentBlock(), userData, symbol)
 
-        #4 Save the hash the text, scope and state
-        userData.textHash = hash(text) + hash(self.syntax.scopeName) + state
+        #4 Split words [ (( wordStart, wordEnd ), word )...]
+        words = map(lambda match: (match.span(), match.group()), RE_WORD.finditer(text))
+        if userData.words != words:
+            self.editor.updateWords(self.currentBlock(), userData, words)
 
-        return state
+        #5 Save the hash the text, scope and state
+        userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
 
+        return blockState
+
+    #@printtime
     def highlightBlock(self, text):
         userData = self.currentBlock().userData()
         if userData is not None and userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
@@ -98,8 +126,10 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.processor.startParsing(self.syntax.scopeName)
             if self.previousBlockState() == self.MULTI_LINE:
                 #Recupero una copia del stack y los scopes del user data
-                stack, scopes = self.currentBlock().previous().userData().getStackAndScopes()
-                self.processor.setScopes(scopes)
+                stack, scopes = self.currentBlock().previous().userData().processorState()
+                #Set copy, not original
+                stack = stack[:]
+                self.processor.setScopes(scopes[:])
             else:
                 #Creo un stack y scopes nuevos
                 stack = [[self.syntax.grammar, None]]
@@ -107,16 +137,12 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             # A parserar mi amor, vamos a parsear mi amor
             self.syntax.parseLine(stack, text, self.processor)
             
-            data = self.processor.lines[-1]
             if userData is None:
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
-            oldSymbol = userData.symbol
-            oldFoldingMark = userData.foldingMark
-
-            state = self.setupBlockUserData(text, userData, data)
-            self.setCurrentBlockState(state)
+            blockState = self.setupBlockUserData(text, userData)
+            self.setCurrentBlockState(blockState)
 
             self.applyFormat(userData)
 

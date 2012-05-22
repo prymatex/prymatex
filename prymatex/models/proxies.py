@@ -4,7 +4,7 @@
 from PyQt4 import QtCore, QtGui
 from prymatex.utils.lists import bisect_key
 
-class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
+class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     """
     Proxy for create flat models from tree models
     """
@@ -27,9 +27,16 @@ class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
         self.__sourceModel = model
         self.__sourceModel.dataChanged.connect(self.on_sourceModel_dataChanged)
         self.__sourceModel.rowsInserted.connect(self.on_sourceModel_rowsInserted)
-        self.__sourceModel.rowsRemoved.connect(self.on_sourceModel_rowsRemoved)
+        self.__sourceModel.rowsAboutToBeRemoved.connect(self.on_sourceModel_rowsAboutToBeRemoved)
         self.__sourceModel.layoutChanged.connect(self.on_sourceModel_layoutChanged)
     
+    def node(self, index):
+        sIndex = self.mapToSource(index)
+        node = self.sourceModel().node(sIndex)
+        #El root node no puede estar en un flat proxy porque sino no es flat
+        if not node.isRootNode():
+            return node
+        
     def filterAcceptsRow(self, sourceRow, sourceParent):
         return True
         
@@ -46,7 +53,7 @@ class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
         return self.__indexMap[proxyIndex.row()]
 
     def mapFromSource(self, sourceIndex):
-        return self.__indexMap.index(sourceIndex)
+        return self.index(self.__indexMap.index(sourceIndex), 0)
             
     def columnCount(self, parent):
         return 1
@@ -71,7 +78,7 @@ class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
     def hasChildren(self, index):
         return False
 
-    def index(self, row, column, parent):
+    def index(self, row, column, parent = QtCore.QModelIndex()):
         if self.hasIndex(row, column, parent):
             return self.createIndex(row, column)
         return QtCore.QModelIndex()
@@ -93,19 +100,34 @@ class PMXFlatTreeProxyModel(QtCore.QAbstractItemModel):
     # source model handler
     #=========================================
     def on_sourceModel_dataChanged(self, topLeft, bottomRight):
-        print "cambiaron los datos", topLeft, bottomRight
+        #Cambiaron los datos tengo que ponerlos en funcion del comparableValue
+        if topLeft in self.__indexMap:
+            self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(topLeft), self.__indexMap.index(topLeft))
+            self.__indexMap.remove(topLeft)
+            self.endRemoveRows()
+            position = bisect_key(self.__indexMap, topLeft, lambda index: self.comparableValue(index))
+            self.beginInsertRows(QtCore.QModelIndex(), position, position)
+            self.__indexMap.insert(position, topLeft)
+            self.endInsertRows()
+            #self.dataChanged.emit(self.mapFromSource(topLeft), self.mapFromSource(topLeft))
     
     def on_sourceModel_rowsInserted(self, parent, start, end):
         for i in xrange(start, end + 1):
-            index = self.__sourceModel.index(i, 0, parent)
+            sIndex = self.__sourceModel.index(i, 0, parent)
             if self.filterAcceptsRow(i, parent):
-                position = bisect_key(self.__indexMap, index, lambda index: self.comparableValue(index))
-                self.__indexMap.insert(position, index)
+                position = bisect_key(self.__indexMap, sIndex, lambda index: self.comparableValue(index))
+                self.beginInsertRows(QtCore.QModelIndex(), position, position)
+                self.__indexMap.insert(position, sIndex)
+                self.endInsertRows()
     
-    def on_sourceModel_rowsRemoved(self, parent, start, end):
+    def on_sourceModel_rowsAboutToBeRemoved(self, parent, start, end):
         #Remove indexes
-        self.__indexMap = filter(lambda index: index.parent() != parent or index.row() not in range(start, end + 1), self.__indexMap)
+        for i in xrange(start, end + 1):
+            sIndex = self.sourceModel().index(i, 0, parent)
+            if sIndex in self.__indexMap:
+                self.beginRemoveRows(QtCore.QModelIndex(), self.__indexMap.index(sIndex), self.__indexMap.index(sIndex))
+                self.__indexMap.remove(sIndex)
+                self.endRemoveRows()
 
     def on_sourceModel_layoutChanged(self):
         print "cambio el layout"
-    

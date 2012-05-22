@@ -52,9 +52,13 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushButtonKillApp">
        <property name="text">
-        <string>&amp;View exception</string>
+        <string>Terminate</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/icons/emblems/emblem-important.png</normaloff>:/icons/emblems/emblem-important.png</iconset>
        </property>
       </widget>
      </item>

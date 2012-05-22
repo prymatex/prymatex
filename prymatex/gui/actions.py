@@ -4,9 +4,12 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
+from prymatex.core import exceptions
 from prymatex.gui import dialogs
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
+from prymatex.gui.about import PMXAboutDialog
+
 
 class MainWindowActions(object):
     
@@ -20,33 +23,14 @@ class MainWindowActions(object):
         
         #Bundles Menu
         self.application.supportManager.appendMenuToBundleMenuGroup(self.menuBundles)
-
-    def updateMenuForEditor(self, editor):
-        #TODO: if editor is none set disabled accions
-        if editor is None: 
-            self.actionSelectBundleItem.setEnabled(False)
-            return
-        else:
-            self.actionSelectBundleItem.setEnabled(True)
-        flags = editor.getFlags()
-        #TODO: Desconectar señales para poder hacer el set, medio raro
-        self.actionShowLineNumbers.setChecked(bool(flags & editor.ShowLineNumbers))
-        self.actionShowFolding.setChecked(bool(flags & editor.ShowFolding))
-        self.actionShowBookmarks.setChecked(bool(flags & editor.ShowBookmarks))
-        self.actionShowTabsAndSpaces.setChecked(bool(flags & editor.ShowTabsAndSpaces))
-        self.actionShowLineAndParagraphs.setChecked(bool(flags & editor.ShowLineAndParagraphs))
-        self.actionWordWrap.setChecked(bool(flags & editor.WordWrap))
         
     #============================================================
     # About To Show Menus
     #============================================================
-    def on_menuFile_aboutToShow(self):
-        pass
-
     def on_menuRecentFiles_aboutToShow(self):
         self.menuRecentFiles.clear()
-        for filePath in self.application.fileManager.fileHistory:
-            actionText = "%s (%s)"% (self.application.fileManager.fileName(filePath), filePath)
+        for index, filePath in enumerate(self.application.fileManager.fileHistory, 1):
+            actionText = "%s (%s)\t&%d" % (self.application.fileManager.basename(filePath), filePath, index)
             action = QtGui.QAction(actionText, self)
             receiver = lambda file = filePath: self.application.openFile(file)
             self.connect(action, QtCore.SIGNAL('triggered()'), receiver)
@@ -54,12 +38,6 @@ class MainWindowActions(object):
         self.menuRecentFiles.addSeparator()
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
-
-    def on_menuEdit_aboutToShow(self):
-        pass
-    
-    def on_menuView_aboutToShow(self):
-        pass
 
     #============================================================
     # File Actions
@@ -78,7 +56,6 @@ class MainWindowActions(object):
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
         PMXNewProjectDialog.getNewProject(self)
-        
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
@@ -98,6 +75,15 @@ class MainWindowActions(object):
         self.application.fileManager.clearFileHistory()
 
     @QtCore.pyqtSlot()
+    def on_actionImportProject_triggered(self):
+        directory = QtGui.QFileDialog.getExistingDirectory(self, "Choose project location", self.application.fileManager.getDirectory())
+        if directory:
+            try:
+                self.application.projectManager.importProject(directory)
+            except exceptions.LocationIsNotProject:
+                QtGui.QMessageBox.critical(self, "Critical", "A error has occurred.\n%s is not a valid project location." % directory)
+
+    @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
         self.saveEditor()
         
@@ -107,7 +93,7 @@ class MainWindowActions(object):
         
     @QtCore.pyqtSlot()
     def on_actionSaveAll_triggered(self):
-        for w in self.splitTabWidget.getAllWidgets():
+        for w in self.editors():
             self.saveEditor(editor = w)
 
     @QtCore.pyqtSlot()
@@ -130,6 +116,10 @@ class MainWindowActions(object):
     def on_actionQuit_triggered(self):
         QtGui.QApplication.quit()
     
+    @QtCore.pyqtSlot()
+    def on_actionSwitchProfile_triggered(self):
+        self.application.switchProfile()
+
     #============================================================
     # Edit Actions
     #============================================================
@@ -159,36 +149,6 @@ class MainWindowActions(object):
             self.currentEditor().paste()
 
     @QtCore.pyqtSlot()
-    def on_actionSelectWord_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(0)
-    
-    @QtCore.pyqtSlot()
-    def on_actionSelectLine_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(1)
-    
-    @QtCore.pyqtSlot()
-    def on_actionSelectParagraph_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(2)
-    
-    @QtCore.pyqtSlot()
-    def on_actionSelectEnclosingBrackets_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(self.currentEditor().SelectEnclosingBrackets)
-        
-    @QtCore.pyqtSlot()
-    def on_actionSelectCurrentScope_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(self.currentEditor().SelectCurrentScope)
-        
-    @QtCore.pyqtSlot()
-    def on_actionSelectAll_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().select(3)
-
-    @QtCore.pyqtSlot()
     def on_actionFind_triggered(self):
         self.statusBar().showIFind()
 
@@ -209,146 +169,9 @@ class MainWindowActions(object):
         if self.currentEditor() is not None:
             self.currentEditor().zoomOut()
 
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowBookmarks_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowBookmarks
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowBookmarks
-            self.currentEditor().setFlags(flags)
-    
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowLineNumbers_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowLineNumbers
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowLineNumbers
-            self.currentEditor().setFlags(flags)
-        
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowFolding_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowFolding
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowFolding
-            self.currentEditor().setFlags(flags)
-    
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowTabsAndSpaces_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowTabsAndSpaces
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowTabsAndSpaces
-            self.currentEditor().setFlags(flags)
-    
-    @QtCore.pyqtSlot(bool)
-    def on_actionShowLineAndParagraphs_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().ShowLineAndParagraphs
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().ShowLineAndParagraphs
-            self.currentEditor().setFlags(flags)
-            
-    @QtCore.pyqtSlot(bool)
-    def on_actionWordWrap_toggled(self, checked):
-        if self.currentEditor() is not None:
-            if checked:
-                flags = self.currentEditor().getFlags() | self.currentEditor().WordWrap
-            else:
-                flags = self.currentEditor().getFlags() & ~self.currentEditor().WordWrap
-            self.currentEditor().setFlags(flags)
-
-    #============================================================
-    # Text Actions
-    #============================================================
-    @QtCore.pyqtSlot()
-    def on_actionConvertToUppercase_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertToUppercase)
-    
-    @QtCore.pyqtSlot()
-    def on_actionConvertToLowercase_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertToLowercase)
-        
-    @QtCore.pyqtSlot()
-    def on_actionConvertToTitlecase_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertToTitlecase)
-        
-    @QtCore.pyqtSlot()
-    def on_actionConvertToOppositeCase_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertToOppositeCase)
-        
-    @QtCore.pyqtSlot()
-    def on_actionConvertSpacesToTabs_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertSpacesToTabs)
-        
-    @QtCore.pyqtSlot()
-    def on_actionConvertTabToSpaces_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertTabsToSpaces)
-
-    @QtCore.pyqtSlot()
-    def on_actionConvertTranspose_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().convertText(self.currentEditor().ConvertTranspose)
-
-    #Move Menu
-    @QtCore.pyqtSlot()
-    def on_actionMoveLineUp_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().moveText(self.currentEditor().MoveLineUp)
-    
-    @QtCore.pyqtSlot()
-    def on_actionMoveLineDown_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().moveText(self.currentEditor().MoveLineDown)
-            
-    @QtCore.pyqtSlot()
-    def on_actionMoveColumnLeft_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().moveText(self.currentEditor().MoveColumnLeft)
-            
-    @QtCore.pyqtSlot()
-    def on_actionMoveColumnRight_triggered(self):
-        if self.currentEditor() is not None:
-            self.currentEditor().moveText(self.currentEditor().MoveColumnRight)
-    
-    @QtCore.pyqtSlot()
-    def on_actionExecute_triggered(self):
-        self.currentEditor().executeCommand()
-
-    @QtCore.pyqtSlot()
-    def on_actionFilterThroughCommand_triggered(self):
-        self.statusBar().showCommand()
-
     #============================================================
     # Navigation Actions
     #============================================================
-    @QtCore.pyqtSlot()
-    def on_actionToggleBookmark_triggered(self):
-        self.currentEditor().toggleBookmark()
-
-    @QtCore.pyqtSlot()
-    def on_actionNextBookmark_triggered(self):
-        self.currentEditor().bookmarkNext()
-
-    @QtCore.pyqtSlot()
-    def on_actionPreviousBookmark_triggered(self):
-        self.currentEditor().bookmarkPrevious()
-        
-    @QtCore.pyqtSlot()
-    def on_actionRemoveAllBookmarks_triggered(self):
-        self.currentEditor().removeAllBookmarks()
-
     @QtCore.pyqtSlot()
     def on_actionNextTab_triggered(self):
         self.splitTabWidget.focusNextTab()
@@ -372,33 +195,6 @@ class MainWindowActions(object):
         if index is not None:
             tab = tabs[index]
             self.splitTabWidget.setCurrentWidget(tab)
-        
-    @QtCore.pyqtSlot()
-    def on_actionGoToLine_triggered(self):
-        self.statusBar().showGoToLine()
-        
-    @QtCore.pyqtSlot()
-    def on_actionGoToSymbol_triggered(self):
-        editor = self.currentEditor()
-        blocks = editor.symbolListModel.blocks
-        def symbolToDict(blocks):
-            for block in blocks:
-                userData = block.userData() 
-                yield [dict(title = userData.symbol, image = resources.getIcon('codefunction'))]
-        index = self.symbolSelectorDialog.select(symbolToDict(blocks))
-        if index is not None:
-            editor.goToBlock(blocks[index])
-        
-    @QtCore.pyqtSlot()
-    def on_actionGoToBookmark_triggered(self):
-        editor = self.currentEditor()
-        blocks = editor.bookmarkListModel.blocks
-        def bookmarkToDict(blocks):
-            for block in blocks:
-                yield [dict(title = block.text(), image = resources.getIcon('bookmarkflag'))]
-        index = self.bookmarkSelectorDialog.select(bookmarkToDict(blocks))
-        if index is not None:
-            editor.goToBlock(blocks[index])
             
     #============================================================
     # Bundles Actions
@@ -424,17 +220,10 @@ class MainWindowActions(object):
         self.application.bundleEditor.execSnippet()
         
     @QtCore.pyqtSlot()
-    def on_actionSelectBundleItem_triggered(self):
+    def on_actionReloadBundles_triggered(self):
         editor = self.currentEditor()
-        scope = editor.getCurrentScope()
-        items = self.application.supportManager.getActionItems(scope)
-        def itemsToDict(items):
-            for item in items:
-                yield [dict(title = item.name, image = item.TYPE), dict(title = item.trigger)]
-        index = self.bundleSelectorDialog.select(itemsToDict(items))
-        if index is not None:
-            self.currentEditor().insertBundleItem(items[index])
-    
+        self.application.supportManager.reloadSupport(editor.showMessage)
+
     #============================================================
     # Preferences Actions
     #============================================================
@@ -448,6 +237,7 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot(bool)
     def on_actionFullscreen_toggled(self, checked):
+        self.toggleDockToolBarVisibility()
         if checked:
             self.showFullScreen()
         else:
@@ -455,21 +245,23 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionSettings_triggered(self):
-        self.application.configDialog.exec_()
+        self.application.settingsDialog.exec_()
             
     #============================================================
     # Help Actions
     #============================================================
     @QtCore.pyqtSlot()
-    def on_actionAbout_Qt_triggered(self):
+    def on_actionAboutQt_triggered(self):
         QtGui.qApp.aboutQt()
-        
+
+    aboutDialog = None
+            
     @QtCore.pyqtSlot()
-    def on_actionAbout_this_application_triggered(self):
-        QtGui.QMessageBox.information(self, self.trUtf8("About Prymatex"), 
-                                self.trUtf8("<h3>Prymatex</h3>"
-                                "<p>A general purpouse Text Editor</p>")
-                                )
+    def on_actionAbout_triggered(self):
+        # Lazy 
+        if not self.aboutDialog:
+            self.aboutDialog = PMXAboutDialog(self) 
+        self.aboutDialog.exec_()
         
     @QtCore.pyqtSlot()
     def on_actionProjectHomepage_triggered(self):
@@ -477,12 +269,44 @@ class MainWindowActions(object):
         import prymatex
         url = getattr(prymatex, '__url__', "https://github.com/D3f0/prymatex")
         webbrowser.open(url)
-
+    
+    SCREENSHOT_FORMAT = 'png'
+    
     @QtCore.pyqtSlot()
     def on_actionTakeScreenshot_triggered(self):
         pxm = QtGui.QPixmap.grabWindow(self.winId())
+        import os
         from datetime import datetime
         now = datetime.now()
-        name = "%s.%s" % (now.strftime('sshot-%Y-%m-%d-%H_%M_%S'), 'png')
-        pxm.save(name, format)
+        baseName = now.strftime("%Y-%m-%d-%H_%M_%S") + '.' + self.SCREENSHOT_FORMAT
+        path = os.path.join(self.application.settings.PMX_SCREENSHOT_PATH, baseName)
+        pxm.save(path, self.SCREENSHOT_FORMAT)
+        try:
+            self.currentEditor().showMessage("%s saved" % baseName)
+        except AttributeError as e:
+            QtGui.QMessageBox.information(self, "Screenshoot", 
+                "%s saved" % fileName)
         
+    def setMainWindowAsActionParent(self):
+        # Don't know if this brings side effects
+        for name in (name for name in dir(self) if name.startswith('action')):
+            obj = getattr(self, name)
+            if not isinstance(obj, QtGui.QAction):
+                continue
+            #print "Making %s available when menubar is hidden %s" % (obj.objectName(), obj.text())
+            self.addAction(obj)
+    
+    def setupHelpMenuMiscConnections(self):
+        #self.actoin
+        from webbrowser import open
+        from functools import partial # Less code in simple callbacks :)
+        import prymatex
+        
+        ACTION_MAPPING = {
+                          self.actionReadDocumentation: prymatex.__source__ + '/wiki',
+                          self.actionReport_Bug: 'https://github.com/prymatex/prymatex/issues?utf8=%E2%9C%93',
+                          self.actionTranslatePrymatex: 'https://prymatex.com/translate',
+                          self.actionProjectHomepage: prymatex.__url__
+        }
+        for action, url in ACTION_MAPPING.iteritems():
+            action.triggered.connect(partial(open, url))

@@ -3,23 +3,23 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.base import PMXObject
-from prymatex.core.settings import pmxConfigPorperty
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
+from prymatex.core.plugin import PMXBaseWidgetComponent
 
-
-class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
-    #=========================================================
-    # Settings
-    #=========================================================
-    SETTINGS_GROUP = 'BundleEditor'
-        
-    def __init__(self, parent = None):
-        super(PMXBundleEditor, self).__init__()
+class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
+    BASE_EDITOR = -1 #El ultimo es el editor base, no tiene nada
+    
+    def __init__(self, application):
+        QtGui.QDialog.__init__(self)
+        PMXBaseWidgetComponent.__init__(self)
         self.setupUi(self)
+        self.namespace = None
+        self.application = application
         self.manager = self.application.supportManager
+        
         self.finished.connect(self.on_bundleEditor_finished)
+        
         #Cargar los widgets editores
         self.configEditorWidgets()
         
@@ -28,7 +28,6 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.configTreeView()
         self.configToolbar()
         self.configActivation()
-        self.configure()
 
     def on_bundleEditor_finished(self, code):
         self.saveChanges()
@@ -36,17 +35,22 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     #==========================================================
     # exec the dialog Show
     #==========================================================
-    def exec_(self, filter = ""):
-        index = self.comboBoxItemFilter.findData(filter)
-        self.comboBoxItemFilter.setCurrentIndex(index)
-        self.proxyTreeModel.setFilterRegExp(filter)
-        self.proxyTreeModel.rowsInserted.connect(self.on_proxyTreeModel_rowsInserted)
-        value = QtGui.QDialog.exec_(self)
-        self.proxyTreeModel.rowsInserted.disconnect(self.on_proxyTreeModel_rowsInserted)
-        return value
+    def exec_(self):
+        #Limiar el editor
+        self.setCurrentEditor(self.editors[-1])
+        #Quitar seleccion
+        firstIndex = self.proxyTreeModel.index(0, 0)
+        self.treeView.setSelection(self.treeView.visualRect(firstIndex), QtGui.QItemSelectionModel.Clear)
         
-    def execEditor(self, filter = ""):
-        self.exec_(filter)
+        return QtGui.QDialog.exec_(self)
+        
+    def execEditor(self, typeFilter = None, namespaceFilter = None):
+        self.namespace = namespaceFilter
+        self.proxyTreeModel.setFilterNamespace(namespaceFilter)
+        self.proxyTreeModel.setFilterBundleItemType(typeFilter)
+        index = self.comboBoxItemFilter.findData(typeFilter)
+        self.comboBoxItemFilter.setCurrentIndex(index)
+        self.exec_()
         
     def execCommand(self):
         return self.execEditor("command")
@@ -75,25 +79,27 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
                          widgets.PMXEditorBaseWidget(self) ]
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackedWidget.addWidget(editor)
-        self.setCurrentEditor(self.editors[-1])
         
     #==========================================================
     # Toolbar
     #==========================================================
     def getBundleForIndex(self, index):
-        bundle = None
         if not index.isValid():
-            bundle = self.manager.getDefaultBundle()
-        else:
-            bundle = self.proxyTreeModel.node(index)
-            while bundle.TYPE != 'bundle':
-                bundle = bundle.parent
+            return self.manager.getDefaultBundle()
+        bundle = self.proxyTreeModel.node(index)
+        while bundle.TYPE != 'bundle':
+            bundle = bundle.parentNode
         return bundle
     
     def createBundleItem(self, itemName, itemType):
         index = self.treeView.currentIndex()
         bundle = self.getBundleForIndex(index)
-        self.manager.createBundleItem(itemName, itemType, bundle)
+        bundleItemNode = self.manager.createBundleItem(itemName, itemType, bundle, self.namespace)
+        sIndex = self.manager.bundleTreeModel.createIndex(bundleItemNode.row(), 0, bundleItemNode)
+        index = self.proxyTreeModel.mapFromSource(sIndex)
+        self.treeView.setCurrentIndex(index)
+        self.editTreeItem(bundleItemNode)
+        self.treeView.edit(index)
         
     def on_actionCommand_triggered(self):
         self.createBundleItem(u"untitled", "command")
@@ -115,16 +121,21 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         if index.isValid():
             template = self.proxyTreeModel.node(index)
             if template.TYPE == 'templatefile':
-                template = template.parent
-        self.manager.createTemplateFile(u"untitled", template)
+                template = template.parentNode
+        self.manager.createTemplateFile(u"untitled", template, self.namespace)
 
     def on_actionPreferences_triggered(self):
         self.createBundleItem(u"untitled", "preference")
 
     def on_actionBundle_triggered(self):
-        self.manager.createBundle("untitled")
+        bundleNode = self.manager.createBundle("untitled", self.namespace)
+        sIndex = self.manager.bundleTreeModel.createIndex(bundleNode.row(), 0, bundleNode)
+        index = self.proxyTreeModel.mapFromSource(sIndex)
+        self.treeView.setCurrentIndex(index)
+        self.editTreeItem(bundleNode)
+        self.treeView.edit(index)
 
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_pushButtonRemove_pressed(self):
         index = self.treeView.currentIndex()
         if index.isValid():
@@ -132,11 +143,11 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
             if item.TYPE == 'bundle':
                 self.manager.deleteBundle(item)
             elif item.TYPE == 'templatefile':
-                self.manager.deleteBundle(u"untitled", template)
+                self.manager.deleteTemplateFile(item)
             else:
                 self.manager.deleteBundleItem(item)
 
-    @QtCore.pyqtSignature('')
+    @QtCore.pyqtSlot()
     def on_pushButtonFilter_pressed(self):
         self.bundleFilterDialog.show()
 
@@ -170,8 +181,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         
         def conditionalEnabledTemplateFile():
             node = self.proxyTreeModel.node(self.treeView.currentIndex())
-            if not node.isRootNode():
-                self.templateFileAction.setEnabled(node.TYPE == "template" or node.TYPE == "templatefile")
+            self.templateFileAction.setEnabled(not node.isRootNode() and (node.TYPE == "template" or node.TYPE == "templatefile"))
         self.toolbarMenu.aboutToShow.connect(conditionalEnabledTemplateFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)
@@ -183,42 +193,49 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
     @QtCore.pyqtSlot(int)
     def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
-        self.proxyTreeModel.setFilterRegExp(value)
+        self.proxyTreeModel.setFilterBundleItemType(value)
     
     def configSelectTop(self):
-        self.comboBoxItemFilter.addItem("Show all", "")
+        self.comboBoxItemFilter.addItem("Show all")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/languages.png"), "Languages", "syntax")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/snippets.png"), "Snippets", "snippet")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/macros.png"), "Macros", "macro")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/commands.png"), "Commands", "command")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/drag-commands.png"), "DragCommands", "dragcommand")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/preferences.png"), "Preferences", "preference")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template*")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template templatefile")
     
     #==========================================================
     # Tree View
     #==========================================================
+    def getEditorBase(self):
+        return self.editors[self.BASE_EDITOR]
+
     def getEditorForTreeItem(self, treeItem):
-        if treeItem.TYPE in self.indexes:
+        if not treeItem.isRootNode() and treeItem.TYPE in self.indexes:
             index = self.indexes[treeItem.TYPE]
             return self.editors[index]
 
-    def on_proxyTreeModel_rowsInserted(self, parent, start, end):
-        index = self.proxyTreeModel.index(start, 0, parent)
+    def on_bundleTreeModel_rowsInserted(self, parent, start, end):
+        sIndex = self.manager.bundleTreeModel.index(start, 0, parent)
+        index = self.proxyTreeModel.mapFromSource(sIndex)
         node = self.proxyTreeModel.node(index)
         self.treeView.setCurrentIndex(index)
-        self.treeView.edit(index)
         self.editTreeItem(node)
-        print index, start, end
-        
+        self.treeView.edit(index)
+
     def on_proxyTreeModel_dataChanged(self, sindex, eindex):
         current = self.stackedWidget.currentWidget()
         self.labelTitle.setText(current.title)
         
-    def on_treeView_Activated(self, index):
-        treeItem = self.proxyTreeModel.node(index)
-        self.editTreeItem(treeItem)
-        
+    def on_treeView_selectionChanged(self, selected, deselected):
+        indexes = selected.indexes()
+        if indexes:
+            treeItem = self.proxyTreeModel.node(indexes[0])
+            self.editTreeItem(treeItem)
+        else:
+            self.editTreeItem(None)
+            
     def configTreeView(self, manager = None):
         self.proxyTreeModel = self.manager.bundleProxyTreeModel
         self.proxyTreeModel.dataChanged.connect(self.on_proxyTreeModel_dataChanged)
@@ -226,9 +243,8 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         self.treeView.setModel(self.proxyTreeModel)
         self.treeView.setHeaderHidden(True)
         self.treeView.setAnimated(True)
-        self.treeView.activated.connect(self.on_treeView_Activated)
-        self.treeView.pressed.connect(self.on_treeView_Activated)
-        
+        self.treeView.selectionModel().selectionChanged.connect(self.on_treeView_selectionChanged)
+
     #===========================================================
     # Activation
     #===========================================================
@@ -239,25 +255,24 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
             self.lineKeyEquivalentActivation.setText(QtGui.QKeySequence(keyseq).toString())
             return True
         return super(PMXBundleEditor, self).eventFilter(obj, event)
-        
-    def on_comboBoxActivation_changed(self, index):
+    
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxActivation_currentIndexChanged(self, index):
         self.lineKeyEquivalentActivation.setVisible(index == 0)
         self.lineTabTriggerActivation.setVisible(index == 1)
     
-    def on_lineEditScope_edited(self, text):
-        self.stackedWidget.currentWidget().setScope(unicode(text))
+    @QtCore.pyqtSlot(str)
+    def on_lineEditScope_textEdited(self, text):
+        self.stackedWidget.currentWidget().setScope(text)
     
-    def on_lineTabTriggerActivation_edited(self, text):
-        self.stackedWidget.currentWidget().setTabTrigger(unicode(text))
+    @QtCore.pyqtSlot(str)
+    def on_lineTabTriggerActivation_textEdited(self, text):
+        self.stackedWidget.currentWidget().setTabTrigger(text)
     
     def configActivation(self):
         self.comboBoxActivation.addItem("Key Equivalent")
         self.comboBoxActivation.addItem("Tab Trigger")
-        self.comboBoxActivation.currentIndexChanged[int].connect(self.on_comboBoxActivation_changed)
         self.lineKeyEquivalentActivation.installEventFilter(self)
-        #textEdited: solo cuando cambias el texto desde la gui
-        self.lineTabTriggerActivation.textEdited.connect(self.on_lineTabTriggerActivation_edited)
-        self.lineEditScope.textEdited.connect(self.on_lineEditScope_edited)
     
     def saveChanges(self):
         #TODO: ver si tengo que guardar el current editor
@@ -265,15 +280,15 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXObject):
         if current.isChanged:
             if current.TYPE != "":
                 if current.TYPE == "bundle":
-                    self.manager.updateBundle(current.bundleItem, **current.changes)
+                    self.manager.updateBundle(current.bundleItem, self.namespace, **current.changes)
                 elif current.TYPE == "templatefile":
-                    self.manager.updateTemplateFile(current.bundleItem, **current.changes)
+                    self.manager.updateTemplateFile(current.bundleItem, self.namespace, **current.changes)
                 else:
-                    self.manager.updateBundleItem(current.bundleItem, **current.changes)
+                    self.manager.updateBundleItem(current.bundleItem, self.namespace, **current.changes)
 
     def editTreeItem(self, treeItem):
         self.saveChanges()
-        editor = self.getEditorForTreeItem(treeItem)
+        editor = self.getEditorForTreeItem(treeItem) if treeItem is not None else self.getEditorBase()
         if editor != None:
             editor.edit(treeItem)
             self.setCurrentEditor(editor)
@@ -313,17 +328,15 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class PMXBundleFilter(QtGui.QDialog, PMXObject):
-    def __init__(self, parent = None):
-        super(PMXBundleFilter, self).__init__(parent)
+class PMXBundleFilter(QtGui.QDialog):
+    def __init__(self, bundleEditor):
+        super(PMXBundleFilter, self).__init__(bundleEditor)
         self.setupUi(self)
-        self.manager = self.application.supportManager
+        self.manager = bundleEditor.application.supportManager
         self.setWindowFlags(QtCore.Qt.Dialog)
         self.proxy = QtGui.QSortFilterProxyModel(self)
         self.proxy.setSourceModel(self.manager.bundleProxyModel)
         self.tableBundleItems.setModel(self.proxy)
-        self.tableBundleItems.resizeColumnsToContents()
-        self.tableBundleItems.resizeRowsToContents()
         
     def setupUi(self, BundleFilter):
         BundleFilter.setObjectName(_fromUtf8("BundleFilter"))
@@ -350,3 +363,8 @@ class PMXBundleFilter(QtGui.QDialog, PMXObject):
     def retranslateUi(self, BundleFilter):
         BundleFilter.setWindowTitle(_('Enable/Disable Bundles'))
         self.labelHelp.setText(_('You should keep the Source, Text and TextMate bundles enabled, as these provide base functionality relied upon by other bundles.'))
+        
+    def show(self):
+        self.tableBundleItems.resizeColumnsToContents()
+        self.tableBundleItems.resizeRowsToContents()
+        QtGui.QDialog.show(self)

@@ -30,24 +30,20 @@
        <enum>QLayout::SetMinimumSize</enum>
       </property>
       <item>
-       <widget class="QPushButton" name="pushButtonUp">
-        <property name="maximumSize">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
-          <width>24</width>
-          <height>24</height>
+          <width>10</width>
+          <height>20</height>
          </size>
         </property>
-        <property name="toolTip">
-         <string>Go up one level</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/go-up.png</normaloff>:/icons/actions/go-up.png</iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
+       </spacer>
       </item>
       <item>
        <widget class="QPushButton" name="pushButtonBack">
@@ -90,6 +86,33 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButtonUp">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Go up one level</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/go-up.png</normaloff>:/icons/actions/go-up.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButtonSync">
         <property name="maximumSize">
          <size>
@@ -104,26 +127,73 @@
          <iconset resource="../../resources.qrc">
           <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
         <property name="flat">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Expanding</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
+       <widget class="QPushButton" name="pushButtonCollapseAll">
+        <property name="maximumSize">
          <size>
-          <width>10</width>
-          <height>20</height>
+          <width>24</width>
+          <height>24</height>
          </size>
         </property>
-       </spacer>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/view-list-tree.png</normaloff>:/icons/actions/view-list-tree.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonCustomFilters">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/view-filter.png</normaloff>:/icons/actions/view-filter.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonOptions">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../resources.qrc">
+          <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -145,20 +215,6 @@
     </item>
     <item>
      <widget class="QTreeView" name="treeViewFileSystem"/>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Filter:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="lineEditFilter"/>
-      </item>
-     </layout>
     </item>
    </layout>
   </widget>
@@ -183,10 +239,13 @@
   <action name="actionNewFromTemplate">
    <property name="icon">
     <iconset resource="../../resources.qrc">
-     <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
+     <normaloff>:/icons/actions/run-build-file.png</normaloff>:/icons/actions/run-build-file.png</iconset>
    </property>
    <property name="text">
-    <string>From Template</string>
+    <string>File From Template</string>
+   </property>
+   <property name="toolTip">
+    <string>File From Template</string>
    </property>
   </action>
   <action name="actionDelete">
@@ -280,7 +339,7 @@
     <string>F2</string>
    </property>
   </action>
-  <action name="actionConvert_Into_Project">
+  <action name="actionConvertIntoProject">
    <property name="icon">
     <iconset resource="../../resources.qrc">
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
@@ -290,6 +349,51 @@
    </property>
    <property name="toolTip">
     <string>Convert current directory into project</string>
+   </property>
+  </action>
+  <action name="actionSetInTerminal">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/apps/utilities-terminal.png</normaloff>:/icons/apps/utilities-terminal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set In Terminal</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cu&amp;t</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="../../resources.qrc">
+     <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>
