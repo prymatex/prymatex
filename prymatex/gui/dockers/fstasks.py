@@ -87,11 +87,9 @@ class PMXFileSystemTasks(object):
         elif os.path.isfile(path):
             pathType = _('file')
         while True:
-            newName, accepted = QtGui.QInputDialog.getText(self, 
-                                                           _("Choose new name for %s") % pathTail, 
+            newName, accepted = QtGui.QInputDialog.getText(self, _("Choose new name for %s") % pathTail, 
                                                            _("Rename {0} {1}").format(pathType, pathTail),
                                                            text = pathTail)
-            
             if accepted:
                 if newName == pathTail:
                     continue # Same name
@@ -104,7 +102,7 @@ class PMXFileSystemTasks(object):
                     if rslt == QtGui.QMessageBox.Cancel:
                         return
                     continue
-                self.application.fileManager.renamePath(path, newFullPath)
+                self.application.fileManager.move(path, newFullPath)
                 return newFullPath
             else:
                 return 
