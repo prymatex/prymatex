@@ -23,7 +23,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #=========================================================
     # Signals
     #=========================================================
-    currentEditorChanged = QtCore.pyqtSignal(object)    
+    currentEditorChanged = QtCore.pyqtSignal(object)
+    editorClosed = QtCore.pyqtSignal(object)
 
     #=========================================================
     # Settings

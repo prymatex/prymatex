@@ -201,7 +201,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         #Setup Context Menu
         optionsMenu = { 
             "title": "Browser Options",
-            "items": [ (self.actionSyncEditor, self.actionConnectEditor) ]
+            "items": [ self.actionSyncEditor, self.actionConnectEditor ]
         }
 
         self.browserOptionsMenu, _ = createQMenu(optionsMenu, self)
@@ -271,6 +271,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     
     def link_clicked(self, url):
         """Update the URL if a link on a web page is clicked"""
+        if self.updateTimer.isActive():
+            self.upsateTimer.stop()
         page = self.webView.page()
         history = page.history()
         self.buttonBack.setEnabled(history.canGoBack())
@@ -312,14 +314,16 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     @QtCore.pyqtSlot(bool)
     def on_actionSyncEditor_toggled(self, checked):
         if checked:
+            self.actionConnectEditor.setChecked(False)
             self.startTimer()
         else:
-            self.stopTimer()
+            self.updateTimer.stop()
             
     @QtCore.pyqtSlot(bool)
     def on_actionConnectEditor_toggled(self, checked):
         # TODO Capturar el current editor y usarlo para el update
         if checked:
+            self.actionSyncEditor.setChecked(False)
             self.startTimer()
         else:
-            self.stopTimer()
+            self.updateTimer.stop()

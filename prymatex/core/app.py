@@ -347,19 +347,20 @@ class PMXApplication(QtGui.QApplication):
 
             geometry = self.settings.value("mainWindowGeometry")
             state = self.settings.value("mainWindowState")
-            openDocuments = self.settings.value("openDocuments") or []
-
-            for doc in openDocuments:
-                self.openFile(*doc)
-            else:
-                self.mainWindow.addEmptyEditor()
-
+            
             if geometry:
                 self.mainWindow.restoreGeometry(geometry)
             if state:
                 self.mainWindow.restoreState(state)
 
             self.mainWindow.show()
+            
+            openDocuments = self.settings.value("openDocuments") or []
+
+            for doc in openDocuments:
+                self.openFile(*doc)
+            else:
+                self.mainWindow.addEmptyEditor()
 
     def currentEditor(self):
         return self.mainWindow.currentEditor()
