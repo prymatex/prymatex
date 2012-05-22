@@ -902,7 +902,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             options.append({ "title": item.buildMenuTextEntry(False), "image": item.TYPE })
             
         def insertBundleItem(index):
-            self.insertBundleItem(items[index], tabTriggered = tabTriggered)
+            if index >= 0:
+                self.insertBundleItem(items[index], tabTriggered = tabTriggered)
         
         self.showFlatPopupMenu(options, insertBundleItem, cursorPosition = not syntax)
     
@@ -1190,6 +1191,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor.setPosition(cursor.block().position() + columnNumber)
         self.setTextCursor(cursor)
     
+    def centerCursor(self, cursor = None):
+        if cursor is not None:
+            #Scroll to the center of cursor block number
+            pageStep = self.verticalScrollBar().pageStep()
+            currentValue = self.verticalScrollBar().value()
+            blockNumber = cursor.block().blockNumber()
+            scrollIndex = 0 if pageStep > blockNumber else blockNumber - (pageStep / 2)
+            self.verticalScrollBar().setValue(scrollIndex)
+        else:
+            QtGui.QPlainTextEdit.centerCursor(self)
     #===========================================================================
     # Zoom
     #===========================================================================

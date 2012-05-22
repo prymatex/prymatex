@@ -37,6 +37,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         content = self.application.fileManager.readFile(filePath)
         self.setPlainText(content)
         self.setFilePath(filePath)
+        self.emit(QtCore.SIGNAL("open()"))
 
     def save(self, filePath):
         """ Save content of editor in a file """
@@ -48,6 +49,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
             self.setFilePath(filePath)
         self.setModified(False)
         self.setExternalAction(None)
+        self.emit(QtCore.SIGNAL("save()"))
         self.showMessage("<i>%s</i> saved" % self.filePath)
     
     def close(self):
@@ -56,12 +58,14 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
             PMXBaseEditor.CREATION_COUNTER -= 1
         elif self.filePath is not None:
             self.application.fileManager.closeFile(self.filePath)
-            
+        self.emit(QtCore.SIGNAL("close()"))
+
     def reload(self):
         """ Reload current file """
         content = self.application.fileManager.readFile(self.filePath)
         self.setPlainText(content)
         self.setExternalAction(None)
+        self.emit(QtCore.SIGNAL("reload()"))
         
     def setFilePath(self, filePath):
         self.filePath = filePath

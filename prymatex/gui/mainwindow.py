@@ -24,7 +24,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # Signals
     #=========================================================
     currentEditorChanged = QtCore.pyqtSignal(object)
-    editorClosed = QtCore.pyqtSignal(object)
 
     #=========================================================
     # Settings
@@ -303,14 +302,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # MainWindow Events
     #===========================================================================
     def closeEvent(self, event):
-        self.openDocumentsOnClose = []
-        try:
-            for editor in self.editors():
-                self.closeEditor(editor, cancel = True)
-                if not editor.isNew():
-                    self.openDocumentsOnClose.append((editor.filePath, editor.cursorPosition()))
-        except exceptions.UserCancelException:
-            event.ignore()
+        for editor in self.editors():
+            while editor and editor.isModified():
+                response = QtGui.QMessageBox.question(self, "Save", 
+                    "Save %s" % editor.tabTitle(), 
+                    buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
+                    defaultButton = QtGui.QMessageBox.Ok)
+                if response == QtGui.QMessageBox.Ok:
+                    self.saveEditor(editor = editor)
+                elif response == QtGui.QMessageBox.No:
+                    break
+                elif response == QtGui.QMessageBox.Cancel:
+                    event.ignore()
+                    return
         
     #===========================================================================
     # Drag and Drop

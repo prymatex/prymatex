@@ -239,8 +239,7 @@ class MultiCursorHelper(PMXCodeEditorKeyHelper):
             newCursor = editor.document().find(text, cursor, flags)
             if not newCursor.isNull():
                 editor.multiCursorMode.addMergeCursor(newCursor)
-                #Scroll to the newCursor block number
-                editor.verticalScrollBar().setValue(newCursor.block().blockNumber())
+                editor.centerCursor(newCursor)
 
 class DeleteRemoveBracesHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Delete

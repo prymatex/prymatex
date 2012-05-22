@@ -191,12 +191,15 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.webView.loadFinished[bool].connect(self.prepare_JavaScript)
         self.webView.titleChanged[str].connect(self.title_changed)
         
+        #Capturar editor, bundleitem
+        self.currentEditor = None
         self.bundleItem = None
         
         #Sync Timer
         self.updateTimer = QtCore.QTimer()
         self.updateTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
-    
+        
+        
     def setupToolBar(self):
         #Setup Context Menu
         optionsMenu = { 
@@ -298,8 +301,10 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
     def updateHtmlCurrentEditorContent(self):
         # TODO Resolver url, asegurar que sea html para no hacer cochinadas
-        content = self.mainWindow.currentEditor().toPlainText()
-        url = QtCore.QUrl.fromUserInput(self.mainWindow.currentEditor().filePath)
+        editor = self.currentEditor if self.currentEditor is not None else self.mainWindow.currentEditor()
+        content = editor.toPlainText()
+        url = QtCore.QUrl.fromUserInput(editor.filePath)
+        self.webView.settings().clearMemoryCaches()
         self.webView.setHtml(content, url)
     
     def stopTimer(self):
@@ -309,19 +314,35 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def startTimer(self):
         self.updateTimer.start(self.updateInterval)
 
+    def connectCurrentEditor(self):
+        self.currentEditor = self.mainWindow.currentEditor()
+        self.connect(self.currentEditor, QtCore.SIGNAL("close()"), self.disconnectCurrentEditor)
+        
+    def disconnectCurrentEditor(self):
+        if self.currentEditor is not None:
+            self.disconnect(self.currentEditor, QtCore.SIGNAL("close()"), self.disconnectCurrentEditor)
+            self.currentEditor = None
+
     @QtCore.pyqtSlot(bool)
     def on_actionSyncEditor_toggled(self, checked):
         if checked:
+            #Quitar otro check
             self.actionConnectEditor.setChecked(False)
+            #Desconectar editor
+            self.disconnectCurrentEditor()
             self.startTimer()
         else:
             self.updateTimer.stop()
-            
+
     @QtCore.pyqtSlot(bool)
     def on_actionConnectEditor_toggled(self, checked):
         # TODO Capturar el current editor y usarlo para el update
         if checked:
+            #Quitar otro check
             self.actionSyncEditor.setChecked(False)
+            #Capturar editor
+            self.connectCurrentEditor()
             self.startTimer()
         else:
             self.updateTimer.stop()
+            self.disconnectCurrentEditor()

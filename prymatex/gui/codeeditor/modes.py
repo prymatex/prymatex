@@ -424,21 +424,21 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         elif event.key() == QtCore.Qt.Key_Right:
             if self.canMoveRight():
+                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
                 for cursor in self.activeCursors():
-                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + 1)
-                    if event.modifiers() & QtCore.Qt.ShiftModifier:
-                        cursor.setPosition(cursor.position() + 1, QtGui.QTextCursor.KeepAnchor)
+                    if event.modifiers() & QtCore.Qt.ControlModifier:
+                        cursor.movePosition(QtGui.QTextCursor.NextWord, mode)
                     else:
-                        cursor.setPosition(cursor.position() + 1)
+                        cursor.movePosition(QtGui.QTextCursor.NextCharacter, mode)
                 self.editor.highlightCurrent()
         elif event.key() == QtCore.Qt.Key_Left:
             if self.canMoveLeft():
+                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
                 for cursor in self.activeCursors():
-                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() - 1)
-                    if event.modifiers() & QtCore.Qt.ShiftModifier:
-                        cursor.setPosition(cursor.position() - 1, QtGui.QTextCursor.KeepAnchor)
+                    if event.modifiers() & QtCore.Qt.ControlModifier:
+                        cursor.movePosition(QtGui.QTextCursor.PreviousWord, mode)
                     else:
-                        cursor.setPosition(cursor.position() - 1)
+                        cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, mode)
                 self.editor.highlightCurrent()
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
@@ -474,6 +474,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.popupView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.popupView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.popupView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+
         #Table view size
         spacing = self.popupView.verticalHeader().fontMetrics().lineSpacing()
         self.popupView.verticalHeader().setDefaultSectionSize(spacing + 3);

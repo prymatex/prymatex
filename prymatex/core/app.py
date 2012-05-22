@@ -289,8 +289,11 @@ class PMXApplication(QtGui.QApplication):
         self.logger.debug("Close")
         
         #Guardar documentos abiertos
-        if self.mainWindow.openDocumentsOnClose:
-            self.settings.setValue("openDocuments", self.mainWindow.openDocumentsOnClose)
+        openDocumentsOnQuit = []
+        for editor in self.mainWindow.editors():
+            if not editor.isNew():
+                openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
+        self.settings.setValue("openDocuments", openDocumentsOnQuit)
 
         #Guardar geometria de la mainWindow
         self.settings.setValue("mainWindowGeometry", self.mainWindow.saveGeometry())
