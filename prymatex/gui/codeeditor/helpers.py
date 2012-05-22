@@ -56,7 +56,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         settings = editor.preferenceSettings(scope)
         character = event.text()
         #Me fijo si es de apertura o cierre
-        pairs = filter(lambda pair: character == pair[0] or character == pair[1], settings.smartTypingPairs)
+        pairs = filter(lambda pair: character == pair[0], settings.smartTypingPairs)
         self.pair = pairs[0] if len(pairs) == 1 else []
         
         #Si no tengo nada termino
@@ -72,7 +72,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         (cursor.position() == self.cursor2.selectionStart()) and not cursor.hasSelection():
             self.skip = True
             self.cursor1 = self.cursor2 = None
-        elif ctrl_down:
+        elif ctrl_down and character == self.pair[0]:
             #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
             openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
             closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
