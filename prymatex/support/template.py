@@ -131,7 +131,7 @@ class PMXTemplate(PMXBundleItem):
         context = PMXRunningContext(self)
         
         context.asynchronous = False
-        context.workingDirectory = self.path('prymatex')
+        context.workingDirectory = self.currentPath
         context.shellCommand, context.environment = prepareShellScript(self.command, environment)
 
         self.manager.runProcess(context, functools.partial(self.afterExecute, callback))

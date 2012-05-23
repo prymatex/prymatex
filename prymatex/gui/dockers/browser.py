@@ -180,16 +180,11 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.lineUrl.setText(self.homePage)
         self.webView.setUrl(QtCore.QUrl(self.homePage))
         
+        self.scrollValues = (False, 0, 0)   #(<restore scroll values>, <horizontalValue>, <verticalValue>)
+
         # history buttons:
         self.buttonBack.setEnabled(False)
         self.buttonNext.setEnabled(False)
-        
-        #Connects
-        self.webView.linkClicked.connect(self.link_clicked)
-        self.webView.urlChanged.connect(self.link_clicked)
-        self.webView.loadProgress[int].connect(self.load_progress)
-        self.webView.loadFinished[bool].connect(self.prepare_JavaScript)
-        self.webView.titleChanged[str].connect(self.title_changed)
         
         #Capturar editor, bundleitem
         self.currentEditor = None
@@ -198,7 +193,6 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         #Sync Timer
         self.updateTimer = QtCore.QTimer()
         self.updateTimer.timeout.connect(self.updateHtmlCurrentEditorContent)
-        
         
     def setupToolBar(self):
         #Setup Context Menu
@@ -232,11 +226,6 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
                 return True
         return QtGui.QDockWidget.event(self, event)
     
-    def prepare_JavaScript(self, ready):
-        if not ready:
-            return
-        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame(), self.bundleItem))
-        self.webView.page().mainFrame().evaluateJavaScript(js)
     
     def setHtml(self, string, bundleItem = None):
         if not self.isVisible():
@@ -262,29 +251,68 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         """Stop loading the page"""
         self.webView.stop()
 
-    def title_changed(self, title):
-        """Web page title changed - change the tab name"""
-        #self.setWindowTitle(title)
-        pass
-    
     def on_buttonReload_clicked(self):
         """Reload the web page"""
         url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
         self.webView.setUrl(url)
-    
-    def link_clicked(self, url):
+
+    #=============================
+    # QWebView Signals
+    #=============================
+    def on_webView_iconChanged(self):
+        print "iconChanged"
+
+    def on_webView_linkClicked(self, link):
+        #Terminar el timer y navegar hasta esa Url
+        #TODO: validar que el link este bien
+        self.stopTimer()
+        map(lambda action: action.setChecked(False), [ self.actionSyncEditor, self.actionConnectEditor ])
+        self.webView.load(link)
+
+    def on_webView_loadFinished(self, ready):
+        if not ready:
+            return
+        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame(), self.bundleItem))
+        self.webView.page().mainFrame().evaluateJavaScript(js)
+        
+        #Restore scroll
+        if self.scrollValues[0]:
+            self.webView.page().mainFrame().setScrollBarValue(QtCore.Qt.Horizontal, self.scrollValues[1])
+            self.webView.page().mainFrame().setScrollBarValue(QtCore.Qt.Vertical, self.scrollValues[2])
+
+    def on_webView_urlChanged(self, url):
         """Update the URL if a link on a web page is clicked"""
+        #History
         page = self.webView.page()
         history = page.history()
         self.buttonBack.setEnabled(history.canGoBack())
         self.buttonNext.setEnabled(history.canGoForward())
         
+        #Scroll Values
+        self.scrollValues = (url.toString() == self.webView.url().toString(), self.scrollValues[1], self.scrollValues[2])
+
+        #Line Location
         self.lineUrl.setText(url.toString())
 
-    def load_progress(self, load):
+    def on_webView_loadStarted(self):
+        self.scrollValues = ( False,    self.webView.page().mainFrame().scrollBarValue(QtCore.Qt.Horizontal),
+                                               self.webView.page().mainFrame().scrollBarValue(QtCore.Qt.Vertical))
+        
+    def on_webView_loadProgress(self, load):
         """Page load progress"""
         self.buttonStop.setEnabled(load != 100)
+    
+    def on_webView_selectionChanged(self):
+        print "selectionChanged"
+
+    def on_webView_statusBarMessage(self, message):
+        print "statusBarMessage", message
         
+    def on_webView_titleChanged(self, title):
+        """Web page title changed - change the tab name"""
+        print "titleChanged", title
+        #self.setWindowTitle(title)
+    
     def on_buttonBack_clicked(self):
         """Back button clicked, go one page back"""
         page = self.webView.page()
@@ -304,15 +332,18 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         editor = self.currentEditor if self.currentEditor is not None else self.mainWindow.currentEditor()
         content = editor.toPlainText()
         url = QtCore.QUrl.fromUserInput(editor.filePath)
+        
         self.webView.settings().clearMemoryCaches()
+        
         self.webView.setHtml(content, url)
     
     def stopTimer(self):
         self.updateTimer.stop()
-        map(lambda action: action.setChecked(False), [self.actionConnectEditor, self.actionSyncEditor])
+        self.webView.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DontDelegateLinks)
 
     def startTimer(self):
         self.updateTimer.start(self.updateInterval)
+        self.webView.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
 
     def connectCurrentEditor(self):
         self.currentEditor = self.mainWindow.currentEditor()
@@ -332,7 +363,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
             self.disconnectCurrentEditor()
             self.startTimer()
         else:
-            self.updateTimer.stop()
+            self.stopTimer()
 
     @QtCore.pyqtSlot(bool)
     def on_actionConnectEditor_toggled(self, checked):
@@ -344,5 +375,5 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
             self.connectCurrentEditor()
             self.startTimer()
         else:
-            self.updateTimer.stop()
+            self.stopTimer()
             self.disconnectCurrentEditor()
