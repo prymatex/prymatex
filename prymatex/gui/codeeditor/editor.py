@@ -1584,6 +1584,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Drag and Drop
     #===========================================================================
     def dragEnterEvent(self, event):
+        self.setFocus(QtCore.Qt.MouseFocusReason)
         mimeData = event.mimeData()
         if mimeData.hasUrls() or mimeData.hasText():
             event.accept()
