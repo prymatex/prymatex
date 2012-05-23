@@ -310,8 +310,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
     def on_webView_titleChanged(self, title):
         """Web page title changed - change the tab name"""
-        print "titleChanged", title
+        #print "titleChanged", title
         #self.setWindowTitle(title)
+	return
     
     def on_buttonBack_clicked(self):
         """Back button clicked, go one page back"""
