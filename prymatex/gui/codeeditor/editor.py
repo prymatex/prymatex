@@ -645,7 +645,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.currentHighlightWord = self.getWordUnderCursor()[0]
             self.highlightWordTimer.timeout.connect(highlightWord)
             self.highlightWordTimer.start(2000)
-        
+
     def highlightCurrentSelections(self):
         extraSelections = self.extraSelections()
         for cursor in self.extraCursorsSelections:
@@ -656,7 +656,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             selection.cursor = cursor
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
-        
+
     def highlightCurrentBrace(self):
         selectedBraces = []
         for cursor in self._currentBraces:

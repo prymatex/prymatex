@@ -55,15 +55,39 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         settings = editor.preferenceSettings(scope)
         character = event.text()
-        #Me fijo si es de apertura o cierre
-        pairs = filter(lambda pair: character == pair[0], settings.smartTypingPairs)
-        self.pair = pairs[0] if len(pairs) == 1 else []
+        pairs = filter(lambda pair: character in pair, settings.smartTypingPairs)
         
-        #Si no tengo nada termino
-        if not bool(self.pair): return False
+        #Si no tengo nada retorno
+        if not pairs: return False
+        self.pair = pairs[0]
         
         self.skip = False
-        self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor)
+        self.cursor1 = self.cursor2 = None
+        
+        isOpen = character == self.pair[0]
+        if isOpen and cursor.hasSelection():
+            #El cursor tiene seleccion, veamos si es un brace de apertura y tiene seleccionado un brace de apertura 
+            selectedText = cursor.selectedText()
+            if any(map(lambda pair: selectedText == pair[0], settings.smartTypingPairs)):
+                self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor)
+            return True
+        
+        isClose = character == self.pair[1] and self.pair[0] != self.pair[1]
+        if isClose:
+            #Es un caracter de cierre, veamos si tengo que saltarme algo hacia la derecha
+            cursor1, cursor2 = editor.currentBracesPairs(cursor, direction = "right")
+            self.skip = cursor1 is not None and cursor2 is not None
+            return self.skip
+
+        ctrl_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
+        if isOpen and ctrl_down:
+            self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor, direction = "left")
+            if self.cursor1 is not None and self.cursor2 is not None:
+                self.cursor1.setPosition(self.cursor1.selectionEnd())
+                self.cursor2.setPosition(self.cursor2.selectionStart())
+        return True
+        
+        """
         nearBalancedCursors = self.cursor1 is not None and self.cursor2 is not None
         ctrl_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
 
@@ -74,8 +98,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
             self.cursor1 = self.cursor2 = None
         elif ctrl_down and character == self.pair[0]:
             #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
-            openTyping = map(lambda pair: pair[0], settings.smartTypingPairs)
-            closeTyping = map(lambda pair: pair[1], settings.smartTypingPairs)
+
             if cursor.hasSelection():
                 selectedText = cursor.selectedText()
                 if selectedText in openTyping + closeTyping:
@@ -104,20 +127,17 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         else:
             self.cursor1 = self.cursor2 = None
         return True
+        """
 
     def execute(self, editor, event, cursor = None, scope = None):
         cursor.beginEditBlock()
         if self.skip:
-            cursor.setPosition(cursor.position() + 1)
+            cursor.movePosition(QtGui.QTextCursor.NextCharacter)
             editor.setTextCursor(cursor)
         elif cursor.hasSelection():
             if self.cursor2 is not None and self.cursor1 is not None:
-                if self.cursor1.selectionStart() < self.cursor2.selectionStart():
-                    self.cursor1.insertText(self.pair[0])
-                    self.cursor2.insertText(self.pair[1])
-                else:
-                    self.cursor1.insertText(self.pair[1])
-                    self.cursor2.insertText(self.pair[0])
+                self.cursor1.insertText(self.pair[0])
+                self.cursor2.insertText(self.pair[1])
             else:
                 position = cursor.selectionStart()
                 text = self.pair[0] + cursor.selectedText() + self.pair[1]
@@ -126,12 +146,8 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
                 cursor.setPosition(position + len(text), QtGui.QTextCursor.KeepAnchor)
                 editor.setTextCursor(cursor)
         elif self.cursor1 is not None and self.cursor2 is not None:
-            if self.cursor1.position() < self.cursor2.position():
-                self.cursor1.insertText(self.pair[0])
-                self.cursor2.insertText(self.pair[1])
-            else:
-                self.cursor1.insertText(self.pair[1])
-                self.cursor2.insertText(self.pair[0])
+            self.cursor1.insertText(self.pair[0])
+            self.cursor2.insertText(self.pair[1])
         else:
             position = cursor.position()
             cursor.insertText("%s%s" % (self.pair[0], self.pair[1]))
