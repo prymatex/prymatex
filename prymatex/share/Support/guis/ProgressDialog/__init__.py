@@ -3,6 +3,8 @@
 
 from PyQt4 import QtGui
 
+from ProgresDialog import ProgressDialog as dialogClass
+
 # {   'title': 'Progress', 
 #     'summary': u'Creating HTML version of document\u2026', 
 #     'details': '', 

@@ -40,7 +40,7 @@ module TextMate
     end
 
     support = ENV['TM_SUPPORT_PATH']
-    nib     = support + '/nibs/ProgressDialog'
+    nib     = support + '/guis/ProgressDialog'
         
     UI.dialog(nib, params, nil, true) do |dialog|
       if cancel_proc.nil?
