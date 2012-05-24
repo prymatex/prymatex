@@ -76,7 +76,7 @@ QTreeView {
     font-size: 11px;
 }
 QTreeView::item {
-    padding: 2px;
+    padding: 1px;
 }
 QTableView {
     font-size: 11px;
@@ -85,7 +85,7 @@ QListView {
      font-size: 11px;
 }
 QListView::item {
-    padding: 2px;    
+    padding: 1px;    
 }
 """
 

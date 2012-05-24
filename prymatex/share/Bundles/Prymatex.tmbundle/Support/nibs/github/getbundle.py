@@ -1,4 +1,5 @@
-# Stdlib
+#!/usr/bin/env python
+#-*- encoding: utf-8 -*-
 
 import os
 from operator import itemgetter
@@ -10,6 +11,8 @@ import urllib2
 # Third parties
 from PyQt4 import QtGui, QtCore
 import httplib2
+
+from prymatex.core.plugins.dialog import PMXBaseDialog
 
 # UI
 from ui_githubclient import Ui_GitHubClientDialog
@@ -71,12 +74,13 @@ class PMXGHSearchBundleThread(QtCore.QThread):
                 self.requestError.emit(str(e))
     
 
-class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog):
+class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     
     MINIMUM_QUERY_LENGTH = 1
     
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
+        PMXBaseDialog.__init__(self)
         self.setupUi(self)
         self.workerThread = PMXGHSearchBundleThread(self)
         self.workerThread.recordsFound.connect(self.updateRecords)

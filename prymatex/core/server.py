@@ -16,6 +16,11 @@ class PrymatexServer(QtCore.QObject):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         self.application = application
+        
+        self.dialogs = {}
+        self.instances = {}
+
+        #Create socket
         self.socket = self.application.zmqSocket(zmq.REP, "Server")
         self.socket.readyRead.connect(self.socketReadyRead)
     
@@ -32,15 +37,29 @@ class PrymatexServer(QtCore.QObject):
         method = getattr(self, name)
         method(*args, **kwargs)
 
-    def _load_window(self, moduleName, directory):
+    def loadDialogClass(self, moduleName, directory):
         try:
             module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
-            loadFunction = getattr(module, 'load')
-            return loadFunction
+            dialogClass = getattr(module, 'dialogClass')
+            self.application.populateComponent(dialogClass)
+            return dialogClass
         except (ImportError, AttributeError), reason:
             #TODO: Manejar estos errores
             raise reason
 
+    def createDialogInstance(self, dialogClass, mainWindow, async = False):
+        instance = dialogClass(mainWindow)
+        self.application.settings.configure(instance)
+        instance.initialize(mainWindow)
+        if async:
+            instanceId = id(instance)
+            self.instances[instanceId] = instance
+            return (instance, instanceId)
+        return instance
+
+    def dialogInstance(self, instanceId):
+        return self.instances[instanceId]
+        
     def sendResult(self, value = None):
         if value is None:
             value = "ok"
@@ -53,29 +72,33 @@ class PrymatexServer(QtCore.QObject):
         
     def async_window(self, nibPath, plist, **kwargs):
         try:
-            settings = plistlib.readPlistFromString(plist)
+            parameters = plistlib.readPlistFromString(plist)
         except ExpatError:
-            settings = {}
+            parameters = {}
         directory = os.path.dirname(nibPath)
         name = os.path.basename(nibPath)
-        window = self._load_window(name, directory)
-        window(self.application, settings)
-        self.sendResult("1234")
+        dialogClass = self.loadDialogClass(name, directory)
+        instance, instanceId = self.createDialogInstance(dialogClass, self.application.mainWindow, async = True)
+        instance.setParameters(parameters)
+        instance.show()
+        self.sendResult(instanceId)
     
     def update_window(self, nibPath, **kwargs):
         print "update_window: ", nibPath, kwargs
         directory = os.path.dirname(nibPath)
         name = os.path.basename(nibPath)
-        window = self._load_window(name, directory)
-        self.sendResult("1234")
+        instance = self.dialogInstance(token)
+        instance.setParameters(parameters)
 
     def modal_window(self, nibPath, plist, **kwargs):
         settings = plistlib.readPlistFromString(plist)
         print "modal_window: ", nibPath, settings, kwargs
         directory = os.path.dirname(nibPath)
         name = os.path.basename(nibPath)
-        window = self._load_window(name, directory)
-        result = window(self.application, settings)
+        dialogClass = self.loadDialogClass(name, directory)
+        instance = self.createDialogInstance(dialogClass, self.application.mainWindow)
+        instance.setParameters(parameters)
+        value = instance._exec()
         self.sendResult(result)
 
     def tooltip(self, content, format = "text", transparent = False):
