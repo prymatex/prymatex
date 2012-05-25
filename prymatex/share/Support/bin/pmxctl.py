@@ -333,42 +333,36 @@ class CommandHandler(object):
         self.socket.connect('tcp://127.0.0.1:%s' % PMX_SERVER_PORT)
         
     def async_window(self, options, args):
-        if options.parameters is None:
-            parameters = sys.stdin.readlines()
-            args.append( "".join(parameters))
-        else:
-            args.append(options.parameters)
-        command = {"name": "async_window", "args": args, "kwargs": {}}
+        kwargs = {}
+        kwargs["guiPath"] = args[0]
+        kwargs["center"] = options.center
+        kwargs["quiet"] = options.quiet
+        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
+        
+        command = {"name": "async_window", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
     def update_window(self, options, args):
         """docstring for update_window"""
-        args.append(options.token)    
-        if options.parameters is None:
-            parameters = sys.stdin.readlines()
-            args.append( "".join(parameters))
-        else:
-            args.append(options.parameters)
+        kwargs = {}
+        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
+        kwargs["token"] = options.token
 
-        command = {"name": "update_window", "args": args, "kwargs": {}}
+        command = {"name": "update_window", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value["result"])
     
     def modal_window(self, options, args):
         """docstring for modal_window"""
-        if options.parameters is None:
-            parameters = sys.stdin.readlines()
-            args.append( "".join(parameters))
-        else:
-            args.append(options.parameters)
-            
-        kwargs = {
-            "center": options.center
-        }
-        command = {"name": "modal_window", "args": args, "kwargs": kwargs}
+        kwargs = {}
+        kwargs["guiPath"] = args[0]
+        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
+        kwargs["center"] = options.center
+        
+        command = {"name": "modal_window", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
@@ -377,37 +371,25 @@ class CommandHandler(object):
         pass
         
     def tooltip(self, options, args):
-        if not args:
-            args = [ "".join(sys.stdin.readlines()) ]
-
-        kwargs = {
-            "format": options.html and "html" or "text",
-            "transparent": options.transparent
-        }
+        kwargs = {}
+        kwargs["message"] = "".join(args) if args else "".join(sys.stdin.readlines())
+        kwargs["format"] = options.html and "html" or "text"
+        kwargs["transparent"] = options.transparent
         
-        command = {"name": "tooltip", "args": args, "kwargs": kwargs}
+        command = {"name": "tooltip", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
 
     def menu(self, options, args):
-        if options.parameters == None:
-            parameters = sys.stdin.readlines()
-            args.append("".join(parameters))
-        else:
-            args.append(options.parameters)
-        command = {"name": "menu", "args": args, "kwargs": {}}
+        kwargs = {}
+        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
+        command = {"name": "menu", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
     def popup(self, options, args):
-        if options.suggestions is None:
-            parameters = sys.stdin.readlines()
-            args.append("".join(parameters))
-        else:
-            args.append(options.suggestions)
-        
         kwargs = {
             "returnChoice": options.returnChoice,
             "alreadyTyped": options.alreadyTyped,
@@ -415,33 +397,32 @@ class CommandHandler(object):
             "additionalWordCharacters": options.additionalWordCharacters,
             "caseInsensitive": options.caseInsensitive
         }
+        kwargs["suggestions"] = options.suggestions if options.suggestions is not None else "".join(sys.stdin.readlines())
         
-        command = {"name": "popup", "args": args, "kwargs": kwargs}
+        command = {"name": "popup", "kwargs": kwargs}
         
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
     def defaults(self, options, args):
-        command = {"name": "defaults", "args": args, "kwargs": {}}
+        command = {"name": "defaults", "kwargs": {}}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
 
     def images(self, options, args):
-        if options.plist is None:
-            parameters = sys.stdin.readlines()
-            args.append("".join(parameters))
-        else:
-            args.append(options.plist)
+        kwargs = {}
+        kwargs["parameters"] = options.plist if options.plist is not None else "".join(sys.stdin.readlines())
         
-        command = {"name": "images", "args": args, "kwargs": {}}
+        command = {"name": "images", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
         
     def alert(self, options, args):
-        command = {"name": "alert", "args": args, "kwargs": {}}
+        kwargs = {}
+        command = {"name": "alert", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
@@ -449,18 +430,16 @@ class CommandHandler(object):
     def open(self, options, urls):
         for url in urls:
             if url.startswith("txmt"):
-                command = {"name": "open", "args": [ url ], "kwargs": {}}
+                command = {"name": "open", "kwargs": { "url": url}}
                 self.socket.send_pyobj(command)
-                value = self.socket.recv()
-                sys.stdout.write(value)
+                _ = self.socket.recv()
             else:
                 os.popen("xdg-open %s" % url)
                 
     def debug(self, options, args):
-        if options.parameters == None:
-            parameters = sys.stdin.readlines()
-            args.append( "".join(parameters))
-        command = {"name": "debug", "args": args, "kwargs": {}}
+        kwargs = {}
+        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
+        command = {"name": "debug", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
@@ -486,6 +465,8 @@ def main(args):
             handler.modal_window(options, args)
         elif options.close_window:
             handler.close_window(options, args)
+        elif args and options.center and options.quiet:
+            handler.async_window(options, args)
         else:
             handler.debug(options, args)
 

@@ -27,15 +27,14 @@ class PrymatexServer(QtCore.QObject):
     def socketReadyRead(self):
         command = self.socket.recv_pyobj()
         name = command.get("name")
-        args = command.get("args", [])
         kwargs = command.get("kwargs", {})
         
         #TODO: Filtro todo lo que sea None asumo que las signaturas de los metodos ponene los valores por defecto
         # esto tendria que ser controlado de una mejor forma
         kwargs = dict(filter(lambda (key, value): value != None, kwargs.iteritems()))
-        print args, kwargs
+        print name, kwargs
         method = getattr(self, name)
-        method(*args, **kwargs)
+        method(**kwargs)
 
     def loadDialogClass(self, moduleName, directory):
         try:
@@ -70,76 +69,85 @@ class PrymatexServer(QtCore.QObject):
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
         self.socket.send(value)
         
-    def async_window(self, nibPath, plist, **kwargs):
+    def async_window(self, **kwargs):
         try:
-            parameters = plistlib.readPlistFromString(plist)
+            parameters = plistlib.readPlistFromString(kwargs["parameters"])
         except ExpatError:
             parameters = {}
-        directory = os.path.dirname(nibPath)
-        name = os.path.basename(nibPath)
+        directory = os.path.dirname(kwargs["guiPath"])
+        name = os.path.basename(kwargs["guiPath"])
         dialogClass = self.loadDialogClass(name, directory)
         instance, instanceId = self.createDialogInstance(dialogClass, self.application.mainWindow, async = True)
         instance.setParameters(parameters)
         instance.show()
-        self.sendResult(instanceId)
+        self.sendResult(str(instanceId))
     
-    def update_window(self, nibPath, **kwargs):
-        print "update_window: ", nibPath, kwargs
-        directory = os.path.dirname(nibPath)
-        name = os.path.basename(nibPath)
-        instance = self.dialogInstance(token)
+    def update_window(self, **kwargs):
+        try:
+            parameters = plistlib.readPlistFromString(kwargs["parameters"])
+        except ExpatError:
+            parameters = {}
+        directory = os.path.dirname(kwargs["guiPath"])
+        name = os.path.basename(kwargs["guiPath"])
+        instance = self.dialogInstance(int(kwargs["token"]))
         instance.setParameters(parameters)
+        self.sendResult()
 
-    def modal_window(self, nibPath, plist, **kwargs):
-        settings = plistlib.readPlistFromString(plist)
-        print "modal_window: ", nibPath, settings, kwargs
-        directory = os.path.dirname(nibPath)
-        name = os.path.basename(nibPath)
+    def modal_window(self, **kwargs):
+        try:
+            parameters = plistlib.readPlistFromString(kwargs["parameters"])
+        except ExpatError:
+            parameters = {}
+        directory = os.path.dirname(kwargs["guiPath"])
+        name = os.path.basename(kwargs["guiPath"])
         dialogClass = self.loadDialogClass(name, directory)
         instance = self.createDialogInstance(dialogClass, self.application.mainWindow)
         instance.setParameters(parameters)
         value = instance._exec()
-        self.sendResult(result)
+        self.sendResult(value)
 
-    def tooltip(self, content, format = "text", transparent = False):
-        message = ""
+    def tooltip(self, message = "", format = "text", transparent = False):
         try:
-            data = plistlib.readPlistFromString(content)
+            data = plistlib.readPlistFromString(message)
             message = data[format]
         except ExpatError, reason:
             message = content
-        self.application.currentEditor().showMessage(message)
+        message = message.strip()
+        if message:
+            self.application.currentEditor().showMessage(message)
         self.sendResult()
     
-    def menu(self, plist):
-        data = plistlib.readPlistFromString(plist)
+    def menu(self, **kwargs):
+        try:
+            parameters = plistlib.readPlistFromString(kwargs["parameters"])
+        except ExpatError:
+            parameters = {}
         def sendSelectedIndex(index):
             self.sendResult({"selectedIndex": index})
-        self.application.currentEditor().showFlatPopupMenu(data["menuItems"], sendSelectedIndex)
+        if "menuItems" in parameters:
+            self.application.currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex)
 
-    def popup(self, suggestions, returnChoice = False, caseInsensitive = True, alreadyTyped = "", staticPrefix = "", additionalWordCharacters = ""):
+    def popup(self, suggestions = "", returnChoice = False, caseInsensitive = True, alreadyTyped = "", staticPrefix = "", additionalWordCharacters = ""):
         suggestions = plistlib.readPlistFromString(suggestions)
         self.application.currentEditor().showCompleter(suggestions["suggestions"], alreadyTyped = alreadyTyped, caseInsensitive = caseInsensitive)
         self.sendResult()
     
-    def defaults(self, args):
-        print "defaults: ", args
+    def defaults(self, **kwargs):
         return True
     
-    def images(self, plist):
-        data = plistlib.readPlistFromString(plist)
+    def images(self, parameters = ""):
+        data = plistlib.readPlistFromString(parameters)
         for name, path in data["register"].iteritems():
             resources.registerImagePath(name, path)
         self.sendResult()
     
-    def alert(self, args):
-        print "alert: ", args
+    def alert(self, **kwargs):
         self.sendResult()
     
-    def open(self, url):
-        self.application.handleUrlCommand(url)
+    def open(self, **kwargs):
+        self.application.handleUrlCommand(kwargs["url"])
         self.sendResult()
 
-    def debug(self, *args, **kwargs):
-        print args, kwargs
+    def debug(self, **kwargs):
+        print kwargs
         self.sendResult()

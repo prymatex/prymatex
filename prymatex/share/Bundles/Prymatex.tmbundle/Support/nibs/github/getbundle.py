@@ -12,7 +12,7 @@ import urllib2
 from PyQt4 import QtGui, QtCore
 import httplib2
 
-from prymatex.core.plugins.dialog import PMXBaseDialog
+from prymatex.core.plugin.dialog import PMXBaseDialog
 
 # UI
 from ui_githubclient import Ui_GitHubClientDialog
@@ -23,7 +23,6 @@ _ = lambda s:s
 class PMXGitHubRepoModel(QtGui.QStandardItemModel):
     ROWS = (
             ('name', _('Repo')),
-            ('description', _('Description')),
             ('url', _('URL')),
             ('username', _('Username')),
             ('watchers', _('Watchers')),

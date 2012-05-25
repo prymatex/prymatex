@@ -49,7 +49,7 @@ class PMXProjectManager(QtCore.QObject):
         for path in self.knownProjects[:]:
             try:
                 PMXProject.loadProject(path, self)
-            except exceptions.PrymatexFileNotExistsException as e:
+            except exceptions.FileNotExistsException as e:
                 print e
                 self.knownProjects.remove(path)
                 self.settings.setValue('knownProjects', self.knownProjects)
