@@ -23,6 +23,7 @@ _ = lambda s:s
 class PMXGitHubRepoModel(QtGui.QStandardItemModel):
     ROWS = (
             ('name', _('Repo')),
+            ('description', _('Description')),
             ('url', _('URL')),
             ('username', _('Username')),
             ('watchers', _('Watchers')),

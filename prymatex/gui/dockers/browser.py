@@ -260,7 +260,8 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     # QWebView Signals
     #=============================
     def on_webView_iconChanged(self):
-        print "iconChanged"
+        # print "iconChanged"
+        pass
 
     def on_webView_linkClicked(self, link):
         #Terminar el timer y navegar hasta esa Url
@@ -303,16 +304,18 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.buttonStop.setEnabled(load != 100)
     
     def on_webView_selectionChanged(self):
-        print "selectionChanged"
+        # print "selectionChanged"
+        pass
 
     def on_webView_statusBarMessage(self, message):
-        print "statusBarMessage", message
+        # print "statusBarMessage", message
+        pass
         
     def on_webView_titleChanged(self, title):
         """Web page title changed - change the tab name"""
         #print "titleChanged", title
         #self.setWindowTitle(title)
-	return
+        pass
     
     def on_buttonBack_clicked(self):
         """Back button clicked, go one page back"""

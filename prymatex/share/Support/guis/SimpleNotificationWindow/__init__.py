@@ -16,7 +16,7 @@ class NotificationDialog(QtGui.QDialog, Ui_NotificationDialog, PMXBaseDialog):
         
     def setParameters(self, parameters):
         self.setWindowTitle(parameters["title"])
-        self.labelLog.setText(parameters["log"])
-        self.textEditSummary.setPlainText(parameters["summary"])
+        self.labelSummary.setText(parameters["log"])
+        self.textEditLog.setPlainText(parameters["summary"])
         
 dialogClass = NotificationDialog
