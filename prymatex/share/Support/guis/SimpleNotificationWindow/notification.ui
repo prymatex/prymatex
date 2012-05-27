@@ -27,14 +27,14 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="labelLog">
+    <widget class="QLabel" name="labelSummary">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="textEditSummary"/>
+    <widget class="QTextEdit" name="textEditLog"/>
    </item>
   </layout>
  </widget>

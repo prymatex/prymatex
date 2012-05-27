@@ -59,12 +59,12 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 self.endSnippet()
             else:
                 snippet = self.editor.snippetProcessor.snippet 
-                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index + 1, len(snippet) -1))
+                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index + 1, len(snippet)))
                 self.editor.snippetProcessor.selectHolder(holder)
         elif event.text():
             self.logger.debug("Con texto %s" % event.text())
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-            if currentHolder is None:
+            if currentHolder is None or currentHolder.last:
                 return self.endSnippet(event)
             
             #Cuidado con los extremos del holder
@@ -106,11 +106,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             self.editor.textCursor().endEditBlock()
         else:
             self.logger.debug("Con cualquier otra tecla sin texto")
-            holder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-            if (holder is None or holder.last) and event.key() in [ QtCore.Qt.Key_Return ]:
-                return self.endSnippet(event)
-            else:
-                return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+            return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             
     def endSnippet(self, event = None):
         self.editor.snippetProcessor.endSnippet()
