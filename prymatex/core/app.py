@@ -306,7 +306,7 @@ class PMXApplication(QtGui.QApplication):
         print "Commit data"
         
     def saveState(self, session_manager):
-        print "Save state %s" % session_manager
+        pass
     
     #========================================================
     # Components

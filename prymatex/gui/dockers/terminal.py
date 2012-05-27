@@ -281,7 +281,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.terminal.sendText("%s\n" % command)
         
     def chdir(self, directory):
-        self.runCommand("cd %s" % directory)
+        self.runCommand('cd "%s"' % directory)
         
     @property
     def terminal(self):
