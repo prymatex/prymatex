@@ -12,7 +12,7 @@ class NotificationDialog(QtGui.QDialog, Ui_NotificationDialog, PMXBaseDialog):
         QtGui.QDialog.__init__(self, parent)
         PMXBaseDialog.__init__(self)
         self.setupUi(self)
-        self.textEditSummary.setReadOnly(True)
+        self.textEditLog.setReadOnly(True)
         
     def setParameters(self, parameters):
         self.setWindowTitle(parameters["title"])
