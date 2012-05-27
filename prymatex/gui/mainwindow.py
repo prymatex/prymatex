@@ -59,7 +59,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
-        self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor().insertBundleItem(item))
+        self.application.supportManager.bundleItemTriggered.connect(self.insertBundleItem)
         
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.dockers = []
@@ -70,7 +70,17 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
-        
+    
+    
+    def insertBundleItem(self, item):
+        '''Insert selected bundle item in current editor if possible'''
+        editor = self.currentEditor()
+        if editor:
+            self.currentEditor().insertBundleItem(item)
+        else:
+            QtGui.QMessageBox.information(self, _("No editor open"), 
+                                          _("%s needs an editor to run") % item.name)
+            
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import PMXGeneralWidget
