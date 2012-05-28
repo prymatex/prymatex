@@ -43,3 +43,12 @@ class PMXTerminalSettings(QtGui.QWidget, PMXSettingTreeNode, Ui_Terminal):
     def on_comboColorScheme_activated(self, index):
         scheme = self.comboColorScheme.itemData(index)
         self.settingGroup.setValue('colorScheme', scheme)
+
+    @QtCore.pyqtSlot()
+    def on_pushButtonChangeFont_pressed(self):
+        font = self.settingGroup.value('font')
+        font, ok = QtGui.QFontDialog.getFont(font, self, _("Select terminal font"))
+        if ok:
+            self.settingGroup.setValue('font', font)
+            self.lineFont.setFont(font)
+            self.lineFont.setText("%s, %d" % (font.family(), font.pointSize()))
