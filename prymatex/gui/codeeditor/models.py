@@ -41,7 +41,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
     def rowCount (self, parent = None):
         return len(self.blocks)
 
-    def data (self, index, role = QtCore.Qt.DisplayRole):
+    def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         block = self.blocks[index.row()]
@@ -168,10 +168,14 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
 class PMXCompleterTableModel(QtCore.QAbstractTableModel): 
     def __init__(self, suggestions, editor): 
         QtCore.QAbstractListModel.__init__(self, editor) 
-        self.suggestions = suggestions
         self.editor = editor
+        self.setSuggestions(suggestions)
 
-    def index (self, row, column, parent = QtCore.QModelIndex()):
+    def setSuggestions(self, suggestions):
+        self.suggestions = suggestions
+        self.columns = 2 if any(map(lambda s: isinstance(s, PMXBundleTreeNode), suggestions)) else 1
+        
+    def index(self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):
             return self.createIndex(row, column, parent)
         else:
@@ -181,14 +185,14 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
         return len(self.suggestions)
 
     def columnCount(self, parent = None):
-        return 2
+        return self.columns
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         suggestion = self.suggestions[index.row()]
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
-            if isinstance(suggestion, dict):
+            if isinstance(suggestion, dict) and index.column() == 0:
                 if 'display' in suggestion:
                     return suggestion['display']
                 elif 'title' in suggestion:
