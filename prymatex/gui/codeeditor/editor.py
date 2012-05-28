@@ -802,7 +802,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
-        if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
+        if self.multiCursorMode.isActive():
             self.multiCursorMode.mouseReleasePoint(event.pos(), bool(event.modifiers() & QtCore.Qt.MetaModifier))
             self.viewport().repaint(self.viewport().visibleRegion())
         else:
