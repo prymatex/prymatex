@@ -51,11 +51,11 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         if self.checkBoxUseDefaultLocation.isChecked():
             projectPath = os.path.join(self.application.projectManager.workspaceDirectory, text)
             self.lineLocation.setText(projectPath)
-        self.buttonCreate.setEnabled(bool(text))
+        self.buttonCreate.setEnabled(bool(text.strip()))
     
     def on_lineLocation_textChanged(self, text):
-        if not text:
-            self.lineLocation.setText(self.application.projectManager.workspaceDirectory)
+        if text and not self.checkBoxUseDefaultLocation.isChecked():
+            self.lineProjectName.setText(os.path.basename(text))
 
     def on_checkBoxUseDefaultLocation_toggled(self, checked):
         self.lineLocation.setEnabled(not checked)
