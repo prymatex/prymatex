@@ -3,15 +3,17 @@
 
 from PyQt4 import QtGui
 
-from ProgresDialog import ProgressDialog as dialogClass
+from prymatex.core.plugin.dialog import PMXBaseDialog
 
-# {   'title': 'Progress', 
-#     'summary': u'Creating HTML version of document\u2026', 
-#     'details': '', 
-#     'isIndeterminate': True, 
-#     'progressAnimate': True
-# }
+from RequestItem.ui_requestitem import Ui_RequestItemDialog
 
-def load(application, settings):
-    progress = QtGui.QProgressBar(application.mainWindow)
-    progress.show()
+class RequestItemDialog(QtGui.QDialog, Ui_RequestItemDialog, PMXBaseDialog):
+    def __init__(self, parent = None):
+        QtGui.QDialog.__init__(self, parent)
+        PMXBaseDialog.__init__(self)
+        self.setupUi(self)
+        
+    def setParameters(self, parameters):
+        print parameters
+        
+dialogClass = RequestItemDialog
