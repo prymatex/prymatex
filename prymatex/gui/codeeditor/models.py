@@ -218,8 +218,10 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
                 else:
                     return resources.getIcon('inserttext')
         elif role == QtCore.Qt.ToolTipRole:
-            if isinstance(suggestion, dict) and 'tooltip' in suggestion:
-                return suggestion['tooltip']
+            if isinstance(suggestion, dict) and 'tool_tip' in suggestion:
+                if 'tool_tip_format' in suggestion:
+                    print suggestion["tool_tip_format"]
+                return suggestion['tool_tip']
             elif isinstance(suggestion, PMXBundleTreeNode):
                 return suggestion.name
         elif role == QtCore.Qt.ForegroundRole:

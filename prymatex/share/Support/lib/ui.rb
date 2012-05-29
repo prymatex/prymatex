@@ -300,7 +300,7 @@ module TextMate
 
             # this is a workaround for a presumed Leopard bug, see log entry for revision 8566 for more info
             if animate = start_parameters['progressAnimate']
-              open("|#{TM_DIALOG} -t#{@dialog_token}", "w") { |io| io << { 'progressAnimate' => animate }.to_plist }
+              open("|#{TM_DIALOG} -t #{@dialog_token}", "w") { |io| io << { 'progressAnimate' => animate }.to_plist }
             end
           end
 

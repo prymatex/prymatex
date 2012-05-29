@@ -61,9 +61,9 @@ class PrymatexServer(QtCore.QObject):
         
     def sendResult(self, value = None):
         if value is None:
-            value = "ok"
-        if isinstance(value, basestring):
-            value = { "result": value }
+            value = ""
+        if isinstance(value, int):
+            value = str(value)
         if isinstance(value, dict):
             value = plistlib.writePlistToString(value)
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
@@ -80,15 +80,13 @@ class PrymatexServer(QtCore.QObject):
         instance, instanceId = self.createDialogInstance(dialogClass, self.application.mainWindow, async = True)
         instance.setParameters(parameters)
         instance.show()
-        self.sendResult(str(instanceId))
+        self.sendResult(instanceId)
     
     def update_window(self, **kwargs):
         try:
             parameters = plistlib.readPlistFromString(kwargs["parameters"])
         except ExpatError:
             parameters = {}
-        directory = os.path.dirname(kwargs["guiPath"])
-        name = os.path.basename(kwargs["guiPath"])
         instance = self.dialogInstance(int(kwargs["token"]))
         instance.setParameters(parameters)
         self.sendResult()
@@ -109,9 +107,10 @@ class PrymatexServer(QtCore.QObject):
     def tooltip(self, message = "", format = "text", transparent = False):
         try:
             data = plistlib.readPlistFromString(message)
-            message = data[format]
+            if data is not None:
+                message = data[format]
         except ExpatError, reason:
-            message = content
+            pass
         message = message.strip()
         if message:
             self.application.currentEditor().showMessage(message)
@@ -123,7 +122,10 @@ class PrymatexServer(QtCore.QObject):
         except ExpatError:
             parameters = {}
         def sendSelectedIndex(index):
-            self.sendResult({"selectedIndex": index})
+            if index != -1:
+                self.sendResult({"selectedIndex": index})
+            else:
+                self.sendResult()
         if "menuItems" in parameters:
             self.application.currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex)
 

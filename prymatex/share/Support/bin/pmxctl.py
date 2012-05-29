@@ -348,12 +348,12 @@ class CommandHandler(object):
         """docstring for update_window"""
         kwargs = {}
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
-        kwargs["token"] = options.token
+        kwargs["token"] = options.update_window
 
         command = {"name": "update_window", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()
-        sys.stdout.write(value["result"])
+        sys.stdout.write(value)
     
     def modal_window(self, options, args):
         """docstring for modal_window"""
