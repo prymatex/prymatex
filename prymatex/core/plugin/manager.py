@@ -3,17 +3,24 @@
 
 import os, sys
 from logging import getLogger
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from PyQt4 import QtGui, QtCore
 
 from prymatex.core.plugin import PMXBaseComponent
 from prymatex.utils.importlib import import_module, import_from_directory
 
+PLUGIN_EXTENSION = '.plugin'
+
 class PMXPluginManager(PMXBaseComponent):
     def __init__(self, application):
         self.application = application
         self.directories = []
         
+        self.modules = {}
         self.editors = []
         self.dockers = []
         self.statusBars = []
@@ -124,11 +131,21 @@ class PMXPluginManager(PMXBaseComponent):
             status = self.createWidgetInstance(statusBarClass, mainWindow)
             mainWindow.addStatusBar(status)
     
-    def _load_plugin(self, moduleName, directory = None):
+    def _load_plugin(self, moduleName, directory = None, descriptor = None):
+        if isinstance(descriptor, basestring):
+            descriptorFile = open(descriptor, 'r')
+            pluginInfo = json.load(descriptorFile)
+            descriptorFile.close()
+            moduleId = pluginInfo.get("id", None)
+            registerFunction = pluginInfo.get("register", "registerPlugin")
+        else:
+            moduleId = moduleName
+            registerFunction = "registerPlugin"
         try:
-            module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
-            registerPluginFunction = getattr(module, 'registerPlugin')
+            module = import_from_directory(directory, moduleName) if isinstance(directory, basestring) else import_module(moduleName)
+            registerPluginFunction = getattr(module, registerFunction)
             registerPluginFunction(self)
+            self.modules[moduleId] = module
         except (ImportError, AttributeError), reason:
             #TODO: Manejar estos errores
             raise reason
@@ -142,6 +159,7 @@ class PMXPluginManager(PMXBaseComponent):
             #TODO: Ver si no es mejor usar glob y filtrar por algo en particular en los directorios con plugins
             moduleNames = os.listdir(directory)
             for name in moduleNames:
-                if not os.path.isdir(os.path.join(directory, name)) or name.startswith("."):
-                    continue 
-                self._load_plugin(name, directory)
+                moduleDirectory = os.path.join(directory, name)
+                pluginDescriptor = os.path.join(moduleDirectory, "%s%s" % (name, PLUGIN_EXTENSION))
+                if os.path.isdir(moduleDirectory) and os.path.isfile(pluginDescriptor):
+                    self._load_plugin(name, directory, pluginDescriptor)
