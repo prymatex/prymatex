@@ -7,6 +7,7 @@ from prymatex.gui import utils
 from prymatex.utils.lists import bisect_key
 from prymatex.gui.codeeditor import helpers
 from prymatex.gui.support.models import PMXBundleTreeNode
+from prymatex.gui.codeeditor.models import PMXCompleterTableModel
 
 class PMXBaseEditorMode(object):
     def __init__(self, editor):
@@ -482,14 +483,13 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
 
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
+        
+        self.completerTableModel = PMXCompleterTableModel(self)
+        self.setModel(self.completerTableModel)
 
-    def setModel(self, completerTableModel):
-        QtGui.QCompleter.setModel(self, completerTableModel)
-        #Tenemos Modelo
-        #Acomodamos al contenido
+    def setSuggestions(self, suggestions):
+        self.completerTableModel.setSuggestions(suggestions)
         self.popupView.resizeColumnsToContents()
-        #self.popupView.resizeRowsToContents()
-        #Tomamos ancho de los datos del modelo
         self.currentContentWidth = self.popup().verticalScrollBar().sizeHint().width()
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
             self.currentContentWidth += self.popup().sizeHintForColumn(columnIndex)

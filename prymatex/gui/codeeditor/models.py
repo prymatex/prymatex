@@ -166,14 +166,16 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
 # Completer
 #=========================================================
 class PMXCompleterTableModel(QtCore.QAbstractTableModel): 
-    def __init__(self, suggestions, editor): 
+    def __init__(self, editor): 
         QtCore.QAbstractListModel.__init__(self, editor) 
         self.editor = editor
-        self.setSuggestions(suggestions)
+        self.columns = 1
+        self.suggestions = []
 
     def setSuggestions(self, suggestions):
         self.suggestions = suggestions
         self.columns = 2 if any(map(lambda s: isinstance(s, PMXBundleTreeNode), suggestions)) else 1
+        self.layoutChanged.emit()
         
     def index(self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):

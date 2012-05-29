@@ -26,7 +26,7 @@ from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetPr
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
-from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterTableModel, PMXAlreadyTypedWords
+from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
 
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
@@ -967,7 +967,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
         self.completerMode.setCompletionPrefix(alreadyTyped)
-        self.completerMode.setModel(PMXCompleterTableModel(suggestions, self))
+        self.completerMode.setSuggestions(suggestions)
         self.completerMode.complete(self.cursorRect())
     
     def completionSuggestions(self, cursor = None, scope = None):
