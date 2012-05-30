@@ -7,16 +7,21 @@ class ZeroMQTContext(QtCore.QObject):
     def __init__(self, ioThreads = 1, parent = None):
         QtCore.QObject.__init__(self, parent)
         self.zmq_context = zmq.Context(ioThreads)
-        if not self.zmq_context:
-            pass
-    
+        self.pool = []
+
     def __getattr__(self, name):
         return getattr(self.zmq_context, name)
     
     def socket(self, socketType):
         if self.zmq_context.closed:
             raise zmq.ZMQError(zmq.ENOTSUP)
-        return ZeroMQTSocket(self, socketType)
+        socket = ZeroMQTSocket(self, socketType)
+        self.pool.append(socket)
+        return socket
+        
+    #def destroy(self, linger=None):
+        #self.zmq_context.destroy(linger)
+        #map(lambda s: s.close(), self.pool)
         
 class ZeroMQTSocket(QtCore.QObject):
     readyRead = QtCore.pyqtSignal()

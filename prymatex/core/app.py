@@ -28,7 +28,8 @@ class PMXApplication(QtGui.QApplication):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
     The application loads the PMX Support."""
-    
+    RESTART_CODE = 1000
+
     def __init__(self):
         """Inicialización de la aplicación."""
         #TODO: Pasar los argumentos a la QApplication
@@ -79,14 +80,27 @@ class PMXApplication(QtGui.QApplication):
         except KeyboardInterrupt:
             self.logger.critical("\nQuit signal catched during application startup. Quiting...")
             self.quit()
-            
+
+    def unloadGraphicalUserInterface(self):
+        #TODO: ver como dejar todo lindo y ordenado para terminar correctamente
+        #if self.zmqContext is not None:
+        #    self.zmqContext.destroy()
+        self.mainWindow.close()
+        del self.mainWindow
+    
     def resetSettings(self):
         self.settings.clear()
         
     def switchProfile(self):
         from prymatex.gui.dialogs.profile import PMXProfileDialog
-        return PMXProfileDialog.switchProfile(PMXSettings.PMX_PROFILES_FILE)
+        profile = PMXProfileDialog.switchProfile(PMXSettings.PMX_PROFILES_FILE)
+        if profile != self.settings.PMX_PROFILE_NAME:
+            print "switch to", profile
+            self.restart()
         
+    def restart(self):
+        self.exit(self.RESTART_CODE)
+
     def buildSettings(self, profile):
         if profile is None or (profile == "" and PMXSettings.askForProfile()):
             #Select profile
@@ -287,7 +301,7 @@ class PMXApplication(QtGui.QApplication):
     
     def closePrymatex(self):
         self.logger.debug("Close")
-        
+
         #Guardar documentos abiertos
         openDocumentsOnQuit = []
         for editor in self.mainWindow.editors():
