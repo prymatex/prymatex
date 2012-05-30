@@ -42,7 +42,7 @@ class ProgressDialog(QtGui.QDialog, Ui_ProgressDialog, PMXBaseDialog):
         if "details" in parameters:
             print parameters["details"]
         if "summary" in parameters:
-            print parameters["summary"]
+            self.labelSummary.setText(parameters["summary"])
         if "progressValue" in parameters and self.progressAnimate:
             self.milestoneProgressValue = parameters["progressValue"]
             self.animateTimer.start(10)

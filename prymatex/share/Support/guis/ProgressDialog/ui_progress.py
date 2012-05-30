@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'progress.ui'
 #
-# Created: Tue May 29 10:39:56 2012
+# Created: Wed May 30 10:10:56 2012
 #      by: PyQt4 UI code generator 4.8.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,14 +17,17 @@ except AttributeError:
 class Ui_ProgressDialog(object):
     def setupUi(self, ProgressDialog):
         ProgressDialog.setObjectName(_fromUtf8("ProgressDialog"))
-        ProgressDialog.resize(318, 39)
+        ProgressDialog.resize(318, 36)
         self.verticalLayout = QtGui.QVBoxLayout(ProgressDialog)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.labelSummary = QtGui.QLabel(ProgressDialog)
+        self.labelSummary.setText(_fromUtf8(""))
+        self.labelSummary.setObjectName(_fromUtf8("labelSummary"))
+        self.verticalLayout.addWidget(self.labelSummary)
         self.progressBar = QtGui.QProgressBar(ProgressDialog)
-        self.progressBar.setMaximum(100)
-        self.progressBar.setProperty(_fromUtf8("value"), -1)
+        self.progressBar.setTextVisible(True)
         self.progressBar.setObjectName(_fromUtf8("progressBar"))
         self.verticalLayout.addWidget(self.progressBar)
 
