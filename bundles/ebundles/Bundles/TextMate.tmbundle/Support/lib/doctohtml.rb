@@ -222,10 +222,11 @@ end
 def document_to_html(input, opt = {})
 	# Read the source document / selection
 	# Convert tabs to spaces using configured tab width
+	
 	input = detab(input, (ENV['TM_TAB_SIZE'] || '8').to_i)
 
 	html = ''
-
+     
 	theme_class = ''
   if opt[:include_css]
 		# If you declare a 'http://...' link as a TM_SOURCE_STYLESHEET

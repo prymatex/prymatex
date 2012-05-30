@@ -36,13 +36,15 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 scopes = block.userData().scopeRanges(end = endIndex)
             else:
                 scopes = block.userData().scopeRanges()
+            lineXML = ""
             for (start, end), scope in scopes:
                 ss = scope.split()
                 token = "".join(map(lambda scope: "<" + scope + ">", ss))
                 token += line[start:end]
                 ss.reverse()
                 token += "".join(map(lambda scope: "</" + scope + ">", ss))
-                result.append(token)
+                lineXML += token
+            result.append(lineXML)
             if block == lastBlock:
                 break
             block = block.next()

@@ -163,5 +163,5 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         self.tableView.setStyleSheet(tableStyle)
         
         if changeSettings:
-            self.settingGroup.setValue('theme', unicode(theme.uuid))
+            self.settingGroup.setValue('theme', unicode(theme.uuid).upper())
         

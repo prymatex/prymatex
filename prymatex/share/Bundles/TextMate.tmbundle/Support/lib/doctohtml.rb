@@ -17,8 +17,10 @@ FONT_MAP = {
 def find_theme(uuid)
 	theme_dirs = [
 		File.expand_path('~/Library/Application Support/TextMate/Themes'),
+		File.expand_path('~/.prymatex/Themes'),
 		'/Library/Application Support/TextMate/Themes',
-		TextMate.app_path + '/Contents/SharedSupport/Themes'
+		TextMate.app_path + '/Contents/SharedSupport/Themes',
+		TextMate.app_path + '/share/Themes'
 	]
 
 	theme_dirs.each do |theme_dir|
@@ -206,7 +208,7 @@ def document_to_html(input, opt = {})
 	input = detab(input, (ENV['TM_TAB_SIZE'] || '8').to_i)
 
 	html = ''
-
+     
 	theme_class = ''
   if opt[:include_css]
 		# If you declare a 'http://...' link as a TM_SOURCE_STYLESHEET

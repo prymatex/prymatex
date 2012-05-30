@@ -457,6 +457,7 @@ class CommandHandler(object):
                 
     def debug(self, options, args):
         kwargs = {}
+        kwargs["args"] = args
         kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
         command = {"name": "debug", "kwargs": kwargs}
         self.socket.send_pyobj(command)

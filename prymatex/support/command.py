@@ -53,21 +53,20 @@ class PMXCommand(PMXBundleItem):
         return dataHash
 
     def getInputText(self, processor):
-        def getInputTypeAndValue(input, format):
-            if input is None or input == "none": return None, None
-            return input, getattr(processor, input)(format)
-        input, value = getInputTypeAndValue(self.input, self.inputFormat)
-        if value == None and self.fallbackInput != None:
-            input, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat)
-        if value == None and self.standardInput != None:
-            input, value = getInputTypeAndValue(self.standardInput, self.inputFormat)
-
-        if input == 'selection' and value == None:
+        def getInputTypeAndValue(inputType, format):
+            if inputType is None or inputType == "none": return None, None
+            return inputType, getattr(processor, inputType)(format)
+        inputType, value = getInputTypeAndValue(self.input, self.inputFormat)
+        if value is None and self.fallbackInput is not None:
+            inputType, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat)
+        if value is None and self.standardInput is not None:
+            inputType, value = getInputTypeAndValue(self.standardInput, self.inputFormat)
+        if inputType == 'selection' and value is None:
             value = processor.document(self.inputFormat)
-            input = "document"
-        elif value == None:
-            input = None
-        return input, value
+            inputType = "document"
+        elif value is None:
+            inputType = None
+        return inputType, value
     
     def systemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:

@@ -221,6 +221,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         self.comboBoxOutput.addItem("Show as HTML", "showAsHTML")
         self.comboBoxOutput.addItem("Show as Tool Tip", "showAsTooltip")
         self.comboBoxOutput.addItem("Create New Document", "createNewDocument")
+        self.comboBoxOutput.addItem("Open as New Document", "openAsNewDocument")
         self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
         
         self.command.setTabStopWidth(TABWIDTH)
