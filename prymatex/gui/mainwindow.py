@@ -224,6 +224,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     def addEmptyEditor(self):
         editor = self.application.getEditorInstance(parent = self)
         self.addEditor(editor)
+        return editor
         
     def removeEditor(self, editor):
         self.splitTabWidget.removeTab(editor)

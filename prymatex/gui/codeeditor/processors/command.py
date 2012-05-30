@@ -218,9 +218,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
         
     def createNewDocument(self, context):
-        editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
-        editor_widget.codeEdit.setPlainText(context.outputValue)
+        editor= self.editor.mainWindow.addEmptyEditor()
+        editor.setPlainText(context.outputValue)
         
     def openAsNewDocument(self, context):
-        editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
-        editor_widget.codeEdit.setPlainText(context.outputValue)
+        editor= self.editor.mainWindow.addEmptyEditor()
+        editor.setPlainText(context.outputValue)

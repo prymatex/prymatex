@@ -354,7 +354,29 @@ class CommandHandler(object):
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
+
+    def close_window(self, options, args):
+        """docstring for close_window"""
+        kwargs = {}
+        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
+        kwargs["token"] = options.close_window
+
+        command = {"name": "close_window", "kwargs": kwargs}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv()
+        sys.stdout.write(value)
     
+    def wait_for_input(self, options, args):
+        """docstring for wait_for_input"""
+        kwargs = {}
+        kwargs["parameters"] = options.parameters if options.parameters is not None else "".join(sys.stdin.readlines())
+        kwargs["token"] = options.wait_for_input
+
+        command = {"name": "wait_for_input", "kwargs": kwargs}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv()
+        sys.stdout.write(value)
+        
     def modal_window(self, options, args):
         """docstring for modal_window"""
         kwargs = {}
@@ -366,9 +388,6 @@ class CommandHandler(object):
         self.socket.send_pyobj(command)
         value = self.socket.recv()
         sys.stdout.write(value)
-
-    def close_window(self, options, args):
-        pass
         
     def tooltip(self, options, args):
         kwargs = {}
@@ -467,6 +486,8 @@ def main(args):
             handler.close_window(options, args)
         elif args and options.center and options.quiet:
             handler.async_window(options, args)
+        elif options.wait_for_input:
+            handler.wait_for_input(options, args)
         else:
             handler.debug(options, args)
 
