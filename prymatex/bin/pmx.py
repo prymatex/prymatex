@@ -19,6 +19,7 @@ prymatexAppInstance = None
 # TODO: Accept Qt Arguments to QtApplication
 def runPrymatexApplication(options, files):
     from prymatex.core.app import PMXApplication
+    from prymatex.core import exceptions
     
     def runPrymatexInstance(instanceOptions, instanceFiles = []):
         global prymatexAppInstance

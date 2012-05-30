@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
+from glob import glob
 from logging import getLogger
+
 try:
     import json
 except ImportError:
@@ -13,7 +15,8 @@ from PyQt4 import QtGui, QtCore
 from prymatex.core.plugin import PMXBaseComponent
 from prymatex.utils.importlib import import_module, import_from_directory
 
-PLUGIN_EXTENSION = '.plugin'
+PLUGIN_EXTENSION = 'pmxplugin'
+PLUGIN_DESCRIPTOR_FILE = 'info.json'
 
 class PMXPluginManager(PMXBaseComponent):
     def __init__(self, application):
@@ -131,35 +134,34 @@ class PMXPluginManager(PMXBaseComponent):
             status = self.createWidgetInstance(statusBarClass, mainWindow)
             mainWindow.addStatusBar(status)
     
-    def _load_plugin(self, moduleName, directory = None, descriptor = None):
-        if isinstance(descriptor, basestring):
-            descriptorFile = open(descriptor, 'r')
-            pluginInfo = json.load(descriptorFile)
-            descriptorFile.close()
-            moduleId = pluginInfo.get("id", None)
-            registerFunction = pluginInfo.get("register", "registerPlugin")
-        else:
-            moduleId = moduleName
-            registerFunction = "registerPlugin"
+    def _load_module(self, moduleName, moduleId = None, moduleDirectory = None, registerFunction = "registerPlugin"):
+        moduleId = moduleId or moduleName
         try:
-            module = import_from_directory(directory, moduleName) if isinstance(directory, basestring) else import_module(moduleName)
+            module = import_from_directory(moduleDirectory, moduleName) if moduleDirectory is not None else import_module(moduleName)
             registerPluginFunction = getattr(module, registerFunction)
             registerPluginFunction(self)
             self.modules[moduleId] = module
         except (ImportError, AttributeError), reason:
             #TODO: Manejar estos errores
             raise reason
+
+    def _load_plugin(self, pluginPath, pluginDescriptorPath):
+        descriptorFile = open(pluginDescriptorPath, 'r')
+        pluginInfo = json.load(descriptorFile)
+        descriptorFile.close()
+        moduleId = pluginInfo.get("id", None)
+        moduleName = pluginInfo.get("module", None)
+        registerFunction = pluginInfo.get("register", "registerPlugin")
+        self._load_module(moduleName, moduleId = moduleId, moduleDirectory = pluginPath, registerFunction = registerFunction)
     
     def loadPlugins(self):
-        self._load_plugin('prymatex.gui.codeeditor')
-        self._load_plugin('prymatex.gui.dockers')
+        self._load_module('prymatex.gui.codeeditor')
+        self._load_module('prymatex.gui.dockers')
         for directory in self.directories:
             if not os.path.isdir(directory):
-                continue 
-            #TODO: Ver si no es mejor usar glob y filtrar por algo en particular en los directorios con plugins
-            moduleNames = os.listdir(directory)
-            for name in moduleNames:
-                moduleDirectory = os.path.join(directory, name)
-                pluginDescriptor = os.path.join(moduleDirectory, "%s%s" % (name, PLUGIN_EXTENSION))
-                if os.path.isdir(moduleDirectory) and os.path.isfile(pluginDescriptor):
-                    self._load_plugin(name, directory, pluginDescriptor)
+                continue
+            for pluginPath in glob(os.path.join(directory, '*.%s' % PLUGIN_EXTENSION)):
+                pluginDescriptorPath = os.path.join(pluginPath, PLUGIN_DESCRIPTOR_FILE)
+                if os.path.isdir(pluginPath) and os.path.isfile(pluginDescriptorPath):
+                    self._load_plugin(pluginPath, pluginDescriptorPath)
+                    
