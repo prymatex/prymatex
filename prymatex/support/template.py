@@ -132,9 +132,10 @@ class PMXTemplate(PMXBundleItem):
         
         context.asynchronous = False
         context.workingDirectory = self.currentPath
-        context.shellCommand, context.environment = prepareShellScript(self.command, environment)
-
-        self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
+        with prepareShellScript(self.command, environment) as (shellCommand, environment):
+            context.shellCommand = shellCommand
+            context.environment = environment
+            self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
     
     def afterExecute(self, callback, context):
         #TODO: Ver los errores

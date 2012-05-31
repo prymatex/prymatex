@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
 # python bindings for soryu's web-preview
 from cgi import escape

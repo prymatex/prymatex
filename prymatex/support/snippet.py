@@ -541,14 +541,13 @@ class Shell(NodeList):
         return node
     
     def execute(self, processor):
-        command, env = prepareShellScript(unicode(self), processor.environment)
-        
-        process = Popen(command, stdout=PIPE, stderr=STDOUT, env = env)
-        text = process.stdout.read()
-        text = text.strip()
-        process.stdout.close()
-        _ = process.wait()
-        self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
+        with prepareShellScript(unicode(self), processor.environment) as (command, env):
+            process = Popen(command, stdout=PIPE, stderr=STDOUT, env = env)
+            text = process.stdout.read()
+            text = text.strip()
+            process.stdout.close()
+            _ = process.wait()
+            self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
         
     def render(self, processor):
         if not hasattr(self, 'content'):

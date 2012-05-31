@@ -98,9 +98,11 @@ class PMXCommand(PMXBundleItem):
             
             context.asynchronous = processor.asynchronous
             context.inputType, context.inputValue = self.getInputText(processor)
-            context.shellCommand, context.environment = prepareShellScript(self.systemCommand(), processor.environment(self))
-    
-            self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
+            
+            with prepareShellScript(self.systemCommand(), processor.environment(self)) as (shellCommand, environment):
+                context.shellCommand = shellCommand
+                context.environment = environment
+                self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
     
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)

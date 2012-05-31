@@ -118,11 +118,10 @@ class TextMate(QtCore.QObject):
     @QtCore.pyqtSlot(str)
     def _system(self, command):
         environment = self.bundleItem != None and self.bundleItem.buildEnvironment() or {}
-        file, env = prepareShellScript(unicode(command), environment)
-        
-        process = Popen([ file ], stdout=PIPE, stdin=PIPE, stderr=STDOUT, env = env)
-        self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, file))
-    
+        with prepareShellScript(unicode(command), environment) as (tempFile, environment):
+            process = Popen([ tempFile ], stdout=PIPE, stdin=PIPE, stderr=STDOUT, env = environment)
+            self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, tempFile))
+
     def isBusy(self):
         return True
     isBusy = QtCore.pyqtProperty("bool", isBusy)
