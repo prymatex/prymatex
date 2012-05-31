@@ -145,23 +145,65 @@ class PMXPluginManager(PMXBaseComponent):
             #TODO: Manejar estos errores
             raise reason
 
-    def _load_plugin(self, pluginPath, pluginDescriptorPath):
-        descriptorFile = open(pluginDescriptorPath, 'r')
-        pluginInfo = json.load(descriptorFile)
-        descriptorFile.close()
-        moduleId = pluginInfo.get("id", None)
-        moduleName = pluginInfo.get("module", None)
-        registerFunction = pluginInfo.get("register", "registerPlugin")
-        self._load_module(moduleName, moduleId = moduleId, moduleDirectory = pluginPath, registerFunction = registerFunction)
+    def loadPlugin(self, pluginEntry):
+        pluginId = pluginEntry.get("id")
+        packageName = pluginEntry.get("package")
+        registerFunction = pluginEntry.get("register", "registerPlugin")
+        pluginDirectory = pluginEntry.get("path")
+        try:
+            pluginEntry["module"] = import_from_directory(pluginDirectory, packageName)
+            registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
+            registerPluginFunction(self)
+            self.modules[pluginId] = pluginEntry
+        except (ImportError, AttributeError), reason:
+            #TODO: Manejar estos errores
+            raise reason
+    
+    def loadCoreModule(self, moduleName, pluginId):
+        pluginEntry = {"id": pluginId}
+        try:
+            pluginEntry["module"] = import_module(moduleName)
+            registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
+            registerPluginFunction(self)
+            self.modules[pluginId] = pluginEntry
+        except (ImportError, AttributeError), reason:
+            #TODO: Manejar estos errores
+            raise reason
+    
+    def hasDependenciesResolved(self, pluginEntry):
+        return all(map(lambda dep: dep in self.modules, pluginEntry.get("depends", [])))
     
     def loadPlugins(self):
-        self._load_module('prymatex.gui.codeeditor')
-        self._load_module('prymatex.gui.dockers')
+        self.loadCoreModule('prymatex.gui.codeeditor', 'org.prymatex.codeeditor')
+        self.loadCoreModule('prymatex.gui.dockers', 'org.prymatex.dockers')
+        loadLaterEntries = []
         for directory in self.directories:
             if not os.path.isdir(directory):
                 continue
             for pluginPath in glob(os.path.join(directory, '*.%s' % PLUGIN_EXTENSION)):
                 pluginDescriptorPath = os.path.join(pluginPath, PLUGIN_DESCRIPTOR_FILE)
                 if os.path.isdir(pluginPath) and os.path.isfile(pluginDescriptorPath):
-                    self._load_plugin(pluginPath, pluginDescriptorPath)
-                    
+                    descriptorFile = open(pluginDescriptorPath, 'r')
+                    pluginEntry = json.load(descriptorFile)
+                    descriptorFile.close()
+                    pluginEntry["path"] = pluginPath
+                    if self.hasDependenciesResolved(pluginEntry):
+                        self.loadPlugin(pluginEntry)
+                    else:
+                        loadLaterEntries.append(pluginEntry)
+        #Cargar las que quedaron bloqueadas por dependencias hasta consumirlas
+        # dependencias circulares? son ridiculas pero por lo menos detectarlas
+        unsolvedCount = len(loadLaterEntries)
+        while True:
+            loadLater = []
+            for pluginEntry in loadLaterEntries:
+                if self.hasDependenciesResolved(pluginEntry):
+                    self.loadPlugin(pluginEntry)
+                else:
+                    loadLater.append(pluginEntry)
+            if not loadLater or unsolvedCount == len(loadLater):
+                break
+            else:
+                loadLaterEntries = loadLater
+                unsolvedCount = len(loadLaterEntries)
+        #Si me quedan plugins tendira que avisar o mostrar algo es que no se cumplieron todas las dependencias
