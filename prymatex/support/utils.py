@@ -59,22 +59,18 @@ def shebang_patch(shebang, environment):
 
 def shebang_command(shebang, environment):
     shebangParts = shebang.split()
-    command = " ".join(shebangParts[1:])
     if shebangParts[0].startswith("#!/usr/bin/env") and len(shebangParts) > 1:
         envKey = shebangParts[1].upper()
         patchValue = environment.get("TM_%s" % envKey, environment.get( "PMX_%s" % envKey))
         if patchValue:
-            command = "%s %s" % (patchValue, " ".join(shebangParts[2:]))
+            return "%s %s" % (patchValue, " ".join(shebangParts[2:]))
     else:
         #No portable shebang
         for key, value in environment.iteritems():
-            if key.startswith("TM_") and key[3:].lower() in shebang:
-                command = ("%s %s") % (value, " ".join(shebangParts[1:]))
-                break
-            elif key.startswith("PMX_") and key[4:].lower() in shebang:
-                command = ("%s %s") % (value, " ".join(shebangParts[1:]))
-                break
-    return command
+            for prefix in [ "TM_", "PMX_" ]:
+                if key.startswith(prefix) and key[len(prefix):].lower() in shebang:
+                    return ("%s %s") % (value, " ".join(shebangParts[1:]))
+    return " ".join(shebangParts[1:])
 
 def ensureShellScript(script, environment):
     scriptLines = script.splitlines()
