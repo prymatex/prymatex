@@ -80,7 +80,8 @@ class prepareShellScript():
         return command, environment
 
     def __exit__(self, type, value, traceback):
-        deleteFile(self.tempFile)
+        pass
+        #deleteFile(self.tempFile)
 
 def sh(cmd):
     """ Execute cmd and capture stdout, and return it as a string. """
