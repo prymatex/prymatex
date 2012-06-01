@@ -90,7 +90,7 @@ def ensureShellScript(script, environment):
     elif has_shebang(scriptFirstLine) or is_env_shebang(scriptFirstLine):
         #shebang = shebang_patch(scriptFirstLine, environment)
         command = shebang_command(scriptFirstLine, environment)
-        script = ENV_SCRIPT % (supportPath, shebang, scriptContent) 
+        script = ENV_SCRIPT % (supportPath, command, scriptContent) 
     return script
 
 def ensureEnvironment(environment):
