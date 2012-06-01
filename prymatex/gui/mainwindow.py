@@ -14,7 +14,6 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils, dialogs
 from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
-from prymatex.gui.settings.support import PMXSupportSettings
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 
@@ -84,7 +83,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import PMXGeneralWidget
-        return [ PMXGeneralWidget, PMXSupportSettings ]
+        return [ PMXGeneralWidget ]
         
     #============================================================
     # Setups

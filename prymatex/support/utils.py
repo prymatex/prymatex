@@ -10,7 +10,8 @@ except Exception, e:
 ABSPATH_LINENO_RE = re.compile('''
     (?P<text>(?P<path>/[\w\d\/\.]+)(:(?P<line>\d+))?)
 ''', re.VERBOSE)
-    
+
+#TODO: Tomar del environment la shell por defecto    
 BASH_SCRIPT = '''#!/bin/bash
 source %s/lib/bash_init.sh
 %s'''
@@ -18,28 +19,78 @@ source %s/lib/bash_init.sh
 ENV_SCRIPT = '''#!%s/bin/shebang.sh %s
 %s'''
 
-def has_shebang(text):
-    line = text.split()[0]
+"""
+Working with shebangs
+http://en.wikipedia.org/wiki/Shebang_(Unix)
+
+In memory of Dennis Ritchie
+http://en.wikipedia.org/wiki/Dennis_Ritchie
+"""
+
+RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
+
+def has_shebang(line):
     return line.startswith("#!")
 
-def is_bash_shebang(text):
-    line = text.split()[0]
-    #TODO: Regexp
+def is_bash_shebang(line):
     return line.startswith("#!/bin/bash") or line.startswith("#!/bin/sh")
 
-def is_env_shebang(text):
-    line = text.split()[0]
+def is_env_shebang(line):
     return line.startswith("#!/usr/bin/env")
 
-def ensureShellScript(script, supportPath):
-    if not has_shebang(script) or is_bash_shebang(script):
+def shebang_patch(shebang, environment):
+    shebangParts = shebang.split()
+    if shebangParts[0].startswith("#!/usr/bin/env") and len(shebangParts) > 1:
+        envKey = shebangParts[1].upper()
+        patchValue = environment.get("TM_%s" % envKey, environment.get( "PMX_%s" % envKey))
+        if patchValue:
+            shebang = "%s %s %s" % ("#!/usr/bin/env", patchValue, " ".join(shebangParts[2:]))
+    else:
+        #No portable shebang
+        for key, value in environment.iteritems():
+            match = RE_SHEBANG_ENVKEY.match(key)
+            if match:
+                shebangKey = match.group(1).lower()
+                splitIndex = shebang.find(shebangKey)
+                if splitIndex != -1:
+                    splitIndex += len(shebangKey)
+                    shebang = value + shebang[splitIndex:]
+    return shebang
+
+def shebang_command(shebang, environment):
+    shebangParts = shebang.split()
+    command = " ".join(shebangParts[1:])
+    if shebangParts[0].startswith("#!/usr/bin/env") and len(shebangParts) > 1:
+        envKey = shebangParts[1].upper()
+        patchValue = environment.get("TM_%s" % envKey, environment.get( "PMX_%s" % envKey))
+        if patchValue:
+            command = "%s %s" % (patchValue, " ".join(shebangParts[2:]))
+    else:
+        #No portable shebang
+        for key, value in environment.iteritems():
+            if key.startswith("TM_") and key[3:].lower() in shebang:
+                command = ("%s %s") % (value, " ".join(shebangParts[1:]))
+                break
+            elif key.startswith("PMX_") and key[4:].lower() in shebang:
+                command = ("%s %s") % (value, " ".join(shebangParts[1:]))
+                break
+    return command
+
+def ensureShellScript(script, environment):
+    scriptLines = script.splitlines()
+    scriptFirstLine = scriptLines[0]
+    scriptContent = "\n".join(scriptLines[1:])
+    supportPath = environment['PMX_SUPPORT_PATH']
+    
+    #shebang analytics for build executable script
+    if not has_shebang(scriptFirstLine) or is_bash_shebang(scriptFirstLine):
         if sys.platform == "win32":
             supportPath = supportPath.replace("\\",'/')
-        script = BASH_SCRIPT % (supportPath, script)
-    elif is_env_shebang(script):
-        lines = script.splitlines()
-        shebang = lines[0].split()
-        script = ENV_SCRIPT % (supportPath, " ".join(shebang[1:]), "\n".join(lines[1:])) 
+        script = BASH_SCRIPT % (supportPath, scriptContent)
+    elif has_shebang(scriptFirstLine) or is_env_shebang(scriptFirstLine):
+        #shebang = shebang_patch(scriptFirstLine, environment)
+        command = shebang_command(scriptFirstLine, environment)
+        script = ENV_SCRIPT % (supportPath, shebang, scriptContent) 
     return script
 
 def ensureEnvironment(environment):
@@ -52,9 +103,9 @@ def ensureEnvironment(environment):
 
 def makeExecutableTempFile(content, directory):
     descriptor, name = tempfile.mkstemp(prefix='pmx', dir = directory)
-    file = os.fdopen(descriptor, 'w+')
-    file.write(content.encode('utf-8'))
-    file.close()
+    tempFile = os.fdopen(descriptor, 'w+')
+    tempFile.write(content.encode('utf-8'))
+    tempFile.close()
     os.chmod(name, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
     return name
 
@@ -70,7 +121,7 @@ class prepareShellScript():
     def __enter__(self):
         environment = ensureEnvironment(self.environment)
         assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
-        script = ensureShellScript(self.script, environment['PMX_SUPPORT_PATH'])
+        script = ensureShellScript(self.script, environment)
         self.tempFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
         if sys.platform == "win32":
             #FIXME: re trucho pero por ahora funciona para mi :)
@@ -135,3 +186,31 @@ def compileRegexp(string):
         except:
             #Mala leche
             pass
+
+if __name__ == '__main__':
+    #http://en.wikipedia.org/wiki/Shebang_(Unix)
+    environment = {
+        "TM_PYTHON": "python2",
+        "PMX_PHP": "php4",
+        "TM_RUBY": "ruby1.8",
+        "TM_BASH": "zsh",
+        "PYTHON_SHEBANG": "#!/usr/bin/python2",
+        "RUBY_SHEBANG": "#!/usr/local/bin/ruby1.8",
+        "BASH_SHEBANG": "#!/bin/sh"
+    }
+    print shebang_patch("#!/usr/bin/env python", environment)
+    print shebang_patch("#!/usr/bin/env python -s", environment)
+    print shebang_patch("#!/usr/bin/env ruby -w -u", environment)
+    print shebang_patch("#!/bin/ruby -uw --other", environment)
+    print shebang_patch("#!/usr/bin/python", environment)
+    print shebang_patch("#!/usr/bin/env bash", environment)
+    print shebang_patch("#!/usr/bin/bash", environment)
+    print shebang_command("#!/usr/bin/env python", environment)
+    print shebang_command("#!/usr/bin/env python -s", environment)
+    print shebang_command("#!/usr/bin/env ruby -w -u", environment)
+    print shebang_command("#!/bin/ruby -uw --other", environment)
+    print shebang_command("#!/bin/php -uw --other", environment)
+    print shebang_command("#!/usr/bin/python", environment)
+    print shebang_command("#!/usr/bin/env bash", environment)
+    print shebang_command("#!/usr/bin/env php", environment)
+    print shebang_command("#!/usr/bin/bash", environment)
