@@ -23,6 +23,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
+        self.errorCommand = settings.get("errorCommand", False)
 
     def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
         result = []
@@ -132,6 +133,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def error(self, context):
         #TODO: Mover esto a un lugar donde no dependa del processor mostrar un error en el borwser, quiza a la mainWindow
         #para poder llamarlos como showErrorInBrowser o algo asi :)
+        if self.errorCommand:
+            #Prevenir la entrada recursiva
+            raise Exception(context.errorValue)
         from prymatex.support.utils import makeHyperlinks
         command = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
@@ -150,7 +154,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
         command.setBundle(context.bundleItem.bundle)
         command.setManager(context.bundleItem.manager)
-        self.editor.insertBundleItem(command)
+        self.editor.insertBundleItem(command, errorCommand = True)
         
     def discard(self, context):
         pass
