@@ -12,3 +12,6 @@ class PMXBaseDialog(PMXBaseWidgetComponent):
         
     def setParameters(self, parameters):
         pass
+        
+    def execModal(self):
+        pass

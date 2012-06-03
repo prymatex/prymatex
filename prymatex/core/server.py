@@ -32,7 +32,7 @@ class PrymatexServer(QtCore.QObject):
         #TODO: Filtro todo lo que sea None asumo que las signaturas de los metodos ponene los valores por defecto
         # esto tendria que ser controlado de una mejor forma
         kwargs = dict(filter(lambda (key, value): value != None, kwargs.iteritems()))
-        print name, kwargs
+        print "Server Recv -->", name, kwargs
         method = getattr(self, name)
         method(**kwargs)
 
@@ -67,7 +67,10 @@ class PrymatexServer(QtCore.QObject):
         if isinstance(value, dict):
             value = plistlib.writePlistToString(value)
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
-        self.socket.send(value)
+        #Ensure Unicode encode
+        result = unicode(value).encode("utf-8")
+        print "Server Send -->", result
+        self.socket.send(result)
         
     def async_window(self, **kwargs):
         try:
@@ -118,8 +121,8 @@ class PrymatexServer(QtCore.QObject):
         dialogClass = self.loadDialogClass(name, directory)
         instance = self.createDialogInstance(dialogClass, self.application.mainWindow)
         instance.setParameters(parameters)
-        value = instance._exec()
-        self.sendResult(value)
+        value = instance.execModal()
+        self.sendResult({"result": value})
 
     def tooltip(self, message = "", format = "text", transparent = False):
         try:

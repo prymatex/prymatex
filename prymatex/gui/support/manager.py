@@ -96,7 +96,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
             if id(bundle.mainMenu) != menu.ID:
                 menu.clear()
-                submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+                submenus = bundle.mainMenu['submenus'] if bundle.mainMenu is not None and 'submenus' in bundle.mainMenu else {}
                 items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
                 self.buildMenu(items, menu, submenus, menu)
                 menu.ID = id(bundle.mainMenu)

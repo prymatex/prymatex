@@ -27,6 +27,7 @@ In memory of Dennis Ritchie
 http://en.wikipedia.org/wiki/Dennis_Ritchie
 """
 
+RE_SHEBANG = re.compile("^#!(.*)$")
 RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
 
 def has_shebang(line):
@@ -59,7 +60,7 @@ def shebang_patch(shebang, environment):
 
 def shebang_command(shebang, environment):
     shebangParts = shebang.split()
-    if shebangParts[0].startswith("#!/usr/bin/env") and len(shebangParts) > 1:
+    if is_env_shebang(shebangParts[0]) and len(shebangParts) > 1:
         envKey = shebangParts[1].upper()
         patchValue = environment.get("TM_%s" % envKey, environment.get( "PMX_%s" % envKey))
         if patchValue:
@@ -79,12 +80,11 @@ def ensureShellScript(script, environment):
     supportPath = environment['PMX_SUPPORT_PATH']
     
     #shebang analytics for build executable script
-    if not has_shebang(scriptFirstLine) or is_bash_shebang(scriptFirstLine):
-        if sys.platform == "win32":
-            supportPath = supportPath.replace("\\",'/')
+    if not has_shebang(scriptFirstLine):
+        script = BASH_SCRIPT % (supportPath, script)
+    elif is_bash_shebang(scriptFirstLine):
         script = BASH_SCRIPT % (supportPath, scriptContent)
-    elif has_shebang(scriptFirstLine) or is_env_shebang(scriptFirstLine):
-        #shebang = shebang_patch(scriptFirstLine, environment)
+    else:
         command = shebang_command(scriptFirstLine, environment)
         script = ENV_SCRIPT % (supportPath, command, scriptContent) 
     return script
