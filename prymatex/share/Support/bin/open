@@ -1,4 +1,4 @@
 #!/bin/bash
 
-exec ${TM_PYTHON:-python} $PMX_SUPPORT_PATH/bin/pmxctl.py open $@
+exec ${TM_PYTHON:-python} $PMX_SUPPORT_PATH/bin/pmxctl.py open "$@"
 
