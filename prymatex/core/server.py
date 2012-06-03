@@ -141,11 +141,13 @@ class PrymatexServer(QtCore.QObject):
             parameters = plistlib.readPlistFromString(kwargs["parameters"])
         except ExpatError:
             parameters = {}
+            
         def sendSelectedIndex(index):
             if index != -1:
                 self.sendResult({"selectedIndex": index})
             else:
-                self.sendResult()
+                self.sendResult({})
+            
         if "menuItems" in parameters:
             self.application.currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex)
 
