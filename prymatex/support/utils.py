@@ -7,17 +7,15 @@ try:
 except Exception, e:
     sre = re
 
-ABSPATH_LINENO_RE = re.compile('''
+RE_SHEBANG = re.compile("^#!(.*)$")
+RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
+RE_ABSPATH_LINENO = re.compile('''
     (?P<text>(?P<path>/[\w\d\/\.]+)(:(?P<line>\d+))?)
 ''', re.VERBOSE)
 
-#TODO: Tomar del environment la shell por defecto    
-BASH_SCRIPT = '''#!/bin/bash
-source %s/lib/bash_init.sh
-%s'''
-
-ENV_SCRIPT = '''#!%s/bin/shebang.sh %s
-%s'''
+PMX_SHEBANG = "#!%(PMX_SUPPORT_PATH)s/bin/shebang.sh"
+PMX_BASHINIT = "%(PMX_SUPPORT_PATH)s/lib/bash_init.sh"
+SHELL_SHEBANG = "#!/bin/bash"
 
 """
 Working with shebangs
@@ -27,9 +25,22 @@ In memory of Dennis Ritchie
 http://en.wikipedia.org/wiki/Dennis_Ritchie
 """
 
-RE_SHEBANG = re.compile("^#!(.*)$")
-RE_SHEBANG_ENVKEY = re.compile("(\w+)_SHEBANG")
+def buildShellScript(script, environment):
+    #TODO: Tomar del environment la shell por defecto
+    shellScript = [SHELL_SHEBANG]
+    bashInit = PMX_BASHINIT % environment
+    bashInit = bashInit.replace("\\", "/")
+    shellScript.append("source %s" % bashInit)
+    shellScript.append(script)
+    return "\n".join(shellScript)
 
+def buildEnvScript(script, command, environment):
+    shebang = PMX_SHEBANG % environment
+    shebang = shebang.replace("\\", "/")
+    envScript = [ "%s %s" % (shebang, command) ]
+    envScript.append(script)
+    return "\n".join(envScript)
+    
 def has_shebang(line):
     return line.startswith("#!")
 
@@ -77,16 +88,16 @@ def ensureShellScript(script, environment):
     scriptLines = script.splitlines()
     scriptFirstLine = scriptLines[0]
     scriptContent = "\n".join(scriptLines[1:])
-    supportPath = environment['PMX_SUPPORT_PATH']
     
     #shebang analytics for build executable script
     if not has_shebang(scriptFirstLine):
-        script = BASH_SCRIPT % (supportPath, script)
+        script = buildShellScript(script, environment)
     elif is_bash_shebang(scriptFirstLine):
-        script = BASH_SCRIPT % (supportPath, scriptContent)
+        script = buildShellScript(scriptContent, environment)
     else:
         command = shebang_command(scriptFirstLine, environment)
-        script = ENV_SCRIPT % (supportPath, command, scriptContent) 
+        script = buildEnvScript(scriptContent, command, environment)
+    print script, environment
     return script
 
 def ensureEnvironment(environment):
@@ -115,7 +126,7 @@ def prepareShellScript(script, environment):
     tempFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
     if sys.platform == "win32":
         #FIXME: re trucho pero por ahora funciona para mi :)
-        command = "c:\\cygwin\\bin\\env %s" % self.tempFile
+        command = 'c:\\cygwin\\bin\\env "%s"' % tempFile
     else:
         command = tempFile
     return command, environment, tempFile
@@ -159,7 +170,7 @@ def pathToLink(match):
     return link
 
 def makeHyperlinks(text):
-    return re.sub(ABSPATH_LINENO_RE, pathToLink, text)
+    return re.sub(RE_ABSPATH_LINENO, pathToLink, text)
 
 def compileRegexp(string):
     #Muejejejeje
