@@ -171,7 +171,6 @@ def prepareCygwinShellScript(script, environment):
     script = ensureShellScript(script, environment)
     tmpFile = makeExecutableTempFile(script, environment.get("PMX_TMP_PATH"))
     command = '%s\\bin\\env.exe "%s"' % (cygwinPath, tmpFile)
-    print command
     return command, environment, tmpFile
 
 def prepareShellScript(script, environment):
