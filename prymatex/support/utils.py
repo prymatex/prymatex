@@ -13,8 +13,10 @@ RE_ABSPATH_LINENO = re.compile('''
     (?P<text>(?P<path>/[\w\d\/\.]+)(:(?P<line>\d+))?)
 ''', re.VERBOSE)
 
-PMX_SHEBANG = "#!%(PMX_SUPPORT_PATH)s/bin/shebang.sh"
-PMX_BASHINIT = "%(PMX_SUPPORT_PATH)s/lib/bash_init.sh"
+PMX_CYGWIN_PATH = "c:\\cygwin"
+
+PMX_SHEBANG = "#!%s/bin/shebang.sh"
+PMX_BASHINIT = "%s/lib/bash_init.sh"
 SHELL_SHEBANG = "#!/bin/bash"
 
 """
@@ -25,18 +27,27 @@ In memory of Dennis Ritchie
 http://en.wikipedia.org/wiki/Dennis_Ritchie
 """
 
+def getSupportPath(environment):
+    supportPath = environment["PMX_SUPPORT_PATH"]
+    if (supportPath[0] == '"' and supportPath[-1] == '"') or \
+    (supportPath[0] == "'" and supportPath[-1] == "'"):
+        supportPath = supportPath[1:-1]
+    return supportPath
+
 def buildShellScript(script, environment):
     #TODO: Tomar del environment la shell por defecto
     shellScript = [SHELL_SHEBANG]
-    bashInit = PMX_BASHINIT % environment
-    bashInit = bashInit.replace("\\", "/")
-    shellScript.append("source %s" % bashInit)
+    supportPath = getSupportPath(environment)
+    
+    bashInit = PMX_BASHINIT % supportPath
+    shellScript.append('source "%s"' % bashInit)
     shellScript.append(script)
     return "\n".join(shellScript)
 
 def buildEnvScript(script, command, environment):
-    shebang = PMX_SHEBANG % environment
-    shebang = shebang.replace("\\", "/")
+    supportPath = getSupportPath(environment)
+
+    shebang = PMX_SHEBANG % supportPath
     envScript = [ "%s %s" % (shebang, command) ]
     envScript.append(script)
     return "\n".join(envScript)
@@ -97,16 +108,79 @@ def ensureShellScript(script, environment):
     else:
         command = shebang_command(scriptFirstLine, environment)
         script = buildEnvScript(scriptContent, command, environment)
-    print script, environment
     return script
 
-def ensureEnvironment(environment):
+#============================
+# UINX
+#============================
+def ensureUnixEnvironment(environment):
     codingenv = {}
     for key, value in os.environ.iteritems():
         codingenv[key] = value[:]
     for key, value in environment.iteritems():
         codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
     return codingenv
+
+def prepareUnixShellScript(script, environment):
+    environment = ensureUnixEnvironment(environment)
+    script = ensureShellScript(script, environment)
+    tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
+    return tmpFile, environment, tmpFile
+    
+#============================
+# WINDOWS
+#============================
+def ensureWindowsEnvironment(environment):
+    codingenv = {}
+    for key, value in os.environ.iteritems():
+        codingenv[key] = value[:]
+    for key, value in environment.iteritems():
+        codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
+    return codingenv
+
+def prepareWindowsShellScript(script, environment):
+    environment = ensureWindowsEnvironment(environment)
+    script = ensureShellScript(script, environment)
+    tmpFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
+    return tmpFile, environment, tmpFile
+    
+#============================
+# CYGWIN
+#============================
+def ensureCygwinPath(path):
+    import win32api
+    if os.path.exists(path):
+        path = win32api.GetShortPathName(path)
+        path = path.replace("\\", "/")
+    return path
+
+def ensureCygwinEnvironment(environment):
+    codingenv = {}
+    for key, value in os.environ.iteritems():
+        codingenv[key] = ensureCygwinPath(value)
+    for key, value in environment.iteritems():
+        key = unicode(key).encode('utf-8')
+        value = unicode(value).encode('utf-8')
+        codingenv[key] = ensureCygwinPath(value)
+    return codingenv
+
+def prepareCygwinShellScript(script, environment):
+    cygwinPath = environment.get("PMX_CYGWIN_PATH", PMX_CYGWIN_PATH)
+    environment = ensureCygwinEnvironment(environment)
+
+    script = ensureShellScript(script, environment)
+    tmpFile = makeExecutableTempFile(script, environment.get("PMX_TMP_PATH"))
+    command = '%s\\bin\\env.exe "%s"' % (cygwinPath, tmpFile)
+    print command
+    return command, environment, tmpFile
+
+def prepareShellScript(script, environment):
+    assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
+    if sys.platform == "win32" and "PMX_CYGWIN_PATH" in environment:
+        return prepareCygwinShellScript(script, environment)
+    elif sys.platform == "win32":
+        return prepareWindowsShellScript(script, environment)
+    return prepareUnixShellScript(script, environment)
 
 def makeExecutableTempFile(content, directory):
     descriptor, name = tempfile.mkstemp(prefix='pmx', dir = directory)
@@ -118,18 +192,6 @@ def makeExecutableTempFile(content, directory):
 
 def deleteFile(filePath):
     os.unlink(filePath)
-    
-def prepareShellScript(script, environment):
-    environment = ensureEnvironment(environment)
-    assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
-    script = ensureShellScript(script, environment)
-    tempFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
-    if sys.platform == "win32":
-        #FIXME: re trucho pero por ahora funciona para mi :)
-        command = 'c:\\cygwin\\bin\\env "%s"' % tempFile
-    else:
-        command = tempFile
-    return command, environment, tempFile
 
 def sh(cmd):
     """ Execute cmd and capture stdout, and return it as a string. """
