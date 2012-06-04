@@ -55,7 +55,11 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableView" name="tableViewResults"/>
+    <widget class="QTableView" name="tableViewResults">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QTextEdit" name="textEditDescription">
@@ -85,7 +89,7 @@
      <item>
       <widget class="QLabel" name="labelBundle">
        <property name="text">
-        <string>Bundle:</string>
+        <string>Bundle directory name:</string>
        </property>
       </widget>
      </item>

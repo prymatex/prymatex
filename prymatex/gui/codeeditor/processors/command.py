@@ -137,6 +137,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
             #Prevenir la entrada recursiva
             raise Exception(context.errorValue)
         from prymatex.support.utils import makeHyperlinks
+        from prymatex.utils import html
         command = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             
@@ -144,8 +145,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
             echo -e "<pre>%(output)s</pre>"
             echo -e "<p>Exit code was: %(exitcode)d</p>"
             html_footer
-        ''' % {'output': context.errorValue, 
-               'name': context.description(),
+        ''' % {'output': html.escape(context.errorValue),
+               'name': html.escape(context.description()),
                'exitcode': context.outputType}
         commandHash = { 'command': command, 
                            'name': "Error" + context.bundleItem.name,

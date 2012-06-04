@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+
+#Cosas interesantes
+#http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
+
 import os
 import codecs
 import shutil
@@ -9,10 +13,11 @@ import fnmatch
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.core.plugin import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
 
-class PMXFileManager(QtCore.QObject):
+class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     """A File Manager"""
     #=========================================================
     # Signals

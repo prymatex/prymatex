@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Cosas interesantes
-#http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
 import os
 import sys
 import logging
@@ -286,6 +284,7 @@ class PMXApplication(QtGui.QApplication):
         #Seria mejor que esto no falle pero bueno tengo que preguntar por none
         if self.zmqContext is not None:
             from prymatex.core.server import PrymatexServer
+            self.populateComponent(PrymatexServer)
             self.server = PrymatexServer(self)
 
     #========================================================

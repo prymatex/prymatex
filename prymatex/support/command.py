@@ -8,7 +8,7 @@ import functools
 from collections import namedtuple
 
 from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
-from prymatex.support.utils import compileRegexp, prepareShellScript
+from prymatex.support.utils import compileRegexp
 
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
@@ -93,15 +93,12 @@ class PMXCommand(PMXBundleItem):
 
     def execute(self, processor):
         if self.beforeExecute(processor): 
-    
-            context = PMXRunningContext(self)
+            systemCommand = self.systemCommand()
+            environment = processor.environment(self)
             
-            context.asynchronous = processor.asynchronous
-            context.inputType, context.inputValue = self.getInputText(processor)
-            
-            with prepareShellScript(self.systemCommand(), processor.environment(self)) as (shellCommand, environment):
-                context.shellCommand = shellCommand
-                context.environment = environment
+            with PMXRunningContext(self, systemCommand, environment) as context:
+                context.asynchronous = processor.asynchronous
+                context.inputType, context.inputValue = self.getInputText(processor)
                 self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
     
     def afterExecute(self, processor, context):

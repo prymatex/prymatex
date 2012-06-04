@@ -22,7 +22,7 @@ except Exception, e:
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
-from prymatex.support.utils import prepareShellScript
+from prymatex.support.utils import prepareShellScript, deleteFile
 from subprocess import Popen, PIPE, STDOUT
 
 SNIPPET_SYNTAX = { 
@@ -541,13 +541,15 @@ class Shell(NodeList):
         return node
     
     def execute(self, processor):
-        with prepareShellScript(unicode(self), processor.environment) as (command, env):
-            process = Popen(command, stdout=PIPE, stderr=STDOUT, env = env)
-            text = process.stdout.read()
-            text = text.strip()
-            process.stdout.close()
-            _ = process.wait()
-            self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
+        # TODO Migrar a runing context
+        command, env, tempFile = prepareShellScript(unicode(self), processor.environment)
+        process = Popen(command, stdout=PIPE, stderr=STDOUT, env = env)
+        text = process.stdout.read()
+        text = text.strip()
+        process.stdout.close()
+        _ = process.wait()
+        deleteFile(tempFile)
+        self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
         
     def render(self, processor):
         if not hasattr(self, 'content'):

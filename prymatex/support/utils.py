@@ -106,29 +106,19 @@ def makeExecutableTempFile(content, directory):
     return name
 
 def deleteFile(filePath):
-    return os.unlink(filePath)
-
-class prepareShellScript():
-    def __init__(self, script, environment):
-        self.script = script
-        self.environment = environment
-        self.tempFile = ""
-
-    def __enter__(self):
-        environment = ensureEnvironment(self.environment)
-        assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
-        script = ensureShellScript(self.script, environment)
-        self.tempFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
-        if sys.platform == "win32":
-            #FIXME: re trucho pero por ahora funciona para mi :)
-            command = "c:\\cygwin\\bin\\env %s" % self.tempFile
-        else:
-            command = self.tempFile
-        return command, environment
-
-    def __exit__(self, type, value, traceback):
-        pass
-        #deleteFile(self.tempFile)
+    os.unlink(filePath)
+    
+def prepareShellScript(script, environment):
+    environment = ensureEnvironment(environment)
+    assert 'PMX_SUPPORT_PATH' in environment, "PMX_SUPPORT_PATH is not in the environment"
+    script = ensureShellScript(script, environment)
+    tempFile = makeExecutableTempFile(script, environment.get('PMX_TMP_PATH'))
+    if sys.platform == "win32":
+        #FIXME: re trucho pero por ahora funciona para mi :)
+        command = "c:\\cygwin\\bin\\env %s" % self.tempFile
+    else:
+        command = tempFile
+    return command, environment, tempFile
 
 def sh(cmd):
     """ Execute cmd and capture stdout, and return it as a string. """

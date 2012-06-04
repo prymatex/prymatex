@@ -10,12 +10,12 @@ from xml.parsers.expat import ExpatError
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
+from prymatex.core.plugin import PMXBaseComponent
 from prymatex.utils.importlib import import_module, import_from_directory
 
-class PrymatexServer(QtCore.QObject):
+class PrymatexServer(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
-        self.application = application
         
         self.dialogs = {}
         self.instances = {}
@@ -32,20 +32,21 @@ class PrymatexServer(QtCore.QObject):
         #TODO: Filtro todo lo que sea None asumo que las signaturas de los metodos ponene los valores por defecto
         # esto tendria que ser controlado de una mejor forma
         kwargs = dict(filter(lambda (key, value): value != None, kwargs.iteritems()))
-        print "Server Recv -->", name, kwargs
+        
+        self.logger.debug("Server Recv --> Method: %s, Arguments: %s" % (name, kwargs))
         method = getattr(self, name)
-        method(**kwargs)
-
-    def loadDialogClass(self, moduleName, directory):
         try:
-            module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
-            dialogClass = getattr(module, 'dialogClass')
-            self.application.populateComponent(dialogClass)
-            return dialogClass
-        except (ImportError, AttributeError), reason:
-            #TODO: Manejar estos errores
+            method(**kwargs)
+        except Exception, reason:
+            self.sendResult({"error": {"code": -1, "message": reason.message}})
             raise reason
 
+    def loadDialogClass(self, moduleName, directory):
+        module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
+        dialogClass = getattr(module, 'dialogClass')
+        self.application.populateComponent(dialogClass)
+        return dialogClass
+        
     def createDialogInstance(self, dialogClass, mainWindow, async = False):
         instance = dialogClass(mainWindow)
         self.application.settings.configure(instance)
@@ -69,7 +70,7 @@ class PrymatexServer(QtCore.QObject):
         #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}  
         #Ensure Unicode encode
         result = unicode(value).encode("utf-8")
-        print "Server Send -->", result
+        self.logger.debug("Server Send --> Result: %s" % (result))
         self.socket.send(result)
         
     def async_window(self, **kwargs):

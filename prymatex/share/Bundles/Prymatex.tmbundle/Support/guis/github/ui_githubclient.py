@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'githubclient.ui'
 #
-# Created: Thu Apr 26 15:28:46 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Sun Jun  3 15:35:44 2012
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_GitHubClientDialog(object):
     def setupUi(self, GitHubClientDialog):
         GitHubClientDialog.setObjectName(_fromUtf8("GitHubClientDialog"))
-        GitHubClientDialog.resize(500, 300)
+        GitHubClientDialog.resize(500, 424)
         GitHubClientDialog.setMinimumSize(QtCore.QSize(500, 0))
         self.verticalLayout = QtGui.QVBoxLayout(GitHubClientDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -34,15 +34,20 @@ class Ui_GitHubClientDialog(object):
         self.horizontalLayout_2.addWidget(self.lineEditQuery)
         self.buttonSearch = QtGui.QPushButton(GitHubClientDialog)
         font = QtGui.QFont()
-        font.setWeight(75)
         font.setBold(True)
+        font.setWeight(75)
         self.buttonSearch.setFont(font)
         self.buttonSearch.setObjectName(_fromUtf8("buttonSearch"))
         self.horizontalLayout_2.addWidget(self.buttonSearch)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.tableViewResults = QtGui.QTableView(GitHubClientDialog)
+        self.tableViewResults.setAlternatingRowColors(True)
         self.tableViewResults.setObjectName(_fromUtf8("tableViewResults"))
         self.verticalLayout.addWidget(self.tableViewResults)
+        self.textEditDescription = QtGui.QTextEdit(GitHubClientDialog)
+        self.textEditDescription.setMaximumSize(QtCore.QSize(16777215, 60))
+        self.textEditDescription.setObjectName(_fromUtf8("textEditDescription"))
+        self.verticalLayout.addWidget(self.textEditDescription)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -66,6 +71,6 @@ class Ui_GitHubClientDialog(object):
         self.label.setText(QtGui.QApplication.translate("GitHubClientDialog", "<html><head/><body><p>This tool allows you to get TextMate bundles from <br/>GitHub and install them in your current profile.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.labelSearch.setText(QtGui.QApplication.translate("GitHubClientDialog", "Search:", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonSearch.setText(QtGui.QApplication.translate("GitHubClientDialog", "Search Github", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelBundle.setText(QtGui.QApplication.translate("GitHubClientDialog", "Bundle:", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelBundle.setText(QtGui.QApplication.translate("GitHubClientDialog", "Bundle directory name:", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonClone.setText(QtGui.QApplication.translate("GitHubClientDialog", "Clone", None, QtGui.QApplication.UnicodeUTF8))
 

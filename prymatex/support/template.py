@@ -128,13 +128,9 @@ class PMXTemplate(PMXBundleItem):
         return env
     
     def execute(self, environment = {}, callback = lambda x: x):
-        context = PMXRunningContext(self)
-        
-        context.asynchronous = False
-        context.workingDirectory = self.currentPath
-        with prepareShellScript(self.command, environment) as (shellCommand, environment):
-            context.shellCommand = shellCommand
-            context.environment = environment
+        with PMXRunningContext(self, self.command, environment) as context:
+            context.asynchronous = False
+            context.workingDirectory = self.currentPath
             self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
     
     def afterExecute(self, callback, context):

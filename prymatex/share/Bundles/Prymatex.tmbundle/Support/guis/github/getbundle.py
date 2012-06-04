@@ -90,6 +90,7 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.tableViewResults.setModel(self.model)
         self.tableViewResults.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tableViewResults.verticalHeader().hide()
+        self.tableViewResults.selectionModel().selectionChanged.connect(self.on_treeView_selectionChanged)
         
     def on_buttonSearch_pressed(self):
         text = self.lineEditQuery.text()
@@ -107,16 +108,17 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     
     def on_lineEditBundle_textChanged(self):    
         self.buttonClone.setEnabled(len(self.lineEditQuery.text()) >= self.MINIMUM_QUERY_LENGTH)
-        
-    def on_tableViewResults_activated(self):
-        index = self.tableViewResults.currentIndex()
-        repoName = self.model.item(index.row(), 0).text()
-        self.lineEditBundle.setText(repoName)
-        
-    def on_tableViewResults_clicked(self):
-        index = self.tableViewResults.currentIndex()
-        repoName = self.model.item(index.row(), 0).text()
-        self.lineEditBundle.setText(repoName)
+    
+    def on_treeView_selectionChanged(self, selected, deselected):
+        indexes = selected.indexes()
+        if indexes:
+            index = indexes[0]
+            repoName = self.model.item(index.row(), 0).text()
+            if repoName.endswith(".tmbundle") or repoName.endswith("-tmbundle"):
+                repoName = repoName[0:-9]
+            self.lineEditBundle.setText(repoName)
+        else:
+            self.lineEditBundle.setText("")
 
     def updateRecords(self, data):
         item_names = map(itemgetter(0), self.model.ROWS)
