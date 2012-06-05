@@ -619,12 +619,12 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
 
 class PMXProjectWidget(PMXEditorBaseWidget, Ui_Template):
     TYPE = 'project'
-    DEFAULTS = {'extension': 'txt',
-                'command': '''if [[ ! -f "$TM_NEW_FILE" ]]; then
+    DEFAULTS = {
+                'command': '''if [[ ! -f "$TM_NEW_PROJECT_LOCATION" ]]; then
   TM_YEAR=`date +%Y` \
   TM_DATE=`date +%Y-%m-%d` \
   perl -pe 's/\$\{([^}]*)\}/$ENV{$1}/g' \
-     < template_in.txt > "$TM_NEW_FILE"
+     < template_in.txt > "$TM_NEW_PROJECT_LOCATION"
 fi"'''}
     def __init__(self, parent = None):
         PMXEditorBaseWidget.__init__(self, parent)
@@ -659,7 +659,3 @@ fi"'''}
         if command is None:
             command = self.DEFAULTS['command']
         self.command.setPlainText(command)
-        extension = bundleItem.extension
-        if extension is None:
-            extension = self.changes['extension'] = self.DEFAULTS['extension']
-        self.lineEditExtension.setText(extension)

@@ -117,6 +117,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     def on_actionTemplate_triggered(self):
         self.createBundleItem(u"untitled", "template")
         
+    def on_actionProject_triggered(self):
+        self.createBundleItem(u"untitled", "project")
+        
     def on_actionTemplateFile_triggered(self):
         index = self.treeView.currentIndex()
         if index.isValid():
@@ -169,6 +172,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         action = QtGui.QAction("New Template", self)
         action.triggered.connect(self.on_actionTemplate_triggered)
         self.toolbarMenu.addAction(action)
+        action = QtGui.QAction("New Project", self)
+        action.triggered.connect(self.on_actionProject_triggered)
+        self.toolbarMenu.addAction(action)
         self.templateFileAction = QtGui.QAction("New Template File", self)
         self.templateFileAction.triggered.connect(self.on_actionTemplateFile_triggered)
         self.toolbarMenu.addAction(self.templateFileAction)
@@ -182,7 +188,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         
         def conditionalEnabledTemplateFile():
             node = self.proxyTreeModel.node(self.treeView.currentIndex())
-            self.templateFileAction.setEnabled(not node.isRootNode() and (node.TYPE == "template" or node.TYPE == "templatefile"))
+            self.templateFileAction.setEnabled(not node.isRootNode() and (node.TYPE in ["template", "templatefile", "project"]))
         self.toolbarMenu.aboutToShow.connect(conditionalEnabledTemplateFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)
@@ -205,6 +211,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/drag-commands.png"), "DragCommands", "dragcommand")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/preferences.png"), "Preferences", "preference")
         self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template templatefile")
+        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/project.png"), "Projects", "project templatefile")
     
     #==========================================================
     # Tree View

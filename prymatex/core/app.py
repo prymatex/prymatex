@@ -92,8 +92,7 @@ class PMXApplication(QtGui.QApplication):
     def switchProfile(self):
         from prymatex.gui.dialogs.profile import PMXProfileDialog
         profile = PMXProfileDialog.switchProfile(PMXSettings.PMX_PROFILES_FILE)
-        if profile != self.settings.PMX_PROFILE_NAME:
-            print "switch to", profile
+        if profile is not None and profile != self.settings.PMX_PROFILE_NAME:
             self.restart()
         
     def restart(self):
@@ -319,6 +318,7 @@ class PMXApplication(QtGui.QApplication):
         print "Commit data"
         
     def saveState(self, session_manager):
+        print "saveState"
         pass
     
     #========================================================
