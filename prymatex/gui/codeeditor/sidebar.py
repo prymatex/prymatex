@@ -2,7 +2,7 @@
 #-*- encoding: utf-8 -*-
 
 from PyQt4 import QtGui, QtCore
-from PyQt4.Qt import QColor, QSize
+from PyQt4.Qt import QColor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex import resources
 
@@ -13,7 +13,7 @@ class PMXSidebar(QtGui.QWidget):
     FOLDING_POSITION = 2
     
     def __init__(self, editor):
-        super(PMXSidebar, self).__init__(editor)
+        QtGui.QWidget.__init__(self, editor)
         self.editor = editor
         self.showBookmarks = True
         self.showLineNumbers = True
@@ -36,16 +36,16 @@ class PMXSidebar(QtGui.QWidget):
         return padding
         
     def sizeHint(self):
-        return QtGui.QSize(self.editor.lineNumberAreaWidth(), 0)
+        return QtCore.QSize(self.editor.lineNumberAreaWidth(), 0)
 
     def paintEvent(self, event):
+        editorFont = QtGui.QFont(self.editor.font)
         page_bottom = self.editor.viewport().height()
-        font_metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
+        font_metrics = QtGui.QFontMetrics(editorFont)
         current_block = self.editor.document().findBlock(self.editor.textCursor().position())
-
+        
         painter = QtGui.QPainter(self)
         painter.setPen(self.foreground)
-        painter.setFont(self.editor.document().defaultFont())
         painter.fillRect(self.rect(), self.background)
 
         block = self.editor.firstVisibleBlock()
@@ -60,19 +60,18 @@ class PMXSidebar(QtGui.QWidget):
             if position.y() > page_bottom:
                 break
 
-            font = painter.font()
-            font.setBold(block == current_block)
-            painter.setFont(font)
+            editorFont.setBold(block == current_block)
+            painter.setFont(editorFont)
 
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():
                 #Line Numbers
                 if self.showLineNumbers:
-                    leftPosition = self.width() - font_metrics.width(str(line_count)) - 1
+                    leftPosition = self.width() - font_metrics.width(str(line_count)) - 2
                     if self.showFolding:
                         leftPosition -= self.foldArea
                     painter.drawText(leftPosition,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 1,
+                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 2,
                         str(line_count))
 
                 #Bookmarks
@@ -115,7 +114,7 @@ class PMXSidebar(QtGui.QWidget):
     def translatePosition(self, position):
         xofs = self.width() - self.foldArea
         xobs = self.bookmarkArea
-        font_metrics = QtGui.QFontMetrics(self.editor.document().defaultFont())
+        font_metrics = QtGui.QFontMetrics(self.editor.font)
         fh = font_metrics.lineSpacing()
         ys = position.y()
         

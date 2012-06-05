@@ -27,6 +27,7 @@ from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleter
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
+from prymatex.gui.codeeditor.addons import SideBarWidgetAddon
 
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
@@ -196,7 +197,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Load Default Syntax
         syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.setSyntax(syntax)
-        
+    
+    def addAddon(self, addon):
+        PMXBaseEditor.addAddon(self, addon)
+        if isinstance(addon, SideBarWidgetAddon):
+            self.addSideBarWidget(addon)
+
+    def addSideBarWidget(self, widget):
+        print "agregar a la sidebar"
+
     def updateIndent(self, block, userData, indent):
         self.logger.debug("Update Block Indent")
     
@@ -522,10 +531,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Espacio para la sidebar
     #=======================================================================
     def lineNumberAreaWidth(self):
-        font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
         area = self.sidebar.padding
         if self.sidebar.showLineNumbers:
-            area += font_metrics.width(str(self.blockCount()))
+            editorFont = QtGui.QFont(self.font)
+            editorFont.setBold(True)
+            fontMetrics = QtGui.QFontMetrics(editorFont)
+            area += fontMetrics.width(str(self.blockCount()))
         if self.sidebar.showBookmarks:
             area += self.sidebar.bookmarkArea
         if self.sidebar.showFolding:

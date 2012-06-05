@@ -6,6 +6,12 @@ from PyQt4 import QtCore, QtGui
 from prymatex.core.plugin import PMXBaseAddon
 from prymatex.support import PMXPreferenceSettings
 
+class CodeEditorBaseAddon(PMXBaseAddon):
+    pass
+
+class SideBarWidgetAddon(PMXBaseAddon):
+    pass
+    
 class CompleterAddon(QtCore.QObject, PMXBaseAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
@@ -67,4 +73,42 @@ class SpellCheckerAddon(QtCore.QObject, PMXBaseAddon):
             currentBlock = cursor.block()
             spellRange = filter(lambda ((start, end), p): p.spellChecking,  currentBlock.userData().preferences)
             print spellRange
+
+class SpellCheckerAddon(QtCore.QObject, PMXBaseAddon):
+    def __init__(self, parent):
+        QtCore.QObject.__init__(self, parent)
+
+    def initialize(self, editor):
+        self.editor = editor
+        self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
+    
+    def finalize(self):
+        pass
         
+    def on_editor_keyPressEvent(self, event):
+        if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ]:
+            cursor = self.editor.textCursor()
+            currentBlock = cursor.block()
+            spellRange = filter(lambda ((start, end), p): p.spellChecking,  currentBlock.userData().preferences)
+            print spellRange
+        
+class ExtraSelectionSideBarAddon(QtGui.QWidget, SideBarWidgetAddon):
+    def __init__(self, parent):
+        QtGui.QWidget.__init__(self, parent)
+
+    def initialize(self, editor):
+        self.editor = editor
+        
+    def finalize(self):
+        pass
+        
+    def sizeHint(self):
+        return QtCore.QSize(30, 30)
+
+    def paintEvent(self, event):
+        print "pintando"
+        painter = QtGui.QPainter(self)
+        painter.setPen(self.editor.colours['foreground'])
+        painter.fillRect(self.rect(), self.editor.colours['foreground'])
+        painter.end()
+        QtGui.QWidget.paintEvent(self, event)

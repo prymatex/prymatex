@@ -36,3 +36,4 @@ def registerPlugin(manager):
     manager.registerAddon(PMXCodeEditor, addons.CompleterAddon)
     manager.registerAddon(PMXCodeEditor, addons.SmartUnindentAddon)
     manager.registerAddon(PMXCodeEditor, addons.SpellCheckerAddon)
+    #manager.registerAddon(PMXCodeEditor, addons.ExtraSelectionSideBarAddon)
