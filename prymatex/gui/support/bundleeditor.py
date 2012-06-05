@@ -76,6 +76,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
                          widgets.PMXPreferenceWidget(self),
                          widgets.PMXLanguageWidget(self),
                          widgets.PMXMacroWidget(self),
+                         widgets.PMXProjectWidget(self),
                          widgets.PMXEditorBaseWidget(self) ]
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackedWidget.addWidget(editor)

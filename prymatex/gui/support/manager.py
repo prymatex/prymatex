@@ -10,7 +10,7 @@ from prymatex.support.manager import PMXSupportBaseManager
 
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeListModel, PMXThemeStylesTableModel, PMXThemeStyleRow, PMXProcessTableModel
-from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel, PMXProjectProxyModel
 
 class PMXBundleMenuGroup(QtCore.QObject):
     def __init__(self, manager):
@@ -176,6 +176,10 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         self.templateProxyModel = PMXTemplateProxyModel(self)
         self.templateProxyModel.setSourceModel(self.bundleTreeModel)
         
+        #PROJECTS
+        self.projectProxyModel = PMXProjectProxyModel(self)
+        self.projectProxyModel.setSourceModel(self.bundleTreeModel)
+
         #SYNTAX
         self.syntaxProxyModel = PMXSyntaxProxyModel(self)
         self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)

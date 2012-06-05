@@ -34,7 +34,7 @@ class PMXBundleTreeNode(TreeNode):
     
     @property
     def icon(self):
-        return resources.getIcon(self.TYPE)
+        return resources.getIcon("bundle-item-%s" % self.TYPE)
     
     @property
     def trigger(self):

@@ -20,12 +20,28 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.completerFileSystem = QtGui.QCompleter(model, self)
         self.lineLocation.setCompleter(self.completerFileSystem)
         
-        self.templateProxyModel = self.application.supportManager.templateProxyModel
-        self.comboBoxTemplate.setModel(self.templateProxyModel)
-        self.comboBoxTemplate.setModelColumn(0)
+        self.setupComboTemplates()
         self.buttonCreate.setDefault(True)
         self.projectCreated = None
-    
+
+    def setupComboTemplates(self):
+        self.projectProxyModel = self.application.supportManager.projectProxyModel
+        tableView = QtGui.QTableView(self)
+        tableView.setModel(self.projectProxyModel)
+        tableView.resizeColumnsToContents()
+        tableView.resizeRowsToContents()
+        tableView.verticalHeader().setVisible(False)
+        tableView.horizontalHeader().setVisible(False)
+        tableView.setShowGrid(False)
+        tableView.setMinimumWidth(tableView.horizontalHeader().length() + 25)
+        tableView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        tableView.setAutoScroll(False)
+        self.comboBoxTemplate.setModel(self.projectProxyModel)
+        self.comboBoxTemplate.setView(tableView)
+        self.comboBoxTemplate.setModelColumn(0)
+
     def on_buttonChoose_pressed(self):
         directory = self.application.fileManager.getDirectory()
         path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
@@ -74,7 +90,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.reject()
 
     def runTemplateForProject(self, name, location):
-        index = self.templateProxyModel.mapToSource(self.templateProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0))
+        index = self.projectProxyModel.mapToSource(self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0))
         if index.isValid():
             template = index.internalPointer()
             environment = template.buildEnvironment(projectName = name, projectLocation = location)

@@ -616,3 +616,50 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def edit(self, bundle):
         super(PMXBundleWidget, self).edit(bundle)
         self.treeMenuModel.setBundle(bundle)
+
+class PMXProjectWidget(PMXEditorBaseWidget, Ui_Template):
+    TYPE = 'project'
+    DEFAULTS = {'extension': 'txt',
+                'command': '''if [[ ! -f "$TM_NEW_FILE" ]]; then
+  TM_YEAR=`date +%Y` \
+  TM_DATE=`date +%Y-%m-%d` \
+  perl -pe 's/\$\{([^}]*)\}/$ENV{$1}/g' \
+     < template_in.txt > "$TM_NEW_FILE"
+fi"'''}
+    def __init__(self, parent = None):
+        PMXEditorBaseWidget.__init__(self, parent)
+        self.setupUi(self)
+        self.comboBoxOutput.addItem("Insert as Text", "insertText")
+        self.command.setTabStopWidth(TABWIDTH)
+
+    @QtCore.pyqtSlot()
+    def on_command_textChanged(self):
+        text = self.command.toPlainText()
+        if self.bundleItem.command != text:
+            self.changes['command'] = text
+        else:
+            self.changes.pop('command', None)
+    
+    @QtCore.pyqtSlot(str)
+    def on_lineEditExtension_textEdited(self, text):
+        if text != self.bundleItem.extension:
+            self.changes['extension'] = text
+        else:
+            self.changes.pop('extension', None)
+            
+    @property
+    def title(self):
+        if self.bundleItem != None:
+            return 'Edit Template: "%s"' % self.bundleItem.name
+        return super(PMXProjectWidget, self).title
+
+    def edit(self, bundleItem):
+        super(PMXProjectWidget, self).edit(bundleItem)
+        command = bundleItem.command
+        if command is None:
+            command = self.DEFAULTS['command']
+        self.command.setPlainText(command)
+        extension = bundleItem.extension
+        if extension is None:
+            extension = self.changes['extension'] = self.DEFAULTS['extension']
+        self.lineEditExtension.setText(extension)

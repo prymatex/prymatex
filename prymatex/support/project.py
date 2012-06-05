@@ -10,7 +10,7 @@ from prymatex.support.utils import prepareShellScript
 from prymatex.utils import plist
 
 class PMXProjectFile(object):
-    TYPE = 'projectfile'
+    TYPE = 'templatefile'
     def __init__(self, path, project):
         self.path = path
         self.name = os.path.basename(path)

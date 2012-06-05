@@ -8,7 +8,7 @@ class PMXBundleTreeProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, manager, parent = None):
         QtGui.QSortFilterProxyModel.__init__(self, parent)
         self.manager = manager
-        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax"]
+        self.bundleItemTypeOrder = ["bundle", "command", "dragcommand", "macro", "snippet", "preference", "template", "templatefile", "syntax", "project"]
         self.namespacesFilter = [ "prymatex", "user" ]
         self.bundleItemTypesFilter = self.bundleItemTypeOrder[:]
     
@@ -158,6 +158,28 @@ class PMXSyntaxProxyModel(PMXBundleTypeFilterProxyModel):
 class PMXTemplateProxyModel(PMXBundleTypeFilterProxyModel):
     def __init__(self, parent = None):
         PMXBundleTypeFilterProxyModel.__init__(self, 'template', parent)
+    
+    def data(self, index, role):
+        if self.sourceModel() is None:
+            return None
+        
+        if not index.isValid():
+            return None
+        
+        sIndex = self.mapToSource(index)
+        
+        if role == QtCore.Qt.DisplayRole and index.column() == 1:
+            template = self.sourceModel().node(sIndex)
+            return template.bundle.name
+        elif index.column() == 0:
+            return self.sourceModel().data(sIndex, role)
+
+    def columnCount(self, parent):
+        return 2
+
+class PMXProjectProxyModel(PMXBundleTypeFilterProxyModel):
+    def __init__(self, parent = None):
+        PMXBundleTypeFilterProxyModel.__init__(self, 'project', parent)
     
     def data(self, index, role):
         if self.sourceModel() is None:

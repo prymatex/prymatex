@@ -11,15 +11,16 @@ from prymatex import resources_rc
 
 INTERNAL = {
     #Bundles
-    "bundle": ":/icons/bundles/bundle.png",
-    "template": ":/icons/bundles/templates.png",
-    "command": ":/icons/bundles/commands.png",
-    "syntax": ":/icons/bundles/languages.png",
-    "preference": ":/icons/bundles/preferences.png",
-    "dragcommand": ":/icons/bundles/drag-commands.png",
-    "snippet": ":/icons/bundles/snippets.png",
-    "macro": ":/icons/bundles/macros.png",
-    "templatefile": ":/icons/bundles/template-files.png",
+    "bundle-item-bundle": ":/icons/bundles/bundle.png",
+    "bundle-item-template": ":/icons/bundles/templates.png",
+    "bundle-item-command": ":/icons/bundles/commands.png",
+    "bundle-item-syntax": ":/icons/bundles/languages.png",
+    "bundle-item-project": ":/icons/bundles/project.png",
+    "bundle-item-preference": ":/icons/bundles/preferences.png",
+    "bundle-item-dragcommand": ":/icons/bundles/drag-commands.png",
+    "bundle-item-snippet": ":/icons/bundles/snippets.png",
+    "bundle-item-macro": ":/icons/bundles/macros.png",
+    "bundle-item-templatefile": ":/icons/bundles/template-files.png",
     
     #Editor Sidebar
     "foldingtop": ":/editor/sidebar/folding-top.png",
