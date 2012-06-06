@@ -76,7 +76,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
         if isClose:
             #Es un caracter de cierre, veamos si tengo que saltarme algo hacia la derecha
             cursor1, cursor2 = editor.currentBracesPairs(cursor, direction = "right")
-            self.skip = cursor1 is not None and cursor2 is not None
+            self.skip = cursor1 is not None and cursor2 is not None and character == cursor2.selectedText()
             return self.skip
 
         ctrl_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
