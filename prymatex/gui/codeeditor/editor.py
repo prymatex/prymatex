@@ -21,7 +21,7 @@ from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
-from prymatex.gui.codeeditor.sidebar import PMXSidebar
+from prymatex.gui.codeeditor.sidebar import PMXSidebar, PMXNewSidebar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
@@ -149,7 +149,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #Sidebar
         self.sidebar = PMXSidebar(self)
-
+        self.rightBar = PMXNewSidebar(self)
+        
         #Models
         self.bookmarkListModel = PMXBookmarkListModel(self)
         self.symbolListModel = PMXSymbolListModel(self)
@@ -204,7 +205,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.addSideBarWidget(addon)
 
     def addSideBarWidget(self, widget):
-        print "agregar a la sidebar"
+        widget.setParent(self.rightBar)
+        self.rightBar.addWidget(widget)
 
     def updateIndent(self, block, userData, indent):
         self.logger.debug("Update Block Indent")
@@ -237,6 +239,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Connect Signals
     #=======================================================================
     def connectSignals(self):
+        self.rightBar.updateRequest.connect(self.updateLineNumberAreaWidth)
+        
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateLineNumberArea)
@@ -543,13 +547,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             area += self.sidebar.foldArea
         return area
         
-    def updateLineNumberAreaWidth(self, newBlockCount):
-        self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
+    def updateLineNumberAreaWidth(self, newBlockCount = 0):
+        self.setViewportMargins(self.lineNumberAreaWidth(), 0, self.rightBar.width(), 0)
     
     def updateLineNumberArea(self, rect, dy):
         if dy:
+            self.rightBar.scroll(0, dy)
             self.sidebar.scroll(0, dy)
         else:
+            self.rightBar.update(0, rect.y(), self.sidebar.width(), rect.height())
             self.sidebar.update(0, rect.y(), self.sidebar.width(), rect.height())
         if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
@@ -728,6 +734,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
         self.sidebar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+        rightBarPosition = cr.right() - self.rightBar.width()
+        if self.verticalScrollBar().isVisible():
+            rightBarPosition -= self.verticalScrollBar().width()
+        self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
         self.updateOverlays()
     
     def paintEvent(self, event):
@@ -1167,11 +1177,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def toggleBookmark(self, block = None):
         block = block or self.textCursor().block()
         self.bookmarkListModel.toggleBookmark(block)
-        self.sidebar.update()
     
     def removeAllBookmarks(self):
         self.bookmarkListModel.removeAllBookmarks()
-        self.sidebar.update()
     
     def bookmarkNext(self, block = None):
         block = block or self.textCursor().block()
@@ -1344,7 +1352,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     
     # Contributes to Main Menu
     @classmethod
-    def contributeToMainMenu(cls):
+    def contributeToMainMenu(cls, addonClasses):
+        leftGutter = []
+        rightGutter = []
+        for addon in addonClasses:
+            if issubclass(addon, SideBarWidgetAddon):
+                if addon.ALIGNMENT == QtCore.Qt.AlignRight:
+                    rightGutter.append(addon.contributeToMenu())
+                else:
+                    leftGutter.append(addon.contributeToMenu())
+
         view = {
             'items': [
                 {'title': 'Font',
@@ -1356,24 +1373,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                       'shortcut': "Ctrl+-",
                       'callback': cls.zoomOut}
                 ]},
-                {'title': 'Gutter',
-                 'items': [
-                    {'title': 'Foldings',
-                     'callback': cls.on_actionShowFoldings_toggled,
-                     'shortcut': 'Shift+F10',
-                     'checkable': True,
-                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowFolding) },
-                    {'title': "Bookmarks",
-                     'callback': cls.on_actionShowBookmarks_toggled,
-                     'shortcut': 'Alt+F10',
-                     'checkable': True,
-                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowBookmarks) },
-                    {'title': "Line Numbers",
-                     'callback': cls.on_actionShowLineNumbers_toggled,
-                     'shortcut': 'F10',
-                     'checkable': True,
-                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineNumbers) },
-                ]},
+                {'title': 'Left Gutter',
+                 'items': leftGutter},
+                 {'title': 'Right Gutter',
+                 'items': rightGutter},
                 '-',
                 {'title': "Show Tabs And Spaces",
                  'callback': cls.on_actionShowTabsAndSpaces_toggled,

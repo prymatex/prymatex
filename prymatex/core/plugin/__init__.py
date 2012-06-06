@@ -43,6 +43,11 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     def addAddon(self, addon):
         self.addons.append(addon)
         
+    def addonByClassName(self, className):
+        addons = filter(lambda addon: addon.__class__.__name__ == className, self.addons)
+        #TODO: Solo uno
+        return addons[0]
+
     @classmethod
     def addKeyHelper(cls, helper):
         helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])
@@ -52,6 +57,10 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
         helpers = self.KEY_HELPERS[Key_Any][:]
         return helpers + self.KEY_HELPERS.get(key, [])
 
+    @classmethod
+    def contributeToMainMenu(cls, addonClasses):
+        return PMXBaseComponent.contributeToMainMenu()
+        
 class PMXBaseOverlay(object):
     def initialize(self, widget):
         pass
@@ -67,6 +76,10 @@ class PMXBaseAddon(object):
         pass
     
     def finalize(self):
+        pass
+
+    @classmethod
+    def contributeToMenu(cls):
         pass
 
 Key_Any = 0

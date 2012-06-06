@@ -95,7 +95,9 @@ class PMXPluginManager(PMXBaseComponent):
     
     def createCustomActions(self, mainWindow):
         for editorClass in self.editors:
-            menus = editorClass.contributeToMainMenu()
+            addonClasses = self.addons.get(editorClass, [])
+            print addonClasses
+            menus = editorClass.contributeToMainMenu(addonClasses)
             if menus is not None:
                 customEditorActions = []
                 for name, settings in menus.iteritems():
@@ -104,7 +106,8 @@ class PMXPluginManager(PMXBaseComponent):
             mainWindow.registerEditorClassActions(editorClass, customEditorActions)
         
         for dockClass in self.dockers:
-            menus = dockClass.contributeToMainMenu()
+            addonClasses = self.addons.get(dockClass, [])
+            menus = dockClass.contributeToMainMenu(addonClasses)
             if menus is not None:
                 customDockActions = []
                 for name, settings in menus.iteritems():
@@ -113,7 +116,8 @@ class PMXPluginManager(PMXBaseComponent):
             mainWindow.registerDockClassActions(dockClass, customDockActions)
         
         for statusClass in self.statusBars:
-            menus = statusClass.contributeToMainMenu()
+            addonClasses = self.addons.get(statusClass, [])
+            menus = statusClass.contributeToMainMenu(addonClasses)
             if menus is not None:
                 customStatusActions = []
                 for name, settings in menus.iteritems():

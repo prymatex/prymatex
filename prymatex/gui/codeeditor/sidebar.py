@@ -6,6 +6,36 @@ from PyQt4.Qt import QColor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex import resources
 
+class PMXNewSidebar(QtGui.QWidget):
+    updateRequest = QtCore.pyqtSignal()
+    
+    def __init__(self, editor):
+        QtGui.QWidget.__init__(self, editor)
+        self.editor = editor
+        self.setupUi()
+        
+    def setupUi(self):
+        self.horizontalLayout = QtGui.QHBoxLayout(self)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setMargin(0)
+        
+    def addWidget(self, widget):
+        self.horizontalLayout.addWidget(widget)
+        widget.visibilityChanged.connect(lambda _, sidebar = self: sidebar.updateRequest.emit())
+
+    def width(self):
+        width = 0
+        for index in range(self.horizontalLayout.count()):
+            widget = self.horizontalLayout.itemAt(index).widget()
+            if widget.isVisible():
+                width += widget.width()
+        return width
+
+    def scroll(self, *args):
+        for index in range(self.horizontalLayout.count()):
+            self.horizontalLayout.itemAt(index).widget().scroll(*args)
+
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
 class PMXSidebar(QtGui.QWidget):
     BOOKMARK_POSITION = 0
@@ -34,9 +64,6 @@ class PMXSidebar(QtGui.QWidget):
             if addPadding:
                 padding += 2
         return padding
-        
-    def sizeHint(self):
-        return QtCore.QSize(self.editor.lineNumberAreaWidth(), 0)
 
     def paintEvent(self, event):
         editorFont = QtGui.QFont(self.editor.font)
