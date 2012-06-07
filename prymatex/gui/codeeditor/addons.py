@@ -149,7 +149,7 @@ class ExtraSelectionSideBarAddon(SideBarWidgetAddon):
         QtGui.QWidget.paintEvent(self, event)
 
 class LineNumberSideBarAddon(SideBarWidgetAddon):
-    ALIGNMENT = QtCore.Qt.AlignRight
+    ALIGNMENT = QtCore.Qt.AlignLeft
     def initialize(self, editor):
         SideBarWidgetAddon.initialize(self, editor)
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
@@ -223,7 +223,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
         QtGui.QWidget.paintEvent(self, event)
         
 class BookmarkSideBarAddon(SideBarWidgetAddon):
-    ALIGNMENT = QtCore.Qt.AlignRight
+    ALIGNMENT = QtCore.Qt.AlignLeft
     
     def __init__(self, parent):
         SideBarWidgetAddon.__init__(self, parent)
@@ -290,7 +290,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
         self.repaint(self.rect())
             
 class FoldingSideBarAddon(SideBarWidgetAddon):
-    ALIGNMENT = QtCore.Qt.AlignRight
+    ALIGNMENT = QtCore.Qt.AlignLeft
     
     def __init__(self, parent):
         SideBarWidgetAddon.__init__(self, parent)

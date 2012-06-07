@@ -21,7 +21,7 @@ from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
-from prymatex.gui.codeeditor.sidebar import PMXSidebar, PMXNewSidebar
+from prymatex.gui.codeeditor.sidebar import PMXSideBar
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
@@ -40,6 +40,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
     themeChanged = QtCore.pyqtSignal()
+    fontChanged = QtCore.pyqtSignal()
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
@@ -59,8 +60,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def font(self, font):
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.document().setDefaultFont(font)
-        self.sidebar.font = font
         self.setTabStopWidth(self.tabStopSize * 9)
+        self.fontChanged.emit()
     
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
     def theme(self, uuid):
@@ -76,13 +77,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
         self.setStyleSheet(appStyle)
 
-        #Sidebar colours
-        #TODO: que la sidebar lo tomo del editor
-        self.sidebar.foreground = self.colours['foreground']
-        self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
-        
-        self.updateLineNumberAreaWidth(0)
-        self.highlightCurrent()
         if not firstTime:
             message = "<b>%s</b> theme set " % theme.name
             if theme.author is not None:
@@ -147,10 +141,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self)
 
-        #Sidebar
-        self.sidebar = PMXSidebar(self)
-        self.rightBar = PMXNewSidebar(self)
-        
+        #Sidebars
+        self.leftBar = PMXSideBar(self)
+        self.rightBar = PMXSideBar(self)
+        self.updateViewportMargins()
+
         #Models
         self.bookmarkListModel = PMXBookmarkListModel(self)
         self.symbolListModel = PMXSymbolListModel(self)
@@ -205,8 +200,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.addSideBarWidget(addon)
 
     def addSideBarWidget(self, widget):
-        widget.setParent(self.rightBar)
-        self.rightBar.addWidget(widget)
+        #widget.setParent(self.rightBar)
+        if widget.ALIGNMENT == QtCore.Qt.AlignRight:
+            self.rightBar.addWidget(widget)
+        else:
+            self.leftBar.addWidget(widget)
 
     def updateIndent(self, block, userData, indent):
         self.logger.debug("Update Block Indent")
@@ -239,14 +237,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Connect Signals
     #=======================================================================
     def connectSignals(self):
-        self.rightBar.updateRequest.connect(self.updateLineNumberAreaWidth)
+        self.rightBar.updateRequest.connect(self.updateViewportMargins)
+        self.leftBar.updateRequest.connect(self.updateViewportMargins)
         
-        self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.blockCountChanged.connect(self.on_blockCountChanged)
-        self.updateRequest.connect(self.updateLineNumberArea)
+        self.updateRequest.connect(self.updateSideBars)
         self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.showSyntaxMessage)
+        self.themeChanged.connect(self.highlightCurrent)
         
         self.actionCopyPath.triggered.connect(self.on_actionCopyPath_triggered)
         
@@ -420,12 +419,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             flags |= self.ShowTabsAndSpaces
         if options.flags() & QtGui.QTextOption.ShowLineAndParagraphSeparators:
             flags |= self.ShowLineAndParagraphs
-        if self.sidebar.showBookmarks:
-            flags |= self.ShowBookmarks
-        if self.sidebar.showLineNumbers:
-            flags |= self.ShowLineNumbers
-        if self.sidebar.showFolding:
-            flags |= self.ShowFolding
+        # if self.sidebar.showBookmarks:
+        #     flags |= self.ShowBookmarks
+        # if self.sidebar.showLineNumbers:
+        #     flags |= self.ShowLineNumbers
+        # if self.sidebar.showFolding:
+        #     flags |= self.ShowFolding
         if options.wrapMode() & QtGui.QTextOption.WordWrap:
             flags |= self.WordWrap
         return flags
@@ -447,13 +446,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             options.setWrapMode(QtGui.QTextOption.NoWrap)
         options.setFlags(oFlags)
         self.document().setDefaultTextOption(options)
-        self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
-        self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
-        self.sidebar.showFolding = bool(flags & self.ShowFolding)
-        self.updateLineNumberAreaWidth(0)
-        #self.setCenterOnScroll(True)
-        #self.viewport().repaint(self.viewport().visibleRegion())
-    
+        # self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
+        # self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
+        # self.sidebar.showFolding = bool(flags & self.ShowFolding)
+        
     # Syntax
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
@@ -532,33 +528,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.setTextCursor(cursor)
         
     #=======================================================================
-    # Espacio para la sidebar
+    # SideBars
     #=======================================================================
-    def lineNumberAreaWidth(self):
-        area = self.sidebar.padding
-        if self.sidebar.showLineNumbers:
-            editorFont = QtGui.QFont(self.font)
-            editorFont.setBold(True)
-            fontMetrics = QtGui.QFontMetrics(editorFont)
-            area += fontMetrics.width(str(self.blockCount()))
-        if self.sidebar.showBookmarks:
-            area += self.sidebar.bookmarkArea
-        if self.sidebar.showFolding:
-            area += self.sidebar.foldArea
-        return area
-        
-    def updateLineNumberAreaWidth(self, newBlockCount = 0):
-        self.setViewportMargins(self.lineNumberAreaWidth(), 0, self.rightBar.width(), 0)
+    def updateViewportMargins(self):
+        self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
     
-    def updateLineNumberArea(self, rect, dy):
+    def updateSideBars(self, rect, dy):
         if dy:
             self.rightBar.scroll(0, dy)
-            self.sidebar.scroll(0, dy)
+            self.leftBar.scroll(0, dy)
         else:
-            self.rightBar.update(0, rect.y(), self.sidebar.width(), rect.height())
-            self.sidebar.update(0, rect.y(), self.sidebar.width(), rect.height())
-        if rect.contains(self.viewport().rect()):
-            self.updateLineNumberAreaWidth(0)
+            self.rightBar.update(0, rect.y(), self.rightBar.width(), rect.height())
+            self.leftBar.update(0, rect.y(), self.leftBar.width(), rect.height())
         
     #=======================================================================
     # Braces
@@ -733,10 +714,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
-        self.sidebar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+        self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
         rightBarPosition = cr.right() - self.rightBar.width()
-        if self.verticalScrollBar().isVisible():
-            rightBarPosition -= self.verticalScrollBar().width()
+        #if self.verticalScrollBar().isVisible():
+        #    rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
         self.updateOverlays()
     
@@ -1025,13 +1006,13 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     def codeFoldingFold(self, block):
         self._fold(block)
-        self.update()
-        self.sidebar.update()
+        # self.update()
+        # self.sidebar.update()
     
     def codeFoldingUnfold(self, block):
         self._unfold(block)
-        self.update()
-        self.sidebar.update()
+        # self.update()
+        # self.sidebar.update()
         
     def _fold(self, block):
         milestone = block
@@ -1290,7 +1271,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             if start == end:
                 break
             start = start.next()
-        cursor.endEditBlock()        
+        cursor.endEditBlock()
 
     def unindentBlocks(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor or self.textCursor())

@@ -46,7 +46,7 @@ class PMXEditorFolding(object):
             self.updateIndentFoldingBlocks()
         else:
             self.updateFoldingBlocks()
-        self.editor.sidebar.update()
+        #self.editor.sidebar.update()
 
     def updateFoldingBlocks(self):
         nest = 0

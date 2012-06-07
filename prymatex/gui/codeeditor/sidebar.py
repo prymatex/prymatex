@@ -3,18 +3,14 @@
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import QColor
-from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex import resources
 
-class PMXNewSidebar(QtGui.QWidget):
+class PMXSideBar(QtGui.QWidget):
     updateRequest = QtCore.pyqtSignal()
     
     def __init__(self, editor):
         QtGui.QWidget.__init__(self, editor)
         self.editor = editor
-        self.setupUi()
-        
-    def setupUi(self):
         self.horizontalLayout = QtGui.QHBoxLayout(self)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalLayout.setSpacing(0)
@@ -37,7 +33,7 @@ class PMXNewSidebar(QtGui.QWidget):
             self.horizontalLayout.itemAt(index).widget().scroll(*args)
 
 #based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
-class PMXSidebar(QtGui.QWidget):
+class PMXOldSidebar(QtGui.QWidget):
     BOOKMARK_POSITION = 0
     LINENUMBER_POSITION = 1
     FOLDING_POSITION = 2
