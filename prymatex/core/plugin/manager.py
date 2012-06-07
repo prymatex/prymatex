@@ -96,7 +96,6 @@ class PMXPluginManager(PMXBaseComponent):
     def createCustomActions(self, mainWindow):
         for editorClass in self.editors:
             addonClasses = self.addons.get(editorClass, [])
-            print addonClasses
             menus = editorClass.contributeToMainMenu(addonClasses)
             if menus is not None:
                 customEditorActions = []

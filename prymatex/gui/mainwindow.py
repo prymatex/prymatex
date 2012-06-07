@@ -216,7 +216,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                     action.setVisible(editorClass == currentEditorClass)
                     if editorClass == currentEditorClass and action.isCheckable() and hasattr(action, 'testChecked'):
                         action.setChecked(action.testChecked(editor))
-                        
+
+    def showMessage(self, message):
+        #Busca el show message en el editor sino ver otra forma de mostrar el mensaje
+        self.currentEditor().showMessage(message)
+    
     #============================================================
     # Create and manage editors
     #============================================================

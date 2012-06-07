@@ -76,12 +76,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         color: %s;
         selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
         self.setStyleSheet(appStyle)
-
-        if not firstTime:
-            message = "<b>%s</b> theme set " % theme.name
-            if theme.author is not None:
-                message += "<i>(by %s)</i>" % theme.author
-            self.showMessage(message)
         self.themeChanged.emit()
         
     #================================================================

@@ -164,4 +164,8 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         
         if changeSettings:
             self.settingGroup.setValue('theme', unicode(theme.uuid).upper())
+            message = "<b>%s</b> theme set " % theme.name
+            if theme.author is not None:
+                message += "<i>(by %s)</i>" % theme.author
+            self.application.showMessage(message)    
         

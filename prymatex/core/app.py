@@ -378,6 +378,10 @@ class PMXApplication(QtGui.QApplication):
             else:
                 self.mainWindow.addEmptyEditor()
 
+    def showMessage(self, message):
+        #Si tengo mainwindow vamos por este camino, sino hacerlo llegar de otra forma
+        self.mainWindow.showMessage(message)
+
     def currentEditor(self):
         return self.mainWindow.currentEditor()
 

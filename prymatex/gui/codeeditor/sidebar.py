@@ -3,6 +3,8 @@
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import QColor
+
+from prymatex.gui.codeeditor.addons import SideBarWidgetAddon
 from prymatex import resources
 
 class PMXSideBar(QtGui.QWidget):
@@ -18,7 +20,7 @@ class PMXSideBar(QtGui.QWidget):
         
     def addWidget(self, widget):
         self.horizontalLayout.addWidget(widget)
-        widget.visibilityChanged.connect(lambda _, sidebar = self: sidebar.updateRequest.emit())
+        widget.updateRequest.connect(lambda sidebar = self: sidebar.updateRequest.emit())
 
     def width(self):
         width = 0
@@ -32,39 +34,57 @@ class PMXSideBar(QtGui.QWidget):
         for index in range(self.horizontalLayout.count()):
             self.horizontalLayout.itemAt(index).widget().scroll(*args)
 
-#based on: http://john.nachtimwald.com/2009/08/15/qtextedit-with-line-numbers/ (MIT license)
-class PMXOldSidebar(QtGui.QWidget):
-    BOOKMARK_POSITION = 0
-    LINENUMBER_POSITION = 1
-    FOLDING_POSITION = 2
-    
-    def __init__(self, editor):
-        QtGui.QWidget.__init__(self, editor)
-        self.editor = editor
-        self.showBookmarks = True
-        self.showLineNumbers = True
-        self.showFolding = True
-        self.bookmarkArea = 12
-        self.foldArea = 12
-        self.foreground = None
-        self.background = None
-        self.images = {}
-        for key in ["bookmarkflag", "foldingcollapsed", "foldingtop", "foldingbottom"]:
-            self.images[key] = resources.getImage(key)
-        self.setMouseTracking(True)
+#=======================================
+# SideBar Widgets
+#=======================================
+class LineNumberSideBarAddon(SideBarWidgetAddon):
+    ALIGNMENT = QtCore.Qt.AlignLeft
+    MARGIN = 10
+    def initialize(self, editor):
+        SideBarWidgetAddon.initialize(self, editor)
+        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.foreground = self.editor.colours["foreground"]
+        self.normalFont = QtGui.QFont(self.editor.font)
+        self.boldFont = QtGui.QFont(self.editor.font)
+        self.boldFont.setBold(True)
+        self.normalMetrics = QtGui.QFontMetrics(self.normalFont)
+        self.boldMetrics = QtGui.QFontMetrics(self.boldFont)
+        
+        self.setFixedWidth(self.fontMetrics().width("0") + self.MARGIN)
 
-    @property
-    def padding(self):
-        padding = 0
-        for addPadding in [self.showLineNumbers or self.showFolding or self.showBookmarks]:
-            if addPadding:
-                padding += 2
-        return padding
+        self.editor.blockCountChanged.connect(self.updateWidth)
+        self.editor.themeChanged.connect(self.updateColours)
+
+    def updateColours(self):
+        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.foreground = self.editor.colours["foreground"]
+        self.repaint(self.rect())
+
+    def updateWidth(self, newBlockCount):
+        width = self.fontMetrics().width(str(newBlockCount)) + self.MARGIN
+        if self.width() != width:
+            self.setFixedWidth(width)
+            self.updateRequest.emit()
+
+    @classmethod
+    def contributeToMenu(cls):
+        def on_actionShowLineNumbers_toggled(editor, checked):
+            instance = editor.addonByClassName(cls.__name__)
+            instance.setVisible(checked)
+
+        def on_actionShowLineNumbers_testChecked(editor):
+            instance = editor.addonByClassName(cls.__name__)
+            return instance.isVisible()
+        
+        menuEntry = {'title': "Line Numbers",
+            'callback': on_actionShowLineNumbers_toggled,
+            'shortcut': 'F10',
+            'checkable': True,
+            'testChecked': on_actionShowLineNumbers_testChecked }
+        return menuEntry
 
     def paintEvent(self, event):
-        editorFont = QtGui.QFont(self.editor.font)
         page_bottom = self.editor.viewport().height()
-        font_metrics = QtGui.QFontMetrics(editorFont)
         current_block = self.editor.document().findBlock(self.editor.textCursor().position())
         
         painter = QtGui.QPainter(self)
@@ -83,89 +103,173 @@ class PMXOldSidebar(QtGui.QWidget):
             if position.y() > page_bottom:
                 break
 
-            editorFont.setBold(block == current_block)
-            painter.setFont(editorFont)
-
             # Draw the line number right justified at the y position of the line.
             if block.isVisible():
-                #Line Numbers
-                if self.showLineNumbers:
-                    leftPosition = self.width() - font_metrics.width(str(line_count)) - 2
-                    if self.showFolding:
-                        leftPosition -= self.foldArea
-                    painter.drawText(leftPosition,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 2,
-                        str(line_count))
+                numberText = str(line_count)
+                if block == current_block:
+                    painter.setFont(self.boldFont)
+                    leftPosition = self.width() - (self.boldMetrics.width(numberText) + round(self.MARGIN / 2))
+                    topPosition = position.y() + self.boldMetrics.ascent() + self.boldMetrics.descent() - 2
+                    painter.drawText(leftPosition, topPosition, numberText)
+                else:
+                    painter.setFont(self.normalFont)
+                    leftPosition = self.width() - (self.normalMetrics.width(numberText) + round(self.MARGIN / 2))
+                    topPosition = position.y() + self.normalMetrics.ascent() + self.normalMetrics.descent() - 2
+                    painter.drawText(leftPosition, topPosition, numberText)
 
-                #Bookmarks
-                if self.showBookmarks and block in self.editor.bookmarkListModel:
-                    painter.drawPixmap(2,
-                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["bookmarkflag"].height(),
-                        self.images["bookmarkflag"])
-                
-                #Folding
-                if self.showFolding:
-                    userData = block.userData()
-    
-                    mark = self.editor.folding.getFoldingMark(block)
-                    if self.editor.folding.isStart(mark):
-                        if userData.folded:
-                            painter.drawPixmap(self.width() - self.images["foldingcollapsed"].width() - 1,
-                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["foldingcollapsed"].height(),
-                                self.images["foldingcollapsed"])
-                        else:
-                            painter.drawPixmap(self.width() - self.images["foldingtop"].width() - 1,
-                                round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["foldingtop"].height(),
-                                self.images["foldingtop"])
-                    elif self.editor.folding.isStop(mark):
-                        painter.drawPixmap(self.width() - self.images["foldingcollapsed"].width() - 1,
-                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.images["foldingcollapsed"].height(),
-                            self.images["foldingbottom"])
-            
             block = block.next()
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
-
-    def mouseMoveEvent(self, event):
-        pass
-        #TODO: Un Tooltip con lo que esta foldeado
-        #position, block = self.translatePosition(event.pos())
-        #if position == self.FOLDING_POSITION and self.editor.folding.isFoldingMark(block) and self.editor.folding.isFolded(block):
-        #    print "poner timer sobre", block.blockNumber()
-    
-    def translatePosition(self, position):
-        xofs = self.width() - self.foldArea
-        xobs = self.bookmarkArea
-        font_metrics = QtGui.QFontMetrics(self.editor.font)
-        fh = font_metrics.lineSpacing()
-        ys = position.y()
         
-        if position.x() > xofs or position.x() < xobs:
-            block = self.editor.firstVisibleBlock()
-            viewport_offset = self.editor.contentOffset()
-            page_bottom = self.editor.viewport().height()
-            while block.isValid():
-                blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-                if blockPosition.y() > page_bottom:
-                    break
-                if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:
-                    break
-                block = block.next()
-            if position.x() > xofs:
-                return (self.FOLDING_POSITION, block)
-            elif xobs < position.x() < xofs:
-                return (self.LINENUMBER_POSITION, block)
-            else:
-                return (self.BOOKMARK_POSITION, block)
-        return (None, None)
+class BookmarkSideBarAddon(SideBarWidgetAddon):
+    ALIGNMENT = QtCore.Qt.AlignLeft
     
+    def __init__(self, parent):
+        SideBarWidgetAddon.__init__(self, parent)
+        self.bookmarkflagImage = resources.getImage("bookmarkflag")
+        self.setFixedWidth(self.bookmarkflagImage.width())
+        
+    def initialize(self, editor):
+        SideBarWidgetAddon.initialize(self, editor)
+        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.editor.themeChanged.connect(self.updateColours)
+        
+    def updateColours(self):
+        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.repaint(self.rect())
+
+    @classmethod
+    def contributeToMenu(cls):
+        def on_actionShowBookmarks_toggled(editor, checked):
+            instance = editor.addonByClassName(cls.__name__)
+            instance.setVisible(checked)
+
+        def on_actionShowBookmarks_testChecked(editor):
+            instance = editor.addonByClassName(cls.__name__)
+            return instance.isVisible()
+        
+        menuEntry = {'title': "Bookmarks",
+            'callback': on_actionShowBookmarks_toggled,
+            'shortcut': 'Alt+F10',
+            'checkable': True,
+            'testChecked': on_actionShowBookmarks_testChecked }
+        return menuEntry
+
+    def paintEvent(self, event):
+        font_metrics = QtGui.QFontMetrics(self.editor.font)
+        page_bottom = self.editor.viewport().height()
+       
+        painter = QtGui.QPainter(self)
+        painter.fillRect(self.rect(), self.background)
+
+        block = self.editor.firstVisibleBlock()
+        viewport_offset = self.editor.contentOffset()
+        
+        while block.isValid():
+            # The top left position of the block in the document
+            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            # Check if the position of the block is out side of the visible area
+            if position.y() > page_bottom:
+                break
+
+            # Draw the line number right justified at the y position of the line.
+            if block.isVisible() and block in self.editor.bookmarkListModel:
+                painter.drawPixmap(0,
+                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.bookmarkflagImage.height(),
+                    self.bookmarkflagImage)
+
+            block = block.next()
+
+        painter.end()
+        QtGui.QWidget.paintEvent(self, event)
+        
     def mousePressEvent(self, event):
-        position, block = self.translatePosition(event.pos())
-        if position == self.FOLDING_POSITION and self.editor.folding.isFoldingMark(block):
+        block = self.translatePosition(event.pos())
+        self.editor.toggleBookmark(block)
+        self.repaint(self.rect())
+            
+class FoldingSideBarAddon(SideBarWidgetAddon):
+    ALIGNMENT = QtCore.Qt.AlignLeft
+    
+    def __init__(self, parent):
+        SideBarWidgetAddon.__init__(self, parent)
+        self.foldingcollapsedImage = resources.getImage("foldingcollapsed")
+        self.foldingtopImage = resources.getImage("foldingtop")
+        self.foldingbottomImage = resources.getImage("foldingbottom")
+        self.setFixedWidth(self.foldingbottomImage.width())
+        
+    def initialize(self, editor):
+        SideBarWidgetAddon.initialize(self, editor)
+        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.editor.themeChanged.connect(self.updateColours)
+        
+    def updateColours(self):
+        self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
+        self.repaint(self.rect())
+    
+    @classmethod
+    def contributeToMenu(cls):
+        def on_actionShowFoldings_toggled(editor, checked):
+            instance = editor.addonByClassName(cls.__name__)
+            instance.setVisible(checked)
+
+        def on_actionShowFoldings_testChecked(editor):
+            instance = editor.addonByClassName(cls.__name__)
+            return instance.isVisible()
+        
+        menuEntry = {'title': 'Foldings',
+            'callback': on_actionShowFoldings_toggled,
+            'shortcut': 'Shift+F10',
+            'checkable': True,
+            'testChecked': on_actionShowFoldings_testChecked }
+        return menuEntry
+
+    def paintEvent(self, event):
+        font_metrics = QtGui.QFontMetrics(self.editor.font)
+        page_bottom = self.editor.viewport().height()
+       
+        painter = QtGui.QPainter(self)
+        painter.fillRect(self.rect(), self.background)
+
+        block = self.editor.firstVisibleBlock()
+        viewport_offset = self.editor.contentOffset()
+        
+        while block.isValid():
+            # The top left position of the block in the document
+            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            # Check if the position of the block is out side of the visible area
+            if position.y() > page_bottom:
+                break
+
+            # Draw the line number right justified at the y position of the line.
+            if block.isVisible():
+                userData = block.userData()
+    
+                mark = self.editor.folding.getFoldingMark(block)
+                if self.editor.folding.isStart(mark):
+                    if userData.folded:
+                        painter.drawPixmap(0,
+                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingcollapsedImage.height(),
+                            self.foldingcollapsedImage)
+                    else:
+                        painter.drawPixmap(0,
+                            round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingtopImage.height(),
+                            self.foldingtopImage)
+                elif self.editor.folding.isStop(mark):
+                    painter.drawPixmap(0,
+                        round(position.y()) + font_metrics.ascent() + font_metrics.descent() - self.foldingbottomImage.height(),
+                        self.foldingbottomImage)
+
+            block = block.next()
+
+        painter.end()
+        QtGui.QWidget.paintEvent(self, event)
+        
+    def mousePressEvent(self, event):
+        block = self.translatePosition(event.pos())
+        if self.editor.folding.isFoldingMark(block):
             if self.editor.folding.isFolded(block):
                 self.editor.codeFoldingUnfold(block)
             else:
                 self.editor.codeFoldingFold(block)
-        elif position == self.BOOKMARK_POSITION:
-            self.editor.toggleBookmark(block)

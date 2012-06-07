@@ -5,7 +5,7 @@ from PyQt4 import QtCore
 
 from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbolsDock
 from prymatex.gui.codeeditor.editor import PMXCodeEditor
-from prymatex.gui.codeeditor import helpers, addons
+from prymatex.gui.codeeditor import helpers, addons, sidebar
 from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
 from prymatex.gui.codeeditor.overlay import PMXEditorMessageOverlay, PMXMiniMapOverlay
 
@@ -37,6 +37,6 @@ def registerPlugin(manager):
     manager.registerAddon(PMXCodeEditor, addons.SmartUnindentAddon)
     manager.registerAddon(PMXCodeEditor, addons.SpellCheckerAddon)
     #manager.registerAddon(PMXCodeEditor, addons.ExtraSelectionSideBarAddon)
-    manager.registerAddon(PMXCodeEditor, addons.BookmarkSideBarAddon)
-    manager.registerAddon(PMXCodeEditor, addons.LineNumberSideBarAddon)
-    manager.registerAddon(PMXCodeEditor, addons.FoldingSideBarAddon)
+    manager.registerAddon(PMXCodeEditor, sidebar.BookmarkSideBarAddon)
+    manager.registerAddon(PMXCodeEditor, sidebar.LineNumberSideBarAddon)
+    manager.registerAddon(PMXCodeEditor, sidebar.FoldingSideBarAddon)
