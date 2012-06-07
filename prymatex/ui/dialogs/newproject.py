@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/newproject.ui'
 #
-# Created: Thu May 10 16:19:51 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Thu Jun  7 06:28:44 2012
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -76,11 +76,6 @@ class Ui_NewProjectDialog(object):
         self.formLayout_2.setWidget(6, QtGui.QFormLayout.LabelRole, self.label_2)
         self.comboBoxTemplate = QtGui.QComboBox(NewProjectDialog)
         self.comboBoxTemplate.setEnabled(False)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.comboBoxTemplate.sizePolicy().hasHeightForWidth())
-        self.comboBoxTemplate.setSizePolicy(sizePolicy)
         self.comboBoxTemplate.setObjectName(_fromUtf8("comboBoxTemplate"))
         self.formLayout_2.setWidget(6, QtGui.QFormLayout.FieldRole, self.comboBoxTemplate)
         self.checkBoxUseTemplate = QtGui.QCheckBox(NewProjectDialog)
