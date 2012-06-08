@@ -38,21 +38,19 @@ def textToObjectName(text, sufix = "", prefix = ""):
 
 def createQAction(settings, parent):
     title = settings.get("title", "Action Title")
-    icon = settings.get("icon")
-    shortcut = settings.get("shortcut")
-    checkable = settings.get("checkable", False)
-    callback = settings.get("callback")
-    testChecked = settings.get("testChecked")
     action = QtGui.QAction(title, parent)
     object_name = textToObjectName(title, prefix = "action")
     action.setObjectName(object_name)
-    if icon is not None:
-        action.setIcon(icon)
-    if shortcut is not None:
-        action.setShortcut(shortcut)
-    action.setCheckable(checkable)
-    action.testChecked = testChecked
-    action.callback = callback
+    if "icon" in settings:
+        action.setIcon(settings["icon"])
+    if "shortcut" in settings:
+        action.setShortcut(settings["shortcut"])
+    if "checkable" in settings:
+        action.setCheckable(settings["checkable"])
+    if "callback" in settings:
+        action.callback = settings["callback"]
+    if "testChecked" in settings:
+        action.testChecked = settings["testChecked"]
     return action
     
 def createQMenu(settings, parent, useSeparatorName = False):
@@ -113,6 +111,8 @@ def extendQMenu(menu, items, useSeparatorName = False):
             menu.addAction(action)
         elif isinstance(item, QtGui.QAction):
             menu.addAction(item)
+        elif isinstance(item, QtGui.QMenu):
+            menu.addMenu(item)
         elif isinstance(item, list):
             actionGroup = QtGui.QActionGroup(menu)
             actions.append(actionGroup)

@@ -68,10 +68,12 @@ class PMXPluginManager(PMXBaseComponent):
         instance = widgetClass(mainWindow)
         
         for overlayClass in self.overlays.get(widgetClass, []):
+            #TODO: Ver que pasa con esto de pasarle la instancia a la construccion del objeto, corresponde?
             overlay = overlayClass(instance)
             instance.addOverlay(overlay)
 
         for addonClass in self.addons.get(widgetClass, []):
+            #TODO: Ver que pasa con esto de pasarle la instancia a la construccion del objeto, corresponde?
             addon = addonClass(instance)
             instance.addAddon(addon)
             

@@ -3,58 +3,16 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.plugin import PMXBaseAddon
+from prymatex.core.plugin.addons import PMXEditorBaseAddon
 from prymatex.support import PMXPreferenceSettings
 
-#========================================
-# BASE EDITOR ADDON
-#========================================
-class CodeEditorBaseAddon(PMXBaseAddon):
-    def initialize(self, editor):
-        PMXBaseAddon.initialize(self, editor)
-        self.editor = editor
-        
-    def finalize(self):
-        pass
-
-#========================================
-# BASE EDITOR SIDEBAR ADDON
-#========================================
-class SideBarWidgetAddon(QtGui.QWidget, CodeEditorBaseAddon):
-    ALIGNMENT = None
-    updateRequest = QtCore.pyqtSignal()
-    
-    def __init__(self, parent):
-        QtGui.QWidget.__init__(self, parent)
-    
-    def setVisible(self, value):
-        QtGui.QWidget.setVisible(self, value)
-        self.updateRequest.emit()
-
-    def translatePosition(self, position):
-        font_metrics = QtGui.QFontMetrics(self.editor.font)
-        fh = font_metrics.lineSpacing()
-        ys = position.y()
-        
-        block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
-        page_bottom = self.editor.viewport().height()
-        while block.isValid():
-            blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-            if blockPosition.y() > page_bottom:
-                break
-            if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:
-                break
-            block = block.next()
-        return block
-
-class CompleterAddon(QtCore.QObject, CodeEditorBaseAddon):
+class CompleterAddon(QtCore.QObject, PMXEditorBaseAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
         self.charCounter = 0
 
     def initialize(self, editor):
-        CodeEditorBaseAddon.initialize(self, editor)
+        PMXEditorBaseAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
@@ -67,12 +25,12 @@ class CompleterAddon(QtCore.QObject, CodeEditorBaseAddon):
             if bool(completions):
                 self.editor.showCompleter(completions, alreadyTyped)
                 
-class SmartUnindentAddon(QtCore.QObject, CodeEditorBaseAddon):
+class SmartUnindentAddon(QtCore.QObject, PMXEditorBaseAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
 
     def initialize(self, editor):
-        CodeEditorBaseAddon.initialize(self, editor)
+        PMXEditorBaseAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
@@ -86,12 +44,12 @@ class SmartUnindentAddon(QtCore.QObject, CodeEditorBaseAddon):
             if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
                 self.editor.unindentBlocks(cursor)
             
-class SpellCheckerAddon(QtCore.QObject, CodeEditorBaseAddon):
+class SpellCheckerAddon(QtCore.QObject, PMXEditorBaseAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
 
     def initialize(self, editor):
-        CodeEditorBaseAddon.initialize(self, editor)
+        PMXEditorBaseAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
@@ -100,40 +58,3 @@ class SpellCheckerAddon(QtCore.QObject, CodeEditorBaseAddon):
             currentBlock = cursor.block()
             spellRange = filter(lambda ((start, end), p): p.spellChecking,  currentBlock.userData().preferences)
             print spellRange
-        
-#=======================================
-# SideBar Widgets
-#=======================================
-class ExtraSelectionSideBarAddon(SideBarWidgetAddon):
-    def paintEvent(self, event):
-        editorFont = QtGui.QFont(self.editor.font)
-        page_bottom = self.editor.viewport().height()
-        font_metrics = QtGui.QFontMetrics(editorFont)
-        painter = QtGui.QPainter(self)
-        painter.setPen(self.editor.colours["foreground"])
-        painter.fillRect(self.rect(), self.editor.colours["foreground"])
-        
-        block = self.editor.firstVisibleBlock()
-        viewport_offset = self.editor.contentOffset()
-        line_count = block.blockNumber()
-        
-        while block.isValid():
-            line_count += 1
-            # The top left position of the block in the document
-            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
-            # Check if the position of the block is out side of the visible area
-            if position.y() > page_bottom:
-                break
-
-            # Draw the line number right justified at the y position of the line.
-            if block.isVisible():
-                #Line Numbers
-                leftPosition = self.width() - font_metrics.width(str(line_count)) - 2
-                painter.drawText(leftPosition,
-                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 2,
-                    str(line_count))
-
-            block = block.next()
-        painter.end()
-        QtGui.QWidget.paintEvent(self, event)
-

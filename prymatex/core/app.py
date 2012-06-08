@@ -19,7 +19,6 @@ from prymatex.utils.decorator import deprecated
 from prymatex.utils import coroutines
 from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
-from prymatex.gui.style import PrymatexStyle
 from prymatex.utils.decorator.helpers import printtime
 
 class PMXApplication(QtGui.QApplication):

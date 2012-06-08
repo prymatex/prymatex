@@ -126,7 +126,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     def extendFileSystemItemMenu(self, menu, node):
         utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
-        utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal, "--properties", self.actionProperties], section = -1)
+        utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
         if isinstance(node, PMXProject):
             utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
             utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
@@ -135,7 +135,12 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
             utils.extendMenuSection(menu, self.actionOpen, section = "open", position = 0)
-
+        #Ahora los addons
+        addonMenues = []
+        for addon in self.addons:
+            addonsMenus.append(addon.contributeToContextMenu(node))
+            
+        utils.extendMenuSection(menu, ["--properties", self.actionProperties], section = -1)
     #================================================
     # Tree View Project
     #================================================

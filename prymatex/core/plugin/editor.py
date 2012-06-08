@@ -142,10 +142,10 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def cursorPosition(self):
         return (0, 0)
         
-    def contributeToTabMenu(self, menu):
+    def contributeToTabMenu(self):
         ''' When an editor is right clicked on it's tab, the editor
         can provide custom actions to the menu through this callback'''
-        pass
+        return []
     
     #======================================================================
     # For Plugin Manager administrator

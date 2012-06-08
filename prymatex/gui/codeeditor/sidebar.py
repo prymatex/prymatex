@@ -4,7 +4,7 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import QColor
 
-from prymatex.gui.codeeditor.addons import SideBarWidgetAddon
+from prymatex.core.plugin.addons import PMXEditorBaseAddon
 from prymatex import resources
 
 class PMXSideBar(QtGui.QWidget):
@@ -34,9 +34,73 @@ class PMXSideBar(QtGui.QWidget):
         for index in range(self.horizontalLayout.count()):
             self.horizontalLayout.itemAt(index).widget().scroll(*args)
 
+#========================================
+# BASE EDITOR SIDEBAR ADDON
+#========================================
+class SideBarWidgetAddon(QtGui.QWidget, PMXEditorBaseAddon):
+    ALIGNMENT = None
+    updateRequest = QtCore.pyqtSignal()
+    
+    def __init__(self, parent):
+        QtGui.QWidget.__init__(self, parent)
+    
+    def setVisible(self, value):
+        QtGui.QWidget.setVisible(self, value)
+        self.updateRequest.emit()
+
+    def translatePosition(self, position):
+        font_metrics = QtGui.QFontMetrics(self.editor.font)
+        fh = font_metrics.lineSpacing()
+        ys = position.y()
+        
+        block = self.editor.firstVisibleBlock()
+        viewport_offset = self.editor.contentOffset()
+        page_bottom = self.editor.viewport().height()
+        while block.isValid():
+            blockPosition = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            if blockPosition.y() > page_bottom:
+                break
+            if blockPosition.y() < ys and (blockPosition.y() + fh) > ys:
+                break
+            block = block.next()
+        return block
+
 #=======================================
 # SideBar Widgets
 #=======================================
+class ExtraSelectionSideBarAddon(SideBarWidgetAddon):
+    def paintEvent(self, event):
+        editorFont = QtGui.QFont(self.editor.font)
+        page_bottom = self.editor.viewport().height()
+        font_metrics = QtGui.QFontMetrics(editorFont)
+        painter = QtGui.QPainter(self)
+        painter.setPen(self.editor.colours["foreground"])
+        painter.fillRect(self.rect(), self.editor.colours["foreground"])
+        
+        block = self.editor.firstVisibleBlock()
+        viewport_offset = self.editor.contentOffset()
+        line_count = block.blockNumber()
+        
+        while block.isValid():
+            line_count += 1
+            # The top left position of the block in the document
+            position = self.editor.blockBoundingGeometry(block).topLeft() + viewport_offset
+            # Check if the position of the block is out side of the visible area
+            if position.y() > page_bottom:
+                break
+
+            # Draw the line number right justified at the y position of the line.
+            if block.isVisible():
+                #Line Numbers
+                leftPosition = self.width() - font_metrics.width(str(line_count)) - 2
+                painter.drawText(leftPosition,
+                    round(position.y()) + font_metrics.ascent() + font_metrics.descent() - 2,
+                    str(line_count))
+
+            block = block.next()
+        painter.end()
+        QtGui.QWidget.paintEvent(self, event)
+
 class LineNumberSideBarAddon(SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 10
@@ -81,7 +145,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
             'shortcut': 'F10',
             'checkable': True,
             'testChecked': on_actionShowLineNumbers_testChecked }
-        return menuEntry
+        return [ menuEntry ]
 
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
@@ -154,7 +218,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
             'shortcut': 'Alt+F10',
             'checkable': True,
             'testChecked': on_actionShowBookmarks_testChecked }
-        return menuEntry
+        return [ menuEntry ]
 
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font)
@@ -223,7 +287,7 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
             'shortcut': 'Shift+F10',
             'checkable': True,
             'testChecked': on_actionShowFoldings_testChecked }
-        return menuEntry
+        return [ menuEntry ]
 
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font)

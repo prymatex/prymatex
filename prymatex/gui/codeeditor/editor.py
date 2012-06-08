@@ -22,13 +22,12 @@ from prymatex.core import exceptions
 from prymatex.gui.support.models import PMXBundleTreeNode
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
-from prymatex.gui.codeeditor.sidebar import PMXSideBar
+from prymatex.gui.codeeditor.sidebar import PMXSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
 from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
-from prymatex.gui.codeeditor.addons import SideBarWidgetAddon
 
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
@@ -1318,13 +1317,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         menu.popup(self.mapToGlobal(point))
     
     # Contributes to Tab Menu
-    def contributeToTabMenu(self, menu):
+    def contributeToTabMenu(self):
+        menues = []
         bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
         if bundleMenu is not None:
-            menu.addMenu(bundleMenu)
-            menu.addSeparator()
+            menues.append(bundleMenu)
+            menues.append("-")
         if self.filePath:
-            menu.addAction(self.actionCopyPath)
+            menues.append(self.actionCopyPath)
+        return menues
     
     # Contributes to Main Menu
     @classmethod
@@ -1334,9 +1335,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         for addon in addonClasses:
             if issubclass(addon, SideBarWidgetAddon):
                 if addon.ALIGNMENT == QtCore.Qt.AlignRight:
-                    rightGutter.append(addon.contributeToMenu())
+                    rightGutter.extend(addon.contributeToMenu())
                 else:
-                    leftGutter.append(addon.contributeToMenu())
+                    leftGutter.extend(addon.contributeToMenu())
 
         view = {
             'items': [

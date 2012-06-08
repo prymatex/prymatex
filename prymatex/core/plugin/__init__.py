@@ -78,9 +78,12 @@ class PMXBaseAddon(object):
     def finalize(self):
         pass
 
+    def contributeToContextMenu(self):
+        return []
+
     @classmethod
     def contributeToMenu(cls):
-        pass
+        return []
 
 Key_Any = 0
 class PMXBaseKeyHelper(object):
