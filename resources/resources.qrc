@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/format-text-color.png</file>
     <file>bundles/project.png</file>
     <file>actions/network-connect.png</file>
     <file>icons/bullet-yellow.png</file>
@@ -40,13 +41,11 @@
     <file>mimetypes/text-plain.png</file>
     <file>actions/project-development-close.png</file>
     <file>actions/run-build-clean.png</file>
-    <file>actions/run-build-clean.png</file>
     <file>actions/run-build-configure.png</file>
     <file>actions/run-build-file.png</file>
     <file>actions/run-build-install-root.png</file>
     <file>actions/run-build-install.png</file>
     <file>actions/run-build-prune.png</file>
-    <file>actions/run-build.png</file>
     <file>actions/run-build.png</file>
     <file>actions/insert-text.png</file>
     <file>actions/folder-new.png</file>

@@ -33,6 +33,7 @@ INTERNAL = {
     "save": ":/icons/actions/document-save.png",
     "inserttext": ":/icons/actions/insert-text.png",
     "codefunction": ":/icons/actions/code-function.png",
+    "codevariable": ":/icons/actions/code-variable.png",
     "projectnew": ":/icons/actions/project-development-new-template.png",
     "projectopen": ":/icons/actions/project-open.png",
     "projectclose": ":/icons/actions/project-development-close.png",
@@ -40,6 +41,10 @@ INTERNAL = {
     "stack-open": ":/icons/emblems/image-stack-open.png",
     "stack": ":/icons/emblems/image-stack.png",    
 
+    "gearfile": ":/icons/actions/run-build-file.png",
+    "gearconfigure": ":/icons/actions/run-build-configure.png",
+    "textcolor": ":/icons/actions/format-text-color.png",
+    
     # For menus
     "close":":/icons/actions/document-close.png", 
     "closeall":":/icons/actions/project-development-close-all.png",

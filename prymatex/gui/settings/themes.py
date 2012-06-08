@@ -3,6 +3,8 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
+
 from prymatex.ui.configure.theme import Ui_FontThemeWidget
 from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
@@ -42,6 +44,8 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
 
     NAMESPACE = "editor"
     TITLE = "Font and Themes"
+    ICON = resources.getIcon("textcolor")
+    
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "theme", settingGroup)

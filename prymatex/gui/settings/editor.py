@@ -3,13 +3,15 @@
 
 from PyQt4 import QtGui, QtCore
 
+from prymatex import resources
 from prymatex.ui.configure.editor import Ui_EditorWidget
 from prymatex.gui.settings.models import PMXSettingTreeNode
-
 from prymatex.gui.codeeditor.editor import PMXCodeEditor
     
 class PMXEditorWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EditorWidget):
     TITLE = "Editor"
+    ICON = resources.getIcon("gearfile")
+    
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "editor", settingGroup)
