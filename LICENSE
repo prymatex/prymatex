@@ -7,10 +7,10 @@ refer to GPL.txt.
 Prymatex could not be possible without the help of other projects
 which are distributed under their respective licence terms.
 
-	* PyQt4 
+     * PyQt4 
 
-	* Ponyguruma (http://dev.pocoo.org/hg/sandbox/ponyguruma)
+     * Ponyguruma (http://dev.pocoo.org/hg/sandbox/ponyguruma)
 
-	* QTermWidget
+     * QTermWidget
 
      * IPython (http://ipython.org/)

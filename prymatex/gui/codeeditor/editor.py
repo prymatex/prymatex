@@ -19,6 +19,7 @@ from prymatex import resources
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
+from prymatex.gui.support.models import PMXBundleTreeNode
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
 from prymatex.gui.codeeditor.sidebar import PMXSideBar
@@ -893,15 +894,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
-        options = []
-        for index, item in enumerate(items):
-            options.append({ "title": item.buildMenuTextEntry(False), "image": item.TYPE })
-            
+        
         def insertBundleItem(index):
             if index >= 0:
                 self.insertBundleItem(items[index], tabTriggered = tabTriggered)
         
-        self.showFlatPopupMenu(options, insertBundleItem, cursorPosition = not syntax)
+        self.showFlatPopupMenu(items, insertBundleItem, cursorPosition = not syntax)
     
     def executeCommand(self, command = None, input = "none", output = "insertText"):
         if command is None:
@@ -1299,6 +1297,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             elif isinstance(item,  basestring):
                 title = "%s \t&%d" % (item, index)
                 icon = QtGui.QIcon()
+            elif isinstance(item,  PMXBundleTreeNode):
+                title = "%s \t&%d" % (item.buildMenuTextEntry(False), index)
+                icon = item.icon
             menu.addAction(icon, title)
 
         def menu_aboutToHide():
