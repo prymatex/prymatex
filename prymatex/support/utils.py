@@ -17,7 +17,7 @@ PMX_CYGWIN_PATH = "c:\\cygwin"
 
 PMX_SHEBANG = "#!%s/bin/shebang.sh"
 PMX_BASHINIT = "%s/lib/bash_init.sh"
-SHELL_SHEBANG = "#!/bin/bash"
+SHELL_BASH = "/bin/bash"
 
 """
 Working with shebangs
@@ -28,15 +28,13 @@ http://en.wikipedia.org/wiki/Dennis_Ritchie
 """
 
 def getSupportPath(environment):
-    supportPath = environment["PMX_SUPPORT_PATH"]
-    if (supportPath[0] == '"' and supportPath[-1] == '"') or \
-    (supportPath[0] == "'" and supportPath[-1] == "'"):
-        supportPath = supportPath[1:-1]
-    return supportPath
+    return environment["PMX_SUPPORT_PATH"]
 
-def buildShellScript(script, environment):
-    #TODO: Tomar del environment la shell por defecto
-    shellScript = [SHELL_SHEBANG]
+def getShellShebang(environment):
+    return "#!%s" % environment.get("SHELL", SHELL_BASH)
+
+def buildShellScript(script, environment, shebang = None):
+    shellScript = [ getShellShebang(environment) ] if shebang is None else [ shebang ]
     supportPath = getSupportPath(environment)
     
     bashInit = PMX_BASHINIT % supportPath
@@ -55,11 +53,11 @@ def buildEnvScript(script, command, environment):
 def has_shebang(line):
     return line.startswith("#!")
 
-def is_bash_shebang(line):
-    return line.startswith("#!/bin/bash") or line.startswith("#!/bin/sh")
+def is_shell_shebang(line):
+    return os.path.basename(line) in [ "bash", "sh", "csh", "zsh" ]
 
 def is_env_shebang(line):
-    return line.startswith("#!/usr/bin/env")
+    return os.path.basename(line) == "env"
 
 def shebang_patch(shebang, environment):
     shebangParts = shebang.split()
@@ -103,8 +101,8 @@ def ensureShellScript(script, environment):
     #shebang analytics for build executable script
     if not has_shebang(scriptFirstLine):
         script = buildShellScript(script, environment)
-    elif is_bash_shebang(scriptFirstLine):
-        script = buildShellScript(scriptContent, environment)
+    elif is_shell_shebang(scriptFirstLine):
+        script = buildShellScript(scriptContent, environment, shebang = scriptFirstLine)
     else:
         command = shebang_command(scriptFirstLine, environment)
         script = buildEnvScript(scriptContent, command, environment)
