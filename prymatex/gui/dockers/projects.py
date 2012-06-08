@@ -135,12 +135,17 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
             utils.extendMenuSection(menu, self.actionOpen, section = "open", position = 0)
-        #Ahora los addons
-        addonMenues = []
-        for addon in self.addons:
-            addonsMenus.append(addon.contributeToContextMenu(node))
             
+        #Ahora los addons
+        addonMenues = [ "-" ]
+        for addon in self.addons:
+            addonMenues.extend(addon.contributeToContextMenu(node))
+        if len(addonMenues) > 1:
+            utils.extendMenuSection(menu, addonMenues, section = -1)
+        
+        #El final
         utils.extendMenuSection(menu, ["--properties", self.actionProperties], section = -1)
+
     #================================================
     # Tree View Project
     #================================================

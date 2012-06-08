@@ -12,5 +12,5 @@ class ProjectDockAddon(QtCore.QObject, PMXDockBaseAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
         
-    def contributeToContextMenu(self):
-        pass
+    def contributeToContextMenu(self, node):
+        return []
