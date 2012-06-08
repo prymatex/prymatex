@@ -673,7 +673,14 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
 #=========================================================
 # Process
 #=========================================================
-class PMXProcessTableModel(QtCore.QAbstractTableModel): 
+class PMXProcessTableModel(QtCore.QAbstractTableModel):
+    STATES_STRING = {0: "NotRunning",
+                     1: "Starting",
+                     2: "Running" }
+    STATES_ICONS = {0: resources.getIcon("bulletred"),
+                    1: resources.getIcon("bulletyellow"),
+                    2: resources.getIcon("bulletgreen") }
+                    
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.manager = manager
@@ -698,11 +705,10 @@ class PMXProcessTableModel(QtCore.QAbstractTableModel):
             elif index.column() == 1:
                 return item["description"]
             elif index.column() == 2:
-                states = {  0: "NotRunning",
-                            1: "Starting"	,
-                            2: "Running" }
-                return states[item["process"].state()]
-
+                return self.STATES_STRING[item["process"].state()]
+        elif role == QtCore.Qt.DecorationRole and index.column() == 0:
+            return self.STATES_ICONS[item["process"].state()]
+            
     def findRowIndex(self, process):
         items = filter(lambda item: item["process"] == process, self.processItems)
         assert len(items) == 1, "No puede tener mas de uno"
