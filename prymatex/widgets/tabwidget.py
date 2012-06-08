@@ -12,11 +12,13 @@
 
 # Standard library imports.
 import sys
-from prymatex import resources
 from functools import partial
 # Major library imports.
 import sip
 from PyQt4 import QtCore, QtGui
+
+from prymatex import resources
+from prymatex.gui import utils
 
 class _TabWidget(QtGui.QTabWidget):
     """ The _TabWidget class is a QTabWidget with a dragable tab bar. """
@@ -110,23 +112,41 @@ class _DragableTabBar(QtGui.QTabBar):
             widget = self.widgetAtPos(e.pos())
             tabWidget = self.parent()
             tabSplitter = tabWidget.parent()
-            #show menu
-            menu = QtGui.QMenu()
-            actionClose = menu.addAction(resources.getIcon("close"), "Close")
-            actionCloseAll = menu.addAction(resources.getIcon("closeall"), "Close All")
-            actionCloseAllNotThis = menu.addAction("Close Other")
-            # Connect
-            actionClose.triggered.connect(partial(tabWidget._close_widget, widget))
-            actionCloseAll.triggered.connect(tabSplitter.closeAll)
-            actionCloseAllNotThis.triggered.connect(partial(tabSplitter.closeAllExceptWidget, widget))
-            
+            tabMenu = { 
+                "title": "Tab Menu",
+                "items": [
+                    {   "title": "Close",
+                        "icon": resources.getIcon("close"),
+                        "callback": partial(tabWidget._close_widget, widget) 
+                    },
+                    {   "title": "Close All",
+                        "icon": resources.getIcon("closeall"),
+                        "callback": tabSplitter.closeAll
+                    },
+                    {   "title": "Close Other",
+                        "callback": partial(tabSplitter.closeAllExceptWidget, widget)
+                    }
+                ]
+            }
+
             if self.parent().count() > 1:
-                menu.addSeparator()
-                actionSplitH = menu.addAction("Split Horizontally")
-                actionSplitV = menu.addAction("Split Vertically")
-            menu.addSeparator()
+                tabMenu["items"].append("-")
+                tabMenu["items"].append({
+                    "title": "Split Horizontally"                
+                })
+                tabMenu["items"].append({
+                    "title": "Split Vertically"                
+                })
+            tabMenu["items"].append("-")
             # Create custom menu (
-            widget.contributeToTabMenu(menu)
+            tabMenu["items"].extend(widget.contributeToTabMenu())
+            
+            menu, actions = utils.createQMenu(tabMenu, self)
+            
+            for action in actions:
+                if hasattr(action, "callback"):
+                    action.triggered.connect(action.callback)
+
             # Display menu
             menu.exec_(e.globalPos())
         elif e.button() == QtCore.Qt.LeftButton:
