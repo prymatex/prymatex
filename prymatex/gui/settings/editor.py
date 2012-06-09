@@ -19,7 +19,7 @@ class PMXEditorWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_EditorWidget):
         self.checkBoxLineNumbers.toggled.connect(self.on_gutterOption_toggled)
         self.checkBoxFolding.toggled.connect(self.on_gutterOption_toggled)
         self.checkBoxBookmarks.toggled.connect(self.on_gutterOption_toggled)
-    
+
     def loadSettings(self):
         flags = int(self.settingGroup.value('defaultFlags'))
         self.checkBoxFolding.setChecked(flags & PMXCodeEditor.ShowFolding)

@@ -38,6 +38,15 @@ class FileSystemTreeNode(TreeNode):
         self.isfile = os.path.isfile(self.path)
         self.ishidden = name.startswith('.')
         self.isproject = isinstance(self, PMXProject)
+        self.__project = self if isinstance(self, PMXProject) else None
+
+    @property
+    def project(self):
+        if not hasattr(self, "_project"):
+            self._project = self
+            while not isinstance(self._project, PMXProject):
+                self._project = self._project.parentNode
+        return self._project    
 
     @property
     def path(self):

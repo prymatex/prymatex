@@ -70,6 +70,8 @@ INTERNAL = {
 
 EXTERNAL = {}
 
+PLUGINS = {}
+
 FileIconProvider = QtGui.QFileIconProvider()
 
 #===============================================================
@@ -106,7 +108,7 @@ def getImagePath(index):
     return INTERNAL.get(index) or EXTERNAL.get(index)
 
 def getImage(index):
-    path = getImagePath(index) 
+    path = getImagePath(index)
     if path is not None:
         return QtGui.QPixmap(path)
 
@@ -136,3 +138,15 @@ def getFileType(fileInfo):
 
 def registerImagePath(index, path):
     EXTERNAL[index] = path
+    
+class ResourceProvider(dict):
+    def getImage(self, index):
+        if index in self:
+            return QtGui.QPixmap(self[index])
+        return getImage(index)
+        
+    def getIcon(self, index):
+        if index in self:
+            return QtGui.QIcon(self[index])
+        return getIcon(index)
+    

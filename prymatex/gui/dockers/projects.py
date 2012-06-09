@@ -122,6 +122,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             self.extendFileSystemItemMenu(contextMenu, node)
         # contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self, useSeparatorName = True)
         contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self)
+        
+        for action in contextMenuActions:
+            if hasattr(action, "callback"):
+                action.triggered.connect(action.callback)
+                
         return contextMenu
 
     def extendFileSystemItemMenu(self, menu, node):

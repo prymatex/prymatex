@@ -12,6 +12,8 @@ except ImportError:
 
 from PyQt4 import QtGui, QtCore
 
+from prymatex import resources
+from prymatex.utils import osextra
 from prymatex.core.plugin import PMXBaseComponent
 from prymatex.utils.importlib import import_module, import_from_directory
 
@@ -23,7 +25,9 @@ class PMXPluginManager(PMXBaseComponent):
         self.application = application
         self.directories = []
         
+        self.currentPluginEntry = None
         self.modules = {}
+        
         self.editors = []
         self.dockers = []
         self.statusBars = []
@@ -40,30 +44,39 @@ class PMXPluginManager(PMXBaseComponent):
     #==================================================
     def registerEditor(self, editorClass):
         self.application.populateComponent(editorClass)
+        editorClass.resources = self.currentPluginEntry["resources"]
         self.editors.append(editorClass)
  
     def registerDocker(self, dockerClass):
         self.application.populateComponent(dockerClass)
+        dockerClass.resources = self.currentPluginEntry["resources"]
         self.dockers.append(dockerClass)
         
     def registerStatusBar(self, statusBarClass):
         self.application.populateComponent(statusBarClass)
+        statusBarClass.resources = self.currentPluginEntry["resources"]
         self.statusBars.append(statusBarClass)
     
     def registerKeyHelper(self, editorClass, helperClass):
         self.application.extendComponent(helperClass)
+        helperClass.resources = self.currentPluginEntry["resources"]
         editorClass.addKeyHelper(helperClass())
         
     def registerOverlay(self, widgetClass, overlayClass):
         self.application.extendComponent(overlayClass)
+        overlayClass.resources = self.currentPluginEntry["resources"]
         overlayClasses = self.overlays.setdefault(widgetClass, [])
         overlayClasses.append(overlayClass)
 
     def registerAddon(self, widgetClass, addonClass):
         self.application.extendComponent(addonClass)
+        addonClass.resources = self.currentPluginEntry["resources"]
         addonClasses = self.addons.setdefault(widgetClass, [])
         addonClasses.append(addonClass)
-                
+           
+    #==================================================
+    # Creando instancias
+    #==================================================     
     def createWidgetInstance(self, widgetClass, mainWindow):
         instance = widgetClass(mainWindow)
         
@@ -139,40 +152,65 @@ class PMXPluginManager(PMXBaseComponent):
             status = self.createWidgetInstance(statusBarClass, mainWindow)
             mainWindow.addStatusBar(status)
     
-    def _load_module(self, moduleName, moduleId = None, moduleDirectory = None, registerFunction = "registerPlugin"):
-        moduleId = moduleId or moduleName
-        try:
-            module = import_from_directory(moduleDirectory, moduleName) if moduleDirectory is not None else import_module(moduleName)
-            registerPluginFunction = getattr(module, registerFunction)
-            registerPluginFunction(self)
-            self.modules[moduleId] = module
-        except (ImportError, AttributeError), reason:
-            #TODO: Manejar estos errores
-            raise reason
-
+    #==================================================
+    # Load plugins
+    #==================================================
+    def beginRegisterPlugin(self, pluginId, pluginEntry):
+        self.modules[pluginId] = pluginEntry
+        self.currentPluginEntry = pluginEntry
+        
+    def endRegisterPlugin(self, success):
+        if not success:
+            del self.modules[self.currentPluginEntry["id"]]
+        self.currentPluginEntry = None
+        
+    def loadResources(self, pluginDirectory, pluginEntry):
+        pluginResources = resources.ResourceProvider()
+        if "resources" in pluginEntry:
+            resourcesDirectory = os.path.join(pluginDirectory, pluginEntry["resources"])
+            for dirpath, dirnames, filenames in os.walk(resourcesDirectory):
+                dirParts = osextra.path.fullsplit(dirpath)
+                for filename in filenames:
+                    resourceKey, _ = os.path.splitext(filename)
+                    index = -1
+                    while resourceKey in pluginResources and index:
+                        newKey = "-".join(dirParts[index:] + [resourceKey])
+                        if newKey == resourceKey:
+                            raise Exception("Esto no puede ocurrir")
+                        index -= 1
+                        resourceKey = newKey
+                    pluginResources[resourceKey] = os.path.join(dirpath, filename)
+        pluginEntry["resources"] = pluginResources
+        
     def loadPlugin(self, pluginEntry):
         pluginId = pluginEntry.get("id")
         packageName = pluginEntry.get("package")
         registerFunction = pluginEntry.get("register", "registerPlugin")
-        pluginDirectory = pluginEntry.get("path")
+        pluginDirectory = pluginEntry.get("path")    
+        self.loadResources(pluginDirectory, pluginEntry)
         try:
             pluginEntry["module"] = import_from_directory(pluginDirectory, packageName)
             registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
+            self.beginRegisterPlugin(pluginId, pluginEntry)
             registerPluginFunction(self)
-            self.modules[pluginId] = pluginEntry
+            self.endRegisterPlugin(True)
         except (ImportError, AttributeError), reason:
             #TODO: Manejar estos errores
+            self.endRegisterPlugin(False)
             raise reason
     
     def loadCoreModule(self, moduleName, pluginId):
-        pluginEntry = {"id": pluginId}
+        pluginEntry = {"id": pluginId,
+                       "resources": resources.ResourceProvider()}
         try:
             pluginEntry["module"] = import_module(moduleName)
             registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
+            self.beginRegisterPlugin(pluginId, pluginEntry)
             registerPluginFunction(self)
-            self.modules[pluginId] = pluginEntry
+            self.endRegisterPlugin(True)
         except (ImportError, AttributeError), reason:
             #TODO: Manejar estos errores
+            self.endRegisterPlugin(False)
             raise reason
     
     def hasDependenciesResolved(self, pluginEntry):
