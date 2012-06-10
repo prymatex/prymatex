@@ -14,8 +14,10 @@ from prymatex.gui.project.base import PMXProject
 
 class PMXProjectManager(QtCore.QObject):
     #Signals
-    projectClosed = QtCore.pyqtSignal(object)
-    projectOpened = QtCore.pyqtSignal(object)
+    projectAdded = QtCore.pyqtSignal(object)
+    projectRemoved = QtCore.pyqtSignal(object)
+    projectClose = QtCore.pyqtSignal(object)
+    projectOpen = QtCore.pyqtSignal(object)
     
     #Settings
     SETTINGS_GROUP = 'ProjectManager'
@@ -116,6 +118,7 @@ class PMXProjectManager(QtCore.QObject):
         if project.hasBundles() or project.hasThemes():
             self.application.supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
+        self.projectAdded.emit(project)
         
     def modifyProject(self, project):
         pass

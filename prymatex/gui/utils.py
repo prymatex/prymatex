@@ -130,25 +130,23 @@ def extendQMenu(menu, items, useSeparatorName = False):
     return actions
 
 def sectionNameRange(items, name):
-    begin, end = None, None
-    for item in items:
+    begin, end = -1, -1
+    for index, item in enumerate(items):
         if isinstance(item, basestring):
-            if begin is None and item == '--' + name:
-                begin = item
-            elif begin is not None and item.startswith('--'):
-                end = item
+            if begin == -1 and item.startswith('-') and item.endswith(name):
+                begin = index
+            elif begin != -1 and item.startswith('-'):
+                end = index
                 break
-    if begin is None:
+    if begin == -1:
         raise Exception("Section %s not exists" % name)
-    begin = items.index(begin)
-    end = items.index(end) if end is not None else -1
     return begin, end
 
 def chunkSections(items):
     sections = []
     start = 0
     for i in xrange(0, len(items)):
-        if isinstance(items[i], basestring) and items[i].startswith('--'):
+        if isinstance(items[i], basestring) and items[i].startswith('-'):
             sections.append(items[start:i])
             start = i
     sections.append(items[start:len(items)])

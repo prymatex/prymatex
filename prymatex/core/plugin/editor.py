@@ -82,7 +82,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
             baseIcon = resources.getIcon("save")
         if self.externalAction != None:
             importantIcon = resources.getIcon("important")
-            baseIcon = utils.combineIcons(baseIcon, importantIcon, 0.6)
+            baseIcon = utils.combineIcons(baseIcon, importantIcon, 0.8)
         return baseIcon
     
     def tabTitles(self):

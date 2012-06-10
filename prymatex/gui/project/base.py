@@ -75,6 +75,7 @@ class PMXProject(FileSystemTreeNode):
         self.bundles = None
         self.themes = None
         self.namespace = None
+        self.extensions = {}
         self.load(hash)
     
     def hasSupport(self):
@@ -153,6 +154,9 @@ class PMXProject(FileSystemTreeNode):
         env['TM_SELECTED_FILES'] = ""
         env['TM_SELECTED_FILE'] = ""
         return env
+
+    def addExtensions(self, key, extensions):
+        self.extensions[key] = extensions
 
     @classmethod
     def loadProject(cls, path, manager):

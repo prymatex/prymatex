@@ -20,12 +20,32 @@ from prymatex.utils.importlib import import_module, import_from_directory
 PLUGIN_EXTENSION = 'pmxplugin'
 PLUGIN_DESCRIPTOR_FILE = 'info.json'
 
+class PMXPluginDescriptor(object):
+    def __init__(self, entry):
+        self.__entry = entry
+    
+    def __getitem__(self, name):
+        if name in self.__entry:
+            return self.__entry[name]
+        raise KeyError(name)
+    
+    def __getattr__(self, name):
+        if name in self.__entry:
+            return self.__entry[name]
+        raise AttributeError(name)
+        
+    def getImage(self, key):
+        return self.__entry["resources"].getImage(key)
+
+    def getIcon(self, key):
+        return self.__entry["resources"].getIcon(key)
+        
 class PMXPluginManager(PMXBaseComponent):
     def __init__(self, application):
         self.application = application
         self.directories = []
         
-        self.currentPluginEntry = None
+        self.currentPluginDescriptor = None
         self.modules = {}
         
         self.editors = []
@@ -44,33 +64,33 @@ class PMXPluginManager(PMXBaseComponent):
     #==================================================
     def registerEditor(self, editorClass):
         self.application.populateComponent(editorClass)
-        editorClass.resources = self.currentPluginEntry["resources"]
+        editorClass.plugin = self.currentPluginDescriptor
         self.editors.append(editorClass)
  
     def registerDocker(self, dockerClass):
         self.application.populateComponent(dockerClass)
-        dockerClass.resources = self.currentPluginEntry["resources"]
+        dockerClass.plugin = self.currentPluginDescriptor
         self.dockers.append(dockerClass)
         
     def registerStatusBar(self, statusBarClass):
         self.application.populateComponent(statusBarClass)
-        statusBarClass.resources = self.currentPluginEntry["resources"]
+        statusBarClass.plugin = self.currentPluginDescriptor
         self.statusBars.append(statusBarClass)
     
     def registerKeyHelper(self, editorClass, helperClass):
         self.application.extendComponent(helperClass)
-        helperClass.resources = self.currentPluginEntry["resources"]
+        helperClass.plugin = self.currentPluginDescriptor
         editorClass.addKeyHelper(helperClass())
         
     def registerOverlay(self, widgetClass, overlayClass):
         self.application.extendComponent(overlayClass)
-        overlayClass.resources = self.currentPluginEntry["resources"]
+        overlayClass.plugin = self.currentPluginDescriptor
         overlayClasses = self.overlays.setdefault(widgetClass, [])
         overlayClasses.append(overlayClass)
 
     def registerAddon(self, widgetClass, addonClass):
         self.application.extendComponent(addonClass)
-        addonClass.resources = self.currentPluginEntry["resources"]
+        addonClass.plugin = self.currentPluginDescriptor
         addonClasses = self.addons.setdefault(widgetClass, [])
         addonClasses.append(addonClass)
            
@@ -157,12 +177,12 @@ class PMXPluginManager(PMXBaseComponent):
     #==================================================
     def beginRegisterPlugin(self, pluginId, pluginEntry):
         self.modules[pluginId] = pluginEntry
-        self.currentPluginEntry = pluginEntry
+        self.currentPluginDescriptor = PMXPluginDescriptor(pluginEntry)
         
     def endRegisterPlugin(self, success):
         if not success:
-            del self.modules[self.currentPluginEntry["id"]]
-        self.currentPluginEntry = None
+            del self.modules[self.currentPluginDescriptor["id"]]
+        self.currentPluginDescriptor = None
         
     def loadResources(self, pluginDirectory, pluginEntry):
         pluginResources = resources.ResourceProvider()
@@ -188,10 +208,10 @@ class PMXPluginManager(PMXBaseComponent):
         registerFunction = pluginEntry.get("register", "registerPlugin")
         pluginDirectory = pluginEntry.get("path")    
         self.loadResources(pluginDirectory, pluginEntry)
+        self.beginRegisterPlugin(pluginId, pluginEntry)
         try:
             pluginEntry["module"] = import_from_directory(pluginDirectory, packageName)
             registerPluginFunction = getattr(pluginEntry["module"], registerFunction)
-            self.beginRegisterPlugin(pluginId, pluginEntry)
             registerPluginFunction(self)
             self.endRegisterPlugin(True)
         except (ImportError, AttributeError), reason:
@@ -202,10 +222,10 @@ class PMXPluginManager(PMXBaseComponent):
     def loadCoreModule(self, moduleName, pluginId):
         pluginEntry = {"id": pluginId,
                        "resources": resources.ResourceProvider()}
+        self.beginRegisterPlugin(pluginId, pluginEntry)
         try:
             pluginEntry["module"] = import_module(moduleName)
             registerPluginFunction = getattr(pluginEntry["module"], "registerPlugin")
-            self.beginRegisterPlugin(pluginId, pluginEntry)
             registerPluginFunction(self)
             self.endRegisterPlugin(True)
         except (ImportError, AttributeError), reason:

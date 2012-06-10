@@ -35,8 +35,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
         self.setupUi(self)
-        self.projectTreeProxyModel = self.application.projectManager.projectTreeProxyModel
-
+        self.projectManager = self.application.projectManager
+        self.projectTreeProxyModel = self.projectManager.projectTreeProxyModel
+    
         self.setupPropertiesDialog()
         self.setupTreeViewProjects()
 
@@ -45,6 +46,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
         mainWindow.projects = self
     
+    def addFileSystemNodeFormater(self, formater):
+        self.projectTreeProxyModel.addNodeFormater(formater)
+        
     def keyPressEvent(self, event):
         print event
         return QtGui.QDockWidget.keyPressEvent(self, event) 
