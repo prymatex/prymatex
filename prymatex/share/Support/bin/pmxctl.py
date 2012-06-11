@@ -253,6 +253,18 @@ def mate_parse_args(args):
     options, args = parser.parse_args(args)
     return options, args
 
+# ##############################################################################
+# terminal
+# ##############################################################################
+def terminal_parse_args(args):
+    """
+    Send command to pmx terminal
+
+    images usage:
+        "$DIALOG" terminal command
+    """ 
+    return None, args
+
 def new_dialgo_parse_args(args):
     '''
     Dialog Options:
@@ -365,7 +377,8 @@ PARSERS = {
            'images': images_parse_args,
            'alert': alert_parse_args,
            'open': open_parse_args,
-           'mate': mate_parse_args
+           'mate': mate_parse_args,
+           'terminal': terminal_parse_args
            }
 
 class CommandHandler(object):
@@ -496,7 +509,17 @@ class CommandHandler(object):
                 _ = self.socket.recv()
             else:
                 os.popen("xdg-open %s" % url)
-                
+    
+    def mate(self, options, args):
+        pass
+        
+    def terminal(self, options, args):
+        kwargs = {}
+        command = {"name": "terminal", "kwargs": kwargs}
+        self.socket.send_pyobj(command)
+        value = self.socket.recv()
+        sys.stdout.write(value)
+
     def debug(self, options, args):
         kwargs = {}
         kwargs["args"] = args

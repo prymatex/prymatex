@@ -554,7 +554,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     def setBraces(self, scope):
         settings = self.preferenceSettings(scope)
-        self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
+        self.braces = settings.smartTypingPairs[:]
+        #self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
         
     def setCurrentBraces(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
@@ -567,26 +568,24 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         self._currentBraces = (None, None, None, None)
 
-        if leftChar in openBraces or rightChar in openBraces:
-            if leftChar in openBraces:
-                leftCursor = QtGui.QTextCursor(cursor)
-                leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                index = openBraces.index(leftChar)
-                self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, closeBraces[index], leftCursor), None)
-            if rightChar in openBraces:
-                rightCursor = QtGui.QTextCursor(cursor)
-                rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                index = openBraces.index(rightChar)
-                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, closeBraces[index], rightCursor))
-        if leftChar in closeBraces or rightChar in closeBraces:
-            if leftChar in closeBraces:
-                leftCursor = QtGui.QTextCursor(cursor)
-                leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True), None)
-            if rightChar in closeBraces:
-                rightCursor = QtGui.QTextCursor(cursor)
-                rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
+        if leftChar in openBraces:
+            leftCursor = QtGui.QTextCursor(cursor)
+            leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+            index = openBraces.index(leftChar)
+            self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, closeBraces[index], leftCursor), None)
+        if rightChar in openBraces:
+            rightCursor = QtGui.QTextCursor(cursor)
+            rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+            index = openBraces.index(rightChar)
+            self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, closeBraces[index], rightCursor))
+        if leftChar in closeBraces and self._currentBraces[0] == None:
+            leftCursor = QtGui.QTextCursor(cursor)
+            leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+            self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True), None)
+        if rightChar in closeBraces and self._currentBraces[1] == None:
+            rightCursor = QtGui.QTextCursor(cursor)
+            rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+            self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
 
     def currentBracesPairs(self, cursor = None, direction = "both"):
         """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
@@ -1070,31 +1069,39 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         b2 texto a buscar
         cursor representando la posicion a partir de la cual se busca
         backward buscar para atras
-        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre 
+        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre dentro del bloque actual
         """
         flags = QtGui.QTextDocument.FindFlags()
         if backward:
             flags |= QtGui.QTextDocument.FindBackward
         if cursor.hasSelection():
-            startPosition = cursor.selectionEnd() if b1 == b2 or backward else cursor.selectionStart() 
+            if b1 == b2:
+                startPosition = cursor.selectionStart() if backward else cursor.selectionEnd()
+            else:
+                startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
         else:
             startPosition = cursor.position()
         c1 = self.document().find(b1, startPosition, flags)
         c2 = self.document().find(b2, startPosition, flags)
-        if backward:
-            while c1 > c2:
-                c1 = self.document().find(b1, c1.selectionStart(), flags)
-                if c1 > c2:
-                    c2 = self.document().find(b2, c2.selectionStart(), flags)
+        if b1 != b2:
+            #Balanceo solo si son distintos
+            if backward:
+                while c1 > c2:
+                    c1 = self.document().find(b1, c1.selectionStart(), flags)
+                    if c1 > c2:
+                        c2 = self.document().find(b2, c2.selectionStart(), flags)
+            else:
+                while not c1.isNull() and c1.position() != -1 and c1 < c2:
+                    c1 = self.document().find(b1, c1.selectionEnd(), flags)
+                    if c1.isNull():
+                        break
+                    if c1 < c2:
+                        c2 = self.document().find(b2, c2.selectionEnd(), flags)
+            if not c2.isNull():
+                return c2
         else:
-            while not c1.isNull() and c1.position() != -1 and c1 < c2:
-                c1 = self.document().find(b1, c1.selectionEnd(), flags)
-                if c1.isNull():
-                    break
-                if c1 < c2:
-                    c2 = self.document().find(b2, c2.selectionEnd(), flags)
-        if not c2.isNull():
-            return c2
+            if not c2.isNull() and c2.block() == cursor.block():
+                return c2
 
     def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = True):
         cursor = cursor or self.textCursor()

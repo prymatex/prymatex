@@ -15,7 +15,7 @@ QTERMWIDGET_IMPORT_SUGGESTOIN = '''
 QTermWidget disabled because of:
 {}
 Please install QTermWidget. Please note QTermWidget consists in a C++ with Python binding.
-Get/Update it at https://github.com/D3f0/qtermwidget
+Get/Update it at https://github.com/prymatex/qtermwidget
 '''
 
 class PMXTabTerminals(QtGui.QTabWidget):
