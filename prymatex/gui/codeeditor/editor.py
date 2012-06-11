@@ -45,6 +45,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
 
+    afterOpened = QtCore.pyqtSignal()
+    afterSaved = QtCore.pyqtSignal()
+    afterClosed = QtCore.pyqtSignal()
+    afterReload = QtCore.pyqtSignal()
+
     #=======================================================================
     # Settings
     #=======================================================================
@@ -131,6 +136,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def tabKeyBehavior(self):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
     
+    #================================================================
+    # INIT
+    #================================================================
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self)
@@ -172,7 +180,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
-        self.setupActions()
         self.connectSignals()
         
         #Connect context menu
@@ -181,7 +188,19 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #Basic setup
         #self.setCenterOnScroll(True)
-            
+    
+    # Connect Signals
+    def connectSignals(self):
+        self.rightBar.updateRequest.connect(self.updateViewportMargins)
+        self.leftBar.updateRequest.connect(self.updateViewportMargins)
+        
+        self.blockCountChanged.connect(self.on_blockCountChanged)
+        self.updateRequest.connect(self.updateSideBars)
+        self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
+        self.modificationChanged.connect(self.on_modificationChanged)
+        self.syntaxChanged.connect(self.showSyntaxMessage)
+        self.themeChanged.connect(self.highlightCurrent)
+
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
         #Load Default Syntax
@@ -200,6 +219,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             self.leftBar.addWidget(widget)
 
+    #================================================================
+    # Update editor status, called from Highlighter
+    #================================================================
     def updateIndent(self, block, userData, indent):
         self.logger.debug("Update Block Indent")
     
@@ -226,26 +248,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Agregar las palabras nuevas
         self.alreadyTypedWords.addWordsBlock(block, newWords.difference(oldWords))
         userData.words = words
-            
-    #=======================================================================
-    # Connect Signals
-    #=======================================================================
-    def connectSignals(self):
-        self.rightBar.updateRequest.connect(self.updateViewportMargins)
-        self.leftBar.updateRequest.connect(self.updateViewportMargins)
-        
-        self.blockCountChanged.connect(self.on_blockCountChanged)
-        self.updateRequest.connect(self.updateSideBars)
-        self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
-        self.modificationChanged.connect(self.on_modificationChanged)
-        self.syntaxChanged.connect(self.showSyntaxMessage)
-        self.themeChanged.connect(self.highlightCurrent)
-        
-        self.actionCopyPath.triggered.connect(self.on_actionCopyPath_triggered)
-        
-    def setupActions(self):
-        # Some actions
-        self.actionCopyPath = QtGui.QAction(resources.getIcon("copy"), _("Copy path to clipboard"), self)
         
     def showSyntaxMessage(self, syntax):
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
@@ -288,10 +290,22 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             yield
         self.document().clearUndoRedoStacks()
         self.setModified(False)
+        self.afterOpened.emit()
         
+    def save(self, filePath):
+        value = PMXBaseEditor.save(self, filePath)
+        self.afterSaved.emit()
+        return value
+
     def close(self):
-        QtGui.QPlainTextEdit.close(self)
-        return PMXBaseEditor.close(self)
+        value = PMXBaseEditor.close(self)
+        self.afterClosed.emit()
+        return value
+    
+    def reload(self):
+        value = PMXBaseEditor.reload(self)
+        self.afterReload.emit()
+        return value
 
     def isModified(self):
         return self.document().isModified()
@@ -540,7 +554,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     def setBraces(self, scope):
         settings = self.preferenceSettings(scope)
-        self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
+        self.braces = settings.smartTypingPairs[:]
+        #self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
         
     def setCurrentBraces(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
@@ -553,26 +568,24 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         self._currentBraces = (None, None, None, None)
 
-        if leftChar in openBraces or rightChar in openBraces:
-            if leftChar in openBraces:
-                leftCursor = QtGui.QTextCursor(cursor)
-                leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                index = openBraces.index(leftChar)
-                self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, closeBraces[index], leftCursor), None)
-            if rightChar in openBraces:
-                rightCursor = QtGui.QTextCursor(cursor)
-                rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                index = openBraces.index(rightChar)
-                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, closeBraces[index], rightCursor))
-        if leftChar in closeBraces or rightChar in closeBraces:
-            if leftChar in closeBraces:
-                leftCursor = QtGui.QTextCursor(cursor)
-                leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True), None)
-            if rightChar in closeBraces:
-                rightCursor = QtGui.QTextCursor(cursor)
-                rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
+        if leftChar in openBraces:
+            leftCursor = QtGui.QTextCursor(cursor)
+            leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+            index = openBraces.index(leftChar)
+            self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, closeBraces[index], leftCursor), None)
+        if rightChar in openBraces:
+            rightCursor = QtGui.QTextCursor(cursor)
+            rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+            index = openBraces.index(rightChar)
+            self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, closeBraces[index], rightCursor))
+        if leftChar in closeBraces and self._currentBraces[0] == None:
+            leftCursor = QtGui.QTextCursor(cursor)
+            leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+            self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True), None)
+        if rightChar in closeBraces and self._currentBraces[1] == None:
+            rightCursor = QtGui.QTextCursor(cursor)
+            rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+            self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
 
     def currentBracesPairs(self, cursor = None, direction = "both"):
         """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
@@ -710,13 +723,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cr = self.contentsRect()
         self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
         rightBarPosition = cr.right() - self.rightBar.width()
-        #if self.verticalScrollBar().isVisible():
-        #    rightBarPosition -= self.verticalScrollBar().width()
         self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
         self.updateOverlays()
     
     def paintEvent(self, event):
-        #QtGui.QPlainTextEdit.paintEvent(self, event)
         QtGui.QPlainTextEdit.paintEvent(self, event)
         page_bottom = self.viewport().height()
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
@@ -1059,31 +1069,39 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         b2 texto a buscar
         cursor representando la posicion a partir de la cual se busca
         backward buscar para atras
-        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre 
+        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre dentro del bloque actual
         """
         flags = QtGui.QTextDocument.FindFlags()
         if backward:
             flags |= QtGui.QTextDocument.FindBackward
         if cursor.hasSelection():
-            startPosition = cursor.selectionEnd() if b1 == b2 or backward else cursor.selectionStart() 
+            if b1 == b2:
+                startPosition = cursor.selectionStart() if backward else cursor.selectionEnd()
+            else:
+                startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
         else:
             startPosition = cursor.position()
         c1 = self.document().find(b1, startPosition, flags)
         c2 = self.document().find(b2, startPosition, flags)
-        if backward:
-            while c1 > c2:
-                c1 = self.document().find(b1, c1.selectionStart(), flags)
-                if c1 > c2:
-                    c2 = self.document().find(b2, c2.selectionStart(), flags)
+        if b1 != b2:
+            #Balanceo solo si son distintos
+            if backward:
+                while c1 > c2:
+                    c1 = self.document().find(b1, c1.selectionStart(), flags)
+                    if c1 > c2:
+                        c2 = self.document().find(b2, c2.selectionStart(), flags)
+            else:
+                while not c1.isNull() and c1.position() != -1 and c1 < c2:
+                    c1 = self.document().find(b1, c1.selectionEnd(), flags)
+                    if c1.isNull():
+                        break
+                    if c1 < c2:
+                        c2 = self.document().find(b2, c2.selectionEnd(), flags)
+            if not c2.isNull():
+                return c2
         else:
-            while not c1.isNull() and c1.position() != -1 and c1 < c2:
-                c1 = self.document().find(b1, c1.selectionEnd(), flags)
-                if c1.isNull():
-                    break
-                if c1 < c2:
-                    c2 = self.document().find(b2, c2.selectionEnd(), flags)
-        if not c2.isNull():
-            return c2
+            if not c2.isNull() and c2.block() == cursor.block():
+                return c2
 
     def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = True):
         cursor = cursor or self.textCursor()
@@ -1324,7 +1342,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             menues.append(bundleMenu)
             menues.append("-")
         if self.filePath:
-            menues.append(self.actionCopyPath)
+            menues.append({
+                "title": "Copy file path",
+                "icon": resources.getIcon("copy"),
+                "callback": lambda editor = self: QtGui.QApplication.clipboard().setText(editor.filePath)  })
         return menues
     
     # Contributes to Main Menu
@@ -1610,7 +1631,3 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     self.application.openFile(file)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
-
-    @QtCore.pyqtSlot()
-    def on_actionCopyPath_triggered(self):
-        QtGui.QApplication.clipboard().setText(self.filePath)

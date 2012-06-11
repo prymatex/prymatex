@@ -201,8 +201,8 @@ class BackspaceUnindentHelper(PMXCodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
-        indent = len(cursor.block().userData().indent)
-        return indent != 0 and indent >= cursor.columnNumber() and editor.tabStopSoft
+        lineText = cursor.block().text()
+        return lineText[:cursor.columnNumber()].endswith(editor.tabKeyBehavior)
         
     def execute(self, editor, event, cursor = None, scope = None):
         counter = cursor.columnNumber() % editor.tabStopSize or editor.tabStopSize

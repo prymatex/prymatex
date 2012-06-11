@@ -53,7 +53,7 @@ def createQAction(settings, parent):
         action.testChecked = settings["testChecked"]
     return action
     
-def createQMenu(settings, parent, useSeparatorName = False):
+def createQMenu(settings, parent, useSeparatorName = False, connectActions = False):
     """
     settings = {
             "title": "Menu Title",
@@ -87,6 +87,13 @@ def createQMenu(settings, parent, useSeparatorName = False):
     if items is not None:
         subactions = extendQMenu(menu, items, useSeparatorName)
         actions.extend(subactions)
+    if connectActions:
+        for action in actions:
+            if hasattr(action, 'callback'):
+                if action.isCheckable():
+                    parent.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
+                else:
+                    parent.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
     return menu, actions
 
 def extendQMenu(menu, items, useSeparatorName = False):

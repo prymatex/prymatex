@@ -141,12 +141,8 @@ class _DragableTabBar(QtGui.QTabBar):
             # Create custom menu (
             tabMenu["items"].extend(widget.contributeToTabMenu())
             
-            menu, actions = utils.createQMenu(tabMenu, self)
+            menu, actions = utils.createQMenu(tabMenu, self, connectActions = True)
             
-            for action in actions:
-                if hasattr(action, "callback"):
-                    action.triggered.connect(action.callback)
-
             # Display menu
             menu.exec_(e.globalPos())
         elif e.button() == QtCore.Qt.LeftButton:

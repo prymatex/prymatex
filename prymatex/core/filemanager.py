@@ -13,6 +13,7 @@ import fnmatch
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.utils import osextra
 from prymatex.core.plugin import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
@@ -30,8 +31,10 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     directoryDeleted = QtCore.pyqtSignal(str)
     directoryChanged = QtCore.pyqtSignal(str)
     directoryRenamed = QtCore.pyqtSignal(str, str)
+
     # Generic Signal 
     filesytemChange = QtCore.pyqtSignal(str, int)
+    
     
     #=========================================================
     # Settings
