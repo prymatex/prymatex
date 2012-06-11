@@ -35,5 +35,11 @@ def fullsplit(path, result=None):
         return result
     return fullsplit(head, [tail] + result)
 
+def issubpath(childPath, parentPath):
+    def fixpath(p):
+        return os.path.normpath(p) + os.sep
+    return fixpath(childPath).startswith(fixpath(parentPath))
+
 if __name__ == "__main__":
-    print expand_shell_var('$home/alfa')
+    print os.sep
+    print expand_shell_var("$PATH/alfa")
