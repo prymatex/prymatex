@@ -210,7 +210,49 @@ def open_parse_args(args):
     """ 
     return None, args
 
-   
+# ##############################################################################
+# mate 
+# ##############################################################################
+def mate_parse_args(args):
+    """
+    Calling TextMate from Other Applications
+
+    mate usage: %1$s [-awl<number>rdnhv] [file ...]
+        Options:
+         -a, --async            Do not wait for file to be closed by TextMate.
+         -w, --wait             Wait for file to be closed by TextMate.
+         -l, --line <number>    Place caret on line <number> after loading file.
+         -r, --recent           Add file to Open Recent menu.
+         -d, --change-dir       Change TextMates working directory to that of the file.
+         -n, --no-reactivation  After edit with -w, do not re-activate the calling app.
+         -h, --help             Show this information.
+         -v, --version          Print version information.
+         
+        If multiple files are given, a project is created consisting of these
+        files, -a is then default and -w will be ignored (e.g. "%1$s *.tex").
+        
+        %4$nBy default %1$s will not wait for the file to be closed
+        except when used as filter:
+         ls *.tex|%1$s|sh%3$s-w implied
+         %1$s -|cat -n   %3$s-w implied (read from stdin)
+        
+        An exception is made if the command is started as something which ends
+        with "_wait". So to have a command with --wait as default, you can
+        create a symbolic link like this:
+         ln -s %1$s %1$s_wait
+    """ 
+
+    parser = OptionParser()
+    parser.add_option("-a", "--async", action = 'store')
+    parser.add_option("-w", "--wait", action = 'store')
+    parser.add_option("-l", "--line", action = 'store')
+    parser.add_option("-r", "--recent", action = 'store')
+    parser.add_option("-d", "--change-dir", action = 'store')
+    parser.add_option("-n", "--no-reactivation", action = 'store')
+    
+    options, args = parser.parse_args(args)
+    return options, args
+
 def new_dialgo_parse_args(args):
     '''
     Dialog Options:
@@ -314,7 +356,6 @@ Note:
 
     return options, args
     
-
 PARSERS = {
            'nib': nib_parse_args,
            'tooltip': tooltip_parse_args,
@@ -323,7 +364,8 @@ PARSERS = {
            'defaults': defaults_parse_args,
            'images': images_parse_args,
            'alert': alert_parse_args,
-           'open': open_parse_args
+           'open': open_parse_args,
+           'mate': mate_parse_args
            }
 
 class CommandHandler(object):
