@@ -262,7 +262,6 @@ class DeleteRemoveBracesHelper(PMXCodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
         self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor, direction = "right")
-        print "otro cursor es", self.cursor2
         return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
         
     def execute(self, editor, event, cursor = None, scope = None):
