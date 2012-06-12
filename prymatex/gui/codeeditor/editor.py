@@ -568,6 +568,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         self._currentBraces = (None, None, None, None)
 
+        # TODO si no hay para uno no hay para ninguno, quitar el que esta si el findTypingPair retorna None
         if leftChar in openBraces:
             leftCursor = QtGui.QTextCursor(cursor)
             leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
@@ -578,11 +579,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
             index = openBraces.index(rightChar)
             self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, closeBraces[index], rightCursor))
-        if leftChar in closeBraces and self._currentBraces[0] == None:
+        if leftChar in closeBraces and (self._currentBraces[0] is None or self._currentBraces[2] is None):
             leftCursor = QtGui.QTextCursor(cursor)
             leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
             self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True), None)
-        if rightChar in closeBraces and self._currentBraces[1] == None:
+        if rightChar in closeBraces and (self._currentBraces[1] is None or self._currentBraces[3] is None):
             rightCursor = QtGui.QTextCursor(cursor)
             rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
             self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
@@ -1101,7 +1102,15 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 return c2
         else:
             if not c2.isNull() and c2.block() == cursor.block():
-                return c2
+                #Ahora balanceamos usando el texto del block
+                block = cursor.block()
+                text = block.text()
+                positionStart = cursor.selectionEnd() if backward else cursor.selectionStart()
+                positionStart -= block.position()
+                positionEnd = c2.selectionEnd() if c2 > cursor else c2.selectionStart()
+                positionEnd -= block.position()
+                if text[:positionStart].count(b2) % 2 == 0 and text[positionEnd:].count(b2) % 2 == 0:
+                    return c2
 
     def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = True):
         cursor = cursor or self.textCursor()
