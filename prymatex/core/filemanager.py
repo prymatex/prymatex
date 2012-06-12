@@ -164,7 +164,8 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     dirname = lambda self, path: os.path.dirname(path)
     basename = lambda self, path: os.path.basename(path)
     mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
-
+    issubpath = lambda self, childPath, parentPath: osextra.path.issubpath(childPath, parentPath)
+    
     #==================================================================
     # Handling files for retrieving data. open, read, write, close
     #==================================================================

@@ -146,4 +146,6 @@ class PMXProjectManager(QtCore.QObject):
         self.projectTreeModel.dataChanged.emit()
         
     def findProjectForPath(self, path):
-        return self.projectTreeModel.projectForPath(path)
+        for project in self.getAllProjects():
+            if self.application.fileManager.issubpath(path, project.path):
+                return project
