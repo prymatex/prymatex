@@ -4,39 +4,39 @@
 from PyQt4 import QtCore
 
 from prymatex.gui.codeeditor.dockers import PMXCodeBookmarksDock, PMXCodeSymbolsDock
-from prymatex.gui.codeeditor.editor import PMXCodeEditor
+from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.gui.codeeditor import helpers, addons, sidebar
 from prymatex.gui.codeeditor.status import PMXCodeEditorStatus
 from prymatex.gui.codeeditor.overlay import PMXEditorMessageOverlay, PMXMiniMapOverlay
 
 def registerPlugin(manager):
-    manager.registerEditor(PMXCodeEditor)
+    manager.registerEditor(CodeEditor)
     manager.registerStatusBar(PMXCodeEditorStatus)
     manager.registerDocker(PMXCodeSymbolsDock)
     manager.registerDocker(PMXCodeBookmarksDock)
     
-    #manager.registerOverlay(PMXCodeEditor, PMXMiniMapOverlay)
-    manager.registerOverlay(PMXCodeEditor, PMXEditorMessageOverlay)
+    #manager.registerOverlay(CodeEditor, PMXMiniMapOverlay)
+    manager.registerOverlay(CodeEditor, PMXEditorMessageOverlay)
     
-    manager.registerKeyHelper(PMXCodeEditor, helpers.KeyEquivalentHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.SmartTypingPairsHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.TabTriggerHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.TabIndentHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.CompleterHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.BacktabUnindentHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.BackspaceUnindentHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.BackspaceRemoveBracesHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.MoveCursorToHomeHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.SmartIndentHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.OverwriteHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.MultiCursorHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.DeleteRemoveBracesHelper)
-    manager.registerKeyHelper(PMXCodeEditor, helpers.PrintEditorStatusHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.KeyEquivalentHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.SmartTypingPairsHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.TabTriggerHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.TabIndentHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.CompleterHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.BacktabUnindentHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.BackspaceUnindentHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.BackspaceRemoveBracesHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.MoveCursorToHomeHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.SmartIndentHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.OverwriteHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.MultiCursorHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.DeleteRemoveBracesHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.PrintEditorStatusHelper)
     
-    manager.registerAddon(PMXCodeEditor, addons.CompleterAddon)
-    manager.registerAddon(PMXCodeEditor, addons.SmartUnindentAddon)
-    manager.registerAddon(PMXCodeEditor, addons.SpellCheckerAddon)
-    #manager.registerAddon(PMXCodeEditor, sidebar.ExtraSelectionSideBarAddon)
-    manager.registerAddon(PMXCodeEditor, sidebar.BookmarkSideBarAddon)
-    manager.registerAddon(PMXCodeEditor, sidebar.LineNumberSideBarAddon)
-    manager.registerAddon(PMXCodeEditor, sidebar.FoldingSideBarAddon)
+    manager.registerAddon(CodeEditor, addons.CompleterAddon)
+    manager.registerAddon(CodeEditor, addons.SmartUnindentAddon)
+    manager.registerAddon(CodeEditor, addons.SpellCheckerAddon)
+    #manager.registerAddon(CodeEditor, sidebar.ExtraSelectionSideBarAddon)
+    manager.registerAddon(CodeEditor, sidebar.BookmarkSideBarAddon)
+    manager.registerAddon(CodeEditor, sidebar.LineNumberSideBarAddon)
+    manager.registerAddon(CodeEditor, sidebar.FoldingSideBarAddon)

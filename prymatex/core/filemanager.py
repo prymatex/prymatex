@@ -164,6 +164,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     basename = lambda self, path: os.path.basename(path)
     mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
     issubpath = lambda self, childPath, parentPath: osextra.path.issubpath(childPath, parentPath)
+    fullsplit = lambda self, path: osextra.path.fullsplit(path)
     def expandVars(self, text):
         context = self.application.supportManager.buildEnvironment()
         path = osextra.path.expand_shell_var(text, context = context)

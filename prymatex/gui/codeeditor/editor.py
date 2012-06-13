@@ -34,7 +34,7 @@ from prymatex.utils.i18n import ugettext as _
 
 from prymatex.utils.decorator.helpers import printtime
 
-class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
+class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Signals
     #=======================================================================

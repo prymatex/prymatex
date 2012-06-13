@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-from prymatex.utils import osextra
-
 from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.gui import utils
-from prymatex.core.plugin import PMXBaseWidgetComponent
+from prymatex.core.plugin import PMXBaseWidgetComponent, PMXBaseKeyHelper
 from prymatex.core import exceptions
 
 class PMXBaseEditor(PMXBaseWidgetComponent):
@@ -82,7 +79,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     
     def tabTitles(self):
         if self.filePath is not None:
-            return osextra.path.fullsplit(self.filePath)[::-1]
+            return self.application.fileManager.fullsplit(self.filePath)[::-1]
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter).split()
 
     def setTabTitle(self, title):
@@ -92,7 +89,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         if hasattr(self, "_tabTitle"):
             return self._tabTitle
         if self.filePath is not None:
-            return os.path.basename(self.filePath)
+            return self.application.fileManager.basename(self.filePath)
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
 
     def tabToolTip(self):
@@ -148,4 +145,10 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     @classmethod
     def acceptFile(cls, filePath, mimetype):
         return True
-        
+
+class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
+    def accept(self, editor, event):
+        return PMXBaseKeyHelper.accept(self, editor, event.key())
+    
+    def execute(self, editor, event):
+        PMXBaseKeyHelper.accept(self, editor, event.key())

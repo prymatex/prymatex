@@ -52,7 +52,7 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     def addKeyHelper(cls, helper):
         helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])
         helpers.append(helper)
-        
+
     def findHelpers(self, key):
         helpers = self.KEY_HELPERS[Key_Any][:]
         return helpers + self.KEY_HELPERS.get(key, [])
@@ -88,8 +88,8 @@ class PMXBaseAddon(object):
 Key_Any = 0
 class PMXBaseKeyHelper(object):
     KEY = Key_Any
-    def accept(self, widget, event):
-        return self.KEY == event.key()
+    def accept(self, widget, key):
+        return self.KEY == key
     
-    def execute(self, widget, event):
+    def execute(self, widget, key):
         pass

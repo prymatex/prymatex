@@ -5,6 +5,8 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.core.plugin import PMXBaseAddon
 
+#Mover cada addon a su respectivo modulo, addon editor a editor y dock addon a dock
+
 #========================================
 # BASE EDITOR ADDON
 #========================================

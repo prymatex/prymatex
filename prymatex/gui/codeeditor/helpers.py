@@ -3,16 +3,16 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.plugin import PMXBaseKeyHelper
+from prymatex.core.plugin.editor import PMXBaseEditorKeyHelper
 
-class PMXCodeEditorKeyHelper(PMXBaseKeyHelper):
+class CodeEditorKeyHelper(PMXBaseEditorKeyHelper):
     def accept(self, editor, event, cursor, scope):
-        return PMXBaseKeyHelper.accept(self, editor, event)
+        return PMXBaseEditorKeyHelper.accept(self, editor, event)
     
     def execute(self, editor, event, cursor, scope):
-        PMXBaseKeyHelper.accept(self, editor, event)
+        PMXBaseEditorKeyHelper.accept(self, editor, event)
 
-class KeyEquivalentHelper(PMXCodeEditorKeyHelper):
+class KeyEquivalentHelper(CodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         keyseq = int(event.modifiers()) + event.key()
         self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, scope)
@@ -24,7 +24,7 @@ class KeyEquivalentHelper(PMXCodeEditorKeyHelper):
         else:
             editor.selectBundleItem(self.items)
 
-class TabTriggerHelper(PMXCodeEditorKeyHelper):
+class TabTriggerHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Tab
     def accept(self, editor, event, cursor = None, scope = None):
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
@@ -38,7 +38,7 @@ class TabTriggerHelper(PMXCodeEditorKeyHelper):
         else:
             editor.selectBundleItem(self.items, tabTriggered = True)
 
-class CompleterHelper(PMXCodeEditorKeyHelper):
+class CompleterHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Space
     def accept(self, editor, event, cursor = None, scope = None):
         """Accept the completer event"""
@@ -50,7 +50,7 @@ class CompleterHelper(PMXCodeEditorKeyHelper):
     def execute(self, editor, event, cursor = None, scope = None):
         editor.showCompleter(self.completions, self.alreadyTyped)
 
-class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
+class SmartTypingPairsHelper(CodeEditorKeyHelper):
     #TODO: Mas amor para la inteligencia de los cursores balanceados
     def accept(self, editor, event, cursor = None, scope = None):
         settings = editor.preferenceSettings(scope)
@@ -155,7 +155,7 @@ class SmartTypingPairsHelper(PMXCodeEditorKeyHelper):
             editor.setTextCursor(cursor)
         cursor.endEditBlock()
 
-class MoveCursorToHomeHelper(PMXCodeEditorKeyHelper):
+class MoveCursorToHomeHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Home
     def accept(self, editor, event, cursor = None, scope = None):
         #Solo si el cursor no esta al final de la indentacion
@@ -169,13 +169,13 @@ class MoveCursorToHomeHelper(PMXCodeEditorKeyHelper):
         cursor.setPosition(self.newPosition, event.modifiers() == QtCore.Qt.ShiftModifier and QtGui.QTextCursor.KeepAnchor or QtGui.QTextCursor.MoveAnchor)
         editor.setTextCursor(cursor)
 
-class OverwriteHelper(PMXCodeEditorKeyHelper):
+class OverwriteHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Insert
     def execute(self, editor, event, cursor = None, scope = None):
         editor.setOverwriteMode(not editor.overwriteMode())
         editor.modeChanged.emit()
         
-class TabIndentHelper(PMXCodeEditorKeyHelper):
+class TabIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Tab
     def accept(self, editor, event, cursor = None, scope = None):
         #Solo si el cursor tiene seleccion o usa soft Tab
@@ -191,13 +191,13 @@ class TabIndentHelper(PMXCodeEditorKeyHelper):
             spaces = editor.tabStopSize - (cursor.columnNumber() % editor.tabStopSize)
             cursor.insertText(spaces * ' ')
 
-class BacktabUnindentHelper(PMXCodeEditorKeyHelper):
+class BacktabUnindentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backtab
     #Siempre se come esta pulsacion solo que no unindenta si la linea ya esta al borde
     def execute(self, editor, event, cursor = None, scope = None):
         editor.unindentBlocks()
 
-class BackspaceUnindentHelper(PMXCodeEditorKeyHelper):
+class BackspaceUnindentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
@@ -209,7 +209,7 @@ class BackspaceUnindentHelper(PMXCodeEditorKeyHelper):
         for _ in range(counter):
             cursor.deletePreviousChar()
 
-class BackspaceRemoveBracesHelper(PMXCodeEditorKeyHelper):
+class BackspaceRemoveBracesHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Backspace
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
@@ -222,7 +222,7 @@ class BackspaceRemoveBracesHelper(PMXCodeEditorKeyHelper):
         self.cursor2.removeSelectedText()
         cursor.endEditBlock()
 
-class SmartIndentHelper(PMXCodeEditorKeyHelper):
+class SmartIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Return
     def execute(self, editor, event, cursor = None, scope = None):
         if editor.document().blockCount() == 1:
@@ -231,7 +231,7 @@ class SmartIndentHelper(PMXCodeEditorKeyHelper):
                 editor.setSyntax(syntax)
         editor.insertNewLine(cursor)
 
-class MultiCursorHelper(PMXCodeEditorKeyHelper):
+class MultiCursorHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_M
     def accept(self, editor, event, cursor = None, scope = None):
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
@@ -257,7 +257,7 @@ class MultiCursorHelper(PMXCodeEditorKeyHelper):
                 editor.multiCursorMode.addMergeCursor(newCursor)
                 editor.centerCursor(newCursor)
 
-class DeleteRemoveBracesHelper(PMXCodeEditorKeyHelper):
+class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Delete
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
@@ -270,7 +270,7 @@ class DeleteRemoveBracesHelper(PMXCodeEditorKeyHelper):
         self.cursor2.removeSelectedText()
         cursor.endEditBlock()
 
-class PrintEditorStatusHelper(PMXCodeEditorKeyHelper):
+class PrintEditorStatusHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_P
     def accept(self, editor, event, cursor = None, scope = None):
         control_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)

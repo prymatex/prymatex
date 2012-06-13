@@ -5,7 +5,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.core.plugin.status import PMXBaseStatusBar
-from prymatex.gui.codeeditor.editor import PMXCodeEditor
+from prymatex.gui.codeeditor.editor import CodeEditor
 from prymatex.ui.codeeditor.status import Ui_CodeEditorStatus
 
 class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
@@ -125,7 +125,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
     # Handle editors
     #============================================================
     def acceptEditor(self, editor):
-        return isinstance(editor, PMXCodeEditor)
+        return isinstance(editor, CodeEditor)
     
     def disconnectEditor(self, editor):
         editor.cursorPositionChanged.disconnect(self.on_cursorPositionChanged)
