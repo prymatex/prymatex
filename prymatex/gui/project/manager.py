@@ -30,6 +30,7 @@ class PMXProjectManager(QtCore.QObject):
     
     def __init__(self, application):
         QtCore.QObject.__init__(self)
+        self.fileManager = application.fileManager
         self.projectTreeModel = PMXProjectTreeModel(self)
         
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
@@ -119,7 +120,7 @@ class PMXProjectManager(QtCore.QObject):
             self.application.supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
         self.projectAdded.emit(project)
-        
+
     def modifyProject(self, project):
         pass
 

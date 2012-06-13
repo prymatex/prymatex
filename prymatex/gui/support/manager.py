@@ -211,11 +211,10 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         return self.bundleMenuGroup.menuForBundle(bundle)
         
     def buildEnvironment(self):
-        env = {}
+        env = PMXSupportBaseManager.buildEnvironment(self)
         for var in self.shellVariables:
             if var['enabled']:
                 env[var['variable']] = var['value']
-        env.update(self.environment)
         return env
     
     # Override loadSupport for emit signals
@@ -238,11 +237,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
             
         self.processTableModel.appendProcess(process, description = context.description())
         
-        #TODO: context.environment ya tiene las variables de system ver que hacer
-        env = QtCore.QProcessEnvironment.systemEnvironment()
-        for key, value in context.environment.iteritems():
-            env.insert(key, value)
-        process.setProcessEnvironment(env)
+        process.setProcessEnvironment(context.environment)
 
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):

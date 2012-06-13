@@ -238,10 +238,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
-        mimeData = self.projectTreeProxyModel.mimeData( [ self.treeViewProjects.currentIndex() ])
-        self.application.clipboard().setMimeData(mimeData)
-        treeNode = self.currentNode()
-        self.propertiesDialog.exec_(treeNode)
+        self.propertiesDialog.exec_(self.currentNode())
 
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):
@@ -260,8 +257,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
     @QtCore.pyqtSlot()
     def on_actionOpenSystemEditor_triggered(self):
-        path = self.currentPath()
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % self.currentPath(), QtCore.QUrl.TolerantMode))
     
     @QtCore.pyqtSlot()
     def on_pushButtonCollapseAll_pressed(self):

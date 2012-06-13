@@ -34,8 +34,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
 
     # Generic Signal 
     filesytemChange = QtCore.pyqtSignal(str, int)
-    
-    
+
     #=========================================================
     # Settings
     #=========================================================
@@ -165,6 +164,16 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     basename = lambda self, path: os.path.basename(path)
     mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
     issubpath = lambda self, childPath, parentPath: osextra.path.issubpath(childPath, parentPath)
+    def expandVars(self, text):
+        context = self.application.supportManager.buildEnvironment()
+        path = osextra.path.expand_shell_var(text, context = context)
+        if os.path.exists(path):
+            return path
+
+    def normpath(self, path):
+        """ os.path.normpath and os.path.realpath, con condimentos de prymatex """
+        path = os.path.realpath(path)
+        return os.path.normpath(path)
     
     #==================================================================
     # Handling files for retrieving data. open, read, write, close

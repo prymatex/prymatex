@@ -114,7 +114,10 @@ class PMXSupportBaseManager(object):
         self.environment.update(env)
 
     def buildEnvironment(self):
-        return self.environment.copy()
+        env = {}
+        env.update(os.environ)
+        env.update(self.environment)
+        return env
     
     def basePath(self, element, namespace):
         if namespace not in self.namespaces:

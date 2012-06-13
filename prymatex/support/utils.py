@@ -113,8 +113,6 @@ def ensureShellScript(script, environment):
 #============================
 def ensureUnixEnvironment(environment):
     codingenv = {}
-    for key, value in os.environ.iteritems():
-        codingenv[key] = value[:]
     for key, value in environment.iteritems():
         codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
     return codingenv
@@ -130,8 +128,6 @@ def prepareUnixShellScript(script, environment):
 #============================
 def ensureWindowsEnvironment(environment):
     codingenv = {}
-    for key, value in os.environ.iteritems():
-        codingenv[key] = value[:]
     for key, value in environment.iteritems():
         codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
     return codingenv
@@ -154,8 +150,6 @@ def ensureCygwinPath(path):
 
 def ensureCygwinEnvironment(environment):
     codingenv = {}
-    for key, value in os.environ.iteritems():
-        codingenv[key] = ensureCygwinPath(value)
     for key, value in environment.iteritems():
         key = unicode(key).encode('utf-8')
         value = unicode(value).encode('utf-8')

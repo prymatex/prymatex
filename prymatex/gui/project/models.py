@@ -11,9 +11,10 @@ from prymatex.gui.project.base import FileSystemTreeNode
 from prymatex.gui.configure.models import PMXConfigureTreeNode
 
 class PMXProjectTreeModel(TreeModel):  
-    def __init__(self, manager, parent = None):
-        TreeModel.__init__(self, parent)
-        self.manager = manager
+    def __init__(self, projectManager):
+        #projectManager is a qObject
+        TreeModel.__init__(self, projectManager)
+        self.projectManager = projectManager
         
     def rowCount(self, parent):
         parentNode = self.node(parent)
