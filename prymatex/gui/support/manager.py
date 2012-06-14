@@ -236,8 +236,12 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
             process.setWorkingDirectory(context.workingDirectory)
             
         self.processTableModel.appendProcess(process, description = context.description())
-        
-        process.setProcessEnvironment(context.environment)
+
+        environment = QtCore.QProcessEnvironment()
+        for key, value in context.environment.iteritems():
+            environment.insert(key, value)
+                    
+        process.setProcessEnvironment(environment)
 
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):
