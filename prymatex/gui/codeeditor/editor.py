@@ -199,7 +199,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.showSyntaxMessage)
-        self.themeChanged.connect(self.highlightCurrent)
+        self.themeChanged.connect(self.highlightEditor)
 
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
@@ -267,7 +267,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def on_cursorPositionChanged(self):
         #El cursor se movio es hora de:
         self.setCurrentBraces()
-        self.highlightCurrent()
+        self.highlightEditor()
 
     #=======================================================================
     # Base Editor Interface
@@ -634,7 +634,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Highlight Editor
     #=======================================================================
-    def highlightCurrent(self):
+    def highlightEditor(self):
         #Clean current extra selection
         self.setExtraSelections([])
         if self.multiCursorMode.isActive():
