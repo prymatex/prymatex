@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.gui import utils
-from prymatex.core.plugin import PMXBaseWidgetComponent, PMXBaseKeyHelper
+from prymatex.core.plugin import PMXBaseWidgetComponent, PMXBaseKeyHelper, PMXBaseAddon
 from prymatex.core import exceptions
 
 class PMXBaseEditor(PMXBaseWidgetComponent):
@@ -139,6 +139,9 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         can provide custom actions to the menu through this callback'''
         return []
     
+    def runKeyHelper(self, event):
+        return PMXBaseWidgetComponent.runKeyHelper(self, event.key())
+        
     #======================================================================
     # For Plugin Manager administrator
     #======================================================================    
@@ -146,9 +149,23 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def acceptFile(cls, filePath, mimetype):
         return True
 
+#======================================================================
+# Base Helper
+#======================================================================    
 class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
     def accept(self, editor, event):
         return PMXBaseKeyHelper.accept(self, editor, event.key())
     
     def execute(self, editor, event):
         PMXBaseKeyHelper.accept(self, editor, event.key())
+
+#======================================================================
+# Base Addon
+#======================================================================    
+class PMXBaseEditorAddon(PMXBaseAddon):
+    def initialize(self, editor):
+        PMXBaseAddon.initialize(self, editor)
+        self.editor = editor
+
+    def finalize(self):
+        pass

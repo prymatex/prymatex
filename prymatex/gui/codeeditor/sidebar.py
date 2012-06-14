@@ -4,7 +4,7 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import QColor
 
-from prymatex.core.plugin.addons import PMXEditorBaseAddon
+from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex import resources
 
 class PMXSideBar(QtGui.QWidget):
@@ -37,7 +37,7 @@ class PMXSideBar(QtGui.QWidget):
 #========================================
 # BASE EDITOR SIDEBAR ADDON
 #========================================
-class SideBarWidgetAddon(QtGui.QWidget, PMXEditorBaseAddon):
+class SideBarWidgetAddon(QtGui.QWidget, PMXBaseEditorAddon):
     ALIGNMENT = None
     updateRequest = QtCore.pyqtSignal()
     

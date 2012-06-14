@@ -39,7 +39,8 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     
     def addOverlay(self, overlay):
         self.overlays.append(overlay)
-    
+
+    # Addons api    
     def addAddon(self, addon):
         self.addons.append(addon)
         
@@ -48,6 +49,7 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
         #TODO: Solo uno
         return addons[0]
 
+    # Helpers api
     @classmethod
     def addKeyHelper(cls, helper):
         helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])
@@ -56,6 +58,14 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     def findHelpers(self, key):
         helpers = self.KEY_HELPERS[Key_Any][:]
         return helpers + self.KEY_HELPERS.get(key, [])
+
+    def runKeyHelper(self, key):
+        runHelper = False
+        for helper in self.findHelpers(key):
+            runHelper = helper.accept(self, key)
+            if runHelper:
+                helper.execute(self, key)
+        return runHelper
 
     @classmethod
     def contributeToMainMenu(cls, addonClasses):

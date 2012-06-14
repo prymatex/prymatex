@@ -3,16 +3,16 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.plugin.addons import PMXEditorBaseAddon
+from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex.support import PMXPreferenceSettings
 
-class CompleterAddon(QtCore.QObject, PMXEditorBaseAddon):
+class CompleterAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
         self.charCounter = 0
 
     def initialize(self, editor):
-        PMXEditorBaseAddon.initialize(self, editor)
+        PMXBaseEditorAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
@@ -25,12 +25,12 @@ class CompleterAddon(QtCore.QObject, PMXEditorBaseAddon):
             if bool(completions):
                 self.editor.showCompleter(completions, alreadyTyped)
                 
-class SmartUnindentAddon(QtCore.QObject, PMXEditorBaseAddon):
+class SmartUnindentAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
 
     def initialize(self, editor):
-        PMXEditorBaseAddon.initialize(self, editor)
+        PMXBaseEditorAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
@@ -44,12 +44,12 @@ class SmartUnindentAddon(QtCore.QObject, PMXEditorBaseAddon):
             if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
                 self.editor.unindentBlocks(cursor)
             
-class SpellCheckerAddon(QtCore.QObject, PMXEditorBaseAddon):
+class SpellCheckerAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
 
     def initialize(self, editor):
-        PMXEditorBaseAddon.initialize(self, editor)
+        PMXBaseEditorAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):

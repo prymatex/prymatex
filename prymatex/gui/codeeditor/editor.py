@@ -826,6 +826,19 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
+    def runKeyHelper(self, event):
+        #No tengo modo activo, intento con los helpers
+        #Obtener key, scope y cursor
+        scope = self.getCurrentScope()
+        cursor = self.textCursor()
+        runHelper = False
+        for helper in self.findHelpers(event.key()):
+            #Buscar Entre los helpers
+            runHelper = helper.accept(self, event, cursor, scope)
+            if runHelper:
+                helper.execute(self, event, cursor, scope)
+        return runHelper
+
     #@printtime
     def keyPressEvent(self, event):
         """
@@ -838,21 +851,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             if mode.isActive():
                 return mode.keyPressEvent(event)
         
-        #No tengo modo activo, intento con los helpers
-        #Obtener key, scope y cursor
-        scope = self.getCurrentScope()
-        cursor = self.textCursor()
-        
-        for helper in self.findHelpers(event.key()):
-            #Buscar Entre los helpers
-            if helper.accept(self, event, cursor, scope):
-                #pasarle el evento
-                return helper.execute(self, event, cursor, scope)
-        
-        #No tengo helper paso el evento a la base
-        QtGui.QPlainTextEdit.keyPressEvent(self, event)
-        
-        self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
+        if not self.runKeyHelper(event):
+            #No tengo helper paso el evento a la base
+            QtGui.QPlainTextEdit.keyPressEvent(self, event)
+            
+            self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
     
     def keyReleaseEvent(self, event):
         #Primero ver si tengo un modo activo,

@@ -3,12 +3,12 @@
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.core.plugin.addons import PMXDockBaseAddon
+from prymatex.core.plugin.dock import PMXBaseDockAddon
 
 #========================================
 # BASE PROJECT ADDON
 #========================================
-class ProjectDockAddon(QtCore.QObject, PMXDockBaseAddon):
+class ProjectDockAddon(QtCore.QObject, PMXBaseDockAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
         
