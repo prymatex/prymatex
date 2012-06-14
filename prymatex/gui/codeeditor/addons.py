@@ -58,3 +58,14 @@ class SpellCheckerAddon(QtCore.QObject, PMXBaseEditorAddon):
             currentBlock = cursor.block()
             spellRange = filter(lambda ((start, end), p): p.spellChecking,  currentBlock.userData().preferences)
             print spellRange
+
+class HighlightCurrentWordAddon(QtCore.QObject, PMXBaseEditorAddon):
+    def __init__(self, parent):
+        QtCore.QObject.__init__(self, parent)
+
+    def initialize(self, editor):
+        PMXBaseEditorAddon.initialize(self, editor)
+        editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
+    
+    def on_editor_cursorPositionChanged(self):
+        pass
