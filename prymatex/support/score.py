@@ -89,13 +89,39 @@ class PMXScoreManager(object):
             if currentReference == currentPending or currentReference.startswith("%s." % currentPending):
                 point_score = (2 ** cls.POINT_DEPTH) - currentReference.count( '.' ) + currentPending.count( '.' )
                 result += point_score * multiplier
-                #TODO: Sospecho que quitando los pop se puede hacer mas rapido
                 pending.pop()
                 currentPending = pending[-1] if pending else None
             multiplier = multiplier / cls.BASE
-            #TODO: Sospecho que quitando los pop se puede hacer mas rapido
             reference_array.pop()
             currentReference = reference_array[-1] if reference_array else None
         if pending:
-            result = 0
+            return 0
         return result
+        
+    # TODO DebugME
+    @classmethod  
+    def score_array_startswith_index(cls, search_array, reference_array):
+        """ Esta funcion pretende apurar el trabajo de obtener el score no usando los pop's y trabajando con cadenas """
+        lenSearch = -len(search_array)
+        lenReference = -len(reference_array)
+        indexReference = indexPending = -1
+        multiplier = cls.START_VALUE
+        result = 0
+        while indexPending >= lenSearch and indexReference >= lenReference:
+            if reference_array[indexReference] == search_array[indexPending] or reference_array[indexReference].startswith("%s." % search_array[indexPending]):
+                point_score = (2 ** cls.POINT_DEPTH) - reference_array[indexReference].count( '.' ) + search_array[indexPending].count( '.' )
+                result += point_score * multiplier
+                indexPending -= 1
+            multiplier = multiplier / cls.BASE
+            indexReference -= 1
+        if indexPending > lenSearch:
+            return 0
+        return result
+        
+if __name__ == '__main__':
+    reference = "source.python string.quoted.double.single-line.python punctuation.definition.string.end.python meta.empty-string.double.python"
+    for _ in xrange(10000):
+        scoreManager = PMXScoreManager()
+        scope = "source.python string.quoted.double.single-line punctuation.definition.string.end.python"
+        scoreManager.score(scope, reference)
+    
