@@ -497,16 +497,21 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def isActive(self):
         return self.popup().isVisible()
         
+    def inactive(self):
+        self.popup().setVisible(False)
+        
     def keyPressEvent(self, event):
         if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
             event.ignore()
+        elif self.editor.runKeyHelper(event):
+            self.inactive()
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
             cursor = self.editor.textCursor()
             
-            #TODO: Se puede hacer mejor, para controlar que si esta en la mitad de la palabro o algo de eso
+            #TODO: Se puede hacer mejor, para controlar que si esta en la mitad de la palabra o algo de eso
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
                 newPrefix = cursor.selectedText()
@@ -516,12 +521,12 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
                     suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
                     if isinstance(suggestion, basestring) and suggestion == newPrefix:
                         #Se termino
-                        self.popup().setVisible(False)
+                        self.inactive()
                         return
                 self.setCompletionPrefix(newPrefix)
                 self.complete(self.editor.cursorRect())
             else:
-                self.popup().setVisible(False)
+                self.inactive()
                 
     def setStartCursorPosition(self, position):
         self.startCursorPosition = position
