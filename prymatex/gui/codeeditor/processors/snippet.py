@@ -24,9 +24,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.baseEnvironment = settings.get("environment", {})
         
     def startSnippet(self, snippet):
-        """
-        Inicia el snippet
-        """
+        """Inicia el snippet"""
         self.snippet = snippet
         self.editor.modeChanged.emit()
         

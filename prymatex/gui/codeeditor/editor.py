@@ -174,8 +174,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
-        self.connectSignals()
-        
+
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
@@ -197,6 +196,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
+        self.connectSignals()
         #Load Default Syntax
         syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.setSyntax(syntax)
