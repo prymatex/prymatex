@@ -837,6 +837,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             runHelper = helper.accept(self, event, cursor, scope)
             if runHelper:
                 helper.execute(self, event, cursor, scope)
+                break
         return runHelper
 
     #@printtime

@@ -65,6 +65,7 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
             runHelper = helper.accept(self, key)
             if runHelper:
                 helper.execute(self, key)
+                break
         return runHelper
 
     @classmethod
