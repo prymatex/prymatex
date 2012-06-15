@@ -50,39 +50,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     afterClosed = QtCore.pyqtSignal()
     afterReload = QtCore.pyqtSignal()
 
-    #=======================================================================
-    # Settings
-    #=======================================================================
-    SETTINGS_GROUP = 'CodeEditor'
-    
-    defaultSyntax = pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
-    tabStopSoft = pmxConfigPorperty(default = True)
-    @pmxConfigPorperty(default = 4)
-    def tabStopSize(self, size):
-        self.setTabStopWidth(size * 9)
-    
-    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
-    def font(self, font):
-        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-        self.document().setDefaultFont(font)
-        self.setTabStopWidth(self.tabStopSize * 9)
-        self.fontChanged.emit()
-    
-    @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
-    def theme(self, uuid):
-        theme = self.application.supportManager.getTheme(uuid)
-
-        firstTime = not self.syntaxHighlighter.hasTheme()
-        self.syntaxHighlighter.setTheme(theme)
-        self.colours = theme.settings
-        
-        #Set color for QPlainTextEdit
-        appStyle = """QPlainTextEdit {background-color: %s;
-        color: %s;
-        selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
-        self.setStyleSheet(appStyle)
-        self.themeChanged.emit()
-        
     #================================================================
     # Regular expresions
     #================================================================
@@ -128,14 +95,44 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     ShowFolding           = 1<<4
     WordWrap              = 1<<5
     
+    #=======================================================================
+    # Settings
+    #=======================================================================
+    SETTINGS_GROUP = 'CodeEditor'
+    
+    defaultSyntax = pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
+    tabStopSoft = pmxConfigPorperty(default = True)
+    
+    @pmxConfigPorperty(default = 4)
+    def tabStopSize(self, size):
+        self.setTabStopWidth(size * 9)
+    
+    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
+    def font(self, font):
+        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+        self.document().setDefaultFont(font)
+        self.setTabStopWidth(self.tabStopSize * 9)
+        self.fontChanged.emit()
+    
+    @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
+    def theme(self, uuid):
+        theme = self.application.supportManager.getTheme(uuid)
+
+        firstTime = not self.syntaxHighlighter.hasTheme()
+        self.syntaxHighlighter.setTheme(theme)
+        self.colours = theme.settings
+        
+        #Set color for QPlainTextEdit
+        appStyle = """QPlainTextEdit {background-color: %s;
+        color: %s;
+        selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
+        self.setStyleSheet(appStyle)
+        self.themeChanged.emit()
+
     @pmxConfigPorperty(default = ShowLineNumbers)
     def defaultFlags(self, flags):
         self.setFlags(flags)
-                
-    @property
-    def tabKeyBehavior(self):
-        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
-    
+
     #================================================================
     # INIT
     #================================================================
@@ -168,10 +165,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.multiCursorMode = PMXMultiCursorEditorMode(self)
         self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
-        
-        self.highlightWordTimer = QtCore.QTimer()
-        self.currentHighlightWord = None
-        self.extraCursorsSelections = []
         
         self.braces = []
         #Current braces for cursor position (leftBrace * rightBrace, oppositeLeftBrace, oppositeRightBrace) 
@@ -345,6 +338,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Obteniendo datos del editor
     #=======================================================================
+    def tabKeyBehavior(self):
+        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
+
     def preferenceSettings(self, scope):
         return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
         
@@ -634,66 +630,50 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Highlight Editor
     #=======================================================================
+    def registerTextCharFormatBuilder(self, formatHash, formatBuilder):
+        self.syntaxHighlighter.registerTextCharFormatBuilder(formatHash, formatBuilder)
+        
+    def textCharFormat_line_builder(self):
+        format = QtGui.QTextCharFormat()
+        format.setBackground(self.colours['lineHighlight'])
+        format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+        return format
+        
+    def textCharFormat_brace_builder(self):
+        format = QtGui.QTextCharFormat()
+        format.setForeground(self.colours['caret'])
+        format.setFontUnderline(True)
+        format.setUnderlineColor(self.colours['foreground']) 
+        format.setBackground(QtCore.Qt.transparent)
+        return format
+
+    def textCharFormat_selection_builder(self):
+        format = QtGui.QTextCharFormat()
+        #color = QtGui.QColor(self.colours['selection'])
+        #color.setAlpha(100)
+        format.setBackground(self.colours['selection'])
+        return format
+        
     def highlightEditor(self):
-        #Clean current extra selection
-        self.setExtraSelections([])
+        extraSelections = []
         if self.multiCursorMode.isActive():
-            self.multiCursorMode.highlightCurrentLines()
+            extraSelections += self.multiCursorMode.buildExtraSelections()
         else:
-            self.highlightCurrentLine()
-            self.highlightCurrentBrace()
-            self.highlightCurrentSelections()
-            self.highlightCurrentWord()
-
-    def highlightCurrentWord(self):
-        return
-        #TODO: Mejorar esto porque sino cuando se carga un archivo le manda como loco
-        def highlightWord():
-            if self.currentHighlightWord == self.getWordUnderCursor()[0]:
-                self.extraCursorsSelections = self.findAll(self.currentHighlightWord, QtGui.QTextDocument.FindWholeWords | QtGui.QTextDocument.FindCaseSensitively)
-                self.highlightCurrentSelections()
-            self.highlightWordTimer.stop()
-        if self.currentHighlightWord != self.getWordUnderCursor()[0]:
-            if self.highlightWordTimer.isActive():
-                self.highlightWordTimer.stop()
-            self.currentHighlightWord = self.getWordUnderCursor()[0]
-            self.highlightWordTimer.timeout.connect(highlightWord)
-            self.highlightWordTimer.start(2000)
-
-    def highlightCurrentSelections(self):
-        extraSelections = self.extraSelections()
-        for cursor in self.extraCursorsSelections:
+            cursor = self.textCursor()
+            cursor.clearSelection()
+            extraSelections += self.buildExtraSelections("#line", cursor)
+            extraSelections += self.buildExtraSelections("#brace", filter(lambda c: c is not None, list(self._currentBraces)))
+        self.setExtraSelections(extraSelections)
+        
+    def buildExtraSelections(self, styleHash, cursors):
+        extraSelections = []
+        cursors = cursors if isinstance(cursors, list) else [ cursors ]
+        for cursor in cursors:
             selection = QtGui.QTextEdit.ExtraSelection()
-            color = QtGui.QColor(self.colours['selection'])
-            color.setAlpha(100)
-            selection.format.setBackground(color)
+            selection.format = self.syntaxHighlighter.highlightFormat(styleHash)
             selection.cursor = cursor
             extraSelections.append(selection)
-        self.setExtraSelections(extraSelections)
-
-    def highlightCurrentBrace(self):
-        selectedBraces = []
-        for cursor in self._currentBraces:
-            if cursor is not None:
-                selection = QtGui.QTextEdit.ExtraSelection()
-                selection.format.setForeground(QtGui.QBrush(self.colours['caret']))
-                selection.format.setFontUnderline(True)
-                selection.format.setUnderlineColor(self.colours['foreground']) 
-                selection.format.setBackground(QtGui.QBrush(QtCore.Qt.transparent))
-                selection.cursor = cursor
-                selectedBraces.append(selection)
-        if selectedBraces:
-            self.setExtraSelections(self.extraSelections() + selectedBraces)
-
-    def highlightCurrentLine(self):
-        extraSelections = self.extraSelections()
-        selection = QtGui.QTextEdit.ExtraSelection()
-        selection.format.setBackground(self.colours['lineHighlight'])
-        selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        selection.cursor = self.textCursor()
-        selection.cursor.clearSelection()
-        extraSelections.append(selection)
-        self.setExtraSelections(extraSelections)
+        return extraSelections
 
     def select(self, selection):
         cursor = self.textCursor()
@@ -831,14 +811,12 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Obtener key, scope y cursor
         scope = self.getCurrentScope()
         cursor = self.textCursor()
-        runHelper = False
         for helper in self.findHelpers(event.key()):
             #Buscar Entre los helpers
-            runHelper = helper.accept(self, event, cursor, scope)
-            if runHelper:
+            if helper.accept(self, event, cursor, scope):
                 helper.execute(self, event, cursor, scope)
-                break
-        return runHelper
+                return True
+        return False
 
     #@printtime
     def keyPressEvent(self, event):
@@ -875,16 +853,16 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
-            indent = block.userData().indent + self.tabKeyBehavior
+            indent = block.userData().indent + self.tabKeyBehavior()
         elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
             #TODO: Creo que este no es el correcto
             self.logger.debug("Increase next line indent")
-            indent = block.userData().indent + self.tabKeyBehavior
+            indent = block.userData().indent + self.tabKeyBehavior()
         elif PMXPreferenceSettings.UNINDENT in indentMarks:
             self.logger.debug("Unindent")
             indent = ""
         elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-            indent = block.userData().indent[:len(self.tabKeyBehavior)]
+            indent = block.userData().indent[:len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
             indent = block.userData().indent
@@ -1297,7 +1275,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor.beginEditBlock()
         while True:
             cursor.setPosition(start.position())
-            cursor.insertText(self.tabKeyBehavior)
+            cursor.insertText(self.tabKeyBehavior())
             if start == end:
                 break
             start = start.next()

@@ -133,11 +133,11 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
     @classmethod
     def contributeToMenu(cls):
         def on_actionShowLineNumbers_toggled(editor, checked):
-            instance = editor.addonByClassName(cls.__name__)
+            instance = editor.addonByClass(cls)
             instance.setVisible(checked)
 
         def on_actionShowLineNumbers_testChecked(editor):
-            instance = editor.addonByClassName(cls.__name__)
+            instance = editor.addonByClass(cls)
             return instance.isVisible()
         
         menuEntry = {'title': "Line Numbers",
@@ -206,11 +206,11 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
     @classmethod
     def contributeToMenu(cls):
         def on_actionShowBookmarks_toggled(editor, checked):
-            instance = editor.addonByClassName(cls.__name__)
+            instance = editor.addonByClass(cls)
             instance.setVisible(checked)
 
         def on_actionShowBookmarks_testChecked(editor):
-            instance = editor.addonByClassName(cls.__name__)
+            instance = editor.addonByClass(cls)
             return instance.isVisible()
         
         menuEntry = {'title': "Bookmarks",
@@ -275,11 +275,11 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
     @classmethod
     def contributeToMenu(cls):
         def on_actionShowFoldings_toggled(editor, checked):
-            instance = editor.addonByClassName(cls.__name__)
+            instance = editor.addonByClass(cls)
             instance.setVisible(checked)
 
         def on_actionShowFoldings_testChecked(editor):
-            instance = editor.addonByClassName(cls.__name__)
+            instance = editor.addonByClass(cls)
             return instance.isVisible()
         
         menuEntry = {'title': 'Foldings',

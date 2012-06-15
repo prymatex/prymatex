@@ -44,8 +44,8 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     def addAddon(self, addon):
         self.addons.append(addon)
         
-    def addonByClassName(self, className):
-        addons = filter(lambda addon: addon.__class__.__name__ == className, self.addons)
+    def addonByClass(self, klass):
+        addons = filter(lambda addon: isinstance(addon, klass), self.addons)
         #TODO: Solo uno
         return addons[0]
 
@@ -92,6 +92,7 @@ class PMXBaseAddon(object):
     def contributeToContextMenu(self):
         return []
 
+    #TODO: ver que pasa con este
     @classmethod
     def contributeToMenu(cls):
         return []
@@ -104,3 +105,4 @@ class PMXBaseKeyHelper(object):
     
     def execute(self, widget, key):
         pass
+

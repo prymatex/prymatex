@@ -142,21 +142,17 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.editor.application.restoreOverrideCursor()
         self.editor.modeChanged.emit()
 
-    def highlightCurrentLines(self):
-        extraSelections = self.editor.extraSelections()
-        for cursor in self.cursors:
-            selection = QtGui.QTextEdit.ExtraSelection()
-            selection.format.setBackground(self.editor.colours['lineHighlight'])
-            selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-            selection.cursor = QtGui.QTextCursor(cursor)
-            selection.cursor.clearSelection()
-            extraSelections.append(selection)
-            if cursor.hasSelection():
-                selection = QtGui.QTextEdit.ExtraSelection()
-                selection.format.setBackground(self.editor.colours['selection'])
-                selection.cursor = cursor
-                extraSelections.append(selection)
-        self.editor.setExtraSelections(extraSelections)
+    def buildExtraSelections(self):
+        extraSelections = []
+        cursorSelections = filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors))
+        cursorLines = []
+        for cursorLine in map(lambda c: QtGui.QTextCursor(c), self.cursors):
+            if all(map(lambda c: c.block() != cursorLine.block(), cursorLines)):
+                cursorLine.clearSelection()
+                cursorLines.append(cursorLine)
+        extraSelections += self.editor.buildExtraSelections("#line", cursorLines)
+        extraSelections += self.editor.buildExtraSelections("#selection", cursorSelections)
+        return extraSelections
 
     @property
     def isDragCursor(self):

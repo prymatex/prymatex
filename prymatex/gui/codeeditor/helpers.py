@@ -202,7 +202,7 @@ class BackspaceUnindentHelper(CodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         if cursor.hasSelection(): return False
         lineText = cursor.block().text()
-        return lineText[:cursor.columnNumber()].endswith(editor.tabKeyBehavior)
+        return lineText[:cursor.columnNumber()].endswith(editor.tabKeyBehavior())
         
     def execute(self, editor, event, cursor = None, scope = None):
         counter = cursor.columnNumber() % editor.tabStopSize or editor.tabStopSize

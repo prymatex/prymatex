@@ -83,6 +83,14 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         groups = self.groups(nameFilter)
         return filter(lambda word: any(map(lambda group: group[0] <= word[0][0] and group[1] >= word[0][1], groups)), self.words)
 
+    def wordsRanges(self, start = None, end = None):
+        words = self.words[:]
+        if start is not None:
+            words = filter(lambda ran: ran[0][0] >= start, words)
+        if end is not None:
+            words = filter(lambda ran: ran[0][1] <= end, words)
+        return words
+
     #================================================
     # Cache Handle
     #================================================

@@ -43,21 +43,31 @@ class SmartUnindentAddon(QtCore.QObject, PMXBaseEditorAddon):
             indentMarks = settings.indent(currentBlock.text())
             if PMXPreferenceSettings.INDENT_DECREASE in indentMarks and previousBlock.isValid() and currentBlock.userData().indent >= previousBlock.userData().indent:
                 self.editor.unindentBlocks(cursor)
-            
+
 class SpellCheckerAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
 
     def initialize(self, editor):
         PMXBaseEditorAddon.initialize(self, editor)
+        editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
+    def textCharFormat_spell_builder(self):
+        format = QtGui.QTextCharFormat()
+        format.setFontUnderline(True)
+        format.setUnderlineColor(QtCore.Qt.red) 
+        format.setUnderlineStyle(QtGui.QTextCharFormat.SpellCheckUnderline)
+        format.setBackground(QtCore.Qt.transparent)
+        return format
+        
     def on_editor_keyPressEvent(self, event):
         if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ]:
             cursor = self.editor.textCursor()
             currentBlock = cursor.block()
             spellRange = filter(lambda ((start, end), p): p.spellChecking,  currentBlock.userData().preferences)
-            print spellRange
+            for ran, p in spellRange:
+                print currentBlock.userData().wordsRanges(ran[0], ran[1])
 
 class HighlightCurrentWordAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
