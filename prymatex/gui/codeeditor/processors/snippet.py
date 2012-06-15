@@ -36,7 +36,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
             for _ in range(len(snippet.tabTrigger)):
                 cursor.deletePreviousChar()
         
-        self.tabreplacement = self.editor.tabKeyBehavior
+        self.tabreplacement = self.editor.tabKeyBehavior()
         self.indentation = "" if self.disableIndent else cursor.block().userData().indent
         
         self.__env = self.editor.buildEnvironment(snippet.buildEnvironment())
