@@ -43,9 +43,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.__env.update(self.baseEnvironment)
     
     def endSnippet(self):
-        """
-        Termina el snippet
-        """
+        """Termina el snippet"""
         self.snippet = None
         self.editor.modeChanged.emit()
 

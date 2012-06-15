@@ -142,7 +142,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.editor.application.restoreOverrideCursor()
         self.editor.modeChanged.emit()
 
-    def buildExtraSelections(self):
+    def extraSelections(self):
         extraSelections = []
         cursorSelections = filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors))
         cursorLines = []

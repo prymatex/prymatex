@@ -22,6 +22,7 @@ from prymatex.core import exceptions
 from prymatex.gui.support.models import PMXBundleTreeNode
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
+from prymatex.gui.codeeditor.addons import CodeEditorObjectAddon
 from prymatex.gui.codeeditor.sidebar import PMXSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
@@ -657,12 +658,15 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def highlightEditor(self):
         extraSelections = []
         if self.multiCursorMode.isActive():
-            extraSelections += self.multiCursorMode.buildExtraSelections()
+            extraSelections += self.multiCursorMode.extraSelections()
         else:
             cursor = self.textCursor()
             cursor.clearSelection()
             extraSelections += self.buildExtraSelections("#line", cursor)
             extraSelections += self.buildExtraSelections("#brace", filter(lambda c: c is not None, list(self._currentBraces)))
+        for addon in self.addons:
+            if isinstance(addon, CodeEditorObjectAddon):
+                extraSelections += addon.extraSelections()
         self.setExtraSelections(extraSelections)
         
     def buildExtraSelections(self, styleHash, cursors):
