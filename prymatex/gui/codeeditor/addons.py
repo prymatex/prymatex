@@ -51,8 +51,19 @@ class SpellCheckerAddon(QtCore.QObject, PMXBaseEditorAddon):
     def initialize(self, editor):
         PMXBaseEditorAddon.initialize(self, editor)
         editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
-        self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
-    
+        
+        try:
+            import enchant
+        except Exception as e:
+            # TODO: Configure this some way...
+            print "No spellcheck due to ", e
+            self.dict = None
+        else:
+            # TODO: Use custom word list with DictWithPWL class
+            self.dict = enchant.Dict()
+            self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
+        
+        
     def textCharFormat_spell_builder(self):
         format = QtGui.QTextCharFormat()
         format.setFontUnderline(True)
@@ -62,12 +73,20 @@ class SpellCheckerAddon(QtCore.QObject, PMXBaseEditorAddon):
         return format
         
     def on_editor_keyPressEvent(self, event):
+        '''Dynamically connect dependant on pyenchant import'''
+        assert self.dict is not None
+        fmt = self.textCharFormat_spell_builder()
         if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ]:
             cursor = self.editor.textCursor()
             currentBlock = cursor.block()
             spellRange = filter(lambda ((start, end), p): p.spellChecking,  currentBlock.userData().preferences)
             for ran, p in spellRange:
-                print currentBlock.userData().wordsRanges(ran[0], ran[1])
+                wordRangeList = currentBlock.userData().wordsRanges(ran[0], ran[1])
+                for (start, end), word in wordRangeList:
+                    if not self.dict.check(word):
+                        print "No esta en el diccionario:", word, " proximamente con ", fmt, "desde", start, "hasta", end
+                    
+                
 
 class HighlightCurrentWordAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
