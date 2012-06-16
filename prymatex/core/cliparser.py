@@ -45,7 +45,7 @@ try:
                         help = "Change profile")
 
         # Maybe useful for some debugging information
-        parser.add_argument('--devel', default=False,
+        parser.add_argument('-d','--devel', default=False, action='store_true',
                         help = 'Enable developer mode. Useful for plugin developers.')
 
         parser.add_argument('--verbose', default=0, type=int,
@@ -53,6 +53,8 @@ try:
         
         parser.add_argument('--log-pattern', default='', type=str,
                         help = 'Set filter pattern for logging')
+        
+        
         return parser
 
 except:

@@ -43,11 +43,16 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.comboBoxTemplate.setModelColumn(0)
 
     def on_buttonChoose_pressed(self):
-        directory = self.application.fileManager.getDirectory()
-        path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
-        if path:
-            self.lineLocation.setText(path)
-            self.lineProjectName.setText(os.path.basename(path))
+        directory = self.lineLocation.text()
+        while True:
+            path = QtGui.QFileDialog.getExistingDirectory(self, _("Choose Location for Project"), directory)
+            if path:
+                print path
+                if not os.path.exists(path): continue
+                path = os.path.abspath(path)
+                self.lineLocation.setText(path)
+                self.lineProjectName.setText(os.path.basename(path))
+            return
 
     def on_buttonCreate_pressed(self):
         name = self.lineProjectName.text()
