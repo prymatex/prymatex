@@ -114,7 +114,12 @@ def ensureShellScript(script, environment):
 def ensureUnixEnvironment(environment):
     codingenv = {}
     for key, value in environment.iteritems():
-        codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
+        try:
+            key = unicode(key).encode('utf-8')
+            value = unicode(value).encode('utf-8')
+            codingenv[key] = value
+        except UnicodeDecodeError, e:
+            pass
     return codingenv
 
 def prepareUnixShellScript(script, environment):
@@ -129,7 +134,12 @@ def prepareUnixShellScript(script, environment):
 def ensureWindowsEnvironment(environment):
     codingenv = {}
     for key, value in environment.iteritems():
-        codingenv[unicode(key).encode('utf-8')] = unicode(value).encode('utf-8')
+        try:
+            key = unicode(key).encode('utf-8')
+            value = unicode(value).encode('utf-8')
+            codingenv[key] = value
+        except UnicodeDecodeError, e:
+            pass
     return codingenv
 
 def prepareWindowsShellScript(script, environment):
@@ -151,9 +161,12 @@ def ensureCygwinPath(path):
 def ensureCygwinEnvironment(environment):
     codingenv = {}
     for key, value in environment.iteritems():
-        key = unicode(key).encode('utf-8')
-        value = unicode(value).encode('utf-8')
-        codingenv[key] = ensureCygwinPath(value)
+        try:
+            key = unicode(key).encode('utf-8')
+            value = unicode(value).encode('utf-8')
+            codingenv[key] = ensureCygwinPath(value)
+        except UnicodeDecodeError, e:
+            pass
     return codingenv
 
 def prepareCygwinShellScript(script, environment):

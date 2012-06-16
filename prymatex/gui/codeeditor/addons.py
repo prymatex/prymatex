@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+from prymatex.utils.lists import bisect_key
+
 from PyQt4 import QtCore, QtGui
 
 from prymatex.core.plugin.editor import PMXBaseEditorAddon
@@ -57,9 +59,9 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         self.wordCursors = []
 
     def initialize(self, editor):
-        print editor
         CodeEditorObjectAddon.initialize(self, editor)
         editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
+        editor.afterOpened.connect(self.on_editor_afterOpened)
         
         try:
             import enchant
@@ -82,22 +84,34 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
     def extraSelections(self):
         return self.editor.buildExtraSelections("#spell", self.wordCursors)
         
+    def spellWordsForBlock(self, block):
+        spellRange = filter(lambda ((start, end), p): p.spellChecking,  block.userData().preferences)
+        for ran, p in spellRange:
+            wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
+            for (start, end), word in wordRangeList:
+                yield (start, end), word
+
+    def cleanCursorsForBlock(self, block):
+        self.wordCursors = filter(lambda cursor: cursor.block() != block, self.wordCursors)
+        
+    def on_editor_afterOpened(self):
+        print "analizar todo"
+
     def on_editor_keyPressEvent(self, event):
         '''Dynamically connect dependant on pyenchant import'''
         assert self.dict is not None
         if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ]:
             cursor = self.editor.textCursor()
             currentBlock = cursor.block()
-            spellRange = filter(lambda ((start, end), p): p.spellChecking,  currentBlock.userData().preferences)
-            for ran, p in spellRange:
-                wordRangeList = currentBlock.userData().wordsRanges(ran[0], ran[1])
-                for (start, end), word in wordRangeList:
-                    if not self.dict.check(word):
-                        cursor = self.editor.textCursor()
-                        cursor.setPosition(currentBlock.position() + start)
-                        cursor.setPosition(currentBlock.position() + end, QtGui.QTextCursor.KeepAnchor)
-                        self.wordCursors.append(cursor)
-
+            self.cleanCursorsForBlock(currentBlock)
+            for (start, end), word in self.spellWordsForBlock(currentBlock):
+                if not self.dict.check(word):
+                    cursor = self.editor.textCursor()
+                    cursor.setPosition(currentBlock.position() + start)
+                    cursor.setPosition(currentBlock.position() + end, QtGui.QTextCursor.KeepAnchor)
+                    self.wordCursors.append(cursor)
+        self.editor.highlightEditor()
+        
 class HighlightCurrentWordAddon(CodeEditorObjectAddon):
     def initialize(self, editor):
         CodeEditorObjectAddon.initialize(self, editor)
