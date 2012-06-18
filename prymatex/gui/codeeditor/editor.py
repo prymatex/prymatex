@@ -1332,9 +1332,29 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     
     # Default Context Menus
     def showEditorContextMenu(self, point):
-        #TODO: Poneme aca tambien el menu por defecto de este bundle
         menu = self.createStandardContextMenu()
         menu.setParent(self)
+
+        #Bundle Menu
+        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        utils.extendQMenu(menu, [ "-", bundleMenu ])
+
+        #Se lo pasamos a los addons
+        cursor = self.cursorForPosition(point)
+        items = ["-"]
+        for addon in self.addons:
+            if isinstance(addon, CodeEditorObjectAddon):
+                items += addon.contributeToContextMenu(cursor)
+        
+        if len(items) > 1:
+            actions = utils.extendQMenu(menu, items)
+            for action in actions:
+                if hasattr(action, 'callback'):
+                    if action.isCheckable():
+                        self.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
+                    else:
+                        self.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
+
         menu.popup(self.mapToGlobal(point))
     
     # Contributes to Tab Menu
@@ -1359,9 +1379,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         for addon in addonClasses:
             if issubclass(addon, SideBarWidgetAddon):
                 if addon.ALIGNMENT == QtCore.Qt.AlignRight:
-                    rightGutter.extend(addon.contributeToMenu())
+                    rightGutter.extend(addon.contributeToMainMenu())
                 else:
-                    leftGutter.extend(addon.contributeToMenu())
+                    leftGutter.extend(addon.contributeToMainMenu())
 
         view = {
             'items': [

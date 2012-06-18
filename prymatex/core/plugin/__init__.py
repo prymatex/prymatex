@@ -92,9 +92,8 @@ class PMXBaseAddon(object):
     def contributeToContextMenu(self):
         return []
 
-    #TODO: ver que pasa con este
     @classmethod
-    def contributeToMenu(cls):
+    def contributeToMainMenu(cls):
         return []
 
 Key_Any = 0

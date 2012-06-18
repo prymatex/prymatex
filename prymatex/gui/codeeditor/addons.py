@@ -18,6 +18,9 @@ class CodeEditorObjectAddon(QtCore.QObject, PMXBaseEditorAddon):
     def extraSelections(self):
         return []
         
+    def contributeToContextMenu(self, cursor):
+        return PMXBaseEditorAddon.contributeToContextMenu(self)
+        
 class CompleterAddon(CodeEditorObjectAddon):
     def __init__(self, parent):
         CodeEditorObjectAddon.__init__(self, parent)
@@ -57,6 +60,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
     def __init__(self, parent):
         CodeEditorObjectAddon.__init__(self, parent)
         self.wordCursors = []
+        self.currentSpellTask = None
 
     def initialize(self, editor):
         CodeEditorObjectAddon.initialize(self, editor)
@@ -72,6 +76,15 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
             # TODO: Configure this some way...
             print "No spellcheck due to ", e
             self.dict = None
+        
+    def contributeToContextMenu(self, cursor):
+        items = []
+        cursors = filter(lambda c: c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd(), self.wordCursors)
+        if cursors:
+            cursor = cursors[0]
+            items.append({'title': "Spell",
+            'callback': lambda cursor = cursor: self.on_actionSpell_toggled(cursor) })
+        return items
         
     def textCharFormat_spell_builder(self):
         format = QtGui.QTextCharFormat()
@@ -93,23 +106,41 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
 
     def cleanCursorsForBlock(self, block):
         self.wordCursors = filter(lambda cursor: cursor.block() != block, self.wordCursors)
+
+    def spellCheckWord(self, word, block, start, end):
+        if not self.dict.check(word):
+            cursor = self.editor.textCursor()
+            cursor.setPosition(block.position() + start)
+            cursor.setPosition(block.position() + end, QtGui.QTextCursor.KeepAnchor)
+            self.wordCursors.append(cursor)
+
+    def spellCheckAllDocument(self):
+        block = self.editor.document().firstBlock()
+        while block.isValid():
+            for (start, end), word in self.spellWordsForBlock(block):
+                self.spellCheckWord(word, block, start, end)
+            block = block.next()
+            yield
+        self.editor.highlightEditor()
+    
+    def on_actionSpell_toggled(self, cursor):
+        print cursor.selectedText()
         
     def on_editor_afterOpened(self):
-        print "analizar todo"
-
+        self.currentSpellTask = self.application.scheduler.newTask(self.spellCheckAllDocument())
+        def on_spellReady():
+            self.currentSpellTask = None
+        self.currentSpellTask.done.connect(on_spellReady)
+        
     def on_editor_keyPressEvent(self, event):
         '''Dynamically connect dependant on pyenchant import'''
         assert self.dict is not None
-        if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ]:
+        if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ] and self.currentSpellTask == None:
             cursor = self.editor.textCursor()
-            currentBlock = cursor.block()
-            self.cleanCursorsForBlock(currentBlock)
-            for (start, end), word in self.spellWordsForBlock(currentBlock):
-                if not self.dict.check(word):
-                    cursor = self.editor.textCursor()
-                    cursor.setPosition(currentBlock.position() + start)
-                    cursor.setPosition(currentBlock.position() + end, QtGui.QTextCursor.KeepAnchor)
-                    self.wordCursors.append(cursor)
+            block = cursor.block()
+            self.cleanCursorsForBlock(block)
+            for (start, end), word in self.spellWordsForBlock(block):
+                self.spellCheckWord(word, block, start, end)
         self.editor.highlightEditor()
         
 class HighlightCurrentWordAddon(CodeEditorObjectAddon):

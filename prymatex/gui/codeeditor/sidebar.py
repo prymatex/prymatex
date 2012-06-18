@@ -131,7 +131,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
             self.updateRequest.emit()
 
     @classmethod
-    def contributeToMenu(cls):
+    def contributeToMainMenu(cls):
         def on_actionShowLineNumbers_toggled(editor, checked):
             instance = editor.addonByClass(cls)
             instance.setVisible(checked)
@@ -204,7 +204,7 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
         self.repaint(self.rect())
 
     @classmethod
-    def contributeToMenu(cls):
+    def contributeToMainMenu(cls):
         def on_actionShowBookmarks_toggled(editor, checked):
             instance = editor.addonByClass(cls)
             instance.setVisible(checked)
@@ -273,7 +273,7 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
         self.repaint(self.rect())
     
     @classmethod
-    def contributeToMenu(cls):
+    def contributeToMainMenu(cls):
         def on_actionShowFoldings_toggled(editor, checked):
             instance = editor.addonByClass(cls)
             instance.setVisible(checked)
