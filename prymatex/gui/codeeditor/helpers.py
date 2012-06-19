@@ -87,48 +87,6 @@ class SmartTypingPairsHelper(CodeEditorKeyHelper):
                 self.cursor2.setPosition(self.cursor2.selectionStart())
         return True
         
-        """
-        nearBalancedCursors = self.cursor1 is not None and self.cursor2 is not None
-        ctrl_down = bool(event.modifiers() & QtCore.Qt.ControlModifier)
-
-        if not ctrl_down and nearBalancedCursors and \
-        (self.pair[0], self.pair[1]) == (self.cursor1.selectedText(), character) and \
-        (cursor.position() == self.cursor2.selectionStart()) and not cursor.hasSelection():
-            self.skip = True
-            self.cursor1 = self.cursor2 = None
-        elif ctrl_down and character == self.pair[0]:
-            #Ya se que son pares, vamos a intentar inferir donde esta el cierre o la apertura del brace
-
-            if cursor.hasSelection():
-                selectedText = cursor.selectedText()
-                if selectedText in openTyping + closeTyping:
-                    self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor)
-                return True
-            elif editor.besideBrace(cursor) and character in openTyping + closeTyping:
-                self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor)
-                if self.cursor2 is not None and self.cursor1 is not None and \
-                (self.cursor1.selectionEnd() == self.cursor2.selectionStart()):
-                    #Estan pegados
-                    self.cursor1 = self.cursor2 = None
-                elif nearBalancedCursors:
-                    if (cursor.position() == self.cursor1.selectionEnd() and character in openTyping) or \
-                    (cursor.position() == self.cursor2.selectionStart() and character in closeTyping):
-                        self.cursor1.setPosition(self.cursor1.selectionEnd())
-                        self.cursor2.setPosition(self.cursor2.selectionStart())
-                    #elif (cursor.position() == self.cursor2.selectionStart() and character in closeTyping):
-                    #    self.cursor1.setPosition(self.cursor1.position() < self.cursor2.position() and self.cursor1.selectionEnd() or self.cursor1.selectionStart())
-                    #    self.cursor2.setPosition(self.cursor1.position() < self.cursor2.position() and self.cursor2.selectionStart() or self.cursor2.selectionEnd())
-                    else:
-                        self.cursor1 = self.cursor2 = None
-            else:
-                currentWord, currentWordStart, currentWordEnd = editor.currentWord()
-                if currentWord and currentWordEnd != cursor.position():
-                    return False
-        else:
-            self.cursor1 = self.cursor2 = None
-        return True
-        """
-
     def execute(self, editor, event, cursor = None, scope = None):
         cursor.beginEditBlock()
         if self.skip:
