@@ -83,7 +83,7 @@ class PMXPreferenceSettings(object):
                 dataHash[key] = value
         return dataHash
     
-    def combine(self, other):
+    def update(self, other):
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(other, key, None)
             if value != None:
@@ -94,7 +94,7 @@ class PMXPreferenceSettings(object):
                 elif not getattr(self, key):
                     setattr(self, key, value)
     
-    def update(self, other):
+    def combine(self, other):
         for key in PMXPreferenceSettings.KEYS:
             if key not in [ 'decreaseIndentPattern', 'increaseIndentPattern', 
                             'indentNextLinePattern', 'unIndentedLinePattern' ]:
@@ -171,7 +171,7 @@ class PMXPreference(PMXBundleItem):
             bundle = preferences[0].bundle
             for p in preferences:
                 if p.bundle == bundle:
-                    settings.combine(p.settings)
-                else:
                     settings.update(p.settings)
+                else:
+                    settings.combine(p.settings)
         return settings
