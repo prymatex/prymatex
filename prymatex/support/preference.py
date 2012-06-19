@@ -96,9 +96,11 @@ class PMXPreferenceSettings(object):
     
     def update(self, other):
         for key in PMXPreferenceSettings.KEYS:
-            value = getattr(other, key, None)
-            if value is not None and not getattr(self, key):
-                setattr(self, key, value)
+            if key not in [ 'decreaseIndentPattern', 'increaseIndentPattern', 
+                            'indentNextLinePattern', 'unIndentedLinePattern' ]:
+                value = getattr(other, key, None)
+                if value is not None and not getattr(self, key):
+                    setattr(self, key, value)
 
     def indent(self, line):
         #IncreasePattern on return indent nextline
@@ -121,7 +123,7 @@ class PMXPreferenceSettings(object):
         for symbol in self.symbolTransformation:
             symbol = "${SYMBOL" + symbol[1:] + "}"
             dataHash = {    'content': symbol, 
-                           'name': symbol }
+                            'name': symbol }
             snippet = PMXSnippet(uuidmodule.uuid1(), "internal", dataHash = dataHash)
             self.snippetsTransformation.append(snippet)
     
