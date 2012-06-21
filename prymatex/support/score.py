@@ -19,28 +19,35 @@ class PMXScoreManager(object):
         self.scores = {}
     
     def score(self, search_scope, reference_scope):
-        maxi = 0
-        for scope in search_scope.split( ',' ):
-            arrays =  self.SPLITER.split(scope)
-            arrays = map(lambda s: s.strip(), arrays)
-            if len(arrays) == 1:
-                maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
-            elif len(arrays) > 1:
-                excluded = False
-                for a in arrays[1:]:
-                    if self.score_term( a, reference_scope ) > 0:
-                        excluded = True
-                        break
-                if not excluded:
-                    maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
-            elif len(arrays) < 1:
-                raise Exception("Error in scope string: '%s' %s is not a valid number of operands" % (search_scope, len(arrays)))
-        return maxi
-    
-    def score_term(self, search_scope, reference_scope):
-        #TODO: Resolver referencias con parentesis y otras cosas
         if reference_scope not in self.scores or search_scope not in self.scores[reference_scope]:
+            #Guardo resultados finales
             self.scores.setdefault(reference_scope, {})
+            maxi = 0
+            for scope in search_scope.split( ',' ):
+                arrays =  self.SPLITER.split(scope)
+                arrays = map(lambda s: s.strip(), arrays)
+                if len(arrays) == 1:
+                    maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
+                elif len(arrays) > 1:
+                    excluded = False
+                    for a in arrays[1:]:
+                        if self.score_term( a, reference_scope ) > 0:
+                            excluded = True
+                            break
+                    if not excluded:
+                        maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
+                elif len(arrays) < 1:
+                    raise Exception("Error in scope string: '%s' %s is not a valid number of operands" % (search_scope, len(arrays)))
+            self.scores[reference_scope][search_scope] = maxi
+        return self.scores[reference_scope][search_scope]
+
+    def score_term(self, search_scope, reference_scope):
+        if reference_scope not in self.scores or search_scope not in self.scores[reference_scope]:
+            #Guardo resultados parciales
+            self.scores.setdefault(reference_scope, {})
+            #Parentesis
+            if search_scope.startswith("(") and search_scope.endswith(")"):
+                search_scope = search_scope[1:-1]
             if search_scope.find(self.OR):
                 comparation = max
                 scopes = search_scope.split(self.OR)
@@ -119,6 +126,13 @@ class PMXScoreManager(object):
         return result
         
 if __name__ == '__main__':
+    scoreManager = PMXScoreManager()
+    scope = "text.html -(meta.tag | source), invalid.illegal.incomplete.html -source"
+    reference = "text.html meta.tag source"
+    print scoreManager.score(scope, reference)
+    scope = "text.html meta.tag -(entity.other.attribute-name | punctuation.definition.tag.begin | source | entity.name.tag | string | invalid.illegal.incomplete.html)"
+    print scoreManager.score(scope, reference)
+    print scoreManager.scores
     reference = "source.python string.quoted.double.single-line.python punctuation.definition.string.end.python meta.empty-string.double.python"
     for _ in xrange(10000):
         scoreManager = PMXScoreManager()
