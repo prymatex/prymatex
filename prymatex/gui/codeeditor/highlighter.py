@@ -10,9 +10,9 @@ from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex.support.syntax import PMXSyntax
 from prymatex.utils.decorator.helpers import printtime
 
-#TODO: Usar mas el modulo de string en general, string.punctuation
+#TODO: Usar mas el modulo de string en general, string.punctuation, mover las regexp a otro lugar, recursos quiza?
 
-RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
+RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
 RE_WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
 RE_MAGIC_FORMAT_BUILDER = re.compile(r"textCharFormat_([A-Za-z]+)_builder", re.UNICODE)
 
@@ -78,23 +78,28 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         userData.setRanges(self.processor.scopeRanges)
         userData.setPreferences(self.processor.preferences)
         userData.setChunks(self.processor.lineChunks)
+
         if self.processor.state is not None:
             blockState = self.MULTI_LINE
             userData.setProcessorState(self.processor.state)
-        
-        #1 Update Indent
+            
+        #1 Update words
+        if userData.words != self.processor.words:
+            self.editor.updateWords(self.currentBlock(), userData, self.processor.words)
+     
+        #2 Update Indent
         indent = whiteSpace(text)
         if indent != userData.indent:
             userData.indent = indent
             self.editor.updateIndent(self.currentBlock(), userData, indent)
 
-        #2 Update Folding
+        #3 Update Folding
         foldingMark = self.syntax.folding(text)
         if userData.foldingMark != foldingMark:
             userData.foldingMark = foldingMark
             self.editor.updateFolding(self.currentBlock(), userData, foldingMark)
             
-        #3 Update Symbols
+        #4 Update Symbols
         symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, userData.preferences)
         if symbolRange:
             #TODO: Hacer la transformacion de los symbolos
@@ -107,11 +112,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         if userData.symbol != symbol:
             userData.symbol = symbol
             self.editor.updateSymbol(self.currentBlock(), userData, symbol)
-
-        #4 Split words [ (( wordStart, wordEnd ), word )...]
-        words = map(lambda match: (match.span(), match.group()), RE_WORD.finditer(text))
-        if userData.words != words:
-            self.editor.updateWords(self.currentBlock(), userData, words)
 
         #5 Save the hash the text, scope and state
         userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState

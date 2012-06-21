@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
 from copy import copy
+
 from prymatex.support import processor
+
+RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
 
 class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
@@ -20,6 +24,7 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
         self.scopeRanges = []       #[ ((start, end), scope) ... ]
         self.preferences = []       #[ ((start, end), preference) ... ]
         self.lineChunks = []        #[ ((start, end), chunk) ... ]
+        self.words = []             #[ ((start, end), word) ... ]
         self.state = None
         
     def endLine(self, line, stack):
@@ -52,5 +57,7 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
             self.scopes[begin:end] = [scope for _ in xrange(end - begin)]
             self.scopeRanges.append( ((begin, end), scope) )
             self.preferences.append( ((begin, end), self.editor.preferenceSettings(scope)) )
-            self.lineChunks.append( ((begin, end), self.line[begin:end]) )
+            chunk = self.line[begin:end]
+            self.lineChunks.append( ((begin, end), chunk) )
+            self.words += map(lambda match: ((begin + match.span()[0], begin + match.span()[1]), match.group()), RE_WORD.finditer(chunk))
         self.lineIndex = end
