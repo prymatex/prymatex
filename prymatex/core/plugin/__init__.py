@@ -82,7 +82,7 @@ class PMXBaseOverlay(object):
     def updateOverlay(self):
         pass
 
-class PMXBaseAddon(object):
+class PMXBaseAddon(PMXBaseComponent):
     def initialize(self, widget):
         pass
     
@@ -90,10 +90,6 @@ class PMXBaseAddon(object):
         pass
 
     def contributeToContextMenu(self):
-        return []
-
-    @classmethod
-    def contributeToMainMenu(cls):
         return []
 
 Key_Any = 0

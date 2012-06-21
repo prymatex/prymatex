@@ -89,7 +89,7 @@ class PMXPluginManager(PMXBaseComponent):
         overlayClasses.append(overlayClass)
 
     def registerAddon(self, widgetClass, addonClass):
-        self.application.extendComponent(addonClass)
+        self.application.populateComponent(addonClass)
         addonClass.plugin = self.currentPluginDescriptor
         addonClasses = self.addons.setdefault(widgetClass, [])
         addonClasses.append(addonClass)
