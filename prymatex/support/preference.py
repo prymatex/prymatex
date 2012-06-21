@@ -41,7 +41,7 @@ DEFAULT_SETTINGS = { 'completions': [],
                      'indentNextLinePattern': None,
                      'unIndentedLinePattern': None,
                      'shellVariables': {},
-                     'spellChecking': 0
+                     'spellChecking': 1
                       }
 
 class PMXPreferenceSettings(object):

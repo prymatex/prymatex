@@ -61,31 +61,36 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         CodeEditorObjectAddon.__init__(self, parent)
         self.wordCursors = []
         self.currentSpellTask = None
-
+        self.setupSpellChecker()
+        
     def initialize(self, editor):
         CodeEditorObjectAddon.initialize(self, editor)
-        editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
-        editor.afterOpened.connect(self.on_editor_afterOpened)
-        
-        try:
-            import enchant
-            # TODO: Use custom word list with DictWithPWL class
-            self.dict = enchant.Dict()
+        if self.dictionary is not None:
+            editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
+            editor.afterOpened.connect(self.on_editor_afterOpened)
             self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
-        except Exception as e:
-            # TODO: Configure this some way...
-            print "No spellcheck due to ", e
-            self.dict = None
-        
+
     def contributeToContextMenu(self, cursor):
         items = []
         cursors = filter(lambda c: c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd(), self.wordCursors)
         if cursors:
             cursor = cursors[0]
-            items.append({'title': "Spell",
-            'callback': lambda cursor = cursor: self.on_actionSpell_toggled(cursor) })
+            for word in self.dictionary.suggest(cursor.selectedText()):
+                items.append({'title': word,
+                'callback': lambda word = word, cursor = cursor: cursor.insertText(word) })
         return items
+
+    def extraSelections(self):
+        return self.editor.buildExtraSelections("#spell", self.wordCursors)
         
+    def setupSpellChecker(self):
+        try:
+            import enchant
+            # TODO: Use custom word list with DictWithPWL class
+            self.dictionary = enchant.Dict()
+        except Exception as e:
+            self.dictionary = None
+
     def textCharFormat_spell_builder(self):
         format = QtGui.QTextCharFormat()
         format.setFontUnderline(True)
@@ -93,10 +98,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         format.setUnderlineStyle(QtGui.QTextCharFormat.SpellCheckUnderline)
         format.setBackground(QtCore.Qt.transparent)
         return format
-        
-    def extraSelections(self):
-        return self.editor.buildExtraSelections("#spell", self.wordCursors)
-        
+
     def spellWordsForBlock(self, block):
         spellRange = filter(lambda ((start, end), p): p.spellChecking,  block.userData().preferences)
         for ran, p in spellRange:
@@ -108,7 +110,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         self.wordCursors = filter(lambda cursor: cursor.block() != block, self.wordCursors)
 
     def spellCheckWord(self, word, block, start, end):
-        if not self.dict.check(word):
+        if not self.dictionary.check(word):
             cursor = self.editor.textCursor()
             cursor.setPosition(block.position() + start)
             cursor.setPosition(block.position() + end, QtGui.QTextCursor.KeepAnchor)
@@ -134,7 +136,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         
     def on_editor_keyPressEvent(self, event):
         '''Dynamically connect dependant on pyenchant import'''
-        assert self.dict is not None
+        assert self.dictionary is not None
         if not event.modifiers() and event.key() in [ QtCore.Qt.Key_Space ] and self.currentSpellTask == None:
             cursor = self.editor.textCursor()
             block = cursor.block()
