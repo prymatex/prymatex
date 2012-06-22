@@ -806,7 +806,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # PREFERENCES
     #---------------------------------------------------------------
-    def getPreferences(self, scope, baseBundle = None):
+    def getPreferences(self, scope):
         with_bundle = []
         with_scope = []
         without_scope = []
@@ -816,17 +816,14 @@ class PMXSupportBaseManager(object):
             else:
                 score = self.scores.score(preference.scope, scope)
                 if score != 0:
-                    if preference.bundle == baseBundle:
-                        with_bundle.append((score, preference))
-                    else:
-                        with_scope.append((score, preference))
+                    with_scope.append((score, preference))
         with_bundle.sort(key = lambda t: t[0], reverse = True)
         with_scope.sort(key = lambda t: t[0], reverse = True)
         return map(lambda item: item[1], with_bundle + with_scope) + without_scope
 
-    def getPreferenceSettings(self, scope, baseBundle = None):
+    def getPreferenceSettings(self, scope):
         if not self.cache.hasSettings(scope):
-            preferences = self.getPreferences(scope, baseBundle)
+            preferences = self.getPreferences(scope)
             self.cache.setSettings(scope, PMXPreference.buildSettings(preferences))
         return self.cache.getSettings(scope)
     

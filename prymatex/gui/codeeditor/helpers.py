@@ -238,6 +238,7 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
     def execute(self, editor, event, cursor = None, scope = None):
         #Aca lo que queramos hacer
         userData = cursor.block().userData()
+        print "scopes:", userData.scopes
         print "words:", userData.words
         for group in [ "comment", "constant", "entity", "invalid", "keyword", "markup", "meta", "storage", "string", "support", "variable" ]:
             print "%s: %s" % (group, cursor.block().userData().wordsByGroup(group))

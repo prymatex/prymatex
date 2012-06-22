@@ -343,12 +343,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
 
     def preferenceSettings(self, scope):
-        return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
-        
-    def getPreference(self, scope):
-        """Deprecated"""
-        return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
-
+        return self.application.supportManager.getPreferenceSettings(scope)
+    
     def wordUnderCursor(self):
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)

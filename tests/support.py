@@ -77,6 +77,15 @@ def test_themes(manager):
     theme = themes.pop()
     manager.updateTheme(theme, name = "Cacho")
         
+def test_preferences(manager):
+    scope = "source.python"
+    preferences = manager.getPreferences(scope)
+    for p in preferences:
+        print p.bundle.name, p.scope, p.settings.hash
+    settings = manager.getPreferenceSettings(scope)
+    for name in settings.KEYS:
+        print name, getattr(settings, name)
+    
 def loadCallback(message):
     print message
     
@@ -86,4 +95,4 @@ if __name__ == "__main__":
     manager.addNamespace('prymatex', os.path.abspath('../prymatex/share'))
     manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     manager.loadSupport(loadCallback)
-    test_snippet(manager)
+    test_preferences(manager)

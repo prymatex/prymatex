@@ -23,36 +23,31 @@
     shellVariables, an array of key/value pairs. See context dependent variables.
     spellChecking, set to 0/1 to disable/enable spell checking.
 '''
+from copy import copy
 import uuid as uuidmodule
+
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.utils import compileRegexp
 from prymatex.support.snippet import PMXSnippet
 from prymatex.support.processor import PMXDebugSnippetProcessor
 
-DEFAULT_SETTINGS = { 'completions': [],
-                     'completionCommand': '',
-                     'disableDefaultCompletion': 0,
-                     'showInSymbolList': 0,
-                     'symbolTransformation': None,
-                     'highlightPairs': [],
-                     'smartTypingPairs': [],
-                     'decreaseIndentPattern': None,
-                     'increaseIndentPattern': None,
-                     'indentNextLinePattern': None,
-                     'unIndentedLinePattern': None,
-                     'shellVariables': {},
-                     'spellChecking': 0
-                      }
-
+DEFAULT_SETTINGS = { 
+    'showInSymbolList': False,
+    'spellChecking': True,
+    'completions': []
+}
+                      
 class PMXPreferenceSettings(object):
     KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
                 'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking',
                 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
+    INDENT_KEYS = [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
+    COPY_KEYS = ['shellVariables', 'highlightPairs', 'smartTypingPairs', 'completions']
     INDENT_INCREASE = 0
     INDENT_DECREASE = 1
     INDENT_NEXTLINE = 2
     UNINDENT = 3
-    def __init__(self, dataHash):
+    def __init__(self, dataHash = {}):
         for key in self.KEYS:
             value = dataHash.get(key, None)
             if value != None:
@@ -63,6 +58,8 @@ class PMXPreferenceSettings(object):
                 elif key in [ 'symbolTransformation' ]:
                     value = map(lambda value: value.strip(), value.split(";"))
                 elif key in [ 'showInSymbolList' ]:
+                    value = bool(int(value))
+                elif key in [ 'spellChecking' ]:
                     value = bool(int(value))
             setattr(self, key, value)
     
@@ -80,27 +77,31 @@ class PMXPreferenceSettings(object):
                     value = ";".join(value) + ";"
                 elif key in [ 'showInSymbolList' ]:
                     value = value and "1" or "0"
+                elif key in [ 'spellChecking' ]:
+                    value = value and "1" or "0"
                 dataHash[key] = value
         return dataHash
     
     def update(self, other):
+        self._indentPatternsReady = any(map(lambda indent: getattr(self, indent) is not None, PMXPreferenceSettings.INDENT_KEYS))
         for key in PMXPreferenceSettings.KEYS:
             value = getattr(other, key, None)
             if value != None:
-                if key == 'shellVariables':
-                    self.shellVariables.update(value)
-                if key == 'showInSymbolList' and self.showInSymbolList == None:
-                    self.showInSymbolList = other.showInSymbolList
-                elif not getattr(self, key):
+                if key in PMXPreferenceSettings.COPY_KEYS:
+                    value = copy(value)
+
+                isIndent = key in PMXPreferenceSettings.INDENT_KEYS
+                if (isIndent and not self._indentPatternsReady) or (not isIndent and getattr(self, key) is None):
                     setattr(self, key, value)
-    
+                    
     def combine(self, other):
         for key in PMXPreferenceSettings.KEYS:
-            if key not in [ 'decreaseIndentPattern', 'increaseIndentPattern', 
-                            'indentNextLinePattern', 'unIndentedLinePattern' ]:
-                value = getattr(other, key, None)
-                if value is not None and not getattr(self, key):
-                    setattr(self, key, value)
+            if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 
+                        'indentNextLinePattern', 'unIndentedLinePattern' ]:
+                continue
+            value = getattr(other, key, None)
+            if value is not None and getattr(self, key) is None:
+                setattr(self, key, value)
 
     def indent(self, line):
         #IncreasePattern on return indent nextline
@@ -139,6 +140,8 @@ class PMXPreferenceSettings(object):
             if text:
                 return text
         return text
+
+DEFAULTS = PMXPreferenceSettings(DEFAULT_SETTINGS)
     
 class PMXPreference(PMXBundleItem):
     KEYS = [ 'settings' ]
@@ -166,12 +169,9 @@ class PMXPreference(PMXBundleItem):
 
     @staticmethod
     def buildSettings(preferences):
-        settings = PMXPreferenceSettings(DEFAULT_SETTINGS)
+        settings = PMXPreferenceSettings()
         if preferences:
-            bundle = preferences[0].bundle
             for p in preferences:
-                if p.bundle == bundle:
-                    settings.update(p.settings)
-                else:
-                    settings.combine(p.settings)
+                settings.update(p.settings)
+        settings.update(DEFAULTS)
         return settings
