@@ -91,9 +91,14 @@ class PMXPreferenceSettings(object):
                     value = copy(value)
 
                 isIndent = key in PMXPreferenceSettings.INDENT_KEYS
-                if (isIndent and not self._indentPatternsReady) or (not isIndent and getattr(self, key) is None):
+                currentValue = getattr(self, key)
+                if (isIndent and not self._indentPatternsReady) or (not isIndent and currentValue is None):
                     setattr(self, key, value)
-                    
+                elif key == "shellVariables" and isinstance(currentValue, dict) and isinstance(value, dict):
+                    #Solo voy a hacer updates si no rompen lo que ya esta bien ganado por el score
+                    if all(map(lambda newValue: newValue not in currentValue, value)):
+                        currentValue.update(value)
+
     def combine(self, other):
         for key in PMXPreferenceSettings.KEYS:
             if key in [ 'decreaseIndentPattern', 'increaseIndentPattern', 

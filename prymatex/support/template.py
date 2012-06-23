@@ -167,4 +167,4 @@ class PMXTemplate(PMXBundleItem):
         for templateFilePath in templateFilePaths:
             templateFile = PMXTemplateFile(templateFilePath, bundleItem)
             templateFile = manager.addTemplateFile(templateFile)
-            template.files.append(templateFile)
+            bundleItem.files.append(templateFile)

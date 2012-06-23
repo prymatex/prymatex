@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
-sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath('.'))
 
 def test_findPreferences(manager):
     settings = manager.getPreferenceSettings('text.html.textile markup.heading.textile')
@@ -78,21 +78,22 @@ def test_themes(manager):
     manager.updateTheme(theme, name = "Cacho")
         
 def test_preferences(manager):
-    scope = "source.python"
-    preferences = manager.getPreferences(scope)
+    pythonScope = "source.python"
+    htmlScope = "text.html"
+    preferences = manager.getPreferences(htmlScope)
     for p in preferences:
         print p.bundle.name, p.scope, p.settings.hash
-    settings = manager.getPreferenceSettings(scope)
+    settings = manager.getPreferenceSettings(htmlScope)
     for name in settings.KEYS:
         print name, getattr(settings, name)
     
 def loadCallback(message):
-    print message
+    pass
     
 if __name__ == "__main__":
     from prymatex.support.manager import PMXSupportPythonManager
     manager = PMXSupportPythonManager()
-    manager.addNamespace('prymatex', os.path.abspath('../prymatex/share'))
+    manager.addNamespace('prymatex', os.path.abspath('./prymatex/share'))
     manager.addNamespace('user', os.path.abspath(os.path.join(os.path.expanduser('~'), '.prymatex')))
     manager.loadSupport(loadCallback)
     test_preferences(manager)

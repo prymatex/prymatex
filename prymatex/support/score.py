@@ -127,15 +127,9 @@ class PMXScoreManager(object):
         
 if __name__ == '__main__':
     scoreManager = PMXScoreManager()
-    scope = "text.html -(meta.tag | source), invalid.illegal.incomplete.html -source"
-    reference = "text.html meta.tag source"
-    print scoreManager.score(scope, reference)
-    scope = "text.html meta.tag -(entity.other.attribute-name | punctuation.definition.tag.begin | source | entity.name.tag | string | invalid.illegal.incomplete.html)"
-    print scoreManager.score(scope, reference)
-    print scoreManager.scores
-    reference = "source.python string.quoted.double.single-line.python punctuation.definition.string.end.python meta.empty-string.double.python"
-    for _ in xrange(10000):
-        scoreManager = PMXScoreManager()
-        scope = "source.python string.quoted.double.single-line punctuation.definition.string.end.python"
-        scoreManager.score(scope, reference)
+    scopeTags = "text.html -entity.other.attribute-name -string.quoted, invalid.illegal.incomplete.html" #Tags
+    scopeAttrs = "text.html punctuation.definition.tag -source, text.html meta.tag -entity.other.attribute-name -source"
+    reference = "text.html.basic meta.tag.any.html punctuation.definition.tag.html"
+    print scoreManager.score(scopeTags, reference)
+    print scoreManager.score(scopeAttrs, reference)
     
