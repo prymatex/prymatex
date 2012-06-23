@@ -919,7 +919,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         block = cursor.block()
         line = block.text()
         scope = self.getCurrentScope()
-        preferences = self.getPreference(scope)
+        preferences = self.preferenceSettings(scope)
         current_word, start, end = self.getCurrentWord()
         #Combine base env from params and editor env
         env.update({
