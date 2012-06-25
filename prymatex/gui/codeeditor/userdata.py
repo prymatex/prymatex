@@ -2,9 +2,16 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtGui
+
 from prymatex.support.syntax import PMXSyntax
+from prymatex.utils.decorator.deprecated import deprecated
 
 class PMXBlockUserData(QtGui.QTextBlockUserData):
+    ROOT_GROUPS = [ 
+        "comment", "constant", "entity", "invalid",
+        "keyword", "markup", "meta", "storage",
+        "string", "support", "variable" ]
+
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
         self.scopes = []
@@ -41,6 +48,10 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def getLastScope(self):
         return self.scopes[-1]
         
+    def scopeAtPosition(self, pos):
+        return self.scopes[pos]
+        
+    @deprecated
     def getScopeAtPosition(self, pos):
         #FIXME: Voy a poner algo mentiroso si pos no esta en self.scopes
         scope = self.scopes[pos] if pos < len(self.scopes) else self.scopes[-1]
@@ -90,6 +101,14 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         if end is not None:
             words = filter(lambda ran: ran[0][1] <= end, words)
         return words
+
+    def rootGroup(self, pos):
+        scope = self.scopeAtPosition(pos)
+        scopeParts = scope.split()[::-1]
+        for part in scopeParts:
+            roots = filter(lambda rootGroup: part.startswith(rootGroup), self.ROOT_GROUPS)
+            if roots:
+                return roots[0]
 
     #================================================
     # Cache Handle

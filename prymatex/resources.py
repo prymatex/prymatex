@@ -66,7 +66,21 @@ INTERNAL = {
     "project": ":/icons/actions/project-development.png",
     "bookmark": ":/icons/actions/rating.png",
     "symbols": ":/icons/actions/code-context.png",
-    "console": ":/icons/dockers/console.png"
+    "console": ":/icons/dockers/console.png",
+    
+    # Scope Root Groups
+    # TODO: Poner imagenes copadas
+    "scope-root-comment": ":/icons/icons/bullet-red.png",
+    "scope-root-constant": ":/icons/icons/bullet-blue.png",
+    "scope-root-entity": ":/icons/icons/bullet-green.png",
+    "scope-root-invalid": ":/icons/icons/bullet-pink.png",
+    "scope-root-keyword": ":/icons/icons/bullet-yellow.png",
+    "scope-root-markup": ":/icons/icons/bullet-red.png",
+    "scope-root-meta": ":/icons/icons/bullet-blue.png",
+    "scope-root-storage": ":/icons/icons/bullet-green.png",
+    "scope-root-string": ":/icons/icons/bullet-pink.png",
+    "scope-root-support": ":/icons/icons/bullet-yellow.png",
+    "scope-root-variable": ":/icons/icons/bullet-green.png"
 }
 
 EXTERNAL = {}

@@ -179,7 +179,32 @@ class BackspaceRemoveBracesHelper(CodeEditorKeyHelper):
         self.cursor1.removeSelectedText()
         self.cursor2.removeSelectedText()
         cursor.endEditBlock()
+        
+class DeleteUnindentHelper(CodeEditorKeyHelper):
+    KEY = QtCore.Qt.Key_Delete
+    def accept(self, editor, event, cursor = None, scope = None):
+        if cursor.hasSelection(): return False
+        lineText = cursor.block().text()
+        return lineText[cursor.columnNumber():].startswith(editor.tabKeyBehavior())
+        
+    def execute(self, editor, event, cursor = None, scope = None):
+        counter = cursor.columnNumber() % editor.tabStopSize or editor.tabStopSize
+        for _ in range(counter):
+            cursor.deleteChar()
 
+class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
+    KEY = QtCore.Qt.Key_Delete
+    def accept(self, editor, event, cursor = None, scope = None):
+        if cursor.hasSelection(): return False
+        self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor, direction = "right")
+        return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
+        
+    def execute(self, editor, event, cursor = None, scope = None):
+        cursor.beginEditBlock()
+        self.cursor1.removeSelectedText()
+        self.cursor2.removeSelectedText()
+        cursor.endEditBlock()
+        
 class SmartIndentHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Return
     def execute(self, editor, event, cursor = None, scope = None):
@@ -214,19 +239,6 @@ class MultiCursorHelper(CodeEditorKeyHelper):
             if not newCursor.isNull():
                 editor.multiCursorMode.addMergeCursor(newCursor)
                 editor.centerCursor(newCursor)
-
-class DeleteRemoveBracesHelper(CodeEditorKeyHelper):
-    KEY = QtCore.Qt.Key_Delete
-    def accept(self, editor, event, cursor = None, scope = None):
-        if cursor.hasSelection(): return False
-        self.cursor1, self.cursor2 = editor.currentBracesPairs(cursor, direction = "right")
-        return self.cursor1 is not None and self.cursor2 is not None and (self.cursor1.selectionStart() == self.cursor2.selectionEnd() or self.cursor1.selectionEnd() == self.cursor2.selectionStart())
-        
-    def execute(self, editor, event, cursor = None, scope = None):
-        cursor.beginEditBlock()
-        self.cursor1.removeSelectedText()
-        self.cursor2.removeSelectedText()
-        cursor.endEditBlock()
 
 class PrintEditorStatusHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_P

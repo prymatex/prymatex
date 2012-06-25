@@ -237,10 +237,19 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.logger.debug("Update Words")
         oldWords = set(map(lambda (index, word): word, userData.words))
         newWords = set(map(lambda (index, word): word, words))
+        
         #Quitar el block de las palabras anteriores
         self.alreadyTypedWords.removeWordsBlock(block, oldWords.difference(newWords))
+        
         #Agregar las palabras nuevas
-        self.alreadyTypedWords.addWordsBlock(block, newWords.difference(oldWords))
+        addWords = newWords.difference(oldWords)
+        self.alreadyTypedWords.addWordsBlock(block, addWords)
+        
+        #Tipificar las palabras
+        wordTypes = map(lambda (index, word): (word, userData.rootGroup(index[0])), filter(lambda (index, word): word in addWords, words))
+        wordTypes = filter(lambda word: word[1] is not None, wordTypes)
+        self.alreadyTypedWords.addWordsTypes(wordTypes)
+        
         userData.words = words
         
     def showSyntaxMessage(self, syntax):
@@ -541,7 +550,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         else:
             self.rightBar.update(0, rect.y(), self.rightBar.width(), rect.height())
             self.leftBar.update(0, rect.y(), self.leftBar.width(), rect.height())
-        
+        if rect.contains(self.viewport().rect()):
+            self.rightBar.update()
+            self.leftBar.update()
+            
     #=======================================================================
     # Braces
     #=======================================================================

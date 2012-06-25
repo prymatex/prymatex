@@ -26,11 +26,13 @@ def registerPlugin(manager):
     manager.registerKeyHelper(CodeEditor, helpers.BacktabUnindentHelper)
     manager.registerKeyHelper(CodeEditor, helpers.BackspaceUnindentHelper)
     manager.registerKeyHelper(CodeEditor, helpers.BackspaceRemoveBracesHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.DeleteRemoveBracesHelper)
+    manager.registerKeyHelper(CodeEditor, helpers.DeleteUnindentHelper)
     manager.registerKeyHelper(CodeEditor, helpers.MoveCursorToHomeHelper)
     manager.registerKeyHelper(CodeEditor, helpers.SmartIndentHelper)
     manager.registerKeyHelper(CodeEditor, helpers.OverwriteHelper)
     manager.registerKeyHelper(CodeEditor, helpers.MultiCursorHelper)
-    manager.registerKeyHelper(CodeEditor, helpers.DeleteRemoveBracesHelper)
+
     manager.registerKeyHelper(CodeEditor, helpers.PrintEditorStatusHelper)
     
     manager.registerAddon(CodeEditor, addons.CompleterAddon)

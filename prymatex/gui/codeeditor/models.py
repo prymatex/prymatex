@@ -238,6 +238,7 @@ class PMXAlreadyTypedWords(object):
         self.editor = editor
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.words = {}
+        self.wordTypes = {}
 
     def _purge_words(self):
         self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
@@ -264,7 +265,14 @@ class PMXAlreadyTypedWords(object):
         for word in words:
             self.words[word].remove(block)
         
+    def addWordsTypes(self, words):
+        for word in words:
+            types = self.wordTypes.setdefault(word[0], set())
+            types.add(word[1])
+
     def typedWords(self, block = None):
         #Purge words
         self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
-        return self.words.keys()
+        return map(lambda word: 
+            { "display": word, "image": word in self.wordTypes and "scope-root-%s" % list(self.wordTypes[word])[0] or "inserttext" },
+            self.words.keys())

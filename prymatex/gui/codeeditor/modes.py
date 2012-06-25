@@ -526,7 +526,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
                 
     def setStartCursorPosition(self, position):
         self.startCursorPosition = position
-        
+
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
