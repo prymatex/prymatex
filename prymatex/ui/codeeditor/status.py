@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
+# Created: Mon Jun 25 17:39:59 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -203,7 +203,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonMultiCursor.setMaximumSize(QtCore.QSize(20, 16777215))
         self.pushButtonMultiCursor.setText(_fromUtf8(""))
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/bullet-red.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/editor/modes/cursors.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonMultiCursor.setIcon(icon4)
         self.pushButtonMultiCursor.setFlat(True)
         self.pushButtonMultiCursor.setObjectName(_fromUtf8("pushButtonMultiCursor"))
@@ -212,7 +212,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonSnippet.setMaximumSize(QtCore.QSize(20, 16777215))
         self.pushButtonSnippet.setText(_fromUtf8(""))
         icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/bullet-blue.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/editor/modes/snippet.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonSnippet.setIcon(icon5)
         self.pushButtonSnippet.setFlat(True)
         self.pushButtonSnippet.setObjectName(_fromUtf8("pushButtonSnippet"))
@@ -221,7 +221,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonOverwrite.setMaximumSize(QtCore.QSize(20, 16777215))
         self.pushButtonOverwrite.setText(_fromUtf8(""))
         icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/bullet-green.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/editor/modes/insert.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonOverwrite.setIcon(icon6)
         self.pushButtonOverwrite.setFlat(True)
         self.pushButtonOverwrite.setObjectName(_fromUtf8("pushButtonOverwrite"))
@@ -275,6 +275,9 @@ class Ui_CodeEditorStatus(object):
         self.checkBox.setText(_('Selection Only'))
         self.pushButtonFindAll.setText(_('Find All'))
         self.labelLineColumn.setText(_('Line: 0 Column: 0 Selection: 0'))
+        self.pushButtonMultiCursor.setToolTip(_('Multicursor Mode'))
+        self.pushButtonSnippet.setToolTip(_('Snippet Mode'))
+        self.pushButtonOverwrite.setToolTip(_('Overwrite Mode'))
         self.labelTabSize.setText(_('Tab Size'))
 
 from prymatex import resources_rc

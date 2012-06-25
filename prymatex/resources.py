@@ -12,16 +12,16 @@ from prymatex import resources_rc
 
 INTERNAL = {
     #Bundles
-    "bundle-item-bundle": ":/icons/bundles/bundle.png",
-    "bundle-item-template": ":/icons/bundles/templates.png",
-    "bundle-item-command": ":/icons/bundles/commands.png",
-    "bundle-item-syntax": ":/icons/bundles/languages.png",
-    "bundle-item-project": ":/icons/bundles/project.png",
-    "bundle-item-preference": ":/icons/bundles/preferences.png",
-    "bundle-item-dragcommand": ":/icons/bundles/drag-commands.png",
-    "bundle-item-snippet": ":/icons/bundles/snippets.png",
-    "bundle-item-macro": ":/icons/bundles/macros.png",
-    "bundle-item-templatefile": ":/icons/bundles/template-files.png",
+    "bundle-item-bundle": ":/items/bundles/bundle.png",
+    "bundle-item-template": ":/items/bundles/templates.png",
+    "bundle-item-command": ":/items/bundles/commands.png",
+    "bundle-item-syntax": ":/items/bundles/languages.png",
+    "bundle-item-project": ":/items/bundles/project.png",
+    "bundle-item-preference": ":/items/bundles/preferences.png",
+    "bundle-item-dragcommand": ":/items/bundles/drag-commands.png",
+    "bundle-item-snippet": ":/items/bundles/snippets.png",
+    "bundle-item-macro": ":/items/bundles/macros.png",
+    "bundle-item-templatefile": ":/items/bundles/template-files.png",
     
     #Editor Sidebar
     "foldingtop": ":/editor/sidebar/folding-top.png",
@@ -56,9 +56,7 @@ INTERNAL = {
     "bulletred": ":/icons/icons/bullet-red.png",
     "bulletblue": ":/icons/icons/bullet-blue.png",
     "bulletgreen": ":/icons/icons/bullet-green.png",
-    "bulletpink": ":/icons/icons/bullet-pink.png",
-    "bulletyellow": ":/icons/icons/bullet-yellow.png",
-
+    
     # For Dock
     "terminal":":/icons/apps/utilities-terminal.png", 
     "browser":":/icons/apps/internet-web-browser.png",
@@ -69,18 +67,17 @@ INTERNAL = {
     "console": ":/icons/dockers/console.png",
     
     # Scope Root Groups
-    # TODO: Poner imagenes copadas
-    "scope-root-comment": ":/icons/icons/bullet-red.png",
-    "scope-root-constant": ":/icons/icons/bullet-blue.png",
-    "scope-root-entity": ":/icons/icons/bullet-green.png",
-    "scope-root-invalid": ":/icons/icons/bullet-pink.png",
-    "scope-root-keyword": ":/icons/icons/bullet-yellow.png",
-    "scope-root-markup": ":/icons/icons/bullet-red.png",
-    "scope-root-meta": ":/icons/icons/bullet-blue.png",
-    "scope-root-storage": ":/icons/icons/bullet-green.png",
-    "scope-root-string": ":/icons/icons/bullet-pink.png",
-    "scope-root-support": ":/icons/icons/bullet-yellow.png",
-    "scope-root-variable": ":/icons/icons/bullet-green.png"
+    "scope-root-comment": ":/bullets/groups/blue.png",
+    "scope-root-constant": ":/bullets/groups/yellow.png",
+    "scope-root-entity": ":/bullets/groups/ligthblue.png",
+    "scope-root-invalid": ":/bullets/groups/red.png",
+    "scope-root-keyword": ":/bullets/groups/green.png",
+    "scope-root-markup": ":/bullets/groups/violet.png",
+    "scope-root-meta": ":/bullets/groups/darkviolet.png",
+    "scope-root-storage": ":/bullets/groups/gray.png",
+    "scope-root-string": ":/bullets/groups/darkgreen.png",
+    "scope-root-support": ":/bullets/groups/brown.png",
+    "scope-root-variable": ":/bullets/groups/orange.png"
 }
 
 EXTERNAL = {}

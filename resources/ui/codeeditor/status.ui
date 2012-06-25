@@ -412,12 +412,15 @@ p, li { white-space: pre-wrap; }
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Multicursor Mode</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
          <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/icons/bullet-red.png</normaloff>:/icons/icons/bullet-red.png</iconset>
+          <normaloff>:/editor/modes/cursors.png</normaloff>:/editor/modes/cursors.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -432,12 +435,15 @@ p, li { white-space: pre-wrap; }
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Snippet Mode</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
          <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/icons/bullet-blue.png</normaloff>:/icons/icons/bullet-blue.png</iconset>
+          <normaloff>:/editor/modes/snippet.png</normaloff>:/editor/modes/snippet.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -452,12 +458,15 @@ p, li { white-space: pre-wrap; }
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Overwrite Mode</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
          <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/icons/bullet-green.png</normaloff>:/icons/icons/bullet-green.png</iconset>
+          <normaloff>:/editor/modes/insert.png</normaloff>:/editor/modes/insert.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
