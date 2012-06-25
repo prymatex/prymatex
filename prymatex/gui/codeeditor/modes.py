@@ -455,7 +455,6 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         QtGui.QCompleter.__init__(self, editor)
         PMXBaseEditorMode.__init__(self, editor)
         self.setWidget(self.editor)
-        self.currentContentWidth = 0
 
         #Table view
         self.popupView = QtGui.QTableView()
@@ -486,9 +485,12 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def setSuggestions(self, suggestions):
         self.completerTableModel.setSuggestions(suggestions)
         self.popupView.resizeColumnsToContents()
-        self.currentContentWidth = self.popup().verticalScrollBar().sizeHint().width()
+        self.popupView.setMinimumHeight(200)
+        width = self.popup().verticalScrollBar().sizeHint().width()
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
-            self.currentContentWidth += self.popup().sizeHintForColumn(columnIndex)
+            width += self.popup().sizeHintForColumn(columnIndex)
+        self.popupView.setMinimumWidth(width)
+        self.popupView.setCurrentIndex(self.completionModel().index(0, 0))
 
     def isActive(self):
         return self.popup().isVisible()
@@ -542,9 +544,3 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             self.editor.insertBundleItem(suggestion)
         else:
             cursor.insertText(suggestion)
-
-    def complete(self, rect):
-        self.popup().setCurrentIndex(self.completionModel().index(0, 0))
-        rect.setWidth(self.currentContentWidth)
-        #TODO: height
-        QtGui.QCompleter.complete(self, rect)
