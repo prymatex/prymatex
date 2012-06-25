@@ -145,10 +145,26 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
                 self.spellCheckWord(word, block, start, end)
         self.editor.highlightEditor()
         
-class HighlightCurrentWordAddon(CodeEditorObjectAddon):
+class HighlightCurrentSelectionAddon(CodeEditorObjectAddon):
+    def __init__(self, parent):
+        CodeEditorObjectAddon.__init__(self, parent)
+        self.highlightCursors = []
+
     def initialize(self, editor):
         CodeEditorObjectAddon.initialize(self, editor)
+        editor.registerTextCharFormatBuilder("#currentSelection", self.textCharFormat_currentSelection_builder)
         editor.cursorPositionChanged.connect(self.on_editor_cursorPositionChanged)
-    
+
+    def textCharFormat_currentSelection_builder(self):
+        format = QtGui.QTextCharFormat()
+        color = QtGui.QColor(self.editor.colours['selection'])
+        color.setAlpha(128)
+        format.setBackground(color)
+        return format
+
+    def extraSelections(self):
+        return self.editor.buildExtraSelections("#currentSelection", self.highlightCursors)
+
     def on_editor_cursorPositionChanged(self):
-        pass
+        cursor = self.editor.textCursor()
+        self.highlightCursors = self.editor.findAll(cursor.selectedText(), QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords) if cursor.hasSelection() else []

@@ -646,8 +646,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def textCharFormat_selection_builder(self):
         format = QtGui.QTextCharFormat()
-        #color = QtGui.QColor(self.colours['selection'])
-        #color.setAlpha(100)
         format.setBackground(self.colours['selection'])
         return format
         
