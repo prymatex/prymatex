@@ -11,6 +11,8 @@ from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
 from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.project.proxies import PMXProjectTreeProxyModel
 from prymatex.gui.project.base import PMXProject
+from prymatex.core.exceptions import ProjectExistsException, FileException
+from prymatex.utils.i18n import ugettext as _
 
 class PMXProjectManager(QtCore.QObject):
     #Signals
@@ -81,7 +83,21 @@ class PMXProjectManager(QtCore.QObject):
         elif not reuseDirectory:
             raise Exception()
         project = PMXProject(directory, { "name": name })
-        project.save()
+        try:
+            project.save()
+        except ProjectExistsException:
+            rslt = QtGui.QMessageBox.information(None, _("Project already created on %s") % name,
+                                          _("Directory %s already contains .pmxproject directory structure. "
+                                            "Unless you know what you are doing, Cancel and import project,"
+                                            " if it still fails, choose overwirte. Overwrite?") % directory,
+                                          QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel) 
+            if rslt == QtGui.QMessageBox.Cancel:
+                return
+            try:
+                project.save(overwirte = True)
+            except FileException as excp:
+                QtGui.QMessageBox.critical(None, _("Project creation failed"), 
+                                           _("<p>Project %s could not be created<p><pre>%s</pre>") % (name, excp))
         self.addProject(project)
         self.appendToKnowProjects(project)
         return project
