@@ -483,9 +483,12 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.setModel(self.completerTableModel)
 
     def setSuggestions(self, suggestions):
+        #Limpiar el prefix
+        self.setCompletionPrefix("")
+        #Set del modelo
         self.completerTableModel.setSuggestions(suggestions)
-        self.popupView.resizeColumnsToContents()
-        self.popupView.setMinimumHeight(200)
+        self.popup().setMinimumHeight(200)
+        self.popup().resizeColumnsToContents()
         width = self.popup().verticalScrollBar().sizeHint().width()
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
@@ -507,27 +510,27 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
             cursor = self.editor.textCursor()
-            
+
             #TODO: Se puede hacer mejor, para controlar que si esta en la mitad de la palabra o algo de eso
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
                 newPrefix = cursor.selectedText()
+                self.setCompletionPrefix(newPrefix)
                 if not self.completionModel().hasIndex(1, 0):
-                    #Me queda solo una sugerencia, veamos si no es lo que ya esta tipeado y en modo texto :)
+                    #Me queda solo una sugerencia, veamos si no es lo que ya esta tipeada
                     sIndex = self.completionModel().mapToSource(self.completionModel().index(0, 0))
-                    suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
+                    suggestion = self.completionModel().sourceModel().data(sIndex)
                     if isinstance(suggestion, basestring) and suggestion == newPrefix:
                         #Se termino
                         self.inactive()
                         return
-                self.setCompletionPrefix(newPrefix)
                 self.complete(self.editor.cursorRect())
             else:
                 self.inactive()
-                
+
     def setStartCursorPosition(self, position):
         self.startCursorPosition = position
-
+        
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)

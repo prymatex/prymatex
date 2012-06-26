@@ -970,8 +970,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerMode.setCaseSensitivity(case)
         
         self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
-        self.completerMode.setCompletionPrefix(alreadyTyped)
         self.completerMode.setSuggestions(suggestions)
+        self.completerMode.setCompletionPrefix(alreadyTyped)
         self.completerMode.complete(self.cursorRect())
     
     def completionSuggestions(self, cursor = None, scope = None):
@@ -1010,7 +1010,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self._fold(block)
         # self.update()
         # self.sidebar.update()
-    
+
     def codeFoldingUnfold(self, block):
         self._unfold(block)
         # self.update()
@@ -1327,7 +1327,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 title = "%s \t&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon
             menu.addAction(icon, title)
-
+        
         def menu_aboutToHide():
             activeActionIndex = menu.actions().index(menu.activeAction()) if menu.activeAction() else -1
             callback(activeActionIndex)

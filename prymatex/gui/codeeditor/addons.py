@@ -167,4 +167,4 @@ class HighlightCurrentSelectionAddon(CodeEditorObjectAddon):
 
     def on_editor_cursorPositionChanged(self):
         cursor = self.editor.textCursor()
-        self.highlightCursors = self.editor.findAll(cursor.selectedText(), QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords) if cursor.hasSelection() else []
+        self.highlightCursors = self.editor.findAll(cursor.selectedText(), QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords) if cursor.hasSelection() and cursor.selectedText().strip() != '' else []
