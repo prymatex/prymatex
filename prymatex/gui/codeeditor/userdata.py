@@ -7,11 +7,6 @@ from prymatex.support.syntax import PMXSyntax
 from prymatex.utils.decorator.deprecated import deprecated
 
 class PMXBlockUserData(QtGui.QTextBlockUserData):
-    ROOT_GROUPS = [ 
-        "comment", "constant", "entity", "invalid",
-        "keyword", "markup", "meta", "storage",
-        "string", "support", "variable" ]
-
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
         self.scopes = []
@@ -106,7 +101,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         scope = self.scopeAtPosition(pos)
         scopeParts = scope.split()[::-1]
         for part in scopeParts:
-            roots = filter(lambda rootGroup: part.startswith(rootGroup), self.ROOT_GROUPS)
+            roots = filter(lambda rootGroup: part.startswith(rootGroup), PMXSyntax.ROOT_GROUPS)
             if roots:
                 return roots[0]
 

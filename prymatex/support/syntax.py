@@ -168,6 +168,9 @@ class PMXSyntax(PMXBundleItem):
     FOLDING_NONE = 0
     FOLDING_START = 1
     FOLDING_STOP = -1
+    ROOT_GROUPS = [ "comment", "constant", "entity", "invalid",
+                    "keyword", "markup", "meta", "storage",
+                    "string", "support", "variable" ]
     def load(self, dataHash):
         super(PMXSyntax, self).load(dataHash)
         for key in PMXSyntax.KEYS:

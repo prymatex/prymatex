@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from bisect import bisect
+from collections import OrderedDict
 
 from PyQt4 import QtCore, QtGui
 
@@ -232,14 +233,18 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
 # Word Struct for Completer
 #=========================================================
 class PMXAlreadyTypedWords(object):
+    SORTED_GROUPS = [   "entity", "meta", "variable", "keyword", "markup", 
+                        "support", "storage", "constant", "string", "comment", "invalid" ]
     def __init__(self, editor):
         self.editor = editor
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.words = {}
-        self.wordTypes = {}
+        self.wordTypes = OrderedDict(map(lambda group: (group, set()), PMXAlreadyTypedWords.SORTED_GROUPS))
 
     def _purge_words(self):
         self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
+        for group, words in self.wordTypes.iteritems():
+            self.wordTypes[group] = set(filter(lambda word: word in self.words, words))
 
     def _purge_blocks(self):
         def validWordBlock(block):
@@ -261,16 +266,21 @@ class PMXAlreadyTypedWords(object):
         
     def removeWordsBlock(self, block, words):
         for word in words:
-            self.words[word].remove(block)
+            if block in self.words[word]:
+                self.words[word].remove(block)
         
-    def addWordsTypes(self, words):
-        for word in words:
-            types = self.wordTypes.setdefault(word[0], set())
-            types.add(word[1])
+    def addWordToGroup(self, word, group):
+        self.wordTypes[group].add(word)
 
     def typedWords(self, block = None):
         #Purge words
-        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
-        return map(lambda word: 
-            { "display": word, "image": word in self.wordTypes and "scope-root-%s" % list(self.wordTypes[word])[0] or "inserttext" },
-            self.words.keys())
+        self._purge_words()
+        typedWords = map(lambda (word, blocks): word, filter(lambda (word, blocks): block not in blocks, self.words.iteritems()))
+        readyWords = []
+
+        for group, words in self.wordTypes.iteritems():
+            for word in sorted(words.intersection(typedWords)):
+                readyWords.append({ "display": word, "image": "scope-root-%s" % group})
+                typedWords.remove(word)
+        readyWords += typedWords
+        return readyWords

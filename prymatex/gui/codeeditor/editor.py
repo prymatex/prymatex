@@ -247,8 +247,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #Tipificar las palabras
         wordTypes = map(lambda (index, word): (word, userData.rootGroup(index[0])), filter(lambda (index, word): word in addWords, words))
-        wordTypes = filter(lambda word: word[1] is not None, wordTypes)
-        self.alreadyTypedWords.addWordsTypes(wordTypes)
+        for word, group in filter(lambda word: word[1] is not None, wordTypes):
+            self.alreadyTypedWords.addWordToGroup(word, group)
         
         userData.words = words
         
@@ -995,7 +995,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #A tab tigger completion
         completions += self.application.supportManager.getAllTabTiggerItemsByScope(scope)
-        typedWords = self.alreadyTypedWords.typedWords()
+        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
         if alreadyTyped in typedWords:
             typedWords.remove(alreadyTyped)
 
@@ -1633,7 +1633,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def dragMoveEvent(self, event):
         cursor = self.cursorForPosition(event.pos())
         self.setTextCursor(cursor)
-     
+    
     def dropEvent(self, event):
         """
         When a url or text is dropped
