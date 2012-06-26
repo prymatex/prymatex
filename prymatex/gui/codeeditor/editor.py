@@ -247,8 +247,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #Tipificar las palabras
         wordTypes = map(lambda (index, word): (word, userData.rootGroup(index[0])), filter(lambda (index, word): word in addWords, words))
-        wordTypes = filter(lambda word: word[1] is not None, wordTypes)
-        self.alreadyTypedWords.addWordsTypes(wordTypes)
+        for word, group in filter(lambda word: word[1] is not None, wordTypes):
+            self.alreadyTypedWords.addWordToGroup(word, group)
         
         userData.words = words
         
@@ -970,8 +970,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerMode.setCaseSensitivity(case)
         
         self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
-        self.completerMode.setCompletionPrefix(alreadyTyped)
         self.completerMode.setSuggestions(suggestions)
+        self.completerMode.setCompletionPrefix(alreadyTyped)
         self.completerMode.complete(self.cursorRect())
     
     def completionSuggestions(self, cursor = None, scope = None):
@@ -995,7 +995,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #A tab tigger completion
         completions += self.application.supportManager.getAllTabTiggerItemsByScope(scope)
-        typedWords = self.alreadyTypedWords.typedWords()
+        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
         if alreadyTyped in typedWords:
             typedWords.remove(alreadyTyped)
 
@@ -1010,7 +1010,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self._fold(block)
         # self.update()
         # self.sidebar.update()
-    
+
     def codeFoldingUnfold(self, block):
         self._unfold(block)
         # self.update()
@@ -1327,7 +1327,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 title = "%s \t&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon
             menu.addAction(icon, title)
-
+        
         def menu_aboutToHide():
             activeActionIndex = menu.actions().index(menu.activeAction()) if menu.activeAction() else -1
             callback(activeActionIndex)
@@ -1633,7 +1633,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def dragMoveEvent(self, event):
         cursor = self.cursorForPosition(event.pos())
         self.setTextCursor(cursor)
-     
+    
     def dropEvent(self, event):
         """
         When a url or text is dropped

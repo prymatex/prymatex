@@ -27,6 +27,8 @@ class KeyEquivalentHelper(CodeEditorKeyHelper):
 class TabTriggerHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Tab
     def accept(self, editor, event, cursor = None, scope = None):
+        if cursor.hasSelection(): return False
+
         trigger = self.application.supportManager.getTabTriggerSymbol(cursor.block().text(), cursor.columnNumber())
         self.items = self.application.supportManager.getTabTriggerItem(trigger, scope) if trigger is not None else []
         return bool(self.items)
