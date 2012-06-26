@@ -149,11 +149,9 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
         elif role == QtCore.Qt.DecorationRole:
-            for name, icon in self.icons.iteritems():
-                if userData.isWordInScopes(name):
-                    return icon
-            return self.icons["typedef"]
-    
+            #userData.rootGroup(pos)
+            return resources.getIcon("scope-root-entity")
+
     def findBlockIndex(self, block):
         self._purge_blocks()
         indexes = map(lambda block: block.blockNumber(), self.blocks)

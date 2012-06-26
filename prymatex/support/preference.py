@@ -34,7 +34,8 @@ from prymatex.support.processor import PMXDebugSnippetProcessor
 DEFAULT_SETTINGS = { 
     'showInSymbolList': False,
     'spellChecking': True,
-    'completions': []
+    'completions': [],
+    'shellVariables': {}
 }
                       
 class PMXPreferenceSettings(object):

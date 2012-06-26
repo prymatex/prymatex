@@ -490,8 +490,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popupView.setMinimumWidth(width)
-        self.popupView.setCurrentIndex(self.completionModel().index(0, 0))
-
+        
     def isActive(self):
         return self.popup().isVisible()
         
@@ -544,3 +543,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             self.editor.insertBundleItem(suggestion)
         else:
             cursor.insertText(suggestion)
+        
+    def complete(self, rect):
+        self.popup().setCurrentIndex(self.completionModel().index(0, 0))
+        QtGui.QCompleter.complete(self, rect)
