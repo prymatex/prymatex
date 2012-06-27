@@ -37,6 +37,12 @@ from prymatex.utils.decorator.helpers import printtime
 
 class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
+    # Scope groups
+    #=======================================================================
+    SORTED_GROUPS = [   "entity", "meta", "variable", "keyword", "markup", 
+                        "support", "storage", "constant", "string", "comment", "invalid" ]
+
+    #=======================================================================
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
@@ -235,21 +241,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
     def updateWords(self, block, userData, words):
         self.logger.debug("Update Words")
-        oldWords = set(map(lambda (index, word): word, userData.words))
-        newWords = set(map(lambda (index, word): word, words))
-        
         #Quitar el block de las palabras anteriores
-        self.alreadyTypedWords.removeWordsBlock(block, oldWords.difference(newWords))
+        self.alreadyTypedWords.removeWordsBlock(block, userData.words)
         
         #Agregar las palabras nuevas
-        addWords = newWords.difference(oldWords)
-        self.alreadyTypedWords.addWordsBlock(block, addWords)
-        
-        #Tipificar las palabras
-        wordTypes = map(lambda (index, word): (word, userData.rootGroup(index[0])), filter(lambda (index, word): word in addWords, words))
-        for word, group in filter(lambda word: word[1] is not None, wordTypes):
-            self.alreadyTypedWords.addWordToGroup(word, group)
-        
+        self.alreadyTypedWords.addWordsBlock(block, words)
         userData.words = words
         
     def showSyntaxMessage(self, syntax):
@@ -979,7 +975,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         scope = scope or self.scope(cursor)
         currentWord, start, end = self.currentWord()
         alreadyTyped = currentWord[:cursor.position() - start]
-
+        
         settings = self.preferenceSettings(scope)
         disableDefaultCompletion = settings.disableDefaultCompletion
         if disableDefaultCompletion:
@@ -994,14 +990,21 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             print "comando", completionCommand
 
         #A tab tigger completion
-        completions += self.application.supportManager.getAllTabTiggerItemsByScope(scope)
-        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
-        if alreadyTyped in typedWords:
-            typedWords.remove(alreadyTyped)
-
-        completions += typedWords
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
         
-        return completions, alreadyTyped
+        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
+        
+        #Lo ponemos en la mezcladora
+        suggestions = tabTriggers + map(lambda word: { "display": word, "image": "scope-root-keyword" }, completions)
+        for group in CodeEditor.SORTED_GROUPS:
+            newWords = filter(lambda word: word not in completions, typedWords.pop(group, []))
+            suggestions += map(lambda word: { "display": word, "image": "scope-root-%s" % group }, newWords)
+            completions += newWords
+        
+        for words in typedWords.values():
+            suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, words)
+        
+        return suggestions, alreadyTyped
 
     #==========================================================================
     # Folding
