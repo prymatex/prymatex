@@ -46,6 +46,7 @@ class CompleterHelper(CodeEditorKeyHelper):
         """Accept the completer event"""
         if event.modifiers() == QtCore.Qt.ControlModifier:
             self.completions, self.alreadyTyped = editor.completionSuggestions(cursor, scope)
+            print self.alreadyTyped
             return bool(self.completions)
         return False
 
@@ -252,6 +253,8 @@ class PrintEditorStatusHelper(CodeEditorKeyHelper):
     def execute(self, editor, event, cursor = None, scope = None):
         #Aca lo que queramos hacer
         userData = cursor.block().userData()
+        print editor.currentWord()
+        print editor.wordUnderCursor(), cursor.position()
         for group in [ "comment", "constant", "entity", "invalid", "keyword", "markup", "meta", "storage", "string", "support", "variable" ]:
             print "%s: %s" % (group, cursor.block().userData().wordsByGroup(group))
         print "sin comentarios, sin cadenas", cursor.block().userData().wordsByGroup("-string -comment")

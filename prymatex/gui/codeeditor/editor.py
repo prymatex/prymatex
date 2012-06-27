@@ -39,7 +39,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Scope groups
     #=======================================================================
-    SORTED_GROUPS = [   "entity", "meta", "variable", "keyword", "markup", 
+    SORTED_GROUPS = [   "keyword", "entity", "meta", "variable", "markup", 
                         "support", "storage", "constant", "string", "comment", "invalid" ]
 
     #=======================================================================
@@ -973,8 +973,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def completionSuggestions(self, cursor = None, scope = None):
         cursor = cursor or self.textCursor()
         scope = scope or self.scope(cursor)
-        currentWord, start, end = self.currentWord()
-        alreadyTyped = currentWord[:cursor.position() - start]
+        wordUnder, start, end = self.wordUnderCursor()
+        alreadyTyped = wordUnder[:cursor.position() - start]
         
         settings = self.preferenceSettings(scope)
         disableDefaultCompletion = settings.disableDefaultCompletion
@@ -1002,8 +1002,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             completions += newWords
         
         for words in typedWords.values():
-            suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, words)
-        
+            newWords = filter(lambda word: word not in completions, words)
+            suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, newWords)
+            completions += newWords
+
         return suggestions, alreadyTyped
 
     #==========================================================================
