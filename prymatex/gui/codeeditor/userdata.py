@@ -97,14 +97,6 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
             words = filter(lambda ran: ran[0][1] <= end, words)
         return words
 
-    def rootGroup(self, pos):
-        scope = self.scopeAtPosition(pos)
-        scopeParts = scope.split()[::-1]
-        for part in scopeParts:
-            roots = filter(lambda rootGroup: part.startswith(rootGroup), PMXSyntax.ROOT_GROUPS)
-            if roots:
-                return roots[0]
-
     #================================================
     # Cache Handle
     #================================================

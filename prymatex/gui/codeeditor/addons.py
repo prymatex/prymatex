@@ -103,7 +103,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         spellRange = filter(lambda ((start, end), p): p.spellChecking,  block.userData().preferences)
         for ran, p in spellRange:
             wordRangeList = block.userData().wordsRanges(ran[0], ran[1])
-            for (start, end), word in wordRangeList:
+            for (start, end), word, group in wordRangeList:
                 yield (start, end), word
 
     def cleanCursorsForBlock(self, block):
