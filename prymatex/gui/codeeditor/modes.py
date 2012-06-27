@@ -476,6 +476,9 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         
         self.setPopup(self.popupView)
 
+        #QCompleter::PopupCompletion	0	Current completions are displayed in a popup window.
+        #QCompleter::InlineCompletion	2	Completions appear inline (as selected text).
+        #QCompleter::UnfilteredPopupCompletion	1	All possible completions are displayed in a popup window with the most likely suggestion indicated as current.
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
         
@@ -507,7 +510,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             self.inactive()
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-            
+
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
             cursor = self.editor.textCursor()
 
@@ -535,7 +538,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
         cursor = self.editor.textCursor()
-        cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
+        cursor.select(QtGui.QTextCursor.WordUnderCursor)
         if isinstance(suggestion, dict):
             if 'display' in suggestion:
                 cursor.insertText(suggestion['display'])
