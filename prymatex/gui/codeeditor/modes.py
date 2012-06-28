@@ -535,7 +535,8 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
-        word, start, end = self.editor.currentWord(search = False)
+        _, start, end = self.editor.currentWord(search = False)
+        cursor = self.editor.textCursor()
         cursor.setPosition(start)
         cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         if isinstance(suggestion, dict):

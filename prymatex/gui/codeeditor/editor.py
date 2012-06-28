@@ -16,6 +16,7 @@ from PyQt4 import QtCore, QtGui
 # Local application / Library specific imports
 #=======================================================================
 from prymatex import resources
+from prymatex.utils import coroutines
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
@@ -969,8 +970,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     # Completer
     #==========================================================================
-    def showCompleter(self, suggestions, alreadyTyped = "", caseInsensitive = True):
+    def showCompleter(self, suggestions, alreadyTyped = None, caseInsensitive = True):
         case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
+        alreadyTyped = alreadyTyped if alreadyTyped is not None else self.currentWord(direction = "left", search = False)[0]
         self.completerMode.setCaseSensitivity(case)
         
         self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
@@ -982,17 +984,19 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         settings = self.currentPreferenceSettings()
         if settings.disableDefaultCompletion and settings.executeCompletionCommand:
             self.executeCompletionCommand(settings)
-        else:
-            self.defaultCompletion(settings)
+        elif not hasattr(self, '_completerTask') or self._completerTask.isReady():
+            self._completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
+            def on_suggestionsReady(result):
+                 if bool(result.value):
+                    self.showCompleter(result.value)
+            self._completerTask.done.connect(on_suggestionsReady)
 
     def executeCompletionCommand(self, settings):
-        print settings.executeCompletionCommand
-        
-    def defaultCompletion(self, settings):
-        alreadyTyped, start, end = self.currentWord(direction = "left", search = False)
-        completions = self.completionSuggestions(settings = settings)
-        if bool(completions):
-            self.showCompleter(completions, alreadyTyped)
+        commandHash = settings.executeCompletionCommand
+        command = PMXCommand(self.application.supportManager.uuidgen(), dataHash = commandHash)
+        command.setBundle(self.getSyntax().bundle)
+        command.setManager(self.getSyntax().manager)
+        self.insertBundleItem(command)
     
     def completionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()
@@ -1006,11 +1010,13 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         completionCommand = settings.completionCommand
         if completionCommand:
             print "comando", completionCommand
-
+        yield
+        
         #A tab tigger completion
         tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope) if not settings.disableDefaultCompletion else []
         
         typedWords = self.alreadyTypedWords.typedWords(cursor.block()) if not settings.disableDefaultCompletion else []
+        yield
         
         #Lo ponemos en la mezcladora
         suggestions = tabTriggers + map(lambda word: { "display": word, "image": "scope-root-keyword" }, completions)
@@ -1018,13 +1024,15 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             newWords = filter(lambda word: word not in completions, typedWords.pop(group, []))
             suggestions += map(lambda word: { "display": word, "image": "scope-root-%s" % group }, newWords)
             completions += newWords
+            yield
         
         for words in typedWords.values():
             newWords = filter(lambda word: word not in completions, words)
             suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, newWords)
             completions += newWords
+            yield
 
-        return suggestions
+        yield coroutines.Return(suggestions)
 
     #==========================================================================
     # Folding

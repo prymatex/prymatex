@@ -379,7 +379,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         self.widgetIFind.setVisible(True)
         self.lineEditIFind.selectAll()
         self.lineEditIFind.setFocus()
-    
+
     #===========================================================================
     # Menus
     #===========================================================================
