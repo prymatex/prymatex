@@ -374,7 +374,7 @@ class PMXCodeEditorStatus(QtGui.QWidget, Ui_CodeEditorStatus, PMXBaseStatusBar):
         if cursor.hasSelection():
             word = cursor.selectedText()
         else: 
-            word, _, _ = self.currentEditor.getCurrentWord()
+            word, _, _ = self.currentEditor.currentWord()
         self.lineEditIFind.setText(word)        
         self.widgetIFind.setVisible(True)
         self.lineEditIFind.selectAll()

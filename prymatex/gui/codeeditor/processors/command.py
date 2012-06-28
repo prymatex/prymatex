@@ -86,7 +86,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return self.selection
     
     def word(self, format = None):
-        word, start, end = self.editor.getCurrentWord()
+        word, start, end = self.editor.currentWord()
         return word
     
     #beforeRunningCommand

@@ -370,34 +370,38 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def currentScope(self):
         return self.scope(self.textCursor())
 
-    def currentWord(self, *largs, **kwargs):
-        return self.getCurrentWord(*largs, **kwargs)
+    def currentWord(self, direction = "both", search = True):
+        return self.word(cursor = self.textCursor(), direction = direction, search = search)
         
-    def getCurrentWord(self, pat = RE_WORD, direction = "both"):
-        cursor = self.textCursor()
+    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
+        cursor = cursor or self.textCursor()
         line = cursor.block().text()
         position = cursor.position()
         columnNumber = cursor.columnNumber()
         #Get text before and after the cursor position.
         first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
+        
         #Try left word
         lword = rword = ""
-        m = self.RE_WORD.match(first_part)
+        m = pattern.match(first_part)
         if m and direction in ("left", "both"):
             lword = m.group(0)[::-1]
         #Try right word
-        m = self.RE_WORD.match(last_part)
+        m = pattern.match(last_part)
         if m and direction in ("right", "both"):
             rword = m.group(0)
         
-        if lword or rword: 
+        if lword or rword:
             return lword + rword, position - len(lword), position + len(rword)
         
+        if not search: 
+            return "", position, position
+
         lword = rword = ""
         #Search left word
         for i in range(len(first_part)):
             lword += first_part[i]
-            m = self.RE_WORD.search(first_part[i + 1:], i )
+            m = pattern.search(first_part[i + 1:], i )
             if m.group(0):
                 lword += m.group(0)
                 break
@@ -405,7 +409,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Search right word
         for i in range(len(last_part)):
             rword += last_part[i]
-            m = self.RE_WORD.search(last_part[i:], i )
+            m = pattern.search(last_part[i:], i )
             if m.group(0):
                 rword += m.group(0)
                 break
@@ -519,7 +523,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.replaceTabsForSpaces()
         else:
             if not cursor.hasSelection():
-                word, start, end = self.getCurrentWord()
+                word, start, end = self.currentWord()
                 position = cursor.position()
                 cursor.setPosition(start)
                 cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
@@ -691,7 +695,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             #Handle by editor
             cursor.select(selection)
         elif selection == self.SelectWord:
-            word, start, end = self.getCurrentWord()
+            word, start, end = self.currentWord()
             cursor.setPosition(start)
             cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         elif selection == self.SelectEnclosingBrackets:
@@ -930,7 +934,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         line = block.text()
         scope = self.getCurrentScope()
         preferences = self.preferenceSettings(scope)
-        current_word, start, end = self.getCurrentWord()
+        current_word, start, end = self.currentWord()
         #Combine base env from params and editor env
         env.update({
                 'TM_CURRENT_LINE': line,
@@ -985,9 +989,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         print settings.executeCompletionCommand
         
     def defaultCompletion(self, settings):
-        currentWord, start, end = self.currentWord(direction = "left")
-        alreadyTyped = currentWord[:self.textCursor().position() - start]
-        print currentWord, alreadyTyped
+        alreadyTyped, start, end = self.currentWord(direction = "left", search = False)
         completions = self.completionSuggestions(settings = settings)
         if bool(completions):
             self.showCompleter(completions, alreadyTyped)

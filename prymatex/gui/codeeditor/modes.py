@@ -502,7 +502,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         
     def inactive(self):
         self.popup().setVisible(False)
-        
+
     def keyPressEvent(self, event):
         if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
             event.ignore()
@@ -514,22 +514,20 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
             cursor = self.editor.textCursor()
 
-            #TODO: Se puede hacer mejor, para controlar que si esta en la mitad de la palabra o algo de eso
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
-                newPrefix = cursor.selectedText()
-                self.setCompletionPrefix(newPrefix)
-                if not self.completionModel().hasIndex(1, 0):
-                    #Me queda solo una sugerencia, veamos si no es lo que ya esta tipeada
-                    sIndex = self.completionModel().mapToSource(self.completionModel().index(0, 0))
-                    suggestion = self.completionModel().sourceModel().data(sIndex)
-                    if isinstance(suggestion, basestring) and suggestion == newPrefix:
-                        #Se termino
-                        self.inactive()
-                        return
+                self.setCompletionPrefix(cursor.selectedText())
                 self.complete(self.editor.cursorRect())
             else:
                 self.inactive()
+
+    def onlyOneSameSuggestion(self):
+        cursor = self.editor.textCursor()
+        if not self.completionModel().hasIndex(1, 0):
+            sIndex = self.completionModel().mapToSource(self.completionModel().index(0, 0))
+            suggestion = self.completionModel().sourceModel().data(sIndex)
+            return suggestion == self.completionPrefix()
+        return False
 
     def setStartCursorPosition(self, position):
         self.startCursorPosition = position
@@ -537,8 +535,9 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
-        cursor = self.editor.textCursor()
-        cursor.select(QtGui.QTextCursor.WordUnderCursor)
+        word, start, end = self.editor.currentWord(search = False)
+        cursor.setPosition(start)
+        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         if isinstance(suggestion, dict):
             if 'display' in suggestion:
                 cursor.insertText(suggestion['display'])
@@ -551,5 +550,8 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             cursor.insertText(suggestion)
         
     def complete(self, rect):
-        self.popup().setCurrentIndex(self.completionModel().index(0, 0))
-        QtGui.QCompleter.complete(self, rect)
+        if not self.onlyOneSameSuggestion():
+            self.popup().setCurrentIndex(self.completionModel().index(0, 0))
+            QtGui.QCompleter.complete(self, rect)
+        else:
+            self.inactive()
