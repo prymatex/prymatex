@@ -970,26 +970,37 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     # Completer
     #==========================================================================
-    def showCompleter(self, suggestions, alreadyTyped = None, caseInsensitive = True):
+    def showCompleter(self, suggestions, source = "default", alreadyTyped = None, caseInsensitive = True):
         case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
         alreadyTyped = alreadyTyped if alreadyTyped is not None else self.currentWord(direction = "left", search = False)[0]
         self.completerMode.setCaseSensitivity(case)
         
         self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
-        self.completerMode.setSuggestions(suggestions)
+        self.completerMode.setSuggestions(suggestions, source)
         self.completerMode.setCompletionPrefix(alreadyTyped)
         self.completerMode.complete(self.cursorRect())
     
+    def switchCompleter(self):
+        settings = self.currentPreferenceSettings()
+        if not self.completerMode.hasSource("default"):
+            self._completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
+            def on_suggestionsReady(suggestions):
+                if bool(suggestions):
+                    self.completerMode.setSuggestions(suggestions, "default")
+                    self.completerMode.switch()
+            self._completerTask.done.connect(on_suggestionsReady)
+        else:
+            self.completerMode.switch()
+
     def runCompleter(self):
         settings = self.currentPreferenceSettings()
         if settings.disableDefaultCompletion and settings.executeCompletionCommand:
             self.executeCompletionCommand(settings)
-        elif not hasattr(self, '_completerTask') or self._completerTask.isReady():
-            self._completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
-            def on_suggestionsReady(result):
-                 if bool(result.value):
-                    self.showCompleter(result.value)
-            self._completerTask.done.connect(on_suggestionsReady)
+        else:
+            def on_suggestionsReady(suggestions):
+                 if bool(suggestions):
+                    self.showCompleter(suggestions)
+            self.defaultCompletion(settings, on_suggestionsReady)
 
     def executeCompletionCommand(self, settings):
         commandHash = settings.executeCompletionCommand
@@ -998,6 +1009,16 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         command.setManager(self.getSyntax().manager)
         self.insertBundleItem(command)
     
+    def defaultCompletion(self, settings, callback):
+        if not hasattr(self, '_completerTask') or self._completerTask.isReady():
+            self._completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
+            def on_completerTaskReady(callback):
+                def completerTaskReady(result):
+                    callback(result.value)
+                return completerTaskReady
+            #En una clausura
+            self._completerTask.done.connect(on_completerTaskReady(callback))
+
     def completionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()
         scope = scope or self.scope(cursor)
@@ -1691,3 +1712,4 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     self.application.openFile(file)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
+        

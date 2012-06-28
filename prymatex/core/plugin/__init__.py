@@ -59,6 +59,7 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
         helpers = self.KEY_HELPERS[Key_Any][:]
         return helpers + self.KEY_HELPERS.get(key, [])
 
+    #TODO: Poder filtrar que key helpers no quiero que corra o otra cosa
     def runKeyHelper(self, key):
         runHelper = False
         for helper in self.findHelpers(key):

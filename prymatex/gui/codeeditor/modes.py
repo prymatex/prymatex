@@ -481,22 +481,36 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         #QCompleter::UnfilteredPopupCompletion	1	All possible completions are displayed in a popup window with the most likely suggestion indicated as current.
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
-        
-        self.completerTableModel = PMXCompleterTableModel(self)
-        self.setModel(self.completerTableModel)
 
-    def setSuggestions(self, suggestions):
-        #Limpiar el prefix
-        self.setCompletionPrefix("")
-        #Set del modelo
-        self.completerTableModel.setSuggestions(suggestions)
+        self.activeSources = []
+        self.completerTableModels = {}
+
+    def hasSource(self, source):
+        return source in self.activeSources
+        
+    def switch(self):
+        if len(self.activeSources) > 1:
+            print "cambiar"
+        else:
+            print "no hace nada"
+
+    def currentSource(self):
+        return self.completionModel().sourceModel() and self.completionModel().sourceModel().name or ""
+    
+    def setSuggestions(self, suggestions, source):
+        #Preparo el modelo
+        if self.currentSource() != source:
+            completerTableModel = self.completerTableModels.setdefault(source, PMXCompleterTableModel(source, self))
+            self.setModel(completerTableModel)
+        self.activeSources.append(source)
+        self.completionModel().sourceModel().setSuggestions(suggestions)
         self.popup().setMinimumHeight(200)
         self.popup().resizeColumnsToContents()
         width = self.popup().verticalScrollBar().sizeHint().width()
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popupView.setMinimumWidth(width)
-        
+
     def isActive(self):
         return self.popup().isVisible()
         
@@ -506,6 +520,8 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def keyPressEvent(self, event):
         if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
             event.ignore()
+        elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() == QtCore.Qt.Key_Space:
+            self.editor.switchCompleter()
         elif self.editor.runKeyHelper(event):
             self.inactive()
         else:
@@ -530,6 +546,8 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         return False
 
     def setStartCursorPosition(self, position):
+        self.setCompletionPrefix("")
+        self.activeSources = []
         self.startCursorPosition = position
         
     def insertCompletion(self, index):
