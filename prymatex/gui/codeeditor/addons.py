@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.utils.lists import bisect_key
+import re
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.utils.lists import bisect_key
 from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex.support import PMXPreferenceSettings
+
+RE_CHAR = re.compile(r"(\w)", re.UNICODE)
 
 class CodeEditorObjectAddon(QtCore.QObject, PMXBaseEditorAddon):
     def __init__(self, parent):
@@ -24,22 +27,24 @@ class CodeEditorObjectAddon(QtCore.QObject, PMXBaseEditorAddon):
 class CompleterAddon(CodeEditorObjectAddon):
     def __init__(self, parent):
         CodeEditorObjectAddon.__init__(self, parent)
-        self.charCounter = 0
+        self.positionCounter = []
 
     def initialize(self, editor):
         CodeEditorObjectAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
-        if event.text() and event.key() not in [ QtCore.Qt.Key_Space, QtCore.Qt.Key_Backspace ]:
-            self.charCounter += 1
-        else:
-            self.charCounter = 0
-        if self.charCounter == 3:
-            completions, alreadyTyped = self.editor.completionSuggestions()
-            if bool(completions):
-                self.editor.showCompleter(completions, alreadyTyped)
-                
+        if not event.modifiers() and RE_CHAR.match(event.text()):
+            if not self.positionCounter or self.positionCounter[-1] + 1 == self.editor.textCursor().position():
+                self.positionCounter.append(self.editor.textCursor().position())
+                if len(self.positionCounter) == 3:
+                    self.editor.runCompleter()
+                    self.positionCounter = []
+            else:
+                self.positionCounter = []
+        elif self.positionCounter:
+            self.positionCounter = []
+        
 class SmartUnindentAddon(CodeEditorObjectAddon):
     def initialize(self, editor):
         CodeEditorObjectAddon.initialize(self, editor)

@@ -528,10 +528,10 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     def on_settings_textChanged(self):
         #Convertir a dict
         try:
-            self.changes['content'] = ast.literal_eval(self.command.toPlainText())
+            self.changes['settings'] = ast.literal_eval(self.settings.toPlainText())
         except:
             pass
-    
+
     @property
     def title(self):
         if self.bundleItem != None:

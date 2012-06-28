@@ -345,12 +345,13 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Obteniendo datos del editor
     #=======================================================================
     def tabKeyBehavior(self):
-        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
+        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('	')
 
     def preferenceSettings(self, scope):
         return self.application.supportManager.getPreferenceSettings(scope)
     
     def wordUnderCursor(self):
+        """ Esto no es lo mismo que curre"""
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
@@ -363,6 +364,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def scope(self, cursor):
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
 
+    def currentPreferenceSettings(self):
+        return self.preferenceSettings(self.currentScope())
+        
     def currentScope(self):
         return self.scope(self.textCursor())
 
@@ -970,16 +974,28 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerMode.setCompletionPrefix(alreadyTyped)
         self.completerMode.complete(self.cursorRect())
     
-    def completionSuggestions(self, cursor = None, scope = None):
+    def runCompleter(self):
+        settings = self.currentPreferenceSettings()
+        if settings.disableDefaultCompletion and settings.executeCompletionCommand:
+            self.executeCompletionCommand(settings)
+        else:
+            self.defaultCompletion(settings)
+
+    def executeCompletionCommand(self, settings):
+        print settings.executeCompletionCommand
+        
+    def defaultCompletion(self, settings):
+        currentWord, start, end = self.currentWord(direction = "left")
+        alreadyTyped = currentWord[:self.textCursor().position() - start]
+        print currentWord, alreadyTyped
+        completions = self.completionSuggestions(settings = settings)
+        if bool(completions):
+            self.showCompleter(completions, alreadyTyped)
+    
+    def completionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()
         scope = scope or self.scope(cursor)
-        wordUnder, start, end = self.wordUnderCursor()
-        alreadyTyped = wordUnder[:cursor.position() - start]
-        
-        settings = self.preferenceSettings(scope)
-        disableDefaultCompletion = settings.disableDefaultCompletion
-        if disableDefaultCompletion:
-            print "no autocompletar"
+        settings = settings or self.preferenceSettings(scope)
         
         #An array of additional candidates when cycling through completion candidates from the current document.
         completions = settings.completions[:]
@@ -990,9 +1006,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             print "comando", completionCommand
 
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope) if not settings.disableDefaultCompletion else []
         
-        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
+        typedWords = self.alreadyTypedWords.typedWords(cursor.block()) if not settings.disableDefaultCompletion else []
         
         #Lo ponemos en la mezcladora
         suggestions = tabTriggers + map(lambda word: { "display": word, "image": "scope-root-keyword" }, completions)
@@ -1006,7 +1022,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, newWords)
             completions += newWords
 
-        return suggestions, alreadyTyped
+        return suggestions
 
     #==========================================================================
     # Folding
@@ -1168,12 +1184,12 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return replaced
     
     def replaceTabsForSpaces(self):
-        match = QtCore.QRegExp("\t")
+        match = QtCore.QRegExp("	")
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
         
     def replaceSpacesForTabs(self):
         match = QtCore.QRegExp(" " * self.tabStopSize)
-        self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
+        self.replaceMatch(match, "	", QtGui.QTextDocument.FindFlags(), True)
         
     #==========================================================================
     # Bookmarks and gotos
@@ -1323,13 +1339,13 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         menu = QtGui.QMenu(self)
         for index, item in enumerate(menuItems, 1):
             if isinstance(item, dict):
-                title = "%s \t&%d" % (item["title"], index)
+                title = "%s 	&%d" % (item["title"], index)
                 icon = resources.getIcon(item["image"]) if "image" in item else QtGui.QIcon()
             elif isinstance(item,  basestring):
-                title = "%s \t&%d" % (item, index)
+                title = "%s 	&%d" % (item, index)
                 icon = QtGui.QIcon()
             elif isinstance(item,  PMXBundleTreeNode):
-                title = "%s \t&%d" % (item.buildMenuTextEntry(False), index)
+                title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon
             menu.addAction(icon, title)
         

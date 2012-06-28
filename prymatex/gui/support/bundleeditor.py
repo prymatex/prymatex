@@ -3,6 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
 from prymatex.core.plugin import PMXBaseWidgetComponent
@@ -204,14 +205,14 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     
     def configSelectTop(self):
         self.comboBoxItemFilter.addItem("Show all")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/languages.png"), "Languages", "syntax")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/snippets.png"), "Snippets", "snippet")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/macros.png"), "Macros", "macro")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/commands.png"), "Commands", "command")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/drag-commands.png"), "DragCommands", "dragcommand")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/preferences.png"), "Preferences", "preference")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template templatefile")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/project.png"), "Projects", "project templatefile")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-syntax"), "Languages", "syntax")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-snippet"), "Snippets", "snippet")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-macro"), "Macros", "macro")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-command"), "Commands", "command")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-dragcommand"), "DragCommands", "dragcommand")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-preference"), "Preferences", "preference")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-template"), "Templates", "template templatefile")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-project"), "Projects", "project templatefile")
     
     #==========================================================
     # Tree View

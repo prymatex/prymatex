@@ -44,14 +44,10 @@ class CompleterHelper(CodeEditorKeyHelper):
     KEY = QtCore.Qt.Key_Space
     def accept(self, editor, event, cursor = None, scope = None):
         """Accept the completer event"""
-        if event.modifiers() == QtCore.Qt.ControlModifier:
-            self.completions, self.alreadyTyped = editor.completionSuggestions(cursor, scope)
-            print self.alreadyTyped
-            return bool(self.completions)
-        return False
+        return event.modifiers() == QtCore.Qt.ControlModifier
 
     def execute(self, editor, event, cursor = None, scope = None):
-        editor.showCompleter(self.completions, self.alreadyTyped)
+        editor.runCompleter()
 
 class SmartTypingPairsHelper(CodeEditorKeyHelper):
     #TODO: Mas amor para la inteligencia de los cursores balanceados

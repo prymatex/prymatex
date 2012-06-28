@@ -7,6 +7,7 @@
     
     completions, an array of additional candidates when cycling through completion candidates from the current document.
     completionCommand, a shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
+    executeCompletionCommand, a command item
     disableDefaultCompletion, set to 1 if you want to exclude matches from the current document when asking for completion candidates (useful when you provide your own completion command).
 
     decreaseIndentPattern, regular expression.
@@ -39,7 +40,7 @@ DEFAULT_SETTINGS = {
 }
                       
 class PMXPreferenceSettings(object):
-    KEYS = [    'completions', 'completionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
+    KEYS = [    'completions', 'completionCommand', 'executeCompletionCommand', 'disableDefaultCompletion', 'showInSymbolList', 'symbolTransformation', 
                 'highlightPairs', 'smartTypingPairs', 'shellVariables', 'spellChecking',
                 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
     INDENT_KEYS = [ 'decreaseIndentPattern', 'increaseIndentPattern', 'indentNextLinePattern', 'unIndentedLinePattern' ]
@@ -159,20 +160,28 @@ class PMXPreference(PMXBundleItem):
     def load(self, dataHash):
         super(PMXPreference, self).load(dataHash)
         for key in PMXPreference.KEYS:
+            value = dataHash.get(key, None)
             if key == 'settings':
-                setattr(self, key, PMXPreferenceSettings(dataHash.get(key, {})))
-            else:
-                setattr(self, key, dataHash.get(key, None))
+                value = PMXPreferenceSettings(value or {})
+            setattr(self, key, value)
     
     @property
     def hash(self):
         dataHash = super(PMXPreference, self).hash
         for key in PMXPreference.KEYS:
-            value = self.settings.hash
-            if value != None:
-                dataHash[key] = value
+            value = getattr(self, key)
+            if key == 'settings':
+                value = value.hash
+            dataHash[key] = value
         return dataHash
 
+    def update(self, dataHash):
+        for key in dataHash.keys():
+            value = dataHash.get(key, None)
+            if key == 'settings':
+                value = PMXPreferenceSettings(value or {})
+            setattr(self, key, value)
+            
     @staticmethod
     def buildSettings(preferences):
         settings = PMXPreferenceSettings()
