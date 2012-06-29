@@ -243,10 +243,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def updateWords(self, block, userData, words):
         self.logger.debug("Update Words")
         #Quitar el block de las palabras anteriores
-        self.alreadyTypedWords.removeWordsBlock(block, userData.words)
+        self.alreadyTypedWords.removeWordsBlock(block, filter(lambda word: word not in words, userData.words))
         
         #Agregar las palabras nuevas
-        self.alreadyTypedWords.addWordsBlock(block, words)
+        self.alreadyTypedWords.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
         userData.words = words
         
     def showSyntaxMessage(self, syntax):
