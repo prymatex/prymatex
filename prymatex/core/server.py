@@ -154,7 +154,7 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
 
     def popup(self, suggestions = "", returnChoice = False, caseInsensitive = True, alreadyTyped = "", staticPrefix = "", additionalWordCharacters = ""):
         suggestions = plistlib.readPlistFromString(suggestions)
-        self.application.currentEditor().showCompleter(suggestions["suggestions"], alreadyTyped = alreadyTyped, caseInsensitive = caseInsensitive)
+        self.application.currentEditor().showCompleter(suggestions["suggestions"], source = "external", alreadyTyped = alreadyTyped, caseInsensitive = caseInsensitive)
         self.sendResult()
     
     def defaults(self, **kwargs):

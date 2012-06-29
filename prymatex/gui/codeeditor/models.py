@@ -165,9 +165,8 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
 # Completer
 #=========================================================
 class PMXCompleterTableModel(QtCore.QAbstractTableModel): 
-    def __init__(self, name, parent): 
+    def __init__(self, parent): 
         QtCore.QAbstractListModel.__init__(self, parent) 
-        self.name = name
         self.columns = 1
         self.suggestions = []
 

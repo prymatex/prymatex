@@ -149,7 +149,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
                'name': html.escape(context.description()),
                'exitcode': context.outputType}
         commandHash = { 'command': command, 
-                           'name': "Error" + context.bundleItem.name,
+                           'name': "Error runing %s" % context.description(),
                           'input': 'none',
                          'output': 'showAsHTML' }
         command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)

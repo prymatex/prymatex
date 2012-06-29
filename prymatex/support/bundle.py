@@ -43,6 +43,7 @@ class PMXManagedObject(object):
     def hash(self):
         return { 'uuid': unicode(self.uuid).upper() }
 
+    
     def path(self, namespace):
         return self.sources[namespace][self._PATH]
 
@@ -289,7 +290,7 @@ class PMXRunningContext(object):
             self.removeTempFile()
         
     def description(self):
-        return self.bundleItem.name
+        return self.bundleItem.name or "No Name"
         
     def removeTempFile(self):
         utils.deleteFile(self.tempFile)

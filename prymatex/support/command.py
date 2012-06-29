@@ -109,7 +109,9 @@ class PMXCommand(PMXBundleItem):
             if deleteMethod != None:
                 deleteMethod()
 
-        getattr(processor, outputHandler, None)(context)
+        handlerFunction = getattr(processor, outputHandler, None)
+        if handlerFunction is not None:
+            handlerFunction(context)
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]

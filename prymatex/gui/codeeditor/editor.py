@@ -888,6 +888,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     def insertBundleItem(self, item, **processorSettings):
         """Inserta un bundle item"""
+        
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
             self.textCursor().beginEditBlock()
@@ -971,24 +972,22 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Completer
     #==========================================================================
     def showCompleter(self, suggestions, source = "default", alreadyTyped = None, caseInsensitive = True):
-        case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
-        alreadyTyped = alreadyTyped if alreadyTyped is not None else self.currentWord(direction = "left", search = False)[0]
-        self.completerMode.setCaseSensitivity(case)
-        
-        self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
-        self.completerMode.setSuggestions(suggestions, source)
-        self.completerMode.setCompletionPrefix(alreadyTyped)
-        self.completerMode.complete(self.cursorRect())
+        currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
+        if alreadyTyped is None or currentAlreadyTyped.startswith(alreadyTyped):
+            case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
+            self.completerMode.setCaseSensitivity(case)
+            self.completerMode.setStartCursorPosition(self.textCursor().position() - len(currentAlreadyTyped))
+            self.completerMode.setSuggestions(suggestions, source)
+            self.completerMode.setCompletionPrefix(currentAlreadyTyped)
+            self.completerMode.complete(self.cursorRect())
     
     def switchCompleter(self):
         settings = self.currentPreferenceSettings()
         if not self.completerMode.hasSource("default"):
-            self._completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
             def on_suggestionsReady(suggestions):
                 if bool(suggestions):
                     self.completerMode.setSuggestions(suggestions, "default")
-                    self.completerMode.switch()
-            self._completerTask.done.connect(on_suggestionsReady)
+            self.defaultCompletion(settings, on_suggestionsReady)
         else:
             self.completerMode.switch()
 
@@ -1005,8 +1004,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def executeCompletionCommand(self, settings):
         commandHash = settings.executeCompletionCommand
         command = PMXCommand(self.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.setBundle(self.getSyntax().bundle)
-        command.setManager(self.getSyntax().manager)
+        command.setBundle(settings.getBundle("executeCompletionCommand"))
+        command.setManager(settings.getManager("executeCompletionCommand"))
         self.insertBundleItem(command)
     
     def defaultCompletion(self, settings, callback):
@@ -1031,13 +1030,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         completionCommand = settings.completionCommand
         if completionCommand:
             print "comando", completionCommand
-        yield
         
         #A tab tigger completion
-        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope) if not settings.disableDefaultCompletion else []
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
         
-        typedWords = self.alreadyTypedWords.typedWords(cursor.block()) if not settings.disableDefaultCompletion else []
-        yield
+        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
         
         #Lo ponemos en la mezcladora
         suggestions = tabTriggers + map(lambda word: { "display": word, "image": "scope-root-keyword" }, completions)

@@ -482,35 +482,38 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
 
-        self.activeSources = []
-        self.completerTableModels = {}
-
-    def hasSource(self, source):
-        return source in self.activeSources
+        self.setModel(PMXCompleterTableModel(self))
         
-    def switch(self):
-        if len(self.activeSources) > 1:
-            print "cambiar"
-        else:
-            print "no hace nada"
+        self.currentSource = None
+        self.activeSources = []
+        self.completerSuggestions = {}
 
-    def currentSource(self):
-        return self.completionModel().sourceModel() and self.completionModel().sourceModel().name or ""
-    
-    def setSuggestions(self, suggestions, source):
-        #Preparo el modelo
-        if self.currentSource() != source:
-            completerTableModel = self.completerTableModels.setdefault(source, PMXCompleterTableModel(source, self))
-            self.setModel(completerTableModel)
-        self.activeSources.append(source)
-        self.completionModel().sourceModel().setSuggestions(suggestions)
+    def fixPopupViewSize(self):
         self.popup().setMinimumHeight(200)
         self.popup().resizeColumnsToContents()
         width = self.popup().verticalScrollBar().sizeHint().width()
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popupView.setMinimumWidth(width)
+        
+    def hasSource(self, source):
+        return source in self.activeSources
+        
+    def switch(self):
+        if len(self.activeSources) > 1:
+            index = self.activeSources.index(self.currentSource)
+            index = (index + 1) % len(self.activeSources)
+            self.currentSource = self.activeSources[index]
+            self.completionModel().sourceModel().setSuggestions(self.completerSuggestions[self.currentSource])
+            self.fixPopupViewSize()
 
+    def setSuggestions(self, suggestions, source):
+        self.completerSuggestions[source] = suggestions
+        self.activeSources.append(source)
+        self.currentSource = source
+        self.completionModel().sourceModel().setSuggestions(suggestions)
+        self.fixPopupViewSize()
+        
     def isActive(self):
         return self.popup().isVisible()
         
