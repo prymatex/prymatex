@@ -8,7 +8,7 @@ A collection of useful helper functions and classes for writing
 commands in Python for TextMate.
 """
 
-import sys, os
+import sys, os, tempfile, stat
 from re import sub, compile as compile_
 from os import popen, path, environ as env
 
@@ -52,6 +52,41 @@ def selection_or_line():
         text = os.environ.get('TM_CURRENT_LINE')
     return text
 
+def makeTempFile():
+    tempDir = os.environ.get("PMX_TMP_PATH")
+    descriptor, name = tempfile.mkstemp(dir = tempDir, text=True)
+    os.chmod(name, stat.S_IREAD | stat.S_IWRITE)
+    return name
+
+def save_current_document():
+    doc, dst = sys.stdin.read(), os.environ.get('TM_FILEPATH')
+    
+    if dst:
+        os.environ['TM_DISPLAYNAME'] = os.environ.get('TM_FILENAME')
+        if os.path.exists(dst) and os.access(os.path.dirname(dst), os.W_OK):
+            os.utime(dst, None)
+        with open(dst) as fd:
+            content = fd.read()
+        if os.path.exists(dst) and content == doc:
+            return
+    else:
+        os.environ['TM_FILEPATH']         = dst = makeTempFile()
+        os.environ['TM_FILENAME']         = os.path.basename(dst)
+        os.environ['TM_FILE_IS_UNTITLED'] = "true"
+        os.environ['TM_DISPLAYNAME']      = 'untitled'
+        os.chdir(os.path.dirname(os.environ["TM_FILEPATH"]))
+    
+    try:
+        f = open(dst, 'w')
+        f.write(doc)
+        f.close()
+    except:
+        os.environ['TM_ORIG_FILEPATH']    = dst
+        os.environ['TM_ORIG_FILENAME']    = os.path.basename(dst)
+        os.environ['TM_FILEPATH']         = dst = makeTempFile()
+        os.environ['TM_FILENAME']         = os.path.basename(dst)
+        os.environ['TM_DISPLAYNAME']     += ' (M)'
+    
 def env_python():
     """ Return (python, version) from env.
     
