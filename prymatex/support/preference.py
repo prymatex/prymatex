@@ -254,7 +254,7 @@ class PMXPreference(PMXBundleItem):
             value = getattr(self, key)
             if key == 'settings':
                 value = value.hash
-            dataHash[key] = value
+            dataHash[key] = 'value'
         return dataHash
 
     def update(self, dataHash):
@@ -262,7 +262,8 @@ class PMXPreference(PMXBundleItem):
             value = dataHash.get(key, None)
             if key == 'settings':
                 self.settings.update(value)
-            setattr(self, key, value)
+            else:
+                setattr(self, key, value)
             
     @staticmethod
     def buildSettings(preferences):
