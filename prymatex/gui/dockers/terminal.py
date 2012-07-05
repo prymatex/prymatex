@@ -243,11 +243,20 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.tabTerminals = PMXTabTerminals(self)
         self.setWidget(self.tabTerminals)
         self.setupSocket()
+        self.installEventFilter(self)
+    
     
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
         self.widget().addTerminal()
+    
+    def eventFilter(self, obj, event):
+        if obj == self and event.type() == QtCore.QEvent.KeyPress:
+            if event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_W]:
+                print "W"
+                return
+        return super(PMXTerminalDock, self).eventFilter(obj, event)
     
     #====================================================
     # ZMQ External actions
@@ -291,7 +300,12 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     def contributeToSettings(cls):
         from prymatex.gui.settings.terminal import PMXTerminalSettings
         return [ PMXTerminalSettings ]
-
+    
+    
+    
+    def showEvent(self, event):
+        self.widget().setFocus()
+        
 #===============================================================================
 # Signals
 #===============================================================================
