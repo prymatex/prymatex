@@ -152,11 +152,26 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         if "menuItems" in parameters:
             self.application.currentEditor().showFlatPopupMenu(parameters["menuItems"], sendSelectedIndex)
 
-    def popup(self, suggestions = "", returnChoice = False, caseInsensitive = True, alreadyTyped = "", staticPrefix = "", additionalWordCharacters = ""):
-        suggestions = plistlib.readPlistFromString(suggestions)
-        self.application.currentEditor().showCompleter(suggestions["suggestions"], source = "external", alreadyTyped = alreadyTyped, caseInsensitive = caseInsensitive)
-        self.sendResult()
-    
+    def popup(self, **kwargs):
+        suggestions = plistlib.readPlistFromString(kwargs["suggestions"])
+        if kwargs.get("returnChoice", False):
+            def sendSelectedSuggestion(suggestion):
+                if suggestion is not None:
+                    self.sendResult(suggestion)
+                else:
+                    self.sendResult({})
+            self.application.currentEditor().showCompleter( suggestions = suggestions["suggestions"], 
+                                                        source = "external",
+                                                        alreadyTyped = kwargs.get("alreadyTyped"), 
+                                                        caseInsensitive = kwargs.get("caseInsensitive", True),
+                                                        callback = sendSelectedSuggestion)
+        else:
+            self.application.currentEditor().showCompleter( suggestions = suggestions["suggestions"], 
+                                                        source = "external",
+                                                        alreadyTyped = kwargs.get("alreadyTyped"), 
+                                                        caseInsensitive = kwargs.get("caseInsensitive", True))
+            self.sendResult()
+        
     def defaults(self, **kwargs):
         return True
     

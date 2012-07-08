@@ -487,7 +487,8 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.currentSource = None
         self.activeSources = []
         self.completerSuggestions = {}
-
+        self.activatedCallback = None
+    
     def fixPopupViewSize(self):
         self.popup().setMinimumHeight(200)
         self.popup().resizeColumnsToContents()
@@ -506,6 +507,9 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
             self.currentSource = self.activeSources[index]
             self.completionModel().sourceModel().setSuggestions(self.completerSuggestions[self.currentSource])
             self.fixPopupViewSize()
+
+    def setActivatedCallback(self, callback):
+        self.activatedCallback = callback
 
     def setSuggestions(self, suggestions, source):
         self.completerSuggestions[source] = suggestions
@@ -556,20 +560,23 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
-        _, start, end = self.editor.currentWord(search = False)
-        cursor = self.editor.textCursor()
-        cursor.setPosition(start)
-        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
-        if isinstance(suggestion, dict):
-            if 'display' in suggestion:
-                cursor.insertText(suggestion['display'])
-            elif 'title' in suggestion:
-                cursor.insertText(suggestion['title'])
-        elif isinstance(suggestion, PMXBundleTreeNode):
-            cursor.removeSelectedText()
-            self.editor.insertBundleItem(suggestion)
+        if self.activatedCallback is None:
+            _, start, end = self.editor.currentWord(search = False)
+            cursor = self.editor.textCursor()
+            cursor.setPosition(start)
+            cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+            if isinstance(suggestion, dict):
+                if 'display' in suggestion:
+                    cursor.insertText(suggestion['display'])
+                elif 'title' in suggestion:
+                    cursor.insertText(suggestion['title'])
+            elif isinstance(suggestion, PMXBundleTreeNode):
+                cursor.removeSelectedText()
+                self.editor.insertBundleItem(suggestion)
+            else:
+                cursor.insertText(suggestion)
         else:
-            cursor.insertText(suggestion)
+            self.activatedCallback(suggestion)
         
     def complete(self, rect):
         if not self.onlyOneSameSuggestion():

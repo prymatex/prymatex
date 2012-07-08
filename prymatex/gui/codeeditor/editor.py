@@ -951,31 +951,36 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         })
 
         if current_word:
+            self.logger.debug("Add current word to environment")
             env['TM_CURRENT_WORD'] = current_word
         if self.filePath is not None:
+            self.logger.debug("Add file path to environment")
             env['TM_FILEPATH'] = self.filePath
             env['TM_FILENAME'] = self.application.fileManager.basename(self.filePath)
             env['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath)
         if self.project is not None:
+            self.logger.debug("Add project to environment")
             env.update(self.project.buildEnvironment())
         if cursor.hasSelection():
+            self.logger.debug("Add selection to environment")
             env['TM_SELECTED_TEXT'] = utils.replaceLineBreaks(cursor.selectedText())
             start, end = self.getSelectionBlockStartEnd()
             env['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             env['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             env['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
-            
+
         env.update(preferences.shellVariables)
         return env
 
     #==========================================================================
     # Completer
     #==========================================================================
-    def showCompleter(self, suggestions, source = "default", alreadyTyped = None, caseInsensitive = True):
+    def showCompleter(self, suggestions, source = "default", alreadyTyped = None, caseInsensitive = True, callback = None):
         currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
-        if alreadyTyped is None or currentAlreadyTyped.startswith(alreadyTyped):
+        if alreadyTyped is None or currentAlreadyTyped.startswith(alreadyTyped) or callback is not None:
             case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
             self.completerMode.setCaseSensitivity(case)
+            self.completerMode.setActivatedCallback(callback)
             self.completerMode.setStartCursorPosition(self.textCursor().position() - len(currentAlreadyTyped))
             self.completerMode.setSuggestions(suggestions, source)
             self.completerMode.setCompletionPrefix(currentAlreadyTyped)
