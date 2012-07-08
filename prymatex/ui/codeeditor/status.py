@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
 #
-# Created: Mon Jun 25 17:39:59 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Thu Jul  5 12:16:28 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -79,7 +79,7 @@ class Ui_CodeEditorStatus(object):
         self.horizontalLayout_3.addWidget(self.labelGoToLine)
         self.spinBoxGoToLine = QtGui.QSpinBox(self.widgetGoToLine)
         self.spinBoxGoToLine.setMinimum(1)
-        self.spinBoxGoToLine.setMaximum(1000)
+        self.spinBoxGoToLine.setMaximum(999999999)
         self.spinBoxGoToLine.setObjectName(_fromUtf8("spinBoxGoToLine"))
         self.horizontalLayout_3.addWidget(self.spinBoxGoToLine)
         spacerItem = QtGui.QSpacerItem(154, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

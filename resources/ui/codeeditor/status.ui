@@ -124,7 +124,7 @@
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>1000</number>
+         <number>999999999</number>
         </property>
        </widget>
       </item>
@@ -419,7 +419,7 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
+         <iconset>
           <normaloff>:/editor/modes/cursors.png</normaloff>:/editor/modes/cursors.png</iconset>
         </property>
         <property name="flat">
@@ -465,7 +465,7 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
+         <iconset>
           <normaloff>:/editor/modes/insert.png</normaloff>:/editor/modes/insert.png</iconset>
         </property>
         <property name="flat">
