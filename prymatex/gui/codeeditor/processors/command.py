@@ -172,8 +172,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def replaceDocument(self, context):
         #1 Recuperar la posicion actual del cursor
+        position = self.editor.textCursor().position()
+        self.editor.setPlainText(context.outputValue)
         cursor = self.editor.textCursor()
-        self.editor.document().setPlainText(context.outputValue)
+        cursor.setPosition(position)
         self.editor.setTextCursor(cursor)
         
     def insertText(self, context):
