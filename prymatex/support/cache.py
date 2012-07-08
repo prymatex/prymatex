@@ -6,12 +6,11 @@ import inspect
 class PMXSupportCache(object):
     def __init__(self):
         self.keyValues = {}
-        self.settings = {}
-
+        
     def hasKey(self, key):
         return key in self.keyValues
 
-    def get(self, key, default):
+    def get(self, key, default = None):
         if self.hasKey(key):
             return self.keyValues[key]
         return default
@@ -27,19 +26,10 @@ class PMXSupportCache(object):
                 self.keyValues[key] = function(*args)
         return self.keyValues[key]
     
-    def deprecateAll(self):
+    def clear(self):
         pass
 
-    def deprecateValues(self, *values):
-        for value in values:
+    def deleteMany(self, keys):
+        for value in keys:
             if value in self.keyValues:
                 del self.keyValues[value]
-    
-    def setSettings(self, scope, settings):
-        self.settings[scope] = settings
-
-    def hasSettings(self, scope):
-        return scope in self.settings
-        
-    def getSettings(self, scope):
-        return self.settings.get(scope, None)

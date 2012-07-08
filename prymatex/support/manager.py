@@ -57,9 +57,17 @@ class PMXSupportBaseManager(object):
         self.ready = False
         self.environment = {}
         self.managedObjects = {}
-        self.cache = PMXSupportCache()
         self.scores = PMXScoreManager()
     
+    
+    #---------------------------------------------------
+    # CACHE
+    #---------------------------------------------------
+    def cache(self):
+        if not hasattr(self, "_cache"):
+            self._cache = PMXSupportCache()
+        return self._cache
+            
     #---------------------------------------------------
     # Namespaces
     #---------------------------------------------------
@@ -585,13 +593,13 @@ class PMXSupportBaseManager(object):
 
         #Deprecate keyEquivalent in cache
         if 'keyEquivalent' in attrs and item.keyEquivalent != attrs['keyEquivalent']:
-            self.cache.deprecateValues(item.keyEquivalent, attrs['keyEquivalent'])
+            self.cache().deleteMany([item.keyEquivalent, attrs['keyEquivalent']])
 
         #Deprecate tabTrigger in cache
         if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
-            self.cache.deprecateValues(item.tabTrigger, attrs['tabTrigger'])
+            self.cache().deleteMany([item.tabTrigger, attrs['tabTrigger']])
             #Deprecated list of all tabTrigers
-            self.cache.deprecateValues('tabTriggers')
+            self.cache().delete('tabTriggers')
 
         #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco m�s
         namespace = namespace or self.defaultNamespace
@@ -810,7 +818,7 @@ class PMXSupportBaseManager(object):
         with_bundle = []
         with_scope = []
         without_scope = []
-        for preference in self.cache.setcallable("preferences", self.getAllPreferences):
+        for preference in self.cache().setcallable("preferences", self.getAllPreferences):
             if not preference.scope:
                 without_scope.append(preference)
             else:
@@ -822,10 +830,10 @@ class PMXSupportBaseManager(object):
         return map(lambda item: item[1], with_bundle + with_scope) + without_scope
 
     def getPreferenceSettings(self, scope):
-        if not self.cache.hasSettings(scope):
+        if not self.cache().hasKey(scope):
             preferences = self.getPreferences(scope)
-            self.cache.setSettings(scope, PMXPreference.buildSettings(preferences))
-        return self.cache.getSettings(scope)
+            self.cache().set(scope, PMXPreference.buildSettings(preferences))
+        return self.cache().get(scope)
     
     #---------------------------------------------------
     # TABTRIGGERS INTERFACE
@@ -847,7 +855,7 @@ class PMXSupportBaseManager(object):
     #@printtime
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
-        tabTriggerItems = self.cache.setcallable("tabTriggers", self.getAllTabTriggerItems)
+        tabTriggerItems = self.cache().setcallable("tabTriggers", self.getAllTabTriggerItems)
         search = map(lambda item: (item.tabTrigger, line.find(item.tabTrigger[::-1]), len(item.tabTrigger)), tabTriggerItems)
         search = filter(lambda (trigger, value, length): value == 0, search)
         if search:
@@ -861,7 +869,7 @@ class PMXSupportBaseManager(object):
     def getAllTabTiggerItemsByScope(self, scope):
         with_scope = []
         without_scope = []
-        for item in self.cache.setcallable("tabTriggers", self.getAllTabTriggerItems):
+        for item in self.cache().setcallable("tabTriggers", self.getAllTabTriggerItems):
             if not item.scope:
                 without_scope.append(item)
             else:
@@ -876,7 +884,7 @@ class PMXSupportBaseManager(object):
     def getTabTriggerItem(self, keyword, scope):
         with_scope = []
         without_scope = []
-        for item in self.cache.setcallable(keyword, self.getAllBundleItemsByTabTrigger, keyword):
+        for item in self.cache().setcallable(keyword, self.getAllBundleItemsByTabTrigger, keyword):
             if not item.scope:
                 without_scope.append(item)
             else:
@@ -901,7 +909,7 @@ class PMXSupportBaseManager(object):
     def getKeyEquivalentItem(self, code, scope):
         with_scope = []
         without_scope = []
-        for item in self.cache.setcallable(code, self.getAllBundleItemsByKeyEquivalent, code):
+        for item in self.cache().setcallable(code, self.getAllBundleItemsByKeyEquivalent, code):
             if not item.scope:
                 without_scope.append(item)
             else:
