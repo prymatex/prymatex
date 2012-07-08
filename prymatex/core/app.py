@@ -394,7 +394,6 @@ class PMXApplication(QtGui.QApplication):
     #@printtime
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         """Open a editor in current window"""
-        filePath = self.fileManager.normpath(filePath)
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:
@@ -404,6 +403,7 @@ class PMXApplication(QtGui.QApplication):
             editor = self.getEditorInstance(filePath, self.mainWindow)
             project = self.projectManager.findProjectForPath(filePath)
             if project != None:
+                self.logger.debug("The file %s belongs to project %s", (filePath, project.path))
                 editor.setProject(project)
             def on_editorReady(editor, cursorPosition, focus):
                 def editorReady(openResult):
