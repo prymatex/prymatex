@@ -10,7 +10,6 @@ from PyQt4 import QtGui, QtCore, Qt
 
 import prymatex
 
-from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.core.logger import NameFilter
 from prymatex.core.settings import PMXSettings
@@ -31,7 +30,6 @@ class PMXApplication(QtGui.QApplication):
         """Inicialización de la aplicación."""
         #TODO: Pasar los argumentos a la QApplication
         QtGui.QApplication.__init__(self, [])
-        self.setStyleSheet(resources.APPLICATION_STYLE)
         
         # Some init's
         self.setApplicationName(prymatex.__name__)
@@ -46,15 +44,15 @@ class PMXApplication(QtGui.QApplication):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/splash.svg"))
         splash.show()
         try:
-            
-            self.setupPluginManager()     #Prepare plugin manager
+            self.cacheManager = self.setupCacheManager()        #Cache system Manager
+            self.pluginManager = self.setupPluginManager()      #Prepare plugin manager
 
             #TODO: Cambiar los setup por build, que retornen los manager
             # Loads
             self.supportManager = self.setupSupportManager()    #Support Manager
             self.fileManager = self.setupFileManager()          #File Manager
             self.projectManager = self.setupProjectManager()    #Project Manager
-            self.setupKernelManager()                           #Console kernel Manager
+            self.kernelManager = self.setupKernelManager()      #Console kernel Manager
             self.setupCoroutines()
             self.setupZeroMQContext()
             self.setupMainWindow()
@@ -69,6 +67,7 @@ class PMXApplication(QtGui.QApplication):
             self.supportManager.loadSupport(splash.showMessage)
             self.settingsDialog.loadSettings()
             
+            self.setupStyleSheet()
             # Creates the Main Window
             self.createMainWindow()
             
@@ -124,6 +123,13 @@ class PMXApplication(QtGui.QApplication):
             f.write('%s' % self.applicationPid())
             f.close()
 
+    #========================================================
+    # Application Style Sheet
+    #========================================================
+    def setupStyleSheet(self):
+        from prymatex import resources
+        self.setStyleSheet(resources.APPLICATION_STYLE)
+        
     #========================================================
     # Logging system and loggers
     #========================================================
@@ -233,35 +239,42 @@ class PMXApplication(QtGui.QApplication):
         return manager
     
     def setupKernelManager(self):
+        kernelManager = None
         try:
             from IPython.frontend.qt.kernelmanager import QtKernelManager
-            self.kernelManager = QtKernelManager()
-            self.kernelManager.start_kernel()
-            self.kernelManager.start_channels()
-            if hasattr(self.kernelManager, "connection_file"):
-                ipconnection = self.kernelManager.connection_file
+            kernelManager = QtKernelManager()
+            kernelManager.start_kernel()
+            kernelManager.start_channels()
+            if hasattr(kernelManager, "connection_file"):
+                ipconnection = kernelManager.connection_file
             else:
-                shell_port = self.kernelManager.shell_address[1]
-                iopub_port = self.kernelManager.sub_address[1]
-                stdin_port = self.kernelManager.stdin_address[1]
-                hb_port = self.kernelManager.hb_address[1]
+                shell_port = kernelManager.shell_address[1]
+                iopub_port = kernelManager.sub_address[1]
+                stdin_port = kernelManager.stdin_address[1]
+                hb_port = kernelManager.hb_address[1]
                 ipconnection = "--shell={0} --iopub={1} --stdin={2} --hb={3}".format(shell_port, iopub_port, stdin_port, hb_port)
             self.supportManager.updateEnvironment({ 
                     "PMX_IPYTHON_CONNECTION": ipconnection
             })
         except ImportError as e:
             self.logger.warn("Warning: %s" % e)
-            self.kernelManager = None
+            kernelManager = None
+        return kernelManager
 
+    def setupCacheManager(self):
+        from prymatex.core.cache import PMXCacheManager
+        return PMXCacheManager()
+        
     def setupPluginManager(self):
         from prymatex.core.plugin.manager import PMXPluginManager
         
         self.populateComponent(PMXPluginManager)
         
-        self.pluginManager = PMXPluginManager(self)
+        pluginManager = PMXPluginManager(self)
         defaultDirectory = self.settings.value('PMX_PLUGINS_PATH')
-        self.pluginManager.addPluginDirectory(defaultDirectory)
-        self.pluginManager.loadPlugins()
+        pluginManager.addPluginDirectory(defaultDirectory)
+        pluginManager.loadPlugins()
+        return pluginManager
 
     def setupCoroutines(self):
         self.scheduler = coroutines.Scheduler(self)

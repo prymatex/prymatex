@@ -4,7 +4,9 @@
 import os
 
 from PyQt4 import QtGui, QtCore
+
 from prymatex import resources_rc
+from prymatex.core.cache import memoized
 
 #===============================================================
 # IMAGES AND ICONS
@@ -119,11 +121,13 @@ FIND_MATCH_STYLE = 'background-color: #dea;'
 def getImagePath(index):
     return INTERNAL.get(index) or EXTERNAL.get(index)
 
+@memoized
 def getImage(index):
     path = getImagePath(index)
     if path is not None:
         return QtGui.QPixmap(path)
 
+@memoized
 def getIcon(index):
     '''
     Makes the best effort to find an icon for an index.

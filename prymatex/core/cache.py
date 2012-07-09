@@ -2,11 +2,16 @@
 #-*- encoding: utf-8 -*-
 
 import inspect
+from functools import wraps
+
+from PyQt4 import QtCore
+
 from prymatex.core.plugin import PMXBaseComponent
 
-class PMXCache(QtCore.QObject, PMXBaseComponent):
-    def __init__(self, application):
+class PMXCacheManager(QtCore.QObject, PMXBaseComponent):
+    def __init__(self):
         QtCore.QObject.__init__(self)
+        self.memoize = {}
         self.cachedValues = {}
         
     def add(self, key, value):
@@ -43,3 +48,13 @@ class PMXCache(QtCore.QObject, PMXBaseComponent):
     
     def clear(self):
         pass
+
+def memoized(function):
+    full_func_name = function.__module__ + '.' + function.func_name
+    cacheManager = QtCore.QCoreApplication.instance().cacheManager
+    @wraps(function)
+    def _memoized(*largs, **kwargs):
+        key = largs + tuple(kwargs.items())
+        memento = cacheManager.memoize.setdefault(full_func_name, {})
+        return memento.setdefault(key, function(*largs, **kwargs))
+    return _memoized

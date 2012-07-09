@@ -1641,7 +1641,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         items = self.application.supportManager.getActionItems(scope)
         def itemsToDict(items):
             for item in items:
-                yield [dict(title = item.name, image = item.TYPE), dict(title = item.bundle.name), dict(title = item.trigger)]
+                yield [dict(title = item.name, image = "bundle-item-%s" % item.TYPE), dict(title = item.bundle.name), dict(title = item.trigger)]
         index = self.mainWindow.bundleSelectorDialog.select(itemsToDict(items))
         if index is not None:
             self.insertBundleItem(items[index])

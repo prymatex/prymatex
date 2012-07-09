@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-from prymatex.utils.decorator import printparams, printtime
-
+from functools import wraps
 import shelve
 import sys
 import os
-import logging
-logger = logging.getLogger(__name__)
+
+from PyQt4 import QtCore
+
+from prymatex.utils.decorator import available_attrs, printparams, printtime
 
 class cacheable(object):
     falashback = None
@@ -26,7 +27,6 @@ class cacheable(object):
     def __call__(self, f):
         
         if cacheable.flashback is None and not cacheable.warning_show:
-            logging.warning("Call init_cache()\n")
             cacheable.warning_show = True
             return f
         
@@ -63,9 +63,8 @@ class cacheable(object):
 
 
 def file_alteration_check(path):
-    '''
-    Checks wether a file has changed based on its mtime and size
-    '''
+    """Checks wether a file has changed based on its mtime and size
+    """
     if os.path.isdir(path):
         pass
     elif os.path.isfile(path):
