@@ -560,7 +560,9 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
-        if self.activatedCallback is None:
+        if self.activatedCallback is not None:
+            self.activatedCallback(suggestion)
+        else:
             _, start, end = self.editor.currentWord(search = False)
             cursor = self.editor.textCursor()
             cursor.setPosition(start)
@@ -575,8 +577,6 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
                 self.editor.insertBundleItem(suggestion)
             else:
                 cursor.insertText(suggestion)
-        else:
-            self.activatedCallback(suggestion)
         
     def complete(self, rect):
         if not self.onlyOneSameSuggestion():

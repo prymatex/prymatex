@@ -128,7 +128,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def deleteDocument(self):
         print "borrar documento"
         self.editor.document().clear()
-        
+       
     # Outpus function
     def error(self, context):
         #TODO: Mover esto a un lugar donde no dependa del processor mostrar un error en el borwser, quiza a la mainWindow
@@ -173,7 +173,11 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def replaceDocument(self, context):
         #1 Recuperar la posicion actual del cursor
         position = self.editor.textCursor().position()
-        self.editor.setPlainText(context.outputValue)
+        currentText = self.editor.toPlainText()
+        newText = context.outputValue
+        #if currentText[:position] != newText[:position]:
+        #    position += (len(newText) - len(currentText))
+        self.editor.setPlainText(newText)
         cursor = self.editor.textCursor()
         cursor.setPosition(position)
         self.editor.setTextCursor(cursor)
