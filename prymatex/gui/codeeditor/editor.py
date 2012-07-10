@@ -402,7 +402,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Search left word
         for i in range(len(first_part)):
             lword += first_part[i]
-            m = pattern.search(first_part[i + 1:], i )
+            m = pattern.search(first_part[i + 1:])
             if m.group(0):
                 lword += m.group(0)
                 break
@@ -410,7 +410,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Search right word
         for i in range(len(last_part)):
             rword += last_part[i]
-            m = pattern.search(last_part[i:], i )
+            m = pattern.search(last_part[i:])
             if m.group(0):
                 rword += m.group(0)
                 break
