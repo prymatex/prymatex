@@ -106,8 +106,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     # deleteFromEditor
     def deleteWord(self):
+        _, start, end = self.editor.currentWord()
         cursor = self.editor.textCursor()
-        cursor.select(QtGui.QTextCursor.WordUnderCursor)
+        cursor.setPosition(start)
+        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         cursor.removeSelectedText()
         
     def deleteSelection(self):
