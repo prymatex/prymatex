@@ -6,6 +6,9 @@ from PyQt4.Qt import QColor
 
 from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex import resources
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 class PMXSideBar(QtGui.QWidget):
     updateRequest = QtCore.pyqtSignal()
@@ -118,7 +121,8 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
 
         self.editor.blockCountChanged.connect(self.updateWidth)
         self.editor.themeChanged.connect(self.updateColours)
-
+    
+    
     def updateColours(self):
         self.background = self.editor.colours['gutter'] if 'gutter' in self.editor.colours else self.editor.colours['background']
         self.foreground = self.editor.colours["foreground"]
@@ -185,7 +189,38 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
 
         painter.end()
         QtGui.QWidget.paintEvent(self, event)
+    
+    __foreground = QtGui.QColor()
+    @property
+    def foreground(self):
+        return self.__foreground
+    
+    @foreground.setter
+    def foreground(self, color):
+        assert isinstance(color, QtGui.QColor)
+        # http://www.qtcentre.org/wiki/index.php?title=Adaptive_Coloring_for_Syntax_Highlighting#The_HSV_Color_Space
+        # Yet to be perfected...
+        h1, s1, v1, _ = color.getHsv()
+        h2, s2, v2, _ = color.getHsv()
+        if h1 == h2 == -1 and s1 == s2:
+            # Lilely to be gray
+            if v1 - v2 < 35:
+                v1 = 255 if h2 < 128 else 0
+                color = QtGui.QColor.fromHsv(h1, s1, v1)
+                logger.debug("Changing foreground color to %s" % str(color.getRgb()))  
+        self.__foreground = color
+    
+    __background = QtGui.QColor()
+    @property
+    def background(self):
+        return self.__background
+    
+    @background.setter
+    def background(self, color):
+        assert isinstance(color, QtGui.QColor)
+        self.__background = color
         
+    
 class BookmarkSideBarAddon(SideBarWidgetAddon):
     ALIGNMENT = QtCore.Qt.AlignLeft
     
