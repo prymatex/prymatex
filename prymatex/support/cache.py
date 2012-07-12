@@ -29,6 +29,10 @@ class PMXSupportCache(object):
     def clear(self):
         pass
 
+    def delete(self, key):
+        if key in self.keyValues:
+            del self.keyValues[key]
+                
     def deleteMany(self, keys):
         for value in keys:
             if value in self.keyValues:
