@@ -130,8 +130,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
     
     @QtCore.pyqtSignature('')
     def on_pushButtonAdd_pressed(self):
-        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex())
-        theme = self.application.supportManager.getTheme(unicode(uuid))
+        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
         style = self.application.supportManager.createThemeStyle('untitled', unicode(self.comboBoxScope.currentText()), theme)
     
     @QtCore.pyqtSignature('')
@@ -142,8 +141,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
             self.application.supportManager.deleteThemeStyle(style)
     
     def on_pushButtonColor_pressed(self, element):
-        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex())
-        theme = self.application.supportManager.getTheme(unicode(uuid))
+        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
         settings = theme.settings
         color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
         if ok:
