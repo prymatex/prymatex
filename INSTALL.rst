@@ -30,7 +30,7 @@ In order to install Prymatex you need to make sure you have:
 	
 	* sip 4.12.4
 	
-         * qtermwidget (https://github.com/prymatex/qtermwidget prymatex fork of https://gitorious.org/qtermwidget)
+     * qtermwidget (https://github.com/prymatex/qtermwidget prymatex fork of https://gitorious.org/qtermwidget)
 
 Additionally you should install pip requirements::
 

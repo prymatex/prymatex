@@ -50,3 +50,6 @@ class UserCancelException(Exception):
 
 class LocationIsNotProject(Exception):
     pass
+
+class ProjectExistsException(Exception):
+    pass

@@ -8,7 +8,7 @@ import functools
 from collections import namedtuple
 
 from prymatex.support.bundle import PMXBundleItem, PMXRunningContext
-from prymatex.support.utils import compileRegexp, prepareShellScript
+from prymatex.support.utils import compileRegexp
 
 class PMXCommand(PMXBundleItem):
     KEYS = [    'input', 'fallbackInput', 'standardInput', 'output', 'standardOutput',  #I/O
@@ -53,21 +53,20 @@ class PMXCommand(PMXBundleItem):
         return dataHash
 
     def getInputText(self, processor):
-        def getInputTypeAndValue(input, format):
-            if input is None or input == "none": return None, None
-            return input, getattr(processor, input)(format)
-        input, value = getInputTypeAndValue(self.input, self.inputFormat)
-        if value == None and self.fallbackInput != None:
-            input, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat)
-        if value == None and self.standardInput != None:
-            input, value = getInputTypeAndValue(self.standardInput, self.inputFormat)
-
-        if input == 'selection' and value == None:
+        def getInputTypeAndValue(inputType, format):
+            if inputType is None or inputType == "none": return None, None
+            return inputType, getattr(processor, inputType)(format)
+        inputType, value = getInputTypeAndValue(self.input, self.inputFormat)
+        if value is None and self.fallbackInput is not None:
+            inputType, value = getInputTypeAndValue(self.fallbackInput, self.inputFormat)
+        if value is None and self.standardInput is not None:
+            inputType, value = getInputTypeAndValue(self.standardInput, self.inputFormat)
+        if inputType == 'selection' and value is None:
             value = processor.document(self.inputFormat)
-            input = "document"
-        elif value == None:
-            input = None
-        return input, value
+            inputType = "document"
+        elif value is None:
+            inputType = None
+        return inputType, value
     
     def systemCommand(self):
         if self.winCommand != None and 'Window' in os.environ['OS']:
@@ -94,14 +93,13 @@ class PMXCommand(PMXBundleItem):
 
     def execute(self, processor):
         if self.beforeExecute(processor): 
-    
-            context = PMXRunningContext(self)
+            systemCommand = self.systemCommand()
+            environment = processor.environment(self)
             
-            context.asynchronous = processor.asynchronous
-            context.inputType, context.inputValue = self.getInputText(processor)
-            context.shellCommand, context.environment = prepareShellScript(self.systemCommand(), processor.environment(self))
-    
-            self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
+            with PMXRunningContext(self, systemCommand, environment) as context:
+                context.asynchronous = processor.asynchronous
+                context.inputType, context.inputValue = self.getInputText(processor)
+                self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
     
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
@@ -111,7 +109,9 @@ class PMXCommand(PMXBundleItem):
             if deleteMethod != None:
                 deleteMethod()
 
-        getattr(processor, outputHandler, None)(context)
+        handlerFunction = getattr(processor, outputHandler, None)
+        if handlerFunction is not None:
+            handlerFunction(context)
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]

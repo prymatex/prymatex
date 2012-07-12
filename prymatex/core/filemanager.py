@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+
+#Cosas interesantes
+#http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qfilesystemwatcher.html
+
 import os
 import codecs
 import shutil
@@ -9,10 +13,12 @@ import fnmatch
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.utils import osextra
+from prymatex.core.plugin import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
 
-class PMXFileManager(QtCore.QObject):
+class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     """A File Manager"""
     #=========================================================
     # Signals
@@ -25,9 +31,10 @@ class PMXFileManager(QtCore.QObject):
     directoryDeleted = QtCore.pyqtSignal(str)
     directoryChanged = QtCore.pyqtSignal(str)
     directoryRenamed = QtCore.pyqtSignal(str, str)
+
     # Generic Signal 
     filesytemChange = QtCore.pyqtSignal(str, int)
-    
+
     #=========================================================
     # Settings
     #=========================================================
@@ -156,7 +163,19 @@ class PMXFileManager(QtCore.QObject):
     dirname = lambda self, path: os.path.dirname(path)
     basename = lambda self, path: os.path.basename(path)
     mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
+    issubpath = lambda self, childPath, parentPath: osextra.path.issubpath(childPath, parentPath)
+    fullsplit = lambda self, path: osextra.path.fullsplit(path)
+    def expandVars(self, text):
+        context = self.application.supportManager.buildEnvironment()
+        path = osextra.path.expand_shell_var(text, context = context)
+        if os.path.exists(path):
+            return path
 
+    def normpath(self, path):
+        """ os.path.normpath and os.path.realpath, con condimentos de prymatex """
+        path = os.path.realpath(path)
+        return os.path.normpath(path)
+    
     #==================================================================
     # Handling files for retrieving data. open, read, write, close
     #==================================================================

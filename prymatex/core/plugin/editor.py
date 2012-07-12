@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-from prymatex.utils import osextra
-
 from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
 from prymatex.gui import utils
-from prymatex.core.plugin import PMXBaseWidgetComponent
+from prymatex.core.plugin import PMXBaseWidgetComponent, PMXBaseKeyHelper, PMXBaseAddon
 from prymatex.core import exceptions
 
 class PMXBaseEditor(PMXBaseWidgetComponent):
@@ -48,7 +45,6 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
             self.setFilePath(filePath)
         self.setModified(False)
         self.setExternalAction(None)
-        self.showMessage("<i>%s</i> saved" % self.filePath)
     
     def close(self):
         """ Close editor """
@@ -56,7 +52,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
             PMXBaseEditor.CREATION_COUNTER -= 1
         elif self.filePath is not None:
             self.application.fileManager.closeFile(self.filePath)
-            
+
     def reload(self):
         """ Reload current file """
         content = self.application.fileManager.readFile(self.filePath)
@@ -78,12 +74,12 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
             baseIcon = resources.getIcon("save")
         if self.externalAction != None:
             importantIcon = resources.getIcon("important")
-            baseIcon = utils.combineIcons(baseIcon, importantIcon, 0.6)
+            baseIcon = utils.combineIcons(baseIcon, importantIcon, 0.8)
         return baseIcon
     
     def tabTitles(self):
         if self.filePath is not None:
-            return osextra.path.fullsplit(self.filePath)[::-1]
+            return self.application.fileManager.fullsplit(self.filePath)[::-1]
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter).split()
 
     def setTabTitle(self, title):
@@ -93,7 +89,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         if hasattr(self, "_tabTitle"):
             return self._tabTitle
         if self.filePath is not None:
-            return os.path.basename(self.filePath)
+            return self.application.fileManager.basename(self.filePath)
         return self.UNTITLED_FILE_TEMPLATE.format(CREATION_COUNTER = self.creationCounter)
 
     def tabToolTip(self):
@@ -138,15 +134,38 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def cursorPosition(self):
         return (0, 0)
         
-    def contributeToTabMenu(self, menu):
+    def contributeToTabMenu(self):
         ''' When an editor is right clicked on it's tab, the editor
         can provide custom actions to the menu through this callback'''
-        pass
+        return []
     
+    def runKeyHelper(self, event):
+        return PMXBaseWidgetComponent.runKeyHelper(self, event.key())
+        
     #======================================================================
     # For Plugin Manager administrator
     #======================================================================    
     @classmethod
     def acceptFile(cls, filePath, mimetype):
         return True
-        
+
+#======================================================================
+# Base Helper
+#======================================================================    
+class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
+    def accept(self, editor, event):
+        return PMXBaseKeyHelper.accept(self, editor, event.key())
+    
+    def execute(self, editor, event):
+        PMXBaseKeyHelper.accept(self, editor, event.key())
+
+#======================================================================
+# Base Addon
+#======================================================================    
+class PMXBaseEditorAddon(PMXBaseAddon):
+    def initialize(self, editor):
+        PMXBaseAddon.initialize(self, editor)
+        self.editor = editor
+
+    def finalize(self):
+        pass

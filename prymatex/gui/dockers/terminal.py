@@ -15,7 +15,7 @@ QTERMWIDGET_IMPORT_SUGGESTOIN = '''
 QTermWidget disabled because of:
 {}
 Please install QTermWidget. Please note QTermWidget consists in a C++ with Python binding.
-Get/Update it at https://github.com/D3f0/qtermwidget
+Get/Update it at https://github.com/prymatex/qtermwidget
 '''
 
 class PMXTabTerminals(QtGui.QTabWidget):
@@ -49,13 +49,8 @@ class PMXTabTerminals(QtGui.QTabWidget):
         layout.addWidget(self.pushAddNewTerminal)
         
         # Copy
-        self.pushCopyTerminalText = QtGui.QPushButton()
-        self.pushCopyTerminalText.setIcon(resources.getIcon("copy"))
-        self.pushCopyTerminalText.setObjectName("pushCopyTerminalText")
-        self.pushCopyTerminalText.setToolTip("Copy terminal selection")
-        self.pushCopyTerminalText.setFlat(True)
-        self.pushCopyTerminalText.pressed.connect(lambda s=self: s.currentWidget().copyClipboard())
-        layout.addWidget(self.pushCopyTerminalText)
+        shortcutCopy = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+c"), self)
+        shortcutCopy.activated.connect(lambda s = self: s.currentWidget().copyClipboard())
         
         # Paste
         self.pushPasteIntoTerminal = QtGui.QPushButton()
@@ -74,7 +69,6 @@ class PMXTabTerminals(QtGui.QTabWidget):
         self.pushConfigTerminal.setToolTip('Configure terminal')
         self.pushConfigTerminal.setFlat(True)
         layout.addWidget(self.pushConfigTerminal)
-        
         
         
         # Close
@@ -97,10 +91,15 @@ class PMXTabTerminals(QtGui.QTabWidget):
         }
         ''')
         self.setCornerWidget(widget)
-        
+
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            print "tecla"
+            return False
+        return QtGui.QTabWidget.eventFilter(self, obj, event)
+     
     def getTerminal(self, cmd = None):
         ''' Factory '''
-        # TODO: Get some initial config?
         from QTermWidget import QTermWidget
         if not cmd:
             term = QTermWidget(1)
@@ -114,6 +113,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
         
         term.setColorScheme(self.parent().colorScheme)
         term.setTerminalFont(self.parent().font)
+        term.installEventFilter(self)
         return term
     
     def launchCustomCommandInTerminal(self):
@@ -226,11 +226,13 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
 
     @pmxConfigPorperty(default = "linux")
     def colorScheme(self, scheme):
-        print scheme
+        for index in range(self.tabTerminals.count()):
+            self.tabTerminals.widget(index).setColorScheme(scheme)
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
     def font(self, font):
-        print font
+        for index in range(self.tabTerminals.count()):
+            self.tabTerminals.widget(index).setTerminalFont(font)
 
     terminalAvailable = True
     def __init__(self, parent):
@@ -238,13 +240,23 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         PMXBaseDock.__init__(self)
         self.setWindowTitle(_("Terminal"))
         self.setObjectName(_("TerminalDock"))
-        self.setWidget(PMXTabTerminals())
+        self.tabTerminals = PMXTabTerminals(self)
+        self.setWidget(self.tabTerminals)
         self.setupSocket()
+        self.installEventFilter(self)
+    
     
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         mainWindow.terminal = self
         self.widget().addTerminal()
+    
+    def eventFilter(self, obj, event):
+        if obj == self and event.type() == QtCore.QEvent.KeyPress:
+            if event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_W]:
+                print "W"
+                return
+        return super(PMXTerminalDock, self).eventFilter(obj, event)
     
     #====================================================
     # ZMQ External actions
@@ -278,7 +290,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.terminal.sendText("%s\n" % command)
         
     def chdir(self, directory):
-        self.runCommand("cd %s" % directory)
+        self.runCommand('cd "%s"' % directory)
         
     @property
     def terminal(self):
@@ -288,7 +300,12 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     def contributeToSettings(cls):
         from prymatex.gui.settings.terminal import PMXTerminalSettings
         return [ PMXTerminalSettings ]
-
+    
+    
+    
+    def showEvent(self, event):
+        self.widget().setFocus()
+        
 #===============================================================================
 # Signals
 #===============================================================================

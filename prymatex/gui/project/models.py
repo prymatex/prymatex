@@ -11,9 +11,10 @@ from prymatex.gui.project.base import FileSystemTreeNode
 from prymatex.gui.configure.models import PMXConfigureTreeNode
 
 class PMXProjectTreeModel(TreeModel):  
-    def __init__(self, manager, parent = None):
-        TreeModel.__init__(self, parent)
-        self.manager = manager
+    def __init__(self, projectManager):
+        #projectManager is a qObject
+        TreeModel.__init__(self, projectManager)
+        self.projectManager = projectManager
         
     def rowCount(self, parent):
         parentNode = self.node(parent)
@@ -51,10 +52,7 @@ class PMXProjectTreeModel(TreeModel):
             self.endInsertRows()
         for child in parentNode.childrenNodes:
             child._populated = False
-            #if child.isdir:
-            #    index = self.index(child.row(), 0, parentIndex)
-            #    self._load_directory(child, index)
-	parentNode._populated = True
+        parentNode._populated = True
 	
     def refresh(self, index):
         node = self.node(index)
@@ -109,8 +107,6 @@ class PMXProjectTreeModel(TreeModel):
         self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
         self.rootNode.appendChild(project)
         self.endInsertRows()
-        #index = self.index(project.row(), 0, QtCore.QModelIndex())
-        #self._load_directory(project, index)
     
     def removeProject(self, project):
         self.beginRemoveRows(QtCore.QModelIndex(), project.row(), project.row())

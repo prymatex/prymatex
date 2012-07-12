@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from bisect import bisect
+from copy import copy
 
 from PyQt4 import QtCore, QtGui
 
@@ -41,7 +42,7 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
     def rowCount (self, parent = None):
         return len(self.blocks)
 
-    def data (self, index, role = QtCore.Qt.DisplayRole):
+    def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         block = self.blocks[index.row()]
@@ -149,11 +150,9 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.ToolTipRole]:
             return userData.symbol
         elif role == QtCore.Qt.DecorationRole:
-            for name, icon in self.icons.iteritems():
-                if userData.isWordInScopes(name):
-                    return icon
-            return self.icons["typedef"]
-    
+            #userData.rootGroup(pos)
+            return resources.getIcon("scope-root-entity")
+
     def findBlockIndex(self, block):
         self._purge_blocks()
         indexes = map(lambda block: block.blockNumber(), self.blocks)
@@ -166,12 +165,17 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
 # Completer
 #=========================================================
 class PMXCompleterTableModel(QtCore.QAbstractTableModel): 
-    def __init__(self, suggestions, editor): 
-        QtCore.QAbstractListModel.__init__(self, editor) 
-        self.suggestions = suggestions
-        self.editor = editor
+    def __init__(self, parent): 
+        QtCore.QAbstractListModel.__init__(self, parent) 
+        self.columns = 1
+        self.suggestions = []
 
-    def index (self, row, column, parent = QtCore.QModelIndex()):
+    def setSuggestions(self, suggestions):
+        self.suggestions = suggestions
+        self.columns = 2 if any(map(lambda s: isinstance(s, PMXBundleTreeNode), suggestions)) else 1
+        self.layoutChanged.emit()
+        
+    def index(self, row, column, parent = QtCore.QModelIndex()):
         if row < len(self.suggestions):
             return self.createIndex(row, column, parent)
         else:
@@ -181,14 +185,14 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
         return len(self.suggestions)
 
     def columnCount(self, parent = None):
-        return 2
+        return self.columns
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
         if not index.isValid():
             return None
         suggestion = self.suggestions[index.row()]
         if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
-            if isinstance(suggestion, dict):
+            if isinstance(suggestion, dict) and index.column() == 0:
                 if 'display' in suggestion:
                     return suggestion['display']
                 elif 'title' in suggestion:
@@ -212,8 +216,10 @@ class PMXCompleterTableModel(QtCore.QAbstractTableModel):
                 else:
                     return resources.getIcon('inserttext')
         elif role == QtCore.Qt.ToolTipRole:
-            if isinstance(suggestion, dict) and 'tooltip' in suggestion:
-                return suggestion['tooltip']
+            if isinstance(suggestion, dict) and 'tool_tip' in suggestion:
+                if 'tool_tip_format' in suggestion:
+                    print suggestion["tool_tip_format"]
+                return suggestion['tool_tip']
             elif isinstance(suggestion, PMXBundleTreeNode):
                 return suggestion.name
         elif role == QtCore.Qt.ForegroundRole:
@@ -230,11 +236,15 @@ class PMXAlreadyTypedWords(object):
         self.editor = editor
         self.editor.blocksRemoved.connect(self.on_editor_blocksRemoved)
         self.words = {}
-
+        self.groups = {}
+        
     def _purge_words(self):
+        """ Limpiar palabras """
         self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
+        self.groups = dict(map(lambda (group, words): (group, filter(lambda word: word in self.words, words)), self.groups.iteritems()))
 
     def _purge_blocks(self):
+        """ Quitar bloques que no van mas """
         def validWordBlock(block):
             return block.userData() is not None and bool(block.userData().words)
         words = {}
@@ -246,17 +256,28 @@ class PMXAlreadyTypedWords(object):
         self._purge_blocks()
         
     def addWordsBlock(self, block, words):
-        for word in words:
+        for index, word, group in words:
+            #Blocks
             blocks = self.words.setdefault(word, [])
-            indexes = map(lambda block: block.blockNumber(), blocks)
-            index = bisect(indexes, block.blockNumber())
-            blocks.insert(index, block)
+            if block not in blocks:
+                indexes = map(lambda block: block.blockNumber(), blocks)
+                index = bisect(indexes, block.blockNumber())
+                blocks.insert(index, block)
+            #Words
+            words = self.groups.setdefault(group, [])
+            if word not in words:
+                position = bisect(words, word)
+                words.insert(position, word)
         
     def removeWordsBlock(self, block, words):
-        for word in words:
-            self.words[word].remove(block)
+        for index, word, group in words:
+            #Blocks
+            if block in self.words[word]:
+                self.words[word].remove(block)
+            if word in self.groups[group]:
+                self.groups[group].remove(word)
         
     def typedWords(self, block = None):
         #Purge words
-        self.words = dict(filter(lambda (word, blocks): bool(blocks), self.words.iteritems()))
-        return self.words.keys()
+        self._purge_words()
+        return copy(self.groups)

@@ -3,6 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
 from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.ui.configure.environment import Ui_Environment
 
@@ -104,6 +105,8 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
     """
     NAMESPACE = "general"
     TITLE = "Enviroment Variables"
+    ICON = resources.getIcon("codevariable")
+    
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "environment", settingGroup)

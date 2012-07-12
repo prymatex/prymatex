@@ -14,7 +14,6 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils, dialogs
 from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
-from prymatex.gui.settings.support import PMXSupportSettings
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 
@@ -24,7 +23,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # Signals
     #=========================================================
     currentEditorChanged = QtCore.pyqtSignal(object)
-    editorClosed = QtCore.pyqtSignal(object)
 
     #=========================================================
     # Settings
@@ -60,7 +58,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
-        self.application.supportManager.bundleItemTriggered.connect(lambda item: self.currentEditor().insertBundleItem(item))
+        self.application.supportManager.bundleItemTriggered.connect(self.insertBundleItem)
         
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.dockers = []
@@ -71,11 +69,21 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
-        
+    
+    
+    def insertBundleItem(self, item):
+        '''Insert selected bundle item in current editor if possible'''
+        editor = self.currentEditor()
+        if editor:
+            self.currentEditor().insertBundleItem(item)
+        else:
+            QtGui.QMessageBox.information(self, _("No editor open"), 
+                                          _("%s needs an editor to run") % item.name)
+            
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import PMXGeneralWidget
-        return [ PMXGeneralWidget, PMXSupportSettings ]
+        return [ PMXGeneralWidget ]
         
     #============================================================
     # Setups
@@ -208,13 +216,18 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                     action.setVisible(editorClass == currentEditorClass)
                     if editorClass == currentEditorClass and action.isCheckable() and hasattr(action, 'testChecked'):
                         action.setChecked(action.testChecked(editor))
-                        
+
+    def showMessage(self, message):
+        #Busca el show message en el editor sino ver otra forma de mostrar el mensaje
+        self.currentEditor().showMessage(message)
+    
     #============================================================
     # Create and manage editors
     #============================================================
     def addEmptyEditor(self):
         editor = self.application.getEditorInstance(parent = self)
         self.addEditor(editor)
+        return editor
         
     def removeEditor(self, editor):
         self.splitTabWidget.removeTab(editor)
@@ -303,14 +316,19 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # MainWindow Events
     #===========================================================================
     def closeEvent(self, event):
-        self.openDocumentsOnClose = []
-        try:
-            for editor in self.editors():
-                self.closeEditor(editor, cancel = True)
-                if not editor.isNew():
-                    self.openDocumentsOnClose.append((editor.filePath, editor.cursorPosition()))
-        except exceptions.UserCancelException:
-            event.ignore()
+        for editor in self.editors():
+            while editor and editor.isModified():
+                response = QtGui.QMessageBox.question(self, "Save", 
+                    "Save %s" % editor.tabTitle(), 
+                    buttons = QtGui.QMessageBox.Ok | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel, 
+                    defaultButton = QtGui.QMessageBox.Ok)
+                if response == QtGui.QMessageBox.Ok:
+                    self.saveEditor(editor = editor)
+                elif response == QtGui.QMessageBox.No:
+                    break
+                elif response == QtGui.QMessageBox.Cancel:
+                    event.ignore()
+                    return
         
     #===========================================================================
     # Drag and Drop

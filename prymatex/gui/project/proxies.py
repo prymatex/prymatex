@@ -10,13 +10,27 @@ from prymatex.gui.configure.proxies import PMXConfigureProxyModel
 from prymatex.models.proxies import FlatTreeProxyModel
 
 class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
-    def __init__(self, parent = None):
-        QtGui.QSortFilterProxyModel.__init__(self, parent)
-        self.application = QtGui.QApplication.instance()
+    def __init__(self, projectManager):
+        QtGui.QSortFilterProxyModel.__init__(self, projectManager)
+        self.projectManager = projectManager
+        self.fileManager = self.projectManager.fileManager
         self.orderBy = "name"
         self.folderFirst = True
         self.descending = False
+        self.nodeFormaters = []
     
+    def addNodeFormater(self, formater):
+        self.nodeFormaters.append(formater)
+        
+    def data(self, index, role):
+        sIndex = self.mapToSource(index)
+        value = self.sourceModel().data(sIndex, role)
+        node = self.node(index)
+        if not node.isRootNode():
+            for formater in self.nodeFormaters:
+                value = formater(node, value, role)
+        return value
+
     def filterAcceptsRow(self, sourceRow, sourceParent):
         sIndex = self.sourceModel().index(sourceRow, 0, sourceParent)
         node = self.sourceModel().node(sIndex)
@@ -46,7 +60,7 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
         elif self.orderBy == "name" and rightNode.isproject and leftNode.isproject:
             return cmp(leftNode.name, rightNode.name) < 0
         else:
-            return self.application.fileManager.compareFiles(leftNode.path, rightNode.path, self.orderBy) < 0
+            return self.fileManager.compareFiles(leftNode.path, rightNode.path, self.orderBy) < 0
 
     def node(self, index):
         sIndex = self.mapToSource(index)

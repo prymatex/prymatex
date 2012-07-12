@@ -7,6 +7,8 @@ from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.models.tree import TreeNode
 from prymatex.utils import plist
+from prymatex.core.exceptions import ProjectExistsException, FileException
+from prymatex.utils.pyqtdebug import ipdb_set_trace
 
 """
 currentDocument: Documento actual en el editor
@@ -38,6 +40,15 @@ class FileSystemTreeNode(TreeNode):
         self.isfile = os.path.isfile(self.path)
         self.ishidden = name.startswith('.')
         self.isproject = isinstance(self, PMXProject)
+        self.__project = self if isinstance(self, PMXProject) else None
+
+    @property
+    def project(self):
+        if not hasattr(self, "_project"):
+            self._project = self
+            while not isinstance(self._project, PMXProject):
+                self._project = self._project.parentNode
+        return self._project    
 
     @property
     def path(self):
@@ -120,18 +131,37 @@ class PMXProject(FileSystemTreeNode):
         for key in hash.keys():
             setattr(self, key, hash[key])
 
-    def save(self):
-        if not os.path.exists(self.projectPath):
-            os.makedirs(self.projectPath)
+    def save(self, overwirte = False):
+        path = self.projectPath
+        
+        
+        if not os.path.exists(path):
+            os.makedirs(path)
+        else:
+            if overwirte:
+                #ipdb_set_trace()
+                try:
+                    self.delete(removeFiles = True)
+                    os.makedirs(self.projectPath)
+                except OSError as e:
+                    # TODO: Classify even more
+                    raise FileException(unicode(e))
+            else:
+                raise ProjectExistsException(self.projectPath)
         filePath = os.path.join(self.projectPath, self.FILE)
         plist.writePlist(self.hash, filePath)
 
     def delete(self, removeFiles = False):
-        shutil.rmtree(self.projectPath)
+        if os.path.isfile(self.projectPath):
+            # PMX early project version
+            os.unlink(self.projectPath)
+            return
+        elif os.path.isdir(self.projectPath):
+            shutil.rmtree(self.projectPath)
         if removeFiles:
             try:
                 shutil.rmtree(self.directory)
-            except os.OSError:
+            except OSError:
                 pass
     
     def buildEnvironment(self):

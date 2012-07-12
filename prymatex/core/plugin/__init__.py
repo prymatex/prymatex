@@ -39,19 +39,40 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     
     def addOverlay(self, overlay):
         self.overlays.append(overlay)
-    
+
+    # Addons api    
     def addAddon(self, addon):
         self.addons.append(addon)
         
+    def addonByClass(self, klass):
+        addons = filter(lambda addon: isinstance(addon, klass), self.addons)
+        #TODO: Solo uno
+        return addons[0]
+
+    # Helpers api
     @classmethod
     def addKeyHelper(cls, helper):
         helpers = cls.KEY_HELPERS.setdefault(helper.KEY, [])
         helpers.append(helper)
-        
+
     def findHelpers(self, key):
         helpers = self.KEY_HELPERS[Key_Any][:]
         return helpers + self.KEY_HELPERS.get(key, [])
 
+    #TODO: Poder filtrar que key helpers no quiero que corra o otra cosa
+    def runKeyHelper(self, key):
+        runHelper = False
+        for helper in self.findHelpers(key):
+            runHelper = helper.accept(self, key)
+            if runHelper:
+                helper.execute(self, key)
+                break
+        return runHelper
+
+    @classmethod
+    def contributeToMainMenu(cls, addonClasses):
+        return PMXBaseComponent.contributeToMainMenu()
+        
 class PMXBaseOverlay(object):
     def initialize(self, widget):
         pass
@@ -62,18 +83,22 @@ class PMXBaseOverlay(object):
     def updateOverlay(self):
         pass
 
-class PMXBaseAddon(object):
+class PMXBaseAddon(PMXBaseComponent):
     def initialize(self, widget):
         pass
     
     def finalize(self):
         pass
 
+    def contributeToContextMenu(self):
+        return []
+
 Key_Any = 0
 class PMXBaseKeyHelper(object):
     KEY = Key_Any
-    def accept(self, widget, event):
-        return self.KEY == event.key()
+    def accept(self, widget, key):
+        return self.KEY == key
     
-    def execute(self, widget, event):
+    def execute(self, widget, key):
         pass
+

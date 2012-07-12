@@ -106,3 +106,16 @@ class PMXMacroProcessor(PMXMacroProcessor):
         command.setBundle(self.macro.bundle)
         command.setManager(self.macro.manager)
         self.editor.insertBundleItem(command, asynchronous = False)
+
+    def findWithOptions(self, options):
+        print options
+        """{'action': 'findNext',
+        'findInProjectIgnoreCase': False,
+        'findInProjectRegularExpression': False,
+        'findString': '$\\n\\s*',
+        'ignoreCase': False,
+        'regularExpression': True,
+        'replaceAllScope': 'document',
+        'replaceString': 'key',
+        'wrapAround': False}"""
+        

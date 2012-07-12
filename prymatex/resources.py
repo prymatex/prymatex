@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import os
 
 from PyQt4 import QtGui, QtCore
+
 from prymatex import resources_rc
+from prymatex.core.cache import memoized
 
 #===============================================================
 # IMAGES AND ICONS
@@ -11,15 +14,16 @@ from prymatex import resources_rc
 
 INTERNAL = {
     #Bundles
-    "bundle": ":/icons/bundles/bundle.png",
-    "template": ":/icons/bundles/templates.png",
-    "command": ":/icons/bundles/commands.png",
-    "syntax": ":/icons/bundles/languages.png",
-    "preference": ":/icons/bundles/preferences.png",
-    "dragcommand": ":/icons/bundles/drag-commands.png",
-    "snippet": ":/icons/bundles/snippets.png",
-    "macro": ":/icons/bundles/macros.png",
-    "templatefile": ":/icons/bundles/template-files.png",
+    "bundle-item-bundle": ":/items/bundles/bundle.png",
+    "bundle-item-template": ":/items/bundles/templates.png",
+    "bundle-item-command": ":/items/bundles/commands.png",
+    "bundle-item-syntax": ":/items/bundles/languages.png",
+    "bundle-item-project": ":/items/bundles/project.png",
+    "bundle-item-preference": ":/items/bundles/preferences.png",
+    "bundle-item-dragcommand": ":/items/bundles/drag-commands.png",
+    "bundle-item-snippet": ":/items/bundles/snippets.png",
+    "bundle-item-macro": ":/items/bundles/macros.png",
+    "bundle-item-templatefile": ":/items/bundles/template-files.png",
     
     #Editor Sidebar
     "foldingtop": ":/editor/sidebar/folding-top.png",
@@ -32,6 +36,7 @@ INTERNAL = {
     "save": ":/icons/actions/document-save.png",
     "inserttext": ":/icons/actions/insert-text.png",
     "codefunction": ":/icons/actions/code-function.png",
+    "codevariable": ":/icons/actions/code-variable.png",
     "projectnew": ":/icons/actions/project-development-new-template.png",
     "projectopen": ":/icons/actions/project-open.png",
     "projectclose": ":/icons/actions/project-development-close.png",
@@ -39,6 +44,10 @@ INTERNAL = {
     "stack-open": ":/icons/emblems/image-stack-open.png",
     "stack": ":/icons/emblems/image-stack.png",    
 
+    "gearfile": ":/icons/actions/run-build-file.png",
+    "gearconfigure": ":/icons/actions/run-build-configure.png",
+    "textcolor": ":/icons/actions/format-text-color.png",
+    
     # For menus
     "close":":/icons/actions/document-close.png", 
     "closeall":":/icons/actions/project-development-close-all.png",
@@ -49,9 +58,7 @@ INTERNAL = {
     "bulletred": ":/icons/icons/bullet-red.png",
     "bulletblue": ":/icons/icons/bullet-blue.png",
     "bulletgreen": ":/icons/icons/bullet-green.png",
-    "bulletpink": ":/icons/icons/bullet-pink.png",
-    "bulletyellow": ":/icons/icons/bullet-yellow.png",
-
+    
     # For Dock
     "terminal":":/icons/apps/utilities-terminal.png", 
     "browser":":/icons/apps/internet-web-browser.png",
@@ -59,10 +66,25 @@ INTERNAL = {
     "project": ":/icons/actions/project-development.png",
     "bookmark": ":/icons/actions/rating.png",
     "symbols": ":/icons/actions/code-context.png",
-    "console": ":/icons/dockers/console.png"
+    "console": ":/icons/dockers/console.png",
+    
+    # Scope Root Groups
+    "scope-root-comment": ":/bullets/groups/blue.png",
+    "scope-root-constant": ":/bullets/groups/yellow.png",
+    "scope-root-entity": ":/bullets/groups/ligthblue.png",
+    "scope-root-invalid": ":/bullets/groups/red.png",
+    "scope-root-keyword": ":/bullets/groups/green.png",
+    "scope-root-markup": ":/bullets/groups/violet.png",
+    "scope-root-meta": ":/bullets/groups/darkviolet.png",
+    "scope-root-storage": ":/bullets/groups/gray.png",
+    "scope-root-string": ":/bullets/groups/darkgreen.png",
+    "scope-root-support": ":/bullets/groups/brown.png",
+    "scope-root-variable": ":/bullets/groups/orange.png"
 }
 
 EXTERNAL = {}
+
+PLUGINS = {}
 
 FileIconProvider = QtGui.QFileIconProvider()
 
@@ -76,7 +98,7 @@ QTreeView {
     font-size: 11px;
 }
 QTreeView::item {
-    padding: 2px;
+    padding: 1px;
 }
 QTableView {
     font-size: 11px;
@@ -85,7 +107,7 @@ QListView {
      font-size: 11px;
 }
 QListView::item {
-    padding: 2px;    
+    padding: 1px;    
 }
 """
 
@@ -99,11 +121,13 @@ FIND_MATCH_STYLE = 'background-color: #dea;'
 def getImagePath(index):
     return INTERNAL.get(index) or EXTERNAL.get(index)
 
+@memoized
 def getImage(index):
-    path = getImagePath(index) 
+    path = getImagePath(index)
     if path is not None:
         return QtGui.QPixmap(path)
 
+@memoized
 def getIcon(index):
     '''
     Makes the best effort to find an icon for an index.
@@ -130,3 +154,15 @@ def getFileType(fileInfo):
 
 def registerImagePath(index, path):
     EXTERNAL[index] = path
+    
+class ResourceProvider(dict):
+    def getImage(self, index):
+        if index in self:
+            return QtGui.QPixmap(self[index])
+        return getImage(index)
+        
+    def getIcon(self, index):
+        if index in self:
+            return QtGui.QIcon(self[index])
+        return getIcon(index)
+    

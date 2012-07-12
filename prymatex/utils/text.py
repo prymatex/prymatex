@@ -6,7 +6,7 @@ import string
 upperCase = string.upper
     
 lowerCase = string.lower
-    
+
 def titleCase(text):
     return text.title()
     

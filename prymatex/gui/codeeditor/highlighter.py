@@ -10,10 +10,12 @@ from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex.support.syntax import PMXSyntax
 from prymatex.utils.decorator.helpers import printtime
 
-#TODO: Usar mas el modulo de string en general, string.punctuation
+#TODO: Usar mas el modulo de string en general, string.punctuation, mover las regexp a otro lugar, recursos quiza?
 
-RE_WORD = re.compile(r"([A-Za-z_]+)", re.UNICODE)
+RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
 RE_WHITESPACE = re.compile(r'^(?P<whitespace>\s+)', re.UNICODE)
+RE_MAGIC_FORMAT_BUILDER = re.compile(r"textCharFormat_([A-Za-z]+)_builder", re.UNICODE)
+
 def whiteSpace(text):
     match = RE_WHITESPACE.match(text)
     try:
@@ -34,6 +36,11 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor = PMXSyntaxProcessor(editor)
         self.syntax = syntax
         self.theme = theme
+        self.textCharFormatBuilders = {}
+        for method in dir(editor):
+            match = RE_MAGIC_FORMAT_BUILDER.match(method)
+            if match:
+                self.registerTextCharFormatBuilder("#%s" % match.group(1), getattr(editor, method))
     
     @property
     def ready(self):
@@ -64,12 +71,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             block.setUserData(userData)
             block.setUserState(state)
     
-    def applyFormat(self, userData):
-        for (start, end), scope in userData.ranges:
-            format = self.getFormat(scope)
-            if format is not None:
-                self.setFormat(start, end - start, format)
-
     #@printtime
     def setupBlockUserData(self, text, userData):
         blockState = self.SINGLE_LINE
@@ -77,23 +78,28 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         userData.setRanges(self.processor.scopeRanges)
         userData.setPreferences(self.processor.preferences)
         userData.setChunks(self.processor.lineChunks)
+
         if self.processor.state is not None:
             blockState = self.MULTI_LINE
             userData.setProcessorState(self.processor.state)
-        
-        #1 Update Indent
+            
+        #1 Update words
+        if userData.words != self.processor.words:
+            self.editor.updateWords(self.currentBlock(), userData, self.processor.words)
+     
+        #2 Update Indent
         indent = whiteSpace(text)
         if indent != userData.indent:
             userData.indent = indent
             self.editor.updateIndent(self.currentBlock(), userData, indent)
 
-        #2 Update Folding
+        #3 Update Folding
         foldingMark = self.syntax.folding(text)
         if userData.foldingMark != foldingMark:
             userData.foldingMark = foldingMark
             self.editor.updateFolding(self.currentBlock(), userData, foldingMark)
             
-        #3 Update Symbols
+        #4 Update Symbols
         symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, userData.preferences)
         if symbolRange:
             #TODO: Hacer la transformacion de los symbolos
@@ -106,11 +112,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         if userData.symbol != symbol:
             userData.symbol = symbol
             self.editor.updateSymbol(self.currentBlock(), userData, symbol)
-
-        #4 Split words [ (( wordStart, wordEnd ), word )...]
-        words = map(lambda match: (match.span(), match.group()), RE_WORD.finditer(text))
-        if userData.words != words:
-            self.editor.updateWords(self.currentBlock(), userData, words)
 
         #5 Save the hash the text, scope and state
         userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
@@ -146,22 +147,34 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
             self.applyFormat(userData)
 
-    def getFormat(self, scope):
+    def registerTextCharFormatBuilder(self, formatHash, formatBuilder):
+        self.textCharFormatBuilders[formatHash] = formatBuilder
+
+    def applyFormat(self, userData):
+        for (start, end), scope in userData.ranges:
+            format = self.highlightFormat(scope)
+            if format is not None:
+                self.setFormat(start, end - start, format)
+
+    def highlightFormat(self, scopeOrHash):
         if self.theme is None:
             return None
-        if scope not in PMXSyntaxHighlighter.FORMAT_CACHE: 
-            format = QtGui.QTextCharFormat()
-            settings = self.theme.getStyle(scope)
-            if 'foreground' in settings:
-                format.setForeground(settings['foreground'])
-            if 'background' in settings:
-                format.setBackground(settings['background'])
-            if 'fontStyle' in settings:
-                if 'bold' in settings['fontStyle']:
-                    format.setFontWeight(QtGui.QFont.Bold)
-                if 'underline' in settings['fontStyle']:
-                    format.setFontUnderline(True)
-                if 'italic' in settings['fontStyle']:
-                    format.setFontItalic(True)
-            PMXSyntaxHighlighter.FORMAT_CACHE[scope] = format 
-        return PMXSyntaxHighlighter.FORMAT_CACHE[scope]
+        if scopeOrHash not in PMXSyntaxHighlighter.FORMAT_CACHE:
+            if scopeOrHash in self.textCharFormatBuilders:
+                format = self.textCharFormatBuilders[scopeOrHash]()
+            else:
+                format = QtGui.QTextCharFormat()
+                settings = self.theme.getStyle(scopeOrHash)
+                if 'foreground' in settings:
+                    format.setForeground(settings['foreground'])
+                if 'background' in settings:
+                    format.setBackground(settings['background'])
+                if 'fontStyle' in settings:
+                    if 'bold' in settings['fontStyle']:
+                        format.setFontWeight(QtGui.QFont.Bold)
+                    if 'underline' in settings['fontStyle']:
+                        format.setFontUnderline(True)
+                    if 'italic' in settings['fontStyle']:
+                        format.setFontItalic(True)
+            PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrHash] = format 
+        return PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrHash]

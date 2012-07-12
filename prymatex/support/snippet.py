@@ -10,19 +10,12 @@ if __name__ == '__main__':
     import os, sys
     sys.path.append(os.path.abspath("."))
     
-#TODO: Ver de usar compileRegexp de prymatex.support.utils
-try:
-    from ponyguruma import sre
-    from ponyguruma.constants import OPTION_CAPTURE_GROUP, OPTION_MULTILINE
-except Exception, e:
-    sre = re
-    OPTION_CAPTURE_GROUP = re.MULTILINE
-    OPTION_MULTILINE = re.MULTILINE
+from prymatex.support.utils import compileRegexp, OPTION_CAPTURE_GROUP, OPTION_MULTILINE
 
 from prymatex.support.bundle import PMXBundleItem
 from prymatex.support.processor import PMXSyntaxProcessor
 from prymatex.support.syntax import PMXSyntax
-from prymatex.support.utils import prepareShellScript
+from prymatex.support.utils import prepareShellScript, deleteFile
 from subprocess import Popen, PIPE, STDOUT
 
 SNIPPET_SYNTAX = { 
@@ -425,7 +418,7 @@ class VariableTransformation(Node):
             processor.insertText(text)
 
 class Regexp(NodeList):
-    _repl_re = sre.compile(u"\$(?:(\d+)|g<(.+?)>)")
+    _repl_re = compileRegexp(u"\$(?:(\d+)|g<(.+?)>)")
     
     def __init__(self, scope, parent = None):
         super(Regexp, self).__init__(scope, parent)
@@ -442,7 +435,7 @@ class Regexp(NodeList):
             self.append(node)
         elif scope == 'constant.character.escape.regexp':
             #Escape in pattern
-            if isinstance(self.pattern, (str, unicode)):
+            if isinstance(self.pattern, basestring):
                 self.pattern += text
             else:
                 self.append(text.replace('\\n', '\n').replace('\\t', '\t'))
@@ -458,7 +451,7 @@ class Regexp(NodeList):
             self.options = text
         elif scope == 'constant.character.escape.regexp':
             #Escape in pattern
-            if isinstance(self.pattern, (str, unicode)):
+            if isinstance(self.pattern, basestring):
                 self.pattern += text
             else:
                 self.append(text)
@@ -503,18 +496,18 @@ class Regexp(NodeList):
         flags = [OPTION_CAPTURE_GROUP]
         if self.option_multiline:
             flags.append(OPTION_MULTILINE)
-        self.pattern = sre.compile(unicode(self.pattern), reduce(lambda x, y: x | y, flags, 0))
+        pattern = compileRegexp(unicode(self.pattern), flags)
         result = ""
         for child in self:
             if isinstance(child, TextNode):
                 repl = self.prepare_replacement(unicode(child))
-                result += self.pattern.sub(repl, text)
+                result += pattern.sub(repl, text)
             elif isinstance(child, Condition):
-                for match in self.pattern.finditer(text):
+                for match in pattern.finditer(text):
                     repl = match.group(child.index) != None and child.insertion or child.otherwise
                     if repl != None:
                         repl = self.prepare_replacement(repl)
-                        result += self.pattern.sub(repl, str(match))
+                        result += pattern.sub(repl, match.group(0))
                     if not self.option_global:
                         break
         if any(map(lambda r: result.find(r) != -1, ['\u', '\U'])):
@@ -541,13 +534,14 @@ class Shell(NodeList):
         return node
     
     def execute(self, processor):
-        command, env = prepareShellScript(unicode(self), processor.environment)
-        
+        # TODO Migrar a runing context
+        command, env, tempFile = prepareShellScript(unicode(self), processor.environment)
         process = Popen(command, stdout=PIPE, stderr=STDOUT, env = env)
         text = process.stdout.read()
         text = text.strip()
         process.stdout.close()
         _ = process.wait()
+        deleteFile(tempFile)
         self.content = text.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
         
     def render(self, processor):

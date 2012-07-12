@@ -34,7 +34,7 @@ class PMXBundleTreeNode(TreeNode):
     
     @property
     def icon(self):
-        return resources.getIcon(self.TYPE)
+        return resources.getIcon("bundle-item-%s" % self.TYPE)
     
     @property
     def trigger(self):
@@ -351,10 +351,10 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
             style = self.styles[row]
             if column == 0:
                 self.manager.updateThemeStyle(style, name = value)
-            elif column == 1 and value.canConvert(QtCore.QVariant.Color):
-                self.manager.updateThemeStyle(style, settings = {'foreground' : QtGui.QColor(value) })
-            elif column == 2 and value.canConvert(QtCore.QVariant.Color):
-                self.manager.updateThemeStyle(style, settings = {'background' : QtGui.QColor(value) })
+            elif column == 1:
+                self.manager.updateThemeStyle(style, settings = {'foreground' : value })
+            elif column == 2:
+                self.manager.updateThemeStyle(style, settings = {'background' : value })
             elif column == 3:
                 self.manager.updateThemeStyle(style, settings = {'fontStyle' : value })
             self.dataChanged.emit(index, index)
@@ -673,7 +673,14 @@ class PMXExcludedListModel(QtCore.QAbstractListModel):
 #=========================================================
 # Process
 #=========================================================
-class PMXProcessTableModel(QtCore.QAbstractTableModel): 
+class PMXProcessTableModel(QtCore.QAbstractTableModel):
+    STATES_STRING = {0: "NotRunning",
+                     1: "Starting",
+                     2: "Running" }
+    STATES_ICONS = {0: resources.getIcon("bulletred"),
+                    1: resources.getIcon("bulletyellow"),
+                    2: resources.getIcon("bulletgreen") }
+                    
     def __init__(self, manager, parent = None): 
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.manager = manager
@@ -698,11 +705,10 @@ class PMXProcessTableModel(QtCore.QAbstractTableModel):
             elif index.column() == 1:
                 return item["description"]
             elif index.column() == 2:
-                states = {  0: "NotRunning",
-                            1: "Starting"	,
-                            2: "Running" }
-                return states[item["process"].state()]
-
+                return self.STATES_STRING[item["process"].state()]
+        elif role == QtCore.Qt.DecorationRole and index.column() == 0:
+            return self.STATES_ICONS[item["process"].state()]
+            
     def findRowIndex(self, process):
         items = filter(lambda item: item["process"] == process, self.processItems)
         assert len(items) == 1, "No puede tener mas de uno"

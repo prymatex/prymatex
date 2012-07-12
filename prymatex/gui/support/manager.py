@@ -6,11 +6,12 @@ from bisect import bisect
 
 import uuid as uuidmodule
 from PyQt4 import QtCore, QtGui
-from prymatex.support.manager import PMXSupportBaseManager
 
 from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.cache import memoized
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeListModel, PMXThemeStylesTableModel, PMXThemeStyleRow, PMXProcessTableModel
-from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel
+from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel, PMXProjectProxyModel
+from prymatex.support.manager import PMXSupportBaseManager
 
 class PMXBundleMenuGroup(QtCore.QObject):
     def __init__(self, manager):
@@ -96,7 +97,7 @@ class PMXBundleMenuGroup(QtCore.QObject):
                 menu.menuAction().setVisible(bundle.enabled and bundle.mainMenu is not None)
             if id(bundle.mainMenu) != menu.ID:
                 menu.clear()
-                submenus = bundle.mainMenu['submenus'] if 'submenus' in bundle.mainMenu else {}
+                submenus = bundle.mainMenu['submenus'] if bundle.mainMenu is not None and 'submenus' in bundle.mainMenu else {}
                 items = bundle.mainMenu['items'] if 'items' in bundle.mainMenu else []
                 self.buildMenu(items, menu, submenus, menu)
                 menu.ID = id(bundle.mainMenu)
@@ -176,6 +177,10 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         self.templateProxyModel = PMXTemplateProxyModel(self)
         self.templateProxyModel.setSourceModel(self.bundleTreeModel)
         
+        #PROJECTS
+        self.projectProxyModel = PMXProjectProxyModel(self)
+        self.projectProxyModel.setSourceModel(self.bundleTreeModel)
+
         #SYNTAX
         self.syntaxProxyModel = PMXSyntaxProxyModel(self)
         self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)
@@ -207,11 +212,10 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         return self.bundleMenuGroup.menuForBundle(bundle)
         
     def buildEnvironment(self):
-        env = {}
+        env = PMXSupportBaseManager.buildEnvironment(self)
         for var in self.shellVariables:
             if var['enabled']:
                 env[var['variable']] = var['value']
-        env.update(self.environment)
         return env
     
     # Override loadSupport for emit signals
@@ -233,12 +237,12 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
             process.setWorkingDirectory(context.workingDirectory)
             
         self.processTableModel.appendProcess(process, description = context.description())
-        
-        #TODO: context.environment ya tiene las variables de system ver que hacer
-        env = QtCore.QProcessEnvironment.systemEnvironment()
+
+        environment = QtCore.QProcessEnvironment()
         for key, value in context.environment.iteritems():
-            env.insert(key, value)
-        process.setProcessEnvironment(env)
+            environment.insert(key, value)
+                    
+        process.setProcessEnvironment(environment)
 
         def onQProcessFinished(process, context, callback):
             def runCallback(exitCode):
@@ -376,19 +380,22 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     # PREFERENCES OVERRIDE INTERFACE
     #---------------------------------------------------
+    @memoized
     def getAllPreferences(self):
         return self.preferenceProxyModel.getAllItems()
     
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
+    @memoized
     def getAllTabTriggerItems(self):
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
                 tabTriggers.append(item)
         return tabTriggers
-            
+        
+    @memoized
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
@@ -399,6 +406,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
+    @memoized
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         items = []
         for item in self.actionItemsProxyModel.getAllItems():

@@ -7,6 +7,7 @@ from prymatex.gui import utils
 from prymatex.utils.lists import bisect_key
 from prymatex.gui.codeeditor import helpers
 from prymatex.gui.support.models import PMXBundleTreeNode
+from prymatex.gui.codeeditor.models import PMXCompleterTableModel
 
 class PMXBaseEditorMode(object):
     def __init__(self, editor):
@@ -59,12 +60,12 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
                 self.endSnippet()
             else:
                 snippet = self.editor.snippetProcessor.snippet 
-                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index + 1, len(snippet) -1))
+                self.editor.showMessage("<i>&laquo;%s&raquo;</i> %s of %s" % (snippet.name, snippet.index + 1, len(snippet)))
                 self.editor.snippetProcessor.selectHolder(holder)
         elif event.text():
             self.logger.debug("Con texto %s" % event.text())
             currentHolder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-            if currentHolder is None:
+            if currentHolder is None or currentHolder.last:
                 return self.endSnippet(event)
             
             #Cuidado con los extremos del holder
@@ -106,11 +107,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
             self.editor.textCursor().endEditBlock()
         else:
             self.logger.debug("Con cualquier otra tecla sin texto")
-            holder = self.editor.snippetProcessor.getHolder(cursor.selectionStart(), cursor.selectionEnd())
-            if (holder is None or holder.last) and event.key() in [ QtCore.Qt.Key_Return ]:
-                return self.endSnippet(event)
-            else:
-                return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
+            return QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
             
     def endSnippet(self, event = None):
         self.editor.snippetProcessor.endSnippet()
@@ -145,21 +142,17 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
         self.editor.application.restoreOverrideCursor()
         self.editor.modeChanged.emit()
 
-    def highlightCurrentLines(self):
-        extraSelections = self.editor.extraSelections()
-        for cursor in self.cursors:
-            selection = QtGui.QTextEdit.ExtraSelection()
-            selection.format.setBackground(self.editor.colours['lineHighlight'])
-            selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-            selection.cursor = QtGui.QTextCursor(cursor)
-            selection.cursor.clearSelection()
-            extraSelections.append(selection)
-            if cursor.hasSelection():
-                selection = QtGui.QTextEdit.ExtraSelection()
-                selection.format.setBackground(self.editor.colours['selection'])
-                selection.cursor = cursor
-                extraSelections.append(selection)
-        self.editor.setExtraSelections(extraSelections)
+    def extraSelections(self):
+        extraSelections = []
+        cursorSelections = filter(lambda c: c.hasSelection(), map(lambda c: QtGui.QTextCursor(c), self.cursors))
+        cursorLines = []
+        for cursorLine in map(lambda c: QtGui.QTextCursor(c), self.cursors):
+            if all(map(lambda c: c.block() != cursorLine.block(), cursorLines)):
+                cursorLine.clearSelection()
+                cursorLines.append(cursorLine)
+        extraSelections += self.editor.buildExtraSelections("#line", cursorLines)
+        extraSelections += self.editor.buildExtraSelections("#selection", cursorSelections)
+        return extraSelections
 
     @property
     def isDragCursor(self):
@@ -304,7 +297,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             self.editor.setTextCursor(lastCursor)
             self.editor.application.setOverrideCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
             self.editor.modeChanged.emit()
-        self.editor.highlightCurrent()
+        self.editor.highlightEditor()
 
     def removeBreakCursor(self, cursor):
         #TODO: Hay cosas que se pueden simplificar pero hoy no me da el cerebro
@@ -375,7 +368,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 if not c.hasSelection() and c.position() == cursor.position():
                     self.cursors.remove(c)
                     break
-        self.editor.highlightCurrent()
+        self.editor.highlightEditor()
 
     def canMoveRight(self):
         return all(map(lambda c: not c.atEnd(), self.cursors))
@@ -398,7 +391,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
                 ecursor.clearSelection()
             self.editor.setTextCursor(ecursor)
             self.inactive()
-            self.editor.highlightCurrent()
+            self.editor.highlightEditor()
             #Se termino la joda
         elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() in [ QtCore.Qt.Key_Z]:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
@@ -424,22 +417,22 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         elif event.key() == QtCore.Qt.Key_Right:
             if self.canMoveRight():
+                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
                 for cursor in self.activeCursors():
-                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() + 1)
-                    if event.modifiers() & QtCore.Qt.ShiftModifier:
-                        cursor.setPosition(cursor.position() + 1, QtGui.QTextCursor.KeepAnchor)
+                    if event.modifiers() & QtCore.Qt.ControlModifier:
+                        cursor.movePosition(QtGui.QTextCursor.NextWord, mode)
                     else:
-                        cursor.setPosition(cursor.position() + 1)
-                self.editor.highlightCurrent()
+                        cursor.movePosition(QtGui.QTextCursor.NextCharacter, mode)
+                self.editor.highlightEditor()
         elif event.key() == QtCore.Qt.Key_Left:
             if self.canMoveLeft():
+                mode = QtGui.QTextCursor.KeepAnchor if bool(event.modifiers() & QtCore.Qt.ShiftModifier) else QtGui.QTextCursor.MoveAnchor
                 for cursor in self.activeCursors():
-                    self.editor.document().markContentsDirty(cursor.position(), cursor.position() - 1)
-                    if event.modifiers() & QtCore.Qt.ShiftModifier:
-                        cursor.setPosition(cursor.position() - 1, QtGui.QTextCursor.KeepAnchor)
+                    if event.modifiers() & QtCore.Qt.ControlModifier:
+                        cursor.movePosition(QtGui.QTextCursor.PreviousWord, mode)
                     else:
-                        cursor.setPosition(cursor.position() - 1)
-                self.editor.highlightCurrent()
+                        cursor.movePosition(QtGui.QTextCursor.PreviousCharacter, mode)
+                self.editor.highlightEditor()
         elif event.key() in [ QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown, QtCore.Qt.Key_End, QtCore.Qt.Key_Home]:
             #Desactivados por ahora
             pass
@@ -462,7 +455,6 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         QtGui.QCompleter.__init__(self, editor)
         PMXBaseEditorMode.__init__(self, editor)
         self.setWidget(self.editor)
-        self.currentContentWidth = 0
 
         #Table view
         self.popupView = QtGui.QTableView()
@@ -474,6 +466,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         self.popupView.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.popupView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.popupView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+
         #Table view size
         spacing = self.popupView.verticalHeader().fontMetrics().lineSpacing()
         self.popupView.verticalHeader().setDefaultSectionSize(spacing + 3);
@@ -483,70 +476,111 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         
         self.setPopup(self.popupView)
 
+        #QCompleter::PopupCompletion	0	Current completions are displayed in a popup window.
+        #QCompleter::InlineCompletion	2	Completions appear inline (as selected text).
+        #QCompleter::UnfilteredPopupCompletion	1	All possible completions are displayed in a popup window with the most likely suggestion indicated as current.
         self.setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.connect(self, QtCore.SIGNAL('activated(QModelIndex)'), self.insertCompletion)
 
-    def setModel(self, completerTableModel):
-        QtGui.QCompleter.setModel(self, completerTableModel)
-        #Tenemos Modelo
-        #Acomodamos al contenido
-        self.popupView.resizeColumnsToContents()
-        #self.popupView.resizeRowsToContents()
-        #Tomamos ancho de los datos del modelo
-        self.currentContentWidth = self.popup().verticalScrollBar().sizeHint().width()
+        self.setModel(PMXCompleterTableModel(self))
+        
+        self.currentSource = None
+        self.activeSources = []
+        self.completerSuggestions = {}
+        self.activatedCallback = None
+    
+    def fixPopupViewSize(self):
+        self.popup().setMinimumHeight(200)
+        self.popup().resizeColumnsToContents()
+        width = self.popup().verticalScrollBar().sizeHint().width()
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
-            self.currentContentWidth += self.popup().sizeHintForColumn(columnIndex)
+            width += self.popup().sizeHintForColumn(columnIndex)
+        self.popupView.setMinimumWidth(width)
+        
+    def hasSource(self, source):
+        return source in self.activeSources
+        
+    def switch(self):
+        if len(self.activeSources) > 1:
+            index = self.activeSources.index(self.currentSource)
+            index = (index + 1) % len(self.activeSources)
+            self.currentSource = self.activeSources[index]
+            self.completionModel().sourceModel().setSuggestions(self.completerSuggestions[self.currentSource])
+            self.fixPopupViewSize()
 
+    def setActivatedCallback(self, callback):
+        self.activatedCallback = callback
+
+    def setSuggestions(self, suggestions, source):
+        self.completerSuggestions[source] = suggestions
+        self.activeSources.append(source)
+        self.currentSource = source
+        self.completionModel().sourceModel().setSuggestions(suggestions)
+        self.fixPopupViewSize()
+        
     def isActive(self):
         return self.popup().isVisible()
         
+    def inactive(self):
+        self.popup().setVisible(False)
+
     def keyPressEvent(self, event):
         if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return, QtCore.Qt.Key_Tab, QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab):
             event.ignore()
+        elif event.modifiers() == QtCore.Qt.ControlModifier and event.key() == QtCore.Qt.Key_Space:
+            self.editor.switchCompleter()
+        elif self.editor.runKeyHelper(event):
+            self.inactive()
         else:
             QtGui.QPlainTextEdit.keyPressEvent(self.editor, event)
-            
+
             maxPosition = self.startCursorPosition + len(self.completionPrefix()) + 1
             cursor = self.editor.textCursor()
-            
-            #TODO: Se puede hacer mejor, para controlar que si esta en la mitad de la palabro o algo de eso
+
             if self.startCursorPosition <= cursor.position() <= maxPosition:
                 cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
-                newPrefix = cursor.selectedText()
-                if not self.completionModel().hasIndex(1, 0):
-                    #Me queda solo una sugerencia, veamos si no es lo que ya esta tipeado y en modo texto :)
-                    sIndex = self.completionModel().mapToSource(self.completionModel().index(0, 0))
-                    suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
-                    if isinstance(suggestion, basestring) and suggestion == newPrefix:
-                        #Se termino
-                        self.popup().setVisible(False)
-                        return
-                self.setCompletionPrefix(newPrefix)
+                self.setCompletionPrefix(cursor.selectedText())
                 self.complete(self.editor.cursorRect())
             else:
-                self.popup().setVisible(False)
-                
+                self.inactive()
+
+    def onlyOneSameSuggestion(self):
+        cursor = self.editor.textCursor()
+        if not self.completionModel().hasIndex(1, 0):
+            sIndex = self.completionModel().mapToSource(self.completionModel().index(0, 0))
+            suggestion = self.completionModel().sourceModel().data(sIndex)
+            return suggestion == self.completionPrefix()
+        return False
+
     def setStartCursorPosition(self, position):
+        self.setCompletionPrefix("")
+        self.activeSources = []
         self.startCursorPosition = position
         
     def insertCompletion(self, index):
         sIndex = self.completionModel().mapToSource(index)
         suggestion = self.completionModel().sourceModel().getSuggestion(sIndex)
-        cursor = self.editor.textCursor()
-        cursor.setPosition(self.startCursorPosition, QtGui.QTextCursor.KeepAnchor)
-        if isinstance(suggestion, dict):
-            if 'display' in suggestion:
-                cursor.insertText(suggestion['display'])
-            elif 'title' in suggestion:
-                cursor.insertText(suggestion['title'])
-        elif isinstance(suggestion, PMXBundleTreeNode):
-            cursor.removeSelectedText()
-            self.editor.insertBundleItem(suggestion)
+        if self.activatedCallback is not None:
+            self.activatedCallback(suggestion)
         else:
-            cursor.insertText(suggestion)
-
+            _, start, end = self.editor.currentWord(search = False)
+            cursor = self.editor.textCursor()
+            cursor.setPosition(start)
+            cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
+            if isinstance(suggestion, dict):
+                if 'display' in suggestion:
+                    cursor.insertText(suggestion['display'])
+                elif 'title' in suggestion:
+                    cursor.insertText(suggestion['title'])
+            elif isinstance(suggestion, PMXBundleTreeNode):
+                cursor.removeSelectedText()
+                self.editor.insertBundleItem(suggestion)
+            else:
+                cursor.insertText(suggestion)
+        
     def complete(self, rect):
-        self.popup().setCurrentIndex(self.completionModel().index(0, 0))
-        rect.setWidth(self.currentContentWidth)
-        #TODO: height
-        QtGui.QCompleter.complete(self, rect)
+        if not self.onlyOneSameSuggestion():
+            self.popup().setCurrentIndex(self.completionModel().index(0, 0))
+            QtGui.QCompleter.complete(self, rect)
+        else:
+            self.inactive()

@@ -109,32 +109,19 @@ class PMXTemplate(PMXBundleItem):
         except:
             pass
 
-    def buildEnvironment(self, **kwargs):
+    def buildEnvironment(self, fileName, fileDirectory):
         env = super(PMXTemplate, self).buildEnvironment()
-        fileName = kwargs.get('fileName', '')
-        fileDirectory = kwargs.get('fileDirectory', '')
-        if fileName and fileDirectory:
-            nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension) if self.extension else fileName
-            env['TM_NEW_FILE'] = os.path.join(fileDirectory, nameWithExtension)
-            env['TM_NEW_FILE_BASENAME'] = fileName
-            env['TM_NEW_FILE_DIRECTORY'] = fileDirectory
-        projectName = kwargs.get('projectName', '')
-        projectLocation = kwargs.get('projectLocation', '')
-        if projectName and projectLocation:
-            env['TM_NEW_PROJECT_NAME'] = projectName
-            env['TM_NEW_PROJECT_LOCATION'] = projectLocation
-            env['TM_NEW_PROJECT_BASENAME'] = os.path.basename(projectLocation)
-            env['TM_NEW_PROJECT_DIRECTORY'] = os.path.dirname(projectLocation)
+        nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension) if self.extension else fileName
+        env['TM_NEW_FILE'] = os.path.join(fileDirectory, nameWithExtension)
+        env['TM_NEW_FILE_BASENAME'] = fileName
+        env['TM_NEW_FILE_DIRECTORY'] = fileDirectory
         return env
     
     def execute(self, environment = {}, callback = lambda x: x):
-        context = PMXRunningContext(self)
-        
-        context.asynchronous = False
-        context.workingDirectory = self.path('prymatex')
-        context.shellCommand, context.environment = prepareShellScript(self.command, environment)
-
-        self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
+        with PMXRunningContext(self, self.command, environment) as context:
+            context.asynchronous = False
+            context.workingDirectory = self.currentPath
+            self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
     
     def afterExecute(self, callback, context):
         #TODO: Ver los errores
@@ -180,4 +167,4 @@ class PMXTemplate(PMXBundleItem):
         for templateFilePath in templateFilePaths:
             templateFile = PMXTemplateFile(templateFilePath, bundleItem)
             templateFile = manager.addTemplateFile(templateFile)
-            template.files.append(templateFile)
+            bundleItem.files.append(templateFile)

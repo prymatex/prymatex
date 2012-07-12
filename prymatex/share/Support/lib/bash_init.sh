@@ -42,8 +42,8 @@ fi
 export PATH
 
 #Now export
-export DIALOG="$PMX_SUPPORT_PATH/bin/pmxctl.py"
-export DIALOG_1="$PMX_SUPPORT_PATH/bin/pmxctl.py"
+export DIALOG="$PMX_SUPPORT_PATH/bin/pmxctl"
+export DIALOG_1="$PMX_SUPPORT_PATH/bin/pmxctl"
 export TMPDIR=$PMX_TMP_PATH
 export TEMP=$PMX_TMP_PATH
 export TMP=$PMX_TMP_PATH

@@ -24,9 +24,7 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
         self.baseEnvironment = settings.get("environment", {})
         
     def startSnippet(self, snippet):
-        """
-        Inicia el snippet
-        """
+        """Inicia el snippet"""
         self.snippet = snippet
         self.editor.modeChanged.emit()
         
@@ -36,16 +34,14 @@ class PMXSnippetProcessor(PMXSnippetProcessor):
             for _ in range(len(snippet.tabTrigger)):
                 cursor.deletePreviousChar()
         
-        self.tabreplacement = self.editor.tabKeyBehavior
+        self.tabreplacement = self.editor.tabKeyBehavior()
         self.indentation = "" if self.disableIndent else cursor.block().userData().indent
         
         self.__env = self.editor.buildEnvironment(snippet.buildEnvironment())
         self.__env.update(self.baseEnvironment)
     
     def endSnippet(self):
-        """
-        Termina el snippet
-        """
+        """Termina el snippet"""
         self.snippet = None
         self.editor.modeChanged.emit()
 

@@ -38,24 +38,22 @@ def textToObjectName(text, sufix = "", prefix = ""):
 
 def createQAction(settings, parent):
     title = settings.get("title", "Action Title")
-    icon = settings.get("icon")
-    shortcut = settings.get("shortcut")
-    checkable = settings.get("checkable", False)
-    callback = settings.get("callback")
-    testChecked = settings.get("testChecked")
     action = QtGui.QAction(title, parent)
     object_name = textToObjectName(title, prefix = "action")
     action.setObjectName(object_name)
-    if icon is not None:
-        action.setIcon(icon)
-    if shortcut is not None:
-        action.setShortcut(shortcut)
-    action.setCheckable(checkable)
-    action.testChecked = testChecked
-    action.callback = callback
+    if "icon" in settings:
+        action.setIcon(settings["icon"])
+    if "shortcut" in settings:
+        action.setShortcut(settings["shortcut"])
+    if "checkable" in settings:
+        action.setCheckable(settings["checkable"])
+    if "callback" in settings:
+        action.callback = settings["callback"]
+    if "testChecked" in settings:
+        action.testChecked = settings["testChecked"]
     return action
     
-def createQMenu(settings, parent, useSeparatorName = False):
+def createQMenu(settings, parent, useSeparatorName = False, connectActions = False):
     """
     settings = {
             "title": "Menu Title",
@@ -89,6 +87,13 @@ def createQMenu(settings, parent, useSeparatorName = False):
     if items is not None:
         subactions = extendQMenu(menu, items, useSeparatorName)
         actions.extend(subactions)
+    if connectActions:
+        for action in actions:
+            if hasattr(action, 'callback'):
+                if action.isCheckable():
+                    parent.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
+                else:
+                    parent.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
     return menu, actions
 
 def extendQMenu(menu, items, useSeparatorName = False):
@@ -113,6 +118,8 @@ def extendQMenu(menu, items, useSeparatorName = False):
             menu.addAction(action)
         elif isinstance(item, QtGui.QAction):
             menu.addAction(item)
+        elif isinstance(item, QtGui.QMenu):
+            menu.addMenu(item)
         elif isinstance(item, list):
             actionGroup = QtGui.QActionGroup(menu)
             actions.append(actionGroup)
@@ -130,25 +137,23 @@ def extendQMenu(menu, items, useSeparatorName = False):
     return actions
 
 def sectionNameRange(items, name):
-    begin, end = None, None
-    for item in items:
+    begin, end = -1, -1
+    for index, item in enumerate(items):
         if isinstance(item, basestring):
-            if begin is None and item == '--' + name:
-                begin = item
-            elif begin is not None and item.startswith('--'):
-                end = item
+            if begin == -1 and item.startswith('-') and item.endswith(name):
+                begin = index
+            elif begin != -1 and item.startswith('-'):
+                end = index
                 break
-    if begin is None:
+    if begin == -1:
         raise Exception("Section %s not exists" % name)
-    begin = items.index(begin)
-    end = items.index(end) if end is not None else -1
     return begin, end
 
 def chunkSections(items):
     sections = []
     start = 0
     for i in xrange(0, len(items)):
-        if isinstance(items[i], basestring) and items[i].startswith('--'):
+        if isinstance(items[i], basestring) and items[i].startswith('-'):
             sections.append(items[start:i])
             start = i
     sections.append(items[start:len(items)])

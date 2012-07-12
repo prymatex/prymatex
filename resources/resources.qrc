@@ -1,11 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>actions/format-text-color.png</file>
+    <file>bundles/project.png</file>
     <file>actions/network-connect.png</file>
-    <file>icons/bullet-yellow.png</file>
-    <file>icons/bullet-pink.png</file>
-    <file>icons/bullet-green.png</file>
-    <file>icons/bullet-blue.png</file>
-    <file>icons/bullet-red.png</file>
     <file>emblems/image-stack.png</file>
     <file>actions/project-development-close-all.png</file>
     <file>emblems/image-stack-open.png</file>
@@ -39,13 +36,11 @@
     <file>mimetypes/text-plain.png</file>
     <file>actions/project-development-close.png</file>
     <file>actions/run-build-clean.png</file>
-    <file>actions/run-build-clean.png</file>
     <file>actions/run-build-configure.png</file>
     <file>actions/run-build-file.png</file>
     <file>actions/run-build-install-root.png</file>
     <file>actions/run-build-install.png</file>
     <file>actions/run-build-prune.png</file>
-    <file>actions/run-build.png</file>
     <file>actions/run-build.png</file>
     <file>actions/insert-text.png</file>
     <file>actions/folder-new.png</file>
@@ -98,16 +93,25 @@
     <file>actions/document-save-all.png</file>
     <file>actions/document-save-as.png</file>
     <file>actions/document-save.png</file>
-    <file>bundles/commands.png</file>
-    <file>bundles/drag-commands.png</file>
-    <file>bundles/languages.png</file>
-    <file>bundles/macros.png</file>
-    <file>bundles/preferences.png</file>
-    <file>bundles/snippets.png</file>
-    <file>bundles/template-files.png</file>
-    <file>bundles/templates.png</file>
+  </qresource>
+  <qresource prefix="bullets">
+    <file>groups/darkviolet.png</file>
+    <file>groups/yellow.png</file>
+    <file>groups/darkgreen.png</file>
+    <file>groups/red.png</file>
+    <file>groups/magenta.png</file>
+    <file>groups/brown.png</file>
+    <file>groups/blue.png</file>
+    <file>groups/green.png</file>
+    <file>groups/violet.png</file>
+    <file>groups/gray.png</file>
+    <file>groups/ligthblue.png</file>
+    <file>groups/orange.png</file>
   </qresource>
   <qresource prefix="editor">
+    <file>modes/insert.png</file>
+    <file>modes/snippet.png</file>
+    <file>modes/cursors.png</file>
     <file>sidebar/bookmark-flag.png</file>
     <file>sidebar/folding-bottom.png</file>
     <file>sidebar/folding-collapsed.png</file>
@@ -117,6 +121,17 @@
   <qresource prefix="images">
     <file>prymatex/logo.png</file>
     <file>prymatex/splash.svg</file>
-    <file>prymatex/Prymatex_Splash.svg</file>
+  </qresource>
+  <qresource prefix="items">
+    <file>bundles/project.png</file>
+    <file>bundles/bundle.png</file>
+    <file>bundles/templates.png</file>
+    <file>bundles/template-files.png</file>
+    <file>bundles/snippets.png</file>
+    <file>bundles/preferences.png</file>
+    <file>bundles/macros.png</file>
+    <file>bundles/languages.png</file>
+    <file>bundles/drag-commands.png</file>
+    <file>bundles/commands.png</file>
   </qresource>
 </RCC>

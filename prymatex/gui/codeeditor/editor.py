@@ -16,79 +16,48 @@ from PyQt4 import QtCore, QtGui
 # Local application / Library specific imports
 #=======================================================================
 from prymatex import resources
+from prymatex.utils import coroutines
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core.plugin.editor import PMXBaseEditor
 from prymatex.core import exceptions
+from prymatex.gui.support.models import PMXBundleTreeNode
 from prymatex.support import PMXSnippet, PMXMacro, PMXCommand, PMXDragCommand, PMXSyntax, PMXPreferenceSettings
 from prymatex.gui import utils
-from prymatex.gui.codeeditor.sidebar import PMXSidebar
+from prymatex.gui.codeeditor.addons import CodeEditorObjectAddon
+from prymatex.gui.codeeditor.sidebar import PMXSideBar, SideBarWidgetAddon
 from prymatex.gui.codeeditor.processors import PMXCommandProcessor, PMXSnippetProcessor, PMXMacroProcessor
 from prymatex.gui.codeeditor.modes import PMXMultiCursorEditorMode, PMXCompleterEditorMode, PMXSnippetEditorMode
 from prymatex.gui.codeeditor.highlighter import PMXSyntaxHighlighter
 from prymatex.gui.codeeditor.folding import PMXEditorFolding
-from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXCompleterTableModel, PMXAlreadyTypedWords
+from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListModel, PMXAlreadyTypedWords
 
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 
 from prymatex.utils.decorator.helpers import printtime
 
-class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
+class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
+    #=======================================================================
+    # Scope groups
+    #=======================================================================
+    SORTED_GROUPS = [   "keyword", "entity", "meta", "variable", "markup", 
+                        "support", "storage", "constant", "string", "comment", "invalid" ]
+
     #=======================================================================
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
     themeChanged = QtCore.pyqtSignal()
+    fontChanged = QtCore.pyqtSignal()
     modeChanged = QtCore.pyqtSignal()
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
 
-    #=======================================================================
-    # Settings
-    #=======================================================================
-    SETTINGS_GROUP = 'CodeEditor'
-    
-    defaultSyntax = pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
-    tabStopSoft = pmxConfigPorperty(default = True)
-    @pmxConfigPorperty(default = 4)
-    def tabStopSize(self, size):
-        self.setTabStopWidth(size * 9)
-    
-    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
-    def font(self, font):
-        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-        self.document().setDefaultFont(font)
-        self.sidebar.font = font
-        self.setTabStopWidth(self.tabStopSize * 9)
-    
-    @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
-    def theme(self, uuid):
-        theme = self.application.supportManager.getTheme(uuid)
+    afterOpened = QtCore.pyqtSignal()
+    afterSaved = QtCore.pyqtSignal()
+    afterClosed = QtCore.pyqtSignal()
+    afterReload = QtCore.pyqtSignal()
 
-        firstTime = not self.syntaxHighlighter.hasTheme()
-        self.syntaxHighlighter.setTheme(theme)
-        self.colours = theme.settings
-        
-        #Set color for QPlainTextEdit
-        appStyle = """QPlainTextEdit {background-color: %s;
-        color: %s;
-        selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
-        self.setStyleSheet(appStyle)
-
-        #Sidebar colours
-        #TODO: que la sidebar lo tomo del editor
-        self.sidebar.foreground = self.colours['foreground']
-        self.sidebar.background = self.colours['gutter'] if 'gutter' in self.colours else self.colours['background']  
-        
-        self.updateLineNumberAreaWidth(0)
-        self.highlightCurrent()
-        if not firstTime:
-            message = "<b>%s</b> theme set " % theme.name
-            if theme.author is not None:
-                message += "<i>(by %s)</i>" % theme.author
-            self.showMessage(message)
-        self.themeChanged.emit()
-        
     #================================================================
     # Regular expresions
     #================================================================
@@ -134,20 +103,55 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     ShowFolding           = 1<<4
     WordWrap              = 1<<5
     
+    #=======================================================================
+    # Settings
+    #=======================================================================
+    SETTINGS_GROUP = 'CodeEditor'
+    
+    defaultSyntax = pmxConfigPorperty(default = "3130E4FA-B10E-11D9-9F75-000D93589AF6", tm_name = 'OakDefaultLanguage')
+    tabStopSoft = pmxConfigPorperty(default = True)
+    
+    @pmxConfigPorperty(default = 4)
+    def tabStopSize(self, size):
+        self.setTabStopWidth(size * 9)
+    
+    @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
+    def font(self, font):
+        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+        self.document().setDefaultFont(font)
+        self.setTabStopWidth(self.tabStopSize * 9)
+        self.fontChanged.emit()
+    
+    @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
+    def theme(self, uuid):
+        theme = self.application.supportManager.getTheme(uuid)
+
+        firstTime = not self.syntaxHighlighter.hasTheme()
+        self.syntaxHighlighter.setTheme(theme)
+        self.colours = theme.settings
+        
+        #Set color for QPlainTextEdit
+        appStyle = """QPlainTextEdit {background-color: %s;
+        color: %s;
+        selection-background-color: %s; }""" % (self.colours['background'].name(), self.colours['foreground'].name(), self.colours['selection'].name())
+        self.setStyleSheet(appStyle)
+        self.themeChanged.emit()
+
     @pmxConfigPorperty(default = ShowLineNumbers)
     def defaultFlags(self, flags):
         self.setFlags(flags)
-                
-    @property
-    def tabKeyBehavior(self):
-        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('\t')
-    
+
+    #================================================================
+    # INIT
+    #================================================================
     def __init__(self, parent = None):
         QtGui.QPlainTextEdit.__init__(self, parent)
         PMXBaseEditor.__init__(self)
 
-        #Sidebar
-        self.sidebar = PMXSidebar(self)
+        #Sidebars
+        self.leftBar = PMXSideBar(self)
+        self.rightBar = PMXSideBar(self)
+        self.updateViewportMargins()
 
         #Models
         self.bookmarkListModel = PMXBookmarkListModel(self)
@@ -170,10 +174,6 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.completerMode = PMXCompleterEditorMode(self)
         self.snippetMode = PMXSnippetEditorMode(self)
         
-        self.highlightWordTimer = QtCore.QTimer()
-        self.currentHighlightWord = None
-        self.extraCursorsSelections = []
-        
         self.braces = []
         #Current braces for cursor position (leftBrace * rightBrace, oppositeLeftBrace, oppositeRightBrace) 
         # * the cursor is allways here>
@@ -181,22 +181,48 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
-        self.setupActions()
-        self.connectSignals()
-        
+
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
         
         #Basic setup
         #self.setCenterOnScroll(True)
-            
+    
+    # Connect Signals
+    def connectSignals(self):
+        self.rightBar.updateRequest.connect(self.updateViewportMargins)
+        self.leftBar.updateRequest.connect(self.updateViewportMargins)
+        
+        self.blockCountChanged.connect(self.on_blockCountChanged)
+        self.updateRequest.connect(self.updateSideBars)
+        self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
+        self.modificationChanged.connect(self.on_modificationChanged)
+        self.syntaxChanged.connect(self.showSyntaxMessage)
+        self.themeChanged.connect(self.highlightEditor)
+
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
+        self.connectSignals()
         #Load Default Syntax
         syntax = self.application.supportManager.getBundleItem(self.defaultSyntax)
         self.setSyntax(syntax)
-        
+    
+    def addAddon(self, addon):
+        PMXBaseEditor.addAddon(self, addon)
+        if isinstance(addon, SideBarWidgetAddon):
+            self.addSideBarWidget(addon)
+
+    def addSideBarWidget(self, widget):
+        #widget.setParent(self.rightBar)
+        if widget.ALIGNMENT == QtCore.Qt.AlignRight:
+            self.rightBar.addWidget(widget)
+        else:
+            self.leftBar.addWidget(widget)
+
+    #================================================================
+    # Update editor status, called from Highlighter
+    #================================================================
     def updateIndent(self, block, userData, indent):
         self.logger.debug("Update Block Indent")
     
@@ -216,30 +242,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
     def updateWords(self, block, userData, words):
         self.logger.debug("Update Words")
-        oldWords = set(map(lambda (index, word): word, userData.words))
-        newWords = set(map(lambda (index, word): word, words))
         #Quitar el block de las palabras anteriores
-        self.alreadyTypedWords.removeWordsBlock(block, oldWords.difference(newWords))
+        self.alreadyTypedWords.removeWordsBlock(block, filter(lambda word: word not in words, userData.words))
+        
         #Agregar las palabras nuevas
-        self.alreadyTypedWords.addWordsBlock(block, newWords.difference(oldWords))
+        self.alreadyTypedWords.addWordsBlock(block, filter(lambda word: word not in userData.words, words))
         userData.words = words
-            
-    #=======================================================================
-    # Connect Signals
-    #=======================================================================
-    def connectSignals(self):
-        self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
-        self.blockCountChanged.connect(self.on_blockCountChanged)
-        self.updateRequest.connect(self.updateLineNumberArea)
-        self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
-        self.modificationChanged.connect(self.on_modificationChanged)
-        self.syntaxChanged.connect(self.showSyntaxMessage)
-        
-        self.actionCopyPath.triggered.connect(self.on_actionCopyPath_triggered)
-        
-    def setupActions(self):
-        # Some actions
-        self.actionCopyPath = QtGui.QAction(resources.getIcon("copy"), _("Copy path to clipboard"), self)
         
     def showSyntaxMessage(self, syntax):
         self.showMessage("Syntax changed to <b>%s</b>" % syntax.name)
@@ -259,7 +267,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def on_cursorPositionChanged(self):
         #El cursor se movio es hora de:
         self.setCurrentBraces()
-        self.highlightCurrent()
+        self.highlightEditor()
 
     #=======================================================================
     # Base Editor Interface
@@ -282,10 +290,22 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             yield
         self.document().clearUndoRedoStacks()
         self.setModified(False)
+        self.afterOpened.emit()
         
+    def save(self, filePath):
+        value = PMXBaseEditor.save(self, filePath)
+        self.afterSaved.emit()
+        return value
+
     def close(self):
-        QtGui.QPlainTextEdit.close(self)
-        return PMXBaseEditor.close(self)
+        value = PMXBaseEditor.close(self)
+        self.afterClosed.emit()
+        return value
+    
+    def reload(self):
+        value = PMXBaseEditor.reload(self)
+        self.afterReload.emit()
+        return value
 
     def isModified(self):
         return self.document().isModified()
@@ -325,14 +345,14 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Obteniendo datos del editor
     #=======================================================================
-    def preferenceSettings(self, scope):
-        return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
-        
-    def getPreference(self, scope):
-        """Deprecated"""
-        return self.application.supportManager.getPreferenceSettings(scope, self.getSyntax().bundle)
+    def tabKeyBehavior(self):
+        return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('	')
 
+    def preferenceSettings(self, scope):
+        return self.application.supportManager.getPreferenceSettings(scope)
+    
     def wordUnderCursor(self):
+        """ Esto no es lo mismo que curre"""
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
@@ -345,37 +365,44 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def scope(self, cursor):
         return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
 
+    def currentPreferenceSettings(self):
+        return self.preferenceSettings(self.currentScope())
+        
     def currentScope(self):
         return self.scope(self.textCursor())
 
-    def currentWord(self, *largs, **kwargs):
-        return self.getCurrentWord(*largs, **kwargs)
+    def currentWord(self, direction = "both", search = True):
+        return self.word(cursor = self.textCursor(), direction = direction, search = search)
         
-    def getCurrentWord(self, pat = RE_WORD, direction = "both"):
-        cursor = self.textCursor()
+    def word(self, cursor = None, pattern = RE_WORD, direction = "both", search = True):
+        cursor = cursor or self.textCursor()
         line = cursor.block().text()
         position = cursor.position()
         columnNumber = cursor.columnNumber()
         #Get text before and after the cursor position.
         first_part, last_part = line[:columnNumber][::-1], line[columnNumber:]
+        
         #Try left word
         lword = rword = ""
-        m = self.RE_WORD.match(first_part)
+        m = pattern.match(first_part)
         if m and direction in ("left", "both"):
             lword = m.group(0)[::-1]
         #Try right word
-        m = self.RE_WORD.match(last_part)
+        m = pattern.match(last_part)
         if m and direction in ("right", "both"):
             rword = m.group(0)
         
-        if lword or rword: 
+        if lword or rword:
             return lword + rword, position - len(lword), position + len(rword)
         
+        if not search: 
+            return "", position, position
+
         lword = rword = ""
         #Search left word
         for i in range(len(first_part)):
             lword += first_part[i]
-            m = self.RE_WORD.search(first_part[i + 1:], i )
+            m = pattern.search(first_part[i + 1:])
             if m.group(0):
                 lword += m.group(0)
                 break
@@ -383,7 +410,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Search right word
         for i in range(len(last_part)):
             rword += last_part[i]
-            m = self.RE_WORD.search(last_part[i:], i )
+            m = pattern.search(last_part[i:])
             if m.group(0):
                 rword += m.group(0)
                 break
@@ -407,12 +434,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             flags |= self.ShowTabsAndSpaces
         if options.flags() & QtGui.QTextOption.ShowLineAndParagraphSeparators:
             flags |= self.ShowLineAndParagraphs
-        if self.sidebar.showBookmarks:
-            flags |= self.ShowBookmarks
-        if self.sidebar.showLineNumbers:
-            flags |= self.ShowLineNumbers
-        if self.sidebar.showFolding:
-            flags |= self.ShowFolding
+        # if self.sidebar.showBookmarks:
+        #     flags |= self.ShowBookmarks
+        # if self.sidebar.showLineNumbers:
+        #     flags |= self.ShowLineNumbers
+        # if self.sidebar.showFolding:
+        #     flags |= self.ShowFolding
         if options.wrapMode() & QtGui.QTextOption.WordWrap:
             flags |= self.WordWrap
         return flags
@@ -434,13 +461,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             options.setWrapMode(QtGui.QTextOption.NoWrap)
         options.setFlags(oFlags)
         self.document().setDefaultTextOption(options)
-        self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
-        self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
-        self.sidebar.showFolding = bool(flags & self.ShowFolding)
-        self.updateLineNumberAreaWidth(0)
-        #self.setCenterOnScroll(True)
-        #self.viewport().repaint(self.viewport().visibleRegion())
-    
+        # self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
+        # self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
+        # self.sidebar.showFolding = bool(flags & self.ShowFolding)
+        
     # Syntax
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
@@ -500,7 +524,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.replaceTabsForSpaces()
         else:
             if not cursor.hasSelection():
-                word, start, end = self.getCurrentWord()
+                word, start, end = self.currentWord()
                 position = cursor.position()
                 cursor.setPosition(start)
                 cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
@@ -519,36 +543,29 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.setTextCursor(cursor)
         
     #=======================================================================
-    # Espacio para la sidebar
+    # SideBars
     #=======================================================================
-    def lineNumberAreaWidth(self):
-        font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
-        area = self.sidebar.padding
-        if self.sidebar.showLineNumbers:
-            area += font_metrics.width(str(self.blockCount()))
-        if self.sidebar.showBookmarks:
-            area += self.sidebar.bookmarkArea
-        if self.sidebar.showFolding:
-            area += self.sidebar.foldArea
-        return area
-        
-    def updateLineNumberAreaWidth(self, newBlockCount):
-        self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
+    def updateViewportMargins(self):
+        self.setViewportMargins(self.leftBar.width(), 0, self.rightBar.width(), 0)
     
-    def updateLineNumberArea(self, rect, dy):
+    def updateSideBars(self, rect, dy):
         if dy:
-            self.sidebar.scroll(0, dy)
+            self.rightBar.scroll(0, dy)
+            self.leftBar.scroll(0, dy)
         else:
-            self.sidebar.update(0, rect.y(), self.sidebar.width(), rect.height())
+            self.rightBar.update(0, rect.y(), self.rightBar.width(), rect.height())
+            self.leftBar.update(0, rect.y(), self.leftBar.width(), rect.height())
         if rect.contains(self.viewport().rect()):
-            self.updateLineNumberAreaWidth(0)
-        
+            self.rightBar.update()
+            self.leftBar.update()
+            
     #=======================================================================
     # Braces
     #=======================================================================
     def setBraces(self, scope):
         settings = self.preferenceSettings(scope)
-        self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
+        self.braces = settings.smartTypingPairs[:]
+        #self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
         
     def setCurrentBraces(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor) if cursor is not None else QtGui.QTextCursor(self.textCursor())
@@ -561,26 +578,33 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         self._currentBraces = (None, None, None, None)
 
-        if leftChar in openBraces or rightChar in openBraces:
-            if leftChar in openBraces:
-                leftCursor = QtGui.QTextCursor(cursor)
-                leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                index = openBraces.index(leftChar)
-                self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, closeBraces[index], leftCursor), None)
-            if rightChar in openBraces:
-                rightCursor = QtGui.QTextCursor(cursor)
-                rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                index = openBraces.index(rightChar)
-                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, closeBraces[index], rightCursor))
-        if leftChar in closeBraces or rightChar in closeBraces:
-            if leftChar in closeBraces:
-                leftCursor = QtGui.QTextCursor(cursor)
-                leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
-                self._currentBraces = (leftCursor, None, self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True), None)
-            if rightChar in closeBraces:
-                rightCursor = QtGui.QTextCursor(cursor)
-                rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
-                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True))
+        # TODO si no hay para uno no hay para ninguno, quitar el que esta si el findTypingPair retorna None
+        if leftChar in openBraces:
+            leftCursor = QtGui.QTextCursor(cursor)
+            leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+            index = openBraces.index(leftChar)
+            otherBrace = self.findTypingPair(leftChar, closeBraces[index], leftCursor)
+            if otherBrace is not None:
+                self._currentBraces = (leftCursor, None, otherBrace, None)
+        if rightChar in openBraces:
+            rightCursor = QtGui.QTextCursor(cursor)
+            rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+            index = openBraces.index(rightChar)
+            otherBrace = self.findTypingPair(rightChar, closeBraces[index], rightCursor)
+            if otherBrace is not None:
+                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], otherBrace)
+        if leftChar in closeBraces and self._currentBraces[0] is None:  #Tener uno implica tener los dos por el if
+            leftCursor = QtGui.QTextCursor(cursor)
+            leftCursor.movePosition(QtGui.QTextCursor.PreviousCharacter, QtGui.QTextCursor.KeepAnchor)
+            otherBrace = self.findTypingPair(leftChar, openBraces[closeBraces.index(leftChar)], leftCursor, True)
+            if otherBrace is not None:
+                self._currentBraces = (leftCursor, self._currentBraces[1], otherBrace, self._currentBraces[3])
+        if rightChar in closeBraces and self._currentBraces[1] is None: #Tener uno implica tener los dos por el if
+            rightCursor = QtGui.QTextCursor(cursor)
+            rightCursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor)
+            otherBrace = self.findTypingPair(rightChar, openBraces[closeBraces.index(rightChar)], rightCursor, True)
+            if otherBrace is not None:
+                self._currentBraces = (self._currentBraces[0], rightCursor, self._currentBraces[2], otherBrace)
 
     def currentBracesPairs(self, cursor = None, direction = "both"):
         """ Retorna el otro cursor correspondiente al cursor (brace) pasado o actual del editor, puede retornar None en caso de no estar cerrado el brace"""
@@ -620,66 +644,51 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Highlight Editor
     #=======================================================================
-    def highlightCurrent(self):
-        #Clean current extra selection
-        self.setExtraSelections([])
-        if self.multiCursorMode.isActive():
-            self.multiCursorMode.highlightCurrentLines()
-        else:
-            self.highlightCurrentLine()
-            self.highlightCurrentBrace()
-            self.highlightCurrentSelections()
-            self.highlightCurrentWord()
-
-    def highlightCurrentWord(self):
-        return
-        #TODO: Mejorar esto porque sino cuando se carga un archivo le manda como loco
-        def highlightWord():
-            if self.currentHighlightWord == self.getWordUnderCursor()[0]:
-                self.extraCursorsSelections = self.findAll(self.currentHighlightWord, QtGui.QTextDocument.FindWholeWords | QtGui.QTextDocument.FindCaseSensitively)
-                self.highlightCurrentSelections()
-            self.highlightWordTimer.stop()
-        if self.currentHighlightWord != self.getWordUnderCursor()[0]:
-            if self.highlightWordTimer.isActive():
-                self.highlightWordTimer.stop()
-            self.currentHighlightWord = self.getWordUnderCursor()[0]
-            self.highlightWordTimer.timeout.connect(highlightWord)
-            self.highlightWordTimer.start(2000)
+    def registerTextCharFormatBuilder(self, formatHash, formatBuilder):
+        self.syntaxHighlighter.registerTextCharFormatBuilder(formatHash, formatBuilder)
         
-    def highlightCurrentSelections(self):
-        extraSelections = self.extraSelections()
-        for cursor in self.extraCursorsSelections:
+    def textCharFormat_line_builder(self):
+        format = QtGui.QTextCharFormat()
+        format.setBackground(self.colours['lineHighlight'])
+        format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+        return format
+        
+    def textCharFormat_brace_builder(self):
+        format = QtGui.QTextCharFormat()
+        format.setForeground(self.colours['caret'])
+        format.setFontUnderline(True)
+        format.setUnderlineColor(self.colours['foreground']) 
+        format.setBackground(QtCore.Qt.transparent)
+        return format
+
+    def textCharFormat_selection_builder(self):
+        format = QtGui.QTextCharFormat()
+        format.setBackground(self.colours['selection'])
+        return format
+        
+    def highlightEditor(self):
+        extraSelections = []
+        if self.multiCursorMode.isActive():
+            extraSelections += self.multiCursorMode.extraSelections()
+        else:
+            cursor = self.textCursor()
+            cursor.clearSelection()
+            extraSelections += self.buildExtraSelections("#line", cursor)
+            extraSelections += self.buildExtraSelections("#brace", filter(lambda c: c is not None, list(self._currentBraces)))
+        for addon in self.addons:
+            if isinstance(addon, CodeEditorObjectAddon):
+                extraSelections += addon.extraSelections()
+        self.setExtraSelections(extraSelections)
+        
+    def buildExtraSelections(self, styleHash, cursors):
+        extraSelections = []
+        cursors = cursors if isinstance(cursors, list) else [ cursors ]
+        for cursor in cursors:
             selection = QtGui.QTextEdit.ExtraSelection()
-            color = QtGui.QColor(self.colours['selection'])
-            color.setAlpha(100)
-            selection.format.setBackground(color)
+            selection.format = self.syntaxHighlighter.highlightFormat(styleHash)
             selection.cursor = cursor
             extraSelections.append(selection)
-        self.setExtraSelections(extraSelections)
-        
-    def highlightCurrentBrace(self):
-        selectedBraces = []
-        for cursor in self._currentBraces:
-            if cursor is not None:
-                selection = QtGui.QTextEdit.ExtraSelection()
-                selection.format.setForeground(QtGui.QBrush(self.colours['caret']))
-                selection.format.setFontUnderline(True)
-                selection.format.setUnderlineColor(self.colours['foreground']) 
-                selection.format.setBackground(QtGui.QBrush(QtCore.Qt.transparent))
-                selection.cursor = cursor
-                selectedBraces.append(selection)
-        if selectedBraces:
-            self.setExtraSelections(self.extraSelections() + selectedBraces)
-
-    def highlightCurrentLine(self):
-        extraSelections = self.extraSelections()
-        selection = QtGui.QTextEdit.ExtraSelection()
-        selection.format.setBackground(self.colours['lineHighlight'])
-        selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        selection.cursor = self.textCursor()
-        selection.cursor.clearSelection()
-        extraSelections.append(selection)
-        self.setExtraSelections(extraSelections)
+        return extraSelections
 
     def select(self, selection):
         cursor = self.textCursor()
@@ -687,7 +696,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             #Handle by editor
             cursor.select(selection)
         elif selection == self.SelectWord:
-            word, start, end = self.getCurrentWord()
+            word, start, end = self.currentWord()
             cursor.setPosition(start)
             cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         elif selection == self.SelectEnclosingBrackets:
@@ -716,11 +725,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def resizeEvent(self, event):
         QtGui.QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
-        self.sidebar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+        self.leftBar.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftBar.width(), cr.height()))
+        rightBarPosition = cr.right() - self.rightBar.width()
+        self.rightBar.setGeometry(QtCore.QRect(rightBarPosition, cr.top(), self.rightBar.width(), cr.height()))
         self.updateOverlays()
     
     def paintEvent(self, event):
-        #QtGui.QPlainTextEdit.paintEvent(self, event)
         QtGui.QPlainTextEdit.paintEvent(self, event)
         page_bottom = self.viewport().height()
         font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
@@ -802,7 +812,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
-        if event.modifiers() & QtCore.Qt.ControlModifier or self.multiCursorMode.isActive():
+        if self.multiCursorMode.isActive():
             self.multiCursorMode.mouseReleasePoint(event.pos(), bool(event.modifiers() & QtCore.Qt.MetaModifier))
             self.viewport().repaint(self.viewport().visibleRegion())
         else:
@@ -811,6 +821,18 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Keyboard Events
     #=======================================================================
+    def runKeyHelper(self, event):
+        #No tengo modo activo, intento con los helpers
+        #Obtener key, scope y cursor
+        scope = self.getCurrentScope()
+        cursor = self.textCursor()
+        for helper in self.findHelpers(event.key()):
+            #Buscar Entre los helpers
+            if helper.accept(self, event, cursor, scope):
+                helper.execute(self, event, cursor, scope)
+                return True
+        return False
+
     #@printtime
     def keyPressEvent(self, event):
         """
@@ -823,21 +845,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             if mode.isActive():
                 return mode.keyPressEvent(event)
         
-        #No tengo modo activo, intento con los helpers
-        #Obtener key, scope y cursor
-        scope = self.getCurrentScope()
-        cursor = self.textCursor()
-        
-        for helper in self.findHelpers(event.key()):
-            #Buscar Entre los helpers
-            if helper.accept(self, event, cursor, scope):
-                #pasarle el evento
-                return helper.execute(self, event, cursor, scope)
-        
-        #No tengo helper paso el evento a la base
-        QtGui.QPlainTextEdit.keyPressEvent(self, event)
-        
-        self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
+        if not self.runKeyHelper(event):
+            #No tengo helper paso el evento a la base
+            QtGui.QPlainTextEdit.keyPressEvent(self, event)
+            
+            self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
     
     def keyReleaseEvent(self, event):
         #Primero ver si tengo un modo activo,
@@ -856,16 +868,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         indentMarks = settings.indent(block.text()[:cursor.columnNumber()])
         if PMXPreferenceSettings.INDENT_INCREASE in indentMarks:
             self.logger.debug("Increase indent")
-            indent = block.userData().indent + self.tabKeyBehavior
+            indent = block.userData().indent + self.tabKeyBehavior()
         elif PMXPreferenceSettings.INDENT_NEXTLINE in indentMarks:
             #TODO: Creo que este no es el correcto
             self.logger.debug("Increase next line indent")
-            indent = block.userData().indent + self.tabKeyBehavior
+            indent = block.userData().indent + self.tabKeyBehavior()
         elif PMXPreferenceSettings.UNINDENT in indentMarks:
             self.logger.debug("Unindent")
             indent = ""
         elif PMXPreferenceSettings.INDENT_DECREASE in indentMarks:
-            indent = block.userData().indent[:len(self.tabKeyBehavior)]
+            indent = block.userData().indent[:len(self.tabKeyBehavior())]
         else:
             self.logger.debug("Preserve indent")
             indent = block.userData().indent
@@ -876,6 +888,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     def insertBundleItem(self, item, **processorSettings):
         """Inserta un bundle item"""
+        
         if item.TYPE == PMXSnippet.TYPE:
             self.snippetProcessor.configure(processorSettings)
             self.textCursor().beginEditBlock()
@@ -897,14 +910,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def selectBundleItem(self, items, tabTriggered = False):
         #Tengo mas de uno que hago?, muestro un menu
         syntax = any(map(lambda item: item.TYPE == 'syntax', items))
-        options = []
-        for index, item in enumerate(items):
-            options.append({ "title": item.buildMenuTextEntry(False), "image": item.TYPE })
-            
-        def insertBundleItem(index):
-            self.insertBundleItem(items[index], tabTriggered = tabTriggered)
         
-        self.showFlatPopupMenu(options, insertBundleItem, cursorPosition = not syntax)
+        def insertBundleItem(index):
+            if index >= 0:
+                self.insertBundleItem(items[index], tabTriggered = tabTriggered)
+        
+        self.showFlatPopupMenu(items, insertBundleItem, cursorPosition = not syntax)
     
     def executeCommand(self, command = None, input = "none", output = "insertText"):
         if command is None:
@@ -924,8 +935,8 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         block = cursor.block()
         line = block.text()
         scope = self.getCurrentScope()
-        preferences = self.getPreference(scope)
-        current_word, start, end = self.getCurrentWord()
+        preferences = self.preferenceSettings(scope)
+        current_word, start, end = self.currentWord()
         #Combine base env from params and editor env
         env.update({
                 'TM_CURRENT_LINE': line,
@@ -940,45 +951,82 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         })
 
         if current_word:
+            self.logger.debug("Add current word to environment")
             env['TM_CURRENT_WORD'] = current_word
         if self.filePath is not None:
+            self.logger.debug("Add file path to environment")
             env['TM_FILEPATH'] = self.filePath
             env['TM_FILENAME'] = self.application.fileManager.basename(self.filePath)
             env['TM_DIRECTORY'] = self.application.fileManager.dirname(self.filePath)
         if self.project is not None:
+            self.logger.debug("Add project to environment")
             env.update(self.project.buildEnvironment())
         if cursor.hasSelection():
+            self.logger.debug("Add selection to environment")
             env['TM_SELECTED_TEXT'] = utils.replaceLineBreaks(cursor.selectedText())
             start, end = self.getSelectionBlockStartEnd()
             env['TM_INPUT_START_COLUMN'] = cursor.selectionStart() - start.position() + 1
             env['TM_INPUT_START_LINE'] = start.blockNumber() + 1
             env['TM_INPUT_START_LINE_INDEX'] = cursor.selectionStart() - start.position()
-            
+
         env.update(preferences.shellVariables)
         return env
 
     #==========================================================================
     # Completer
     #==========================================================================
-    def showCompleter(self, suggestions, alreadyTyped = "", caseInsensitive = True):
-        case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
-        self.completerMode.setCaseSensitivity(case)
-        
-        self.completerMode.setStartCursorPosition(self.textCursor().position() - len(alreadyTyped))
-        self.completerMode.setCompletionPrefix(alreadyTyped)
-        self.completerMode.setModel(PMXCompleterTableModel(suggestions, self))
-        self.completerMode.complete(self.cursorRect())
+    def showCompleter(self, suggestions, source = "default", alreadyTyped = None, caseInsensitive = True, callback = None):
+        currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
+        if alreadyTyped is None or currentAlreadyTyped.startswith(alreadyTyped) or callback is not None:
+            case = QtCore.Qt.CaseInsensitive if caseInsensitive else QtCore.Qt.CaseSensitive
+            self.completerMode.setCaseSensitivity(case)
+            self.completerMode.setActivatedCallback(callback)
+            self.completerMode.setStartCursorPosition(self.textCursor().position() - len(currentAlreadyTyped))
+            self.completerMode.setSuggestions(suggestions, source)
+            self.completerMode.setCompletionPrefix(currentAlreadyTyped)
+            self.completerMode.complete(self.cursorRect())
     
-    def completionSuggestions(self, cursor = None, scope = None):
+    def switchCompleter(self):
+        settings = self.currentPreferenceSettings()
+        if not self.completerMode.hasSource("default"):
+            def on_suggestionsReady(suggestions):
+                if bool(suggestions):
+                    self.completerMode.setSuggestions(suggestions, "default")
+            self.defaultCompletion(settings, on_suggestionsReady)
+        else:
+            self.completerMode.switch()
+
+    def runCompleter(self):
+        settings = self.currentPreferenceSettings()
+        if settings.disableDefaultCompletion and settings.executeCompletionCommand:
+            self.executeCompletionCommand(settings)
+        else:
+            def on_suggestionsReady(suggestions):
+                 if bool(suggestions):
+                    self.showCompleter(suggestions)
+            self.defaultCompletion(settings, on_suggestionsReady)
+
+    def executeCompletionCommand(self, settings):
+        commandHash = settings.executeCompletionCommand
+        command = PMXCommand(self.application.supportManager.uuidgen(), dataHash = commandHash)
+        command.setBundle(settings.getBundle("executeCompletionCommand"))
+        command.setManager(settings.getManager("executeCompletionCommand"))
+        self.insertBundleItem(command)
+    
+    def defaultCompletion(self, settings, callback):
+        if not hasattr(self, '_completerTask') or self._completerTask.isReady():
+            self._completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
+            def on_completerTaskReady(callback):
+                def completerTaskReady(result):
+                    callback(result.value)
+                return completerTaskReady
+            #En una clausura
+            self._completerTask.done.connect(on_completerTaskReady(callback))
+
+    def completionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()
         scope = scope or self.scope(cursor)
-        currentWord, start, end = self.currentWord()
-        alreadyTyped = currentWord[:cursor.position() - start]
-
-        settings = self.preferenceSettings(scope)
-        disableDefaultCompletion = settings.disableDefaultCompletion
-        if disableDefaultCompletion:
-            print "no autocompletar"
+        settings = settings or self.preferenceSettings(scope)
         
         #An array of additional candidates when cycling through completion candidates from the current document.
         completions = settings.completions[:]
@@ -987,29 +1035,40 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         completionCommand = settings.completionCommand
         if completionCommand:
             print "comando", completionCommand
-
-        #A tab tigger completion
-        completions += self.application.supportManager.getAllTabTiggerItemsByScope(scope)
-        typedWords = self.alreadyTypedWords.typedWords()
-        if alreadyTyped in typedWords:
-            typedWords.remove(alreadyTyped)
-
-        completions += typedWords
         
-        return completions, alreadyTyped
+        #A tab tigger completion
+        tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
+        
+        typedWords = self.alreadyTypedWords.typedWords(cursor.block())
+        
+        #Lo ponemos en la mezcladora
+        suggestions = tabTriggers + map(lambda word: { "display": word, "image": "scope-root-keyword" }, completions)
+        for group in CodeEditor.SORTED_GROUPS:
+            newWords = filter(lambda word: word not in completions, typedWords.pop(group, []))
+            suggestions += map(lambda word: { "display": word, "image": "scope-root-%s" % group }, newWords)
+            completions += newWords
+            yield
+        
+        for words in typedWords.values():
+            newWords = filter(lambda word: word not in completions, words)
+            suggestions += map(lambda word: { "display": word, "image": "scope-root-invalid" }, newWords)
+            completions += newWords
+            yield
+
+        yield coroutines.Return(suggestions)
 
     #==========================================================================
     # Folding
     #==========================================================================
     def codeFoldingFold(self, block):
         self._fold(block)
-        self.update()
-        self.sidebar.update()
-    
+        # self.update()
+        # self.sidebar.update()
+
     def codeFoldingUnfold(self, block):
         self._unfold(block)
-        self.update()
-        self.sidebar.update()
+        # self.update()
+        # self.sidebar.update()
         
     def _fold(self, block):
         milestone = block
@@ -1065,31 +1124,47 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         b2 texto a buscar
         cursor representando la posicion a partir de la cual se busca
         backward buscar para atras
-        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre 
+        Si b1 es igual a b2 no se controla el balanceo y se retorna la primera ocurrencia que se encuentre dentro del bloque actual
         """
         flags = QtGui.QTextDocument.FindFlags()
         if backward:
             flags |= QtGui.QTextDocument.FindBackward
         if cursor.hasSelection():
-            startPosition = cursor.selectionEnd() if b1 == b2 or backward else cursor.selectionStart() 
+            if b1 == b2:
+                startPosition = cursor.selectionStart() if backward else cursor.selectionEnd()
+            else:
+                startPosition = cursor.selectionEnd() if backward else cursor.selectionStart()
         else:
             startPosition = cursor.position()
         c1 = self.document().find(b1, startPosition, flags)
         c2 = self.document().find(b2, startPosition, flags)
-        if backward:
-            while c1 > c2:
-                c1 = self.document().find(b1, c1.selectionStart(), flags)
-                if c1 > c2:
-                    c2 = self.document().find(b2, c2.selectionStart(), flags)
+        if b1 != b2:
+            #Balanceo solo si son distintos
+            if backward:
+                while c1 > c2:
+                    c1 = self.document().find(b1, c1.selectionStart(), flags)
+                    if c1 > c2:
+                        c2 = self.document().find(b2, c2.selectionStart(), flags)
+            else:
+                while not c1.isNull() and c1.position() != -1 and c1 < c2:
+                    c1 = self.document().find(b1, c1.selectionEnd(), flags)
+                    if c1.isNull():
+                        break
+                    if c1 < c2:
+                        c2 = self.document().find(b2, c2.selectionEnd(), flags)
+            if not c2.isNull():
+                return c2
         else:
-            while not c1.isNull() and c1.position() != -1 and c1 < c2:
-                c1 = self.document().find(b1, c1.selectionEnd(), flags)
-                if c1.isNull():
-                    break
-                if c1 < c2:
-                    c2 = self.document().find(b2, c2.selectionEnd(), flags)
-        if not c2.isNull():
-            return c2
+            if not c2.isNull() and c2.block() == cursor.block():
+                #Ahora balanceamos usando el texto del block
+                block = cursor.block()
+                text = block.text()
+                positionStart = cursor.selectionEnd() if backward else cursor.selectionStart()
+                positionStart -= block.position()
+                positionEnd = c2.selectionEnd() if c2 > cursor else c2.selectionStart()
+                positionEnd -= block.position()
+                if text[:positionStart].count(b2) % 2 == 0 and text[positionEnd:].count(b2) % 2 == 0:
+                    return c2
 
     def findMatchCursor(self, match, flags, findNext = False, cursor = None, cyclicFind = True):
         cursor = cursor or self.textCursor()
@@ -1142,12 +1217,12 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return replaced
     
     def replaceTabsForSpaces(self):
-        match = QtCore.QRegExp("\t")
+        match = QtCore.QRegExp("	")
         self.replaceMatch(match, " " * self.tabStopSize, QtGui.QTextDocument.FindFlags(), True)
         
     def replaceSpacesForTabs(self):
         match = QtCore.QRegExp(" " * self.tabStopSize)
-        self.replaceMatch(match, "\t", QtGui.QTextDocument.FindFlags(), True)
+        self.replaceMatch(match, "	", QtGui.QTextDocument.FindFlags(), True)
         
     #==========================================================================
     # Bookmarks and gotos
@@ -1155,11 +1230,9 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def toggleBookmark(self, block = None):
         block = block or self.textCursor().block()
         self.bookmarkListModel.toggleBookmark(block)
-        self.sidebar.update()
     
     def removeAllBookmarks(self):
         self.bookmarkListModel.removeAllBookmarks()
-        self.sidebar.update()
     
     def bookmarkNext(self, block = None):
         block = block or self.textCursor().block()
@@ -1190,6 +1263,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor.setPosition(cursor.block().position() + columnNumber)
         self.setTextCursor(cursor)
     
+    def centerCursor(self, cursor = None):
+        if cursor is not None:
+            #Scroll to the center of cursor block number
+            pageStep = self.verticalScrollBar().pageStep()
+            currentValue = self.verticalScrollBar().value()
+            blockNumber = cursor.block().blockNumber()
+            scrollIndex = 0 if pageStep > blockNumber else blockNumber - (pageStep / 2)
+            self.verticalScrollBar().setValue(scrollIndex)
+        else:
+            QtGui.QPlainTextEdit.centerCursor(self)
     #===========================================================================
     # Zoom
     #===========================================================================
@@ -1256,11 +1339,11 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor.beginEditBlock()
         while True:
             cursor.setPosition(start.position())
-            cursor.insertText(self.tabKeyBehavior)
+            cursor.insertText(self.tabKeyBehavior())
             if start == end:
                 break
             start = start.next()
-        cursor.endEditBlock()        
+        cursor.endEditBlock()
 
     def unindentBlocks(self, cursor = None):
         cursor = QtGui.QTextCursor(cursor or self.textCursor())
@@ -1289,13 +1372,16 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         menu = QtGui.QMenu(self)
         for index, item in enumerate(menuItems, 1):
             if isinstance(item, dict):
-                title = "%s \t&%d" % (item["title"], index)
+                title = "%s 	&%d" % (item["title"], index)
                 icon = resources.getIcon(item["image"]) if "image" in item else QtGui.QIcon()
             elif isinstance(item,  basestring):
-                title = "%s \t&%d" % (item, index)
+                title = "%s 	&%d" % (item, index)
                 icon = QtGui.QIcon()
+            elif isinstance(item,  PMXBundleTreeNode):
+                title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
+                icon = item.icon
             menu.addAction(icon, title)
-
+        
         def menu_aboutToHide():
             activeActionIndex = menu.actions().index(menu.activeAction()) if menu.activeAction() else -1
             callback(activeActionIndex)
@@ -1306,23 +1392,57 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     
     # Default Context Menus
     def showEditorContextMenu(self, point):
-        #TODO: Poneme aca tambien el menu por defecto de este bundle
         menu = self.createStandardContextMenu()
         menu.setParent(self)
+
+        #Bundle Menu
+        bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
+        utils.extendQMenu(menu, [ "-", bundleMenu ])
+
+        #Se lo pasamos a los addons
+        cursor = self.cursorForPosition(point)
+        items = ["-"]
+        for addon in self.addons:
+            if isinstance(addon, CodeEditorObjectAddon):
+                items += addon.contributeToContextMenu(cursor)
+        
+        if len(items) > 1:
+            actions = utils.extendQMenu(menu, items)
+            for action in actions:
+                if hasattr(action, 'callback'):
+                    if action.isCheckable():
+                        self.connect(action, QtCore.SIGNAL('triggered(bool)'), action.callback)
+                    else:
+                        self.connect(action, QtCore.SIGNAL('triggered()'), action.callback)
+
         menu.popup(self.mapToGlobal(point))
     
     # Contributes to Tab Menu
-    def contributeToTabMenu(self, menu):
+    def contributeToTabMenu(self):
+        menues = []
         bundleMenu = self.application.supportManager.menuForBundle(self.getSyntax().bundle)
         if bundleMenu is not None:
-            menu.addMenu(bundleMenu)
-            menu.addSeparator()
+            menues.append(bundleMenu)
+            menues.append("-")
         if self.filePath:
-            menu.addAction(self.actionCopyPath)
+            menues.append({
+                "title": "Copy file path",
+                "icon": resources.getIcon("copy"),
+                "callback": lambda editor = self: QtGui.QApplication.clipboard().setText(editor.filePath)  })
+        return menues
     
     # Contributes to Main Menu
     @classmethod
-    def contributeToMainMenu(cls):
+    def contributeToMainMenu(cls, addonClasses):
+        leftGutter = []
+        rightGutter = []
+        for addon in addonClasses:
+            if issubclass(addon, SideBarWidgetAddon):
+                if addon.ALIGNMENT == QtCore.Qt.AlignRight:
+                    rightGutter.extend(addon.contributeToMainMenu())
+                else:
+                    leftGutter.extend(addon.contributeToMainMenu())
+
         view = {
             'items': [
                 {'title': 'Font',
@@ -1334,24 +1454,10 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                       'shortcut': "Ctrl+-",
                       'callback': cls.zoomOut}
                 ]},
-                {'title': 'Gutter',
-                 'items': [
-                    {'title': 'Foldings',
-                     'callback': cls.on_actionShowFoldings_toggled,
-                     'shortcut': 'Shift+F10',
-                     'checkable': True,
-                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowFolding) },
-                    {'title': "Bookmarks",
-                     'callback': cls.on_actionShowBookmarks_toggled,
-                     'shortcut': 'Alt+F10',
-                     'checkable': True,
-                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowBookmarks) },
-                    {'title': "Line Numbers",
-                     'callback': cls.on_actionShowLineNumbers_toggled,
-                     'shortcut': 'F10',
-                     'checkable': True,
-                     'testChecked': lambda editor: bool(editor.getFlags() & editor.ShowLineNumbers) },
-                ]},
+                {'title': 'Left Gutter',
+                 'items': leftGutter},
+                 {'title': 'Right Gutter',
+                 'items': rightGutter},
                 '-',
                 {'title': "Show Tabs And Spaces",
                  'callback': cls.on_actionShowTabsAndSpaces_toggled,
@@ -1535,7 +1641,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         items = self.application.supportManager.getActionItems(scope)
         def itemsToDict(items):
             for item in items:
-                yield [dict(title = item.name, image = item.TYPE), dict(title = item.bundle.name), dict(title = item.trigger)]
+                yield [dict(title = item.name, image = "bundle-item-%s" % item.TYPE), dict(title = item.bundle.name), dict(title = item.trigger)]
         index = self.mainWindow.bundleSelectorDialog.select(itemsToDict(items))
         if index is not None:
             self.insertBundleItem(items[index])
@@ -1573,6 +1679,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Drag and Drop
     #===========================================================================
     def dragEnterEvent(self, event):
+        self.setFocus(QtCore.Qt.MouseFocusReason)
         mimeData = event.mimeData()
         if mimeData.hasUrls() or mimeData.hasText():
             event.accept()
@@ -1580,7 +1687,7 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def dragMoveEvent(self, event):
         cursor = self.cursorForPosition(event.pos())
         self.setTextCursor(cursor)
-     
+    
     def dropEvent(self, event):
         """
         When a url or text is dropped
@@ -1607,7 +1714,4 @@ class PMXCodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     self.application.openFile(file)
         elif event.mimeData().hasText():
             self.textCursor().insertText(event.mimeData().text())
-
-    @QtCore.pyqtSlot()
-    def on_actionCopyPath_triggered(self):
-        QtGui.QApplication.clipboard().setText(self.filePath)
+        

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'resources\ui\configure\support.ui'
+# Form implementation generated from reading ui file 'resources/ui/configure/support.ui'
 #
-# Created: Wed May 09 07:32:31 2012
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Thu Jun  7 06:28:45 2012
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 

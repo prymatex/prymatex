@@ -4,25 +4,27 @@
 import re, os
 from functools import partial
 
-RE_SHELL_VAR = re.compile('(\$[\w\d]+)')
+RE_SHELL_VAR = re.compile('\$([\w\d]+)')
 
 def callback(match, context = None, sensitive = True, default = ''):
-    key = match.group().replace('$', '')
-    if callable(context):
-        context = context()
-    if not sensitive:
-        return context.get(key.lower(), context.get(key.upper(), default))
-    else:
+    key = match.group(1)
+    if sensitive:
         return context.get(key, default)
-
-environ_repl_callback = partial(callback, sensitive = False, context = os.environ)
+    else:
+        return context.get(key.lower(), context.get(key.upper(), default))
 
 #===============================================================================
 # Expand $exp taking os.environ as context
 #===============================================================================
-expand_shell_var = lambda path: RE_SHELL_VAR.sub(path, environ_repl_callback)
+def expand_shell_var(path, context = None, sensitive = True):
+    if context is not None and callable(context):
+        context = context()
+    elif context is None:
+        context = os.environ
+    
+    return RE_SHELL_VAR.sub(partial(callback, sensitive = sensitive, context = context), path)
 
-def fullsplit(path, result=None):
+def fullsplit(path, result = None):
     """
     Split a pathname into components (the opposite of os.path.join) in a platform-neutral way.
     """
@@ -35,5 +37,10 @@ def fullsplit(path, result=None):
         return result
     return fullsplit(head, [tail] + result)
 
+def issubpath(childPath, parentPath):
+    def fixpath(p):
+        return os.path.normpath(p) + os.sep
+    return fixpath(childPath).startswith(fixpath(parentPath))
+
 if __name__ == "__main__":
-    print expand_shell_var('$home/alfa')
+    print expand_shell_var("$PATH/alfa")

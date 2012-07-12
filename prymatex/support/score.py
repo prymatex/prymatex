@@ -19,28 +19,35 @@ class PMXScoreManager(object):
         self.scores = {}
     
     def score(self, search_scope, reference_scope):
-        maxi = 0
-        for scope in search_scope.split( ',' ):
-            arrays =  self.SPLITER.split(scope)
-            arrays = map(lambda s: s.strip(), arrays)
-            if len(arrays) == 1:
-                maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
-            elif len(arrays) > 1:
-                excluded = False
-                for a in arrays[1:]:
-                    if self.score_term( a, reference_scope ) > 0:
-                        excluded = True
-                        break
-                if not excluded:
-                    maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
-            elif len(arrays) < 1:
-                raise Exception("Error in scope string: '%s' %s is not a valid number of operands" % (search_scope, len(arrays)))
-        return maxi
-    
-    def score_term(self, search_scope, reference_scope):
-        #TODO: Resolver referencias con parentesis y otras cosas
         if reference_scope not in self.scores or search_scope not in self.scores[reference_scope]:
+            #Guardo resultados finales
             self.scores.setdefault(reference_scope, {})
+            maxi = 0
+            for scope in search_scope.split( ',' ):
+                arrays =  self.SPLITER.split(scope)
+                arrays = map(lambda s: s.strip(), arrays)
+                if len(arrays) == 1:
+                    maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
+                elif len(arrays) > 1:
+                    excluded = False
+                    for a in arrays[1:]:
+                        if self.score_term( a, reference_scope ) > 0:
+                            excluded = True
+                            break
+                    if not excluded:
+                        maxi = max([maxi, self.score_term( arrays[0], reference_scope )])
+                elif len(arrays) < 1:
+                    raise Exception("Error in scope string: '%s' %s is not a valid number of operands" % (search_scope, len(arrays)))
+            self.scores[reference_scope][search_scope] = maxi
+        return self.scores[reference_scope][search_scope]
+
+    def score_term(self, search_scope, reference_scope):
+        if reference_scope not in self.scores or search_scope not in self.scores[reference_scope]:
+            #Guardo resultados parciales
+            self.scores.setdefault(reference_scope, {})
+            #Parentesis
+            if search_scope.startswith("(") and search_scope.endswith(")"):
+                search_scope = search_scope[1:-1]
             if search_scope.find(self.OR):
                 comparation = max
                 scopes = search_scope.split(self.OR)
@@ -89,13 +96,40 @@ class PMXScoreManager(object):
             if currentReference == currentPending or currentReference.startswith("%s." % currentPending):
                 point_score = (2 ** cls.POINT_DEPTH) - currentReference.count( '.' ) + currentPending.count( '.' )
                 result += point_score * multiplier
-                #TODO: Sospecho que quitando los pop se puede hacer mas rapido
                 pending.pop()
                 currentPending = pending[-1] if pending else None
             multiplier = multiplier / cls.BASE
-            #TODO: Sospecho que quitando los pop se puede hacer mas rapido
             reference_array.pop()
             currentReference = reference_array[-1] if reference_array else None
         if pending:
-            result = 0
+            return 0
         return result
+        
+    # TODO DebugME
+    @classmethod  
+    def score_array_startswith_index(cls, search_array, reference_array):
+        """ Esta funcion pretende apurar el trabajo de obtener el score no usando los pop's y trabajando con cadenas """
+        lenSearch = -len(search_array)
+        lenReference = -len(reference_array)
+        indexReference = indexPending = -1
+        multiplier = cls.START_VALUE
+        result = 0
+        while indexPending >= lenSearch and indexReference >= lenReference:
+            if reference_array[indexReference] == search_array[indexPending] or reference_array[indexReference].startswith("%s." % search_array[indexPending]):
+                point_score = (2 ** cls.POINT_DEPTH) - reference_array[indexReference].count( '.' ) + search_array[indexPending].count( '.' )
+                result += point_score * multiplier
+                indexPending -= 1
+            multiplier = multiplier / cls.BASE
+            indexReference -= 1
+        if indexPending > lenSearch:
+            return 0
+        return result
+        
+if __name__ == '__main__':
+    scoreManager = PMXScoreManager()
+    scopeTags = "text.html -entity.other.attribute-name -string.quoted, invalid.illegal.incomplete.html" #Tags
+    scopeAttrs = "text.html punctuation.definition.tag -source, text.html meta.tag -entity.other.attribute-name -source"
+    reference = "text.html.basic meta.tag.any.html punctuation.definition.tag.html"
+    print scoreManager.score(scopeTags, reference)
+    print scoreManager.score(scopeAttrs, reference)
+    

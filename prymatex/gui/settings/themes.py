@@ -3,6 +3,8 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
+
 from prymatex.ui.configure.theme import Ui_FontThemeWidget
 from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.models.delegates import PMXColorDelegate, PMXFontStyleDelegate
@@ -42,6 +44,8 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
 
     NAMESPACE = "editor"
     TITLE = "Font and Themes"
+    ICON = resources.getIcon("textcolor")
+    
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
         PMXSettingTreeNode.__init__(self, "theme", settingGroup)
@@ -126,8 +130,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
     
     @QtCore.pyqtSignature('')
     def on_pushButtonAdd_pressed(self):
-        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex())
-        theme = self.application.supportManager.getTheme(unicode(uuid))
+        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
         style = self.application.supportManager.createThemeStyle('untitled', unicode(self.comboBoxScope.currentText()), theme)
     
     @QtCore.pyqtSignature('')
@@ -138,8 +141,7 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
             self.application.supportManager.deleteThemeStyle(style)
     
     def on_pushButtonColor_pressed(self, element):
-        uuid = self.comboBoxThemes.itemData(self.comboBoxThemes.currentIndex())
-        theme = self.application.supportManager.getTheme(unicode(uuid))
+        theme = self.comboBoxThemes.model().themeForIndex(self.comboBoxThemes.currentIndex())
         settings = theme.settings
         color, ok = QtGui.QColorDialog.getRgba(settings[element].rgba(), self)
         if ok:
@@ -163,5 +165,9 @@ class PMXThemeWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_FontThemeWidget):
         self.tableView.setStyleSheet(tableStyle)
         
         if changeSettings:
-            self.settingGroup.setValue('theme', unicode(theme.uuid))
+            self.settingGroup.setValue('theme', unicode(theme.uuid).upper())
+            message = "<b>%s</b> theme set " % theme.name
+            if theme.author is not None:
+                message += "<i>(by %s)</i>" % theme.author
+            self.application.showMessage(message)    
         

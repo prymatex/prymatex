@@ -11,11 +11,15 @@ from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
 from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.gui.project.proxies import PMXProjectTreeProxyModel
 from prymatex.gui.project.base import PMXProject
+from prymatex.core.exceptions import ProjectExistsException, FileException
+from prymatex.utils.i18n import ugettext as _
 
 class PMXProjectManager(QtCore.QObject):
     #Signals
-    projectClosed = QtCore.pyqtSignal(object)
-    projectOpened = QtCore.pyqtSignal(object)
+    projectAdded = QtCore.pyqtSignal(object)
+    projectRemoved = QtCore.pyqtSignal(object)
+    projectClose = QtCore.pyqtSignal(object)
+    projectOpen = QtCore.pyqtSignal(object)
     
     #Settings
     SETTINGS_GROUP = 'ProjectManager'
@@ -28,6 +32,7 @@ class PMXProjectManager(QtCore.QObject):
     
     def __init__(self, application):
         QtCore.QObject.__init__(self)
+        self.fileManager = application.fileManager
         self.projectTreeModel = PMXProjectTreeModel(self)
         
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
@@ -49,7 +54,7 @@ class PMXProjectManager(QtCore.QObject):
         for path in self.knownProjects[:]:
             try:
                 PMXProject.loadProject(path, self)
-            except exceptions.PrymatexFileNotExistsException as e:
+            except exceptions.FileNotExistsException as e:
                 print e
                 self.knownProjects.remove(path)
                 self.settings.setValue('knownProjects', self.knownProjects)
@@ -78,7 +83,21 @@ class PMXProjectManager(QtCore.QObject):
         elif not reuseDirectory:
             raise Exception()
         project = PMXProject(directory, { "name": name })
-        project.save()
+        try:
+            project.save()
+        except ProjectExistsException:
+            rslt = QtGui.QMessageBox.information(None, _("Project already created on %s") % name,
+                                          _("Directory %s already contains .pmxproject directory structure. "
+                                            "Unless you know what you are doing, Cancel and import project,"
+                                            " if it still fails, choose overwirte. Overwrite?") % directory,
+                                          QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel) 
+            if rslt == QtGui.QMessageBox.Cancel:
+                return
+            try:
+                project.save(overwirte = True)
+            except FileException as excp:
+                QtGui.QMessageBox.critical(None, _("Project creation failed"), 
+                                           _("<p>Project %s could not be created<p><pre>%s</pre>") % (name, excp))
         self.addProject(project)
         self.appendToKnowProjects(project)
         return project
@@ -116,7 +135,8 @@ class PMXProjectManager(QtCore.QObject):
         if project.hasBundles() or project.hasThemes():
             self.application.supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
-        
+        self.projectAdded.emit(project)
+
     def modifyProject(self, project):
         pass
 
@@ -143,4 +163,6 @@ class PMXProjectManager(QtCore.QObject):
         self.projectTreeModel.dataChanged.emit()
         
     def findProjectForPath(self, path):
-        return self.projectTreeModel.projectForPath(path)
+        for project in self.getAllProjects():
+            if self.application.fileManager.issubpath(path, project.path):
+                return project

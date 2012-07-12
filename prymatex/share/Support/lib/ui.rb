@@ -81,7 +81,7 @@ module TextMate
         raise if options.empty?
 
         support = ENV['TM_SUPPORT_PATH']
-        nib     = support + '/nibs/SimpleNotificationWindow.nib'
+        nib     = support + '/guis/SimpleNotificationWindow'
     
         plist = Hash.new
         plist['title']    = options[:title]   || ''
@@ -235,7 +235,7 @@ module TextMate
           params["string"] = options[:default] || ""
           params["items"] = items
 
-          return_plist = %x{#{TM_DIALOG} -cmp #{e_sh params.to_plist} #{e_sh(ENV['TM_SUPPORT_PATH'] + "/nibs/RequestItem")}}
+          return_plist = %x{#{TM_DIALOG} -cmp #{e_sh params.to_plist} #{e_sh(ENV['TM_SUPPORT_PATH'] + "/guis/RequestItem")}}
           return_hash = OSX::PropertyList::load(return_plist)
 
           # return string is in hash->result->returnArgument.
@@ -300,7 +300,7 @@ module TextMate
 
             # this is a workaround for a presumed Leopard bug, see log entry for revision 8566 for more info
             if animate = start_parameters['progressAnimate']
-              open("|#{TM_DIALOG} -t#{@dialog_token}", "w") { |io| io << { 'progressAnimate' => animate }.to_plist }
+              open("|#{TM_DIALOG} -t #{@dialog_token}", "w") { |io| io << { 'progressAnimate' => animate }.to_plist }
             end
           end
 
@@ -353,7 +353,7 @@ module TextMate
         params["prompt"] = options[:prompt] || ""
         params["string"] = options[:default] || ""
         
-        return_plist = %x{#{TM_DIALOG} -cmp #{e_sh params.to_plist} #{e_sh(ENV['TM_SUPPORT_PATH'] + "/nibs/#{nib_name}")}}
+        return_plist = %x{#{TM_DIALOG} -cmp #{e_sh params.to_plist} #{e_sh(ENV['TM_SUPPORT_PATH'] + "/guis/#{nib_name}")}}
         return_hash = OSX::PropertyList::load(return_plist)
         
         # return string is in hash->result->returnArgument.
@@ -427,7 +427,7 @@ require "test/unit"
 # = Misc =
 # ========
 # params = {'title' => "Hotness", 'prompt' => 'Please enter some hotness', 'string' => 'teh hotness'}
-# return_value = %x{#{TM_DIALOG} -cmp #{e_sh params.to_plist} #{e_sh(ENV['TM_SUPPORT_PATH'] + '/nibs/RequestString')}}
+# return_value = %x{#{TM_DIALOG} -cmp #{e_sh params.to_plist} #{e_sh(ENV['TM_SUPPORT_PATH'] + '/guis/RequestString')}}
 # return_hash = OSX::PropertyList::load(return_value)
 # puts return_hash['result'].inspect
 

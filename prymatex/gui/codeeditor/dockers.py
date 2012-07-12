@@ -6,7 +6,7 @@ from PyQt4 import QtGui, QtCore
 from prymatex import resources
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core.plugin.dock import PMXBaseDock
-from prymatex.gui.codeeditor.editor import PMXCodeEditor
+from prymatex.gui.codeeditor.editor import CodeEditor
 
 class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F7"
@@ -35,7 +35,7 @@ class PMXCodeSymbolsDock(QtGui.QDockWidget, PMXBaseDock):
         mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     def on_mainWindow_currentEditorChanged(self, editor):
-        if isinstance(editor, PMXCodeEditor):
+        if isinstance(editor, CodeEditor):
             self.tableViewSymbols.setModel(editor.symbolListModel)
         elif editor is None:
             #Clear
@@ -78,7 +78,7 @@ class PMXCodeBookmarksDock(QtGui.QDockWidget, PMXBaseDock):
         mainWindow.currentEditorChanged.connect(self.on_mainWindow_currentEditorChanged)
 
     def on_mainWindow_currentEditorChanged(self, editor):
-        if isinstance(editor, PMXCodeEditor):
+        if isinstance(editor, CodeEditor):
             self.tableViewBookmarks.setModel(editor.bookmarkListModel)
         elif editor is None:
             #Clear

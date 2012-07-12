@@ -3,6 +3,7 @@
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex import resources
 from prymatex.ui.support.editor import Ui_BundleEditor
 from prymatex.gui.support import widgets
 from prymatex.core.plugin import PMXBaseWidgetComponent
@@ -76,6 +77,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
                          widgets.PMXPreferenceWidget(self),
                          widgets.PMXLanguageWidget(self),
                          widgets.PMXMacroWidget(self),
+                         widgets.PMXProjectWidget(self),
                          widgets.PMXEditorBaseWidget(self) ]
         for editor in self.editors:
             self.indexes[editor.TYPE] = self.stackedWidget.addWidget(editor)
@@ -115,6 +117,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         
     def on_actionTemplate_triggered(self):
         self.createBundleItem(u"untitled", "template")
+        
+    def on_actionProject_triggered(self):
+        self.createBundleItem(u"untitled", "project")
         
     def on_actionTemplateFile_triggered(self):
         index = self.treeView.currentIndex()
@@ -168,6 +173,9 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         action = QtGui.QAction("New Template", self)
         action.triggered.connect(self.on_actionTemplate_triggered)
         self.toolbarMenu.addAction(action)
+        action = QtGui.QAction("New Project", self)
+        action.triggered.connect(self.on_actionProject_triggered)
+        self.toolbarMenu.addAction(action)
         self.templateFileAction = QtGui.QAction("New Template File", self)
         self.templateFileAction.triggered.connect(self.on_actionTemplateFile_triggered)
         self.toolbarMenu.addAction(self.templateFileAction)
@@ -181,7 +189,7 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
         
         def conditionalEnabledTemplateFile():
             node = self.proxyTreeModel.node(self.treeView.currentIndex())
-            self.templateFileAction.setEnabled(not node.isRootNode() and (node.TYPE == "template" or node.TYPE == "templatefile"))
+            self.templateFileAction.setEnabled(not node.isRootNode() and (node.TYPE in ["template", "templatefile", "project"]))
         self.toolbarMenu.aboutToShow.connect(conditionalEnabledTemplateFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)
@@ -197,13 +205,14 @@ class PMXBundleEditor(QtGui.QDialog, Ui_BundleEditor, PMXBaseWidgetComponent):
     
     def configSelectTop(self):
         self.comboBoxItemFilter.addItem("Show all")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/languages.png"), "Languages", "syntax")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/snippets.png"), "Snippets", "snippet")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/macros.png"), "Macros", "macro")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/commands.png"), "Commands", "command")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/drag-commands.png"), "DragCommands", "dragcommand")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/preferences.png"), "Preferences", "preference")
-        self.comboBoxItemFilter.addItem(QtGui.QIcon(":/icons/bundles/templates.png"), "Templates", "template templatefile")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-syntax"), "Languages", "syntax")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-snippet"), "Snippets", "snippet")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-macro"), "Macros", "macro")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-command"), "Commands", "command")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-dragcommand"), "DragCommands", "dragcommand")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-preference"), "Preferences", "preference")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-template"), "Templates", "template templatefile")
+        self.comboBoxItemFilter.addItem(resources.getIcon("bundle-item-project"), "Projects", "project templatefile")
     
     #==========================================================
     # Tree View

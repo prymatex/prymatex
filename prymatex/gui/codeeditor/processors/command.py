@@ -23,6 +23,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.tabTriggered = settings.get("tabTriggered", False)
         self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
+        self.errorCommand = settings.get("errorCommand", False)
 
     def formatAsXml(self, text, firstBlock, lastBlock, startIndex, endIndex):
         result = []
@@ -36,13 +37,15 @@ class PMXCommandProcessor(PMXCommandProcessor):
                 scopes = block.userData().scopeRanges(end = endIndex)
             else:
                 scopes = block.userData().scopeRanges()
+            lineXML = ""
             for (start, end), scope in scopes:
                 ss = scope.split()
                 token = "".join(map(lambda scope: "<" + scope + ">", ss))
                 token += line[start:end]
                 ss.reverse()
                 token += "".join(map(lambda scope: "</" + scope + ">", ss))
-                result.append(token)
+                lineXML += token
+            result.append(lineXML)
             if block == lastBlock:
                 break
             block = block.next()
@@ -83,7 +86,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         return self.selection
     
     def word(self, format = None):
-        word, start, end = self.editor.getCurrentWord()
+        word, start, end = self.editor.currentWord()
         return word
     
     #beforeRunningCommand
@@ -103,8 +106,10 @@ class PMXCommandProcessor(PMXCommandProcessor):
     
     # deleteFromEditor
     def deleteWord(self):
+        _, start, end = self.editor.currentWord()
         cursor = self.editor.textCursor()
-        cursor.select(QtGui.QTextCursor.WordUnderCursor)
+        cursor.setPosition(start)
+        cursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)
         cursor.removeSelectedText()
         
     def deleteSelection(self):
@@ -125,12 +130,16 @@ class PMXCommandProcessor(PMXCommandProcessor):
     def deleteDocument(self):
         print "borrar documento"
         self.editor.document().clear()
-        
+       
     # Outpus function
     def error(self, context):
         #TODO: Mover esto a un lugar donde no dependa del processor mostrar un error en el borwser, quiza a la mainWindow
         #para poder llamarlos como showErrorInBrowser o algo asi :)
+        if self.errorCommand:
+            #Prevenir la entrada recursiva
+            raise Exception(context.errorValue)
         from prymatex.support.utils import makeHyperlinks
+        from prymatex.utils import html
         command = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             
@@ -138,17 +147,17 @@ class PMXCommandProcessor(PMXCommandProcessor):
             echo -e "<pre>%(output)s</pre>"
             echo -e "<p>Exit code was: %(exitcode)d</p>"
             html_footer
-        ''' % {'output': context.errorValue, 
-               'name': context.description(),
+        ''' % {'output': html.escape(context.errorValue),
+               'name': html.escape(context.description()),
                'exitcode': context.outputType}
         commandHash = { 'command': command, 
-                           'name': "Error" + context.bundleItem.name,
+                           'name': "Error runing %s" % context.description(),
                           'input': 'none',
                          'output': 'showAsHTML' }
         command = PMXCommand(self.editor.application.supportManager.uuidgen(), dataHash = commandHash)
         command.setBundle(context.bundleItem.bundle)
         command.setManager(context.bundleItem.manager)
-        self.editor.insertBundleItem(command)
+        self.editor.insertBundleItem(command, errorCommand = True)
         
     def discard(self, context):
         pass
@@ -165,8 +174,14 @@ class PMXCommandProcessor(PMXCommandProcessor):
         
     def replaceDocument(self, context):
         #1 Recuperar la posicion actual del cursor
+        position = self.editor.textCursor().position()
+        currentText = self.editor.toPlainText()
+        newText = context.outputValue
+        #if currentText[:position] != newText[:position]:
+        #    position += (len(newText) - len(currentText))
+        self.editor.setPlainText(newText)
         cursor = self.editor.textCursor()
-        self.editor.document().setPlainText(context.outputValue)
+        cursor.setPosition(position)
         self.editor.setTextCursor(cursor)
         
     def insertText(self, context):
@@ -218,9 +233,9 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
         
     def createNewDocument(self, context):
-        editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
-        editor_widget.codeEdit.setPlainText(context.outputValue)
+        editor= self.editor.mainWindow.addEmptyEditor()
+        editor.setPlainText(context.outputValue)
         
     def openAsNewDocument(self, context):
-        editor_widget = self.editor.mainWindow.currentTabWidget.appendEmptyTab()
-        editor_widget.codeEdit.setPlainText(context.outputValue)
+        editor= self.editor.mainWindow.addEmptyEditor()
+        editor.setPlainText(context.outputValue)

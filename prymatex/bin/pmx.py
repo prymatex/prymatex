@@ -14,24 +14,33 @@ else:
 if project_basedir not in sys.path:
     sys.path.insert(0, project_basedir)
 
+prymatexAppInstance = None
+
 # TODO: Accept Qt Arguments to QtApplication
 def runPrymatexApplication(options, files):
-    from prymatex.core import app, exceptions
+    from prymatex.core.app import PMXApplication
+    from prymatex.core import exceptions
     
-    pmx = None
-    try:
-        pmx = app.PMXApplication()
-        
-        pmx.buildSettings(options.profile)
-        pmx.setupLogging(options.verbose, options.log_pattern)
-        
-        pmx.replaceSysExceptHook()
-        pmx.checkSingleInstance()
+    def runPrymatexInstance(instanceOptions, instanceFiles = []):
+        global prymatexAppInstance
+        if prymatexAppInstance is not None:
+            prymatexAppInstance.unloadGraphicalUserInterface()
+            del prymatexAppInstance
+        prymatexAppInstance = PMXApplication()
+        prymatexAppInstance.buildSettings(instanceOptions.profile)
+        prymatexAppInstance.setupLogging(instanceOptions.verbose, instanceOptions.log_pattern)
+    
+        prymatexAppInstance.replaceSysExceptHook()
+        prymatexAppInstance.checkSingleInstance()
         if options.reset_settings:
-            pmx.resetSettings()
-        pmx.loadGraphicalUserInterface()
-        pmx.openArgumentFiles(files)
-        return pmx.exec_()
+            prymatexAppInstance.resetSettings()
+        prymatexAppInstance.loadGraphicalUserInterface()
+        prymatexAppInstance.openArgumentFiles(instanceFiles)
+        return prymatexAppInstance.exec_()
+
+    returnCode = -1
+    try:
+        returnCode = runPrymatexInstance(options, files)
     except exceptions.AlreadyRunningError as ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
@@ -39,11 +48,13 @@ def runPrymatexApplication(options, files):
         from traceback import format_exc
         traceback = format_exc()
         print(traceback)
-        # Something went very bad tell the user something about the emergency
-        #from prymatex.gui.emergency.crashdialog import PMXCrashDialog
-        #crashDialog = PMXCrashDialog(traceback)
-        #return crashDialog.exec_()
-    return -1
+
+    if returnCode == PMXApplication.RESTART_CODE:
+        options.profile = ""
+        while returnCode == PMXApplication.RESTART_CODE:
+            returnCode = runPrymatexInstance(options)
+
+    return returnCode
 
 def main(args):
     from prymatex.core import cliparser

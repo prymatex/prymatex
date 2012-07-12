@@ -35,8 +35,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         QtGui.QDockWidget.__init__(self, parent)
         PMXBaseDock.__init__(self)
         self.setupUi(self)
-        self.projectTreeProxyModel = self.application.projectManager.projectTreeProxyModel
-
+        self.projectManager = self.application.projectManager
+        self.projectTreeProxyModel = self.projectManager.projectTreeProxyModel
+    
         self.setupPropertiesDialog()
         self.setupTreeViewProjects()
 
@@ -45,6 +46,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
         mainWindow.projects = self
     
+    def addFileSystemNodeFormater(self, formater):
+        self.projectTreeProxyModel.addNodeFormater(formater)
+        
     def keyPressEvent(self, event):
         print event
         return QtGui.QDockWidget.keyPressEvent(self, event) 
@@ -122,11 +126,16 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             self.extendFileSystemItemMenu(contextMenu, node)
         # contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self, useSeparatorName = True)
         contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self)
+        
+        for action in contextMenuActions:
+            if hasattr(action, "callback"):
+                action.triggered.connect(action.callback)
+                
         return contextMenu
 
     def extendFileSystemItemMenu(self, menu, node):
         utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
-        utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal, "--properties", self.actionProperties], section = -1)
+        utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
         if isinstance(node, PMXProject):
             utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
             utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
@@ -135,6 +144,16 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
             utils.extendMenuSection(menu, self.actionOpen, section = "open", position = 0)
+            
+        #Ahora los addons
+        addonMenues = [ "-" ]
+        for addon in self.addons:
+            addonMenues.extend(addon.contributeToContextMenu(node))
+        if len(addonMenues) > 1:
+            utils.extendMenuSection(menu, addonMenues, section = -1)
+        
+        #El final
+        utils.extendMenuSection(menu, ["--properties", self.actionProperties], section = -1)
 
     #================================================
     # Tree View Project
@@ -219,10 +238,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     @QtCore.pyqtSlot()
     def on_actionProperties_triggered(self):
-        mimeData = self.projectTreeProxyModel.mimeData( [ self.treeViewProjects.currentIndex() ])
-        self.application.clipboard().setMimeData(mimeData)
-        treeNode = self.currentNode()
-        self.propertiesDialog.exec_(treeNode)
+        self.propertiesDialog.exec_(self.currentNode())
 
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):
@@ -241,8 +257,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
     @QtCore.pyqtSlot()
     def on_actionOpenSystemEditor_triggered(self):
-        path = self.currentPath()
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % path, QtCore.QUrl.TolerantMode))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % self.currentPath(), QtCore.QUrl.TolerantMode))
     
     @QtCore.pyqtSlot()
     def on_pushButtonCollapseAll_pressed(self):

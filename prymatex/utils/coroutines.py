@@ -258,6 +258,10 @@ class Task( QObject ):
         self.emitUnhandled = False    # emits done with unhandled exception as Return.value
 
 
+    def isReady(self):
+        return self.state in [ Task.DONE, Task.EXCEPTION ]
+
+
     # Do not pass exceptions to scheduler.
     #
     # Useful with WaitTask of WaitFirstTask calls.

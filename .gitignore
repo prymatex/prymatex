@@ -2,10 +2,7 @@
 *~
 dict.*
 *.swp
-.ropeproject
-.pydevproject
-.settings
-.directory
+.*
 *.log
 *.egg-info
 *.pot
@@ -14,6 +11,5 @@ docs/_build/
 build/
 dist/
 src/
-.pmxproject
 *.png
 fab*

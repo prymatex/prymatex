@@ -221,6 +221,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         self.comboBoxOutput.addItem("Show as HTML", "showAsHTML")
         self.comboBoxOutput.addItem("Show as Tool Tip", "showAsTooltip")
         self.comboBoxOutput.addItem("Create New Document", "createNewDocument")
+        self.comboBoxOutput.addItem("Open as New Document", "openAsNewDocument")
         self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
         
         self.command.setTabStopWidth(TABWIDTH)
@@ -527,10 +528,10 @@ class PMXPreferenceWidget(PMXEditorBaseWidget, Ui_Preference):
     def on_settings_textChanged(self):
         #Convertir a dict
         try:
-            self.changes['content'] = ast.literal_eval(self.command.toPlainText())
+            self.changes['settings'] = ast.literal_eval(self.settings.toPlainText())
         except:
             pass
-    
+
     @property
     def title(self):
         if self.bundleItem != None:
@@ -615,3 +616,46 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
     def edit(self, bundle):
         super(PMXBundleWidget, self).edit(bundle)
         self.treeMenuModel.setBundle(bundle)
+
+class PMXProjectWidget(PMXEditorBaseWidget, Ui_Template):
+    TYPE = 'project'
+    DEFAULTS = {
+                'command': '''if [[ ! -f "$TM_NEW_PROJECT_LOCATION" ]]; then
+  TM_YEAR=`date +%Y` \
+  TM_DATE=`date +%Y-%m-%d` \
+  perl -pe 's/\$\{([^}]*)\}/$ENV{$1}/g' \
+     < template_in.txt > "$TM_NEW_PROJECT_LOCATION"
+fi"'''}
+    def __init__(self, parent = None):
+        PMXEditorBaseWidget.__init__(self, parent)
+        self.setupUi(self)
+        self.comboBoxOutput.addItem("Insert as Text", "insertText")
+        self.command.setTabStopWidth(TABWIDTH)
+
+    @QtCore.pyqtSlot()
+    def on_command_textChanged(self):
+        text = self.command.toPlainText()
+        if self.bundleItem.command != text:
+            self.changes['command'] = text
+        else:
+            self.changes.pop('command', None)
+    
+    @QtCore.pyqtSlot(str)
+    def on_lineEditExtension_textEdited(self, text):
+        if text != self.bundleItem.extension:
+            self.changes['extension'] = text
+        else:
+            self.changes.pop('extension', None)
+            
+    @property
+    def title(self):
+        if self.bundleItem != None:
+            return 'Edit Template: "%s"' % self.bundleItem.name
+        return super(PMXProjectWidget, self).title
+
+    def edit(self, bundleItem):
+        super(PMXProjectWidget, self).edit(bundleItem)
+        command = bundleItem.command
+        if command is None:
+            command = self.DEFAULTS['command']
+        self.command.setPlainText(command)

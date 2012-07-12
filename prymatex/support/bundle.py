@@ -5,6 +5,7 @@ import os, re, shutil
 from copy import copy
 
 from prymatex.utils import plist
+from prymatex.support import utils
 
 """
 Este es el unico camino -> http://manual.macromates.com/en/
@@ -42,6 +43,7 @@ class PMXManagedObject(object):
     def hash(self):
         return { 'uuid': unicode(self.uuid).upper() }
 
+    
     def path(self, namespace):
         return self.sources[namespace][self._PATH]
 
@@ -150,7 +152,7 @@ class PMXBundle(PMXManagedObject):
             
     def buildEnvironment(self):
         env = copy(self.manager.buildEnvironment())
-        env['TM_BUNDLE_PATH'] = self.path
+        env['TM_BUNDLE_PATH'] = self.currentPath
         if self.support != None:
             env['TM_BUNDLE_SUPPORT'] = self.support
         return env
@@ -270,13 +272,25 @@ class PMXBundleItem(PMXManagedObject):
         pass
         
 class PMXRunningContext(object):
-    def __init__(self, bundleItem):
+    def __init__(self, bundleItem, shellCommand, environment):
         self.bundleItem = bundleItem
         self.inputType, self.inputValue = None, None
-        self.shellCommand, self.environment = "", {}
+        self.shellCommand = shellCommand
+        self.environment = environment
         self.asynchronous = False
         self.outputValue = self.outputType = None
         self.workingDirectory = None
         
+    def __enter__(self):
+        self.shellCommand, self.environment, self.tempFile = utils.prepareShellScript(self.shellCommand, self.environment)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        if not self.asynchronous:
+            self.removeTempFile()
+        
     def description(self):
-        return self.bundleItem.name
+        return self.bundleItem.name or "No Name"
+        
+    def removeTempFile(self):
+        utils.deleteFile(self.tempFile)

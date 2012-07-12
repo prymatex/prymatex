@@ -117,7 +117,7 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
         dlg.buttonStartPrymatex.setText("Restart Prymatex")
         dlg.buttonExit.setVisible(False)
         if dlg.exec_() == cls.Accepted:
-            QtGui.QApplication.exit(3)
+            return dlg.profiles[dlg.listProfiles.currentRow()]["name"]
 
     @classmethod
     def selectProfile(cls, profilesFilePath, parent = None):
