@@ -6,11 +6,12 @@ from bisect import bisect
 
 import uuid as uuidmodule
 from PyQt4 import QtCore, QtGui
-from prymatex.support.manager import PMXSupportBaseManager
 
 from prymatex.core.settings import pmxConfigPorperty
+from prymatex.core.cache import memoized
 from prymatex.gui.support.models import PMXBundleTreeModel, PMXBundleTreeNode, PMXThemeListModel, PMXThemeStylesTableModel, PMXThemeStyleRow, PMXProcessTableModel
 from prymatex.gui.support.proxies import PMXBundleTreeProxyModel, PMXBundleTypeFilterProxyModel, PMXThemeStyleTableProxyModel, PMXBundleProxyModel, PMXSyntaxProxyModel, PMXTemplateProxyModel, PMXProjectProxyModel
+from prymatex.support.manager import PMXSupportBaseManager
 
 class PMXBundleMenuGroup(QtCore.QObject):
     def __init__(self, manager):
@@ -379,19 +380,22 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     # PREFERENCES OVERRIDE INTERFACE
     #---------------------------------------------------
+    @memoized
     def getAllPreferences(self):
         return self.preferenceProxyModel.getAllItems()
     
     #---------------------------------------------------
     # TABTRIGGERS OVERRIDE INTERFACE
     #---------------------------------------------------
+    @memoized
     def getAllTabTriggerItems(self):
         tabTriggers = []
         for item in self.actionItemsProxyModel.getAllItems():
             if item.tabTrigger != None:
                 tabTriggers.append(item)
         return tabTriggers
-            
+        
+    @memoized
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         items = []
         for item in self.actionItemsProxyModel.getAllItems():
@@ -402,6 +406,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     #---------------------------------------------------
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
+    @memoized
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         items = []
         for item in self.actionItemsProxyModel.getAllItems():

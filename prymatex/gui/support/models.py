@@ -351,10 +351,10 @@ class PMXThemeStylesTableModel(QtCore.QAbstractTableModel):
             style = self.styles[row]
             if column == 0:
                 self.manager.updateThemeStyle(style, name = value)
-            elif column == 1 and value.canConvert(QtCore.QVariant.Color):
-                self.manager.updateThemeStyle(style, settings = {'foreground' : QtGui.QColor(value) })
-            elif column == 2 and value.canConvert(QtCore.QVariant.Color):
-                self.manager.updateThemeStyle(style, settings = {'background' : QtGui.QColor(value) })
+            elif column == 1:
+                self.manager.updateThemeStyle(style, settings = {'foreground' : value })
+            elif column == 2:
+                self.manager.updateThemeStyle(style, settings = {'background' : value })
             elif column == 3:
                 self.manager.updateThemeStyle(style, settings = {'fontStyle' : value })
             self.dataChanged.emit(index, index)
