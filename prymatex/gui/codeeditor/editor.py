@@ -986,6 +986,17 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.completerMode.setCompletionPrefix(currentAlreadyTyped)
             self.completerMode.complete(self.cursorRect())
     
+    def showCachedCompleter(self):
+        if not self.completerMode.hasSource("default"):
+            return
+        currentAlreadyTyped = self.currentWord(direction = "left", search = False)[0]
+        if currentAlreadyTyped:
+            self.completerMode.setActivatedCallback(None)
+            self.completerMode.setStartCursorPosition(self.textCursor().position() - len(currentAlreadyTyped))
+            self.completerMode.setSource("default")
+            self.completerMode.setCompletionPrefix(currentAlreadyTyped)
+            self.completerMode.complete(self.cursorRect())
+    
     def switchCompleter(self):
         settings = self.currentPreferenceSettings()
         if not self.completerMode.hasSource("default"):
