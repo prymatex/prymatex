@@ -496,7 +496,7 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
         for columnIndex in range(self.completionModel().sourceModel().columnCount()):
             width += self.popup().sizeHintForColumn(columnIndex)
         self.popupView.setMinimumWidth(width)
-        
+      
     def hasSource(self, source):
         return source in self.activeSources
         
@@ -510,6 +510,12 @@ class PMXCompleterEditorMode(QtGui.QCompleter, PMXBaseEditorMode):
 
     def setActivatedCallback(self, callback):
         self.activatedCallback = callback
+
+    def setSource(self, source):
+        self.activeSources.append(source)
+        self.currentSource = source
+        self.completionModel().sourceModel().setSuggestions(self.completerSuggestions[source])
+        self.fixPopupViewSize()
 
     def setSuggestions(self, suggestions, source):
         self.completerSuggestions[source] = suggestions

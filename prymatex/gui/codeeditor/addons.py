@@ -27,23 +27,14 @@ class CodeEditorObjectAddon(QtCore.QObject, PMXBaseEditorAddon):
 class CompleterAddon(CodeEditorObjectAddon):
     def __init__(self, parent):
         CodeEditorObjectAddon.__init__(self, parent)
-        self.positionCounter = []
 
     def initialize(self, editor):
         CodeEditorObjectAddon.initialize(self, editor)
         self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
     
     def on_editor_keyPressEvent(self, event):
-        if not event.modifiers() and RE_CHAR.match(event.text()):
-            if not self.positionCounter or self.positionCounter[-1] + 1 == self.editor.textCursor().position():
-                self.positionCounter.append(self.editor.textCursor().position())
-                if len(self.positionCounter) == 3:
-                    self.editor.runCompleter()
-                    self.positionCounter = []
-            else:
-                self.positionCounter = []
-        elif self.positionCounter:
-            self.positionCounter = []
+        if event.text() and self.editor.currentWord(direction = "left", search = False)[0]:
+            self.editor.showCachedCompleter()
         
 class SmartUnindentAddon(CodeEditorObjectAddon):
     def initialize(self, editor):
