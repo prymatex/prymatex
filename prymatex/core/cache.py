@@ -30,4 +30,7 @@ def removeMemoizedArgument(key):
 def removeMemoizedFunction(function):
     full_func_name = function.__module__ + '.' + function.func_name
     cacheManager = QtCore.QCoreApplication.instance().cacheManager
-    del cacheManager.memoize[full_func_name]
+    try:
+        del cacheManager.memoize[full_func_name]
+    except KeyError as error:
+        pass
