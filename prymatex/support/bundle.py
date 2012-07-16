@@ -293,4 +293,5 @@ class PMXRunningContext(object):
         return self.bundleItem.name or "No Name"
         
     def removeTempFile(self):
-        utils.deleteFile(self.tempFile)
+        if os.path.exists(self.tempFile):
+            utils.deleteFile(self.tempFile)
