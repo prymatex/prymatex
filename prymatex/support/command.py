@@ -112,6 +112,9 @@ class PMXCommand(PMXBundleItem):
         handlerFunction = getattr(processor, outputHandler, None)
         if handlerFunction is not None:
             handlerFunction(context)
+        
+        #Delete temp file
+        context.removeTempFile()
 
 class PMXDragCommand(PMXCommand):
     KEYS = [    'draggedFileExtensions' ]
