@@ -20,8 +20,8 @@ class PMXProcessDock(QtGui.QDockWidget, PMXBaseDock):
     
     def __init__(self, parent):
         QtGui.QDockWidget.__init__(self, parent)
-        self.setWindowTitle(_("Process"))
-        self.setObjectName(_("ProcessDock"))
+        self.setWindowTitle(_("External process"))
+        self.setObjectName(_("ExternalProcessDock"))
         PMXBaseDock.__init__(self)
         self.processTableModel = self.application.supportManager.processTableModel
         self.tableViewProcess = QtGui.QTableView()

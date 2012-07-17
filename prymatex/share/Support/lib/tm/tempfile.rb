@@ -27,8 +27,10 @@ module TextMate
         
         if ENV.has_key?('TM_PID')
           unique_id = ENV["TM_PID"].to_i
-        else
+        elsif ENV.has_key?('LOGNAME')
           unique_id = ENV['LOGNAME'].sum(10)
+        else
+          unique_id = ENV['USER'].sum(10)
         end
         
         begin
