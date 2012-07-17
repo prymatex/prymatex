@@ -56,11 +56,11 @@ class PMXProjectTreeModel(TreeModel):
 	
     def refresh(self, index):
         node = self.node(index)
-        while not os.path.exists(node.path):
+        while not node.isRootNode() and not os.path.exists(node.path):
             index = index.parent()
             node = self.node(index)
-        #TODO: Ver que pasa si llegamos al root, quiere decir que el project no esta mas
-        if node.isdir:
+        #TODO: mejorar esto de la verificacion con el root node
+        if not node.isRootNode() and node.isdir:
             self.beginRemoveRows(index, 0, node.childCount() - 1)
             for child in node.childrenNodes:
                 node.removeAllChild()

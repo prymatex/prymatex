@@ -544,7 +544,7 @@ class Shell(NodeList):
     def execute(self, processor):
         # TODO Migrar a runing context
         def afterExecute(context):
-            self.content = context.outputValue.replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
+            self.content = context.outputValue.strip().replace('\n', '\n' + processor.indentation).replace('\t', processor.tabreplacement)
         with PMXRunningContext(self, unicode(self), processor.environment) as context:
             context.asynchronous = False
             self.manager.runProcess(context, afterExecute)
