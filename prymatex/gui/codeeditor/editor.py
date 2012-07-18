@@ -832,7 +832,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 helper.execute(self, event, cursor, scope)
                 return True
         return False
-
+    from prymatex.utils.decorator.profilehooks import profile
+    
+    #@profile(filename="%s.prof" % __name__, immediate = True)
     #@printtime
     def keyPressEvent(self, event):
         """
@@ -850,7 +852,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
             
             self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
-    
+    #@printtime
     def keyReleaseEvent(self, event):
         #Primero ver si tengo un modo activo,
         for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
