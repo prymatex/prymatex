@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+
 from functools import wraps
+import sha
 
 from PyQt4 import QtCore
 
@@ -11,6 +13,10 @@ class PMXCacheManager(QtCore.QObject, PMXBaseComponent):
     def __init__(self):
         QtCore.QObject.__init__(self)
         self.memoize = {}
+
+    def buildKey(self, content):
+        """docstring for buildKey"""
+        return sha.sha(content).hexdigest()
 
 def memoized(function):
     full_func_name = function.__module__ + '.' + function.func_name
