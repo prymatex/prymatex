@@ -35,6 +35,7 @@ from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 
 from prymatex.utils.decorator.helpers import printtime
+from prymatex.core.cache import memoized, localmemoized, fmemoized
 
 class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
@@ -832,10 +833,14 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 helper.execute(self, event, cursor, scope)
                 return True
         return False
-    from prymatex.utils.decorator.profilehooks import profile
+    # -------------------------------------------------------
+    #
     
-    #@profile(filename="%s.prof" % __name__, immediate = True)
-    #@printtime
+    from prymatex.utils.decorator.profilehooks import profile
+    from datetime import datetime
+    #@profile(filename="%s-%s.prof" % (__name__,
+    #                                  datetime.now().strftime('%d%m%Y-%H%M%S')), immediate = True)
+    @printtime
     def keyPressEvent(self, event):
         """
         This method is called whenever a key is pressed. The key code is stored in event.key()
