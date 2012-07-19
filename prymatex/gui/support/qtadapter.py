@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import string
+from prymatex.core.cache import fmemoized
 
 try:
     from PyQt4 import QtGui
@@ -65,6 +66,7 @@ QTCHARCODES = {9: Qt.Key_Backspace,
 
 KEYMAP = get_keymap_table()
 
+@fmemoized
 def keyboardLayoutQtKeys(character):
     keys = []
 

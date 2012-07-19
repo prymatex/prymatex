@@ -73,7 +73,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
 
     def on_buttonClose_pressed(self):
         self.reject()
-
+        
     @classmethod
     def newFileFromTemplate(cls, fileDirectory = "", fileName = "", parent = None):
         '''
