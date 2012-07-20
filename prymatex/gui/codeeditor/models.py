@@ -51,6 +51,9 @@ class PMXBookmarkListModel(QtCore.QAbstractListModel):
         elif role == QtCore.Qt.DecorationRole:
             return resources.getIcon('bookmarkflag')
 
+    def lineNumbers(self):
+        return map(lambda block: block.lineNumber(), self.blocks)
+
     def toggleBookmark(self, block):
         try:
             index = self.blocks.index(block)

@@ -6,7 +6,7 @@ import os
 from PyQt4 import QtGui, QtCore
 
 from prymatex import resources_rc
-from prymatex.core.cache import memoized
+from prymatex.utils.decorators.memoize import memoized
 
 #===============================================================
 # IMAGES AND ICONS

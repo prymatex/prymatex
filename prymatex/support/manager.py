@@ -10,7 +10,6 @@ import uuid as uuidmodule
 import subprocess
 from glob import glob
 
-from prymatex.core.cache import memoized, removeMemoizedArgument, removeMemoizedFunction
 from prymatex.support.bundle import PMXBundle, PMXBundleItem
 from prymatex.support.macro import PMXMacro
 from prymatex.support.syntax import PMXSyntax
@@ -24,7 +23,8 @@ from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
 from prymatex.support.cache import PMXSupportCache
 
-from prymatex.utils.decorator.helpers import printtime
+from prymatex.utils.decorators.helpers import printtime
+from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
 
 BUNDLEITEM_CLASSES = [ PMXSyntax, PMXSnippet, PMXMacro, PMXCommand, PMXPreference, PMXTemplate, PMXDragCommand, PMXProject ]
 
@@ -585,15 +585,15 @@ class PMXSupportBaseManager(object):
 
         #Deprecate keyEquivalent in cache
         if 'keyEquivalent' in attrs and item.keyEquivalent != attrs['keyEquivalent']:
-            removeMemoizedArgument(item.keyEquivalent)
-            removeMemoizedArgument(attrs['keyEquivalent'])
+            remove_memoized_argument(item.keyEquivalent)
+            remove_memoized_argument(attrs['keyEquivalent'])
             
         #Deprecate tabTrigger in cache
         if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
-            removeMemoizedArgument(item.tabTrigger)
-            removeMemoizedArgument(attrs['tabTrigger'])
+            remove_memoized_argument(item.tabTrigger)
+            remove_memoized_argument(attrs['tabTrigger'])
             #Delete list of all tabTrigers
-            removeMemoizedFunction(self.getAllTabTriggerItems)
+            remove_memoized_function(self.getAllTabTriggerItems)
 
         #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco m�s
         namespace = namespace or self.defaultNamespace
@@ -823,7 +823,7 @@ class PMXSupportBaseManager(object):
         with_scope.sort(key = lambda t: t[0], reverse = True)
         return map(lambda item: item[1], with_bundle + with_scope) + without_scope
 
-    @memoized
+    @dynamic_memoized
     def getPreferenceSettings(self, scope):
         return PMXPreference.buildSettings(self.getPreferences(scope))
         

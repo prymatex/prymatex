@@ -14,11 +14,10 @@ from prymatex.core import exceptions
 from prymatex.core.logger import NameFilter
 from prymatex.core.settings import PMXSettings
 
-from prymatex.utils.decorator import deprecated
+from prymatex.utils.decorators import deprecated
 from prymatex.utils import coroutines
-from prymatex.utils import decorator as deco
 from prymatex.utils.i18n import ugettext as _
-from prymatex.utils.decorator.helpers import printtime
+from prymatex.utils.decorators.helpers import printtime, logtime
 
 class PMXApplication(QtGui.QApplication):
     """The application instance.
@@ -182,7 +181,7 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     # Managers
     #========================================================
-    @deco.logtime
+    @logtime
     def setupSupportManager(self):
         from prymatex.gui.support.manager import PMXSupportManager
         

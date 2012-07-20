@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
 from prymatex.support.syntax import PMXSyntax
-from prymatex.utils.decorator.helpers import printtime
+from prymatex.utils.decorators.helpers import printtime
 
 #TODO: Usar mas el modulo de string en general, string.punctuation, mover las regexp a otro lugar, recursos quiza?
 

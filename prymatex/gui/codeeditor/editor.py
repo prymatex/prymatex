@@ -34,7 +34,7 @@ from prymatex.gui.codeeditor.models import PMXSymbolListModel, PMXBookmarkListMo
 from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 
-from prymatex.utils.decorator.helpers import printtime
+from prymatex.utils.decorators.helpers import printtime
 
 class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
@@ -306,6 +306,21 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         value = PMXBaseEditor.reload(self)
         self.afterReload.emit()
         return value
+
+    def saveState(self):
+        """Returns a Python dictionary containing the state of the editor."""
+        state = {}
+        #Bookmarks
+        state['bookmarks'] = self.bookmarkListModel.lineNumbers()
+        
+        #UserDatas
+        state['data'] = []
+        
+        return state
+    
+    def restoreState(self, state):
+        """Restore the state from the given state (returned by a previous call to state())."""
+        pass
 
     def isModified(self):
         return self.document().isModified()
@@ -835,7 +850,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # -------------------------------------------------------
     #
     
-    from prymatex.utils.decorator.profilehooks import profile
+    from prymatex.utils.decorators.profilehooks import profile
     from datetime import datetime
     #@profile(filename="%s-%s.prof" % (__name__,
     #                                  datetime.now().strftime('%d%m%Y-%H%M%S')), immediate = True)

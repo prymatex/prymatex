@@ -4,11 +4,8 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import QColor
 
-from prymatex.core.plugin.editor import PMXBaseEditorAddon
 from prymatex import resources
-from logging import getLogger
-
-logger = getLogger(__name__)
+from prymatex.core.plugin.editor import PMXBaseEditorAddon
 
 class PMXSideBar(QtGui.QWidget):
     updateRequest = QtCore.pyqtSignal()
@@ -207,7 +204,7 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
             if v1 - v2 < 35:
                 v1 = 255 if h2 < 128 else 0
                 color = QtGui.QColor.fromHsv(h1, s1, v1)
-                logger.debug("Changing foreground color to %s" % str(color.getRgb()))  
+                self.editor.logger.debug("Changing foreground color to %s" % str(color.getRgb()))  
         self.__foreground = color
     
     __background = QtGui.QColor()
