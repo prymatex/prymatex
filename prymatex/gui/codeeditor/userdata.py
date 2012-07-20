@@ -4,7 +4,7 @@
 from PyQt4 import QtGui
 
 from prymatex.support.syntax import PMXSyntax
-from prymatex.utils.decorator.deprecated import deprecated
+from prymatex.utils.decorators.deprecated import deprecated
 
 class PMXBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
@@ -102,6 +102,12 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     #================================================
     def processorState(self):
         return self.__cache["processor_state"]
-    
+
     def setProcessorState(self, processorState):
         self.__cache["processor_state"] = processorState
+
+    def saveState(self):
+        return {}
+        
+    def restoreState(self, state):
+        pass

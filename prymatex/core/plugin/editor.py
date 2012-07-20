@@ -54,10 +54,11 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
             self.application.fileManager.closeFile(self.filePath)
 
     def saveState(self):
-        """ Returns a Python dictionary containing the state of the editor."""
+        """Returns a Python dictionary containing the state of the editor."""
         return {}
     
     def restoreState(self, state):
+        """Restore the state from the given state (returned by a previous call to state())."""
         pass
 
     def reload(self):
