@@ -1474,7 +1474,24 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     rightGutter.extend(addon.contributeToMainMenu())
                 else:
                     leftGutter.extend(addon.contributeToMainMenu())
-
+        edit = {
+            'items': [
+                '-',
+                {'title': 'Mode',
+                 'items': [
+                    {'title': 'Freehanded Editing', 'shortcut': 'Meta+Alt+E'},
+                    {'title': 'Overwrite Mode', 'shortcut': 'Meta+Alt+O'},
+                    {'title': 'Multi Edit Mode'}
+                 ]
+                },
+                {'title': 'Spelling',
+                 'items': [
+                    {'title': 'Show Spelling'},
+                    {'title': 'Check Spelling'},
+                    {'title': 'Check Spelling as You Type'}
+                ]}
+            ]
+        }
         view = {
             'items': [
                 {'title': 'Font',
@@ -1615,7 +1632,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'shortcut': 'Meta+Ctrl+Shift+B',
                  }
             ]}
-        return { "View": view , "Text": text, "Navigation": navigation}
+        return { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
     
     @classmethod
     def contributeToSettings(cls):

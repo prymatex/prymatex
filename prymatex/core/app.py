@@ -43,10 +43,25 @@ class PMXApplication(QtGui.QApplication):
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
 
-    def loadGraphicalUserInterface(self):
+    def buildSplashScreen(self):
+        from prymatex.widgets.splash import SplashScreen
         splash_image = resources.getImage('prymatex-splash')
-        splash = QtGui.QSplashScreen(splash_image, QtCore.Qt.WindowStaysOnTopHint)
+        splash = SplashScreen(splash_image)
+        splash.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.SplashScreen)
+        
+        splashFont = QtGui.QFont()
+        splashFont.setFamily("Arial")
+        splashFont.setBold(True)
+        splashFont.setPixelSize(9)
+        splashFont.setStretch(125)
+ 
+        splash.setFont(splashFont);
         splash.setMask(splash_image.mask())
+        
+        return splash
+        
+    def loadGraphicalUserInterface(self):
+        splash = self.buildSplashScreen()
         splash.show()
         try:
             self.cacheManager = self.setupCacheManager()        #Cache system Manager
