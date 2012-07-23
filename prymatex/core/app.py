@@ -9,6 +9,7 @@ import inspect
 from PyQt4 import QtGui, QtCore, Qt
 
 import prymatex
+from prymatex import resources
 
 from prymatex.core import exceptions
 from prymatex.core.logger import NameFilter
@@ -36,11 +37,16 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)
 
+        #Style
+        self.setStyleSheet(resources.APPLICATION_STYLE)
+        
         #Connects
         self.aboutToQuit.connect(self.closePrymatex)
 
     def loadGraphicalUserInterface(self):
-        splash = QtGui.QSplashScreen(QtGui.QPixmap(":/images/prymatex/splash.svg"))
+        splash_image = resources.getImage('prymatex-splash')
+        splash = QtGui.QSplashScreen(splash_image, QtCore.Qt.WindowStaysOnTopHint)
+        splash.setMask(splash_image.mask())
         splash.show()
         try:
             self.cacheManager = self.setupCacheManager()        #Cache system Manager
@@ -66,7 +72,6 @@ class PMXApplication(QtGui.QApplication):
             self.supportManager.loadSupport(splash.showMessage)
             self.settingsDialog.loadSettings()
             
-            self.setupStyleSheet()
             # Creates the Main Window
             self.createMainWindow()
             
@@ -103,10 +108,15 @@ class PMXApplication(QtGui.QApplication):
         elif profile == "":
             #Find default profile in config
             profile = PMXSettings.defaultProfile()
+            
+        #Settings
         from prymatex.gui.dialogs.settings import PMXSettingsDialog
         self.settings = PMXSettings(profile)
         self.settingsDialog = PMXSettingsDialog(self)
-
+        
+        #State
+        self.state = QtCore.QSettings(os.path.join(self.settings.PMX_PROFILE_PATH, PMXSettings.PMX_STATE_NAME), QtCore.QSettings.IniFormat)
+        
     def checkSingleInstance(self):
         """
         Checks if there's another instance using current profile
@@ -121,13 +131,6 @@ class PMXApplication(QtGui.QApplication):
             f = open(self.fileLock, 'w')
             f.write('%s' % self.applicationPid())
             f.close()
-
-    #========================================================
-    # Application Style Sheet
-    #========================================================
-    def setupStyleSheet(self):
-        from prymatex import resources
-        self.setStyleSheet(resources.APPLICATION_STYLE)
         
     #========================================================
     # Logging system and loggers
@@ -326,10 +329,10 @@ class PMXApplication(QtGui.QApplication):
         self.settings.sync()
         os.unlink(self.fileLock)
     
-    def commitData(self):
+    def commitData(self, manager):
         print "Commit data"
         
-    def saveState(self, session_manager):
+    def saveState(self, manager):
         print "saveState"
         pass
     
@@ -363,8 +366,6 @@ class PMXApplication(QtGui.QApplication):
         """Creates the windows"""
         from prymatex.gui.mainwindow import PMXMainWindow
 
-        print PMXMainWindow.application
-        
         #TODO: Testeame con mas de una
         for _ in range(1):
             self.mainWindow = PMXMainWindow(self)

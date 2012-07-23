@@ -119,8 +119,8 @@
     <file>sidebar/folding-top.png</file>
   </qresource>
   <qresource prefix="images">
+    <file>prymatex/splash.png</file>
     <file>prymatex/logo.png</file>
-    <file>prymatex/splash.svg</file>
   </qresource>
   <qresource prefix="items">
     <file>bundles/project.png</file>

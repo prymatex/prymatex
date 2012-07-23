@@ -8,8 +8,7 @@ from prymatex.core import exceptions
 from prymatex.gui import dialogs
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
-from prymatex.gui.about import PMXAboutDialog
-
+from prymatex.gui.dialogs.about import PMXAboutDialog
 
 class MainWindowActions(object):
     
@@ -256,7 +255,6 @@ class MainWindowActions(object):
         QtGui.qApp.aboutQt()
 
     aboutDialog = None
-            
     @QtCore.pyqtSlot()
     def on_actionAbout_triggered(self):
         # Lazy 
@@ -268,8 +266,7 @@ class MainWindowActions(object):
     def on_actionProjectHomepage_triggered(self):
         import webbrowser
         import prymatex
-        url = getattr(prymatex, '__url__', "https://github.com/D3f0/prymatex")
-        webbrowser.open(url)
+        webbrowser.open(getattr(prymatex, '__url__', "https://github.com/prymatex/prymatex"))
     
     SCREENSHOT_FORMAT = 'png'
     

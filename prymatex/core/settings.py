@@ -16,7 +16,8 @@ except ImportError:
     USER_HOME_PATH = os.path.expanduser("~")
 
 PRYMATEX_HOME_NAME = ".prymatex"
-PRYMATEX_SETTING_NAME = "settings.ini"
+PRYMATEX_SETTINGS_NAME = "settings.ini"
+PRYMATEX_STATE_NAME = "state.ini"
 PRYMATEX_PROFILES_NAME = "profiles.ini"
 TEXTMATE_SETTINGS_NAME = "com.macromates.textmate.plist"
 TEXTMATE_WEBPREVIEW_NAME = "com.macromates.textmate.webpreview.plist"
@@ -210,6 +211,9 @@ class pmxConfigPorperty(object):
             self.fset(instance, value)
 
 class PMXSettings(object):
+    PMX_SETTING_NAME = PRYMATEX_SETTINGS_NAME
+    PMX_STATE_NAME = PRYMATEX_STATE_NAME
+    TM_SETTINGS_NAME = TEXTMATE_SETTINGS_NAME
     PMX_APP_PATH = get_prymatex_app_path()
     PMX_SHARE_PATH = os.path.join(PMX_APP_PATH, 'share')
     PMX_HOME_PATH = get_prymatex_home_path()
@@ -249,9 +253,8 @@ class PMXSettings(object):
         self.PMX_CACHE_PATH = os.path.join(self.PMX_PROFILE_PATH, 'cache')
         self.PMX_SCREENSHOT_PATH = os.path.join(self.PMX_PROFILE_PATH, 'screenshot')
         self.GROUPS = {}
-        #TODO Defaults settings
-        self.qsettings = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, PRYMATEX_SETTING_NAME), QtCore.QSettings.IniFormat)
-        self.tmsettings = TextMateSettings(os.path.join(self.PMX_PREFERENCES_PATH, TEXTMATE_SETTINGS_NAME))
+        self.qsettings = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, self.PMX_SETTING_NAME), QtCore.QSettings.IniFormat)
+        self.tmsettings = TextMateSettings(os.path.join(self.PMX_PREFERENCES_PATH, self.TM_SETTINGS_NAME))
 
     def getGroup(self, name):
         if name not in self.GROUPS:
@@ -271,7 +274,7 @@ class PMXSettings(object):
     def configure(self, configurableInstance):
         configurableInstance.settings.addListener(configurableInstance)
         configurableInstance.settings.configure(configurableInstance)
-        
+
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)
     
