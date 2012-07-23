@@ -116,19 +116,19 @@ class PMXProjectTreeProxyModel(QtGui.QSortFilterProxyModel):
             
         for url in mimeData.urls():
             srcPath = url.toLocalFile()
-            pIndex = self.indexForPath(self.application.fileManager.dirname(srcPath))
+            pIndex = self.indexForPath(self.fileManager.dirname(srcPath))
             if pIndex not in updateIndexes:
                 updateIndexes.append(pIndex)
-            dstPath = os.path.join(parentPath, self.application.fileManager.basename(srcPath))
+            dstPath = os.path.join(parentPath, self.fileManager.basename(srcPath))
             if action == QtCore.Qt.CopyAction:
                 if os.path.isdir(srcPath):
-                    self.application.fileManager.copytree(srcPath, dstPath)
+                    self.fileManager.copytree(srcPath, dstPath)
                 else:
-                    self.application.fileManager.copy(srcPath, dstPath)
+                    self.fileManager.copy(srcPath, dstPath)
             elif action == QtCore.Qt.MoveAction:
-                self.application.fileManager.move(srcPath, dstPath)
+                self.fileManager.move(srcPath, dstPath)
             elif action == QtCore.Qt.LinkAction:
-                self.application.fileManager.link(srcPath, dstPath)
+                self.fileManager.link(srcPath, dstPath)
 
         map(lambda index: self.refresh(index), updateIndexes)
         return True
