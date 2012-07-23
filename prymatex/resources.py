@@ -14,7 +14,7 @@ from prymatex.utils.decorators.memoize import memoized
 
 INTERNAL = {
     #Splash Image
-    "prymatex-splash": ":/images/prymatex/splash.svg",
+    "prymatex-splash": ":/images/prymatex/splash.png",
     #Bundles
     "bundle-item-bundle": ":/items/bundles/bundle.png",
     "bundle-item-template": ":/items/bundles/templates.png",
