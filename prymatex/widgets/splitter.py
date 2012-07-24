@@ -173,8 +173,7 @@ class SplitTabWidget(QtGui.QSplitter):
                 else:
                     del new_qsp
 
-        # Restore the QSplitter state (being careful to get the right
-        # implementation).
+        # Restore the QSplitter state (being careful to get the right implementation).
         QtGui.QSplitter.restoreState(qsplitter, sp_qstate)
 
     def addTab(self, w):

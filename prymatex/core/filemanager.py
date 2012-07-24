@@ -165,16 +165,16 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     mimeType = lambda self, path: mimetypes.guess_type(path)[0] or ""
     issubpath = lambda self, childPath, parentPath: osextra.path.issubpath(childPath, parentPath)
     fullsplit = lambda self, path: osextra.path.fullsplit(path)
+    normcase = lambda self, path: os.path.normcase(path)
+    normpath = lambda self, path: os.path.normpath(path)
+    realpath = lambda self, path: os.path.realpath(path)
+    relpath = lambda self, path: os.path.relpath(path)
+
     def expandVars(self, text):
         context = self.application.supportManager.buildEnvironment()
         path = osextra.path.expand_shell_var(text, context = context)
         if os.path.exists(path):
             return path
-
-    def normpath(self, path):
-        """ os.path.normpath and os.path.realpath, con condimentos de prymatex """
-        path = os.path.realpath(path)
-        return os.path.normpath(path)
     
     #==================================================================
     # Handling files for retrieving data. open, read, write, close
