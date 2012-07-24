@@ -15,6 +15,7 @@ class PMXProjectTreeModel(TreeModel):
         #projectManager is a qObject
         TreeModel.__init__(self, projectManager)
         self.projectManager = projectManager
+        self.fileManager = projectManager.fileManager
         
     def rowCount(self, parent):
         parentNode = self.node(parent)
@@ -34,10 +35,18 @@ class PMXProjectTreeModel(TreeModel):
         self.refresh(index)
     
     def indexForPath(self, path):
-        node = self.nodeForPath(path)
-        index = self.createIndex(node.row(), 0, node) if node != None else QtCore.QModelIndex()
-        return index
-        
+        currentIndex = QtCore.QModelIndex()
+        while self.rowCount(currentIndex):
+            goAhead = False
+            for node in self.node(currentIndex).childrenNodes:
+                if self.fileManager.issubpath(path, node.path):
+                    currentIndex = self.createIndex(node.row(), 0, node)
+                    goAhead = True
+                    break
+            if not goAhead:
+                break
+        return currentIndex
+
     #========================================================================
     # Custom methods
     #========================================================================
@@ -68,21 +77,7 @@ class PMXProjectTreeModel(TreeModel):
             self._load_directory(node, index, True)
             
     def nodeForPath(self, path):
-        currentNode = self.rootNode
-        while currentNode.childrenNodes:
-            goAhead = False
-            for node in currentNode.childrenNodes:
-                prefix = os.path.commonprefix([node.path, path])
-                if prefix == path:
-                    return node
-                elif prefix == node.path:
-                    currentNode = node
-                    goAhead = True
-                    break
-            if not goAhead:
-                break
-        if currentNode != self.rootNode:
-            return currentNode
+        return self.node(self.indexForPath)
 
     def projectForPath(self, path):
         for project in self.rootNode.childrenNodes:

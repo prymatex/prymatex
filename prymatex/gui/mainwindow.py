@@ -333,11 +333,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #===========================================================================
     # MainWindow State
     #===========================================================================
-    def saveState(self, version = 0):
-        pass
+    def saveState(self):
+        return QtGui.QMainWindow.saveState(self)
 
-    def restoreState (self, state, version = 0):
-        pass
+    def restoreState (self, state):
+        QtGui.QMainWindow.restoreState(self, state)
+
     #===========================================================================
     # Drag and Drop
     #===========================================================================

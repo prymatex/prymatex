@@ -335,13 +335,13 @@ class PMXApplication(QtGui.QApplication):
         for editor in self.mainWindow.editors():
             if not editor.isNew():
                 openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
-        self.settings.setValue("openDocuments", openDocumentsOnQuit)
+        self.state.setValue("openDocuments", openDocumentsOnQuit)
 
         #Guardar geometria de la mainWindow
-        self.settings.setValue("mainWindowGeometry", self.mainWindow.saveGeometry())
-        self.settings.setValue("mainWindowState", self.mainWindow.saveState())
+        self.state.setValue("mainWindowGeometry", self.mainWindow.saveGeometry())
+        self.state.setValue("mainWindowState", self.mainWindow.saveState())
         
-        self.settings.sync()
+        self.state.sync()
         os.unlink(self.fileLock)
     
     def commitData(self, manager):
@@ -389,8 +389,8 @@ class PMXApplication(QtGui.QApplication):
             self.pluginManager.populateMainWindow(self.mainWindow)
             self.settings.configure(self.mainWindow)
 
-            geometry = self.settings.value("mainWindowGeometry")
-            state = self.settings.value("mainWindowState")
+            geometry = self.state.value("mainWindowGeometry")
+            state = self.state.value("mainWindowState")
             
             if geometry:
                 self.mainWindow.restoreGeometry(geometry)
@@ -399,7 +399,7 @@ class PMXApplication(QtGui.QApplication):
 
             self.mainWindow.show()
             
-            openDocuments = self.settings.value("openDocuments") or []
+            openDocuments = self.state.value("openDocuments") or []
 
             for doc in openDocuments:
                 self.openFile(*doc)
@@ -423,6 +423,7 @@ class PMXApplication(QtGui.QApplication):
     #@printtime
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         """Open a editor in current window"""
+        filePath = self.fileManager.normcase(filePath)
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:
