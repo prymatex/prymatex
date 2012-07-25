@@ -126,6 +126,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         return self.externalAction == self.application.fileManager.CHANGED
 
     def isExternalDeleted(self):
+        # FIXME: Rename or move files make produces bogus behavior 
         return self.externalAction == self.application.fileManager.DELETED    
 
     def setCursorPosition(self, cursorPosition):

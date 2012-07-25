@@ -291,7 +291,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         directory = self.application.fileManager.getDirectory(path)
         self.mainWindow.terminal.chdir(directory)
         project = self.application.projectManager.findProjectForPath(path)
-        if project.hasSupport():
+        if project and project.hasSupport():
             self.mainWindow.terminal.runCommand("source %s" % project.bashInit())
     
     @QtCore.pyqtSlot()
