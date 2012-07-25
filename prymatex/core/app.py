@@ -405,7 +405,7 @@ class PMXApplication(QtGui.QApplication):
             openDocuments = self.state.value("openDocuments") or []
 
             for doc in openDocuments:
-                self.openFile(*doc)
+                self.openFile(*doc, forceOpen=True)
             else:
                 self.mainWindow.addEmptyEditor()
 
@@ -426,7 +426,7 @@ class PMXApplication(QtGui.QApplication):
     def canBeHandled(self, filePath):
         #from prymatex.utils.pyqtdebug import ipdb_set_trace
         #ipdb_set_trace()
-        _root, ext = os.path.splitext(filePath)
+        ext = os.path.splitext(filePath)[1].replace('.', '')
         for fileTypes in  [ syntax.item.fileTypes for syntax in 
                             self.supportManager.getAllSyntaxes()
                             if hasattr(syntax.item, 'fileTypes') and
@@ -439,9 +439,10 @@ class PMXApplication(QtGui.QApplication):
     def openFile(self, filePath, cursorPosition = (0,0), focus = True, forceOpen=False):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
-        if not forceOpen and not self.canBeHandled(filePath):
-            logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
-            return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
+        if not forceOpen:
+            if not self.canBeHandled(filePath):
+                logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
+                return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
         
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
