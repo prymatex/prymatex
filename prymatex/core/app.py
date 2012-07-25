@@ -5,6 +5,7 @@ import os
 import sys
 import logging
 import inspect
+from logging import getLogger
 
 from PyQt4 import QtGui, QtCore, Qt
 
@@ -19,6 +20,8 @@ from prymatex.utils.decorators import deprecated
 from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
+
+logger = getLogger(__name__)
 
 class PMXApplication(QtGui.QApplication):
     """The application instance.
@@ -421,12 +424,23 @@ class PMXApplication(QtGui.QApplication):
         return self.pluginManager.createEditor(filePath, parent)
     
     def canBeHandled(self, filePath):
-        return True
+        #from prymatex.utils.pyqtdebug import ipdb_set_trace
+        #ipdb_set_trace()
+        _root, ext = os.path.splitext(filePath)
+        for fileTypes in  [ syntax.item.fileTypes for syntax in 
+                            self.supportManager.getAllSyntaxes()
+                            if hasattr(syntax.item, 'fileTypes') and
+                            syntax.item.fileTypes ]:
+            
+            if ext in fileTypes:
+                return True
+        return False
     
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
         if not self.canBeHandled(filePath):
+            logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
             return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
         
         if self.fileManager.isOpen(filePath):

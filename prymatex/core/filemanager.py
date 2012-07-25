@@ -120,7 +120,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     #========================================================
     # Path handling, create, move, copy, link, delete
     #========================================================
-    def _onerror(func, path, exc_info):
+    def _onerror(func, path, exc_info): #@NoSelf
         import stat
         if not os.access(path, os.W_OK):
             # Is the error an access error ?
