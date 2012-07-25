@@ -334,6 +334,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # MainWindow State
     #===========================================================================
     def saveState(self):
+        for dock in self.dockers:
+            print dock.objectName()
+            print dock.saveState()
         return QtGui.QMainWindow.saveState(self)
 
     def restoreState (self, state):

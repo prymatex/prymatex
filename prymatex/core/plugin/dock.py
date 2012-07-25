@@ -15,7 +15,7 @@ class PMXBaseDock(PMXBaseWidgetComponent):
         PMXBaseWidgetComponent.__init__(self)
         self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
         self.toggleViewAction().setIcon(self.ICON)
-        
+    
 #========================================
 # BASE ADDON
 #========================================

@@ -48,7 +48,14 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     def addFileSystemNodeFormater(self, formater):
         self.projectTreeProxyModel.addNodeFormater(formater)
-        
+    
+    def saveState(self):
+        print "guardar estado"
+        return {}
+
+    def restoreState(self, state):
+        print "recuperar estado"
+            
     def keyPressEvent(self, event):
         return QtGui.QDockWidget.keyPressEvent(self, event) 
         

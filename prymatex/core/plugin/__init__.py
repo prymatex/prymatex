@@ -73,6 +73,14 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     def contributeToMainMenu(cls, addonClasses):
         return PMXBaseComponent.contributeToMainMenu()
         
+    def saveState(self):
+        """Returns a Python dictionary containing the state of the editor."""
+        return {}
+    
+    def restoreState(self, state):
+        """Restore the state from the given state (returned by a previous call to saveState())."""
+        pass
+
 class PMXBaseOverlay(object):
     def initialize(self, widget):
         pass
