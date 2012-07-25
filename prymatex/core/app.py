@@ -436,10 +436,10 @@ class PMXApplication(QtGui.QApplication):
                 return True
         return False
     
-    def openFile(self, filePath, cursorPosition = (0,0), focus = True):
+    def openFile(self, filePath, cursorPosition = (0,0), focus = True, forceOpen=False):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
-        if not self.canBeHandled(filePath):
+        if not forceOpen and not self.canBeHandled(filePath):
             logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
             return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
         
