@@ -420,10 +420,15 @@ class PMXApplication(QtGui.QApplication):
     def getEditorInstance(self, filePath = None, parent = None):
         return self.pluginManager.createEditor(filePath, parent)
     
-    #@printtime
+    def canBeHandled(self, filePath):
+        return True
+    
     def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
+        if not self.canBeHandled(filePath):
+            return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
+        
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:

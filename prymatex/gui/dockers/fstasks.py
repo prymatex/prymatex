@@ -49,7 +49,7 @@ class PMXFileSystemTasks(object):
                 absNewFileName = os.path.join(basePath, newFileName)
                 try:
                     rslt = self.application.fileManager.createFile(absNewFileName)
-                except PrymatexFileExistsException as e:
+                except exceptions.FileExistsException as e:
                     QtGui.QMessageBox.warning(self, _("Error creating file"), 
                                               _("%s already exists") % newFileName)
                     continue
