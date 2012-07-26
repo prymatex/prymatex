@@ -21,8 +21,6 @@ from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
 
-logger = getLogger(__name__)
-
 class PMXApplication(QtGui.QApplication):
     """The application instance.
     There can't be two apps running simultaneously, since configuration issues may occur.
@@ -65,7 +63,7 @@ class PMXApplication(QtGui.QApplication):
         
     def loadGraphicalUserInterface(self):
         splash = self.buildSplashScreen()
-        splash.show()
+        #splash.show()
         try:
             self.cacheManager = self.setupCacheManager()        #Cache system Manager
             self.pluginManager = self.setupPluginManager()      #Prepare plugin manager
@@ -441,7 +439,7 @@ class PMXApplication(QtGui.QApplication):
         filePath = self.fileManager.normcase(filePath)
         if not forceOpen:
             if not self.canBeHandled(filePath):
-                logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
+                self.logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
                 return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
         
         if self.fileManager.isOpen(filePath):

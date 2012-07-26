@@ -50,12 +50,15 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.projectTreeProxyModel.addNodeFormater(formater)
     
     def saveState(self):
-        print "guardar estado"
-        return {}
+        expandedIndexes = filter(lambda index: self.treeViewProjects.isExpanded(index), self.projectTreeProxyModel.persistentIndexList())
+        expandedPaths = map(lambda index: self.projectTreeProxyModel.node(index).path, expandedIndexes)
+        return { "expanded": expandedPaths }
 
     def restoreState(self, state):
-        print "recuperar estado"
-            
+        #Expanded Nodes
+        map(lambda index: index.isValid() and self.treeViewProjects.setExpanded(index, True), 
+            map(lambda path: self.projectTreeProxyModel.indexForPath(path), state["expanded"]))
+
     def keyPressEvent(self, event):
         return QtGui.QDockWidget.keyPressEvent(self, event) 
         

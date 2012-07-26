@@ -334,13 +334,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # MainWindow State
     #===========================================================================
     def saveState(self):
-        for dock in self.dockers:
-            print dock.objectName()
-            print dock.saveState()
-        return QtGui.QMainWindow.saveState(self)
+        state = { 
+            "self": QtGui.QMainWindow.saveState(self),
+            "dockers": dict(map(lambda dock: (dock.objectName(), dock.saveState()), self.dockers))
+        }
+        return state
 
     def restoreState (self, state):
-        QtGui.QMainWindow.restoreState(self, state)
+        map(lambda dock: dock.restoreState(state["dockers"][dock.objectName()]), self.dockers)
+        QtGui.QMainWindow.restoreState(self, state["self"])
 
     #===========================================================================
     # Drag and Drop
