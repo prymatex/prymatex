@@ -20,6 +20,7 @@ from prymatex.utils.decorators import deprecated
 from prymatex.utils import coroutines
 from prymatex.utils.i18n import ugettext as _
 from prymatex.utils.decorators.helpers import printtime, logtime
+from prymatex.core.exceptions import InvalidProfile
 
 class PMXApplication(QtGui.QApplication):
     """The application instance.
@@ -127,6 +128,8 @@ class PMXApplication(QtGui.QApplication):
             
         #Settings
         from prymatex.gui.dialogs.settings import PMXSettingsDialog
+        if not profile:
+            raise ValueError("Invalid Profile")
         self.settings = PMXSettings(profile)
         self.settingsDialog = PMXSettingsDialog(self)
         
