@@ -55,6 +55,7 @@ class SmartUnindentAddon(CodeEditorObjectAddon):
 class SpellCheckerAddon(CodeEditorObjectAddon):
     def __init__(self, parent):
         CodeEditorObjectAddon.__init__(self, parent)
+        self.spellingOnType = False
         self.wordCursors = []
         self.currentSpellTask = None
         self.setupSpellChecker()
@@ -66,6 +67,29 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
             editor.afterOpened.connect(self.on_editor_afterOpened)
             self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
 
+    @classmethod
+    def contributeToMainMenu(cls):
+        def on_actionSpellingOnType_toggled(editor, checked):
+            instance = editor.addonByClass(cls)
+            instance.spellingOnType = checked
+
+        def on_actionSpellingOnType_testChecked(editor):
+            instance = editor.addonByClass(cls)
+            return instance.spellingOnType
+        
+        baseMenu = "Edit"
+        menuEntry = {'title': 'Spelling',
+                 'items': [
+                    {'title': 'Show Spelling'},
+                    {'title': 'Check Spelling'},
+                    {'title': 'Check Spelling as You Type',
+                      'callback': on_actionSpellingOnType_toggled,
+                      'checkable': True,
+                      'testChecked': on_actionSpellingOnType_testChecked
+                    }
+                ]}
+        return { baseMenu: menuEntry }
+        
     def contributeToContextMenu(self, cursor):
         items = []
         cursors = filter(lambda c: c.selectionStart() <= cursor.selectionStart() <= cursor.selectionEnd() <= c.selectionEnd(), self.wordCursors)

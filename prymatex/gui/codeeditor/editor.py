@@ -1474,15 +1474,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'items': [
                     {'title': 'Freehanded Editing', 'shortcut': 'Meta+Alt+E'},
                     {'title': 'Overwrite Mode', 'shortcut': 'Meta+Alt+O'},
-                    {'title': 'Multi Edit Mode'}
-                 ]
-                },
-                {'title': 'Spelling',
-                 'items': [
-                    {'title': 'Show Spelling'},
-                    {'title': 'Check Spelling'},
-                    {'title': 'Check Spelling as You Type'}
-                ]}
+                    {'title': 'Multi Edit Mode', 'shortcut': 'Meta+Alt+M'}
+                 ]}
             ]
         }
         view = {

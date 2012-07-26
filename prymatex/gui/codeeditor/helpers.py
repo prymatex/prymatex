@@ -224,7 +224,7 @@ class MultiCursorHelper(CodeEditorKeyHelper):
         cursor = cursor or editor.textCursor()
         flags = QtGui.QTextDocument.FindCaseSensitively | QtGui.QTextDocument.FindWholeWords
         if not cursor.hasSelection():
-            text, start, end = editor.getCurrentWord()
+            text, start, end = editor.currentWord()
             newCursor = QtGui.QTextCursor(cursor)
             newCursor.setPosition(start)
             newCursor.setPosition(end, QtGui.QTextCursor.KeepAnchor)

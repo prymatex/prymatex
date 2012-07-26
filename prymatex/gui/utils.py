@@ -155,7 +155,7 @@ def chunkSections(items):
     sections = []
     start = 0
     for i in xrange(0, len(items)):
-        if isinstance(items[i], basestring) and items[i].startswith('-'):
+        if isinstance(items[i], basestring) and items[i].startswith('-') and start != i:
             sections.append(items[start:i])
             start = i
     sections.append(items[start:len(items)])
@@ -169,6 +169,7 @@ def sectionNumberRange(items, index):
     return begin, end
 
 def extendMenuSection(menu, newItems, section = 0, position = None):
+    # TODO: Implementar algo para usar section = None, puedo ponerlo en cualquier lugar del menu con su posicion
     if not isinstance(newItems, list):
         newItems = [ newItems ]
     menuItems = menu.setdefault('items', [])
@@ -197,11 +198,13 @@ def updateMenu(menuBase, menuUpdates):
         newMenu = { "title": name, "items": [] }
         items.append(newMenu)
         return newMenu
-        
+
     for names, update in menuUpdates.iteritems():
-        names = names if isinstance(names, tuple) else ( names )
+        names = names if isinstance(names, (list, tuple)) else [ names ]
         menu = reduce(lambda menu, name: find_or_create_submenu(menu, name), names, menuBase)
-        extendMenuSection(menu, update)
+        position = update.pop('position', None)
+        section = update.pop('section', 0)
+        extendMenuSection(menu, update, section = section, position = position)
 
 def combineIcons(icon1, icon2, scale = 1):
     newIcon = QtGui.QIcon()
