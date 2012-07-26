@@ -17,6 +17,9 @@ from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """Prymatex main window"""
     #=========================================================
@@ -341,8 +344,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return state
 
     def restoreState (self, state):
-        map(lambda dock: dock.restoreState(state["dockers"][dock.objectName()]), self.dockers)
-        QtGui.QMainWindow.restoreState(self, state["self"])
+        try:
+            map(lambda dock: dock.restoreState(state["dockers"][dock.objectName()]), self.dockers)
+            QtGui.QMainWindow.restoreState(self, state["self"])
+        except (TypeError, ValueError) as e:
+            logger.error("Could not restore state for %s. Reason %s" % (self, e))
 
     #===========================================================================
     # Drag and Drop

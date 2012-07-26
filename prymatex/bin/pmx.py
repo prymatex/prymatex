@@ -3,6 +3,7 @@
 import os
 import sys
 
+
 # this will be replaced at install time
 INSTALLED_BASE_DIR = "@ INSTALLED_BASE_DIR @"
 
@@ -22,12 +23,16 @@ def runPrymatexApplication(options, files):
     from prymatex.core import exceptions
     
     def runPrymatexInstance(instanceOptions, instanceFiles = []):
+        
         global prymatexAppInstance
         if prymatexAppInstance is not None:
             prymatexAppInstance.unloadGraphicalUserInterface()
             del prymatexAppInstance
         prymatexAppInstance = PMXApplication()
-        prymatexAppInstance.buildSettings(instanceOptions.profile)
+        try:
+            prymatexAppInstance.buildSettings(instanceOptions.profile)
+        except ValueError:
+            return
         prymatexAppInstance.setupLogging(instanceOptions.verbose, instanceOptions.log_pattern)
     
         prymatexAppInstance.replaceSysExceptHook()
