@@ -1466,15 +1466,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Contributes to Main Menu
     @classmethod
     def contributeToMainMenu(cls, addonClasses):
-        leftGutter = []
-        rightGutter = []
-        for addon in addonClasses:
-            if issubclass(addon, SideBarWidgetAddon):
-                if addon.ALIGNMENT == QtCore.Qt.AlignRight:
-                    rightGutter.extend(addon.contributeToMainMenu())
-                else:
-                    leftGutter.extend(addon.contributeToMainMenu())
         edit = {
+            'title': 'Edit',
             'items': [
                 '-',
                 {'title': 'Mode',
@@ -1493,6 +1486,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             ]
         }
         view = {
+            'title': 'View',
             'items': [
                 {'title': 'Font',
                  'items': [
@@ -1504,9 +1498,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                       'callback': cls.zoomOut}
                 ]},
                 {'title': 'Left Gutter',
-                 'items': leftGutter},
+                 'items': []},
                  {'title': 'Right Gutter',
-                 'items': rightGutter},
+                 'items': []},
                 '-',
                 {'title': "Show Tabs And Spaces",
                  'callback': cls.on_actionShowTabsAndSpaces_toggled,
@@ -1522,6 +1516,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
             ]}
         text = {
+            'title': 'Text',
             'items': [ 
                 {'title': 'Select',
                  'items': [
@@ -1604,6 +1599,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  }
             ]}
         navigation = {
+            'title': 'Navigation',
             'items': [
                 "-",
                 {'title': 'Toggle Bookmark',
@@ -1632,7 +1628,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'shortcut': 'Meta+Ctrl+Shift+B',
                  }
             ]}
-        return { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
+        menuContributions = { "Edit": edit, "View": view , "Text": text, "Navigation": navigation}
+        for addon in addonClasses:
+            utils.updateMenu(menuContributions, addon.contributeToMainMenu())
+        return menuContributions
     
     @classmethod
     def contributeToSettings(cls):

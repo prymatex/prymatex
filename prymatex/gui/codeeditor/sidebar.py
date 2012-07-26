@@ -141,12 +141,13 @@ class LineNumberSideBarAddon(SideBarWidgetAddon):
             instance = editor.addonByClass(cls)
             return instance.isVisible()
         
+        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'title': "Line Numbers",
             'callback': on_actionShowLineNumbers_toggled,
             'shortcut': 'F10',
             'checkable': True,
             'testChecked': on_actionShowLineNumbers_testChecked }
-        return [ menuEntry ]
+        return { baseMenu: menuEntry }
 
     def paintEvent(self, event):
         page_bottom = self.editor.viewport().height()
@@ -245,12 +246,13 @@ class BookmarkSideBarAddon(SideBarWidgetAddon):
             instance = editor.addonByClass(cls)
             return instance.isVisible()
         
+        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'title': "Bookmarks",
             'callback': on_actionShowBookmarks_toggled,
             'shortcut': 'Alt+F10',
             'checkable': True,
             'testChecked': on_actionShowBookmarks_testChecked }
-        return [ menuEntry ]
+        return { baseMenu: menuEntry} 
 
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font)
@@ -314,12 +316,13 @@ class FoldingSideBarAddon(SideBarWidgetAddon):
             instance = editor.addonByClass(cls)
             return instance.isVisible()
         
+        baseMenu = ("View", cls.ALIGNMENT == QtCore.Qt.AlignRight and "Right Gutter" or "Left Gutter")
         menuEntry = {'title': 'Foldings',
             'callback': on_actionShowFoldings_toggled,
             'shortcut': 'Shift+F10',
             'checkable': True,
             'testChecked': on_actionShowFoldings_testChecked }
-        return [ menuEntry ]
+        return {baseMenu: menuEntry} 
 
     def paintEvent(self, event):
         font_metrics = QtGui.QFontMetrics(self.editor.font)

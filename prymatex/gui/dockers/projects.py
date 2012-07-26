@@ -285,7 +285,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def on_mainWindow_currentEditorChanged(self, editor):
         if editor is not None and not editor.isNew():
             index = self.projectTreeProxyModel.indexForPath(editor.filePath)
-            print editor.filePath, index
             self.treeViewProjects.setCurrentIndex(index)
     
     @QtCore.pyqtSlot()
