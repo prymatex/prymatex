@@ -827,9 +827,25 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
  
     def mouseReleaseEvent(self, event):
+        freehanded = False
         if self.multiCursorMode.isActive():
             self.multiCursorMode.mouseReleasePoint(event.pos(), bool(event.modifiers() & QtCore.Qt.MetaModifier))
             self.viewport().repaint(self.viewport().visibleRegion())
+        elif freehanded:
+            #Modo freehanded
+            cursor = self.cursorForPosition(event.pos())
+            if not self.cursorRect(cursor).contains(event.pos()):
+                cursor.beginEditBlock()
+                while not self.cursorRect(cursor).top() <= event.pos().y() <= self.cursorRect(cursor).bottom():
+                    cursor.insertText("\n")
+                    print cursor.position(), self.cursorRect(cursor)
+                while self.cursorRect(cursor).x() <= event.pos().x():
+                    cursor.insertText(" ")
+                    print cursor.position(), self.cursorRect(cursor)
+                cursor.endEditBlock()
+                self.setTextCursor(cursor)
+            else:
+                QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
         else:
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
