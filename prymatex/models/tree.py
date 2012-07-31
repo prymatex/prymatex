@@ -5,8 +5,8 @@ from PyQt4 import QtCore
 
 class TreeNode(object):
     def __init__(self, nodeName, parentNode = None):
-        #TODO: Migrar a nodeName y proximamente a atributos ocultos __nodeName, __parentNode y __childrenNodes
-        self.name = self.nodeName = nodeName
+        #TODO: Migrar a atributos ocultos __nodeName, __parentNode y __childrenNodes
+        self.nodeName = nodeName
         self.parentNode = parentNode
         self.childrenNodes = []
     
@@ -25,9 +25,9 @@ class TreeNode(object):
         self.childrenNodes.remove(child)
         child.parentNode = None
     
-    def findChildByName(self, name):
+    def findChildByName(self, nodeName):
         for child in self.childrenNodes:
-            if child.nodeName == name:
+            if child.nodeName == nodeName:
                 return child
 
     def removeAllChild(self):
@@ -103,11 +103,11 @@ class NamespaceTreeModel(TreeModel):
     def proxyNodeFactory(self, value):
         self.__proxyNodeFactory = value
 
-    def createProxyNode(self, name, parent):
+    def createProxyNode(self, nodeName, parent):
         if self.proxyNodeFactory is not None:
-            proxy = self.proxyNodeFactory(name, parent)
+            proxy = self.proxyNodeFactory(nodeName, parent)
         else:
-            proxy = TreeNode(name, parent)
+            proxy = TreeNode(nodeName, parent)
         proxy._isproxy = True
         return proxy
         
@@ -133,7 +133,7 @@ class NamespaceTreeModel(TreeModel):
         parentNode = self.nodeForNamespace(namespace, True)
         parentIndex = self.createIndex(parentNode.row(), 0, parentNode) if not parentNode.isRootNode() else QtCore.QModelIndex()
         #Check if exit proxy for setting
-        proxy = parentNode.findChildByName(node.name)
+        proxy = parentNode.findChildByName(node.nodeName)
         if proxy != None:
             if proxy._isproxy:
                 #Reparent

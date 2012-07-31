@@ -26,7 +26,7 @@ class PMXProjectTreeModel(TreeModel):
     def data(self, index, role):
         node = self.node(index)
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return node.name
+            return node.nodeName
         elif role == QtCore.Qt.DecorationRole:
             return node.icon
 
