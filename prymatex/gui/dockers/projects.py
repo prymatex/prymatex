@@ -225,8 +225,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             question.setCheckBoxText("Delete project contents on disk (cannot be undone)")
             question.setDetailedText("Project location:\n%s" % treeNode.path)
             ret = question.exec_()
-            #self.application.projectManager.deleteProject(treeNode, removeFiles = False)
-            #self.application.projectManager.removeProject(treeNode)
+            if ret == QtGui.QMessageBox.Ok:
+                self.application.projectManager.deleteProject(treeNode, removeFiles = question.isChecked())
+                #self.application.projectManager.removeProject(treeNode)
         else:
             #Es un path
             self.deletePath(treeNode.path)

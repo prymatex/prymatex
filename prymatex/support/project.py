@@ -71,14 +71,12 @@ class PMXProject(PMXBundleItem):
     
     def execute(self, environment = {}, callback = lambda x: x):
         with PMXRunningContext(self, self.command, environment) as context:
-            context.asynchronous = False
+            context.asynchronous = True
             context.workingDirectory = self.currentPath
             self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
             
     def afterExecute(self, callback, context):
-        #TODO: Ver los errores
-        newFileOrPath = context.environment.get('TM_NEW_FILE', context.environment.get('TM_NEW_PROJECT_LOCATION', None))
-        callback(newFileOrPath)
+        callback(context)
 
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):

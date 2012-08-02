@@ -13,3 +13,6 @@ class CheckableMessageBox(QtGui.QMessageBox):
 
     def setCheckBoxText(self, text):
         self.checkBox.setText(text)
+        
+    def isChecked(self):
+        return self.checkBox.isChecked()

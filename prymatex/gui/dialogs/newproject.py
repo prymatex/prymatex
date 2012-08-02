@@ -60,14 +60,9 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         
         if self.checkBoxUseTemplate.isChecked():
             location = self.runTemplateForProject(name, location)
+        else:
+            self.runCreateProject(name, location)
         
-        self.projectCreated = self.application.projectManager.createProject(name, location)
-        
-        if self.checkBoxAddToWorkingSet.isChecked():
-            workingSet = self.comboBoxWorkingSet.lineEdit().text()
-            self.application.projectManager.setWorkingSet(self.projectCreated, workingSet)
-        self.accept()
-    
     def on_lineProjectName_textChanged(self, text):
         if self.checkBoxUseDefaultLocation.isChecked():
             projectPath = os.path.join(self.application.projectManager.workspaceDirectory, text)
@@ -94,12 +89,25 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def on_buttonClose_pressed(self):
         self.reject()
 
+    def runCreateProject(self, name, location):
+        self.projectCreated = self.application.projectManager.createProject(name, location)
+        
+        if self.checkBoxAddToWorkingSet.isChecked():
+            workingSet = self.comboBoxWorkingSet.lineEdit().text()
+            self.application.projectManager.setWorkingSet(self.projectCreated, workingSet)
+
+        self.accept()
+
+    def afterRunTemplate(self, context):
+        print context
+        self.runCreateProject("cacho", "location")
+
     def runTemplateForProject(self, name, location):
         index = self.projectProxyModel.mapToSource(self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0))
         if index.isValid():
             template = index.internalPointer()
             environment = template.buildEnvironment(projectName = name, projectLocation = location)
-            return template.execute(environment)
+            return template.execute(environment, self.afterRunTemplate)
     
     @classmethod
     def getNewProject(cls, parent = None, directory = None, name = None):
