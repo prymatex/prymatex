@@ -52,7 +52,7 @@ class FileSystemTreeNode(TreeNode):
 
     @property
     def path(self):
-        return os.path.join(self.parentNode.path, self.name)
+        return os.path.join(self.parentNode.path, self.nodeName)
     
     @property
     def icon(self):
@@ -70,7 +70,7 @@ class PMXProject(FileSystemTreeNode):
     def __init__(self, directory, hash):
         self.directory = directory
         self.projectPath = os.path.join(self.path, self.FOLDER)
-        FileSystemTreeNode.__init__(self, "Project Name")
+        FileSystemTreeNode.__init__(self, hash.get("name"))
         self.workingSet = None
         self.manager = None
         self.support = None
@@ -101,7 +101,7 @@ class PMXProject(FileSystemTreeNode):
     def environment(self):
         env = {
             'TM_PROJECT_DIRECTORY': self.directory,
-            'TM_PROJECT_NAME': self.name,
+            'TM_PROJECT_NAME': self.nodeName,
             'TM_PROJECT_PATH': self.projectPath }
         if self.namespace is not None:
             env['TM_PROJECT_NAMESPACE'] = self.namespace

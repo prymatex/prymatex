@@ -18,7 +18,7 @@ class PMXConfigureTreeNode(TreeNode):
         self.__icon = self.ICON
         
     def filterString(self):
-        return self.name + self.title + reduce(lambda initial, child: initial + child.filterString(), self.childrenNodes, "")
+        return self.nodeName + self.title + reduce(lambda initial, child: initial + child.filterString(), self.childrenNodes, "")
 
     @property
     def title(self):

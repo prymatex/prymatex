@@ -14,6 +14,7 @@ from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui import utils
 from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
+from prymatex.gui.dialogs.messages import CheckableMessageBox
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.project.base import PMXProject
 from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
@@ -146,7 +147,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
         utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
         if isinstance(node, PMXProject):
-            utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
+            utils.extendMenuSection(menu, [self.actionPaste], section = "handlepaths", position = 0)
             utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
             utils.extendMenuSection(menu, [self.actionBashInit, self.actionBundleEditor], section = "interact")
         else:
@@ -213,21 +214,26 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):
-        treeNode = self.currentNode()
-        if not treeNode.isproject:
+        currentIndex = self.treeViewProjects.currentIndex()
+        treeNode = self.projectTreeProxyModel.node(currentIndex)
+        if treeNode.isproject:
+            #Es proyecto
+            question = CheckableMessageBox(self)
+            question.setIcon(QtGui.QMessageBox.Question)
+            question.setWindowTitle("Remove project")
+            question.setText("Are you sure you want to remove project '%s' from the workspace?" % treeNode.name)
+            question.setCheckBoxText("Delete project contents on disk (cannot be undone)")
+            question.setDetailedText("Project location:\n%s" % treeNode.path)
+            ret = question.exec_()
+            if ret == QtGui.QMessageBox.Ok:
+                self.application.projectManager.deleteProject(treeNode, removeFiles = question.isChecked())
+                #self.application.projectManager.removeProject(treeNode)
+        else:
+            #Es un path
             self.deletePath(treeNode.path)
             #TODO: si esta en auto update ver como hacer los refresh
-            self.projectTreeProxyModel.refresh(self.projectTreeProxyModel.indexForPath(treeNode.parentNode.path))
-        else:
-            #Test delete removeFiles
-            self.application.projectManager.deleteProject(treeNode, removeFiles = False)
-    
-    @QtCore.pyqtSlot()
-    def on_actionRemove_triggered(self):
-        treeNode = self.currentNode()
-        if treeNode.isproject:
-            self.application.projectManager.removeProject(treeNode)
-
+        self.projectTreeProxyModel.refresh(currentIndex.parent())
+        
     @QtCore.pyqtSlot()
     def on_actionRename_triggered(self):
         basePath = self.currentPath()

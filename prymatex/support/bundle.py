@@ -272,6 +272,13 @@ class PMXBundleItem(PMXManagedObject):
         pass
         
 class PMXRunningContext(object):
+    TEMPLATE = """Item Name: {itemName}
+    Asynchronous: {asynchronous}
+    Working Directory: {workingDirectory}
+    Input:  Type {inputType}, Value {inputValue}
+    Environment: {environment}
+    Output: Type {outputType}, Value {outputValue}
+    """
     def __init__(self, bundleItem, shellCommand, environment):
         self.bundleItem = bundleItem
         self.inputType, self.inputValue = None, None
@@ -288,7 +295,31 @@ class PMXRunningContext(object):
     def __exit__(self, type, value, traceback):
         if not self.asynchronous:
             self.removeTempFile()
-        
+
+    def __unicode__(self):
+        return self.TEMPLATE.format(
+                itemName = self.bundleItem.name,
+                asynchronous = self.asynchronous,
+                workingDirectory = self.workingDirectory,
+                inputType = self.inputType,
+                inputValue = self.inputValue,
+                environment = self.environment,
+                outputType = self.outputType,
+                outputValue = self.outputValue
+        )
+
+    def __str__(self):
+        return self.TEMPLATE.format(
+                itemName = self.bundleItem.name,
+                asynchronous = self.asynchronous,
+                workingDirectory = self.workingDirectory,
+                inputType = self.inputType,
+                inputValue = self.inputValue,
+                environment = self.environment,
+                outputType = self.outputType,
+                outputValue = self.outputValue
+        )
+
     def description(self):
         return self.bundleItem.name or "No Name"
         

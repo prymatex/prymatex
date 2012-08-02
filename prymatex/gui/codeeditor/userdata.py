@@ -101,7 +101,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     # Cache Handle
     #================================================
     def processorState(self):
-        return self.__cache["processor_state"]
+        return self.__cache.get("processor_state")
 
     def setProcessorState(self, processorState):
         self.__cache["processor_state"] = processorState
