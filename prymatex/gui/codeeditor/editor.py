@@ -35,6 +35,7 @@ from prymatex.utils.text import convert_functions
 from prymatex.utils.i18n import ugettext as _
 
 from prymatex.utils.decorators.helpers import printtime
+from prymatex.core.exceptions import IOException
 
 class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
@@ -278,7 +279,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def open(self, filePath):
         """ Custom open for large files, use coroutines """
-        self.application.fileManager.openFile(filePath)
+        try:
+            self.application.fileManager.openFile(filePath)
+        except IOException as e:
+            QtGui.QMessageBox.critical(None, _("Could'n open file"), "%s" % e)
+            return
         content = self.application.fileManager.readFile(filePath)
         self.setFilePath(filePath)
         chunksize = 512
