@@ -16,3 +16,15 @@ class CheckableMessageBox(QtGui.QMessageBox):
         
     def isChecked(self):
         return self.checkBox.isChecked()
+        
+    @classmethod
+    def questionFactory(cls, parent, title, text, checkText, buttons = QtGui.QMessageBox.Ok, defaultButton = QtGui.QMessageBox.NoButton):
+        question = cls(parent)
+        question.setIcon(QtGui.QMessageBox.Question)
+        question.setStandardButtons(buttons)
+        question.setDefaultButton(defaultButton)
+        question.setWindowTitle(title)
+        question.setText(text)
+        question.setCheckBoxText(checkText)
+        return question
+        

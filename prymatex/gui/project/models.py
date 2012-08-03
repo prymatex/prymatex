@@ -63,6 +63,30 @@ class PMXProjectTreeModel(TreeModel):
             child._populated = False
         parentNode._populated = True
 	
+    def _update_directory(self, parentNode, parentIndex, notify = False):
+        names = os.listdir(parentNode.path)
+        addNames = filter(lambda name: parentNode.findChildByName(name) is None, names)
+        removeNodes = filter(lambda node: node.nodeName not in names, parentNode.childrenNodes)
+        
+        #Primero quitamos
+        for node in removeNodes:
+            if notify:
+                self.beginRemoveRows(parentIndex, node.row(), node.row())
+            parentNode.removeChild(node)
+            if notify:
+                self.endRemoveRows()
+
+        #Ahora agregamos
+        if notify: 
+            self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount() + len(addNames) - 1)
+        for name in addNames:
+            node = FileSystemTreeNode(name, parentNode)
+            node._populated = False
+            parentNode.appendChild(node)
+        if notify: 
+            self.endInsertRows()
+        parentNode._populated = True
+        
     def refresh(self, index):
         node = self.node(index)
         while not node.isRootNode() and not os.path.exists(node.path):
@@ -70,11 +94,7 @@ class PMXProjectTreeModel(TreeModel):
             node = self.node(index)
         #TODO: mejorar esto de la verificacion con el root node
         if not node.isRootNode() and node.isdir:
-            self.beginRemoveRows(index, 0, node.childCount() - 1)
-            for child in node.childrenNodes:
-                node.removeAllChild()
-            self.endRemoveRows()
-            self._load_directory(node, index, True)
+            self._update_directory(node, index, True)
             
     def nodeForPath(self, path):
         return self.node(self.indexForPath)
