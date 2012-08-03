@@ -227,11 +227,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             ret = question.exec_()
             if ret == QtGui.QMessageBox.Ok:
                 self.application.projectManager.deleteProject(treeNode, removeFiles = question.isChecked())
-                #self.application.projectManager.removeProject(treeNode)
         else:
             #Es un path
             self.deletePath(treeNode.path)
-            #TODO: si esta en auto update ver como hacer los refresh
         self.projectTreeProxyModel.refresh(currentIndex.parent())
         
     @QtCore.pyqtSlot()

@@ -4,10 +4,13 @@
 from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
+from prymatex.support import PMXCommand
+
 from prymatex.models.tree import TreeNode, TreeModel
 from prymatex.models.mimes import PyMimeData
-from prymatex.gui.support import qtadapter
 from prymatex.models.proxies import bisect_key
+
+from prymatex.gui.support import qtadapter
 
 #====================================================
 # Bundle Tree Node
@@ -70,6 +73,8 @@ class PMXBundleTreeNode(TreeNode):
         if parent is not None:
             receiver = lambda item = self: item.manager.bundleItemTriggered.emit(item)
             self.action = self.buildTriggerItemAction(parent, receiver)
+            #Que la accion referencia a su nodo
+            self.action.bundleTreeNode = self
             return self.action
         elif hasattr(self, "action"):
             return self.action
@@ -84,6 +89,19 @@ class PMXBundleTreeNode(TreeNode):
             hash['keyEquivalent'] = qtadapter.buildKeyEquivalent(hash['keyEquivalent'])
         self.item.update(hash)
 
+    def isEditorNeeded(self):
+        return self.isTextInputNeeded() or self.producingOutputText()
+
+    def isTextInputNeeded(self):
+        if isinstance(self.item, PMXCommand):
+            return self.item.input not in [ "none" ]
+        return True
+
+    def producingOutputText(self):
+        if isinstance(self.item, PMXCommand):
+            return self.item.output not in [ "discard", "showAsHTML", "showAsTooltip", "createNewDocument", "openAsNewDocument"]
+        return True
+        
 #====================================================
 # Bundle Tree Model
 #====================================================

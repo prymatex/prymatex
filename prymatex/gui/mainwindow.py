@@ -76,6 +76,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     
     def insertBundleItem(self, item):
         '''Insert selected bundle item in current editor if possible'''
+        #TODO Correr los items que se puedan correr sin current editor
         editor = self.currentEditor()
         if editor:
             self.currentEditor().insertBundleItem(item)
@@ -252,15 +253,21 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return self.splitTabWidget.currentWidget()
     
     def on_currentWidgetChanged(self, editor):
+        
         #TODO: que la statusbar se conecte como los dockers
         self.statusBar().setCurrentEditor(editor)
+
         #Update Menu
         self.updateMenuForEditor(editor)        
 
+        #Window Title
         template = Template(self.windowTitleTemplate)
         title = [ editor.tabTitle() ] if editor is not None else []
         title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
         self.setWindowTitle(" - ".join(title))
+        
+        #Avisar al manager si tenemos editor
+        self.application.supportManager.setEditorAvailable(editor != None)
         
         self.currentEditorChanged.emit(editor)
         if editor is not None:
