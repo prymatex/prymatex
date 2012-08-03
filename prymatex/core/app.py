@@ -406,7 +406,7 @@ class PMXApplication(QtGui.QApplication):
             openDocuments = self.state.value("openDocuments") or []
 
             for doc in openDocuments:
-                self.openFile(*doc, forceOpen=True)
+                self.openFile(*doc)
             else:
                 self.mainWindow.addEmptyEditor()
 
@@ -437,13 +437,15 @@ class PMXApplication(QtGui.QApplication):
                 return True
         return False
     
-    def openFile(self, filePath, cursorPosition = (0,0), focus = True, forceOpen=False):
+    def openFile(self, filePath, cursorPosition = (0,0), focus = True):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
-        if not forceOpen:
-            if not self.canBeHandled(filePath):
-                self.logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
-                return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
+        
+        #Esto es mejor implementarlo con los mime type de los editores
+        #if not forceOpen:
+        #   if not self.canBeHandled(filePath):
+        #        self.logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
+        #        return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
         
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
