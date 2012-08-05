@@ -25,7 +25,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
         self.setupCornerWidget()
         self.setupSignals()
         self.setTabsClosable(True)
-        self.setMinimumHeight(200)
+        #self.setMinimumHeight(200)
     
     def setupSignals(self):    
         self.tabCloseRequested.connect(lambda index, s = self: s.removeTab(index))
