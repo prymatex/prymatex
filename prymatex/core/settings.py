@@ -210,7 +210,7 @@ class pmxConfigPorperty(object):
         if self.fset != None:
             self.fset(instance, value)
 
-class PMXSettings(object):
+class PMXProfile(object):
     PMX_SETTING_NAME = PRYMATEX_SETTINGS_NAME
     PMX_STATE_NAME = PRYMATEX_STATE_NAME
     TM_SETTINGS_NAME = TEXTMATE_SETTINGS_NAME
@@ -245,9 +245,9 @@ class PMXSettings(object):
         config.read(cls.PMX_PROFILES_FILE)
         return not config.getboolean("General", "dontask")
 
-    def __init__(self, profile):
-        self.PMX_PROFILE_NAME = profile
-        self.PMX_PROFILE_PATH = self.get_prymatex_profile_path(profile)
+    def __init__(self, name):
+        self.PMX_PROFILE_NAME = name
+        self.PMX_PROFILE_PATH = self.get_prymatex_profile_path(name)
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
         self.PMX_CACHE_PATH = os.path.join(self.PMX_PROFILE_PATH, 'cache')
@@ -255,6 +255,7 @@ class PMXSettings(object):
         self.GROUPS = {}
         self.qsettings = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, self.PMX_SETTING_NAME), QtCore.QSettings.IniFormat)
         self.tmsettings = TextMateSettings(os.path.join(self.PMX_PREFERENCES_PATH, self.TM_SETTINGS_NAME))
+        self.state = QtCore.QSettings(os.path.join(self.PMX_PROFILE_PATH, self.PMX_STATE_NAME), QtCore.QSettings.IniFormat)
 
     def getGroup(self, name):
         if name not in self.GROUPS:
@@ -275,6 +276,14 @@ class PMXSettings(object):
         configurableInstance.settings.addListener(configurableInstance)
         configurableInstance.settings.configure(configurableInstance)
 
+    def saveState(self, component):
+        self.state.setValue(component.objectName(), component.saveState())
+        self.state.sync()
+
+    def restoreState(self, component):
+        state = self.state.value(component.objectName())
+        component.restoreState(state)
+        
     def setValue(self, name, value):
         self.qsettings.setValue(name, value)
     
