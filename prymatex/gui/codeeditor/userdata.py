@@ -9,7 +9,6 @@ from prymatex.utils.decorators.deprecated import deprecated
 class PMXBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
-        self.scopes = []
         #Folding
         self.foldingMark = PMXSyntax.FOLDING_NONE
         self.foldedLevel = 0
@@ -26,11 +25,8 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.__cache = {}
 
     def __nonzero__(self):
-        return bool(self.scopes)
+        return bool(self.ranges)
     
-    def setScopes(self, scopes):
-        self.scopes = scopes
-        
     def setRanges(self, ranges):
         self.ranges = ranges
         
@@ -41,22 +37,16 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
         self.chunks = chunks
         
     def getLastScope(self):
-        return self.scopes[-1]
+        return self.ranges[-1][1]
         
     def scopeAtPosition(self, pos):
-        return self.scopes[pos]
-        
-    @deprecated
-    def getScopeAtPosition(self, pos):
-        #FIXME: Voy a poner algo mentiroso si pos no esta en self.scopes
-        scope = self.scopes[pos] if pos < len(self.scopes) else self.scopes[-1]
-        return scope
+        return self.scopeRange(pos)[1]
     
     def scopeRange(self, pos):
         ranges = self.scopeRanges()
         sr = filter(lambda ((start, end), scope): start <= pos <= end, self.ranges)
         assert len(sr) >= 1, "More than one range"
-        sr = sr[0] if len(sr) == 1 else None
+        sr = sr[0] if len(sr) >= 1 else None
         return sr
     
     def scopeRanges(self, start = None, end = None):

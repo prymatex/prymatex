@@ -9,13 +9,6 @@ from prymatex.support.syntax import PMXSyntax
 
 RE_WORD = re.compile(r"([A-Za-z_]\w+\b)", re.UNICODE)
 
-def findGroup(scopes):
-    for scope in scopes:
-        group = scope.split(".")[0]
-        if group in PMXSyntax.ROOT_GROUPS:
-            return group
-    return scope.split(".")[0]
-    
 class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
     def __init__(self, editor):
         self.editor = editor
@@ -28,9 +21,7 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
     def beginLine(self, line, stack):
         self.line = line
         self.lineIndex = 0
-        self.scopes = []         #[ s0, s1, .... sN ]
-        self.scopeRanges = []       #[ ((start, end), scope) ... ]
-        self.preferences = []       #[ ((start, end), preference) ... ]
+        self.scopeRanges = []       #[ ((start, end), scopeHash) ... ]
         self.lineChunks = []        #[ ((start, end), chunk) ... ]
         self.words = []             #[ ((start, end), word, group) ... ]
         self.state = None
@@ -61,12 +52,9 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
         begin = self.lineIndex
         # Solo si tengo realmente algo que agregar
         if begin != end:
-            scope = " ".join(self.stackScopes)
-            self.scopes[begin:end] = [scope for _ in xrange(end - begin)]
-            self.scopeRanges.append( ((begin, end), scope) )
-            self.preferences.append( ((begin, end), self.editor.preferenceSettings(scope)) )
-            chunk = self.line[begin:end]
-            self.lineChunks.append( ((begin, end), chunk) )
-            scopeGroup = findGroup(self.stackScopes[::-1])
-            self.words += map(lambda match: ((begin + match.span()[0], begin + match.span()[1]), match.group(), scopeGroup), RE_WORD.finditer(chunk))
+            scopeHash, scopeGroup = self.editor.flyweightScopeFactory(self.stackScopes)
+            self.scopeRanges.append( ((begin, end), scopeHash) )
+            self.lineChunks.append( ((begin, end), self.line[begin:end]) )
+            #TODO: Ver de sacar tambien los groups? y usar todo indexado por el scopeHash
+            self.words += map(lambda match: ((begin + match.span()[0], begin + match.span()[1]), match.group(), scopeGroup), RE_WORD.finditer(self.line[begin:end]))
         self.lineIndex = end

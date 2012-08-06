@@ -74,9 +74,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     #@printtime
     def setupBlockUserData(self, text, userData):
         blockState = self.SINGLE_LINE
-        userData.setScopes(self.processor.scopes)
         userData.setRanges(self.processor.scopeRanges)
-        userData.setPreferences(self.processor.preferences)
         userData.setChunks(self.processor.lineChunks)
 
         if self.processor.state is not None:
@@ -100,7 +98,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.editor.updateFolding(self.currentBlock(), userData, foldingMark)
             
         #4 Update Symbols
-        symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, userData.preferences)
+        symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, 
+            map(lambda ((start, end), scope): ((start, end), self.editor.preferenceSettings(scope)), userData.scopeRanges()))
         if symbolRange:
             #TODO: Hacer la transformacion de los symbolos
             #symbol = text[symbolRange[0][1]:symbolRange[-1][2]]
@@ -151,8 +150,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.textCharFormatBuilders[formatHash] = formatBuilder
 
     def applyFormat(self, userData):
-        for (start, end), scope in userData.ranges:
-            format = self.highlightFormat(scope)
+        for (start, end), scopeHash in userData.scopeRanges():
+            format = self.highlightFormat(self.editor.scopeName(scopeHash))
             if format is not None:
                 self.setFormat(start, end - start, format)
 
