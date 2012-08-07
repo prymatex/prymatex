@@ -414,7 +414,7 @@ class PMXApplication(QtGui.QApplication):
         return False
     
     @printtime
-    def openFile(self, filePath, cursorPosition = (0,0), focus = True, mainWindow = None, useTasks = False):
+    def openFile(self, filePath, cursorPosition = (0,0), focus = True, mainWindow = None, useTasks = True):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
         
@@ -445,8 +445,6 @@ class PMXApplication(QtGui.QApplication):
             if useTasks and inspect.isgeneratorfunction(editor.open):
                 task = self.scheduler.newTask( editor.open(filePath) )
                 task.done.connect( on_editorReady(mainWindow, editor, cursorPosition, focus) )
-            elif inspect.isgeneratorfunction(editor.open):
-                on_editorReady(mainWindow, editor, cursorPosition, focus)(list(editor.open(filePath)))
             else:
                 on_editorReady(mainWindow, editor, cursorPosition, focus)(editor.open(filePath))
 

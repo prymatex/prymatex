@@ -399,7 +399,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return self.scopes[scopeHash]["name"]
 
     def scope(self, cursor):
-        return cursor.block().userData().scopeAtPosition(cursor.columnNumber())
+        return self.scopeName(cursor.block().userData().scopeAtPosition(cursor.columnNumber()))
 
     def currentPreferenceSettings(self):
         return self.preferenceSettings(self.currentScope())
