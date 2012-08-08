@@ -269,7 +269,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         #Avisar al manager si tenemos editor
         self.application.supportManager.setEditorAvailable(editor != None)
         
+        #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)
+
         if editor is not None:
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
@@ -344,16 +346,27 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # MainWindow State
     #===========================================================================
     def saveState(self):
-        state = { 
+        #Documentos abiertos
+        openDocumentsOnQuit = []
+        for editor in self.editors():
+            if not editor.isNew():
+                openDocumentsOnQuit.append((editor.filePath, editor.cursorPosition()))
+        state = {
             "self": QtGui.QMainWindow.saveState(self),
-            "dockers": dict(map(lambda dock: (dock.objectName(), dock.saveState()), self.dockers))
+            "dockers": dict(map(lambda dock: (dock.objectName(), dock.saveState()), self.dockers)),
+            "documents": openDocumentsOnQuit,
+            "geometry": self.saveGeometry(),
         }
         return state
 
-    def restoreState (self, state):
+    def restoreState(self, state):
         try:
             map(lambda dock: dock.restoreState(state["dockers"][dock.objectName()]), self.dockers)
+            self.restoreGeometry(state["geometry"])
+            for doc in state["documents"]:
+                self.application.openFile(*doc, mainWindow = self)
             QtGui.QMainWindow.restoreState(self, state["self"])
+            
         except (TypeError, ValueError) as e:
             logger.error("Could not restore state for %s. Reason %s" % (self, e))
 

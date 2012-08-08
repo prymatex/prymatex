@@ -307,3 +307,11 @@ class PMXSyntax(PMXBundleItem):
 
     def __str__(self):
         return u"<PMXSyntax %s>" % self.name
+
+    @classmethod
+    def findGroup(cls, scopes):
+        for scope in scopes:
+            group = scope.split(".")[0]
+            if group in cls.ROOT_GROUPS:
+                return group
+        return scope.split(".")[0]

@@ -180,6 +180,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         # * the cursor is allways here>
         self._currentBraces = (None, None, None, None)
         
+        #Aca vamos a guardar los scopes del documento, quiza esto pueda ser un objeto factory, por ahora el factory es el editor
+        self.scopes = {}
+        
         #Block Count
         self.lastBlockCount = self.document().blockCount()
 
@@ -363,13 +366,28 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return (cursor.block().blockNumber(), cursor.columnNumber())
 
     #=======================================================================
+    # Scopes
+    #=======================================================================
+    def flyweightScopeFactory(self, scopeStack):
+        scopeName = " ".join(scopeStack)
+        scopeHash = hash(scopeName)
+        scopeData = self.scopes.setdefault(scopeHash, {
+            "name": scopeName,
+            "settings": self.application.supportManager.getPreferenceSettings(scopeName),
+            "group": PMXSyntax.findGroup(scopeStack[::-1])
+        })
+        return scopeHash, scopeData["group"]
+    
+    #=======================================================================
     # Obteniendo datos del editor
     #=======================================================================
     def tabKeyBehavior(self):
         return self.tabStopSoft and unicode(' ') * self.tabStopSize or unicode('	')
 
-    def preferenceSettings(self, scope):
-        return self.application.supportManager.getPreferenceSettings(scope)
+    def preferenceSettings(self, scopeOrHash):
+        scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
+        if scopeHash in self.scopes:
+            return self.scopes[scopeHash]["settings"]
     
     def wordUnderCursor(self):
         """ Esto no es lo mismo que curre"""
@@ -377,13 +395,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
 
-    def getCurrentScope(self):
-        """Deprecated"""
-        cursor = self.textCursor()
-        return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
+    def scopeName(self, scopeHash):
+        return self.scopes[scopeHash]["name"]
 
     def scope(self, cursor):
-        return cursor.block().userData().getScopeAtPosition(cursor.columnNumber())
+        return self.scopeName(cursor.block().userData().scopeAtPosition(cursor.columnNumber()))
 
     def currentPreferenceSettings(self):
         return self.preferenceSettings(self.currentScope())
@@ -860,7 +876,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def runKeyHelper(self, event):
         #No tengo modo activo, intento con los helpers
         #Obtener key, scope y cursor
-        scope = self.getCurrentScope()
+        scope = self.currentScope()
         cursor = self.textCursor()
         for helper in self.findHelpers(event.key()):
             #Buscar Entre los helpers
@@ -976,7 +992,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor = self.textCursor()
         block = cursor.block()
         line = block.text()
-        scope = self.getCurrentScope()
+        scope = self.currentScope()
         preferences = self.preferenceSettings(scope)
         current_word, start, end = self.currentWord()
         #Combine base env from params and editor env
@@ -1699,7 +1715,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setFlags(flags)
     
     def on_actionSelectBundleItem_triggered(self):
-        scope = self.getCurrentScope()
+        scope = self.currentScope()
         items = self.application.supportManager.getActionItems(scope)
         def itemsToDict(items):
             for item in items:
@@ -1757,7 +1773,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #mimeData = event.mimeData()
         if event.mimeData().hasUrls():
             files = map(lambda url: url.toLocalFile(), event.mimeData().urls())
-            scope = self.getCurrentScope()
+            scope = self.currentScope()
             for file in files:                
                 items = self.application.supportManager.getFileExtensionItem(file, scope)
                 if items:

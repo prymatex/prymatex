@@ -49,6 +49,9 @@ class SplitTabWidget(QtGui.QSplitter):
     _HS_WEST = -6
     _HS_OUTSIDE = -7
 
+    _widgetHistoryBack = []
+    _widgetHistoryForward = []
+    
     def __init__(self, *args):
         """ Initialise the instance. """
 
@@ -244,10 +247,8 @@ class SplitTabWidget(QtGui.QSplitter):
         
         self.tabCloseRequest.emit(w)
 
-    def _current_tab_changed(self, w):
-        """ A close button was clicked in one of out _TabWidgets """
-        
-        self.currentWidgetChanged.emit(w)
+    #def _current_tab_changed(self, w):
+    #    self.currentWidgetChanged.emit(w)
         
     def setWidgetIcon(self, w, icon):
         """ Set the active icon on a widget. """
