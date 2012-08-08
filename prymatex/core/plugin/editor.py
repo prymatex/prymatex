@@ -129,6 +129,18 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         # FIXME: Rename or move files make produces bogus behavior 
         return self.externalAction == self.application.fileManager.DELETED    
 
+    #============================================================
+    # Global navigation api
+    #============================================================
+    def nextLocation(self):
+        return False
+        
+    def previousLocation(self):
+        return False
+
+    def locationCount(self):
+        return 0
+
     def setCursorPosition(self, cursorPosition):
         pass
 

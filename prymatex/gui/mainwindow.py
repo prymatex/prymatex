@@ -269,7 +269,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         #Avisar al manager si tenemos editor
         self.application.supportManager.setEditorAvailable(editor != None)
         
+        #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)
+
         if editor is not None:
             editor.setFocus()
             self.application.checkExternalAction(self, editor)

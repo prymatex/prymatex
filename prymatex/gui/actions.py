@@ -194,7 +194,14 @@ class MainWindowActions(object):
         if index is not None:
             tab = tabs[index]
             self.splitTabWidget.setCurrentWidget(tab)
-            
+    
+    # Global navigation
+    def on_actionNextLocation_triggered(self):
+        pass
+        
+    def on_actionPreviousLocation_triggered(self):
+        pass
+
     #============================================================
     # Bundles Actions
     #============================================================
