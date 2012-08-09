@@ -102,6 +102,10 @@
     <addaction name="actionNextTab"/>
     <addaction name="actionPreviousTab"/>
     <addaction name="actionSelectTab"/>
+    <addaction name="separator"/>
+    <addaction name="actionLastEditLocation"/>
+    <addaction name="actionLocationBack"/>
+    <addaction name="actionLocationForward"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -519,6 +523,42 @@
   <action name="actionImportProject">
    <property name="text">
     <string>Import Project</string>
+   </property>
+  </action>
+  <action name="actionLastEditLocation">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/go-first-view.png</normaloff>:/icons/actions/go-first-view.png</iconset>
+   </property>
+   <property name="text">
+    <string>Last Edit Location</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionLocationBack">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/go-previous-view.png</normaloff>:/icons/actions/go-previous-view.png</iconset>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Left</string>
+   </property>
+  </action>
+  <action name="actionLocationForward">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/icons/actions/go-next-view.png</normaloff>:/icons/actions/go-next-view.png</iconset>
+   </property>
+   <property name="text">
+    <string>Forward</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Right</string>
    </property>
   </action>
  </widget>
