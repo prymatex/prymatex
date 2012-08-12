@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Mon Jul 23 13:54:47 2012
+# Created: Wed Aug  8 14:49:12 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -199,6 +199,21 @@ class Ui_MainWindow(object):
         self.actionSwitchProfile.setObjectName(_fromUtf8("actionSwitchProfile"))
         self.actionImportProject = QtGui.QAction(MainWindow)
         self.actionImportProject.setObjectName(_fromUtf8("actionImportProject"))
+        self.actionLastEditLocation = QtGui.QAction(MainWindow)
+        icon20 = QtGui.QIcon()
+        icon20.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-first-view.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionLastEditLocation.setIcon(icon20)
+        self.actionLastEditLocation.setObjectName(_fromUtf8("actionLastEditLocation"))
+        self.actionLocationBack = QtGui.QAction(MainWindow)
+        icon21 = QtGui.QIcon()
+        icon21.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-previous-view.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionLocationBack.setIcon(icon21)
+        self.actionLocationBack.setObjectName(_fromUtf8("actionLocationBack"))
+        self.actionLocationForward = QtGui.QAction(MainWindow)
+        icon22 = QtGui.QIcon()
+        icon22.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/go-next-view.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionLocationForward.setIcon(icon22)
+        self.actionLocationForward.setObjectName(_fromUtf8("actionLocationForward"))
         self.menuRecentFiles.addAction(self.actionOpenAllRecentFiles)
         self.menuRecentFiles.addAction(self.actionRemoveAllRecentFiles)
         self.menuNew.addAction(self.actionNewEditor)
@@ -225,6 +240,10 @@ class Ui_MainWindow(object):
         self.menuNavigation.addAction(self.actionNextTab)
         self.menuNavigation.addAction(self.actionPreviousTab)
         self.menuNavigation.addAction(self.actionSelectTab)
+        self.menuNavigation.addSeparator()
+        self.menuNavigation.addAction(self.actionLastEditLocation)
+        self.menuNavigation.addAction(self.actionLocationBack)
+        self.menuNavigation.addAction(self.actionLocationForward)
         self.menuHelp.addAction(self.actionReport_Bug)
         self.menuHelp.addAction(self.actionTranslatePrymatex)
         self.menuHelp.addAction(self.actionProjectHomepage)
@@ -344,6 +363,12 @@ class Ui_MainWindow(object):
         self.actionDelete.setText(_('Delete'))
         self.actionSwitchProfile.setText(_('Switch Profile'))
         self.actionImportProject.setText(_('Import Project'))
+        self.actionLastEditLocation.setText(_('Last Edit Location'))
+        self.actionLastEditLocation.setShortcut(_('Ctrl+Q'))
+        self.actionLocationBack.setText(_('Back'))
+        self.actionLocationBack.setShortcut(_('Alt+Left'))
+        self.actionLocationForward.setText(_('Forward'))
+        self.actionLocationForward.setShortcut(_('Alt+Right'))
 
 from prymatex.widgets.splitter import SplitTabWidget
 from prymatex import resources_rc

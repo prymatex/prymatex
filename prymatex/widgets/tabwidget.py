@@ -99,7 +99,6 @@ class _DragableTabBar(QtGui.QTabBar):
             self._root._move_right(self.parent(), self.currentIndex())
         else:
             e.ignore()
-
     
     def widgetAtPos(self, pos):
         ''' Returns the widget at position (QPoint)'''
@@ -157,6 +156,7 @@ class _DragableTabBar(QtGui.QTabBar):
     
             # Update the current tab.
             self._root._set_current_tab(self.parent(), self.currentIndex())
+            self._root._tab_focus_changed.emit(self.parent().widget(self.currentIndex()))
             self._root._set_focus()
     
             if e.button() != QtCore.Qt.LeftButton:

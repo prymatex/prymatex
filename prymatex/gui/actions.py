@@ -196,11 +196,17 @@ class MainWindowActions(object):
             self.splitTabWidget.setCurrentWidget(tab)
     
     # Global navigation
-    def on_actionNextLocation_triggered(self):
-        pass
+    @QtCore.pyqtSlot()
+    def on_actionLocationBack_triggered(self):
+        print "back"
         
-    def on_actionPreviousLocation_triggered(self):
-        pass
+    @QtCore.pyqtSlot()
+    def on_actionLocationForward_triggered(self):
+        print "forward"
+    
+    @QtCore.pyqtSlot()
+    def on_actionLastEditLocation_triggered(self):
+        print "last"
 
     #============================================================
     # Bundles Actions

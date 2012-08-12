@@ -17,9 +17,6 @@ from prymatex.gui.statusbar import PMXStatusBar
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
 
-from logging import getLogger
-logger = getLogger(__name__)
-
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """Prymatex main window"""
     #=========================================================
@@ -39,13 +36,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self._showMenuBar = value
         self.menuBar().setShown(value)
     
+    _editorHistory = []
+    _editorHistoryIndex = 0
+    
     # Constructor
     def __init__(self, application):
         """
         The main window
         @param parent: The QObject parent, in this case it should be the QApp
-        @param files_to_open: The set of files to be opened when the window
-                              is shown in the screen.
+        @param files_to_open: The set of files to be opened when the window is shown in the screen.
         """
         QtGui.QMainWindow.__init__(self)
         self.application = application
@@ -72,7 +71,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
-    
     
     def insertBundleItem(self, item):
         '''Insert selected bundle item in current editor if possible'''
@@ -239,12 +237,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
 
     def findEditorForFile(self, filePath):
         # Find open editor for fileInfo
-        for editor in self.splitTabWidget.getAllWidgets():
+        for editor in self.splitTabWidget.allWidgets():
             if editor.filePath == filePath:
                 return editor
 
     def editors(self):
-        return self.splitTabWidget.getAllWidgets()
+        return self.splitTabWidget.allWidgets()
         
     def setCurrentEditor(self, editor):
         self.splitTabWidget.setCurrentWidget(editor)
@@ -254,6 +252,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     
     def on_currentWidgetChanged(self, editor):
         
+        print editor
         #TODO: que la statusbar se conecte como los dockers
         self.statusBar().setCurrentEditor(editor)
 
@@ -368,7 +367,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             QtGui.QMainWindow.restoreState(self, state["self"])
             
         except (TypeError, ValueError) as e:
-            logger.error("Could not restore state for %s. Reason %s" % (self, e))
+            self.logger.error("Could not restore state for %s. Reason %s" % (self, e))
 
     #===========================================================================
     # Drag and Drop
