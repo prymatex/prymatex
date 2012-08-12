@@ -53,3 +53,6 @@ class LocationIsNotProject(Exception):
 
 class ProjectExistsException(Exception):
     pass
+
+class EnviromentNotSuitable(Exception):
+    pass
