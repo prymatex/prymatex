@@ -371,12 +371,15 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def flyweightScopeFactory(self, scopeStack):
         scopeName = " ".join(scopeStack)
         scopeHash = hash(scopeName)
-        scopeData = self.scopes.setdefault(scopeHash, {
-            "name": scopeName,
-            "settings": self.application.supportManager.getPreferenceSettings(scopeName),
-            "group": PMXSyntax.findGroup(scopeStack[::-1])
-        })
-        return scopeHash, scopeData["group"]
+        if scopeHash not in self.scopes:
+            scopeData = self.scopes.setdefault(scopeHash, {
+                "name": scopeName,
+                "settings": self.application.supportManager.getPreferenceSettings(scopeName),
+                "group": PMXSyntax.findGroup(scopeStack[::-1])
+            })
+            return scopeHash, scopeData["group"]
+        else:
+            return scopeHash, self.scopes[scopeHash]["group"]
     
     #=======================================================================
     # Obteniendo datos del editor

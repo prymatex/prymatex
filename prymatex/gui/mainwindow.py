@@ -37,7 +37,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.menuBar().setShown(value)
     
     _editorHistory = []
-    _editorHistoryIndex = 0
+    _editorHistoryIndex = -1
     
     # Constructor
     def __init__(self, application):

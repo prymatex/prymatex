@@ -60,6 +60,9 @@ class _TabWidget(QtGui.QTabWidget):
             prune.hide()
             prune.deleteLater()
 
+    def mouseDoubleClickEvent(self, event):
+        print "doble click"
+        
     def tabRemoved(self, idx):
         """ Reimplemented to update the record of the current tab if it is removed. """
         
@@ -156,7 +159,7 @@ class _DragableTabBar(QtGui.QTabBar):
     
             # Update the current tab.
             self._root._set_current_tab(self.parent(), self.currentIndex())
-            self._root._tab_focus_changed.emit(self.parent().widget(self.currentIndex()))
+            self._root._tab_focus_changed(self.parent().widget(self.currentIndex()))
             self._root._set_focus()
     
             if e.button() != QtCore.Qt.LeftButton:

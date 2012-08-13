@@ -76,6 +76,7 @@ class SplitTabWidget(QtGui.QSplitter):
 
         self._current_tab_w = None
         self._current_tab_idx = -1
+        self._current_widget = None
 
     def saveState(self):
         """ Returns a Python object containing the saved state of the widget.
@@ -204,20 +205,20 @@ class SplitTabWidget(QtGui.QSplitter):
     def removeTab(self, w):
         """ Remove tab to the tab widget."""
         tw, tidx = self._tab_widget(w)
-        self.disconnect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
-        self._remove_tab(tw, tidx)
-        tw.tabBar().setFocus()
-        """
+        if tw is not None:
+            self.disconnect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
+            self._remove_tab(tw, tidx)
             if tw.count() == 0 and self.count() > 1:
                 for tw in self.findChildren(_TabWidget):
                     if tw.count() != 0:
                         break
-                self._set_current_tab(tw, 0)
+                tw, tidx = tw, tw.count() - 1 if tw.count() != 0 else (None, -1)
             else:
-                self._set_current_tab(tw, tidx - 1)
-            #tw.tabBar().setFocus()
-        """
-    
+                tidx = tidx - 1
+            self._set_current_tab(tw, tidx)
+            tw.tabBar().setFocus()
+            self._tab_focus_changed(tw is not None and tw.widget(tidx) or None)
+        
     def allWidgets(self):
         widgets = []
         for tw in self.findChildren(_TabWidget):
@@ -235,10 +236,8 @@ class SplitTabWidget(QtGui.QSplitter):
         self._tab_focus_changed(w)
         
     def currentWidget(self):
-        """ Return current widget. """
-        
-        if self._current_tab_w != None and self._current_tab_idx != -1:
-            return self._current_tab_w.widget(self._current_tab_idx)
+        """Return current widget."""
+        return self._current_widget
 
     def closeAllExceptWidget(self, widget):
         count = 0
@@ -257,10 +256,12 @@ class SplitTabWidget(QtGui.QSplitter):
         
         self.tabCloseRequest.emit(w)
         
-    def _tab_focus_changed(self, w):
+    def _tab_focus_changed(self, widget):
         """ A close button was clicked in one of out _TabWidgets """
         
-        self.currentWidgetChanged.emit(w)
+        if self._current_widget != widget:
+            self._current_widget = widget
+            self.currentWidgetChanged.emit(widget)
         
     #===========================================================================
     # Manejo de las tabs, title, iconos, tootltip, color
