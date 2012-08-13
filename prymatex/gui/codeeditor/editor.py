@@ -142,9 +142,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def defaultFlags(self, flags):
         self.setFlags(flags)
 
-    _cursorHistory = []
-    _cursorHistoryIndex = 0
-    
     #================================================================
     # INIT
     #================================================================
@@ -192,7 +189,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Connect context menu
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
-        
+
+        #Cursor history
+        self._cursorHistory, self._cursorHistoryIndex = [], 0
+           
         #Basic setup
         #self.setCenterOnScroll(True)
     
@@ -207,6 +207,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.modificationChanged.connect(self.on_modificationChanged)
         self.syntaxChanged.connect(self.showSyntaxMessage)
         self.themeChanged.connect(self.highlightEditor)
+        
+        self.document().undoCommandAdded.connect(self.on_document_undoCommandAdded)
+        self.document().undoAvailable.connect(self.on_document_undoAvailable)
 
     def initialize(self, mainWindow):
         PMXBaseEditor.initialize(self, mainWindow)
@@ -1762,14 +1765,42 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #===========================================================================
     # Navigation API
     #===========================================================================
+    def cursorAtPosition(self, position):
+        cursor = self.textCursor()
+        cursor.setPosition(position)
+        return cursor
+        
+    def on_document_undoCommandAdded(self):
+        #TODO una cantidad para el hisotial en lugar de ese 5
+        self._cursorHistory = map(lambda position: self.cursorAtPosition(position), 
+            list(
+                set(
+                    map(lambda cursor: cursor.position(), [self.textCursor()] + self._cursorHistory)
+                    )
+            )[:5]
+        )
+        self._cursorHistoryIndex = 0
+
+    def on_document_undoAvailable(self, available):
+        if not available:
+            self._cursorHistory, self._cursorHistoryIndex = [], 0
+
     def nextLocation(self):
-        return False
+        if self._cursorHistoryIndex == 0:
+            return False
+        self._cursorHistoryIndex -= 1
+        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
+        return True
         
     def previousLocation(self):
-        return False
+        if not self._cursorHistory or self._cursorHistoryIndex >= len(self._cursorHistory) - 1:
+            return False
+        self._cursorHistoryIndex += 1
+        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
+        return True
 
     def locationCount(self):
-        return 0
+        return len(self._cursorHistory)
 
     #===========================================================================
     # Drag and Drop

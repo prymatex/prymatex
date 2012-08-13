@@ -48,8 +48,6 @@ parser.add_argument('--verbose', default=0, type=int,
 parser.add_argument('--log-pattern', default='', type=str,
                 help = 'Set filter pattern for logging')
 
-        
-
 def parse():
     filenames = None
     projects_path = None
