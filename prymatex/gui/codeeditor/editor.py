@@ -142,6 +142,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def defaultFlags(self, flags):
         self.setFlags(flags)
 
+    _cursorHistory = []
+    _cursorHistoryIndex = 0
+    
     #================================================================
     # INIT
     #================================================================
@@ -1756,6 +1759,18 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def on_actionFilterThroughCommand_triggered(self):
         self.statusBar().showCommand()
     
+    #===========================================================================
+    # Navigation API
+    #===========================================================================
+    def nextLocation(self):
+        return False
+        
+    def previousLocation(self):
+        return False
+
+    def locationCount(self):
+        return 0
+
     #===========================================================================
     # Drag and Drop
     #===========================================================================

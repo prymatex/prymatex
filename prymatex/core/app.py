@@ -428,7 +428,7 @@ class PMXApplication(QtGui.QApplication):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:
                 mainWindow.setCurrentEditor(editor)
-                if cursorPosition is not None:
+                if isinstance(cursorPosition, tuple):
                     editor.setCursorPosition(cursorPosition)
         else:
             mainWindow = mainWindow or self.mainWindow
@@ -439,7 +439,8 @@ class PMXApplication(QtGui.QApplication):
                 editor.setProject(project)
             def on_editorReady(mainWindow, editor, cursorPosition, focus):
                 def editorReady(openResult):
-                    editor.setCursorPosition(cursorPosition)
+                    if isinstance(cursorPosition, tuple):
+                        editor.setCursorPosition(cursorPosition)
                     mainWindow.tryCloseEmptyEditor()
                     mainWindow.addEditor(editor, focus)
                 return editorReady

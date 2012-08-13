@@ -101,13 +101,13 @@ class MainWindowActions(object):
 
     @QtCore.pyqtSlot()
     def on_actionCloseAll_triggered(self):
-        for w in self.splitTabWidget.getAllWidgets():
+        for w in self.splitTabWidget.allWidgets():
             self.closeEditor(editor = w)
 
     @QtCore.pyqtSlot()
     def on_actionCloseOthers_triggered(self):
         current = self.currentEditor()
-        for w in self.splitTabWidget.getAllWidgets():
+        for w in self.splitTabWidget.allWidgets():
             if w is not current:
                 self.closeEditor(editor = w)
     
@@ -184,7 +184,7 @@ class MainWindowActions(object):
         """ 
         Shows select tab, and change to selected 
         """
-        tabs = self.splitTabWidget.getAllWidgets()
+        tabs = self.splitTabWidget.allWidgets()
         def tabsToDict(tabs):
             for tab in tabs:
                 image = tab.tabIcon()

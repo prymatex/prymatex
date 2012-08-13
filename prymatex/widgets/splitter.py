@@ -247,7 +247,7 @@ class SplitTabWidget(QtGui.QSplitter):
 
     def closeAllExceptWidget(self, widget):
         count = 0
-        for w in self.getAllWidgets():
+        for w in self.allWidgets():
             if w is widget:
                 continue
             self._close_tab_request(w)
