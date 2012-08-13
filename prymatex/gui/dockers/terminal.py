@@ -198,6 +198,16 @@ class PMXTabTerminals(QtGui.QTabWidget):
             return
         super(PMXTabTerminals, self).mousePressEvent(event)
     
+    def buildSingalMenu(self, process_pid):
+        '''Creates a singal with add hock menu events'''
+        menu = QtGui.QMenu(_('Send &Singal'))
+        # Signals
+        
+        
+    def sendSignalToCurrentProcess(self):
+        pass
+    
+    
     def quitTab(self, index = None):
         if index is None:
             index = self.currentIndex()

@@ -17,13 +17,31 @@ if project_basedir not in sys.path:
 
 prymatexAppInstance = None
 
+#===============================================================================
+# Note PyQt4 is needed by core so basic exceptions wont be even raised
+#===============================================================================
+BASIC_IMPORTS = ('sip', 'PyQt4', 'zmq')
+def areBasicImportsAvaliable():
+    '''
+    @return: True if all basic imports are available
+    '''
+    # Check virtualenv
+    #if 'VIRTUALENVWRAPPER_PYTHON' in os.environ:
+    #    return True
+    try:
+        for name in BASIC_IMPORTS:
+            exec 'import %s' % name
+    except ImportError:
+        return False
+    return True
+        
+
 # TODO: Accept Qt Arguments to QtApplication
 def runPrymatexApplication(options, files):
     from prymatex.core.app import PMXApplication
     from prymatex.core import exceptions
     
     def runPrymatexInstance(instanceOptions, instanceFiles = []):
-        
         global prymatexAppInstance
         if prymatexAppInstance is not None:
             prymatexAppInstance.unloadGraphicalUserInterface()
@@ -46,9 +64,14 @@ def runPrymatexApplication(options, files):
     returnCode = -1
     try:
         returnCode = runPrymatexInstance(options, files)
+    except exceptions.EnviromentNotSuitable:
+        print "Prymatex can't run. Basic imports can't be found. Running in virtualenv?"
+        
+    
     except exceptions.AlreadyRunningError as ex:
         from PyQt4 import QtGui
         QtGui.QMessageBox.critical(None, ex.title, ex.message, QtGui.QMessageBox.Ok)
+    
     except:
         from traceback import format_exc
         traceback = format_exc()
@@ -62,6 +85,13 @@ def runPrymatexApplication(options, files):
     return returnCode
 
 def main(args):
+    if not areBasicImportsAvaliable():
+        print
+        print "Prymatex can't be started. Basic imports are note available."
+        print "Check if you have: %s" % ', '.join(BASIC_IMPORTS)
+        print
+        return
+    
     from prymatex.core import cliparser
     options, files = cliparser.parse()
     
