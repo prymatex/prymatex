@@ -414,7 +414,7 @@ class PMXApplication(QtGui.QApplication):
         return False
     
     @printtime
-    def openFile(self, filePath, cursorPosition = (0,0), focus = True, mainWindow = None, useTasks = True):
+    def openFile(self, filePath, cursorPosition = None, focus = True, mainWindow = None, useTasks = True):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
         
@@ -428,7 +428,8 @@ class PMXApplication(QtGui.QApplication):
             mainWindow, editor = self.findEditorForFile(filePath)
             if editor is not None:
                 mainWindow.setCurrentEditor(editor)
-                editor.setCursorPosition(cursorPosition)
+                if cursorPosition is not None:
+                    editor.setCursorPosition(cursorPosition)
         else:
             mainWindow = mainWindow or self.mainWindow
             editor = self.getEditorInstance(filePath, mainWindow)

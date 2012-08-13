@@ -37,7 +37,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.menuBar().setShown(value)
     
     _editorHistory = []
-    _editorHistoryIndex = -1
+    _editorHistoryIndex = 0
     
     # Constructor
     def __init__(self, application):
@@ -252,7 +252,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     
     def on_currentWidgetChanged(self, editor):
         
-        print editor
         #TODO: que la statusbar se conecte como los dockers
         self.statusBar().setCurrentEditor(editor)
 
@@ -272,6 +271,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.currentEditorChanged.emit(editor)
 
         if editor is not None:
+            self.addEditorToHistory(editor)
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
                     
@@ -323,6 +323,15 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         if editor is not None and editor.isNew() and not editor.isModified():
             self.closeEditor(editor)
     
+    #=========================================================
+    # Handle history
+    #=========================================================
+    def addEditorToHistory(self, editor):
+        if self._editorHistory and self._editorHistory[self._editorHistoryIndex] == editor:
+            return
+        if not editor.isEmpty():
+            self._editorHistory.insert(self._editorHistoryIndex, editor)
+        
     #===========================================================================
     # MainWindow Events
     #===========================================================================

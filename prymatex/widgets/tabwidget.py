@@ -61,7 +61,7 @@ class _TabWidget(QtGui.QTabWidget):
             prune.deleteLater()
 
     def mouseDoubleClickEvent(self, event):
-        print "doble click"
+        self._root._tab_create_request(self)
         
     def tabRemoved(self, idx):
         """ Reimplemented to update the record of the current tab if it is removed. """

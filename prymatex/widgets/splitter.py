@@ -77,6 +77,7 @@ class SplitTabWidget(QtGui.QSplitter):
         self._current_tab_w = None
         self._current_tab_idx = -1
         self._current_widget = None
+        self._tabParentCreateRequest = None
 
     def saveState(self):
         """ Returns a Python object containing the saved state of the widget.
@@ -177,18 +178,20 @@ class SplitTabWidget(QtGui.QSplitter):
     def addTab(self, w):
         """ Add a new tab to the main tab widget. """
 
-        # Find the first tab widget going down the left of the hierarchy.  This
-        # will be the one in the top left corner.
-        if self.count() > 0:
-            ch = self.widget(0)
-
-            while not isinstance(ch, _TabWidget):
-                assert isinstance(ch, QtGui.QSplitter)
-                ch = ch.widget(0)
-        else:
-            # There is no tab widget so create one.
-            ch = _TabWidget(self)
-            self.addWidget(ch)
+        ch = self._tabParentCreateRequest
+        if ch is None:
+            # Find the first tab widget going down the left of the hierarchy.  This
+            # will be the one in the top left corner.
+            if self.count() > 0:
+                ch = self.widget(0)
+    
+                while not isinstance(ch, _TabWidget):
+                    assert isinstance(ch, QtGui.QSplitter)
+                    ch = ch.widget(0)
+            else:
+                # There is no tab widget so create one.
+                ch = _TabWidget(self)
+                self.addWidget(ch)
 
         idx = ch.addTab(w, self.disambiguatedWidgetTitle(w))
         self.setWidgetToolTip(w, w.tabToolTip())
@@ -208,16 +211,19 @@ class SplitTabWidget(QtGui.QSplitter):
         if tw is not None:
             self.disconnect(w, QtCore.SIGNAL("tabStatusChanged()"), self._update_tab_status)
             self._remove_tab(tw, tidx)
-            if tw.count() == 0 and self.count() > 1:
+            if tw.count() == 0 and self.count() > 0:
                 for tw in self.findChildren(_TabWidget):
                     if tw.count() != 0:
                         break
-                tw, tidx = tw, tw.count() - 1 if tw.count() != 0 else (None, -1)
+                (tw, tidx) = (tw, tw.count() - 1) if tw.count() != 0 else (None, -1)
             else:
                 tidx = tidx - 1
             self._set_current_tab(tw, tidx)
-            tw.tabBar().setFocus()
-            self._tab_focus_changed(tw is not None and tw.widget(tidx) or None)
+            if tw is not None:
+                tw.tabBar().setFocus()
+                self._tab_focus_changed(tw.widget(tidx))
+            else:
+                self._tab_focus_changed(None)
         
     def allWidgets(self):
         widgets = []
@@ -262,6 +268,10 @@ class SplitTabWidget(QtGui.QSplitter):
         if self._current_widget != widget:
             self._current_widget = widget
             self.currentWidgetChanged.emit(widget)
+        
+    def _tab_create_request(self, tabWidget):
+        self._tabParentCreateRequest = tabWidget
+        self.tabCreateRequest.emit()
         
     #===========================================================================
     # Manejo de las tabs, title, iconos, tootltip, color
@@ -820,12 +830,7 @@ class SplitTabWidget(QtGui.QSplitter):
                 return (tw, self._HS_AFTER_LAST_TAB, (gx, gy, w, h))
                 
         return miss
-        
-    def mouseDoubleClickEvent(self, event):
-        """Add an empty editor when the tab bar is double clicked"""
-        if event.button() == QtCore.Qt.LeftButton:
-            self.tabCreateRequest.emit()
-        
+
     def moveCurrentTabLeft(self):
         raise NotImplementedError("Not implemented yet")   
 
