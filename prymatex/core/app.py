@@ -378,11 +378,11 @@ class PMXApplication(QtGui.QApplication):
             #Configure and add dockers
             self.pluginManager.populateMainWindow(mainWindow)
             self.settings.configure(mainWindow)
+            mainWindow.show()
             self.settings.restoreState(mainWindow)
-
+            
             if not mainWindow.editors():
                 mainWindow.addEmptyEditor()
-            mainWindow.show()
                     
             self.mainWindow = mainWindow
 
@@ -447,6 +447,8 @@ class PMXApplication(QtGui.QApplication):
             if useTasks and inspect.isgeneratorfunction(editor.open):
                 task = self.scheduler.newTask( editor.open(filePath) )
                 task.done.connect( on_editorReady(mainWindow, editor, cursorPosition, focus) )
+            elif inspect.isgeneratorfunction(editor.open):
+                on_editorReady(mainWindow, editor, cursorPosition, focus)(list(editor.open(filePath)))
             else:
                 on_editorReady(mainWindow, editor, cursorPosition, focus)(editor.open(filePath))
 

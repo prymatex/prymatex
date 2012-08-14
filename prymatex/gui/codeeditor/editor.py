@@ -54,10 +54,14 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     blocksRemoved = QtCore.pyqtSignal(QtGui.QTextBlock, int)
     blocksAdded = QtCore.pyqtSignal(QtGui.QTextBlock, int)
 
-    afterOpened = QtCore.pyqtSignal()
-    afterSaved = QtCore.pyqtSignal()
-    afterClosed = QtCore.pyqtSignal()
-    afterReload = QtCore.pyqtSignal()
+    afterOpen = QtCore.pyqtSignal()
+    afterSave = QtCore.pyqtSignal()
+    afterClose = QtCore.pyqtSignal()
+    afterReloa = QtCore.pyqtSignal()
+    beforeOpen = QtCore.pyqtSignal()
+    beforeSave = QtCore.pyqtSignal()
+    beforeClose = QtCore.pyqtSignal()
+    beforeReloa = QtCore.pyqtSignal()
 
     #================================================================
     # Regular expresions
@@ -288,11 +292,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def open(self, filePath):
         """ Custom open for large files, use coroutines """
-        try:
-            self.application.fileManager.openFile(filePath)
-        except IOException as e:
-            QtGui.QMessageBox.critical(None, _("Could'n open file"), "%s" % e)
-            return
+        self.beforeOpen.emit()
+        self.application.fileManager.openFile(filePath)
         content = self.application.fileManager.readFile(filePath)
         self.setFilePath(filePath)
         chunksize = 512
@@ -304,22 +305,22 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             yield
         self.document().clearUndoRedoStacks()
         self.setModified(False)
-        self.afterOpened.emit()
+        self.afterOpen.emit()
         
     def save(self, filePath):
-        value = PMXBaseEditor.save(self, filePath)
-        self.afterSaved.emit()
-        return value
+        self.beforeSave.emit()
+        PMXBaseEditor.save(self, filePath)
+        self.afterSave.emit()
 
     def close(self):
-        value = PMXBaseEditor.close(self)
-        self.afterClosed.emit()
-        return value
+        self.beforeClose.emit()
+        PMXBaseEditor.close(self)
+        self.afterClose.emit()
     
     def reload(self):
-        value = PMXBaseEditor.reload(self)
-        self.afterReload.emit()
-        return value
+        self.beforeReload.emit()
+        PMXBaseEditor.reload(self)
+        self.afterReloa.emit()
 
     def saveState(self):
         """Returns a Python dictionary containing the state of the editor."""

@@ -64,7 +64,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
         CodeEditorObjectAddon.initialize(self, editor)
         if self.dictionary is not None:
             editor.registerTextCharFormatBuilder("#spell", self.textCharFormat_spell_builder)
-            editor.afterOpened.connect(self.on_editor_afterOpened)
+            editor.afterOpen.connect(self.on_editor_afterOpen)
             self.connect(editor, QtCore.SIGNAL("keyPressEvent(QEvent)"), self.on_editor_keyPressEvent)
 
     @classmethod
@@ -150,7 +150,7 @@ class SpellCheckerAddon(CodeEditorObjectAddon):
     def on_actionSpell_toggled(self, cursor):
         print cursor.selectedText()
         
-    def on_editor_afterOpened(self):
+    def on_editor_afterOpen(self):
         self.currentSpellTask = self.application.scheduler.newTask(self.spellCheckAllDocument())
         def on_spellReady():
             self.currentSpellTask = None
