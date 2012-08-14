@@ -18,20 +18,27 @@ def memoized(function):
     return memoizer
 
 def dynamic_memoized(function):
-    full_func_name = function.__module__ + '.' + function.func_name
+    memento = DYNAMIC_MEMOIZED_CACHE[function] = {}
     @functools.wraps(function)
     def memoizer(*largs, **kwargs):
-        memento = DYNAMIC_MEMOIZED_CACHE.setdefault(full_func_name, {})
         if largs in memento:
             return memento[largs]
         return memento.setdefault(largs, function(*largs, **kwargs))
     return memoizer
 
-def remove_memoized_argument(key):
-    for full_func_name, memento in DYNAMIC_MEMOIZED_CACHE.memoize.iteritems():
-        DYNAMIC_MEMOIZED_CACHE[full_func_name] = dict(filter(lambda (mkey, mvalue): key in mkey[0] or any(map(lambda kwarg: key in kwargs, mkey[1])), memento.iteritems()))
-
+def remove_memoized_argument(key, function = None, condition = lambda f, key, mkey: key in mkey):
+    def remove_memento_items(function, memento):
+        for mkey, mvalue in memento.items():
+            if condition(function, key, mkey):
+                del memento[mkey]
+    if function is None:
+        for function, memento in DYNAMIC_MEMOIZED_CACHE.iteritems():
+            remove_memento_items(function, memento)
+    elif function in DYNAMIC_MEMOIZED_CACHE:
+        remove_memento_items(function, DYNAMIC_MEMOIZED_CACHE[function])
+        
 def remove_memoized_function(function):
-    full_func_name = function.__module__ + '.' + function.func_name
-    if full_func_name in DYNAMIC_MEMOIZED_CACHE:
-        del DYNAMIC_MEMOIZED_CACHE[full_func_name]
+    for mfunction in DYNAMIC_MEMOIZED_CACHE.keys():
+        if mfunction.func_name == function.func_name:
+            print "limpiando", mfunction
+            DYNAMIC_MEMOIZED_CACHE[mfunction].clear()

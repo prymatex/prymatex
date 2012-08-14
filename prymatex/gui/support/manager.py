@@ -424,6 +424,14 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
     @dynamic_memoized
+    def getAllKeyEquivalentItems(self):
+        keyEquivalent = []
+        for item in self.actionItemsProxyModel.getAllItems():
+            if item.tabTrigger != None:
+                keyEquivalent.append(item)
+        return keyEquivalent
+        
+    @dynamic_memoized
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         items = []
         for item in self.actionItemsProxyModel.getAllItems():

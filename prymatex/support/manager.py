@@ -587,6 +587,8 @@ class PMXSupportBaseManager(object):
         if 'keyEquivalent' in attrs and item.keyEquivalent != attrs['keyEquivalent']:
             remove_memoized_argument(item.keyEquivalent)
             remove_memoized_argument(attrs['keyEquivalent'])
+            #Delete list of all keyEquivalent
+            remove_memoized_function(self.getAllKeyEquivalentItems)
             
         #Deprecate tabTrigger in cache
         if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
@@ -595,7 +597,23 @@ class PMXSupportBaseManager(object):
             #Delete list of all tabTrigers
             remove_memoized_function(self.getAllTabTriggerItems)
 
-        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco m�s
+        #Deprecate scope in cache
+        def test_scope_item(itemType):
+            def test_scope(f, key, fkey):
+                reference = None
+                if itemType == PMXPreference.TYPE and f.func_name == "getPreferenceSettings":
+                    reference = fkey[1]
+                elif f.func_name in [ "getTabTriggerItem", "getKeyEquivalentItem" ]:
+                    reference = fkey[2]
+                return reference is not None and bool(self.scores.score(key, reference)) or False
+                
+            return test_scope
+
+        if 'scope' in attrs and item.scope != attrs['scope']:
+            remove_memoized_argument(item.scope, condition = test_scope_item(item.TYPE))
+            remove_memoized_argument(attrs['scope'], condition = test_scope_item(item.TYPE))
+            
+        #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco más
         namespace = namespace or self.defaultNamespace
         
         if item.bundle.isProtected and not item.bundle.isSafe:
@@ -832,8 +850,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     def getAllTabTriggerItems(self):
         """
-        Return a list of all tab triggers
-        ['class', 'def', ...]
+        Return a list of all tab triggers items
         """
         raise NotImplementedError
     
@@ -844,7 +861,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # TABTRIGGERS
     #---------------------------------------------------------------
-    #@printtime
+    @printtime
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
         tabTriggerItems = self.getAllTabTriggerItems()
@@ -857,7 +874,7 @@ class PMXSupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    #@printtime
+    @printtime
     def getAllTabTiggerItemsByScope(self, scope):
         with_scope = []
         without_scope = []
@@ -872,11 +889,11 @@ class PMXSupportBaseManager(object):
         with_scope = map(lambda (score, item): item, with_scope)
         return with_scope + without_scope
 
-    #@printtime
-    def getTabTriggerItem(self, keyword, scope):
+    @printtime
+    def getTabTriggerItem(self, tabTrigger, scope):
         with_scope = []
         without_scope = []
-        for item in self.getAllBundleItemsByTabTrigger(keyword):
+        for item in self.getAllBundleItemsByTabTrigger(tabTrigger):
             if not item.scope:
                 without_scope.append(item)
             else:
@@ -890,6 +907,12 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------
     # KEYEQUIVALENT INTERFACE
     #---------------------------------------------------
+    def getAllKeyEquivalentItems(self):
+        """
+        Return a list of all key equivalent items
+        """
+        raise NotImplementedError
+        
     def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
         """Return a list of key equivalent bundle items"""
         raise NotImplementedError
@@ -897,7 +920,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # KEYEQUIVALENT
     #---------------------------------------------------------------
-    #@printtime
+    @printtime
     def getKeyEquivalentItem(self, code, scope):
         with_scope = []
         without_scope = []

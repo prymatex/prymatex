@@ -155,15 +155,15 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             if format is not None:
                 self.setFormat(start, end - start, format)
 
-    def highlightFormat(self, scopeOrHash):
+    def highlightFormat(self, scopeOrKey):
         if self.theme is None:
             return None
-        if scopeOrHash not in PMXSyntaxHighlighter.FORMAT_CACHE:
-            if scopeOrHash in self.textCharFormatBuilders:
-                format = self.textCharFormatBuilders[scopeOrHash]()
+        if scopeOrKey not in PMXSyntaxHighlighter.FORMAT_CACHE:
+            if scopeOrKey in self.textCharFormatBuilders:
+                format = self.textCharFormatBuilders[scopeOrKey]()
             else:
                 format = QtGui.QTextCharFormat()
-                settings = self.theme.getStyle(scopeOrHash)
+                settings = self.theme.getStyle(scopeOrKey)
                 if 'foreground' in settings:
                     format.setForeground(settings['foreground'])
                 if 'background' in settings:
@@ -175,5 +175,5 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                         format.setFontUnderline(True)
                     if 'italic' in settings['fontStyle']:
                         format.setFontItalic(True)
-            PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrHash] = format 
-        return PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrHash]
+            PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrKey] = format 
+        return PMXSyntaxHighlighter.FORMAT_CACHE[scopeOrKey]
