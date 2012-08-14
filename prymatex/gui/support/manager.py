@@ -427,7 +427,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def getAllKeyEquivalentItems(self):
         keyEquivalent = []
         for item in self.actionItemsProxyModel.getAllItems():
-            if item.tabTrigger != None:
+            if item.keyEquivalent != None:
                 keyEquivalent.append(item)
         return keyEquivalent
         

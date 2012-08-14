@@ -826,6 +826,7 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # PREFERENCES
     #---------------------------------------------------------------
+    @dynamic_memoized
     def getPreferences(self, scope):
         with_bundle = []
         with_scope = []
@@ -857,15 +858,17 @@ class PMXSupportBaseManager(object):
     def getAllBundleItemsByTabTrigger(self, tabTrigger):
         """Return a list of tab triggers bundle items"""
         raise NotImplementedError
-    
     #---------------------------------------------------------------
     # TABTRIGGERS
     #---------------------------------------------------------------
-    @printtime
+    @dynamic_memoized
+    def getAllTabTriggerSymbols(self):
+        return map(lambda item: item.tabTrigger, self.getAllTabTriggerItems())
+        
+    @dynamic_memoized
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
-        tabTriggerItems = self.getAllTabTriggerItems()
-        search = map(lambda item: (item.tabTrigger, line.find(item.tabTrigger[::-1]), len(item.tabTrigger)), tabTriggerItems)
+        search = map(lambda tabTrigger: (tabTrigger, line.find(tabTrigger[::-1]), len(tabTrigger)), self.getAllTabTriggerSymbols())
         search = filter(lambda (trigger, value, length): value == 0, search)
         if search:
             best = ("", 0)
@@ -874,7 +877,7 @@ class PMXSupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    @printtime
+    @dynamic_memoized
     def getAllTabTiggerItemsByScope(self, scope):
         with_scope = []
         without_scope = []
@@ -889,7 +892,7 @@ class PMXSupportBaseManager(object):
         with_scope = map(lambda (score, item): item, with_scope)
         return with_scope + without_scope
 
-    @printtime
+    @dynamic_memoized
     def getTabTriggerItem(self, tabTrigger, scope):
         with_scope = []
         without_scope = []
@@ -920,7 +923,11 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # KEYEQUIVALENT
     #---------------------------------------------------------------
-    @printtime
+    @dynamic_memoized
+    def getAllKeyEquivalentCodes(self):
+        return map(lambda item: item.keyEquivalent, self.getAllKeyEquivalentItems())
+        
+    @dynamic_memoized
     def getKeyEquivalentItem(self, code, scope):
         with_scope = []
         without_scope = []
@@ -947,7 +954,6 @@ class PMXSupportBaseManager(object):
     #---------------------------------------------------------------
     # FILE EXTENSION, for drag commands
     #---------------------------------------------------------------
-    #@printtime
     def getFileExtensionItem(self, path, scope):
         with_scope = []
         without_scope = []
@@ -1126,7 +1132,7 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
     #---------------------------------------------------
     # TABTRIGGERS INTERFACE
     #---------------------------------------------------
-    def getAllTabTriggersMnemonics(self):
+    def getAllTabTriggerSymbols(self):
         """
         Return a list of tab triggers
         ['class', 'def', ...]

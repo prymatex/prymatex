@@ -15,6 +15,8 @@ class CodeEditorKeyHelper(PMXBaseEditorKeyHelper):
 class KeyEquivalentHelper(CodeEditorKeyHelper):
     def accept(self, editor, event, cursor = None, scope = None):
         keyseq = int(event.modifiers()) + event.key()
+        if keyseq not in self.application.supportManager.getAllKeyEquivalentCodes():
+            return False
         self.items = self.application.supportManager.getKeyEquivalentItem(keyseq, scope)
         return bool(self.items)
 
