@@ -50,6 +50,7 @@ class PMXEditorFolding(QtCore.QObject):
             self.foldingUpdated = False
         
     def updateFolding(self):
+        # TODO Update en una tarea aparte para no molestar
         self.folding = []
         if self.indentSensitive:
             self.updateIndentFoldingBlocks()

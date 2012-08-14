@@ -358,6 +358,41 @@ class PMXSupportBaseManager(object):
         self.populatedBundle(bundle)
 
     #---------------------------------------------------
+    # CACHE COHERENCE
+    #---------------------------------------------------
+    def updateBundleItemCacheCoherence(self, bundleItem, attrs):
+        # TODO Terminar, identificar las funciones y borrar las cosas como corresponde
+        #Deprecate keyEquivalent in cache
+        if 'keyEquivalent' in attrs and bundleItem.keyEquivalent != attrs['keyEquivalent']:
+            remove_memoized_argument(bundleItem.keyEquivalent)
+            remove_memoized_argument(attrs['keyEquivalent'])
+            #Delete list of all keyEquivalent
+            remove_memoized_function(self.getAllKeyEquivalentItems)
+            
+        #Deprecate tabTrigger in cache
+        if 'tabTrigger' in attrs and bundleItem.tabTrigger != attrs['tabTrigger']:
+            remove_memoized_argument(bundleItem.tabTrigger)
+            remove_memoized_argument(attrs['tabTrigger'])
+            #Delete list of all tabTrigers
+            remove_memoized_function(self.getAllTabTriggerItems)
+
+        #Deprecate scope in cache
+        def test_scope_bundleItem(itemType):
+            def test_scope(f, key, fkey):
+                reference = None
+                if itemType == PMXPreference.TYPE and f.func_name == "getPreferenceSettings":
+                    reference = fkey[1]
+                elif f.func_name in [ "getTabTriggerItem", "getKeyEquivalentItem" ]:
+                    reference = fkey[2]
+                return reference is not None and bool(self.scores.score(key, reference)) or False
+                
+            return test_scope
+
+        if 'scope' in attrs and bundleItem.scope != attrs['scope']:
+            remove_memoized_argument(bundleItem.scope, condition = test_scope_item(bundleItem.TYPE))
+            remove_memoized_argument(attrs['scope'], condition = test_scope_item(bundleItem.TYPE))
+        
+    #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
     #---------------------------------------------------
     def setDeleted(self, uuid):
@@ -583,36 +618,8 @@ class PMXSupportBaseManager(object):
             #Updates que no son updates
             return item
 
-        #Deprecate keyEquivalent in cache
-        if 'keyEquivalent' in attrs and item.keyEquivalent != attrs['keyEquivalent']:
-            remove_memoized_argument(item.keyEquivalent)
-            remove_memoized_argument(attrs['keyEquivalent'])
-            #Delete list of all keyEquivalent
-            remove_memoized_function(self.getAllKeyEquivalentItems)
-            
-        #Deprecate tabTrigger in cache
-        if 'tabTrigger' in attrs and item.tabTrigger != attrs['tabTrigger']:
-            remove_memoized_argument(item.tabTrigger)
-            remove_memoized_argument(attrs['tabTrigger'])
-            #Delete list of all tabTrigers
-            remove_memoized_function(self.getAllTabTriggerItems)
-
-        #Deprecate scope in cache
-        def test_scope_item(itemType):
-            def test_scope(f, key, fkey):
-                reference = None
-                if itemType == PMXPreference.TYPE and f.func_name == "getPreferenceSettings":
-                    reference = fkey[1]
-                elif f.func_name in [ "getTabTriggerItem", "getKeyEquivalentItem" ]:
-                    reference = fkey[2]
-                return reference is not None and bool(self.scores.score(key, reference)) or False
-                
-            return test_scope
-
-        if 'scope' in attrs and item.scope != attrs['scope']:
-            remove_memoized_argument(item.scope, condition = test_scope_item(item.TYPE))
-            remove_memoized_argument(attrs['scope'], condition = test_scope_item(item.TYPE))
-            
+        self.updateBundleItemCacheCoherence(item, attrs)
+         
         #TODO: Este paso es importante para obtener el namespace, quiza ponerlo en un metodo para trabajarlo un poco más
         namespace = namespace or self.defaultNamespace
         
@@ -1127,7 +1134,7 @@ class PMXSupportPythonManager(PMXSupportBaseManager):
         '''
             Return all preferences
         '''
-        return self.PREFERENCES
+        return self.PREFERENCES 
     
     #---------------------------------------------------
     # TABTRIGGERS INTERFACE
