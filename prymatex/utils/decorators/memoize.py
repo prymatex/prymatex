@@ -12,6 +12,8 @@ def memoized(function):
 
     @functools.wraps(function)
     def memoizer(*largs, **kwargs):
+        if largs in cache:
+            return cache[largs]
         return cache.setdefault(largs, function(*largs, **kwargs))
     return memoizer
 
@@ -20,6 +22,8 @@ def dynamic_memoized(function):
     @functools.wraps(function)
     def memoizer(*largs, **kwargs):
         memento = DYNAMIC_MEMOIZED_CACHE.setdefault(full_func_name, {})
+        if largs in memento:
+            return memento[largs]
         return memento.setdefault(largs, function(*largs, **kwargs))
     return memoizer
 
