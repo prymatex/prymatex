@@ -10,7 +10,7 @@ import uuid as uuidmodule
 import subprocess
 from glob import glob
 
-from prymatex.support.bundle import PMXBundle, PMXBundleItem
+from prymatex.support.bundle import PMXBundle, PMXBundleItem, PMXRunningContext
 from prymatex.support.macro import PMXMacro
 from prymatex.support.syntax import PMXSyntax
 from prymatex.support.snippet import PMXSnippet
@@ -146,7 +146,7 @@ class PMXSupportBaseManager(object):
         return ''.join(validPath)
 
     def runProcess(self, context, callback):
-        """ Synchronous run process"""
+        """Synchronous run process"""
         origWD = os.getcwd() # remember our original working directory
         if context.workingDirectory is not None:
             os.chdir(context.workingDirectory)
@@ -169,6 +169,16 @@ class PMXSupportBaseManager(object):
             os.chdir(origWD)
         
         callback(context)
+
+    def buildAdHocCommand(self, commandScript, bundle, commandInput = "none", commandOutput = "insertText"):
+        commandHash = {    'command': commandScript, 
+                              'name': "Ad-Hoc command %s" % commandScript,
+                             'input': commandInput,
+                            'output': commandOutput }
+        command = PMXCommand(self.uuidgen(), dataHash = commandHash)
+        command.setBundle(bundle)
+        command.setManager(self)
+        return command
 
     #---------------------------------------------------
     # Message Handler

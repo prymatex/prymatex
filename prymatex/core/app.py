@@ -414,7 +414,7 @@ class PMXApplication(QtGui.QApplication):
         return False
     
     @printtime
-    def openFile(self, filePath, cursorPosition = None, focus = True, mainWindow = None, useTasks = True):
+    def openFile(self, filePath, cursorPosition = None, focus = True, mainWindow = None, useTasks = False):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
         

@@ -101,6 +101,16 @@ class PMXCommand(PMXBundleItem):
                 context.inputType, context.inputValue = self.getInputText(processor)
                 self.manager.runProcess(context, functools.partial(self.afterExecute, processor))
     
+    def executeCallback(self, processor, callback):
+        if self.beforeExecute(processor): 
+            systemCommand = self.systemCommand()
+            environment = processor.environment(self)
+            
+            with PMXRunningContext(self, systemCommand, environment) as context:
+                context.asynchronous = processor.asynchronous
+                context.inputType, context.inputValue = self.getInputText(processor)
+                self.manager.runProcess(context, callback)
+                
     def afterExecute(self, processor, context):
         outputHandler = self.getOutputHandler(context.outputType)
         # Remove old
