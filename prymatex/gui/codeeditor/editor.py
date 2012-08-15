@@ -985,16 +985,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         
         self.showFlatPopupMenu(items, insertBundleItem, cursorPosition = not syntax)
     
-    def executeCommand(self, command = None, input = "none", output = "insertText"):
-        if command is None:
-            command = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
-        commandHash = {    'command': command, 
-                                           'name': command,
-                                           'input': input,
-                                        'output': output }
-        command = PMXCommand(self.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.setBundle(self.getSyntax().bundle)
-        command.setManager(self.getSyntax().manager)
+    def executeCommand(self, commandScript = None, commandInput = "none", commandOutput = "insertText"):
+        if commandScript is None:
+            commandScript = self.textCursor().selectedText() if self.textCursor().hasSelection() else self.textCursor().block().text()
+        command = self.application.supportManager.buildAdHocCommand(commandScript, self.getSyntax().bundle, commandInput, commandOutput)
         self.insertBundleItem(command)
     
     def buildEnvironment(self, env = {}):
@@ -1111,10 +1105,13 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         completions = settings.completions[:]
 
         #A shell command (string) which should return a list of candidates to complete the current word (obtained via the TM_CURRENT_WORD variable).
-        completionCommand = settings.completionCommand
-        if completionCommand:
-            print "comando", completionCommand
-        
+        if settings.completionCommand:
+            def commandCallback(context):
+                print unicode(context)
+            command = self.application.supportManager.buildAdHocCommand(settings.completionCommand, self.getSyntax().bundle, commandInput="document")
+            self.commandProcessor.configure({ "asynchronous": False })
+            command.executeCallback(self.commandProcessor, commandCallback)
+            
         #A tab tigger completion
         tabTriggers = self.application.supportManager.getAllTabTiggerItemsByScope(scope)
         

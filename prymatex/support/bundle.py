@@ -272,7 +272,7 @@ class PMXBundleItem(PMXManagedObject):
         pass
         
 class PMXRunningContext(object):
-    TEMPLATE = """Item Name: {itemName}
+    TEMPLATE = u"""Item Name: {itemName}
     Asynchronous: {asynchronous}
     Working Directory: {workingDirectory}
     Input:  Type {inputType}, Value {inputValue}
