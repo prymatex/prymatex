@@ -216,8 +216,11 @@ class MainWindowActions(object):
     
     @QtCore.pyqtSlot()
     def on_actionLastEditLocation_triggered(self):
-        #Tengo que buscar entre los puntos
-        pass
+        for index, editor in enumerate(self._editorHistory):
+            if editor.lastLocation():
+                self._editorHistoryIndex = index
+                self.setCurrentEditor(editor)
+                break
 
     #============================================================
     # Bundles Actions

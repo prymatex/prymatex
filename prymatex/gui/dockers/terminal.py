@@ -297,7 +297,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         if not self.isVisible():
             self.show()
         self.raise_()
-        self.terminal.sendText("%s\n" % command)
+        self.terminal.sendText("\r%s\n" % command)
         
     def chdir(self, directory):
         self.runCommand('cd "%s"' % directory)

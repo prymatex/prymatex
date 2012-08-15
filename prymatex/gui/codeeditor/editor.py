@@ -1799,9 +1799,16 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
         return True
 
+    def lastLocation(self):
+        if not self.locationCount():
+            return False
+        self._cursorHistoryIndex = 0
+        self.setTextCursor(self._cursorHistory[self._cursorHistoryIndex])
+        return True
+        
     def locationCount(self):
         return len(self._cursorHistory)
-        
+
     def resetLocationIndex(self, back = True):
         self._cursorHistoryIndex = 0 if not back else len(self._cursorHistory)
 
@@ -1819,9 +1826,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setTextCursor(cursor)
     
     def dropEvent(self, event):
-        """
-        When a url or text is dropped
-        """
+        """When a url or text is dropped"""
         #mimeData = event.mimeData()
         if event.mimeData().hasUrls():
             files = map(lambda url: url.toLocalFile(), event.mimeData().urls())

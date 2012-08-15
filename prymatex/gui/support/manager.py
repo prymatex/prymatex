@@ -426,7 +426,7 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     @dynamic_memoized
     def getAllKeyEquivalentItems(self):
         keyEquivalent = []
-        for item in self.actionItemsProxyModel.getAllItems():
+        for item in self.actionItemsProxyModel.getAllItems() + self.syntaxProxyModel.getAllItems():
             if item.keyEquivalent != None:
                 keyEquivalent.append(item)
         return keyEquivalent

@@ -138,6 +138,9 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def previousLocation(self):
         return False
 
+    def lastLocation(self):
+        return False
+        
     def locationCount(self):
         return 0
 

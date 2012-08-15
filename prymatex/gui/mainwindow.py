@@ -387,7 +387,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     def dropEvent(self, event):
         def collectFiles(paths):
             from glob import glob
-            ''' Recursively collect fileInfos '''
+            '''Recursively collect fileInfos'''
             for path in paths:
                 if os.path.isfile(path):
                     yield path
