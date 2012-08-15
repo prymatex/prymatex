@@ -29,7 +29,9 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #=========================================================
     SETTINGS_GROUP = 'MainWindow'
 
-    windowTitleTemplate = pmxConfigPorperty(default = "$PMX_APP_NAME")
+    @pmxConfigPorperty(default = "$PMX_APP_NAME ($PMX_VERSION)")
+    def windowTitleTemplate(self, titleTemplate):
+         self.titleTemplate = Template(titleTemplate)
     
     @pmxConfigPorperty(default = True)
     def showMenuBar(self, value):
@@ -58,6 +60,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         # Connect Signals
         self.splitTabWidget.currentWidgetChanged.connect(self.on_currentWidgetChanged)
+        self.splitTabWidget.currentWidgetChanged.connect(self.setWindowTitleForEditor)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
         self.application.supportManager.bundleItemTriggered.connect(self.insertBundleItem)
@@ -251,18 +254,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         return self.splitTabWidget.currentWidget()
     
     def on_currentWidgetChanged(self, editor):
-        
-        #TODO: que la statusbar se conecte como los dockers
-        self.statusBar().setCurrentEditor(editor)
-
         #Update Menu
         self.updateMenuForEditor(editor)        
-
-        #Window Title
-        template = Template(self.windowTitleTemplate)
-        title = [ editor.tabTitle() ] if editor is not None else []
-        title.append(template.safe_substitute(**self.application.supportManager.buildEnvironment()))
-        self.setWindowTitle(" - ".join(title))
         
         #Avisar al manager si tenemos editor
         self.application.supportManager.setEditorAvailable(editor != None)
@@ -274,7 +267,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             self.addEditorToHistory(editor)
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
-                    
+
+    def setWindowTitleForEditor(self, editor):
+        #Set Window Title for editor, editor can be None
+        titleChunks = [ self.titleTemplate.safe_substitute(**self.application.supportManager.buildEnvironment()) ]
+        if editor is not None:
+            titleChunks.insert(0, editor.tabTitle())
+        self.setWindowTitle(" - ".join(titleChunks))
+        
     def saveEditor(self, editor = None, saveAs = False):
         editor = editor or self.currentEditor()
         if editor.isExternalChanged():
@@ -329,8 +329,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     def addEditorToHistory(self, editor):
         if self._editorHistory and self._editorHistory[self._editorHistoryIndex] == editor:
             return
-        if not editor.isEmpty():
-            self._editorHistory.insert(self._editorHistoryIndex, editor)
+        self._editorHistory.insert(self._editorHistoryIndex, editor)
         
     #===========================================================================
     # MainWindow Events

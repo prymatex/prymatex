@@ -1763,21 +1763,23 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #===========================================================================
     # Navigation API
     #===========================================================================
-    def cursorAtPosition(self, position):
-        cursor = self.textCursor()
+    def newCursorAtPosition(self, position):
+        cursor = QtGui.QTextCursor(self.document())
         cursor.setPosition(position)
         return cursor
         
     def on_document_undoCommandAdded(self):
-        #TODO una cantidad para el hisotial en lugar de ese 5
-        self._cursorHistory = map(lambda position: self.cursorAtPosition(position), 
-            list(
-                set(
-                    map(lambda cursor: cursor.position(), [self.textCursor()] + self._cursorHistory)
-                    )
-            )[:5]
-        )
         self._cursorHistoryIndex = 0
+        #Inserto el cursor
+        self._cursorHistory.insert(self._cursorHistoryIndex, self.newCursorAtPosition(self.textCursor().position() - 1))
+        #Filtrar los que sean iguales
+        positions = []
+        for position in map(lambda cursor: cursor.position(), self._cursorHistory):
+            if position not in positions:
+                positions.append(position)
+        self._cursorHistory = map(lambda position: self.newCursorAtPosition(position), positions)
+        #Solo los ultimos N cursores
+        self._cursorHistory = self._cursorHistory[:10]
 
     def on_document_undoAvailable(self, available):
         if not available:
@@ -1799,6 +1801,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def locationCount(self):
         return len(self._cursorHistory)
+        
+    def resetLocationIndex(self, back = True):
+        self._cursorHistoryIndex = 0 if not back else len(self._cursorHistory)
 
     #===========================================================================
     # Drag and Drop

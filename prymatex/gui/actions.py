@@ -198,27 +198,26 @@ class MainWindowActions(object):
     # Global navigation
     @QtCore.pyqtSlot()
     def on_actionLocationBack_triggered(self):
-        # FIXME puede ser que el editor tenga movimientos internos, ver que con el ultimo index tambien intente
-        if not self._editorHistory or self._editorHistoryIndex >= len(self._editorHistory) - 1:
-            return
         editor = self._editorHistory[self._editorHistoryIndex]
-        if not editor.previousLocation():
-            self._editorHistoryIndex += 1
-            self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+        if editor.previousLocation() or not self._editorHistory or self._editorHistoryIndex >= len(self._editorHistory) - 1:
+            return
+        editor.resetLocationIndex()
+        self._editorHistoryIndex += 1
+        self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
         
     @QtCore.pyqtSlot()
     def on_actionLocationForward_triggered(self):
-        # FIXME puede ser que el editor tenga movimientos internos, ver que con 0 tambien intente
-        if self._editorHistoryIndex == 0:
-            return
         editor = self._editorHistory[self._editorHistoryIndex]
-        if not editor.nextLocation():
-            self._editorHistoryIndex -= 1
-            self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
+        if editor.nextLocation() or self._editorHistoryIndex == 0:
+            return
+        editor.resetLocationIndex(False)
+        self._editorHistoryIndex -= 1
+        self.setCurrentEditor(self._editorHistory[self._editorHistoryIndex])
     
     @QtCore.pyqtSlot()
     def on_actionLastEditLocation_triggered(self):
-        print "last"
+        #Tengo que buscar entre los puntos
+        pass
 
     #============================================================
     # Bundles Actions

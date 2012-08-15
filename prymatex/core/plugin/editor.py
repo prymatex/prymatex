@@ -141,12 +141,18 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
     def locationCount(self):
         return 0
 
+    def resetLocationIndex(self, back = True):
+        pass
+
+    #============================================================
+    # Cursor positions as tuple
+    #============================================================
     def setCursorPosition(self, cursorPosition):
         pass
 
     def cursorPosition(self):
         return (0, 0)
-        
+
     def contributeToTabMenu(self):
         ''' When an editor is right clicked on it's tab, the editor
         can provide custom actions to the menu through this callback'''
