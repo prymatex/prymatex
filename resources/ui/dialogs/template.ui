@@ -10,11 +10,11 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>115</height>
+    <height>117</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>New File From Template</string>
+   <string>New From Template</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../resources.qrc">
@@ -29,12 +29,18 @@
    </property>
    <item>
     <layout class="QFormLayout" name="formLayout_2">
-     <item row="2" column="0">
-      <widget class="QLabel" name="label3">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::ExpandingFieldsGrow</enum>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label1">
        <property name="text">
-        <string>Template:</string>
+        <string>File Name:</string>
        </property>
       </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="lineFileName"/>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label2">
@@ -57,18 +63,43 @@
        </item>
       </layout>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label1">
+     <item row="2" column="0">
+      <widget class="QLabel" name="label3">
        <property name="text">
-        <string>File Name:</string>
+        <string>Template:</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="lineFileName"/>
-     </item>
      <item row="2" column="1">
-      <widget class="QComboBox" name="comboTemplates"/>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QComboBox" name="comboTemplates">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="buttonEnvironment">
+         <property name="maximumSize">
+          <size>
+           <width>32</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../../resources.qrc">
+           <normaloff>:/icons/actions/code-variable.png</normaloff>:/icons/actions/code-variable.png</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -116,7 +147,6 @@
  <tabstops>
   <tabstop>lineFileName</tabstop>
   <tabstop>lineLocation</tabstop>
-  <tabstop>comboTemplates</tabstop>
   <tabstop>buttonChoose</tabstop>
   <tabstop>buttonCreate</tabstop>
  </tabstops>
