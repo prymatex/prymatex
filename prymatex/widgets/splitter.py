@@ -203,7 +203,6 @@ class SplitTabWidget(QtGui.QSplitter):
         if ch is not self._current_tab_w:
             self._set_current_tab(ch, idx)
             ch.tabBar().setFocus()
-        self._tab_focus_changed(w)
 
     def removeTab(self, w):
         """ Remove tab to the tab widget."""
@@ -221,9 +220,6 @@ class SplitTabWidget(QtGui.QSplitter):
             self._set_current_tab(tw, tidx)
             if tw is not None:
                 tw.tabBar().setFocus()
-                self._tab_focus_changed(tw.widget(tidx))
-            else:
-                self._tab_focus_changed(None)
         
     def allWidgets(self):
         widgets = []
@@ -239,7 +235,6 @@ class SplitTabWidget(QtGui.QSplitter):
 
         if tw is not None:
             self._set_current_tab(tw, tidx)
-        self._tab_focus_changed(w)
         
     def currentWidget(self):
         """Return current widget."""
@@ -371,6 +366,8 @@ class SplitTabWidget(QtGui.QSplitter):
         # Save the new current widget.
         self._current_tab_w = tw
         self._current_tab_idx = tidx
+        
+        self._tab_focus_changed(self._current_tab_w and self._current_tab_w.widget(self._current_tab_idx) or None)
 
     def _set_focus(self):
         """ Set the focus to an appropriate widget in the current tab. """
@@ -425,8 +422,7 @@ class SplitTabWidget(QtGui.QSplitter):
 
         if ntw is not None:
             self._set_current_tab(ntw, ntidx)
-            self._tab_focus_changed(ntw.widget(ntidx))
-
+            
         # See if the widget that has lost the focus is ours.
         otw, _ = self._tab_widget_of(old)
 

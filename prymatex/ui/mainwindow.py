@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Wed Aug  8 14:49:12 2012
+# Created: Wed Aug 15 14:59:44 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -313,7 +313,6 @@ class Ui_MainWindow(object):
         self.actionCloseOthers.setText(_('Close Others'))
         self.actionCloseOthers.setShortcut(_('Ctrl+Alt+W'))
         self.actionQuit.setText(_('Quit'))
-        self.actionQuit.setShortcut(_('Ctrl+Q'))
         self.actionUndo.setText(_('&Undo'))
         self.actionUndo.setShortcut(_('Ctrl+Z'))
         self.actionRedo.setText(_('&Redo'))

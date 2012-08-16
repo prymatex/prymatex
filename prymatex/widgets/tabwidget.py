@@ -159,7 +159,6 @@ class _DragableTabBar(QtGui.QTabBar):
     
             # Update the current tab.
             self._root._set_current_tab(self.parent(), self.currentIndex())
-            self._root._tab_focus_changed(self.parent().widget(self.currentIndex()))
             self._root._set_focus()
     
             if e.button() != QtCore.Qt.LeftButton:
