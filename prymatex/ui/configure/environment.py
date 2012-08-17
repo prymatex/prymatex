@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/environment.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
+# Created: Thu Aug 16 19:26:19 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_Environment(object):
     def setupUi(self, Environment):
         Environment.setObjectName(_fromUtf8("Environment"))
+        Environment.resize(256, 275)
         self.verticalLayout = QtGui.QVBoxLayout(Environment)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -32,9 +33,15 @@ class Ui_Environment(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.pushAdd = QtGui.QPushButton(Environment)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushAdd.setIcon(icon)
         self.pushAdd.setObjectName(_fromUtf8("pushAdd"))
         self.horizontalLayout.addWidget(self.pushAdd)
         self.pushRemove = QtGui.QPushButton(Environment)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/edit-delete.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pushRemove.setIcon(icon1)
         self.pushRemove.setObjectName(_fromUtf8("pushRemove"))
         self.horizontalLayout.addWidget(self.pushRemove)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -44,6 +51,5 @@ class Ui_Environment(object):
 
     def retranslateUi(self, Environment):
         Environment.setWindowTitle(_('Form'))
-        self.pushAdd.setText(_('+'))
-        self.pushRemove.setText(_('-'))
 
+from prymatex import resources_rc

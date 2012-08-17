@@ -6,7 +6,7 @@ import os
 from PyQt4 import QtCore, QtGui
 
 from prymatex.utils.i18n import ugettext as _
-from prymatex.ui.dialogs.newproject import Ui_NewProjectDialog
+from prymatex.ui.dialogs.project import Ui_NewProjectDialog
 
 class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def __init__(self, parent = None):

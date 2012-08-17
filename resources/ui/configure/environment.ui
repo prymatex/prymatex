@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>Environment</class>
  <widget class="QWidget" name="Environment">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>256</width>
+    <height>275</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -39,15 +47,19 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushAdd">
-       <property name="text">
-        <string>+</string>
+       <property name="icon">
+        <iconset theme="list-add">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushRemove">
-       <property name="text">
-        <string>-</string>
+       <property name="icon">
+        <iconset theme="list-remove">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -55,6 +67,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
