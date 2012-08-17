@@ -4,7 +4,7 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.core import exceptions
-from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
+from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
 
 class PMXFileSystemTasks(object):
     """Groups FileSystem and Project actions, it's a facade of the PMXFileManager

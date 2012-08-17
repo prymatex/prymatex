@@ -12,12 +12,15 @@ from prymatex.utils.i18n import ugettext as _
 from prymatex.gui.project.models import PMXProjectTreeModel
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.gui import utils
-from prymatex.ui.dockers.projects import Ui_ProjectsDock
-from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
+
+from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
+from prymatex.gui.dialogs.project import PMXNewProjectDialog
 from prymatex.gui.dialogs.messages import CheckableMessageBox
+
+from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.project.base import PMXProject
-from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
+
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"

@@ -6,8 +6,8 @@ from PyQt4 import QtCore, QtGui
 from prymatex import resources
 from prymatex.core import exceptions
 from prymatex.gui import dialogs
-from prymatex.gui.dialogs.newfromtemplate import PMXNewFromTemplateDialog
-from prymatex.gui.dialogs.newproject import PMXNewProjectDialog
+from prymatex.gui.dialogs.template import PMXNewFromTemplateDialog
+from prymatex.gui.dialogs.project import PMXNewProjectDialog
 from prymatex.gui.dialogs.about import PMXAboutDialog
 
 class MainWindowActions(object):
