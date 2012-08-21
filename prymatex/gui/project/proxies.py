@@ -194,3 +194,36 @@ class PMXPropertiesProxyModel(PMXConfigureProxyModel):
     def setFilterFileSystem(self, fileSystemItem):
         self.fileSystemItem = fileSystemItem
         self.setFilterRegExp("")
+
+#=========================================
+# Project Bundle Menu
+#=========================================
+class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
+    
+    def __init__(self, parent = None):
+        super(ProjectMenuProxyModel, self).__init__(parent)
+    
+    def setCurrentProject(self, project):
+        print project
+
+    def data(self, index, role):
+        if self.sourceModel() is None:
+            return QtCore.QVariant()
+        
+        sIndex = self.mapToSource(index)
+        if role == QtCore.Qt.CheckStateRole:
+            return QtCore.Qt.Unchecked
+            #bundle = sIndex.internalPointer()
+            #return QtCore.Qt.Checked if bundle.enabled else QtCore.Qt.Unchecked
+        else:
+            return self.sourceModel().data(sIndex, role)
+
+    def setData(self, index, value, role):
+        if self.sourceModel() is None:
+            return False
+            
+        sIndex = self.mapToSource(index)    
+        if role == QtCore.Qt.CheckStateRole:
+            return True
+            #return self.sourceModel().setData(sIndex, value, role)
+        return False

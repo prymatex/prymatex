@@ -9,7 +9,7 @@ from PyQt4 import QtCore, QtGui
 from prymatex.core import exceptions
 from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
 from prymatex.gui.project.models import PMXProjectTreeModel
-from prymatex.gui.project.proxies import PMXProjectTreeProxyModel
+from prymatex.gui.project.proxies import PMXProjectTreeProxyModel, ProjectMenuProxyModel
 from prymatex.gui.project.base import PMXProject
 from prymatex.core.exceptions import ProjectExistsException, FileException
 from prymatex.utils.i18n import ugettext as _
@@ -37,6 +37,9 @@ class PMXProjectManager(QtCore.QObject):
         
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
+        
+        self.projectMenuProxyModel = ProjectMenuProxyModel(self)
+        self.projectMenuProxyModel.setSourceModel(self.application.supportManager.bundleProxyModel)
     
     @classmethod
     def contributeToSettings(cls):

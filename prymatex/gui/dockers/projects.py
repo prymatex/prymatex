@@ -44,7 +44,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
         self.setupPropertiesDialog()
         self.setupTreeViewProjects()
-
+        
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
@@ -328,7 +328,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         project = self.currentNode()
         if project.namespace is None:
             self.application.supportManager.addProjectNamespace(project)
-        self.application.bundleEditor.execEditor(namespaceFilter = project.namespace)
+        self.projectManager.projectMenuProxyModel.setCurrentProject(project)
+        self.application.bundleEditor.execEditor(namespaceFilter = project.namespace, filterText = "Menu", filterModel = self.projectManager.projectMenuProxyModel)
     
     def on_actionCopy_triggered(self):
         mimeData = self.projectTreeProxyModel.mimeData( [ self.treeViewProjects.currentIndex() ] )
