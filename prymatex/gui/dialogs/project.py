@@ -7,6 +7,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex.utils.i18n import ugettext as _
 from prymatex.ui.dialogs.project import Ui_NewProjectDialog
+from prymatex.gui.dialogs.environment import EnvironmentDialog
 
 class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def __init__(self, parent = None):
@@ -23,7 +24,8 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.setupComboTemplates()
         self.buttonCreate.setDefault(True)
         self.projectCreated = None
-
+        self.userEnvironment = []
+        
     def setupComboTemplates(self):
         self.projectProxyModel = self.application.supportManager.projectProxyModel
         tableView = QtGui.QTableView(self)
@@ -85,10 +87,20 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     
     def on_checkBoxUseTemplate_toggled(self, checked):
         self.comboBoxTemplate.setEnabled(checked)
+        self.buttonEnvironment.setEnabled(checked)
         
     def on_buttonClose_pressed(self):
         self.reject()
 
+    def on_buttonEnvironment_pressed(self):
+        name = self.lineProjectName.text()
+        location = self.lineLocation.text()
+        index = self.projectProxyModel.mapToSource(self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0))
+        if index.isValid():
+            template = index.internalPointer()
+            environment = template.buildEnvironment(projectName = name, projectLocation = location)
+        print EnvironmentDialog.editEnvironment(self, environment, self.userEnvironment)
+        
     def runCreateProject(self, name, location):
         self.projectCreated = self.application.projectManager.createProject(name, location)
         

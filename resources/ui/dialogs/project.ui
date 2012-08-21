@@ -144,6 +144,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="buttonEnvironment">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="maximumSize">
           <size>
            <width>32</width>

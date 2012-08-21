@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/project.ui'
 #
-# Created: Thu Aug 16 18:29:02 2012
+# Created: Fri Aug 17 20:10:19 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -89,6 +89,7 @@ class Ui_NewProjectDialog(object):
         self.comboBoxTemplate.setObjectName(_fromUtf8("comboBoxTemplate"))
         self.horizontalLayout_3.addWidget(self.comboBoxTemplate)
         self.buttonEnvironment = QtGui.QPushButton(NewProjectDialog)
+        self.buttonEnvironment.setEnabled(False)
         self.buttonEnvironment.setMaximumSize(QtCore.QSize(32, 16777215))
         self.buttonEnvironment.setText(_fromUtf8(""))
         icon1 = QtGui.QIcon()

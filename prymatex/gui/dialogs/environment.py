@@ -1,24 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex import resources
-from prymatex.gui.settings.models import PMXSettingTreeNode
 from prymatex.ui.configure.environment import Ui_Environment
-from prymatex.gui.models.environment import EnvironmentTableModel
 
-class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
+class EnvVariablesTableModel(QtCore.QAbstractTableModel):
     userVariablesChanged = QtCore.pyqtSignal(list)
     def __init__(self, parent = None):
-        super(PMXEnvVariablesTableModel, self).__init__(parent)
+        super(EnvVariablesTableModel, self).__init__(parent)
         self.variables = []
         
-    def setVariables(self, user, system):
-        if user is None:
-            user = []
+    def setVariables(self, system, user = []):
         self.variables = user + map(lambda (variable, value): {'variable': variable, 'value': value, 'system': True, 'enabled': True}, system.iteritems())
+        print self.variables
         self.layoutChanged.emit()
         
     def setSettingValue(self):
@@ -46,9 +41,9 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
                 return self.variables[index.row()]['value']
 
     def setData(self, index, value, role):
-        """Retornar verdadero si se puedo hacer el camio, falso en caso contratio
-        """
-
+        '''
+            Retornar verdadero si se puedo hacer el camio, falso en caso contratio
+        '''
         if not index.isValid(): return False
 
         if role == QtCore.Qt.EditRole:
@@ -102,32 +97,19 @@ class PMXEnvVariablesTableModel(QtCore.QAbstractTableModel):
         else:
             return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
 
-class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
-    """Environment variables
-    """
-    NAMESPACE = "general"
-    TITLE = "Enviroment Variables"
-    ICON = resources.getIcon("codevariable")
-    
-    def __init__(self, settingGroup, parent = None):
+class EnvironmentWidget(QtGui.QWidget, Ui_Environment):
+    """Environment variables"""
+    def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
-        PMXSettingTreeNode.__init__(self, "environment", settingGroup)
         self.setupUi(self)
         self.setupVariablesTableModel()
-    
-    def loadSettings(self):
-        self.checkBox1.setText("User")
-        self.checkBox1.setChecked(True)
-        self.model.addGroup('user', self.application.supportManager.shellVariables, editable = True, checkable=True, foreground=QtCore.Qt.blue)
-        self.checkBox2.setText("Prymatex")
-        self.checkBox2.setChecked(True)
-        self.model.addGroup('prymatex', self.application.supportManager.environment)
-        self.checkBox3.setText("System")
-        self.model.addGroup('system', os.environ, foreground=QtCore.Qt.red, visible = False)
+
+    def edit(self, systemVariables, userVariables):
+        self.model.setVariables(systemVariables, userVariables)
 
     def setupVariablesTableModel(self):
-        self.model = EnvironmentTableModel(self)
-        self.model.variablesChanged.connect(self.on_variablesModel_userVariablesChanged)
+        self.model = EnvVariablesTableModel(self)
+        self.model.userVariablesChanged.connect(self.on_variablesModel_userVariablesChanged)
         self.tableView.setModel(self.model)
         
         self.tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -137,26 +119,33 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
         self.model.rowsRemoved.connect(self.tableView.resizeRowsToContents)
         self.tableView.resizeRowsToContents()
 
-    @QtCore.pyqtSlot(bool)
-    def on_checkBox1_clicked(self, checked):
-        self.model.setVisibility('user', checked)
-
-    @QtCore.pyqtSlot(bool)        
-    def on_checkBox2_clicked(self, checked):
-        self.model.setVisibility('prymatex', checked)
-    
-    @QtCore.pyqtSlot(bool)
-    def on_checkBox3_clicked(self, checked):
-        self.model.setVisibility('system', checked)
-        
-    def on_variablesModel_userVariablesChanged(self, group, variables):
-        print group, variables
-        self.settingGroup.setValue('shellVariables', variables)
+    def on_variablesModel_userVariablesChanged(self, variables):
+        self.application.projectManager.updateProject(self.project, shellVariables = variables)
 
     def on_pushAdd_pressed(self):
         self.model.insertRows(0, 1)
-        #self.model.insertVariable('user')
         
     def on_pushRemove_pressed(self):
         index = self.tableView.currentIndex()
         self.model.removeRows(index.row() , 1)
+        
+class EnvironmentDialog(QtGui.QDialog):
+    def __init__(self, parent):
+        """docstring for __init__"""
+        QtGui.QDialog.__init__(self, parent)
+        self.setObjectName("EnvironmentDialog")
+        self.verticalLayout = QtGui.QVBoxLayout(self)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.environmentWidget = EnvironmentWidget(self)
+        self.environmentWidget.setObjectName("environmentWidget")
+        self.verticalLayout.addWidget(self.environmentWidget)
+        
+    def edit(self, systemVariables, userVariables):
+        self.environmentWidget.edit(systemVariables, userVariables)
+        
+    @classmethod
+    def editEnvironment(cls, parent = None, systemVariables = {}, userVariables = []):
+        dlg = cls(parent)
+        dlg.edit(systemVariables, userVariables)
+        dlg.exec_()
+        return systemVariables, userVariables

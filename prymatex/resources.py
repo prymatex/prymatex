@@ -128,7 +128,9 @@ def getImage(index):
     path = getImagePath(index)
     if path is not None:
         return QtGui.QPixmap(path)
-
+        
+        
+#http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
 @memoized
 def getIcon(index):
     '''
