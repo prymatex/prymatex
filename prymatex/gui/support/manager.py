@@ -228,8 +228,8 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def menuForBundle(self, bundle):
         return self.bundleMenuGroup.menuForBundle(bundle)
         
-    def buildEnvironment(self):
-        env = PMXSupportBaseManager.buildEnvironment(self)
+    def buildEnvironment(self, systemEnvironment = True):
+        env = PMXSupportBaseManager.buildEnvironment(self, systemEnvironment)
         for var in self.shellVariables:
             if var['enabled']:
                 env[var['variable']] = var['value']

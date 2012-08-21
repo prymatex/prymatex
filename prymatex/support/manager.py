@@ -113,9 +113,10 @@ class PMXSupportBaseManager(object):
     def updateEnvironment(self, env):
         self.environment.update(env)
 
-    def buildEnvironment(self):
+    def buildEnvironment(self, systemEnvironment = True):
         env = {}
-        env.update(os.environ)
+        if systemEnvironment:
+            env.update(os.environ)
         env.update(self.environment)
         return env
     

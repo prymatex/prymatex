@@ -61,8 +61,8 @@ class PMXProject(PMXBundleItem):
         except:
             pass
 
-    def buildEnvironment(self, projectName, projectLocation):
-        env = super(PMXProject, self).buildEnvironment()
+    def buildEnvironment(self, projectName, projectLocation, localVars = False):
+        env = super(PMXProject, self).buildEnvironment() if not localVars else {}
         env['TM_NEW_PROJECT_NAME'] = projectName
         env['TM_NEW_PROJECT_LOCATION'] = projectLocation
         env['TM_NEW_PROJECT_BASENAME'] = os.path.basename(projectLocation)

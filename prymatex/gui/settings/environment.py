@@ -116,13 +116,8 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
         self.setupVariablesTableModel()
     
     def loadSettings(self):
-        self.checkBox1.setText("User")
-        self.checkBox1.setChecked(True)
         self.model.addGroup('user', self.application.supportManager.shellVariables, editable = True, checkable=True, foreground=QtCore.Qt.blue)
-        self.checkBox2.setText("Prymatex")
-        self.checkBox2.setChecked(True)
         self.model.addGroup('prymatex', self.application.supportManager.environment)
-        self.checkBox3.setText("System")
         self.model.addGroup('system', os.environ, foreground=QtCore.Qt.red, visible = False)
 
     def setupVariablesTableModel(self):
@@ -136,6 +131,12 @@ class PMXEnvVariablesWidget(QtGui.QWidget, PMXSettingTreeNode, Ui_Environment):
         self.model.rowsInserted.connect(self.tableView.resizeRowsToContents)
         self.model.rowsRemoved.connect(self.tableView.resizeRowsToContents)
         self.tableView.resizeRowsToContents()
+        
+        self.checkBox1.setText("User")
+        self.checkBox1.setChecked(True)
+        self.checkBox2.setText("Prymatex")
+        self.checkBox2.setChecked(True)
+        self.checkBox3.setText("System")
 
     @QtCore.pyqtSlot(bool)
     def on_checkBox1_clicked(self, checked):

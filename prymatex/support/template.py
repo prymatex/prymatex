@@ -109,8 +109,8 @@ class PMXTemplate(PMXBundleItem):
         except:
             pass
 
-    def buildEnvironment(self, fileName, fileDirectory):
-        env = super(PMXTemplate, self).buildEnvironment()
+    def buildEnvironment(self, fileName, fileDirectory, localVars = False):
+        env = super(PMXTemplate, self).buildEnvironment() if not localVars else {}
         nameWithExtension = "{0}{1}{2}".format(fileName, os.path.extsep, self.extension) if self.extension else fileName
         env['TM_NEW_FILE'] = os.path.join(fileDirectory, nameWithExtension)
         env['TM_NEW_FILE_BASENAME'] = fileName

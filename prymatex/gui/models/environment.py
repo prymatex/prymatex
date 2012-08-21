@@ -14,8 +14,10 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
         self.variableGroups = []
         
     def mapFromVariables(self, variables):
-        #Return variable as 3-tuple [(Name, Value, checked)...]
-        if hasattr(variables, 'iteritems'):
+        #Return variable as list of dicts [{'variable': name, 'value': value, 'enabled': True}...]
+        if variables is None:
+            return []
+        elif hasattr(variables, 'iteritems'):
             return map(lambda (name, value): {'variable': name, 'value': value, 'enabled': True}, variables.iteritems())
         return variables
         
@@ -36,6 +38,10 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
         })
         self.layoutChanged.emit()
     
+    def clear(self):
+        self.variableGroups = []
+        self.layoutChanged.emit()
+        
     def setVisibility(self, name, visible):
         group = self.groupByName(name)
         group['visible'] = visible
@@ -55,6 +61,8 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
         return reduce(lambda l, group: l + (group['editable'] and group['variables'] or []), self.variableGroups, [])
         
     def rowCount(self, parent = None):
+        if not self.variableGroups:
+            return 0
         return reduce(lambda count, group: count + (group['visible'] and len(group['variables']) or 0), self.variableGroups, 0)
     
     def columnCount(self, parent = None):

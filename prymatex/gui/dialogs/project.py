@@ -98,8 +98,8 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         index = self.projectProxyModel.mapToSource(self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0))
         if index.isValid():
             template = index.internalPointer()
-            environment = template.buildEnvironment(projectName = name, projectLocation = location)
-        print EnvironmentDialog.editEnvironment(self, environment, self.userEnvironment)
+            tEnv = template.buildEnvironment(projectName = name, projectLocation = location, localVars = True)
+        print EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
         
     def runCreateProject(self, name, location):
         self.projectCreated = self.application.projectManager.createProject(name, location)
