@@ -108,6 +108,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     ShowLineNumbers       = 1<<3
     ShowFolding           = 1<<4
     WordWrap              = 1<<5
+    MarginLine              = 1<<6
     
     #=======================================================================
     # Settings
@@ -123,9 +124,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     
     @pmxConfigPorperty(default = QtGui.QFont("Monospace", 9))
     def font(self, font):
+        font.setStyleHint(QtGui.QFont.Monospace)
+        font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.document().setDefaultFont(font)
-        self.setTabStopWidth(self.tabStopSize * 9)
         self.fontChanged.emit()
     
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
@@ -197,7 +199,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
         #Cursor history
         self._cursorHistory, self._cursorHistoryIndex = [], 0
-           
+
+        #Esta señal es especial porque es emitida en el setFont por los settings
+        self.fontChanged.connect(self.on_fontChanged)
         #Basic setup
         #self.setCenterOnScroll(True)
     
@@ -290,6 +294,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setBraces(self.syntax().scopeName)
         self.syntaxReady.emit(self.syntax())
         
+    def on_fontChanged(self):
+        font_metrics = QtGui.QFontMetrics(self.document().defaultFont())
+        self.pos_margin = font_metrics.width("#") * 80
+        self.setTabStopWidth(self.tabStopSize * font_metrics.width("#"))
+
     #=======================================================================
     # Base Editor Interface
     #=======================================================================
@@ -479,8 +488,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             flags |= self.ShowTabsAndSpaces
         if options.flags() & QtGui.QTextOption.ShowLineAndParagraphSeparators:
             flags |= self.ShowLineAndParagraphs
-        # if self.sidebar.showBookmarks:
-        #     flags |= self.ShowBookmarks
+        if self.showMarginLine:
+            flags |= self.MarginLine
         # if self.sidebar.showLineNumbers:
         #     flags |= self.ShowLineNumbers
         # if self.sidebar.showFolding:
@@ -506,7 +515,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             options.setWrapMode(QtGui.QTextOption.NoWrap)
         options.setFlags(oFlags)
         self.document().setDefaultTextOption(options)
-        # self.sidebar.showBookmarks = bool(flags & self.ShowBookmarks)
+        self.showMarginLine = bool(flags & self.MarginLine)
         # self.sidebar.showLineNumbers = bool(flags & self.ShowLineNumbers)
         # self.sidebar.showFolding = bool(flags & self.ShowFolding)
         
@@ -804,6 +813,12 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     resources.getImage("foldingellipsis"))
             
             block = block.next()
+
+        if self.showMarginLine:
+            painter.setPen(self.colours['gutter'])
+            offset = self.contentOffset()
+            painter.drawLine(self.pos_margin + offset.x(), 0, self.pos_margin + offset.x(), self.viewport().height())
+
         if self.multiCursorMode.isActive():
             ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
             for index, cursor in enumerate(self.multiCursorMode.cursors, 1):
@@ -818,6 +833,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                      colour = self.colours['selection']
                 painter.setPen(QtGui.QPen(colour))
                 painter.drawLine(fakeCursor)
+
         if self.multiCursorMode.isDragCursor:
             pen = QtGui.QPen(self.colours['caret'])
             pen.setWidth(2)
@@ -894,14 +910,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 helper.execute(self, event, cursor, scope)
                 return True
         return False
-    # -------------------------------------------------------
-    #
-    
-    from prymatex.utils.decorators.profilehooks import profile
-    from datetime import datetime
-    #@profile(filename="%s-%s.prof" % (__name__,
-    #                                  datetime.now().strftime('%d%m%Y-%H%M%S')), immediate = True)
-    #@printtime
+
     def keyPressEvent(self, event):
         """
         This method is called whenever a key is pressed. The key code is stored in event.key()
@@ -918,7 +927,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
             
             self.emit(QtCore.SIGNAL("keyPressEvent(QEvent)"), event)
-    #@printtime
+
     def keyReleaseEvent(self, event):
         #Primero ver si tengo un modo activo,
         for mode in [ self.snippetMode, self.multiCursorMode, self.completerMode ]:
@@ -1349,6 +1358,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.verticalScrollBar().setValue(scrollIndex)
         else:
             QtGui.QPlainTextEdit.centerCursor(self)
+
     #===========================================================================
     # Zoom
     #===========================================================================
@@ -1551,6 +1561,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                  'callback': cls.on_actionWordWrap_toggled,
                  'checkable': True,
                  'testChecked': lambda editor: bool(editor.getFlags() & editor.WordWrap) },
+                {'title': "Margin Line",
+                 'callback': cls.on_actionMarginLine_toggled,
+                 'checkable': True,
+                 'testChecked': lambda editor: bool(editor.getFlags() & editor.MarginLine) },
             ]}
         text = {
             'title': 'Text',
@@ -1700,6 +1714,13 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             flags = self.getFlags() & ~self.WordWrap
         self.setFlags(flags)
     
+    def on_actionMarginLine_toggled(self, checked):
+        if checked:
+            flags = self.getFlags() | self.MarginLine
+        else:
+            flags = self.getFlags() & ~self.MarginLine
+        self.setFlags(flags)
+        
     def on_actionShowBookmarks_toggled(self, checked):
         if checked:
             flags = self.getFlags() | self.ShowBookmarks
