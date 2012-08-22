@@ -304,15 +304,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setFilePath(filePath)
         self.beforeOpen.emit()
         self.setPlainText(content)
-        #chunksize = 512
-        #currentIndex = 0
-        #contentLength = len(content)
-        #while currentIndex <= contentLength:
-         #   self.insertPlainText(content[currentIndex:currentIndex + chunksize])
-          #  currentIndex += chunksize
-           # yield
-        #self.document().clearUndoRedoStacks()
-        #self.setModified(False)
         self.afterOpen.emit()
         
     def save(self, filePath):
