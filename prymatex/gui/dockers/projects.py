@@ -137,6 +137,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         if index.isValid():
             node = self.projectTreeProxyModel.node(index)
             self.extendFileSystemItemMenu(contextMenu, node)
+            self.extendAddonsItemMenu(contextMenu, node)
+            self.extendProjectBundleItemMenu(contextMenu, node)
         # contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self, useSeparatorName = True)
         contextMenu, contextMenuActions = utils.createQMenu(contextMenu, self)
         
@@ -157,17 +159,24 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
             utils.extendMenuSection(menu, self.actionOpen, section = "open", position = 0)
-            
-        #Ahora los addons
+
+        #El final
+        utils.extendMenuSection(menu, ["--properties", self.actionProperties], section = -1)
+
+    def extendAddonsItemMenu(self, menu, node):
+        #Menu de los addons
         addonMenues = [ "-" ]
         for addon in self.addons:
             addonMenues.extend(addon.contributeToContextMenu(node))
         if len(addonMenues) > 1:
-            utils.extendMenuSection(menu, addonMenues, section = -1)
+            utils.extendMenuSection(menu, addonMenues, section = 'properties')
         
-        #El final
-        utils.extendMenuSection(menu, ["--properties", self.actionProperties], section = -1)
-
+    def extendProjectBundleItemMenu(self, menu, node):
+        #Menu de los bundles relacionados al proyecto
+        bundleMenues = ["--bundles" ] + map(lambda bundle: self.application.supportManager.menuForBundle(bundle), 
+            map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project.bundleMenu or []))
+        utils.extendMenuSection(menu, bundleMenues, section = "interact")
+        
     #================================================
     # Tree View Project
     #================================================

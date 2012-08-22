@@ -35,15 +35,17 @@ class PMXManagedObject(object):
     def delete(self, namespace):
         raise NotImplemented
 
+    def uuidAsUnicode(self):
+        return unicode(self.uuid).upper()
+
     @property
     def enabled(self):
         return self.manager.isEnabled(self.uuid)
                 
     @property
     def hash(self):
-        return { 'uuid': unicode(self.uuid).upper() }
+        return { 'uuid': self.uuidAsUnicode() }
 
-    
     def path(self, namespace):
         return self.sources[namespace][self._PATH]
 

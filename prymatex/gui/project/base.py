@@ -40,7 +40,6 @@ class FileSystemTreeNode(TreeNode):
         self.isfile = os.path.isfile(self.path)
         self.ishidden = name.startswith('.')
         self.isproject = isinstance(self, PMXProject)
-        self.__project = self if isinstance(self, PMXProject) else None
 
     @property
     def project(self):
@@ -60,7 +59,7 @@ class FileSystemTreeNode(TreeNode):
     
 class PMXProject(FileSystemTreeNode):
     KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 
-                'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'mainMenu' ]
+                'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'bundleMenu' ]
     FILE = 'info.plist'
     FOLDER = '.pmxproject'
     SUPPORT = 'Support'
@@ -195,6 +194,25 @@ class PMXProject(FileSystemTreeNode):
             return resources.getIcon("projectopen")
         else:
             return resources.getIcon("projectclose")
+
+    #==========================================
+    # Bundle Menu 
+    #==========================================
+    def addBundleMenu(self, bundle):
+        if not isinstance(self.bundleMenu, list):
+            self.bundleMenu = []
+        self.bundleMenu.append(bundle.uuidAsUnicode())
+        
+    def removeBundleMenu(self, bundle):
+        uuid = bundle.uuidAsUnicode()
+        if uuid in self.bundleMenu:
+            self.bundleMenu.remove(uuid)
+        if not self.bundleMenu:
+            self.bundleMenu = None
+            
+    def hasBundleMenu(self, bundle):
+        if self.bundleMenu is None: return False
+        return bundle.uuidAsUnicode() in self.bundleMenu
 
     def bashInit(self):
         bashInitPath = os.path.join(self.projectPath, self.BASH_INIT)

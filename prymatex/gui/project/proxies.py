@@ -213,9 +213,8 @@ class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
 
         sIndex = self.mapToSource(index)
         if role == QtCore.Qt.CheckStateRole:
-            return QtCore.Qt.Unchecked
-            #bundle = sIndex.internalPointer()
-            #return QtCore.Qt.Checked if bundle.enabled else QtCore.Qt.Unchecked
+            bundle = self.sourceModel().node(sIndex)
+            return QtCore.Qt.Checked if self.currentProject.hasBundleMenu(bundle) else QtCore.Qt.Unchecked
         else:
             return self.sourceModel().data(sIndex, role)
 
@@ -225,6 +224,10 @@ class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
             
         sIndex = self.mapToSource(index)    
         if role == QtCore.Qt.CheckStateRole:
+            bundle = self.sourceModel().node(sIndex)
+            if value:
+                self.currentProject.addBundleMenu(bundle)
+            else:
+                self.currentProject.removeBundleMenu(bundle)
             return True
-            #return self.sourceModel().setData(sIndex, value, role)
         return False
