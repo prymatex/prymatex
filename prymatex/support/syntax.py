@@ -314,4 +314,3 @@ class PMXSyntax(PMXBundleItem):
             group = scope.split(".")[0]
             if group in cls.ROOT_GROUPS:
                 return group
-        return scope.split(".")[0]

@@ -15,6 +15,7 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
 
     #START
     def startParsing(self, scope):
+        self.lines = []
         self.setScopes([ scope ])
     
     #BEGIN NEW LINE

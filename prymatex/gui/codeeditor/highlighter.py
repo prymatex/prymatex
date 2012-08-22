@@ -3,7 +3,7 @@
 
 import re
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from prymatex.gui.codeeditor.processors import PMXSyntaxProcessor
 from prymatex.gui.codeeditor.userdata import PMXBlockUserData
@@ -29,6 +29,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     SINGLE_LINE = 0
     MULTI_LINE = 1
     FORMAT_CACHE = {}
+    highlightReady = QtCore.pyqtSignal()
     
     def __init__(self, editor, syntax = None, theme = None):
         QtGui.QSyntaxHighlighter.__init__(self, editor)
@@ -36,12 +37,35 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.processor = PMXSyntaxProcessor(editor)
         self.syntax = syntax
         self.theme = theme
+        
+        #Highlight Function
+        self.highlight_function = self.realtime_highlight
+        self.currentHighlightTask = None
+
+        #Format builders
         self.textCharFormatBuilders = {}
         for method in dir(editor):
             match = RE_MAGIC_FORMAT_BUILDER.match(method)
             if match:
                 self.registerTextCharFormatBuilder("#%s" % match.group(1), getattr(editor, method))
     
+        #Conect signals
+        self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
+        self.editor.afterOpen.connect(self.on_editor_afterOpen)
+
+    def on_editor_beforeOpen(self):
+        #Replace highlight function
+        self.highlight_function = lambda x: None
+
+    def on_editor_afterOpen(self):
+        self.highlight_function = self.async_highlight
+        self.currentHighlightTask = self.editor.application.scheduler.newTask(self.highlightAllDocument())
+        def on_highlightReady():
+            #Restore realitme function
+            self.highlight_function = self.realtime_highlight
+            self.highlightReady.emit()
+        self.currentHighlightTask.done.connect(on_highlightReady)
+
     @property
     def ready(self):
         if self.theme and self.syntax:
@@ -52,7 +76,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def setSyntax(self, syntax):
         self.syntax = syntax
         if self.ready:
-            self.rehighlight()
+            self.on_editor_afterOpen()
         
     def setTheme(self, theme):
         PMXSyntaxHighlighter.FORMAT_CACHE = {}
@@ -60,19 +84,28 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         if self.ready:
             self.rehighlight()
     
-    def hasTheme(self):  
+    def hasTheme(self):
         return self.theme is not None
             
-    def _analyze_all_text(self, text):
-        self.syntax.parse(text, self.processor)
-        for index, data in enumerate(self.processor.lines):
-            block = self.document().findBlockByNumber(index)
-            userData, state = self.buildBlockUserData(block, data)
-            block.setUserData(userData)
-            block.setUserState(state)
-    
-    #@printtime
-    def setupBlockUserData(self, text, userData):
+    def highlightAllDocument(self):
+        block = self.document().begin()
+        self.processor.startParsing(self.syntax.scopeName)
+        stack = [[self.syntax.grammar, None]]
+        while block.isValid():
+            text = block.text()
+            self.syntax.parseLine(stack, text, self.processor)
+            userData = block.userData()
+            if userData is None:
+                userData = PMXBlockUserData()
+                block.setUserData(userData)
+            
+            blockState = self.setupBlockUserData(text, block, userData)
+            block.setUserState(blockState)
+            self.rehighlightBlock(block)
+            block = block.next()
+            yield
+
+    def setupBlockUserData(self, text, block, userData):
         blockState = self.SINGLE_LINE
         userData.setRanges(self.processor.scopeRanges)
         userData.setChunks(self.processor.lineChunks)
@@ -83,19 +116,19 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             
         #1 Update words
         if userData.words != self.processor.words:
-            self.editor.updateWords(self.currentBlock(), userData, self.processor.words)
+            self.editor.updateWords(block, userData, self.processor.words)
      
         #2 Update Indent
         indent = whiteSpace(text)
         if indent != userData.indent:
             userData.indent = indent
-            self.editor.updateIndent(self.currentBlock(), userData, indent)
+            self.editor.updateIndent(block, userData, indent)
 
         #3 Update Folding
         foldingMark = self.syntax.folding(text)
         if userData.foldingMark != foldingMark:
             userData.foldingMark = foldingMark
-            self.editor.updateFolding(self.currentBlock(), userData, foldingMark)
+            self.editor.updateFolding(block, userData, foldingMark)
             
         #4 Update Symbols
         symbolRange = filter(lambda ((start, end), p): p.showInSymbolList, 
@@ -110,15 +143,22 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
         if userData.symbol != symbol:
             userData.symbol = symbol
-            self.editor.updateSymbol(self.currentBlock(), userData, symbol)
+            self.editor.updateSymbol(block, userData, symbol)
 
         #5 Save the hash the text, scope and state
         userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
 
         return blockState
 
-    #@printtime
     def highlightBlock(self, text):
+        self.highlight_function(text)
+
+    def async_highlight(self, text):
+        userData = self.currentBlock().userData()
+        if userData:
+            self.applyFormat(userData)
+
+    def realtime_highlight(self, text):
         userData = self.currentBlock().userData()
         if userData is not None and userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
             self.applyFormat(userData)
@@ -141,7 +181,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
-            blockState = self.setupBlockUserData(text, userData)
+            blockState = self.setupBlockUserData(text, self.currentBlock(), userData)
             self.setCurrentBlockState(blockState)
 
             self.applyFormat(userData)

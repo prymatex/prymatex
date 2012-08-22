@@ -48,6 +48,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     # Signals
     #=======================================================================
     syntaxChanged = QtCore.pyqtSignal(object)
+    syntaxReady = QtCore.pyqtSignal(object)
     themeChanged = QtCore.pyqtSignal()
     fontChanged = QtCore.pyqtSignal()
     modeChanged = QtCore.pyqtSignal()
@@ -205,6 +206,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.rightBar.updateRequest.connect(self.updateViewportMargins)
         self.leftBar.updateRequest.connect(self.updateViewportMargins)
         
+        self.syntaxHighlighter.highlightReady.connect(self.on_highlightReady)
         self.blockCountChanged.connect(self.on_blockCountChanged)
         self.updateRequest.connect(self.updateSideBars)
         self.cursorPositionChanged.connect(self.on_cursorPositionChanged)
@@ -283,6 +285,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setCurrentBraces()
         self.highlightEditor()
 
+    def on_highlightReady(self):
+        self.folding.indentSensitive = self.syntax().indentSensitive
+        self.setBraces(self.syntax().scopeName)
+        self.syntaxReady.emit(self.syntax())
+        
     #=======================================================================
     # Base Editor Interface
     #=======================================================================
@@ -292,19 +299,20 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def open(self, filePath):
         """ Custom open for large files, use coroutines """
-        self.beforeOpen.emit()
         self.application.fileManager.openFile(filePath)
         content = self.application.fileManager.readFile(filePath)
         self.setFilePath(filePath)
-        chunksize = 512
-        currentIndex = 0
-        contentLength = len(content)
-        while currentIndex <= contentLength:
-            self.insertPlainText(content[currentIndex:currentIndex + chunksize])
-            currentIndex += chunksize
-            yield
-        self.document().clearUndoRedoStacks()
-        self.setModified(False)
+        self.beforeOpen.emit()
+        self.setPlainText(content)
+        #chunksize = 512
+        #currentIndex = 0
+        #contentLength = len(content)
+        #while currentIndex <= contentLength:
+         #   self.insertPlainText(content[currentIndex:currentIndex + chunksize])
+          #  currentIndex += chunksize
+           # yield
+        #self.document().clearUndoRedoStacks()
+        #self.setModified(False)
         self.afterOpen.emit()
         
     def save(self, filePath):
@@ -515,11 +523,12 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def getSyntax(self):
         return self.syntaxHighlighter.syntax
         
+    def syntax(self):
+        return self.syntaxHighlighter.syntax
+        
     def setSyntax(self, syntax):
         if self.syntaxHighlighter.syntax != syntax:
             self.syntaxHighlighter.setSyntax(syntax)
-            self.folding.indentSensitive = syntax.indentSensitive
-            self.setBraces(syntax.scopeName)
             self.syntaxChanged.emit(syntax)
 
     # Move text

@@ -14,7 +14,7 @@ class PMXEditorFolding(QtCore.QObject):
         self.foldingUpdated = True
         self.editor.textChanged.connect(self.on_editor_textChanged)
         self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
-        self.editor.afterOpen.connect(self.on_editor_afterOpen)
+        self.editor.syntaxReady.connect(self.on_editor_syntaxReady)
         self.blocks = []
         self.folding = []
 
@@ -27,7 +27,7 @@ class PMXEditorFolding(QtCore.QObject):
     def on_editor_beforeOpen(self):
         self.editor.textChanged.disconnect(self.on_editor_textChanged)
         
-    def on_editor_afterOpen(self):
+    def on_editor_syntaxReady(self):
         self.editor.textChanged.connect(self.on_editor_textChanged)
         self.updateFolding()
             
