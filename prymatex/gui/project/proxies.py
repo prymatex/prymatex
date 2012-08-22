@@ -202,14 +202,15 @@ class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
     
     def __init__(self, parent = None):
         super(ProjectMenuProxyModel, self).__init__(parent)
-    
+        self.currentProject = None
+        
     def setCurrentProject(self, project):
-        print project
+        self.currentProject = project
 
     def data(self, index, role):
-        if self.sourceModel() is None:
-            return QtCore.QVariant()
-        
+        if self.sourceModel() is None or self.currentProject is None:
+            return None
+
         sIndex = self.mapToSource(index)
         if role == QtCore.Qt.CheckStateRole:
             return QtCore.Qt.Unchecked
@@ -219,7 +220,7 @@ class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
             return self.sourceModel().data(sIndex, role)
 
     def setData(self, index, value, role):
-        if self.sourceModel() is None:
+        if self.sourceModel() is None or self.currentProject is None:
             return False
             
         sIndex = self.mapToSource(index)    

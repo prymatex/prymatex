@@ -59,7 +59,8 @@ class FileSystemTreeNode(TreeNode):
         return resources.getIcon(self.path)
     
 class PMXProject(FileSystemTreeNode):
-    KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables' ]
+    KEYS = [    'name', 'currentDocument', 'documents', 'fileHierarchyDrawerWidth', 'metaData', 
+                'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'mainMenu' ]
     FILE = 'info.plist'
     FOLDER = '.pmxproject'
     SUPPORT = 'Support'
