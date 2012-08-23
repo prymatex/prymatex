@@ -468,7 +468,7 @@ class SplitTabWidget(QtGui.QSplitter):
             tidx = tw.count() - 1
 
         self._set_current_tab(tw, tidx)
-        tw.setFocus()
+        #tw.tabBar().setFocus()
 
     def _move_right(self, tw, tidx):
         """ Move the current tab to the one logically to the right. """
@@ -490,7 +490,7 @@ class SplitTabWidget(QtGui.QSplitter):
             tidx = 0
 
         self._set_current_tab(tw, tidx)
-        tw.setFocus()
+        #tw.tabBar().setFocus()
 
     def _select(self, pos):
         tw, hs, hs_geom = self._hotspot(pos)
