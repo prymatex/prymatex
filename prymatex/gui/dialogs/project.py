@@ -99,7 +99,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         if index.isValid():
             template = self.projectProxyModel.node(index)
             tEnv = template.buildEnvironment(projectName = name, projectLocation = location, localVars = True)
-        print EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
+        self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
         
     def runCreateProject(self, name, location):
         self.projectCreated = self.application.projectManager.createProject(name, location)

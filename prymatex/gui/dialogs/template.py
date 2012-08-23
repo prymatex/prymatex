@@ -25,6 +25,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         
         self.buttonCreate.setDefault(True)
         self.fileCreated = None
+        self.userEnvironment = {}
     
     def setupComboTemplates(self):
         tableView = QtGui.QTableView(self)
@@ -53,7 +54,6 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         templateModel = self.comboTemplates.model()
         template = templateModel.node(templateModel.createIndex(self.comboTemplates.currentIndex(), 0))
         if template is not None:
-            print template
             environment = template.buildEnvironment(fileDirectory = self.lineLocation.text(), fileName = self.lineFileName.text())
             self.fileCreated = template.execute(environment)
             self.accept()
@@ -76,13 +76,12 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         self.reject()
     
     def on_buttonEnvironment_pressed(self):
-        name = self.lineProjectName.text()
+        name = self.lineFileName.text()
         location = self.lineLocation.text()
-        index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
-        if index.isValid():
-            template = self.projectProxyModel.node(index)
-            tEnv = template.buildEnvironment(projectName = name, projectLocation = location, localVars = True)
-        print EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
+        templateModel = self.comboTemplates.model()
+        template = templateModel.node(templateModel.createIndex(self.comboTemplates.currentIndex(), 0))
+        tEnv = template.buildEnvironment(fileName = name, fileDirectory = location, localVars = True)
+        self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
              
     @classmethod
     def newFileFromTemplate(cls, fileDirectory = "", fileName = "", parent = None):
@@ -95,4 +94,3 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         dlg.buttonCreate.setEnabled(False)
         if dlg.exec_() == cls.Accepted:
             return dlg.fileCreated
-    

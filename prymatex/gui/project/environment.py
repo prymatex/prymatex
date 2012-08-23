@@ -62,7 +62,7 @@ class EnvironmentWidget(QtGui.QWidget, PMXPropertyTreeNode, Ui_Environment):
         self.application.projectManager.updateProject(self.project, shellVariables = variables)
 
     def on_pushAdd_pressed(self):
-        self.model.insertRows(0, 1)
+        self.model.insertVariable()
         
     def on_pushRemove_pressed(self):
         index = self.tableView.currentIndex()

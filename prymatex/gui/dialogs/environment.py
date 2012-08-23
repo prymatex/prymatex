@@ -47,7 +47,7 @@ class EnvironmentWidget(QtGui.QWidget, Ui_Environment):
         print group, variables
 
     def on_pushAdd_pressed(self):
-        self.model.insertRows(0, 1)
+        self.model.insertVariable()
         
     def on_pushRemove_pressed(self):
         index = self.tableView.currentIndex()

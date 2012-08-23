@@ -199,8 +199,9 @@ class PMXPropertiesProxyModel(PMXConfigureProxyModel):
 # Project Bundle Menu
 #=========================================
 class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
-    def __init__(self, parent = None):
-        super(ProjectMenuProxyModel, self).__init__(parent)
+    def __init__(self, projectManager):
+        super(ProjectMenuProxyModel, self).__init__(projectManager)
+        self.projectManager = projectManager
         self.currentProject = None
         
     def setCurrentProject(self, project):
@@ -233,8 +234,8 @@ class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
         if role == QtCore.Qt.CheckStateRole:
             bundle = self.sourceModel().node(sIndex)
             if value:
-                self.currentProject.addBundleMenu(bundle)
+                self.projectManager.addProjectBundleMenu(self.currentProject, bundle)
             else:
-                self.currentProject.removeBundleMenu(bundle)
+                self.projectManager.removeProjectBundleMenu(self.currentProject, bundle)
             return True
         return False

@@ -175,9 +175,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         #Menu de los bundles relacionados al proyecto
         bundles = map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project.bundleMenu or [])
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
-        bundleMenues = [ "--bundles" ] + map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
-        print bundleMenues
-        utils.extendMenuSection(menu, bundleMenues, section = "interact")
+        if bundles:
+            bundleMenues = [ "--bundles" ] + map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
+            utils.extendMenuSection(menu, bundleMenues, section = "interact")
         
     #================================================
     # Tree View Project
@@ -263,8 +263,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     @QtCore.pyqtSlot()
     def on_actionRename_triggered(self):
-        basePath = self.currentPath()
-        self.renamePath(basePath)
+        self.renamePath(self.currentPath())
+        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
 
     @QtCore.pyqtSlot()
     def on_actionCloseProject_triggered(self):

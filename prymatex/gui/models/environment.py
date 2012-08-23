@@ -12,7 +12,8 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
     def __init__(self, parent = None):
         super(EnvironmentTableModel, self).__init__(parent)
         self.variableGroups = []
-        
+        self.lastEditableGroup = None
+
     def mapFromVariables(self, variables):
         #Return variable as list of dicts [{'variable': name, 'value': value, 'enabled': True}...]
         if variables is None:
@@ -27,7 +28,7 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
                 return group
                 
     def addGroup(self, name, variables, editable = False, checkable = False, visible = True, foreground = QtCore.Qt.black, background = QtCore.Qt.white):
-        self.variableGroups.append({
+        group = {
             'name': name,
             'variables': self.mapFromVariables(variables),
             'editable': editable,
@@ -35,7 +36,10 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
             'visible': visible,
             'foreground': foreground,
             'background': background
-        })
+        } 
+        self.variableGroups.append(group)
+        if editable:
+            self.lastEditableGroup = group
         self.layoutChanged.emit()
     
     def clear(self):
@@ -56,7 +60,18 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
                     break
                 index -= varCount
         return index, currentGroup
-           
+
+    def variableGroupTablePosition(self, group, top = True):
+        position = 0
+        for currentGroup in self.variableGroups:
+            if currentGroup["visible"]:
+                if currentGroup == group:
+                    break
+                position += len(currentGroup['variables'])
+        if not top:
+            position += len(currentGroup['variables'])
+        return position
+
     def allEditableVariables(self):
         return reduce(lambda l, group: l + (group['editable'] and group['variables'] or []), self.variableGroups, [])
         
@@ -120,21 +135,13 @@ class EnvironmentTableModel(QtCore.QAbstractTableModel):
                 elif section == 1:
                     return "Value"
 
-    def insertVariable(self, groupName):
-        group = self.groupByName(groupName)
-        if group['editable']:
-            self.insertRows(0, 1)
-
-    def insertRows(self, position, rows, parent = QtCore.QModelIndex()):
-        # No agregar nuevo si no tiene una edicion terminada
-        if any(map(lambda value: value['variable'] == "", self.allEditableVariables())):
-            return False
-        self.beginInsertRows(parent, position, position + rows - 1)
-        row, group = self.mapToGroup(position)
-        for _ in range(rows):
-            group['variables'].insert(row, {'variable': "", 'value': "", 'enabled': True})
-        self.endInsertRows()
-        return True
+    def insertVariable(self, groupName = None):
+        group = self.groupByName(groupName) if groupName else self.lastEditableGroup
+        if group is not None and group['editable']:
+            position = self.variableGroupTablePosition(group)
+            self.beginInsertRows(QtCore.QModelIndex(), position, position)
+            group['variables'].insert(0, {'variable': "", 'value': "", 'enabled': True})
+            self.endInsertRows()
 
     def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
         if any(map(lambda value: 'system' in value, self.variables[position:position + 1])):

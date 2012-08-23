@@ -106,8 +106,7 @@ class PMXProjectManager(QtCore.QObject):
         return project
     
     def updateProject(self, project, **attrs):
-        """Actualiza un proyecto
-        """
+        """Actualiza un proyecto"""
         if len(attrs) == 1 and "name" in attrs and attrs["name"] == item.name:
             #Updates que no son updates
             return item
@@ -164,6 +163,14 @@ class PMXProjectManager(QtCore.QObject):
         projects.append(project.filePath)
         project.setWorkingSet(workingSet)
         self.projectTreeModel.dataChanged.emit()
+        
+    def addProjectBundleMenu(self, project, bundle):
+        project.addBundleMenu(bundle)
+        project.save()
+        
+    def removeProjectBundleMenu(self, project, bundle):
+        project.removeBundleMenu(bundle)
+        project.save()
         
     def findProjectForPath(self, path):
         for project in self.getAllProjects():

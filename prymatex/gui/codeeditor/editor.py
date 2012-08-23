@@ -108,7 +108,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     ShowLineNumbers       = 1<<3
     ShowFolding           = 1<<4
     WordWrap              = 1<<5
-    MarginLine              = 1<<6
+    MarginLine            = 1<<6
     
     #=======================================================================
     # Settings
