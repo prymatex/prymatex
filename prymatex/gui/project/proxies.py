@@ -199,7 +199,6 @@ class PMXPropertiesProxyModel(PMXConfigureProxyModel):
 # Project Bundle Menu
 #=========================================
 class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
-    
     def __init__(self, parent = None):
         super(ProjectMenuProxyModel, self).__init__(parent)
         self.currentProject = None
@@ -207,6 +206,14 @@ class ProjectMenuProxyModel(QtGui.QSortFilterProxyModel):
     def setCurrentProject(self, project):
         self.currentProject = project
 
+    def filterAcceptsRow(self, sourceRow, sourceParent):
+        index = self.sourceModel().index(sourceRow, 0, sourceParent)
+        node = self.sourceModel().node(index)
+        return not node.isRootNode() and node.enabled
+        
+    def filterAcceptsColumn(self, sourceColumn, sourceParent):
+        return True
+        
     def data(self, index, role):
         if self.sourceModel() is None or self.currentProject is None:
             return None

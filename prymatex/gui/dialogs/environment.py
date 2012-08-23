@@ -60,6 +60,8 @@ class EnvironmentDialog(QtGui.QDialog):
         self.setObjectName("EnvironmentDialog")
         self.verticalLayout = QtGui.QVBoxLayout(self)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setSpacing(2)
+        self.verticalLayout.setMargin(0)
         self.environmentWidget = EnvironmentWidget(self)
         self.environmentWidget.setObjectName("environmentWidget")
         self.verticalLayout.addWidget(self.environmentWidget)

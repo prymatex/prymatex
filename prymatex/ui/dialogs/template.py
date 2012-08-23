@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/template.ui'
 #
-# Created: Thu Aug 16 18:29:02 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Thu Aug 23 00:38:08 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -45,6 +45,8 @@ class Ui_NewFromTemplateDialog(object):
         self.lineLocation.setObjectName(_fromUtf8("lineLocation"))
         self.horizontalLayout_5.addWidget(self.lineLocation)
         self.buttonChoose = QtGui.QPushButton(NewFromTemplateDialog)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("folder"))
+        self.buttonChoose.setIcon(icon)
         self.buttonChoose.setObjectName(_fromUtf8("buttonChoose"))
         self.horizontalLayout_5.addWidget(self.buttonChoose)
         self.formLayout_2.setLayout(1, QtGui.QFormLayout.FieldRole, self.horizontalLayout_5)
@@ -64,9 +66,8 @@ class Ui_NewFromTemplateDialog(object):
         self.buttonEnvironment = QtGui.QPushButton(NewFromTemplateDialog)
         self.buttonEnvironment.setMaximumSize(QtCore.QSize(32, 16777215))
         self.buttonEnvironment.setText(_fromUtf8(""))
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/code-variable.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonEnvironment.setIcon(icon1)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("code-variable"))
+        self.buttonEnvironment.setIcon(icon)
         self.buttonEnvironment.setObjectName(_fromUtf8("buttonEnvironment"))
         self.horizontalLayout_3.addWidget(self.buttonEnvironment)
         self.formLayout_2.setLayout(2, QtGui.QFormLayout.FieldRole, self.horizontalLayout_3)
@@ -76,15 +77,13 @@ class Ui_NewFromTemplateDialog(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.buttonCreate = QtGui.QPushButton(NewFromTemplateDialog)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonCreate.setIcon(icon2)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("document-new"))
+        self.buttonCreate.setIcon(icon)
         self.buttonCreate.setObjectName(_fromUtf8("buttonCreate"))
         self.horizontalLayout.addWidget(self.buttonCreate)
         self.buttonCancel = QtGui.QPushButton(NewFromTemplateDialog)
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/dialog-cancel.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.buttonCancel.setIcon(icon3)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("dialog-cancel"))
+        self.buttonCancel.setIcon(icon)
         self.buttonCancel.setObjectName(_fromUtf8("buttonCancel"))
         self.horizontalLayout.addWidget(self.buttonCancel)
         self.verticalLayout.addLayout(self.horizontalLayout)

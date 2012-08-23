@@ -61,7 +61,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         location = self.lineLocation.text()
         
         if self.checkBoxUseTemplate.isChecked():
-            location = self.runTemplateForProject(name, location)
+            self.runTemplateForProject(name, location)
         else:
             self.runCreateProject(name, location)
         
@@ -95,15 +95,21 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def on_buttonEnvironment_pressed(self):
         name = self.lineProjectName.text()
         location = self.lineLocation.text()
-        index = self.projectProxyModel.mapToSource(self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0))
+        index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
         if index.isValid():
-            template = index.internalPointer()
+            template = self.projectProxyModel.node(index)
             tEnv = template.buildEnvironment(projectName = name, projectLocation = location, localVars = True)
         print EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
         
     def runCreateProject(self, name, location):
         self.projectCreated = self.application.projectManager.createProject(name, location)
-        
+
+        #Set template's bundle for project        
+        if self.checkBoxUseTemplate.isChecked():
+            index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
+            template = self.projectProxyModel.node(index)
+            self.projectCreated.addBundleMenu(template.bundle)
+
         if self.checkBoxAddToWorkingSet.isChecked():
             workingSet = self.comboBoxWorkingSet.lineEdit().text()
             self.application.projectManager.setWorkingSet(self.projectCreated, workingSet)
@@ -111,15 +117,14 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.accept()
 
     def afterRunTemplate(self, context):
-        print context
-        self.runCreateProject("cacho", "location")
+        self.runCreateProject(context.environment['TM_NEW_PROJECT_NAME'], context.environment['TM_NEW_PROJECT_LOCATION'])
 
     def runTemplateForProject(self, name, location):
-        index = self.projectProxyModel.mapToSource(self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0))
+        index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
         if index.isValid():
-            template = index.internalPointer()
+            template = self.projectProxyModel.node(index)
             environment = template.buildEnvironment(projectName = name, projectLocation = location)
-            return template.execute(environment, self.afterRunTemplate)
+            template.execute(environment, self.afterRunTemplate)
     
     @classmethod
     def getNewProject(cls, parent = None, directory = None, name = None):

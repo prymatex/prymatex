@@ -173,8 +173,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
     def extendProjectBundleItemMenu(self, menu, node):
         #Menu de los bundles relacionados al proyecto
-        bundleMenues = ["--bundles" ] + map(lambda bundle: self.application.supportManager.menuForBundle(bundle), 
-            map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project.bundleMenu or []))
+        bundles = map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project.bundleMenu or [])
+        bundles = sorted(bundles, key=lambda bundle: bundle.name)
+        bundleMenues = [ "--bundles" ] + map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
+        print bundleMenues
         utils.extendMenuSection(menu, bundleMenues, section = "interact")
         
     #================================================

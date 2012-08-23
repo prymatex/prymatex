@@ -57,8 +57,7 @@
          <string>Sync folder with current editor file path</string>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
+         <iconset theme="folder-sync"/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -80,8 +79,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/view-list-tree.png</normaloff>:/icons/actions/view-list-tree.png</iconset>
+         <iconset theme="view-list-tree"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -100,8 +98,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/icons/actions/view-filter.png</normaloff>:/icons/actions/view-filter.png</iconset>
+         <iconset theme="view-filter"/>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -120,7 +117,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="configure"/>
+         <iconset theme="configure">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>

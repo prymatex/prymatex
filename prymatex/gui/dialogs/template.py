@@ -5,8 +5,9 @@ import os
 
 from PyQt4 import QtCore, QtGui
 
-from prymatex.ui.dialogs.template import Ui_NewFromTemplateDialog
 from prymatex.utils.i18n import ugettext as _
+from prymatex.ui.dialogs.template import Ui_NewFromTemplateDialog
+from prymatex.gui.dialogs.environment import EnvironmentDialog
 
 class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
     def __init__(self, parent = None):
@@ -59,7 +60,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         else:
             #TODO: Mostrar error
             pass
-        
+       
     def check_valid_location(self):
         """ Disable file """
         if os.path.isdir(self.lineLocation.text()) and self.lineFileName.text():
@@ -73,10 +74,16 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
 
     def on_buttonClose_pressed(self):
         self.reject()
-        
+    
     def on_buttonEnvironment_pressed(self):
-        print "go"
-        
+        name = self.lineProjectName.text()
+        location = self.lineLocation.text()
+        index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
+        if index.isValid():
+            template = self.projectProxyModel.node(index)
+            tEnv = template.buildEnvironment(projectName = name, projectLocation = location, localVars = True)
+        print EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
+             
     @classmethod
     def newFileFromTemplate(cls, fileDirectory = "", fileName = "", parent = None):
         '''
