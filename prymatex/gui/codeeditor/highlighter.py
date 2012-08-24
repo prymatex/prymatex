@@ -41,7 +41,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         
         #Highlight Function
         self.highlight_function = self.realtime_highlight
-        self.currentHighlightTask = None
+        self.currentHighlightTask = self.editor.application.scheduler.idleTask()
 
         #Format builders
         self.textCharFormatBuilders = {}
@@ -51,21 +51,18 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.registerTextCharFormatBuilder("#%s" % match.group(1), getattr(editor, method))
     
         #Conect signals
-        self.editor.beforeOpen.connect(self.on_editor_beforeOpen)
         self.editor.afterOpen.connect(self.on_editor_afterOpen)
 
-    def on_editor_beforeOpen(self):
-        #Replace highlight function
-        self.highlight_function = lambda x: None
-
     def on_editor_afterOpen(self):
-        self.highlight_function = self.async_highlight
-        self.currentHighlightTask = self.editor.application.scheduler.newTask(self.highlightAllDocument())
-        def on_highlightReady():
-            #Restore realitme function
-            self.highlight_function = self.realtime_highlight
-            self.highlightReady.emit()
-        self.currentHighlightTask.done.connect(on_highlightReady)
+        #Cuidado si estoy corriendo la tarea no correrla nuevamente
+        if not self.currentHighlightTask.isRunning():
+            self.highlight_function = self.async_highlight
+            self.currentHighlightTask = self.editor.application.scheduler.newTask(self.highlightAllDocument())
+            def on_highlightReady():
+                #Restore realitme function
+                self.highlight_function = self.realtime_highlight
+                self.highlightReady.emit()
+            self.currentHighlightTask.done.connect(on_highlightReady)
 
     @property
     def ready(self):
@@ -75,6 +72,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         return False
     
     def setSyntax(self, syntax):
+        if self.currentHighlightTask.isRunning():
+            self.currentHighlightTask.cancel()
         self.syntax = syntax
         if self.ready:
             self.on_editor_afterOpen()
@@ -104,7 +103,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             
             blockState = self.SINGLE_LINE if len(stack) != 1 else self.MULTI_LINE
             if blockState == self.MULTI_LINE:
-                print (copy(stack), copy(self.processor.scopes()))
                 userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
             userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
             block.setUserState(blockState)

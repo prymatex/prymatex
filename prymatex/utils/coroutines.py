@@ -218,20 +218,21 @@ class CoException( Exception ):
     def __str__( self ):
         return self.__repr__()
 
-
+    
 # Coroutine based task
 class Task( QObject ):
     # Return.value is task result, if no unhandled Exceptions occured.
     # Emmited on Exception with Exception as Return.value, if emitUnhandled set.
     # Do not emmited with exception, if emitUnhandled is False. Pass exceptions to main loop.
     done = pyqtSignal( Return )
-
+    
     # States
     NEW = 0
     RUNNING = 1
     DONE = 2
     EXCEPTION = 3
-
+    CANCELED = 4
+    
     def stateStr( self ):
         if self.state == Task.NEW:
             return 'NEW'
@@ -241,6 +242,8 @@ class Task( QObject ):
             return 'DONE'
         elif self.state == Task.EXCEPTION:
             return 'EXCEPTION'
+        elif self.state == Task.CANCELED:
+            return 'CANCELED'
         else:
             raise Exception( 'Unknown state %s' % self.state )
 
@@ -261,6 +264,8 @@ class Task( QObject ):
     def isReady(self):
         return self.state in [ Task.DONE, Task.EXCEPTION ]
 
+    def isRunning(self):
+        return self.state == Task.RUNNING
 
     # Do not pass exceptions to scheduler.
     #
@@ -291,6 +296,8 @@ class Task( QObject ):
                 if self.exception:
                     self.result = self.coroutine.throw( self.exception.orig )
                     self.exception = None
+                elif self.state == Task.CANCELED:
+                    self.coroutine.close()
                 else:
                     # save result into self to protect from gc
                     self.result = self.coroutine.send( self.sendval )
@@ -322,6 +329,9 @@ class Task( QObject ):
                                  (self.formatBacktrace(), type(self.result)) )
 
             except StopIteration:
+                if self.state == Task.CANCELED:
+                    raise
+
                 # old exceptions handled
                 self.exception = None
 
@@ -362,8 +372,19 @@ class Task( QObject ):
                 del self.coroutine
                 self.coroutine = self.stack.pop()
 
+    def cancel(self):
+        self.state = Task.CANCELED
 
-
+class IdleTask( QObject ):
+    def __init__( self, parent):
+        QObject.__init__( self, parent )
+    
+    def isReady(self):
+        return True
+    
+    def isRunning(self):
+        return False
+    
 class Scheduler( QObject ):
     longIteration = pyqtSignal( datetime.timedelta, Task )
     done = pyqtSignal()
@@ -391,6 +412,14 @@ class Scheduler( QObject ):
         self.schedule( t )
         return t
 
+    def idleTask( self, parent = None ):
+        if parent is None:
+            parent = self
+
+        t = IdleTask( parent )  
+
+        t.state = Task.NEW
+        return t
 
     def schedule( self, t ):
         self.ready.appendleft( t )
