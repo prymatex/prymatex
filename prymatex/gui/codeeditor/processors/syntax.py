@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import re
-from copy import copy
 
 from prymatex.support import processor
 from prymatex.support.syntax import PMXSyntax
@@ -15,22 +14,18 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
 
     #START
     def startParsing(self, scope):
-        self.lines = []
         self.setScopes([ scope ])
     
     #BEGIN NEW LINE
-    def beginLine(self, line, stack):
+    def beginLine(self, line):
         self.line = line
         self.lineIndex = 0
         self.scopeRanges = []       #[ ((start, end), scopeHash) ... ]
         self.lineChunks = []        #[ ((start, end), chunk) ... ]
         self.words = []             #[ ((start, end), word, group) ... ]
-        self.state = None
         
-    def endLine(self, line, stack):
+    def endLine(self, line):
         self.addToken(len(self.line) + 1)
-        if len(stack) != 1:
-            self.state = (copy(stack), copy(self.stackScopes))
 
     #OPEN
     def openTag(self, scope, position):
@@ -49,6 +44,9 @@ class PMXSyntaxProcessor(processor.PMXSyntaxProcessor):
     def setScopes(self, scopes):
         self.stackScopes = scopes
 
+    def scopes(self):
+        return self.stackScopes
+        
     def addToken(self, end):
         begin = self.lineIndex
         # Solo si tengo realmente algo que agregar

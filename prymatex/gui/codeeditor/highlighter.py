@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+from copy import copy
 
 from PyQt4 import QtGui, QtCore
 
@@ -99,20 +100,23 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 userData = PMXBlockUserData()
                 block.setUserData(userData)
             
-            blockState = self.setupBlockUserData(text, block, userData)
+            self.setupBlockUserData(text, block, userData)
+            
+            blockState = self.SINGLE_LINE if len(stack) != 1 else self.MULTI_LINE
+            if blockState == self.MULTI_LINE:
+                print (copy(stack), copy(self.processor.scopes()))
+                userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
+            userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
             block.setUserState(blockState)
+            
             self.rehighlightBlock(block)
             block = block.next()
             yield
-
+        self.processor.endParsing(self.syntax.scopeName)
+        
     def setupBlockUserData(self, text, block, userData):
-        blockState = self.SINGLE_LINE
         userData.setRanges(self.processor.scopeRanges)
         userData.setChunks(self.processor.lineChunks)
-
-        if self.processor.state is not None:
-            blockState = self.MULTI_LINE
-            userData.setProcessorState(self.processor.state)
             
         #1 Update words
         if userData.words != self.processor.words:
@@ -145,11 +149,6 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData.symbol = symbol
             self.editor.updateSymbol(block, userData, symbol)
 
-        #5 Save the hash the text, scope and state
-        userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
-
-        return blockState
-
     def highlightBlock(self, text):
         self.highlight_function(text)
 
@@ -181,9 +180,15 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
-            blockState = self.setupBlockUserData(text, self.currentBlock(), userData)
+            self.setupBlockUserData(text, self.currentBlock(), userData)
+            
+            blockState = self.SINGLE_LINE if len(stack) != 1 else self.MULTI_LINE
+            if blockState == self.MULTI_LINE:
+                userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
+            userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
             self.setCurrentBlockState(blockState)
-
+            self.processor.endParsing(self.syntax.scopeName)
+            
             self.applyFormat(userData)
 
     def registerTextCharFormatBuilder(self, formatHash, formatBuilder):
