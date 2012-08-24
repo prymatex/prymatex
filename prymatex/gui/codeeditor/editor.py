@@ -197,6 +197,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showEditorContextMenu)
 
+        self.completerTask = self.application.scheduler.idleTask()
+        
         #Cursor history
         self._cursorHistory, self._cursorHistoryIndex = [], 0
 
@@ -1096,14 +1098,14 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         self.insertBundleItem(command)
     
     def defaultCompletion(self, settings, callback):
-        if not hasattr(self, '_completerTask') or self._completerTask.isReady():
-            self._completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
+        if not self.completerTask.isRunning():
+            self.completerTask = self.application.scheduler.newTask(self.completionSuggestions(settings = settings))
             def on_completerTaskReady(callback):
                 def completerTaskReady(result):
                     callback(result.value)
                 return completerTaskReady
             #En una clausura
-            self._completerTask.done.connect(on_completerTaskReady(callback))
+            self.completerTask.done.connect(on_completerTaskReady(callback))
 
     def completionSuggestions(self, cursor = None, scope = None, settings = None):
         cursor = cursor or self.textCursor()

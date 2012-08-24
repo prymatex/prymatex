@@ -41,7 +41,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         
         #Highlight Function
         self.highlight_function = self.realtime_highlight
-        self.currentHighlightTask = self.editor.application.scheduler.idleTask()
+        self.highlightTask = self.editor.application.scheduler.idleTask()
 
         #Format builders
         self.textCharFormatBuilders = {}
@@ -55,14 +55,14 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def on_editor_afterOpen(self):
         #Cuidado si estoy corriendo la tarea no correrla nuevamente
-        if not self.currentHighlightTask.isRunning():
+        if not self.highlightTask.isRunning():
             self.highlight_function = self.async_highlight
-            self.currentHighlightTask = self.editor.application.scheduler.newTask(self.highlightAllDocument())
+            self.highlightTask = self.editor.application.scheduler.newTask(self.highlightAllDocument())
             def on_highlightReady():
                 #Restore realitme function
                 self.highlight_function = self.realtime_highlight
                 self.highlightReady.emit()
-            self.currentHighlightTask.done.connect(on_highlightReady)
+            self.highlightTask.done.connect(on_highlightReady)
 
     @property
     def ready(self):
@@ -72,8 +72,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         return False
     
     def setSyntax(self, syntax):
-        if self.currentHighlightTask.isRunning():
-            self.currentHighlightTask.cancel()
+        if self.highlightTask.isRunning():
+            self.highlightTask.cancel()
         self.syntax = syntax
         if self.ready:
             self.on_editor_afterOpen()
