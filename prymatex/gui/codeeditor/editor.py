@@ -1575,25 +1575,28 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 {'title': 'Select',
                  'items': [
                     {'title': '&Word',
-                     'shortcut': 'Ctrl+A',
-                     'callback': lambda editor: editor.select(0)
+                     'callback': lambda editor: editor.select(0),
+                     'shortcut': 'Ctrl+Meta+W',
                      },
                     {'title': '&Line',
-                     'callback': lambda editor: editor.select(1)
+                     'callback': lambda editor: editor.select(1),
+                     'shortcut': 'Ctrl+Meta+L',
                      },
                     {'title': '&Paragraph',
-                     'callback': lambda editor: editor.select(2)
+                     'callback': lambda editor: editor.select(2),
+                     'shortcut': '',
                      },
                     {'title': 'Enclosing &Brackets',
-                     'callback': lambda editor: editor.select(editor.SelectEnclosingBrackets)
+                     'callback': lambda editor: editor.select(editor.SelectEnclosingBrackets),
+                     'shortcut': 'Ctrl+Meta+B',
                      },
                     {'title': 'Current &Scope',
                      'callback': lambda editor: editor.select(editor.SelectCurrentScope),
-                     'shortcut': 'Ctrl+Meta+B',
+                     'shortcut': 'Ctrl+Meta+S',
                      },
                     {'title': '&All',
+                     'callback': lambda editor: editor.select(3),
                      'shortcut': 'Ctrl+A',
-                     'callback': lambda editor: editor.select(3)
                      }    
                 ]},
                 {'title': 'Convert',
