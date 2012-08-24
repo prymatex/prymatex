@@ -419,7 +419,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return self.scopes[scopeHash]["name"]
 
     def scope(self, cursor):
-        return self.scopeName(cursor.block().userData().scopeAtPosition(cursor.columnNumber()))
+        userData = cursor.block().userData()
+        return self.syntax().scopeName if userData is None else self.scopeName(userData.scopeAtPosition(cursor.columnNumber()))
 
     def currentPreferenceSettings(self):
         return self.preferenceSettings(self.currentScope())
@@ -769,9 +770,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         elif selection == self.SelectCurrentScope:
             block = cursor.block()
             beginPosition = block.position()
-            range = block.userData().scopeRange(cursor.columnNumber())
-            if range is not None:
-                scope, start, end = range
+            # TODO Todo lo que implique userData centrarlo en una API en la instancia de cada editor
+            (start, end), scope = block.userData().scopeRange(cursor.columnNumber())
+            if scope is not None:
                 cursor.setPosition(beginPosition + start)
                 cursor.setPosition(beginPosition + end, QtGui.QTextCursor.KeepAnchor)
         self.setTextCursor(cursor)
@@ -1587,7 +1588,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                      'callback': lambda editor: editor.select(editor.SelectEnclosingBrackets)
                      },
                     {'title': 'Current &Scope',
-                     'callback': lambda editor: editor.select(editor.SelectCurrentScope)
+                     'callback': lambda editor: editor.select(editor.SelectCurrentScope),
+                     'shortcut': 'Ctrl+Meta+B',
                      },
                     {'title': '&All',
                      'shortcut': 'Ctrl+A',

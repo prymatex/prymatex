@@ -45,7 +45,7 @@ class PMXBlockUserData(QtGui.QTextBlockUserData):
     def scopeRange(self, pos):
         ranges = self.scopeRanges()
         sr = filter(lambda ((start, end), scope): start <= pos <= end, self.ranges)
-        return sr[0] if len(sr) >= 1 else None
+        return sr[0] if len(sr) >= 1 else ((0, 0), None)
     
     def scopeRanges(self, start = None, end = None):
         ranges = self.ranges[:]

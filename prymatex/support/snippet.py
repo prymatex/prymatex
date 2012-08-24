@@ -614,7 +614,7 @@ class PMXSnippetSyntaxProcessor(PMXSyntaxProcessor):
                 self.taborder[self.node.index] = self.node.taborder(container)
         self.index = end
 
-    def beginLine(self, line, stack):
+    def beginLine(self, line):
         if self.current != None:
             if self.index != len(self.current):
                 self.node.append(self.current[self.index:len(self.current)])
