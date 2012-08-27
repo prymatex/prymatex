@@ -224,6 +224,9 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         self.comboBoxOutput.addItem("Open as New Document", "openAsNewDocument")
         self.comboBoxOutput.currentIndexChanged[int].connect(self.on_comboBoxOutput_changed)
         
+        self.labelInputOption.setVisible(False)
+        self.comboBoxFallbackInput.setVisible(False)
+        
         self.command.setTabStopWidth(TABWIDTH)
         self.menuCommandTemplates = QtGui.QMenu()
         
@@ -308,6 +311,7 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         if command is None:
             command = self.DEFAULTS['command']
         self.command.setPlainText(command)
+        
         #BeforeRunningCommand
         beforeRunningCommand = bundleItem.beforeRunningCommand
         if beforeRunningCommand is None:
@@ -315,13 +319,15 @@ print "Selection:",  os.environ("TM_SELECTED_TEXT")'''
         index = self.comboBoxBeforeRunning.findData(beforeRunningCommand)
         if index != -1:
             self.comboBoxBeforeRunning.setCurrentIndex(index)
+
         #Input
-        input = bundleItem.input
-        if input is None:
-            input = self.changes['input'] = self.DEFAULTS['input']
-        index = self.comboBoxInput.findData(input)
+        commandInput = bundleItem.input
+        if commandInput is None:
+            commandInput = self.changes['input'] = self.DEFAULTS['input']
+        index = self.comboBoxInput.findData(commandInput)
         if index != -1:
             self.comboBoxInput.setCurrentIndex(index)
+
         #Output
         output = bundleItem.output
         if output is None:
