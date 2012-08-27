@@ -54,7 +54,13 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         templateModel = self.comboTemplates.model()
         template = templateModel.node(templateModel.createIndex(self.comboTemplates.currentIndex(), 0))
         if template is not None:
+            
+            #Build environment for template
             environment = template.buildEnvironment(fileDirectory = self.lineLocation.text(), fileName = self.lineFileName.text())
+            for var in self.userEnvironment:
+                if var['enabled']:
+                    environment[var['variable']] = var['value']
+
             self.fileCreated = template.execute(environment)
             self.accept()
         else:
@@ -80,6 +86,7 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
         location = self.lineLocation.text()
         templateModel = self.comboTemplates.model()
         template = templateModel.node(templateModel.createIndex(self.comboTemplates.currentIndex(), 0))
+        
         tEnv = template.buildEnvironment(fileName = name, fileDirectory = location, localVars = True)
         self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
              

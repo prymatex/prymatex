@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+import os, sys
 
 from PyQt4 import QtGui, QtCore
 
@@ -128,7 +128,7 @@ def getImage(index):
     path = getImagePath(index)
     if path is not None:
         return QtGui.QPixmap(path)
-        
+
 #http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
 @memoized
 def getIcon(index):
@@ -168,4 +168,11 @@ class ResourceProvider(dict):
         if index in self:
             return QtGui.QIcon(self[index])
         return getIcon(index)
-    
+
+def addIconThemePath():
+    iconThemes = os.path.abspath(__file__ + "\..\..\..\icons")
+    QtGui.QIcon.setThemeSearchPaths([ iconThemes ])
+    QtGui.QIcon.setThemeName('oxygen')
+
+if sys.platform == "win32":
+    addIconThemePath()

@@ -123,7 +123,13 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
         if index.isValid():
             template = self.projectProxyModel.node(index)
+
+            #Build environment for template
             environment = template.buildEnvironment(projectName = name, projectLocation = location)
+            for var in self.userEnvironment:
+                if var['enabled']:
+                    environment[var['variable']] = var['value']
+
             template.execute(environment, self.afterRunTemplate)
     
     @classmethod
