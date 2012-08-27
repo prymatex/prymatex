@@ -2,10 +2,18 @@
 <ui version="4.0">
  <class>ResouceWidget</class>
  <widget class="QWidget" name="ResouceWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>314</width>
+    <height>221</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Resource</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="_2">
    <property name="spacing">
     <number>2</number>
    </property>
@@ -14,6 +22,9 @@
    </property>
    <item>
     <layout class="QFormLayout" name="formLayout">
+     <property name="labelAlignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
      <property name="horizontalSpacing">
       <number>2</number>
      </property>

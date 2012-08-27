@@ -104,7 +104,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
     def runCreateProject(self, name, location):
         self.projectCreated = self.application.projectManager.createProject(name, location)
 
-        #Set template's bundle for project        
+        #Set template's bundle for project
         if self.checkBoxUseTemplate.isChecked():
             index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
             template = self.projectProxyModel.node(index)
