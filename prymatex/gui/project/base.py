@@ -154,8 +154,9 @@ class PMXProject(FileSystemTreeNode):
                 if var['enabled']:
                     env[var['variable']] = var['value']
         env.update(self.environment)
-        env['TM_SELECTED_FILES'] = ""
-        env['TM_SELECTED_FILE'] = ""
+        # TODO Tomar estos valores del docker o ver como hacer para que los obtenga
+        # env['TM_SELECTED_FILES'] = ""
+        # env['TM_SELECTED_FILE'] = ""
         return env
 
     @classmethod

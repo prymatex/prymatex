@@ -12,6 +12,7 @@ from prymatex.ui.support.bundle import Ui_Menu
 from prymatex.ui.support.templatefile import Ui_TemplateFile
 from prymatex.ui.support.preference import Ui_Preference
 from prymatex.ui.support.macro import Ui_Macro
+from prymatex.ui.support.project import Ui_Project
 from prymatex.gui.support.models import PMXMenuTreeModel, PMXExcludedListModel
 from pprint import pformat
 import ast
@@ -623,7 +624,7 @@ class PMXBundleWidget(PMXEditorBaseWidget, Ui_Menu):
         super(PMXBundleWidget, self).edit(bundle)
         self.treeMenuModel.setBundle(bundle)
 
-class PMXProjectWidget(PMXEditorBaseWidget, Ui_Template):
+class PMXProjectWidget(PMXEditorBaseWidget, Ui_Project):
     TYPE = 'project'
     DEFAULTS = {
                 'command': '''if [[ ! -f "$TM_NEW_PROJECT_LOCATION" ]]; then
@@ -635,7 +636,6 @@ fi"'''}
     def __init__(self, parent = None):
         PMXEditorBaseWidget.__init__(self, parent)
         self.setupUi(self)
-        self.comboBoxOutput.addItem("Insert as Text", "insertText")
         self.command.setTabStopWidth(TABWIDTH)
 
     @QtCore.pyqtSlot()
@@ -646,13 +646,6 @@ fi"'''}
         else:
             self.changes.pop('command', None)
     
-    @QtCore.pyqtSlot(str)
-    def on_lineEditExtension_textEdited(self, text):
-        if text != self.bundleItem.extension:
-            self.changes['extension'] = text
-        else:
-            self.changes.pop('extension', None)
-            
     @property
     def title(self):
         if self.bundleItem != None:

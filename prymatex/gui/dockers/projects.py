@@ -117,6 +117,16 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
         self.treeViewProjects.setAlternatingRowColors(True)
         self.treeViewProjects.setAnimated(True)
+        
+        # Selection Mode
+        self.treeViewProjects.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.treeViewProjects.selectionModel().selectionChanged.connect(self.on_treeViewProjects_selectionChanged)
+    
+    def on_treeViewProjects_selectionChanged(self, selected, deselected):
+        indexes = selected.indexes()
+        for index in indexes:
+            node = self.projectTreeProxyModel.node(indexes[0])
+            print node.path
 
     #================================================
     # Build Menus
