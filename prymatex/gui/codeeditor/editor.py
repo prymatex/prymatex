@@ -44,6 +44,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     SORTED_GROUPS = [   "keyword", "entity", "meta", "variable", "markup", 
                         "support", "storage", "constant", "string", "comment", "invalid" ]
 
+    # Aca vamos a guardar los scopes de los editores, quiza esto pueda ser un objeto factory,
+    # por ahora la fabricacion la hace el editor en el factory method flyweightScopeFactory
+    SCOPES = {}
+        
     #=======================================================================
     # Signals
     #=======================================================================
@@ -186,9 +190,6 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         #Current braces for cursor position (leftBrace * rightBrace, oppositeLeftBrace, oppositeRightBrace) 
         # * the cursor is allways here>
         self._currentBraces = (None, None, None, None)
-        
-        #Aca vamos a guardar los scopes del documento, quiza esto pueda ser un objeto factory, por ahora el factory es el editor
-        self.scopes = {}
         
         #Block Count
         self.lastBlockCount = self.document().blockCount()
@@ -385,18 +386,19 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     # Scopes
     #=======================================================================
-    def flyweightScopeFactory(self, scopeStack):
+    @classmethod
+    def flyweightScopeFactory(cls, scopeStack):
         scopeName = " ".join(scopeStack)
         scopeHash = hash(scopeName)
-        if scopeHash not in self.scopes:
-            scopeData = self.scopes.setdefault(scopeHash, {
+        if scopeHash not in cls.SCOPES:
+            scopeData = cls.SCOPES.setdefault(scopeHash, {
                 "name": scopeName,
-                "settings": self.application.supportManager.getPreferenceSettings(scopeName),
+                "settings": cls.application.supportManager.getPreferenceSettings(scopeName),
                 "group": PMXSyntax.findGroup(scopeStack[::-1])
             })
             return scopeHash, scopeData["group"]
         else:
-            return scopeHash, self.scopes[scopeHash]["group"]
+            return scopeHash, cls.SCOPES[scopeHash]["group"]
     
     #=======================================================================
     # Obteniendo datos del editor
@@ -406,8 +408,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
 
     def preferenceSettings(self, scopeOrHash):
         scopeHash = scopeOrHash if isinstance(scopeOrHash, int) else hash(scopeOrHash)
-        if scopeHash in self.scopes:
-            return self.scopes[scopeHash]["settings"]
+        if scopeHash in self.SCOPES:
+            return self.SCOPES[scopeHash]["settings"]
     
     def wordUnderCursor(self):
         """ Esto 'no' es lo mismo que currentWord """
@@ -416,7 +418,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
 
     def scopeName(self, scopeHash):
-        return self.scopes[scopeHash]["name"]
+        return self.SCOPES[scopeHash]["name"]
 
     def scope(self, cursor):
         userData = cursor.block().userData()
@@ -532,6 +534,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def setSyntax(self, syntax):
         if self.syntaxHighlighter.syntax != syntax:
             self.syntaxHighlighter.setSyntax(syntax)
+            self.flyweightScopeFactory(syntax.scopeName)
             self.syntaxChanged.emit(syntax)
 
     # Move text
@@ -622,7 +625,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #=======================================================================
     def setBraces(self, scope):
         settings = self.preferenceSettings(scope)
-        self.braces = settings.smartTypingPairs[:]
+        self.braces = settings.smartTypingPairs
         #self.braces = filter(lambda pair: pair[0] != pair[1], settings.smartTypingPairs)
         
     def setCurrentBraces(self, cursor = None):

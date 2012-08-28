@@ -81,7 +81,6 @@ class PMXProjectManager(QtCore.QObject):
         if paths:
             env['TM_SELECTED_FILE'] = paths[0]
             env['TM_SELECTED_FILES'] = " ".join(["'%s'" % path for path in paths])
-        print env
         return env
         
     #---------------------------------------------------
