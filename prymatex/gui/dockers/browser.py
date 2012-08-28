@@ -119,7 +119,7 @@ class TextMate(QtCore.QObject):
     def _system(self, command):
         if self.bundleItem != None:
             command, environment, tempFile = prepareShellScript(unicode(command), self.bundleItem.buildEnvironment())
-            process = Popen(command, stdout=PIPE, stdin=PIPE, stderr=STDOUT, env = environment)
+            process = Popen(command, stdout = PIPE, stdin = PIPE, stderr = STDOUT, env = environment)
             self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, command))
             deleteFile(tempFile)
 
