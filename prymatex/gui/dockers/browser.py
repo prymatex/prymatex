@@ -209,6 +209,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
+        #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
         mainWindow.browser = self
         
     def showEvent(self, event):

@@ -148,15 +148,12 @@ class PMXProject(FileSystemTreeNode):
                 pass
     
     def buildEnvironment(self):
-        env = {}
+        env = self.manager.buildEnvironment()
         if isinstance(self.shellVariables, list):
             for var in self.shellVariables:
                 if var['enabled']:
                     env[var['variable']] = var['value']
         env.update(self.environment)
-        # TODO Tomar estos valores del docker o ver como hacer para que los obtenga
-        # env['TM_SELECTED_FILES'] = ""
-        # env['TM_SELECTED_FILE'] = ""
         return env
 
     @classmethod

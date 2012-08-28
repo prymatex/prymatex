@@ -120,13 +120,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
         # Selection Mode
         self.treeViewProjects.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.treeViewProjects.selectionModel().selectionChanged.connect(self.on_treeViewProjects_selectionChanged)
     
-    def on_treeViewProjects_selectionChanged(self, selected, deselected):
-        indexes = selected.indexes()
-        for index in indexes:
-            node = self.projectTreeProxyModel.node(indexes[0])
-            print node.path
+    def selectedPaths(self):
+        self.treeViewProjects.selectedIndexes()
+        indexes = self.treeViewProjects.selectedIndexes()
+        return map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
 
     #================================================
     # Build Menus

@@ -72,7 +72,18 @@ class PMXProjectManager(QtCore.QObject):
     def removeFromKnowProjects(self, project):
         self.knownProjects.remove(project.path)
         self.settings.setValue('knownProjects', self.knownProjects)
-
+    
+    def buildEnvironment(self):
+        env = {}
+        # TODO Hacer las cosas bien, obtener el project Docker de una forma mejor
+        docker = self.application.mainWindow.projects
+        paths = docker.selectedPaths()
+        if paths:
+            env['TM_SELECTED_FILE'] = paths[0]
+            env['TM_SELECTED_FILES'] = " ".join(["'%s'" % path for path in paths])
+        print env
+        return env
+        
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------

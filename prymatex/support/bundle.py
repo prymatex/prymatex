@@ -153,6 +153,7 @@ class PMXBundle(PMXManagedObject):
             pass
             
     def buildEnvironment(self):
+        # TODO Aca no tiene porque ser un copy el manager tiene que manejar esta situacion, viola la encapsulacion
         env = copy(self.manager.buildEnvironment())
         env['TM_BUNDLE_PATH'] = self.currentPath
         if self.support != None:

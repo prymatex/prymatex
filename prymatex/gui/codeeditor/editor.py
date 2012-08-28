@@ -410,7 +410,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             return self.scopes[scopeHash]["settings"]
     
     def wordUnderCursor(self):
-        """ Esto no es lo mismo que curre"""
+        """ Esto 'no' es lo mismo que currentWord """
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         return cursor.selectedText(), cursor.selectionStart(), cursor.selectionEnd()
