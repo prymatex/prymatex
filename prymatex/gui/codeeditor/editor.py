@@ -62,11 +62,11 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     afterOpen = QtCore.pyqtSignal()
     afterSave = QtCore.pyqtSignal()
     afterClose = QtCore.pyqtSignal()
-    afterReloa = QtCore.pyqtSignal()
+    afterReload = QtCore.pyqtSignal()
     beforeOpen = QtCore.pyqtSignal()
     beforeSave = QtCore.pyqtSignal()
     beforeClose = QtCore.pyqtSignal()
-    beforeReloa = QtCore.pyqtSignal()
+    beforeReload = QtCore.pyqtSignal()
 
     #================================================================
     # Regular expresions
@@ -331,7 +331,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     def reload(self):
         self.beforeReload.emit()
         PMXBaseEditor.reload(self)
-        self.afterReloa.emit()
+        self.afterReload.emit()
 
     def saveState(self):
         """Returns a Python dictionary containing the state of the editor."""
