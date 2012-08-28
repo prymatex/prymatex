@@ -11,12 +11,16 @@ class EditorMessageOverlay(PMXMessageOverlay):
     def initialize(self, editor):
         PMXMessageOverlay.initialize(self, editor)
         editor.themeChanged.connect(self.on_editor_themeChanged)
+        #Save editor
+        self.editor = editor
+        #Reparent to the mainWindow
+        self.setParent(editor.mainWindow)
     
     def on_editor_themeChanged(self):
         # Update Message Colors
-        self.setMessageTextColor( self.parent().colours['background'])
-        self.setMessageBackgroundColor( self.parent().colours['foreground'] )
-        self.setMessageBorderColor(self.parent().colours['selection'])
+        self.setMessageTextColor( self.editor.colours['background'])
+        self.setMessageBackgroundColor( self.editor.colours['foreground'] )
+        self.setMessageBorderColor( self.editor.colours['selection'])
 
 class MiniMapOverlay(QtGui.QPlainTextEdit, PMXBaseOverlay):
 
