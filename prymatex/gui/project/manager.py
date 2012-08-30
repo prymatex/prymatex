@@ -86,7 +86,7 @@ class PMXProjectManager(QtCore.QObject):
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------
-    def createProject(self, name, directory, reuseDirectory = True):
+    def createProject(self, name, directory, description = None, reuseDirectory = True):
         """
         Crea un proyecto nuevo lo agrega en los existentes y lo retorna,
         """
@@ -95,7 +95,7 @@ class PMXProjectManager(QtCore.QObject):
             os.makedirs(directory)
         elif not reuseDirectory:
             raise Exception()
-        project = PMXProject(directory, { "name": name })
+        project = PMXProject(directory, { "name": name, "description": description })
         try:
             project.save()
         except ProjectExistsException:
