@@ -171,11 +171,12 @@ class PMXSupportBaseManager(object):
         
         callback(context)
 
-    def buildAdHocCommand(self, commandScript, bundle, commandInput = "none", commandOutput = "insertText"):
+    def buildAdHocCommand(self, commandScript, bundle, name = None, commandInput = "none", commandOutput = "insertText"):
         commandHash = {    'command': commandScript, 
-                              'name': "Ad-Hoc command %s" % commandScript,
                              'input': commandInput,
                             'output': commandOutput }
+        commandHash['name'] = name if name is not None else "Ad-Hoc command %s" % commandScript,
+        
         command = PMXCommand(self.uuidgen(), dataHash = commandHash)
         command.setBundle(bundle)
         command.setManager(self)

@@ -281,6 +281,9 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
         else:
             process.start(context.shellCommand, QtCore.QIODevice.ReadOnly)
 
+    def buildAdHocCommand(self, *largs, **kwargs):
+        return PMXBundleTreeNode(PMXSupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))
+
     #---------------------------------------------------
     # MANAGED OBJECTS OVERRIDE INTERFACE
     #---------------------------------------------------
