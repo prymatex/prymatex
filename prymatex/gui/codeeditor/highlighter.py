@@ -101,7 +101,7 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             
             self.setupBlockUserData(text, block, userData)
             
-            blockState = self.SINGLE_LINE if len(stack) != 1 else self.MULTI_LINE
+            blockState = self.SINGLE_LINE if len(stack) == 1 else self.MULTI_LINE
             if blockState == self.MULTI_LINE:
                 userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
             userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
@@ -173,20 +173,20 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     
             # A parserar mi amor, vamos a parsear mi amor
             self.syntax.parseLine(stack, text, self.processor)
-            
+            self.processor.endParsing(self.syntax.scopeName)
+                        
             if userData is None:
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
             self.setupBlockUserData(text, self.currentBlock(), userData)
             
-            blockState = self.SINGLE_LINE if len(stack) != 1 else self.MULTI_LINE
+            blockState = self.SINGLE_LINE if len(stack) == 1 else self.MULTI_LINE
             if blockState == self.MULTI_LINE:
                 userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
             userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
-            self.setCurrentBlockState(blockState)
-            self.processor.endParsing(self.syntax.scopeName)
             
+            self.setCurrentBlockState(blockState)
             self.applyFormat(userData)
 
     def registerTextCharFormatBuilder(self, formatHash, formatBuilder):
