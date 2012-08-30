@@ -6,16 +6,17 @@ from string import Template
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.core import exceptions
+from prymatex.core.settings import pmxConfigPorperty
 from prymatex.ui.mainwindow import Ui_MainWindow
 from prymatex.gui.actions import MainWindowActions
-from prymatex.core.settings import pmxConfigPorperty
-from prymatex.core import exceptions
-from prymatex.utils.i18n import ugettext as _
 from prymatex.gui import utils, dialogs
 from prymatex.gui.utils import textToObjectName, extendQMenu
 from prymatex.gui.statusbar import PMXStatusBar
+from prymatex.gui.processors import MainWindowCommandProcessor
 from prymatex.widgets.docker import DockWidgetTitleBar
 from prymatex.widgets.toolbar import DockWidgetToolBar
+from prymatex.utils.i18n import ugettext as _
 
 class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     """Prymatex main window"""
@@ -74,17 +75,28 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
-    
-    def insertBundleItem(self, item):
+        self.commandProcessor = MainWindowCommandProcessor(self)
+
+    #==========================================================================
+    # Bundle Items
+    #==========================================================================
+    def insertBundleItem(self, bundleItem, **processorSettings):
         '''Insert selected bundle item in current editor if possible'''
-        #TODO Correr los items que se puedan correr sin current editor
         editor = self.currentEditor()
-        if editor:
-            self.currentEditor().insertBundleItem(item)
+        if editor is not None:
+            self.currentEditor().insertBundleItem(bundleItem)
+        elif not bundleItem.isEditorNeeded():
+            print "vamos con nuestro processor"
+            self.commandProcessor.configure(processorSettings)
+            bundleItem.execute(self.commandProcessor)
         else:
             QtGui.QMessageBox.information(self, _("No editor open"), 
-                                          _("%s needs an editor to run") % item.name)
-            
+                                          _("%s needs an editor to run") % bundleItem.name)
+
+    def buildEnvironment(self, env = {}):
+        env.update({})
+        return env
+
     @classmethod
     def contributeToSettings(cls):
         from prymatex.gui.settings.general import PMXGeneralWidget

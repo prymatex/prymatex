@@ -5,8 +5,6 @@ from PyQt4 import QtGui, QtCore
 
 from prymatex.gui import utils
 from prymatex.support.processor import PMXCommandProcessor
-from prymatex.support.snippet import PMXSnippet
-from prymatex.support.command import PMXCommand
 
 #Este es un processor de commands para la Main Window
 class MainWindowCommandProcessor(PMXCommandProcessor):
@@ -53,7 +51,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
             raise Exception(context.errorValue)
         from prymatex.support.utils import makeHyperlinks
         from prymatex.utils import html
-        command = '''
+        commandScript = '''
             source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
             
             html_header "An error has occurred while executing command %(name)s"
@@ -63,13 +61,9 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         ''' % {'output': html.escape(context.errorValue),
                'name': html.escape(context.description()),
                'exitcode': context.outputType}
-        commandHash = { 'command': command, 
-                           'name': "Error runing %s" % context.description(),
-                          'input': 'none',
-                         'output': 'showAsHTML' }
-        command = PMXCommand(self.mainWindow.application.supportManager.uuidgen(), dataHash = commandHash)
-        command.setBundle(context.bundleItem.bundle)
-        command.setManager(context.bundleItem.manager)
+        command = self.mainWindow.application.supportManager.buildAdHocCommand(commandScript, context.bundleItem.bundle,
+            name = "Error runing %s" % context.description(),
+            commandOutput = 'showAsHTML')
         self.mainWindow.insertBundleItem(command, errorCommand = True)
         
     def showAsHTML(self, context):
