@@ -181,7 +181,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         
     def extendProjectBundleItemMenu(self, menu, node):
         #Menu de los bundles relacionados al proyecto
+        #Try get all bundles for project bundle definition
         bundles = map(lambda uuid: self.application.supportManager.getManagedObject(uuid), node.project.bundleMenu or [])
+        #Filter None bundles
+        bundles = filter(lambda bundle: bundle is not None, bundles)
+        #Sort by name
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
             bundleMenues = [ "--bundles" ] + map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)

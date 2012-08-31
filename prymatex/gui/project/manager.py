@@ -33,6 +33,8 @@ class PMXProjectManager(QtCore.QObject):
     def __init__(self, application):
         QtCore.QObject.__init__(self)
         self.fileManager = application.fileManager
+        self.supportManager = application.supportManager
+        
         self.projectTreeModel = PMXProjectTreeModel(self)
         
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
@@ -41,6 +43,9 @@ class PMXProjectManager(QtCore.QObject):
         self.projectMenuProxyModel = ProjectMenuProxyModel(self)
         self.projectMenuProxyModel.setSourceModel(self.application.supportManager.bundleProxyModel)
     
+        self.supportManager.bundleAdded.connect(self.on_supportManager_bundleAdded)
+        self.supportManager.bundleRemoved.connect(self.on_supportManager_bundleRemoved)
+
     @classmethod
     def contributeToSettings(cls):
         return []
@@ -53,6 +58,16 @@ class PMXProjectManager(QtCore.QObject):
             validPath.append(char)
         return ''.join(validPath)
 
+    def on_supportManager_bundleAdded(self, bundle):
+        for project in self.getAllProjects():
+            if project.namespace is not None and bundle.hasNamespace(project.namespace) and not project.hasBundleMenu(bundle):
+                self.addProjectBundleMenu(project, bundle)
+
+    def on_supportManager_bundleRemoved(self, bundle):
+        for project in self.getAllProjects():
+            if project.namespace is not None and bundle.hasNamespace(project.namespace) and project.hasBundleMenu(bundle):
+                self.removeProjectBundleMenu(project, bundle)
+                
     def loadProjects(self):
         for path in self.knownProjects[:]:
             try:

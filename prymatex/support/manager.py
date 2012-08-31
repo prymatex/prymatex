@@ -175,12 +175,21 @@ class PMXSupportBaseManager(object):
         commandHash = {    'command': commandScript, 
                              'input': commandInput,
                             'output': commandOutput }
-        commandHash['name'] = name if name is not None else "Ad-Hoc command %s" % commandScript,
+        commandHash['name'] = name if name is not None else "Ad-Hoc command %s" % commandScript
         
         command = PMXCommand(self.uuidgen(), dataHash = commandHash)
         command.setBundle(bundle)
         command.setManager(self)
         return command
+    
+    def buildAdHocSnippet(self, snippetContent, bundle, name = None):
+        snippetHash = {    'content': context.outputValue }
+        
+        snippetHash['name'] = name if name is not None else "Ad-Hoc snippet"
+        snippet = PMXSnippet(self.uuidgen(), dataHash = snippetHash)
+        snippet.setBundle(bundle)
+        snippet.setManager(self)
+        return snippet
 
     #---------------------------------------------------
     # Message Handler

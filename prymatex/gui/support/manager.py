@@ -284,6 +284,9 @@ class PMXSupportManager(QtCore.QObject, PMXSupportBaseManager):
     def buildAdHocCommand(self, *largs, **kwargs):
         return PMXBundleTreeNode(PMXSupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))
 
+    def buildAdHocSnippet(self, *largs, **kwargs):
+        return PMXBundleTreeNode(PMXSupportBaseManager.buildAdHocSnippet(self, *largs, **kwargs))
+
     #---------------------------------------------------
     # MANAGED OBJECTS OVERRIDE INTERFACE
     #---------------------------------------------------

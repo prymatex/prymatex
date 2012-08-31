@@ -190,13 +190,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
         cursor.insertText(context.outputValue)
         
     def insertAsSnippet(self, context):
-        snippetHash = {    'content': context.outputValue, 
-                       'name': context.bundleItem.name,
-                 'tabTrigger': context.bundleItem.tabTrigger,
-              'keyEquivalent': context.bundleItem.keyEquivalent }
-        snippet = PMXSnippet(self.editor.application.supportManager.uuidgen(), dataHash = snippetHash)
-        snippet.setBundle(context.bundleItem.bundle)
-        snippet.setManager(context.bundleItem.manager)
+        snippet = self.editor.application.supportManager.buildAdHocSnippet(context.outputValue, context.bundleItem.bundle)
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, context):
