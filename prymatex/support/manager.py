@@ -182,9 +182,9 @@ class PMXSupportBaseManager(object):
         command.setManager(self)
         return command
     
-    def buildAdHocSnippet(self, snippetContent, bundle, name = None):
-        snippetHash = {    'content': context.outputValue }
-        
+    def buildAdHocSnippet(self, snippetContent, bundle, name = None, tabTrigger = None):
+        snippetHash = {    'content': snippetContent,
+                           'tabTrigger': tabTrigger  }
         snippetHash['name'] = name if name is not None else "Ad-Hoc snippet"
         snippet = PMXSnippet(self.uuidgen(), dataHash = snippetHash)
         snippet.setBundle(bundle)
@@ -410,8 +410,8 @@ class PMXSupportBaseManager(object):
             return test_scope
 
         if 'scope' in attrs and bundleItem.scope != attrs['scope']:
-            remove_memoized_argument(bundleItem.scope, condition = test_scope_item(bundleItem.TYPE))
-            remove_memoized_argument(attrs['scope'], condition = test_scope_item(bundleItem.TYPE))
+            remove_memoized_argument(bundleItem.scope, condition = test_scope_bundleItem(bundleItem.TYPE))
+            remove_memoized_argument(attrs['scope'], condition = test_scope_bundleItem(bundleItem.TYPE))
         
     #---------------------------------------------------
     # MANAGED OBJECTS INTERFACE
