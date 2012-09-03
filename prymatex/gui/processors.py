@@ -13,7 +13,8 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         self.mainWindow = mainWindow
 
     def environment(self, command):
-        environment = self.mainWindow.buildEnvironment(command.buildEnvironment())
+        environment = command.buildEnvironment()
+        environment.update(self.mainWindow.buildEnvironment())
         environment.update(self.baseEnvironment)
         return environment
 

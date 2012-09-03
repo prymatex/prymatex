@@ -93,8 +93,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             QtGui.QMessageBox.information(self, _("No editor open"), 
                                           _("%s needs an editor to run") % bundleItem.name)
 
-    def buildEnvironment(self, env = {}):
-        env.update({})
+    def buildEnvironment(self):
+        env = {}
+        for docker in self.dockers:
+            print docker
+            env.update(docker.buildEnvironment())
         return env
 
     @classmethod

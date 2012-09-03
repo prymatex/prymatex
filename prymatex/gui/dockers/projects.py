@@ -63,7 +63,16 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         map(lambda index: index.isValid() and self.treeViewProjects.setExpanded(index, True), 
             map(lambda path: self.projectTreeProxyModel.indexForPath(path), state["expanded"]))
 
+    def buildEnvironemnt(self):
+        paths = docker.selectedPaths()
+        if paths:
+            return { 
+                'TM_SELECTED_FILE': paths[0], 
+                'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths])
+            }
+
     def keyPressEvent(self, event):
+        # TODO Terminar esto que es una prueba, ver de meterle teclas o algo
         return QtGui.QDockWidget.keyPressEvent(self, event) 
         
     def setupPropertiesDialog(self):

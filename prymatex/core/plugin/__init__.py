@@ -5,6 +5,8 @@ import sys
 
 from PyQt4 import QtCore, QtGui
 
+#TODO: Refactor del paquete plugin, por un nombre mas de base
+
 class PMXBaseComponent(object):
     def initialize(self):
         raise NotImplemented
@@ -20,6 +22,9 @@ class PMXBaseComponent(object):
     def contributeToMainMenu(cls):
         return {}
 
+    def buildEnvironment(self):
+        return {}
+    
 class PMXBaseWidgetComponent(PMXBaseComponent):
     KEY_HELPERS = {}
     def __init__(self):
@@ -80,7 +85,7 @@ class PMXBaseWidgetComponent(PMXBaseComponent):
     def restoreState(self, state):
         """Restore the state from the given state (returned by a previous call to saveState())."""
         pass
-
+    
 class PMXBaseOverlay(object):
     def initialize(self, widget):
         pass

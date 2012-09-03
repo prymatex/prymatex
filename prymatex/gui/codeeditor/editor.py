@@ -1006,7 +1006,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         command = self.application.supportManager.buildAdHocCommand(commandScript, self.getSyntax().bundle, commandInput, commandOutput)
         self.insertBundleItem(command)
     
-    def buildEnvironment(self, env = {}):
+    def buildEnvironment(self):
         """ http://manual.macromates.com/en/environment_variables.html """
         cursor = self.textCursor()
         block = cursor.block()
@@ -1014,8 +1014,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         scope = self.currentScope()
         preferences = self.preferenceSettings(scope)
         current_word, start, end = self.currentWord()
-        #Combine base env from params and editor env
-        env.update({
+        env = {
                 'TM_CURRENT_LINE': line,
                 'TM_LINE_INDEX': cursor.columnNumber(), 
                 'TM_LINE_NUMBER': block.blockNumber() + 1,
@@ -1025,7 +1024,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 'TM_SOFT_TABS': self.tabStopSoft and unicode('YES') or unicode('NO'),
                 'TM_TAB_SIZE': self.tabStopSize,
                 'TM_NESTEDLEVEL': self.folding.getNestedLevel(block)
-        })
+        }
 
         if current_word:
             self.logger.debug("Add current word to environment")

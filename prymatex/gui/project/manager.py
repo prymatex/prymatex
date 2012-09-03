@@ -6,6 +6,7 @@ import fnmatch
 
 from PyQt4 import QtCore, QtGui
 
+from prymatex.core.plugin import PMXBaseComponent
 from prymatex.core import exceptions
 from prymatex.core.settings import USER_HOME_PATH, pmxConfigPorperty
 from prymatex.gui.project.models import PMXProjectTreeModel
@@ -14,7 +15,7 @@ from prymatex.gui.project.base import PMXProject
 from prymatex.core.exceptions import ProjectExistsException, FileException
 from prymatex.utils.i18n import ugettext as _
 
-class PMXProjectManager(QtCore.QObject):
+class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
     #Signals
     projectAdded = QtCore.pyqtSignal(object)
     projectRemoved = QtCore.pyqtSignal(object)
@@ -89,14 +90,7 @@ class PMXProjectManager(QtCore.QObject):
         self.settings.setValue('knownProjects', self.knownProjects)
     
     def buildEnvironment(self):
-        env = {}
-        # TODO Hacer las cosas bien, obtener el project Docker de una forma mejor
-        docker = self.application.mainWindow.projects
-        paths = docker.selectedPaths()
-        if paths:
-            env['TM_SELECTED_FILE'] = paths[0]
-            env['TM_SELECTED_FILES'] = " ".join(["'%s'" % path for path in paths])
-        return env
+        return {}
         
     #---------------------------------------------------
     # PROJECT CRUD
