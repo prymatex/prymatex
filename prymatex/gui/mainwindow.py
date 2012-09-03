@@ -86,7 +86,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         if editor is not None:
             self.currentEditor().insertBundleItem(bundleItem)
         elif not bundleItem.isEditorNeeded():
-            print "vamos con nuestro processor"
             self.commandProcessor.configure(processorSettings)
             bundleItem.execute(self.commandProcessor)
         else:
@@ -96,7 +95,6 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     def buildEnvironment(self):
         env = {}
         for docker in self.dockers:
-            print docker
             env.update(docker.buildEnvironment())
         return env
 

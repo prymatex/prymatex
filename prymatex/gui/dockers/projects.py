@@ -63,12 +63,14 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         map(lambda index: index.isValid() and self.treeViewProjects.setExpanded(index, True), 
             map(lambda path: self.projectTreeProxyModel.indexForPath(path), state["expanded"]))
 
-    def buildEnvironemnt(self):
-        paths = docker.selectedPaths()
-        if paths:
+    def buildEnvironment(self):
+        indexes = self.treeViewProjects.selectedIndexes()
+        if indexes:
+            path = self.currentPath()
+            paths = map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
             return { 
-                'TM_SELECTED_FILE': paths[0], 
-                'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths])
+                'TM_SELECTED_FILE': path, 
+                'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
             }
 
     def keyPressEvent(self, event):
@@ -130,11 +132,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         # Selection Mode
         self.treeViewProjects.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
     
-    def selectedPaths(self):
-        self.treeViewProjects.selectedIndexes()
-        indexes = self.treeViewProjects.selectedIndexes()
-        return map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
-
     #================================================
     # Build Menus
     #================================================

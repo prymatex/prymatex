@@ -16,6 +16,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         environment = command.buildEnvironment()
         environment.update(self.mainWindow.buildEnvironment())
         environment.update(self.baseEnvironment)
+        print environment
         return environment
 
     def configure(self, settings):
