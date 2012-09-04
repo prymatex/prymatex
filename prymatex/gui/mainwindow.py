@@ -75,7 +75,10 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         
         self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
+        
+        #Processor de comandos local a la main window
         self.commandProcessor = MainWindowCommandProcessor(self)
+        self.__forseLocalCommandProcessor = False
 
     #==========================================================================
     # Bundle Items
@@ -97,6 +100,14 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         for docker in self.dockers:
             env.update(docker.buildEnvironment())
         return env
+
+    # TODO: Esto el forse es muy feo y tiene patas cortas
+    def forseLocalCommandProcessor(self, forse):
+        self.__forseLocalCommandProcessor = forse
+        if self.__forseLocalCommandProcessor:
+            self.application.supportManager.setEditorAvailable(not forse)
+        else:
+            self.application.supportManager.setEditorAvailable(self.currentEditor() is not None)
 
     @classmethod
     def contributeToSettings(cls):
@@ -271,7 +282,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.updateMenuForEditor(editor)        
         
         #Avisar al manager si tenemos editor
-        self.application.supportManager.setEditorAvailable(editor != None)
+        self.application.supportManager.setEditorAvailable(editor is not None)
         
         #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)

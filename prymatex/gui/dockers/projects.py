@@ -21,7 +21,6 @@ from prymatex.ui.dockers.projects import Ui_ProjectsDock
 from prymatex.gui.dockers.fstasks import PMXFileSystemTasks
 from prymatex.gui.project.base import PMXProject
 
-
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"
     ICON = resources.getIcon("project")
@@ -66,17 +65,34 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def buildEnvironment(self):
         indexes = self.treeViewProjects.selectedIndexes()
         if indexes:
-            path = self.currentPath()
+            node = self.currentNode()
             paths = map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
-            return { 
-                'TM_SELECTED_FILE': path, 
+            env = {
+                'TM_SELECTED_FILE': node.path, 
                 'TM_SELECTED_FILES': " ".join(["'%s'" % path for path in paths ])
             }
-
+            
+            if node.isfile:
+                env.update({
+                    'TM_FILEPATH': node.path,
+                    'TM_FILENAME': node.nodeName,
+                    'TM_DIRECTORY': node.parentNode.path,
+                })
+            else:
+                env.update({
+                    'TM_DIRECTORY': node.path,
+                })
+            
+            env.update(node.project.buildEnvironment())
+            print env
+            return env
+            
+            
     def keyPressEvent(self, event):
         # TODO Terminar esto que es una prueba, ver de meterle teclas o algo
-        return QtGui.QDockWidget.keyPressEvent(self, event) 
-        
+        print "apreto tecla sobre docker"
+        return QtGui.QDockWidget.keyPressEvent(self, event)
+
     def setupPropertiesDialog(self):
         from prymatex.gui.dialogs.properties import PMXPropertiesDialog
         from prymatex.gui.project.environment import EnvironmentWidget
@@ -160,7 +176,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         for action in contextMenuActions:
             if hasattr(action, "callback"):
                 action.triggered.connect(action.callback)
-                
+
         return contextMenu
 
     def extendFileSystemItemMenu(self, menu, node):
@@ -197,8 +213,12 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
             bundleMenues = map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
-            utils.extendMenuSection(menu, bundleMenues, section = "bundles", position = 0)
+            
+            #Restaurar el force processor de la main Window
+            #contextMenu.aboutToHide.connect(lambda mainWindow = self.mainWindow: mainWindow.forseLocalCommandProcessor(False))
         
+            utils.extendMenuSection(menu, bundleMenues, section = "bundles", position = 0)
+
     #================================================
     # Tree View Project
     #================================================

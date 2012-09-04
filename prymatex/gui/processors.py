@@ -20,8 +20,6 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
 
     def configure(self, settings):
         self.asynchronous = settings.get("asynchronous", True)
-        self.tabTriggered = settings.get("tabTriggered", False)
-        self.disableIndent = settings.get("disableIndent", False)
         self.baseEnvironment = settings.get("environment", {})
         self.errorCommand = settings.get("errorCommand", False)
 
