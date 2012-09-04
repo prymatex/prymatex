@@ -146,6 +146,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 },
                 "--refresh",
                 self.actionRefresh,
+                "--bundles"
             ]
         }
         if index.isValid():
@@ -168,7 +169,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         if isinstance(node, PMXProject):
             utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
             utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
-            utils.extendMenuSection(menu, [self.actionBashInit, self.actionBundleEditor], section = "interact")
+            utils.extendMenuSection(menu, [self.actionBashInit], section = "interact")
+            utils.extendMenuSection(menu, [self.actionBundleEditor], section = "bundles")
         else:
             utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
         if node.isfile:
@@ -194,8 +196,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         #Sort by name
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
-            bundleMenues = [ "--bundles" ] + map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
-            utils.extendMenuSection(menu, bundleMenues, section = "interact")
+            bundleMenues = map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
+            utils.extendMenuSection(menu, bundleMenues, section = "bundles", position = 0)
         
     #================================================
     # Tree View Project
