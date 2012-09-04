@@ -64,7 +64,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.splitTabWidget.currentWidgetChanged.connect(self.setWindowTitleForEditor)
         self.splitTabWidget.tabCloseRequest.connect(self.closeEditor)
         self.splitTabWidget.tabCreateRequest.connect(self.addEmptyEditor)
-        self.application.supportManager.bundleItemTriggered.connect(self.insertBundleItem)
+        self.application.supportManager.bundleItemTriggered.connect(self.on_bundleItemTriggered)
         
         utils.centerWidget(self, scale = (0.9, 0.8))
         self.dockers = []
@@ -76,6 +76,8 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
         
+        self.bundleItem_handler = self.insertBundleItem
+        
         #Processor de comandos local a la main window
         self.commandProcessor = MainWindowCommandProcessor(self)
         self.__forseLocalCommandProcessor = False
@@ -83,31 +85,23 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     #==========================================================================
     # Bundle Items
     #==========================================================================
+    def on_bundleItemTriggered(self, bundleItem):
+        if self.bundleItem_handler is not None:
+            self.bundleItem_handler(bundleItem)
+
     def insertBundleItem(self, bundleItem, **processorSettings):
         '''Insert selected bundle item in current editor if possible'''
-        editor = self.currentEditor()
-        if editor is not None:
-            self.currentEditor().insertBundleItem(bundleItem)
-        elif not bundleItem.isEditorNeeded():
-            self.commandProcessor.configure(processorSettings)
-            bundleItem.execute(self.commandProcessor)
-        else:
-            QtGui.QMessageBox.information(self, _("No editor open"), 
-                                          _("%s needs an editor to run") % bundleItem.name)
+        assert not bundleItem.isEditorNeeded(), "Bundle Item needs editor"
+        
+        print "insert bundle item"
+        self.commandProcessor.configure(processorSettings)
+        bundleItem.execute(self.commandProcessor)
 
     def buildEnvironment(self):
         env = {}
         for docker in self.dockers:
             env.update(docker.buildEnvironment())
         return env
-
-    # TODO: Esto el forse es muy feo y tiene patas cortas
-    def forseLocalCommandProcessor(self, forse):
-        self.__forseLocalCommandProcessor = forse
-        if self.__forseLocalCommandProcessor:
-            self.application.supportManager.setEditorAvailable(not forse)
-        else:
-            self.application.supportManager.setEditorAvailable(self.currentEditor() is not None)
 
     @classmethod
     def contributeToSettings(cls):
@@ -281,8 +275,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         #Update Menu
         self.updateMenuForEditor(editor)        
         
-        #Avisar al manager si tenemos editor
+        #Avisar al manager si tenemos editor y preparar el handler
         self.application.supportManager.setEditorAvailable(editor is not None)
+        if editor is not None:
+            self.bundleItem_handler = editor.bundleItemHandler() or self.insertBundleItem
+        else:
+            self.bundleItem_handler = self.insertBundleItem    
         
         #Emitir señal de cambio
         self.currentEditorChanged.emit(editor)
@@ -291,7 +289,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             self.addEditorToHistory(editor)
             editor.setFocus()
             self.application.checkExternalAction(self, editor)
-
+            
     def setWindowTitleForEditor(self, editor):
         #Set Window Title for editor, editor can be None
         titleChunks = [ self.titleTemplate.safe_substitute(**self.application.supportManager.buildEnvironment()) ]
