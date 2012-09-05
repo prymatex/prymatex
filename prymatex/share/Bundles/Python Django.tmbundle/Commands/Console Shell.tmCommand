@@ -9,7 +9,7 @@
 
 cd "$TM_PROJECT_DIRECTORY"
 
-terminal.py "clear; cd \"$TM_PROJECT_DIRECTORY\"; python manage.py shell"
+terminal "clear; cd \"$TM_PROJECT_DIRECTORY\"; python manage.py shell"
 </string>
 	<key>input</key>
 	<string>none</string>

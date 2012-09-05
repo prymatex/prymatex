@@ -9,7 +9,7 @@
 
 cd "$TM_PROJECT_DIRECTORY"
 
-terminal.py "clear; cd \"$TM_PROJECT_DIRECTORY\"; python manage.py dbshell"</string>
+terminal "clear; cd \"$TM_PROJECT_DIRECTORY\"; python manage.py dbshell"</string>
 	<key>input</key>
 	<string>none</string>
 	<key>keyEquivalent</key>
