@@ -64,6 +64,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     def buildEnvironment(self):
         indexes = self.treeViewProjects.selectedIndexes()
+        env = {}
         if indexes:
             node = self.currentNode()
             paths = map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
@@ -84,8 +85,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 })
             
             env.update(node.project.buildEnvironment())
-            print env
-            return env
+        return env
             
             
     def keyPressEvent(self, event):

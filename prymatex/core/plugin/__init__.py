@@ -22,7 +22,7 @@ class PMXBaseComponent(object):
     def contributeToMainMenu(cls):
         return {}
 
-    def buildEnvironment(self):
+    def buildEnvironment(self, **kwargs):
         return {}
     
 class PMXBaseWidgetComponent(PMXBaseComponent):

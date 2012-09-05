@@ -14,6 +14,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     def environment(self, command):
         environment = command.buildEnvironment()
+        environment.update(self.editor.mainWindow.buildEnvironment())
         environment.update(self.editor.buildEnvironment())
         environment.update(self.baseEnvironment)
         return environment
