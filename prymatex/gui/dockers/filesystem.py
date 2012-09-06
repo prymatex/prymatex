@@ -76,7 +76,7 @@ class PMXFileSystemItemDelegate(QtGui.QItemDelegate):
 
 class PMXFileSystemDock(QtGui.QDockWidget, Ui_FileSystemDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "Shift+F8"
-    ICON = resources.getIcon("filemanager")
+    ICON = resources.getIcon("system-file-manager")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
     
     #=======================================================================

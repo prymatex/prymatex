@@ -14,7 +14,7 @@ from prymatex.gui.dialogs.filesearch import PMXFileSearchDialog
 
 class PMXSearchDock(QtGui.QDockWidget, Ui_SearchDock, PMXBaseDock):
     SHORTCUT = "Shift+F4"
-    ICON = resources.getIcon("find")
+    ICON = resources.getIcon("edit-find-project")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     def __init__(self, parent):

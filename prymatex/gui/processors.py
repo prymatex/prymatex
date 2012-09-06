@@ -66,7 +66,7 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
         self.mainWindow.insertBundleItem(command, errorCommand = True)
         
     def showAsHTML(self, context):
-        self.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
+        self.mainWindow.browser.setRunningContext(context)
 
     timespanFactor = 1
     def showAsTooltip(self, context):

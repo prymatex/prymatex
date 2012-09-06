@@ -14,7 +14,7 @@ class PMXLoggerDock(QtGui.QDockWidget, Ui_LogWidget, PMXBaseDock):
     """Logging widget
     """
     SHORTCUT = "F12"
-    ICON = resources.getIcon("logger")
+    ICON = resources.getIcon("utilities-log-viewer")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     def __init__(self, parent = None):

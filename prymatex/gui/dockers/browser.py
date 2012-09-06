@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+
 import os
 import codecs
 from subprocess import Popen, PIPE, STDOUT
@@ -110,14 +111,15 @@ class SystemWrapper(QtCore.QObject):
     outputString = QtCore.pyqtProperty(str, outputString)
     
 class TextMate(QtCore.QObject):
-    def __init__(self, mainFrame, bundleItem = None):
-        QtCore.QObject.__init__(self)
-        self.mainFrame = mainFrame
+    def __init__(self, webView, bundleItem):
+        QtCore.QObject.__init__(self, webView)
+        self.mainFrame = webView.page().mainFrame()
         self.bundleItem = bundleItem
         
     @QtCore.pyqtSlot(str)
     def _system(self, command):
         if self.bundleItem != None:
+            print command
             command, environment, tempFile = prepareShellScript(unicode(command), self.bundleItem.buildEnvironment())
             process = Popen(command, stdout = PIPE, stdin = PIPE, stderr = STDOUT, env = environment)
             self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, command))
@@ -129,7 +131,7 @@ class TextMate(QtCore.QObject):
     
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     SHORTCUT = "F9"
-    ICON = resources.getIcon("browser")
+    ICON = resources.getIcon("internet-web-browser")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     SETTINGS_GROUP = "Browser"
@@ -138,8 +140,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     homePage = pmxConfigPorperty(default = "http://www.prymatex.org")
     @pmxConfigPorperty(default = os.environ.get('http_proxy', ''))
     def proxy(self, value):
-        """System wide proxy
-        """
+        """System wide proxy"""
         proxy_url = QtCore.QUrl(value)
         #TODO: Una regexp para filtar basura y quitar el try except
         if not value:
@@ -227,16 +228,19 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
                 return True
         return QtGui.QDockWidget.event(self, event)
     
-    
-    def setHtml(self, string, bundleItem = None):
+    def setHtml(self, string, url = None):
         if not self.isVisible():
             self.show()
         self.raise_()
-        self.bundleItem = bundleItem
-        url = QtCore.QUrl.fromUserInput("about:%s" % bundleItem.name)
-        self.lineUrl.setText(url.toString())
+        if url is not None:
+            self.lineUrl.setText(url.toString())
         self.webView.setHtml(string, url)
     
+    def setRunningContext(self, context):
+        self.bundleItem = context.bundleItem
+        url = QtCore.QUrl.fromUserInput("about:%s" % context.description())
+        self.setHtml(context.outputValue, url)
+        
     def on_lineUrl_returnPressed(self):
         """Url have been changed by user"""
 
@@ -274,7 +278,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def on_webView_loadFinished(self, ready):
         if not ready:
             return
-        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView.page().mainFrame(), self.bundleItem))
+        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView, self.bundleItem))
         self.webView.page().mainFrame().evaluateJavaScript(js)
         
         #Restore scroll

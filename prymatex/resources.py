@@ -15,6 +15,7 @@ from prymatex.utils.decorators.memoize import memoized
 INTERNAL = {
     #Splash Image
     "prymatex-splash": ":/images/prymatex/splash.png",
+    
     #Bundles
     "bundle-item-bundle": ":/items/bundles/bundle.png",
     "bundle-item-template": ":/items/bundles/templates.png",
@@ -57,18 +58,9 @@ INTERNAL = {
     "find":":/icons/actions/edit-find.png",
 
     # Bullets
-    "bulletred": ":/icons/icons/bullet-red.png",
-    "bulletblue": ":/icons/icons/bullet-blue.png",
-    "bulletgreen": ":/icons/icons/bullet-green.png",
-    
-    # For Dock
-    "terminal":":/icons/apps/utilities-terminal.png", 
-    "browser":":/icons/apps/internet-web-browser.png",
-    "filemanager":":/icons/apps/system-file-manager.png",
-    "project": ":/icons/actions/project-development.png",
-    "bookmark": ":/icons/actions/rating.png",
-    "symbols": ":/icons/actions/code-context.png",
-    "console": ":/icons/dockers/console.png",
+    "bulletred": ":/bullets/groups/red.png",
+    "bulletblue": ":/bullets/groups/blue.png",
+    "bulletgreen": ":/bullets/groups/green.png",
     
     # Scope Root Groups
     "scope-root-comment": ":/bullets/groups/blue.png",
@@ -147,7 +139,7 @@ def getIcon(index):
             return FileIconProvider.icon(QtCore.QFileInfo(index))
         elif os.path.isdir(index):
             return FileIconProvider.icon(QtGui.QFileIconProvider.Folder)
-        return FileIconProvider.icon(QtGui.QFileIconProvider.File)
+        return QtGui.QIcon.fromTheme(index)
     elif isinstance(index, int):
         #Try icon by int index in fileicon provider
         return FileIconProvider.icon(index)
