@@ -139,7 +139,11 @@ def getIcon(index):
             return FileIconProvider.icon(QtCore.QFileInfo(index))
         elif os.path.isdir(index):
             return FileIconProvider.icon(QtGui.QFileIconProvider.Folder)
-        return QtGui.QIcon.fromTheme(index)
+        elif QtGui.QIcon.hasThemeIcon(index):
+            return QtGui.QIcon.fromTheme(index)
+        else:
+            print "falta icono", index
+            return QtGui.QIcon.fromTheme(index)
     elif isinstance(index, int):
         #Try icon by int index in fileicon provider
         return FileIconProvider.icon(index)
@@ -161,10 +165,7 @@ class ResourceProvider(dict):
             return QtGui.QIcon(self[index])
         return getIcon(index)
 
-def addIconThemePath():
-    iconThemes = os.path.abspath(__file__ + "\..\..\..\icons")
-    QtGui.QIcon.setThemeSearchPaths([ iconThemes ])
+def addIconThemePrymatex(sharePath):
+    iconThemes = os.path.join(sharePath, "Icons")
+    QtGui.QIcon.setThemeSearchPaths(QtGui.QIcon.themeSearchPaths() + [ iconThemes ])
     QtGui.QIcon.setThemeName('oxygen')
-
-if sys.platform == "win32":
-    addIconThemePath()

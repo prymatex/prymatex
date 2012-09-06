@@ -65,7 +65,11 @@ class NetworkAccessManager(QNetworkAccessManager):
             return reply
         return QNetworkAccessManager.createRequest(self, operation, request, data)
 
-js = """
+#=======================================================================
+# JavaScript environment for browser
+#=======================================================================
+BASE_JS = """
+%s
 TextMate.system = function(command, callback) {
     this._system(command);
     if (callback != null) {
@@ -111,24 +115,20 @@ class SystemWrapper(QtCore.QObject):
     outputString = QtCore.pyqtProperty(str, outputString)
     
 class TextMate(QtCore.QObject):
-    def __init__(self, webView, bundleItem):
-        QtCore.QObject.__init__(self, webView)
-        self.mainFrame = webView.page().mainFrame()
-        self.bundleItem = bundleItem
+    def __init__(self, browser):
+        QtCore.QObject.__init__(self, browser)
         
     @QtCore.pyqtSlot(str)
     def _system(self, command):
-        if self.bundleItem != None:
-            print command
-            command, environment, tempFile = prepareShellScript(unicode(command), self.bundleItem.buildEnvironment())
-            process = Popen(command, stdout = PIPE, stdin = PIPE, stderr = STDOUT, env = environment)
-            self.mainFrame.addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, command))
-            deleteFile(tempFile)
-
+        self.parent().runCommand(command)
+        
     def isBusy(self):
         return True
     isBusy = QtCore.pyqtProperty("bool", isBusy)
     
+#=======================================================================
+# Browser Dock
+#=======================================================================
 class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     SHORTCUT = "F9"
     ICON = resources.getIcon("internet-web-browser")
@@ -189,7 +189,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         
         #Capturar editor, bundleitem
         self.currentEditor = None
-        self.bundleItem = None
+        self.runningContext = None
         
         #Sync Timer
         self.updateTimer = QtCore.QTimer()
@@ -205,9 +205,6 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         self.browserOptionsMenu, _ = createQMenu(optionsMenu, self)
         self.pushButtonOptions.setMenu(self.browserOptionsMenu)
 
-    def on_manager_commandUrlRequested(self, url):
-        self.application.handleUrlCommand(url)
-        
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
         #TODO: ver el tema de proveer servicios esta instalacion en la main window es pedorra
@@ -227,7 +224,10 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
                 self.lineUrl.selectAll()
                 return True
         return QtGui.QDockWidget.event(self, event)
-    
+
+    #=======================================================================
+    # Browser main methods
+    #=======================================================================
     def setHtml(self, string, url = None):
         if not self.isVisible():
             self.show()
@@ -235,12 +235,25 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         if url is not None:
             self.lineUrl.setText(url.toString())
         self.webView.setHtml(string, url)
+        self.runningContext = None
     
     def setRunningContext(self, context):
-        self.bundleItem = context.bundleItem
         url = QtCore.QUrl.fromUserInput("about:%s" % context.description())
         self.setHtml(context.outputValue, url)
-        
+        self.runningContext = context
+    
+    def runCommand(self, command):
+        print command
+        command, environment, tempFile = prepareShellScript(unicode(command), self.runningContext.environment)
+        process = Popen(command, stdout = PIPE, stdin = PIPE, stderr = PIPE, env = environment)
+        self.webView.page().mainFrame().addToJavaScriptWindowObject("_systemWrapper", SystemWrapper(process, command))
+    
+    #=======================================================================
+    # Browser Signals handlers
+    #=======================================================================
+    def on_manager_commandUrlRequested(self, url):
+        self.application.handleUrlCommand(url)
+
     def on_lineUrl_returnPressed(self):
         """Url have been changed by user"""
 
@@ -261,8 +274,22 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         url = QtCore.QUrl.fromUserInput(self.lineUrl.text())
         self.webView.setUrl(url)
 
+    def on_buttonBack_clicked(self):
+        """Back button clicked, go one page back"""
+        page = self.webView.page()
+        history = page.history()
+        history.back()
+        self.buttonBack.setEnabled(history.canGoBack())
+    
+    def on_buttonNext_clicked(self):
+        """Next button clicked, go to next page"""
+        page = self.webView.page()
+        history = page.history()
+        history.forward()
+        self.buttonNext.setEnabled(history.canGoForward())
+    
     #=============================
-    # QWebView Signals
+    # QWebView Signals handlers
     #=============================
     def on_webView_iconChanged(self):
         # print "iconChanged"
@@ -278,8 +305,13 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
     def on_webView_loadFinished(self, ready):
         if not ready:
             return
-        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self.webView, self.bundleItem))
-        self.webView.page().mainFrame().evaluateJavaScript(js)
+        self.webView.page().mainFrame().addToJavaScriptWindowObject("TextMate", TextMate(self))
+        environment = ""
+        if self.runningContext is not None:
+            environment = "\n".join(
+                map(lambda (key, value): 'window["{0}"]="{1}";'.format(key, value), self.runningContext.environment.iteritems())
+            )
+        self.webView.page().mainFrame().evaluateJavaScript(BASE_JS % environment)
         
         #Restore scroll
         if self.scrollValues[0]:
@@ -322,20 +354,9 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         #self.setWindowTitle(title)
         pass
     
-    def on_buttonBack_clicked(self):
-        """Back button clicked, go one page back"""
-        page = self.webView.page()
-        history = page.history()
-        history.back()
-        self.buttonBack.setEnabled(history.canGoBack())
-    
-    def on_buttonNext_clicked(self):
-        """Next button clicked, go to next page"""
-        page = self.webView.page()
-        history = page.history()
-        history.forward()
-        self.buttonNext.setEnabled(history.canGoForward())
-        
+    #=======================================================================
+    # Browser Auto update for current Editor
+    #=======================================================================
     def updateHtmlCurrentEditorContent(self):
         # TODO Resolver url, asegurar que sea html para no hacer cochinadas
         editor = self.currentEditor if self.currentEditor is not None else self.mainWindow.currentEditor()
