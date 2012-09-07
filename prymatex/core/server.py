@@ -184,6 +184,12 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
     def alert(self, **kwargs):
         self.sendResult()
     
+    def mate(self, **kwargs):
+        if "paths" in kwargs:
+            for path in kwargs["paths"]:
+                self.application.openFile(path)
+        self.sendResult()
+    
     def open(self, **kwargs):
         self.application.handleUrlCommand(kwargs["url"])
         self.sendResult()
