@@ -57,7 +57,9 @@
          <string>Go previous place</string>
         </property>
         <property name="icon">
-         <iconset theme="go-previous"/>
+         <iconset theme="go-previous">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -76,7 +78,9 @@
          <string>Go next place</string>
         </property>
         <property name="icon">
-         <iconset theme="go-next"/>
+         <iconset theme="go-next">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -95,7 +99,9 @@
          <string>Go up one level</string>
         </property>
         <property name="icon">
-         <iconset theme="go-up"/>
+         <iconset theme="go-up">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -121,7 +127,9 @@
          <string>Sync folder with current editor file path</string>
         </property>
         <property name="icon">
-         <iconset theme="folder-sync"/>
+         <iconset theme="folder-sync">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -143,7 +151,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="view-list-tree"/>
+         <iconset theme="view-list-tree">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -162,7 +172,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="view-filter"/>
+         <iconset theme="view-filter">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -181,7 +193,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="configure"/>
+         <iconset theme="configure">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -213,7 +227,7 @@
   </widget>
   <action name="actionNewFile">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
    </property>
    <property name="text">
@@ -222,7 +236,7 @@
   </action>
   <action name="actionNewFolder">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/folder-new.png</normaloff>:/icons/actions/folder-new.png</iconset>
    </property>
    <property name="text">
@@ -231,7 +245,7 @@
   </action>
   <action name="actionNewFromTemplate">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/run-build-file.png</normaloff>:/icons/actions/run-build-file.png</iconset>
    </property>
    <property name="text">
@@ -243,7 +257,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
    </property>
    <property name="text">
@@ -300,7 +314,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/document-open.png</normaloff>:/icons/actions/document-open.png</iconset>
    </property>
    <property name="text">
@@ -319,7 +333,7 @@
   </action>
   <action name="actionRename">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/edit-rename.png</normaloff>:/icons/actions/edit-rename.png</iconset>
    </property>
    <property name="text">
@@ -334,7 +348,7 @@
   </action>
   <action name="actionConvertIntoProject">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
    </property>
    <property name="text">
@@ -346,7 +360,7 @@
   </action>
   <action name="actionSetInTerminal">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/apps/utilities-terminal.png</normaloff>:/icons/apps/utilities-terminal.png</iconset>
    </property>
    <property name="text">
@@ -355,7 +369,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
@@ -367,7 +381,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
@@ -379,7 +393,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
@@ -390,8 +404,6 @@
    </property>
   </action>
  </widget>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

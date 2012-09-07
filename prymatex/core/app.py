@@ -41,7 +41,7 @@ class PMXApplication(QtGui.QApplication):
 
         # TODO: Fix icons, usar otra cosa que no sea win32, porque en gnome por ejemplo puede ser que no esten los iconos
         if sys.platform == "win32":
-            resources.addIconThemePrymatex(PMXProfile.PMX_SHARE_PATH)
+            resources.loadPrymatexResources(PMXProfile.PMX_RESOURCES_PATH)
 
         #Style
         self.setStyleSheet(resources.APPLICATION_STYLE)

@@ -20,7 +20,7 @@
    <string>Bundle Editor</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
+   <iconset>
     <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -54,14 +54,18 @@
          <item>
           <widget class="QPushButton" name="pushButtonAdd">
            <property name="icon">
-            <iconset theme="list-add"/>
+            <iconset theme="list-add">
+             <normaloff/>
+            </iconset>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButtonRemove">
            <property name="icon">
-            <iconset theme="list-remove"/>
+            <iconset theme="list-remove">
+             <normaloff/>
+            </iconset>
            </property>
           </widget>
          </item>
@@ -84,7 +88,9 @@
             <string>Filter</string>
            </property>
            <property name="icon">
-            <iconset theme="view-filter"/>
+            <iconset theme="view-filter">
+             <normaloff/>
+            </iconset>
            </property>
           </widget>
          </item>
@@ -156,8 +162,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

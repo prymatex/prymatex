@@ -2,11 +2,19 @@
 <ui version="4.0">
  <class>FontThemeConfig</class>
  <widget class="QWidget" name="FontThemeConfig">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>383</width>
+    <height>426</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Font and Theme</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
+   <iconset>
     <normaloff>:/icons/actions/format-font-size-more.png</normaloff>:/icons/actions/format-font-size-more.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -258,8 +266,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

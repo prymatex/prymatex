@@ -41,7 +41,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="go-previous"/>
+         <iconset theme="go-previous">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -69,7 +71,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="go-next"/>
+         <iconset theme="go-next">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -91,7 +95,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="view-refresh"/>
+         <iconset theme="view-refresh">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -116,7 +122,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="dialog-close"/>
+         <iconset theme="dialog-close">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -142,7 +150,9 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="configure"/>
+         <iconset theme="configure">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -167,7 +177,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/system-switch-user.png</normaloff>:/icons/actions/system-switch-user.png</iconset>
    </property>
    <property name="text">
@@ -182,7 +192,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../resources.qrc">
+    <iconset>
      <normaloff>:/icons/actions/network-connect.png</normaloff>:/icons/actions/network-connect.png</iconset>
    </property>
    <property name="text">
@@ -200,8 +210,6 @@
    <header>QtWebKit/QWebView</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
