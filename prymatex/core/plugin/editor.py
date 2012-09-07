@@ -130,6 +130,12 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         return self.externalAction == self.application.fileManager.DELETED    
 
     #============================================================
+    # Bundle Item Handler
+    #============================================================
+    def bundleItemHandler(self):
+        return None
+        
+    #============================================================
     # Global navigation api
     #============================================================
     def nextLocation(self):

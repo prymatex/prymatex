@@ -969,6 +969,9 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
     #==========================================================================
     # Bundle Items
     #==========================================================================
+    def bundleItemHandler(self):
+        return self.insertBundleItem
+        
     def insertBundleItem(self, item, **processorSettings):
         """Inserta un bundle item"""
         

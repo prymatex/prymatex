@@ -23,7 +23,7 @@ from prymatex.gui.project.base import PMXProject
 
 class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMXBaseDock):
     SHORTCUT = "F8"
-    ICON = resources.getIcon("project")
+    ICON = resources.getIcon("project-development")
     PREFERED_AREA = QtCore.Qt.LeftDockWidgetArea
 
     #=======================================================================
@@ -64,6 +64,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     def buildEnvironment(self):
         indexes = self.treeViewProjects.selectedIndexes()
+        env = {}
         if indexes:
             node = self.currentNode()
             paths = map(lambda node: self.application.fileManager.normcase(node.path), [ self.projectTreeProxyModel.node(index) for index in indexes ])
@@ -84,8 +85,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
                 })
             
             env.update(node.project.buildEnvironment())
-            print env
-            return env
+        return env
             
             
     def keyPressEvent(self, event):
@@ -177,8 +177,27 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             if hasattr(action, "callback"):
                 action.triggered.connect(action.callback)
 
+        contextMenu.aboutToShow.connect(self.on_contextMenu_aboutToShow)
+        contextMenu.aboutToHide.connect(self.on_contextMenu_aboutToHide)
+        contextMenu.triggered.connect(self.on_contextMenu_triggered)
         return contextMenu
+        
+    def on_contextMenu_aboutToShow(self):      
+        # TODO Quiza un metodo que haga esto en el manager  
+        self.application.supportManager.setEditorAvailable(False)
+        self.application.supportManager.blockSignals(True)
+                
+    def on_contextMenu_aboutToHide(self):
+        self.application.supportManager.setEditorAvailable(True)
+        def restore_supportManager_signals():
+            self.application.supportManager.blockSignals(False)
+        # TODO No estoy muy contento con esto pero que le vamos a hacer
+        QtCore.QTimer.singleShot(0, restore_supportManager_signals)
 
+    def on_contextMenu_triggered(self, action):
+        if hasattr(action, "bundleTreeNode"):
+            self.mainWindow.insertBundleItem(action.bundleTreeNode)
+    
     def extendFileSystemItemMenu(self, menu, node):
         utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
         utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
@@ -213,10 +232,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         bundles = sorted(bundles, key=lambda bundle: bundle.name)
         if bundles:
             bundleMenues = map(lambda bundle: self.application.supportManager.menuForBundle(bundle), bundles)
-            
-            #Restaurar el force processor de la main Window
-            #contextMenu.aboutToHide.connect(lambda mainWindow = self.mainWindow: mainWindow.forseLocalCommandProcessor(False))
-        
             utils.extendMenuSection(menu, bundleMenues, section = "bundles", position = 0)
 
     #================================================

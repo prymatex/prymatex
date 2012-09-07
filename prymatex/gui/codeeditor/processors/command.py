@@ -14,6 +14,7 @@ class PMXCommandProcessor(PMXCommandProcessor):
 
     def environment(self, command):
         environment = command.buildEnvironment()
+        environment.update(self.editor.mainWindow.buildEnvironment())
         environment.update(self.editor.buildEnvironment())
         environment.update(self.baseEnvironment)
         return environment
@@ -195,7 +196,8 @@ class PMXCommandProcessor(PMXCommandProcessor):
         self.editor.insertBundleItem(snippet, tabTriggered = self.tabTriggered, disableIndent = self.disableIndent)
             
     def showAsHTML(self, context):
-        self.editor.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
+        self.editor.mainWindow.browser.setRunningContext(context)
+        #self.editor.mainWindow.browser.setHtml(context.outputValue, context.bundleItem)
 
     timespanFactor = 1
     def showAsTooltip(self, context):

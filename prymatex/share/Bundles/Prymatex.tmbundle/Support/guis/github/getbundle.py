@@ -140,8 +140,12 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.buttonOk.setEnabled(False)
         self.widgetInfo.setVisible(False)
         self.model = RepositoryTableModel(self)
-        self.tableViewResults.setModel(self.model)
+        self.proxy = QtGui.QSortFilterProxyModel()
+        self.proxy.setSourceModel(self.model)
+        self.tableViewResults.setModel(self.proxy)
         self.tableViewResults.verticalHeader().hide()
+        self.tableViewResults.horizontalHeader().setSortIndicatorShown(True)
+        self.tableViewResults.horizontalHeader().setClickable(True)
         
     def on_buttonSearch_pressed(self):
         text = self.lineEditQuery.text()

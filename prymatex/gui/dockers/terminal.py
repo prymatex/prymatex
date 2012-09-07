@@ -234,7 +234,7 @@ class PMXTabTerminals(QtGui.QTabWidget):
     
 class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "F4"
-    ICON = resources.getIcon("terminal")
+    ICON = resources.getIcon("utilities-terminal")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     #=======================================================================

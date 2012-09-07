@@ -9,7 +9,7 @@ from prymatex.utils.i18n import ugettext as _
 
 class PMXConsoleDock(QtGui.QDockWidget, PMXBaseDock):
     SHORTCUT = "Shift+F4"
-    ICON = resources.getIcon("console")
+    ICON = resources.getIcon("applications-utilities")
     PREFERED_AREA = QtCore.Qt.BottomDockWidgetArea
     
     def __init__(self, parent):
