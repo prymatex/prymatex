@@ -17,7 +17,7 @@
    <string>New Project</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
+   <iconset>
     <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -245,9 +245,7 @@
   <tabstop>buttonChoose</tabstop>
   <tabstop>buttonCreate</tabstop>
  </tabstops>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonCancel</sender>

@@ -20,7 +20,7 @@
    <string>Search</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
+   <iconset>
     <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -235,7 +235,7 @@
         <string>&amp;Search</string>
        </property>
        <property name="icon">
-        <iconset resource="../../resources.qrc">
+        <iconset>
          <normaloff>:/icons/actions/edit-find.png</normaloff>:/icons/actions/edit-find.png</iconset>
        </property>
       </widget>
@@ -246,7 +246,7 @@
         <string>C&amp;ancel</string>
        </property>
        <property name="icon">
-        <iconset resource="../../resources.qrc">
+        <iconset>
          <normaloff>:/icons/actions/dialog-cancel.png</normaloff>:/icons/actions/dialog-cancel.png</iconset>
        </property>
       </widget>
@@ -255,8 +255,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

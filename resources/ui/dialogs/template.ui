@@ -10,14 +10,14 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>117</height>
+    <height>126</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>New From Template</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
+   <iconset>
     <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -60,7 +60,9 @@
           <string>Ch&amp;oose</string>
          </property>
          <property name="icon">
-          <iconset theme="folder"/>
+          <iconset theme="folder">
+           <normaloff/>
+          </iconset>
          </property>
         </widget>
        </item>
@@ -97,7 +99,9 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset theme="code-variable"/>
+          <iconset theme="code-variable">
+           <normaloff/>
+          </iconset>
          </property>
         </widget>
        </item>
@@ -126,7 +130,9 @@
         <string>&amp;Create</string>
        </property>
        <property name="icon">
-        <iconset theme="document-new"/>
+        <iconset theme="document-new">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -136,7 +142,9 @@
         <string>C&amp;ancel</string>
        </property>
        <property name="icon">
-        <iconset theme="dialog-cancel"/>
+        <iconset theme="dialog-cancel">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -150,9 +158,7 @@
   <tabstop>buttonChoose</tabstop>
   <tabstop>buttonCreate</tabstop>
  </tabstops>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonCancel</sender>
