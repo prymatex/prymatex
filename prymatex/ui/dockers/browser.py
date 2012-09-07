@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/browser.ui'
 #
-# Created: Tue Aug 21 00:14:54 2012
+# Created: Fri Sep  7 14:19:37 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -112,4 +112,3 @@ class Ui_BrowserDock(object):
         self.actionConnectEditor.setToolTip(_('Connect browser with current editor'))
 
 from PyQt4 import QtWebKit
-from prymatex import resources_rc

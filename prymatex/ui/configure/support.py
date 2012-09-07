@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/support.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -54,4 +54,3 @@ class Ui_Support(object):
         self.pushButton.setText(_('Add'))
         self.pushButton_2.setText(_('Remove'))
 
-from prymatex import resources_rc

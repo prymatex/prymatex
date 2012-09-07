@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Wed Aug 15 14:59:44 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -33,7 +33,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.splitTabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 801, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -370,4 +370,3 @@ class Ui_MainWindow(object):
         self.actionLocationForward.setShortcut(_('Alt+Right'))
 
 from prymatex.widgets.splitter import SplitTabWidget
-from prymatex import resources_rc

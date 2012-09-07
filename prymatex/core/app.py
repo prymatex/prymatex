@@ -39,9 +39,7 @@ class PMXApplication(QtGui.QApplication):
         self.setOrganizationDomain(prymatex.__url__)
         self.setOrganizationName(prymatex.__author__)
 
-        # TODO: Fix icons, usar otra cosa que no sea win32, porque en gnome por ejemplo puede ser que no esten los iconos
-        if sys.platform == "win32":
-            resources.loadPrymatexResources(PMXProfile.PMX_RESOURCES_PATH)
+        resources.loadPrymatexResources(PMXProfile.PMX_RESOURCES_PATH)
 
         #Style
         self.setStyleSheet(resources.APPLICATION_STYLE)

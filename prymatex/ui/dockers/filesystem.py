@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/filesystem.ui'
 #
-# Created: Thu Aug 23 00:38:08 2012
+# Created: Fri Sep  7 14:19:37 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -216,4 +216,3 @@ class Ui_FileSystemDock(object):
         self.actionPaste.setText(_('&Paste'))
         self.actionPaste.setShortcut(_('Ctrl+V'))
 
-from prymatex import resources_rc

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
 #
-# Created: Thu Aug 23 00:38:08 2012
+# Created: Fri Sep  7 14:19:37 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_CodeEditorStatus(object):
     def setupUi(self, CodeEditorStatus):
         CodeEditorStatus.setObjectName(_fromUtf8("CodeEditorStatus"))
-        CodeEditorStatus.resize(629, 249)
+        CodeEditorStatus.resize(629, 267)
         self.verticalLayout = QtGui.QVBoxLayout(CodeEditorStatus)
         self.verticalLayout.setSpacing(2)
         self.verticalLayout.setMargin(0)
@@ -203,8 +203,7 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonMultiCursor = QtGui.QPushButton(self.widgetStatus)
         self.pushButtonMultiCursor.setMaximumSize(QtCore.QSize(20, 16777215))
         self.pushButtonMultiCursor.setText(_fromUtf8(""))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/editor/modes/cursors.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("modes-cursors"))
         self.pushButtonMultiCursor.setIcon(icon)
         self.pushButtonMultiCursor.setFlat(True)
         self.pushButtonMultiCursor.setObjectName(_fromUtf8("pushButtonMultiCursor"))
@@ -212,18 +211,16 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonSnippet = QtGui.QPushButton(self.widgetStatus)
         self.pushButtonSnippet.setMaximumSize(QtCore.QSize(20, 16777215))
         self.pushButtonSnippet.setText(_fromUtf8(""))
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/editor/modes/snippet.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButtonSnippet.setIcon(icon1)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("modes-snippet"))
+        self.pushButtonSnippet.setIcon(icon)
         self.pushButtonSnippet.setFlat(True)
         self.pushButtonSnippet.setObjectName(_fromUtf8("pushButtonSnippet"))
         self.horizontalLayout_2.addWidget(self.pushButtonSnippet)
         self.pushButtonOverwrite = QtGui.QPushButton(self.widgetStatus)
         self.pushButtonOverwrite.setMaximumSize(QtCore.QSize(20, 16777215))
         self.pushButtonOverwrite.setText(_fromUtf8(""))
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/editor/modes/insert.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButtonOverwrite.setIcon(icon2)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("modes-insert"))
+        self.pushButtonOverwrite.setIcon(icon)
         self.pushButtonOverwrite.setFlat(True)
         self.pushButtonOverwrite.setObjectName(_fromUtf8("pushButtonOverwrite"))
         self.horizontalLayout_2.addWidget(self.pushButtonOverwrite)
@@ -280,4 +277,3 @@ class Ui_CodeEditorStatus(object):
         self.pushButtonOverwrite.setToolTip(_('Overwrite Mode'))
         self.labelTabSize.setText(_('Tab Size'))
 
-from prymatex import resources_rc

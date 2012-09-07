@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/emergencycrash.ui'
 #
-# Created: Thu May 10 16:16:04 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -27,8 +27,8 @@ class Ui_CrashDialog(object):
         self.label = QtGui.QLabel(CrashDialog)
         font = QtGui.QFont()
         font.setPointSize(14)
-        font.setWeight(75)
         font.setBold(True)
+        font.setWeight(75)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
@@ -84,4 +84,3 @@ class Ui_CrashDialog(object):
         self.pushCopyTraceback.setText(_('Copy'))
         self.pushClose.setText(_('Close'))
 
-from prymatex import resources_rc

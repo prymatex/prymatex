@@ -57,7 +57,7 @@
         <string>Terminate</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
+        <iconset>
          <normaloff>:/icons/emblems/emblem-important.png</normaloff>:/icons/emblems/emblem-important.png</iconset>
        </property>
       </widget>
@@ -68,7 +68,7 @@
         <string>&amp;Copy</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
+        <iconset>
          <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
        </property>
       </widget>
@@ -79,7 +79,7 @@
         <string>&amp;Close</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
+        <iconset>
          <normaloff>:/icons/actions/dialog-cancel.png</normaloff>:/icons/actions/dialog-cancel.png</iconset>
        </property>
       </widget>
@@ -88,9 +88,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>pushClose</sender>

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/filemanager.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_FileManagerDialog(object):
     def setupUi(self, FileManagerDialog):
         FileManagerDialog.setObjectName(_fromUtf8("FileManagerDialog"))
+        FileManagerDialog.resize(290, 92)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/document-save.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         FileManagerDialog.setWindowIcon(icon)
@@ -75,4 +76,3 @@ class Ui_FileManagerDialog(object):
         self.label_3.setText(_('Encoding'))
         self.label_4.setText(_('Line Ending'))
 
-from prymatex import resources_rc

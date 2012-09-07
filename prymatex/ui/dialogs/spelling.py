@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/spelling.ui'
 #
-# Created: Mon Jul 23 13:51:49 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -74,4 +74,3 @@ class Ui_SpellingDialog(object):
         self.pushButtonIgnore.setText(_('Ignore'))
         self.pushButtonLearn.setText(_('Learn'))
 
-from prymatex import resources_rc

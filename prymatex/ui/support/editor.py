@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/support/editor.ui'
 #
-# Created: Mon Aug 27 13:36:45 2012
+# Created: Fri Sep  7 14:19:37 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -111,4 +111,3 @@ class Ui_BundleEditor(object):
         self.labelActivation.setText(_('Activation:'))
         self.labelScopeSelector.setText(_('Scope Selector:'))
 
-from prymatex import resources_rc
