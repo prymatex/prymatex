@@ -15,7 +15,8 @@ from optparse import OptionParser, OptionGroup
 if 'PMX_SERVER_PORT' in os.environ:
     PMX_SERVER_PORT = os.environ['PMX_SERVER_PORT']
 else:
-    raise Exception("PMX_SERVER_PORT is not in environ")
+    #raise Exception("PMX_SERVER_PORT is not in environ")
+    PMX_SERVER_PORT = 10
 
 '''
 # create and show the dialog
@@ -511,7 +512,11 @@ class CommandHandler(object):
                 os.popen("xdg-open %s" % url)
     
     def mate(self, options, args):
-        pass
+        kwargs = {"paths": args}
+        command = {"name": "mate", "kwargs": kwargs }
+        self.socket.send_pyobj(command)
+        value = self.socket.recv()
+        sys.stdout.write(value)
         
     def terminal(self, options, args):
         kwargs = {}
