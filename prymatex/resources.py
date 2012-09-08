@@ -91,7 +91,7 @@ PLUGINS = {}
 FileIconProvider = QtGui.QFileIconProvider()
 
 def getImagePath(index):
-    return RESOURCES.get(index)
+    return RESOURCES.get(index) or EXTERNAL.get(index)
 
 @memoized
 def getImage(index):

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/codeeditor/status.ui'
 #
-# Created: Fri Sep  7 14:19:37 2012
+# Created: Fri Sep  7 18:15:15 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -228,14 +228,13 @@ class Ui_CodeEditorStatus(object):
         self.comboBoxSyntaxes.setMaximumSize(QtCore.QSize(250, 16777215))
         self.comboBoxSyntaxes.setObjectName(_fromUtf8("comboBoxSyntaxes"))
         self.horizontalLayout_2.addWidget(self.comboBoxSyntaxes)
-        self.pushButtonMenuBundle = QtGui.QPushButton(self.widgetStatus)
-        self.pushButtonMenuBundle.setMaximumSize(QtCore.QSize(45, 16777215))
-        self.pushButtonMenuBundle.setText(_fromUtf8(""))
+        self.toolButtonMenuBundle = QtGui.QToolButton(self.widgetStatus)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("applications-system"))
-        self.pushButtonMenuBundle.setIcon(icon)
-        self.pushButtonMenuBundle.setFlat(True)
-        self.pushButtonMenuBundle.setObjectName(_fromUtf8("pushButtonMenuBundle"))
-        self.horizontalLayout_2.addWidget(self.pushButtonMenuBundle)
+        self.toolButtonMenuBundle.setIcon(icon)
+        self.toolButtonMenuBundle.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
+        self.toolButtonMenuBundle.setAutoRaise(True)
+        self.toolButtonMenuBundle.setObjectName(_fromUtf8("toolButtonMenuBundle"))
+        self.horizontalLayout_2.addWidget(self.toolButtonMenuBundle)
         self.labelTabSize = QtGui.QLabel(self.widgetStatus)
         self.labelTabSize.setMaximumSize(QtCore.QSize(80, 16777215))
         self.labelTabSize.setObjectName(_fromUtf8("labelTabSize"))

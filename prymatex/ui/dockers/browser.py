@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/browser.ui'
 #
-# Created: Fri Sep  7 14:19:37 2012
+# Created: Fri Sep  7 18:10:46 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -70,14 +70,15 @@ class Ui_BrowserDock(object):
         self.line.setFrameShadow(QtGui.QFrame.Sunken)
         self.line.setObjectName(_fromUtf8("line"))
         self.horizontalLayout.addWidget(self.line)
-        self.pushButtonOptions = QtGui.QPushButton(self.dockWidgetContents)
-        self.pushButtonOptions.setMaximumSize(QtCore.QSize(45, 24))
-        self.pushButtonOptions.setText(_fromUtf8(""))
+        self.toolButtonOptions = QtGui.QToolButton(self.dockWidgetContents)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("configure"))
-        self.pushButtonOptions.setIcon(icon)
-        self.pushButtonOptions.setFlat(True)
-        self.pushButtonOptions.setObjectName(_fromUtf8("pushButtonOptions"))
-        self.horizontalLayout.addWidget(self.pushButtonOptions)
+        self.toolButtonOptions.setIcon(icon)
+        self.toolButtonOptions.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
+        self.toolButtonOptions.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+        self.toolButtonOptions.setAutoRaise(True)
+        self.toolButtonOptions.setArrowType(QtCore.Qt.NoArrow)
+        self.toolButtonOptions.setObjectName(_fromUtf8("toolButtonOptions"))
+        self.horizontalLayout.addWidget(self.toolButtonOptions)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.webView = QtWebKit.QWebView(self.dockWidgetContents)
         self.webView.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
