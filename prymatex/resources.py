@@ -75,6 +75,11 @@ STATICMAPPING = (
     (os.path.normcase("bundles/snippets.png"), "bundle-item-snippet"),
     (os.path.normcase("bundles/macros.png"), "bundle-item-macro"),
     (os.path.normcase("bundles/template-files.png"), "bundle-item-templatefile"),
+    
+    #Editor Sidebar
+    (os.path.normcase("modes/cursors.png"), "modes-cursors"),
+    (os.path.normcase("modes/snippet.png"), "modes-snippet"),
+    (os.path.normcase("modes/insert.png"), "modes-insert"),
 )
 
 RESOURCES = {}
@@ -86,7 +91,7 @@ PLUGINS = {}
 FileIconProvider = QtGui.QFileIconProvider()
 
 def getImagePath(index):
-    return RESOURCES.get(index)
+    return RESOURCES.get(index) or EXTERNAL.get(index)
 
 @memoized
 def getImage(index):
@@ -139,13 +144,7 @@ def buildResourceKey(filename, namePrefixes):
 
 def loadResources(resourcesPath, themeName = "oxygen"):
     iconsPath = os.path.join(resourcesPath, "Icons")
-    themesPath = os.path.join(resourcesPath, "IconThemes")
     imagesPath = os.path.join(resourcesPath, "Images")
-    #Test icon theme:
-    if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
-        #Add icon theme
-        QtGui.QIcon.setThemeSearchPaths([ themesPath ])
-        QtGui.QIcon.setThemeName(themeName)
     #Load custom images and icons
     for pixmapPath in [ imagesPath, iconsPath ]:
         for dirpath, dirnames, filenames in os.walk(pixmapPath):
@@ -160,6 +159,12 @@ def loadResources(resourcesPath, themeName = "oxygen"):
                     RESOURCES[name] = iconPath
 
 def loadPrymatexResources(resourcesPath):
+    themesPath = os.path.join(resourcesPath, "IconThemes")
+    #Test icon theme:
+    if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
+        #Add icon theme
+        QtGui.QIcon.setThemeSearchPaths([ themesPath ])
+        QtGui.QIcon.setThemeName(themeName)
     loadResources(resourcesPath)
     #Install fromTheme custom function
     QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme

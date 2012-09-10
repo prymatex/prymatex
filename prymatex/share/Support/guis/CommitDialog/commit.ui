@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>462</height>
+    <height>384</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -41,7 +41,14 @@
     </layout>
    </item>
    <item>
-    <widget class="QTextEdit" name="textEditSummary"/>
+    <widget class="QTextEdit" name="textEditSummary">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>100</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="label_2">
@@ -70,11 +77,14 @@
      </property>
      <item>
       <widget class="QToolButton" name="toolButtonSelect">
-       <property name="text">
-        <string>...</string>
+       <property name="icon">
+        <iconset theme="edit-select"/>
        </property>
-       <property name="arrowType">
-        <enum>Qt::DownArrow</enum>
+       <property name="popupMode">
+        <enum>QToolButton::MenuButtonPopup</enum>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

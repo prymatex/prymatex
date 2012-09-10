@@ -115,7 +115,7 @@ class QtBuild(build):
                 if filename.endswith('.ui'):
                     
                     self.compile_ui(os.path.join(dirpath, filename))
-        self.compile_rc(os.path.join('resources', 'resources.qrc'))
+        #self.compile_rc(os.path.join('resources', 'resources.qrc'))
     _wrappeduic = False
     
     @classmethod

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/themes.ui'
 #
-# Created: Thu Jun  7 06:28:45 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,6 +18,7 @@ except AttributeError:
 class Ui_FontThemeConfig(object):
     def setupUi(self, FontThemeConfig):
         FontThemeConfig.setObjectName(_fromUtf8("FontThemeConfig"))
+        FontThemeConfig.resize(383, 426)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/format-font-size-more.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         FontThemeConfig.setWindowIcon(icon)
@@ -155,4 +156,3 @@ class Ui_FontThemeConfig(object):
         self.label_9.setText(_('Scope Selector'))
         self.checkBox.setText(_('Antialias'))
 
-from prymatex import resources_rc

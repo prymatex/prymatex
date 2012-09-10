@@ -203,7 +203,7 @@ class PMXBrowserDock(QtGui.QDockWidget, Ui_BrowserDock, PMXBaseDock):
         }
 
         self.browserOptionsMenu, _ = createQMenu(optionsMenu, self)
-        self.pushButtonOptions.setMenu(self.browserOptionsMenu)
+        self.toolButtonOptions.setMenu(self.browserOptionsMenu)
 
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)

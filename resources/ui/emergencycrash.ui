@@ -14,7 +14,7 @@
    <string>Prymatex Crash</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../resources.qrc">
+   <iconset>
     <normaloff>:/images/prymatex/logo.png</normaloff>:/images/prymatex/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -102,7 +102,7 @@ Full detail about the exception has been pasted below.</string>
         <string>Copy</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
+        <iconset>
          <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
        </property>
       </widget>
@@ -113,7 +113,7 @@ Full detail about the exception has been pasted below.</string>
         <string>Close</string>
        </property>
        <property name="icon">
-        <iconset resource="../resources.qrc">
+        <iconset>
          <normaloff>:/icons/actions/application-exit.png</normaloff>:/icons/actions/application-exit.png</iconset>
        </property>
       </widget>
@@ -122,9 +122,7 @@ Full detail about the exception has been pasted below.</string>
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>pushClose</sender>

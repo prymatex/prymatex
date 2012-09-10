@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/project.ui'
 #
-# Created: Thu Aug 23 00:40:52 2012
+# Created: Fri Sep  7 14:19:37 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,9 +39,9 @@ class Ui_NewProjectDialog(object):
         self.label = QtGui.QLabel(NewProjectDialog)
         self.label.setObjectName(_fromUtf8("label"))
         self.formLayout_2.setWidget(1, QtGui.QFormLayout.LabelRole, self.label)
-        self.textEdit = QtGui.QTextEdit(NewProjectDialog)
-        self.textEdit.setObjectName(_fromUtf8("textEdit"))
-        self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.textEdit)
+        self.textDescription = QtGui.QTextEdit(NewProjectDialog)
+        self.textDescription.setObjectName(_fromUtf8("textDescription"))
+        self.formLayout_2.setWidget(1, QtGui.QFormLayout.FieldRole, self.textDescription)
         self.checkBoxUseDefaultLocation = QtGui.QCheckBox(NewProjectDialog)
         self.checkBoxUseDefaultLocation.setChecked(True)
         self.checkBoxUseDefaultLocation.setObjectName(_fromUtf8("checkBoxUseDefaultLocation"))
@@ -153,4 +153,3 @@ class Ui_NewProjectDialog(object):
         self.buttonCreate.setText(_('&Create'))
         self.buttonCancel.setText(_('C&ancel'))
 
-from prymatex import resources_rc

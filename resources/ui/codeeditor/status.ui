@@ -428,7 +428,9 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="modes-cursors"/>
+         <iconset theme="modes-cursors">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -450,7 +452,9 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="modes-snippet"/>
+         <iconset theme="modes-snippet">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -472,7 +476,9 @@ p, li { white-space: pre-wrap; }
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="modes-insert"/>
+         <iconset theme="modes-insert">
+          <normaloff/>
+         </iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -490,22 +496,14 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonMenuBundle">
-        <property name="maximumSize">
-         <size>
-          <width>45</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
+       <widget class="QToolButton" name="toolButtonMenuBundle">
         <property name="icon">
-         <iconset theme="applications-system">
-          <normaloff/>
-         </iconset>
+         <iconset theme="applications-system"/>
         </property>
-        <property name="flat">
+        <property name="popupMode">
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>

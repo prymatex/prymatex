@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/treewidget.ui'
 #
-# Created: Thu May 10 16:19:51 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -52,8 +52,8 @@ class Ui_TreeWidgetDialog(object):
         self.textLabelTitle = QtGui.QLabel(self.verticalLayoutWidget_2)
         font = QtGui.QFont()
         font.setPointSize(12)
-        font.setWeight(75)
         font.setBold(True)
+        font.setWeight(75)
         self.textLabelTitle.setFont(font)
         self.textLabelTitle.setObjectName(_fromUtf8("textLabelTitle"))
         self.widgetsLayout.addWidget(self.textLabelTitle)
@@ -71,4 +71,3 @@ class Ui_TreeWidgetDialog(object):
         TreeWidgetDialog.setWindowTitle(_('Dialog'))
         self.textLabelTitle.setText(_('TextLabel'))
 
-from prymatex import resources_rc

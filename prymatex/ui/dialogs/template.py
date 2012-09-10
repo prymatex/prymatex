@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/template.ui'
 #
-# Created: Thu Aug 23 00:38:08 2012
+# Created: Fri Sep  7 14:19:37 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,7 @@ class Ui_NewFromTemplateDialog(object):
     def setupUi(self, NewFromTemplateDialog):
         NewFromTemplateDialog.setObjectName(_fromUtf8("NewFromTemplateDialog"))
         NewFromTemplateDialog.setWindowModality(QtCore.Qt.WindowModal)
-        NewFromTemplateDialog.resize(450, 117)
+        NewFromTemplateDialog.resize(450, 126)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/prymatex/logo.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         NewFromTemplateDialog.setWindowIcon(icon)
@@ -104,4 +104,3 @@ class Ui_NewFromTemplateDialog(object):
         self.buttonCreate.setText(_('&Create'))
         self.buttonCancel.setText(_('C&ancel'))
 
-from prymatex import resources_rc

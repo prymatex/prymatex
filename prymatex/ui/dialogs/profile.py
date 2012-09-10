@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dialogs/profile.ui'
 #
-# Created: Thu May 10 16:19:51 2012
-#      by: PyQt4 UI code generator 4.8.4
+# Created: Fri Sep  7 14:19:37 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -79,4 +79,3 @@ class Ui_ProfileDialog(object):
         self.buttonExit.setText(_('Exit'))
         self.buttonStartPrymatex.setText(_('Start Prymatex'))
 
-from prymatex import resources_rc
