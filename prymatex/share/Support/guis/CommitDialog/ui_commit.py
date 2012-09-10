@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'commit.ui'
 #
-# Created: Fri Sep  7 17:41:19 2012
+# Created: Sat Sep  8 15:29:44 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_CommitDialog(object):
     def setupUi(self, CommitDialog):
         CommitDialog.setObjectName(_fromUtf8("CommitDialog"))
-        CommitDialog.resize(500, 462)
+        CommitDialog.resize(500, 384)
         CommitDialog.setMinimumSize(QtCore.QSize(500, 0))
         self.verticalLayout = QtGui.QVBoxLayout(CommitDialog)
         self.verticalLayout.setSpacing(2)
@@ -33,6 +33,7 @@ class Ui_CommitDialog(object):
         self.horizontalLayout_2.addWidget(self.comboBoxSummary)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.textEditSummary = QtGui.QTextEdit(CommitDialog)
+        self.textEditSummary.setMaximumSize(QtCore.QSize(16777215, 100))
         self.textEditSummary.setObjectName(_fromUtf8("textEditSummary"))
         self.verticalLayout.addWidget(self.textEditSummary)
         self.label_2 = QtGui.QLabel(CommitDialog)
@@ -48,7 +49,10 @@ class Ui_CommitDialog(object):
         self.horizontalLayout.setSpacing(2)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.toolButtonSelect = QtGui.QToolButton(CommitDialog)
-        self.toolButtonSelect.setArrowType(QtCore.Qt.DownArrow)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("edit-select"))
+        self.toolButtonSelect.setIcon(icon)
+        self.toolButtonSelect.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
+        self.toolButtonSelect.setAutoRaise(True)
         self.toolButtonSelect.setObjectName(_fromUtf8("toolButtonSelect"))
         self.horizontalLayout.addWidget(self.toolButtonSelect)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -72,7 +76,6 @@ class Ui_CommitDialog(object):
         CommitDialog.setWindowTitle(QtGui.QApplication.translate("CommitDialog", "GitHub Client", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("CommitDialog", "Summary of changes:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("CommitDialog", "Chose files to commit:", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButtonSelect.setText(QtGui.QApplication.translate("CommitDialog", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonOk.setText(QtGui.QApplication.translate("CommitDialog", "OK", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonCancel.setText(QtGui.QApplication.translate("CommitDialog", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
 
