@@ -48,9 +48,7 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         return dialogClass
         
     def createDialogInstance(self, dialogClass, mainWindow, async = False):
-        instance = dialogClass(mainWindow)
-        self.application.settings.configure(instance)
-        instance.initialize(mainWindow)
+        instance = self.application.createWidgetInstance(dialogClass, mainWindow)
         if async:
             instanceId = id(instance)
             self.instances[instanceId] = instance

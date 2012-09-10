@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
+import sys
 
 from PyQt4 import QtGui, QtCore
 
-from prymatex.core.plugin.dialog import PMXBaseDialog
+try:
+    from prymatex.core.plugin.dialog import PMXBaseDialog
+except:
+    PMXBaseDialog = type("PMXBaseDialog", (object,), {})
 
-from CommitDialog.ui_commit import Ui_CommitDialog
-from CommitDialog.model import FilesTableModel
+from ui_commit import Ui_CommitDialog
+from model import FilesTableModel
 
 class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
     def __init__(self, parent = None):
@@ -67,3 +71,10 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         return ''
         
 dialogClass = CommitDialog
+
+if __name__ == '__main__':
+    app = QtGui.QApplication([])
+    win = dialogClass()
+    win.setParameters({"title": "Commit", "files": "uno dos tres", "status": "M:?:A"})
+    win.show()
+    sys.exit(app.exec_())

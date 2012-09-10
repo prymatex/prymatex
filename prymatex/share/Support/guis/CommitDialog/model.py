@@ -4,7 +4,7 @@
 from PyQt4 import QtCore, QtGui
 
 class FilesTableModel(QtCore.QAbstractTableModel):
-    HEADER_NAMES = ["File", "Status"]
+    HEADER_NAMES = ["S", "File"]
     def __init__(self, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.files = []
@@ -29,9 +29,15 @@ class FilesTableModel(QtCore.QAbstractTableModel):
             return QtCore.Qt.Checked if f['checked'] else QtCore.Qt.Unchecked
         elif role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
             if index.column() == 0:
-                return f['path']
-            elif index.column() == 1:
                 return f['status']
+            elif index.column() == 1:
+                return f['path']
+        elif role in [QtCore.Qt.ForegroundRole]:
+            if index.column() == 0:
+                return QtCore.Qt.blue
+        elif role in [QtCore.Qt.BackgroundColorRole]:
+            if index.column() == 0:
+                return QtCore.Qt.red
 
     def setData(self, index, value, role):
         """Retornar verdadero si se puedo hacer el cambio, falso en caso contrario"""
