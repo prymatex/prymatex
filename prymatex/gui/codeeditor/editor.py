@@ -1177,7 +1177,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                 return
             startBlock = milestone.next()
         block = startBlock
-        while True:
+        while block.isValid():
             userData = block.userData()
             userData.foldedLevel += 1
             block.setVisible(userData.foldedLevel == 0)
@@ -1196,7 +1196,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             return
         
         block = startBlock
-        while True:
+        while block.isValid():
             userData = block.userData()
             userData.foldedLevel -= 1
             block.setVisible(userData.foldedLevel == 0)
