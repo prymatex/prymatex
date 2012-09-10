@@ -142,7 +142,7 @@ def buildResourceKey(filename, namePrefixes):
         resourceKey = newKey
     return resourceKey
 
-def loadResources(resourcesPath, themeName = "oxygen"):
+def loadResources(resourcesPath):
     iconsPath = os.path.join(resourcesPath, "Icons")
     imagesPath = os.path.join(resourcesPath, "Images")
     #Load custom images and icons
@@ -158,7 +158,7 @@ def loadResources(resourcesPath, themeName = "oxygen"):
                     name = buildResourceKey(filename, osextra.path.fullsplit(dirpath))
                     RESOURCES[name] = iconPath
 
-def loadPrymatexResources(resourcesPath):
+def loadPrymatexResources(resourcesPath, themeName = "oxygen"):
     themesPath = os.path.join(resourcesPath, "IconThemes")
     #Test icon theme:
     if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
