@@ -14,7 +14,8 @@ from prymatex.utils.i18n import ugettext as _
 QTERMWIDGET_IMPORT_SUGGESTOIN = '''
 QTermWidget disabled because of:
 {}
-Please install QTermWidget. Please note QTermWidget consists in a C++ with Python binding.
+Please install QTermWidget. Please note QTermWidget consists 
+in a C++ with Python binding.
 Get/Update it at https://github.com/prymatex/qtermwidget
 '''
 
@@ -65,11 +66,18 @@ class PMXTabTerminals(QtGui.QTabWidget):
         self.pushConfigTerminal = QtGui.QPushButton("C")
         
         #self.pushConfigTerminal.setIcon(getIcon('preference'))
-        self.pushConfigTerminal.setObjectName('pushConfigTerminal')
-        self.pushConfigTerminal.setToolTip('Configure terminal')
-        self.pushConfigTerminal.setFlat(True)
-        layout.addWidget(self.pushConfigTerminal)
+        # self.pushConfigTerminal.setObjectName('pushConfigTerminal')
+        # self.pushConfigTerminal.setToolTip('Configure terminal')
+        # self.pushConfigTerminal.setFlat(True)
+        # layout.addWidget(self.pushConfigTerminal)
+        self.cornerMenuButton = QtGui.QPushButton()        
+        self.cornerMenuButtonMenu = QtGui.QMenu()
+        self.cornerMenuButton.setMenu(self.cornerMenuButtonMenu)
+        self.cornerMenuButtonMenu.addAction("Alfa")
+        self.cornerMenuButtonMenu.addAction("Beta")
+        self.cornerMenuButtonMenu.addAction("Gama")
         
+        layout.addWidget(self.cornerMenuButton)
         
         # Close
         self.pushCloseTerminal = QtGui.QPushButton()

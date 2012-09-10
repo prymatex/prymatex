@@ -187,7 +187,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
         Open and read a file, return the content.
         """
         if not os.path.exists(filePath):
-            raise exceptions.IOException("The file does not exist")
+            raise exceptions.IOException("The file does not exist: %s" % filePath)
         if not os.path.isfile(filePath):
             raise exceptions.IOException("%s is not a file" % filePath)
         self.last_directory = os.path.dirname(filePath)
