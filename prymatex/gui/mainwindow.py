@@ -248,7 +248,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
     # Create and manage editors
     #============================================================
     def addEmptyEditor(self):
-        editor = self.application.getEditorInstance(parent = self)
+        editor = self.application.createEditorInstance(parent = self)
         self.addEditor(editor)
         return editor
         

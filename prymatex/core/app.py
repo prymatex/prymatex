@@ -357,6 +357,9 @@ class PMXApplication(QtGui.QApplication):
             self.extendComponent(settingClass)
             self.settingsDialog.register(settingClass(componentClass.settings))
 
+    def createWidgetInstance(self, widgetClass, parent):
+        return self.pluginManager.createWidgetInstance(widgetClass, parent)
+    
     #========================================================
     # Create Zmq Sockets
     #========================================================
@@ -369,6 +372,11 @@ class PMXApplication(QtGui.QApplication):
     #========================================================
     # Editors and mainWindow handle
     #========================================================
+    def createEditorInstance(self, filePath = None, parent = None):
+        editorClass = self.pluginManager.findEditorClassForFile(filePath) if filePath is not None else self.pluginManager.defaultEditor()
+        if editorClass is not None:
+            return self.createWidgetInstance(editorClass, parent)
+    
     def createMainWindow(self):
         """Creates the windows"""
         from prymatex.gui.mainwindow import PMXMainWindow
@@ -399,9 +407,6 @@ class PMXApplication(QtGui.QApplication):
         #Para cada mainwindow buscar el editor
         return self.mainWindow, self.mainWindow.findEditorForFile(filePath)
             
-    def getEditorInstance(self, filePath = None, parent = None):
-        return self.pluginManager.createEditor(filePath, parent)
-    
     def canBeHandled(self, filePath):
         #from prymatex.utils.pyqtdebug import ipdb_set_trace
         #ipdb_set_trace()
@@ -434,7 +439,7 @@ class PMXApplication(QtGui.QApplication):
                     editor.setCursorPosition(cursorPosition)
         else:
             mainWindow = mainWindow or self.mainWindow
-            editor = self.getEditorInstance(filePath, mainWindow)
+            editor = self.createEditorInstance(filePath, mainWindow)
             project = self.projectManager.findProjectForPath(filePath)
             if project != None:
                 self.logger.debug("The file %s belongs to project %s", (filePath, project.path))

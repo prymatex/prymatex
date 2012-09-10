@@ -117,17 +117,6 @@ class PMXPluginManager(PMXBaseComponent):
         instances.append(instance)
         return instance
     
-    def createEditor(self, filePath, mainWindow):
-        editorClass = self.editors[0]
-        if filePath is not None:
-            mimetype = self.application.fileManager.mimeType(filePath)
-            for Klass in self.editors:
-                if Klass.acceptFile(filePath, mimetype):
-                    editorClass = Klass
-                    break
-        editor = self.createWidgetInstance(editorClass, mainWindow)
-        return editor
-    
     def createCustomActions(self, mainWindow):
         for editorClass in self.editors:
             addonClasses = self.addons.get(editorClass, [])
@@ -172,6 +161,18 @@ class PMXPluginManager(PMXBaseComponent):
             status = self.createWidgetInstance(statusBarClass, mainWindow)
             mainWindow.addStatusBar(status)
     
+    #==================================================
+    # Handle editor classes
+    #==================================================
+    def findEditorClassForFile(self, filePath):
+        mimetype = self.application.fileManager.mimeType(filePath)
+        for Klass in self.editors:
+            if Klass.acceptFile(filePath, mimetype):
+                return Klass
+    
+    def defaultEditor(self):
+        return self.editors[0]
+
     #==================================================
     # Load plugins
     #==================================================
