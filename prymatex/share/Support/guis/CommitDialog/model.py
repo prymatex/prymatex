@@ -62,3 +62,6 @@ class FilesTableModel(QtCore.QAbstractTableModel):
     
     def flags(self, index):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
+        
+    def selectedFiles(self):
+        return map(lambda f: f["path"], filter(lambda f: f["checked"], self.files))

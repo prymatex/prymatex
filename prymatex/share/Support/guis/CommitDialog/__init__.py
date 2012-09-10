@@ -22,6 +22,7 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         self.tableViewFiles.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tableViewFiles.customContextMenuRequested.connect(self.showTableViewFilesContextMenu)
         self.tableViewFiles.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableViewFiles.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch);
         
     def showTableViewFilesContextMenu(self, point):
         index = self.tableViewFiles.indexAt(point)
@@ -67,6 +68,7 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         if code == QtGui.QDialog.Accepted:
             args = [ "dylan" ]
             args.append("'%s'" % self.textEditSummary.toPlainText())
+            args.append(" ".join(self.filesTableModel.selectedFiles()))
             return " ".join(args)
         return ''
         
@@ -76,5 +78,5 @@ if __name__ == '__main__':
     app = QtGui.QApplication([])
     win = dialogClass()
     win.setParameters({"title": "Commit", "files": "uno dos tres", "status": "M:?:A"})
-    win.show()
+    print win.execModal()
     sys.exit(app.exec_())
