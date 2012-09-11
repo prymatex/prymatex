@@ -158,6 +158,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
     #==================================================================
     # Path data
     #==================================================================
+    exists = lambda self, path: os.path.exists(path)
     extension = lambda self, path: os.path.splitext(path.lower())[-1][1:]
     splitext = lambda self, path: os.path.splitext(path)
     dirname = lambda self, path: os.path.dirname(path)
