@@ -24,8 +24,9 @@ class PMXBaseComponent(object):
 
     def buildEnvironment(self, **kwargs):
         return {}
-    
+
 class PMXBaseWidgetComponent(PMXBaseComponent):
+    # TODO esto
     KEY_HELPERS = {}
     def __init__(self):
         self.overlays = []
