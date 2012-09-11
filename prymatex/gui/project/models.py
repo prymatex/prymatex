@@ -30,10 +30,6 @@ class PMXProjectTreeModel(TreeModel):
         elif role == QtCore.Qt.DecorationRole:
             return node.icon
 
-    def refreshProjectByPath(self, path):
-        index = self.indexForPath(path)
-        self.refresh(index)
-    
     def indexForPath(self, path):
         currentIndex = QtCore.QModelIndex()
         while self.rowCount(currentIndex):
@@ -86,7 +82,7 @@ class PMXProjectTreeModel(TreeModel):
         if notify: 
             self.endInsertRows()
         parentNode._populated = True
-        
+    
     def refresh(self, index):
         node = self.node(index)
         while not node.isRootNode() and not os.path.exists(node.path):
@@ -95,7 +91,11 @@ class PMXProjectTreeModel(TreeModel):
         #TODO: mejorar esto de la verificacion con el root node
         if not node.isRootNode() and node.isdir:
             self._update_directory(node, index, True)
-            
+
+    def refreshPath(self, path):
+        index = self.indexForPath(path)
+        self.refresh(index)
+    
     def nodeForPath(self, path):
         return self.node(self.indexForPath)
 

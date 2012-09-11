@@ -14,6 +14,8 @@ import fnmatch
 from PyQt4 import QtCore, QtGui
 
 from prymatex.utils import osextra
+from prymatex.utils.decorators import deprecated
+
 from prymatex.core.plugin import PMXBaseComponent
 from prymatex.core.settings import pmxConfigPorperty
 from prymatex.core import exceptions
@@ -233,7 +235,7 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
         self.logger.debug("Unwatch path %s" % path)
         self.fileWatcher.removePath(path)
     
-    def getDirectory(self, filePath = None):
+    def directory(self, filePath = None):
         """
         Obtiene un directorio para el path
         """
@@ -243,6 +245,10 @@ class PMXFileManager(QtCore.QObject, PMXBaseComponent):
         if os.path.isdir(filePath):
             return filePath
         return os.path.dirname(filePath)
+        
+    @deprecated
+    def getDirectory(self, filePath = None):
+        return self.directory(filePath)
 
     def listDirectory(self, directory, absolute = False, filePatterns = []):
         if not os.path.isdir(directory):

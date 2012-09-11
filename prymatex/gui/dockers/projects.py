@@ -252,34 +252,41 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     def currentNode(self):
         return self.projectTreeProxyModel.node(self.treeViewProjects.currentIndex())
         
+    def currentDirectory(self):
+        return self.application.fileManager.directory(self.currentPath())
+
     #================================================
     # Actions Create, Delete, Rename objects
     #================================================      
     @QtCore.pyqtSlot()
     def on_actionNewFile_triggered(self):
-        basePath = self.currentPath()
-        self.createFile(basePath)
-        #TODO: si esta en auto update ver como hacer los refresh
-        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
+        currentDirectory = self.currentDirectory()
+        filePath = self.createFile(currentDirectory)
+        if filePath is not None:
+            self.application.openFile(filePath)
+            #TODO: si esta en auto update ver como hacer los refresh
+            self.projectTreeProxyModel.refreshPath(currentDirectory)
     
     @QtCore.pyqtSlot()
     def on_actionNewFromTemplate_triggered(self):
-        basePath = self.currentPath()
-        self.createFileFromTemplate(basePath)
-        #TODO: si esta en auto update ver como hacer los refresh
-        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
+        currentDirectory = self.currentDirectory()
+        filePath = self.createFileFromTemplate(currentDirectory)
+        if filePath is not None:
+            self.application.openFile(filePath)
+            #TODO: si esta en auto update ver como hacer los refresh
+            self.projectTreeProxyModel.refreshPath(currentDirectory)
     
     @QtCore.pyqtSlot()
     def on_actionNewFolder_triggered(self):
-        basePath = self.currentPath()
-        self.createDirectory(basePath)
-        #TODO: si esta en auto update ver como hacer los refresh
-        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
+        currentDirectory = self.currentDirectory()
+        dirPath = self.createDirectory(currentDirectory)
+        if dirPath is not None:
+            #TODO: si esta en auto update ver como hacer los refresh
+            self.projectTreeProxyModel.refreshPath(currentDirectory)
 
     @QtCore.pyqtSlot()
     def on_actionNewProject_triggered(self):
         PMXNewProjectDialog.getNewProject(self)
-        self.projectTreeProxyModel.refresh(self.treeViewProjects.currentIndex())
 
     @QtCore.pyqtSlot()
     def on_actionDelete_triggered(self):

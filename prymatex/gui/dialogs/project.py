@@ -102,7 +102,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
         
     def runCreateProject(self, name, location):
-        description = self.textEdit.toPlainText()
+        description = self.textDescription.toPlainText()
         self.projectCreated = self.application.projectManager.createProject(name, location, description)
 
         #Set template's bundle for project
@@ -117,8 +117,8 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
 
         self.accept()
 
-    def afterRunTemplate(self, context):
-        self.runCreateProject(context.environment['TM_NEW_PROJECT_NAME'], context.environment['TM_NEW_PROJECT_LOCATION'])
+    def afterRunTemplate(self, name, location):
+        self.runCreateProject(name, location)
 
     def runTemplateForProject(self, name, location):
         index = self.projectProxyModel.createIndex(self.comboBoxTemplate.currentIndex(), 0)
