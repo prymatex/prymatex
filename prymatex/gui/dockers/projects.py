@@ -89,9 +89,8 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             
             
     def keyPressEvent(self, event):
-        # TODO Terminar esto que es una prueba, ver de meterle teclas o algo
-        print "apreto tecla sobre docker"
-        return QtGui.QDockWidget.keyPressEvent(self, event)
+        if not self.runKeyHelper(event):
+            return QtGui.QDockWidget.keyPressEvent(self, event)
 
     def setupPropertiesDialog(self):
         from prymatex.gui.dialogs.properties import PMXPropertiesDialog

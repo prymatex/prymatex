@@ -4,7 +4,7 @@
 from PyQt4 import QtGui, QtCore
 
 from prymatex import resources
-from prymatex.core.plugin import PMXBaseWidgetComponent, PMXBaseAddon
+from prymatex.core.plugin import PMXBaseWidgetComponent, PMXBaseAddon, PMXBaseKeyHelper
 
 class PMXBaseDock(PMXBaseWidgetComponent):
     SHORTCUT = ""
@@ -16,6 +16,19 @@ class PMXBaseDock(PMXBaseWidgetComponent):
         self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
         self.toggleViewAction().setIcon(self.ICON)
     
+    def runKeyHelper(self, event):
+        return PMXBaseWidgetComponent.runKeyHelper(self, event.key())
+        
+#======================================================================
+# Base Helper
+#======================================================================    
+class PMXBaseDockKeyHelper(PMXBaseKeyHelper):
+    def accept(self, editor, event):
+        return PMXBaseKeyHelper.accept(self, editor, event.key())
+    
+    def execute(self, editor, event):
+        PMXBaseKeyHelper.accept(self, editor, event.key())
+        
 #========================================
 # BASE ADDON
 #========================================

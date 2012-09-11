@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -196,7 +196,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
+    <iconset theme="document-save">
      <normaloff>:/icons/actions/document-save.png</normaloff>:/icons/actions/document-save.png</iconset>
    </property>
    <property name="text">
@@ -208,7 +208,7 @@
   </action>
   <action name="actionSaveAs">
    <property name="icon">
-    <iconset>
+    <iconset theme="document-save-as">
      <normaloff>:/icons/actions/document-save-as.png</normaloff>:/icons/actions/document-save-as.png</iconset>
    </property>
    <property name="text">
@@ -220,7 +220,7 @@
   </action>
   <action name="actionSaveAll">
    <property name="icon">
-    <iconset>
+    <iconset theme="document-save-all">
      <normaloff>:/icons/actions/document-save-all.png</normaloff>:/icons/actions/document-save-all.png</iconset>
    </property>
    <property name="text">
@@ -232,7 +232,7 @@
   </action>
   <action name="actionClose">
    <property name="icon">
-    <iconset>
+    <iconset theme="document-close">
      <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
    </property>
    <property name="text">
@@ -243,6 +243,11 @@
    </property>
   </action>
   <action name="actionCloseOthers">
+   <property name="icon">
+    <iconset theme="tab-close-other">
+     <normaloff/>
+    </iconset>
+   </property>
    <property name="text">
     <string>Close Others</string>
    </property>
@@ -252,7 +257,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset>
+    <iconset theme="application-exit">
      <normaloff>:/icons/actions/application-exit.png</normaloff>:/icons/actions/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -261,7 +266,7 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-undo">
      <normaloff>:/icons/actions/edit-undo.png</normaloff>:/icons/actions/edit-undo.png</iconset>
    </property>
    <property name="text">
@@ -273,7 +278,7 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-redo">
      <normaloff>:/icons/actions/edit-redo.png</normaloff>:/icons/actions/edit-redo.png</iconset>
    </property>
    <property name="text">
@@ -285,7 +290,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-copy">
      <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
@@ -297,7 +302,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-cut">
      <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
@@ -309,7 +314,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-paste">
      <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
@@ -321,7 +326,7 @@
   </action>
   <action name="actionSettings">
    <property name="icon">
-    <iconset>
+    <iconset theme="configure">
      <normaloff>:/icons/actions/configure.png</normaloff>:/icons/actions/configure.png</iconset>
    </property>
    <property name="text">
@@ -336,7 +341,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset theme="view-fullscreen">
      <normaloff>:/icons/actions/view-fullscreen.png</normaloff>:/icons/actions/view-fullscreen.png</iconset>
    </property>
    <property name="text">
@@ -389,11 +394,21 @@
    </property>
   </action>
   <action name="actionTakeScreenshot">
+   <property name="icon">
+    <iconset theme="ksnapshot">
+     <normaloff/>
+    </iconset>
+   </property>
    <property name="text">
     <string>Take &amp;Screenshot</string>
    </property>
   </action>
   <action name="actionAbout">
+   <property name="icon">
+    <iconset theme="help-about">
+     <normaloff/>
+    </iconset>
+   </property>
    <property name="text">
     <string>&amp;About...</string>
    </property>
@@ -438,7 +453,9 @@
   </action>
   <action name="actionOpenAllRecentFiles">
    <property name="icon">
-    <iconset theme="document-open-recent"/>
+    <iconset theme="document-open-recent">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Open All Recent Files</string>
@@ -508,7 +525,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-delete">
      <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
    </property>
    <property name="text">
@@ -527,7 +544,7 @@
   </action>
   <action name="actionLastEditLocation">
    <property name="icon">
-    <iconset>
+    <iconset theme="go-first-view">
      <normaloff>:/icons/actions/go-first-view.png</normaloff>:/icons/actions/go-first-view.png</iconset>
    </property>
    <property name="text">
@@ -539,7 +556,7 @@
   </action>
   <action name="actionLocationBack">
    <property name="icon">
-    <iconset>
+    <iconset theme="go-previous-view">
      <normaloff>:/icons/actions/go-previous-view.png</normaloff>:/icons/actions/go-previous-view.png</iconset>
    </property>
    <property name="text">
@@ -551,7 +568,7 @@
   </action>
   <action name="actionLocationForward">
    <property name="icon">
-    <iconset>
+    <iconset theme="go-next-view">
      <normaloff>:/icons/actions/go-next-view.png</normaloff>:/icons/actions/go-next-view.png</iconset>
    </property>
    <property name="text">
