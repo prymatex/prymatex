@@ -87,11 +87,9 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             env.update(node.project.buildEnvironment())
         return env
             
-            
     def keyPressEvent(self, event):
-        # if not self.runKeyHelper(event):
-        #             return QtGui.QDockWidget.keyPressEvent(self, event)
-        return QtGui.QDockWidget.keyPressEvent(self, event)
+        if not self.runKeyHelper(event.key()):
+            return QtGui.QDockWidget.keyPressEvent(self, event)
 
     def setupPropertiesDialog(self):
         from prymatex.gui.dialogs.properties import PMXPropertiesDialog
