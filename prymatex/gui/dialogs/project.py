@@ -102,7 +102,7 @@ class PMXNewProjectDialog(QtGui.QDialog, Ui_NewProjectDialog):
         self.userEnvironment = EnvironmentDialog.editEnvironment(self, self.userEnvironment, tEnv)
         
     def runCreateProject(self, name, location):
-        description = self.textEdit.toPlainText()
+        description = self.textDescription.toPlainText()
         self.projectCreated = self.application.projectManager.createProject(name, location, description)
 
         #Set template's bundle for project
