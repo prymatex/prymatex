@@ -128,7 +128,7 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
 class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
         PMXBaseEditorMode.__init__(self, editor)
-        self.helper = helpers.MultiCursorHelper()
+        self.helper = helpers.MultiCursorHelper(editor)
         self.cursors = []
         self.selectedCursors = []
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
@@ -381,7 +381,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
             self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
         if self.helper.accept(self.editor, event):
             cursor = self.cursors[0] if event.modifiers() & QtCore.Qt.ShiftModifier else self.cursors[-1]
-            self.helper.execute(self.editor, event, cursor)
+            self.helper.execute(event, cursor)
         elif event.key() == QtCore.Qt.Key_Escape:
             #Deprecated usar una lista de cursores ordenados para tomar de [0] y [-1]
             scursor = min(self.cursors, key = lambda cursor: cursor.position())

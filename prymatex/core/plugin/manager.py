@@ -77,10 +77,11 @@ class PMXPluginManager(PMXBaseComponent):
         statusBarClass.plugin = self.currentPluginDescriptor
         self.statusBars.append(statusBarClass)
     
-    def registerKeyHelper(self, editorClass, helperClass):
+    def registerKeyHelper(self, widgetClass, helperClass):
         self.application.extendComponent(helperClass)
         helperClass.plugin = self.currentPluginDescriptor
-        editorClass.addKeyHelper(helperClass())
+        keyHelperClasses = self.keyHelpers.setdefault(widgetClass, [])
+        keyHelperClasses.append(helperClass)
         
     def registerOverlay(self, widgetClass, overlayClass):
         self.application.extendComponent(overlayClass)
@@ -101,14 +102,16 @@ class PMXPluginManager(PMXBaseComponent):
         instance = widgetClass(mainWindow)
         
         for overlayClass in self.overlays.get(widgetClass, []):
-            #TODO: Ver que pasa con esto de pasarle la instancia a la construccion del objeto, corresponde?
             overlay = overlayClass(instance)
             instance.addOverlay(overlay)
 
         for addonClass in self.addons.get(widgetClass, []):
-            #TODO: Ver que pasa con esto de pasarle la instancia a la construccion del objeto, corresponde?
             addon = addonClass(instance)
             instance.addAddon(addon)
+        
+        for keyHelperClass in self.keyHelpers.get(widgetClass, []):
+            keyHelper = keyHelperClass(instance)
+            instance.addKeyHelper(keyHelper)
             
         self.application.settings.configure(instance)
         instance.initialize(mainWindow)

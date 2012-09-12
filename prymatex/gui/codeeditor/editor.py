@@ -912,8 +912,8 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         cursor = self.textCursor()
         for helper in self.findHelpers(event.key()):
             #Buscar Entre los helpers
-            if helper.accept(self, event, cursor, scope):
-                helper.execute(self, event, cursor, scope)
+            if helper.accept(event, cursor, scope):
+                helper.execute(event, cursor, scope)
                 return True
         return False
 

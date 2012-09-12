@@ -181,11 +181,15 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
 # Base Helper
 #======================================================================    
 class PMXBaseEditorKeyHelper(PMXBaseKeyHelper):
-    def accept(self, editor, event):
-        return PMXBaseKeyHelper.accept(self, editor, event.key())
+    def initialize(self, editor):
+        PMXBaseKeyHelper.initialize(self, editor)
+        self.editor = editor
+
+    def accept(self, event):
+        return PMXBaseKeyHelper.accept(self, event.key())
     
-    def execute(self, editor, event):
-        PMXBaseKeyHelper.accept(self, editor, event.key())
+    def execute(self, event):
+        PMXBaseKeyHelper.accept(self, event.key())
 
 #======================================================================
 # Base Addon
