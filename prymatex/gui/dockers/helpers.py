@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from PyQt4 import QtCore
+
 from prymatex.core.plugin.dock import PMXBaseDockKeyHelper
 
 class RefreshHelper(PMXBaseDockKeyHelper):

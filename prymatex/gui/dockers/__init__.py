@@ -12,8 +12,11 @@ from prymatex.gui.dockers.terminal import PMXTerminalDock
 from prymatex.gui.dockers.search import PMXSearchDock
 from prymatex.gui.dockers.process import PMXProcessDock
 
+from prymatex.gui.dockers.helpers import RefreshHelper
+
 def registerPlugin(manager):
     manager.registerDocker(PMXProjectDock)
+    manager.registerKeyHelper(PMXProjectDock, RefreshHelper)
     manager.registerDocker(PMXFileSystemDock)
     manager.registerDocker(PMXTerminalDock)
     manager.registerDocker(PMXConsoleDock)

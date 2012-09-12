@@ -88,7 +88,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         return env
             
     def keyPressEvent(self, event):
-        if not self.runKeyHelper(event.key()):
+        if not self.runKeyHelper(event):
             return QtGui.QDockWidget.keyPressEvent(self, event)
 
     def setupPropertiesDialog(self):

@@ -16,6 +16,15 @@ class PMXBaseDock(PMXBaseWidgetComponent):
         self.toggleViewAction().setShortcut(QtGui.QKeySequence(self.SHORTCUT))
         self.toggleViewAction().setIcon(self.ICON)
 
+    def runKeyHelper(self, event):
+        runHelper = False
+        for helper in self.findHelpers(event.key()):
+            runHelper = helper.accept(event)
+            if runHelper:
+                helper.execute(event)
+                break
+        return runHelper
+
 #======================================================================
 # Base Helper
 #======================================================================    

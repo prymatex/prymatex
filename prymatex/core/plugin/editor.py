@@ -168,7 +168,13 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         return []
     
     def runKeyHelper(self, event):
-        return PMXBaseWidgetComponent.runKeyHelper(self, event.key())
+        runHelper = False
+        for helper in self.findHelpers(event.key()):
+            runHelper = helper.accept(event)
+            if runHelper:
+                helper.execute(event)
+                break
+        return runHelper
         
     #======================================================================
     # For Plugin Manager administrator
