@@ -40,7 +40,7 @@ class Ui_CommitDialog(object):
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout.addWidget(self.label_2)
         self.tableViewFiles = QtGui.QTableView(CommitDialog)
-        self.tableViewFiles.setAlternatingRowColors(True)
+        #self.tableViewFiles.setAlternatingRowColors(True)
         self.tableViewFiles.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.tableViewFiles.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tableViewFiles.setObjectName(_fromUtf8("tableViewFiles"))

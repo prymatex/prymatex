@@ -4,15 +4,16 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 
-try:
-    from prymatex.core.plugin.dialog import PMXBaseDialog
-except:
-    PMXBaseDialog = type("PMXBaseDialog", (object,), {})
+from prymatex.core.plugin.dialog import PMXBaseDialog
+from prymatex.core.settings import pmxConfigPorperty
+from prymatex.gui import utils
 
 from ui_commit import Ui_CommitDialog
 from model import FilesTableModel
 
 class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
+    lastCommitSummary = pmxConfigPorperty(default=[])
+    
     def __init__(self, parent = None):
         QtGui.QDialog.__init__(self, parent)
         PMXBaseDialog.__init__(self)
@@ -24,6 +25,47 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         self.tableViewFiles.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tableViewFiles.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch);
         
+        #Setup Context Menu
+        selectMenu = { 
+            "title": "Select Menu",
+            "items": [
+                {   'title': 'Choose All',
+                    'callback': lambda dialog: dialog.chooseAll(),
+                },
+                {   'title': 'Choose None',
+                    'callback': lambda dialog: dialog.chooseNone(),
+                },
+                {   'title': 'Revert to Default Choices',
+                    'callback': lambda dialog: dialog.revertChoices(),
+                },
+            ]
+        }
+        
+        self.selectMenu, _ = utils.createQMenu(selectMenu, self, connectActions = True)
+        self.toolButtonSelect.setMenu(self.selectMenu)
+        
+    def chooseAll(self):
+        print "chooseAll"
+        
+    def chooseNone(self):
+        print "chooseNone"
+        
+    def revertChoices(self):
+        print "revertChoices"
+        
+    def initialize(self, mainWindow):
+        self.lastCommitSummary = self.lastCommitSummary[:10]
+        self.comboBoxSummary.addItem("Previous Summaries")
+        for summary in self.lastCommitSummary:
+            self.comboBoxSummary.addItem("%s ..." % " ".join(summary.split()[:8]))
+
+    @QtCore.pyqtSlot(int)
+    def on_comboBoxSummary_activated(self, index):
+        index -= 1
+        if index < len(self.lastCommitSummary):
+            self.textEditSummary.setPlainText(self.lastCommitSummary[index])
+            self.comboBoxSummary.setCurrentIndex(0)
+            
     def showTableViewFilesContextMenu(self, point):
         index = self.tableViewFiles.indexAt(point)
         if index.isValid():
@@ -37,7 +79,6 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         filePaths = []
         fileStatus = []
         self.actions = []
-        print parameters
         if "title" in parameters:
             self.setWindowTitle(parameters["title"])
         if "files" in parameters:
@@ -67,10 +108,14 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         code = self.exec_()
         if code == QtGui.QDialog.Accepted:
             args = [ "dylan" ]
-            args.append("'%s'" % self.textEditSummary.toPlainText())
+            message = self.textEditSummary.toPlainText()
+            args.append("'%s'" % message)
+            if message not in self.lastCommitSummary:
+                self.lastCommitSummary.append(message)
+                self.settings.setValue("lastCommitSummary", self.lastCommitSummary)
             args.append(" ".join(self.filesTableModel.selectedFiles()))
             return " ".join(args)
-        return ''
+        return 'cancel'
         
 dialogClass = CommitDialog
 

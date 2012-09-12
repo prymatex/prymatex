@@ -66,7 +66,7 @@ class PMXApplication(QtGui.QApplication):
         
     def loadGraphicalUserInterface(self):
         splash = self.buildSplashScreen()
-        #splash.show()
+        splash.show()
         try:
             self.cacheManager = self.setupCacheManager()        #Cache system Manager
             self.pluginManager = self.setupPluginManager()      #Prepare plugin manager
@@ -373,7 +373,8 @@ class PMXApplication(QtGui.QApplication):
     # Editors and mainWindow handle
     #========================================================
     def createEditorInstance(self, filePath = None, parent = None):
-        editorClass = self.pluginManager.findEditorClassForFile(filePath) if filePath is not None else self.pluginManager.defaultEditor()
+        editorClass = filePath is not None and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()
+        
         if editorClass is not None:
             return self.createWidgetInstance(editorClass, parent)
     
@@ -420,16 +421,9 @@ class PMXApplication(QtGui.QApplication):
                 return True
         return False
     
-    @printtime
     def openFile(self, filePath, cursorPosition = None, focus = True, mainWindow = None, useTasks = True):
         """Open a editor in current window"""
         filePath = self.fileManager.normcase(filePath)
-        
-        #Esto es mejor implementarlo con los mime type de los editores
-        #if not forceOpen:
-        #   if not self.canBeHandled(filePath):
-        #        self.logger.debug("Prymatex does not understand filePath, perhaps you should add it to fileTypes")
-        #        return QtGui.QDesktopServices.openUrl(QtCore.QUrl("file://%s" % filePath, QtCore.QUrl.TolerantMode))
         
         if self.fileManager.isOpen(filePath):
             mainWindow, editor = self.findEditorForFile(filePath)
@@ -437,7 +431,7 @@ class PMXApplication(QtGui.QApplication):
                 mainWindow.setCurrentEditor(editor)
                 if isinstance(cursorPosition, tuple):
                     editor.setCursorPosition(cursorPosition)
-        else:
+        elif self.fileManager.exists(filePath):
             mainWindow = mainWindow or self.mainWindow
             editor = self.createEditorInstance(filePath, mainWindow)
             project = self.projectManager.findProjectForPath(filePath)

@@ -76,7 +76,9 @@ class PMXProject(PMXBundleItem):
             self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
             
     def afterExecute(self, callback, context):
-        callback(context)
+        name = context.environment['TM_NEW_PROJECT_NAME']
+        location = context.environment['TM_NEW_PROJECT_LOCATION']
+        callback(name, location)
 
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):

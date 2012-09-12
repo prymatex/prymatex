@@ -148,7 +148,7 @@
   </widget>
   <action name="actionNewFile">
    <property name="icon">
-    <iconset>
+    <iconset theme="document-new">
      <normaloff>:/icons/actions/document-new.png</normaloff>:/icons/actions/document-new.png</iconset>
    </property>
    <property name="text">
@@ -157,7 +157,7 @@
   </action>
   <action name="actionNewFolder">
    <property name="icon">
-    <iconset>
+    <iconset theme="folder-new">
      <normaloff>:/icons/actions/folder-new.png</normaloff>:/icons/actions/folder-new.png</iconset>
    </property>
    <property name="text">
@@ -178,7 +178,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-delete">
      <normaloff>:/icons/actions/edit-delete.png</normaloff>:/icons/actions/edit-delete.png</iconset>
    </property>
    <property name="text">
@@ -219,7 +219,7 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset>
+    <iconset theme="view-refresh">
      <normaloff>:/icons/actions/view-refresh.png</normaloff>:/icons/actions/view-refresh.png</iconset>
    </property>
    <property name="text">
@@ -231,7 +231,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset theme="document-open">
      <normaloff>:/icons/actions/document-open.png</normaloff>:/icons/actions/document-open.png</iconset>
    </property>
    <property name="text">
@@ -245,7 +245,7 @@
   </action>
   <action name="actionRename">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-rename">
      <normaloff>:/icons/actions/edit-rename.png</normaloff>:/icons/actions/edit-rename.png</iconset>
    </property>
    <property name="text">
@@ -336,7 +336,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-copy">
      <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
@@ -348,7 +348,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-cut">
      <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
@@ -360,7 +360,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset>
+    <iconset theme="edit-paste">
      <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
    </property>
    <property name="text">

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/configure/themes.ui'
 #
-# Created: Fri Sep  7 14:19:37 2012
+# Created: Mon Sep 10 15:31:09 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ except AttributeError:
 class Ui_FontThemeConfig(object):
     def setupUi(self, FontThemeConfig):
         FontThemeConfig.setObjectName(_fromUtf8("FontThemeConfig"))
-        FontThemeConfig.resize(383, 426)
+        FontThemeConfig.resize(387, 426)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/actions/format-font-size-more.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         FontThemeConfig.setWindowIcon(icon)
@@ -116,9 +116,13 @@ class Ui_FontThemeConfig(object):
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         self.pushButtonAdd = QtGui.QPushButton(self.groupBox)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("list-add"))
+        self.pushButtonAdd.setIcon(icon)
         self.pushButtonAdd.setObjectName(_fromUtf8("pushButtonAdd"))
         self.horizontalLayout_3.addWidget(self.pushButtonAdd)
         self.pushButtonRemove = QtGui.QPushButton(self.groupBox)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("list-remove"))
+        self.pushButtonRemove.setIcon(icon)
         self.pushButtonRemove.setObjectName(_fromUtf8("pushButtonRemove"))
         self.horizontalLayout_3.addWidget(self.pushButtonRemove)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -151,8 +155,6 @@ class Ui_FontThemeConfig(object):
         self.label_8.setText(_('Line Highlight'))
         self.label_5.setText(_('Selection'))
         self.label_7.setText(_('Caret'))
-        self.pushButtonAdd.setText(_('+'))
-        self.pushButtonRemove.setText(_('-'))
         self.label_9.setText(_('Scope Selector'))
         self.checkBox.setText(_('Antialias'))
 

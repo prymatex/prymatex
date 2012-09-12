@@ -124,9 +124,8 @@ class PMXTemplate(PMXBundleItem):
             self.manager.runProcess(context, functools.partial(self.afterExecute, callback))
     
     def afterExecute(self, callback, context):
-        #TODO: Ver los errores
-        newFileOrPath = context.environment.get('TM_NEW_FILE', context.environment.get('TM_NEW_PROJECT_LOCATION', None))
-        callback(newFileOrPath)
+        filePath = context.environment.get('TM_NEW_FILE', None)
+        callback(filePath)
 
     @classmethod
     def loadBundleItem(cls, path, namespace, bundle, manager):

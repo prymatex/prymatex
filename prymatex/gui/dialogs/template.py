@@ -61,12 +61,12 @@ class PMXNewFromTemplateDialog(QtGui.QDialog, Ui_NewFromTemplateDialog):
                 if var['enabled']:
                     environment[var['variable']] = var['value']
 
-            self.fileCreated = template.execute(environment)
-            self.accept()
-        else:
-            #TODO: Mostrar error
-            pass
+            template.execute(environment, self.afterRunTemplate)
        
+    def afterRunTemplate(self, filePath):
+        self.fileCreated = filePath
+        self.accept()
+        
     def check_valid_location(self):
         """ Disable file """
         if os.path.isdir(self.lineLocation.text()) and self.lineFileName.text():
