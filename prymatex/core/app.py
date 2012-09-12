@@ -66,7 +66,7 @@ class PMXApplication(QtGui.QApplication):
         
     def loadGraphicalUserInterface(self):
         splash = self.buildSplashScreen()
-        #splash.show()
+        splash.show()
         try:
             self.cacheManager = self.setupCacheManager()        #Cache system Manager
             self.pluginManager = self.setupPluginManager()      #Prepare plugin manager
@@ -373,7 +373,8 @@ class PMXApplication(QtGui.QApplication):
     # Editors and mainWindow handle
     #========================================================
     def createEditorInstance(self, filePath = None, parent = None):
-        editorClass = self.pluginManager.findEditorClassForFile(filePath) if filePath is not None else self.pluginManager.defaultEditor()
+        editorClass = filePath is not None and self.pluginManager.findEditorClassForFile(filePath) or self.pluginManager.defaultEditor()
+        
         if editorClass is not None:
             return self.createWidgetInstance(editorClass, parent)
     
