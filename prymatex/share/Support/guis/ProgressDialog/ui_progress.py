@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'progress.ui'
 #
-# Created: Wed May 30 10:10:56 2012
-#      by: PyQt4 UI code generator 4.8.2
+# Created: Wed Sep 12 18:51:43 2012
+#      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
 

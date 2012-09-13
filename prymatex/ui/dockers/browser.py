@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/dockers/browser.ui'
 #
-# Created: Fri Sep  7 18:10:46 2012
+# Created: Wed Sep 12 18:54:22 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
