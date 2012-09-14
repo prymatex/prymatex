@@ -13,7 +13,6 @@ class RefreshHelper(PMXBaseDockKeyHelper):
 class CopyHelper(PMXBaseDockKeyHelper):
     KEY = QtCore.Qt.Key_C
     def accept(self, event):
-        print "test c", bool(event.modifiers() & QtCore.Qt.ControlModifier)
         return bool(event.modifiers() & QtCore.Qt.ControlModifier)
         
     def execute(self, event):
@@ -22,7 +21,6 @@ class CopyHelper(PMXBaseDockKeyHelper):
 class PasteHelper(PMXBaseDockKeyHelper):
     KEY = QtCore.Qt.Key_V
     def accept(self, event):
-        print "test v", bool(event.modifiers() & QtCore.Qt.ControlModifier)
         return bool(event.modifiers() & QtCore.Qt.ControlModifier)
         
     def execute(self, event):

@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -272,9 +272,6 @@
    <property name="text">
     <string>&amp;Undo</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+Z</string>
-   </property>
   </action>
   <action name="actionRedo">
    <property name="icon">
@@ -283,9 +280,6 @@
    </property>
    <property name="text">
     <string>&amp;Redo</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+Z</string>
    </property>
   </action>
   <action name="actionCopy">
@@ -296,9 +290,6 @@
    <property name="text">
     <string>&amp;Copy</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
   </action>
   <action name="actionCut">
    <property name="icon">
@@ -308,9 +299,6 @@
    <property name="text">
     <string>Cu&amp;t</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+X</string>
-   </property>
   </action>
   <action name="actionPaste">
    <property name="icon">
@@ -319,9 +307,6 @@
    </property>
    <property name="text">
     <string>&amp;Paste</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+V</string>
    </property>
   </action>
   <action name="actionSettings">

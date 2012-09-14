@@ -27,8 +27,7 @@ def whiteSpace(text):
 
 class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     NO_STATE = -1
-    SINGLE_LINE = 0
-    MULTI_LINE = 1
+    SINGLE_LINE = 1
     FORMAT_CACHE = {}
     highlightReady = QtCore.pyqtSignal()
     
@@ -101,8 +100,8 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             
             self.setupBlockUserData(text, block, userData)
             
-            blockState = self.SINGLE_LINE if len(stack) == 1 else self.MULTI_LINE
-            if blockState == self.MULTI_LINE:
+            blockState = len(stack)
+            if blockState != self.SINGLE_LINE:
                 userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
             userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
             block.setUserState(blockState)
@@ -154,14 +153,14 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         userData = self.currentBlock().userData()
         if userData:
             self.applyFormat(userData)
-
+    
     def realtime_highlight(self, text):
         userData = self.currentBlock().userData()
         if userData is not None and userData.textHash == hash(text) + hash(self.syntax.scopeName) + self.previousBlockState():
             self.applyFormat(userData)
         else:
             self.processor.startParsing(self.syntax.scopeName)
-            if self.previousBlockState() == self.MULTI_LINE:
+            if self.previousBlockState() not in [self.SINGLE_LINE, self.NO_STATE]:
                 #Recupero una copia del stack y los scopes del user data
                 stack, scopes = self.currentBlock().previous().userData().processorState()
                 #Set copy, not original
@@ -170,19 +169,20 @@ class PMXSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             else:
                 #Creo un stack y scopes nuevos
                 stack = [[self.syntax.grammar, None]]
-    
+
             # A parserar mi amor, vamos a parsear mi amor
             self.syntax.parseLine(stack, text, self.processor)
             self.processor.endParsing(self.syntax.scopeName)
-                        
+
             if userData is None:
                 userData = PMXBlockUserData()
                 self.setCurrentBlockUserData(userData)
 
             self.setupBlockUserData(text, self.currentBlock(), userData)
+
+            blockState = len(stack)
             
-            blockState = self.SINGLE_LINE if len(stack) == 1 else self.MULTI_LINE
-            if blockState == self.MULTI_LINE:
+            if blockState != self.SINGLE_LINE:
                 userData.setProcessorState((copy(stack), copy(self.processor.scopes())))
             userData.textHash = hash(text) + hash(self.syntax.scopeName) + blockState
             
