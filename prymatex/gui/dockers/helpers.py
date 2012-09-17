@@ -8,7 +8,7 @@ from prymatex.core.plugin.dock import PMXBaseDockKeyHelper
 class RefreshHelper(PMXBaseDockKeyHelper):
     KEY = QtCore.Qt.Key_F5
     def execute(self, event):
-        print "actualizar"
+        self.dock.refresh()
         
 class CopyHelper(PMXBaseDockKeyHelper):
     KEY = QtCore.Qt.Key_C
@@ -16,7 +16,7 @@ class CopyHelper(PMXBaseDockKeyHelper):
         return bool(event.modifiers() & QtCore.Qt.ControlModifier)
         
     def execute(self, event):
-        print "copy"
+        self.dock.copy()
         
 class PasteHelper(PMXBaseDockKeyHelper):
     KEY = QtCore.Qt.Key_V
@@ -24,5 +24,22 @@ class PasteHelper(PMXBaseDockKeyHelper):
         return bool(event.modifiers() & QtCore.Qt.ControlModifier)
         
     def execute(self, event):
-        print "paste"
+        self.dock.paste()
         
+class CutHelper(PMXBaseDockKeyHelper):
+    KEY = QtCore.Qt.Key_X
+    def accept(self, event):
+        return bool(event.modifiers() & QtCore.Qt.ControlModifier)
+        
+    def execute(self, event):
+        self.dock.cut()
+        
+class DeleteHelper(PMXBaseDockKeyHelper):
+    KEY = QtCore.Qt.Key_Delete
+    def execute(self, event):
+        self.dock.delete()
+
+class RenameHelper(PMXBaseDockKeyHelper):
+    KEY = QtCore.Qt.Key_F2
+    def execute(self, event):
+        self.dock.rename()

@@ -344,13 +344,10 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
 
     @QtCore.pyqtSlot()
     def on_actionRefresh_triggered(self):
-        index = self.treeViewProjects.currentIndex()
-        if index.isValid():
+        indexes = self.treeViewProjects.selectedIndexes()
+        for index in indexes:
             self.projectTreeProxyModel.refresh(index)
-        else:
-            pass
-            #
-    
+
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         node = self.currentNode()
@@ -403,9 +400,13 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         self.application.bundleEditor.execEditor(namespaceFilter = project.namespace, filterText = "Menu", filterModel = self.projectManager.projectMenuProxyModel)
     
     def on_actionCopy_triggered(self):
-        mimeData = self.projectTreeProxyModel.mimeData( [ self.treeViewProjects.currentIndex() ] )
+        mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
         self.application.clipboard().setMimeData(mimeData)
-    
+        
+    def on_actionCut_triggered(self):
+        mimeData = self.projectTreeProxyModel.mimeData( self.treeViewProjects.selectedIndexes() )
+        self.application.clipboard().setMimeData(mimeData)
+        
     def on_actionPaste_triggered(self):
         parentPath = self.currentPath()
         mimeData = self.application.clipboard().mimeData()
@@ -458,3 +459,24 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     @QtCore.pyqtSlot()
     def on_actionOrderFoldersFirst_triggered(self):
         self.projectTreeProxyModel.sortBy(self.projectTreeProxyModel.orderBy, self.actionOrderFoldersFirst.isChecked(), self.actionOrderDescending.isChecked())
+
+    #================================================
+    # Helper actions
+    #================================================
+    def refresh(self):
+        self.on_actionRefresh_triggered()
+        
+    def copy(self):
+        self.on_actionCopy_triggered()
+        
+    def paste(self):
+        self.on_actionPaste_triggered()
+        
+    def cut(self):
+        self.on_actionCut_triggereda()
+
+    def delete(self):
+        self.on_actionDelete_triggered()
+        
+    def rename(self):
+        self.on_actionRefresh_triggered()

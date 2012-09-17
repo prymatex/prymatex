@@ -19,6 +19,8 @@ def registerPlugin(manager):
     manager.registerKeyHelper(PMXProjectDock, helpers.RefreshHelper)
     manager.registerKeyHelper(PMXProjectDock, helpers.PasteHelper)
     manager.registerKeyHelper(PMXProjectDock, helpers.CopyHelper)
+    manager.registerKeyHelper(PMXProjectDock, helpers.CutHelper)
+    manager.registerKeyHelper(PMXProjectDock, helpers.DeleteHelper)
     manager.registerDocker(PMXFileSystemDock)
     manager.registerDocker(PMXTerminalDock)
     manager.registerDocker(PMXConsoleDock)
