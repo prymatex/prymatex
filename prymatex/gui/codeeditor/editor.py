@@ -965,6 +965,7 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
             self.logger.debug("Preserve indent")
             indent = block.userData().indent
         cursor.insertText("\n%s" % indent)
+        self.ensureCursorVisible()
 
     #==========================================================================
     # Bundle Items
