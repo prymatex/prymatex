@@ -128,7 +128,9 @@ class PMXSnippetEditorMode(PMXBaseEditorMode):
 class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def __init__(self, editor):
         PMXBaseEditorMode.__init__(self, editor)
+        # TODO: Buscar una forma mejor de obtener o trabajar con este helper en el modo, quiza filtarndo por clase en el evento
         self.helper = helpers.MultiCursorHelper(editor)
+        self.helper.initialize(editor)
         self.cursors = []
         self.selectedCursors = []
         self.scursor = self.dragPoint = self.startPoint = self.doublePoint = None
@@ -379,7 +381,7 @@ class PMXMultiCursorEditorMode(PMXBaseEditorMode):
     def keyPressEvent(self, event):
         if bool(event.modifiers() & QtCore.Qt.ControlModifier):
             self.editor.viewport().repaint(self.editor.viewport().visibleRegion())
-        if self.helper.accept(self.editor, event):
+        if self.helper.accept(event):
             cursor = self.cursors[0] if event.modifiers() & QtCore.Qt.ShiftModifier else self.cursors[-1]
             self.helper.execute(event, cursor)
         elif event.key() == QtCore.Qt.Key_Escape:
