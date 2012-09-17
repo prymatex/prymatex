@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -288,7 +288,10 @@
      <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Copy</string>
+    <string>&amp;Copy\tCtrl+C</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy</string>
    </property>
   </action>
   <action name="actionCut">
@@ -297,7 +300,10 @@
      <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
-    <string>Cu&amp;t</string>
+    <string>Cu&amp;t\tCtrl+X</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut</string>
    </property>
   </action>
   <action name="actionPaste">
@@ -306,7 +312,10 @@
      <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Paste</string>
+    <string>&amp;Paste\tCtrl+V</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste</string>
    </property>
   </action>
   <action name="actionSettings">

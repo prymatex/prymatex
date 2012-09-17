@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resources/ui/mainwindow.ui'
 #
-# Created: Wed Sep 12 18:54:21 2012
+# Created: Fri Sep 14 17:40:02 2012
 #      by: PyQt4 UI code generator 4.9.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -304,16 +304,14 @@ class Ui_MainWindow(object):
         self.actionCloseOthers.setText(_('Close Others'))
         self.actionCloseOthers.setShortcut(_('Ctrl+Alt+W'))
         self.actionQuit.setText(_('Quit'))
-        self.actionUndo.setText(_('&Undo\tCtrl+Z'))
-        #self.actionUndo.setShortcut(_('Ctrl+Z'))
+        self.actionUndo.setText(_('&Undo'))
         self.actionRedo.setText(_('&Redo'))
-        #self.actionRedo.setShortcut(_('Ctrl+Shift+Z'))
         self.actionCopy.setText(_('&Copy\tCtrl+C'))
-        #self.actionCopy.setShortcut(_('Ctrl+C'))
+        self.actionCopy.setToolTip(_('Copy'))
         self.actionCut.setText(_('Cu&t\tCtrl+X'))
-        #self.actionCut.setShortcut(_('Ctrl+X'))
+        self.actionCut.setToolTip(_('Cut'))
         self.actionPaste.setText(_('&Paste\tCtrl+V'))
-        #self.actionPaste.setShortcut(_('Ctrl+V'))
+        self.actionPaste.setToolTip(_('Paste'))
         self.actionSettings.setText(_('Settings'))
         self.actionSettings.setShortcut(_('Alt+P'))
         self.actionFullscreen.setText(_('Fullscreen'))
