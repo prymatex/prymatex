@@ -63,8 +63,8 @@ class PMXProjectTreeModel(TreeModel):
         names = os.listdir(parentNode.path)
         addNames = filter(lambda name: parentNode.findChildByName(name) is None, names)
         removeNodes = filter(lambda node: node.nodeName not in names, parentNode.childrenNodes)
-        
-        #Primero quitamos
+                
+        #Quitamos elementos eliminados
         for node in removeNodes:
             if notify:
                 self.beginRemoveRows(parentIndex, node.row(), node.row())
@@ -72,7 +72,7 @@ class PMXProjectTreeModel(TreeModel):
             if notify:
                 self.endRemoveRows()
 
-        #Ahora agregamos
+        #Agregamos elementos nuevos
         if notify: 
             self.beginInsertRows(parentIndex, parentNode.childCount(), parentNode.childCount() + len(addNames) - 1)
         for name in addNames:
@@ -81,16 +81,22 @@ class PMXProjectTreeModel(TreeModel):
             parentNode.appendChild(node)
         if notify: 
             self.endInsertRows()
-        parentNode._populated = True
-    
-    def refresh(self, index):
-        node = self.node(index)
-        while not node.isRootNode() and not os.path.exists(node.path):
-            index = index.parent()
-            node = self.node(index)
-        #TODO: mejorar esto de la verificacion con el root node
-        if not node.isRootNode() and node.isdir:
-            self._update_directory(node, index, True)
+
+    def _collect_expanded_subdirs(self, parentNode):
+        subDirs = filter(lambda node: node.isdir and node._populated, parentNode.childrenNodes)
+        collected = []
+        for dirNode in subDirs:
+            collected += self._collect_expanded_subdirs(dirNode)
+        return collected + subDirs
+        
+    def refresh(self, updateIndex):
+        updateNode = self.node(updateIndex)
+        while not updateNode.isRootNode() and not os.path.exists(updateNode.path):
+            updateIndex = updateIndex.parent()
+            updateNode = self.node(updateIndex)
+        if not updateNode.isRootNode() and updateNode.isdir:
+            for node in self._collect_expanded_subdirs(updateNode) + [updateNode]:
+                self._update_directory(node, self.createIndex(node.row(), 0, node), True)
 
     def refreshPath(self, path):
         index = self.indexForPath(path)
@@ -110,13 +116,8 @@ class PMXProjectTreeModel(TreeModel):
             return node.path
     
     def isDir(self, index):
-        try:
-            return index.internalPointer().isdir
-        except AttributeError as _exc:
-            # Not in tree, should check through python 
-            print index.data()
-            return False
-    
+        return self.node(index).isdir
+        
     def appendProject(self, project):
         project._populated = False
         self.beginInsertRows(QtCore.QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())

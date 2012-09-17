@@ -43,27 +43,15 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
     
     # Outpus function
     def error(self, context):
-        #TODO: Mover esto a un lugar donde no dependa del processor mostrar un error en el borwser, quiza a la mainWindow
-        #para poder llamarlos como showErrorInBrowser o algo asi :)
         if self.errorCommand:
-            #Prevenir la entrada recursiva
             raise Exception(context.errorValue)
-        from prymatex.support.utils import makeHyperlinks
-        from prymatex.utils import html
-        commandScript = '''
-            source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
-            
-            html_header "An error has occurred while executing command %(name)s"
-            echo -e "<pre>%(output)s</pre>"
-            echo -e "<p>Exit code was: %(exitcode)d</p>"
-            html_footer
-        ''' % {'output': html.escape(context.errorValue),
-               'name': html.escape(context.description()),
-               'exitcode': context.outputType}
-        command = self.mainWindow.application.supportManager.buildAdHocCommand(commandScript, context.bundleItem.bundle,
-            name = "Error runing %s" % context.description(),
-            commandOutput = 'showAsHTML')
-        self.mainWindow.insertBundleItem(command, errorCommand = True)
+        else:
+            self.mainWindow.showErrorInBrowser(
+                context.description(),
+                context.errorValue,
+                context.outputType,
+                errorCommand = True
+            )
         
     def showAsHTML(self, context):
         self.mainWindow.browser.setRunningContext(context)

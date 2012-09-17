@@ -93,10 +93,29 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
         '''Insert selected bundle item in current editor if possible'''
         assert not bundleItem.isEditorNeeded(), "Bundle Item needs editor"
         
-        print "insert bundle item"
         self.commandProcessor.configure(processorSettings)
         bundleItem.execute(self.commandProcessor)
 
+    # Browser error
+    def showErrorInBrowser(self, title, summary, exitcode = -1, **settings):
+        from prymatex.support.utils import makeHyperlinks
+        from prymatex.utils import html
+        commandScript = '''
+            source "$TM_SUPPORT_PATH/lib/webpreview.sh" 
+            
+            html_header "An error has occurred while executing command %(name)s"
+            echo -e "<pre>%(output)s</pre>"
+            echo -e "<p>Exit code was: %(exitcode)d</p>"
+            html_footer
+        ''' % {
+                'name': html.escape(title),
+                'output': html.escape(summary),
+                'exitcode': exitcode}
+        command = self.application.supportManager.buildAdHocCommand(commandScript, context.bundleItem.bundle,
+            name = "Error runing %s" % title,
+            commandOutput = 'showAsHTML')
+        self.bundleItem_handler(command, settings)
+        
     def buildEnvironment(self):
         env = {}
         for docker in self.dockers:
@@ -398,6 +417,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             
         except (TypeError, ValueError) as e:
             self.logger.error("Could not restore state for %s. Reason %s" % (self, e))
+
 
     #===========================================================================
     # Drag and Drop
