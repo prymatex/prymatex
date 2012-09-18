@@ -111,10 +111,12 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                 'name': html.escape(title),
                 'output': html.escape(summary),
                 'exitcode': exitcode}
-        command = self.application.supportManager.buildAdHocCommand(commandScript, context.bundleItem.bundle,
+        bundle = self.application.supportManager.getBundle(self.application.supportManager.defaultBundleForNewBundleItems)
+        command = self.application.supportManager.buildAdHocCommand(commandScript,
+            bundle,
             name = "Error runing %s" % title,
             commandOutput = 'showAsHTML')
-        self.bundleItem_handler(command, settings)
+        self.bundleItem_handler(command, **settings)
         
     def buildEnvironment(self):
         env = {}
