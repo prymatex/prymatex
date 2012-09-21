@@ -56,30 +56,15 @@ class MainWindowCommandProcessor(PMXCommandProcessor):
     def showAsHTML(self, context):
         self.mainWindow.browser.setRunningContext(context)
 
-    timespanFactor = 1
     def showAsTooltip(self, context):
-        # Chicho's sense of statistics
+        # TODO Otra forma de mostrar como tooltip si no hay editor
         linesToRead = context.outputValue.count('\n') or context.outputValue.count('<br')
         if linesToRead > 10:
             timeout = 8000
         else:
             timeout = linesToRead * 700
             
-        #TODO: Una mejor forma de mostrar en html la salida 
-        cursor = self.mainWindow.textCursor()
-        point = self.mainWindow.cursorRect(cursor).bottomRight()
-        html = """
-            <span>%s</span><hr>
-            <div style='text-align: right; font-size: small;'><a href='copy'>Copy</a>
-            </div>""" % context.outputValue.strip().replace('\n', '<br/>').replace(' ', '&nbsp;')
-        timeout = timeout * self.timespanFactor
-        callbacks = {
-                   'copy': lambda s = context.outputValue: QtGui.qApp.instance().clipboard().setText(s)
-        }
-        pos = (point.x() + 30, point.y() + 5)
-        timeout = timeout * self.timespanFactor
-        
-        self.mainWindow.showMessage(html, timeout = timeout, pos = pos, hrefCallbacks = callbacks)
+        self.mainWindow.currentEditor().showMessage(html, timeout = timeout)
         
     def createNewDocument(self, context):
         editor = self.mainWindow.addEmptyEditor()
