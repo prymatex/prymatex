@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>beforeRunningCommand</key>
-	<string>saveActiveFile</string>
+	<string>nop</string>
 	<key>command</key>
 	<string>#!/usr/bin/env python
 
@@ -28,8 +28,10 @@ else:
     text = '%prun ' + prun_options + text
 
 helpers.exit_show_tool_tip(console.execute(text))</string>
+	<key>fallbackInput</key>
+	<string>line</string>
 	<key>input</key>
-	<string>none</string>
+	<string>selection</string>
 	<key>keyEquivalent</key>
 	<string>^I</string>
 	<key>name</key>
