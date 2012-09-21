@@ -358,6 +358,7 @@ class PMXApplication(QtGui.QApplication):
             self.settingsDialog.register(settingClass(componentClass.settings))
 
     def createWidgetInstance(self, widgetClass, parent):
+        # TODO Que parent sea opcional y pueda ser la mainWindow si no viene seteado
         return self.pluginManager.createWidgetInstance(widgetClass, parent)
     
     #========================================================

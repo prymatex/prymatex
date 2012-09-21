@@ -504,7 +504,7 @@ class CommandHandler(object):
 
     def open(self, options, urls):
         for url in urls:
-            if url.startswith("txmt"):
+            if url.startswith("txmt"):   # or "pmtx" :)
                 command = {"name": "open", "kwargs": { "url": url}}
                 self.socket.send_pyobj(command)
                 _ = self.socket.recv()
@@ -520,6 +520,7 @@ class CommandHandler(object):
         
     def terminal(self, options, args):
         kwargs = {}
+        kwargs["commands"] = args
         command = {"name": "terminal", "kwargs": kwargs}
         self.socket.send_pyobj(command)
         value = self.socket.recv()

@@ -62,10 +62,8 @@ class PMXProject(FileSystemTreeNode):
                 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'bundleMenu' ]
     FILE = 'info.plist'
     FOLDER = '.pmxproject'
-    SUPPORT = 'Support'
     BUNDLES = 'Bundles'
     THEMES = 'Themes'
-    BASH_INIT = os.path.join(SUPPORT, 'lib', 'bash_init.sh')
     
     def __init__(self, directory, hash):
         self.directory = directory
@@ -165,8 +163,6 @@ class PMXProject(FileSystemTreeNode):
         try:
             data = plist.readPlist(fileInfo)
             project = cls(path, data)
-            if os.path.exists(os.path.join(projectPath, cls.SUPPORT)):
-                project.ensureSupport()
             if os.path.exists(os.path.join(projectPath, cls.BUNDLES)):
                 project.ensureBundles()
             if os.path.exists(os.path.join(projectPath, cls.THEMES)):
@@ -209,23 +205,6 @@ class PMXProject(FileSystemTreeNode):
     def hasBundleMenu(self, bundle):
         if self.bundleMenu is None: return False
         return bundle.uuidAsUnicode() in self.bundleMenu
-
-    def bashInit(self):
-        bashInitPath = os.path.join(self.projectPath, self.BASH_INIT)
-        if not os.path.exists(bashInitPath):
-            self.ensureSupport()
-            open(bashInitPath, 'w').close()
-        return bashInitPath
-    
-    def ensureSupport(self):
-        supportPath = os.path.join(self.projectPath, self.SUPPORT)
-        if not os.path.exists(supportPath):
-            os.makedirs(supportPath)
-        self.setSupport(supportPath)
-        for subNames in ['lib', 'bin']:
-            subPath = os.path.join(supportPath, subNames)
-            if not os.path.exists(subPath):
-                os.makedirs(subPath)
 
     def ensureBundles(self):
         bundlesPath = os.path.join(self.projectPath, self.BUNDLES)

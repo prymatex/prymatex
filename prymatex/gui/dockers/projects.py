@@ -198,11 +198,11 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
     
     def extendFileSystemItemMenu(self, menu, node):
         utils.extendMenuSection(menu, ["--open", self.actionOpenSystemEditor, "--handlepaths", self.actionDelete, self.actionRename])
-        utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
+        #utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
         if isinstance(node, PMXProject):
             utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
             #utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
-            utils.extendMenuSection(menu, [self.actionBashInit], section = "interact")
+            #utils.extendMenuSection(menu, [self.actionBashInit], section = "interact")
             utils.extendMenuSection(menu, [self.actionBundleEditor], section = "bundles")
         else:
             utils.extendMenuSection(menu, [self.actionCut, self.actionCopy, self.actionPaste], section = "handlepaths", position = 0)
@@ -377,20 +377,6 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             index = self.projectTreeProxyModel.indexForPath(editor.filePath)
             self.treeViewProjects.setCurrentIndex(index)
     
-    @QtCore.pyqtSlot()
-    def on_actionSetInTerminal_triggered(self):
-        path = self.currentPath()
-        directory = self.application.fileManager.getDirectory(path)
-        self.mainWindow.terminal.chdir(directory)
-        project = self.application.projectManager.findProjectForPath(path)
-        if project and project.hasSupport():
-            self.mainWindow.terminal.runCommand("source %s" % project.bashInit())
-    
-    @QtCore.pyqtSlot()
-    def on_actionBashInit_triggered(self):
-        project = self.currentNode()
-        self.application.openFile(project.bashInit())
-
     @QtCore.pyqtSlot()
     def on_actionBundleEditor_triggered(self):
         project = self.currentNode()

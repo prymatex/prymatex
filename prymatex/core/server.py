@@ -192,6 +192,11 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
         self.application.handleUrlCommand(kwargs["url"])
         self.sendResult()
 
+    def terminal(self, **kwargs):
+        for command in kwargs["commands"]:
+            self.application.mainWindow.terminal.runCommand(command)
+        self.sendResult()
+
     def debug(self, **kwargs):
         print kwargs
         self.sendResult()

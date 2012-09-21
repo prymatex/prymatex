@@ -260,9 +260,7 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         self.setObjectName(_("TerminalDock"))
         self.tabTerminals = PMXTabTerminals(self)
         self.setWidget(self.tabTerminals)
-        self.setupSocket()
         self.installEventFilter(self)
-    
     
     def initialize(self, mainWindow):
         PMXBaseDock.initialize(self, mainWindow)
@@ -276,28 +274,6 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
                 return
         return super(PMXTerminalDock, self).eventFilter(obj, event)
     
-    #====================================================
-    # ZMQ External actions
-    #====================================================
-    def setupSocket(self):
-        self.socket = self.application.zmqSocket(zmq.REP, "Terminal")
-        self.socket.readyRead.connect(self.socketReadyRead)
-    
-    def socketReadyRead(self):
-        command = self.socket.recv_pyobj()
-        name = command.get("name")
-        args = command.get("args", [])
-        kwargs = command.get("kwargs", {})
-
-        method = getattr(self, name)
-        method(*args, **kwargs)
-        self.sendResult()
-        
-    def sendResult(self, value = None):
-        value = str(value) if value is not None else "ok"
-        #Si tengo error retorno en lugar de result un error con { "code": <numero>, "message": "Cadena de error"}
-        self.socket.send_pyobj({ "result": value })
-
     #========================================================
     # Commands
     #========================================================
@@ -305,11 +281,8 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         if not self.isVisible():
             self.show()
         self.raise_()
-        self.terminal.sendText("\r%s\n" % command)
-        
-    def chdir(self, directory):
-        self.runCommand('cd "%s"' % directory)
-        
+        self.terminal.sendText("%s\n" % command)
+
     @property
     def terminal(self):
         return self.widget().currentWidget()
