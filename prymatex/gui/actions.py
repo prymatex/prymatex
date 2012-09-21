@@ -195,6 +195,11 @@ class MainWindowActions(object):
             tab = tabs[index]
             self.splitTabWidget.setCurrentWidget(tab)
     
+    @QtCore.pyqtSlot()
+    def on_actionJumpToTabWindow_triggered(self):
+        if self.currentEditor() is not None:
+            self.currentEditor().setFocus()
+    
     # Global navigation
     @QtCore.pyqtSlot()
     def on_actionLocationBack_triggered(self):
