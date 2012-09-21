@@ -189,9 +189,7 @@ class PMXProject(FileSystemTreeNode):
     @property
     def icon(self):
         if self.manager.isOpen(self):
-            return resources.getIcon("projectopen")
-        else:
-            return resources.getIcon("projectclose")
+            return resources.getIcon("project-development")
 
     #==========================================
     # Bundle Menu 

@@ -155,7 +155,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
             "items": [
                 {   "title": "New",
                     "items": [
-                        self.actionNewFolder, self.actionNewFile, self.actionNewFromTemplate, "-", self.actionNewProject,
+                        self.actionNewFolder, self.actionNewFile, "-", self.actionNewFromTemplate, self.actionNewProject,
                     ]
                 },
                 "--refresh",
@@ -201,7 +201,7 @@ class PMXProjectDock(QtGui.QDockWidget, Ui_ProjectsDock, PMXFileSystemTasks, PMX
         utils.extendMenuSection(menu, ["--interact", self.actionSetInTerminal ], section = -1)
         if isinstance(node, PMXProject):
             utils.extendMenuSection(menu, [self.actionPaste, self.actionRemove], section = "handlepaths", position = 0)
-            utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
+            #utils.extendMenuSection(menu, [self.actionCloseProject, self.actionOpenProject], section = "refresh")
             utils.extendMenuSection(menu, [self.actionBashInit], section = "interact")
             utils.extendMenuSection(menu, [self.actionBundleEditor], section = "bundles")
         else:

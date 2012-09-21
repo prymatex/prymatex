@@ -64,7 +64,7 @@
      </property>
      <addaction name="actionNewEditor"/>
      <addaction name="separator"/>
-     <addaction name="actionNewFileFromTemplate"/>
+     <addaction name="actionNewFromTemplate"/>
      <addaction name="actionNewProject"/>
     </widget>
     <addaction name="menuNew"/>
@@ -102,6 +102,7 @@
     <addaction name="actionNextTab"/>
     <addaction name="actionPreviousTab"/>
     <addaction name="actionSelectTab"/>
+    <addaction name="actionJumpToTabWindow"/>
     <addaction name="separator"/>
     <addaction name="actionLastEditLocation"/>
     <addaction name="actionLocationBack"/>
@@ -111,7 +112,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="actionReport_Bug"/>
+    <addaction name="actionReportBug"/>
     <addaction name="actionTranslatePrymatex"/>
     <addaction name="actionProjectHomepage"/>
     <addaction name="actionReadDocumentation"/>
@@ -172,7 +173,7 @@
   </widget>
   <action name="actionNewEditor">
    <property name="icon">
-    <iconset>
+    <iconset theme="tab-new">
      <normaloff>:/icons/mimetypes/text-plain.png</normaloff>:/icons/mimetypes/text-plain.png</iconset>
    </property>
    <property name="text">
@@ -232,7 +233,7 @@
   </action>
   <action name="actionClose">
    <property name="icon">
-    <iconset theme="document-close">
+    <iconset theme="tab-close">
      <normaloff>:/icons/actions/dialog-close.png</normaloff>:/icons/actions/dialog-close.png</iconset>
    </property>
    <property name="text">
@@ -288,7 +289,7 @@
      <normaloff>:/icons/actions/edit-copy.png</normaloff>:/icons/actions/edit-copy.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Copy\tCtrl+C</string>
+    <string>&amp;Copy</string>
    </property>
    <property name="toolTip">
     <string>Copy</string>
@@ -300,7 +301,7 @@
      <normaloff>:/icons/actions/edit-cut.png</normaloff>:/icons/actions/edit-cut.png</iconset>
    </property>
    <property name="text">
-    <string>Cu&amp;t\tCtrl+X</string>
+    <string>Cu&amp;t</string>
    </property>
    <property name="toolTip">
     <string>Cut</string>
@@ -312,7 +313,7 @@
      <normaloff>:/icons/actions/edit-paste.png</normaloff>:/icons/actions/edit-paste.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Paste\tCtrl+V</string>
+    <string>&amp;Paste</string>
    </property>
    <property name="toolTip">
     <string>Paste</string>
@@ -372,7 +373,7 @@
     <string>Ctrl+PgUp</string>
    </property>
   </action>
-  <action name="actionReport_Bug">
+  <action name="actionReportBug">
    <property name="text">
     <string>Report &amp;Bug</string>
    </property>
@@ -412,16 +413,19 @@
     <string>About &amp;Qt</string>
    </property>
   </action>
-  <action name="actionNewFileFromTemplate">
+  <action name="actionNewFromTemplate">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset theme="document-new">
      <normaloff>:/icons/actions/run-build-file.png</normaloff>:/icons/actions/run-build-file.png</iconset>
    </property>
    <property name="text">
-    <string>File From Template</string>
+    <string>From Template</string>
+   </property>
+   <property name="toolTip">
+    <string>From Template</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
@@ -456,6 +460,9 @@
    </property>
   </action>
   <action name="actionRemoveAllRecentFiles">
+   <property name="icon">
+    <iconset theme="edit-clear"/>
+   </property>
    <property name="text">
     <string>Remove All Recent Files</string>
    </property>
@@ -507,7 +514,7 @@
   </action>
   <action name="actionNewProject">
    <property name="icon">
-    <iconset>
+    <iconset theme="project-development-new-template">
      <normaloff>:/icons/actions/project-development-new-template.png</normaloff>:/icons/actions/project-development-new-template.png</iconset>
    </property>
    <property name="text">
@@ -527,11 +534,19 @@
    </property>
   </action>
   <action name="actionSwitchProfile">
+   <property name="icon">
+    <iconset theme="system-switch-user">
+     <normaloff/>
+    </iconset>
+   </property>
    <property name="text">
     <string>Switch Profile</string>
    </property>
   </action>
   <action name="actionImportProject">
+   <property name="icon">
+    <iconset theme="project-open"/>
+   </property>
    <property name="text">
     <string>Import Project</string>
    </property>
@@ -570,6 +585,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+Right</string>
+   </property>
+  </action>
+  <action name="actionJumpToTabWindow">
+   <property name="text">
+    <string>Jump To Tab Window</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
    </property>
   </action>
  </widget>

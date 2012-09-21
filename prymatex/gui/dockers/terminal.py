@@ -319,10 +319,8 @@ class PMXTerminalDock(QtGui.QDockWidget, PMXBaseDock):
         from prymatex.gui.settings.terminal import PMXTerminalSettings
         return [ PMXTerminalSettings ]
     
-    
-    
     def showEvent(self, event):
-        self.widget().setFocus()
+        self.terminal.setFocus()
         
 #===============================================================================
 # Signals

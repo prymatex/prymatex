@@ -46,7 +46,7 @@ class MainWindowActions(object):
         self.addEmptyEditor()
 
     @QtCore.pyqtSlot()
-    def on_actionNewFileFromTemplate_triggered(self):
+    def on_actionNewFromTemplate_triggered(self):
         filePath = PMXNewFromTemplateDialog.newFileFromTemplate(parent = self)
 
         if filePath:
@@ -329,7 +329,7 @@ class MainWindowActions(object):
         
         ACTION_MAPPING = {
                           self.actionReadDocumentation: prymatex.__source__ + '/wiki',
-                          self.actionReport_Bug: 'https://github.com/prymatex/prymatex/issues?utf8=%E2%9C%93',
+                          self.actionReportBug: 'https://github.com/prymatex/prymatex/issues?utf8=%E2%9C%93',
                           self.actionTranslatePrymatex: 'https://prymatex.com/translate',
                           self.actionProjectHomepage: prymatex.__url__
         }

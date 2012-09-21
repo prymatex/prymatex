@@ -166,14 +166,14 @@
   </action>
   <action name="actionNewFromTemplate">
    <property name="icon">
-    <iconset>
+    <iconset theme="document-new">
      <normaloff>:/icons/actions/run-build-file.png</normaloff>:/icons/actions/run-build-file.png</iconset>
    </property>
    <property name="text">
-    <string>File From Template</string>
+    <string>From Template</string>
    </property>
    <property name="toolTip">
-    <string>File From Template</string>
+    <string>From Template</string>
    </property>
   </action>
   <action name="actionDelete">
@@ -187,7 +187,7 @@
   </action>
   <action name="actionNewProject">
    <property name="icon">
-    <iconset>
+    <iconset theme="project-development-new-template">
      <normaloff>:/icons/actions/project-development-new-template.png</normaloff>:/icons/actions/project-development-new-template.png</iconset>
    </property>
    <property name="text">
@@ -308,7 +308,7 @@
   </action>
   <action name="actionSetInTerminal">
    <property name="icon">
-    <iconset>
+    <iconset theme="utilities-terminal">
      <normaloff>:/icons/apps/utilities-terminal.png</normaloff>:/icons/apps/utilities-terminal.png</iconset>
    </property>
    <property name="text">
@@ -322,7 +322,7 @@
   </action>
   <action name="actionBundleEditor">
    <property name="icon">
-    <iconset>
+    <iconset theme="bundle-item-bundle">
      <normaloff>:/icons/bundles/bundle.png</normaloff>:/icons/bundles/bundle.png</iconset>
    </property>
    <property name="text">
