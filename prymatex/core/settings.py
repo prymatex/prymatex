@@ -219,36 +219,46 @@ class PMXProfile(object):
     PMX_RESOURCES_PATH = os.path.join(PMX_APP_PATH, 'resources')
     PMX_HOME_PATH = get_prymatex_home_path()
     PMX_PLUGINS_PATH = os.path.join(PMX_HOME_PATH, 'Plugins')
-    PMX_PROFILES_FILE = get_prymatex_profiles_file(PMX_HOME_PATH)
     USER_HOME_PATH = USER_HOME_PATH
     PMX_PREFERENCES_PATH = get_textmate_preferences_user_path()
-
+    # Profiles
+    PMX_PROFILES_FILE = get_prymatex_profiles_file(PMX_HOME_PATH)
+    
+    # ===================
+    # = Profile methods =
+    # ===================
     @classmethod
-    def get_prymatex_profile_path(cls, name):
-        path = os.path.abspath(os.path.join(cls.PMX_HOME_PATH, name.lower()))
+    def get_prymatex_profile(cls, name):
+        name = name.lower()
+        if name in cls.PMX_PROFILES:
+            return cls.PMX_PROFILES[name]
+        path = os.path.abspath(os.path.join(cls.PMX_HOME_PATH, name))
+        profile = { "name": name, "path": path, "default": True }
         if not os.path.exists(path):
             build_prymatex_profile(path)
-        return path
-    
-    @classmethod
-    def defaultProfile(cls):
-        config = ConfigParser()
-        config.read(cls.PMX_PROFILES_FILE)
-        for section in config.sections():
-            if section.startswith("Profile"):
-                if config.getboolean(section, "default"):
-                    return config.get(section, "name")
-        return "default"
-    
-    @classmethod
-    def askForProfile(cls):
-        config = ConfigParser()
-        config.read(cls.PMX_PROFILES_FILE)
-        return not config.getboolean("General", "dontask")
+        cls.PMX_PROFILES[name] = profile 
+        cls.saveProfiles()
+        return profile
 
+    @classmethod
+    def saveProfiles(cls):
+        config = ConfigParser()
+        config.add_section("General")
+        config.set("General", "dontask", str(cls.PMX_PROFILES_DONTASK))
+        for index, profile in enumerate(cls.PMX_PROFILES.values()):
+            section = "Profile%d" % index
+            config.add_section(section)
+            for key, value in profile.iteritems():
+                config.set(section, key, str(value))
+        
+        f = open(cls.PMX_PROFILES_FILE, "w")
+        config.write(f)
+        f.close()
+        
     def __init__(self, name):
-        self.PMX_PROFILE_NAME = name
-        self.PMX_PROFILE_PATH = self.get_prymatex_profile_path(name)
+        profile = self.get_prymatex_profile(name)
+        self.PMX_PROFILE_NAME = profile["name"]
+        self.PMX_PROFILE_PATH = profile["path"]
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
         self.PMX_LOG_PATH = os.path.join(self.PMX_PROFILE_PATH, 'log')
         self.PMX_CACHE_PATH = os.path.join(self.PMX_PROFILE_PATH, 'cache')
@@ -302,3 +312,25 @@ class PMXProfile(object):
         for group in self.GROUPS.values():
             group.sync()
         self.qsettings.sync()
+        
+# ============
+# = Profiles =
+# ============
+def load_prymatex_profiles():
+    """docstring for load_prymatex_profiles"""
+    config = ConfigParser()
+    config.read(PMXProfile.PMX_PROFILES_FILE)
+    PMXProfile.PMX_PROFILES = {}
+    for section in config.sections():
+        if section.startswith("Profile"):
+            profile = { "name": config.get(section, "name"),
+                        "path": config.get(section, "path"),
+                        "default": config.getboolean(section, "default")}
+            if profile["default"]:
+                PMXProfile.PMX_PROFILE_DEFAULT = profile
+            PMXProfile.PMX_PROFILES[profile["name"]] = profile
+    PMXProfile.PMX_PROFILES_DONTASK = config.getboolean("General", "dontask")
+
+load_prymatex_profiles()
+print PMXProfile.PMX_PROFILES
+print PMXProfile.PMX_PROFILES_DONTASK

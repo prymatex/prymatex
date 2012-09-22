@@ -46,9 +46,9 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
         self.listProfiles.setCurrentRow(defaultProfile is not None and self.profiles.index(defaultProfile) or 0)
         
     def on_checkDontAsk_clicked(self):
-        self.config.set("General", "dontask", str(self.checkDontAsk.isChecked()))
-        self.saveProfiles()
-
+        PMXProfile.PMX_PROFILES_DONTASK = self.checkDontAsk.isChecked()
+        PMXProfile.saveProfiles()
+        
     def on_buttonExit_pressed(self):
         QtGui.QApplication.exit(0)
         
