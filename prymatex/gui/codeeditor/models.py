@@ -101,12 +101,12 @@ class PMXSymbolListModel(QtCore.QAbstractListModel):
         self.editor.afterOpen.connect(self.on_editor_afterOpen)
         self.blocks = []
         self.icons = {
-            "class": resources.getIcon("bulletred"),
-            "block": resources.getIcon("bulletblue"),
-            "context": resources.getIcon("bulletpink"),
-            "function": resources.getIcon("bulletblue"),
-            "typedef": resources.getIcon("bulletyellow"),
-            "variable": resources.getIcon("bulletgreen")
+            "class": resources.getIcon("symbol-class"),
+            "block": resources.getIcon("symbol-block"),
+            "context": resources.getIcon("symbol-context"),
+            "function": resources.getIcon("symbol-function"),
+            "typedef": resources.getIcon("symbol-typedef"),
+            "variable": resources.getIcon("symbol-variable")
         }
         
     def on_editor_afterOpen(self):

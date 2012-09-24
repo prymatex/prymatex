@@ -44,6 +44,19 @@ STATICMAPPING = (
     #Splash Image
     (os.path.normcase("splash.png"), "prymatex-splash"),
     
+    # Process
+    (os.path.normcase("groups/red.png"), "porcess-not-running"),
+    (os.path.normcase("groups/yellow.png"), "porcess-starting"),
+    (os.path.normcase("groups/green.png"), "porcess-running"),
+    
+    # Symbols
+    (os.path.normcase("groups/blue.png"), "symbol-class"),
+    (os.path.normcase("groups/green.png"), "symbol-block"),
+    (os.path.normcase("groups/yellow.png"), "symbol-context"),
+    (os.path.normcase("groups/ligthblue.png"), "symbol-function"),
+    (os.path.normcase("groups/brown.png"), "symbol-typedef"),
+    (os.path.normcase("groups/red.png"), "symbol-variable"),
+    
     # Scope Root Groups
     (os.path.normcase("groups/blue.png"), "scope-root-comment"),
     (os.path.normcase("groups/yellow.png"), "scope-root-constant"),

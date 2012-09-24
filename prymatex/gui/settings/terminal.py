@@ -9,7 +9,7 @@ from prymatex import resources
 
 class PMXTerminalSettings(QtGui.QWidget, PMXSettingTreeNode, Ui_Terminal):
     TITLE = "Terminal"
-    ICON = resources.getIcon("terminal")
+    ICON = resources.getIcon("utilities-terminal")
     
     def __init__(self, settingGroup, parent = None):
         QtGui.QWidget.__init__(self, parent)
