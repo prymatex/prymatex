@@ -30,20 +30,15 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
         self.setupDialogProfiles()
         
     def setupDialogProfiles(self):
-        self.profiles = []
         self.listProfiles.clear()
         defaultProfile = None
-        for section in self.config.sections():
-            if section.startswith("Profile"):
-                profile = { "name": self.config.get(section, "name"),
-                            "path": self.config.get(section, "path"),
-                            "default": self.config.getboolean(section, "default")}
-                if profile["default"]:
-                    defaultProfile = profile
-                self.listProfiles.addItem(QtGui.QListWidgetItem(profile["name"]))
-                self.profiles.append(profile)
-        self.checkDontAsk.setChecked(self.config.getboolean("General", "dontask"))
-        self.listProfiles.setCurrentRow(defaultProfile is not None and self.profiles.index(defaultProfile) or 0)
+        defaultIndex = 0
+        for index, profileName in enumerate(PMXProfile.PMX_PROFILES):
+            self.listProfiles.addItem(QtGui.QListWidgetItem(QtGui.QIcon.fromTheme("user-identity"), profileName))
+            if PMXProfile.PMX_PROFILE_DEFAULT == profileName:
+                defaultIndex = index
+        self.checkDontAsk.setChecked(PMXProfile.PMX_PROFILES_DONTASK)
+        self.listProfiles.setCurrentRow(defaultIndex)
         
     def on_checkDontAsk_clicked(self):
         PMXProfile.PMX_PROFILES_DONTASK = self.checkDontAsk.isChecked()
@@ -53,11 +48,8 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
         QtGui.QApplication.exit(0)
         
     def on_buttonStartPrymatex_pressed(self):
-        index = self.listProfiles.currentRow()
-        defaultProfile = self.profiles[index]
-        for profile in self.profiles:
-            profile["default"] = defaultProfile == profile
-        self.saveProfiles()
+        PMXProfile.PMX_PROFILE_DEFAULT = self.listProfiles.item(self.listProfiles.currentRow()).data(QtCore.Qt.DisplayRole)
+        PMXProfile.saveProfiles()
         self.accept()
     
     def on_buttonCreate_pressed(self):
@@ -117,10 +109,10 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
         dlg.buttonStartPrymatex.setText("Restart Prymatex")
         dlg.buttonExit.setVisible(False)
         if dlg.exec_() == cls.Accepted:
-            return dlg.profiles[dlg.listProfiles.currentRow()]["name"]
+            return PMXProfile.PMX_PROFILE_DEFAULT
 
     @classmethod
     def selectProfile(cls, profilesFilePath, parent = None):
         dlg = cls(profilesFilePath, parent = parent)
         if dlg.exec_() == cls.Accepted:
-            return dlg.profiles[dlg.listProfiles.currentRow()]["name"]
+            return PMXProfile.PMX_PROFILE_DEFAULT
