@@ -147,6 +147,10 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.tableViewResults.horizontalHeader().setSortIndicatorShown(True)
         self.tableViewResults.horizontalHeader().setClickable(True)
         
+    def loadComboBoxNamespace(self):
+        for ns in self.application.supportManager.nsorder:
+            self.comboBoxNamespace.addItem(ns, )
+
     def on_buttonSearch_pressed(self):
         text = self.lineEditQuery.text()
         if len(text) < self.MINIMUM_QUERY_LENGTH or self.workerThread.isRunning():

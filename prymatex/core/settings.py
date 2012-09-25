@@ -4,7 +4,7 @@
 """
 Application configuration based on Qt's QSettings module.
 """
-import os, plistlib
+import os, plistlib, shutil
 from ConfigParser import ConfigParser
 
 from PyQt4 import QtCore, QtGui
@@ -223,22 +223,25 @@ class PMXProfile(object):
     PMX_PREFERENCES_PATH = get_textmate_preferences_user_path()
     # Profiles
     PMX_PROFILES_FILE = get_prymatex_profiles_file(PMX_HOME_PATH)
+    PMX_PROFILES = {}
+    PMX_PROFILE_DEFAULT = None
+    PMX_PROFILES_DONTASK = True
     
     # ===================
     # = Profile methods =
     # ===================
     @classmethod
-    def get_prymatex_profile(cls, name):
+    def get_or_create_profile(cls, name, path = None):
         name = name.lower()
         if name in cls.PMX_PROFILES:
-            return cls.PMX_PROFILES[name]
-        path = os.path.abspath(os.path.join(cls.PMX_HOME_PATH, name))
+            return cls.PMX_PROFILES[name], False
+        path = path if path is not None else os.path.abspath(os.path.join(cls.PMX_HOME_PATH, name))
         profile = { "name": name, "path": path, "default": True }
         if not os.path.exists(path):
             build_prymatex_profile(path)
         cls.PMX_PROFILES[name] = profile 
         cls.saveProfiles()
-        return profile
+        return profile, True
 
     @classmethod
     def saveProfiles(cls):
@@ -250,13 +253,33 @@ class PMXProfile(object):
             config.add_section(section)
             for key, value in profile.iteritems():
                 config.set(section, key, str(value))
-        
         f = open(cls.PMX_PROFILES_FILE, "w")
         config.write(f)
         f.close()
-        
+
+    @classmethod
+    def createProfile(cls, name):
+        profile, created = cls.get_or_create_profile(name)
+        return profile["name"]
+    
+    @classmethod
+    def renameProfile(cls, oldName, newName):
+        newName = newName.lower()
+        profile = PMXProfile.PMX_PROFILES.pop(oldName)
+        profile["name"] = newName.lower()
+        PMXProfile.PMX_PROFILES[profile["name"]] = profile
+        cls.saveProfiles()
+        return newName
+
+    @classmethod
+    def deleteProfile(cls, name, files = False):
+        profile = PMXProfile.PMX_PROFILES.pop(name)
+        if files:
+            shutil.rmtree(profile["path"])
+        cls.saveProfiles()
+
     def __init__(self, name):
-        profile = self.get_prymatex_profile(name)
+        profile, created = self.get_or_create_profile(name)
         self.PMX_PROFILE_NAME = profile["name"]
         self.PMX_PROFILE_PATH = profile["path"]
         self.PMX_TMP_PATH = os.path.join(self.PMX_PROFILE_PATH, 'tmp')
@@ -320,17 +343,14 @@ def load_prymatex_profiles():
     """docstring for load_prymatex_profiles"""
     config = ConfigParser()
     config.read(PMXProfile.PMX_PROFILES_FILE)
-    PMXProfile.PMX_PROFILES = {}
     for section in config.sections():
         if section.startswith("Profile"):
             profile = { "name": config.get(section, "name"),
                         "path": config.get(section, "path"),
                         "default": config.getboolean(section, "default")}
             if profile["default"]:
-                PMXProfile.PMX_PROFILE_DEFAULT = profile
+                PMXProfile.PMX_PROFILE_DEFAULT = profile["name"]
             PMXProfile.PMX_PROFILES[profile["name"]] = profile
     PMXProfile.PMX_PROFILES_DONTASK = config.getboolean("General", "dontask")
 
 load_prymatex_profiles()
-print PMXProfile.PMX_PROFILES
-print PMXProfile.PMX_PROFILES_DONTASK

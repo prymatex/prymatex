@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, shutil
+import os
 from ConfigParser import ConfigParser
 
 from PyQt4 import QtCore, QtGui
@@ -54,55 +54,32 @@ class PMXProfileDialog(QtGui.QDialog, Ui_ProfileDialog):
     
     def on_buttonCreate_pressed(self):
         profileName, ok = QtGui.QInputDialog.getText(self, _("Create profile"), _(CREATE_MESSAGE))
-        while profileName in map(lambda profile: profile["name"], self.profiles):
+        while profileName in PMXProfile.PMX_PROFILES.keys():
             profileName, ok = QtGui.QInputDialog.getText(self, _("Create profile"), _(CREATE_MESSAGE))
         if ok:
-            profile = { "name": profileName,
-                        "path": PMXProfile.get_prymatex_profile_path(profileName),
-                        "default": 0}
-            self.listProfiles.addItem(QtGui.QListWidgetItem(profile["name"]))
-            self.profiles.append(profile)
-            self.saveProfiles()
+            profileName = PMXProfile.createProfile(profileName)
+            self.listProfiles.addItem(QtGui.QListWidgetItem(QtGui.QIcon.fromTheme("user-identity"), profileName))
 
     def on_buttonRename_pressed(self):
-        index = self.listProfiles.currentRow()
-        rprofile = self.profiles[index]
-        profileName, ok = QtGui.QInputDialog.getText(self, _("Rename profile"), _(RENAME_MESSAGE) % rprofile["name"])
-        while profileName in map(lambda profile: profile["name"], filter(lambda profile: profile != rprofile, self.profiles)):
-            profileName, ok = QtGui.QInputDialog.getText(self, _("Rename profile"), _(RENAME_MESSAGE) % rprofile["name"])
+        profileOldName = self.listProfiles.item(self.listProfiles.currentRow()).data(QtCore.Qt.DisplayRole)
+        profileNewName, ok = QtGui.QInputDialog.getText(self, _("Rename profile"), _(RENAME_MESSAGE) % profileOldName, text=profileOldName)
+        while profileNewName in PMXProfile.PMX_PROFILES.keys():
+            profileNewName, ok = QtGui.QInputDialog.getText(self, _("Rename profile"), _(RENAME_MESSAGE) % profileOldName, text=profileNewName)
         if ok:
-            rprofile["name"] = profileName
-            self.saveProfiles()
-                
+            newName = PMXProfile.renameProfile(profileOldName, profileNewName)
+            self.listProfiles.item(self.listProfiles.currentRow()).setData(QtCore.Qt.DisplayRole, newName)
+
     def on_buttonDelete_pressed(self):
-        index = self.listProfiles.currentRow()
-        dprofile = self.profiles[index]
+        item = self.listProfiles.item(self.listProfiles.currentRow())
+        profileOldName = item.data(QtCore.Qt.DisplayRole)
         result = QtGui.QMessageBox.question(self, _("Delete Profile"),
-            _(DELETE_MESSAGE) % dprofile["path"],
+            _(DELETE_MESSAGE) % profileOldName,
             buttons = QtGui.QMessageBox.Yes | QtGui.QMessageBox.Ok | QtGui.QMessageBox.Discard,
             defaultButton = QtGui.QMessageBox.Ok)
-        if result == QtGui.QMessageBox.Yes:
-            shutil.rmtree(dprofile["path"])
-            self.profiles = filter(lambda profile: profile != dprofile, self.profiles)
-            self.saveProfiles()
-        elif result == QtGui.QMessageBox.Ok:
-            self.profiles = filter(lambda profile: profile != dprofile, self.profiles)
-            self.saveProfiles()
-
-    def saveProfiles(self):
-        f = open(self.profilesFilePath, "w")
-        for section in self.config.sections():
-            if section.startswith("Profile"):
-                self.config.remove_section(section)
-        for index, profile in enumerate(self.profiles):
-            section = "Profile%d" % index
-            self.config.add_section(section)
-            for key, value in profile.iteritems():
-                self.config.set(section, key, str(value))
-        self.config.write(f)
-        f.close()
-        self.setupDialogProfiles()
-
+        if result != QtGui.QMessageBox.Discard:
+            PMXProfile.deleteProfile(profileOldName, result == QtGui.QMessageBox.Yes)
+            self.listProfiles.removeItemWidget(item)
+            
     @classmethod
     def switchProfile(cls, profilesFilePath, parent = None):
         dlg = cls(profilesFilePath, parent = parent)

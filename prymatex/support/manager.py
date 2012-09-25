@@ -67,6 +67,7 @@ class PMXSupportBaseManager(object):
         self.namespaces[name] = {}
         self.nsorder.append(name)
         for element in self.ELEMENTS:
+            # TODO: Aunque no exista el path crear la entrada igual
             epath = os.path.join(path, element)
             if not os.path.exists(epath):
                 continue
@@ -93,7 +94,7 @@ class PMXSupportBaseManager(object):
 
     def addProjectNamespace(self, project):
         #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
-        project.ensureBundles()
+        #project.ensureBundles()
         path = project.projectPath
         project.namespace = project.name
         while project.namespace in self.namespaces:

@@ -153,8 +153,8 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
     #---------------------------------------------------
     def addProject(self, project):
         project.setManager(self)
-        if project.hasBundles() or project.hasThemes():
-            self.application.supportManager.addProjectNamespace(project)
+        # Todo proyecto define un namespace en el manager de support
+        self.application.supportManager.addProjectNamespace(project)
         self.projectTreeModel.appendProject(project)
         self.projectAdded.emit(project)
 

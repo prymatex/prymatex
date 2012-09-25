@@ -253,7 +253,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
             for editorClass, actions in self.customEditorActions.iteritems():
                 map(lambda action: action.setVisible(False), actions)
         else:
-            currentEditorClass = editor.__class__ 
+            currentEditorClass = editor.__class__
             
             for editorClass, actions in self.customEditorActions.iteritems():
                 for action in actions:
@@ -262,8 +262,11 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
                         action.setChecked(action.testChecked(editor))
 
     def showMessage(self, message):
-        #Busca el show message en el editor sino ver otra forma de mostrar el mensaje
-        self.currentEditor().showMessage(message)
+        # TODO: Hacer el showMessage de la main window
+        if self.currentEditor() is not None:
+            self.currentEditor().showMessage(message)
+        else:
+            print "TODO: Hacer el showMessage de la mainWindow"
     
     #============================================================
     # Create and manage editors
