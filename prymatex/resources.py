@@ -96,6 +96,7 @@ STATICMAPPING = (
 )
 
 RESOURCES = {}
+RESOURCES_READY = False
 
 EXTERNAL = {}
 
@@ -155,7 +156,8 @@ def buildResourceKey(filename, namePrefixes):
         resourceKey = newKey
     return resourceKey
 
-def loadResources(resourcesPath):
+def loadResources(resourcesPath, staticMapping = []):
+    resources ={}
     iconsPath = os.path.join(resourcesPath, "Icons")
     imagesPath = os.path.join(resourcesPath, "Images")
     #Load custom images and icons
@@ -163,25 +165,30 @@ def loadResources(resourcesPath):
         for dirpath, dirnames, filenames in os.walk(pixmapPath):
             for filename in filenames:
                 iconPath = os.path.join(dirpath, filename)
-                staticNames = filter(lambda (path, names): iconPath.endswith(path), STATICMAPPING)
+                staticNames = filter(lambda (path, names): iconPath.endswith(path), staticMapping)
                 if staticNames:
                     for name in staticNames:
-                        RESOURCES[name[1]] = iconPath
+                        resources[name[1]] = iconPath
                 else:
                     name = buildResourceKey(filename, osextra.path.fullsplit(dirpath))
-                    RESOURCES[name] = iconPath
+                    resources[name] = iconPath
+    return resources
 
 def loadPrymatexResources(resourcesPath, themeName = "oxygen"):
-    themesPath = os.path.join(resourcesPath, "IconThemes")
-    #Test icon theme:
-    if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
-        #Add icon theme
-        QtGui.QIcon.setThemeSearchPaths([ themesPath ])
-        QtGui.QIcon.setThemeName(themeName)
-    loadResources(resourcesPath)
-    #Install fromTheme custom function
-    QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
-    QtGui.QIcon.fromTheme = staticmethod(getIcon)
+    global RESOURCES, RESOURCES_READY
+    if not RESOURCES_READY:
+        themesPath = os.path.join(resourcesPath, "IconThemes")
+        #Test icon theme:
+        if not QtGui.QIcon.hasThemeIcon(THEME_ICON_TEST):
+            #Add icon theme
+            QtGui.QIcon.setThemeSearchPaths([ themesPath ])
+            QtGui.QIcon.setThemeName(themeName)
+        RESOURCES = loadResources(resourcesPath, STATICMAPPING)
+        
+        #Install fromTheme custom function
+        QtGui.QIcon._fromTheme = QtGui.QIcon.fromTheme
+        QtGui.QIcon.fromTheme = staticmethod(getIcon)
+        RESOURCES_READY = True
     
 #===============================================================
 # PRYMATEX STYLES

@@ -11,7 +11,7 @@ from PyQt4 import QtCore, QtGui
 
 from prymatex import resources
 from prymatex.core.plugin import PMXBaseComponent
-from prymatex.utils.importlib import import_module, import_from_directory
+from prymatex.utils.importlib import import_from_directory
 
 class PrymatexServer(QtCore.QObject, PMXBaseComponent):
     def __init__(self, application):
@@ -42,7 +42,8 @@ class PrymatexServer(QtCore.QObject, PMXBaseComponent):
             raise reason
 
     def loadDialogClass(self, moduleName, directory):
-        module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
+        # module = import_from_directory(directory, moduleName) if directory is not None else import_module(moduleName)
+        module = import_from_directory(directory, moduleName)
         dialogClass = getattr(module, 'dialogClass')
         self.application.populateComponent(dialogClass)
         return dialogClass
