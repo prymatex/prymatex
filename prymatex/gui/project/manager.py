@@ -35,15 +35,15 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
         QtCore.QObject.__init__(self)
         self.fileManager = application.fileManager
         self.supportManager = application.supportManager
-        
+
         self.projectTreeModel = PMXProjectTreeModel(self)
-        
+
         self.projectTreeProxyModel = PMXProjectTreeProxyModel(self)
         self.projectTreeProxyModel.setSourceModel(self.projectTreeModel)
-        
+
         self.projectMenuProxyModel = ProjectMenuProxyModel(self)
         self.projectMenuProxyModel.setSourceModel(self.application.supportManager.bundleProxyModel)
-    
+
         self.supportManager.bundleAdded.connect(self.on_supportManager_bundleAdded)
         self.supportManager.bundleRemoved.connect(self.on_supportManager_bundleRemoved)
 
@@ -68,7 +68,7 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
         for project in self.getAllProjects():
             if project.namespace is not None and bundle.hasNamespace(project.namespace) and project.hasBundleMenu(bundle):
                 self.removeProjectBundleMenu(project, bundle)
-                
+
     def loadProjects(self):
         for path in self.knownProjects[:]:
             try:
@@ -91,7 +91,10 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
     
     def buildEnvironment(self):
         return {}
-        
+    
+    def supportProjectEnvironment(self, project):
+        return self.supportManager.projectEnvironment(project)
+
     #---------------------------------------------------
     # PROJECT CRUD
     #---------------------------------------------------
@@ -164,15 +167,15 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
     def removeProject(self, project):
         self.removeFromKnowProjects(project)
         self.projectTreeModel.removeProject(project)
-    
+
     def getAllProjects(self):
         #TODO: devolver un copia o no hace falta?
         return self.projectTreeModel.rootNode.childrenNodes
-        
+
     def openProject(self, project):
         # Cuando abro un proyecto agrego su namespace al support para aportar bundles y themes
         print project.directory
-    
+
     def closeProject(self, project):
         # Cuando cierro un proyecto quito su namespace al support
         print project.directory
@@ -182,15 +185,15 @@ class PMXProjectManager(QtCore.QObject, PMXBaseComponent):
         projects.append(project.filePath)
         project.setWorkingSet(workingSet)
         self.projectTreeModel.dataChanged.emit()
-        
+
     def addProjectBundleMenu(self, project, bundle):
         project.addBundleMenu(bundle)
         project.save()
-        
+
     def removeProjectBundleMenu(self, project, bundle):
         project.removeBundleMenu(bundle)
         project.save()
-        
+
     def findProjectForPath(self, path):
         for project in self.getAllProjects():
             if self.application.fileManager.issubpath(path, project.path):

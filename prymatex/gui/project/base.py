@@ -62,8 +62,6 @@ class PMXProject(FileSystemTreeNode):
                 'openDocuments', 'showFileHierarchyDrawer', 'windowFrame', 'shellVariables', 'bundleMenu' ]
     FILE = 'info.plist'
     FOLDER = '.pmxproject'
-    BUNDLES = 'Bundles'
-    THEMES = 'Themes'
     
     def __init__(self, directory, hash):
         self.directory = directory
@@ -71,44 +69,17 @@ class PMXProject(FileSystemTreeNode):
         FileSystemTreeNode.__init__(self, hash.get("name"))
         self.workingSet = None
         self.manager = None
-        self.support = None
-        self.bundles = None
-        self.themes = None
         self.namespace = None
         self.load(hash)
     
-    def hasSupport(self):
-        return self.support is not None
-    
-    def hasBundles(self):
-        return self.bundles is not None
-
-    def hasThemes(self):
-        return self.themes is not None
-
-    def setThemes(self, themes):
-        self.themes = themes
-
-    def setBundles(self, bundles):
-        self.bundles = bundles
-        
-    def setSupport(self, support):
-        self.support = support
-
     @property
     def environment(self):
         env = {
             'TM_PROJECT_DIRECTORY': self.directory,
             'TM_PROJECT_NAME': self.nodeName,
-            'TM_PROJECT_PATH': self.projectPath }
-        if self.namespace is not None:
-            env['TM_PROJECT_NAMESPACE'] = self.namespace
-        if self.support is not None:
-            env['TM_PROJECT_SUPPORT'] = self.support
-        if self.bundles is not None:
-            env['TM_PROJECT_BUNDLES'] = self.bundles
-        if self.themes is not None:
-            env['TM_PROJECT_THEMES'] = self.themes
+            'TM_PROJECT_PATH': self.projectPath,
+            'TM_PROJECT_NAMESPACE': self.namespace }
+        env.update(self.manager.supportProjectEnvironment(self))
         return env
 
     def load(self, hash):
@@ -163,10 +134,6 @@ class PMXProject(FileSystemTreeNode):
         try:
             data = plist.readPlist(fileInfo)
             project = cls(path, data)
-            if os.path.exists(os.path.join(projectPath, cls.BUNDLES)):
-                project.ensureBundles()
-            if os.path.exists(os.path.join(projectPath, cls.THEMES)):
-                project.ensureThemes()
             manager.addProject(project)
             return project
         except Exception, e:
@@ -205,15 +172,3 @@ class PMXProject(FileSystemTreeNode):
     def hasBundleMenu(self, bundle):
         if self.bundleMenu is None: return False
         return bundle.uuidAsUnicode() in self.bundleMenu
-
-    def ensureBundles(self):
-        bundlesPath = os.path.join(self.projectPath, self.BUNDLES)
-        if not os.path.exists(bundlesPath):
-            os.makedirs(bundlesPath)
-        self.setBundles(bundlesPath)
-            
-    def ensureThemes(self):
-        themesPath = os.path.join(self.projectPath, self.THEMES)
-        if not os.path.exists(themesPath):
-            os.makedirs(themesPath)
-        self.setThemes(themesPath)

@@ -31,8 +31,8 @@ if [[ -d "$TM_SUPPORT_PATH/bin" ]]; then
 	fi
 fi
 
-if [[ -d "$TM_PROJECT_SUPPORT" && -d "$TM_PROJECT_SUPPORT/bin" ]]; then
-   PATH="$TM_PROJECT_SUPPORT/bin:$PATH"
+if [[ -d "$PMX_PROJECT_SUPPORT" && -d "$PMX_PROJECT_SUPPORT/bin" ]]; then
+   PATH="$PMX_PROJECT_SUPPORT/bin:$PATH"
 fi
 
 if [[ -d "$TM_BUNDLE_SUPPORT" && -d "$TM_BUNDLE_SUPPORT/bin" ]]; then

@@ -23,6 +23,7 @@ from prymatex.support.score import PMXScoreManager
 from prymatex.support.utils import ensurePath
 from prymatex.support.cache import PMXSupportCache
 
+from prymatex.utils.decorators.deprecated import deprecated
 from prymatex.utils.decorators.helpers import printtime
 from prymatex.utils.decorators.memoize import dynamic_memoized, remove_memoized_argument, remove_memoized_function
 
@@ -64,20 +65,23 @@ class PMXSupportBaseManager(object):
     # Namespaces
     #---------------------------------------------------
     def addNamespace(self, name, path):
-        self.namespaces[name] = {}
+        # TODO: Quiza migrar a algo con mas forma para encapsular los namespace
+        self.namespaces[name] = { "dirname": path }
         self.nsorder.append(name)
         for element in self.ELEMENTS:
-            # TODO: Aunque no exista el path crear la entrada igual
-            epath = os.path.join(path, element)
-            if not os.path.exists(epath):
+            elementPath = os.path.join(path, element)
+            if not os.path.exists(elementPath):
                 continue
-            #Si es el primero es el protegido
-            if len(self.nsorder) == 1:
-                var = "_".join([ self.VAR_PREFIX, element.upper(), 'PATH' ])
-            else:
-                var = "_".join([ self.VAR_PREFIX, name.upper(), element.upper(), 'PATH' ])
-            self.namespaces[name][element] = self.environment[var] = epath
+            self.addNamespaceElement(name, element, elementPath)
         return name
+
+    def addNamespaceElement(self, namespace, element, path):
+        if namespace == self.protectedNamespace:
+            # Es el protected namespace ?
+            var = "_".join([ self.VAR_PREFIX, element.upper(), 'PATH' ])
+        else:
+            var = "_".join([ self.VAR_PREFIX, namespace.upper(), element.upper(), 'PATH' ])
+        self.namespaces[namespace][element] = self.environment[var] = path
 
     def hasNamespace(self, name):
         return name in self.namespaces
@@ -94,7 +98,6 @@ class PMXSupportBaseManager(object):
 
     def addProjectNamespace(self, project):
         #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
-        #project.ensureBundles()
         path = project.projectPath
         project.namespace = project.name
         while project.namespace in self.namespaces:
@@ -108,6 +111,9 @@ class PMXSupportBaseManager(object):
                 if bundle.enabled:
                     self.populateBundle(bundle)
 
+    #---------------------------------------------------
+    # Environment
+    #---------------------------------------------------
     def addToEnvironment(self, name, value):
         self.environment[name] = value
 
@@ -121,10 +127,41 @@ class PMXSupportBaseManager(object):
         env.update(self.environment)
         return env
     
-    def basePath(self, element, namespace):
+    def projectEnvironment(self, project):
+        assert hasattr(project, 'namespace'), "El proyecto no tienen namespace"
+        namespace = project.namespace
+        env = {}
+        for element in self.ELEMENTS:
+            key = "_".join([ self.VAR_PREFIX, "PROJECT", element.upper(), 'PATH'])
+            path, exists = self.namespaceElementPath(namespace, element)
+            if exists:
+                env[key] = path
+        return env
+
+    #---------------------------------------------------
+    # Paths for namespaces
+    #---------------------------------------------------
+    def namespaceElementPath(self, namespace, element, create = False):
+        assert namespace in self.namespaces, "The %s namespace is not registered" % namespace
+        assert element in self.ELEMENTS, "The %s namespace is not registered" % namespace
+        path = os.path.join(self.namespaces[namespace]["dirname"], element)
+        if element not in self.namespaces[namespace] and create:
+            # TODO Usar el del fileManager
+            os.makedirs(path)
+            self.addNamespaceElement(namespace, element, path)
+        return path, os.path.exists(path)
+        
+    @deprecated
+    def basePath(self, element, namespace, create = False):
         if namespace not in self.namespaces:
             raise Exception("The %s namespace is not registered" % namespace)
         if element in self.namespaces[namespace]:
+            return self.namespaces[namespace][element]
+        elif create and element in self.ELEMENTS:
+            path = os.path.join(self.namespaces[namespace], element)
+            # TODO Usar el del fileManager
+            os.makedirs(path)
+            self.addNamespaceElement(namespace, element, path)
             return self.namespaces[namespace][element]
     
     #---------------------------------------------------
