@@ -89,12 +89,16 @@ class PMXSupportBaseManager(object):
     @property
     def protectedNamespace(self):
         return self.nsorder[self.PROTECTEDNS]
-        
+
     @property
     def defaultNamespace(self):
         if len(self.nsorder) < 2:
             raise Exception("No default namespace")
         return self.nsorder[self.DEFAULTNS]
+
+    @property
+    def safeNamespaces(self):
+        return self.nsorder[self.DEFAULTNS:][:]
 
     def addProjectNamespace(self, project):
         #TODO: Asegurar que no esta ya cargado eso del md5 es medio trucho
@@ -163,7 +167,7 @@ class PMXSupportBaseManager(object):
             os.makedirs(path)
             self.addNamespaceElement(namespace, element, path)
             return self.namespaces[namespace][element]
-    
+
     #---------------------------------------------------
     # Tools
     #---------------------------------------------------

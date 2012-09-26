@@ -23,7 +23,7 @@ class CommitDialog(QtGui.QDialog, Ui_CommitDialog, PMXBaseDialog):
         self.tableViewFiles.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tableViewFiles.customContextMenuRequested.connect(self.showTableViewFilesContextMenu)
         self.tableViewFiles.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.tableViewFiles.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch);
+        self.tableViewFiles.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.Stretch)
         
         #Setup Context Menu
         selectMenu = { 

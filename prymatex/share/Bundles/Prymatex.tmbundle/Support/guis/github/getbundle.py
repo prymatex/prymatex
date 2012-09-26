@@ -12,81 +12,10 @@ from prymatex.core.plugin.dialog import PMXBaseDialog
 
 # UI
 from ui_githubclient import Ui_GitHubClientDialog
+from model import RepositoryTableModel
 
 GITHUB_API_SEARCH_URL = 'https://api.github.com/legacy/repos/search/%s+tmbundle'
-GITHUB_CLONE_URL = 'https://github.com/{username}/{name}.git'
 
-class RepositoryTableModel(QtCore.QAbstractTableModel):
-    HEADER_NAMES = ["Name", "User", "Watchers"]
-    def __init__(self, parent = None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
-        self.repositories = []
-        
-    def rowCount(self, parent = None):
-        return len(self.repositories)
-    
-    def columnCount(self, parent = None):
-        return len(self.HEADER_NAMES)
-        
-    def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.DisplayRole:
-            if orientation == QtCore.Qt.Horizontal:
-                return self.HEADER_NAMES[section]
-    
-    def data(self, index, role = QtCore.Qt.DisplayRole):
-        if not index.isValid(): 
-            return None
-        repository = self.repositories[ index.row() ]
-        
-        if role == QtCore.Qt.CheckStateRole and index.column() == 0:
-            return QtCore.Qt.Checked if repository['checked'] else QtCore.Qt.Unchecked
-        elif role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
-            if index.column() == 0:
-                return repository['name']
-            elif index.column() == 1:
-                return repository['username']
-            elif index.column() == 2:
-                return repository['watchers']
-
-    def setData(self, index, value, role):
-        """Retornar verdadero si se puedo hacer el cambio, falso en caso contrario"""
-
-        if not index.isValid(): return False
-        repository = self.repositories[ index.row() ]
-        
-        if role == QtCore.Qt.CheckStateRole:
-            repository['checked'] = value
-            self.dataChanged.emit(index, index)
-            return True
-        return False
-    
-    def hasSelected(self):
-        return bool(self.allSelected())
-        
-    def allSelected(self):
-        return filter(lambda repo: repo["checked"], self.repositories)
-        
-    def clearUnselected(self):
-        self.repositories = filter(lambda repo: repo["checked"], self.repositories)
-        self.layoutChanged.emit()
-        
-    def addRepositories(self, repositories):
-        for repo in repositories:
-            repo['checked'] = False
-            if repo["name"].endswith(".tmbundle") or repo["name"].endswith("-tmbundle"):
-                basename = "%s.tmbundle" % repo["name"][0:-9]
-            else:
-                basename = "%s.tmbundle" % repo["name"]
-            repo['folder'] = basename
-            repo.setdefault('destiny', '')
-            repo.setdefault('homepage', '')
-            repo.setdefault('url', '')
-        self.repositories += repositories
-        self.layoutChanged.emit()
-    
-    def flags(self, index):
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
-        
 class GitHubSearchBundleThread(QtCore.QThread):
     recordsFound = QtCore.pyqtSignal(object)
     requestError = QtCore.pyqtSignal(str)
@@ -123,10 +52,8 @@ class GitHubSearchBundleThread(QtCore.QThread):
             except Exception as e:
                 print e
                 self.requestError.emit(str(e))
-    
 
 class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
-    
     MINIMUM_QUERY_LENGTH = 1
     
     def __init__(self, parent = None):
@@ -135,25 +62,32 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.setupUi(self)
         
         self.currentRepository = None
+        
         self.workerThread = GitHubSearchBundleThread(self)
-        self.buttonSearch.setEnabled(False)
-        self.buttonOk.setEnabled(False)
-        self.widgetInfo.setVisible(False)
         self.model = RepositoryTableModel(self)
         self.proxy = QtGui.QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
         
+        self.buttonSearch.setEnabled(False)
+        self.buttonOk.setEnabled(False)
+        self.widgetInfo.setVisible(False)
+        
         self.workerThread.recordsFound.connect(self.on_workerThread_recordsFound)
         self.model.dataChanged.connect(self.on_model_dataChanged)
-        
+
+        self.setupTableView()
+        self.loadComboBoxNamespace()
+
+    def setupTableView(self):
         self.tableViewResults.setModel(self.proxy)
         self.tableViewResults.verticalHeader().hide()
+        self.tableViewResults.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableViewResults.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
         self.tableViewResults.horizontalHeader().setSortIndicatorShown(True)
         self.tableViewResults.horizontalHeader().setClickable(True)
-        self.loadComboBoxNamespace()
-        
+
     def loadComboBoxNamespace(self):
-        for ns in self.application.supportManager.nsorder:
+        for ns in self.application.supportManager.safeNamespaces():
             self.comboBoxNamespace.addItem(ns)
 
     def setCurrentRepository(self, repo):
@@ -166,8 +100,15 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.labelFollowers.setText(unicode(repo["followers"]))
         self.labelForks.setText(unicode(repo["forks"]))
         self.lineEditFolder.setText(repo["folder"])
-        self.labelDestiny.setText(repo["destiny"])
+        if repo["namespace"]:
+            namespaceBundlePath, _ = self.application.supportManager.namespaceElementPath(repo["namespace"], "Bundles")
+            self.labelDestiny.setText(os.path.join(namespaceBundlePath, repo["folder"]))
         self.labelUrl.setText(repo["url"])
+        
+    def reloadSupport(self):
+        def showMessages(text):
+            print text
+        self.application.supportManager.reloadSupport(showMessages)
         
     # =======================
     # = Señales de busqueda =
@@ -191,14 +132,11 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     # ================================
     @QtCore.pyqtSlot(str)
     def on_comboBoxNamespace_activated(self, namespace):
-        basePath = self.application.supportManager.basePath("Bundles", namespace)
-        self.currentRepository["destiny"] = os.path.join(basePath, self.currentRepository["folder"])
+        self.currentRepository["namespace"] = namespace
         self.setCurrentRepository(self.currentRepository)
     
     def on_lineEditFolder_editingFinished(self):
         self.currentRepository["folder"] = self.lineEditFolder.text()
-        basePath = self.application.supportManager.basePath("Bundles", self.comboBoxNamespace.currentText())
-        self.currentRepository["destiny"] = os.path.join(basePath, self.currentRepository["folder"])
         self.setCurrentRepository(self.currentRepository)
     
     # ======================
@@ -207,13 +145,9 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     def on_model_dataChanged(self, index):
         repo = self.model.repositories[index.row()]
         if repo["checked"]:
-            namespace = self.comboBoxNamespace.currentText()
-            basePath = self.application.supportManager.basePath("Bundles", namespace)
-            repo["url"] = GITHUB_CLONE_URL.format(**repo)
-            repo["destiny"] = os.path.join(basePath, repo["folder"])
+            repo["namespace"] = self.comboBoxNamespace.currentText()
         else:
-            repo["url"] = ""
-            repo["destiny"] = ""
+            repo["namespace"] = None
         self.buttonOk.setEnabled(self.model.hasSelected())
         self.setCurrentRepository(repo)
         
@@ -238,20 +172,23 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     
     def on_buttonOk_pressed(self):
         repos = self.model.allSelected()
+        self._processCount = len(repos)
         for repo in repos:
-            print repo
-            #process = QtCore.QProcess(self)
-            #process.setWorkingDirectory(dstPath)
-            #process.finished[int].connect(self.on_processClone_finished)
+            namespaceBundlePath, _ = self.application.supportManager.namespaceElementPath(repo["namespace"], "Bundles", create = True)
+            process = QtCore.QProcess(self)
+            process.setWorkingDirectory(namespaceBundlePath)
+            process.finished[int].connect(self.on_processClone_finished)
+            process.start("ls", QtCore.QIODevice.ReadOnly)
             #process.start("git clone %s %s.tmbundle" % (repoUrl, bundleName), QtCore.QIODevice.ReadOnly)
 
     def on_buttonCancel_pressed(self):
         self.close()
-        
+
     def on_processClone_finished(self, value):
-        def showMessages(text):
-            print text
-        self.application.supportManager.reloadSupport(showMessages)
+        self._processCount -= 1
+        if not self._processCount:
+            self.reloadSupport()
+            self.close()
         
 if __name__ == '__main__':
     app = QtGui.QApplication([])

@@ -71,7 +71,7 @@ class PMXBaseEditor(PMXBaseWidgetComponent):
         if self.filePath is not None:
             baseIcon = resources.getIcon(self.filePath)
         if self.isModified():
-            baseIcon = resources.getIcon("save")
+            baseIcon = resources.getIcon("document-save")
         if self.externalAction != None:
             importantIcon = resources.getIcon("important")
             baseIcon = utils.combineIcons(baseIcon, importantIcon, 0.8)
