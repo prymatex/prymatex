@@ -132,6 +132,10 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         font.setStyleStrategy(QtGui.QFont.ForceIntegerMetrics)
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.document().setDefaultFont(font)
+        #print QtGui.QFontMetrics(self.document().defaultFont()).width(" ")
+        #print QtGui.QFontMetrics(self.document().defaultFont()).width("i")
+        #print QtGui.QFontMetrics(self.document().defaultFont()).width("w")
+        #print QtGui.QFontMetrics(self.document().defaultFont()).width("#")
         self.fontChanged.emit()
     
     @pmxConfigPorperty(default = '766026CB-703D-4610-B070-8DE07D967C5F', tm_name = 'OakThemeManagerSelectedTheme')
@@ -801,10 +805,12 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
         font.setBold(True)
         painter.setFont(font)
             
+        painter.setPen(self.colours['gutter'])
+        offset = self.contentOffset()
         block = self.firstVisibleBlock()
         viewport_offset = self.contentOffset()
         line_count = block.blockNumber()
-        while block.isValid():
+        while block.isValid() and block.userData():
             line_count += 1
             # The top left position of the block in the document
             position = self.blockBoundingGeometry(block).topLeft() + viewport_offset
@@ -818,12 +824,14 @@ class CodeEditor(QtGui.QPlainTextEdit, PMXBaseEditor):
                     round(position.y()) + font_metrics.ascent() + font_metrics.descent() - resources.getImage("foldingellipsis").height(),
                     resources.getImage("foldingellipsis"))
             
-            block = block.next()
+            for s in range(0, (len(user_data.indent) / len(self.tabKeyBehavior()))):
+                linePositionX = (font_metrics.width("#") * self.tabStopSize * s) + font_metrics.width("#") + offset.x()
+                painter.drawLine(linePositionX, round(position.y()), linePositionX, font_metrics.height() + round(position.y()))
 
-        if self.showMarginLine:
-            painter.setPen(self.colours['gutter'])
-            offset = self.contentOffset()
-            painter.drawLine(self.pos_margin + offset.x(), 0, self.pos_margin + offset.x(), self.viewport().height())
+            if self.showMarginLine:
+                painter.drawLine(self.pos_margin + offset.x(), round(position.y()), self.pos_margin + offset.x(), font_metrics.height() + round(position.y()))
+            
+            block = block.next()
 
         if self.multiCursorMode.isActive():
             ctrl_down = bool(self.application.keyboardModifiers() & QtCore.Qt.ControlModifier)
