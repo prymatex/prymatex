@@ -87,7 +87,7 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
         self.tableViewResults.horizontalHeader().setClickable(True)
 
     def loadComboBoxNamespace(self):
-        for ns in self.application.supportManager.safeNamespaces():
+        for ns in self.application.supportManager.safeNamespaces:
             self.comboBoxNamespace.addItem(ns)
 
     def setCurrentRepository(self, repo):
@@ -162,7 +162,6 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
     def on_workerThread_recordsFound(self, data):
         self.model.clearUnselected()
         self.model.addRepositories(data["repositories"])
-        self.tableViewResults.resizeColumnsToContents()
         self.tableViewResults.resizeRowsToContents()
         self.tableViewResults.setEnabled(True)
     
@@ -178,8 +177,7 @@ class GitHubBundlesDialog(QtGui.QDialog, Ui_GitHubClientDialog, PMXBaseDialog):
             process = QtCore.QProcess(self)
             process.setWorkingDirectory(namespaceBundlePath)
             process.finished[int].connect(self.on_processClone_finished)
-            process.start("ls", QtCore.QIODevice.ReadOnly)
-            #process.start("git clone %s %s.tmbundle" % (repoUrl, bundleName), QtCore.QIODevice.ReadOnly)
+            process.start("git clone %s %s" % (repo["url"], repo["folder"]), QtCore.QIODevice.ReadOnly)
 
     def on_buttonCancel_pressed(self):
         self.close()

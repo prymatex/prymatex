@@ -16,7 +16,7 @@ from prymatex.gui.dockers import helpers
 
 def registerPlugin(manager):
     manager.registerDocker(PMXProjectDock)
-    manager.registerKeyHelper(PMXProjectDock, helpers.RefreshHelper)
+    #manager.registerKeyHelper(PMXProjectDock, helpers.RefreshHelper)
     manager.registerKeyHelper(PMXProjectDock, helpers.PasteHelper)
     manager.registerKeyHelper(PMXProjectDock, helpers.CopyHelper)
     manager.registerKeyHelper(PMXProjectDock, helpers.CutHelper)

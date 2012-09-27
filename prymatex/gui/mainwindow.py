@@ -73,7 +73,7 @@ class PMXMainWindow(QtGui.QMainWindow, Ui_MainWindow, MainWindowActions):
 
         self.setAcceptDrops(True)
         
-        self.setMainWindowAsActionParent()
+        #self.setMainWindowAsActionParent()
         self.setupHelpMenuMiscConnections()
         
         self.bundleItem_handler = self.insertBundleItem
